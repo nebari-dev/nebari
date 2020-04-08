@@ -10,7 +10,8 @@ setup(
     python_requires=">=3.5",
     install_requires=[
         'cryptography',
-        'apache-libcloud'
+        'apache-libcloud',
+        'jsonschema'
     ],
     entry_points={
         'console_scripts': ['qhub-tljh=qhub.tljh.__main__:cli_start']
