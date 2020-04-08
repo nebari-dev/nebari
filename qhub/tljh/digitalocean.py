@@ -2,6 +2,7 @@
 Setup & tear down TLJH instances in da cloud
 """
 import asyncio
+import asyncssh
 import argparse
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
@@ -98,26 +99,26 @@ class DigitalOceanProvisioner:
 
         raise ValueError("Supported ubuntu image not found")
 
-    async def ensure_keypair(self, name, public_key):
+    async def ensure_keypair(self, name, key: asyncssh.SSHKey):
         """
-        Ensure that keypair with given public_key exists
+        Ensure that keypair with given key exists
 
-        Returns keypair id
+        Returns key fingerprint
         """
         # FIXME: Make sure it is obvious the keypair is created by qhub
         existing_kps = await self.run_in_executor(self.driver.list_key_pairs)
         for kp in existing_kps:
-            if kp.public_key == public_key:
-                return kp.extra['id']
+            if kp.fingerprint == key.get_fingerprint('md5'):
+                return kp.fingerprint
 
-        kp = await self.run_in_executor(self.driver.create_key_pair, name, public_key)
-        return kp.extra['id']
+        kp = await self.run_in_executor(self.driver.create_key_pair, name, key.export_public_key('openssh').decode('utf-8'))
+        return kp.fingerprint
 
-    async def create(self, name, keypair_id):
+    async def create(self, name, key_fingerprint: str):
         """
         Create a TLJH with given name
 
-        SSH as root will be enabled, with access granted to key specified by keypair_id
+        SSH as root will be enabled, with access granted to key specified by key_fingerprint
         """
         node = await self.run_in_executor(self.driver.create_node,
             name, (await self.sizes())[0],
@@ -125,8 +126,9 @@ class DigitalOceanProvisioner:
             ex_user_data=INSTALL_SCRIPT,
             ex_create_attr={
                 'tags': ['creator:qhub'],
-                'ssh_keys': [keypair_id]
+                'ssh_keys': [key_fingerprint]
             }
         )
-        return await self.run_in_executor(self.driver.wait_until_running, [node])
+        completed_node, public_ip = (await self.run_in_executor(self.driver.wait_until_running, [node]))[0]
 
+        return completed_node

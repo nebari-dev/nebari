@@ -1,6 +1,7 @@
 import asyncio
 import argparse
 import os
+import asyncssh
 from concurrent.futures import ThreadPoolExecutor
 
 from ..utils import create_keypair, schema_to_subparser
@@ -23,15 +24,16 @@ async def main():
 
     args = parser.parse_args()
 
-    # FIXME: Make this configurable
-    private_key, public_key = create_keypair(args.name)
+
+    key: asyncssh.SSHKey = asyncssh.generate_private_key('ssh-rsa')
     with open(args.name, 'w') as f:
         os.fchmod(f.fileno(), 0o600)
-        f.write(private_key)
+        f.write(key.export_private_key().decode())
 
     provisioner = DigitalOceanProvisioner({'access_token': args.access_token}, ThreadPoolExecutor(1))
 
-    print(await provisioner.create(args.name, await provisioner.ensure_keypair(args.name, public_key)))
+    completed_node = await provisioner.create(args.name, await provisioner.ensure_keypair(args.name, key))
+    print(completed_node)
 
 def cli_start():
     """
