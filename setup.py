@@ -7,7 +7,7 @@ setup(
     url='https://github.com/quansight/qhub',
     license='3 Clause BSD',
     packages=find_packages(),
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     install_requires=[
         'cryptography',
         'apache-libcloud',
