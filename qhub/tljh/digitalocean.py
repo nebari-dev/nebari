@@ -1,9 +1,11 @@
 """
 Setup & tear down TLJH instances in da cloud
 """
+import asyncio
+from functools import partial
+from concurrent.futures import ThreadPoolExecutor
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
-from libcloud.compute.deployment import MultiStepDeployment, ScriptDeployment
 from ..utils import create_keypair
 import os
 
@@ -14,72 +16,87 @@ curl https://raw.githubusercontent.com/jupyterhub/the-littlest-jupyterhub/master
 """
 
 class DigitalOceanProvisioner:
-    # FIXME: Make this inherently async
-    def __init__(self, access_token):
+    def __init__(self, access_token, threadpool):
         self.driver = get_driver(Provider.DIGITAL_OCEAN)(access_token, api_version='v2')
+        self.threadpool = threadpool
 
-    def sizes(self):
+    def run_in_executor(self, func, *args, **kwargs):
         """
-        Return recommended sizes for TLJH
-        """
-        return self.driver.list_sizes()
+        Run func(*args, **kwargs) in current threadpool.
 
-    def regions(self):
+        Returns an Awaitable, which can be awaited to get the result of func
+
+        IMPORTANT INFORMATION TO AVOID DEADLOCKS
+
+        Code should operate on the assumption that the ThreadPool has only one
+        Thread. This *will* cause deadlocks if we nest run_in_executor calls -
+        a function running on the thread will block on trying to run another
+        function on the thread, and be stuck indefinitely. So, we should try
+        make sure that doesn't happen.
+        """
+        # FIXME: Enforce that run_in_executor can't be called if there's another instance of it in the stack
+        loop = asyncio.get_running_loop()
+        return loop.run_in_executor(self.threadpool, partial(func, *args, **kwargs))
+
+    async def regions(self):
         """
         Return recommended regions for TLJH
         """
-        return self.driver.list_locations()
+        return await self.run_in_executor(self.driver.list_locations)
 
-    def sizes(self):
+    async def sizes(self):
         """
         Return recommended node sizes for TLJH
 
         Minimum requirement is 1.5G
         """
-        return [s for s in self.driver.list_sizes() if s.ram > (1.5 * 1024)]
+        return [s for s in await self.run_in_executor(self.driver.list_sizes) if s.ram > (1.5 * 1024)]
 
-    def image(self):
+    async def image(self):
         """
         Return image to be used for setting up TLJH
         """
-        for image in self.driver.list_images():
+        for image in await self.run_in_executor(self.driver.list_images):
             if image.extra.get('slug') == 'ubuntu-18-04-x64':
                 return image
 
         raise ValueError("Supported ubuntu image not found")
 
-    def ensure_keypair(self, name, public_key):
+    async def ensure_keypair(self, name, public_key):
         """
         Ensure that keypair with given public_key exists
 
         Returns keypair id
         """
         # FIXME: Make sure it is obvious the keypair is created by qhub
-        existing_kps = self.driver.list_key_pairs()
+        existing_kps = await self.run_in_executor(self.driver.list_key_pairs)
         for kp in existing_kps:
             if kp.public_key == public_key:
                 return kp.extra['id']
 
-        kp = self.driver.create_key_pair(name, public_key)
+        kp = await self.run_in_executor(self.driver.create_key_pair, name, public_key)
         return kp.extra['id']
 
-    def create(self, name, keypair_id):
-        node = self.driver.create_node(
-            name, self.sizes()[0],
-            self.image(), self.regions()[0],
+    async def create(self, name, keypair_id):
+        """
+        Create a TLJH with given name
+
+        SSH as root will be enabled, with access granted to key specified by keypair_id
+        """
+        node = await self.run_in_executor(self.driver.create_node,
+            name, (await self.sizes())[0],
+            await self.image(), (await self.regions())[0],
             ex_user_data=INSTALL_SCRIPT,
             ex_create_attr={
                 'tags': ['creator:qhub'],
                 'ssh_keys': [keypair_id]
             }
         )
-        print(node)
-        print(self.driver.wait_until_running([node]))
+        return await self.run_in_executor(self.driver.wait_until_running, [node])
 
 
-
-def main():
-    name = 'test-12'
+async def main():
+    name = 'test-15'
     # FIXME: Read this securely from users
     token = os.environ['DIGITALOCEAN_TOKEN']
     # FIXME: Make this configurable
@@ -87,8 +104,8 @@ def main():
     with open(name, 'w') as f:
         os.fchmod(f.fileno(), 0o600)
         f.write(private_key)
-    provisioner = DigitalOceanProvisioner(token)
-    provisioner.create(name, provisioner.ensure_keypair(name, public_key))
+    provisioner = DigitalOceanProvisioner(token, ThreadPoolExecutor(1))
+    print(await provisioner.create(name, await provisioner.ensure_keypair(name, public_key)))
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
