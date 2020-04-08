@@ -6,4 +6,4 @@ on *your* cloud infrastructure, using a graphical hosted installer.
 ## Prototype 1
 
 A simple hosted GUI that can launch a pre-configured [TLJH](https://tljh.jupyter.org)
-on Google Cloud Platform.
+on Digital Ocean.
