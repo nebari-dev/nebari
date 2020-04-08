@@ -34,7 +34,13 @@ class DigitalOceanProvisioner:
         function on the thread, and be stuck indefinitely. So, we should try
         make sure that doesn't happen.
         """
-        # FIXME: Enforce that run_in_executor can't be called if there's another instance of it in the stack
+        # @FIXME: Detect threadpool deadlocks early & throw exceptions
+        # @body: ThreadPoolExecutor(1) is the common case, and *will* deadlock if run_in_executor
+        #        is called while another run_in_executor is in the stack - the two caller will
+        #        just wait forever for the called function to be scheduled, and the called function
+        #        will forever wait for the thread to be made available. We should inspect the
+        #        stack (if it is cheap), and error out if we detect this is happening. Much
+        #        rather get an unexpected exception than an unexpected deadlock
         loop = asyncio.get_running_loop()
         return loop.run_in_executor(self.threadpool, partial(func, *args, **kwargs))
 
