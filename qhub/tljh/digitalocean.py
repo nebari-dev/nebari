@@ -2,8 +2,11 @@
 Setup & tear down TLJH instances in da cloud
 """
 import asyncio
+import argparse
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
+
+from jsonschema import validate
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 from ..utils import create_keypair
@@ -16,9 +19,36 @@ curl https://raw.githubusercontent.com/jupyterhub/the-littlest-jupyterhub/master
 """
 
 class DigitalOceanProvisioner:
-    def __init__(self, access_token, threadpool):
-        self.driver = get_driver(Provider.DIGITAL_OCEAN)(access_token, api_version='v2')
+    def __init__(self, auth, threadpool):
+        validate(auth, schema=DigitalOceanProvisioner.auth_schema())
+        self.driver = get_driver(Provider.DIGITAL_OCEAN)(auth['access_token'], api_version='v2')
         self.threadpool = threadpool
+
+    @classmethod
+    def auth_schema(cls):
+        """
+        Define what authentication parameters this provisioner needs
+
+        Returns a JSON Schema of properties needed by auth
+        """
+        # FIXME: Is this sane?
+        # JSON Schema is transferable between Python and JS. This is probably going to
+        # be important when we build a web interface? Unclear. This will probably be in flux.
+        return {
+            'type': 'object',
+            'properties': {
+                'access_token': {
+                    'type': 'string',
+                    'description': """
+                    Personal Access Token with write permissions from the DigitalOcean website.
+
+                    See https://www.digitalocean.com/docs/apis-clis/api/create-personal-access-token/
+                    for details on how to fetch this.
+                    """,
+                }
+            }
+        }
+
 
     def run_in_executor(self, func, *args, **kwargs):
         """
@@ -100,18 +130,3 @@ class DigitalOceanProvisioner:
         )
         return await self.run_in_executor(self.driver.wait_until_running, [node])
 
-
-async def main():
-    name = 'test-15'
-    # FIXME: Read this securely from users
-    token = os.environ['DIGITALOCEAN_TOKEN']
-    # FIXME: Make this configurable
-    private_key, public_key = create_keypair(name)
-    with open(name, 'w') as f:
-        os.fchmod(f.fileno(), 0o600)
-        f.write(private_key)
-    provisioner = DigitalOceanProvisioner(token, ThreadPoolExecutor(1))
-    print(await provisioner.create(name, await provisioner.ensure_keypair(name, public_key)))
-
-if __name__ == '__main__':
-    asyncio.run(main())

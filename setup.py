@@ -11,5 +11,8 @@ setup(
     install_requires=[
         'cryptography',
         'apache-libcloud'
-    ]
+    ],
+    entry_points={
+        'console_scripts': ['qhub-tljh=qhub.tljh.__main__:cli_start']
+    }
 )
