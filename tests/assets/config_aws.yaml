@@ -1,0 +1,38 @@
+project_name: aws-jupyterhub
+provider: aws
+ci_cd: github-actions
+domain: "aws.qhub.dev"
+
+authentication:
+  type: Auth0
+  config:
+    client_id: ...
+    client_secret: ...
+    oauth_callback_url: ...
+    scope: ['openid', 'email', 'profile']
+    auth0_subdomain: ...
+  admin:
+    access: true
+    users:
+      - "chris.ostrouchov@gmail.com"
+  whitelist:
+    users:
+      - "dharhas@quansight.com"
+
+amazon_web_services:
+  region: us-west-2
+  availability_zones: ["us-west-2a", "us-west-2b"]
+  kubernetes_version: "1.14"
+  node_groups:
+    general:
+      instance: "m5.large"
+      min_nodes: 1
+      max_nodes: 1
+    user:
+      instance: "m5.large"
+      min_nodes: 1
+      max_nodes: 2
+    worker:
+      instance: "m5.large"
+      min_nodes: 1
+      max_nodes: 2

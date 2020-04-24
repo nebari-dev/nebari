@@ -1,0 +1,83 @@
+name: "Docker Image Build"
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "image/**"
+      - ".github/workflows/image.yaml"
+
+
+jobs:
+  build:
+    name: QHub Build Dockerfile
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dockerfile:
+          - jupyterlab
+          - jupyterhub
+          - dask-gateway
+          - dask-worker
+    steps:
+      - name: 'Checkout Image'
+        uses: actions/checkout@master
+{% if cookiecutter.provider == "aws" %}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: {{ '${{ secrets.AWS_ACCESS_KEY_ID }}' }}
+          aws-secret-access-key: {{ '${{ secrets.AWS_SECRET_ACCESS_KEY }}' }}
+          aws-region: {{ '${{ secrets.AWS_DEFAULT_REGION }}' }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+{% elif cookiecutter.provider == "gcp" %}
+      - name: Configure GCP Credentials
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '270.0.0'
+          service_account_key: {{ '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}' }}
+      - name: 'Add GCP Credentials'
+        run: |
+          echo "$gcp_credentials" > gcp-infrastructure/account.json
+          gcloud auth activate-service-account --key-file=gcp-infrastructure/account.json
+        env:
+          gcp_credentials: {{ '${{ secrets.gcp_credentials }}' }}
+      - run: |
+          gcloud auth configure-docker
+{% elif cookiecutter.provider == "do" %}
+      - name: Docker Login
+        run: |
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+        env:
+          DOCKER_USERNAME: {{ '${{ secrets.docker_username }}' }}
+          DOCKER_PASSWORD: {{ '${{ secrets.docker_password }}' }}
+{% endif %}
+      - name: Docker Build, Tag, and Push Image
+        env:
+{% if cookiecutter.provider == "aws" %}
+          IMAGE_NAME: {{ '${{ steps.login-ecr.outputs.registry }}/crowdsmart-jupyterhub-dev-jupyterlab' }}
+{% elif cookiecutter.provider == "gcp" %}
+          IMAGE_NAME: {{ 'gcr.io/$GCP_PROJECT/$GCP_REPOSITORY' }}
+{% elif cookiecutter.provider == "do" %}
+          IMAGE_NAME: 'quansight/qhub-{{ '${{ matrix.dockerfile }}' }}'
+{% endif %}
+          IMAGE_TAG: {{ '${{ github.sha }}' }}
+        run: |
+          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
+          docker push $IMAGE_NAME:$IMAGE_TAG
+{% if cookiecutter.provider == "aws" %}
+      - name: Logout of Amazon ECR
+        if: always()
+        run: docker logout {{ '${{ steps.login-ecr.outputs.registry }}' }}
+{% elif cookiecutter.provider == "gcp" %}
+      - name: Docker Logout
+        run: |
+          docker logout
+{% elif cookiecutter.provider == "do" %}
+      - name: Docker Logout
+        run: |
+          docker logout
+{% endif %}

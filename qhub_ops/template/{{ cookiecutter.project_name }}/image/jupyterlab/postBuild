@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# install classic notebook extensions
+jupyter nbextension enable --py widgetsnbextension --sys-prefix
+jupyter serverextension enable --sys-prefix jupyter_server_proxy
+
+# install jupyterlab extensions
+jupyter labextension install --clean \
+        dask-labextension \
+        jupyterlab-cpustatus \
+        @jupyter-widgets/jupyterlab-manager \
+
+# ====== cleanup labextension install =======
+rm -rf ${HOME}/.cache ${HOME}/.npm ${HOME}/.yarn
+rm -rf /opt/conda/share/jupyter/lab/staging
+find /opt/conda -follow -type f -name '*.js.map' -delete
+
+# ====== setup ipython conifiguration ======
+mkdir /etc/ipython
+cp /opt/jupyterlab/ipython_config.py /etc/ipython/ipython_config.py

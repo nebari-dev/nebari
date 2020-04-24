@@ -1,0 +1,41 @@
+name: "Build Docker Images"
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "qhub_ops/template/{{ cookiecutter.project_name }}/image/**"
+      - ".github/workflows/image.yaml"
+
+jobs:
+  jupyterlab:
+    name: 'Build Docker Images'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dockerfile:
+          - jupyterlab
+          - jupyterhub
+          - dask-gateway
+          - dask-worker
+    steps:
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@master
+      - name: Docker Login
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run:
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      - name: Docker Build, Tag, Push Image
+        env:
+          IMAGE_NAME: 'quansight/qhub-${{ matrix.dockerfile }}'
+          IMAGE_TAG: ${{ github.sha }}
+        working-directory: "qhub/template/{{ cookiecutter.repo_name }}/image"
+        run: |
+          docker build -f "Dockerfile.${{ matrix.dockerfile }}" -t $IMAGE_NAME:$IMAGE_TAG .
+          docker push $IMAGE_NAME:$IMAGE_TAG
+      - name: Docker Logout
+        run: |
+          docker logout

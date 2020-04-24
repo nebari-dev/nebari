@@ -1,0 +1,18 @@
+# ignore terraform state
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.tfstate.lock.info
+
+# python
+__pycache__
+
+# nix
+result
+
+# ignore deploments
+do-deployment
+aws-deployment
+gcp-deployment
+modules
+quansight-terraform-modules

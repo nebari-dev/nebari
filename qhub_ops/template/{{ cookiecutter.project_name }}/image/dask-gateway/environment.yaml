@@ -1,0 +1,5 @@
+aiohttp
+dask==2.14.0
+numpy
+pandas
+dask-gateway==0.6.1

@@ -1,0 +1,166 @@
+name: "Tests"
+
+on:
+  push:
+    branches:
+      - master
+
+
+env:
+  TERRAFORM_VERSION: 0.12.24
+
+
+jobs:
+  test-general:
+    name: 'Test Package'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    steps:
+      - name: 'Checkout Infastructure'
+        uses: actions/checkout@master
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install QHub
+        run: |
+          pip install .[test,dev]
+      - name: Black Formatting
+        run: |
+          black --check qhub
+      - name: Flake8 Formatting
+        run: |
+          flake8
+      - name: Test QHub
+        run: |
+          pytest
+
+
+  test-digital-ocean:
+    name: 'Test Digital Ocean Deployment'
+    runs-on: ubuntu-latest
+    needs: test-general
+    steps:
+      - name: 'Checkout Infastructure'
+        uses: actions/checkout@master
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install QHub
+        run: |
+          pip install .[test,dev]
+      - name: QHub Build Digital Ocean Template
+        run: |
+          qhub-ops render -c tests/assets/config_do.yaml
+      - name: Digital Ocean Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: qhub-digital-ocean-artifact
+          path: do-deployment
+      - name: 'Terraform Format'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.TERRAFORM_VERSION }}
+          tf_actions_subcommand: 'fmt'
+          tf_actions_working_dir: 'do-deployment/infrastructure'
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.TERRAFORM_VERSION }}
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: 'do-deployment/infrastructure'
+        env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+          SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+          SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+      - name: 'Terraform Validate'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: ${{ env.TERRAFORM_VERSION }}
+          tf_actions_subcommand: 'validate'
+          tf_actions_working_dir: 'do-deployment/infrastructure'
+          tf_actions_comment: true
+        env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+          SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+          SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+
+
+  test-amazon-web-services:
+    name: 'Test Amazon Web Services Deployment'
+    runs-on: ubuntu-latest
+    needs: test-general
+    steps:
+      - name: 'Checkout Infastructure'
+        uses: actions/checkout@master
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install QHub
+        run: |
+          pip install .[test,dev]
+      - name: QHub Build Amazon Web Services Template
+        run: |
+          qhub-ops render -c tests/assets/config_aws.yaml
+      - name: Amazon Web Services Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: qhub-amazon-web-services-artifact
+          path: aws-deployment
+      - name: 'Terraform Format'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.24
+          tf_actions_subcommand: 'fmt'
+          tf_actions_working_dir: 'aws-deployment/infrastructure'
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.24
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: 'aws-deployment/infrastructure'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: 'Terraform Validate'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.24
+          tf_actions_subcommand: 'validate'
+          tf_actions_working_dir: 'aws-deployment/infrastructure'
+          tf_actions_comment: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+
+  test-google-cloud-platform:
+    name: 'Test Google Cloud Platform Deployment'
+    runs-on: ubuntu-latest
+    needs: test-general
+    steps:
+      - name: 'Checkout Infastructure'
+        uses: actions/checkout@master
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install QHub
+        run: |
+          pip install .[test,dev]
+      - name: QHub Build Google Cloud Platform Template
+        run: |
+          qhub-ops render -c tests/assets/config_gcp.yaml
+      - name: Google Cloud Platform Artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: qhub-google-cloud-platform-artifact
+          path: gcp-deployment

@@ -1,0 +1,2 @@
+graft qhub_ops
+global-exclude *.py[cod] __pycache__ *.so

@@ -1,0 +1,40 @@
+project_name: gcp-jupyterhub
+provider: gcp
+ci_cd: github-actions
+domain: "gcp.qhub.dev"
+
+authentication:
+  type: Auth0
+  config:
+    client_id: ...
+    client_secret: ...
+    oauth_callback_url: ...
+    scope: ['openid', 'email', 'profile']
+    auth0_subdomain: ...
+  admin:
+    access: true
+    users:
+      - "chris.ostrouchov@gmail.com"
+  whitelist:
+    users:
+      - "dharhas@quansight.com"
+
+google_cloud_platform:
+  project: test-test-test
+  region: us-central1
+  zone: us-central1-c
+  availability_zones: ["us-central1-c"]
+  kubernetes_version: "1.14.10-gke.31"
+  node_groups:
+    general:
+      instance: n1-standard-1
+      min_nodes: 2
+      max_nodes: 2
+    user:
+      instance: n1-standard-2
+      min_nodes: 0
+      max_nodes: 2
+    worker:
+      instance: n1-standard-2
+      min_nodes: 0
+      max_nodes: 5

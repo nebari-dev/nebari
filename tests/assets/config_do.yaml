@@ -1,0 +1,35 @@
+project_name: do-jupyterhub
+provider: do
+ci_cd: github-actions
+domain: "do3.qhub.dev"
+
+authentication:
+  type: GitHub
+  config:
+    client_id: ...
+    client_secret: ...
+    oauth_callback_url: ...
+  admin:
+    access: true
+    users:
+      - costrouc
+  whitelist:
+    users:
+      - dharhas
+
+digital_ocean:
+  region: nyc3
+  kubernetes_version: "1.16.6-do.2"
+  node_groups:
+    general:
+      instance: "s-2vcpu-4gb"
+      min_nodes: 1
+      max_nodes: 1
+    user:
+      instance: "s-2vcpu-4gb"
+      min_nodes: 1
+      max_nodes: 4
+    worker:
+      instance: "s-2vcpu-4gb"
+      min_nodes: 1
+      max_nodes: 4

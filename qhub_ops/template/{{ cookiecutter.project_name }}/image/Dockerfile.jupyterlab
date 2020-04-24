@@ -1,0 +1,38 @@
+FROM debian:10.3-slim
+LABEL MAINTAINER="Quansight"
+
+# ============= base install ===============
+ENV CONDA_VERSION py37_4.8.2
+ENV CONDA_SHA256 957d2f0f0701c3d1335e3b39f235d197837ad69a944fa6f5d8ad2c686b69df3b
+
+COPY scripts /opt/scripts
+
+RUN /opt/scripts/install-conda.sh
+
+ENV PATH="/opt/conda/bin:$PATH"
+
+# ========== jupyterlab install ============
+COPY jupyterlab /opt/jupyterlab
+
+RUN /opt/scripts/install-apt.sh                  /opt/jupyterlab/apt.txt \
+    && /opt/scripts/install-conda-environment.sh /opt/jupyterlab/environment.yaml \
+    && /opt/jupyterlab/postBuild
+
+# ========== regular user ===========
+ARG NB_USER="jovyan"
+# We assume only one user per container, so make it unique UID matches
+# GID
+ARG NB_UID="1000"
+
+RUN groupadd --gid ${NB_UID} ${NB_USER} && \
+    useradd \
+    --comment 'Jupyter container user' \
+    --create-home \
+    --no-log-init \
+    --shell /bin/bash \
+    --gid ${NB_UID} \
+    --uid ${NB_UID} \
+    ${NB_USER}
+
+USER ${NB_UID}
+WORKDIR /home/${NB_USER}

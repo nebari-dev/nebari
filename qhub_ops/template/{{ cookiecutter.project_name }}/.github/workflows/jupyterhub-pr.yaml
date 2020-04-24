@@ -1,0 +1,69 @@
+name: "Jupyterhub Infrastructure - Pull Request"
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "infrastructure/**"
+      - ".github/workflows/jupyterhub.yaml"
+
+{% if cookiecutter.provider == 'aws' %}
+{% raw %}
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+{% endraw %}
+{% elif cookiecutter.provider == 'do' %}
+{% raw %}
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  SPACES_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  SPACES_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+{% endraw %}
+{% elif cookiecutter.provider == 'gcp' %}
+{% raw %}
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+{% endraw %}
+{% endif %}
+
+jobs:
+  terraform-plan:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout Infastructure'
+        uses: actions/checkout@master
+      - name: 'Terraform Format'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.23
+          tf_actions_subcommand: 'fmt'
+          tf_actions_working_dir: 'infrastructure'
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.23
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: 'infrastructure'
+      - name: 'Terraform Validate'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.23
+          tf_actions_subcommand: 'validate'
+          tf_actions_working_dir: 'infrastructure'
+          tf_actions_comment: true
+      - name: 'Terraform Plan'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.23
+          tf_actions_subcommand: 'plan'
+          tf_actions_working_dir: 'infrastructure'
+          tf_actions_comment: true

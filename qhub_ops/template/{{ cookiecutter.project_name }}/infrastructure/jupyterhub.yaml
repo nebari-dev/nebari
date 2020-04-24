@@ -1,0 +1,59 @@
+{% if cookiecutter.authentication.type == 'Auth0' %}
+auth:
+  type: custom
+  custom:
+    className: "oauthenticator.auth0.Auth0OAuthenticator"
+    config:
+      client_id: "{{ cookiecutter.authentication.config.client_id }}"
+      client_secret: "{{ cookiecutter.authentication.config.client_secret }}"
+      oauth_callback_url: "{{ cookiecutter.authentication.config.oauth_callback_url }}"
+      scope: {{ cookiecutter.authentication.config.scope | jsonify }}
+      auth0_subdomain: "{{ cookiecutter.authentication.config.auth0_subdomain }}"
+{% elif cookiecutter.authentication.type == 'GitHub' %}
+auth:
+  type: github
+  github:
+    clientId: "{{ cookiecutter.authentication.config.client_id }}"
+    clientSecret: "{{ cookiecutter.authentication.config.client_secret }}"
+    callbackUrl: "{{ cookiecutter.authentication.config.oauth_callback_url }}"
+{% endif %}
+  admin:
+    {{ cookiecutter.authentication.admin | yamlify | indent(4) }}
+  whitelist:
+    {{ cookiecutter.authentication.whitelist | yamlify | indent(4) }}
+
+
+hub:
+{% if cookiecutter.authentication.type == 'Auth0' %}
+  extraEnv:
+    AUTH0_SUBDOMAIN: "{{ cookiecutter.authentication.config.auth0_subdomain }}"
+{% endif %}
+  extraConfig:
+    01-jupyterlab: |
+      c.Spawner.cmd = ['jupyter-labhub']
+
+    customPodHook: |
+      c.JupyterHub.template_paths = ['/usr/local/share/jupyterhub/custom_templates/']
+      c.JupyterHub.template_vars = {
+          'pangeo_hub_title': 'QHub - {{ cookiecutter.project_name }}',
+          'pangeo_hub_subtitle': 'Autoscaling Compute Environment on Digital Ocean',
+          'pangeo_welcome': """Welcome to jupyter.{{ cookiecutter.domain }}. It is maintained by the <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in the github repository based on <a href="https://github.com/Quansight/qhub-kubernetes/">https://github.com/Quansight/qhub-kubernetes/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub-kubernetes//issues">github issue tracker</a>."""
+      }
+
+singleuser:
+  profileList:
+    - display_name: "Small Instance"
+      description: "Stable environment with 0.25 cpu / 0.5 GB ram"
+      default: true
+    - display_name: "Medium Instance"
+      description: "Stable environment with 1 cpu / 2 GB ram"
+      kubespawner_override:
+        cpu_limit: 1
+        cpu_guarantee: 0.5
+        mem_limit: "2G"
+        mem_guarantee: "1G"
+
+cull:
+  enabled: true
+  timeout: 1800 # cull after 30min of inactivity
+  every: 600

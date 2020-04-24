@@ -1,0 +1,10 @@
+locales
+
+# utilities
+wget curl
+
+# development utilities
+git
+
+# editors
+nano
