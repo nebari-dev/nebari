@@ -1,4 +1,4 @@
-project_name: do-jupyterhub
+project_name: do-qhub-auth0-provisioned
 provider: do
 ci_cd: github-actions
 domain: "do3.qhub.dev"

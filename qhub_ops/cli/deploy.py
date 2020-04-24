@@ -7,8 +7,7 @@ from qhub_ops.deploy import deploy_configuration
 logger = logging.getLogger(__name__)
 
 
-def create_deploy_subcommand(parser):
-    subparser = parser.add_subparsers(help="Deploy QHub")
+def create_deploy_subcommand(subparser):
     subparser = subparser.add_parser("deploy")
     subparser.add_argument("-c", "--config", help="qhub configuration", required=True)
     subparser.set_defaults(func=handle_deploy)

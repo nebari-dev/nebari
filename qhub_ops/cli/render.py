@@ -1,8 +1,7 @@
-from qhub.render import render_default_template, render_template
+from qhub_ops.render import render_default_template, render_template
 
 
-def create_init_subcommand(parser):
-    subparser = parser.add_subparsers(help="Initialize QHub repository")
+def create_render_subcommand(subparser):
     subparser = subparser.add_parser("render")
     subparser.add_argument("-i", "--input", help="input directory")
     subparser.add_argument("-o", "--output", default=".", help="output directory")

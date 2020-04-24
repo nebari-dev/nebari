@@ -11,8 +11,8 @@ __pycache__
 result
 
 # ignore deploments
-do-deployment
-aws-deployment
-gcp-deployment
+do-jupyterhub
+aws-jupyterhub
+gcp-jupyterhub
 modules
 quansight-terraform-modules

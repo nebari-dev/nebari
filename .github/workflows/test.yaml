@@ -59,19 +59,19 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: qhub-digital-ocean-artifact
-          path: do-deployment
+          path: do-jupyterhub
       - name: 'Terraform Format'
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: ${{ env.TERRAFORM_VERSION }}
           tf_actions_subcommand: 'fmt'
-          tf_actions_working_dir: 'do-deployment/infrastructure'
+          tf_actions_working_dir: 'do-jupyterhub/infrastructure'
       - name: 'Terraform Init'
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: ${{ env.TERRAFORM_VERSION }}
           tf_actions_subcommand: 'init'
-          tf_actions_working_dir: 'do-deployment/infrastructure'
+          tf_actions_working_dir: 'do-jupyterhub/infrastructure'
         env:
           DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
@@ -83,7 +83,7 @@ jobs:
         with:
           tf_actions_version: ${{ env.TERRAFORM_VERSION }}
           tf_actions_subcommand: 'validate'
-          tf_actions_working_dir: 'do-deployment/infrastructure'
+          tf_actions_working_dir: 'do-jupyterhub/infrastructure'
           tf_actions_comment: true
         env:
           DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
@@ -114,19 +114,19 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: qhub-amazon-web-services-artifact
-          path: aws-deployment
+          path: aws-jupyterhub
       - name: 'Terraform Format'
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: 0.12.24
           tf_actions_subcommand: 'fmt'
-          tf_actions_working_dir: 'aws-deployment/infrastructure'
+          tf_actions_working_dir: 'aws-jupyterhub/infrastructure'
       - name: 'Terraform Init'
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: 0.12.24
           tf_actions_subcommand: 'init'
-          tf_actions_working_dir: 'aws-deployment/infrastructure'
+          tf_actions_working_dir: 'aws-jupyterhub/infrastructure'
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -135,7 +135,7 @@ jobs:
         with:
           tf_actions_version: 0.12.24
           tf_actions_subcommand: 'validate'
-          tf_actions_working_dir: 'aws-deployment/infrastructure'
+          tf_actions_working_dir: 'aws-jupyterhub/infrastructure'
           tf_actions_comment: true
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -163,4 +163,4 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: qhub-google-cloud-platform-artifact
-          path: gcp-deployment
+          path: gcp-jupyterhub
