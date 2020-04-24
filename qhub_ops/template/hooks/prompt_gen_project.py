@@ -8,7 +8,6 @@ from qhub_ops.provider.cloud import digital_ocean, google_cloud, amazon_web_serv
 
 
 DEFAULT_CONFIGURATION = {
-    "repo_name": "qhub-deployment",
     "project_name": "qhub-jupyterhub",
     "providers": {
         "Google Cloud Platform (GCP)": "gcp",
@@ -183,9 +182,6 @@ def prompt_aws_config(config):
 
 
 def prompt_config():
-    repo_name = prompt.read_user_variable(
-        "Repository Name", DEFAULT_CONFIGURATION["repo_name"]
-    )
     project_name = prompt.read_user_variable(
         "Project Name", DEFAULT_CONFIGURATION["project_name"]
     )
@@ -201,7 +197,6 @@ def prompt_config():
     provider = prompt_dict("Cloud Provider", DEFAULT_CONFIGURATION["providers"])
 
     config = {
-        "repo_name": repo_name,
         "project_name": project_name,
         "provider": provider,
         "ci_cd": ci_cd,

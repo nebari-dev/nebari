@@ -1,7 +1,7 @@
 project_name: do-qhub-auth0-provisioned
 provider: do
 ci_cd: github-actions
-domain: "do3.qhub.dev"
+domain: "do4.qhub.dev"
 
 authentication:
   type: Auth0

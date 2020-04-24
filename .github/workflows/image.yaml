@@ -32,7 +32,7 @@ jobs:
         env:
           IMAGE_NAME: 'quansight/qhub-${{ matrix.dockerfile }}'
           IMAGE_TAG: ${{ github.sha }}
-        working-directory: "qhub/template/{{ cookiecutter.repo_name }}/image"
+        working-directory: "qhub_ops/template/{{ cookiecutter.project_name }}/image"
         run: |
           docker build -f "Dockerfile.${{ matrix.dockerfile }}" -t $IMAGE_NAME:$IMAGE_TAG .
           docker push $IMAGE_NAME:$IMAGE_TAG

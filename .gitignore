@@ -16,3 +16,4 @@ aws-jupyterhub
 gcp-jupyterhub
 modules
 quansight-terraform-modules
+config.yaml

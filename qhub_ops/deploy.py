@@ -35,7 +35,7 @@ def deploy_configuration(config):
 
         render_default_template(".", tmp_config)
 
-    infrastructure_dir = pathlib.Path(config["repo_name"]) / "infrastructure"
+    infrastructure_dir = pathlib.Path(config["project_name"]) / "infrastructure"
 
     terraform.init(str(infrastructure_dir))
 

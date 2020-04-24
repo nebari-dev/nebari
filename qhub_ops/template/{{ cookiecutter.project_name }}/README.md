@@ -1,4 +1,4 @@
-# {{ cookiecutter.repo_name }} Infrastructure
+# {{ cookiecutter.project_name }} Infrastructure
 
 This guide is intended to show how to deploy and maintain a jupyterhub
 cluster along with its related components. Infastructure as code is
