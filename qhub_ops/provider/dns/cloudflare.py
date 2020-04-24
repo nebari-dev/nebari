@@ -3,12 +3,12 @@ import logging
 
 import CloudFlare
 
-CLOUDFLARE_API_TOKEN = os.environ["CLOUDFLARE_TOKEN"]
 
 logger = logging.getLogger(__name__)
 
 
 def update_record(zone_name, record_name, record_type, record_address):
+    CLOUDFLARE_API_TOKEN = os.environ["CLOUDFLARE_TOKEN"]
     cf = CloudFlare.CloudFlare(token=CLOUDFLARE_API_TOKEN)
 
     record = {

@@ -4,12 +4,11 @@ from auth0.v3.management import Auth0
 from auth0.v3.authentication import GetToken
 
 
-DOMAIN = os.environ["AUTH0_DOMAIN"]
-CLIENT_ID = os.environ["AUTH0_CLIENT_ID"]
-CLIENT_SECRET = os.environ["AUTH0_CLIENT_SECRET"]
-
-
 def create_client(jupyterhub_endpoint):
+    DOMAIN = os.environ["AUTH0_DOMAIN"]
+    CLIENT_ID = os.environ["AUTH0_CLIENT_ID"]
+    CLIENT_SECRET = os.environ["AUTH0_CLIENT_SECRET"]
+
     get_token = GetToken(DOMAIN)
     token = get_token.client_credentials(
         CLIENT_ID, CLIENT_SECRET, "https://{}/api/v2/".format(DOMAIN)
