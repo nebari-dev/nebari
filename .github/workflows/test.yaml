@@ -29,7 +29,7 @@ jobs:
           pip install .[test,dev]
       - name: Black Formatting
         run: |
-          black --check qhub
+          black --check qhub_ops
       - name: Flake8 Formatting
         run: |
           flake8
