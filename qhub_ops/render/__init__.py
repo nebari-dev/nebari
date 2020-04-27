@@ -7,14 +7,16 @@ from cookiecutter.main import cookiecutter
 from cookiecutter.generate import generate_files
 
 
-def render_default_template(output_directory, config_filename=None):
+def render_default_template(output_directory, config_filename=None, force=False):
     import qhub_ops
 
     input_directory = pathlib.Path(qhub_ops.__file__).parent / "template"
-    render_template(input_directory, output_directory, config_filename)
+    render_template(input_directory, output_directory, config_filename, force=force)
 
 
-def render_template(input_directory, output_directory, config_filename=None):
+def render_template(
+    input_directory, output_directory, config_filename=None, force=False
+):
     # would be nice to remove assumption that input directory
     # is in local filesystem
     input_directory = pathlib.Path(input_directory)
@@ -43,6 +45,7 @@ def render_template(input_directory, output_directory, config_filename=None):
             repo_dir=str(input_directory),
             context={"cookiecutter": config},
             output_dir=str(output_directory),
+            overwrite_if_exists=force,
         )
     elif prompt_filename.is_file():
         with prompt_filename.open() as f:
@@ -57,6 +60,11 @@ def render_template(input_directory, output_directory, config_filename=None):
             no_input=True,
             extra_context=config,
             output_dir=str(output_directory),
+            overwrite_if_exists=force,
         )
     else:
-        cookiecutter(str(input_directory), output_dir=str(output_directory))
+        cookiecutter(
+            str(input_directory),
+            output_dir=str(output_directory),
+            overwrite_if_exists=force,
+        )

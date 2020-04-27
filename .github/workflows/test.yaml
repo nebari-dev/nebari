@@ -52,45 +52,67 @@ jobs:
       - name: Install QHub
         run: |
           pip install .[test,dev]
+      - name: Checkout Do Deployment Repository
+        run: |
+          mkdir -p $HOME/.ssh
+          echo "${SSH_KEY}" > $HOME/.ssh/id_rsa
+          chmod 600 $HOME/.ssh/id_rsa
+
+          git clone git@github.com:Quansight/qhub-automated-do-deployment.git do-jupyterhub
+        env:
+          SSH_KEY: ${{ secrets.QHUB_AUTOMATED_DO_DEPLOYMENT_KEY }}
       - name: QHub Build Digital Ocean Template
         run: |
-          qhub-ops render -c tests/assets/config_do.yaml
+          qhub-ops render -c tests/assets/config_do.yaml -f
       - name: Digital Ocean Artifact
         uses: actions/upload-artifact@v1
         with:
           name: qhub-digital-ocean-artifact
           path: do-jupyterhub
-      - name: 'Terraform Format'
-        uses: hashicorp/terraform-github-actions@master
-        with:
-          tf_actions_version: ${{ env.TERRAFORM_VERSION }}
-          tf_actions_subcommand: 'fmt'
-          tf_actions_working_dir: 'do-jupyterhub/infrastructure'
-      - name: 'Terraform Init'
-        uses: hashicorp/terraform-github-actions@master
-        with:
-          tf_actions_version: ${{ env.TERRAFORM_VERSION }}
-          tf_actions_subcommand: 'init'
-          tf_actions_working_dir: 'do-jupyterhub/infrastructure'
+      - name: Push Changes to Do Deployment Repository
+        run: |
+          cd do-jupyterhub
+          git config user.email "qhub-ops@quansight.com"
+          git config user.name "github action"
+          git add .
+          # only commit and push if we have changes
+          git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
+          cd ..
         env:
-          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
-          SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
-          SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
-      - name: 'Terraform Validate'
-        uses: hashicorp/terraform-github-actions@master
-        with:
-          tf_actions_version: ${{ env.TERRAFORM_VERSION }}
-          tf_actions_subcommand: 'validate'
-          tf_actions_working_dir: 'do-jupyterhub/infrastructure'
-          tf_actions_comment: true
-        env:
-          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
-          SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
-          SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+          COMMIT_MSG: |
+            Automated push from qhub-ops digital ocean deployment ${{ github.sha }}
+            skip-checks: true
+      # - name: 'Terraform Format'
+      #   uses: hashicorp/terraform-github-actions@master
+      #   with:
+      #     tf_actions_version: ${{ env.TERRAFORM_VERSION }}
+      #     tf_actions_subcommand: 'fmt'
+      #     tf_actions_working_dir: 'do-jupyterhub/infrastructure'
+      # - name: 'Terraform Init'
+      #   uses: hashicorp/terraform-github-actions@master
+      #   with:
+      #     tf_actions_version: ${{ env.TERRAFORM_VERSION }}
+      #     tf_actions_subcommand: 'init'
+      #     tf_actions_working_dir: 'do-jupyterhub/infrastructure'
+      #   env:
+      #     DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+      #     SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+      #     SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+      # - name: 'Terraform Validate'
+      #   uses: hashicorp/terraform-github-actions@master
+      #   with:
+      #     tf_actions_version: ${{ env.TERRAFORM_VERSION }}
+      #     tf_actions_subcommand: 'validate'
+      #     tf_actions_working_dir: 'do-jupyterhub/infrastructure'
+      #     tf_actions_comment: true
+      #   env:
+      #     DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+      #     SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+      #     SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
 
 
   test-amazon-web-services:

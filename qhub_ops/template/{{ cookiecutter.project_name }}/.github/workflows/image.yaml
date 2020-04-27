@@ -58,11 +58,13 @@ jobs:
       - name: Docker Build, Tag, and Push Image
         env:
 {% if cookiecutter.provider == "aws" %}
-          IMAGE_NAME: {{ '${{ steps.login-ecr.outputs.registry }}/crowdsmart-jupyterhub-dev-jupyterlab' }}
+          IMAGE_NAME: {{ '${{ steps.login-ecr.outputs.registry }}' }}/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
 {% elif cookiecutter.provider == "gcp" %}
-          IMAGE_NAME: {{ 'gcr.io/$GCP_PROJECT/$GCP_REPOSITORY' }}
+          IMAGE_NAME: {{ 'gcr.io/$GCP_PROJECT/$GCP_REPOSITORY' }}/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
 {% elif cookiecutter.provider == "do" %}
-          IMAGE_NAME: 'quansight/qhub-{{ '${{ matrix.dockerfile }}' }}'
+          # due to digitalocean not having a public container registry (beta)
+          # https://www.digitalocean.com/products/container-registry/
+          IMAGE_NAME: quansight/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
 {% endif %}
           IMAGE_TAG: {{ '${{ github.sha }}' }}
         run: |

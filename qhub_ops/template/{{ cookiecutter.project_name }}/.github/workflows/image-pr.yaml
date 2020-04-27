@@ -25,5 +25,6 @@ jobs:
       - name: Build Image
         env:
           IMAGE_TAG: {{ '${{ github.sha }}' }}
+          IMAGE_NAME: {{ cookiecutter.project_name }}-{{ '${{ strategy.dockerfile }}' }}
         run: |
-          docker build -f "image/Dockerfile.{{ '${{ strategy.dockerfile }}' }}" -t "qhub-{{ '${{ strategy.dockerfile }}' }}:$IMAGE_TAG" image
+          docker build -f "image/Dockerfile.{{ '${{ strategy.dockerfile }}' }}" -t $IMAGE_NAME:$IMAGE_TAG" image
