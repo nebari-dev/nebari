@@ -61,6 +61,13 @@ jobs:
           git clone git@github.com:Quansight/qhub-automated-do-deployment.git do-jupyterhub
         env:
           SSH_KEY: ${{ secrets.QHUB_AUTOMATED_DO_DEPLOYMENT_KEY }}
+      - name: Initialize configuration file
+        run: |
+          sed -i "s/CLIENT_ID/${CLIENT_ID}/" tests/assets/config_do.yaml
+          sed -i "s/CLIENT_SECRET/${CLIENT_SECRET}/" tests/assets/config_do.yaml
+        env:
+          CLIENT_ID: ${{ secrets.DO_OAUTH_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.DO_OAUTH_CLIENT_SECRET }}
       - name: QHub Build Digital Ocean Template
         run: |
           qhub-ops render -c tests/assets/config_do.yaml -f

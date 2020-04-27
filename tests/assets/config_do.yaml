@@ -1,14 +1,14 @@
 project_name: do-jupyterhub
 provider: do
 ci_cd: github-actions
-domain: "do3.qhub.dev"
+domain: "do.qhub.dev"
 
 authentication:
   type: GitHub
   config:
-    client_id: ...
-    client_secret: ...
-    oauth_callback_url: ...
+    client_id: CLIENT_ID
+    client_secret: CLIENT_SECRET
+    oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
   admin:
     access: true
     users:
