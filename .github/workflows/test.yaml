@@ -81,9 +81,7 @@ jobs:
           cd ..
         env:
           COMMIT_MSG: |
-            Automated push from qhub-ops digital ocean deployment ${{ github.sha }}
-            skip-checks: true
-
+            qhub-ops automated commit: ${{ github.sha }}
 
   test-amazon-web-services:
     name: 'Test Amazon Web Services Deployment'
