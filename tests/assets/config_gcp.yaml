@@ -27,9 +27,9 @@ google_cloud_platform:
   kubernetes_version: "1.14.10-gke.31"
   node_groups:
     general:
-      instance: n1-standard-1
-      min_nodes: 2
-      max_nodes: 2
+      instance: n1-standard-2
+      min_nodes: 1
+      max_nodes: 1
     user:
       instance: n1-standard-2
       min_nodes: 0
