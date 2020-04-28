@@ -43,3 +43,4 @@ sphinx
 pytest-cov
 black
 isort
+importnb
