@@ -13,6 +13,7 @@ authentication:
     access: true
     users:
       - costrouc
+      - tonyfast
   whitelist:
     users:
       - dharhas
