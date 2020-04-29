@@ -39,6 +39,16 @@ not merged](https://github.com/terraform-providers/terraform-provider-digitaloce
 
 {% elif cookiecutter.provider == 'gcp' %}
 
+Google Cloud deployment has the simplest setup since it will only require one environment variable.
+
+ - `GOOGLE_APPLICATION_CREDENTIALS`
+ 
+`GOOGLE_APPLICATION_CREDENTIALS` must the path to a `json` credentials
+file with sufficient permissions to create all resources on the
+cluster. Detailed instructions on [creating service accounts can be
+found
+here](https://cloud.google.com/iam/docs/creating-managing-service-account-keys).
+
 {% endif %}
 
 
@@ -69,6 +79,9 @@ for many terraform deployments.
 {% elif cookiecutter.provider == 'do' %}
 
 {% elif cookiecutter.provider == 'gcp' %}
+
+Google Cloud storage provides an s3 compatible storage with additional
+benefits such as built in file locking.
 
 {% endif %}
 

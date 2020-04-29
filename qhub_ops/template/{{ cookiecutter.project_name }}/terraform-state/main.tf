@@ -16,7 +16,6 @@ module "terraform-state" {
 }
 {% elif cookiecutter.provider == "gcp" -%}
 provider "google" {
-  credentials = file("/tmp/account.json")
   project     = "{{ cookiecutter.google_cloud_platform.project }}"
   region      = "{{ cookiecutter.google_cloud_platform.region }}"
   zone        = "{{ cookiecutter.google_cloud_platform.zone }}"
