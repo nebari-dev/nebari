@@ -49,6 +49,12 @@ cluster. Detailed instructions on [creating service accounts can be
 found
 here](https://cloud.google.com/iam/docs/creating-managing-service-account-keys).
 
+If using the github actions CI the google cloud provisioner requires
+that the credentials be base 64 encoded. Thus we provide a different
+environment variable. 
+
+ - `GCP_B64_SERVICE_ACCOUNT`
+
 {% endif %}
 
 

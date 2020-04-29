@@ -8,7 +8,6 @@ on:
       - "image/**"
       - ".github/workflows/image.yaml"
 
-
 jobs:
   build:
     name: QHub Build Dockerfile
@@ -33,20 +32,42 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+      - name: Docker Build, Tag, and Push Image
+        env:
+          IMAGE_TAG: {{ '${{ github.sha }}' }}
+          IMAGE_NAME: {{ '${{ steps.login-ecr.outputs.registry }}' }}/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
+        run: |
+          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
+          docker push $IMAGE_NAME:$IMAGE_TAG
+      - name: Logout of Amazon ECR
+        if: always()
+        run: docker logout {{ '${{ steps.login-ecr.outputs.registry }}' }}
 {% elif cookiecutter.provider == "gcp" %}
       - name: Configure GCP Credentials
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '270.0.0'
-          service_account_key: {{ '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}' }}
+          service_account_key: {{ '${{ secrets.GCP_B64_SERVICE_ACCOUNT }}' }}
       - name: 'Add GCP Credentials'
         run: |
-          echo "$gcp_credentials" > gcp-infrastructure/account.json
-          gcloud auth activate-service-account --key-file=gcp-infrastructure/account.json
+          echo "$SERVICE_ACCOUNT" | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
+          gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
         env:
-          gcp_credentials: {{ '${{ secrets.gcp_credentials }}' }}
-      - run: |
+          GOOGLE_APPLICATION_CREDENTIALS: "/tmp/account.json"
+          SERVICE_ACCOUNT: {{ '${{ secrets.GCP_B64_SERVICE_ACCOUNT }}' }}
+      - name: Add GCP Docker Credentials
+        run: |
           gcloud auth configure-docker
+      - name: Docker Build, Tag, and Push Image
+        env:
+          IMAGE_TAG: {{ '${{ github.sha }}' }}
+        run: |
+          export IMAGE_NAME="gcr.io/$GCP_PROJECT/$GCP_REPOSITORY/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}"
+          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
+          docker push $IMAGE_NAME:$IMAGE_TAG
+      - name: Docker Logout
+        run: |
+          docker logout
 {% elif cookiecutter.provider == "do" %}
       - name: Docker Login
         run: |
@@ -54,31 +75,15 @@ jobs:
         env:
           DOCKER_USERNAME: {{ '${{ secrets.docker_username }}' }}
           DOCKER_PASSWORD: {{ '${{ secrets.docker_password }}' }}
-{% endif %}
       - name: Docker Build, Tag, and Push Image
         env:
-{% if cookiecutter.provider == "aws" %}
-          IMAGE_NAME: {{ '${{ steps.login-ecr.outputs.registry }}' }}/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
-{% elif cookiecutter.provider == "gcp" %}
-          IMAGE_NAME: {{ 'gcr.io/$GCP_PROJECT/$GCP_REPOSITORY' }}/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
-{% elif cookiecutter.provider == "do" %}
+          IMAGE_TAG: {{ '${{ github.sha }}' }}
           # due to digitalocean not having a public container registry (beta)
           # https://www.digitalocean.com/products/container-registry/
           IMAGE_NAME: quansight/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
-{% endif %}
-          IMAGE_TAG: {{ '${{ github.sha }}' }}
         run: |
           docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
           docker push $IMAGE_NAME:$IMAGE_TAG
-{% if cookiecutter.provider == "aws" %}
-      - name: Logout of Amazon ECR
-        if: always()
-        run: docker logout {{ '${{ steps.login-ecr.outputs.registry }}' }}
-{% elif cookiecutter.provider == "gcp" %}
-      - name: Docker Logout
-        run: |
-          docker logout
-{% elif cookiecutter.provider == "do" %}
       - name: Docker Logout
         run: |
           docker logout
