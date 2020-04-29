@@ -54,6 +54,7 @@ that the credentials be base 64 encoded. Thus we provide a different
 environment variable. 
 
  - `GCP_B64_SERVICE_ACCOUNT`
+ - `PROJECT_ID`
 
 {% endif %}
 

@@ -61,8 +61,9 @@ jobs:
       - name: Docker Build, Tag, and Push Image
         env:
           IMAGE_TAG: {{ '${{ github.sha }}' }}
+          PROJECT_ID: {{ '${{ secrets.PROJECT_ID }}' }}
         run: |
-          export IMAGE_NAME="gcr.io/$GCP_PROJECT/$GCP_REPOSITORY/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}"
+          export IMAGE_NAME="gcr.io/$PROJECT_ID/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}"
           docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
           docker push $IMAGE_NAME:$IMAGE_TAG
       - name: Docker Logout
