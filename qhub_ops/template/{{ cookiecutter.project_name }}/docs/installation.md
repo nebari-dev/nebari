@@ -39,25 +39,18 @@ not merged](https://github.com/terraform-providers/terraform-provider-digitaloce
 
 {% elif cookiecutter.provider == 'gcp' %}
 
-Google Cloud deployment has the simplest setup since it will only require one environment variable.
+Google Cloud deployment has the simplest setup since it will only
+require one environment variable.
 
- - `GOOGLE_APPLICATION_CREDENTIALS`
+ - `GOOGLE_CREDENTIALS`
  
-`GOOGLE_APPLICATION_CREDENTIALS` must the path to a `json` credentials
+`GOOGLE_CREDENTIALS` must be the contents of the `json` credentials
 file with sufficient permissions to create all resources on the
 cluster. Detailed instructions on [creating service accounts can be
 found
 here](https://cloud.google.com/iam/docs/creating-managing-service-account-keys).
 
-If using the github actions CI the google cloud provisioner requires
-that the credentials be base 64 encoded. Thus we provide a different
-environment variable. 
-
- - `GCP_B64_SERVICE_ACCOUNT`
- - `PROJECT_ID`
-
 {% endif %}
-
 
 ## Bootstrapping
 

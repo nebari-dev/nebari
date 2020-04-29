@@ -47,14 +47,12 @@ jobs:
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
           version: '270.0.0'
-          service_account_key: {{ '${{ secrets.GCP_B64_SERVICE_ACCOUNT }}' }}
       - name: 'Add GCP Credentials'
         run: |
-          echo "$SERVICE_ACCOUNT" | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
-          gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+          echo "$GOOGLE_CREDENTIALS" > /tmp/service-account.json
+          gcloud auth activate-service-account --key-file=/tmp/service-account.json
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: "/tmp/account.json"
-          SERVICE_ACCOUNT: {{ '${{ secrets.GCP_B64_SERVICE_ACCOUNT }}' }}
+          GOOGLE_CREDENTIALS: {{ '${{ secrets.GOOGLE_CREDENTIALS }}' }}
       - name: Add GCP Docker Credentials
         run: |
           gcloud auth configure-docker
