@@ -30,7 +30,7 @@ env:
 {% raw %}
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+  GOOGLE_APPLICATION_CREDENTIALS: "/tmp/account.json"
 {% endraw %}
 {% endif %}
 
@@ -41,6 +41,13 @@ jobs:
     steps:
       - name: 'Checkout Infastructure'
         uses: actions/checkout@master
+{% if cookiecutter.provider == 'gcp' %}
+      - name: 'Setup GCP Credentials'
+        env:
+          SERVICE_ACCOUNT: {{ '${{ secrets.GCP_B64_SERVICE_ACCOUNT }}' }}
+        run: |
+          echo "$SERVICE_ACCOUNT" | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
+{% endif %}
       - name: 'Terraform Format'
         uses: hashicorp/terraform-github-actions@master
         with:
