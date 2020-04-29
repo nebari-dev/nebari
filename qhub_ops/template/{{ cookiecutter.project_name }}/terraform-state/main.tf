@@ -16,9 +16,16 @@ module "terraform-state" {
 }
 {% elif cookiecutter.provider == "gcp" -%}
 provider "google" {
+<<<<<<< HEAD
   project = "{{ cookiecutter.google_cloud_platform.project }}"
   region  = "{{ cookiecutter.google_cloud_platform.region }}"
   zone    = "{{ cookiecutter.google_cloud_platform.zone }}"
+=======
+  credentials = file("account.json")
+  project     = "{{ cookiecutter.google_cloud_platform.project }}"
+  region      = "{{ cookiecutter.google_cloud_platform.region }}"
+  zone        = "{{ cookiecutter.google_cloud_platform.zone }}"
+>>>>>>> Terraform formatting on gcp deployment
 }
 
 module "terraform-state" {
