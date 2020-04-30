@@ -36,3 +36,23 @@ digital_ocean:
       instance: "s-2vcpu-4gb"
       min_nodes: 1
       max_nodes: 4
+
+profiles:
+  jupyterlab:
+    - display_name: Small Instance
+      description: Stable environment with 1 cpu / 1 GB ram
+      default: true
+      kubespawner:
+        cpu_limit: 1
+        cpu_guarentee: 1
+        mem_limit: 1G
+        mem_guarentee: 1G
+        image: "quansight/qhub-jupyterlab:277e8cd698924b482516fe5708c6f4b55d6b7650"
+    - display_name: Medium Instance
+      description: Stable environment with 1.5 cpu / 2 GB ram
+      kubespawner:
+        cpu_limit: 1.5
+        cpu_guarentee: 1.25
+        mem_limit: 2G
+        mem_guarentee: 2G
+        image: "quansight/qhub-jupyterlab:277e8cd698924b482516fe5708c6f4b55d6b7650"

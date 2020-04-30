@@ -42,16 +42,8 @@ hub:
 
 singleuser:
   profileList:
-    - display_name: "Small Instance"
-      description: "Stable environment with 0.25 cpu / 0.5 GB ram"
-      default: true
-    - display_name: "Medium Instance"
-      description: "Stable environment with 1 cpu / 2 GB ram"
-      kubespawner_override:
-        cpu_limit: 1
-        cpu_guarantee: 0.5
-        mem_limit: "2G"
-        mem_guarantee: "1G"
+    {{ cookiecutter.profiles.jupyterlab | yamlify | indent(4) }}
+
 
 cull:
   enabled: true

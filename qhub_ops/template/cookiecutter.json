@@ -76,6 +76,11 @@
         }
     },
 
+    "profiles": {
+        "jupyterlab": [],
+        "dask-worker": []
+    },
+
     "_extensions": [
         "qhub_ops.render.jinja.YamlifyExtension",
         "qhub_ops.render.jinja.JsonifyExtension"
