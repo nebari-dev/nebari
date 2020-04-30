@@ -39,16 +39,19 @@ not merged](https://github.com/terraform-providers/terraform-provider-digitaloce
 
 {% elif cookiecutter.provider == 'gcp' %}
 
-Google Cloud deployment has the simplest setup since it will only
-require one environment variable.
+Google Cloud deployment requires the project id and service account
+credentials.
 
  - `GOOGLE_CREDENTIALS`
+ - `PROJECT_ID`
  
 `GOOGLE_CREDENTIALS` must be the contents of the `json` credentials
 file with sufficient permissions to create all resources on the
 cluster. Detailed instructions on [creating service accounts can be
 found
-here](https://cloud.google.com/iam/docs/creating-managing-service-account-keys).
+here](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). `PROJECT_ID`
+is a short string of around 32 characters that defines your project
+uniquely.
 
 {% endif %}
 
