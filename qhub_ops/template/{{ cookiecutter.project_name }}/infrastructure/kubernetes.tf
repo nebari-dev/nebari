@@ -91,4 +91,8 @@ module "qhub" {
   jupyterhub-overrides = [
     file("jupyterhub.yaml")
   ]
+
+  dask-gateway-overrides = [
+    file("dask-gateway.yaml")
+  ]
 }

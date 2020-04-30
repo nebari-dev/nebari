@@ -1,0 +1,18 @@
+gateway:
+  extraConfig:
+    profiles: |
+      from dask_gateway_server.options import Options, Select
+
+      # A mapping from profile name to configuration overrides
+      profiles = {{ cookiecutter.profiles.dask_worker }}
+
+      # Expose a list of profiles for workers
+      c.DaskGateway.cluster_manager_options = Options(
+          Select(
+              "profile",
+              {{ cookiecutter.profiles.dask_worker.keys() | list() }},
+              default='{{ cookiecutter.profiles.dask_worker.keys() | list() | first() }}',
+              label="Cluster Profile",
+          ),
+          handler=lambda options: profiles[options.profile],
+      )

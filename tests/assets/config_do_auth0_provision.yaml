@@ -56,3 +56,17 @@ profiles:
         mem_limit: 2G
         mem_guarentee: 2G
         image: "quansight/qhub-jupyterlab:277e8cd698924b482516fe5708c6f4b55d6b7650"
+
+  dask_worker:
+    "Small Worker":
+      worker_cores_limit: 1
+      worker_cores: 1
+      worker_memory_limit: 1G
+      worker_memory: 1G
+      image: "quansight/qhub-dask-worker:277e8cd698924b482516fe5708c6f4b55d6b7650"
+    "Medium Worker":
+      worker_cores_limit: 1.5
+      worker_cores: 1.25
+      worker_memory_limit: 2G
+      worker_memory: 2G
+      image: "quansight/qhub-dask-worker:277e8cd698924b482516fe5708c6f4b55d6b7650"
