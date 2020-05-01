@@ -3,20 +3,29 @@ provider: do
 ci_cd: github-actions
 domain: "do.qhub.dev"
 
-authentication:
-  type: GitHub
-  config:
-    client_id: CLIENT_ID
-    client_secret: CLIENT_SECRET
-    oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
-  admin:
-    access: true
+security:
+  authentication:
+    type: GitHub
+    config:
+      client_id: CLIENT_ID
+      client_secret: CLIENT_SECRET
+      oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
+  users:
+    costrouc:
+      uid: 1000
+      group: users
+    dharhas:
+      uid: 1001
+      group: admin
+    tonyfast:
+      uid: 1002
+      group: admin
+  groups:
     users:
-      - costrouc
-      - tonyfast
-  whitelist:
-    users:
-      - dharhas
+      gid: 1000
+    admin:
+      gid: 1001
+
 
 digital_ocean:
   region: nyc3
@@ -48,6 +57,8 @@ profiles:
         image: "quansight/qhub-jupyterlab:277e8cd698924b482516fe5708c6f4b55d6b7650"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
+      groups:
+        - admin
       kubespawner:
         cpu_limit: 1.5
         cpu_guarentee: 1.25

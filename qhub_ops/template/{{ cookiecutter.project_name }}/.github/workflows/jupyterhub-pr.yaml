@@ -30,10 +30,7 @@ env:
 {% raw %}
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-<<<<<<< HEAD
   GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-=======
->>>>>>> Terraform formatting on gcp deployment
 {% endraw %}
 {% endif %}
 
@@ -44,16 +41,6 @@ jobs:
     steps:
       - name: 'Checkout Infastructure'
         uses: actions/checkout@master
-<<<<<<< HEAD
-=======
-{% if cookiecutter.provider == 'gcp' %}
-      - name: 'Add GCP Credentials'
-        run: |
-          echo "$SERVICE_ACCOUNT" | base64 -d > infrastructure/account.json
-        env:
-          SERVICE_ACCOUNT: {{ '${{ secrets.GCP_B64_SERVICE_ACCOUNT }}' }}
-{% endif %}
->>>>>>> Terraform formatting on gcp deployment
       - name: 'Terraform Format'
         uses: hashicorp/terraform-github-actions@master
         with:

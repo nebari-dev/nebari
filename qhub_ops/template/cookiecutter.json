@@ -4,7 +4,8 @@
     "ci_cd": null,
     "endpoint": null,
 
-    "authentication": null,
+    "security": null,
+    "profiles": null,
 
     "digital_ocean": {
         "region": null,
@@ -74,11 +75,6 @@
                 "max_nodes": null
             }
         }
-    },
-
-    "profiles": {
-        "jupyterlab": [],
-        "dask-worker": []
     },
 
     "_extensions": [

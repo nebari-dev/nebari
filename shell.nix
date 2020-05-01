@@ -38,6 +38,6 @@ pkgs.mkShell {
     export AWS_SECRET_ACCESS_KEY=$(gopass www/digitalocean.com/costrouchov@quansight.com qhub-terraform-state-spaces-secret-key)
     export SPACES_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
     export DIGITALOCEAN_TOKEN=$(gopass www/digitalocean.com/costrouchov@quansight.com qhub-terraform)
-    # doctl kubernetes cluster kubeconfig save do-jupyterhub-dev
+    doctl kubernetes cluster kubeconfig save do-jupyterhub-dev
   '';
 }

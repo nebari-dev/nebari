@@ -3,21 +3,30 @@ provider: aws
 ci_cd: github-actions
 domain: "aws.qhub.dev"
 
-authentication:
-  type: Auth0
-  config:
-    client_id: ...
-    client_secret: ...
-    oauth_callback_url: ...
-    scope: ['openid', 'email', 'profile']
-    auth0_subdomain: ...
-  admin:
-    access: true
+security:
+  authentication:
+    type: Auth0
+    config:
+      client_id: ...
+      client_secret: ...
+      oauth_callback_url: ...
+      scope: ['openid', 'email', 'profile']
+      auth0_subdomain: ...
+
+  users:
+    "chris.ostrouchov@gmail.com":
+      uid: 1000
+      group: users
+    "dharhas@quansight.com":
+      uid: 1001
+      group: admin
+
+  groups:
     users:
-      - "chris.ostrouchov@gmail.com"
-  whitelist:
-    users:
-      - "dharhas@quansight.com"
+      gid: 1000
+    admin:
+      gid: 1001
+
 
 amazon_web_services:
   region: us-west-2

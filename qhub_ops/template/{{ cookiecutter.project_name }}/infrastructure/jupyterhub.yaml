@@ -1,49 +1,82 @@
-{% if cookiecutter.authentication.type == 'Auth0' %}
+{% if cookiecutter.security.authentication.type == 'Auth0' %}
 auth:
   type: custom
   custom:
     className: "oauthenticator.auth0.Auth0OAuthenticator"
     config:
-      client_id: "{{ cookiecutter.authentication.config.client_id }}"
-      client_secret: "{{ cookiecutter.authentication.config.client_secret }}"
-      oauth_callback_url: "{{ cookiecutter.authentication.config.oauth_callback_url }}"
-      scope: {{ cookiecutter.authentication.config.scope | jsonify }}
-      auth0_subdomain: "{{ cookiecutter.authentication.config.auth0_subdomain }}"
-{% elif cookiecutter.authentication.type == 'GitHub' %}
+      client_id: "{{ cookiecutter.security.authentication.config.client_id }}"
+      client_secret: "{{ cookiecutter.security.authentication.config.client_secret }}"
+      oauth_callback_url: "{{ cookiecutter.security.authentication.config.oauth_callback_url }}"
+      scope: {{ cookiecutter.security.authentication.config.scope | jsonify }}
+      auth0_subdomain: "{{ cookiecutter.security.authentication.config.auth0_subdomain }}"
+{% elif cookiecutter.security.authentication.type == 'GitHub' %}
 auth:
   type: github
   github:
-    clientId: "{{ cookiecutter.authentication.config.client_id }}"
-    clientSecret: "{{ cookiecutter.authentication.config.client_secret }}"
-    callbackUrl: "{{ cookiecutter.authentication.config.oauth_callback_url }}"
+    clientId: "{{ cookiecutter.security.authentication.config.client_id }}"
+    clientSecret: "{{ cookiecutter.security.authentication.config.client_secret }}"
+    callbackUrl: "{{ cookiecutter.security.authentication.config.oauth_callback_url }}"
 {% endif %}
-  admin:
-    {{ cookiecutter.authentication.admin | yamlify | indent(4) }}
-  whitelist:
-    {{ cookiecutter.authentication.whitelist | yamlify | indent(4) }}
 
 
 hub:
-{% if cookiecutter.authentication.type == 'Auth0' %}
+{% if cookiecutter.security.authentication.type == 'Auth0' %}
   extraEnv:
-    AUTH0_SUBDOMAIN: "{{ cookiecutter.authentication.config.auth0_subdomain }}"
+    AUTH0_SUBDOMAIN: "{{ cookiecutter.security.authentication.config.auth0_subdomain }}"
 {% endif %}
   extraConfig:
     01-jupyterlab: |
       c.Spawner.cmd = ['jupyter-labhub']
 
-    customPodHook: |
+    02-spawner: |
+      QHUB_USER_MAPPING = {{ cookiecutter.security.users }}
+      QHUB_GROUP_MAPPING = {{ cookiecutter.security.groups }}
+      QHUB_PROFILES = {{ cookiecutter.profiles.jupyterlab }}
+
+      def qhub_list_admins(users):
+          return [k for k,v in users.items() if v['group'] == 'admin']
+
+      def qhub_list_users(users):
+          return [k for k,v in users.items() if v['group'] != 'admin']
+
+      def qhub_list_available_profiles(user, group, profiles):
+          exclude_keys = {'users', 'groups'}
+
+          available_profiles = []
+          for profile in profiles:
+              if 'users' in profile:
+                  if user in profile['users']:
+                      available_profiles.append({k: v for k,v in profile.items() if k not in exclude_keys})
+              elif 'groups' in profile:
+                  if group in profile['groups']:
+                      available_profiles.append({k: v for k,v in profile.items() if k not in exclude_keys})
+              else:
+                  available_profiles.append({k: v for k,v in profile.items() if k not in exclude_keys})
+
+          return available_profiles
+
+      c.JupyterHub.admin_access = True
+      c.Authenticator.admin_users = qhub_list_admins(QHUB_USER_MAPPING)
+      c.Authenticator.whitelist = qhub_list_users(QHUB_USER_MAPPING)
+
+      async def custom_options_form(self):
+          self.profile_list = qhub_list_available_profiles(
+               self.user.name,
+               QHUB_USER_MAPPING[self.user.name]['group'],
+               QHUB_PROFILES)
+
+          # Let KubeSpawner inspect profile_list and decide what to return
+          return self._options_form_default()
+
+      c.KubeSpawner.options_form = custom_options_form
+
+    03-themeing: |
       c.JupyterHub.template_paths = ['/usr/local/share/jupyterhub/custom_templates/']
       c.JupyterHub.template_vars = {
           'pangeo_hub_title': 'QHub - {{ cookiecutter.project_name }}',
           'pangeo_hub_subtitle': 'Autoscaling Compute Environment on Digital Ocean',
           'pangeo_welcome': """Welcome to jupyter.{{ cookiecutter.domain }}. It is maintained by the <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in the github repository based on <a href="https://github.com/Quansight/qhub-kubernetes/">https://github.com/Quansight/qhub-kubernetes/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub-kubernetes//issues">github issue tracker</a>."""
       }
-
-singleuser:
-  profileList:
-    {{ cookiecutter.profiles.jupyterlab | yamlify | indent(4) }}
-
 
 cull:
   enabled: true
