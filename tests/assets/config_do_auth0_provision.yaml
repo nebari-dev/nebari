@@ -16,10 +16,10 @@ security:
   users:
     "chris.ostrouchov@gmail.com":
       uid: 1000
-      group: users
+      primary_group: users
     "dharhas@quansight.com":
       uid: 1001
-      group: admin
+      primary_group: admin
   groups:
     users:
       gid: 1000
@@ -49,7 +49,7 @@ profiles:
     - display_name: Small Instance
       description: Stable environment with 1 cpu / 1 GB ram
       default: true
-      kubespawner:
+      kubespawner_override:
         cpu_limit: 1
         cpu_guarentee: 1
         mem_limit: 1G
@@ -57,7 +57,7 @@ profiles:
         image: "quansight/qhub-jupyterlab:277e8cd698924b482516fe5708c6f4b55d6b7650"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
-      kubespawner:
+      kubespawner_override:
         cpu_limit: 1.5
         cpu_guarentee: 1.25
         mem_limit: 2G

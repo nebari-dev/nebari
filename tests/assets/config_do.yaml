@@ -13,18 +13,22 @@ security:
   users:
     costrouc:
       uid: 1000
-      group: users
+      primary_group: users
+      secondary_groups:
+        - billing
     dharhas:
       uid: 1001
-      group: admin
+      primary_group: admin
     tonyfast:
       uid: 1002
-      group: admin
+      primary_group: admin
   groups:
     users:
-      gid: 1000
+      gid: 100
     admin:
-      gid: 1001
+      gid: 101
+    billing:
+      gid: 102
 
 
 digital_ocean:
@@ -49,7 +53,7 @@ profiles:
     - display_name: Small Instance
       description: Stable environment with 1 cpu / 1 GB ram
       default: true
-      kubespawner:
+      kubespawner_override:
         cpu_limit: 1
         cpu_guarentee: 1
         mem_limit: 1G
@@ -59,7 +63,7 @@ profiles:
       description: Stable environment with 1.5 cpu / 2 GB ram
       groups:
         - admin
-      kubespawner:
+      kubespawner_override:
         cpu_limit: 1.5
         cpu_guarentee: 1.25
         mem_limit: 2G
