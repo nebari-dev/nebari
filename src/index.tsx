@@ -6,7 +6,6 @@ import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <React.StrictMode>
-    <h1> Welcome to the Qhub Deployment Wizard </h1>
     <App />
   </React.StrictMode>,
   document.getElementById('root')

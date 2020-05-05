@@ -1,10 +1,10 @@
 import React from 'react';
-import HorizontalLinearStepper from './Stepper';
+import QhubWizard from './wizard/QhubWizard';
 
 function App() {
   return (
     <div>
-	<HorizontalLinearStepper />
+	<QhubWizard />
     </div>
   );
 }

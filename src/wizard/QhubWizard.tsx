@@ -5,6 +5,7 @@ import Step from '@material-ui/core/Step';
 import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import WelcomePanel from './components/WelcomePanel';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -12,7 +13,10 @@ const useStyles = makeStyles((theme: Theme) =>
       width: '100%',
     },
     button: {
-      marginRight: theme.spacing(1),
+      marginLeft: theme.spacing(1),
+    },
+    center_buttons: {
+      justifyContent: 'center',
     },
     instructions: {
       marginTop: theme.spacing(1),
@@ -22,6 +26,41 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 /*
+ * Define interfaces
+ */
+
+interface ProjectFormPropTypes {
+  /*
+   * project name: string
+   * will be displayed as a text field, completely
+   * configurable by the user.
+   */
+  project_name: string;
+
+  /*
+   * provider: string;
+   * will be a dropdown menu that will be
+   * a display of all available options
+   */
+  provider: string;
+
+  /*
+   * ci/cd: string;
+   * will also have a dropdown to choose 
+   * from different options
+   */
+  ci_cd: string;
+
+  /*
+   * domain: string;
+   * TODO: ask chris what this is for
+   */
+  domain: string; 
+
+}
+
+
+/*
  * This function contains a collection for the title of the deployment step.
  * Documentation will contain more information on how these are linked together.
  *
@@ -29,7 +68,7 @@ const useStyles = makeStyles((theme: Theme) =>
  * 
  */ 
 function getSteps() {
-  return ['Setup Project - General', '{insert project name} - Authentication Setup', '{ipn} - Users Setup', '{ipn} - Groups Setup', '{provider} Setup', 'Profiles (Optional)'];
+  return ['General Information', 'Setup Project', '{insert project name} - Authentication Setup', '{ipn} - Users Setup', '{ipn} - Groups Setup', '{provider} Setup', 'Profiles (Optional)'];
 }
 
 /*
@@ -39,7 +78,7 @@ function getSteps() {
 function getStepContent(step: number) {
   switch (step) {
     case 0:
-      return 'Select campaign settings...';
+	    return <WelcomePanel />;
     case 1:
       return 'authentiacation setup placeholder';
     case 2:
@@ -50,12 +89,14 @@ function getStepContent(step: number) {
       return 'provider placeholder (build with do)'; 
     case 5:
       return 'profiles setup'; 
+    case 6:
+	    return 'just keep adding more cases'; 
     default:
       return 'Unknown step';
   }
 }
 
-export default function HorizontalLinearStepper() {
+export default function QhubWizard() {
   const classes = useStyles();
   const [activeStep, setActiveStep] = React.useState(0);
   const [skipped, setSkipped] = React.useState(new Set<number>());
@@ -133,9 +174,9 @@ export default function HorizontalLinearStepper() {
             </Button>
           </div>
         ) : (
-          <div>
+	   <div>
             <Typography className={classes.instructions}>{getStepContent(activeStep)}</Typography>
-            <div>
+          <div className={classes.center_buttons}>
               <Button disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
                 Back
               </Button>
