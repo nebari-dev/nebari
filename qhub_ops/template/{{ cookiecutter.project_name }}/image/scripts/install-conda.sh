@@ -22,10 +22,14 @@ ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
 echo ". /opt/conda/etc/profile.d/conda.sh" >> /etc/profile
 
 mkdir -p /etc/conda
-echo "always_yes: true" >> /etc/conda/.condarc
-echo "changeps1: false" >> /etc/conda/.condarc
-echo "auto_update_conda: false" >> /etc/conda/.condarc
-echo "aggressive_update_packages: []" >> /etc/conda/.condarc
+cat <<EOF > /etc/conda/condarc
+always_yes: true
+changeps1: false
+auto_update_conda: false
+aggressive_update_packages: []
+envs_dirs:
+ - /home/jovyan/envs
+EOF
 
 apt-get autoremove --purge -y wget bzip2
 apt-get clean
