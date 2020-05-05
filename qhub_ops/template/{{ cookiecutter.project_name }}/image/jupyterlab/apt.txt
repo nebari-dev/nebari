@@ -1,4 +1,6 @@
 locales
+# assign uid/gid names
+libnss-wrapper
 
 # utilities
 wget curl
