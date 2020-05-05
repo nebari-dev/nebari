@@ -33,21 +33,61 @@ hub:
       QHUB_GROUP_MAPPING = {{ cookiecutter.security.groups }}
       QHUB_PROFILES = {{ cookiecutter.profiles.jupyterlab }}
 
+
+      def qhub_generate_nss_files():
+          passwd = []
+          passwd_format = '{username}:x:{uid}:{gid}:{username}:/home/{username}:/bin/false'
+          for username, config in QHUB_USER_MAPPING.items():
+              uid = config['uid']
+              gid = QHUB_GROUP_MAPPING[config['primary_group']]['gid']
+              passwd.append(passwd_format.format(username=username, uid=uid, gid=gid))
+
+          group = []
+          group_format = '{groupname}:x:{gid}:'
+          for groupname, config in QHUB_GROUP_MAPPING.items():
+              gid = config['gid']
+              group.append(group_format.format(groupname=groupname, gid=gid))
+
+          return '\n'.join(passwd), '\n'.join(group)
+
+
       def qhub_list_admins(users):
           return [k for k,v in users.items() if v['primary_group'] == 'admin']
+
 
       def qhub_list_users(users):
           return [k for k,v in users.items() if v['primary_group'] != 'admin']
 
+
       def qhub_list_user_groups(username):
           user = QHUB_USER_MAPPING[username]
           return set([user['primary_group']] + user.get('secondary_groups', []))
+
 
       def qhub_configure_profile(username, profile):
           user = QHUB_USER_MAPPING[username]
           uid = user['uid']
           primary_gid = QHUB_GROUP_MAPPING[user['primary_group']]['gid']
           secondary_gids = [QHUB_GROUP_MAPPING[_]['gid'] for _ in user.get('secondary_groups', [])]
+
+          profile['kubespawner_override']['environment'] = {
+             'LD_PRELOAD': 'libnss_wrapper.so',
+             'NSS_WRAPPER_PASSWD': '/tmp/passwd',
+             'NSS_WRAPPER_GROUP': '/tmp/group'
+          }
+
+          passwd, group = qhub_generate_nss_files()
+          profile['kubespawner_override']['lifecycle_hooks'] = {
+              "postStart": {
+                  "exec": {
+                      "command": ["/bin/sh", "-c", (
+                           "echo '{passwd}' > /tmp/passwd && "
+                           "echo '{group}' > /tmp/group && "
+                           "ln -sfn /home/shared $HOME/shared"
+                      ).format(passwd=passwd, group=group)]
+                  }
+              }
+          }
 
           profile['kubespawner_override']['uid'] = uid
           profile['kubespawner_override']['gid'] = primary_gid
@@ -75,15 +115,18 @@ hub:
 
           return available_profiles
 
+
       c.JupyterHub.admin_access = True
       c.Authenticator.admin_users = qhub_list_admins(QHUB_USER_MAPPING)
       c.Authenticator.whitelist = qhub_list_users(QHUB_USER_MAPPING)
+
 
       async def custom_options_form(self):
           self.profile_list = qhub_list_available_profiles(self.user.name)
 
           # Let KubeSpawner inspect profile_list and decide what to return
           return self._options_form_default()
+
 
       c.KubeSpawner.options_form = custom_options_form
 
