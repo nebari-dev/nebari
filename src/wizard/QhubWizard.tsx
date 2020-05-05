@@ -6,6 +6,7 @@ import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import WelcomePanel from './components/WelcomePanel';
+import ProjectSetupForm from './components/ProjectSetupForm'; 
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -80,7 +81,7 @@ function getStepContent(step: number) {
     case 0:
 	    return <WelcomePanel />;
     case 1:
-      return 'authentiacation setup placeholder';
+	    return <ProjectSetupForm />;
     case 2:
       return 'This is the bit I really care about!';
     case 3:
