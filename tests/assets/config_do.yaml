@@ -22,6 +22,9 @@ security:
     tonyfast:
       uid: 1002
       primary_group: admin
+    prasunanand:
+      uid: 1003
+      primary_group: admin
   groups:
     users:
       gid: 100
