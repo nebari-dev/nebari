@@ -4,7 +4,7 @@ import Typography from '@material-ui/core/Typography';
 export default function WelcomePanel() {
 	return(
 		<div>
-			<Typography variant='h5' align='right'>
+			<Typography variant='h5' align='center'>
 				Welcome to the Quansight Hub Deployment Wizard
 			</Typography>
 			<Typography variant='body1' align='center'>
