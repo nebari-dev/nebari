@@ -28,7 +28,9 @@ changeps1: false
 auto_update_conda: false
 aggressive_update_packages: []
 envs_dirs:
- - /home/jovyan/envs
+ - /home/jovyan/.conda/envs
+pkgs_dirs:
+ - /home/jovyan/.conda/pkgs
 EOF
 
 apt-get autoremove --purge -y wget bzip2
