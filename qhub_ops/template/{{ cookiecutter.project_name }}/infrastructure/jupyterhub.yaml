@@ -94,13 +94,13 @@ hub:
               {
                    "name": "init-nfs",
                    "image": "busybox:1.31",
-                   "command": ["sh", "-c", (
-                        "mkdir -p /mnt/home/{username} && "
-                        "chmod 700 /mnt/home/{username} && "
-                        "chown {uid}:{primary_gid} /mnt/home/{username} && "
-                        "mkdir -p /mnt/home/shared && "
+                   "command": ["sh", "-c", ' && '.join([
+                        "mkdir -p /mnt/home/{username}",
+                        "chmod 700 /mnt/home/{username}",
+                        "chown {uid}:{primary_gid} /mnt/home/{username}",
+                        "mkdir -p /mnt/home/shared",
                         "chmod 777 /mnt/home/shared"
-                   ).format(username=username, uid=uid, primary_gid=primary_gid)],
+                   ] + ["mkdir -p /mnt/home/shared/groups/{groupname} && chmod 770 /mnt/home/shared/groups/{groupname} && chown 0:{gid}".format(groupname=groupname, gid=gid) for groupname, config in QHUB_GROUP_MAPPING.items()]).format(username=username, uid=uid, primary_gid=primary_gid)],
                    "securityContext": {"runAsUser": 0},
                    "volumeMounts": [{"mountPath": "/mnt", "name": "home"}]
               }
