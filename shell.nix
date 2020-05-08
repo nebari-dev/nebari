@@ -11,6 +11,7 @@ pkgs.mkShell {
     pkgs.terraform
     pkgs.doctl
     pkgs.kubectl
+    pkgs.kubernetes-helm
 
     # dependencies
     pythonPackages.cloudflare
