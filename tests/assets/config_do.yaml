@@ -25,6 +25,11 @@ security:
     prasunanand:
       uid: 1003
       primary_group: admin
+    aktech:
+      uid: 1004
+      primary_group: users
+      secondary_groups:
+        - admin
   groups:
     users:
       gid: 100
