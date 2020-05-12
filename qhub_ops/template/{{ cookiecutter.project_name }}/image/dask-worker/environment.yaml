@@ -16,6 +16,7 @@ s3fs
 boto3
 
 # viz tools
+bokeh
 panel
 param
 python-graphviz
