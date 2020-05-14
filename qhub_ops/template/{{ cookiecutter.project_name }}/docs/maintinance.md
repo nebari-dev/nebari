@@ -82,6 +82,53 @@ digital_ocean:
       max_nodes: 4
 ```
 
+### Setting specific JupyterLab profile to run on a nodegroup
+
+Sometimes we would like a profile to execute on nodes that are not in
+the normal nodegroup. In the example above we created a high memory
+node group. To make the jupyterlab profile `small worker` use the high
+memory nodegroup do the following.
+
+```yaml
+profiles:
+  jupyterlab:
+    - display_name: Small Instance
+      description: Stable environment with 1 cpu / 1 GB ram
+      groups:
+        - admin
+      kubespawner_override:
+        cpu_limit: 1
+        cpu_guarentee: 1
+        mem_limit: 1G
+        mem_guarentee: 1G
+        image: "quansight/qhub-jupyterlab:fb3489522cde4b0fe6b2b0d4f24522d0fffcabc8"
+```
+
+We add the `node_selector` attribute. Note that for AWS, GCP, and DO they have different keys for the nodegroup name.
+
+ - AWS :: `eks.amazonaws.com/nodegroup`
+ - GCP :: `cloud.google.com/gke-nodepool`
+ - DO :: `doks.digitalocean.com/node-pool`
+
+Since we are using digital ocean in this example we then need to set the following.
+
+```yaml
+profiles:
+  jupyterlab:
+    - display_name: Small Instance
+      description: Stable environment with 1 cpu / 1 GB ram
+      groups:
+        - admin
+      kubespawner_override:
+        cpu_limit: 1
+        cpu_guarentee: 1
+        mem_limit: 1G
+        mem_guarentee: 1G
+        image: "quansight/qhub-jupyterlab:fb3489522cde4b0fe6b2b0d4f24522d0fffcabc8"
+        node_selector:
+          "doks.digitalocean.com/node-pool": worker-high-memory
+```
+
 ## General Modifications
 
 The infrastructure was designed with the goal in mind that each
