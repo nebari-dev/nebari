@@ -96,11 +96,3 @@ def to_yaml(app: Providers):
 @fastapi.get("/")
 def hello():
     return {"hello": "world"}
-
-
-def main():
-    __import__("uvicorn").run(fastapi, port=8444)
-
-
-if __name__ == "__main__":
-    main()

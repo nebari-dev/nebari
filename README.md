@@ -11,7 +11,9 @@ written in fastAPI, and a fronend in Vue, with additional components.
 
 `docker build -t <image_name> .`
 
-`docker run -d --name <container_name> -p 8444:8444 <image_name>`
+`docker run -d --name <container_name> -p 8000:8000 <image_name>`
+
+Then, navigate to `0.0.0.0:8000/docs` in the web browser to see the api view.
 
 ## Running without dockerfile 
 
