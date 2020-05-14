@@ -129,6 +129,51 @@ profiles:
           "doks.digitalocean.com/node-pool": worker-high-memory
 ```
 
+### Setting specific dask workers to run on a nodegroup
+
+Suppose we want a specific dask worker profile to run on a specific
+node group. Here we demonstrate annotating the DO example configuration.
+
+```yaml
+profiles:
+  dask_worker:
+    "Small Worker":
+      worker_cores_limit: 1
+      worker_cores: 1
+      worker_memory_limit: 1G
+      worker_memory: 1G
+      image: "quansight/qhub-dask-worker:fb3489522cde4b0fe6b2b0d4f24522d0fffcabc8"
+
+```
+
+[Dask-gateway](https://gateway.dask.org/api-server.html#kube-cluster-config)
+takes additional configuration for the scheduler pods and
+workers. Remember similar to assigning node groups to specific
+jupyterlab instances we must get the key for the node pool.
+
+ - AWS :: `eks.amazonaws.com/nodegroup`
+ - GCP :: `cloud.google.com/gke-nodepool`
+ - DO :: `doks.digitalocean.com/node-pool`
+
+Since we are using digital ocean in this example we then need to set the following.
+
+```yaml
+profiles:
+  dask_worker:
+    "Small Worker":
+      worker_cores_limit: 1
+      worker_cores: 1
+      worker_memory_limit: 1G
+      worker_memory: 1G
+      image: "quansight/qhub-dask-worker:fb3489522cde4b0fe6b2b0d4f24522d0fffcabc8"
+      scheduler_extra_pod_config:
+        nodeSelector:
+          "doks.digitalocean.com/node-pool": worker-high-memory
+      worker_extra_pod_config:
+        nodeSelector:
+          "doks.digitalocean.com/node-pool": worker-high-memory
+```
+
 ## General Modifications
 
 The infrastructure was designed with the goal in mind that each
