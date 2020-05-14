@@ -30,7 +30,60 @@ built, a PR must follow that adds the image to the qhub
 deployment. This can be done by modifying
 `infrastructure/variables.tf` and the configuration file.
 
+### Adding additional worker nodegroups
+
+Adding additional nodegroups can be done by editing the configuration
+file. While a `general`, `user`, and `worker` nodegroup are required
+you may create any addional node group. Take for example the Digital
+Ocean configuration.
+
+```yaml
+digital_ocean:
+  region: nyc3
+  kubernetes_version: "1.16.6-do.2"
+  node_groups:
+    general:
+      instance: "s-2vcpu-4gb"
+      min_nodes: 1
+      max_nodes: 1
+    user:
+      instance: "s-2vcpu-4gb"
+      min_nodes: 1
+      max_nodes: 4
+    worker:
+      instance: "s-2vcpu-4gb"
+      min_nodes: 1
+      max_nodes: 4
+```
+
+To add a node group for a node group called `worker-high-mem` simply
+add to the configuration. The same applies for AWS, GCP, and DO.
+
+```yaml
+digital_ocean:
+  region: nyc3
+  kubernetes_version: "1.16.6-do.2"
+  node_groups:
+    general:
+      instance: "s-2vcpu-4gb"
+      min_nodes: 1
+      max_nodes: 1
+    user:
+      instance: "s-2vcpu-4gb"
+      min_nodes: 1
+      max_nodes: 4
+    worker:
+      instance: "s-2vcpu-4gb"
+      min_nodes: 1
+      max_nodes: 4
+    worker-high-memory:
+      instance: "m6-2vcpu-16gb"
+      min_nodes: 1
+      max_nodes: 4
+```
+
 ## General Modifications
 
 The infrastructure was designed with the goal in mind that each
 `module` is orthogonal.
+

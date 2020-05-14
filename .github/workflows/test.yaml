@@ -112,31 +112,6 @@ jobs:
         with:
           name: qhub-amazon-web-services-artifact
           path: aws-jupyterhub
-      - name: 'Terraform Format'
-        uses: hashicorp/terraform-github-actions@master
-        with:
-          tf_actions_version: 0.12.24
-          tf_actions_subcommand: 'fmt'
-          tf_actions_working_dir: 'aws-jupyterhub/infrastructure'
-      - name: 'Terraform Init'
-        uses: hashicorp/terraform-github-actions@master
-        with:
-          tf_actions_version: 0.12.24
-          tf_actions_subcommand: 'init'
-          tf_actions_working_dir: 'aws-jupyterhub/infrastructure'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      - name: 'Terraform Validate'
-        uses: hashicorp/terraform-github-actions@master
-        with:
-          tf_actions_version: 0.12.24
-          tf_actions_subcommand: 'validate'
-          tf_actions_working_dir: 'aws-jupyterhub/infrastructure'
-          tf_actions_comment: true
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 
   test-google-cloud-platform:

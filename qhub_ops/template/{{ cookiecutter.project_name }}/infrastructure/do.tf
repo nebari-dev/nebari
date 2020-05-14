@@ -10,32 +10,15 @@ module "kubernetes" {
   kubernetes_version = "{{ cookiecutter.digital_ocean.kubernetes_version }}"
 
   node_groups = [
+{% for nodegroup, nodegroup_config in cookiecutter.digital_ocean.node_groups.items() %}
     {
-      name = "general"
-
+      name       = "{{ nodegroup }}"
       auto_scale = true
 
-      size      = "{{ cookiecutter.digital_ocean.node_groups.general.instance }}"
-      min_nodes = {{ cookiecutter.digital_ocean.node_groups.general.min_nodes }}
-      max_nodes = {{ cookiecutter.digital_ocean.node_groups.general.max_nodes }}
+      size      = "{{ nodegroup_config.instance }}"
+      min_nodes = {{ nodegroup_config.min_nodes }}
+      max_nodes = {{ nodegroup_config.max_nodes }}
     },
-    {
-      name = "user"
-
-      auto_scale = true
-
-      size      = "{{ cookiecutter.digital_ocean.node_groups.user.instance }}"
-      min_nodes = {{ cookiecutter.digital_ocean.node_groups.user.min_nodes }}
-      max_nodes = {{ cookiecutter.digital_ocean.node_groups.user.max_nodes }}
-    },
-    {
-      name = "worker"
-
-      auto_scale = true
-
-      size      = "{{ cookiecutter.digital_ocean.node_groups.worker.instance }}"
-      min_nodes = {{ cookiecutter.digital_ocean.node_groups.worker.min_nodes }}
-      max_nodes = {{ cookiecutter.digital_ocean.node_groups.worker.max_nodes }}
-    }
+{% endfor %}
   ]
 }

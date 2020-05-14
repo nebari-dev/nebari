@@ -27,23 +27,13 @@ module "kubernetes" {
   ]
 
   node_groups = [
+{% for nodegroup, nodegroup_config in cookiecutter.google_cloud_platform.node_groups.items() %}
     {
-      name          = "general"
-      instance_type = "{{ cookiecutter.google_cloud_platform.node_groups.general.instance }}"
-      min_size      = {{ cookiecutter.google_cloud_platform.node_groups.general.min_nodes }}
-      max_size      = {{ cookiecutter.google_cloud_platform.node_groups.general.max_nodes }}
+      name          = "{{ nodegroup }}"
+      instance_type = "{{ nodegroup_config.instance }}"
+      min_size      = {{ nodegroup_config.min_nodes }}
+      max_size      = {{ nodegroup_config.max_nodes }}
     },
-    {
-      name          = "user"
-      instance_type = "{{ cookiecutter.google_cloud_platform.node_groups.user.instance }}"
-      min_size      = {{ cookiecutter.google_cloud_platform.node_groups.user.min_nodes }}
-      max_size      = {{ cookiecutter.google_cloud_platform.node_groups.user.max_nodes }}
-    },
-    {
-      name          = "worker"
-      instance_type = "{{ cookiecutter.google_cloud_platform.node_groups.worker.instance }}"
-      min_size      = {{ cookiecutter.google_cloud_platform.node_groups.worker.min_nodes }}
-      max_size      = {{ cookiecutter.google_cloud_platform.node_groups.worker.max_nodes }}
-    }
+{% endfor %}
   ]
 }
