@@ -5,7 +5,6 @@ pip
 dask==2.14.0
 distributed
 dask-gateway=0.6.1
-jupyter-server-proxy
 
 # numerical
 numba
