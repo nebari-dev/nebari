@@ -101,7 +101,7 @@ terraform apply # reply yes
 Once the setup has been bootstrapped we recommend letting GitHub
 actions take over from this point on. This means setting the
 environment variables mentioned above as secrets. One additional
-benifit of this approach. Is that After bootstrapping the terraform
+benefit of this approach. Is that After bootstrapping the terraform
 state no one needs to have access to the credentials (only github
 actions). If you would like to perform the installation locally we
 follow the same terraform deployment steps.
@@ -117,11 +117,46 @@ Notice a pattern here with terraform deployments? `terraform init` +
 cluster. About 15 minutes after these commands or the GitHub Action
 starting you will have a working jupyterhub cluster.
 
-# DNS 
+## Checking the Cluster via CLI
+
+* Install the AWS CLI:
+https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html
+
+* Update the kubeconfig:
+
+```bash
+aws eks --region us-west-2  update-kubeconfig --name jupyterhub-aws-dev
+```
+
+Now you can run `kubectl` and `helm` commands to know about your cluster and deployments.
+Here are some useful commands:
+
+```bash
+kubectl get pods -n dev
+kubectl get nodes -n dev
+helm list -n dev
+```
+
+# DNS
+
+The DNS is handled by Cloudflare. To point the cloudflare subdomain `jupyter.aws`(.qhub.dev)
+to your application, first get the IP address of the Load balancer. You can get the CNAME
+of the load balancer via the following command:
+
+```bash
+kubectl get svc -n dev
+```
+This lists all the running services in the Kubernetes cluster. There would be a service
+of type `LoadBalancer`, listed in the output of the above command. The CNAME would
+be mentioned right next to it. Run the `ping` on the CNAME to get the IP Address.
+
+Now go to the DNS section of the Cloudflare's dashboard and create an `A` record for the
+subdomain `jupyter.aws`(.qhub.dev) and paste the IP (from the ping command) in the IPv4
+column and click on the proxy status to change the value to DNS only.
 
 # Authentication
 
-Currently authentication is being performed by Github. Instructions to come on 
+Currently the authentication is being performed by Github OAuth. Instructions to come on.
 
 # QHub Installation
 

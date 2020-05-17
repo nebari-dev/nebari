@@ -6,13 +6,19 @@ terraform.tfstate.backup
 
 # python
 __pycache__
+build/
+*.egg
+*.egg-info/
+
+# IntelliJ
+.idea/
 
 # nix
 result
 
 # ignore deploments
 do-jupyterhub
-aws-jupyterhub
+jupyterhub-aws
 gcp-jupyterhub
 modules
 quansight-terraform-modules
