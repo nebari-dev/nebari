@@ -13,7 +13,7 @@ python setup.py install
 * Amazon Web Services
 
 ```bash
-qhub_ops render -c tests/assets/config_aws.yaml
+qhub-ops render -c tests/assets/config_aws.yaml
 ```
 
 * Digital Ocean
