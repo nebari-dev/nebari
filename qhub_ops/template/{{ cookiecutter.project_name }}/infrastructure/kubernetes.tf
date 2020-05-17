@@ -10,6 +10,9 @@ module "kubernetes-initialization" {
 
   namespace = var.environment
   secrets   = []
+  dependencies = [
+    module.kubernetes.depended_on
+  ]
 }
 
 
@@ -21,6 +24,9 @@ module "kubernetes-nfs-mount" {
   namespace    = var.environment
   nfs_capacity = "10Gi"
   nfs_endpoint = module.efs.credentials.dns_name
+  dependencies = [
+    module.kubernetes-initialization.depended_on
+  ]
 }
 {% else -%}
 module "kubernetes-nfs-server" {
@@ -59,6 +65,10 @@ module "kubernetes-autoscaling" {
 
   aws-region   = var.region
   cluster-name = local.cluster_name
+
+  dependencies = [
+    module.kubernetes.depended_on
+  ]
 }
 {% endif -%}
 
@@ -68,6 +78,10 @@ module "kubernetes-ingress" {
   namespace = var.environment
 
   node-group = local.node_groups.general
+
+  dependencies = [
+    module.kubernetes-initialization.depended_on
+  ]
 }
 
 module "qhub" {
@@ -94,5 +108,9 @@ module "qhub" {
 
   dask-gateway-overrides = [
     file("dask-gateway.yaml")
+  ]
+
+  dependencies = [
+    module.kubernetes-ingress.depended_on
   ]
 }

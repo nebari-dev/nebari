@@ -1,4 +1,4 @@
-project_name: aws-jupyterhub
+project_name: jupyterhub-aws
 provider: aws
 ci_cd: github-actions
 domain: "aws.qhub.dev"
