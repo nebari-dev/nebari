@@ -105,4 +105,3 @@ dependencies:
   - zipp=3.1.0=py_0
   - zlib=1.2.11=h0b31af3_1006
 prefix: /Users/anirrudhkrishnan/miniconda3/envs/fast_api
-
