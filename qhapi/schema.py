@@ -93,6 +93,26 @@ class Security(Base):
     group: typing.Dict[str, Group]
 
 
+class DaskWorker(Base):
+    worker_cores_limit: int
+    worker_cores: int
+    worker_memory_limit: str
+    worker_memory: str
+    image: str
+
+
+class JupyterLabProfile(Base):
+    display_name: str
+    description: str
+    groups: typing.List[str]
+    kubespawner_override: KubeSpawner
+
+
+class Profiles:
+    jupyterlab: typing.List[JupyterLabProfile]
+    dask_worker: typing.Dict[str, DaskWorker]
+
+
 class Main(Base):
     """"""
 
@@ -100,15 +120,8 @@ class Main(Base):
     provider: ProviderEnum
     ci_cd: CiEnum
     security: Security
+    profiles: Profiles
 
 
 class Providers(Main):
     digital_ocean: Provider = None
-
-
-class DaskWorker(Base):
-    worker_cores_limit: int
-    worker_cores: int
-    worker_memory_limit: str
-    worker_memory: str
-    image: str
