@@ -4,18 +4,17 @@ import flit
 import setuptools
 import toml
 
-flit = toml.load("pyproject.toml")["tool"]["flit"]
-metadata = flit["metadata"]
+metadata = toml.load("pyproject.toml")["tool"]["flit"]["metadata"]
 
 description, version = flit.common.get_docstring_and_version_via_import(
-    flit.common.Module("poser")
+    flit.common.Module("qhapi")
 )
 
 setuptools.setup(
     name=metadata["module"],
     version=version,
     packages=setuptools.find_packages(),
-    classifiers=metadata["classifiers"],
+    classifiers=metadata.get("classifiers", []),
     url=metadata["home-page"],
     author=metadata["author"],
     install_requires=metadata.get("requires", []),
