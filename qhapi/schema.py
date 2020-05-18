@@ -104,3 +104,11 @@ class Main(Base):
 
 class Providers(Main):
     digital_ocean: Provider = None
+
+
+class DaskWorker(Base):
+    worker_cores_limit: int
+    worker_cores: int
+    worker_memory_limit: str
+    worker_memory: str
+    image: str
