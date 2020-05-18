@@ -26,8 +26,32 @@ class Provider(Base):
     ...
 
 
-class Profile(Base):
-    ...
+class KubeSpawner(pydantic.BaseModel):
+    cpu_limit: int
+    cpu_guarentee: int
+    mem_limit: str
+    mem_guarentee: str
+    image: str
+
+    class Config:
+        schema_extra = dict(
+            examples=[
+                dict(
+                    cpu_limit=1,
+                    cpu_guarentee=1,
+                    mem_limit="1G",
+                    mem_guarentee="1G",
+                    image="quansight/qhub-jupyterlab:398e040a7d26bcc1d04fc3576f452bfa261032bc",
+                )
+            ]
+        )
+
+
+class LabProfile(Base):
+    "Stable environment with 1 cpu / 1 GB ram"
+    display_name: str
+    groups: typing.List[str]
+    kubespawner_override: KubeSpawner
 
 
 class Project(Base):
