@@ -34,17 +34,27 @@ class KubeSpawner(pydantic.BaseModel):
     image: str
 
     class Config:
-        schema_extra = dict(
-            examples=[
-                dict(
-                    cpu_limit=1,
-                    cpu_guarentee=1,
-                    mem_limit="1G",
-                    mem_guarentee="1G",
-                    image="quansight/qhub-jupyterlab:398e040a7d26bcc1d04fc3576f452bfa261032bc",
-                )
-            ]
-        )
+        @staticmethod
+        def schema_extra(schema, model):
+            schema.update(
+                examples=[
+                    KubeSpawner(
+                        cpu_limit=1,
+                        cpu_guarentee=1,
+                        mem_limit="1G",
+                        mem_guarentee="1G",
+                        image="quansight/qhub-jupyterlab:398e040a7d26bcc1d04fc3576f452bfa261032bc",
+                    ).dict(),
+                    KubeSpawner(
+                        cpu_limit=1.5,
+                        cpu_guarentee=1.25,
+                        mem_limit="2G",
+                        mem_guarentee="2G",
+                        image="quansight/qhub-jupyterlab:398e040a7d26bcc1d04fc3576f452bfa261032bc",
+                    ).dict(),
+                ]
+            )
+            return schema
 
 
 class LabProfile(Base):
@@ -100,6 +110,29 @@ class DaskWorker(Base):
     worker_memory: str
     image: str
 
+    class Config:
+        @staticmethod
+        def schema_extra(schema, model):
+            schema.update(
+                examples=[
+                    DaskWorker(
+                        worker_cores_limit=1,
+                        worker_cores=1,
+                        worker_memory_limit="1G",
+                        worker_memory="1G",
+                        image="quansight/qhub-dask-worker:398e040a7d26bcc1d04fc3576f452bfa261032bc",
+                    ).dict(),
+                    DaskWorker(
+                        worker_cores_limit=1.5,
+                        worker_cores=1.25,
+                        worker_memory_limit="2G",
+                        worker_memory="2G",
+                        image="quansight/qhub-dask-worker:398e040a7d26bcc1d04fc3576f452bfa261032bc",
+                    ).dict(),
+                ]
+            )
+            return schema
+
 
 class JupyterLabProfile(Base):
     display_name: str
@@ -108,14 +141,12 @@ class JupyterLabProfile(Base):
     kubespawner_override: KubeSpawner
 
 
-class Profiles:
+class Profiles(Base):
     jupyterlab: typing.List[JupyterLabProfile]
     dask_worker: typing.Dict[str, DaskWorker]
 
 
 class Main(Base):
-    """"""
-
     project_name: str
     provider: ProviderEnum
     ci_cd: CiEnum
@@ -123,5 +154,5 @@ class Main(Base):
     profiles: Profiles
 
 
-class Providers(Main):
+class DigitalOcean(Main):
     digital_ocean: Provider = None
