@@ -140,7 +140,7 @@ helm list -n dev
 # DNS
 
 The DNS is handled by Cloudflare. To point the cloudflare subdomain `jupyter.aws`(.qhub.dev)
-to your application, first get the IP address of the Load balancer. You can get the CNAME
+to your application, first get the CNAME of the Load balancer. You can get the CNAME
 of the load balancer via the following command:
 
 ```bash
@@ -148,10 +148,10 @@ kubectl get svc -n dev
 ```
 This lists all the running services in the Kubernetes cluster. There would be a service
 of type `LoadBalancer`, listed in the output of the above command. The CNAME would
-be mentioned right next to it. Run the `ping` on the CNAME to get the IP Address.
+be mentioned right next to it.
 
-Now go to the DNS section of the Cloudflare's dashboard and create an `A` record for the
-subdomain `jupyter.aws`(.qhub.dev) and paste the IP (from the ping command) in the IPv4
+Now go to the DNS section of the Cloudflare's dashboard and create an `CNAME` record for the
+subdomain `jupyter.aws`(.qhub.dev) and paste the CNAME of the load balancer in the content
 column and click on the proxy status to change the value to DNS only.
 
 # Authentication
