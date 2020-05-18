@@ -19,11 +19,45 @@ class Base(pydantic.BaseModel):
 
 
 class NodeGroup(Base):
-    ...
+    instance: str = "s-2vcpu-4gb"
+    min_nodes: int = 1
+    max_nodes: int = 1
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema, model):
+            schema.update(
+                examples=[
+                    NodeGroup(instance="s-2vcpu-4gb", min_nodes=1, max_nodes=1).dict(),
+                    NodeGroup(instance="s-2vcpu-4gb", min_nodes=1, max_nodes=4).dict(),
+                ]
+            )
+            return schema
 
 
 class Provider(Base):
-    ...
+    region: str
+    node_groups: typing.Dict[str, NodeGroup]
+
+    class Config:
+        @staticmethod
+        def schema_extra(schema, model):
+            schema.update(
+                examples=[
+                    {
+                        "general": NodeGroup(
+                            instance="s-2vcpu-4gb", min_nodes=1, max_nodes=1
+                        ).dict(),
+                        "user": NodeGroup(
+                            instance="s-2vcpu-4gb", min_nodes=1, max_nodes=1
+                        ).dict(),
+                        "work": NodeGroup(
+                            instance="s-2vcpu-4gb", min_nodes=1, max_nodes=1
+                        ).dict(),
+                    }
+                ]
+            )
+            return schema
 
 
 class KubeSpawner(pydantic.BaseModel):
