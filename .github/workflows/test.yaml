@@ -111,7 +111,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: qhub-amazon-web-services-artifact
-          path: aws-jupyterhub
+          path: jupyterhub-aws
 
 
   test-google-cloud-platform:
