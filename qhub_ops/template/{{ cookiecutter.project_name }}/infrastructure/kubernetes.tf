@@ -47,6 +47,23 @@ module "kubernetes-nfs-mount" {
 }
 {% endif %}
 
+module "kubernetes-conda-store-server" {
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/conda-store"
+
+  name         = "conda-store"
+  namespace    = var.environment
+  nfs_capacity = "20Gi"
+}
+
+module "kubernetes-conda-store-mount" {
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+
+  name         = "conda-store"
+  namespace    = var.environment
+  nfs_capacity = module.kubernetes-conda-store-server.nfs_capacity
+  nfs_endpoint = module.kubernetes-conda-store-server.endpoint_ip
+}
+
 provider "helm" {
   kubernetes {
     load_config_file       = false
