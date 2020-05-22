@@ -12,9 +12,9 @@ def remove_file(filepath):
 
 if __name__ == "__main__":
     if ENVIRONMENTS:
-        os.makedirs('environments', exist_ok=True)
+        os.makedirs("environments", exist_ok=True)
         for name, spec in ENVIRONMENTS.items():
-            with open(f'environments/{name}', 'w') as f:
+            with open(f"environments/{name}", "w") as f:
                 yaml.dump(spec, f)
 
     if PROVIDER == "aws":
