@@ -6,6 +6,7 @@
 
     "security": null,
     "profiles": null,
+    "environments": null,
 
     "digital_ocean": {
         "region": null,

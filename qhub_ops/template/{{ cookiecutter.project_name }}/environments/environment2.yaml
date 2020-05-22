@@ -1,9 +1,0 @@
-name: env-name-2
-channels:
-  - conda-forge
-  - defaults
-dependencies:
-  - python=3.7
-  - jinja2
-  - pyyaml
-  - flask

@@ -91,3 +91,27 @@ profiles:
       worker_memory_limit: 2G
       worker_memory: 2G
       image: "quansight/qhub-dask-worker:398e040a7d26bcc1d04fc3576f452bfa261032bc"
+
+
+environments:
+  "environment-default.yaml":
+    name: default
+    channels:
+      - conda-forge
+      - defaults
+    dependencies:
+      - python=3.7
+      - numpy
+      - numba
+      - asdf
+      - pandas
+
+  "environment-example-2.yaml":
+    name: example-2
+    channels:
+      - conda-forge
+      - defaults
+    dependencies:
+      - python=3.7
+      - jinja2
+      - pyyaml

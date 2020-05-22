@@ -56,8 +56,9 @@ module "kubernetes-conda-store-server" {
   namespace    = var.environment
   nfs_capacity = "20Gi"
   environments = {
-    "environment1.yaml" = file("../environments/environment1.yaml")
-    "environment2.yaml" = file("../environments/environment2.yaml")
+{% for key in cookiecutter.environments %}
+    "{{ key }}" = file("../environments/{{ key }}")
+{% endfor %}
   }
 }
 
