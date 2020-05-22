@@ -55,6 +55,10 @@ module "kubernetes-conda-store-server" {
   name         = "conda-store"
   namespace    = var.environment
   nfs_capacity = "20Gi"
+  environments = {
+    "environment1.yaml" = file("../environments/environment1.yaml")
+    "environment2.yaml" = file("../environments/environment2.yaml")
+  }
 }
 
 module "kubernetes-conda-store-mount" {
