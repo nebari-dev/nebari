@@ -11,7 +11,9 @@ module "kubernetes-initialization" {
   namespace = var.environment
   secrets   = []
   dependencies = [
+{% if cookiecutter.provider == "aws" -%}
     module.kubernetes.depended_on
+{% endif %}
   ]
 }
 
@@ -60,7 +62,7 @@ module "kubernetes-conda-store-mount" {
 
   name         = "conda-store"
   namespace    = var.environment
-  nfs_capacity = module.kubernetes-conda-store-server.nfs_capacity
+  nfs_capacity = "20Gi"
   nfs_endpoint = module.kubernetes-conda-store-server.endpoint_ip
 }
 
