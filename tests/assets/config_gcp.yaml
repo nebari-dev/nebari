@@ -90,6 +90,7 @@ environments:
       - defaults
     dependencies:
       - python=3.7
+      - ipykernel
       - numpy
       - numba
       - asdf
@@ -102,5 +103,6 @@ environments:
       - defaults
     dependencies:
       - python=3.7
+      - ipykernel
       - jinja2
       - pyyaml
