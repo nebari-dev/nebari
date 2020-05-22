@@ -24,11 +24,6 @@ dask-gateway=0.6.1
 # numerical
 numba
 numpy
-pandas
-
-# s3 utits
-s3fs
-boto3
 
 # viz tools
 panel

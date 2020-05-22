@@ -28,6 +28,7 @@ changeps1: false
 auto_update_conda: false
 aggressive_update_packages: []
 envs_dirs:
+ - /home/conda/environments
  - /home/jovyan/.conda/envs
 pkgs_dirs:
  - /home/jovyan/.conda/pkgs
