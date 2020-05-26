@@ -9,7 +9,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 
 setup(
-    name='qhub_ops',
+    name='qhub-ops',
     version='0.1.0',
     description='Management of QHub on Cloud Infrastructure',
     long_description=long_description,
