@@ -10,11 +10,11 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='qhub_ops',
-    version='0.0.1',
+    version='0.1.0',
     description='Management of QHub on Cloud Infrastructure',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/quansight/QHub',
+    url='https://github.com/quansight/qhub-ops',
     author='Quansight',
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -37,11 +37,10 @@ setup(
     extras_require={
         'dev': [
             'flake8',
-            'black'
-        ],
-        'test': [
+            'black',
+            'twine',
             'pytest'
-        ],
+        ]
     },
     include_package_data=True,
     entry_points={

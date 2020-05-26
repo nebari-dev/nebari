@@ -9,6 +9,7 @@ __pycache__
 build/
 *.egg
 *.egg-info/
+dist/
 
 # IntelliJ
 .idea/

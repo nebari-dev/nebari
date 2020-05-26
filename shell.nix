@@ -26,6 +26,9 @@ pkgs.mkShell {
 
     # docs
     pythonPackages.sphinx
+
+    # distribute
+    pythonPackages.twine
   ];
 
   shellHook = ''
