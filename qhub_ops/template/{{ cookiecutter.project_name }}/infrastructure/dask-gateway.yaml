@@ -11,6 +11,11 @@ gateway:
       {% endfor %}
       ]
 
+      def worker_profile(options):
+           config = profiles[options.profile]
+           config['worker_cmd'] = ['conda', 'run', '-n', options.environment, '--', 'dask-gateway-worker']
+           return config
+
       # Expose a list of profiles for workers
       c.DaskGateway.cluster_manager_options = Options(
           Select(
@@ -25,5 +30,5 @@ gateway:
               default='{{ cookiecutter.profiles.dask_worker.keys() | list() | first() }}',
               label="Cluster Profile",
           ),
-          handler=lambda options: profiles[options.profile],
+          handler=worker_profile,
       )
