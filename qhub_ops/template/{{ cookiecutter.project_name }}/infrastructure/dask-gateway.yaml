@@ -5,9 +5,20 @@ gateway:
 
       # A mapping from profile name to configuration overrides
       profiles = {{ cookiecutter.profiles.dask_worker }}
+      environments = [
+      {% for filename, config in cookiecutter.environments.items() %}
+          "{{config['name']}}",
+      {% endfor %}
+      ]
 
       # Expose a list of profiles for workers
       c.DaskGateway.cluster_manager_options = Options(
+          Select(
+              "environment",
+              environments,
+              default=environments[0],
+              label='Environments',
+          ),
           Select(
               "profile",
               {{ cookiecutter.profiles.dask_worker.keys() | list() }},
