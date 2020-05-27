@@ -13,7 +13,10 @@ gateway:
 
       def worker_profile(options):
            config = profiles[options.profile]
-           config['worker_cmd'] = ['conda', 'run', '-n', options.environment, '--', 'dask-gateway-worker']
+           config['worker_cmd'] = '/opt/conda-run'
+           config['environment'] = {
+               'CONDA_ENVIRONMENT': options.environment
+           }
            return config
 
       # Expose a list of profiles for workers
