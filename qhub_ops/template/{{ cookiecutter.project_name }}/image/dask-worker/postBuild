@@ -7,7 +7,7 @@ cat <<EOF > /opt/conda-run
 #!/bin/bash
 set -xe
 
-conda run -n \$CONDA_ENVIRONMENT -- dask-gateway-worker "\$@"
+conda run -n \$CONDA_ENVIRONMENT dask-gateway-worker "\$@"
 EOF
 
 chmod 755 /opt/conda-run
