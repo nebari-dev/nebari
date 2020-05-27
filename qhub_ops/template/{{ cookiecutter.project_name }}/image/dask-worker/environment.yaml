@@ -3,7 +3,7 @@ pip
 
 # dask
 dask==2.14.0
-distributed
+distributed=2.14.0
 dask-gateway=0.6.1
 
 # numerical
