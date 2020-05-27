@@ -17,7 +17,7 @@ gateway:
               "environment",
               environments,
               default=environments[0],
-              label='Environments',
+              label='Environment',
           ),
           Select(
               "profile",
