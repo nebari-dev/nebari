@@ -58,7 +58,7 @@ variable "jupyterhub-image" {
   })
   default = {
     name = "quansight/qhub-jupyterhub"
-    tag  = "588d50b4ab0c4fee6c06e40144a16f3a4b16e0cf"
+    tag  = "613d9b3558cce8ed878543df3503ee01201c5465"
   }
 }
 
@@ -70,7 +70,7 @@ variable "jupyterlab-image" {
   })
   default = {
     name = "quansight/qhub-jupyterlab"
-    tag  = "588d50b4ab0c4fee6c06e40144a16f3a4b16e0cf"
+    tag  = "613d9b3558cce8ed878543df3503ee01201c5465"
   }
 }
 
@@ -82,6 +82,6 @@ variable "dask-worker-image" {
   })
   default = {
     name = "quansight/qhub-dask-worker"
-    tag  = "588d50b4ab0c4fee6c06e40144a16f3a4b16e0cf"
+    tag  = "613d9b3558cce8ed878543df3503ee01201c5465"
   }
 }
