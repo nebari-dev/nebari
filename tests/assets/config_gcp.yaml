@@ -91,9 +91,11 @@ environments:
     dependencies:
       - python=3.7
       - ipykernel
+      - dask==2.14.0
+      - distributed
+      - dask-gateway=0.6.1
       - numpy
       - numba
-      - asdf
       - pandas
 
   "environment-example-2.yaml":
@@ -104,5 +106,11 @@ environments:
     dependencies:
       - python=3.7
       - ipykernel
+      - dask==2.14.0
+      - distributed
+      - dask-gateway=0.6.1
+      - numpy
+      - numba
+      - pandas
       - jinja2
       - pyyaml
