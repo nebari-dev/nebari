@@ -7,7 +7,7 @@ html_theme = "pydata_sphinx_theme"
 master_doc = "README"
 source_suffix = ".rst .md .ipynb .py".split()
 #extensions = "recommonmark nbsphinx sphinx.ext.autodoc sphinx.ext.coverage sphinx.ext.napoleon autoapi.extension sphinx.ext.mathjax sphinx_copybutton     sphinx.ext.viewcode".split()
-extensions = "nbsphinx".split()
+extensions = "recommonmark nbsphinx".split()
 
 # Exclude build directory and Jupyter backup files:
 exclude_patterns = ["_build", "*checkpoint*"]
