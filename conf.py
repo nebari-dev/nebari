@@ -1,8 +1,8 @@
 # import sphinx.writers.html5
 # sphinx.writers.html5.HTML5Translator.visit_pending_xref = lambda *x:...
 # sphinx.writers.html5.HTML5Translator.depart_pending_xref = lambda *x:...
-title = html_title = "pidgy literate computing"
-author = "Quansight"
+BLOG_TITLE = title = html_title = "Qhub code as infrastructure."
+BLOG_AUTHOR = author = "Quansight"
 html_theme = "classic"
 master_doc = "README"
 source_suffix = ".rst .md .ipynb .py".split()
