@@ -13,6 +13,13 @@ exclude_patterns = ["_build", "*checkpoint*"]
 autoapi_type = "python"
 autoapi_dirs = []
 
+# for Sphinx-1.3
+from recommonmark.parser import CommonMarkParser
+
+source_parsers = {
+    '.md': CommonMarkParser,
+}
+
 nbsphinx_prolog = """.. raw:: html
     
     <style>.prompt {
