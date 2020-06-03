@@ -109,6 +109,7 @@ environments:
     dependencies:
       - python=3.7
       - ipykernel
+      - ipywidgets
       - dask==2.14.0
       - distributed==2.14.0
       - dask-gateway=0.6.1
@@ -124,6 +125,7 @@ environments:
     dependencies:
       - python=3.7
       - ipykernel
+      - ipywidgets
       - dask==2.14.0
       - distributed==2.14.0
       - dask-gateway=0.6.1
