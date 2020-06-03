@@ -23,7 +23,7 @@ jobs:
           pip install qhub-ops
       - name: Render Changes to Template
         run: |
-          qhub-ops render -c qhub-ops-config.yaml ./
+          qhub-ops render -c qhub-ops-config.yaml -o ./ -f
       - name: Push Changes
         run: |
           git config user.email "qhub-ops@quansight.com"
