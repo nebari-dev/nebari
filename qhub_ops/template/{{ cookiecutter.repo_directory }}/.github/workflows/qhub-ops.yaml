@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: 'Checkout Image'
         uses: actions/checkout@master
+        with:
+          token: {{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
