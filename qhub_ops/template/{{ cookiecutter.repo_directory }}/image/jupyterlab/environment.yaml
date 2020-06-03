@@ -16,15 +16,6 @@ nbconvert
 nbval
 dask_labextension
 
-# dask
-dask==2.14.0
-distributed=2.14.0
-dask-gateway=0.6.1
-
-# numerical
-numba
-numpy
-
 # viz tools
 panel
 param

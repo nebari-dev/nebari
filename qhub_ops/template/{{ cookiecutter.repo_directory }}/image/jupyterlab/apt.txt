@@ -6,7 +6,7 @@ libnss-wrapper
 wget curl
 
 # development utilities
-git
+git openssh-client
 
 # editors
 nano

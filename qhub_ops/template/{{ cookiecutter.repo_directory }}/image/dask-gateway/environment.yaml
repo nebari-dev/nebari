@@ -1,6 +1,0 @@
-aiohttp
-numpy
-pandas
-dask==2.14.0
-distributed==2.14.0
-dask-gateway==0.6.1
