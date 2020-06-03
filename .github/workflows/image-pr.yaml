@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - "qhub_ops/template/{{ cookiecutter.project_name }}/image/**"
+      - "qhub_ops/template/{{ cookiecutter.repo_directory }}/image/**"
       - ".github/workflows/image-pr.yaml"
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
       - name: 'Checkout Image'
         uses: actions/checkout@master
       - name: Build Image
-        working-directory: "qhub_ops/template/{{ cookiecutter.project_name }}/image"
+        working-directory: "qhub_ops/template/{{ cookiecutter.repo_directory }}/image"
         env:
           IMAGE_NAME: 'quansight/qhub-${{ matrix.dockerfile }}'
           IMAGE_TAG: ${{ github.sha }}

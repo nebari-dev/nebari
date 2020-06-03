@@ -40,7 +40,7 @@ def render_template(
 
         with filename.open() as f:
             config = yaml.safe_load(f)
-            config['repo_directory'] = repo_directory
+            config["repo_directory"] = repo_directory
 
         with (input_directory / "cookiecutter.json").open() as f:
             config = collections.ChainMap(config, json.load(f))

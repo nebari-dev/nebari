@@ -76,7 +76,7 @@ jobs:
         with:
           tf_actions_version: ${{ env.TERRAFORM_VERSION }}
           tf_actions_subcommand: 'fmt'
-          tf_actions_working_dir: 'do-jupyterhub'
+          tf_actions_working_dir: 'qhub-do-deployment'
       - name: Push Changes to Do Deployment Repository
         run: |
           cd qhub-do-deployment
