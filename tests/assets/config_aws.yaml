@@ -46,6 +46,11 @@ amazon_web_services:
       min_nodes: 1
       max_nodes: 2
 
+default_images:
+  jupyterhub: "quansight/qhub-jupyterhub:c0b79fd6b09cb5fcf7b52121d4c780b0113b5e74"
+  jupyterlab: "quansight/qhub-jupyterlab:c0b79fd6b09cb5fcf7b52121d4c780b0113b5e74"
+  dask_worker: "quansight/qhub-dask-worker:c0b79fd6b09cb5fcf7b52121d4c780b0113b5e74"
+
 profiles:
   jupyterlab:
     - display_name: Small Instance

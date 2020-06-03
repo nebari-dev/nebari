@@ -6,6 +6,7 @@
     "endpoint": null,
 
     "security": null,
+    "default_images": null,
     "profiles": null,
     "environments": null,
 

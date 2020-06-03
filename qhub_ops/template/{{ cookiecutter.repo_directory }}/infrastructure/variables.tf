@@ -57,8 +57,8 @@ variable "jupyterhub-image" {
     tag  = string
   })
   default = {
-    name = "quansight/qhub-jupyterhub"
-    tag  = "c0b79fd6b09cb5fcf7b52121d4c780b0113b5e74"
+    name = "{{ cookiecutter.default_images.jupyterhub.split(':')[0] }}"
+    tag  = "{{ cookiecutter.default_images.jupyterhub.split(':')[1] }}"
   }
 }
 
@@ -69,8 +69,8 @@ variable "jupyterlab-image" {
     tag  = string
   })
   default = {
-    name = "quansight/qhub-jupyterlab"
-    tag  = "c0b79fd6b09cb5fcf7b52121d4c780b0113b5e74"
+    name = "{{ cookiecutter.default_images.jupyterlab.split(':')[0] }}"
+    tag  = "{{ cookiecutter.default_images.jupyterlab.split(':')[1] }}"
   }
 }
 
@@ -81,7 +81,7 @@ variable "dask-worker-image" {
     tag  = string
   })
   default = {
-    name = "quansight/qhub-dask-worker"
-    tag  = "c0b79fd6b09cb5fcf7b52121d4c780b0113b5e74"
+    name = "{{ cookiecutter.default_images.dask_worker.split(':')[0] }}"
+    tag  = "{{ cookiecutter.default_images.dask_worker.split(':')[1] }}"
   }
 }
