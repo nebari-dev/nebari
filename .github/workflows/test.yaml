@@ -58,7 +58,7 @@ jobs:
           echo "${SSH_KEY}" > $HOME/.ssh/id_rsa
           chmod 600 $HOME/.ssh/id_rsa
 
-          git clone git@github.com:Quansight/qhub-automated-do-deployment.git do-jupyterhub
+          git clone git@github.com:Quansight/qhub-automated-do-deployment.git qhub-do-deployment
         env:
           SSH_KEY: ${{ secrets.QHUB_AUTOMATED_DO_DEPLOYMENT_KEY }}
       - name: Initialize configuration file
@@ -70,7 +70,7 @@ jobs:
           CLIENT_SECRET: ${{ secrets.DO_OAUTH_CLIENT_SECRET }}
       - name: QHub Build Digital Ocean Template
         run: |
-          qhub-ops render -c tests/assets/config_do.yaml -f
+          qhub-ops render -c tests/assets/config_do.yaml -o qhub-do-deployment -f
       - name: 'Terraform Format'
         uses: hashicorp/terraform-github-actions@master
         with:
@@ -79,7 +79,7 @@ jobs:
           tf_actions_working_dir: 'do-jupyterhub'
       - name: Push Changes to Do Deployment Repository
         run: |
-          cd do-jupyterhub
+          cd qhub-do-deployment
           git config user.email "qhub-ops@quansight.com"
           git config user.name "github action"
           git add .
@@ -106,12 +106,12 @@ jobs:
           pip install .[dev]
       - name: QHub Build Amazon Web Services Template
         run: |
-          qhub-ops render -c tests/assets/config_aws.yaml
+          qhub-ops render -c tests/assets/config_aws.yaml -o qhub-aws-deployment
       - name: Amazon Web Services Artifact
         uses: actions/upload-artifact@v1
         with:
           name: qhub-amazon-web-services-artifact
-          path: jupyterhub-aws
+          path: qhub-aws-deployment
 
 
   test-google-cloud-platform:
@@ -130,9 +130,9 @@ jobs:
           pip install .[dev]
       - name: QHub Build Google Cloud Platform Template
         run: |
-          qhub-ops render -c tests/assets/config_gcp.yaml
+          qhub-ops render -c tests/assets/config_gcp.yaml -o qhub-gcp-deployment
       - name: Google Cloud Platform Artifact
         uses: actions/upload-artifact@v1
         with:
           name: qhub-google-cloud-platform-artifact
-          path: gcp-jupyterhub
+          path: qhub-gcp-deployment

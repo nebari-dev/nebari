@@ -23,9 +23,12 @@ def render_template(
     if not input_directory.is_dir():
         raise ValueError(f"input directory={input_directory} is not a directory")
 
-    output_directory = pathlib.Path(output_directory)
-    if not output_directory.is_dir():
-        raise ValueError(f"output directory={output_directory} is not a directory")
+    output_directory = pathlib.Path(output_directory).resolve()
+    # due to cookiecutter requiring a template directory folder
+    # we take the output directory and split into two components
+    repo_directory = output_directory.name
+    output_directory = output_directory.parent
+    output_directory.mkdir(exist_ok=True, parents=True)
 
     prompt_filename = input_directory / "hooks" / "prompt_gen_project.py"
 
@@ -37,6 +40,7 @@ def render_template(
 
         with filename.open() as f:
             config = yaml.safe_load(f)
+            config['repo_directory'] = repo_directory
 
         with (input_directory / "cookiecutter.json").open() as f:
             config = collections.ChainMap(config, json.load(f))

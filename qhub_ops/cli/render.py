@@ -7,7 +7,7 @@ def create_render_subcommand(subparser):
     subparser.add_argument(
         "-f", "--force", action="store_true", help="overwrite existing files"
     )
-    subparser.add_argument("-o", "--output", default=".", help="output directory")
+    subparser.add_argument("-o", "--output", default="./", help="output directory")
     subparser.add_argument("-c", "--config", help="cookiecutter configuration")
     subparser.set_defaults(func=handle_render)
 
