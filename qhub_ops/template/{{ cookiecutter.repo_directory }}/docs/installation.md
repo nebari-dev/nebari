@@ -1,9 +1,23 @@
 # Installation
 
+## Dependencies
+
+[Terraform installation directions](https://www.terraform.io/downloads.html).
+
 ## Environment Variables
 
 This deployment along with the GitHub Actions assumes several
-environment variables are present.
+environment variables are present. 
+
+{% if cookiecutter.ci_cd == 'github-actions' %}
+Since we are using Github Actions for Continuous Deployment we require
+a [personal api token](https://github.blog/2013-05-16-personal-api-tokens/). 
+This token is required to have access to the **full repo** and **workflows**. 
+Set `REPOSITORY_ACCESS_TOKEN` to the token value. This token is required because
+as of github actions v2 `GITHUB_TOKEN` cannot trigger github actions.
+
+ - `REPOSITORY_ACCESS_TOKEN`
+{% endif %}
 
 {% if cookiecutter.provider == 'aws' %}
  - `AWS_ACCESS_KEY_ID`
@@ -139,9 +153,10 @@ helm list -n dev
 
 # DNS
 
-The DNS is handled by Cloudflare. To point the cloudflare subdomain `jupyter.aws`(.qhub.dev)
-to your application, first get the CNAME of the Load balancer. You can get the CNAME
-of the load balancer via the following command:
+The DNS is handled by Cloudflare. To point the cloudflare subdomain
+`jupyter.aws`(.qhub.dev) to your application, first get the CNAME of
+the Load balancer. You can get the CNAME of the load balancer via the
+following command:
 
 ```bash
 kubectl get svc -n dev
