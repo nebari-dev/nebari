@@ -1,35 +1,43 @@
 # QHub-Ops
 
-Is tool for initializing and maintaining the state of QHub deployments
+Is a tool for initializing and maintaining the state of QHub
+deployments on Digital Ocean, Amazon Web Services, and Google Cloud
+Platform.
 
 ## Installation:
 
 ```bash
-python setup.py install
+pip install qhub-ops
 ```
+
+## Configuration
+
+QHub is entirely controlled from a configuration file. Example
+configuration files can be found in
+[tests/assets](https://github.com/Quansight/qhub-ops/tree/master/tests/assets). Documentation
+on creating a configuration file is detailed [here](https://github.com/Quansight/qhub-ops/blob/master/qhub_ops/template/%7B%7B%20cookiecutter.repo_directory%20%7D%7D/docs/configuration.md).
+
+Templates for each file are at the following paths:
+  - AWS :: tests/assets/config_aws.yaml
+  - DO  :: tests/assets/config_do.yaml
+  - GCP :: tests/assets/config_gcp.yaml
 
 ## Initializing the Provider Template
 
-* Amazon Web Services
+The exact naming of the configuration file is needed to trigger the CI
+actions when the configuration is changed.
 
 ```bash
-qhub-ops render -c tests/assets/config_aws.yaml
+mkdir <repository-name>
+# mv <config-filename> <repository-name>/qhub-ops-config.yaml
+qhub-ops render -c <repository-name>/qhub-ops-config.yaml -o <repository-name>/ --force
 ```
 
-* Digital Ocean
-
-```bash
-qhub-ops render -c tests/assets/config_do.yaml -f
-```
-
-* Google Cloud Platform
-
-```bash
-qhub-ops render -c tests/assets/config_gcp.yaml
-```
-
-After initialising the provider templates, follow the instructions
-in docs: `qhub-ops/qhub_ops/template/{{ cookiecutter.project_name }}/docs/`
+After initialising the provider templates, follow the instructions in
+docs on deploying the infrastructure at
+`<repository-name>/docs/installation.md`. At this current moment some
+bootstrapping is required before github-actions can manage the
+infrastructure as code.
 
 ## Terraform Module Dependencies
 
