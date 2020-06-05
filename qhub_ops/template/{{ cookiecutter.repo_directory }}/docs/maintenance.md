@@ -14,8 +14,6 @@ are built based on the images specified in
 
  - jupyterlab :: modification of jupyterlab instances for each user
  - dask-worker :: modification of dask workers and dask scheduler 
- - dask-gateway :: image currently not used (was intended as dask-gateway)
-   (dask and dask-gateway versions MUST match jupyterlab)
  - jupyterhub :: the jupyterhub server (allows for customization of hub UI)
 
 Each docker image is customized with its respective directory
