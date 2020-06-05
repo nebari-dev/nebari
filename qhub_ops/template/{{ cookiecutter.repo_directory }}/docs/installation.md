@@ -1,8 +1,10 @@
 # Installation
 
-## Dependencies
-
 [Terraform installation directions](https://www.terraform.io/downloads.html).
+
+The following steps can be automated with
+`scripts/00-guided-install.sh`. When the script prompts the user for
+pressing `[enter]` there is an associated user action required.
 
 ## Environment Variables
 
@@ -65,7 +67,9 @@ cluster. Detailed instructions on [creating service accounts can be
 found
 here](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). `PROJECT_ID`
 is a short string of around 32 characters that defines your project
-uniquely.
+uniquely. The service account will need `Project->Editor`
+permissions. In addition you will need to enable the `Cloud Resource
+Manager API`. The deployment will fail without the api enabled.
 
 {% endif %}
 

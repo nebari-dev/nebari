@@ -37,7 +37,15 @@ After initialising the provider templates, follow the instructions in
 docs on deploying the infrastructure at
 `<repository-name>/docs/installation.md`. At this current moment some
 bootstrapping is required before github-actions can manage the
-infrastructure as code.
+infrastructure as code. All of these instructions are automated in
+`scripts/00-guided-install.sh`. Note that you will need to set the
+environment variables in `intallation.md` for this script to
+succeed. You will be prompted several times for use actions such as
+setting oauth provider and dns.
+
+```bash
+scripts/00-guided-install.sh
+```
 
 ## Terraform Module Dependencies
 

@@ -15,15 +15,15 @@ fi
 
 # 03 Check Environment Variables
 {% if cookiecutter.provider == 'gcp' %}
-if [[ -z "${GOOGLE_CREDENTIALS}" ]] || [[ -z "${PROJECT_ID}" ]]; then
+if [[ -v GOOGLE_CREDENTIALS ]] || [[ -v PROJECT_ID ]]; then
     echo "Environment variables required for GCP (GOOGLE_CREDENTIALS, PROJECT_ID) must be set"
 fi
 {% elif cookiecutter.provider == 'aws' %}
-if [[ -z "${AWS_ACCESS_KEY_ID}" ]] || [[ -z "${AWS_SECRET_ACCESS_KEY}" ]] || [[ -z "${AWS_DEFAULT_REGION}" ]]; then
+if [[ -v AWS_ACCESS_KEY_ID ]] || [[ -v AWS_SECRET_ACCESS_KEY ]] || [[ -v AWS_DEFAULT_REGION ]]; then
     echo "Environment variables required for AWS (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION) must be set"
 fi
 {% elif cookiecutter.provider == 'do' %}
-if [[ -z "${AWS_ACCESS_KEY_ID}" ]] || [[ -z "${AWS_SECRET_ACCESS_KEY}" ]] || [[ -z "${SPACES_ACCESS_KEY_ID}" ]] || [[ -z "${SPACES_SECRET_ACCESS_KEY}" ]] || [[ -z "${DIGITALOCEAN_TOKEN}" ]]; then
+if [[ -v AWS_ACCESS_KEY_ID ]] || [[ -v AWS_SECRET_ACCESS_KEY ]] || [[ -v SPACES_ACCESS_KEY_ID ]] || [[ -v SPACES_SECRET_ACCESS_KEY ]] || [[ -v DIGITALOCEAN_TOKEN ]]; then
     echo "Environment variables required for DO (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, SPACES_ACCESS_KEY_ID, SPACES_SECRET_ACCESS_KEY, DIGITALOCEAN_TOKEN) must be set"
 fi
 {% endif %}
@@ -36,7 +36,7 @@ cd terraform-state
 terraform init
 terraform apply -auto-approve
 
-# 06 Create qhub initial state
+# 06 Create qhub initial state (up to nginx-ingress)
 cd ../infrastructure
 terraform init
 terraform apply -auto-approve -target=module.kubernetes -target=module.kubernetes-initialization -target=module.kubernetes-ingress
@@ -44,4 +44,5 @@ terraform apply -auto-approve -target=module.kubernetes -target=module.kubernete
 # 07 Update DNS to point to qhub deployment
 read -s -p "Take IP Address Above and update DNS to point to \"jupyter.{{ cookiecutter.endpoint }}\" [Press Enter when Complete]"
 
+# 07 Full deploy QHub
 terraform apply -auto-approve
