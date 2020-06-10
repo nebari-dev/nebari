@@ -15,3 +15,4 @@ sphinx-copybutton
 sphinx-autoapi
 recommonmark
 pydata-sphinx-theme
+git+https://github.com/bashtage/sphinx-material.git
