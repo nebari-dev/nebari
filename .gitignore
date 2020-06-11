@@ -55,6 +55,7 @@ yarn-error.log*
 
 # production
 /build
+/site
 
 # misc
 .DS_Store

@@ -6,11 +6,10 @@ BLOG_AUTHOR = author = "Quansight"
 html_theme = "pydata_sphinx_theme"
 master_doc = "index"
 source_suffix = ".rst .md .ipynb .py".split()
-#extensions = "recommonmark nbsphinx  sphinx.ext.coverage sphinx.ext.napoleon autoapi.extension sphinx.ext.mathjax sphinx_copybutton     sphinx.ext.viewcode".split()
-extensions = "recommonmark nbsphinx sphinx.ext.autodoc sphinx.ext.napoleon autoapi.extension sphinx.ext.mathjax sphinx_copybutton sphinx.ext.viewcode".split()
+extensions = "myst_parser nbsphinx sphinx.ext.autodoc sphinx.ext.napoleon sphinx.ext.mathjax sphinx_copybutton sphinx.ext.viewcode".split() #autoapi.extension 
 exclude_patterns = ["_build", "*checkpoint*"]
 autoapi_type = "python"
-autoapi_dirs = ["qhapi"]
+autoapi_dirs = [];["qhapi"]
 html_theme = 'sphinx_material'
 
 # Material theme options (see theme.conf for more information)
@@ -40,10 +39,25 @@ html_theme_options = {
     'globaltoc_collapse': True,
     # If True, show hidden TOC entries
     'globaltoc_includehidden': False,
+    'nav_links': [
+        {
+            'href': 'index',
+            'title': 'Q|Hub Home',
+            'internal': True,
+        },
+        {
+            'href': 'docs/faqs',
+            'title': 'FAQ',
+            'internal': True,
+        },
+    ]
+}
+html_sidebars = {
+    "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
 }
 
 # Exclude build directory and Jupyter backup files:
-exclude_patterns = ["_build", "*checkpoint*"]
+exclude_patterns = ["_build", "*checkpoint*", 'site']
 
 nbsphinx_prolog = """.. raw:: html
     
