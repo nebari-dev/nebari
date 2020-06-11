@@ -64,7 +64,7 @@ hub:
           return set([user['primary_group']] + user.get('secondary_groups', []))
 
 
-      def qhub_configure_profile(username, profile):
+      def qhub_configure_profile(username, safe_username, profile):
           user = QHUB_USER_MAPPING[username]
           uid = user['uid']
           primary_gid = QHUB_GROUP_MAPPING[user['primary_group']]['gid']
@@ -100,7 +100,7 @@ hub:
                         "chown {uid}:{primary_gid} /mnt/home/{username}",
                         "mkdir -p /mnt/home/shared",
                         "chmod 777 /mnt/home/shared"
-                   ] + ["mkdir -p /mnt/home/shared/{groupname} && chmod 770 /mnt/home/shared/{groupname} && chown 0:{gid} /mnt/home/shared/{groupname}".format(groupname=groupname, gid=config['gid']) for groupname, config in QHUB_GROUP_MAPPING.items()]).format(username=username, uid=uid, primary_gid=primary_gid)],
+                   ] + ["mkdir -p /mnt/home/shared/{groupname} && chmod 770 /mnt/home/shared/{groupname} && chown 0:{gid} /mnt/home/shared/{groupname}".format(groupname=groupname, gid=config['gid']) for groupname, config in QHUB_GROUP_MAPPING.items()]).format(username=safe_username, uid=uid, primary_gid=primary_gid)],
                    "securityContext": {"runAsUser": 0},
                    "volumeMounts": [{"mountPath": "/mnt", "name": "home"}]
               }
@@ -113,13 +113,18 @@ hub:
           return profile
 
       def qhub_list_available_profiles(username):
+          import escapism
+          import string
+          safe_chars = set(string.ascii_lowercase + string.digits)
+          safe_username = escapism.escape(username, safe=safe_chars, escape_char='-').lower()
+
           exclude_keys = {'users', 'groups'}
 
           groups = qhub_list_user_groups(username)
 
           available_profiles = []
           for profile in QHUB_PROFILES:
-              filtered_profile = qhub_configure_profile(username, {k: v for k,v in profile.items() if k not in exclude_keys})
+              filtered_profile = qhub_configure_profile(username, safe_username, {k: v for k,v in profile.items() if k not in exclude_keys})
 
               if 'users' in profile:
                   if username in profile['users']:
