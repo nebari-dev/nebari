@@ -9,6 +9,7 @@
     "default_images": null,
     "profiles": null,
     "environments": null,
+    "storage": null,
 
     "digital_ocean": {
         "region": null,

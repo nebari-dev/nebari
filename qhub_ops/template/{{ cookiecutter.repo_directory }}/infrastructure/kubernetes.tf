@@ -24,7 +24,7 @@ module "kubernetes-nfs-mount" {
 
   name         = "nfs-mount"
   namespace    = var.environment
-  nfs_capacity = "10Gi"
+  nfs_capacity = "{{ cookiecutter.storage.shared_filesytem }}"
   nfs_endpoint = module.efs.credentials.dns_name
   dependencies = [
     module.kubernetes-initialization.depended_on
@@ -36,7 +36,7 @@ module "kubernetes-nfs-server" {
 
   name         = "nfs-server"
   namespace    = var.environment
-  nfs_capacity = "10Gi"
+  nfs_capacity = "{{ cookiecutter.storage.shared_filesytem }}"
 }
 
 module "kubernetes-nfs-mount" {
@@ -44,7 +44,7 @@ module "kubernetes-nfs-mount" {
 
   name         = "nfs-mount"
   namespace    = var.environment
-  nfs_capacity = "10Gi"
+  nfs_capacity = "{{ cookiecutter.storage.shared_filesytem }}"
   nfs_endpoint = module.kubernetes-nfs-server.endpoint_ip
 }
 {% endif %}
@@ -54,7 +54,7 @@ module "kubernetes-conda-store-server" {
 
   name         = "conda-store"
   namespace    = var.environment
-  nfs_capacity = "20Gi"
+  nfs_capacity = "{{ cookiecutter.storage.conda_store }}"
   environments = {
 {% for key in cookiecutter.environments %}
     "{{ key }}" = file("../environments/{{ key }}")
@@ -67,7 +67,7 @@ module "kubernetes-conda-store-mount" {
 
   name         = "conda-store"
   namespace    = var.environment
-  nfs_capacity = "20Gi"
+  nfs_capacity = "{{ cookiecutter.storage.conda_store }}"
   nfs_endpoint = module.kubernetes-conda-store-server.endpoint_ip
 }
 

@@ -51,6 +51,10 @@ default_images:
   jupyterlab: "quansight/qhub-jupyterlab:ce548a6b13bdcf494ccfa2a08a495b090f973cfe"
   dask_worker: "quansight/qhub-dask-worker:ce548a6b13bdcf494ccfa2a08a495b090f973cfe"
 
+storage:
+  conda_store: 10Gi
+  shared_filesytem: 20Gi
+
 profiles:
   jupyterlab:
     - display_name: Small Instance
