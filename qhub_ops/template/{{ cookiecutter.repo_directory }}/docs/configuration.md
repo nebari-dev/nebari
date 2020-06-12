@@ -197,6 +197,18 @@ default_images:
   dask_worker: "quansight/qhub-dask-worker:ce548a6b13bdcf494ccfa2a08a495b090f973cfe"
 ```
 
+## Storage
+
+Control the amount of storage allocated to shared filesystems. Note
+that when you change the storage size it will delete the previous
+storage!
+
+```yaml
+storage:
+  conda_store: 20Gi
+  shared_filesytem: 10Gi
+```
+
 ## Profiles
 
 Profiles are used to control the jupyterlab user instances and

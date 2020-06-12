@@ -64,8 +64,8 @@ default_images:
 
 
 storage:
-  conda_store: 10Gi
-  shared_filesytem: 20Gi
+  conda_store: 20Gi
+  shared_filesytem: 10Gi
 
 
 profiles:
