@@ -7,9 +7,10 @@ jupyter serverextension enable --sys-prefix jupyter_server_proxy
 
 # install jupyterlab extensions
 jupyter labextension install --clean \
-        dask-labextension \
-        jupyterlab-cpustatus \
         @jupyter-widgets/jupyterlab-manager \
+        jupyterlab-cpustatus \
+        dask-labextension \
+        @pyviz/jupyterlab_pyviz
 
 # ====== cleanup labextension install =======
 rm -rf ${HOME}/.cache ${HOME}/.npm ${HOME}/.yarn
