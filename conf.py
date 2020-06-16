@@ -89,5 +89,4 @@ latex_documents = [
 
 jupyter_execute_notebooks = "off"
 
-SITE_URL = "https://quansight.github.io/"
-BASE_URL = "qhub-ops/"
+SITE_URL = "https://quansight.github.io/qhub-home/"
