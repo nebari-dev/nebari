@@ -3,7 +3,6 @@ set -euo pipefail
 
 # install classic notebook extensions
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
-jupyter serverextension enable --sys-prefix jupyter_server_proxy
 
 # install jupyterlab extensions
 jupyter labextension install --clean \
