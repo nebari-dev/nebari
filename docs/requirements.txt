@@ -17,3 +17,4 @@ myst_parser
 pydata-sphinx-theme
 git+https://github.com/bashtage/sphinx-material.git
 git+https://github.com/tonyfast/MyST-NB.git
+
