@@ -69,10 +69,16 @@ html_theme_options = {
             'internal': True,
         },
         {
+            'href': 'https://quansight.github.io/qhub-home/',
+            'title': 'News',
+            'internal': False,
+        },
+        {
             'href': 'docs/faqs',
             'title': 'FAQ',
             'internal': True,
         },
+        
     ]
 }
 html_sidebars = {
