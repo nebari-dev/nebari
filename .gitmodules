@@ -1,0 +1,3 @@
+[submodule "qhub-ops"]
+	path = qhub-ops
+	url = https://github.com/Quansight/qhub-ops/

@@ -11,6 +11,7 @@ simplifies the deployment of data science infrastructure for you and your team.
 index
 docs/getting-started
 docs/faqs
+qhub-ops/qhub_ops/template/{{ cookiecutter.repo_directory }}/docs/configuration
 ```
 
 ![](https://avatars1.githubusercontent.com/u/17131925?v=4&s=100)![](https://avatars2.githubusercontent.com/u/17927519?v=4&s=100)![](https://avatars1.githubusercontent.com/u/5429470?v=4&s=100)![](https://avatars2.githubusercontent.com/u/288277?v=4&s=100)
