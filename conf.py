@@ -4,13 +4,36 @@
 BLOG_TITLE = title = html_title = "Qhub code as infrastructure."
 BLOG_AUTHOR = author = "Quansight"
 html_theme = "pydata_sphinx_theme"
-master_doc = "index"
+master_doc = "docs/readme"
 source_suffix = ".rst .md .ipynb .py".split()
-extensions = "myst_parser nbsphinx sphinx.ext.autodoc sphinx.ext.napoleon sphinx.ext.mathjax sphinx_copybutton sphinx.ext.viewcode".split() #autoapi.extension 
+extensions = "myst_nb  sphinx.ext.autodoc sphinx.ext.napoleon sphinx.ext.mathjax sphinx_copybutton sphinx.ext.viewcode".split() #autoapi.extension 
 exclude_patterns = ["_build", "*checkpoint*"]
 autoapi_type = "python"
 autoapi_dirs = [];["qhapi"]
 html_theme = 'sphinx_material'
+THEME="material-theme"
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md.ipynb': 'myst-nb',
+    '.ipynb': 'myst-nb',
+}
+DEFAULT_LANG = "en"
+
+
+NAVIGATION_LINKS = {
+    DEFAULT_LANG: tuple(),
+}
+
+THEME_COLOR = '#7B699F'
+
+POSTS = (
+    ("posts/*.md", "posts", "post.tmpl"),
+    ("posts/*.rst", "posts", "post.tmpl"),
+    ("posts/*.txt", "posts", "post.tmpl"),
+    ("posts/*.html", "posts", "post.tmpl"),
+    ("posts/*.ipynb", "posts", "post.tmpl"),
+    ("posts/*.md.ipynb", "posts", "post.tmpl"),
+)
 
 # Material theme options (see theme.conf for more information)
 html_theme_options = {
@@ -26,7 +49,7 @@ html_theme_options = {
     'base_url': 'https://github.com/Quansight/qhub-ops',
 
     # Set the color and the accent color
-    'color_primary': '#7B699F',
+    'color_primary': THEME_COLOR,
     'color_accent': 'light-yellow',
 
     # Set the repo location to get a badge with stats
@@ -57,15 +80,11 @@ html_sidebars = {
 }
 
 # Exclude build directory and Jupyter backup files:
-exclude_patterns = ["_build", "*checkpoint*", 'site']
+exclude_patterns = ["_build", "*checkpoint*", 'site', 'jupyter_execute']
 
-nbsphinx_prolog = """.. raw:: html
-    
-    <style>.prompt {
-        display: none;
-    }</style>
-"""
 
 latex_documents = [
-    (master_doc, "pidgy.tex", "Infrastructure as Code", "QHub", "manual",)
+    (master_doc, "qhub.tex", "Infrastructure as Code", "QHub", "manual",)
 ]
+
+jupyter_execute_notebooks = "off"
