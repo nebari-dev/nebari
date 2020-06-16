@@ -46,7 +46,7 @@ html_theme_options = {
 
     # Specify a base_url used to generate sitemap.xml. If not
     # specified, then no sitemap will be built.
-    'base_url': 'https://github.com/Quansight/qhub-ops',
+    'base_url': 'https://qhub.readthedocs.io/',
 
     # Set the color and the accent color
     'color_primary': THEME_COLOR,
@@ -88,3 +88,6 @@ latex_documents = [
 ]
 
 jupyter_execute_notebooks = "off"
+
+SITE_URL = "https://quansight.github.io/"
+BASE_URL = "qhub-ops/"
