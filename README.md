@@ -52,6 +52,15 @@ scripts/00-guided-install.sh
 This project depends on the terraform modules repository:
 https://github.com/Quansight/qhub-terraform-modules
 
+## Architecture
+
+The architecture diagrams for each cloud provider is in `architecture` folder.
+To generate them, just run the following command:
+
+```bash
+python <diagram_file>.py
+```
+
 # License
 
 qhub-ops is BSD3 licensed

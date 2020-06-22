@@ -39,7 +39,8 @@ setup(
             'flake8',
             'black',
             'twine',
-            'pytest'
+            'pytest',
+            'diagrams'
         ]
     },
     include_package_data=True,
