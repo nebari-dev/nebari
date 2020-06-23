@@ -1,3 +1,7 @@
 submodules:
   include: all
   recursive: true
+version: 2
+
+sphinx:
+  configuration: docs/conf.py

@@ -4,13 +4,16 @@
 
 > Open source tooling for data science research, development, and deployment.
 
-Qhub is [__Infrastructure as Code__](#What-is-Infrastructure-as-Code.) 
+Qhub is [**Infrastructure as Code**](#What-is-Infrastructure-as-Code.)
 simplifies the deployment of data science infrastructure for you and your team.
 
 ```{toctree}
-index
+:maxdepth: 2
+:glob:
+
 docs/getting-started
 docs/faqs
+docs/qhub-gcp-deployment
 qhub-ops/qhub_ops/template/{{ cookiecutter.repo_directory }}/docs/configuration
 qhub-ops/qhub_ops/template/{{ cookiecutter.repo_directory }}/docs/infrastructure
 qhub-ops/qhub_ops/template/{{ cookiecutter.repo_directory }}/docs/installation
@@ -19,23 +22,23 @@ qhub-ops/qhub_ops/template/{{ cookiecutter.repo_directory }}/docs/theming
 ```
 
 ![](https://avatars1.githubusercontent.com/u/17131925?v=4&s=100)![](https://avatars2.githubusercontent.com/u/17927519?v=4&s=100)![](https://avatars1.githubusercontent.com/u/5429470?v=4&s=100)![](https://avatars2.githubusercontent.com/u/288277?v=4&s=100)
-    
+
 ## Use the Qhub wizard for your favorite service.
-    
+
 The Qhub wizard will ask you a few questions to help you
-get started on a long journey with data science. We'll ask you a 
+get started on a long journey with data science. We'll ask you a
 few questions.
-    
+
 ## Try Qhub for free on ![](https://avatars0.githubusercontent.com/u/4650108?v=4&s=60)
-    
+
 ### Or customize your Qhub service
 
 ![](https://avatars0.githubusercontent.com/u/4650108?v=4&s=100)![](https://avatars3.githubusercontent.com/u/2232217?v=4&s=100)![](https://avatars0.githubusercontent.com/u/2810941?v=4&s=100)
-    
+
 ### Digital Ocean Options
-    
-Choose the specifications for your nodes and workers from the list below. 
-    
+
+Choose the specifications for your nodes and workers from the list below.
+
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -225,25 +228,20 @@ computing tools.
 <input value="tonyfast ani"></input>
 ## For command line users
 
-If you prefer, Qhub is configurable from the command line.  Learn more about the CLIs
-    
+If you prefer, Qhub is configurable from the command line. Learn more about the CLIs
+
 ```bash
 qhub new Myhub --workers 10 --users 4
 qhub new -f myhub.yaml
 ```
-    
+
 ### Why QHUB?
-    
-There are many steps along the lifecycle of data science products. Qhub is designed 
+
+There are many steps along the lifecycle of data science products. Qhub is designed
 to work at all points in the process. It includes jupyterlab, dask, kubernetes
-    
-### What is __Infrastructure as Code__.
 
-```{toctree}
-:hidden: true
-:maxdepth: 2
-```<!--
+### What is **Infrastructure as Code**.
 
-    [NbConvertApp] Converting notebook readme.md.ipynb to markdown
+<!--
 
 -->
