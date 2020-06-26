@@ -8,7 +8,11 @@ jupyter nbextension enable --py widgetsnbextension --sys-prefix
 jupyter labextension install --clean \
         @jupyter-widgets/jupyterlab-manager \
         dask-labextension \
-        @pyviz/jupyterlab_pyviz
+        @pyviz/jupyterlab_pyviz \
+        jupyterlab-videochat
+        
+# FIXME: Move this when environment.yml supports installing from pip
+pip install --no-cache jupyter-videochat
 
 # ====== cleanup labextension install =======
 rm -rf ${HOME}/.cache ${HOME}/.npm ${HOME}/.yarn
