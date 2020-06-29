@@ -5,7 +5,7 @@ BLOG_TITLE = title = html_title = "Qhub code as infrastructure."
 BLOG_AUTHOR = author = "Quansight"
 html_theme = "pydata_sphinx_theme"
 master_doc = "index"
-source_suffix = ".rst .md .ipynb .py".split()
+source_suffix = ".md .rst .ipynb .py".split()
 extensions = (
     "myst_parser nbsphinx sphinx.ext.autodoc sphinx.ext.napoleon".split()
 )  # autoapi.extension
