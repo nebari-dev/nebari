@@ -13,7 +13,7 @@ def custom_icon(filename):
     return os.path.join('architecture/icons', filename)
 
 
-with Diagram(f"QHub Architecture: High Level", filename=f'high_level_architecture', show=False, direction="TB",):
+with Diagram("QHub Architecture: High Level", filename='high_level_architecture', show=False, direction="TB",):
     with Cluster('Kubernetes Cluster'):
         conda_pvc = PersistentVolume('Conda (Persistent Volume)')
         nfs_pvc = PersistentVolume('NFS (Persistent Volume)')
