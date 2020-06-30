@@ -25,10 +25,7 @@ hub:
     AUTH0_SUBDOMAIN: "{{ cookiecutter.security.authentication.config.auth0_subdomain }}"
 {% endif %}
   extraConfig:
-    01-jupyterlab: |
-      c.Spawner.cmd = ['jupyter-labhub']
-
-    02-spawner: |
+    01-spawner: |
       QHUB_USER_MAPPING = {{ cookiecutter.security.users }}
       QHUB_GROUP_MAPPING = {{ cookiecutter.security.groups }}
       QHUB_PROFILES = {{ cookiecutter.profiles.jupyterlab }}
@@ -152,7 +149,7 @@ hub:
 
       c.KubeSpawner.options_form = custom_options_form
 
-    03-themeing: |
+    02-themeing: |
       c.JupyterHub.template_paths = ['/usr/local/share/jupyterhub/custom_templates/']
       c.JupyterHub.template_vars = {
           'pangeo_hub_title': 'QHub - {{ cookiecutter.project_name }}',
