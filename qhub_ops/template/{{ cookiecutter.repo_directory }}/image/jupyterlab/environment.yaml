@@ -11,7 +11,7 @@ jupyterlab
 jupyter_client
 jupyter_console
 jupyterhub
-nodejs
+nodejs >= 10
 nbconvert
 nbval
 dask_labextension
