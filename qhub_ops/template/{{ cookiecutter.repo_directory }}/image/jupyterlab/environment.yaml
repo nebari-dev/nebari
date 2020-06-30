@@ -7,7 +7,7 @@ ipython > 7
 jupyter-server-proxy
 jupyterlab-git
 ipywidgets
-jupyterlab
+jupyterlab >= 2
 jupyter_client
 jupyter_console
 jupyterhub
