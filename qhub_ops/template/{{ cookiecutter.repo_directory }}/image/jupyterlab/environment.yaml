@@ -7,8 +7,8 @@ ipython > 7
 jupyter-server-proxy
 jupyterlab-git
 ipywidgets
-jupyterlab < 2.0
-jupyter_client < 6.0
+jupyterlab
+jupyter_client
 jupyter_console
 jupyterhub
 nodejs
