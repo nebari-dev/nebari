@@ -7,7 +7,6 @@ jupyter nbextension enable --py widgetsnbextension --sys-prefix
 # install jupyterlab extensions
 jupyter labextension install --clean \
         @jupyter-widgets/jupyterlab-manager \
-        jupyterlab-cpustatus \
         dask-labextension \
         @pyviz/jupyterlab_pyviz
 
