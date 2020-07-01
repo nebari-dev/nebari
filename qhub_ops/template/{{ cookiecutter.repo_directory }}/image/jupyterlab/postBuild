@@ -13,6 +13,7 @@ jupyter labextension install --clean \
         
 # FIXME: Move this when environment.yml supports installing from pip
 pip install --no-cache jupyter-videochat
+jupyter serverextension enable --sys-prefix jupyter_videochat
 
 # ====== cleanup labextension install =======
 rm -rf ${HOME}/.cache ${HOME}/.npm ${HOME}/.yarn
