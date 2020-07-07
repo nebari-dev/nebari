@@ -3,3 +3,4 @@ dask==2.14.0
 distributed=2.14.0
 dask-gateway=0.6.1
 python-blosc==1.9.1
+lz4==3.1.0
