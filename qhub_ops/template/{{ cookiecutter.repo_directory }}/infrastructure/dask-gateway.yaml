@@ -14,6 +14,7 @@ gateway:
       def worker_profile(options):
            config = profiles[options.profile]
            config['worker_cmd'] = '/opt/conda-run'
+           config['scheduler_cmd'] = '/opt/conda-run'
            config['environment'] = {
                'CONDA_ENVIRONMENT': options.environment
            }
