@@ -13,8 +13,8 @@ gateway:
 
       def worker_profile(options):
            config = profiles[options.profile]
-           config['worker_cmd'] = '/opt/conda-run'
-           config['scheduler_cmd'] = '/opt/conda-run'
+           config['worker_cmd'] = '/opt/conda-run-worker'
+           config['scheduler_cmd'] = '/opt/conda-run-scheduler'
            config['environment'] = {
                'CONDA_ENVIRONMENT': options.environment
            }

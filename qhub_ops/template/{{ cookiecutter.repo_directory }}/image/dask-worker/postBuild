@@ -3,11 +3,19 @@ set -euo pipefail
 
 # A workaround that allows a command to run in a
 # specific conda environment
-cat <<EOF > /opt/conda-run
+cat <<EOF > /opt/conda-run-worker
 #!/bin/bash
 set -xe
 
 conda run -n \$CONDA_ENVIRONMENT dask-gateway-worker "\$@"
 EOF
 
-chmod 755 /opt/conda-run
+cat <<EOF > /opt/conda-run-scheduler
+#!/bin/bash
+set -xe
+
+conda run -n \$CONDA_ENVIRONMENT dask-gateway-scheduler "\$@"
+EOF
+
+chmod 755 /opt/conda-run-worker
+chmod 755 /opt/conda-run-scheduler
