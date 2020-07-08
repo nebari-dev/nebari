@@ -19,24 +19,16 @@ def patch_dask_gateway_extra_config(config):
         "name": "conda-store",
         "persistentVolumeClaim": {"claimName": "conda-store-dev-share"},
     }
-    extra_pod_config = {
-        "volumes": [
-            conda_store_volume
-        ]
-    }
+    extra_pod_config = {"volumes": [conda_store_volume]}
 
-    merge_config_for = [
-        "worker_extra_pod_config",
-        "scheduler_extra_pod_config"
-    ]
+    merge_config_for = ["worker_extra_pod_config", "scheduler_extra_pod_config"]
 
     if "profiles" in config and "dask_worker" in config["profiles"]:
         for worker_name, worker_config in config["profiles"]["dask_worker"].items():
             for config_name in merge_config_for:
                 if config_name in worker_config:
                     worker_config[config_name] = deep_merge(
-                        worker_config[config_name],
-                        extra_pod_config
+                        worker_config[config_name], extra_pod_config
                     )
 
 
@@ -61,7 +53,7 @@ def deep_merge(d1, d2):
     """
     if isinstance(d1, dict) and isinstance(d2, dict):
         d3 = {}
-        for key in (d1.keys() | d2.keys()):
+        for key in d1.keys() | d2.keys():
             if key in d1 and key in d2:
                 d3[key] = deep_merge(d1[key], d2[key])
             elif key in d1:
