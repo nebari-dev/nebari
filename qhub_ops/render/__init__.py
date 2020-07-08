@@ -19,18 +19,60 @@ def patch_dask_gateway_extra_config(config):
         "name": "conda-store",
         "persistentVolumeClaim": {"claimName": "conda-store-dev-share"},
     }
+    extra_pod_config = {
+        "volumes": [
+            conda_store_volume
+        ]
+    }
+
+    merge_config_for = [
+        "worker_extra_pod_config",
+        "scheduler_extra_pod_config"
+    ]
 
     if "profiles" in config and "dask_worker" in config["profiles"]:
         for worker_name, worker_config in config["profiles"]["dask_worker"].items():
-            if "worker_extra_pod_config" in worker_config:
-                if "volumes" in worker_config["worker_extra_pod_config"]:
-                    worker_config["worker_extra_pod_config"]["volumes"].append(
-                        conda_store_volume
+            for config_name in merge_config_for:
+                if config_name in worker_config:
+                    worker_config[config_name] = deep_merge(
+                        worker_config[config_name],
+                        extra_pod_config
                     )
-                else:
-                    worker_config["worker_extra_pod_config"]["volumes"] = [
-                        conda_store_volume
-                    ]
+
+
+def deep_merge(d1, d2):
+    """Deep merge two dictionaries.
+    >>> value_1 = {
+    'a': [1, 2],
+    'b': {'c': 1, 'z': [5, 6]},
+    'e': {'f': {'g': {}}},
+    'm': 1,
+    }
+
+    >>> value_2 = {
+        'a': [3, 4],
+        'b': {'d': 2, 'z': [7]},
+        'e': {'f': {'h': 1}},
+        'm': [1],
+    }
+
+    >>> print(deep_merge(value_1, value_2))
+    {'m': 1, 'e': {'f': {'g': {}, 'h': 1}}, 'b': {'d': 2, 'c': 1, 'z': [5, 6, 7]}, 'a': [1, 2, 3,  4]}
+    """
+    if isinstance(d1, dict) and isinstance(d2, dict):
+        d3 = {}
+        for key in (d1.keys() | d2.keys()):
+            if key in d1 and key in d2:
+                d3[key] = deep_merge(d1[key], d2[key])
+            elif key in d1:
+                d3[key] = d1[key]
+            elif key in d2:
+                d3[key] = d2[key]
+        return d3
+    elif isinstance(d1, list) and isinstance(d2, list):
+        return [*d1, *d2]
+    else:  # if they don't match use left one
+        return d1
 
 
 def render_default_template(output_directory, config_filename=None, force=False):
