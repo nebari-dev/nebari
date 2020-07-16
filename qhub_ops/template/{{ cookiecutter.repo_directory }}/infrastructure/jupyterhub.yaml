@@ -148,6 +148,7 @@ hub:
 
 
       c.KubeSpawner.options_form = custom_options_form
+      c.LocalProcessSpawner.shell_cmd = ['bash', '-l', '-c']
 
     02-themeing: |
       c.JupyterHub.template_paths = ['/usr/local/share/jupyterhub/custom_templates/']
