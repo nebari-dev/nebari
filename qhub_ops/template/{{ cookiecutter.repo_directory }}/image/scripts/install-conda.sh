@@ -19,7 +19,8 @@ sh ./miniconda.sh -b -p /opt/conda
 rm miniconda.sh miniconda.checksum
 
 ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
-echo ". /opt/conda/etc/profile.d/conda.sh" >> /etc/profile
+echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
+echo "conda activate base" >> ~/.bashrc
 
 mkdir -p /etc/conda
 cat <<EOF > /etc/conda/condarc
