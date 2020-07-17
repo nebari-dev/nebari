@@ -60,3 +60,5 @@ RUN apt-get clean && \
 USER ${NB_UID}
 
 RUN echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
+
+WORKDIR /home/${NB_USER}
