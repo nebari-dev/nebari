@@ -69,3 +69,4 @@ yarn-debug.log*
 yarn-error.log*
 
 app/__pycache__
+docs/users.pdf

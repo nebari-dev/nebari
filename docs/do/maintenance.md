@@ -32,7 +32,7 @@ deployment. This can be done by modifying
 
 Adding additional nodegroups can be done by editing the configuration
 file. While a `general`, `user`, and `worker` nodegroup are required
-you may create any addional node group. Take for example the Digital
+you may create any additional node group. Take for example the Digital
 Ocean configuration.
 
 ```yaml
@@ -96,9 +96,9 @@ profiles:
         - admin
       kubespawner_override:
         cpu_limit: 1
-        cpu_guarentee: 1
+        cpu_guarantee: 1
         mem_limit: 1G
-        mem_guarentee: 1G
+        mem_guarantee: 1G
         image: "quansight/qhub-jupyterlab:fb3489522cde4b0fe6b2b0d4f24522d0fffcabc8"
 ```
 
@@ -119,9 +119,9 @@ profiles:
         - admin
       kubespawner_override:
         cpu_limit: 1
-        cpu_guarentee: 1
+        cpu_guarantee: 1
         mem_limit: 1G
-        mem_guarentee: 1G
+        mem_guarantee: 1G
         image: "quansight/qhub-jupyterlab:fb3489522cde4b0fe6b2b0d4f24522d0fffcabc8"
         node_selector:
           "doks.digitalocean.com/node-pool": worker-high-memory
