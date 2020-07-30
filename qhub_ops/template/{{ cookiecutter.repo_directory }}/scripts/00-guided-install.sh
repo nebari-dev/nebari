@@ -13,6 +13,12 @@ if [ ! -f "$(command -v terraform)" ]; then
     exit 1
 fi
 
+# 02 Check version of Terraform
+if ! terraform --version | grep -q "v0.12.24"; then 
+	echo "Error: Please install Terraform v0.12.24"
+	exit 1
+fi
+
 # 03 Check Environment Variables
 {% if cookiecutter.provider == 'gcp' %}
 if [[ -v GOOGLE_CREDENTIALS ]] || [[ -v PROJECT_ID ]]; then
