@@ -7,7 +7,7 @@ root_dir = path.abspath(path.dirname(__file__))
 with open(path.join(root_dir, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-with open(path.join(root_dir, "VERSION")) as version_file:
+with open(path.join(root_dir, "qhub_ops/VERSION")) as version_file:
     version = version_file.read().strip()
 
 setup(
