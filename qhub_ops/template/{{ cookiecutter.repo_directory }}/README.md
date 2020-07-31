@@ -21,7 +21,7 @@ In practice GitHub Actions controls everything.
  - [gcloud](https://cloud.google.com/sdk/install)
  - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
  - [helm](https://helm.sh/) version **3+**
- - [terraform](https://www.terraform.io/downloads.html)
+ - [terraform](https://www.terraform.io/downloads.html)  version **v0.12.24**
 
 ## Development
 
