@@ -134,7 +134,7 @@ class Authentication(Base):
 class Security(Base):
     authentication: Authentication
     users: typing.Dict[str, User]
-    group: typing.Dict[str, Group]
+    group: typing.Dict[str, Group] = {}
 
 
 class DaskWorker(Base):
@@ -171,13 +171,13 @@ class DaskWorker(Base):
 class JupyterLabProfile(Base):
     display_name: str
     description: str
-    groups: typing.List[str]
+    groups: typing.List[str] = []
     kubespawner_override: KubeSpawner
 
 
 class Profiles(Base):
-    jupyterlab: typing.List[JupyterLabProfile]
-    dask_worker: typing.Dict[str, DaskWorker]
+    jupyterlab: typing.List[JupyterLabProfile] = []
+    dask_worker: typing.Dict[str, DaskWorker] = {}
 
 
 class Main(Base):
@@ -185,7 +185,7 @@ class Main(Base):
     provider: ProviderEnum
     ci_cd: CiEnum
     security: Security
-    profiles: Profiles
+    profiles: Profiles = []
 
 
 class DigitalOcean(Main):
