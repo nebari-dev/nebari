@@ -190,3 +190,6 @@ class Main(Base):
 
 class DigitalOcean(Main):
     digital_ocean: Provider = None
+
+def verify(config):
+    Main(**config)
