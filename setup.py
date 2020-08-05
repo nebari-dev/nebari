@@ -39,7 +39,7 @@ setup(
     ],
     extras_require={"dev": ["flake8", "black", "twine", "pytest", "diagrams"]},
     include_package_data=True,
-    entry_points={"console_scripts": ["qhub-ops = qhub_ops.__main__:main",],},
+    entry_points={"console_scripts": ["qhub-ops = qhub_ops.__main__:main"]},
     project_urls={  # Optional
         "Bug Reports": "https://github.com/quansight/QHub",
         "Source": "https://github.com/quansight/QHub",
