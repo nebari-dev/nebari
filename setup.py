@@ -34,7 +34,7 @@ setup(
         "cookiecutter",
         "pyyaml",
         "cloudflare",
-        "auth0-python",=
+        "auth0-python",
         "pydantic",
     ],
     extras_require={"dev": ["flake8", "black", "twine", "pytest", "diagrams"]},
