@@ -30,7 +30,7 @@ setup(
     keywords="aws gcp do qhub",
     packages=find_packages(),
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, <4",
-    install_requires=["cookiecutter", "pyyaml", "cloudflare", "auth0-python"],
+    install_requires=["cookiecutter", "pyyaml", "cloudflare", "auth0-python", "pydantic"],
     extras_require={"dev": ["flake8", "black", "twine", "pytest", "diagrams"]},
     include_package_data=True,
     entry_points={"console_scripts": ["qhub-ops = qhub_ops.__main__:main", ], },
