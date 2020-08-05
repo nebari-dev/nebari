@@ -18,6 +18,7 @@ pkgs.mkShell {
     pythonPackages.auth0-python
     pythonPackages.cookiecutter
     pythonPackages.pyyaml
+    pythonPackages.pydantic
 
     # testing
     pythonPackages.pytest

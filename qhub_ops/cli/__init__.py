@@ -5,6 +5,7 @@ from os import path
 
 from qhub_ops.cli.deploy import create_deploy_subcommand
 from qhub_ops.cli.render import create_render_subcommand
+from qhub_ops.cli.validate import create_validate_subcommand
 
 root_dir = path.abspath(path.join(path.dirname(__file__), path.pardir))
 
@@ -22,6 +23,7 @@ def cli(args):
     subparser = parser.add_subparsers(help=f"QHub Ops - {version}")
     create_deploy_subcommand(subparser)
     create_render_subcommand(subparser)
+    create_validate_subcommand(subparser)
 
     args = parser.parse_args(args)
 
