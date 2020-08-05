@@ -14,7 +14,8 @@ def create_render_subcommand(subparser):
 
 
 def handle_render(args):
-    import pathlib, yaml
+    import pathlib
+    import yaml
 
     config_filename = pathlib.Path(args.config)
     if not config_filename.is_file():
