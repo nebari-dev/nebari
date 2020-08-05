@@ -14,7 +14,19 @@ def create_render_subcommand(subparser):
 
 
 def handle_render(args):
-    verify(args.config)
+    import pathlib, yaml
+
+    config_filename = pathlib.Path(args.config)
+    if not config_filename.is_file():
+        raise ValueError(
+            f"passed in configuration filename={config_filename} must exist"
+        )
+
+    with config_filename.open() as f:
+        config = yaml.safe_load(f.read())
+
+    verify(config)
+
     if args.input is None:
         render_default_template(args.output, args.config, force=args.force)
     else:
