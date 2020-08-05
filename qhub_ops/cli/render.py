@@ -1,4 +1,5 @@
 from qhub_ops.render import render_default_template, render_template
+from qhub_ops.schema import verify
 
 
 def create_render_subcommand(subparser):
@@ -13,6 +14,7 @@ def create_render_subcommand(subparser):
 
 
 def handle_render(args):
+    verify(args.config)
     if args.input is None:
         render_default_template(args.output, args.config, force=args.force)
     else:
