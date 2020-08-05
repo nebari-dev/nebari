@@ -17,4 +17,4 @@ def test_validation(config_filename):
     with open(config_filename) as f:
         data = yaml.safe_load(f.read())
 
-    assert qhub_ops.schema.Main(**data)
+    assert qhub_ops.schema.verify(data) is None

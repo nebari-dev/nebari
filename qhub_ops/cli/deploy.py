@@ -3,6 +3,7 @@ import pathlib
 import logging
 
 from qhub_ops.deploy import deploy_configuration
+from qhub_ops.schema import verify
 
 logger = logging.getLogger(__name__)
 
@@ -22,5 +23,7 @@ def handle_deploy(args):
 
     with config_filename.open() as f:
         config = yaml.safe_load(f.read())
+
+    verify(config)
 
     deploy_configuration(config)
