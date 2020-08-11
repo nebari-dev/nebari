@@ -154,8 +154,14 @@ hub:
       c.JupyterHub.template_paths = ['/usr/local/share/jupyterhub/custom_templates/']
       c.JupyterHub.template_vars = {
           'pangeo_hub_title': 'QHub - {{ cookiecutter.project_name }}',
+          {%- if cookiecutter.provider == "do" -%}
           'pangeo_hub_subtitle': 'Autoscaling Compute Environment on Digital Ocean',
-          'pangeo_welcome': """Welcome to jupyter.{{ cookiecutter.domain }}. It is maintained by the <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in the github repository based on <a href="https://github.com/Quansight/qhub-kubernetes/">https://github.com/Quansight/qhub-kubernetes/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub-kubernetes//issues">github issue tracker</a>."""
+          {%- elif cookiecutter.provider == "gcp" -%}
+          'pangeo_hub_subtitle': 'Autoscaling Compute Environment on Google Cloud Platform',
+          {%- elif cookiecutter.provider == "aws" -%}
+          'pangeo_hub_subtitle': 'Autoscaling Compute Environment on AWS',
+          {% endif %}
+          'pangeo_welcome': """Welcome to jupyter.{{ cookiecutter.domain }}. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
       }
 
 cull:
