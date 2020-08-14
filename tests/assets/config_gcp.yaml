@@ -1,0 +1,126 @@
+project_name: gcp-jupyterhub
+provider: gcp
+ci_cd: github-actions
+domain: "gcp.qhub.dev"
+
+security:
+  authentication:
+    type: Auth0
+    config:
+      client_id: ...
+      client_secret: ...
+      oauth_callback_url: ...
+      scope: ['openid', 'email', 'profile']
+      auth0_subdomain: ...
+  users:
+    "chris.ostrouchov@gmail.com":
+      uid: 1000
+      primary_group: users
+    "dharhas@quansight.com":
+      uid: 1001
+      primary_group: admin
+  groups:
+    users:
+      gid: 1000
+    admin:
+      gid: 1001
+
+
+google_cloud_platform:
+  project: test-test-test
+  region: us-central1
+  zone: us-central1-c
+  availability_zones: ["us-central1-c"]
+  kubernetes_version: "1.14.10-gke.31"
+  node_groups:
+    general:
+      instance: n1-standard-2
+      min_nodes: 1
+      max_nodes: 1
+    user:
+      instance: n1-standard-2
+      min_nodes: 0
+      max_nodes: 2
+    worker:
+      instance: n1-standard-2
+      min_nodes: 0
+      max_nodes: 5
+
+default_images:
+  jupyterhub: "quansight/qhub-jupyterhub:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+  jupyterlab: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+  dask_worker: "quansight/qhub-dask-worker:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+
+storage:
+  conda_store: 20Gi
+  shared_filesytem: 10Gi
+
+profiles:
+  jupyterlab:
+    - display_name: Small Instance
+      description: Stable environment with 1 cpu / 1 GB ram
+      default: true
+      kubespawner_override:
+        cpu_limit: 1
+        cpu_guarentee: 1
+        mem_limit: 1G
+        mem_guarentee: 1G
+        image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+    - display_name: Medium Instance
+      description: Stable environment with 1.5 cpu / 2 GB ram
+      kubespawner_override:
+        cpu_limit: 1.5
+        cpu_guarentee: 1.25
+        mem_limit: 2G
+        mem_guarentee: 2G
+        image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+
+  dask_worker:
+    "Small Worker":
+      worker_cores_limit: 1
+      worker_cores: 1
+      worker_memory_limit: 1G
+      worker_memory: 1G
+      image: "quansight/qhub-dask-worker:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+    "Medium Worker":
+      worker_cores_limit: 1.5
+      worker_cores: 1.25
+      worker_memory_limit: 2G
+      worker_memory: 2G
+      image: "quansight/qhub-dask-worker:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+
+
+environments:
+  "environment-default.yaml":
+    name: default
+    channels:
+      - conda-forge
+      - defaults
+    dependencies:
+      - python=3.7
+      - ipykernel
+      - ipywidgets
+      - dask==2.14.0
+      - distributed==2.14.0
+      - dask-gateway=0.6.1
+      - numpy
+      - numba
+      - pandas
+
+  "environment-example-2.yaml":
+    name: example-2
+    channels:
+      - conda-forge
+      - defaults
+    dependencies:
+      - python=3.7
+      - ipykernel
+      - ipywidgets
+      - dask==2.14.0
+      - distributed==2.14.0
+      - dask-gateway=0.6.1
+      - numpy
+      - numba
+      - pandas
+      - jinja2
+      - pyyaml

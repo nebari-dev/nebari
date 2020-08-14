@@ -1,0 +1,26 @@
+# ignore terraform state
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.tfstate.lock.info
+
+# python
+__pycache__
+build/
+*.egg
+*.egg-info/
+dist/
+
+# IntelliJ
+.idea/
+
+# nix
+result
+
+# ignore deploments
+do-jupyterhub
+jupyterhub-aws
+gcp-jupyterhub
+modules
+quansight-terraform-modules
+config.yaml

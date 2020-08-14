@@ -1,0 +1,88 @@
+{
+    "repo_directory": null,
+    "project_name": null,
+    "provider": null,
+    "ci_cd": null,
+    "endpoint": null,
+
+    "security": null,
+    "default_images": null,
+    "profiles": null,
+    "environments": null,
+    "storage": null,
+
+    "digital_ocean": {
+        "region": null,
+        "kubernetes_version": null,
+        "node_groups": {
+            "general": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            },
+            "user": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            },
+            "worker": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            }
+        }
+    },
+
+    "google_cloud_platform": {
+        "project": null,
+        "region": null,
+        "zone": null,
+        "availability_zones": [],
+        "kubernetes_version": null,
+        "node_groups": {
+            "general": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            },
+            "user": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            },
+            "worker": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            }
+        }
+    },
+
+    "amazon_web_services": {
+        "region": null,
+        "availability_zones": [],
+        "kubernetes_version": null,
+        "node_groups": {
+            "general": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            },
+            "user": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            },
+            "worker": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            }
+        }
+    },
+
+    "_extensions": [
+        "qhub_ops.render.jinja.YamlifyExtension",
+        "qhub_ops.render.jinja.JsonifyExtension"
+    ]
+}

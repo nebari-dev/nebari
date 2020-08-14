@@ -1,0 +1,29 @@
+name: "Docker Image Build - Pull Request"
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "image/**"
+      - ".github/workflows/image-pr.yaml"
+
+jobs:
+  build:
+    name:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dockerfile:
+          - jupyterlab
+          - jupyterhub
+          - dask-worker
+    steps:
+      - name: 'Checkout Image'
+        uses: actions/checkout@master
+      - name: Build Image
+        env:
+          IMAGE_TAG: {{ '${{ github.sha }}' }}
+          IMAGE_NAME: {{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
+        run: |
+          docker build -f "image/Dockerfile.{{ '${{ matrix.dockerfile }}' }}" -t "$IMAGE_NAME:$IMAGE_TAG" image
