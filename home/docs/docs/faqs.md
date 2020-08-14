@@ -58,4 +58,4 @@
 
 ## I have a question about "how to do *X* using QHub" that is not answered in the [documentation](https://qhub.readthedocs.io/en/latest/index.html), what do I do?
 
-  + Create an issue in the [Github repo](https://github.com/Quansight/qhub-ops) to get answers from the creators of QHub at Quansight.
+  + Create an issue in the [Github repo](https://github.com/Quansight/qhub) to get answers from the creators of QHub at Quansight.

@@ -68,9 +68,9 @@ def deep_merge(d1, d2):
 
 
 def render_default_template(output_directory, config_filename=None, force=False):
-    import qhub_ops
+    import qhub
 
-    input_directory = pathlib.Path(qhub_ops.__file__).parent / "template"
+    input_directory = pathlib.Path(qhub.__file__).parent / "template"
     render_template(input_directory, output_directory, config_filename, force=force)
 
 

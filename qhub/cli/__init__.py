@@ -3,9 +3,9 @@ import logging
 import sys
 from os import path
 
-from qhub_ops.cli.deploy import create_deploy_subcommand
-from qhub_ops.cli.render import create_render_subcommand
-from qhub_ops.cli.validate import create_validate_subcommand
+from qhub.cli.deploy import create_deploy_subcommand
+from qhub.cli.render import create_render_subcommand
+from qhub.cli.validate import create_validate_subcommand
 
 root_dir = path.abspath(path.join(path.dirname(__file__), path.pardir))
 

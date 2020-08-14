@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # 01 Check configuration exists
-if [ ! -f qhub-ops-config.yaml ]; then
-   echo "ERROR: configuration file \"qhub-ops-config.yaml\" does not exist"
+if [ ! -f qhub-config.yaml ]; then
+   echo "ERROR: configuration file \"qhub-config.yaml\" does not exist"
    exit 1
 fi
 
@@ -14,7 +14,7 @@ if [ ! -f "$(command -v terraform)" ]; then
 fi
 
 # 02 Check version of Terraform
-if ! terraform --version | grep -q "v0.12.24"; then 
+if ! terraform --version | grep -q "v0.12.24"; then
 	echo "Error: Please install Terraform v0.12.24"
 	exit 1
 fi

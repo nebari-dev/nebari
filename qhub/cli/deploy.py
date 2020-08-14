@@ -2,8 +2,8 @@ import yaml
 import pathlib
 import logging
 
-from qhub_ops.deploy import deploy_configuration
-from qhub_ops.schema import verify
+from qhub.deploy import deploy_configuration
+from qhub.schema import verify
 
 logger = logging.getLogger(__name__)
 

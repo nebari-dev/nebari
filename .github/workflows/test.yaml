@@ -29,7 +29,7 @@
 #           pip install .[dev]
 #       - name: Black Formatting
 #         run: |
-#           black --check qhub_ops
+#           black --check qhub
 #       - name: Flake8 Formatting
 #         run: |
 #           flake8
@@ -70,7 +70,7 @@
 #           CLIENT_SECRET: ${{ secrets.DO_OAUTH_CLIENT_SECRET }}
 #       - name: QHub Build Digital Ocean Template
 #         run: |
-#           qhub-ops render -c tests/assets/config_do.yaml -o qhub-do-deployment -f
+#           qhub render -c tests/assets/config_do.yaml -o qhub-do-deployment -f
 #       - name: 'Terraform Format'
 #         uses: hashicorp/terraform-github-actions@master
 #         with:
@@ -80,7 +80,7 @@
 #       - name: Push Changes to Do Deployment Repository
 #         run: |
 #           cd qhub-do-deployment
-#           git config user.email "qhub-ops@quansight.com"
+#           git config user.email "qhub@quansight.com"
 #           git config user.name "github action"
 #           git add .
 #           # only commit and push if we have changes
@@ -88,7 +88,7 @@
 #           cd ..
 #         env:
 #           COMMIT_MSG: |
-#             qhub-ops automated commit: ${{ github.sha }}
+#             qhub automated commit: ${{ github.sha }}
 
 #   test-amazon-web-services:
 #     name: 'Test Amazon Web Services Deployment'
@@ -106,7 +106,7 @@
 #           pip install .[dev]
 #       - name: QHub Build Amazon Web Services Template
 #         run: |
-#           qhub-ops render -c tests/assets/config_aws.yaml -o qhub-aws-deployment
+#           qhub render -c tests/assets/config_aws.yaml -o qhub-aws-deployment
 #       - name: Amazon Web Services Artifact
 #         uses: actions/upload-artifact@v1
 #         with:
@@ -130,7 +130,7 @@
 #           pip install .[dev]
 #       - name: QHub Build Google Cloud Platform Template
 #         run: |
-#           qhub-ops render -c tests/assets/config_gcp.yaml -o qhub-gcp-deployment
+#           qhub render -c tests/assets/config_gcp.yaml -o qhub-gcp-deployment
 #       - name: Google Cloud Platform Artifact
 #         uses: actions/upload-artifact@v1
 #         with:

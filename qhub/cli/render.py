@@ -1,5 +1,5 @@
-from qhub_ops.render import render_default_template, render_template
-from qhub_ops.schema import verify
+from qhub.render import render_default_template, render_template
+from qhub.schema import verify
 
 
 def create_render_subcommand(subparser):

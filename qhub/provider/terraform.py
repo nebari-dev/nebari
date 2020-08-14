@@ -2,7 +2,7 @@ import subprocess
 import logging
 import json
 
-from qhub_ops.utils import timer
+from qhub.utils import timer
 
 logger = logging.getLogger(__name__)
 

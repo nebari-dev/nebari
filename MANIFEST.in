@@ -1,3 +1,3 @@
 include VERSION
-graft qhub_ops
+graft qhub
 global-exclude *.py[cod] __pycache__ *.so

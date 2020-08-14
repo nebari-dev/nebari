@@ -1,6 +1,6 @@
 import pytest
 
-from qhub_ops.render import render_default_template
+from qhub.render import render_default_template
 
 
 @pytest.mark.parametrize('config_filename', [

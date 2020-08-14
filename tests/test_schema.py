@@ -1,6 +1,6 @@
 import pytest
 
-import qhub_ops.schema
+import qhub.schema
 
 
 @pytest.mark.parametrize(
@@ -17,4 +17,4 @@ def test_validation(config_filename):
     with open(config_filename) as f:
         data = yaml.safe_load(f.read())
 
-    assert qhub_ops.schema.verify(data) is None
+    assert qhub.schema.verify(data) is None

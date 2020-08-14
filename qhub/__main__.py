@@ -1,6 +1,6 @@
 import sys
 
-from qhub_ops.cli import cli
+from qhub.cli import cli
 
 
 def main():

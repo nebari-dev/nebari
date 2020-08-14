@@ -7,16 +7,16 @@ root_dir = path.abspath(path.dirname(__file__))
 with open(path.join(root_dir, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-with open(path.join(root_dir, "qhub_ops/VERSION")) as version_file:
+with open(path.join(root_dir, "qhub/VERSION")) as version_file:
     version = version_file.read().strip()
 
 setup(
-    name="qhub-ops",
+    name="qhub",
     version=version,
     description="Management of QHub on Cloud Infrastructure",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/quansight/qhub-ops",
+    url="https://github.com/quansight/qhub",
     author="Quansight",
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -39,9 +39,9 @@ setup(
     ],
     extras_require={"dev": ["flake8", "black", "twine", "pytest", "diagrams"]},
     include_package_data=True,
-    entry_points={"console_scripts": ["qhub-ops = qhub_ops.__main__:main"]},
-    project_urls={  # Optional
-        "Bug Reports": "https://github.com/quansight/QHub",
-        "Source": "https://github.com/quansight/QHub",
+    entry_points={"console_scripts": ["qhub = qhub.__main__:main"]},
+    project_urls={
+        "Bug Reports": "https://github.com/quansight/qhub",
+        "Source": "https://github.com/quansight/qhub",
     },
 )

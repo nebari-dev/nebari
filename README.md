@@ -1,4 +1,4 @@
-# QHub-Ops
+# QHub
 
 Is a tool for initializing and maintaining the state of QHub
 deployments on Digital Ocean, Amazon Web Services, and Google Cloud
@@ -7,15 +7,15 @@ Platform.
 ## Installation:
 
 ```bash
-pip install qhub-ops
+pip install qhub
 ```
 
 ## Configuration
 
 QHub is entirely controlled from a configuration file. Example
 configuration files can be found in
-[tests/assets](https://github.com/Quansight/qhub-ops/tree/master/tests/assets). Documentation
-on creating a configuration file is detailed [here](https://github.com/Quansight/qhub-ops/blob/master/qhub_ops/template/%7B%7B%20cookiecutter.repo_directory%20%7D%7D/docs/configuration.md).
+[tests/assets](https://github.com/Quansight/qhub/tree/master/tests/assets). Documentation
+on creating a configuration file is detailed [here](https://github.com/Quansight/qhub/blob/master/qhub/template/%7B%7B%20cookiecutter.repo_directory%20%7D%7D/docs/configuration.md).
 
 Templates for each file are at the following paths:
   - AWS :: tests/assets/config_aws.yaml
@@ -29,8 +29,8 @@ actions when the configuration is changed.
 
 ```bash
 mkdir <repository-name>
-# mv <config-filename> <repository-name>/qhub-ops-config.yaml
-qhub-ops render -c <repository-name>/qhub-ops-config.yaml -o <repository-name>/ --force
+# mv <config-filename> <repository-name>/qhub-config.yaml
+qhub render -c <repository-name>/qhub-config.yaml -o <repository-name>/ --force
 ```
 
 After initialising the provider templates, follow the instructions in
@@ -63,6 +63,6 @@ python <diagram_file>.py
 
 # License
 
-qhub-ops is BSD3 licensed
+QHub is BSD3 licensed
 
 

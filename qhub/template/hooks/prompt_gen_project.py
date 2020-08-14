@@ -4,7 +4,7 @@ import click
 from cookiecutter import prompt
 import yaml
 
-from qhub_ops.provider.cloud import digital_ocean, google_cloud, amazon_web_services
+from qhub.provider.cloud import digital_ocean, google_cloud, amazon_web_services
 
 
 DEFAULT_CONFIGURATION = {

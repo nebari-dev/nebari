@@ -3,11 +3,11 @@ import pathlib
 import logging
 import re
 
-from qhub_ops.render import render_default_template
-from qhub_ops.provider.oauth import auth0
-from qhub_ops.provider.dns import cloudflare
-from qhub_ops.provider import terraform
-from qhub_ops.utils import timer
+from qhub.render import render_default_template
+from qhub.provider.oauth import auth0
+from qhub.provider.dns import cloudflare
+from qhub.provider import terraform
+from qhub.utils import timer
 
 logger = logging.getLogger(__name__)
 

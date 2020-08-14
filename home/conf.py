@@ -46,7 +46,7 @@ html_theme_options = {
     "color_primary": THEME_COLOR,
     "color_accent": "light-yellow",
     # Set the repo location to get a badge with stats
-    "repo_url": "https://github.com/Quansight/qhub-ops",
+    "repo_url": "https://github.com/Quansight/qhub",
     "repo_name": "Q|Hub",
     # Visible levels of the global TOC; -1 means unlimited
     "globaltoc_depth": 1,

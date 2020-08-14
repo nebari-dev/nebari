@@ -8,7 +8,7 @@ QHub admins are **DevOps engineers**, **system administrators**, **scientists**,
 
 You can install QHub through `pip`:
 
-    pip install qhub-ops
+    pip install qhub
 
 After the installation, the next step is to configure QHub.
 

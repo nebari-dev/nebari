@@ -2,12 +2,12 @@ import pathlib
 
 import yaml
 
-from qhub_ops.schema import verify
+from qhub.schema import verify
 
 
 def create_validate_subcommand(subparser):
     subparser = subparser.add_parser("validate")
-    subparser.add_argument("config", help="qhub-ops configuration")
+    subparser.add_argument("config", help="qhub configuration")
     subparser.set_defaults(func=handle_validate)
 
 

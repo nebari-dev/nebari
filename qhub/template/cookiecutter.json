@@ -82,7 +82,7 @@
     },
 
     "_extensions": [
-        "qhub_ops.render.jinja.YamlifyExtension",
-        "qhub_ops.render.jinja.JsonifyExtension"
+        "qhub.render.jinja.YamlifyExtension",
+        "qhub.render.jinja.JsonifyExtension"
     ]
 }

@@ -461,13 +461,13 @@ environments:
 
 1. Create a repository
 
-2. Put configuration file in directory in name `qhub-ops-config.yaml`
+2. Put configuration file in directory in name `qhub-config.yaml`
 
 3. Initialize the qhub repository
 
 ```shell
-pip install qhub-ops
-qhub-ops render -c qhub-ops-config.yaml -o ./ -f
+pip install qhub
+qhub render -c qhub-config.yaml -o ./ -f
 ```
 
 This will initialize the repository and next proceed to

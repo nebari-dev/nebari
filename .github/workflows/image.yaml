@@ -5,7 +5,7 @@
 #     branches:
 #       - master
 #     paths:
-#       - "qhub_ops/template/{{ cookiecutter.repo_directory }}/image/**"
+#       - "qhub/template/{{ cookiecutter.repo_directory }}/image/**"
 #       - ".github/workflows/image.yaml"
 
 # jobs:
@@ -31,7 +31,7 @@
 #         env:
 #           IMAGE_NAME: 'quansight/qhub-${{ matrix.dockerfile }}'
 #           IMAGE_TAG: ${{ github.sha }}
-#         working-directory: "qhub_ops/template/{{ cookiecutter.repo_directory }}/image"
+#         working-directory: "qhub/template/{{ cookiecutter.repo_directory }}/image"
 #         run: |
 #           docker build -f "Dockerfile.${{ matrix.dockerfile }}" -t $IMAGE_NAME:$IMAGE_TAG .
 #           docker push $IMAGE_NAME:$IMAGE_TAG
