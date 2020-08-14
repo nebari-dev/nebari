@@ -1,3 +1,7 @@
-include VERSION
+include qhub VERSION
 graft qhub
-global-exclude *.py[cod] __pycache__ *.so
+prune home
+prune docs
+prune architecture
+prune .github
+global-exclude *.py[cod] __pycache__ *.so *.nix .envrc
