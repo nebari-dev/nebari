@@ -1,138 +1,138 @@
-name: "Tests"
+# name: "Tests"
 
-on:
-  push:
-    branches:
-      - master
-
-
-env:
-  TERRAFORM_VERSION: 0.12.24
+# on:
+#   push:
+#     branches:
+#       - master
 
 
-jobs:
-  test-general:
-    name: 'Test Package'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.6, 3.7, 3.8]
-    steps:
-      - name: 'Checkout Infastructure'
-        uses: actions/checkout@master
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install QHub
-        run: |
-          pip install .[dev]
-      - name: Black Formatting
-        run: |
-          black --check qhub_ops
-      - name: Flake8 Formatting
-        run: |
-          flake8
-      - name: Test QHub
-        run: |
-          pytest
+# env:
+#   TERRAFORM_VERSION: 0.12.24
 
 
-  test-digital-ocean:
-    name: 'Test Digital Ocean Deployment'
-    runs-on: ubuntu-latest
-    needs: test-general
-    steps:
-      - name: 'Checkout Infastructure'
-        uses: actions/checkout@master
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-      - name: Install QHub
-        run: |
-          pip install .[dev]
-      - name: Checkout Do Deployment Repository
-        run: |
-          mkdir -p $HOME/.ssh
-          echo "${SSH_KEY}" > $HOME/.ssh/id_rsa
-          chmod 600 $HOME/.ssh/id_rsa
-
-          git clone git@github.com:Quansight/qhub-automated-do-deployment.git qhub-do-deployment
-        env:
-          SSH_KEY: ${{ secrets.QHUB_AUTOMATED_DO_DEPLOYMENT_KEY }}
-      - name: Initialize configuration file
-        run: |
-          sed -i "s/CLIENT_ID/${CLIENT_ID}/" tests/assets/config_do.yaml
-          sed -i "s/CLIENT_SECRET/${CLIENT_SECRET}/" tests/assets/config_do.yaml
-        env:
-          CLIENT_ID: ${{ secrets.DO_OAUTH_CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.DO_OAUTH_CLIENT_SECRET }}
-      - name: QHub Build Digital Ocean Template
-        run: |
-          qhub-ops render -c tests/assets/config_do.yaml -o qhub-do-deployment -f
-      - name: 'Terraform Format'
-        uses: hashicorp/terraform-github-actions@master
-        with:
-          tf_actions_version: ${{ env.TERRAFORM_VERSION }}
-          tf_actions_subcommand: 'fmt'
-          tf_actions_working_dir: 'qhub-do-deployment'
-      - name: Push Changes to Do Deployment Repository
-        run: |
-          cd qhub-do-deployment
-          git config user.email "qhub-ops@quansight.com"
-          git config user.name "github action"
-          git add .
-          # only commit and push if we have changes
-          git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
-          cd ..
-        env:
-          COMMIT_MSG: |
-            qhub-ops automated commit: ${{ github.sha }}
-
-  test-amazon-web-services:
-    name: 'Test Amazon Web Services Deployment'
-    runs-on: ubuntu-latest
-    needs: test-general
-    steps:
-      - name: 'Checkout Infastructure'
-        uses: actions/checkout@master
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-      - name: Install QHub
-        run: |
-          pip install .[dev]
-      - name: QHub Build Amazon Web Services Template
-        run: |
-          qhub-ops render -c tests/assets/config_aws.yaml -o qhub-aws-deployment
-      - name: Amazon Web Services Artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: qhub-amazon-web-services-artifact
-          path: qhub-aws-deployment
+# jobs:
+#   test-general:
+#     name: 'Test Package'
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         python-version: [3.6, 3.7, 3.8]
+#     steps:
+#       - name: 'Checkout Infastructure'
+#         uses: actions/checkout@master
+#       - name: Set up Python
+#         uses: actions/setup-python@v1
+#         with:
+#           python-version: ${{ matrix.python-version }}
+#       - name: Install QHub
+#         run: |
+#           pip install .[dev]
+#       - name: Black Formatting
+#         run: |
+#           black --check qhub_ops
+#       - name: Flake8 Formatting
+#         run: |
+#           flake8
+#       - name: Test QHub
+#         run: |
+#           pytest
 
 
-  test-google-cloud-platform:
-    name: 'Test Google Cloud Platform Deployment'
-    runs-on: ubuntu-latest
-    needs: test-general
-    steps:
-      - name: 'Checkout Infastructure'
-        uses: actions/checkout@master
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-      - name: Install QHub
-        run: |
-          pip install .[dev]
-      - name: QHub Build Google Cloud Platform Template
-        run: |
-          qhub-ops render -c tests/assets/config_gcp.yaml -o qhub-gcp-deployment
-      - name: Google Cloud Platform Artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: qhub-google-cloud-platform-artifact
-          path: qhub-gcp-deployment
+#   test-digital-ocean:
+#     name: 'Test Digital Ocean Deployment'
+#     runs-on: ubuntu-latest
+#     needs: test-general
+#     steps:
+#       - name: 'Checkout Infastructure'
+#         uses: actions/checkout@master
+#       - name: Set up Python
+#         uses: actions/setup-python@v1
+#         with:
+#           python-version: 3.8
+#       - name: Install QHub
+#         run: |
+#           pip install .[dev]
+#       - name: Checkout Do Deployment Repository
+#         run: |
+#           mkdir -p $HOME/.ssh
+#           echo "${SSH_KEY}" > $HOME/.ssh/id_rsa
+#           chmod 600 $HOME/.ssh/id_rsa
+
+#           git clone git@github.com:Quansight/qhub-automated-do-deployment.git qhub-do-deployment
+#         env:
+#           SSH_KEY: ${{ secrets.QHUB_AUTOMATED_DO_DEPLOYMENT_KEY }}
+#       - name: Initialize configuration file
+#         run: |
+#           sed -i "s/CLIENT_ID/${CLIENT_ID}/" tests/assets/config_do.yaml
+#           sed -i "s/CLIENT_SECRET/${CLIENT_SECRET}/" tests/assets/config_do.yaml
+#         env:
+#           CLIENT_ID: ${{ secrets.DO_OAUTH_CLIENT_ID }}
+#           CLIENT_SECRET: ${{ secrets.DO_OAUTH_CLIENT_SECRET }}
+#       - name: QHub Build Digital Ocean Template
+#         run: |
+#           qhub-ops render -c tests/assets/config_do.yaml -o qhub-do-deployment -f
+#       - name: 'Terraform Format'
+#         uses: hashicorp/terraform-github-actions@master
+#         with:
+#           tf_actions_version: ${{ env.TERRAFORM_VERSION }}
+#           tf_actions_subcommand: 'fmt'
+#           tf_actions_working_dir: 'qhub-do-deployment'
+#       - name: Push Changes to Do Deployment Repository
+#         run: |
+#           cd qhub-do-deployment
+#           git config user.email "qhub-ops@quansight.com"
+#           git config user.name "github action"
+#           git add .
+#           # only commit and push if we have changes
+#           git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
+#           cd ..
+#         env:
+#           COMMIT_MSG: |
+#             qhub-ops automated commit: ${{ github.sha }}
+
+#   test-amazon-web-services:
+#     name: 'Test Amazon Web Services Deployment'
+#     runs-on: ubuntu-latest
+#     needs: test-general
+#     steps:
+#       - name: 'Checkout Infastructure'
+#         uses: actions/checkout@master
+#       - name: Set up Python
+#         uses: actions/setup-python@v1
+#         with:
+#           python-version: 3.8
+#       - name: Install QHub
+#         run: |
+#           pip install .[dev]
+#       - name: QHub Build Amazon Web Services Template
+#         run: |
+#           qhub-ops render -c tests/assets/config_aws.yaml -o qhub-aws-deployment
+#       - name: Amazon Web Services Artifact
+#         uses: actions/upload-artifact@v1
+#         with:
+#           name: qhub-amazon-web-services-artifact
+#           path: qhub-aws-deployment
+
+
+#   test-google-cloud-platform:
+#     name: 'Test Google Cloud Platform Deployment'
+#     runs-on: ubuntu-latest
+#     needs: test-general
+#     steps:
+#       - name: 'Checkout Infastructure'
+#         uses: actions/checkout@master
+#       - name: Set up Python
+#         uses: actions/setup-python@v1
+#         with:
+#           python-version: 3.8
+#       - name: Install QHub
+#         run: |
+#           pip install .[dev]
+#       - name: QHub Build Google Cloud Platform Template
+#         run: |
+#           qhub-ops render -c tests/assets/config_gcp.yaml -o qhub-gcp-deployment
+#       - name: Google Cloud Platform Artifact
+#         uses: actions/upload-artifact@v1
+#         with:
+#           name: qhub-google-cloud-platform-artifact
+#           path: qhub-gcp-deployment
