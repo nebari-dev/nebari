@@ -1,0 +1,88 @@
+name: "Docker Image Build"
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "image/**"
+      - ".github/workflows/image.yaml"
+
+jobs:
+  build:
+    name: QHub Build Dockerfile
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dockerfile:
+          - jupyterlab
+          - jupyterhub
+          - dask-worker
+    steps:
+      - name: 'Checkout Image'
+        uses: actions/checkout@master
+{% if cookiecutter.provider == "aws" %}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: {{ '${{ secrets.AWS_ACCESS_KEY_ID }}' }}
+          aws-secret-access-key: {{ '${{ secrets.AWS_SECRET_ACCESS_KEY }}' }}
+          aws-region: {{ '${{ secrets.AWS_DEFAULT_REGION }}' }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Docker Build, Tag, and Push Image
+        env:
+          IMAGE_TAG: {{ '${{ github.sha }}' }}
+          IMAGE_NAME: {{ '${{ steps.login-ecr.outputs.registry }}' }}/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
+        run: |
+          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
+          docker push $IMAGE_NAME:$IMAGE_TAG
+      - name: Logout of Amazon ECR
+        if: always()
+        run: docker logout {{ '${{ steps.login-ecr.outputs.registry }}' }}
+{% elif cookiecutter.provider == "gcp" %}
+      - name: Configure GCP Credentials
+        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '270.0.0'
+      - name: 'Add GCP Credentials'
+        run: |
+          echo "$GOOGLE_CREDENTIALS" > /tmp/service-account.json
+          gcloud auth activate-service-account --key-file=/tmp/service-account.json
+        env:
+          GOOGLE_CREDENTIALS: {{ '${{ secrets.GOOGLE_CREDENTIALS }}' }}
+      - name: Add GCP Docker Credentials
+        run: |
+          gcloud auth configure-docker
+      - name: Docker Build, Tag, and Push Image
+        env:
+          IMAGE_TAG: {{ '${{ github.sha }}' }}
+          PROJECT_ID: {{ '${{ secrets.PROJECT_ID }}' }}
+        run: |
+          export IMAGE_NAME="gcr.io/$PROJECT_ID/{{ cookiecutter.project_name }}/qhub-{{ '${{ matrix.dockerfile }}' }}"
+          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
+          docker push $IMAGE_NAME:$IMAGE_TAG
+      - name: Docker Logout
+        run: |
+          docker logout
+{% elif cookiecutter.provider == "do" %}
+      - name: Docker Login
+        run: |
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+        env:
+          DOCKER_USERNAME: {{ '${{ secrets.docker_username }}' }}
+          DOCKER_PASSWORD: {{ '${{ secrets.docker_password }}' }}
+      - name: Docker Build, Tag, and Push Image
+        env:
+          IMAGE_TAG: {{ '${{ github.sha }}' }}
+          # due to digitalocean not having a public container registry (beta)
+          # https://www.digitalocean.com/products/container-registry/
+          IMAGE_NAME: quansight/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
+        run: |
+          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
+          docker push $IMAGE_NAME:$IMAGE_TAG
+      - name: Docker Logout
+        run: |
+          docker logout
+{% endif %}

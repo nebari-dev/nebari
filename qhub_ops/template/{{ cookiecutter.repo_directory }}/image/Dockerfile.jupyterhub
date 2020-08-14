@@ -1,0 +1,22 @@
+FROM jupyterhub/k8s-hub:0.9.0
+LABEL MAINTAINER="Quansight"
+
+# ============ download qhub theme ============
+USER root
+
+ARG THEME_OWNER="Quansight"
+ARG THEME_REPO="qhub-jupyterhub-theme"
+ARG THEME_REV="048bdadc612a52b87b7d474d408f13c6865c6916"
+
+RUN cd /opt && \
+    curl -L "https://github.com/${THEME_OWNER}/${THEME_REPO}/archive/${THEME_REV}.tar.gz" -o theme.tar.gz \
+    && tar -xf theme.tar.gz \
+    && mkdir -p /usr/local/share/jupyterhub/custom_templates \
+    && mkdir -p /usr/local/share/jupyterhub/static/extra-assets \
+    && cp -r "/opt/${THEME_REPO}-${THEME_REV}/templates/." /usr/local/share/jupyterhub/custom_templates/ \
+    && cp -r "/opt/${THEME_REPO}-${THEME_REV}/extra-assets/." /usr/local/share/jupyterhub/static/extra-assets/ \
+    && rm -rf "/opt/theme.tar.gz" "/opt/${THEME_REPO}-${THEME_REV}"
+
+
+WORKDIR /srv/jupyterhub
+USER ${NB_USER}

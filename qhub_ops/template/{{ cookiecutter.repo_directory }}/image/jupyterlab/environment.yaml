@@ -1,0 +1,32 @@
+# general
+pip
+
+# jupyterhub/jupyterlab
+nb_conda_kernels
+ipython > 7
+jupyter-server-proxy
+jupyterlab-git
+ipywidgets
+jupyterlab >= 2
+jupyter_client
+jupyter_console
+jupyterhub
+nodejs >= 10
+nbconvert
+nbval
+dask_labextension
+
+# viz tools
+panel
+param
+python-graphviz
+
+# testing, docs, linting
+pytest
+hypothesis
+flake8
+sphinx
+pytest-cov
+black
+isort
+importnb
