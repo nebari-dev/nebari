@@ -62,9 +62,9 @@ class Provider(Base):
 
 class KubeSpawner(pydantic.BaseModel):
     cpu_limit: int
-    cpu_guarentee: int
+    cpu_guarantee: int
     mem_limit: str
-    mem_guarentee: str
+    mem_guarantee: str
     image: str
 
     class Config:
@@ -74,16 +74,16 @@ class KubeSpawner(pydantic.BaseModel):
                 examples=[
                     KubeSpawner(
                         cpu_limit=1,
-                        cpu_guarentee=1,
+                        cpu_guarantee=1,
                         mem_limit="1G",
-                        mem_guarentee="1G",
+                        mem_guarantee="1G",
                         image="quansight/qhub-jupyterlab:398e040a7d26bcc1d04fc3576f452bfa261032bc",
                     ).dict(),
                     KubeSpawner(
                         cpu_limit=1.5,
-                        cpu_guarentee=1.25,
+                        cpu_guarantee=1.25,
                         mem_limit="2G",
-                        mem_guarentee="2G",
+                        mem_guarantee="2G",
                         image="quansight/qhub-jupyterlab:398e040a7d26bcc1d04fc3576f452bfa261032bc",
                     ).dict(),
                 ]

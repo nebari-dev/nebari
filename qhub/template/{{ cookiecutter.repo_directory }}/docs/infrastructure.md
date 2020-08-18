@@ -47,7 +47,7 @@ investigated).
 {% elif cookiecutter.provider == 'do' %}
 
 DigitalOcean has a single limitation on autoscaling that the min size
-must be at least 1. Nodes take around 1 minute to apear within the
+must be at least 1. Nodes take around 1 minute to appear within the
 node group.
 
 {% elif cookiecutter.provider == 'gcp' %}
