@@ -24,7 +24,7 @@ module "kubernetes-nfs-mount" {
 
   name         = "nfs-mount"
   namespace    = var.environment
-  nfs_capacity = "{{ cookiecutter.storage.shared_filesytem }}"
+  nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.efs.credentials.dns_name
   dependencies = [
     module.kubernetes-initialization.depended_on
@@ -36,7 +36,7 @@ module "kubernetes-nfs-server" {
 
   name         = "nfs-server"
   namespace    = var.environment
-  nfs_capacity = "{{ cookiecutter.storage.shared_filesytem }}"
+  nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
 }
 
 module "kubernetes-nfs-mount" {
@@ -44,7 +44,7 @@ module "kubernetes-nfs-mount" {
 
   name         = "nfs-mount"
   namespace    = var.environment
-  nfs_capacity = "{{ cookiecutter.storage.shared_filesytem }}"
+  nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.kubernetes-nfs-server.endpoint_ip
 }
 {% endif %}

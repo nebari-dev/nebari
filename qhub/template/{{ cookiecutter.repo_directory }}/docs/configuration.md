@@ -206,7 +206,7 @@ storage!
 ```yaml
 storage:
   conda_store: 20Gi
-  shared_filesytem: 10Gi
+  shared_filesystem: 10Gi
 ```
 
 ## Profiles
@@ -226,17 +226,17 @@ profiles:
       default: true
       kubespawner_override:
         cpu_limit: 1
-        cpu_guarentee: 1
+        cpu_guarantee: 1
         mem_limit: 1G
-        mem_guarentee: 1G
+        mem_guarantee: 1G
         image: "quansight/qhub-jupyterlab:38a3c917e772112a07ed620f46b23ac5f62616e0"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       kubespawner_override:
         cpu_limit: 1.5
-        cpu_guarentee: 1.25
+        cpu_guarantee: 1.25
         mem_limit: 2G
-        mem_guarentee: 2G
+        mem_guarantee: 2G
         image: "quansight/qhub-jupyterlab:38a3c917e772112a07ed620f46b23ac5f62616e0"
 
   dask_worker:
@@ -312,7 +312,7 @@ please include it in the definition. One current requirement is that
 each environment include `ipykernel`, `ipywidgets`, `dask==2.14.0`,
 `distributed==2.14.0`, `dask-gateway==0.6.1`. Upon changing the
 environment definition expect 1-10 minutes upon deployment of the
-configuration for the environment to apear.
+configuration for the environment to appear.
 
 # Example Full Configuration
 
@@ -392,18 +392,18 @@ profiles:
         - admin
       kubespawner_override:
         cpu_limit: 1
-        cpu_guarentee: 1
+        cpu_guarantee: 1
         mem_limit: 1G
-        mem_guarentee: 1G
+        mem_guarantee: 1G
         image: "quansight/qhub-jupyterlab:38a3c917e772112a07ed620f46b23ac5f62616e0"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       default: true
       kubespawner_override:
         cpu_limit: 1.5
-        cpu_guarentee: 1.25
+        cpu_guarantee: 1.25
         mem_limit: 2G
-        mem_guarentee: 2G
+        mem_guarantee: 2G
         image: "quansight/qhub-jupyterlab:38a3c917e772112a07ed620f46b23ac5f62616e0"
 
   dask_worker:

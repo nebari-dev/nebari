@@ -69,18 +69,18 @@ profiles:
         - admin
       kubespawner_override:
         cpu_limit: 1
-        cpu_guarentee: 1
+        cpu_guarantee: 1
         mem_limit: 1G
-        mem_guarentee: 1G
+        mem_guarantee: 1G
         image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       default: true
       kubespawner_override:
         cpu_limit: 1.5
-        cpu_guarentee: 1.25
+        cpu_guarantee: 1.25
         mem_limit: 2G
-        mem_guarentee: 2G
+        mem_guarantee: 2G
         image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
 
   dask_worker:
