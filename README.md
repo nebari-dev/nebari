@@ -29,8 +29,9 @@ actions when the configuration is changed.
 
 ```bash
 mkdir <repository-name>
-# mv <config-filename> <repository-name>/qhub-config.yaml
-qhub render -c <repository-name>/qhub-config.yaml -o <repository-name>/ --force
+# mv <config-filename> <repository-name>/qhub-ops-config.yaml
+qhub validate <repository-name>/qhub-ops-config.yaml
+qhub render -c <repository-name>/qhub-ops-config.yaml -o <repository-name>/ --force
 ```
 
 After initialising the provider templates, follow the instructions in
