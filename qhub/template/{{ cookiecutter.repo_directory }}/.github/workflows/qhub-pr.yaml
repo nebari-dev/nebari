@@ -1,11 +1,11 @@
-name: "qhub auto update"
+name: "qhub validate"
 
 on:
   pull_request:
     branches:
       - master
     paths:
-      - "qhub-config.yaml"
+      - "qhub-ops-config.yaml"
 
 jobs:
   build:

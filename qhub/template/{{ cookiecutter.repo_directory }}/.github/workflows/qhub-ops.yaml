@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - "qhub-config.yaml"
+      - "qhub-ops-config.yaml"
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
           pip install qhub
       - name: Render Changes to Template
         run: |
-          qhub render -c qhub-config.yaml -o ./ -f
+          qhub render -c qhub-ops-config.yaml -o ./ -f
       - name: Push Changes
         run: |
           git config user.email "qhub@quansight.com"
@@ -35,4 +35,4 @@ jobs:
           git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
         env:
           COMMIT_MSG: |
-            qhub-config.yaml automated commit: {{ '${{ github.sha }}' }}
+            qhub-ops-config.yaml automated commit: {{ '${{ github.sha }}' }}
