@@ -1,10 +1,10 @@
 # QHub Documentation
 
-![quansight_logo](https://avatars0.githubusercontent.com/u/34879953?v=4&s=100)
+[![quansight_logo](https://avatars0.githubusercontent.com/u/34879953?v=4&s=100)](https://www.quansight.com/)
 
 > Open source tooling for data science research, development, and deployment.
 
-QHub is an integrated data science environment designed and developed by scientists at Quansight. QHub enables teams to build and maintain a cost effective and scalable compute/data science platform in the cloud. It provides an [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) platform that streamlines the deployment of data science infrastructure for teams.
+QHub is an integrated data science environment designed and developed by scientists at [**Quansight**](https://www.quansight.com/). QHub enables teams to build and maintain a cost effective and scalable compute/data science platform in the cloud. It provides an [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) platform that streamlines the deployment of data science infrastructure for teams.
 
 ## QHub is for Teams
 
