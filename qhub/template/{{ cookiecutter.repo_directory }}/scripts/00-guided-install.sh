@@ -13,10 +13,9 @@ if [ ! -f "$(command -v terraform)" ]; then
     exit 1
 fi
 
-# 02 Check version of Terraform
-if ! terraform --version | grep -q "v0.12.24"; then
-	echo "Error: Please install Terraform v0.12.24"
-	exit 1
+if [[ "$(terraform version | grep -oP "(?<=Terraform v0\.)\d+")" -lt "12" ]]; then
+    echo "ERROR: Please install Terraform v0.12 or greater"
+    exit 1
 fi
 
 # 03 Check Environment Variables
