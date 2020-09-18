@@ -20,16 +20,19 @@ fi
 
 # 03 Check Environment Variables
 {% if cookiecutter.provider == 'gcp' %}
-if [[ -v GOOGLE_CREDENTIALS ]] || [[ -v PROJECT_ID ]]; then
-    echo "Environment variables required for GCP (GOOGLE_CREDENTIALS, PROJECT_ID) must be set"
+if [[ ! -v GOOGLE_CREDENTIALS ]] || [[ ! -v PROJECT_ID ]]; then
+    echo "ERROR: Environment variables required for GCP (GOOGLE_CREDENTIALS, PROJECT_ID) must be set"
+    exit 1
 fi
 {% elif cookiecutter.provider == 'aws' %}
-if [[ -v AWS_ACCESS_KEY_ID ]] || [[ -v AWS_SECRET_ACCESS_KEY ]] || [[ -v AWS_DEFAULT_REGION ]]; then
-    echo "Environment variables required for AWS (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION) must be set"
+if [[ ! -v AWS_ACCESS_KEY_ID ]] || [[ ! -v AWS_SECRET_ACCESS_KEY ]] || [[ ! -v AWS_DEFAULT_REGION ]]; then
+    echo "ERROR: Environment variables required for AWS (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION) must be set"
+    exit 1
 fi
 {% elif cookiecutter.provider == 'do' %}
-if [[ -v AWS_ACCESS_KEY_ID ]] || [[ -v AWS_SECRET_ACCESS_KEY ]] || [[ -v SPACES_ACCESS_KEY_ID ]] || [[ -v SPACES_SECRET_ACCESS_KEY ]] || [[ -v DIGITALOCEAN_TOKEN ]]; then
-    echo "Environment variables required for DO (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, SPACES_ACCESS_KEY_ID, SPACES_SECRET_ACCESS_KEY, DIGITALOCEAN_TOKEN) must be set"
+if [[ ! -v AWS_ACCESS_KEY_ID ]] || [[ ! -v AWS_SECRET_ACCESS_KEY ]] || [[ ! -v SPACES_ACCESS_KEY_ID ]] || [[ ! -v SPACES_SECRET_ACCESS_KEY ]] || [[ ! -v DIGITALOCEAN_TOKEN ]]; then
+    echo "ERROR: Environment variables required for DO (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, SPACES_ACCESS_KEY_ID, SPACES_SECRET_ACCESS_KEY, DIGITALOCEAN_TOKEN) must be set"
+    exit 1
 fi
 {% endif %}
 
