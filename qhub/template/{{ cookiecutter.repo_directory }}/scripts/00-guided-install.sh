@@ -13,7 +13,7 @@ if [ ! -f "$(command -v terraform)" ]; then
     exit 1
 fi
 
-if [[ "$(terraform version | grep -oP "(?<=Terraform v0\.)\d+")" -lt "12" ]]; then
+if [[ "$(terraform version | sed -n "s/Terraform v0\.\([0-9]\+\)\.[0-9]\+/\1/p")" -lt "12" ]]; then
     echo "ERROR: Please install Terraform v0.12 or greater"
     exit 1
 fi
