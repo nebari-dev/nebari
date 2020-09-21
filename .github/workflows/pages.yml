@@ -14,6 +14,7 @@ jobs:
         pip install sphinx
         pip install -rdocs/requirements.txt
         sphinx-build docs build
+        echo qhub.dev > build/CNAME
     - name: Build and Deploy
       uses: JamesIves/github-pages-deploy-action@master
       env:
