@@ -1,5 +1,6 @@
 import pathlib
 import collections
+import os
 import json
 
 import yaml
@@ -67,6 +68,32 @@ def deep_merge(d1, d2):
         return d1
 
 
+def add_env_variables(config):
+    """
+    Replaces any value in a dictionary that contains 'QHUB_' with the environment variable
+    of the same name with QHUB_ stripped out.
+
+    >>> os.environ['client_id'] = 'id_123'
+    os.environ['client_secret'] = 'secret_456'
+
+    config = {
+        'client_id': 'QHUB_client_id',
+        'client_secret': 'QHUB_client_secret'
+    }
+
+    add_env_variables(config)
+
+    >>> print(config)
+    {'client_id': 'id_123', 'client_secret': 'secret_456'}
+    """
+    for key, value in config.items():
+        if type(value) is dict:
+            add_env_variables(value)
+        else:
+            if "QHUB_" in str(value):
+                config[key] = os.environ[key.lstrip("QHUB_")]
+
+
 def render_default_template(output_directory, config_filename=None, force=False):
     import qhub
 
@@ -101,6 +128,7 @@ def render_template(
         with filename.open() as f:
             config = yaml.safe_load(f)
             config["repo_directory"] = repo_directory
+            add_env_variables(config)
             patch_dask_gateway_extra_config(config)
 
         with (input_directory / "cookiecutter.json").open() as f:
