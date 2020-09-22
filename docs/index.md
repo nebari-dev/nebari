@@ -1,6 +1,6 @@
 # QHub Documentation
 
-[![quansight_logo](https://avatars0.githubusercontent.com/u/34879953?v=4&s=100)](https://www.quansight.com/) 
+[![quansight_logo](https://avatars0.githubusercontent.com/u/34879953?v=4&s=100)](https://www.quansight.com/)
 
 > Open source tooling for data science research, development, and deployment.
 
