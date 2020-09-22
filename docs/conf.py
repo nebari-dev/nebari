@@ -38,15 +38,15 @@ html_theme_options = {
     # Set the name of the project to appear in the navigation.
     "nav_title": "Q|Hub",
     # Set you GA account ID to enable tracking
-    #'google_analytics_account': 'UA-XXXXX',
+    # 'google_analytics_account': 'UA-XXXXX',
     # Specify a base_url used to generate sitemap.xml. If not
     # specified, then no sitemap will be built.
-    "base_url": "https://qhub.readthedocs.io/",
+    "base_url": "https://qhub.dev/",
     # Set the color and the accent color
     "color_primary": THEME_COLOR,
     "color_accent": "light-yellow",
     # Set the repo location to get a badge with stats
-    "repo_url": "https://github.com/Quansight/qhub-ops",
+    "repo_url": "https://github.com/Quansight/qhub",
     "repo_name": "Q|Hub",
     # Visible levels of the global TOC; -1 means unlimited
     "globaltoc_depth": 1,
@@ -55,13 +55,13 @@ html_theme_options = {
     # If True, show hidden TOC entries
     "globaltoc_includehidden": False,
     "nav_links": [
-        {"href": "index", "title": "Q|Hub Home", "internal": True,},
+        {"href": "index", "title": "Q|Hub Home", "internal": True, },
         {
-            "href": "https://quansight.github.io/qhub-home/",
+            "href": "https://qhub.dev/",
             "title": "News",
             "internal": False,
         },
-        {"href": "docs/faqs", "title": "FAQ", "internal": True,},
+        {"href": "docs/faqs", "title": "FAQ", "internal": True, },
     ],
 }
 html_sidebars = {
