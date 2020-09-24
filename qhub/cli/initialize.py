@@ -10,24 +10,28 @@ def create_init_subcommand(subparser):
 
 
 def handle_init(args):
+    platform = args.platform
     import pathlib
-    from shutil import copyfile
-
     import qhub
 
-    platform = args.platform
     config_dir = pathlib.Path(qhub.__file__).parent / "template/configs/"
 
     if platform == "aws":
         print("Generating QHub configuration for AWS")
-        copyfile(path.join(config_dir, "config_aws.yaml"), "qhub-ops-config.yaml")
+        generate_qhub_config(path.join(config_dir, "config_aws.yaml"))
     elif platform == "gcp":
         print("Generating QHub configuration for GCP")
-        copyfile(path.join(config_dir, "config_gcp.yaml"), "qhub-ops-config.yaml")
+        generate_qhub_config(path.join(config_dir, "config_gcp.yaml"))
     elif platform == "do":
         print("Generating QHub configuration for Digital Ocean")
-        copyfile(path.join(config_dir, "config_do.yaml"), "qhub-ops-config.yaml")
+        generate_qhub_config(path.join(config_dir, "config_do.yaml"))
     elif platform == "azure":
         print("Work in Progress")
     else:
         print("Only aws | gcp | do are supported!")
+
+
+def generate_qhub_config(config_file, out="qhub-ops-config.yaml"):
+    from shutil import copyfile
+
+    copyfile(config_file, out)
