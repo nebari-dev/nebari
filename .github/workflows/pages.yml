@@ -1,4 +1,7 @@
-on: [push]
+on: 
+  push:
+    branches: 
+    - master
 jobs:
   run:
     runs-on: ubuntu-18.04
@@ -14,6 +17,8 @@ jobs:
         pip install sphinx
         pip install -rdocs/requirements.txt
         sphinx-build docs build
+        echo qhub.dev > build/CNAME
+        touch build/.nojekyll
     - name: Build and Deploy
       uses: JamesIves/github-pages-deploy-action@master
       env:
