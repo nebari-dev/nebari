@@ -20,13 +20,13 @@ def handle_init(args):
     config_dir = pathlib.Path(qhub.__file__).parent / "template/configs/"
 
     if platform == "aws":
-        print("Generating config for AWS")
+        print("Generating QHub configuration for AWS")
         copyfile(path.join(config_dir, "config_aws.yaml"), "qhub-ops-config.yaml")
     elif platform == "gcp":
-        print("Generating config for GCP")
+        print("Generating QHub configuration for GCP")
         copyfile(path.join(config_dir, "config_gcp.yaml"), "qhub-ops-config.yaml")
     elif platform == "do":
-        print("Generating config for Digital Ocean")
+        print("Generating QHub configuration for Digital Ocean")
         copyfile(path.join(config_dir, "config_do.yaml"), "qhub-ops-config.yaml")
     elif platform == "azure":
         print("Work in Progress")
