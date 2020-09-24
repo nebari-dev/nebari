@@ -33,7 +33,8 @@ module "kubernetes" {
       instance_type = "{{ nodegroup_config.instance }}"
       min_size      = {{ nodegroup_config.min_nodes }}
       max_size      = {{ nodegroup_config.max_nodes }}
-      {% if ((cookiecutter.gpu_enabled) * (nodegroup.name == "user")) == 1 %}
+    {% if cookiecutter.gpu_enabled is defined %}
+    {% if ((cookiecutter.gpu_enabled) * (nodegroup == "user")) == 1 %}
       guest_accelerators = [
         {% for accelerator in nodegroup_config.guest_accelerators %}
           {
@@ -42,6 +43,7 @@ module "kubernetes" {
           }
         {% endfor %}
       ]
+      {% endif %}
       {% endif %}
     },
 {% endfor %}
