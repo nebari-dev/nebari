@@ -101,6 +101,7 @@ def render_template(
         with filename.open() as f:
             config = yaml.safe_load(f)
             config["repo_directory"] = repo_directory
+            config["run_directory"] = pathlib.Path.cwd()
             patch_dask_gateway_extra_config(config)
 
         with (input_directory / "cookiecutter.json").open() as f:

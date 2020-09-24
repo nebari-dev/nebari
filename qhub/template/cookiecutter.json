@@ -10,6 +10,7 @@
     "profiles": null,
     "environments": null,
     "storage": null,
+    "patches": [],
 
     "digital_ocean": {
         "region": null,

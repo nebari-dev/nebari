@@ -1,0 +1,39 @@
+diff --git a/infrastructure/do.tf b/infrastructure/do.tf
+index 5284b90..9f12a42 100644
+--- a/infrastructure/do.tf
++++ b/infrastructure/do.tf
+@@ -7,7 +7,7 @@ module "kubernetes" {
+   name = local.cluster_name
+ 
+   region             = var.region
+-  kubernetes_version = "1.16.6-do.2"
++  kubernetes_version = "this-s-not-a-version"
+ 
+   node_groups = [
+ 
+diff --git a/infrastructure/kubernetes.tf b/infrastructure/kubernetes.tf
+index 762d937..61bfaf4 100644
+--- a/infrastructure/kubernetes.tf
++++ b/infrastructure/kubernetes.tf
+@@ -21,7 +21,7 @@ module "kubernetes-nfs-server" {
+ 
+   name         = "nfs-server"
+   namespace    = var.environment
+-  nfs_capacity = "10Gi"
++  nfs_capacity = "99999999Gi"
+ }
+ 
+ module "kubernetes-nfs-mount" {
+diff --git a/infrastructure/variables.tf b/infrastructure/variables.tf
+index 5a0201d..3672cdb 100644
+--- a/infrastructure/variables.tf
++++ b/infrastructure/variables.tf
+@@ -11,7 +11,7 @@ variable "environment" {
+ 
+ variable "region" {
+   type    = string
+-  default = "nyc3"
++  default = "not-a-region"
+ }
+ # jupyterhub
+ variable "endpoint" {
