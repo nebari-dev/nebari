@@ -25,8 +25,6 @@ security:
     admin:
       gid: 1001
 
-gpu_enabled: true
-
 google_cloud_platform:
   project: test-test-test
   region: us-central1
