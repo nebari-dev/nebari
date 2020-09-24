@@ -12,7 +12,6 @@ def create_init_subcommand(subparser):
 def handle_init(args):
     import pathlib
     from shutil import copyfile
-    import yaml
 
     import qhub
 
