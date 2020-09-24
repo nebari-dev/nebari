@@ -33,6 +33,9 @@ module "kubernetes" {
       instance_type = "{{ nodegroup_config.instance }}"
       min_size      = {{ nodegroup_config.min_nodes }}
       max_size      = {{ nodegroup_config.max_nodes }}
+{% if "preemptible" in nodegroup_config %}
+      preemptible   = {{ "true" if nodegroup_config.preemptible else "false" }}
+{% endif %}
     },
 {% endfor %}
   ]
