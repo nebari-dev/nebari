@@ -10,3 +10,6 @@ git openssh-client
 
 # editors
 nano
+
+#opencv
+libgl1-mesa-glx
