@@ -1,11 +1,11 @@
 from os import path
 
-from qhub.render import render_default_template, render_template
-from qhub.schema import verify
 
 def create_init_subcommand(subparser):
     subparser = subparser.add_parser("init")
-    subparser.add_argument("platform", help="Cloud platform where QHub needs to deployed!", type=str)
+    subparser.add_argument(
+        "platform", help="Cloud platform where QHub needs to deployed!", type=str
+    )
     subparser.set_defaults(func=handle_init)
 
 
