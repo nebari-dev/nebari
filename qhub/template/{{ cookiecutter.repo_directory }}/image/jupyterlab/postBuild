@@ -12,8 +12,6 @@ jupyter labextension install --clean \
         jupyterlab-videochat \
         @jupyterlab/toc
 
-# FIXME: Move this when environment.yml supports installing from pip
-pip install --no-cache jupyter-videochat
 jupyter serverextension enable --sys-prefix jupyter_videochat
 
 # ====== cleanup labextension install =======
