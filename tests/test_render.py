@@ -9,6 +9,7 @@ from qhub.render import render_default_template
         "qhub/template/configs/config_aws.yaml",
         "qhub/template/configs/config_gcp.yaml",
         "qhub/template/configs/config_do.yaml",
+        "tests/assets/config_gcp_gpu.yaml",
     ],
 )
 def test_render(config_filename, tmp_path):

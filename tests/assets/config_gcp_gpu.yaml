@@ -81,25 +81,25 @@ profiles:
         mem_guarantee: 3.5G
         image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
     - display_name: Large Instance
-        description: Stable environment with 1.5 cpu / 2 GB ram
-        kubespawner_override:
-          cpu_limit: 2
-          cpu_guarantee: 2
-          mem_limit: 7G
-          mem_guarantee: 7G
-          image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+      description: Stable environment with 1.5 cpu / 2 GB ram
+      kubespawner_override:
+        cpu_limit: 2
+        cpu_guarantee: 2
+        mem_limit: 7G
+        mem_guarantee: 7G
+        image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
     - display_name: GPU Instance
-        description: Stable environment with 1 Nvidia GPU
-        kubespawner_override:
-          image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
-          cpu_limit: 2
-          cpu_guarantee: 2
-          mem_limit: 7G
-          mem_guarantee: 7G
-          node_selector:
-            "cloud.google.com/gke-nodepool": "user-gpu"
-          extra_resource_limits:
-            nvidia.com/gpu: 1
+      description: Stable environment with 1 Nvidia GPU
+      kubespawner_override:
+        image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+        cpu_limit: 2
+        cpu_guarantee: 2
+        mem_limit: 7G
+        mem_guarantee: 7G
+        node_selector:
+          "cloud.google.com/gke-nodepool": "user-gpu"
+        extra_resource_limits:
+          nvidia.com/gpu: 1
 
   dask_worker:
     "Small Worker":
