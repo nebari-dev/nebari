@@ -1,6 +1,6 @@
 import pytest
 
-import qhub.schema
+from qhub.cli.initialize import generate_qhub_config
 
 
 @pytest.mark.parametrize(
@@ -11,10 +11,7 @@ import qhub.schema
         "qhub/template/configs/config_do.yaml",
     ],
 )
-def test_validation(config_filename):
-    import yaml
+def test_init(config_filename, tmp_path):
+    out = tmp_path / "test"
 
-    with open(config_filename) as f:
-        data = yaml.safe_load(f.read())
-
-    assert qhub.schema.verify(data) is None
+    generate_qhub_config(config_filename, out)
