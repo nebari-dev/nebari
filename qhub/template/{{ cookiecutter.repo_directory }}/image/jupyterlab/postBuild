@@ -27,4 +27,4 @@ cp /opt/jupyterlab/ipython_config.py /etc/ipython/ipython_config.py
 
 # ====== setup juypterlab configuration overrides ======
 mkdir -p /opt/conda/share/jupyter/lab/settings
-cp overrides.json /opt/conda/share/jupyter/lab/settings
+cp /opt/jupyterlab/overrides.json /opt/conda/share/jupyter/lab/settings
