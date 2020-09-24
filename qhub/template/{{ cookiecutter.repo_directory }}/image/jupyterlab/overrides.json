@@ -56,7 +56,7 @@
       ],
       ":root": {
         "--jp-code-font-family": "'Fira Code Medium', var(--jp-code-font-family-default)",
-        "--jp-content-font-family": "'Libre Baskerville', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
+        "--jp-content-font-family": "'Libre Baskerville', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'"
       }
     }
   }
