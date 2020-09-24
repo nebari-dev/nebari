@@ -33,6 +33,14 @@ module "kubernetes" {
       instance_type = "{{ nodegroup_config.instance }}"
       min_size      = {{ nodegroup_config.min_nodes }}
       max_size      = {{ nodegroup_config.max_nodes }}
+    {% if nodegroup == "user_gpu" %}
+      guest_accelerators = [
+        {
+          type  = "{{ nodegroup.gpu }}"
+          count = {{ cookiecutter.gpu_count }}
+        }
+      ]
+    {% endif %}
     },
 {% endfor %}
   ]
