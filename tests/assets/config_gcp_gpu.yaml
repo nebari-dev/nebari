@@ -25,8 +25,7 @@ security:
     admin:
       gid: 1001
 
-gpu:
-  enabled: true
+gpu_enabled: true
 
 google_cloud_platform:
   project: test-test-test
@@ -43,12 +42,9 @@ google_cloud_platform:
       instance: n1-standard-2
       min_nodes: 0
       max_nodes: 2
-    user_gpu:
-        instance: n1-standard-2
-        min_nodes: 0
-        max_nodes: 2
-        gpu: nvidia-tesla-p4
-        gpu_count: 1
+      accelerators:
+        name: nvidia-tesla-p4
+        count: 1        
     worker:
       instance: n1-standard-2
       min_nodes: 0
@@ -69,23 +65,35 @@ profiles:
       description: Stable environment with 1 cpu / 1 GB ram
       default: true
       kubespawner_override:
-        cpu_limit: 1
-        cpu_guarantee: 1
-        mem_limit: 1G
-        mem_guarantee: 1G
+        cpu_limit: 0.5
+        cpu_guarantee: 0.5
+        mem_limit: 1.7G
+        mem_guarantee: 1.7G
         image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       kubespawner_override:
-        cpu_limit: 1.5
-        cpu_guarantee: 1.25
-        mem_limit: 2G
-        mem_guarantee: 2G
+        cpu_limit: 1
+        cpu_guarantee: 1
+        mem_limit: 3.5G
+        mem_guarantee: 3.5G
         image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+    - display_name: Large Instance
+        description: Stable environment with 1.5 cpu / 2 GB ram
+        kubespawner_override:
+          cpu_limit: 2
+          cpu_guarantee: 2
+          mem_limit: 7G
+          mem_guarantee: 7G
+          image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
     - display_name: GPU Instance
         description: Stable environment with 1 Nvidia GPU
         kubespawner_override:
           image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+          cpu_limit: 2
+          cpu_guarantee: 2
+          mem_limit: 7G
+          mem_guarantee: 7G
           extra_resource_limits: 
             nvidia.com/gpu: 1
 
@@ -93,14 +101,14 @@ profiles:
     "Small Worker":
       worker_cores_limit: 1
       worker_cores: 1
-      worker_memory_limit: 1G
-      worker_memory: 1G
+      worker_memory_limit: 3.5G
+      worker_memory: 3.5G
       image: "quansight/qhub-dask-worker:4c8c28332be1fde32f786c54a5961b5f3d789e16"
     "Medium Worker":
-      worker_cores_limit: 1.5
-      worker_cores: 1.25
-      worker_memory_limit: 2G
-      worker_memory: 2G
+      worker_cores_limit: 2
+      worker_cores: 2
+      worker_memory_limit: 7G
+      worker_memory: 7G
       image: "quansight/qhub-dask-worker:4c8c28332be1fde32f786c54a5961b5f3d789e16"
 
 
