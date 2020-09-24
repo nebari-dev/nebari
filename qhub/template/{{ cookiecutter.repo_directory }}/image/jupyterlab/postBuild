@@ -11,7 +11,7 @@ jupyter labextension install --clean \
         @pyviz/jupyterlab_pyviz \
         jupyterlab-videochat \
         @jupyterlab/toc
-        
+
 # FIXME: Move this when environment.yml supports installing from pip
 pip install --no-cache jupyter-videochat
 jupyter serverextension enable --sys-prefix jupyter_videochat
@@ -26,5 +26,5 @@ mkdir /etc/ipython
 cp /opt/jupyterlab/ipython_config.py /etc/ipython/ipython_config.py
 
 # ====== setup juypterlab configuration overrides ======
-mkdir -p ${NB_PYTHON_PREFIX}/share/jupyter/lab/settings
-cp overrides.json ${NB_PYTHON_PREFIX}/share/jupyter/lab/settings
+mkdir -p /opt/conda/share/jupyter/lab/settings
+cp overrides.json /opt/conda/share/jupyter/lab/settings
