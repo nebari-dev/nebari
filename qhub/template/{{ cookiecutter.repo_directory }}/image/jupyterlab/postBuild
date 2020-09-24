@@ -9,7 +9,8 @@ jupyter labextension install --clean \
         @jupyter-widgets/jupyterlab-manager \
         dask-labextension \
         @pyviz/jupyterlab_pyviz \
-        jupyterlab-videochat
+        jupyterlab-videochat \
+        @jupyterlab/toc
         
 # FIXME: Move this when environment.yml supports installing from pip
 pip install --no-cache jupyter-videochat
