@@ -4,6 +4,7 @@ import sys
 from os import path
 
 from qhub.cli.deploy import create_deploy_subcommand
+from qhub.cli.initialize import create_init_subcommand
 from qhub.cli.render import create_render_subcommand
 from qhub.cli.validate import create_validate_subcommand
 
@@ -23,6 +24,7 @@ def cli(args):
     subparser = parser.add_subparsers(help=f"QHub Ops - {version}")
     create_deploy_subcommand(subparser)
     create_render_subcommand(subparser)
+    create_init_subcommand(subparser)
     create_validate_subcommand(subparser)
 
     args = parser.parse_args(args)
