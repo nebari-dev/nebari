@@ -85,3 +85,11 @@ variable "dask-worker-image" {
     tag  = "{{ cookiecutter.default_images.dask_worker.split(':')[1] }}"
   }
 }
+
+{% if cookiecutter.prefect is defined %}
+{% if cookiecutter.prefect %}
+variable "prefect_token" {
+  type = string
+}
+{% endif %}
+{% endif %}
