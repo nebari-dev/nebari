@@ -5,12 +5,7 @@ set -euo pipefail
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
 # install jupyterlab extensions
-jupyter labextension install --clean \
-        @jupyter-widgets/jupyterlab-manager \
-        dask-labextension \
-        @pyviz/jupyterlab_pyviz \
-        jupyterlab-videochat \
-        @jupyterlab/toc
+jupyter labextension install --clean $(cat extensions.txt)
 
 jupyter serverextension enable --sys-prefix jupyter_videochat
 
