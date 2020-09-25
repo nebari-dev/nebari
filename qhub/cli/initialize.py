@@ -31,7 +31,7 @@ def handle_init(args):
         print("Only aws | gcp | do are supported!")
 
 
-def generate_qhub_config(config_file, out="qhub-ops-config.yaml"):
+def generate_qhub_config(config_file, out="qhub-config.yaml"):
     from shutil import copyfile
 
     copyfile(config_file, out)
