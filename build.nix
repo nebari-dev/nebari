@@ -26,7 +26,7 @@ pythonPackages.buildPythonPackage {
   ];
 
   checkPhase = ''
-    black qhub --check
+    black qhub --check --exclude scripts
 
     flake8
 
