@@ -19,11 +19,12 @@ module "kubernetes" {
   availability_zones = var.availability_zones
 
   additional_node_group_roles = [
-    "roles/storage.objectViewer"
+    "roles/storage.objectViewer",
+    "roles/storage.admin"
   ]
 
   additional_node_group_oauth_scopes = [
-    "https://www.googleapis.com/auth/devstorage.read_only"
+    "https://www.googleapis.com/auth/cloud-platform"
   ]
 
   node_groups = [
