@@ -19,11 +19,12 @@ module "kubernetes" {
   availability_zones = var.availability_zones
 
   additional_node_group_roles = [
-    "roles/storage.objectViewer"
+    "roles/storage.objectViewer",
+    "roles/storage.admin"
   ]
 
   additional_node_group_oauth_scopes = [
-    "https://www.googleapis.com/auth/devstorage.read_only"
+    "https://www.googleapis.com/auth/cloud-platform"
   ]
 
   node_groups = [
@@ -33,19 +34,19 @@ module "kubernetes" {
       instance_type = "{{ nodegroup_config.instance }}"
       min_size      = {{ nodegroup_config.min_nodes }}
       max_size      = {{ nodegroup_config.max_nodes }}
-      {% if "preemptible" in nodegroup_config %}
+      {%- if "preemptible" in nodegroup_config %}
       preemptible   = {{ "true" if nodegroup_config.preemptible else "false" }}
-      {% endif %}
-      {% if nodegroup.guest_accelerators is defined %}
+      {%- endif %}
+      {%- if nodegroup.guest_accelerators is defined %}
       guest_accelerators = [
         {% for accelerator in nodegroup_config.guest_accelerators %}
-          {
-            type  = "{{ accelerator.name }}"
-            count = {{ accelerator.count }}
-          }
+        {
+          type  = "{{ accelerator.name }}"
+          count = {{ accelerator.count }}
+        }
         {% endfor %}
       ]
-      {% endif %}
+      {%- endif %}
     },
 {% endfor %}
   ]

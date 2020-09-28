@@ -68,8 +68,8 @@ jobs:
           tf_actions_subcommand: 'plan'
           tf_actions_working_dir: 'infrastructure'
           tf_actions_comment: true
-          {% if cookiecutter.prefect is defined %}
+          {%- if cookiecutter.prefect is defined %}
           {% raw %}
           args: '-var="prefect_token=${{ secrets.PREFECT_TOKEN }}"'
           {% endraw %}
-          {% endif %}
+          {%- endif %}
