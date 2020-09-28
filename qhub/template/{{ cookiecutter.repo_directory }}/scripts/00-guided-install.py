@@ -3,7 +3,7 @@ from shutil import which
 from os import path, environ
 import os
 
-SUPPORTED_VERSIONS = ["v0.12", "v0.13"]
+SUPPORTED_VERSIONS = ["v0.13"]
 
 # 01 Verify configuration file exists
 if not path.exists("qhub-ops-config.yaml"):
@@ -43,8 +43,32 @@ if (
         "The following environment variables are required for AWS: (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION) must be set"
     )
 {% elif cookiecutter.provider == 'do' %}
-if "DIGITALOCEAN_TOKEN" not in environ:
-    print("\"DIGITALOCEAN_TOKEN\" environment variables required for DO")
+do_env_docs = "https://qhub.readthedocs.io/en/latest/docs/do/installation.html#environment-variables"
+required_variables = [
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "SPACES_ACCESS_KEY_ID",
+    "SPACES_SECRET_ACCESS_KEY",
+    "DIGITALOCEAN_TOKEN"
+]
+
+missing_variables = [_ for _ in required_variables if _ not in environ]
+
+if len(missing_variables) > 0:
+    raise Exception(f"""Missing the following required environment variables: {required_variables}
+\n
+Please see the documentation for more information: {do_env_docs}
+    """)
+    
+if environ["AWS_ACCESS_KEY_ID"] != environ["SPACES_ACCESS_KEY_ID"]:
+    raise Exception(f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must equal each other. 
+    \n
+See {do_env_docs} for more information""")
+    
+if environ["AWS_SECRET_ACCESS_KEY"] != environ["SPACES_SECRET_ACCESS_KEY"]:
+    raise Exception(f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must equal each other. 
+    \n
+See {do_env_docs} for more information""")
 
 {% endif %}
 
