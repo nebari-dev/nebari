@@ -86,8 +86,8 @@ variable "dask-worker-image" {
   }
 }
 
-{% if cookiecutter.prefect is defined %}
+{%- if cookiecutter.prefect is defined %}
 variable "prefect_token" {
   type = string
 }
-{% endif %}
+{%- endif %}
