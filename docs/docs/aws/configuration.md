@@ -113,7 +113,7 @@ ocean.](https://www.digitalocean.com/docs/droplets/).
 ```yaml
 digital_ocean:
   region: nyc3
-  kubernetes_version: "1.16.6-do.2"
+  kubernetes_version: "1.18.8-do.0"
   node_groups:
     general:
       instance: "s-2vcpu-4gb"
@@ -361,7 +361,7 @@ security:
 
 digital_ocean:
   region: nyc3
-  kubernetes_version: "1.16.6-do.2"
+  kubernetes_version: "1.18.8-do.0"
   node_groups:
     general:
       instance: "s-2vcpu-4gb"
