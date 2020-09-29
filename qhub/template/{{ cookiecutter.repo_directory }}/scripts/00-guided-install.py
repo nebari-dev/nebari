@@ -2,6 +2,7 @@ from subprocess import check_output
 from shutil import which
 from os import path, environ
 import os
+import re
 
 SUPPORTED_VERSIONS = ["v0.13"]
 
@@ -16,10 +17,10 @@ if which("terraform") is None:
     )
 
 # 03 Check version of Terraform
-if (
-    check_output(["terraform", "--version"]).decode("utf-8")[10:15]
-    not in SUPPORTED_VERSIONS
-):
+version_out = check_output(["terraform", "--version"]).decode("utf-8")
+minor_release = re.search(r'v(\d+)\.(\d+)', version_out).group(0)
+
+if minor_release not in SUPPORTED_VERSIONS:
     raise Exception(
         f"Unsupported Terraform version. Supported minor releases: {SUPPORTED_VERSIONS}"
     )
