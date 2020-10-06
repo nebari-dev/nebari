@@ -38,7 +38,7 @@ Ocean configuration.
 ```yaml
 digital_ocean:
   region: nyc3
-  kubernetes_version: "1.16.6-do.2"
+  kubernetes_version: "1.18.8-do.0"
   node_groups:
     general:
       instance: "s-2vcpu-4gb"
@@ -60,7 +60,7 @@ add to the configuration. The same applies for AWS, GCP, and DO.
 ```yaml
 digital_ocean:
   region: nyc3
-  kubernetes_version: "1.16.6-do.2"
+  kubernetes_version: "1.18.8-do.0"
   node_groups:
     general:
       instance: "s-2vcpu-4gb"
