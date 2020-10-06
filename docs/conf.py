@@ -55,13 +55,21 @@ html_theme_options = {
     # If True, show hidden TOC entries
     "globaltoc_includehidden": False,
     "nav_links": [
-        {"href": "index", "title": "Q|Hub Home", "internal": True,},
+        {
+            "href": "index",
+            "title": "Q|Hub Home",
+            "internal": True,
+        },
         {
             "href": "https://quansight.github.io/qhub-home/",
             "title": "News",
             "internal": False,
         },
-        {"href": "docs/faqs", "title": "FAQ", "internal": True,},
+        {
+            "href": "docs/faqs",
+            "title": "FAQ",
+            "internal": True,
+        },
     ],
 }
 html_sidebars = {
@@ -73,7 +81,13 @@ exclude_patterns = ["_build", "*checkpoint*", "site", "jupyter_execute"]
 
 
 latex_documents = [
-    (master_doc, "qhub.tex", "Infrastructure as Code", "QHub", "manual",)
+    (
+        master_doc,
+        "qhub.tex",
+        "Infrastructure as Code",
+        "QHub",
+        "manual",
+    )
 ]
 
 jupyter_execute_notebooks = "off"

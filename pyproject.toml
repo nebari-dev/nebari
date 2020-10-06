@@ -3,6 +3,6 @@ line-length = 88
 target-version = ['py36', 'py37', 'py38']
 exclude = '''
 /(
-  00-guided-install\.py
+  scripts
 )/
 '''

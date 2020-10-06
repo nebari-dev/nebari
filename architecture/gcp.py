@@ -5,5 +5,5 @@ gcp_architecture = get_common_architecture(
     filename="qhub_gcp_architecture",
     container_registry="GCR",
     k8s_cluster_name="'Kubernetes Cluster'",
-    k8s_engine_name="GKE"
+    k8s_engine_name="GKE",
 )
