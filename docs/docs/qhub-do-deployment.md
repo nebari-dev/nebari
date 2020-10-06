@@ -7,7 +7,7 @@ A **configuration** defines the structure of your deployment, including the type
 
 ## Configuration
 
-You can start the deployment process by providing the configuration details of your project. To abstract away some of the complexities of writing up your own configuration file for QHub deployment on DO, the configuration file, `qhub-ops-config.yaml`, written in the [YAML](https://yaml.org/about.html) syntax, is provided for you. The configuration file consists of three main sections: **General, Security, Provider Infrastructure** that you need to edit with your project and authentication details.
+You can start the deployment process by providing the configuration details of your project. To abstract away some of the complexities of writing up your own configuration file for QHub deployment on DO, the configuration file, `qhub-config.yaml`, written in the [YAML](https://yaml.org/about.html) syntax, is provided for you. The configuration file consists of three main sections: **General, Security, Provider Infrastructure** that you need to edit with your project and authentication details.
 
 ### 1. General
 

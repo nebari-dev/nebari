@@ -1,0 +1,63 @@
+{
+  "@jupyterlab/filebrowser-extension:browser": {
+    "navigateToCurrentDirectory": true
+  },
+  "@jupyterlab/extensionmanager-extension": {
+    "enabled": true
+  },
+  "@jupyterlab/statusbar-extension:plugin": {
+    "visible": true
+  },
+  "@jupyterlab/apputils-extension:themes": {
+    "theme-scrollbars": true
+  },
+  "@krassowski/jupyterlab-lsp:plugin": {
+    "language_servers": {
+      "pyls": {
+        "serverSettings": {
+          "pyls": {
+            "plugins": {
+              "pycodestyle": {
+                "ignore": [
+                  "E113",
+                  "E117",
+                  "W391",
+                  "W291"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "unified-language-server": {
+      "serverSettings": {
+        "unified-language-server": {
+          "remark-parse": {
+            "plugins": [
+              [
+                "#remark-retext",
+                "#parse-latin"
+              ],
+              [
+                "#retext-spell",
+                "#dictionary-en"
+              ]
+            ]
+          }
+        }
+      }
+    }
+  },
+  "@deathbeds/jupyterlab-fonts:fonts": {
+    "styles": {
+      "@import": [
+        "https://tools-static.wmflabs.org/fontcdn/css?family=Libre+Baskerville:400,400italic,700&subset=latin,latin-ext"
+      ],
+      ":root": {
+        "--jp-code-font-family": "'Fira Code Medium', var(--jp-code-font-family-default)",
+        "--jp-content-font-family": "'Libre Baskerville', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'"
+      }
+    }
+  }
+}

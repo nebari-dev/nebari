@@ -55,10 +55,17 @@ digital_ocean:
       instance: "s-2vcpu-4gb"
       min_nodes: 1
       max_nodes: 4
-    worker-high-memory:
-      instance: "m6-2vcpu-16gb"
-      min_nodes: 1
-      max_nodes: 4
+
+
+default_images:
+  jupyterhub: "quansight/qhub-jupyterhub:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
+  jupyterlab: "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
+  dask_worker: "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
+
+
+storage:
+  conda_store: 20Gi
+  shared_filesystem: 10Gi
 
 
 profiles:
@@ -96,3 +103,39 @@ profiles:
       worker_memory_limit: 2G
       worker_memory: 2G
       image: "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
+
+
+environments:
+  "environment-default.yaml":
+    name: default
+    channels:
+      - conda-forge
+      - defaults
+    dependencies:
+      - python=3.7
+      - ipykernel
+      - ipywidgets
+      - dask==2.14.0
+      - distributed==2.14.0
+      - dask-gateway=0.6.1
+      - numpy
+      - numba
+      - pandas
+
+  "environment-example-2.yaml":
+    name: example-2
+    channels:
+      - conda-forge
+      - defaults
+    dependencies:
+      - python=3.7
+      - ipykernel
+      - ipywidgets
+      - dask==2.14.0
+      - distributed==2.14.0
+      - dask-gateway=0.6.1
+      - numpy
+      - numba
+      - pandas
+      - jinja2
+      - pyyaml

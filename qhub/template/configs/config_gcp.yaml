@@ -1,94 +1,79 @@
-project_name: do-jupyterhub
-provider: do
+project_name: gcp-jupyterhub
+provider: gcp
 ci_cd: github-actions
-domain: "do.qhub.dev"
+domain: "gcp.qhub.dev"
 
 security:
   authentication:
-    type: GitHub
+    type: Auth0
     config:
-      client_id: CLIENT_ID
-      client_secret: CLIENT_SECRET
-      oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
+      client_id: ...
+      client_secret: ...
+      oauth_callback_url: ...
+      scope: ['openid', 'email', 'profile']
+      auth0_subdomain: ...
   users:
-    costrouc:
+    "chris.ostrouchov@gmail.com":
       uid: 1000
       primary_group: users
-      secondary_groups:
-        - billing
-    dharhas:
+    "dharhas@quansight.com":
       uid: 1001
       primary_group: admin
-    tonyfast:
-      uid: 1002
-      primary_group: admin
-    prasunanand:
-      uid: 1003
-      primary_group: admin
-    aktech:
-      uid: 1004
-      primary_group: users
-      secondary_groups:
-        - admin
   groups:
     users:
-      gid: 100
+      gid: 1000
     admin:
-      gid: 101
-    billing:
-      gid: 102
+      gid: 1001
 
 
-digital_ocean:
-  region: nyc3
-  kubernetes_version: "1.16.6-do.2"
+google_cloud_platform:
+  project: test-test-test
+  region: us-central1
+  zone: us-central1-c
+  availability_zones: ["us-central1-c"]
+  kubernetes_version: "1.14.10-gke.31"
   node_groups:
     general:
-      instance: "s-2vcpu-4gb"
+      instance: n1-standard-2
       min_nodes: 1
       max_nodes: 1
     user:
-      instance: "s-2vcpu-4gb"
-      min_nodes: 1
-      max_nodes: 4
+      instance: n1-standard-2
+      min_nodes: 0
+      max_nodes: 2
     worker:
-      instance: "s-2vcpu-4gb"
-      min_nodes: 1
-      max_nodes: 4
-
+      instance: n1-standard-2
+      min_nodes: 0
+      max_nodes: 5
 
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:4c8c28332be1fde32f786c54a5961b5f3d789e16"
-  jupyterlab: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
-  dask_worker: "quansight/qhub-dask-worker:4c8c28332be1fde32f786c54a5961b5f3d789e16"
-
+  jupyterhub: "quansight/qhub-jupyterhub:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
+  jupyterlab: "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
+  dask_worker: "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
 
 storage:
   conda_store: 20Gi
   shared_filesystem: 10Gi
 
-
 profiles:
   jupyterlab:
     - display_name: Small Instance
       description: Stable environment with 1 cpu / 1 GB ram
-      groups:
-        - admin
+      default: true
       kubespawner_override:
         cpu_limit: 1
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+        image: "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
-      default: true
       kubespawner_override:
         cpu_limit: 1.5
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+        image: "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
 
   dask_worker:
     "Small Worker":
@@ -96,13 +81,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+      image: "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+      image: "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
 
 
 environments:

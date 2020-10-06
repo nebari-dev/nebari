@@ -25,7 +25,6 @@ security:
     admin:
       gid: 1001
 
-
 google_cloud_platform:
   project: test-test-test
   region: us-central1
@@ -40,16 +39,23 @@ google_cloud_platform:
     user:
       instance: n1-standard-2
       min_nodes: 0
-      max_nodes: 2
+      max_nodes: 5
     worker:
       instance: n1-standard-2
       min_nodes: 0
       max_nodes: 5
+    user-gpu:
+      instance: n1-standard-2
+      min_nodes: 0
+      max_nodes: 2
+      accelerators:
+        - name: nvidia-tesla-p4
+          count: 1
 
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:4c8c28332be1fde32f786c54a5961b5f3d789e16"
-  jupyterlab: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
-  dask_worker: "quansight/qhub-dask-worker:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+  jupyterhub: "quansight/qhub-jupyterhub:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
+  jupyterlab: "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
+  dask_worker: "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
 
 storage:
   conda_store: 20Gi
@@ -61,33 +67,53 @@ profiles:
       description: Stable environment with 1 cpu / 1 GB ram
       default: true
       kubespawner_override:
-        cpu_limit: 1
-        cpu_guarantee: 1
-        mem_limit: 1G
-        mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+        cpu_limit: 0.5
+        cpu_guarantee: 0.5
+        mem_limit: 1.7G
+        mem_guarantee: 1.7G
+        image: "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       kubespawner_override:
-        cpu_limit: 1.5
-        cpu_guarantee: 1.25
-        mem_limit: 2G
-        mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+        cpu_limit: 1
+        cpu_guarantee: 1
+        mem_limit: 3.5G
+        mem_guarantee: 3.5G
+        image: "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
+    - display_name: Large Instance
+      description: Stable environment with 1.5 cpu / 2 GB ram
+      kubespawner_override:
+        cpu_limit: 2
+        cpu_guarantee: 2
+        mem_limit: 7G
+        mem_guarantee: 7G
+        image: "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
+    - display_name: GPU Instance
+      description: Stable environment with 1 Nvidia GPU
+      kubespawner_override:
+        image: "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
+        cpu_limit: 2
+        cpu_guarantee: 2
+        mem_limit: 7G
+        mem_guarantee: 7G
+        node_selector:
+          "cloud.google.com/gke-nodepool": "user-gpu"
+        extra_resource_limits:
+          nvidia.com/gpu: 1
 
   dask_worker:
     "Small Worker":
       worker_cores_limit: 1
       worker_cores: 1
-      worker_memory_limit: 1G
-      worker_memory: 1G
-      image: "quansight/qhub-dask-worker:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+      worker_memory_limit: 3.5G
+      worker_memory: 3.5G
+      image: "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
     "Medium Worker":
-      worker_cores_limit: 1.5
-      worker_cores: 1.25
-      worker_memory_limit: 2G
-      worker_memory: 2G
-      image: "quansight/qhub-dask-worker:4c8c28332be1fde32f786c54a5961b5f3d789e16"
+      worker_cores_limit: 2
+      worker_cores: 2
+      worker_memory_limit: 7G
+      worker_memory: 7G
+      image: "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334"
 
 
 environments:

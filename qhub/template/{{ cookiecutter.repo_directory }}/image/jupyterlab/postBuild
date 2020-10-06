@@ -5,14 +5,8 @@ set -euo pipefail
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
 # install jupyterlab extensions
-jupyter labextension install --clean \
-        @jupyter-widgets/jupyterlab-manager \
-        dask-labextension \
-        @pyviz/jupyterlab_pyviz \
-        jupyterlab-videochat
-        
-# FIXME: Move this when environment.yml supports installing from pip
-pip install --no-cache jupyter-videochat
+jupyter labextension install --clean $(cat /opt/jupyterlab/labextensions.txt)
+
 jupyter serverextension enable --sys-prefix jupyter_videochat
 
 # ====== cleanup labextension install =======
@@ -23,3 +17,7 @@ find /opt/conda -follow -type f -name '*.js.map' -delete
 # ====== setup ipython conifiguration ======
 mkdir /etc/ipython
 cp /opt/jupyterlab/ipython_config.py /etc/ipython/ipython_config.py
+
+# ====== setup juypterlab configuration overrides ======
+mkdir -p /opt/conda/share/jupyter/lab/settings
+cp /opt/jupyterlab/overrides.json /opt/conda/share/jupyter/lab/settings
