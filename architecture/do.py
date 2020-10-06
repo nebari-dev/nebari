@@ -5,5 +5,5 @@ do_architecture = get_common_architecture(
     filename="qhub_do_architecture",
     container_registry="DockerHub",
     k8s_cluster_name="'Kubernetes Cluster'",
-    k8s_engine_name="Kubernetes Engine"
+    k8s_engine_name="Kubernetes Engine",
 )

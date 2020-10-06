@@ -22,9 +22,7 @@ terraform {
     region                      = "us-west-1" # fake aws region required by terraform
     bucket                      = "{{ cookiecutter.project_name }}-terraform-state"
     key                         = "terraform/{{ cookiecutter.project_name }}.tfstate"
-    skip_requesting_account_id  = true
     skip_credentials_validation = true
-    skip_get_ec2_platforms      = true
     skip_metadata_api_check     = true
   }
 }
