@@ -1,0 +1,11 @@
+[tool.black]
+line-length = 88
+target-version = ['py36', 'py37', 'py38']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \qhub/template/{{ cookiecutter.repo_directory }}/terraform-state/versions.tf
+  | \qhub/template/{{ cookiecutter.repo_directory }}/infrastructure/versions.tf
+  | \qhub/qhub/template/{{ cookiecutter.repo_directory }}/scripts/00-guided-install.py
+)/
+'''

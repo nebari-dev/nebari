@@ -24,7 +24,7 @@ jobs:
           pip install .[dev]
       - name: Black Formatting
         run: |
-          black --check qhub --exclude scripts
+          black --check qhub
       - name: Flake8 Formatting
         run: |
           flake8
