@@ -22,7 +22,7 @@ jobs:
           python-version: 3.8
       - name: Install qhub
         run: |
-          pip install qhub==0.1.17
+          pip install qhub==0.1.18
       - name: Render Changes to Template
         run: |
           qhub render -c qhub-config.yaml -o ./ -f
