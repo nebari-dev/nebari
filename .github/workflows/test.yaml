@@ -1,6 +1,9 @@
 name: "Tests"
 
 on:
+  pull_request:
+    branches:
+      - master
   push:
     branches:
       - master
@@ -32,10 +35,16 @@ jobs:
         run: |
           pytest
 
-  test-digital-ocean:
-    name: 'Test Digital Ocean Deployment'
+  test-render-providers:
+    name: 'Test QHub Provider'
     runs-on: ubuntu-latest
     needs: test-general
+    strategy:
+      matrix:
+        provider:
+          - aws
+          - gcp
+          - do
     steps:
       - name: 'Checkout Infastructure'
         uses: actions/checkout@master
@@ -46,58 +55,26 @@ jobs:
       - name: Install QHub
         run: |
           pip install .[dev]
-      - name: QHub Build Digital Ocean template
+      - name: QHub Initialize
         run: |
-          qhub render -c qhub/template/configs/config_do.yaml -o qhub-do-deployment
-      - name: Digital Ocean Artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: qhub-digital-ocean-artifact
-          path: qhub-do-deployment
-
-  test-amazon-web-services:
-    name: 'Test Amazon Web Services Deployment'
-    runs-on: ubuntu-latest
-    needs: test-general
-    steps:
-      - name: 'Checkout Infastructure'
-        uses: actions/checkout@master
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-      - name: Install QHub
+          qhub init "${{ matrix.provider }}"
+      - name: QHub Render
         run: |
-          pip install .[dev]
-      - name: QHub Build Amazon Web Services Template
-        run: |
-          qhub render -c qhub/template/configs/config_aws.yaml -o qhub-aws-deployment
-      - name: Amazon Web Services Artifact
-        uses: actions/upload-artifact@v1
+          qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
+      - name: 'Terraform Format'
+        uses: hashicorp/terraform-github-actions@master
         with:
-          name: qhub-amazon-web-services-artifact
-          path: qhub-aws-deployment
-
-
-  test-google-cloud-platform:
-    name: 'Test Google Cloud Platform Deployment'
-    runs-on: ubuntu-latest
-    needs: test-general
-    steps:
-      - name: 'Checkout Infastructure'
-        uses: actions/checkout@master
-      - name: Set up Python
-        uses: actions/setup-python@v1
+          tf_actions_version: 0.13.4
+          tf_actions_subcommand: 'fmt'
+          tf_actions_working_dir: 'qhub-${{ matrix.provider }}-deployment/terraform-state'
+      - name: 'Terraform Format'
+        uses: hashicorp/terraform-github-actions@master
         with:
-          python-version: 3.8
-      - name: Install QHub
-        run: |
-          pip install .[dev]
-      - name: QHub Build Google Cloud Platform Template
-        run: |
-          qhub render -c qhub/template/configs/config_gcp.yaml -o qhub-gcp-deployment
-      - name: Google Cloud Platform Artifact
-        uses: actions/upload-artifact@v1
+          tf_actions_version: 0.13.4
+          tf_actions_subcommand: 'fmt'
+          tf_actions_working_dir: 'qhub-${{ matrix.provider }}-deployment/infrastructure'
+      - name: QHub Render Artifact
+        uses: actions/upload-artifact@master
         with:
-          name: qhub-google-cloud-platform-artifact
-          path: qhub-gcp-deployment
+          name: "qhub-${{ matrix.provider }}-artifact"
+          path: "qhub-${{ matrix.provider }}-deployment"
