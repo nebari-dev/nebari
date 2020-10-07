@@ -6,7 +6,7 @@ provider "aws" {
 module "terraform-state" {
   source = "github.com/quansight/qhub-terraform-modules//modules/aws/terraform-state"
 
-  name   = "{{ cookiecutter.project_name }}"
+  name = "{{ cookiecutter.project_name }}"
 
   tags = {
     Organization = "{{ cookiecutter.project_name }}"
