@@ -11,7 +11,7 @@ module "kubernetes-initialization" {
   namespace = var.environment
   secrets   = []
   dependencies = [
-{% if cookiecutter.provider == "aws" -%}
+{% if cookiecutter.provider == "aws" %}
     module.kubernetes.depended_on
 {% endif %}
   ]
