@@ -67,3 +67,9 @@ python <diagram_file>.py
 QHub is BSD3 licensed
 
 
+# Release
+
+Creating a release:
+
+1. Increment the version number in `qhub/VERSION`
+2. Ensure that the version number in `qhub/VERSION` is used in pinning qhub in the github actions `qhub/template/{{ cookiecutter.repo_directory }}/.github/workflows/qhub-config.yaml`
