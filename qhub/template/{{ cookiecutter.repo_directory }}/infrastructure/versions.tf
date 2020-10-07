@@ -8,7 +8,7 @@ terraform {
       source = "hashicorp/google"
 {%- elif cookiecutter.provider == "do" %}
     digitalocean = {
-      source = "digitalocean/digitalocean" 
+      source = "digitalocean/digitalocean"
 {% endif %}
     }
     helm = {
