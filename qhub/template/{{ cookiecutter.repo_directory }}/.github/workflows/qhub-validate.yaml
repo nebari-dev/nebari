@@ -7,8 +7,10 @@ on:
     paths:
       - "qhub-config.yaml"
 
+{% raw %}
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+{% endraw %}
 
 jobs:
   qhub-validate:
