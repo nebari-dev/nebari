@@ -1,0 +1,26 @@
+name: "QHub Config Update - Pull Request"
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "qhub-config.yaml"
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  qhub-validate:
+    name: 'Qhub'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout Infastructure'
+        uses: actions/checkout@master
+      - name: 'Qhub Format'
+        uses: Quansight/qhub-github-actions@v0.1-beta
+        with:
+          qhub_actions_version: 0.0.1
+          qhub_actions_subcommand: 'validate'
+          qhub_actions_working_dir: '.'
+          qhub_actions_comment: true
