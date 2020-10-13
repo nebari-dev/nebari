@@ -23,7 +23,7 @@ qhub init <platform-name> # platform-name can be do, aws or gcp.
 ```
 
 This generates a configuration file. Now modify the configuration according to your needs.
-Documentation on modify a configuration file is detailed [here](https://github.com/Quansight/qhub/blob/master/qhub/template/%7B%7B%20cookiecutter.repo_directory%20%7D%7D/docs/configuration.md).
+See documentation on modifying your configuration file for all of the cloud providers: [Configuration File](https://github.com/Quansight/qhub/blob/master/docs/docs/aws/configuration.md) 
 
 ## Initializing the Provider Template
 
