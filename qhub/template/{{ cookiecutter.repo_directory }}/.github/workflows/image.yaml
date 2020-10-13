@@ -67,18 +67,17 @@ jobs:
         run: |
           docker logout
 {% elif cookiecutter.provider == "do" %}
-      - name: Docker Login
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: {{ '${{ secrets.DIGITALOCEAN_TOKEN }}' }}
+      - name: Digital Ocean Docker Registry Login
         run: |
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-        env:
-          DOCKER_USERNAME: {{ '${{ secrets.docker_username }}' }}
-          DOCKER_PASSWORD: {{ '${{ secrets.docker_password }}' }}
+          doctl registry login
       - name: Docker Build, Tag, and Push Image
         env:
           IMAGE_TAG: {{ '${{ github.sha }}' }}
-          # due to digitalocean not having a public container registry (beta)
-          # https://www.digitalocean.com/products/container-registry/
-          IMAGE_NAME: quansight/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
+          IMAGE_NAME: registry.digitalocean.com/{{ cookiecutter.project_name }}/qhub-{{ '${{ matrix.dockerfile }}' }}
         run: |
           docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
           docker push $IMAGE_NAME:$IMAGE_TAG
