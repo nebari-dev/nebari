@@ -7,7 +7,7 @@ import re
 SUPPORTED_VERSIONS = ["v0.13"]
 
 # 01 Verify configuration file exists
-if not path.exists("qhub-ops-config.yaml"):
+if not path.exists("qhub-config.yaml"):
     raise Exception('Configuration file "qhub-ops-config.yaml" does not exist')
 
 # 02 Check if Terraform works
@@ -30,7 +30,7 @@ if minor_release not in SUPPORTED_VERSIONS:
 if "GOOGLE_CREDENTIALS" not in environ:
     raise Exception(
         """The environment variable "Google Credentials" doesn't exist. It must be set to the path that contains
-        the GCP credentials json file. Instructions for creating this file can be found here: 
+        the GCP credentials json file. Instructions for creating this file can be found here:
         https://cloud.google.com/iam/docs/creating-managing-service-account-keys
         """
     )
@@ -60,14 +60,14 @@ if len(missing_variables) > 0:
 \n
 Please see the documentation for more information: {do_env_docs}
     """)
-    
+
 if environ["AWS_ACCESS_KEY_ID"] != environ["SPACES_ACCESS_KEY_ID"]:
-    raise Exception(f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must equal each other. 
+    raise Exception(f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must equal each other.
     \n
 See {do_env_docs} for more information""")
-    
+
 if environ["AWS_SECRET_ACCESS_KEY"] != environ["SPACES_SECRET_ACCESS_KEY"]:
-    raise Exception(f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must equal each other. 
+    raise Exception(f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must equal each other.
     \n
 See {do_env_docs} for more information""")
 
