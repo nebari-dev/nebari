@@ -462,7 +462,7 @@ environments:
 3. Initialize the qhub repository
 
 ```shell
-pip install qhub
+pip install qhub-ops
 qhub-ops render -c qhub-ops-config.yaml -o ./ -f
 ```
 
