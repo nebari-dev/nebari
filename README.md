@@ -2,19 +2,27 @@
 
 :badges:
 
-[`qhub`][qhub] is an opinionated deployment of open source data science infrastrcuture (eg. [jupyterhub], [dask], and [kubernetes]) on different cloud service providers without vendor lock-in. [`qhub`][qhub] is easy to install and maintain.
+[`qhub`][qhub] is an opinionated deployment of open source data science infrastructure (eg. [jupyterhub], [dask], and [kubernetes]) on different cloud service providers without vendor lock-in. [`qhub`][qhub] is easy to install and maintain.
 
 ## Usage
 
-`qhub` is install as a command line application in python. it requires you to choose your the cloud provider you desire.
+`qhub` is installed as a command line application in Python. It requires you to choose your the cloud provider you desire. once you've decided on a provider `qhub` will walk you through the following steps to configure your deployment:
+
+1. initialize
+2. render
+3. deploy
+
+these steps realized using the `qhub` CLI.
+
+### initialize configurations
 
         qhub init do
         qhub init aws
         qhub init gcp
 
-The `qhub init` command will generate configuration files for that service. The configuartion files can be tailored to the needs of your organization. Each file specifies general project information, security, infrastracture settings, computational resource profiles, and data science environments. See documentation on modifying your configuration file for all of the cloud providers: [Configuration File](https://github.com/Quansight/qhub/blob/master/docs/docs/aws/configuration.md) 
+The `qhub init` command will generate configuration files for that service. The configutation files can be tailored to the needs of your organization. Each file specifies general project information, security, infrastructure settings, computational resource profiles and data science environments. See documentation on modifying your configuration file for all of the cloud providers: [Configuration File](https://github.com/Quansight/qhub/blob/master/docs/docs/aws/configuration.md) 
 
-The configuration file is your user interface into scaling your data science environment. Each change triggers [Github Action] that will seamlessly update your infrastructure.
+The configuration file is your user interface into deploying and scaling your data science environment. Each change triggers [Github Action] that will seamlessly update your infrastructure.
 
 Check out the [`qhub` documentation][docs] for more detailed information.
 
@@ -25,6 +33,7 @@ _we need more information here._
 ```bash
 qhub render -c qhub-config.yaml -o ./ --force
 ```
+
 _what is this business?_
 
 ## `qhub` interfaces
@@ -64,9 +73,9 @@ Creating a release:
 [dask]: https://docs.dask.org/ "Dask is a flexible library for parallel computing in Python."
 [kubernetes]: https://kubernetes.io/ "Automated container deployment, scaling, and management"
 [qhub]: https://qhub.dev/ ""
-[Github Action]: #
-[Digital Ocean]: # "digital ocean"
-[AWS]: # "amazon web services"
-[GCP]: # "google cloud provider"
+[Github Action]: https://github.com/features/actions
+[Digital Ocean]: https://www.digitalocean.com/ "digital ocean"
+[AWS]: https://aws.amazon.com/ "amazon web services"
+[GCP]: https://cloud.google.com/ "google cloud provider"
 [qhub gh]: https://github.com/Quansight/qhub "qhub github page"
-[docs]: # "qhub documentation"
+[docs]: https://qhub.dev/ "qhub documentation"
