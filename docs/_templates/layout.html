@@ -1,0 +1,9 @@
+{# Import the theme's layout. #}
+{% extends '!layout.html' %}
+
+{%- block extrahead %}
+{{ super() }}
+<style>
+  .md-header, .md-tabs {background-color: #653c90}
+</style>
+{%- endblock %}
