@@ -1,5 +1,13 @@
 # Step by Step QHub Cloud Deployment
 
+This guide makes the following assumptions:
+- [Github actions](https://github.com/features/actions) will be used for CICD
+- Oauth will be [via github](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps) using [auth0](https://auth0.com/)
+- DNS registry will be through [Cloudflare](https://www.cloudflare.com/)
+
+Other providers can be used, but you will need consult their documention on setting up oauth and DNS registry.
+
+## Deployment steps
 1) **Environment variables**
 
     Set the required environment variables based on your choice of provider below:
@@ -13,29 +21,33 @@
 2) **Create Cloudflare account**
     To set up your DNS and automatically get a certificate, you will need to create a [Cloudflare](https://dash.cloudflare.com/sign-up) account and register a [domain name](https://www.cloudflare.com/products/registrar/). 
 
-3) **Initialize QHub**
-    In your terminal, enter the command `qhub init` followed by the abbreviation of your cloud provider. (do: Digital Ocean, aws: Amazon Web Services, gcp: Google Cloud Platform). Example `qhub init do` to initiate QHub for a Digital Ocean deployment. This will create  a `qhub-config.yaml` file in your folder. 
+3) **Configure QHub**
+    In your terminal, enter the command `qhub init` followed by the abbreviation of your cloud provider. (do: Digital Ocean, aws: Amazon Web Services, gcp: Google Cloud Platform). This will create  a `qhub-config.yaml` file in your folder.
+    ```
+    $ qhub init do
+    ```
+     
 
-    By default `Qhub` authenticates with github.  Open the config file, and under the `security` section, add your github usernames and set a unique `uid` for each username.
+    Open the config file, and under the `security` section, add your github usernames and set a unique `uid` for each username.
          
      ```
-        costrouc:
-            uid: 1000
-            primary_group: users
-            secondary_groups:
-                - billing
+    costrouc:
+        uid: 1000
+        primary_group: users
+        secondary_groups:
+            - billing
     ``` 
 
-    Set the `domain` field on top of the config file to a domain you control. 
+    Set the `domain` field on top of the config file to a domain you own in Cloudflare. 
 
      ```
-        domain: testing.qhub.dev
+    domain: testing.qhub.dev
     ``` 
-    Create an [oauth application] in github and fill in the client_id and client_secret. This needs to be your access token for github. 
+    Create an [oauth application](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps) in github and fill in the client_id and client_secret.
          
      ```
-        client_id: "7b88..."
-        client_secret: "8edd7f14..."
+    client_id: "7b88..."
+    client_secret: "8edd7f14..."
     ```
     
     Set the `oauth_callback_url` by prepending your domain with `jupyter` and appending `/hub/oauth_callback`. 
@@ -62,16 +74,18 @@
 
 4) Render QHub
     
-    Enter this command in terminal to create all qhub configuration files
+    The render step will use `qhub_config.yaml` as a template to create an output folder and generate all the necessary files for deployement. 
+    
+    The below example will create the directory `qhub-deployment` and fill it with the necessary files.
 
     ```
-    $ qhub-render -c qhub qhub_config.yaml -o <output_directory_name> -f
+    $ qhub-render -c qhub qhub_config.yaml -o qhub-deployment -f
     ```
     
-    Move the config file into output directory
+    Move the config file into the output directory
         
     ```
-    $ mv qhub_config.yaml <output_directory_name>
+    $ mv qhub_config.yaml qhub-deployment/
     ```
 
 5) **Deployment and DNS registry**
@@ -120,7 +134,9 @@
     ```
 
 7) **Git ops enabled**
-    To use gitops, make a change to the `qhub-ops.yaml` in a new branch and merge it into master. This will trigger a deployement of all of those changes to your qhub.
+    Since the infrastructure state is reflected in the repository, it allows self-documenting of infrastructure and team members to submit pull requests that can be reviewed before modifying the infrastructure.
+
+    To use gitops, make a change to the `qhub-ops.yaml` in a new branch and create pull request into master. When the pull request is merged, it will trigger a deployement of all of those changes to your qhub.
     
     Congratulations! You have now completed your QHub cloud deployment!
 
