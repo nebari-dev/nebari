@@ -22,7 +22,7 @@ NAVIGATION_LINKS = {
     DEFAULT_LANG: tuple(),
 }
 
-THEME_COLOR = "#7B699F"
+THEME_COLOR = "#652c90"  # "#7B699F"
 
 POSTS = (
     ("posts/*.md", "posts", "post.tmpl"),
@@ -47,7 +47,7 @@ html_theme_options = {
     "color_accent": "light-yellow",
     # Set the repo location to get a badge with stats
     "repo_url": "https://github.com/Quansight/qhub",
-    "repo_name": "Q|Hub",
+    "repo_name": "QHub",
     # Visible levels of the global TOC; -1 means unlimited
     "globaltoc_depth": 1,
     # If False, expand all TOC entries
