@@ -24,6 +24,8 @@ The `qhub init` command will generate configuration files for that service. The 
 
 The configuration file is your user interface into deploying and scaling your data science environment. Each change triggers [Github Action] that will seamlessly update your infrastructure.
 
+![](docs/images/brand-diagram.png "architecture diagram")
+
 Check out the [`qhub` documentation][docs] for more detailed information.
 
 ### rendering the configuration file
