@@ -1,71 +1,68 @@
-# QHub
+# `qhub` - automated data science environments on cloud environments
 
-Is a tool for initializing and maintaining the state of QHub
-deployments on Digital Ocean, Amazon Web Services, and Google Cloud
-Platform.
+[![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
 
-## Installation:
+[`qhub`][qhub] is an opinionated deployment of open source data science infrastructure (eg. [jupyterhub], [dask], and [kubernetes]) on different cloud service providers without vendor lock-in. [`qhub`][qhub] is easy to install and maintain.
 
-```bash
-pip install qhub
-```
+## Usage
 
-## Configuration
+`qhub` is installed as a command line application in Python. It requires you to choose your the cloud provider you desire. once you've decided on a provider `qhub` will walk you through the following steps to configure your deployment:
 
-QHub is entirely controlled from a configuration file. 
+1. initialize
+2. render
+3. deploy
 
-To generate a configuration file follow these instructions.
+these steps realized using the `qhub` CLI.
 
-```
-mkdir <repository-name>
-cd <repository-name>
-qhub init <platform-name> # platform-name can be do, aws or gcp.
-```
+### initialize configurations
 
-This generates a configuration file. Now modify the configuration according to your needs.
-Documentation on modify a configuration file is detailed [here](https://github.com/Quansight/qhub/blob/master/qhub/template/%7B%7B%20cookiecutter.repo_directory%20%7D%7D/docs/configuration.md).
+        qhub init do
+        qhub init aws
+        qhub init gcp
 
-## Initializing the Provider Template
+The `qhub init` command will generate configuration files for that service. The configutation files can be tailored to the needs of your organization. Each file specifies general project information, security, infrastructure settings, computational resource profiles and data science environments. See documentation on modifying your configuration file for all of the cloud providers: [Configuration File](https://github.com/Quansight/qhub/blob/master/docs/docs/aws/configuration.md) 
 
-The exact naming of the configuration file is needed to trigger the CI
-actions when the configuration is changed.
+The configuration file is your user interface into deploying and scaling your data science environment. Each change triggers [Github Action] that will seamlessly update your infrastructure.
+
+![](docs/images/brand-diagram.png "architecture diagram")
+
+Check out the [`qhub` documentation][docs] for more detailed information.
+
+### rendering the configuration file
+
+_we need more information here._
 
 ```bash
 qhub render -c qhub-config.yaml -o ./ --force
 ```
 
-After initialising the provider templates, follow the instructions in
-docs on deploying the infrastructure at
-`<repository-name>/docs/installation.md`. At this current moment some
-bootstrapping is required before github-actions can manage the
-infrastructure as code. All of these instructions are automated in
-`scripts/00-guided-install.sh`. Note that you will need to set the
-environment variables in `intallation.md` for this script to
-succeed. You will be prompted several times for use actions such as
-setting oauth provider and dns.
+_what is this business?_
+
+## `qhub` interfaces
+
+The `qhub` api normalizes with the nuances of configuring interactive data science environments across multiple client providers. The python command line interfaces define an initial environment state that is modified, and its changes are propogated by continuous integration.
+
+Each `qhub` cloud provider has different configuration specifications; more details can be found at the following links about the [Digital Ocean], [AWS], and [GCP] configurations.
+
+
+## Installing `qhub`
+
+`qhub` is a pure python package that can be downloaded from the pypi.
 
 ```bash
-./scripts/00-guided-install.sh
+pip install qhub
 ```
 
-## Terraform Module Dependencies
 
-This project depends on the terraform modules repository:
-https://github.com/Quansight/qhub-terraform-modules
+## License
 
-## Architecture
+[QHub is BSD3 licensed](LICENSE).
 
-The architecture diagrams for each cloud provider is in `architecture` folder.
-To generate them, just run the following command:
+## Developer
 
-```bash
-python <diagram_file>.py
-```
+[`qhub`][qhub gh] is an open source project and welcomes issues and pull requests.
 
-# License
-
-QHub is BSD3 licensed
-
+## Contributing
 
 # Release
 
@@ -73,3 +70,14 @@ Creating a release:
 
 1. Increment the version number in `qhub/VERSION`
 2. Ensure that the version number in `qhub/VERSION` is used in pinning qhub in the github actions `qhub/template/{{ cookiecutter.repo_directory }}/.github/workflows/qhub-config.yaml`
+
+[jupyterhub]: https://jupyter.org/hub "A multi-user version of the notebook designed for companies, classrooms and research labs"
+[dask]: https://docs.dask.org/ "Dask is a flexible library for parallel computing in Python."
+[kubernetes]: https://kubernetes.io/ "Automated container deployment, scaling, and management"
+[qhub]: https://qhub.dev/ ""
+[Github Action]: https://github.com/features/actions
+[Digital Ocean]: https://www.digitalocean.com/ "digital ocean"
+[AWS]: https://aws.amazon.com/ "amazon web services"
+[GCP]: https://cloud.google.com/ "google cloud provider"
+[qhub gh]: https://github.com/Quansight/qhub "qhub github page"
+[docs]: https://qhub.dev/ "qhub documentation"
