@@ -1,6 +1,6 @@
 # `qhub` - automated data science environments on cloud environments
 
-:badges:
+[![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
 
 [`qhub`][qhub] is an opinionated deployment of open source data science infrastructure (eg. [jupyterhub], [dask], and [kubernetes]) on different cloud service providers without vendor lock-in. [`qhub`][qhub] is easy to install and maintain.
 
