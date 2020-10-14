@@ -43,6 +43,7 @@ html_theme_options = {
     # specified, then no sitemap will be built.
     "base_url": "https://qhub.dev/",
     # Set the color and the accent color
+    "theme_color": THEME_COLOR,
     "color_primary": THEME_COLOR,
     "color_accent": "light-yellow",
     # Set the repo location to get a badge with stats
