@@ -22,7 +22,7 @@ NAVIGATION_LINKS = {
     DEFAULT_LANG: tuple(),
 }
 
-THEME_COLOR = "#652c90"  # "#7B699F"
+THEME_COLOR = "652c90"  # "#7B699F"
 
 POSTS = (
     ("posts/*.md", "posts", "post.tmpl"),
@@ -32,6 +32,8 @@ POSTS = (
     ("posts/*.ipynb", "posts", "post.tmpl"),
     ("posts/*.md.ipynb", "posts", "post.tmpl"),
 )
+
+templates_path = ['_templates']
 
 # Material theme options (see theme.conf for more information)
 html_theme_options = {
