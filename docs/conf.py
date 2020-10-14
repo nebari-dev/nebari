@@ -58,13 +58,13 @@ html_theme_options = {
 
         {
             "href": "index",
-            "title": "Q|Hub Home",
+            "title": "QHub Home",
             "internal": True,
         },
 
         {
-            "href": "https://qhub.dev/",
-            "title": "News",
+            "href": "https://pypi.org/project/qhub/",
+            "title": "Pypi",
             "internal": False,
         },
         {
