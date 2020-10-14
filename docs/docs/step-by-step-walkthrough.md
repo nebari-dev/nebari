@@ -1,9 +1,9 @@
 # Step by Step QHub Cloud Deployment
 
 This guide makes the following assumptions:
-- [Github actions](https://github.com/features/actions) will be used for CICD
-- Oauth will be [via github](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps) using [auth0](https://auth0.com/)
-- DNS registry will be through [Cloudflare](https://www.cloudflare.com/)
+- [Github actions] will be used for CICD
+- Oauth will be [via github]using [auth0]
+- DNS registry will be through [Cloudflare]
 
 Other providers can be used, but you will need consult their documention on setting up oauth and DNS registry.
 
@@ -12,14 +12,14 @@ Other providers can be used, but you will need consult their documention on sett
 
     Set the required environment variables based on your choice of provider below:
 
-- [AWS Environment Variables](https://github.com/Quansight/qhub/blob/ft-docs/docs/docs/aws/installation.md).
-- [Digital Ocean Environment Variables](https://github.com/Quansight/qhub/blob/ft-docs/docs/docs/do/installation.md)
-- [Google Cloud Platform](https://github.com/Quansight/qhub/blob/ft-docs/docs/docs/gcp/installation.md)
+- [AWS Environment Variables]
+- [Digital Ocean Environment Variables]
+- [Google Cloud Platform]
 
     After this step, you are ready to initialize `QHub`
 
 2) **Create Cloudflare account**
-    To set up your DNS and automatically get a certificate, you will need to create a [Cloudflare](https://dash.cloudflare.com/sign-up) account and register a [domain name](https://www.cloudflare.com/products/registrar/). 
+    To set up your DNS and automatically get a certificate, you will need to create a [Cloudflare][Cloudflare_signup] account and register a [domain name]. 
 
 3) **Configure QHub**
     In your terminal, enter the command `qhub init` followed by the abbreviation of your cloud provider. (do: Digital Ocean, aws: Amazon Web Services, gcp: Google Cloud Platform). This will create  a `qhub-config.yaml` file in your folder.
@@ -43,7 +43,7 @@ Other providers can be used, but you will need consult their documention on sett
      ```
     domain: testing.qhub.dev
     ``` 
-    Create an [oauth application](https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps) in github and fill in the client_id and client_secret.
+    Create an [oauth application] in github and fill in the client_id and client_secret.
          
      ```
     client_id: "7b88..."
@@ -107,7 +107,7 @@ Other providers can be used, but you will need consult their documention on sett
     Take IP Address Above and update DNS to point to "jupyter.testing.qhub.dev" [Press Enter when Complete]
     ```
     
-     While [recording your DNS](https://support.cloudflare.com/hc/en-us/articles/360019093151-Managing-DNS-records-in-Cloudflare) on Cloudflare, click on **Proxy Status** and change it to **DNS only**.
+     While [recording your DNS] on Cloudflare, click on **Proxy Status** and change it to **DNS only**.
  
     If you are using AWS you will get a CNAME instead of an IP address. Change the type from **A** to **CNAME** in cloudflare to update the DNS
 
@@ -140,5 +140,16 @@ Other providers can be used, but you will need consult their documention on sett
     
     Congratulations! You have now completed your QHub cloud deployment!
 
+[Github actions]: https://github.com/features/actions
+[via github]: https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps
+[auth0]: https://auth0.com/
+[Cloudflare]: https://www.cloudflare.com/
+[AWS Environment Variables]: https://github.com/Quansight/qhub/blob/ft-docs/docs/docs/aws/installation.md
+[Digital Ocean Environment Variables]: https://github.com/Quansight/qhub/blob/ft-docs/docs/docs/do/installation.md
+[Google Cloud Platform]: https://github.com/Quansight/qhub/blob/ft-docs/docs/docs/gcp/installation.md
+[Cloudflare_signup]: https://dash.cloudflare.com/sign-up
+[domain name]: https://www.cloudflare.com/products/registrar/
 [github_oath]: https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/
 [doctl]: https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/
+[oauth application]: https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps
+[recording your DNS]: https://support.cloudflare.com/hc/en-us/articles/360019093151-Managing-DNS-records-in-Cloudflare
