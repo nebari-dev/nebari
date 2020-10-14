@@ -71,12 +71,10 @@ QHub gives you the ability to select from available cloud providers: [**Amazon W
 # more information about QHub
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 0
 :glob:
 
 docs/step-by-step-walkthrough.md
-docs/aws/configuration
 docs/do/configuration
-docs/gcp/configuration
 docs/faqs
 ```
