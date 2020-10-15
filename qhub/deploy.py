@@ -27,7 +27,7 @@ def guided_install(config):
 
     # 01 Verify configuration file exists
     if not path.exists("qhub-config.yaml"):
-        raise Exception('Configuration file "qhub-ops-config.yaml" does not exist')
+        raise Exception('Configuration file "qhub-config.yaml" does not exist')
 
     # 02 Check if Terraform works
     if which("terraform") is None:
