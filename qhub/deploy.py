@@ -110,7 +110,7 @@ def guided_install(config):
 
     # 08 Update DNS to point to qhub deployment
     input(
-        f'Take IP Address Above and update DNS to point to "jupyter.{{ cookiecutter.domain }}" [Press Enter when Complete]'
+        f'Take IP Address Above and update DNS to point to "jupyter.{config["domain"]}" [Press Enter when Complete]'
     )
 
     # 09 Full deploy QHub
