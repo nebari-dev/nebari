@@ -1,7 +1,11 @@
 import yaml
 import pathlib
 import logging
+from os import path, environ
+import os
 import re
+from subprocess import check_output
+from shutil import which
 
 from qhub.render import render_default_template
 from qhub.provider.oauth import auth0
@@ -15,50 +19,95 @@ logger = logging.getLogger(__name__)
 def deploy_configuration(config):
     logger.info(f'All qhub endpoints will be under *.{config["domain"]}')
 
-    jupyterhub_endpoint = f'jupyter.{config["domain"]}'
-    if (
-        "client_id" not in config["authentication"]["config"]
-        or "client_secret" not in config["authentication"]["config"]
-    ):
-        logger.info(
-            "client_id and client_secret were not specified - dynamically creating oauth client"
+    with timer(logger, "deploying QHub"):
+        guided_install(config)
+
+def guided_install(config):
+    SUPPORTED_VERSIONS = ["v0.13"]
+
+    # 01 Verify configuration file exists
+    if not path.exists("qhub-config.yaml"):
+        raise Exception('Configuration file "qhub-ops-config.yaml" does not exist')
+
+    # 02 Check if Terraform works
+    if which("terraform") is None:
+        raise Exception(
+            f"Please install Terraform with one of the following minor releases: {SUPPORTED_VERSIONS}"
         )
-        with timer(logger, "creating oauth client"):
-            config["authentication"]["config"] = auth0.create_client(
-                jupyterhub_endpoint
+
+    # 03 Check version of Terraform
+    version_out = check_output(["terraform", "--version"]).decode("utf-8")
+    minor_release = re.search(r'v(\d+)\.(\d+)', version_out).group(0)
+
+    if minor_release not in SUPPORTED_VERSIONS:
+        raise Exception(
+            f"Unsupported Terraform version. Supported minor releases: {SUPPORTED_VERSIONS}"
+        )
+
+    # 04 Check Environment Variables
+    if config["provider"] == 'gcp':
+        if "GOOGLE_CREDENTIALS" not in environ:
+            raise Exception(
+                """The environment variable "Google Credentials" doesn't exist. It must be set to the path that contains
+                the GCP credentials json file. Instructions for creating this file can be found here:
+                https://cloud.google.com/iam/docs/creating-managing-service-account-keys
+                """
             )
+    elif config["provider"] == 'aws':
+        if (
+            "AWS_ACCESS_KEY_ID" not in environ
+            or "AWS_SECRET_ACCESS_KEY" not in environ
+            or "AWS_DEFAULT_REGION" not in environ
+        ):
+            print(
+                "The following environment variables are required for AWS: (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION) must be set"
+            )
+    elif config["provider"] == 'do':
+        do_env_docs = "https://qhub.readthedocs.io/en/latest/docs/do/installation.html#environment-variables"
+        required_variables = [
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "SPACES_ACCESS_KEY_ID",
+            "SPACES_SECRET_ACCESS_KEY",
+            "DIGITALOCEAN_TOKEN"
+        ]
 
-    with timer(logger, "rendering template"):
-        tmp_config = pathlib.Path("./config.yaml")
-        with tmp_config.open("w") as f:
-            yaml.dump(config, f)
+        missing_variables = [_ for _ in required_variables if _ not in environ]
 
-        render_default_template(".", tmp_config)
+        if len(missing_variables) > 0:
+            raise Exception(f"""Missing the following required environment variables: {required_variables}
+        \n
+        Please see the documentation for more information: {do_env_docs}
+            """)
 
-    infrastructure_dir = pathlib.Path(config["project_name"]) / "infrastructure"
+        if environ["AWS_ACCESS_KEY_ID"] != environ["SPACES_ACCESS_KEY_ID"]:
+            raise Exception(f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must equal each other.
+            \n
+        See {do_env_docs} for more information""")
 
-    terraform.init(str(infrastructure_dir))
+        if environ["AWS_SECRET_ACCESS_KEY"] != environ["SPACES_SECRET_ACCESS_KEY"]:
+            raise Exception(f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must equal each other.
+            \n
+        See {do_env_docs} for more information""")
+    else:
+        raise Exception("Cloud Provider configuration not supported")
 
-    # ========= boostrap infrastructure ========
-    terraform.apply(
-        str(infrastructure_dir),
-        targets=[
-            "module.kubernetes",
-            "module.kubernetes-initialization",
-            "module.kubernetes-ingress",
-        ],
-    )
 
-    # ============= update dns ================
-    output = terraform.output(str(infrastructure_dir))
-    for key in output:
-        if key.startswith("ingress"):
-            endpoint = f'{key.split("_")[1]}.{config["domain"]}'
-            address = output[key]["value"]
-            if re.fullmatch(r"\d+\.\d+\.\d+\.\d+", address):
-                cloudflare.update_record("qhub.dev", endpoint, "A", address)
-            else:
-                cloudflare.update_record("qhub.dev", endpoint, "CNAME", address)
+    # 05 Check that oauth settings are set
+    input("Ensure that oauth settings are in configuration [Press \"Enter\" to continue]")
 
-    # ======= apply entire infrastructure ========
-    terraform.apply(str(infrastructure_dir))
+    # 06 Create terraform backend remote state bucket
+    os.chdir("terraform-state")
+    os.system("terraform init")
+    os.system("terraform apply -auto-approve")
+
+    # 07 Create qhub initial state (up to nginx-ingress)
+    os.chdir("../infrastructure")
+    os.system("terraform init")
+    os.system("terraform apply -auto-approve -target=module.kubernetes -target=module.kubernetes-initialization -target=module.kubernetes-ingress")
+
+    # 08 Update DNS to point to qhub deployment
+    input(f"Take IP Address Above and update DNS to point to \"jupyter.{{ cookiecutter.domain }}\" [Press Enter when Complete]")
+
+    # 09 Full deploy QHub
+    os.system("terraform apply -auto-approve")
