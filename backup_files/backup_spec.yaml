@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: backup 
+  namespace: testing # Needs cookiecutter
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      name: backup-job
+    spec:
+      containers:
+        - name: backup-testing
+          image: quansight/qhub-backup:126c8eeddd7b
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: home
+              mountPath: /shared_nfs
+          command: ["/bin/sh"]
+          args: [ "-c", "python backup_script.py gs://qhub-datum-backup" ] 
+          # need way to specify backup bucket
+
+      volumes:
+      - name: home
+        persistentVolumeClaim:
+          claimName: nfs-mount-testing-share
+      restartPolicy: Never
