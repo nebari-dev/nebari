@@ -79,7 +79,7 @@ Other providers can be used, but you will need consult their documention on sett
     The below example will create the directory `qhub-deployment` and fill it with the necessary files.
 
     ```
-    $ qhub-render -c qhub qhub_config.yaml -o qhub-deployment -f
+    $ qhub-render -c qhub_config.yaml -o qhub-deployment -f
     ```
     
     Move the config file into the output directory
