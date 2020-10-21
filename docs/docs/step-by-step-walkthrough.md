@@ -160,10 +160,10 @@ Then you will be prompted with
 
         Take IP Address Above and update DNS to point to "jupyter.testing.qhub.dev" [Press Enter when Complete]
     
-Login to your DNS provider (e.g. Cloudflare) and make the DNS entry with the information above. For AWS add a CNAME, for DO and GCP add a type "A" entry. 
-While [recording your DNS] on Cloudflare, click on **Proxy Status** and change it to **DNS only**.
+Login to your DNS provider and make the DNS entry with the information above. For AWS add a CNAME, for DO and GCP add a type "A" entry. 
+When [recording your DNS] on Cloudflare, click on **Proxy Status** and change it to **DNS only**.
  
-Once the domain name is registered, wait until the DNS has been updated. You can check on your DNS status with the linux command `dig` followed by your url. The ip address or CNAME will show in the output of the command when DNS registry is complete.
+When the DNS entries are made, wait until the DNS has been updated. You can check on your DNS status with the linux command `dig` followed by your url. The ip address or CNAME will show in the output of the command when DNS registry is complete.
 
 Press **Enter** when the DNS is registered to complete the deployment.
 
