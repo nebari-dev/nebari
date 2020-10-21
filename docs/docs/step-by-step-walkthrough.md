@@ -133,31 +133,39 @@ The render step will use `qhub_config.yaml` as a template to create an output fo
 
 ## 3. Deployment and DNS registry
 
-The following script will check environment variables, deploy the infrastructure, and prompt for DNS registry
-    ```
-    $ python scripts/00-guided-install.py
-    Ensure that oauth settings are in configuration [Press \"Enter\" to continue]
-    ```
+The following command  will check environment variables, deploy the infrastructure, and prompt for DNS registry
 
-    Press enter to verify the oauth has been configured. The first stage of deployment will begin and there will be many lines of output text. After a few minutes, you will be prompted to set your DNS. This output will show based on the the domain example above:
-    ```
-    Outputs:
+        $ qhub deploy -c qhub_config.yaml 
 
-    ingress_jupyter = {
-    "hostname" = ""
-    "ip" = "xxx.xxx.xxx.xxx"
-    }
+Press `enter` to verify the oauth has been configured. The first stage of deployment will begin and there will be many lines of output text. After a few minutes, you will be prompted to set your DNS. This output will show an "ip" address (DO/GCP) or a CNAME "hostname" (AWS) based on the the cloud service provider:
 
-    Take IP Address Above and update DNS to point to "jupyter.testing.qhub.dev" [Press Enter when Complete]
-    ```
+    Digital Ocean/Google Cloud Platform:
+       
+        Outputs:
+
+        ingress_jupyter = {
+        "hostname" = ""
+        "ip" = "xxx.xxx.xxx.xxx"
+        }
+
+    AWS:       
+        Outputs:
+
+        ingress_jupyter = {
+        "hostname" = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxx.us-east-1.elb.amazonaws.com"
+        "ip" = ""
+        }
+
+Then you will be prompted with 
+
+        Take IP Address Above and update DNS to point to "jupyter.testing.qhub.dev" [Press Enter when Complete]
     
-     While [recording your DNS] on Cloudflare, click on **Proxy Status** and change it to **DNS only**.
+Login to your DNS provider (e.g. Cloudflare) and make the DNS entry with the information above. For AWS add a CNAME, for DO and GCP add a type "A" entry. 
+While [recording your DNS] on Cloudflare, click on **Proxy Status** and change it to **DNS only**.
  
-    If you are using AWS you will get a CNAME instead of an IP address. Change the type from **A** to **CNAME** in cloudflare to update the DNS
+Once the domain name is registered, wait until the DNS has been updated. You can check on your DNS status with the linux command `dig` followed by your url. The ip address or CNAME will show in the output of the command when DNS registry is complete.
 
-    Once the domain name is registered, wait until the DNS has been updated. You can check on your DNS status with the linux command `dig` followed by your url. The ip address or CNAME will show in the output of the command when DNS registry is complete.
-
-    Press **Enter** when the DNS is registered to complete the deployment
+Press **Enter** when the DNS is registered to complete the deployment.
 
 
 ## 4. **Set up  github repository**
