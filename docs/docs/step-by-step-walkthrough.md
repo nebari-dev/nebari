@@ -51,11 +51,10 @@ To set up your DNS and automatically get a certificate, you can create a [Cloudf
 
 In your terminal, where the environment variables from Step **1** are set, enter the command `qhub init` followed by the abbreviation of your cloud provider. (do: Digital Ocean, aws: Amazon Web Services, gcp: Google Cloud Platform). This will create  a `qhub-config.yaml` file in your folder.
 
-    ```
-    $ qhub init do    # Digital Ocean
-    $ qhub init aws   # Amazon Web Services
-    $ qhub init gcp   # Google Cloud Platform
-    ```
+
+        $ qhub init do    # Digital Ocean
+        $ qhub init aws   # Amazon Web Services
+        $ qhub init gcp   # Google Cloud Platform
      
 
 Open the config file, and under the `security` section, add your and optionally other `github usernames` (or the usernames used with your `oauth` application), set a unique `uid` for each username, and set `primary_group` and optionally `secondary_groups` affiliations for the user:
