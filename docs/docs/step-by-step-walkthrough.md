@@ -59,7 +59,7 @@ In your terminal, where the environment variables from Step **1** are set, enter
 
 Open the config file `qhub-config.yaml` for editing.
 
-- Top section:
+#### Top section:
 
 Chose a `project_name` that is a compliant name. E.g. a valid bucket name for AWS.
 
@@ -69,7 +69,7 @@ Set the `domain` field on top of the config file to a domain or sub-domain you o
 
         domain: testing.qhub.dev
         
-- `security` section:
+#### `security` section:
 
 Create an [oauth application] in github and fill in the client_id and client_secret.
              
@@ -93,7 +93,7 @@ Add your and optionally other `github username(s)` (or the usernames used with y
             uid: 1000001
             primary_group: users
              
-- Cloud provider section:
+#### Cloud provider section:
 
 Lastly, make the adjusted changes to configure your cluster in he cloud provider section.
 
