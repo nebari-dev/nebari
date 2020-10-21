@@ -8,7 +8,6 @@ This guide makes the following assumptions:
 
 Other providers can be used, but you will need consult their documention on setting up oauth and DNS registry.
 
-
 ## 1. Installing QHub:
 
 * Via github:
@@ -129,7 +128,6 @@ The render step will use `qhub_config.yaml` as a template to create an output fo
         
     
         $ mv qhub_config.yaml qhub-deployment/
-    
 
 ## 3. Deployment and DNS registry
 
@@ -172,9 +170,9 @@ Press **Enter** when the DNS is registered to complete the deployment.
 
     Create a github personal access token ([github_access_token]) and check the `repo` and `workflow` options under scopes.
 
-    Set the personal access token as a github secret named `REPOSITORY_ACCESS_TOKEN`.
-    
-    All other environment variables that were created in step **1** also need to be added to github as secrets.
+    Copy the personal access token Github Secrets with the label `REPOSITORY_ACCESS_TOKEN`
+
+    All other environment variables that were created in step **1** also need to be added to github as secrets
 
     Create a github repo and push all files to it with the following commands:
     ```
