@@ -9,7 +9,7 @@ This guide makes the following assumptions:
 Other providers can be used, but you will need consult their documention on setting up oauth and DNS registry.
 
 
-## 1) Installing QHub:
+## 1. Installing QHub:
 
 * Via github:
 
