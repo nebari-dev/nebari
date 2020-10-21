@@ -13,14 +13,16 @@ Other providers can be used, but you will need consult their documention on sett
 
 * Via github:
 
+    ```
     git clone git@github.com:Quansight/qhub.git
     cd qhub
     python ./setup.py install
+    ```
 
 * Via pip:
-
+    ```
     pip install qhub
-
+    ```
 
 ## Deployment steps
 
@@ -48,6 +50,7 @@ To set up your DNS and automatically get a certificate, you can create a [Cloudf
 3) **Configure QHub**
 
 In your terminal, where the environment variables from Step **1** are set, enter the command `qhub init` followed by the abbreviation of your cloud provider. (do: Digital Ocean, aws: Amazon Web Services, gcp: Google Cloud Platform). This will create  a `qhub-config.yaml` file in your folder.
+
     ```
     $ qhub init do    # Digital Ocean
     $ qhub init aws   # Amazon Web Services
@@ -55,7 +58,7 @@ In your terminal, where the environment variables from Step **1** are set, enter
     ```
      
 
-Open the config file, and under the `security` section, add your *github usernames* (or those used with `oauth`), set a unique `uid` for each username, and set `primary_group` and optionally `secondary_groups` affiliations for the user:
+Open the config file, and under the `security` section, add your and optionally other `github usernames` (or the usernames used with your `oauth` application), set a unique `uid` for each username, and set `primary_group` and optionally `secondary_groups` affiliations for the user:
          
      ```
     costrouc:
