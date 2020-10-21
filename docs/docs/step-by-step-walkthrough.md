@@ -89,7 +89,7 @@ Add your and optionally other `github username(s)` (or the usernames used with y
             secondary_groups:
                 - billing
                 - admin
-       janeuser:
+        janeuser:
             uid: 1000001
             primary_group: users
              
