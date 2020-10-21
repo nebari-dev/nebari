@@ -57,51 +57,63 @@ In your terminal, where the environment variables from Step **1** are set, enter
         $ qhub init gcp   # Google Cloud Platform
      
 
-Open the config file, and under the `security` section, add your and optionally other `github usernames` (or the usernames used with your `oauth` application), set a unique `uid` for each username, and set `primary_group` and optionally `secondary_groups` affiliations for the user:
-         
-     ```
-    costrouc:
-        uid: 1000
-        primary_group: users
-        secondary_groups:
-            - billing
-    ``` 
+Open the config file `qhub-config.yaml` for editing.
+
+- Top section:
+
+Chose a `project_name` that is a compliant name. E.g. a valid bucket name for AWS.
+
+        project_name: my-jupyterhub
 
 Set the `domain` field on top of the config file to a domain or sub-domain you own in Cloudflare or your existing DNS, e.g. `testing.qhub.dev`: 
 
-     ```
-    domain: testing.qhub.dev
-    ``` 
+        domain: testing.qhub.dev
+        
+- `security` section:
 
 Create an [oauth application] in github and fill in the client_id and client_secret.
-         
-     ```
-    client_id: "7b88..."
-    client_secret: "8edd7f14..."
-    ```
-    
+             
+        client_id: "7b88..."
+        client_secret: "8edd7f14..."
+      
 Set the `oauth_callback_url` by prepending your domain with `jupyter` and appending `/hub/oauth_callback`. Example:
- 
-    ```
-    oauth_callback_url: https://jupyter.testing.qhub.dev/hub/oauth_callback
-    ```
+    
+        oauth_callback_url: https://jupyter.testing.qhub.dev/hub/oauth_callback
+
+Add your and optionally other `github username(s)` (or the usernames used with your `oauth` application), set a unique `uid` for each username, and set `primary_group` and optionally `secondary_groups` affiliations for the user:
+         
+
+        costrouc:
+            uid: 1000000
+            primary_group: users
+            secondary_groups:
+                - billing
+                - admin
+       janeuser:
+            uid: 1000001
+            primary_group: users
+             
+- Cloud provider section:
+
+Lastly, make the adjusted changes to configure your cluster in he cloud provider section.
+
 
 **(Digital Ocean only)**
     
     If your provider is Digital Ocean you will need to install [doctl] and obtain the latest kubernetes version. After installing, run this terminal command:
         
-    ```
-    $ doctl kubernetes options versions
-    Slug            Kubernetes Version
-    1.18.8-do.1     1.18.8
-    1.17.11-do.1    1.17.11
-    1.16.14-do.1    1.16.14
-    ```
+    
+        $ doctl kubernetes options versions
+        Slug            Kubernetes Version
+        1.18.8-do.1     1.18.8
+        1.17.11-do.1    1.17.11
+        1.16.14-do.1    1.16.14
+   
     
     Copy the first line under `Slug` which is the latest version. Enter it into the `kubernetes_version` under the `digital_ocean` section of your config file. 
-    ```
-    kubernetes_version: 1.18.8-do.1
-    ```
+    
+        kubernetes_version: 1.18.8-do.1
+    
 
 4) Render QHub
     
@@ -109,18 +121,19 @@ The render step will use `qhub_config.yaml` as a template to create an output fo
     
     The below example will create the directory `qhub-deployment` and fill it with the necessary files.
 
-    ```
-    $ qhub render -c qhub_config.yaml -o qhub-deployment -f
-    ```
+    
+        $ qhub render -c qhub_config.yaml -o qhub-deployment -f
+    
     
     Move the config file into the output directory
         
-    ```
-    $ mv qhub_config.yaml qhub-deployment/
-    ```
+    
+        $ mv qhub_config.yaml qhub-deployment/
+    
 
-5) **Deployment and DNS registry**
-    The following script will check environment variables, deploy the infrastructure, and prompt for DNS registry
+5) Deployment and DNS registry
+
+The following script will check environment variables, deploy the infrastructure, and prompt for DNS registry
     ```
     $ python scripts/00-guided-install.py
     Ensure that oauth settings are in configuration [Press \"Enter\" to continue]
