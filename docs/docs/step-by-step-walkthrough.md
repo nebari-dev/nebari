@@ -9,7 +9,7 @@ This guide makes the following assumptions:
 Other providers can be used, but you will need consult their documention on setting up oauth and DNS registry.
 
 
-## Installing QHUB:
+## Installing QHub:
 
 * Via github:
 
@@ -24,9 +24,9 @@ Other providers can be used, but you will need consult their documention on sett
     pip install qhub
     ```
 
-## Deployment steps
+## Configuration
 
-1) **Environment variables**
+### 1) **Environment variables**
 
 Set the required environment variables based on your choice of provider:
 
@@ -41,13 +41,13 @@ Set the required environment variables based on your choice of provider:
 
 After this step, you are ready to initialize `QHub`
 
-2) **DNS: Optionally Create a Cloudflare account**
+### 2) **DNS: Optionally Create a Cloudflare account**
     
 This step is necessary if you don't have a DNS with an existing domain for which you can make `CNAME` or `A` entries.
 
 To set up your DNS and automatically get a certificate, you can create a [Cloudflare][Cloudflare_signup] account and register a [domain name]. 
 
-3) **Configure QHub**
+### 3) **Initialize and Configure QHub**
 
 In your terminal, where the environment variables from Step **1** are set, enter the command `qhub init` followed by the abbreviation of your cloud provider. (do: Digital Ocean, aws: Amazon Web Services, gcp: Google Cloud Platform). This will create  a `qhub-config.yaml` file in your folder.
 
@@ -115,7 +115,7 @@ Lastly, make the adjusted changes to configure your cluster in he cloud provider
         kubernetes_version: 1.18.8-do.1
     
 
-4) Render QHub
+### 4) Render QHub
     
 The render step will use `qhub_config.yaml` as a template to create an output folder and generate all the necessary files for deployement. 
     
@@ -131,7 +131,7 @@ The render step will use `qhub_config.yaml` as a template to create an output fo
         $ mv qhub_config.yaml qhub-deployment/
     
 
-5) Deployment and DNS registry
+## 4) Deployment and DNS registry
 
 The following script will check environment variables, deploy the infrastructure, and prompt for DNS registry
     ```
@@ -160,7 +160,7 @@ The following script will check environment variables, deploy the infrastructure
     Press **Enter** when the DNS is registered to complete the deployment
 
 
-6) **Set up  github repository**
+## 5) **Set up  github repository**
 
     Create a github personal access token ([github_access_token]) and check the `repo` and `workflow` options under scopes.
 
@@ -177,7 +177,7 @@ The following script will check environment variables, deploy the infrastructure
     $ git push origin master
     ```
 
-7) **Git ops enabled**
+## 6) **Git ops enabled**
     Since the infrastructure state is reflected in the repository, it allows self-documenting of infrastructure and team members to submit pull requests that can be reviewed before modifying the infrastructure.
 
     To use gitops, make a change to the `qhub-ops.yaml` in a new branch and create pull request into master. When the pull request is merged, it will trigger a deployement of all of those changes to your qhub.
