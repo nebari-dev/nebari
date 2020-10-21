@@ -1,34 +1,61 @@
 # Step by Step QHub Cloud Deployment
 
 This guide makes the following assumptions:
+
 - [Github actions] will be used for CICD
-- Oauth will be [via github]using [auth0]
+- Oauth will be [via github] using [auth0]
 - DNS registry will be through [Cloudflare]
 
 Other providers can be used, but you will need consult their documention on setting up oauth and DNS registry.
 
+
+## Installing QHUB:
+
+* Via github:
+
+    git clone git@github.com:Quansight/qhub.git
+    cd qhub
+    python ./setup.py install
+
+* Via pip:
+
+    pip install qhub
+
+
 ## Deployment steps
+
 1) **Environment variables**
 
-    Set the required environment variables based on your choice of provider below:
+Set the required environment variables based on your choice of provider:
 
-- [AWS Environment Variables]
+- AWS:    (Old instructions for reference: [AWS Environment Variables])
+    
+    * `AWS_ACCESS_KEY_ID`
+    * `AWS_SECRET_ACCESS_KEY`
+    * `AWS_DEFAULT_REGION`
+
 - [Digital Ocean Environment Variables]
 - [Google Cloud Platform]
 
-    After this step, you are ready to initialize `QHub`
+After this step, you are ready to initialize `QHub`
 
-2) **Create Cloudflare account**
-    To set up your DNS and automatically get a certificate, you will need to create a [Cloudflare][Cloudflare_signup] account and register a [domain name]. 
+2) **DNS: Optionally Create a Cloudflare account**
+    
+This step is necessary if you don't have a DNS with an existing domain for which you can make `CNAME` or `A` entries.
+
+To set up your DNS and automatically get a certificate, you can create a [Cloudflare][Cloudflare_signup] account and register a [domain name]. 
 
 3) **Configure QHub**
-    In your terminal, enter the command `qhub init` followed by the abbreviation of your cloud provider. (do: Digital Ocean, aws: Amazon Web Services, gcp: Google Cloud Platform). This will create  a `qhub-config.yaml` file in your folder.
+
+In your terminal, where the environment variables from Step **1** are set, enter the command `qhub init` followed by the abbreviation of your cloud provider. (do: Digital Ocean, aws: Amazon Web Services, gcp: Google Cloud Platform). This will create  a `qhub-config.yaml` file in your folder.
     ```
-    $ qhub init do
+    $ qhub init do    # Digital Ocean
+    $ qhub init aws   # Amazon Web Services
+    $ qhub init gcp   # Google Cloud Platform
     ```
      
 
-    Open the config file, and under the `security` section, add your github usernames and set a unique `uid` for each username.
+Open the config file, and under the `security` section, add your *github usernames* (or those used with `oauth`), set a unique `uid` for each username, and set `primary_group` and optionally `secondary_groups` affiliations for the user:
          
      ```
     costrouc:
@@ -38,24 +65,26 @@ Other providers can be used, but you will need consult their documention on sett
             - billing
     ``` 
 
-    Set the `domain` field on top of the config file to a domain you own in Cloudflare. 
+Set the `domain` field on top of the config file to a domain or sub-domain you own in Cloudflare or your existing DNS, e.g. `testing.qhub.dev`: 
 
      ```
     domain: testing.qhub.dev
     ``` 
-    Create an [oauth application] in github and fill in the client_id and client_secret.
+
+Create an [oauth application] in github and fill in the client_id and client_secret.
          
      ```
     client_id: "7b88..."
     client_secret: "8edd7f14..."
     ```
     
-    Set the `oauth_callback_url` by prepending your domain with `jupyter` and appending `/hub/oauth_callback`. 
+Set the `oauth_callback_url` by prepending your domain with `jupyter` and appending `/hub/oauth_callback`. Example:
+ 
     ```
     oauth_callback_url: https://jupyter.testing.qhub.dev/hub/oauth_callback
     ```
 
-    **(Digital Ocean only)**
+**(Digital Ocean only)**
     
     If your provider is Digital Ocean you will need to install [doctl] and obtain the latest kubernetes version. After installing, run this terminal command:
         
@@ -74,12 +103,12 @@ Other providers can be used, but you will need consult their documention on sett
 
 4) Render QHub
     
-    The render step will use `qhub_config.yaml` as a template to create an output folder and generate all the necessary files for deployement. 
+The render step will use `qhub_config.yaml` as a template to create an output folder and generate all the necessary files for deployement. 
     
     The below example will create the directory `qhub-deployment` and fill it with the necessary files.
 
     ```
-    $ qhub-render -c qhub qhub_config.yaml -o qhub-deployment -f
+    $ qhub render -c qhub_config.yaml -o qhub-deployment -f
     ```
     
     Move the config file into the output directory
