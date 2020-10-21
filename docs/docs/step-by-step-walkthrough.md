@@ -172,9 +172,9 @@ Press **Enter** when the DNS is registered to complete the deployment.
 
     Create a github personal access token ([github_access_token]) and check the `repo` and `workflow` options under scopes.
 
-    Set the environment varibale `REPOSITORY_ACCESS_TOKEN` to the personal access token.
+    Set the personal access token as a github secret named `REPOSITORY_ACCESS_TOKEN`.
     
-    All other environment variables that were created in step **1** also need to be added to github as secrets
+    All other environment variables that were created in step **1** also need to be added to github as secrets.
 
     Create a github repo and push all files to it with the following commands:
     ```
