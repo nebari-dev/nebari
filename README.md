@@ -2,7 +2,19 @@
 
 [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
 
-[`qhub`][qhub] is an opinionated deployment of open source data science infrastructure (eg. [jupyterhub], [dask], and [kubernetes]) on different cloud service providers without vendor lock-in. [`qhub`][qhub] is easy to install and maintain.
+QHub is an open source project from Quansight that enables
+organizations to build and maintain cost-effective and scalable
+compute/data science platforms on-premise or on any cloud provider
+with minimal in-house experience. It is a focused JupyterHub
+distribution that integrates many open source libraries into a
+coherent platform. The components that form QHub can be rearranged and
+customized to support many different enterprise use cases. For more
+information see https://www.quansight.com/post/announcing-qhub.
+
+Quansight LLC is a data science and analytics consulting firm
+specializing in open source software. Quansight was co-founded by
+Travis Oliphant, founder of Anaconda and creator of SciPy, NumPy, and
+Numba. For more information see https://www.quansight.com/about-us.
 
 ## Usage
 
