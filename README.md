@@ -12,8 +12,10 @@ customized to support many different enterprise use cases. For more
 information see https://www.quansight.com/post/announcing-qhub.
 
 Quansight LLC is a data science and analytics consulting firm
-specializing in open source software. Quansight was co-founded by
-Travis Oliphant, founder of Anaconda and creator of SciPy, NumPy, and
+specializing in open source software around the PyData community
+including Jupyter, scikit-learn, Dask, Pandas, PyTorch, NumPy, SciPy,
+and much more.  Quansight was co-founded by Travis Oliphant, founder
+of Anaconda, NumFOCUS, and PyData and creator of SciPy, NumPy, and
 Numba. For more information see https://www.quansight.com/about-us.
 
 ## Usage
