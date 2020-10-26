@@ -1,10 +1,31 @@
 from os import path
+import secrets
 
 
 def create_init_subcommand(subparser):
     subparser = subparser.add_parser("init")
     subparser.add_argument(
-        "platform", help="Cloud platform where QHub needs to deployed!", type=str
+        "platform", help="Cloud platform where QHub needs to deployed!",
+        type=str, choices=['do', 'gcp', 'aws',
+    )
+    subparser.add_argument(
+        '--project', help='Namespace to assign to qhub resources'
+    )
+    subparser.add_argument(
+        '--domain', help='Domain for jupyterhub clister to be deployed under'
+    )
+    subparser.add_argument(
+        '--ci--provider', choices=['github-actions'],
+        help='continuous integration to use for infrastructure as code'
+    )
+    subparser.add_argument(
+        '--oauth--provider', choices=['github', 'auth0'],
+        default='github',
+        help='oauth provider to use for authentication'
+    )
+    subparser.add_argument(
+        '--oauth-provision', action='store_true',
+        help='If true init will attempt to automatically provision oauth. Required environment variables AUTH0_CLIENTID, AUTH0_CLIENT_SECRET',
     )
     subparser.set_defaults(func=handle_init)
 
