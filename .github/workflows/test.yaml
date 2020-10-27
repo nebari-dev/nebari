@@ -28,6 +28,7 @@ jobs:
       - name: Black Formatting
         run: |
           black --version
+          black qhub --diff
           black --check qhub
       - name: Flake8 Formatting
         run: |
