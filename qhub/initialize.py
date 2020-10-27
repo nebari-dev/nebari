@@ -1,3 +1,6 @@
+from qhub.provider.oauth.auth0 import create_client
+
+
 BASE_CONFIGURATION = {
     'project_name': None,
     'provider': None,
@@ -101,6 +104,29 @@ GOOGLE_PLATFORM = {
     }
 }
 
+AMAZON_WEB_SERVICES = {
+    'region': 'us-west-2',
+    'availability_zones': ['us-west-2a', 'us-west-2b'],
+    'kubernetes_version': '1.14',
+    'node_groups': {
+        'general': {
+            'instance': 'm5.large',
+            'min_nodes': 1,
+            'max_nodes': 1,
+        },
+        'user': {
+            'instance': 'm5.large',
+            'min_nodes': 1,
+            'max_nodes': 2,
+        },
+        'worker': {
+            'instance': 'm5.large',
+            'min_nodes': 1,
+            'max_nodes': 2,
+        }
+    }
+}
+
 DEFAULT_PROFILES = {
     'jupyterhub': [
         {
@@ -167,8 +193,51 @@ DEFAULT_ENVIRONMENTS = {
 }
 
 
-def initialize_config(project_name, qhub_domain, cloud_provider, ci_provider, oauth_provider):
+def render_config(project_name, qhub_domain, cloud_provider, ci_provider, oauth_provider, oauth_auto_provision):
     config = BASE_CONFIGURATION
     config['provider'] = cloud_provider
+    config['ci_cd'] = ci_provider
+
+    if project_name is None:
+        project_name = input('Provide project name: ')
     config['project_name'] = project_name
-    cofnig
+
+    if qhub_domain is None:
+        qhub_domain = input('Provide domain jupyter.<domain name>: ')
+    config['domain'] = qhub_domain
+    oauth_callback_url = f'https://jupyter.{qhub_domain}/hub/oauth_callback'
+
+    if oauth_provider == 'github':
+        config['security']['authentication'] = OAUTH_GITHUB
+        print('Visit https://github.com/settings/developers and create oauth application')
+        print(f'  set the homepage to: https://jupyter.{qhub_domain}/')
+        print(f'  set the callback_url to: {oauth_callback_url}')
+        config['security']['authentication']['config']['client_id'] = input('Github client_id: ')
+        config['security']['authentication']['config']['client_id'] = input('Github client_secret: ')
+        config['security']['authentication']['config']['oauth_callback_url'] = oauth_callback_url
+    elif oauth_provider == 'auth0':
+        config['security']['authentication'] = OAUTH_AUTH0
+        config['security']['authentication']['config']['oauth_callback_url'] = oauth_callback_url
+
+    if cloud_provider == 'do':
+        config['digital_ocean'] = DIGITAL_OCEAN
+    elif cloud_provider == 'gcp':
+        config['google_cloud_platform'] = GOOGLE_PLATFORM
+    elif cloud_provider == 'aws':
+        config['amazon_web_services'] = AMAZON_WEB_SERVICES
+
+    config['profiles'] = DEFAULT_PROFILES
+    config['environments'] = DEFAULT_ENVIRONMENTS
+
+    if oauth_auto_provision:
+        if oauth_provider == 'auth0':
+            auth0_auto_provision(config)
+
+    return config
+
+
+def auth0_auto_provision(config):
+    auth0_config = create_client(f"jupyter.{config['domain']}", config['project_name'])
+    config['security']['authentication']['config']['client_id'] = auth0_config['client_id']
+    config['security']['authentication']['config']['client_secret'] = auth0_config['client_secret']
+    config['security']['authentication']['config']['auth0_subdomain'] = auth0_config['auth0_subdomain']
