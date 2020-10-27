@@ -178,16 +178,17 @@ def render_config(
     ci_provider,
     oauth_provider,
     oauth_auto_provision,
+    disable_prompt,
 ):
     config = BASE_CONFIGURATION
     config["provider"] = cloud_provider
     config["ci_cd"] = ci_provider
 
-    if project_name is None:
+    if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
     config["project_name"] = project_name
 
-    if qhub_domain is None:
+    if qhub_domain is None and not disable_prompt:
         qhub_domain = input("Provide domain jupyter.<domain name>: ")
     config["domain"] = qhub_domain
     oauth_callback_url = f"https://jupyter.{qhub_domain}/hub/oauth_callback"
@@ -199,15 +200,16 @@ def render_config(
         )
         print(f"  set the homepage to: https://jupyter.{qhub_domain}/")
         print(f"  set the callback_url to: {oauth_callback_url}")
-        config["security"]["authentication"]["config"]["client_id"] = input(
-            "Github client_id: "
-        )
-        config["security"]["authentication"]["config"]["client_id"] = input(
-            "Github client_secret: "
-        )
-        config["security"]["authentication"]["config"][
-            "oauth_callback_url"
-        ] = oauth_callback_url
+        if not disable_prompt:
+            config["security"]["authentication"]["config"]["client_id"] = input(
+                "Github client_id: "
+            )
+            config["security"]["authentication"]["config"]["client_id"] = input(
+                "Github client_secret: "
+            )
+            config["security"]["authentication"]["config"][
+                "oauth_callback_url"
+            ] = oauth_callback_url
     elif oauth_provider == "auth0":
         config["security"]["authentication"] = OAUTH_AUTH0
         config["security"]["authentication"]["config"][
@@ -220,7 +222,7 @@ def render_config(
         config["google_cloud_platform"] = GOOGLE_PLATFORM
         if "PROJECT_ID" in os.environ:
             config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
-        else:
+        elif not disable_prompt:
             config["google_cloud_platform"]["project"] = input(
                 "Enter Google Cloud Platform Project ID: "
             )

@@ -1,17 +1,23 @@
 import pytest
 
-from qhub.cli.initialize import generate_qhub_config
+from qhub.initialize import render_config
 
 
 @pytest.mark.parametrize(
-    "config_filename",
+    "project, domain, cloud_provider, ci_provider, oauth_provider",
     [
-        "qhub/template/configs/config_aws.yaml",
-        "qhub/template/configs/config_gcp.yaml",
-        "qhub/template/configs/config_do.yaml",
+        ('do-pytest', 'do.qhub.dev', 'do', 'github-actions', 'github'),
+        ('aws-pytest', 'aws.qhub.dev', 'aws', 'github-actions', 'github'),
+        ('gcp-pytest', 'gcp.qhub.dev', 'gcp', 'github-actions', 'github'),
     ],
 )
-def test_init(config_filename, tmp_path):
-    out = tmp_path / "test"
-
-    generate_qhub_config(config_filename, out)
+def test_init(project, domain, cloud_provider, ci_provider, oauth_provider):
+    render_config(
+        project_name=project,
+        qhub_domain=domain,
+        cloud_provider=cloud_provider,
+        ci_provider=ci_provider,
+        oauth_provider=oauth_provider,
+        oauth_auto_provision=False,
+        disable_prompt=True,
+    )

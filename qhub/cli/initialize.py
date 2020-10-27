@@ -32,6 +32,11 @@ def create_init_subcommand(subparser):
         action="store_true",
         help="Attempt to automatically provision oauth. For Auth0 is requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
     )
+    subparser.add_argument(
+        "--disable-prompt",
+        action="store_true",
+        help="Never prompt user for input instead leave PLACEHOLDER",
+    )
     subparser.set_defaults(func=handle_init)
 
 
@@ -43,6 +48,7 @@ def handle_init(args):
         ci_provider=args.ci_provider,
         oauth_provider=args.oauth_provider,
         oauth_auto_provision=args.oauth_auto_provision,
+        disable_prompt=args.disable_prompt,
     )
 
     with open("qhub-config.yaml", "x") as f:

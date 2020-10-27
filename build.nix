@@ -21,10 +21,10 @@ pythonPackages.buildPythonPackage {
   ];
 
   checkPhase = ''
-    # black qhub --check
+    black qhub --diff
 
-    # flake8
+    flake8
 
-    # pytest
+    pytest
   '';
 }
