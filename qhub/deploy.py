@@ -9,9 +9,9 @@ from shutil import which
 from qhub.utils import timer, change_directory
 from qhub.provider.dns.cloudflare import update_record
 
-DO_ENV_DOCS = 'https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables'
-AWS_ENV_DOCS = 'https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables'
-GCP_ENV_DOCS = 'https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables'
+DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
+AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
+GCP_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables"
 
 
 logger = logging.getLogger(__name__)
@@ -55,7 +55,11 @@ def guided_install(config, dns_provider, dns_auto_provision):
                     Please see the documentation for more information: {GCP_ENV_DOCS}"""
                 )
     elif config["provider"] == "aws":
-        for variable in {"AWS_ACCESS_KEY_ID", "AWS_ACCESS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION"}:
+        for variable in {
+            "AWS_ACCESS_KEY_ID",
+            "AWS_ACCESS_SECRET_ACCESS_KEY",
+            "AWS_DEFAULT_REGION",
+        }:
             if variable not in os.environ:
                 raise Exception(
                     f"""Missing the following required environment variable: {variable}\n
@@ -63,11 +67,12 @@ def guided_install(config, dns_provider, dns_auto_provision):
                 )
     elif config["provider"] == "do":
         for variable in {
-                "AWS_ACCESS_KEY_ID",
-                "AWS_SECRET_ACCESS_KEY",
-                "SPACES_ACCESS_KEY_ID",
-                "SPACES_SECRET_ACCESS_KEY",
-                "DIGITALOCEAN_TOKEN"}:
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "SPACES_ACCESS_KEY_ID",
+            "SPACES_SECRET_ACCESS_KEY",
+            "DIGITALOCEAN_TOKEN",
+        }:
             if variable not in os.environ:
                 raise Exception(
                     f"""Missing the following required environment variable: {variable}\n
@@ -80,7 +85,10 @@ def guided_install(config, dns_provider, dns_auto_provision):
                 See {DO_ENV_DOCS} for more information"""
             )
 
-        if os.environ["AWS_SECRET_ACCESS_KEY"] != os.environ["SPACES_SECRET_ACCESS_KEY"]:
+        if (
+            os.environ["AWS_SECRET_ACCESS_KEY"]
+            != os.environ["SPACES_SECRET_ACCESS_KEY"]
+        ):
             raise Exception(
                 f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must be equal\n
                 See {DO_ENV_DOCS} for more information"""
@@ -113,7 +121,10 @@ def guided_install(config, dns_provider, dns_auto_provision):
 
     # 08 Update DNS to point to qhub deployment
     if dns_auto_provision and dns_provider == "cloudflare":
-        record_name, zone_name = config["domain"].split(".")[:-2], config["domain"].split(".")[-2:]
+        record_name, zone_name = (
+            config["domain"].split(".")[:-2],
+            config["domain"].split(".")[-2:],
+        )
         record_name = f'jupyter.{".".join(record_name)}'
         zone_name = ".".join(zone_name)
         ip = output["ingress_jupyter"]["value"]["ip"]

@@ -191,10 +191,12 @@ def render_config(
         config["digital_ocean"] = DIGITAL_OCEAN
     elif cloud_provider == "gcp":
         config["google_cloud_platform"] = GOOGLE_PLATFORM
-        if 'PROJECT_ID' in os.environ:
-            config["google_cloud_platform"]['project'] = os.environ['PROJECT_ID']
+        if "PROJECT_ID" in os.environ:
+            config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
         else:
-            config["google_cloud_platform"]['project'] = input('Enter Google Cloud Platform Project ID: ')
+            config["google_cloud_platform"]["project"] = input(
+                "Enter Google Cloud Platform Project ID: "
+            )
     elif cloud_provider == "aws":
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
 
