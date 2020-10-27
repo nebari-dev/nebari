@@ -136,8 +136,7 @@ def prompt_gcp_config(config):
     config["google_cloud_platform"]["node_groups"] = {}
     for node_group in DEFAULT_CONFIGURATION["node_groups"]:
         instance_type = prompt_dict(
-            f"{node_group} node group instance type",
-            google_cloud.instances(project),
+            f"{node_group} node group instance type", google_cloud.instances(project),
         )
         min_nodes = prompt_range(f"{node_group} node group min nodes", 0, 999_999, 1)
         max_nodes = prompt_range(

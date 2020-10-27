@@ -12,12 +12,14 @@ def create_deploy_subcommand(subparser):
     subparser = subparser.add_parser("deploy")
     subparser.add_argument("-c", "--config", help="qhub configuration", required=True)
     subparser.add_argument(
-        '--dns-provider', choices=['cloudflare'],
-        help='dns provider to use for registering domain name mapping'
+        "--dns-provider",
+        choices=["cloudflare"],
+        help="dns provider to use for registering domain name mapping",
     )
     subparser.add_argument(
-        '--dns-auto-provision', action='store_true',
-        help='Attempt to automatically provision DNS. For Auth0 is requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET',
+        "--dns-auto-provision",
+        action="store_true",
+        help="Attempt to automatically provision DNS. For Auth0 is requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
     )
     subparser.set_defaults(func=handle_deploy)
 

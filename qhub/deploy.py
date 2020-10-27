@@ -17,7 +17,7 @@ def deploy_configuration(config, dns_provider, dns_auto_provision):
     logger.info(f'All qhub endpoints will be under *.{config["domain"]}')
 
     with timer(logger, "deploying QHub"):
-        guided_install(config)
+        guided_install(config, dns_provider, dns_auto_provision)
 
 
 def guided_install(config, dns_provider, dns_auto_provision):
@@ -100,35 +100,37 @@ def guided_install(config, dns_provider, dns_auto_provision):
     input('Ensure that oauth settings are in configuration [Press "Enter" to continue]')
 
     # 06 Create terraform backend remote state bucket
-    with change_directory('terraform-state'):
-        check_output(['terraform', 'init'])
-        check_output(['terraform', 'apply', '-auto-approve'])
+    with change_directory("terraform-state"):
+        check_output(["terraform", "init"])
+        check_output(["terraform", "apply", "-auto-approve"])
 
     # 07 Create qhub initial state (up to nginx-ingress)
-    with change_directory('infrastructure'):
-        check_output(['terraform', 'init'])
-        check_output([
-            "terraform", "apply", "-auto-approve",
-            "-target=module.kubernetes",
-            "-target=module.kubernetes-initialization",
-            "-target=module.kubernetes-ingress"
-        ])
-        output = json.loads(check_output([
-            "terraform", "output", "--json"
-        ]))
+    with change_directory("infrastructure"):
+        check_output(["terraform", "init"])
+        check_output(
+            [
+                "terraform",
+                "apply",
+                "-auto-approve",
+                "-target=module.kubernetes",
+                "-target=module.kubernetes-initialization",
+                "-target=module.kubernetes-ingress",
+            ]
+        )
+        output = json.loads(check_output(["terraform", "output", "--json"]))
 
     # 08 Update DNS to point to qhub deployment
-    if dns_auto_provision and dns_provider == 'cloudflare':
-        record_name, zone_name = config['domain'].split('.')
+    if dns_auto_provision and dns_provider == "cloudflare":
+        record_name, zone_name = config["domain"].split(".")
         record_name = f'jupyter.{".".join(record_name)}'
-        zone_name = '.'.join(zone_name)
-        ip = output['ingress_jupyter']['value']['ip']
-        if config['provider'] in {'do', 'gcp'}:
-            update_record(zone_name, record_name, 'A', ip)
+        zone_name = ".".join(zone_name)
+        ip = output["ingress_jupyter"]["value"]["ip"]
+        if config["provider"] in {"do", "gcp"}:
+            update_record(zone_name, record_name, "A", ip)
     else:
         input(
             f'Take IP Address Above and update DNS to point to "jupyter.{config["domain"]}" [Press Enter when Complete]'
         )
 
     # 09 Full deploy QHub
-    check_output(['terraform', 'apply', '-auto-approve'])
+    check_output(["terraform", "apply", "-auto-approve"])
