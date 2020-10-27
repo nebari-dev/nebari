@@ -14,7 +14,7 @@ def update_record(zone_name, record_name, record_type, record_address):
                 f"Cloudflare required environment variable={variable} not defined"
             )
 
-    cf = CloudFlare.CloudFlare(token=os.environ["CLOUDFLARE_API_TOKEN"])
+    cf = CloudFlare.CloudFlare(token=os.environ["CLOUDFLARE_TOKEN"])
 
     record = {
         "name": record_name,

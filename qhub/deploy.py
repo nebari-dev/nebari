@@ -1,5 +1,5 @@
 import logging
-from os import path, environ
+from os import path
 import os
 import re
 import json
@@ -8,6 +8,10 @@ from shutil import which
 
 from qhub.utils import timer, change_directory
 from qhub.provider.dns.cloudflare import update_record
+
+DO_ENV_DOCS = 'https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables'
+AWS_ENV_DOCS = 'https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables'
+GCP_ENV_DOCS = 'https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables'
 
 
 logger = logging.getLogger(__name__)
@@ -44,54 +48,42 @@ def guided_install(config, dns_provider, dns_auto_provision):
 
     # 04 Check Environment Variables
     if config["provider"] == "gcp":
-        if "GOOGLE_CREDENTIALS" not in environ:
-            raise Exception(
-                """The environment variable "Google Credentials" doesn't exist. It must be set to the path that contains
-                the GCP credentials json file. Instructions for creating this file can be found here:
-                https://cloud.google.com/iam/docs/creating-managing-service-account-keys
-                """
-            )
+        for variable in {"GOOGLE_CREDENTIALS"}:
+            if variable not in os.environ:
+                raise Exception(
+                    f"""Missing the following required environment variable: {variable}\n
+                    Please see the documentation for more information: {GCP_ENV_DOCS}"""
+                )
     elif config["provider"] == "aws":
-        if (
-            "AWS_ACCESS_KEY_ID" not in environ
-            or "AWS_SECRET_ACCESS_KEY" not in environ
-            or "AWS_DEFAULT_REGION" not in environ
-        ):
-            print(
-                "The following environment variables are required for AWS: (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION) must be set"
-            )
+        for variable in {"AWS_ACCESS_KEY_ID", "AWS_ACCESS_SECRET_ACCESS_KEY", "AWS_DEFAULT_REGION"}:
+            if variable not in os.environ:
+                raise Exception(
+                    f"""Missing the following required environment variable: {variable}\n
+                    Please see the documentation for more information: {AWS_ENV_DOCS}"""
+                )
     elif config["provider"] == "do":
-        do_env_docs = "https://qhub.readthedocs.io/en/latest/docs/do/installation.html#environment-variables"
-        required_variables = [
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "SPACES_ACCESS_KEY_ID",
-            "SPACES_SECRET_ACCESS_KEY",
-            "DIGITALOCEAN_TOKEN",
-        ]
+        for variable in {
+                "AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY",
+                "SPACES_ACCESS_KEY_ID",
+                "SPACES_SECRET_ACCESS_KEY",
+                "DIGITALOCEAN_TOKEN"}:
+            if variable not in os.environ:
+                raise Exception(
+                    f"""Missing the following required environment variable: {variable}\n
+                    Please see the documentation for more information: {DO_ENV_DOCS}"""
+                )
 
-        missing_variables = [_ for _ in required_variables if _ not in environ]
-
-        if len(missing_variables) > 0:
+        if os.environ["AWS_ACCESS_KEY_ID"] != os.environ["SPACES_ACCESS_KEY_ID"]:
             raise Exception(
-                f"""Missing the following required environment variables: {required_variables}
-        \n
-        Please see the documentation for more information: {do_env_docs}
-            """
+                f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must be equal\n
+                See {DO_ENV_DOCS} for more information"""
             )
 
-        if environ["AWS_ACCESS_KEY_ID"] != environ["SPACES_ACCESS_KEY_ID"]:
+        if os.environ["AWS_SECRET_ACCESS_KEY"] != os.environ["SPACES_SECRET_ACCESS_KEY"]:
             raise Exception(
-                f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must equal each other.
-            \n
-        See {do_env_docs} for more information"""
-            )
-
-        if environ["AWS_SECRET_ACCESS_KEY"] != environ["SPACES_SECRET_ACCESS_KEY"]:
-            raise Exception(
-                f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must equal each other.
-            \n
-        See {do_env_docs} for more information"""
+                f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must be equal\n
+                See {DO_ENV_DOCS} for more information"""
             )
     else:
         raise Exception("Cloud Provider configuration not supported")
@@ -121,7 +113,7 @@ def guided_install(config, dns_provider, dns_auto_provision):
 
     # 08 Update DNS to point to qhub deployment
     if dns_auto_provision and dns_provider == "cloudflare":
-        record_name, zone_name = config["domain"].split(".")
+        record_name, zone_name = config["domain"].split(".")[:-2], config["domain"].split(".")[-2:]
         record_name = f'jupyter.{".".join(record_name)}'
         zone_name = ".".join(zone_name)
         ip = output["ingress_jupyter"]["value"]["ip"]
@@ -133,4 +125,5 @@ def guided_install(config, dns_provider, dns_auto_provision):
         )
 
     # 09 Full deploy QHub
-    check_output(["terraform", "apply", "-auto-approve"])
+    with change_directory("infrastructure"):
+        check_output(["terraform", "apply", "-auto-approve"])
