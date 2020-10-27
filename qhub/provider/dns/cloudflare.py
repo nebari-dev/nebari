@@ -8,8 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 def update_record(zone_name, record_name, record_type, record_address):
-    CLOUDFLARE_API_TOKEN = os.environ["CLOUDFLARE_TOKEN"]
-    cf = CloudFlare.CloudFlare(token=CLOUDFLARE_API_TOKEN)
+    for variable in {'CLOUDFLARE_TOKEN'}:
+        if variable not in os.environ:
+            raise ValueError(f'Cloudflare required environment variable={variable} not defined')
+
+    cf = CloudFlare.CloudFlare(token=os.environ['CLOUDFLARE_API_TOKEN'])
 
     record = {
         "name": record_name,
