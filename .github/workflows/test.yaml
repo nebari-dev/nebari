@@ -27,12 +27,15 @@ jobs:
           pip install .[dev]
       - name: Black Formatting
         run: |
+          black --version
           black --check qhub
       - name: Flake8 Formatting
         run: |
+          flake8 --version
           flake8
       - name: Test QHub
         run: |
+          pytest --version
           pytest
 
   test-render-providers:
