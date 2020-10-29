@@ -132,7 +132,7 @@ def guided_install(config, dns_provider, dns_auto_provision):
             update_record(zone_name, record_name, "A", ip)
     else:
         input(
-            f'Take IP Address Above and update DNS to point to "jupyter.{config["domain"]}" [Press Enter when Complete]'
+            f'Take IP Address {output["ingress_jupyter"]["value"]["ip"]} and update DNS to point to "jupyter.{config["domain"]}" [Press Enter when Complete]'
         )
 
     # 09 Full deploy QHub
