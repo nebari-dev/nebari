@@ -97,12 +97,12 @@ def guided_install(config):
     input('Ensure that oauth settings are in configuration [Press "Enter" to continue]')
 
     # 06 Create terraform backend remote state bucket
-    os.chdir("terraform-state")
+    os.chdir(".qhub/terraform-state")
     os.system("terraform init")
     os.system("terraform apply -auto-approve")
 
     # 07 Create qhub initial state (up to nginx-ingress)
-    os.chdir("../infrastructure")
+    os.chdir(".qhub/infrastructure")
     os.system("terraform init")
     os.system(
         "terraform apply -auto-approve -target=module.kubernetes -target=module.kubernetes-initialization -target=module.kubernetes-ingress"
