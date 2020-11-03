@@ -18,11 +18,11 @@ if __name__ == "__main__":
                 yaml.dump(spec, f)
 
     if PROVIDER == "aws":
-        remove_file("infrastructure/do.tf")
-        remove_file("infrastructure/gcp.tf")
+        remove_file(".qhub/infrastructure/do.tf")
+        remove_file(".qhub/infrastructure/gcp.tf")
     elif PROVIDER == "do":
-        remove_file("infrastructure/aws.tf")
-        remove_file("infrastructure/gcp.tf")
+        remove_file(".qhub/infrastructure/aws.tf")
+        remove_file(".qhub/infrastructure/gcp.tf")
     elif PROVIDER == "gcp":
-        remove_file("infrastructure/aws.tf")
-        remove_file("infrastructure/do.tf")
+        remove_file(".qhub/infrastructure/aws.tf")
+        remove_file(".qhub/infrastructure/do.tf")
