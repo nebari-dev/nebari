@@ -1,4 +1,5 @@
-from os import path
+from os import listdir, path
+import shutil
 
 
 def create_init_subcommand(subparser):
@@ -18,20 +19,28 @@ def handle_init(args):
 
     if platform == "aws":
         print("Generating QHub configuration for AWS")
-        generate_qhub_config(path.join(config_dir, "config_aws.yaml"))
+        generate_qhub_config(path.join(config_dir, "aws"))
     elif platform == "gcp":
         print("Generating QHub configuration for GCP")
-        generate_qhub_config(path.join(config_dir, "config_gcp.yaml"))
+        generate_qhub_config(path.join(config_dir, "gcp"))
     elif platform == "do":
         print("Generating QHub configuration for Digital Ocean")
-        generate_qhub_config(path.join(config_dir, "config_do.yaml"))
+        generate_qhub_config(path.join(config_dir, "do"))
     elif platform == "azure":
         print("Work in Progress")
     else:
         print("Only aws | gcp | do are supported!")
 
 
-def generate_qhub_config(config_dir, out):
-    from shutil import copytree
+def copytree(src, dst, symlinks=False, ignore=None):
+    for item in listdir(src):
+        s = path.join(src, item)
+        d = path.join(dst, item)
+        if path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
 
+
+def generate_qhub_config(config_dir, out="./"):
     copytree(config_dir, out)

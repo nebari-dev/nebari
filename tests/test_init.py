@@ -1,17 +1,18 @@
+import os
 import pytest
 
 from qhub.cli.initialize import generate_qhub_config
 
 
 @pytest.mark.parametrize(
-    "config_filename",
+    "config_dir",
     [
         "qhub/template/configs/aws",
         "qhub/template/configs/gcp",
         "qhub/template/configs/do",
     ],
 )
-def test_init(config_filename, tmp_path):
+def test_init(config_dir, tmp_path):
     out = tmp_path / "test"
-
-    generate_qhub_config(config_filename, out)
+    os.mkdir(out)
+    generate_qhub_config(config_dir, out)
