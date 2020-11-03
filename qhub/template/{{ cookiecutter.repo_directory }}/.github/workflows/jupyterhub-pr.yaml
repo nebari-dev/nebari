@@ -6,7 +6,6 @@ on:
       - master
     paths:
       - "infrastructure/**"
-      - "environments/**"
       - ".github/workflows/jupyterhub.yaml"
 
 {% if cookiecutter.provider == 'aws' %}

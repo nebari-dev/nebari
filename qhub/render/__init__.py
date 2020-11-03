@@ -76,9 +76,7 @@ def render_default_template(output_directory, config_dir=None, force=False):
     render_template(input_directory, output_directory, config_dir, force=force)
 
 
-def render_template(
-    input_directory, output_directory, config_dir=None, force=False
-):
+def render_template(input_directory, output_directory, config_dir=None, force=False):
     # would be nice to remove assumption that input directory
     # is in local filesystem
     input_directory = pathlib.Path(input_directory)
@@ -105,7 +103,6 @@ def render_template(
             config["repo_directory"] = repo_directory
             patch_dask_gateway_extra_config(config)
 
-
         with (input_directory / "cookiecutter.json").open() as f:
             config = collections.ChainMap(config, json.load(f))
 
@@ -113,10 +110,7 @@ def render_template(
         for file in os.listdir(f"{config_dir}/environments"):
             environment = yaml.safe_load(open(f"{config_dir}/environments/{file}"))
             config["environments"].append(
-                {
-                    "name": environment["name"],
-                    "value": environment
-                }
+                {"name": environment["name"], "value": environment}
             )
 
         generate_files(
