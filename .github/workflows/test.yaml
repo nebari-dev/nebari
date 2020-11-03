@@ -60,19 +60,19 @@ jobs:
           qhub init "${{ matrix.provider }}"
       - name: QHub Render
         run: |
-          qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
+          qhub render  -o "qhub-${{ matrix.provider }}-deployment"
       - name: 'Terraform Format'
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: 0.13.4
           tf_actions_subcommand: 'fmt'
-          tf_actions_working_dir: 'qhub-${{ matrix.provider }}-deployment/terraform-state'
+          tf_actions_working_dir: 'qhub-${{ matrix.provider }}-deployment/.qhub/terraform-state'
       - name: 'Terraform Format'
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: 0.13.4
           tf_actions_subcommand: 'fmt'
-          tf_actions_working_dir: 'qhub-${{ matrix.provider }}-deployment/infrastructure'
+          tf_actions_working_dir: 'qhub-${{ matrix.provider }}-deployment/.qhub/infrastructure'
       - name: QHub Render Artifact
         uses: actions/upload-artifact@master
         with:
