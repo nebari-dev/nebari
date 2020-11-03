@@ -6,9 +6,9 @@ from qhub.cli.initialize import generate_qhub_config
 @pytest.mark.parametrize(
     "config_filename",
     [
-        "qhub/template/configs/config_aws.yaml",
-        "qhub/template/configs/config_gcp.yaml",
-        "qhub/template/configs/config_do.yaml",
+        "qhub/template/configs/aws",
+        "qhub/template/configs/gcp",
+        "qhub/template/configs/do",
     ],
 )
 def test_init(config_filename, tmp_path):

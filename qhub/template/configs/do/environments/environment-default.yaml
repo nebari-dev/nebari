@@ -1,0 +1,16 @@
+channels:
+- conda-forge
+- defaults
+dependencies:
+- jupyterlab
+- dask-gateway=0.6.1
+- dask==2.14.0
+- distributed==2.14.0
+- ipykernel
+- ipywidgets
+- numba
+- numpy
+- pandas
+- python=3.7
+- tornado=5.1.1
+name: default

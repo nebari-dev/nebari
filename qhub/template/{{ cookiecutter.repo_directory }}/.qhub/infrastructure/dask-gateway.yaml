@@ -6,8 +6,8 @@ gateway:
       # A mapping from profile name to configuration overrides
       profiles = {{ cookiecutter.profiles.dask_worker }}
       environments = [
-      {% for filename, config in cookiecutter.environments.items() %}
-          "{{config['name']}}",
+      {% for environment in cookiecutter.environments %}
+          "{{ environment['name'] }}",
       {% endfor %}
       ]
 

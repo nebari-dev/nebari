@@ -1,8 +1,10 @@
 import pathlib
 import collections
 import json
-
+import os
 import yaml
+
+
 from cookiecutter.main import cookiecutter
 from cookiecutter.generate import generate_files
 
@@ -67,15 +69,15 @@ def deep_merge(d1, d2):
         return d1
 
 
-def render_default_template(output_directory, config_filename=None, force=False):
+def render_default_template(output_directory, config_dir=None, force=False):
     import qhub
 
     input_directory = pathlib.Path(qhub.__file__).parent / "template"
-    render_template(input_directory, output_directory, config_filename, force=force)
+    render_template(input_directory, output_directory, config_dir, force=force)
 
 
 def render_template(
-    input_directory, output_directory, config_filename=None, force=False
+    input_directory, output_directory, config_dir=None, force=False
 ):
     # would be nice to remove assumption that input directory
     # is in local filesystem
@@ -92,8 +94,8 @@ def render_template(
 
     prompt_filename = input_directory / "hooks" / "prompt_gen_project.py"
 
-    if config_filename is not None:
-        filename = pathlib.Path(config_filename)
+    if config_dir is not None:
+        filename = pathlib.Path(f"{config_dir}/qhub-config.yaml")
 
         if not filename.is_file():
             raise ValueError(f"cookiecutter configuration={filename} is not filename")
@@ -103,8 +105,19 @@ def render_template(
             config["repo_directory"] = repo_directory
             patch_dask_gateway_extra_config(config)
 
+
         with (input_directory / "cookiecutter.json").open() as f:
             config = collections.ChainMap(config, json.load(f))
+
+        config["environments"] = []
+        for file in os.listdir(f"{config_dir}/environments"):
+            environment = yaml.safe_load(open(f"{config_dir}/environments/{file}"))
+            config["environments"].append(
+                {
+                    "name": environment["name"],
+                    "value": environment
+                }
+            )
 
         generate_files(
             repo_dir=str(input_directory),
