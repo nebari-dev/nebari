@@ -1,24 +1,17 @@
 # Step by Step QHub Cloud Deployment
 
-This guide makes the following assumptions:
-
-- [Github actions] will be used for CICD
-- Oauth will be [via github] using [auth0]
-- DNS registry will be through [Cloudflare]
-
-Other providers can be used, but you will need consult their documention on setting up oauth and DNS registry.
-
 ## 1. Installing QHub:
 
-* Via github:
+Choose between: 
+
+*  Latest development release:
 
     ```
-    git clone git@github.com:Quansight/qhub.git
-    cd qhub
-    python ./setup.py install
+    pip install git+https://github.com/Quansight/qhub.git
     ```
 
-* Via pip:
+*  Latest stable release:
+
     ```
     pip install qhub
     ```
@@ -29,16 +22,13 @@ Other providers can be used, but you will need consult their documention on sett
 
 Set the required environment variables based on your choice of provider:
 
-- AWS:    (Old instructions for reference: [AWS Environment Variables])
-    
-    * `AWS_ACCESS_KEY_ID`
-    * `AWS_SECRET_ACCESS_KEY`
-    * `AWS_DEFAULT_REGION`
+- [Amazon Web Services](https://github.com/Quansight/qhub/blob/ft-docs/docs/docs/aws/installation.md#environment-variables)
 
-- [Digital Ocean Environment Variables]
-- [Google Cloud Platform]
+- [Digital Ocean](https://github.com/Quansight/qhub/blob/ft-docs/docs/docs/do/installation.md#environment-variables)
 
-After this step, you are ready to initialize `QHub`
+- [Google Cloud Platform](https://github.com/Quansight/qhub/blob/ft-docs/docs/docs/gcp/installation.md#environment-variables)
+
+After this step, you are ready to initialize QHub.
 
 ### 2.2. **DNS: Optionally Create a Cloudflare account**
     
@@ -60,7 +50,7 @@ Open the config file `qhub-config.yaml` for editing.
 
 #### Top section:
 
-Chose a `project_name` that is a compliant name. E.g. a valid bucket name for AWS.
+Choose a `project_name` that is a compliant name. E.g. a valid bucket name for AWS.
 
         project_name: my-jupyterhub
 
@@ -68,7 +58,7 @@ Set the `domain` field on top of the config file to a domain or sub-domain you o
 
         domain: testing.qhub.dev
         
-#### `security` section:
+#### Security section:
 
 Create an [oauth application] in github and fill in the client_id and client_secret.
              
@@ -79,22 +69,24 @@ Set the `oauth_callback_url` by prepending your domain with `jupyter` and append
     
         oauth_callback_url: https://jupyter.testing.qhub.dev/hub/oauth_callback
 
-Add your and optionally other `github username(s)` (or the usernames used with your `oauth` application), set a unique `uid` for each username, and set `primary_group` and optionally `secondary_groups` affiliations for the user:
+Add your and optionally other `github username(s)` (or the usernames used with your `oauth` application), set a unique `uid` for each username, and set `primary_group` and optionally `secondary_groups` affiliations for the user. Note,  `admin` should be specified as the `primary_group` for at least one user:
          
-
-        costrouc:
-            uid: 1000000
-            primary_group: users
-            secondary_groups:
-                - billing
-                - admin
         janeuser:
+            uid: 1000000
+            primary_group: admin
+            secondary_groups:
+                - users
+                - billing
+        joeuser:
             uid: 1000001
             primary_group: users
+            secondary_groups:
+                - admin
+            
              
 #### Cloud provider section:
 
-Lastly, make the adjusted changes to configure your cluster in he cloud provider section.
+Customize the type, number and size of your cluster instances.
 
 
 **(Digital Ocean only)**
@@ -116,17 +108,15 @@ Lastly, make the adjusted changes to configure your cluster in he cloud provider
 
 ### 2.4. Render QHub
     
-The render step will use `qhub_config.yaml` as a template to create an output folder and generate all the necessary files for deployement. 
+The render step will use `qhub_config.yaml` as a template to create an output folder and generate all the necessary files for deployment. 
     
-    The below example will create the directory `qhub-deployment` and fill it with the necessary files.
+The below example will create the directory `qhub-deployment` and fill it with the necessary files.
 
     
         $ qhub render -c qhub_config.yaml -o qhub-deployment -f
     
-    
-    Move the config file into the output directory
+Move the config file into the output directory
         
-    
         $ mv qhub_config.yaml qhub-deployment/
 
 ## 3. Deployment and DNS registry
@@ -137,7 +127,7 @@ The following command  will check environment variables, deploy the infrastructu
 
 Press `enter` to verify the oauth has been configured. The first stage of deployment will begin and there will be many lines of output text. After a few minutes, you will be prompted to set your DNS. This output will show an "ip" address (DO/GCP) or a CNAME "hostname" (AWS) based on the the cloud service provider:
 
-    Digital Ocean/Google Cloud Platform:
+Digital Ocean/Google Cloud Platform:
        
         Outputs:
 
@@ -146,7 +136,8 @@ Press `enter` to verify the oauth has been configured. The first stage of deploy
         "ip" = "xxx.xxx.xxx.xxx"
         }
 
-    AWS:       
+AWS:     
+
         Outputs:
 
         ingress_jupyter = {
@@ -158,6 +149,8 @@ Then you will be prompted with
 
         Take IP Address Above and update DNS to point to "jupyter.testing.qhub.dev" [Press Enter when Complete]
     
+(Note: For AWS this should really read `Take the hostname above...`)
+
 Login to your DNS provider and make the DNS entry with the information above. For AWS add a CNAME, for DO and GCP add a type "A" entry. 
 When [recording your DNS] on Cloudflare, click on **Proxy Status** and change it to **DNS only**.
  
@@ -168,13 +161,14 @@ Press **Enter** when the DNS is registered to complete the deployment.
 
 ## 4. **Set up  github repository**
 
-    Create a github personal access token ([github_access_token]) and check the `repo` and `workflow` options under scopes.
+Create a github personal access token ([github_access_token]) and check the `repo` and `workflow` options under scopes.
 
-    Copy the personal access token Github Secrets with the label `REPOSITORY_ACCESS_TOKEN`
+Copy the personal access token Github Secrets with the label `REPOSITORY_ACCESS_TOKEN`
 
-    All other environment variables that were created in step **1** also need to be added to github as secrets
+All other environment variables that were created in step **1** also need to be added to github as secrets
 
-    Create a github repo and push all files to it with the following commands:
+Create a github repo and push all files to it with the following commands:
+
     ```
     $ git init
     $ git remote add origin <repo_url>
@@ -183,12 +177,15 @@ Press **Enter** when the DNS is registered to complete the deployment.
     $ git push origin master
     ```
 
-## 5. **Git ops enabled**
-    Since the infrastructure state is reflected in the repository, it allows self-documenting of infrastructure and team members to submit pull requests that can be reviewed before modifying the infrastructure.
+Note: If you created the repo on github, the default branch is named `main` and you need to create a branch named `master` to push to for github actions to work.
 
-    To use gitops, make a change to the `qhub-ops.yaml` in a new branch and create pull request into master. When the pull request is merged, it will trigger a deployement of all of those changes to your qhub.
+## 5. **Git ops enabled**
+
+Since the infrastructure state is reflected in the repository, it allows self-documenting of infrastructure and team members to submit pull requests that can be reviewed before modifying the infrastructure.
+
+To use gitops, make a change to the `qhub-ops.yaml` in a new branch and create pull request into master. When the pull request is merged, it will trigger a deployement of all of those changes to your qhub.
     
-    Congratulations! You have now completed your QHub cloud deployment!
+Congratulations! You have now completed your QHub cloud deployment!
 
 [Github actions]: https://github.com/features/actions
 [via github]: https://docs.github.com/en/free-pro-team@latest/developers/apps/authorizing-oauth-apps
