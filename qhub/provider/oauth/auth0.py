@@ -4,7 +4,7 @@ from auth0.v3.management import Auth0
 from auth0.v3.authentication import GetToken
 
 
-def create_client(jupyterhub_endpoint, project_name):
+def create_client(jupyterhub_endpoint, project_name, reuse_existing=True):
     for variable in {"AUTH0_DOMAIN", "AUTH0_CLIENT_ID", "AUTH0_CLIENT_SECRET"}:
         if variable not in os.environ:
             raise ValueError(f"Required environment variable={variable} not defined")
@@ -19,9 +19,21 @@ def create_client(jupyterhub_endpoint, project_name):
 
     auth0 = Auth0(os.environ["AUTH0_DOMAIN"], mgmt_api_token)
 
-    credentials = auth0.clients.create(
+    for client in auth0.clients.all(
+        fields=["name", "client_id", "client_secret"], include_fields=True
+    ):
+        if client["name"] == project_name and reuse_existing:
+            return {
+                "auth0_subdomain": ".".join(os.environ["AUTH0_DOMAIN"].split(".")[:-2]),
+                "client_id": client["client_id"],
+                "client_secret": client["client_secret"],
+                "scope": ["openid", "email", "profile"],
+                "oauth_callback_url": f"https://{jupyterhub_endpoint}/hub/oauth_callback",
+            }
+
+    client = auth0.clients.create(
         {
-            "name": f"{project_name}",
+            "name": project_name,
             "description": f"QHub - {project_name} - {jupyterhub_endpoint}",
             "callbacks": [f"https://{jupyterhub_endpoint}/hub/oauth_callback"],
             "app_type": "regular_web",
@@ -30,8 +42,8 @@ def create_client(jupyterhub_endpoint, project_name):
 
     return {
         "auth0_subdomain": ".".join(os.environ["AUTH0_DOMAIN"].split(".")[:-2]),
-        "client_id": credentials["client_id"],
-        "client_secret": credentials["client_secret"],
+        "client_id": client["client_id"],
+        "client_secret": client["client_secret"],
         "scope": ["openid", "email", "profile"],
         "oauth_callback_url": f"https://{jupyterhub_endpoint}/hub/oauth_callback",
     }
