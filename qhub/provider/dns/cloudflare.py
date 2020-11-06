@@ -32,13 +32,12 @@ def update_record(zone_name, record_name, record_type, record_address):
     else:
         raise ValueError(f"Cloudflare zone {zone_name} not found")
 
-    for _record in cf.zones.dns_records.get(zone_id):
-        if _record["name"] == record_name:
-            logger.info(
-                f"record name={record_name} type={record_type} address={record_address} already exists updating"
-            )
-            cf.zones.dns_records.put(zone_id, _record["id"], data=_record)
-            break
+    existing_record = cf.zones.dns_records.get(zone_id, params={"name": f'{record_name}.{zone_name}', "type": record_type})
+    if existing_record:
+        logger.info(
+            f"record name={record_name} type={record_type} address={record_address} already exists updating"
+        )
+        cf.zones.dns_records.put(zone_id, existing_record[0]["id"], data=record)
     else:
         logger.info(
             f"record name={record_name} type={record_type} address={record_address} does not exists creating"
