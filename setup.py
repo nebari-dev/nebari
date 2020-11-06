@@ -36,6 +36,7 @@ setup(
         "cloudflare",
         "auth0-python",
         "pydantic",
+        "pynacl"
     ],
     extras_require={"dev": ["flake8", "black", "twine", "pytest", "diagrams"]},
     include_package_data=True,
