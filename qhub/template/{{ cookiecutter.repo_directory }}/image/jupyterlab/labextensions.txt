@@ -3,3 +3,4 @@ dask-labextension
 @pyviz/jupyterlab_pyviz
 jupyterlab-videochat
 @jupyterlab/toc
+jupyter-leaflet
