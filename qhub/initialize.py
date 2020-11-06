@@ -1,6 +1,10 @@
 import os
+import re
+
+import requests
 
 from qhub.provider.oauth.auth0 import create_client
+from qhub.provider.cicd import github
 
 
 BASE_CONFIGURATION = {
@@ -24,10 +28,7 @@ BASE_CONFIGURATION = {
         "jupyterlab": "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334",
         "dask_worker": "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334",
     },
-    "storage": {
-        "conda_store": "20Gi",
-        "shared_filesystem": "10Gi",
-    },
+    "storage": {"conda_store": "20Gi", "shared_filesystem": "10Gi",},
 }
 
 OAUTH_GITHUB = {
@@ -56,11 +57,7 @@ DIGITAL_OCEAN = {
     "node_groups": {
         "general": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
-        "worker": {
-            "instance": "s-2vcpu-4gb",
-            "min_nodes": 1,
-            "max_nodes": 4,
-        },
+        "worker": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4,},
     },
 }
 
@@ -71,17 +68,9 @@ GOOGLE_PLATFORM = {
     "availability_zones": ["us-central1-c"],
     "kubernetes_version": "1.14.10-gke.31",
     "node_groups": {
-        "general": {
-            "instance": "n1-standard-2",
-            "min_nodes": 1,
-            "max_nodes": 1,
-        },
+        "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1,},
         "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
-        "worker": {
-            "instance": "n1-standard-2",
-            "min_nodes": 1,
-            "max_nodes": 4,
-        },
+        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4,},
     },
 }
 
@@ -90,21 +79,9 @@ AMAZON_WEB_SERVICES = {
     "availability_zones": ["us-west-2a", "us-west-2b"],
     "kubernetes_version": "1.14",
     "node_groups": {
-        "general": {
-            "instance": "m5.large",
-            "min_nodes": 1,
-            "max_nodes": 1,
-        },
-        "user": {
-            "instance": "m5.large",
-            "min_nodes": 1,
-            "max_nodes": 2,
-        },
-        "worker": {
-            "instance": "m5.large",
-            "min_nodes": 1,
-            "max_nodes": 2,
-        },
+        "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1,},
+        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2,},
+        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2,},
     },
 }
 
@@ -176,6 +153,8 @@ def render_config(
     qhub_domain,
     cloud_provider,
     ci_provider,
+    repository,
+    repository_auto_provision,
     oauth_provider,
     oauth_auto_provision,
     disable_prompt,
@@ -236,7 +215,52 @@ def render_config(
         if oauth_provider == "auth0":
             auth0_auto_provision(config)
 
+    if repository_auto_provision:
+        GITHUB_REGEX = "github.com/(.*)/(.*)"
+        if re.search(GITHUB_REGEX, repository):
+            match = re.search(GITHUB_REGEX, repository)
+            github_auto_provision(config, match.group(1), match.group(2))
+
     return config
+
+
+def github_auto_provision(config, owner, repo):
+    try:
+        github.get_repository(owner, repo)
+    except requests.exceptions.HTTPError:
+        # repo not found
+        github.create_repository(
+            owner,
+            repo,
+            description=f'QHub {config["project_name"]}-{config["provider"]}',
+            homepage='https://jupyter.{config["domain"]}',
+        )
+
+    # Secrets
+    if config["provider"] == "do":
+        for name in {
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "SPACES_ACCESS_KEY_ID",
+            "SPACES_SECRET_ACCESS_KEY",
+            "DIGITALOCEAN_TOKEN",
+        }:
+            github.update_secret(owner, repo, name, os.environ[name])
+    elif config["provider"] == "aws":
+        for name in {
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "AWS_DEFAULT_REGION",
+        }:
+            github.update_secret(owner, repo, name, os.environ[name])
+    elif config["provider"] == "gcp":
+        github.update_secret(owner, repo, "PROJECT_ID", os.environ["PROJECT_ID"])
+        with open(os.environ["GOOGLE_CREDENTIALS"]) as f:
+            github.update_secret(owner, repo, "GOOGLE_CREDENTIALS", f.read())
+
+    github.update_secret(
+        owner, repo, "REPOSITORY_ACCESS_TOKEN", os.environ["GITHUB_TOKEN"]
+    )
 
 
 def auth0_auto_provision(config):

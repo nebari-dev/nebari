@@ -27,10 +27,16 @@ def create_init_subcommand(subparser):
         default="github",
         help="oauth provider to use for authentication",
     )
+    subparser.add_argument("--repository", help="Repository to initialize qhub")
+    subparser.add_argument(
+        "--repository-auto-provision",
+        action="store_true",
+        help="Attempt to automatically provision repository. For github it requires environment variables GITHUB_USERNAME, GITHUB_TOKEN",
+    )
     subparser.add_argument(
         "--oauth-auto-provision",
         action="store_true",
-        help="Attempt to automatically provision oauth. For Auth0 is requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
+        help="Attempt to automatically provision oauth. For Auth0 it requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
     )
     subparser.add_argument(
         "--disable-prompt",
@@ -46,6 +52,8 @@ def handle_init(args):
         qhub_domain=args.domain,
         cloud_provider=args.platform,
         ci_provider=args.ci_provider,
+        repository=args.repository,
+        repository_auto_provision=args.repository_auto_provision,
         oauth_provider=args.oauth_provider,
         oauth_auto_provision=args.oauth_auto_provision,
         disable_prompt=args.disable_prompt,

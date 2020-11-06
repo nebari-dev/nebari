@@ -28,7 +28,7 @@ def github_request(url, method="GET", json=None):
         ),
     )
     response.raise_for_status()
-    return response.json()
+    return response
 
 
 def encrypt(public_key: str, secret_value: str) -> str:
@@ -40,7 +40,7 @@ def encrypt(public_key: str, secret_value: str) -> str:
 
 
 def get_repo_public_key(owner, repo):
-    return github_request(f"repos/{owner}/{repo}/actions/secrets/public-key")
+    return github_request(f"repos/{owner}/{repo}/actions/secrets/public-key").json()
 
 
 def update_secret(owner, repo, secret_name, secret_value):
@@ -55,7 +55,7 @@ def update_secret(owner, repo, secret_name, secret_value):
 
 
 def get_repository(owner, repo):
-    return github_request(f"repos/{owner}/{repo}")
+    return github_request(f"repos/{owner}/{repo}").json()
 
 
 def create_repository(owner, repo, description, homepage, private=True):
