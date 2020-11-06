@@ -16,6 +16,8 @@ dist/
 
 # nix
 result
+shell.nix
+.envrc
 
 # ignore deploments
 do-jupyterhub
