@@ -18,6 +18,8 @@ def test_schema(project, domain, cloud_provider, ci_provider, oauth_provider):
         qhub_domain=domain,
         cloud_provider=cloud_provider,
         ci_provider=ci_provider,
+        repository='github.com/test/test',
+        repository_auto_provision=False,
         oauth_provider=oauth_provider,
         oauth_auto_provision=False,
         disable_prompt=True,
