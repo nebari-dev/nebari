@@ -5,6 +5,7 @@ import requests
 
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
+from qhub.provider import git
 
 
 BASE_CONFIGURATION = {
@@ -246,7 +247,10 @@ def render_config(
         GITHUB_REGEX = "github.com/(.*)/(.*)"
         if re.search(GITHUB_REGEX, repository):
             match = re.search(GITHUB_REGEX, repository)
-            github_auto_provision(config, match.group(1), match.group(2))
+            git_repository = github_auto_provision(
+                config, match.group(1), match.group(2)
+            )
+            git_repository_initialize(git_repository)
 
     return config
 
@@ -288,6 +292,14 @@ def github_auto_provision(config, owner, repo):
     github.update_secret(
         owner, repo, "REPOSITORY_ACCESS_TOKEN", os.environ["GITHUB_TOKEN"]
     )
+
+    return f"git@github.com:{owner}/{repo}.git"
+
+
+def git_repository_initialize(git_repository):
+    if not git.is_git_repo("./"):
+        git.initialize_git("./")
+    git.add_git_remote(git_repository, path="./", remote_name="origin")
 
 
 def auth0_auto_provision(config):
