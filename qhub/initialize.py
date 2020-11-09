@@ -28,7 +28,10 @@ BASE_CONFIGURATION = {
         "jupyterlab": "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334",
         "dask_worker": "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334",
     },
-    "storage": {"conda_store": "20Gi", "shared_filesystem": "10Gi",},
+    "storage": {
+        "conda_store": "20Gi",
+        "shared_filesystem": "10Gi",
+    },
 }
 
 OAUTH_GITHUB = {
@@ -57,7 +60,11 @@ DIGITAL_OCEAN = {
     "node_groups": {
         "general": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
-        "worker": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4,},
+        "worker": {
+            "instance": "s-2vcpu-4gb",
+            "min_nodes": 1,
+            "max_nodes": 4,
+        },
     },
 }
 
@@ -68,9 +75,17 @@ GOOGLE_PLATFORM = {
     "availability_zones": ["us-central1-c"],
     "kubernetes_version": "1.14.10-gke.31",
     "node_groups": {
-        "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1,},
+        "general": {
+            "instance": "n1-standard-2",
+            "min_nodes": 1,
+            "max_nodes": 1,
+        },
         "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
-        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4,},
+        "worker": {
+            "instance": "n1-standard-2",
+            "min_nodes": 1,
+            "max_nodes": 4,
+        },
     },
 }
 
@@ -79,9 +94,21 @@ AMAZON_WEB_SERVICES = {
     "availability_zones": ["us-west-2a", "us-west-2b"],
     "kubernetes_version": "1.14",
     "node_groups": {
-        "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1,},
-        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2,},
-        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2,},
+        "general": {
+            "instance": "m5.large",
+            "min_nodes": 1,
+            "max_nodes": 1,
+        },
+        "user": {
+            "instance": "m5.large",
+            "min_nodes": 1,
+            "max_nodes": 2,
+        },
+        "worker": {
+            "instance": "m5.large",
+            "min_nodes": 1,
+            "max_nodes": 2,
+        },
     },
 }
 
