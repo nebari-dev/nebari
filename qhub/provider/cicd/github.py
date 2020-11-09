@@ -64,7 +64,7 @@ def get_repository(owner, repo):
 def create_repository(owner, repo, description, homepage, private=True):
     if owner == os.environ.get("GITHUB_USERNAME"):
         github_request(
-            f"user/repos",
+            "user/repos",
             method="POST",
             json={
                 "name": repo,
