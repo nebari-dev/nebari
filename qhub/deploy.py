@@ -3,7 +3,7 @@ from os import path
 import os
 import re
 import json
-from subprocess import check_output
+from subprocess import check_output, run
 from shutil import which
 
 from qhub.utils import timer, change_directory
@@ -101,13 +101,13 @@ def guided_install(config, dns_provider, dns_auto_provision):
 
     # 06 Create terraform backend remote state bucket
     with change_directory("terraform-state"):
-        check_output(["terraform", "init"])
-        check_output(["terraform", "apply", "-auto-approve"])
+        run(["terraform", "init"])
+        run(["terraform", "apply", "-auto-approve"])
 
     # 07 Create qhub initial state (up to nginx-ingress)
     with change_directory("infrastructure"):
-        check_output(["terraform", "init"])
-        check_output(
+        run(["terraform", "init"])
+        run(
             [
                 "terraform",
                 "apply",
@@ -137,4 +137,4 @@ def guided_install(config, dns_provider, dns_auto_provision):
 
     # 09 Full deploy QHub
     with change_directory("infrastructure"):
-        check_output(["terraform", "apply", "-auto-approve"])
+        run(["terraform", "apply", "-auto-approve"])
