@@ -16,6 +16,9 @@ dist/
 
 # nix
 result
+shell.nix
+.envrc
+build.nix
 
 # ignore deploments
 do-jupyterhub
@@ -24,3 +27,6 @@ gcp-jupyterhub
 modules
 quansight-terraform-modules
 config.yaml
+
+# ignore qhub files
+qhub-config.yaml

@@ -8,8 +8,13 @@ logger = logging.getLogger(__name__)
 
 
 def update_record(zone_name, record_name, record_type, record_address):
-    CLOUDFLARE_API_TOKEN = os.environ["CLOUDFLARE_TOKEN"]
-    cf = CloudFlare.CloudFlare(token=CLOUDFLARE_API_TOKEN)
+    for variable in {"CLOUDFLARE_TOKEN"}:
+        if variable not in os.environ:
+            raise ValueError(
+                f"Cloudflare required environment variable={variable} not defined"
+            )
+
+    cf = CloudFlare.CloudFlare(token=os.environ["CLOUDFLARE_TOKEN"])
 
     record = {
         "name": record_name,
@@ -27,13 +32,14 @@ def update_record(zone_name, record_name, record_type, record_address):
     else:
         raise ValueError(f"Cloudflare zone {zone_name} not found")
 
-    for _record in cf.zones.dns_records.get(zone_id):
-        if _record["name"] == record_name:
-            logger.info(
-                f"record name={record_name} type={record_type} address={record_address} already exists updating"
-            )
-            cf.zones.dns_records.put(zone_id, _record["id"], data=_record)
-            break
+    existing_record = cf.zones.dns_records.get(
+        zone_id, params={"name": f"{record_name}.{zone_name}", "type": record_type}
+    )
+    if existing_record:
+        logger.info(
+            f"record name={record_name} type={record_type} address={record_address} already exists updating"
+        )
+        cf.zones.dns_records.put(zone_id, existing_record[0]["id"], data=record)
     else:
         logger.info(
             f"record name={record_name} type={record_type} address={record_address} does not exists creating"

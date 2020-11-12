@@ -11,6 +11,21 @@ logger = logging.getLogger(__name__)
 def create_deploy_subcommand(subparser):
     subparser = subparser.add_parser("deploy")
     subparser.add_argument("-c", "--config", help="qhub configuration", required=True)
+    subparser.add_argument(
+        "--dns-provider",
+        choices=["cloudflare"],
+        help="dns provider to use for registering domain name mapping",
+    )
+    subparser.add_argument(
+        "--dns-auto-provision",
+        action="store_true",
+        help="Attempt to automatically provision DNS. For Auth0 is requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
+    )
+    subparser.add_argument(
+        "--disable-prompt",
+        action="store_true",
+        help="Disable human intervention",
+    )
     subparser.set_defaults(func=handle_deploy)
 
 
@@ -26,4 +41,6 @@ def handle_deploy(args):
 
     verify(config)
 
-    deploy_configuration(config)
+    deploy_configuration(
+        config, args.dns_provider, args.dns_auto_provision, args.disable_prompt
+    )

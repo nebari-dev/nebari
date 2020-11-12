@@ -1,20 +1,27 @@
 import pytest
 
 import qhub.schema
+from qhub.initialize import render_config
 
 
 @pytest.mark.parametrize(
-    "config_filename",
+    "project, domain, cloud_provider, ci_provider, oauth_provider",
     [
-        "qhub/template/configs/config_aws.yaml",
-        "qhub/template/configs/config_gcp.yaml",
-        "qhub/template/configs/config_do.yaml",
+        ('do-pytest', 'do.qhub.dev', 'do', 'github-actions', 'github'),
+        ('aws-pytest', 'aws.qhub.dev', 'aws', 'github-actions', 'github'),
+        ('gcp-pytest', 'gcp.qhub.dev', 'gcp', 'github-actions', 'github'),
     ],
 )
-def test_validation(config_filename):
-    import yaml
-
-    with open(config_filename) as f:
-        data = yaml.safe_load(f.read())
-
-    assert qhub.schema.verify(data) is None
+def test_schema(project, domain, cloud_provider, ci_provider, oauth_provider):
+    config = render_config(
+        project_name=project,
+        qhub_domain=domain,
+        cloud_provider=cloud_provider,
+        ci_provider=ci_provider,
+        repository='github.com/test/test',
+        repository_auto_provision=False,
+        oauth_provider=oauth_provider,
+        oauth_auto_provision=False,
+        disable_prompt=True,
+    )
+    assert qhub.schema.verify(config) is None
