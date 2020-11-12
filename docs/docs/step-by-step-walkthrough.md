@@ -154,6 +154,7 @@ Add your desired list of authorized github usernames. Set a unique `uid` for eac
 Lastly, make the adjusted changes to configure your cluster in he cloud provider section.
 
 
+
 **(Digital Ocean only)**
     
 If your provider is Digital Ocean you will need to install [doctl] and obtain the latest kubernetes version. After installing, run this terminal command:
