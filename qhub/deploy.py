@@ -98,7 +98,9 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
 
     # 05 Check that oauth settings are set
     if not disable_prompt:
-        input('Ensure that oauth settings are in configuration [Press "Enter" to continue]')
+        input(
+            'Ensure that oauth settings are in configuration [Press "Enter" to continue]'
+        )
 
     # 06 Create terraform backend remote state bucket
     with change_directory("terraform-state"):

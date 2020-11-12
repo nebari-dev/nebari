@@ -41,4 +41,6 @@ def handle_deploy(args):
 
     verify(config)
 
-    deploy_configuration(config, args.dns_provider, args.dns_auto_provision, args.disable_prompt)
+    deploy_configuration(
+        config, args.dns_provider, args.dns_auto_provision, args.disable_prompt
+    )
