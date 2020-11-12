@@ -17,14 +17,14 @@ GCP_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/inst
 logger = logging.getLogger(__name__)
 
 
-def deploy_configuration(config, dns_provider, dns_auto_provision):
+def deploy_configuration(config, dns_provider, dns_auto_provision, disable_prompt):
     logger.info(f'All qhub endpoints will be under *.{config["domain"]}')
 
     with timer(logger, "deploying QHub"):
-        guided_install(config, dns_provider, dns_auto_provision)
+        guided_install(config, dns_provider, dns_auto_provision, disable_prompt)
 
 
-def guided_install(config, dns_provider, dns_auto_provision):
+def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=False):
     SUPPORTED_VERSIONS = ["v0.13"]
 
     # 01 Verify configuration file exists
@@ -97,7 +97,8 @@ def guided_install(config, dns_provider, dns_auto_provision):
         raise Exception("Cloud Provider configuration not supported")
 
     # 05 Check that oauth settings are set
-    input('Ensure that oauth settings are in configuration [Press "Enter" to continue]')
+    if not disable_prompt:
+        input('Ensure that oauth settings are in configuration [Press "Enter" to continue]')
 
     # 06 Create terraform backend remote state bucket
     with change_directory("terraform-state"):
