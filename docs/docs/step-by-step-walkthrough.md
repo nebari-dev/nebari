@@ -48,7 +48,9 @@ Within your Cloudflare account, follow these steps to generate a token
 - Click user icon on top right and click `My Profile`
 - Click the `API Tokens` menu and select `Create Token`
 - Click `Use Template` next to `Edit zone DNS`
-- Under Zone Resources select the DNS that you control
+- Under `Permissions` in addition to `Zone | DNS | Edit` use the `Add more` button to add `Zone | Zone | Read`, `Zone | Zone Settings | Read`, and `Account | Account Settings | Read` to the Permissions
+- Under `Account Resources` set the first box to `Include` and the second to your desired account
+- Under `Zone Resources` set it to `Include | Specific zone` and your domain name
 - Click continue to summary
 - Click Create Token
 - `CLOUDFLARE_TOKEN`: Set this variable equal to the token generated
@@ -79,7 +81,7 @@ The access key for the cloud providers require fairly wide permissions in order 
 #### 2.4.1 Amazon Web Services
 
 Please see these instructions for [creating an IAM role] with admin permissions and set the below variables.
-    
+
 - `AWS_ACCESS_KEY_ID`: The public key for an IAM account
 - `AWS_SECRET_ACCESS_KEY`: The Private key for an IAM account
 - `AWS_DEFAULT_REGION`: The region where you intend to deploy QHub
@@ -104,6 +106,25 @@ Follow [these detailed instructions] on creating a Google service account with o
 We're done with the hardest part of deployment!
 
 ### 2.5 QHub init
+
+The next step is to run `qhub init` to generate the configuration file `qhub-config.yaml`. This file is where the vast majority of tweaks to the system will be made. There are are several optional (yet highly recommended) flags that deal with automating the deployment:
+
+- `--project`: This is a project name of your choosing IE `test-cluster`
+- `--domain`: This is the base domain for your cluster. After deployment, the DNS will use the base name prepended with `jupyter`. IE if the base name is `test.qhub.dev` then the DNS will be provisioned as `jupyter.test.qhub.dev`. This pattern is also applicable if you are setting your own DNS through a different provider.
+- `--ci-provide`: This specifies what provider to use for ci-cd. Currently github-actions is supported.
+- `--oauth-provider`: This will set configuration file to use auth0 for authentication
+- `--oauth-auto-provision`: This will automatically create and configure an auth0 application
+- `--repository`: The repository name that will be used to store the infrastructure as code
+- `--repository-auto-provision`: This sets the secrets for the github repository
+
+An example of the full command is below:
+
+`qhub init gcp --project test-project --domain test.qhub.dev --ci-provider github-actions --oauth-provider auth0 --oauth-auto-provision --repository github.com/quansight/qhub-test --repository-auto-provision`
+
+### 2.6 QHub render
+
+After initializing, we then need to create all of the other configuration files
+qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
 
 With all of the applicable environment variables set, we are ready to get into the wizardry that QHub performs. The first command `qhub init` followed by the abbreviation of your cloud provider. (do: Digital Ocean, aws: Amazon Web Services, gcp: Google Cloud Platform). This will create  a `qhub-config.yaml` file in your folder.
 
