@@ -235,7 +235,9 @@ def render_config(
         # the newest version of kubernetes supported this field needs
         # to be dynamically filled since digital ocean updates the
         # versions so frequently
-        config["digital_ocean"]["kubernetes_version"] = digital_ocean.kubernetes_versions()[0]["slug"]
+        config["digital_ocean"][
+            "kubernetes_version"
+        ] = digital_ocean.kubernetes_versions()[0]["slug"]
     elif cloud_provider == "gcp":
         config["google_cloud_platform"] = GOOGLE_PLATFORM
         if "PROJECT_ID" in os.environ:
