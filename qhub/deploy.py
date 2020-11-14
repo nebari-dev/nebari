@@ -57,7 +57,7 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
     elif config["provider"] == "aws":
         for variable in {
             "AWS_ACCESS_KEY_ID",
-            "AWS_ACCESS_SECRET_ACCESS_KEY",
+            "AWS_SECRET_ACCESS_KEY",
             "AWS_DEFAULT_REGION",
         }:
             if variable not in os.environ:
