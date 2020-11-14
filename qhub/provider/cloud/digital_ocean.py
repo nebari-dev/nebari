@@ -40,4 +40,4 @@ def regions():
 
 
 def kubernetes_versions():
-    return _kubernetes_options()["options"]["kubernetes_version"]
+    return _kubernetes_options()["options"]["versions"]

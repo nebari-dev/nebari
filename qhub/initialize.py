@@ -7,6 +7,7 @@ from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
 from qhub.constants import DEFAULT_TERRAFORM_VERSION
+from qhub.provider.cloud import digital_ocean
 
 
 BASE_CONFIGURATION = {
@@ -59,7 +60,7 @@ OAUTH_AUTH0 = {
 
 DIGITAL_OCEAN = {
     "region": "nyc3",
-    "kubernetes_version": "1.18.8-do.0",
+    "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
@@ -230,6 +231,11 @@ def render_config(
 
     if cloud_provider == "do":
         config["digital_ocean"] = DIGITAL_OCEAN
+        # first kubernetes version returned by Digital Ocean api is
+        # the newest version of kubernetes supported this field needs
+        # to be dynamically filled since digital ocean updates the
+        # versions so frequently
+        config["digital_ocean"]["kubernetes_version"] = digital_ocean.kubernetes_versions()[0]["slug"]
     elif cloud_provider == "gcp":
         config["google_cloud_platform"] = GOOGLE_PLATFORM
         if "PROJECT_ID" in os.environ:
