@@ -185,11 +185,12 @@ def render_config(
     cloud_provider,
     ci_provider,
     repository,
-    repository_auto_provision,
     oauth_provider,
-    oauth_auto_provision,
-    disable_prompt,
     terraform_version=DEFAULT_TERRAFORM_VERSION,
+    repository_auto_provision=False,
+    oauth_auto_provision=False,
+    kubernetes_version=None,
+    disable_prompt=False,
 ):
     config = BASE_CONFIGURATION
     config["provider"] = cloud_provider
@@ -231,15 +232,21 @@ def render_config(
 
     if cloud_provider == "do":
         config["digital_ocean"] = DIGITAL_OCEAN
-        # first kubernetes version returned by Digital Ocean api is
-        # the newest version of kubernetes supported this field needs
-        # to be dynamically filled since digital ocean updates the
-        # versions so frequently
-        config["digital_ocean"][
-            "kubernetes_version"
-        ] = digital_ocean.kubernetes_versions()[0]["slug"]
+        if kubernetes_version:
+            config["digital_ocean"]["kubernetes_version"] = kubernetes_version
+        else:
+            # first kubernetes version returned by Digital Ocean api is
+            # the newest version of kubernetes supported this field needs
+            # to be dynamically filled since digital ocean updates the
+            # versions so frequently
+            config["digital_ocean"][
+                "kubernetes_version"
+            ] = digital_ocean.kubernetes_versions()[0]["slug"]
     elif cloud_provider == "gcp":
         config["google_cloud_platform"] = GOOGLE_PLATFORM
+        if kubernetes_version:
+            config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
+
         if "PROJECT_ID" in os.environ:
             config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
         elif not disable_prompt:
@@ -248,6 +255,8 @@ def render_config(
             )
     elif cloud_provider == "aws":
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
+        if kubernetes_version:
+            config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
 
     config["profiles"] = DEFAULT_PROFILES
     config["environments"] = DEFAULT_ENVIRONMENTS
