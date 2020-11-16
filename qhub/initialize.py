@@ -13,6 +13,7 @@ BASE_CONFIGURATION = {
     "provider": None,
     "ci_cd": None,
     "domain": None,
+    "terraform_version": "0.13.15",
     "security": {
         "authentication": None,
         "users": {
