@@ -4,6 +4,7 @@
     "provider": null,
     "ci_cd": null,
     "endpoint": null,
+    "terraform_version": null,
 
     "security": null,
     "default_images": null,
