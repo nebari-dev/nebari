@@ -10,15 +10,19 @@ Other providers can be used, but you will need to consult their documention on s
 
 ## 1. Installing QHub:
 
-- Via github:
+Choose an installation method: 
 
-        git clone git@github.com:Quansight/qhub.git
-        cd qhub
-        python ./setup.py install
+- Install the latest stable release with Conda: 
 
-- Via pip:
+    conda install -c conda-forge qhub
 
-        pip install qhub
+- Install the latest stable release with pip: 
+
+    pip install qhub
+    
+- Install the latest development version: 
+
+    pip install git+https://github.com/Quansight/qhub.git
 
 ## 2. Environment variables
 
