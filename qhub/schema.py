@@ -186,6 +186,15 @@ class Main(Base):
     ci_cd: CiEnum
     security: Security
     profiles: Profiles = []
+    terraform_version: str
+
+    @pydantic.validator("terraform_version")
+    def verify_terraform_version(cls, v):
+        supported_versions = ["0.13.4", "0.13.5"]
+        if v not in supported_versions:
+            raise ValueError(
+                f"terraform_version must be defined in qhub-config.yaml and equal to one of the following: {supported_versions}"
+            )
 
 
 class DigitalOcean(Main):
