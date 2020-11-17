@@ -2,6 +2,8 @@ project_name: gcp-jupyterhub
 provider: gcp
 ci_cd: github-actions
 domain: "gcp.qhub.dev"
+terraform_version: '0.13.4'
+
 
 security:
   authentication:

@@ -2,6 +2,8 @@ project_name: do-qhub-auth0-provisioned
 provider: do
 ci_cd: github-actions
 domain: "do4.qhub.dev"
+terraform_version: '0.13.4'
+
 
 security:
   authentication:

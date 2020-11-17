@@ -2,6 +2,8 @@ project_name: do-jupyterhub
 provider: do
 ci_cd: github-actions
 domain: "do.qhub.dev"
+terraform_version: '0.13.4'
+
 
 security:
   authentication:
