@@ -12,7 +12,7 @@ from qhub.provider.dns.cloudflare import update_record
 DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
 AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
 GCP_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables"
-SUPPORTED_VERSIONS = ["v0.13"]
+
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +25,7 @@ def deploy_configuration(config, dns_provider, dns_auto_provision, disable_promp
 
 
 def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=False):
+    SUPPORTED_VERSIONS = ["v0.13"]
 
     # 01 Verify configuration file exists
     if not path.exists("qhub-config.yaml"):

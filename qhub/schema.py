@@ -193,7 +193,7 @@ class Main(Base):
     def verify_terraform_version(cls, v):
         supported_minor_versions = ["0.13"]
         minor_release = re.search(r"(\d+)\.(\d+)", v).group(0)
-        if v not in supported_versions:
+        if minor_release not in supported_minor_versions:
             raise ValueError(
                 f"terraform_version must be defined in qhub-config.yaml and a release of one of the following minor versions: {supported_minor_versions}"
             )
