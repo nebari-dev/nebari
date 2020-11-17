@@ -5,17 +5,19 @@ from qhub.initialize import render_config
 
 
 @pytest.mark.parametrize(
-    "project, domain, cloud_provider, ci_provider, oauth_provider",
+    "project, terraform_version, domain, cloud_provider, ci_provider, oauth_provider",
     [
-        ("do-pytest", "do.qhub.dev", "do", "github-actions", "github"),
-        ("aws-pytest", "aws.qhub.dev", "aws", "github-actions", "github"),
-        ("gcp-pytest", "gcp.qhub.dev", "gcp", "github-actions", "github"),
+        ("do-pytest", "0.13.5", "do.qhub.dev", "do", "github-actions", "github"),
+        ("aws-pytest", "0.13.5", "aws.qhub.dev", "aws", "github-actions", "github"),
+        ("gcp-pytest", "0.13.5", "gcp.qhub.dev", "gcp", "github-actions", "github"),
     ],
 )
-def test_schema(project, domain, cloud_provider, ci_provider, oauth_provider):
+def test_schema(
+    project, terraform_version, domain, cloud_provider, ci_provider, oauth_provider
+):
     config = render_config(
         project_name=project,
-        terraform_version="0.13.15",
+        terraform_version=terraform_version,
         qhub_domain=domain,
         cloud_provider=cloud_provider,
         ci_provider=ci_provider,
