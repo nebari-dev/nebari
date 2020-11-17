@@ -1,18 +1,3 @@
-Tokens needed for all cloud providers:
-
-        export CLOUDFLARE_TOKEN=
-        export AUTH0_DOMAIN=
-        export AUTH0_CLIENT_ID=
-        export AUTH0_CLIENT_SECRET=
-        export GITHUB_USERNAME=
-        export GITHUB_TOKEN=
-        Google specific providers:
-
-        export PROJECT_ID=
-        export GOOGLE_CREDENTIALS=/tmp/quansight-internal-it-credentials.json
-
-
-
 # Step by Step QHub Cloud Deployment
 
 This guide makes the following assumptions:
