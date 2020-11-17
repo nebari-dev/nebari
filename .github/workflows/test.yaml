@@ -68,13 +68,13 @@ jobs:
       - name: 'Terraform Format'
         uses: hashicorp/terraform-github-actions@master
         with:
-          tf_actions_version: 0.13.4
+          tf_actions_version: 0.13.5
           tf_actions_subcommand: 'fmt'
           tf_actions_working_dir: 'qhub-${{ matrix.provider }}-deployment/terraform-state'
       - name: 'Terraform Format'
         uses: hashicorp/terraform-github-actions@master
         with:
-          tf_actions_version: 0.13.4
+          tf_actions_version: 0.13.5
           tf_actions_subcommand: 'fmt'
           tf_actions_working_dir: 'qhub-${{ matrix.provider }}-deployment/infrastructure'
       - name: QHub Render Artifact

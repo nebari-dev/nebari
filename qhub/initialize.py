@@ -6,6 +6,7 @@ import requests
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
+from qhub.constants import DEFAULT_TERRAFORM_VERSION
 
 
 BASE_CONFIGURATION = {
@@ -187,10 +188,13 @@ def render_config(
     oauth_provider,
     oauth_auto_provision,
     disable_prompt,
+    terraform_version=DEFAULT_TERRAFORM_VERSION,
 ):
     config = BASE_CONFIGURATION
     config["provider"] = cloud_provider
     config["ci_cd"] = ci_provider
+
+    config["terraform_version"] = terraform_version
 
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
