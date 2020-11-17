@@ -15,6 +15,7 @@ from qhub.initialize import render_config
 def test_schema(project, domain, cloud_provider, ci_provider, oauth_provider):
     config = render_config(
         project_name=project,
+        terraform_version='0.13.15'
         qhub_domain=domain,
         cloud_provider=cloud_provider,
         ci_provider=ci_provider,
