@@ -1,5 +1,6 @@
 import enum
 import typing
+import re
 
 import pydantic
 
@@ -190,10 +191,11 @@ class Main(Base):
 
     @pydantic.validator("terraform_version")
     def verify_terraform_version(cls, v):
-        supported_versions = ["0.13.4", "0.13.5"]
+        supported_minor_versions = ["0.13"]
+        minor_release = re.search(r"(\d+)\.(\d+)", v).group(0)
         if v not in supported_versions:
             raise ValueError(
-                f"terraform_version must be defined in qhub-config.yaml and equal to one of the following: {supported_versions}"
+                f"terraform_version must be defined in qhub-config.yaml and a release of one of the following minor versions: {supported_minor_versions}"
             )
 
 
