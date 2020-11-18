@@ -8,6 +8,7 @@ from shutil import which
 
 from qhub.utils import timer, change_directory
 from qhub.provider.dns.cloudflare import update_record
+from qhub.constants import SUPPORTED_TERRAFORM_MINOR_RELEASES
 
 DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
 AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
@@ -25,8 +26,6 @@ def deploy_configuration(config, dns_provider, dns_auto_provision, disable_promp
 
 
 def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=False):
-    SUPPORTED_VERSIONS = ["v0.13"]
-
     # 01 Verify configuration file exists
     if not path.exists("qhub-config.yaml"):
         raise Exception('Configuration file "qhub-config.yaml" does not exist')
@@ -34,16 +33,16 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
     # 02 Check if Terraform works
     if which("terraform") is None:
         raise Exception(
-            f"Please install Terraform with one of the following minor releases: {SUPPORTED_VERSIONS}"
+            f"Please install Terraform with one of the following minor releases: {SUPPORTED_TERRAFORM_MINOR_RELEASES}"
         )
 
     # 03 Check version of Terraform
     version_out = check_output(["terraform", "--version"]).decode("utf-8")
-    minor_release = re.search(r"v(\d+)\.(\d+)", version_out).group(0)
+    minor_release = re.search(r"(\d+)\.(\d+)", version_out).group(0)
 
-    if minor_release not in SUPPORTED_VERSIONS:
+    if minor_release not in SUPPORTED_TERRAFORM_MINOR_RELEASES:
         raise Exception(
-            f"Unsupported Terraform version. Supported minor releases: {SUPPORTED_VERSIONS}"
+            f"Unsupported Terraform version. Supported minor releases: {SUPPORTED_TERRAFORM_MINOR_RELEASES}"
         )
 
     # 04 Check Environment Variables
