@@ -10,6 +10,7 @@ class ProviderEnum(str, enum.Enum):
     do = "do"
     aws = "aws"
     gcp = "gcp"
+    local = "local"
 
 
 class CiEnum(str, enum.Enum):

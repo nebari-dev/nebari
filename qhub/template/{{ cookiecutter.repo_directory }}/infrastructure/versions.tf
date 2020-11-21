@@ -9,6 +9,9 @@ terraform {
 {%- elif cookiecutter.provider == "do" %}
     digitalocean = {
       source = "digitalocean/digitalocean"
+{%- elif cookiecutter.provider == "local" %}
+    kind = {
+      source = "kyma-incubator/kind"
 {% endif %}
     }
     helm = {

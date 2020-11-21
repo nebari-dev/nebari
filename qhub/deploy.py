@@ -92,6 +92,8 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
                 f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must be equal\n
                 See {DO_ENV_DOCS} for more information"""
             )
+    elif config["provider"] == "local":
+        pass
     else:
         raise Exception("Cloud Provider configuration not supported")
 
