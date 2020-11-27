@@ -12,6 +12,7 @@ terraform {
 {%- elif cookiecutter.provider == "local" %}
     kind = {
       source = "kyma-incubator/kind"
+      version = "0.0.7"
 {% endif %}
     }
     helm = {

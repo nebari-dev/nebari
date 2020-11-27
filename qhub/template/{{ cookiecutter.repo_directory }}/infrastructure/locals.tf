@@ -18,6 +18,9 @@ locals {
 {%- elif cookiecutter.provider == "do" %}
       key   = "doks.digitalocean.com/node-pool"
       value = "general"
+{%- elif cookiecutter.provider == "local" %}
+      key   = ""
+      value = "general"
 {% endif %}
     }
 
@@ -31,6 +34,9 @@ locals {
 {%- elif cookiecutter.provider == "do" %}
       key   = "doks.digitalocean.com/node-pool"
       value = "user"
+{%- elif cookiecutter.provider == "local" %}
+      key   = ""
+      value = "user"
 {% endif %}
     }
 
@@ -43,6 +49,9 @@ locals {
       value = "worker"
 {%- elif cookiecutter.provider == "do" %}
       key   = "doks.digitalocean.com/node-pool"
+      value = "worker"
+{%- elif cookiecutter.provider == "local" %}
+      key   = ""
       value = "worker"
 {% endif %}
     }
