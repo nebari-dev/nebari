@@ -1,9 +1,10 @@
 provider "kubernetes" {
-  load_config_file       = false
   host                   = module.kubernetes.credentials.endpoint
 {% if cookiecutter.provider == "local" %}
-  insecure               = "true"
+  load_config_file       = true
+  insecure               = true
 {% else -%}
+  load_config_file       = false
   token                  = module.kubernetes.credentials.token
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
 {% endif %}
@@ -77,11 +78,14 @@ module "kubernetes-conda-store-mount" {
 
 provider "helm" {
   kubernetes {
-    load_config_file       = false
     host                   = module.kubernetes.credentials.endpoint
 {% if cookiecutter.provider != "local" %}
+    load_config_file       = false
     token                  = module.kubernetes.credentials.token
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+{% else %}
+    load_config_file       = true
+    insecure               = true
 {% endif %}
   }
   version = "1.0.0"
