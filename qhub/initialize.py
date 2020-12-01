@@ -216,7 +216,7 @@ def render_config(
             config["security"]["authentication"]["config"]["client_id"] = input(
                 "Github client_id: "
             )
-            config["security"]["authentication"]["config"]["client_id"] = input(
+            config["security"]["authentication"]["config"]["client_secret"] = input(
                 "Github client_secret: "
             )
             config["security"]["authentication"]["config"][
