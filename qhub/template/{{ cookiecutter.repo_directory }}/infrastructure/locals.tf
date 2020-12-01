@@ -19,7 +19,7 @@ locals {
       key   = "doks.digitalocean.com/node-pool"
       value = "general"
 {%- elif cookiecutter.provider == "local" %}
-      key   = ""
+      key   = "node-group"
       value = "general"
 {% endif %}
     }
@@ -35,7 +35,7 @@ locals {
       key   = "doks.digitalocean.com/node-pool"
       value = "user"
 {%- elif cookiecutter.provider == "local" %}
-      key   = ""
+      key   = "node-group"
       value = "user"
 {% endif %}
     }
@@ -51,7 +51,7 @@ locals {
       key   = "doks.digitalocean.com/node-pool"
       value = "worker"
 {%- elif cookiecutter.provider == "local" %}
-      key   = ""
+      key   = "node-group"
       value = "worker"
 {% endif %}
     }
