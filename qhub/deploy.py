@@ -121,7 +121,12 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
                 "-target=module.kubernetes-ingress",
             ]
         )
-        output = json.loads(check_output(["terraform", "output", "--json"]))
+        cmd_output = check_output(["terraform", "output", "--json"])
+        try:
+            output = json.loads(cmd_output)
+        except json.decoder.JSONDecodeError as e:
+            print(f"Failed to parse terraform output: {cmd_output}")
+            raise e
 
     # 08 Update DNS to point to qhub deployment
     if dns_auto_provision and dns_provider == "cloudflare":
