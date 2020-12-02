@@ -1,6 +1,7 @@
 import os
 import yaml
 
+
 PROJECT_DIRECTORY = os.path.realpath(os.path.curdir)
 PROVIDER = "{{ cookiecutter.provider }}"
 ENVIRONMENTS = eval("{{ cookiecutter.environments }}")
@@ -30,3 +31,4 @@ if __name__ == "__main__":
 
     if INSTALL_PREFECT != True:
         remove_file("infrastructure/prefect.tf")
+
