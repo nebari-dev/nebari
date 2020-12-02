@@ -4,6 +4,7 @@ import yaml
 PROJECT_DIRECTORY = os.path.realpath(os.path.curdir)
 PROVIDER = "{{ cookiecutter.provider }}"
 ENVIRONMENTS = eval("{{ cookiecutter.environments }}")
+INSTALL_PREFECT = eval("{{ cookiecutter.prefect }}")
 
 
 def remove_file(filepath):
@@ -26,3 +27,6 @@ if __name__ == "__main__":
     elif PROVIDER == "gcp":
         remove_file("infrastructure/aws.tf")
         remove_file("infrastructure/do.tf")
+
+    if INSTALL_PREFECT != True:
+        remove_file("infrastructure/prefect.tf")
