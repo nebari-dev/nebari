@@ -1,17 +1,21 @@
 locales
+
 # assign uid/gid names
 libnss-wrapper
 
 # utilities
-wget curl
+wget
+curl
 
 # development utilities
-git openssh-client
+git
+openssh-client
 
 # editors
 nano
 
-#conda prerequisites for GUI packages
+# conda prerequisites for GUI packages
+# See https://docs.anaconda.com/anaconda/install/linux/
 libgl1-mesa-glx
 libegl1-mesa
 libxrandr2
