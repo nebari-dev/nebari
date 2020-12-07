@@ -6,6 +6,7 @@ PROVIDER = "{{ cookiecutter.provider }}"
 ENVIRONMENTS = eval("{{ cookiecutter.environments }}")
 INSTALL_PREFECT = eval("{{ cookiecutter.prefect }}")
 
+
 def remove_file(filepath):
     os.remove(os.path.join(PROJECT_DIRECTORY, filepath))
 
