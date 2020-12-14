@@ -106,11 +106,15 @@ module "kubernetes-autoscaling" {
 {% endif -%}
 
 module "kubernetes-ingress" {
+{% if cookiecutter.provider != "local" -%}
   source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/ingress"
 
   namespace = var.environment
 
   node-group = local.node_groups.general
+{% else %}
+  source = "github.com/quansight/qhub-terraform-modules//modules/local/ingress"
+{% endif -%}
 
   dependencies = [
     module.kubernetes-initialization.depended_on
