@@ -114,7 +114,7 @@ Best practices is to create a new directory and run all the qhub commands inside
 
 After initializing, we then need to create all of terraform configuration. This done by running:
 
-        qhub render -c qhub-config.yaml ./ -f
+        qhub render -c qhub-config.yaml -o ./ -f
         
 You will notice that several directories are created: 
   - `environments` : conda environments are stored
