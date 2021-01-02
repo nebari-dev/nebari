@@ -5,6 +5,7 @@ import re
 
 from qhub.constants import SUPPORTED_TERRAFORM_MINOR_RELEASES
 
+
 @contextlib.contextmanager
 def timer(logger, prefix):
     start_time = time.time()
@@ -18,6 +19,7 @@ def change_directory(directory):
     os.chdir(directory)
     yield
     os.chdir(current_directory)
+
 
 def check_cloud_credentials(config):
     if config["provider"] == "gcp":
@@ -69,6 +71,7 @@ def check_cloud_credentials(config):
     else:
         raise Exception("Cloud Provider configuration not supported")
 
+
 def check_terraform():
     # 01 Check if Terraform works
     if which("terraform") is None:
@@ -84,6 +87,7 @@ def check_terraform():
         raise Exception(
             f"Unsupported Terraform version. Supported minor releases: {SUPPORTED_TERRAFORM_MINOR_RELEASES}"
         )
+
 
 def verify_configuration_file_exists():
     if not path.exists("qhub-config.yaml"):

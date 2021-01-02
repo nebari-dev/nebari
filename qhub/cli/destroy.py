@@ -11,11 +11,6 @@ logger = logging.getLogger(__name__)
 def create_destroy_subcommand(subparser):
     subparser = subparser.add_parser("destroy")
     subparser.add_argument("-c", "--config", help="qhub configuration", required=True)
-    subparser.add_argument(
-        "--disable-prompt",
-        action="store_true",
-        help="Disable human intervention",
-    )
     subparser.set_defaults(func=handle_destroy)
 
 

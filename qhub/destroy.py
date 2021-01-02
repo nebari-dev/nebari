@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 def destroy_configuration(config):
-    logger.info(f'Removing all infrastructure, your local files will still remain, 
-    you can use `qhub deploy` to re-install infrastructure using same config file')
+    logger.info(f'Removing all infrastructure, your local files will still remain,
+                you can use `qhub deploy` to re - install infrastructure using same config file')
 
     with timer(logger, "destroying QHub"):
         # 01 Verify configuration file exists
