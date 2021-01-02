@@ -2,7 +2,13 @@ import logging
 import json
 from subprocess import check_output, run
 
-from qhub.utils import timer, change_directory, check_cloud_credentials, verify_configuration_file_exists, check_terraform
+from qhub.utils import (
+    timer,
+    change_directory,
+    check_cloud_credentials,
+    verify_configuration_file_exists,
+    check_terraform,
+)
 from qhub.provider.dns.cloudflare import update_record
 
 logger = logging.getLogger(__name__)
