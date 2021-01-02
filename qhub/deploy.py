@@ -1,19 +1,9 @@
 import logging
-from os import path
-import os
-import re
 import json
 from subprocess import check_output, run
-from shutil import which
 
-from qhub.utils import timer, change_directory, check_cloud_credentials
+from qhub.utils import timer, change_directory, check_cloud_credentials, verify_configuration_file_exists, check_terraform
 from qhub.provider.dns.cloudflare import update_record
-from qhub.constants import SUPPORTED_TERRAFORM_MINOR_RELEASES
-
-DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
-AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
-GCP_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables"
-
 
 logger = logging.getLogger(__name__)
 

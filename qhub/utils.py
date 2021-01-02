@@ -2,8 +2,15 @@ import time
 import os
 import contextlib
 import re
+from os import path
+from subprocess import check_output
+from shutil import which
 
 from qhub.constants import SUPPORTED_TERRAFORM_MINOR_RELEASES
+
+DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
+AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
+GCP_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables"
 
 
 @contextlib.contextmanager

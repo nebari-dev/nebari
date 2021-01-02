@@ -1,22 +1,15 @@
 import logging
-from os import path
-import os
-import re
-import json
-from subprocess import check_output, run
-from shutil import which
+from subprocess import run
 
-from qhub.utils import timer, change_directory
-from qhub.provider.dns.cloudflare import update_record
-from qhub.constants import SUPPORTED_TERRAFORM_MINOR_RELEASES
+from qhub.utils import timer, change_directory, check_cloud_credentials, verify_configuration_file_exists, check_terraform
 
 
 logger = logging.getLogger(__name__)
 
 
 def destroy_configuration(config):
-    logger.info(f'Removing all infrastructure, your local files will still remain,
-                you can use `qhub deploy` to re - install infrastructure using same config file')
+    logger.info("""Removing all infrastructure, your local files will still remain, \n
+    you can use 'qhub deploy' to re - install infrastructure using same config file""")
 
     with timer(logger, "destroying QHub"):
         # 01 Verify configuration file exists
