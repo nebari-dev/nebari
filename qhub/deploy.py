@@ -1,5 +1,5 @@
 import logging
-import json
+import re
 from subprocess import check_output, run
 
 from qhub.utils import (
@@ -56,12 +56,13 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
             ]
         )
         cmd_output = check_output(["terraform", "output", "--json"])
-        try:
-            output = json.loads(cmd_output)
-        except json.decoder.JSONDecodeError as e:
-            print(f"Failed to parse terraform output: {cmd_output}")
-            raise e
-
+        # This is a bit ugly, but the issue we have at the moment is being unable
+        # to parse cmd_output as json on Github Actions.
+        ip_matches = re.findall(rb'"ip": "(?!string)(.*)"', cmd_output)
+        if ip_matches:
+            ip = ip_matches[0].decode()
+        else:
+            raise ValueError(f"IP Address not found in: {cmd_output}")
     # 07 Update DNS to point to qhub deployment
     if dns_auto_provision and dns_provider == "cloudflare":
         record_name, zone_name = (
@@ -70,12 +71,11 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         )
         record_name = f'jupyter.{".".join(record_name)}'
         zone_name = ".".join(zone_name)
-        ip = output["ingress_jupyter"]["value"]["ip"]
         if config["provider"] in {"do", "gcp"}:
             update_record(zone_name, record_name, "A", ip)
     else:
         input(
-            f'Take IP Address {output["ingress_jupyter"]["value"]["ip"]} and update DNS to point to "jupyter.{config["domain"]}" [Press Enter when Complete]'
+            f'Take IP Address {ip} and update DNS to point to "jupyter.{config["domain"]}" [Press Enter when Complete]'
         )
 
     # 08 Full deploy QHub
