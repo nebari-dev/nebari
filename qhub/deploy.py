@@ -63,7 +63,7 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
             ip = ip_matches[0].decode()
         else:
             raise ValueError(f"IP Address not found in: {cmd_output}")
-    # 08 Update DNS to point to qhub deployment
+    # 07 Update DNS to point to qhub deployment
     if dns_auto_provision and dns_provider == "cloudflare":
         record_name, zone_name = (
             config["domain"].split(".")[:-2],
