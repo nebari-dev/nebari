@@ -67,6 +67,13 @@ Each `qhub` cloud provider has different configuration specifications; more deta
 pip install qhub
 ```
 
+## Removing qhub
+
+Remove all infrastructure that `qhub` has created
+
+```bash
+qhub destroy -c qhub-config.yaml
+```
 
 ## License
 
