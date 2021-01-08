@@ -138,3 +138,14 @@ module "qhub" {
     module.kubernetes-ingress.depended_on
   ]
 }
+
+{% if cookiecutter.prefect == "true" -%}
+module "prefect" {
+  dependencies = [
+    module.qhub.depended_on
+  ]
+  environment = var.environment
+  jupyterhub_api_token = module.qhub.jupyterhub_api_token
+  prefect_token = var.prefect_token
+}
+{% endif -%}
