@@ -141,7 +141,7 @@ module "qhub" {
 
 {% if cookiecutter.prefect == "true" -%}
 module "prefect" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect?ref=add-prefect"
 
   dependencies = [
     module.qhub.depended_on
