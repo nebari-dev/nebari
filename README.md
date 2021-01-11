@@ -95,17 +95,24 @@ configuration. The command below will create do so and create folders to hold th
 ```bash
 qhub render -c qhub-config.yaml -o . --force
 ```
-
-The local folder will now look like:
+The local folder will now look like the image below:
 
 ![img2.png](docs/images/img_2.png)
+
 
 ### Deploy the project
 Finally, the project can be deployed with:
 ```bash
   qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
 ```
->>> stopped here :D
+
+## Removing qhub
+Remove all infrastructure created by QHub:
+
+```bash
+qhub destroy -c qhub-config.yaml
+```
+
 ## Developer
 
 To install the latest developer version use:
