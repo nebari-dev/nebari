@@ -109,12 +109,12 @@ The local folder will now look like the image below:
 
 ![render_CLI_output](docs/images/render_cli_output.png)
 
-
 ### Deploy the project
 Finally, the project can be deployed with:
 ```bash
   qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
 ```
+
 The command will check the environment variables and initialize and apply Terraform modules. The process can take up 
 to 20 minutes.
 
@@ -154,17 +154,24 @@ Add files to GitHub:
 * Finally, `git push` will add all the infrastructure files to the specified repository.
 
 Once the files have been pushed, all CI/CD changes will be done via [GitHub Actions] and triggered by committing it 
-to master through Pull Requests (PRs). Once the PR is merged, it will trigger a deployment of all of the changes made to
-to the files to the QHub deployment.
+to master through Pull Requests (PRs). Once a PR is merged, it will trigger a deployment of all the changes made
+to the QHub deployment.
 
 ### Destroy the project
-It is possible to remove the infrastructure for QHub by running the command below:
+To remove all infrastructure for QHub, use the command below:
 
 ```bash
  qhub destroy -c qhub-config.yaml
 ```
 After deletion, it is possible to recreate the previous infrastructure by running the [deploy command](#deploy-the-project)
 using the same configuration file.
+
+
+## Developer
+To install the latest developer version use:
+```bash
+pip install git+https://github.com/Quansight/qhub.git
+```
 
 
 ## Contributions
