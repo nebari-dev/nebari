@@ -4,7 +4,7 @@ Automated data science platform. From JupyterHub to Cloud environments.
 [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
 
 QHub is an open source tool that enables users to build and maintain
-cost-effective and scalable compute/data science platforms [on-premises]() or on [cloud providers]()
+cost-effective and scalable compute/data science platforms [on-premises](#on-premises) or on [cloud providers](#cloud-providers).
 with minimal DevOps experience.
 
 ## On-Premises
@@ -15,6 +15,7 @@ QHub On-Prem is based on OpenHPC.
 QHub offers out-of-the-box support for [Digital Ocean], Amazon [AWS] and [GCP] (Google Cloud Provider). Although by 
 default, as long as the chosen provider offers Kubernetes services and has a Terraform module, it is possible to 
 configure QHub to deploy your project.
+
 
 ![image](docs/images/brand-diagram.png "architecture diagram")
 
@@ -42,29 +43,31 @@ qhub --help
 ```
 If successful, the CLI output will be similar to the following:
 
-![img.png](docs/images/img.png)
+![help_cli_output.png](docs/images/help_cli_output.png)
 
 ### Set up initialization
 #### 1. Cloud Provider
-The next required step is to **choose a Cloud Provider to host the project deployment**. The cloud installation is based
+The first required step is to **choose a Cloud Provider to host the project deployment**. The cloud installation is based
 on Kubernetes, but knowledge of Kubernetes is **NOT** required. By default, QHub uses DigitalOcean, AWS and GCP. If you 
-wish to use a different provider, make sure they support Kubernetes and Terraform and follow the documentation to configure it.
+wish to use a different provider, make sure they support Kubernetes and Terraform and follow the suitable documentation
+to configure it.
 
 #### 2. Authentication (using OAuth and GitHub)
 In order to use GitHub actions, QHub will request a `client_id` and `client_secret`. To create those, you will need to 
 sign up for a [GitHub Developer account](https://github.com/settings/developers) and follow the steps in the Auth0 page
-on [how to Connect Apps to GitHub](https://auth0.com/docs/connections/social/github#set-up-app-in-github).
+on [how to Connect Apps to GitHub](https://auth0.com/docs/connections/social/github#set-up-app-in-github). Take note of
+your GitHub `client_id` and `client_secret`.
 
 #### 3. Domain
-You will need to have a domain name for hosting QHub. The [docs](https://qhub.dev/docs/step-by-step-walkthrough.html#cloudflare),
-describe the DNS registration using Cloudflare but any DNS provider can be used.
+Finally, you will need to have a domain name for hosting QHub. The [docs](https://qhub.dev/docs/step-by-step-walkthrough.html#cloudflare),
+describe how register DNS using Cloudflare only, but any other DNS provider can be used.
 
 Once all those have been set, it is time to generate the config file.
 
 ### Initialize Configuration
 Configuration files can be created with the command `qhub init` from the source folder, followed by the alias of the
 chosen Cloud provider, such as:
-```bash
+```
     qhub init do        # for DigitalOcean 
 ```
 ```bash
@@ -79,7 +82,7 @@ create an OAuth app on GitHub, and finally ask for the GitHub `client_id` and `c
 
 The CLI steps as illustrated on the image below:
 
-![img_1.png](docs/images/img_1.png)
+![init_cli_output.png](docs/images/init_cli_output.png)
 
 This will generate the `qhub-config.yaml` configuration file with the project's general information, and settings for 
 security, infrastructure, computational resource profiles and virtual environments. Triggered by [Github Actions], this
@@ -87,36 +90,85 @@ YAML file will set up the automated deployment and handle the scaling of the dat
 
 For more details on how to modify the configuration file, check out the [docs](https://qhub.dev/docs/do/configuration.html).
 
+> NOTE: To verify if Terraform is installed on your virtual env type `terraform` on your terminal window. In case 
+> it is necessary to install it (using conda) type:
+> ```
+> conda install -c conda-forge terraform=0.13
+>```
+> Terraform version 0.14 is not currently supported. 
 
 ### Render the configuration file
-After the [initialization](###-Initialize-Configuration), we will need to render the config file to create the Terraform
-configuration. The command below will create do so and create folders to hold the deployment states.
+After the [initialization](#-initialize-configuration), we will need to render the config file to create the Terraform
+configuration module. The command below will do so and create folders to hold the deployment states.
 
 ```bash
 qhub render -c qhub-config.yaml -o . --force
 ```
 
-The local folder will now look like:
+The local folder will now look like the image below:
 
-![img2.png](docs/images/img_2.png)
+![render_CLI_output](docs/images/render_cli_output.png)
+
 
 ### Deploy the project
 Finally, the project can be deployed with:
 ```bash
   qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
 ```
->>> stopped here :D
-## Developer
+The command will check the environment variables and initialize and apply Terraform modules. The process can take up 
+to 20 minutes.
 
-To install the latest developer version use:
+When finished, part of the output will be an `ip` address (DO/GCP) or a CNAME `hostname` (AWS), such as illustrated below:
 ```bash
-pip install git+https://github.com/Quansight/qhub.git
+DigitalOcean/GCP:
+    Outputs:
+
+    ingress_jupyter = {
+    "hostname" = ""
+    "ip" = "xxx.xxx.xxx.xxx"
+    }
+
+AWS:       
+    Outputs:
+
+    ingress_jupyter = {
+    "hostname" = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxx.us-east-1.elb.amazonaws.com"
+    "ip" = ""
+    }
 ```
 
+You will then need to update the name and content of the datafile at the DNS management page. In the example below, the
+DNS used is Cloudflare but any other DNS provider can be used.
+![Cloudflare_update](docs/images/cloudfare_update.png)
 
-## Contributing
+This step will allow QHub to be accessed by typing the URL registered under `Name` on an address bar. In this case,
+the link is [jupyter.demo.qhub.dev].
 
-[QHub][qhub gh] is an open source project and welcomes issues and pull requests.
+### Version Control
+Add files to GitHub:
+* `git init` on the local folder
+* `git add .`
+* `git commit -m 'Initial_commit'`
+* Open a new repository on GItHub with the same name as the local folder
+* Copy the command `git remote add origin <repo_name>.git` and paste it on the terminal.
+* Finally, `git push` will add all the infrastructure files to the specified repository.
+
+Once the files have been pushed, all CI/CD changes will be done via [GitHub Actions] and triggered by committing it 
+to master through Pull Requests (PRs). Once the PR is merged, it will trigger a deployment of all of the changes made to
+to the files to the QHub deployment.
+
+### Destroy the project
+It is possible to remove the infrastructure for QHub by running the command below:
+
+```bash
+ qhub destroy -c qhub-config.yaml
+```
+After deletion, it is possible to recreate the previous infrastructure by running the [deploy command](#deploy-the-project)
+using the same configuration file.
+
+
+## Contributions
+
 Thinking about contributing? Check out our [Contribution Guidelines](https://github.com/Quansight/qhub/CONTRIBUTING.md).
 
 ## License
