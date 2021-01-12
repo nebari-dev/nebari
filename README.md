@@ -9,7 +9,7 @@ with minimal DevOps experience.
 
 ## On-Premises
 QHub On-Prem is based on OpenHPC.
-> NOTE: This section of the docs is under development.
+> NOTE: This tool is under development. For more info, check out the repository [QHub HPC](https://github.com/Quansight/qhub-hpc).
 
 ## Cloud providers
 QHub offers out-of-the-box support for [Digital Ocean], Amazon [AWS] and [GCP] (Google Cloud Provider). Although by 
