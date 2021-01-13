@@ -120,6 +120,9 @@ def render_template(
         exec(content, global_context, global_context)
         config = global_context["COOKIECUTTER_CONFIG"]
 
+        
+        
+        
         cookiecutter(
             str(input_directory),
             no_input=True,

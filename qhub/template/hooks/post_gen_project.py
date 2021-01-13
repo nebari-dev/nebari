@@ -4,7 +4,7 @@ import yaml
 PROJECT_DIRECTORY = os.path.realpath(os.path.curdir)
 PROVIDER = "{{ cookiecutter.provider }}"
 ENVIRONMENTS = eval("{{ cookiecutter.environments }}")
-INSTALL_PREFECT = eval("{{ cookiecutter.prefect }}")
+INSTALL_PREFECT = eval("{{ cookiecutter.prefect }}".capitalize())
 
 
 def remove_file(filepath):
