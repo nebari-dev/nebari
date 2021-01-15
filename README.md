@@ -4,14 +4,20 @@ Automated data science platform. From JupyterHub to Cloud environments.
 [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
 
 QHub is an open source tool that enables users to build and maintain
-cost-effective and scalable compute/data science platforms [on-premises](#on-premises) or on [cloud providers](#cloud-providers).
+cost-effective and scalable compute/data science platforms [on-premises](#qhub-on-premises) or on [cloud providers](#qhub-cloud).
 with minimal DevOps experience.
 
-## On-Premises
-QHub On-Prem is based on OpenHPC.
-> NOTE: This tool is under development. For more info, check out the repository [QHub HPC](https://github.com/Quansight/qhub-hpc).
+This repository contains details for the cloud version of QHub.
 
-## Cloud providers
+## QHub On-Premises
+The on-premises version of QHub is based on OpenHPC.
+> NOTE: The tool is currently under development. Curious? Check out the repository [Qhub-HPC](https://github.com/Quansight/qhub-hpc).
+
+## QHub Cloud
+The cloud version of QHub is built using [Terraform](https://www.terraform.io/), [Helm](https://helm.sh/), and 
+[GitHub Actions](https://docs.github.com/en/free-pro-team@latest/actions).
+
+### Cloud Providers
 QHub offers out-of-the-box support for [Digital Ocean], Amazon [AWS] and [GCP] (Google Cloud Provider). Although by 
 default, as long as the chosen provider offers Kubernetes services and has a Terraform module, it is possible to 
 configure QHub to deploy your project.
@@ -105,12 +111,13 @@ configuration module. The command below will do so and create folders to hold th
 qhub render -c qhub-config.yaml -o . --force
 ```
 
-The local folder will now look like the image below:
+The command will generate the following directories:
 
-![render_CLI_output](docs/images/render_cli_output.png)
+![img.png](docs/images/render_cli_output.png)
+
 
 ### Deploy the project
-Finally, the project can be deployed with:
+Finally, the project is ready to be deployed with:
 ```bash
   qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
 ```
@@ -142,7 +149,7 @@ DNS used is Cloudflare but any other DNS provider can be used.
 ![Cloudflare_update](docs/images/cloudfare_update.png)
 
 This step will allow QHub to be accessed by typing the URL registered under `Name` on an address bar. In this case,
-the link is [jupyter.demo.qhub.dev].
+the URL is [jupyter.demo.qhub.dev]().
 
 ### Version Control
 Add files to GitHub:
@@ -173,6 +180,12 @@ To install the latest developer version use:
 pip install git+https://github.com/Quansight/qhub.git
 ```
 
+## Questions?
+We use [GitHub Discussions](https://github.com/Quansight/qhub/discussions) to raise discussions about a subject, such as:
+"What is the recommended way to do X with QHub?". And we use [Issues](https://github.com/Quansight/qhub/issues/new/choose)
+for queries, bug reporting, feature requests, documentation, etc.
+> Note: we are working around the clock to make QHub and QHub-HPC nicer. That does mean that sometimes your query might
+> take a while to reply. We apologise and ask you to please be patient.
 
 ## Contributions
 
@@ -183,6 +196,8 @@ Thinking about contributing? Check out our [Contribution Guidelines](https://git
 [QHub is BSD3 licensed](LICENSE).
 
 
+
+[comment]: <> ( To be checked and deleted)
 [jupyterhub]: https://jupyter.org/hub "A multi-user version of the notebook designed for companies, classrooms and research labs"
 [dask]: https://docs.dask.org/ "Dask is a flexible library for parallel computing in Python."
 [kubernetes]: https://kubernetes.io/ "Automated container deployment, scaling, and management"
