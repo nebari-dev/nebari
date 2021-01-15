@@ -108,14 +108,6 @@ You should get a `my-notebook.html` file that was executed with the myenv kernel
 
 
 
-
-
-
-
-
-
-
-
 ## What is QHub?
 
   + QHub is an integrated data science environment designed and developed by scientists at [Quansight](https://www.quansight.com/). It enables teams to build and maintain a cost effective and scalable compute/data science platform in the cloud.
@@ -164,4 +156,7 @@ You should get a `my-notebook.html` file that was executed with the myenv kernel
 
   + Open Source Software enables great advancements in science and we, at Quansight, are advocates of the open source community. QHub is only a single example how powerful open source software can be and how a combination of some of the greatest open source tools can provide an invaluable service for those who are creating science.
 
+
+
+  + Create an issue in the [Github repo](https://github.com/Quansight/qhub/issues/new/choose) to get answers from the creators of QHub at Quansight.
 
