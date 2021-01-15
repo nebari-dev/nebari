@@ -38,7 +38,11 @@ BASE_CONFIGURATION = {
     },
 }
 
-OAUTH_GITHUB = {
+AUTH_PASSWORD = {
+    "type": "password",
+}
+
+AUTH_OAUTH_GITHUB = {
     "type": "GitHub",
     "config": {
         "client_id": "PLACEHOLDER",
@@ -47,7 +51,7 @@ OAUTH_GITHUB = {
     },
 }
 
-OAUTH_AUTH0 = {
+AUTH_OAUTH_AUTH0 = {
     "type": "Auth0",
     "config": {
         "client_id": "PLACEHOLDER",
@@ -185,10 +189,10 @@ def render_config(
     cloud_provider,
     ci_provider,
     repository,
-    oauth_provider,
-    terraform_version=DEFAULT_TERRAFORM_VERSION,
+    auth_provider,
     repository_auto_provision=False,
-    oauth_auto_provision=False,
+    auth_auto_provision=False,
+    terraform_version=DEFAULT_TERRAFORM_VERSION,
     kubernetes_version=None,
     disable_prompt=False,
 ):
@@ -207,8 +211,8 @@ def render_config(
     config["domain"] = qhub_domain
     oauth_callback_url = f"https://jupyter.{qhub_domain}/hub/oauth_callback"
 
-    if oauth_provider == "github":
-        config["security"]["authentication"] = OAUTH_GITHUB
+    if auth_provider == "github":
+        config["security"]["authentication"] = AUTH_OAUTH_GITHUB
         print(
             "Visit https://github.com/settings/developers and create oauth application"
         )
@@ -224,11 +228,13 @@ def render_config(
             config["security"]["authentication"]["config"][
                 "oauth_callback_url"
             ] = oauth_callback_url
-    elif oauth_provider == "auth0":
-        config["security"]["authentication"] = OAUTH_AUTH0
+    elif auth_provider == "auth0":
+        config["security"]["authentication"] = AUTH_OAUTH_AUTH0
         config["security"]["authentication"]["config"][
             "oauth_callback_url"
         ] = oauth_callback_url
+    elif auth_provider == 'password':
+        config["security"]["password"] = AUTH_PASSWORD
 
     if cloud_provider == "do":
         config["digital_ocean"] = DIGITAL_OCEAN
@@ -261,8 +267,8 @@ def render_config(
     config["profiles"] = DEFAULT_PROFILES
     config["environments"] = DEFAULT_ENVIRONMENTS
 
-    if oauth_auto_provision:
-        if oauth_provider == "auth0":
+    if auth_auto_provision:
+        if auth_provider == "auth0":
             auth0_auto_provision(config)
 
     if repository_auto_provision:

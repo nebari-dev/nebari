@@ -58,9 +58,9 @@ def handle_init(args):
         cloud_provider=args.platform,
         ci_provider=args.ci_provider,
         repository=args.repository,
-        oauth_provider=args.oauth_provider,
         repository_auto_provision=args.repository_auto_provision,
-        oauth_auto_provision=args.oauth_auto_provision,
+        auth_provider=args.auth_provider,
+        auth_auto_provision=args.auth_auto_provision,
         kubernetes_version=args.kubernetes_version,
         disable_prompt=args.disable_prompt,
     )
