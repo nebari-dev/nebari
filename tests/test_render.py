@@ -21,9 +21,10 @@ def test_render(project, domain, cloud_provider, ci_provider, oauth_provider, tm
         cloud_provider=cloud_provider,
         ci_provider=ci_provider,
         repository='github.com/test/test',
-        repository_auto_provision=False,
         oauth_provider=oauth_provider,
+        repository_auto_provision=False,
         oauth_auto_provision=False,
+        kubernetes_version='1.18.0',
         disable_prompt=True,
     )
 
