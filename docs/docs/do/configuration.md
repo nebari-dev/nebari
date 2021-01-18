@@ -1,6 +1,7 @@
 # Configuration
 
-The configuration file is split into several sections.
+The configuration file is split into several sections. In this page, we detail the requirements necessary for
+the YAML config file.
 
 ## General
 
@@ -15,16 +16,18 @@ domain: "do.qhub.dev"
 deployment/kubernetes will be deployed with.
 
 `provider` determines which cloud provider to use for the
-deployment. Possible values are `do`, `aws`, `gcp`.
+deployment. Possible values are `do` for DigitalOcean, `aws` for Amazon AWS and `gcp` for Google Could Provider.
 
 `ci_cd` is the continuous integration and continuous deployment
 framework to use. Currently `github-actions` is supported.
 
-`domain` is the top level url to put jupyterlab and future services
+`domain` is the top level URL to put JupyterLab and future services
 under such a monitoring. For example `jupyter.do.qhub.dev` would be
-the domain for jupyterhub to be exposed under.
+the domain for JupyterHub to be exposed under.
 
 ## Security
+
+This section is for configuring security relating to the QHub deployment. [obvious sentence]
 
 ```yaml
 security:
@@ -52,11 +55,8 @@ security:
       gid: 102
 ```
 
-The security section is for configuring security relating to the qhub
-deployment.
-
-`security.authentication` is for configuring the oauth provider used
-for authentication. Currently the configuration shows github but Auth0
+`security.authentication` is for configuring the OAuth provider used
+for authentication. Currently, the configuration shows GitHub but Auth0
 is also supported.
 
 ```yaml
@@ -71,26 +71,29 @@ security:
       auth0_subdomain: ...
 ```
 
-`users` and `groups` allows you to provision unix permissions to each
+`users` and `groups` allows one to provision UNIX permissions to each
 user. Any user is assigned a `uid`, `primary_group`, and optionally
-any number of `secondary_groups`. The `primary_group` is the group
-name assigned to files that are written for the user. `groups` is
-simply a mapping of group name to group ids. It is recommended to not
-change the ids assigned to groups and users after creation since it
-may lead to login issues. While the demo shows ids around `100` and
-`1000` it is recommended to start with high uid numbers
+any number of `secondary_groups`. 
+* The `primary_group` is the group name assigned to files that are 
+written for the user.
+* `groups` are a mapping of group name to group IDs. It is 
+  recommended to not change the IDs assigned to groups and users
+  after creation, since it may lead to login issues. 
+  > NOTE: While the demo shows IDs between `100` and
+`1000`, it is recommended to start with high User ID numbers
 e.g. `10000000`. `ids` technically supports 2 billion `ids`.
 
 ## Provider Infrastructure
 
-Finally comes the kubernetes infrastructure deployment. Each provider
-has different configuration but they are similar. The following
-configuration sets up a kubernetes deployment with autoscaling node
-groups. Depending on the cloud provider there may be restrictions that
-are detailed in each section.
+Finally, comes the Kubernetes infrastructure deployment. Although quite similar,
+each provider has a different configuration.
 
-For any of the providers adding an additional node group is as easy as
-adding a node group such as `high-memory`
+The following configuration sets up a kubernetes deployment with
+autoscaling node groups. Depending on the cloud provider there
+might be restrictions, which are detailed on each section.
+
+For any of the providers, adding a node group is as easy as
+the following, which adds a `high-memory` group:
 
 ```yaml
 high-memory:
@@ -99,16 +102,17 @@ high-memory:
   max_nodes: 50
 ```
 
-Note that for each provider the instance names, availability zones,
-and kubernetes versions will be different.
+> For each provider details such as **instance names**, **availability zones**,
+and **Kubernetes versions** will be DIFFERENT. [duplicated info]
 
-### Digital Ocean
+### Providers
+#### DigitalOcean
 
-Digital Ocean has a restriction with autoscaling in that `min_nodes`
-cannot be less than 1. Here is a recommended setup. Note that digital
-ocean regularly updates the kubernetes versions so this field will
-likely have to be changed. [See available instance types for digital
-ocean.](https://www.digitalocean.com/docs/droplets/).
+DigitalOcean has a restriction with autoscaling in that the minimum 
+nodes allowed (`min_nodes` = 1) is one. Below is the recommended setup.
+> Note: DigitalOcean regularly updates Kubernetes versions hence, the
+> field `kubernetes_version` will most likely have to be changed.
+> [See available instance types for DigitalOcean](https://www.digitalocean.com/docs/droplets/).
 
 ```yaml
 digital_ocean:
@@ -129,11 +133,14 @@ digital_ocean:
       max_nodes: 4
 ```
 
-### Google Cloud Provider
 
-Google Cloud has the best support for QHub. I allows auto-scaling to
-zero within the node group. There are no major restrictions. [To see
-available instance types refer to gcp docs.](https://cloud.google.com/compute/docs/machine-types)
+#### Google Cloud Provider (GCP)
+
+Google Cloud has the best support for QHub. It allows auto-scaling to
+zero within the node group. There are no major restrictions.
+
+To see available instance types refer to 
+[GCP docs](https://cloud.google.com/compute/docs/machine-types).
 
 ```yaml
 google_cloud_platform:
@@ -157,12 +164,14 @@ google_cloud_platform:
       max_nodes: 5
 ```
 
-### Amazon Web Services
+#### Amazon Web Services (AWS)
 
-Amazon Web Services has similar support to Digital Ocean and does not
-allow auto-scaling below 1 node. Additionally AWS requires that a
-kubernetes cluster run in two availability zones. [Consult aws instance
-types for possible options.](https://aws.amazon.com/ec2/instance-types/)
+Amazon Web Services has similar support to DigitalOcean and does not
+allow auto-scaling below 1 node. Additionally, AWS requires that a
+Kubernetes cluster run in two Availability Zones (AZs).
+
+Consult [AWS instance types](https://aws.amazon.com/ec2/instance-types/)
+for possible options.
 
 ```yaml
 amazon_web_services:
@@ -199,9 +208,9 @@ default_images:
 
 ## Storage
 
-Control the amount of storage allocated to shared filesystems. Note
-that when you change the storage size it will delete the previous
-storage!
+Control the amount of storage allocated to shared filesystems.
+> Note: when the storage size is changed, it will automatically
+> delete (!) the previous storage place.
 
 ```yaml
 storage:
@@ -211,8 +220,8 @@ storage:
 
 ## Profiles
 
-Profiles are used to control the jupyterlab user instances and
-dask-workers provided by dask-gateway.
+Profiles are used to control the JupyterLab user instances and
+Dask-workers provided by Dask-gateway.
 
 ```yaml
 profiles:
@@ -254,14 +263,15 @@ profiles:
       image: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
 ```
 
-For each `profiles.jupyterlab` is a named jupyterlab profile. It
+For each `profiles.jupyterlab` is a named JupyterLab profile. It
 closely follows the
 [KubeSpawner](https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html)
-api. The only exception is that two keys are added `users` and
-`groups` which allow restriction of profiles to a given set of groups and users. We recommend using groups to manage profile access.
+API. The only exception is that two keys are added `users` and
+`groups` which allow restriction of profiles to a given set of groups and users.
+We recommend using groups to manage profile access.
 
-Finally we allow for configuration of the dask workers. In general
-similar to the jupyterlab instances you only need to configuration the
+Finally, we allow for configuration of the Dask workers. In general,
+similar to the JupyterLab instances you only need to configuration the
 cores and memory.
 
 ## Environments
@@ -305,18 +315,19 @@ environments:
 
 QHub is experimenting with a new way of distributing environments
 using [conda-store](https://github.com/quansight/conda-store). Please
-expect this environment distribution method to change over time. Each
-environment configuration is a `environment.<filename>` mapping to a
-conda environment definition file. If you need to pin specific version
+expect this environment distribution method to change over time.
+
+Each environment configuration is a `environment.<filename>` mapping to a
+conda environment definition file. If you need to pin a specific version,
 please include it in the definition. One current requirement is that
 each environment include `ipykernel`, `ipywidgets`, `dask==2.14.0`,
 `distributed==2.14.0`, `dask-gateway==0.6.1`. Upon changing the
 environment definition expect 1-10 minutes upon deployment of the
 configuration for the environment to appear.
 
-# Example Full Configuration
+# Full Configuration Example
 
-Everything in the configuration is set besides
+Everything in the configuration is set besides [???]
 
 ```yaml
 project_name: do-jupyterhub
@@ -459,13 +470,14 @@ environments:
 
 2. Put configuration file in directory in name `qhub-config.yaml`
 
-3. Initialize the qhub repository
+~2. Put configuration file in the directory with name `qhub-config.yaml` [???]
+
+3. Initialize the QHub repository
 
 ```shell
 pip install qhub-ops
 qhub-ops render -c qhub-config.yaml -o ./ -f
 ```
-
 This will initialize the repository and next proceed to
-installation. Do not commit to repo to github until you have
+installation. Do not commit to repo to GitHub until you have
 initialized the `terraform-state` directory seen in installation.

@@ -1,16 +1,119 @@
-# FAQ
+# Frequently Asked Questions (FAQ)
 
-## What is QHub?
+> ## Do you have a question about QHub that is not answered in the [documentation](https://qhub.dev)?
+>
+> + Head over to our [Discussion Q&A](https://github.com/Quansight/qhub/discussions/categories/q-a) page on GitHub and leave your question to our team.
+> 
+> Have feedback or would like to request improvements on the docs? Open an [issue](https://github.com/Quansight/qhub/issues/new/choose) and tell us more.
+    
 
-  + QHub is an integrated data science environment designed and developed by scientists at [Quansight](https://www.quansight.com/). QHub enables teams to build and maintain a cost effective and scalable compute/data science platform in the cloud.
+### Who was QHub made for?
+In summary, anyone who would like to deploy using JupyterHub. From data scientists and researchers to DevOps engineers,
+QHub was designed to abstract the complexities involved on using cloud services and parallel computing.
+
+It introduces the concept of deployment from JupyterHub to a chosen Cloud provider using Kubernetes, without the need for 
+a DevOps specialist. I.e., _Kubernetes for those who don't know how to use Kubernetes_. 
+
+The aim is to make it easier for users to set up infrastructure that is ready to use, scalable, and stable, all with out-of-the-box solutions.
+> QHub is also entirely customisable, although to properly adapt the default settings will require more in-depth DevOps knowledge.
+
 
 ## What is Infrastructure as Code and how is it related to QHub?
   
-  + [Infrastructure as Code](https://en.wikipedia.org/wiki/Infrastructure_as_code#:~:text=Infrastructure%20as%20code%20(IaC)%20is,configuration%20or%20interactive%20configuration%20tools.) is a system that handles the management of infrastructure (networks, virtual machines, load balancers, and connection topology), using the same versioning that DevOps teams use for source code. Infrastructure as Code enables DevOps teams to test applications in production-like environments early in the development cycle.
+  + [Infrastructure as Code](https://docs.aws.amazon.com/whitepapers/latest/introduction-devops-aws/infrastructure-as-code.html) (IaC)
+    is a system that handles the management of infrastructure (networks, virtual machines, load balancers, and connection
+    topology) using the same versioning that DevOps teams use for source-code. Infrastructure as Code enables DevOps teams to test applications in production-like environments early in the development cycle.
   
-    QHub brings together these concepts and tools in its architecture to provide users with the infrastructure that they need to perform development and deployments at scale without having to manually configure it themselves.
+    QHub brings together these concepts and tools in its architecture to provide users with the necessary infrastructure to perform development and deployments at scale without having to manually configure it themselves.
 
-## What are some of the benefits of using QHub?
+
+## Q: How do I retrieve my user data from the EFS Share before I destroy my QHub on AWS?
+Answered by [@jkellndorfer](https://github.com/jkellndorfer).
+
+We want to back up the user-data from the AWS EFS persistent volume associated with our QHub before we destroy it.
+A possible avenue are the following steps:
+
+1. Login to the AWS console
+2. Determine which VPC (Virtual Private Cloud) your QHub EKS cluster is using.
+3. From EFS find the cluster which used EFS Share and determine its ID, e.g. `fs-9083c231`.
+3. Launch an AWS instance with Amazon Linux as the operating system.
+   - Choose the same VPC from Step 2.
+   - In `security groups` assure rights to NFS and SSH.
+4. Login to the AWS instance.
+5. Install EFS mount helper and mount the share (Instructions [here](https://docs.aws.amazon.com/efs/latest/ug/mounting-fs-mount-helper.html#mounting-fs-mount-helper-ec2) and [here](https://docs.aws.amazon.com/efs/latest/ug/mounting-fs-mount-helper.html#mounting-fs-mount-helper-ec2)). 
+
+        sudo yum install -y nfs-utils
+        sudo yum install -y amazon-efs-utils
+        sudo mkdir /mnt/efs
+        sudo mount -t efs fs-9261c667:/ /mnt/efs
+        aws configure --profile efs_backup.  # enter your AWS KEY and SECRET_KEY WITH write rights to the backup bucket you want to use
+     
+6. Assume you mounted the EFS share on mountpoint `/mnt/efs`
+        
+        aws s3 cp --profile efs_backup --recursive /mnt/efs/home s3://<my-backup-bucket>/<my-backup-Prefix>
+        
+7. Terminate your EC2 AWS Linux instance.
+
+
+
+## Q: How do I destroy my QHub deployment on Amazon AWS?
+Answered by: [@jkellndorfer](https://github.com/jkellndorfer).
+
+Follow the steps:
+
+1. On your local QHub repo type the code snipped below:
+```bash
+  cd <your-qhub-repo>
+  git pull              # to fetch the latest changes 
+  cd infrastructure
+  terraform destroy
+```
+2. If `terraform destroy` does not complete and stops with an `unauthorized` error, you should try running it a
+second or several more times until you are stuck at the same `module`.
+
+3. Then try to manually remove the "offending" module with
+    ```
+      terraform state rm <module>
+    ```
+    Followed (again) by
+    ```bash
+      terraform destroy
+    ```
+4. Repeat the above process for every module where the destroy process fails.
+5. Finally, login to your AWS console and look for everything related to the EKS, LoadBalancer, database tables,
+   autoscaling groups, node groups, EFS, volumes, IAM, etc. that may still be left and remove it.
+
+
+## Q: How do I use `nbconvert --execute` on QHub from the Command Line?
+Answered by: [@jkellndorfer](https://github.com/jkellndorfer).
+
+Assume the notebook `my-notebook.ipynb` uses the environment `myenv`.
+
+1. Activate the environment used in the notebook
+
+        conda activate myenv
+
+2. Check that the environment is part of the string returned by `jupyter kernelspec list`
+
+        jupyter kernelspec list
+        python3    /home/conda/store/802e4196e4af0f9dbc000362cdb3bfde2df34aa9512bcfa6511c384ccef4518f-myenv/share/jupyter/kernels/python3
+      
+Interestingly, the kernel name is "python3", but contains,  ...-myenv/share ..., so we are ok.
+
+3. Convert the notebook using the `python3` label:
+
+        jupyter nbconvert --ExecutePreprocessor.kernel_name=python3 --execute --to html my-notebook.ipynb
+      
+You should get a `my-notebook.html` file that was executed with the myenv kernel. 
+
+
+
+## What is QHub?
+
+  + QHub is an integrated data science environment designed and developed by scientists at [Quansight](https://www.quansight.com/). It enables teams to build and maintain a cost effective and scalable compute/data science platform in the cloud.
+
+
+## What are the main benefits of using QHub?
 
   + QHub enables users to deliver stable environments rapidly and at scale. It allows teams enforce consistency by representing the desired state of their environments via code. QHub as a Infrastructure as Code platform prevents runtime issues caused by missing dependencies or configuration drifts.
 
@@ -18,7 +121,7 @@
 
   + QHub is an open source project and free to use. However, the cloud service providers (Amazon Web Services, Google Cloud Platform, Digital Ocean) accessed through QHub require your personal service account information. Any paid services these providers offer and you choose to use for your projects will not be free.
 
-## What challenges does QHub fix?
+## What challenges does QHub solve?
 
   + QHub aims to provide a smooth computing experience for teams of data scientists, engineers, educators, among others. For this, it abstracts away the complex details of deployment environments and management of infrastructure, making your configurations reproducible and your applications scalable.
 
@@ -42,9 +145,6 @@
 
   + Dask is an open source library for parallel computing written in Python. It enables researchers to scale computations beyond the limits of their local machines. See [Dask documentation](https://docs.dask.org/en/latest/) for more details.
 
-## Do I have to be an experienced programmer/data scientist or DevOps engineer to use QHub?
-
-  + The short answer is no. QHub is designed to make it easier for people to use cloud services, parallel computing, and many other open source tools by abstracting away the complexities they entail and providing users with the infrastructure that is ready to use, scalable, and stable. If you want to customize the default settings of QHub to tailor it for specific needs of your team, QHub allows you to do that as well, but you might need to have a little bit more knowledge of DevOps.
 
 ## What are environments?
 
@@ -56,6 +156,7 @@
 
   + Open Source Software enables great advancements in science and we, at Quansight, are advocates of the open source community. QHub is only a single example how powerful open source software can be and how a combination of some of the greatest open source tools can provide an invaluable service for those who are creating science.
 
-## I have a question about "how to do *X* using QHub" that is not answered in the [documentation](https://qhub.readthedocs.io/en/latest/index.html), what do I do?
 
-  + Create an issue in the [Github repo](https://github.com/Quansight/qhub-ops) to get answers from the creators of QHub at Quansight.
+
+  + Create an issue in the [Github repo](https://github.com/Quansight/qhub/issues/new/choose) to get answers from the creators of QHub at Quansight.
+

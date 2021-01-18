@@ -1,7 +1,7 @@
 # import sphinx.writers.html5
 # sphinx.writers.html5.HTML5Translator.visit_pending_xref = lambda *x:...
 # sphinx.writers.html5.HTML5Translator.depart_pending_xref = lambda *x:...
-BLOG_TITLE = title = html_title = "Qhub code as infrastructure."
+BLOG_TITLE = title = html_title = "QHub Code as Infrastructure."
 BLOG_AUTHOR = author = "Quansight"
 html_theme = "pydata_sphinx_theme"
 master_doc = "index"
@@ -38,7 +38,7 @@ templates_path = ['_templates']
 # Material theme options (see theme.conf for more information)
 html_theme_options = {
     # Set the name of the project to appear in the navigation.
-    "nav_title": "Q|Hub",
+    "nav_title": "QHub",
     # Set you GA account ID to enable tracking
     # 'google_analytics_account': 'UA-XXXXX',
     # Specify a base_url used to generate sitemap.xml. If not
