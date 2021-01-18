@@ -34,7 +34,7 @@ Following best practice, we recommend that you create a virtual environment prev
 ## 2. Environment variables
 
 In order to fully automate the deployment, several environment variables must be set. The following subsections will 
-describe the purpose and method for obtaining the values for these variables.
+describe the purpose and method for obtaining the values for these variables. An introduction to unix environment variables can be found [here](https://en.wikipedia.org/wiki/Environment_variable).
 
 ### 2.1 Cloudflare
 
