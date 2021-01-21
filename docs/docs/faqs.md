@@ -154,9 +154,12 @@ You should get a `my-notebook.html` file that was executed with the myenv kernel
 
 ## Why open source?
 
-  + Open Source Software enables great advancements in science and we, at Quansight, are advocates of the open source community. QHub is only a single example how powerful open source software can be and how a combination of some of the greatest open source tools can provide an invaluable service for those who are creating science.
+  + Open Source Software enables great advancements in science, and here at Quansight we advocate for the open source 
+    community. QHub is only a single example how powerful open source software can be and how a combination of some of 
+    the greatest open source tools can provide an invaluable service for those who are creating science.
 
 
 
-  + Create an issue in the [Github repo](https://github.com/Quansight/qhub/issues/new/choose) to get answers from the creators of QHub at Quansight.
+  + Create an issue in the [Github repo](https://github.com/Quansight/qhub/issues/new/choose) to get answers from the 
+    maintainers of QHub at Quansight.
 
