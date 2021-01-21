@@ -167,7 +167,7 @@ Add all files to github:
 
 Push the changes to your repo:
 
-    git push origin master
+    git push origin main
 
 
 ## 3. Post GitHub deployment:
