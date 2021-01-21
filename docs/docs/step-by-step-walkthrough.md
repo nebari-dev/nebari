@@ -1,43 +1,54 @@
-# Step by Step QHub Cloud Deployment
+# Step-by-Step QHub Cloud Deployment
 
-This guide makes the following assumptions:
+The list below is our suggestion. Other providers may be used, but you will need to consult their documentation. When using a different provider the corresponding flag in the `qhub` command-line argument should be omitted.
 
-- [Github actions] will be used for CICD
+For this initial tutorial, we assume that you will use the following tools:
+
+
+- [Github actions] will be used for CI/CD
 - Oauth will be via [auth0]
 - DNS registry will be through [Cloudflare]
 
-Other providers can be used, but you will need to consult their documention on setting up oauth and DNS registry. If a different provider is desired, then the corresponding flag in the `qhub` command line argument can be ommited.
 
-## 1. Installing QHub:
+## 1. Install QHub
+Following best practice, we recommend that you create a virtual environment previously and from there install QHub on machine:
 
-Choose an installation method: 
-
-- Install the latest stable release with Conda: 
-
+- If you prefer conda, install the latest stable release with : 
+```bash
     conda install -c conda-forge qhub
+```
 
-- Install the latest stable release with pip: 
-
+- If you are a PyPI user instead, download the latest stable release with: 
+```bash
     pip install qhub
+```
     
-- Install the latest development version: 
-
+- (For developers) The latest development version can be installed using PyPI: 
+```bash
     pip install git+https://github.com/Quansight/qhub.git
+```
+> NOTE: Download the 'development version' to try out features which have not been yet officially released. 
+    
 
 ## 2. Environment variables
 
-Several different environment variables must be set in order for deployment to be fully automated. The following subsections will describe the purpose and method for obtaining the values for these variables.
+In order to fully automate the deployment, several environment variables must be set. The following subsections will 
+describe the purpose and method for obtaining the values for these variables. An introduction to unix environment variables can be found [here](https://en.wikipedia.org/wiki/Environment_variable).
 
 ### 2.1 Cloudflare
 
-Cloudflare will automate the DNS registration. First a [Cloudflare][Cloudflare_signup] account needs to be created and [domain name] registered through it. If an alternate DNS provider is desired, then omit the `--dns-provider cloudflare` flag for `qhub deploy`. At the end of deployement an IP address (or CNAME for AWS) will be output that can be registered to your desired URL.
+Cloudflare will automate the DNS registration. First a [Cloudflare][Cloudflare_signup] account needs to be created and 
+[domain name] registered through it. If an alternate DNS provider is desired, then omit the `--dns-provider cloudflare`
+flag for `qhub deploy`. At the end of deployment an IP address (or CNAME for AWS) will be output that can be registered
+to your desired URL.
 
 Within your Cloudflare account, follow these steps to generate a token
 
 - Click user icon on top right and click `My Profile`
 - Click the `API Tokens` menu and select `Create Token`
 - Click `Use Template` next to `Edit zone DNS`
-- Under `Permissions` in addition to `Zone | DNS | Edit` use the `Add more` button to add `Zone | Zone | Read`, `Zone | Zone Settings | Read`, and `Account | Account Settings | Read` to the Permissions
+- Under `Permissions` in addition to `Zone | DNS | Edit` use the `Add more` button to add `Zone | Zone | Read`, `Zone |
+  Zone Settings | Read`, and `Account | Account Settings | Read` to the Permissions
 - Under `Account Resources` set the first box to `Include` and the second to your desired account
 - Under `Zone Resources` set it to `Include | Specific zone` and your domain name
 - Click continue to summary
@@ -57,7 +68,7 @@ After creating an [Auth0](https://auth0.com/) account and logging in, follow the
 - `AUTH0_CLIENT_SECRET`: Set this variable equal to the `Client Secret` string under `Settings`
 - `AUTH0_DOMAIN`: Set this variable to be equal to your account name (indicated on the upper right) appended with `.auth0.com`. IE an account called `qhub-test` would have this variable set to `qhub-test.auth0.com`
 
-### 2.3 Github
+### 2.3 GitHub
 Your github username and access token will automate the creation of the repository that will hold the infrastructure code as well as the github secrets
 
 - `GITHUB_USERNAME`: Set this to your github username
@@ -87,7 +98,7 @@ In order to get the DigitalOcean access keys follow this [digitalocean tutorial]
 
 #### 2.4.3 Google Cloud Platform
 
-Follow [these detailed instructions] on creating a Google service account with owner level permissions. With the service account created, follow [these steps] to create and download a json credentials file.
+Follow [these detailed instructions] on creating a Google service account with an owner level permissions. With the service account created, follow [these steps] to create and download a json credentials file.
 
 - `GOOGLE_CREDENTIALS`: Set this to the path to your credentials file
 - `PROJECT_ID`: Set this to the project ID listed on the home page of your Google console under `Project info`
@@ -156,12 +167,12 @@ Add all files to github:
 
 Push the changes to your repo:
 
-    git push origin master
+    git push origin main
 
 
-### 3 Post github deployment:
+## 3. Post GitHub deployment:
 
-After the files are in github all CICD changes will done via github actions and triggered by a commit to master. To use gitops, make a change to the `qhub-ops.yaml` in a new branch and create pull request into master. When the pull request is merged, it will trigger a deployement of all of those changes to your QHub.
+After the files are in Github all CI/CD changes will be triggered by a commit to main and deployed via GitHub actions. To use gitops, make a change to `qhub-ops.yaml` in a new branch and create a pull request into main. When the pull request is merged, it will trigger a deployment of all of those changes to your QHub.
 
 The first thing you will want to do is add users to your new QHub. Any type of supported authorization from auth0 can be used as a username. Below is an example configuration of 2 users:
 
@@ -175,11 +186,13 @@ The first thing you will want to do is add users to your new QHub. Any type of s
             uid: 1000001
             primary_group: users
 
-As seen above, each username has a unique `uid` and a `primary_group`. Optional `secondary_groups` may also be set for each user.
+As seen above, each username has a unique `uid` and a `primary_group`. 
+Optional `secondary_groups` may also be set for each user.
 
-### 4 Git ops enabled
+## 4. GitOps enabled
 
-Since the infrastructure state is reflected in the repository, it allows self-documenting of infrastructure and team members to submit pull requests that can be reviewed before modifying the infrastructure.
+Since the infrastructure state is reflected in the repository, it allows self-documenting of infrastructure and team
+members to submit pull requests that can be reviewed before modifying the infrastructure.
 
 Congratulations! You have now completed your QHub cloud deployment!
 
