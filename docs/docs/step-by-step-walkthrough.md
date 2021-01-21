@@ -1,7 +1,6 @@
 # Step-by-Step QHub Cloud Deployment
 
 The list below is our suggestion. Other providers may be used, but you will need to consult their documentation. When using a different provider the corresponding flag in the `qhub` command-line argument should be omitted.
-If a different provider is desired, then the corresponding flag in the `qhub` command line argument can be omitted.
 
 For this initial tutorial, we assume that you will use the following tools:
 
