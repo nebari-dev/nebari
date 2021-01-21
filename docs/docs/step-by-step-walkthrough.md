@@ -1,6 +1,6 @@
 # Step-by-Step QHub Cloud Deployment
 
-The list above is our suggestion as other providers can be used. You will need to consult their documentation on setting up oauth and DNS registry.
+The list below is our suggestion. Other providers may be used, but you will need to consult their documentation. When using a different provider the corresponding flag in the `qhub` command-line argument should be omitted.
 If a different provider is desired, then the corresponding flag in the `qhub` command line argument can be omitted.
 
 For this initial tutorial, we assume that you will use the following tools:
