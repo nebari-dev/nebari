@@ -83,7 +83,7 @@ variables, check the [Step-by-Step](https://qhub.dev/docs/step-by-step-walkthrou
 Once all the necessary credentials are gathered and set as [UNIX environment variables](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/),
 QHub can be deployed in under 20 minutes using:
 ```bash
-qhub init   ... # generates initial config file
+qhub init   ... # generates initial config file and optionally automates deployment steps
 qhub render ... # creates the Terraform config module
 qhub deploy ... # creates and configures the cloud infrastructure
 ```
