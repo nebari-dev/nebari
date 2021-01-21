@@ -172,7 +172,7 @@ Push the changes to your repo:
 
 ## 3. Post GitHub deployment:
 
-After the files are in github all CI/CD changes will be done via github actions and triggered by a commit to master. To use gitops, make a change to the `qhub-ops.yaml` in a new branch and create pull request into master. When the pull request is merged, it will trigger a deployement of all of those changes to your QHub.
+After the files are in Github all CI/CD changes will be triggered by a commit to main and deployed via GitHub actions. To use gitops, make a change to `qhub-ops.yaml` in a new branch and create a pull request into main. When the pull request is merged, it will trigger a deployment of all of those changes to your QHub.
 
 The first thing you will want to do is add users to your new QHub. Any type of supported authorization from auth0 can be used as a username. Below is an example configuration of 2 users:
 
