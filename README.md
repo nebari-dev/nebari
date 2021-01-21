@@ -17,8 +17,8 @@ The on-premises version of QHub is based on OpenHPC.
 ## QHub Cloud
 The cloud version of QHub is built using [Terraform](https://www.terraform.io/), [Helm](https://helm.sh/), and 
 [GitHub Actions](https://docs.github.com/en/free-pro-team@latest/actions).
-Terraform handles the build, change, and versioning of the infrastructure. Helm helps to define, install and manage 
-[Kubernetes](https://kubernetes.io/ "Automated container deployment, scaling, and management") applications. And GitHub 
+Terraform handles the build, change, and versioning of the infrastructure. Helm helps to define, install, and manage 
+[Kubernetes](https://kubernetes.io/ "Automated container deployment, scaling, and management"). GitHub 
 Actions is used to automatically create commits when the configuration file (`qhub-config.yaml`) is rendered, as well as
 to kick of the deployment action.
 
@@ -78,14 +78,14 @@ optional arguments:
 
 ## Usage
 QHub requires the setting of environment variables to automate the deployments fully. For details on how to obtain those
-variables, check the [Step-by-Step](https://qhub.dev/docs/step-by-step-walkthrough.html) guide on the docs.
+variables, check the [Step-by-Step](https://qhub.dev/docs/step-by-step-walkthrough.html) guide in the docs.
 
 Once all the necessary credentials are gathered and set as [UNIX environment variables](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/),
 QHub can be deployed in under 20 minutes using:
 ```bash
 qhub init   ... # generates initial config file
 qhub render ... # creates the Terraform config module
-qhub deploy ... # deploys the project
+qhub deploy ... # creates and configures the cloud infrastructure
 ```
 
 ## Questions?
