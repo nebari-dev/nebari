@@ -1,9 +1,15 @@
 import os
+import shutil
+
 import yaml
 
 PROJECT_DIRECTORY = os.path.realpath(os.path.curdir)
 PROVIDER = "{{ cookiecutter.provider }}"
 ENVIRONMENTS = eval("{{ cookiecutter.environments }}")
+
+
+def remove_directory(dirpath):
+    shutil.rmtree(os.path.join(PROJECT_DIRECTORY, dirpath))
 
 
 def remove_file(filepath):
@@ -26,3 +32,6 @@ if __name__ == "__main__":
     elif PROVIDER == "gcp":
         remove_file("infrastructure/aws.tf")
         remove_file("infrastructure/do.tf")
+
+    # templates directory is only used by includes
+    remove_directory("templates")
