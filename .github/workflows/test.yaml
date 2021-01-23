@@ -61,7 +61,7 @@ jobs:
           pip install .[dev]
       - name: QHub Initialize
         run: |
-          qhub init "${{ matrix.provider }}" --project "${{ matrix.provider }}-test" --domain "${{ matrix.provider }}.qhub.dev" --oauth-provider github --kubernetes-version "1.18.0" --disable-prompt
+          qhub init "${{ matrix.provider }}" --project "${{ matrix.provider }}-test" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --kubernetes-version "1.18.0" --disable-prompt
       - name: QHub Render
         run: |
           qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
