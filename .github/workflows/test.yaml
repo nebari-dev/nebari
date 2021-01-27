@@ -3,10 +3,10 @@ name: "Tests"
 on:
   pull_request:
     branches:
-      - master
+      - main
   push:
     branches:
-      - master
+      - main
 
 jobs:
   test-general:
@@ -16,8 +16,8 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8]
     steps:
-      - name: 'Checkout Infastructure'
-        uses: actions/checkout@master
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@main
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -50,8 +50,8 @@ jobs:
           - gcp
           - do
     steps:
-      - name: 'Checkout Infastructure'
-        uses: actions/checkout@master
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@main
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
@@ -66,19 +66,19 @@ jobs:
         run: |
           qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
       - name: 'Terraform Format'
-        uses: hashicorp/terraform-github-actions@master
+        uses: hashicorp/terraform-github-actions@main
         with:
           tf_actions_version: 0.13.5
           tf_actions_subcommand: 'fmt'
           tf_actions_working_dir: 'qhub-${{ matrix.provider }}-deployment/terraform-state'
       - name: 'Terraform Format'
-        uses: hashicorp/terraform-github-actions@master
+        uses: hashicorp/terraform-github-actions@main
         with:
           tf_actions_version: 0.13.5
           tf_actions_subcommand: 'fmt'
           tf_actions_working_dir: 'qhub-${{ matrix.provider }}-deployment/infrastructure'
       - name: QHub Render Artifact
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@main
         with:
           name: "qhub-${{ matrix.provider }}-artifact"
           path: "qhub-${{ matrix.provider }}-deployment"
