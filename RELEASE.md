@@ -9,14 +9,10 @@
 ---
 ## Release 0.2.0
 ### Feature changes and enhancements
-* Implemented the option to locally deploy QHub, allowing to ...
-* Local testing implementation (describe)
-* Removed requirement for DNS, authorization is now password-based (no more OAuth requirements).
 * Added conda prerequisites for GUI packages.
 * Added `qhub destroy` functionality that tears down the QHub deployment.
 * Changed the default repository name from `master` to `main`.
 * Added error message when Terraform parsing fails.
-* Added support to [Prefect.io](https://www.prefect.io/) when QHub's deployment flag `prefect: True` is set.
 * Added templates for GitHub issues.
 
 ### Bug fixes
@@ -26,12 +22,20 @@
 
 ### Breaking changes
 * Removed the registry for DigitalOcean.
-* (anything else?)
-
-### Migration guide
-(Shall we add one?)
 
 ## Thank you for your contribution!
 > [Brian Larsen](https://github.com/brl0), [Rajat Goyal](https://github.com/RajatGoyal), 
 > [Prasun Anand](https://github.com/prasunanand), and  [Rich Signell](https://github.com/rsignell-usgs) and  
 > [Josef Kellndorfer](https://github.com/jkellndorfer) for the insightful discussions.
+
+---
+## Upcoming release 0.3.0
+### Feature changes and enhancements
+* Implemented the option to locally deploy QHub allowing for local testing.
+* Removed requirement for DNS, authorization is now password-based (no more OAuth requirements).
+
+### Bug fixes
+
+### Breaking changes
+
+### Migration guide
