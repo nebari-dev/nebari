@@ -1,97 +1,110 @@
-# `qhub` - automated data science environments on cloud environments
+# QHub Cloud
+Automated data science platform. From [JupyterHub](https://jupyter.org/hub "Multi-user version of the Notebook") to 
+Cloud environments with [Dask](https://docs.dask.org/ "Parallel computing in Python").
 
 [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
 
-QHub is an open source project from Quansight that enables
-organizations to build and maintain cost-effective and scalable
-compute/data science platforms on-premise or on any cloud provider
-with minimal in-house experience. It is a focused JupyterHub
-distribution that integrates many open source libraries into a
-coherent platform. The components that form QHub can be rearranged and
-customized to support many different enterprise use cases. For more
-information see https://www.quansight.com/post/announcing-qhub.
+QHub is an open source tool that enables users to build and maintain
+cost-effective and scalable compute/data science platforms [on-premises](#qhub-on-prem) or on 
+[cloud providers](#qhub-cloud) with minimal DevOps experience.
 
-Quansight LLC is a data science and analytics consulting firm
-specializing in open source software around the PyData community
-including Jupyter, scikit-learn, Dask, Pandas, PyTorch, NumPy, SciPy,
-and much more.  Quansight was co-founded by Travis Oliphant, founder
-of Anaconda, NumFOCUS, and PyData and creator of SciPy, NumPy, and
-Numba. For more information see https://www.quansight.com/about-us.
+**This repository details the [QHub Cloud](https://qhub.dev/ "Official QHub docs") version.**
+
+## QHub On-Prem
+The on-premises version of QHub is based on OpenHPC. 
+> NOTE: The tool is currently under development. Curious? Check out the [Qhub On-Prem](https://github.com/Quansight/qhub-onprem) repository.
+
+## QHub Cloud
+The cloud version of QHub is built using [Terraform](https://www.terraform.io/), [Helm](https://helm.sh/), and 
+[GitHub Actions](https://docs.github.com/en/free-pro-team@latest/actions).
+Terraform handles the build, change, and versioning of the infrastructure. Helm helps to define, install, and manage 
+[Kubernetes](https://kubernetes.io/ "Automated container deployment, scaling, and management"). GitHub 
+Actions is used to automatically create commits when the configuration file (`qhub-config.yaml`) is rendered, as well as
+to kick of the deployment action.
+
+QHub aims to abstract all these complexities for our users. Hence, it is not necessary to know any of the above mentioned 
+technologies to have your project successfully deployed.
+
+> TLDR:
+> If you know GitHub and feel comfortable generating and using API keys, you should have all it takes to deploy 
+> and maintain your system without the need for a dedicated DevOps team. No Kubernetes, no Terraform, no Helm.
+
+### Cloud Providers
+QHub offers out-of-the-box support for [Digital Ocean](https://www.digitalocean.com/), Amazon [AWS](https://aws.amazon.com/)
+ and [GCP](https://cloud.google.com/ "Google Cloud Provider"). Support for Microsoft [Azure](https://azure.microsoft.com/en-us/)
+will be added soon.
+
+
+![image](docs/images/brand-diagram.png "architecture diagram")
+
+For more details, check out the release [blog post](https://www.quansight.com/post/announcing-qhub).
+
+## Installation
+### Pre-requisites
+* QHub is supported by macOS and Linux operating systems (Windows is **NOT** currently supported
+* Compatible with Python 3.6+. New to Python? We recommend using [Anaconda](https://www.anaconda.com/products/individual).
+* Adoption of virtual environments (`conda`, `pipenv` or `venv`) is also encouraged. 
+
+### Install
+To install QHub run:
+* `conda`:
+  ```bash
+  conda install -c conda-forge qhub
+  ```
+  
+* or `pip`:
+    ```bash
+    pip install qhub
+    ```  
+Once finished, you can check QHub's version (and additional CLI args) by typing:
+```
+qhub --help
+```
+If successful, the CLI output will be similar to the following:
+
+```bash
+usage: qhub [-h] [-v] {deploy,render,init,validate} ...
+
+QHub command line
+
+positional arguments:
+  {deploy,render,init,validate}
+                        QHub Ops - 0.1.21
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --version         QHub Ops version
+```
 
 ## Usage
+QHub requires the setting of environment variables to automate the deployments fully. For details on how to obtain those
+variables, check the [Step-by-Step](https://qhub.dev/docs/step-by-step-walkthrough.html) guide in the docs.
 
-`qhub` is installed as a command line application in Python. It requires you to choose your the cloud provider you desire. once you've decided on a provider `qhub` will walk you through the following steps to configure your deployment:
-
-1. initialize
-2. render
-3. deploy
-
-these steps realized using the `qhub` CLI.
-
-### initialize configurations
-
-        qhub init do
-        qhub init aws
-        qhub init gcp
-
-The `qhub init` command will generate configuration files for that service. The configutation files can be tailored to the needs of your organization. Each file specifies general project information, security, infrastructure settings, computational resource profiles and data science environments. See documentation on modifying your configuration file for all of the cloud providers: [Configuration File](https://github.com/Quansight/qhub/blob/master/docs/docs/aws/configuration.md) 
-
-The configuration file is your user interface into deploying and scaling your data science environment. Each change triggers [Github Action] that will seamlessly update your infrastructure.
-
-![](docs/images/brand-diagram.png "architecture diagram")
-
-Check out the [`qhub` documentation][docs] for more detailed information.
-
-### rendering the configuration file
-
-_we need more information here._
-
+Once all the necessary credentials are gathered and set as [UNIX environment variables](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/),
+QHub can be deployed in under 20 minutes using:
 ```bash
-qhub render -c qhub-config.yaml -o ./ --force
+qhub init   ... # generates initial config file and optionally automates deployment steps
+qhub render ... # creates the Terraform config module
+qhub deploy ... # creates and configures the cloud infrastructure
 ```
 
-_what is this business?_
-
-## `qhub` interfaces
-
-The `qhub` api normalizes with the nuances of configuring interactive data science environments across multiple client providers. The python command line interfaces define an initial environment state that is modified, and its changes are propogated by continuous integration.
-
-Each `qhub` cloud provider has different configuration specifications; more details can be found at the following links about the [Digital Ocean], [AWS], and [GCP] configurations.
-
-
-## Installing `qhub`
-
-`qhub` is a pure python package that can be downloaded from the pypi.
-
-```bash
-pip install qhub
-```
-
-
-## License
-
-[QHub is BSD3 licensed](LICENSE).
+## Questions?
+We separate the queries for QHub into:
+* [GitHub Discussions](https://github.com/Quansight/qhub/discussions) used to raise discussions about a subject, such as:
+"What is the recommended way to do X with QHub?"
+* [Issues](https://github.com/Quansight/qhub/issues/new/choose) for queries, bug reporting, feature requests, 
+  documentation, etc.
+> We work around the clock to make QHub Cloud more excellent. Which implies that sometimes your
+> query might take a while to get a reply. We apologise in advance and ask you to please, be patient.
 
 ## Developer
+To install the latest developer version use:
+```bash
+pip install git+https://github.com/Quansight/qhub.git
+```
 
-[`qhub`][qhub gh] is an open source project and welcomes issues and pull requests.
+## Contributions
+Thinking about contributing? Check out our [Contribution Guidelines](https://github.com/Quansight/qhub/CONTRIBUTING.md).
 
-## Contributing
-
-# Release
-
-Creating a release:
-
-1. Increment the version number in `qhub/VERSION`
-2. Ensure that the version number in `qhub/VERSION` is used in pinning qhub in the github actions `qhub/template/{{ cookiecutter.repo_directory }}/.github/workflows/qhub-config.yaml`
-
-[jupyterhub]: https://jupyter.org/hub "A multi-user version of the notebook designed for companies, classrooms and research labs"
-[dask]: https://docs.dask.org/ "Dask is a flexible library for parallel computing in Python."
-[kubernetes]: https://kubernetes.io/ "Automated container deployment, scaling, and management"
-[qhub]: https://qhub.dev/ ""
-[Github Action]: https://github.com/features/actions
-[Digital Ocean]: https://www.digitalocean.com/ "digital ocean"
-[AWS]: https://aws.amazon.com/ "amazon web services"
-[GCP]: https://cloud.google.com/ "google cloud provider"
-[qhub gh]: https://github.com/Quansight/qhub "qhub github page"
-[docs]: https://qhub.dev/ "qhub documentation"
+## License
+[QHub is BSD3 licensed](LICENSE).

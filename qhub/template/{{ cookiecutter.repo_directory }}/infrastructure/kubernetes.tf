@@ -1,5 +1,4 @@
 provider "kubernetes" {
-  load_config_file       = false
   host                   = module.kubernetes.credentials.endpoint
   token                  = module.kubernetes.credentials.token
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
