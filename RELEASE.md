@@ -11,7 +11,7 @@
 ### Feature changes, and enhancements
 * Added conda prerequisites for GUI packages.
 * Added `qhub destroy` functionality that tears down the QHub deployment.
-* Changed the default repository name from `master` to `main`.
+* Changed the default repository branch from `master` to `main`.
 * Added error message when Terraform parsing fails.
 * Added templates for GitHub issues.
 
