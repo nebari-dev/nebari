@@ -59,8 +59,11 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         # This is a bit ugly, but the issue we have at the moment is being unable
         # to parse cmd_output as json on Github Actions.
         ip_matches = re.findall(rb'"ip": "(?!string)(.*)"', cmd_output)
-        if ip_matches:
-            ip = ip_matches[0].decode()
+        hostname_matches = re.findall(rb'"hostname": "(?!string)(.*)"', cmd_output)
+        if ip_matches[0]:
+            ip_or_hostname = ip_matches[0].decode()
+        elif hostname_matches[0]:
+            ip_or_hostname = hostname_matches[0].decode()
         else:
             raise ValueError(f"IP Address not found in: {cmd_output}")
     # 07 Update DNS to point to qhub deployment
@@ -72,10 +75,15 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         record_name = f'jupyter.{".".join(record_name)}'
         zone_name = ".".join(zone_name)
         if config["provider"] in {"do", "gcp"}:
-            update_record(zone_name, record_name, "A", ip)
+            update_record(zone_name, record_name, "A", ip_or_hostname)
+        elif config["provider"] == "aws":
+            update_record(zone_name, record_name, "CNAME", ip_or_hostname)
+        else:
+            logger.info(f"Couldn't update the DNS record for cloud provider: {config['provider']}")
     else:
         input(
-            f'Take IP Address {ip} and update DNS to point to "jupyter.{config["domain"]}" [Press Enter when Complete]'
+            f'Take IP Address {ip_or_hostname} and update DNS to point to '
+            f'"jupyter.{config["domain"]}" [Press Enter when Complete]'
         )
 
     # 08 Full deploy QHub
