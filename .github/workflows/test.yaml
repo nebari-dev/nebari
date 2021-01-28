@@ -66,7 +66,7 @@ jobs:
         run: |
           qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
       - name: 'Terraform Format'
-        uses: hashicorp/terraform-github-actions@main
+        uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: 0.13.5
           tf_actions_subcommand: 'fmt'
