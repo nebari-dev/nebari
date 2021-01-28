@@ -8,6 +8,7 @@ For this initial tutorial, we assume that you will use the following tools:
 - [Github actions] will be used for CI/CD
 - Oauth will be via [auth0]
 - DNS registry will be through [Cloudflare]
+- Terraform v0.13.5 is used
 
 
 ## 1. Install QHub
