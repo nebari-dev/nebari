@@ -79,10 +79,12 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         elif config["provider"] == "aws":
             update_record(zone_name, record_name, "CNAME", ip_or_hostname)
         else:
-            logger.info(f"Couldn't update the DNS record for cloud provider: {config['provider']}")
+            logger.info(
+                f"Couldn't update the DNS record for cloud provider: {config['provider']}"
+            )
     else:
         input(
-            f'Take IP Address {ip_or_hostname} and update DNS to point to '
+            f"Take IP Address {ip_or_hostname} and update DNS to point to "
             f'"jupyter.{config["domain"]}" [Press Enter when Complete]'
         )
 
