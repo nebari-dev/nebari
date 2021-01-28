@@ -9,7 +9,7 @@ def create_init_subcommand(subparser):
         "platform",
         help="Cloud to deploy qhub on",
         type=str,
-        choices=["do", "gcp", "aws"],
+        choices=["do", "gcp", "aws", "azure"],
     )
     subparser.add_argument("--project", help="Namespace to assign to qhub resources")
     subparser.add_argument(

@@ -20,9 +20,16 @@ if __name__ == "__main__":
     if PROVIDER == "aws":
         remove_file("infrastructure/do.tf")
         remove_file("infrastructure/gcp.tf")
+        remove_file("infrastructure/azure.tf")
     elif PROVIDER == "do":
         remove_file("infrastructure/aws.tf")
         remove_file("infrastructure/gcp.tf")
+        remove_file("infrastructure/azure.tf")
     elif PROVIDER == "gcp":
         remove_file("infrastructure/aws.tf")
         remove_file("infrastructure/do.tf")
+        remove_file("infrastructure/azure.tf")
+    elif PROVIDER == "azure":
+        remove_file("infrastructure/aws.tf")
+        remove_file("infrastructure/do.tf")
+        remove_file("infrastructure/gcp.tf")

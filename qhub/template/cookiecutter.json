@@ -59,6 +59,31 @@
         }
     },
 
+    "azure": {
+        "project": null,
+        "region": null,
+        "zone": null,
+        "availability_zones": [],
+        "kubernetes_version": null,
+        "node_groups": {
+            "general": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            },
+            "user": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            },
+            "worker": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            }
+        }
+    },
+
     "amazon_web_services": {
         "region": null,
         "availability_zones": [],

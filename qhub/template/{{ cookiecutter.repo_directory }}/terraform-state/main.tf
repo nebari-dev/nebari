@@ -21,6 +21,15 @@ provider "google" {
   zone    = "{{ cookiecutter.google_cloud_platform.zone }}"
 }
 
+{% elif cookiecutter.provider == "azure" -%}
+provider "azurerm" {
+  version = "=2.44.0"
+  features {} 
+  project = "{{ cookiecutter.azure.project }}"
+  region  = "{{ cookiecutter.azure.region }}"
+  zone    = "{{ cookiecutter.azure.zone }}"
+}
+
 module "terraform-state" {
   source = "github.com/quansight/qhub-terraform-modules//modules/gcp/terraform-state"
 

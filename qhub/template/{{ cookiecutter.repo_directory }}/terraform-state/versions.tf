@@ -16,4 +16,13 @@ terraform {
   }
   required_version = ">= 0.13"
 }
+{%- elif cookiecutter.provider == "azure" %}
+terraform {
+  required_providers {
+    azure = {
+      source = "hashicorp/azurerm"
+    }
+  }
+  required_version = ">= 0.13"
+}
 {% endif %}

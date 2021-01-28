@@ -11,7 +11,7 @@ from qhub.constants import SUPPORTED_TERRAFORM_MINOR_RELEASES
 DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
 AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
 GCP_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables"
-
+AZURE_ENV_DOCS = "Coming Soon"
 
 @contextlib.contextmanager
 def timer(logger, prefix):
@@ -35,6 +35,13 @@ def check_cloud_credentials(config):
                 raise Exception(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {GCP_ENV_DOCS}"""
+                )
+    elif config["provider"] == "azure":
+        for variable in {"AZURE_CREDENTIALS"}:
+            if variable not in os.environ:
+                raise Exception(
+                    f"""Missing the following required environment variable: {variable}\n
+                    Please see the documentation for more information: {AZURE_ENV_DOCS}"""
                 )
     elif config["provider"] == "aws":
         for variable in {

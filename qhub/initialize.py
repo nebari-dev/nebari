@@ -93,6 +93,27 @@ GOOGLE_PLATFORM = {
     },
 }
 
+AZURE = {
+    "project": "PLACEHOLDER",
+    "region": "us-central1",
+    "zone": "us-central1-c",
+    "availability_zones": ["us-central1-c"],
+    "kubernetes_version": "1.14.10-gke.31",
+    "node_groups": {
+        "general": {
+            "instance": "n1-standard-2",
+            "min_nodes": 1,
+            "max_nodes": 1,
+        },
+        "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
+        "worker": {
+            "instance": "n1-standard-2",
+            "min_nodes": 1,
+            "max_nodes": 4,
+        },
+    },
+}
+
 AMAZON_WEB_SERVICES = {
     "region": "us-west-2",
     "availability_zones": ["us-west-2a", "us-west-2b"],
@@ -253,6 +274,17 @@ def render_config(
             config["google_cloud_platform"]["project"] = input(
                 "Enter Google Cloud Platform Project ID: "
             )
+    elif cloud_provider == "azure":
+        config["azure"] = AZURE
+        if kubernetes_version:
+            config["azure"]["kubernetes_version"] = kubernetes_version
+
+        # if "PROJECT_ID" in os.environ:
+        #     config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
+        # elif not disable_prompt:
+        #     config["google_cloud_platform"]["project"] = input(
+        #         "Enter Google Cloud Platform Project ID: "
+        #     )
     elif cloud_provider == "aws":
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
         if kubernetes_version:
