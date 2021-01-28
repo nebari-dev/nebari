@@ -3,10 +3,10 @@ name: "Tests"
 on:
   pull_request:
     branches:
-      - master
+      - main
   push:
     branches:
-      - master
+      - main
 
 jobs:
   test-general:
@@ -16,8 +16,8 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8]
     steps:
-      - name: 'Checkout Infastructure'
-        uses: actions/checkout@master
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@main
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -50,8 +50,8 @@ jobs:
           - gcp
           - do
     steps:
-      - name: 'Checkout Infastructure'
-        uses: actions/checkout@master
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@main
       - name: Set up Python
         uses: actions/setup-python@v1
         with:

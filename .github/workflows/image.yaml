@@ -20,7 +20,7 @@ jobs:
           - dask-worker
     steps:
       - name: 'Checkout Infrastructure'
-        uses: actions/checkout@master
+        uses: actions/checkout@main
       - name: Docker Login
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
