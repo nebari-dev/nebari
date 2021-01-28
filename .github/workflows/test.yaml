@@ -78,7 +78,7 @@ jobs:
           tf_actions_subcommand: 'fmt'
           tf_actions_working_dir: 'qhub-${{ matrix.provider }}-deployment/infrastructure'
       - name: QHub Render Artifact
-        uses: actions/upload-artifact@main
+        uses: actions/upload-artifact@master
         with:
           name: "qhub-${{ matrix.provider }}-artifact"
           path: "qhub-${{ matrix.provider }}-deployment"
