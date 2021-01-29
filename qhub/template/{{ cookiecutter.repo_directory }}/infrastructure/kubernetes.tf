@@ -141,14 +141,13 @@ module "qhub" {
 
 {% if cookiecutter.prefect is true -%}
 module "prefect" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/prefect?ref=add-prefect"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect?ref=prefect-temp"
 
   dependencies = [
     module.qhub.depended_on
   ]
-  environment = var.environment
+  namespace = var.environment
   jupyterhub_api_token = module.qhub.jupyterhub_api_token
   prefect_token = var.prefect_token
 }
-  
 {% endif -%}
