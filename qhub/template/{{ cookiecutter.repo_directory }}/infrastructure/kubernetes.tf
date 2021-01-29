@@ -146,8 +146,8 @@ module "prefect" {
   dependencies = [
     module.qhub.depended_on
   ]
-  namespace = var.environment
+  namespace            = var.environment
   jupyterhub_api_token = module.qhub.jupyterhub_api_token
-  prefect_token = var.prefect_token
+  prefect_token        = var.prefect_token
 }
 {% endif -%}
