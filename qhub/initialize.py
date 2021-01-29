@@ -234,7 +234,7 @@ def render_config(
             "oauth_callback_url"
         ] = oauth_callback_url
     elif auth_provider == "password":
-        config["security"]["password"] = AUTH_PASSWORD
+        config["security"]["authentication"] = AUTH_PASSWORD
 
     if cloud_provider == "do":
         config["digital_ocean"] = DIGITAL_OCEAN

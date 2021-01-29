@@ -1,7 +1,9 @@
 provider "kubernetes" {
+{% if cookiecutter.provider != "local" %}
   host                   = module.kubernetes.credentials.endpoint
   token                  = module.kubernetes.credentials.token
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+{% endif %}
 }
 
 module "kubernetes-initialization" {

@@ -32,6 +32,10 @@ if __name__ == "__main__":
     elif PROVIDER == "gcp":
         remove_file("infrastructure/aws.tf")
         remove_file("infrastructure/do.tf")
+    elif PROVIDER == "local":
+        remove_file("infrastructure/aws.tf")
+        remove_file("infrastructure/do.tf")
+        remove_file("infrastructure/gcp.tf")
 
     # templates directory is only used by includes
     remove_directory("templates")
