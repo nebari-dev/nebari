@@ -1,5 +1,8 @@
 provider "kubernetes" {
-{% if cookiecutter.provider != "local" %}
+{% if cookiecutter.provider == "local" %}
+  config_path    = "~/.kube/config"
+  config_context = "minikube"
+{% else %}
   host                   = module.kubernetes.credentials.endpoint
   token                  = module.kubernetes.credentials.token
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
@@ -11,11 +14,6 @@ module "kubernetes-initialization" {
 
   namespace = var.environment
   secrets   = []
-  dependencies = [
-{% if cookiecutter.provider == "aws" %}
-    module.kubernetes.depended_on
-{% endif %}
-  ]
 }
 
 
@@ -27,8 +25,9 @@ module "kubernetes-nfs-mount" {
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.efs.credentials.dns_name
-  dependencies = [
-    module.kubernetes-initialization.depended_on
+
+  depends_on = [
+    module.kubernetes-nfs-server
   ]
 }
 {% else -%}
@@ -38,6 +37,10 @@ module "kubernetes-nfs-server" {
   name         = "nfs-server"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
+
+  depends_on = [
+    module.kubernetes-initialization
+  ]
 }
 
 module "kubernetes-nfs-mount" {
@@ -47,6 +50,10 @@ module "kubernetes-nfs-mount" {
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.kubernetes-nfs-server.endpoint_ip
+
+  depends_on = [
+    module.kubernetes-nfs-server
+  ]
 }
 {% endif %}
 
@@ -61,6 +68,10 @@ module "kubernetes-conda-store-server" {
     "{{ key }}" = file("../environments/{{ key }}")
 {% endfor %}
   }
+
+  depends_on = [
+    module.kubernetes-initialization
+  ]
 }
 
 module "kubernetes-conda-store-mount" {
@@ -70,14 +81,23 @@ module "kubernetes-conda-store-mount" {
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.conda_store }}"
   nfs_endpoint = module.kubernetes-conda-store-server.endpoint_ip
+
+  depends_on = [
+    module.kubernetes-conda-store-server
+  ]
 }
 
 provider "helm" {
   kubernetes {
+{% if cookiecutter.provider == "local" %}
+    config_path = "~/.kube/config"
+    config_context = "minikube"
+{% else %}
     load_config_file       = false
     host                   = module.kubernetes.credentials.endpoint
     token                  = module.kubernetes.credentials.token
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+{% endif %}
   }
   version = "1.0.0"
 }
@@ -91,8 +111,8 @@ module "kubernetes-autoscaling" {
   aws-region   = var.region
   cluster-name = local.cluster_name
 
-  dependencies = [
-    module.kubernetes.depended_on
+  depends_on = [
+    module.kubernetes-initialization
   ]
 }
 {% endif -%}
@@ -104,8 +124,8 @@ module "kubernetes-ingress" {
 
   node-group = local.node_groups.general
 
-  dependencies = [
-    module.kubernetes-initialization.depended_on
+  depends_on = [
+    module.kubernetes-initialization
   ]
 }
 
@@ -136,8 +156,8 @@ module "qhub" {
     file("dask-gateway.yaml")
   ]
 
-  dependencies = [
-    module.kubernetes-ingress.depended_on
+  depends_on = [
+    module.kubernetes-ingress
   ]
 }
 

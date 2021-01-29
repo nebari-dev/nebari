@@ -16,6 +16,7 @@ BASE_CONFIGURATION = {
     "ci_cd": None,
     "domain": None,
     "terraform_version": "0.13.15",
+    "terraform_state": None,
     "security": {
         "authentication": None,
         "users": {
@@ -193,6 +194,7 @@ def render_config(
     repository_auto_provision=False,
     auth_auto_provision=False,
     terraform_version=DEFAULT_TERRAFORM_VERSION,
+    terraform_state=None,
     kubernetes_version=None,
     disable_prompt=False,
 ):
@@ -201,6 +203,7 @@ def render_config(
     config["ci_cd"] = ci_provider
 
     config["terraform_version"] = terraform_version
+    config["terraform_state"] = terraform_state
 
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")

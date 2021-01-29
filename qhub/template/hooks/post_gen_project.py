@@ -6,6 +6,7 @@ import yaml
 PROJECT_DIRECTORY = os.path.realpath(os.path.curdir)
 PROVIDER = "{{ cookiecutter.provider }}"
 ENVIRONMENTS = eval("{{ cookiecutter.environments }}")
+TERRAFORM_STATE = "{{ cookiecutter.terraform_state }}"
 
 
 def remove_directory(dirpath):
@@ -36,6 +37,10 @@ if __name__ == "__main__":
         remove_file("infrastructure/aws.tf")
         remove_file("infrastructure/do.tf")
         remove_file("infrastructure/gcp.tf")
+
+    if TERRAFORM_STATE == "local":
+        remove_directory("terraform-state")
+        remove_file("infrastructure/state.tf")
 
     # templates directory is only used by includes
     remove_directory("templates")

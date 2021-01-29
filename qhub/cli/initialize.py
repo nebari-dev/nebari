@@ -39,6 +39,12 @@ def create_init_subcommand(subparser):
         help="Attempt to automatically provision authentication. For Auth0 it requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
     )
     subparser.add_argument(
+        "--terraform-state",
+        choices=["remote", "local"],
+        default="remote",
+        help="Terraform state to be stored remotely on s3 or locally on the filesystem",
+    )
+    subparser.add_argument(
         "--kubernetes-version",
         type=str,
         help="kubernetes version to use for cloud deployment",
@@ -61,6 +67,7 @@ def handle_init(args):
         repository_auto_provision=args.repository_auto_provision,
         auth_provider=args.auth_provider,
         auth_auto_provision=args.auth_auto_provision,
+        terraform_state=args.terraform_state,
         kubernetes_version=args.kubernetes_version,
         disable_prompt=args.disable_prompt,
     )

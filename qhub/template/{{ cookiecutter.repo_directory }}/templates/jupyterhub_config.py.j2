@@ -128,7 +128,7 @@ c.Authenticator.whitelist = qhub_list_users(QHUB_USER_MAPPING)
 
 {% if cookiecutter.security.authentication.type == 'password' %}
 # ==================== AUTHENTICATION ======================
-import brypt
+import bcrypt
 from jupyterhub.auth import Authenticator
 
 class QHubPasswordAuthenticator(Authenticator):

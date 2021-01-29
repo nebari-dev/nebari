@@ -24,7 +24,7 @@ hub:
     AUTH0_SUBDOMAIN: "{{ cookiecutter.security.authentication.config.auth0_subdomain }}"
 {% endif %}
   extraConfig:
-    jupyterhub_config:
+    jupyterhub_config: |
 {% filter indent(width=6) %}
 {% include "templates/jupyterhub_config.py.j2" %}
 {% endfilter %}
