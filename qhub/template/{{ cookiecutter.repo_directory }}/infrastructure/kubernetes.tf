@@ -139,9 +139,10 @@ module "qhub" {
   ]
 }
 
+# TODO: Remove branch from the source below
 {% if cookiecutter.prefect is true -%}
 module "prefect" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect?ref=prefect-temp"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect?ref=add-prefect"
 
   dependencies = [
     module.qhub.depended_on
