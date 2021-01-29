@@ -138,3 +138,16 @@ module "qhub" {
     module.kubernetes-ingress.depended_on
   ]
 }
+
+{% if cookiecutter.prefect is true -%}
+module "prefect" {
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect"
+
+  dependencies = [
+    module.qhub.depended_on
+  ]
+  namespace            = var.environment
+  jupyterhub_api_token = module.qhub.jupyterhub_api_token
+  prefect_token        = var.prefect_token
+}
+{% endif -%}

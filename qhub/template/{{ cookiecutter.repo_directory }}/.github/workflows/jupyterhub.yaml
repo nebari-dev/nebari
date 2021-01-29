@@ -69,7 +69,7 @@ jobs:
           tf_actions_subcommand: 'plan'
           tf_actions_working_dir: 'infrastructure'
           tf_actions_comment: true
-          {%- if cookiecutter.prefect is defined %}
+          {%- if cookiecutter.prefect is true %}
           {% raw %}
           args: '-var="prefect_token=${{ secrets.PREFECT_TOKEN }}"'
           {% endraw %}
@@ -81,7 +81,7 @@ jobs:
           tf_actions_subcommand: 'apply'
           tf_actions_working_dir: 'infrastructure'
           tf_actions_comment: true
-          {%- if cookiecutter.prefect is defined %}
+          {%- if cookiecutter.prefect is true %}
           {% raw %}
           args: '-var="prefect_token=${{ secrets.PREFECT_TOKEN }}"'
           {%- endraw %}
