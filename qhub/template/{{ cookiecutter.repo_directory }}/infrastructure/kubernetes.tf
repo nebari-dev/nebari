@@ -1,7 +1,6 @@
 provider "kubernetes" {
 {% if cookiecutter.provider == "local" %}
   config_path    = "~/.kube/config"
-  config_context = "minikube"
 {% else %}
   host                   = module.kubernetes.credentials.endpoint
   token                  = module.kubernetes.credentials.token
@@ -91,7 +90,6 @@ provider "helm" {
   kubernetes {
 {% if cookiecutter.provider == "local" %}
     config_path = "~/.kube/config"
-    config_context = "minikube"
 {% else %}
     load_config_file       = false
     host                   = module.kubernetes.credentials.endpoint
