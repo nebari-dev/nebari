@@ -1,0 +1,11 @@
+name: base
+channels:
+  - conda-forge
+dependencies:
+ - jupyterhub
+ - oauthenticator
+ - bcrypt
+ - pip
+ - pip:
+     - jupyterhub-kubespawner
+     - qhub_jupyterhub_theme

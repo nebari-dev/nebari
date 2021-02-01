@@ -1,22 +1,19 @@
-FROM jupyterhub/k8s-hub:0.9.0
+FROM debian:10.3-slim
 LABEL MAINTAINER="Quansight"
 
-# ============ download qhub theme ============
-USER root
 
-ARG THEME_OWNER="Quansight"
-ARG THEME_REPO="qhub-jupyterhub-theme"
-ARG THEME_REV="048bdadc612a52b87b7d474d408f13c6865c6916"
+# ============== base install ===============
+ENV CONDA_VERSION py37_4.8.2
+ENV CONDA_SHA256 957d2f0f0701c3d1335e3b39f235d197837ad69a944fa6f5d8ad2c686b69df3b
 
-RUN cd /opt && \
-    curl -L "https://github.com/${THEME_OWNER}/${THEME_REPO}/archive/${THEME_REV}.tar.gz" -o theme.tar.gz \
-    && tar -xf theme.tar.gz \
-    && mkdir -p /usr/local/share/jupyterhub/custom_templates \
-    && mkdir -p /usr/local/share/jupyterhub/static/extra-assets \
-    && cp -r "/opt/${THEME_REPO}-${THEME_REV}/templates/." /usr/local/share/jupyterhub/custom_templates/ \
-    && cp -r "/opt/${THEME_REPO}-${THEME_REV}/extra-assets/." /usr/local/share/jupyterhub/static/extra-assets/ \
-    && rm -rf "/opt/theme.tar.gz" "/opt/${THEME_REPO}-${THEME_REV}"
+COPY scripts /opt/scripts
+
+RUN /opt/scripts/install-conda.sh
+
+ENV PATH="/opt/conda/bin:$PATH"
 
 
-WORKDIR /srv/jupyterhub
-USER ${NB_USER}
+COPY jupyterhub /opt/jupyterhub
+
+RUN /opt/scripts/install-conda-environment.sh /opt/jupyterhub/environment.yaml \
+    && /opt/jupyterhub/postBuild
