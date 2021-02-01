@@ -9,7 +9,7 @@ provider "kubernetes" {
 }
 
 module "kubernetes-initialization" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/initialization"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/initialization?ref={{ cookiecutter.terraform_modules.rev }}"
 
   namespace = var.environment
   secrets   = []
@@ -18,7 +18,7 @@ module "kubernetes-initialization" {
 
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-nfs-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "nfs-mount"
   namespace    = var.environment
@@ -31,7 +31,7 @@ module "kubernetes-nfs-mount" {
 }
 {% else -%}
 module "kubernetes-nfs-server" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-server"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-server?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "nfs-server"
   namespace    = var.environment
@@ -43,7 +43,7 @@ module "kubernetes-nfs-server" {
 }
 
 module "kubernetes-nfs-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "nfs-mount"
   namespace    = var.environment
@@ -57,7 +57,7 @@ module "kubernetes-nfs-mount" {
 {% endif %}
 
 module "kubernetes-conda-store-server" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/conda-store"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/conda-store?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "conda-store"
   namespace    = var.environment
@@ -74,7 +74,7 @@ module "kubernetes-conda-store-server" {
 }
 
 module "kubernetes-conda-store-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "conda-store"
   namespace    = var.environment
@@ -102,7 +102,7 @@ provider "helm" {
 
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-autoscaling" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/cluster-autoscaler"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/cluster-autoscaler?ref={{ cookiecutter.terraform_modules.rev }}"
 
   namespace = var.environment
 
@@ -116,7 +116,7 @@ module "kubernetes-autoscaling" {
 {% endif -%}
 
 module "kubernetes-ingress" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/ingress"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/ingress?ref={{ cookiecutter.terraform_modules.rev }}"
 
   namespace = var.environment
 
@@ -128,7 +128,7 @@ module "kubernetes-ingress" {
 }
 
 module "qhub" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/meta/qhub"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/meta/qhub?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name      = "qhub"
   namespace = var.environment

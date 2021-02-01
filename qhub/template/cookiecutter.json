@@ -6,6 +6,10 @@
     "endpoint": null,
     "terraform_version": null,
     "terraform_state": null,
+    "terraform_modules": {
+        "repository": "github.com/quansight/qhub-terraform-modules",
+        "rev": "terraform-ingress-traefik"
+    },
     "prefect": null,
     "security": null,
     "default_images": null,

@@ -4,7 +4,7 @@ provider "aws" {
 }
 
 module "terraform-state" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/aws/terraform-state"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/terraform-state?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name = "{{ cookiecutter.project_name }}"
 
@@ -22,14 +22,14 @@ provider "google" {
 }
 
 module "terraform-state" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/gcp/terraform-state"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/gcp/terraform-state?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name     = "{{ cookiecutter.project_name }}"
   location = "{{ cookiecutter.google_cloud_platform.region }}"
 }
 {% elif cookiecutter.provider == "do" -%}
 module "terraform-state" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/digitalocean/terraform-state"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/digitalocean/terraform-state?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name   = "{{ cookiecutter.project_name }}"
   region = "{{ cookiecutter.digital_ocean.region }}"
