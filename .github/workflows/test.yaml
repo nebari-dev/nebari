@@ -49,6 +49,7 @@ jobs:
           - aws
           - gcp
           - do
+          - local
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
