@@ -97,6 +97,12 @@ We separate the queries for QHub into:
 > We work around the clock to make QHub Cloud more excellent. Which implies that sometimes your
 > query might take a while to get a reply. We apologise in advance and ask you to please, be patient.
 
+
+## Code of Conduct
+To guarantee a welcoming and friendly community, we require contributors to follow our
+[Code of Conduct](https://github.com/Quansight/.github/blob/master/CODE_OF_CONDUCT.md).
+
+
 ## Developer
 To install the latest developer version use:
 ```bash
