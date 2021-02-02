@@ -178,8 +178,11 @@ class Profiles(Base):
     dask_worker: typing.Dict[str, DaskWorker] = {}
 
 
+project_name_regex_type = pydantic.constr(regex="^[A-Za-z-_]+$")
+
+
 class Main(Base):
-    project_name: pydantic.constr(regex="^[A-Za-z-_]+$")
+    project_name: project_name_regex_type
     provider: ProviderEnum
     ci_cd: CiEnum
     security: Security
