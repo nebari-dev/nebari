@@ -1,6 +1,6 @@
 provider "kubernetes" {
 {% if cookiecutter.provider == "local" %}
-  config_path    = "~/.kube/config"
+  config_path = "~/.kube/config"
 {% else %}
   host                   = module.kubernetes.credentials.endpoint
   token                  = module.kubernetes.credentials.token
