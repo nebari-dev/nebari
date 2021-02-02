@@ -1,6 +1,6 @@
 # QHub Cloud
 Automated data science platform. From [JupyterHub](https://jupyter.org/hub "Multi-user version of the Notebook") to 
-Cloud environments with [Dask](https://docs.dask.org/ "Parallel computing in Python").
+Cloud environments with [Dask Gateway](https://docs.dask.org/ "Parallel computing in Python").
 
 [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
 
