@@ -35,8 +35,8 @@ filename = os.path.expanduser('~/.minikube/profiles/minikube/config.json')
 with open(filename) as f:
      data = json.load(f)
 
-data['KubernetesConfig']['LoadBalancerStartIP'] = '172.17.1.100'
-data['KubernetesConfig']['LoadBalancerEndIP'] = '172.17.1.200'
+data['KubernetesConfig']['LoadBalancerStartIP'] = '172.17.10.100'
+data['KubernetesConfig']['LoadBalancerEndIP'] = '172.17.10.200'
 
 with open(filename, 'w') as f:
      json.dump(data, f)
@@ -63,7 +63,7 @@ mkdir -p data
 Initialize the `qhub-config.yaml`
 
 ```shell
-python -m qhub init local --project=thisisatest  --domain qhub.test --auth-provider=password --terraform-state=local
+python -m qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
 ```
 
 Give a password to the default user. For this the example password is
@@ -91,23 +91,29 @@ python -m qhub render --config qhub-config.yaml -f
 python -m qhub deploy --config qhub-config.yaml --disable-prompt
 ```
 
-Make sure to point the dns domain `jupyter.qhub.test` to
-`172.17.1.100` from the previous commands. This can be done in many
+To ease development we have already pointed the dns record
+`jupyter.github-actions.qhub.dev` to `172.17.10.100` so the next step
+is optional unless you end up with the load-balancer giving you
+a different ip address.
+
+Make sure to point the dns domain `jupyter.github-actions.qhub.dev` to
+`172.17.10.100` from the previous commands. This can be done in many
 ways possibly the easiest is modifying `/etc/hosts` and adding the
 following line. This will override any dns server.
 
 ```ini
-172.17.1.100 jupyter.qhub.test
+172.17.10.100 jupyter.github-actions.qhub.dev
 ```
 
 Finally if everything is set properly you should be able to curl the
 jupyterhub server.
 
 ```
-curl -k https://jupyter.qhub.test/hub/login
+curl -k https://jupyter.github-actions.qhub.dev/hub/login
 ```
 
-You can also visit `https://jupyter.qhub.test`
+You can also visit `https://jupyter.github-actions.qhub.dev` in your
+web browser.
 
 ## Cleanup
 
