@@ -105,13 +105,13 @@ jobs:
 
           echo "$PWD" >> $GITHUB_PATH
           popd
+      - name: Start Minikube
+        run: |
+          minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 2 --memory 4096 --wait=all
       - name: Versions
         run: |
           minikube version
           kubectl version
-      - name: Start Minikube
-        run: |
-          minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 2 --memory 4096 --wait=all
       - name: Add nfs client to kubernetes docker node
         run: |
           minikube ssh "sudo apt update; sudo apt install nfs-common -y"
