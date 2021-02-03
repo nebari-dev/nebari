@@ -33,7 +33,7 @@ POSTS = (
     ("posts/*.md.ipynb", "posts", "post.tmpl"),
 )
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # Material theme options (see theme.conf for more information)
 html_theme_options = {
@@ -58,13 +58,11 @@ html_theme_options = {
     # If True, show hidden TOC entries
     "globaltoc_includehidden": False,
     "nav_links": [
-
         {
             "href": "index",
             "title": "QHub Home",
             "internal": True,
         },
-
         {
             "href": "https://pypi.org/project/qhub/",
             "title": "Pypi",
