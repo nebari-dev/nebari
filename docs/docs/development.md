@@ -1,6 +1,24 @@
-# Local Testing
+# Testing
 
-## Initialize kubernetes cluster
+## Local Testing
+
+Local testing is a great way to test the components of QHub. While it
+does test most of everything is does not test cloud provisioned
+components such as the managed kubernetes cluster, vpcs, managed
+container registries etc.
+
+This guide assumes that you have the QHub Cloud repository downloaded
+and you are at the root of the repository.
+
+### Dependencies
+
+In order to develop with QHub you will need to download the following
+dependencies and have them available in your path.
+
+ - [terraform](https://www.terraform.io/downloads.html)
+ - [minikube](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-minikube/)
+
+### Initialize kubernetes cluster
 
 Testing done with minikube
 
@@ -53,7 +71,7 @@ minikube addons enable metallb
   The 'metallb' addon is enabled
 ```
 
-## Deploy qhub
+### Deploy qhub
 
 ```shell
 export PYTHONPATH=$PWD:$PYTHONPATH
@@ -115,7 +133,7 @@ curl -k https://jupyter.github-actions.qhub.dev/hub/login
 You can also visit `https://jupyter.github-actions.qhub.dev` in your
 web browser.
 
-## Cleanup
+### Cleanup
 
 ```shell
 python -m qhub destroy --config qhub-config.yaml 
@@ -124,3 +142,11 @@ python -m qhub destroy --config qhub-config.yaml
 ```shell
 minikube delete
 ```
+
+## Cloud Testing
+
+TODO: write docs on cloud testing
+
+Cloud testing on aws, gcp, azure, and digital ocean is significantly
+more complicated and time consuming. You should always prefer the
+local testing when possible.
