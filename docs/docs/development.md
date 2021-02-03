@@ -21,10 +21,26 @@ Configure `metallb`
 minikube addons configure metallb
 ```
 
-```
--- Enter Load Balancer Start IP: 172.17.1.100
--- Enter Load Balancer End IP: 172.17.1.200
-✅  metallb was successfully configured
+If you don't want to configure metallb interactively here is a short
+bash command to run. This is used in the github actions since the
+minikube command does [not provide a no interactive simple way to
+configure addons](https://github.com/kubernetes/minikube/issues/8283)
+
+```shell
+python <<EOF
+import json
+import os
+
+filename = os.path.expanduser('~/.minikube/profiles/minikube/config.json') 
+with open(filename) as f:
+     data = json.load(f)
+     
+data['KubernetesConfig']['LoadBalancerStartIP'] = '172.17.1.100'
+data['KubernetesConfig']['LoadBalancerEndIP'] = '172.17.1.200'
+
+with open(filename, 'w') as f:
+     json.dump(data, f)
+EOF
 ```
 
 Enable metallb
@@ -46,7 +62,7 @@ mkdir -p data
 Initialize the `qhub-config.yaml`
 
 ```shell
-python -m qhub init local --auth-provider=password --terraform-state=local
+python -m qhub init local --project=thisisatest  --domain qhub.test --auth-provider=password --terraform-state=local
 ```
 
 Give a password to the default user. For this the example password is
@@ -73,5 +89,23 @@ python -m qhub render --config qhub-config.yaml -f
 ```shell
 cd infrastructure
 terraform init
-terraform apply
+terraform apply --auto-approve
 ```
+
+Make sure to point the dns domain `jupyter.qhub.test` to
+`172.17.1.100` from the previous commands. This can be done in many
+ways possibly the easiest is modifying `/etc/hosts` and adding the
+following line. This will override any dns server.
+
+```ini
+172.17.1.100 jupyter.qhub.test
+```
+
+Finally if everything is set properly you should be able to curl the
+jupyterhub server.
+
+```
+curl -k https://jupyter.qhub.test/hub/login
+```
+
+You can also visit `https://jupyter.qhub.test`
