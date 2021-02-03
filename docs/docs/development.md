@@ -1,4 +1,4 @@
-# Local Testing 
+# Local Testing
 
 ## Initialize kubernetes cluster
 
@@ -12,7 +12,7 @@ The jupyterlab instances require mounting nfs pvcs. This required
 nfs-common drivers be installed.
 
 ```shell
-minikube ssh "sudo apt update; sudo apt install nfs-common -y" 
+minikube ssh "sudo apt update; sudo apt install nfs-common -y"
 ```
 
 Configure `metallb`
@@ -31,10 +31,10 @@ python <<EOF
 import json
 import os
 
-filename = os.path.expanduser('~/.minikube/profiles/minikube/config.json') 
+filename = os.path.expanduser('~/.minikube/profiles/minikube/config.json')
 with open(filename) as f:
      data = json.load(f)
-     
+
 data['KubernetesConfig']['LoadBalancerStartIP'] = '172.17.1.100'
 data['KubernetesConfig']['LoadBalancerEndIP'] = '172.17.1.200'
 
@@ -50,12 +50,13 @@ minikube addons enable metallb
 ```
 
 ```
-🌟  The 'metallb' addon is enabled
+  The 'metallb' addon is enabled
 ```
 
 ## Deploy qhub
 
 ```shell
+export PYTHONPATH=$PWD:$PYTHONPATH
 mkdir -p data
 ```
 
@@ -87,9 +88,7 @@ python -m qhub render --config qhub-config.yaml -f
 ```
 
 ```shell
-cd infrastructure
-terraform init
-terraform apply --auto-approve
+python -m qhub deploy --config qhub-config.yaml --disable-prompt
 ```
 
 Make sure to point the dns domain `jupyter.qhub.test` to
@@ -109,3 +108,13 @@ curl -k https://jupyter.qhub.test/hub/login
 ```
 
 You can also visit `https://jupyter.qhub.test`
+
+## Cleanup
+
+```shell
+python -m qhub destroy --config qhub-config.yaml 
+```
+
+```shell
+minikube delete
+```

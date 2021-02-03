@@ -8,6 +8,8 @@ on:
     branches:
       - main
 
+
+
 jobs:
   test-general:
     name: 'Test Package'
@@ -103,16 +105,35 @@ jobs:
 
           echo "$PWD" >> $GITHUB_PATH
           popd
-      - name: Start Minikube
-        run: |
-          minikube start --kubernetes-version=1.19.4 --driver=docker --wait=all
-      - name: Enable Minikube Ingress
-        run: |
-          minikube addons enable ingress
       - name: Versions
         run: |
           minikube version
           kubectl version
+      - name: Start Minikube
+        run: |
+          minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 2 --memory 4096 --wait=all
+      - name: Add nfs client to kubernetes docker node
+        run: |
+          minikube ssh "sudo apt update; sudo apt install nfs-common -y"
+      - name: Configure LoadBalancer IPs
+        run: |
+          python <<EOF
+          import json
+          import os
+
+          filename = os.path.expanduser('~/.minikube/profiles/minikube/config.json')
+          with open(filename) as f:
+               data = json.load(f)
+
+          data['KubernetesConfig']['LoadBalancerStartIP'] = '172.17.1.100'
+          data['KubernetesConfig']['LoadBalancerEndIP'] = '172.17.1.200'
+
+          with open(filename, 'w') as f:
+               json.dump(data, f)
+          EOF
+      - name: Enable Minikube metallb
+        run: |
+          minikube addons enable metallb
       - name: Basic Kubectl Checks
         run: |
           kubectl get nodes
