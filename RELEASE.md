@@ -35,6 +35,6 @@
 ### Breaking changes
 * Removed the registry for DigitalOcean.
 
+---
 ## Thank you for your contributions!
 > [Brian Larsen](https://github.com/brl0), [Rajat Goyal](https://github.com/RajatGoyal), [Prasun Anand](https://github.com/prasunanand), and  [Rich Signell](https://github.com/rsignell-usgs) and [Josef Kellndorfer](https://github.com/jkellndorfer) for the insightful discussions.
----
