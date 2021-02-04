@@ -17,6 +17,8 @@ If you have any questions that aren't discussed below, please let us know throug
   - [:sparkle: Where to start: issues](#sparkle-where-to-start-issues)
     - [Submitting issues](#submitting-issues)
     - [Issue labels](#issue-labels)
+  - [:computer: Contributing to the codebase](#computer-contributing-to-the-codebase)
+    - [Step-by-step guide to your first contribution](#step-by-step-guide-to-your-first-contribution)
 
 ## :computer: Contributing through GitHub
 
@@ -66,16 +68,16 @@ This will make it easier for us to reproduce the error. Screenshots are also gre
 
 Check our [labels page][qhub-cloud-labels] for an overview of the system we use to tag our issues and pull requests. 
 
-### :computer: Contributing to the codebase
+## :computer: Contributing to the codebase
 
 You don't have to be a Python or Kubernetes pro to contribute, and we're happy to help you get started. If you're new to qhub-cloud, a good place to start are the issues marked with the [type: good first issue](https://github.com/Quansight/qhub-cloud/labels/type%3A%20good%20first%20issue) label, which we use to tag bugs and feature requests that are easy and self-contained. If you've decided to take on one of these problems and you're making good progress, don't forget to add a quick comment to the issue to assign this to yourself. You can also use the issue to ask questions, or share your work in progress.
 
-## Making a contribution to the codebase
+### Step-by-step guide to your first contribution 
 
 Never made an open source contribution before? Wondering how contributions work in the nteract world? Here's a quick rundown!
 
 1. Find an issue that you are interested in addressing or a feature that you would like to address.
-1. Fork the repository associated with the issue to your local GitHub organization.
+2. Fork the repository associated with the issue to your local GitHub organization.
 
 
 [qhub-cloud-repo]: https://github.com/Quansight/qhub-cloud/
@@ -83,6 +85,7 @@ Never made an open source contribution before? Wondering how contributions work 
 [qhub-cloud-labels]: https://github.com/Quansight/qhub-cloud/labels
 [qhub-cloud-templates]: https://github.com/Quansight/qhub-cloud/issues/new/choose
 [qhub-cloud-qa]: https://github.com/Quansight/qhub-cloud/discussions/categories/q-a
+[issue-template]: https://github.com/Quansight/qhub-cloudb/lob/master/ISSUE_TEMPLATE.md
 [git]: https://git-scm.com
 [github]: https://github.com
 [github-branches]: https://help.github.com/articles/creating-and-deleting-branches-within-your-repository
@@ -92,53 +95,6 @@ Never made an open source contribution before? Wondering how contributions work 
 [github-pullrequest]: https://help.github.com/articles/creating-a-pull-request
 [github-review]: https://help.github.com/articles/about-pull-request-reviews
 [github-syncfork]: https://help.github.com/articles/syncing-a-fork
-[issue-template]: https://github.com/Quansight/qhub-cloudblob/master/ISSUE_TEMPLATE.md
-[labels-link]: https://github.com/Quansight/qhub-cloudlabels
-[labels-approval-request]: https://github.com/Quansight/qhub-cloudlabels/approval%20request
-[labels-binderhub]: https://github.com/Quansight/qhub-cloudlabels/binderhub
-[labels-book-build]: https://github.com/Quansight/qhub-cloudlabels/book%2Dbuild
-[labels-book-dash-feb20]: https://github.com/Quansight/qhub-cloudlabels/book%2Ddash%2Dfeb20
-[labels-book-dash-ldn19]: https://github.com/Quansight/qhub-cloudlabels/book%2Ddash%2Dldn2019
-[labels-book-dash-mcr19]: https://github.com/Quansight/qhub-cloudlabels/book%2Ddash%2Dmcr2019
-[labels-book]: https://github.com/Quansight/qhub-cloudlabels/book
-[labels-bug]: https://github.com/Quansight/qhub-cloudlabels/bug
-[labels-bug-fixed]: https://github.com/Quansight/qhub-cloudlabels/bug%20fixed
-[labels-collaboration-book]: https://github.com/Quansight/qhub-cloudlabels/collaboration%2Dbook
-[labels-communication-book]: https://github.com/Quansight/qhub-cloudlabels/communication%2Dbook
-[labels-community]: https://github.com/Quansight/qhub-cloudlabels/community
-[labels-comms]: https://github.com/Quansight/qhub-cloudlabels/comms
-[labels-conflicting-file-error]: https://github.com/Quansight/qhub-cloudlabels/conflicting%2Dfile%2Derror
-[labels-dependencies]: https://github.com/Quansight/qhub-cloudlabels/dependencies
-[labels-enhancement]: https://github.com/Quansight/qhub-cloudlabels/enhancement
-[labels-ethics-book]: https://github.com/Quansight/qhub-cloudlabels/ethics%2Dbook
-[labels-events]: https://github.com/Quansight/qhub-cloudlabels/events
-[labels-firstissue]: https://github.com/Quansight/qhub-cloudlabels/good%20first%20issue
-[labels-helpwanted]: https://github.com/Quansight/qhub-cloudlabels/help%20wanted
-[labels-idea-for-discussion]: https://github.com/Quansight/qhub-cloudlabels/idea%2Dfor%2Ddiscussion
-[labels-good-first-PR-review]: https://github.com/Quansight/qhub-cloudlabels/good%2Dfirst%2PR%2review
-[labels-jupyter]: https://github.com/Quansight/qhub-cloudlabels/jupyter
-[labels-project-management]: https://github.com/Quansight/qhub-cloudlabels/project%20management
-[labels-newsletter]: https://github.com/Quansight/qhub-cloudlabels/newsletter
-[labels-outreach]: https://github.com/Quansight/qhub-cloudlabels/Outreach
-[labels-pr-draft]: https://github.com/Quansight/qhub-cloudlabels/PR%3A%20draft
-[labels-pr-merged]: https://github.com/Quansight/qhub-cloudlabels/PR%3A%20merged
-[labels-pr-partially-approved]: https://github.com/Quansight/qhub-cloudlabels/PR%3A%20partially%2Dapproved
-[labels-pr-reviewed-approved]: https://github.com/Quansight/qhub-cloudlabels/PR%3A%20reviewed%2Dapproved
-[labels-pr-reviewed-changes-requested]: https://github.com/Quansight/qhub-cloudlabels/PR%3A%20reviewed%2Dchanges%2Drequested
-[labels-pr-unreviewed]: https://github.com/Quansight/qhub-cloudlabels/PR%3A%20unreviewed
-[labels-project-design-book]: https://github.com/Quansight/qhub-cloudlabels/project%2Ddesign%2Dbook
-[labels-question]: https://github.com/Quansight/qhub-cloudlabels/question
-[labels-ready-for-merge]: https://github.com/Quansight/qhub-cloudlabels/ready%20for%20merge
-[labels-reproducibility-book]: https://github.com/Quansight/qhub-cloudlabels/reproducibility%2Dbook
-[labels-research-related-theory]: https://github.com/Quansight/qhub-cloudlabels/research%2Drelated%2Dtheory
-[labels-review-request]: https://github.com/Quansight/qhub-cloudlabels/review%20request
-[labels-software-skills]: https://github.com/Quansight/qhub-cloudlabels/software%2Dskills
-[labels-tools]: https://github.com/Quansight/qhub-cloudlabels/tools
-[labels-translation]: https://github.com/Quansight/qhub-cloudlabels/translation
-[labels-travel]: https://github.com/Quansight/qhub-cloudlabels/travel
-[labels-typo-fix]: https://github.com/Quansight/qhub-cloudlabels/typo%2Dfix
-[labels-work-in-progress]: https://github.com/Quansight/qhub-cloudlabels/work%2Din%2Dprogress
-[labels-workshops]: https://github.com/Quansight/qhub-cloudlabels/workshops
 [markdown]: https://daringfireball.net/projects/markdown
 [rick-roll]: https://www.youtube.com/watch?v=dQw4w9WgXcQ
 [jerry-maguire]: https://media.giphy.com/media/uRb2p09vY8lEs/giphy.gif
