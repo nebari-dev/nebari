@@ -3,9 +3,9 @@
 ## Local Testing
 
 Local testing is a great way to test the components of QHub. While it
-does test most of everything is does not test cloud provisioned
+does test most of everything it does not test cloud provisioned
 components such as the managed kubernetes cluster, vpcs, managed
-container registries etc.
+container registries, etc.
 
 This guide assumes that you have the QHub Cloud repository downloaded
 and you are at the root of the repository.
@@ -26,22 +26,37 @@ Testing done with minikube
 minikube start --cpus 2 --memory 4096 --driver=docker
 ```
 
-The jupyterlab instances require mounting nfs pvcs. This required
-nfs-common drivers be installed.
+The jupyterlab instances require mounting nfs pvcs. This requires
+nfs-common drivers be installed on the nodes themselves.
 
 ```shell
 minikube ssh "sudo apt update; sudo apt install nfs-common -y"
 ```
 
-Configure `metallb`
+Configure `metallb` to have a start ip of `172.17.10.100` and end ip
+of `172.17.10.100`. These ips were not randomly chosen. You must make
+sure that the ip range is within the docker interface subnet. You can
+see your docker subnet via
+
+```shell
+$ ip route
+default via 192.168.1.1 dev wlp4s0 proto dhcp metric 600 
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 
+```
+
+This means that you just have to ensure that the ip range is within
+the `172.17.0.0/16` subnet. Your docker subnet may be different. You
+can run `metallb` manually as shown bellow or use the python command
+shown bellow. We suggest using the values we suggested since there is
+a dns name that already points to the address.
 
 ```shell
 minikube addons configure metallb
 ```
 
 If you don't want to configure metallb interactively here is a short
-bash command to run. This is used in the github actions since the
-minikube command does [not provide a no interactive simple way to
+bash/python command to run. This is used in the github actions since
+the minikube command does not [provide a non interactive way to
 configure addons](https://github.com/kubernetes/minikube/issues/8283)
 
 ```shell
