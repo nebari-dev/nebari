@@ -11,22 +11,24 @@ If you have any questions that aren't discussed below, please let us know throug
 ## Table of contents
 
 - [Contributing to qhub-cloud](#contributing-to-qhub-cloud)
-  - [Contributing through GitHub](#contributing-through-github)
-  - [Writing in Markdown](#writing-in-markdown)
-  - [Where to start: issues](#where-to-start-issues)
+  - [Table of contents](#table-of-contents)
+  - [:computer: Contributing through GitHub](#computer-contributing-through-github)
+  - [:pencil: Writing in Markdown](#pencil-writing-in-markdown)
+  - [:sparkle: Where to start: issues](#sparkle-where-to-start-issues)
+    - [Submitting issues](#submitting-issues)
+    - [Issue labels](#issue-labels)
 
-## :computer: $$Contributing through GitHub
+## :computer: Contributing through GitHub
 
 [Git][git] is a really useful tool for version control.
 [GitHub][github] sits on top of Git and supports collaborative and distributed working.
 
 We know that it can be daunting to start using Git and GitHub if you haven't worked with them in the past, but _qhub-cloud_ maintainers are here to help you figure out any of the jargon or confusing instructions you encounter!
 
-In order to contribute via GitHub, you'll need to set up a free account and sign in.
+To contribute via GitHub, you'll need to set up a free account and sign in.
 Here are some [instructions](https://help.github.com/articles/signing-up-for-a-new-github-account/) to help you get going.
-Remember that you can ask us any questions you need to along the way.
 
-## Writing in Markdown
+## :pencil: Writing in Markdown
 
 GitHub has a helpful page on [getting started with writing and formatting on GitHub](https://help.github.com/articles/getting-started-with-writing-and-formatting-on-github).
 
@@ -37,9 +39,11 @@ For example, you could write words as **bold** (`**bold**`), or in _italics_ (`_
 Also when writing in Markdown, please start each new sentence on a new line.
 While these formats in the same way as if the new line wasn't included, it makes the [diffs produced during the pull request](https://help.github.com/en/articles/about-comparing-branches-in-pull-requests) review easier to read! :sparkles:
 
-## Where to start: issues
+## :sparkle: Where to start: issues
 
-Before you open a new issue, please check if any of our [open issues][qhub-cloud-issues] to see if the issue has already been reported or if your idea has already been discussed. If so, it's often better to leave a comment on an existing issue, rather than creating a new one. Old issues also often include helpful tips and solutions to common problems.
+Before you open a new issue, please check the [open issues][qhub-cloud-issues]. See if the issue has already been reported or if your idea has already been discussed. If so, it's often better to leave a comment on an existing issue, rather than creating a new one. Old issues also often include helpful tips and solutions to common problems.
+
+If you are looking for specific help with qhub-cloud or its configuration make sure to check our [Github discussions][qhub-cloud-qa].
 
 ### Submitting issues
 
@@ -53,18 +57,32 @@ There are 3 issues templates to choose from:
 
 A few more tips:
 
-- Describing your issue: Try to provide as many details as possible. What exactly goes wrong? How is it failing? Is there an error? "XY doesn't work" usually isn't that helpful for tracking down problems. Always remember to include the code you ran and if possible, extract only the relevant parts and don't dump your entire script.
+- **Describing your issue**: Try to provide as many details as possible. What exactly goes wrong? How is it failing? Is there an error? "XY doesn't work" usually isn't that helpful for tracking down problems. Always remember to include the code you ran and if possible, extract only the relevant parts and don't dump your entire script.
 This will make it easier for us to reproduce the error. Screenshots are also great ways to demonstrate errors or unexpected behaviours.
 
-- Sharing long blocks of code or logs: If you need to include long code, logs or tracebacks, you can wrap them in `<details> and </details>`. This collapses the content, so it only becomes visible on click, making the issue easier to read and follow.
+- **Sharing long blocks of code or logs**: If you need to include long code, logs or tracebacks, you can wrap them in `<details> and </details>`. This collapses the content, so it only becomes visible on click, making the issue easier to read and follow.
+
+### Issue labels
+
+Check our [labels page][qhub-cloud-labels] for an overview of the system we use to tag our issues and pull requests. 
+
+### :computer: Contributing to the codebase
+
+You don't have to be a Python or Kubernetes pro to contribute, and we're happy to help you get started. If you're new to qhub-cloud, a good place to start are the issues marked with the [type: good first issue](https://github.com/Quansight/qhub-cloud/labels/type%3A%20good%20first%20issue) label, which we use to tag bugs and feature requests that are easy and self-contained. If you've decided to take on one of these problems and you're making good progress, don't forget to add a quick comment to the issue to assign this to yourself. You can also use the issue to ask questions, or share your work in progress.
+
+## Making a contribution to the codebase
+
+Never made an open source contribution before? Wondering how contributions work in the nteract world? Here's a quick rundown!
+
+1. Find an issue that you are interested in addressing or a feature that you would like to address.
+1. Fork the repository associated with the issue to your local GitHub organization.
 
 
-
-
-[qhub-cloud-repo]: https://github.com/Quansight/qhub-cloud
-[qhub-cloud-issues]: https://github.com/Quansight/qhub-cloudissues
-[qhub-cloud-labels]: https://github.com/Quansight/qhub-cloudlabels
+[qhub-cloud-repo]: https://github.com/Quansight/qhub-cloud/
+[qhub-cloud-issues]: https://github.com/Quansight/qhub-cloud/issues
+[qhub-cloud-labels]: https://github.com/Quansight/qhub-cloud/labels
 [qhub-cloud-templates]: https://github.com/Quansight/qhub-cloud/issues/new/choose
+[qhub-cloud-qa]: https://github.com/Quansight/qhub-cloud/discussions/categories/q-a
 [git]: https://git-scm.com
 [github]: https://github.com
 [github-branches]: https://help.github.com/articles/creating-and-deleting-branches-within-your-repository
