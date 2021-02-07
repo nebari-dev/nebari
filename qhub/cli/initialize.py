@@ -39,6 +39,11 @@ def create_init_subcommand(subparser):
         help="Attempt to automatically provision oauth. For Auth0 it requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
     )
     subparser.add_argument(
+        "--kubernetes-version",
+        type=str,
+        help="kubernetes version to use for cloud deployment",
+    )
+    subparser.add_argument(
         "--disable-prompt",
         action="store_true",
         help="Never prompt user for input instead leave PLACEHOLDER",
@@ -53,9 +58,10 @@ def handle_init(args):
         cloud_provider=args.platform,
         ci_provider=args.ci_provider,
         repository=args.repository,
-        repository_auto_provision=args.repository_auto_provision,
         oauth_provider=args.oauth_provider,
+        repository_auto_provision=args.repository_auto_provision,
         oauth_auto_provision=args.oauth_auto_provision,
+        kubernetes_version=args.kubernetes_version,
         disable_prompt=args.disable_prompt,
     )
 

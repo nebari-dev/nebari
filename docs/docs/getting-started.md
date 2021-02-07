@@ -1,8 +1,8 @@
 # Getting Started
 
-## Q|Hub Wizard
+## QHub Wizard
 
-## Command line interfaces
+## Command line interface
 
 ### Google Cloud Provider
 ### Digital Ocean

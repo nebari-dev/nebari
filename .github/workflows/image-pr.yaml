@@ -3,7 +3,7 @@ name: "Docker Image Build - Pull Request"
 on:
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - "qhub/template/{{ cookiecutter.repo_directory }}/image/**"
       - ".github/workflows/image-pr.yaml"
@@ -20,7 +20,7 @@ jobs:
           - dask-worker
     steps:
       - name: 'Checkout Image'
-        uses: actions/checkout@master
+        uses: actions/checkout@main
       - name: Build Image
         working-directory: "qhub/template/{{ cookiecutter.repo_directory }}/image"
         env:

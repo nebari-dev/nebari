@@ -7,6 +7,7 @@ from qhub.cli.deploy import create_deploy_subcommand
 from qhub.cli.initialize import create_init_subcommand
 from qhub.cli.render import create_render_subcommand
 from qhub.cli.validate import create_validate_subcommand
+from qhub.cli.destroy import create_destroy_subcommand
 
 root_dir = path.abspath(path.join(path.dirname(__file__), path.pardir))
 
@@ -26,6 +27,7 @@ def cli(args):
     create_render_subcommand(subparser)
     create_init_subcommand(subparser)
     create_validate_subcommand(subparser)
+    create_destroy_subcommand(subparser)
 
     args = parser.parse_args(args)
 
