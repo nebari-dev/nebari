@@ -9,7 +9,7 @@ terraform {
 {%- elif cookiecutter.provider == "do" %}
     digitalocean = {
       source = "digitalocean/digitalocean"
-{%- elif cookiecutter.provider == "local" %}
+{%- elif cookiecutter.provider == "kind" %}
     kind = {
       source = "kyma-incubator/kind"
       version = "0.0.7"

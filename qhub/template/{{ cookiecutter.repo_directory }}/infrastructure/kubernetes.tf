@@ -1,10 +1,10 @@
 provider "kubernetes" {
   host                   = module.kubernetes.credentials.endpoint
-{% if cookiecutter.provider == "local" %}
-  load_config_file       = true
+{% if cookiecutter.provider == "kind" %}
+  config_path            = "~/.kube/config"
+  config_context         = "kind-{{ cookiecutter.project_name }}-dev"
   insecure               = true
 {% else -%}
-  load_config_file       = false
   token                  = module.kubernetes.credentials.token
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
 {% endif %}
@@ -80,7 +80,7 @@ provider "helm" {
   kubernetes {
     host                   = module.kubernetes.credentials.endpoint
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
-{% if cookiecutter.provider != "local" %}
+{% if cookiecutter.provider != "kind" %}
     load_config_file       = false
     token                  = module.kubernetes.credentials.token
 {% else %}
@@ -106,14 +106,14 @@ module "kubernetes-autoscaling" {
 {% endif -%}
 
 module "kubernetes-ingress" {
-{% if cookiecutter.provider != "local" -%}
+{% if cookiecutter.provider != "kind" -%}
   source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/ingress"
 
   namespace = var.environment
 
   node-group = local.node_groups.general
 {% else %}
-  source = "github.com/brl0/qhub-terraform-modules//modules/local/ingress?ref=local_kind"
+  source = "github.com/brl0/qhub-terraform-modules//modules/kind/ingress?ref=local_kind"
 {% endif -%}
 
   dependencies = [
