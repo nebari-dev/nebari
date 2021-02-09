@@ -159,7 +159,7 @@ module "qhub" {
   ]
 }
 
-{% if cookiecutter.prefect is true -%}
+{% if cookiecutter.prefect == "true" -%}
 module "prefect" {
   source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect"
 
