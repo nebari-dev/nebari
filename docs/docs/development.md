@@ -20,7 +20,8 @@ dependencies and have them available in your path.
 
 ### Initialize kubernetes cluster
 
-Testing done with minikube
+Testing is done with minikube. Note that this will download a ~500MB
+docker image.
 
 ```shell
 minikube start --cpus 2 --memory 4096 --driver=docker
@@ -33,10 +34,10 @@ nfs-common drivers be installed on the nodes themselves.
 minikube ssh "sudo apt update; sudo apt install nfs-common -y"
 ```
 
-Configure `metallb` to have a start ip of `172.17.10.100` and end ip
-of `172.17.10.100`. These ips were not randomly chosen. You must make
-sure that the ip range is within the docker interface subnet. You can
-see your docker subnet via
+Configure the `metallb` load balancer to have a start ip of
+`172.17.10.100` and an end ip of `172.17.10.200`. These ips were not
+randomly chosen. You must make sure that the ip range is within the
+docker interface subnet. You can see your docker subnet via
 
 ```shell
 $ ip route
@@ -44,18 +45,19 @@ default via 192.168.1.1 dev wlp4s0 proto dhcp metric 600
 172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 
 ```
 
-This means that you just have to ensure that the ip range is within
-the `172.17.0.0/16` subnet. Your docker subnet may be different. You
-can run `metallb` manually as shown bellow or use the python command
-shown bellow. We suggest using the values we suggested since there is
-a dns name that already points to the address.
+This means that you have to ensure that the start/stop ip range
+for the load balancer is within the `172.17.0.0/16` subnet. Your
+docker subnet may be different. You can run `metallb` manually as
+shown below or use the python command shown below. We suggest using
+these values since there is a dns name that already points to the
+address.
 
 ```shell
 minikube addons configure metallb
 ```
 
-If you don't want to configure metallb interactively here is a short
-bash/python command to run. This is used in the github actions since
+If you don't want to configure metallb interactively run the below
+bash/python command. This is also used in github actions since
 the minikube command does not [provide a non interactive way to
 configure addons](https://github.com/kubernetes/minikube/issues/8283)
 
@@ -114,7 +116,7 @@ bcrypt.hashpw(b'<password>', bcrypt.gensalt())`. Where you can change
 
 ```
 
-Finder the files from the `qhub-config.yaml`
+Render the files from the `qhub-config.yaml`
 
 ```shell
 python -m qhub render --config qhub-config.yaml -f
