@@ -12,7 +12,7 @@ provider "kubernetes" {
 }
 
 module "kubernetes-initialization" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/initialization"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/initialization?ref=azure"
 
   namespace = var.environment
   secrets   = []
@@ -26,7 +26,7 @@ module "kubernetes-initialization" {
 
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-nfs-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount?ref=azure"
 
   name         = "nfs-mount"
   namespace    = var.environment
@@ -38,7 +38,7 @@ module "kubernetes-nfs-mount" {
 }
 {% else -%}
 module "kubernetes-nfs-server" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-server"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-server?ref=azure"
 
   name         = "nfs-server"
   namespace    = var.environment
@@ -46,7 +46,7 @@ module "kubernetes-nfs-server" {
 }
 
 module "kubernetes-nfs-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount?ref=azure"
 
   name         = "nfs-mount"
   namespace    = var.environment
@@ -56,7 +56,7 @@ module "kubernetes-nfs-mount" {
 {% endif %}
 
 module "kubernetes-conda-store-server" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/conda-store"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/conda-store?ref=azure"
 
   name         = "conda-store"
   namespace    = var.environment
@@ -69,7 +69,7 @@ module "kubernetes-conda-store-server" {
 }
 
 module "kubernetes-conda-store-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount?ref=azure"
 
   name         = "conda-store"
   namespace    = var.environment
@@ -103,7 +103,7 @@ module "kubernetes-autoscaling" {
 {% endif -%}
 
 module "kubernetes-ingress" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/ingress"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/ingress?ref=azure"
 
   namespace = var.environment
 
@@ -115,7 +115,7 @@ module "kubernetes-ingress" {
 }
 
 module "qhub" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/meta/qhub"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/meta/qhub?ref=azure"
 
   name      = "qhub"
   namespace = var.environment
@@ -148,7 +148,7 @@ module "qhub" {
 
 {% if cookiecutter.prefect is true -%}
 module "prefect" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect?ref=azure"
 
   dependencies = [
     module.qhub.depended_on
