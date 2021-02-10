@@ -104,7 +104,7 @@ module "kubernetes-autoscaling" {
 {% endif -%}
 
 module "kubernetes-ingress" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/ingress?ref=azure"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/ingress"
 
   namespace = var.environment
 
