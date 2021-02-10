@@ -23,10 +23,11 @@ module "kubernetes" {
     {
       name       = "{{ nodegroup }}"
       auto_scale = true
-
+      
+      instance_type = "{{ nodegroup_config.instance }}"
       size      = "{{ nodegroup_config.instance }}"
-      min_nodes = {{ nodegroup_config.min_nodes }}
-      max_nodes = {{ nodegroup_config.max_nodes }}
+      min_size = {{ nodegroup_config.min_nodes }}
+      max_size = {{ nodegroup_config.max_nodes }}
     },
 {% endfor %}
   ]
