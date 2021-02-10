@@ -37,7 +37,12 @@ def check_cloud_credentials(config):
                     Please see the documentation for more information: {GCP_ENV_DOCS}"""
                 )
     elif config["provider"] == "azure":
-        for variable in {"AZURE_CREDENTIALS"}:
+        for variable in {
+            "ARM_CLIENT_ID",
+            "ARM_CLIENT_SECRET",
+            "ARM_SUBSCRIPTION_ID",
+            "ARM_TENANT_ID",
+        }:
             if variable not in os.environ:
                 raise Exception(
                     f"""Missing the following required environment variable: {variable}\n

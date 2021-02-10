@@ -25,16 +25,13 @@ provider "google" {
 provider "azurerm" {
   version = "=2.44.0"
   features {} 
-  project = "{{ cookiecutter.azure.project }}"
-  region  = "{{ cookiecutter.azure.region }}"
-  zone    = "{{ cookiecutter.azure.zone }}"
 }
 
 module "terraform-state" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/gcp/terraform-state"
+  source = "github.com/quansight/qhub-terraform-modules//modules/azure/terraform-state?ref=azure"
 
   name     = "{{ cookiecutter.project_name }}"
-  location = "{{ cookiecutter.google_cloud_platform.region }}"
+  location = "{{ cookiecutter.azure.region }}"
 }
 {% elif cookiecutter.provider == "do" -%}
 module "terraform-state" {

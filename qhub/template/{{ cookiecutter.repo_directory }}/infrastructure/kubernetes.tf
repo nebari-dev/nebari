@@ -1,8 +1,15 @@
 provider "kubernetes" {
   load_config_file       = false
   host                   = module.kubernetes.credentials.endpoint
-  token                  = module.kubernetes.credentials.token
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+{% if cookiecutter.provider == "azure" %}
+  username               = azurerm_kubernetes_cluster.credentials.username
+  password               = azurerm_kubernetes_cluster.credentials.password
+  client_certificate     = azurerm_kubernetes_cluster.credentials.client_certificate
+  client_key             = azurerm_kubernetes_cluster.credentials.client_key
+{% else -%}
+  token                  = module.kubernetes.credentials.token
+{% endif %}
 }
 
 module "kubernetes-initialization" {

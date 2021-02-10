@@ -95,19 +95,19 @@ GOOGLE_PLATFORM = {
 
 AZURE = {
     "project": "PLACEHOLDER",
-    "region": "us-central1",
-    "zone": "us-central1-c",
-    "availability_zones": ["us-central1-c"],
-    "kubernetes_version": "1.14.10-gke.31",
+    "region": "Central US",
+    # "zone": "us-central1-c",
+    # "availability_zones": ["us-central1-c"],
+    "kubernetes_version": "1.18.14",
     "node_groups": {
         "general": {
-            "instance": "n1-standard-2",
+            "instance": "Standard_D2_v2",
             "min_nodes": 1,
             "max_nodes": 1,
         },
-        "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
+        "user": {"instance": "Standard_D2_v2", "min_nodes": 1, "max_nodes": 4},
         "worker": {
-            "instance": "n1-standard-2",
+            "instance": "Standard_D2_v2",
             "min_nodes": 1,
             "max_nodes": 4,
         },
@@ -342,7 +342,14 @@ def github_auto_provision(config, owner, repo):
         github.update_secret(owner, repo, "PROJECT_ID", os.environ["PROJECT_ID"])
         with open(os.environ["GOOGLE_CREDENTIALS"]) as f:
             github.update_secret(owner, repo, "GOOGLE_CREDENTIALS", f.read())
-
+    elif config["provider"] == "azure":
+        for name in {
+            "ARM_CLIENT_ID",
+            "ARM_CLIENT_SECRET",
+            "ARM_SUBSCRIPTION_ID",
+            "ARM_TENANT_ID",
+        }:
+            github.update_secret(owner, repo, name, os.environ[name])
     github.update_secret(
         owner, repo, "REPOSITORY_ACCESS_TOKEN", os.environ["GITHUB_TOKEN"]
     )

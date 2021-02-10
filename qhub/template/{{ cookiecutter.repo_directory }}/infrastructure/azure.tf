@@ -1,52 +1,32 @@
-provider "azurerm" {
-  project = "{{ cookiecutter.google_cloud_platform.project }}"
-  region  = "{{ cookiecutter.google_cloud_platform.region }}"
-  zone    = "{{ cookiecutter.google_cloud_platform.zone }}"
+provider "azure" {
+  versions{}
 }
 
 
-module "registry-jupyterhub" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/azure/registry"
+module "registry" {
+  source = "github.com/quansight/qhub-terraform-modules//modules/azure/registry?ref=azure"
+  name   = "{{ cookiecutter.project_name }}"
+  location   = "{{ cookiecutter.project_name }}"
 }
 
 
 module "kubernetes" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/azure/kubernetes"
+  source = "github.com/quansight/qhub-terraform-modules//modules/azure/kubernetes?ref=azure"
 
-  name     = local.cluster_name
-  location = var.region
+  name = local.cluster_name
 
-  availability_zones = var.availability_zones
-
-  additional_node_group_roles = [
-    "roles/storage.objectViewer",
-    "roles/storage.admin"
-  ]
-
-  additional_node_group_oauth_scopes = [
-    "https://www.googleapis.com/auth/cloud-platform"
-  ]
+  location             = var.region
+  kubernetes_version = "{{ cookiecutter.azure.kubernetes_version }}"
 
   node_groups = [
-{% for nodegroup, nodegroup_config in cookiecutter.google_cloud_platform.node_groups.items() %}
+{% for nodegroup, nodegroup_config in cookiecutter.azure.node_groups.items() %}
     {
-      name          = "{{ nodegroup }}"
-      instance_type = "{{ nodegroup_config.instance }}"
-      min_size      = {{ nodegroup_config.min_nodes }}
-      max_size      = {{ nodegroup_config.max_nodes }}
-      {%- if "preemptible" in nodegroup_config %}
-      preemptible   = {{ "true" if nodegroup_config.preemptible else "false" }}
-      {%- endif %}
-      {%- if nodegroup.guest_accelerators is defined %}
-      guest_accelerators = [
-        {% for accelerator in nodegroup_config.guest_accelerators %}
-        {
-          type  = "{{ accelerator.name }}"
-          count = {{ accelerator.count }}
-        }
-        {% endfor %}
-      ]
-      {%- endif %}
+      name       = "{{ nodegroup }}"
+      auto_scale = true
+
+      size      = "{{ nodegroup_config.instance }}"
+      min_nodes = {{ nodegroup_config.min_nodes }}
+      max_nodes = {{ nodegroup_config.max_nodes }}
     },
 {% endfor %}
   ]
