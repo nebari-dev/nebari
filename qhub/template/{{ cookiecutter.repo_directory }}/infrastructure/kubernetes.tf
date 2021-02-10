@@ -4,7 +4,6 @@ provider "kubernetes" {
   token                  = module.kubernetes.credentials.token
 {% if cookiecutter.provider == "azure" %}
   username               = module.kubernetes.credentials.username
-  password               = module.kubernetes.credentials.password
   client_certificate     = module.kubernetes.credentials.client_certificate
   client_key             = module.kubernetes.credentials.client_key
 {% endif %}
