@@ -10,8 +10,8 @@ jobs:
     name: 'PyPi Release'
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout Infastructure'
-        uses: actions/checkout@master
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@main
       - name: Set up Python
         uses: actions/setup-python@v2
         with:

@@ -3,7 +3,7 @@ import typing
 import re
 
 import pydantic
-from qhub.constants import SUPPORTED_TERRAFORM_MINOR_RELEASES
+from qhub.constants import SUPPORTED_TERRAFORM_VERSIONS
 
 
 class ProviderEnum(str, enum.Enum):
@@ -193,10 +193,10 @@ class Main(Base):
 
     @pydantic.validator("terraform_version")
     def verify_terraform_version(cls, v):
-        minor_release = re.search(r"(\d+)\.(\d+)", v).group(0)
-        if minor_release not in SUPPORTED_TERRAFORM_MINOR_RELEASES:
+        minor_release = re.search(r"(\d+)\.(\d+).(\d+)", v).group(0)
+        if minor_release not in SUPPORTED_TERRAFORM_VERSIONS:
             raise ValueError(
-                f"terraform_version must be defined in qhub-config.yaml and a release of one of the following minor versions: {SUPPORTED_TERRAFORM_MINOR_RELEASES}"
+                f"terraform_version must be defined in qhub-config.yaml and a release of one of the following minor versions: {SUPPORTED_TERRAFORM_VERSIONS}"
             )
 
 

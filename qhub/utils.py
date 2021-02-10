@@ -6,7 +6,7 @@ from os import path
 from subprocess import check_output
 from shutil import which
 
-from qhub.constants import SUPPORTED_TERRAFORM_MINOR_RELEASES
+from qhub.constants import SUPPORTED_TERRAFORM_VERSIONS
 
 DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
 AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
@@ -95,16 +95,16 @@ def check_terraform():
     # 01 Check if Terraform works
     if which("terraform") is None:
         raise Exception(
-            f"Please install Terraform with one of the following minor releases: {SUPPORTED_TERRAFORM_MINOR_RELEASES}"
+            f"Please install Terraform with one of the following minor releases: {SUPPORTED_TERRAFORM_VERSIONS}"
         )
 
     # 02 Check version of Terraform
     version_out = check_output(["terraform", "--version"]).decode("utf-8")
-    minor_release = re.search(r"(\d+)\.(\d+)", version_out).group(0)
+    minor_release = re.search(r"(\d+)\.(\d+).(\d+)", version_out).group(0)
 
-    if minor_release not in SUPPORTED_TERRAFORM_MINOR_RELEASES:
+    if minor_release not in SUPPORTED_TERRAFORM_VERSIONS:
         raise Exception(
-            f"Unsupported Terraform version. Supported minor releases: {SUPPORTED_TERRAFORM_MINOR_RELEASES}"
+            f"Unsupported Terraform version. Supported terraform version(s): {SUPPORTED_TERRAFORM_VERSIONS}"
         )
 
 

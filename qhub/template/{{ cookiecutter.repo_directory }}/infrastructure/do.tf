@@ -1,10 +1,5 @@
 provider "digitalocean" {}
 
-module "registry" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/digitalocean/registry"
-  name   = "{{ cookiecutter.project_name }}"
-}
-
 
 module "kubernetes" {
   source = "github.com/quansight/qhub-terraform-modules//modules/digitalocean/kubernetes"

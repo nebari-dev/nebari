@@ -1,6 +1,6 @@
 # QHub Cloud
 Automated data science platform. From [JupyterHub](https://jupyter.org/hub "Multi-user version of the Notebook") to 
-Cloud environments with [Dask](https://docs.dask.org/ "Parallel computing in Python").
+Cloud environments with [Dask Gateway](https://docs.dask.org/ "Parallel computing in Python").
 
 [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
 
@@ -96,6 +96,12 @@ We separate the queries for QHub into:
   documentation, etc.
 > We work around the clock to make QHub Cloud more excellent. Which implies that sometimes your
 > query might take a while to get a reply. We apologise in advance and ask you to please, be patient.
+
+
+## Code of Conduct
+To guarantee a welcoming and friendly community, we require contributors to follow our
+[Code of Conduct](https://github.com/Quansight/.github/blob/master/CODE_OF_CONDUCT.md).
+
 
 ## Developer
 To install the latest developer version use:

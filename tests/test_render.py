@@ -9,9 +9,9 @@ from qhub.initialize import render_config
 @pytest.mark.parametrize(
     "project, domain, cloud_provider, ci_provider, oauth_provider",
     [
-        ('do-pytest', 'do.qhub.dev', 'do', 'github-actions', 'github'),
-        ('aws-pytest', 'aws.qhub.dev', 'aws', 'github-actions', 'github'),
-        ('gcp-pytest', 'gcp.qhub.dev', 'gcp', 'github-actions', 'github'),
+        ("do-pytest", "do.qhub.dev", "do", "github-actions", "github"),
+        ("aws-pytest", "aws.qhub.dev", "aws", "github-actions", "github"),
+        ("gcp-pytest", "gcp.qhub.dev", "gcp", "github-actions", "github"),
     ],
 )
 def test_render(project, domain, cloud_provider, ci_provider, oauth_provider, tmp_path):
@@ -20,16 +20,16 @@ def test_render(project, domain, cloud_provider, ci_provider, oauth_provider, tm
         qhub_domain=domain,
         cloud_provider=cloud_provider,
         ci_provider=ci_provider,
-        repository='github.com/test/test',
+        repository="github.com/test/test",
         oauth_provider=oauth_provider,
         repository_auto_provision=False,
         oauth_auto_provision=False,
-        kubernetes_version='1.18.0',
+        kubernetes_version="1.18.0",
         disable_prompt=True,
     )
 
-    config_filename = tmp_path / (project + '.yaml')
-    with open(config_filename, 'w') as f:
+    config_filename = tmp_path / (project + ".yaml")
+    with open(config_filename, "w") as f:
         yaml.dump(config, f)
 
     output_directory = tmp_path / "test"
