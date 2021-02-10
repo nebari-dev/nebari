@@ -108,10 +108,7 @@ module "kubernetes-ingress" {
   namespace = var.environment
 
   node-group = local.node_groups.general
-
-  dependencies = [
-    module.kubernetes-initialization.depended_on
-  ]
+  depends_on = [module.kubernetes-initialization]
 }
 
 module "qhub" {
@@ -140,19 +137,14 @@ module "qhub" {
   dask-gateway-overrides = [
     file("dask-gateway.yaml")
   ]
-
-  dependencies = [
-    module.kubernetes-ingress.depended_on
-  ]
+  depends_on = [module.kubernetes-ingress]
 }
 
 {% if cookiecutter.prefect is true -%}
 module "prefect" {
   source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect?ref=azure"
 
-  dependencies = [
-    module.qhub.depended_on
-  ]
+  depends_on = [ module.qhub ]
   namespace            = var.environment
   jupyterhub_api_token = module.qhub.jupyterhub_api_token
   prefect_token        = var.prefect_token
