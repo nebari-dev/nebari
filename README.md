@@ -35,7 +35,7 @@ QHub offers out-of-the-box support for [Digital Ocean](https://www.digitalocean.
 will be added soon.
 
 
-![image](docs/images/brand-diagram.png "architecture diagram")
+![image](docs/source/meta_images/tech_stack_diagram.png "architecture diagram")
 
 For more details, check out the release [blog post](https://www.quansight.com/post/announcing-qhub).
 
@@ -89,6 +89,8 @@ qhub deploy ... # creates and configures the cloud infrastructure
 ```
 
 ## Questions?
+Have a look at our [FAQ](https://qhub.dev/docs/faqs.html) to see if your query has been answered.
+
 We separate the queries for QHub into:
 * [GitHub Discussions](https://github.com/Quansight/qhub/discussions) used to raise discussions about a subject, such as:
 "What is the recommended way to do X with QHub?"
