@@ -3,7 +3,7 @@
 This quide walks you through the steps to create a QHub deployment on DO. **Deployments** represent a set of multiple, identical Pods with no unique identities. A deployment runs multiple replicas of your application and automatically replaces any instances that fail or become unresponsive. In this way, deployments help ensure that one or more instances of your application are available to serve user requests. Deployments are managed by the Kubernetes Deployment controller.
 
 
-A **configuration** defines the structure of your deployment, including the type and properties of the resources that are part of the deployment, any templates the configuration should use, and additional subfiles that can be executed to create your final configuration. You must specify a configuration in order to create a deployment. A configuration allows you to define a variety of resources and features that you would like to setup for your deployment. Let's have a closer look into how you can configure your QHub deployment for DO. 
+A **configuration** defines the structure of your deployment, including the type and properties of the resources that are part of the deployment, any templates the configuration should use, and additional subfiles that can be executed to create your final configuration. You must specify a configuration in order to create a deployment. A configuration allows you to define a variety of resources and features that you would like to setup for your deployment. Let's have a closer look into how you can configure your QHub deployment for DO.
 
 ## Configuration
 
@@ -11,7 +11,7 @@ You can start the deployment process by providing the configuration details of y
 
 ### 1. General
 
-This section allows setting up the general information about your project. 
+This section allows setting up the general information about your project.
 
 ```yaml
 project_name: qhub-do-deployment
@@ -30,7 +30,7 @@ domain: "do.qhub.dev"
 
 ### 2. Security
 
-The security section of the configuration file is for configuring security and authentication details, relating to your QHub deployment. You will need to provide your Digital Ocean account credentials on the appropriate lines of the configuration file as shown below. 
+The security section of the configuration file is for configuring security and authentication details, relating to your QHub deployment. You will need to provide your Digital Ocean account credentials on the appropriate lines of the configuration file as shown below.
 
 ```yaml
 security:
@@ -58,7 +58,7 @@ security:
 
 If the `config` is left blank (i.e.`config: {}`) the client will be auto provisioned by `auth0`.
 
-#### 2.1 Users and Groups 
+#### 2.1 Users and Groups
 
 The configuration file also allows you to specify `users` and `groups` that you would like to give access to your project and its deployment. This portion of the file enables you to provision unix permissions to each user. All users are assigned a `uid`, `primary_group`.
 
@@ -188,9 +188,9 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - dask==2.14.0
-      - distributed==2.14.0
-      - dask-gateway=0.6.1
+      - dask==2.30.0
+      - distributed==2.30.1
+      - dask-gateway=0.9.0
       - numpy
       - numba
       - pandas
@@ -204,9 +204,9 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - dask==2.14.0
-      - distributed==2.14.0
-      - dask-gateway=0.6.1
+      - dask==2.30.0
+      - distributed==2.30.1
+      - dask-gateway=0.9.0
       - numpy
       - numba
       - pandas

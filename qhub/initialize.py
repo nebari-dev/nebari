@@ -154,15 +154,16 @@ DEFAULT_PROFILES = {
 
 DEFAULT_ENVIRONMENTS = {
     "environment-default.yaml": {
-        "name": "default",
+        "name":
+        "default",
         "channels": ["conda-forge", "defaults"],
         "dependencies": [
             "python=3.8",
             "ipykernel",
             "ipywidgets",
-            "dask==2.14.0",
-            "distributed==2.14",
-            "dask-gateway=0.6.1",
+            "dask==2.30.0",
+            "distributed==2.30.1",
+            "dask-gateway=0.9.0",
             "numpy",
             "numba",
             "pandas",
