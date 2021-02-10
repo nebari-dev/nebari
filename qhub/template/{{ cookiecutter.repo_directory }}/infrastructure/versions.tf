@@ -4,7 +4,7 @@ terraform {
     aws = {
       source = "hashicorp/aws"
 {%- elif cookiecutter.provider == "azure" %}
-    azurerm = {
+    azure = {
       source = "hashicorp/azurerm"
       version = "=2.44.0"
 {%- elif cookiecutter.provider == "gcp" %}
