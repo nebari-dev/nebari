@@ -31,7 +31,7 @@ terraform {
   backend "azurerm" {
     resource_group_name  = "{{ cookiecutter.project_name }}-terraform-state"
     storage_account_name = "{{ cookiecutter.project_name }}storage"
-    container_name       = "{{ cookiecutter.project_name }}-state"
+    container_name       = "{{ cookiecutter.project_name }}state"
     key                  = "terraform/{{ cookiecutter.project_name }}.tfstate"
   }
 }    
