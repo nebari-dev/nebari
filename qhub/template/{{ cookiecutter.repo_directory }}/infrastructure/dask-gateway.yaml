@@ -21,7 +21,7 @@ gateway:
            return config
 
       # Expose a list of profiles for workers
-      c.DaskGateway.cluster_manager_options = Options(
+      c.DaskGateway.cluster_options = Options(
           Select(
               "environment",
               environments,
