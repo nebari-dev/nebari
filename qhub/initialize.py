@@ -277,12 +277,6 @@ def render_config(
         if kubernetes_version:
             config["azure"]["kubernetes_version"] = kubernetes_version
 
-        # if "PROJECT_ID" in os.environ:
-        #     config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
-        # elif not disable_prompt:
-        #     config["google_cloud_platform"]["project"] = input(
-        #         "Enter Google Cloud Platform Project ID: "
-        #     )
     elif cloud_provider == "aws":
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
         if kubernetes_version:
