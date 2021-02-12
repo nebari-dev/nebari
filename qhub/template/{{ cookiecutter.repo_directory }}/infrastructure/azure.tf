@@ -25,7 +25,6 @@ module "kubernetes" {
       auto_scale = true
       
       instance_type = "{{ nodegroup_config.instance }}"
-      size      = "{{ nodegroup_config.instance }}"
       min_size = {{ nodegroup_config.min_nodes }}
       max_size = {{ nodegroup_config.max_nodes }}
     },
