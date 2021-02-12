@@ -6,7 +6,7 @@ provider "azure" {
 module "registry" {
   source = "github.com/quansight/qhub-terraform-modules//modules/azure/registry?ref=azure"
   name   = "{{ cookiecutter.project_name }}"
-  location   = "{{ cookiecutter.region }}"
+  location   = "{{ cookiecutter.azure.region }}"
 }
 
 
