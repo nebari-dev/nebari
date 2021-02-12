@@ -33,7 +33,7 @@ locals {
       value = "user"
 {%- elif cookiecutter.provider == "azure" %}
       key   = "azure-node-pool"
-      value = "general"
+      value = "user"
 {%- elif cookiecutter.provider == "do" %}
       key   = "doks.digitalocean.com/node-pool"
       value = "user"
@@ -49,7 +49,7 @@ locals {
       value = "worker"
 {%- elif cookiecutter.provider == "azure" %}
       key   = "azure-node-pool"
-      value = "general"
+      value = "worker"
 {%- elif cookiecutter.provider == "do" %}
       key   = "doks.digitalocean.com/node-pool"
       value = "worker"
