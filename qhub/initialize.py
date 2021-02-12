@@ -96,8 +96,6 @@ GOOGLE_PLATFORM = {
 AZURE = {
     "project": "PLACEHOLDER",
     "region": "Central US",
-    # "zone": "us-central1-c",
-    # "availability_zones": ["us-central1-c"],
     "kubernetes_version": "1.18.14",
     "node_groups": {
         "general": {
@@ -105,10 +103,10 @@ AZURE = {
             "min_nodes": 1,
             "max_nodes": 1,
         },
-        "user": {"instance": "Standard_D2_v2", "min_nodes": 1, "max_nodes": 4},
+        "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 4},
         "worker": {
             "instance": "Standard_D2_v2",
-            "min_nodes": 1,
+            "min_nodes": 0,
             "max_nodes": 4,
         },
     },
