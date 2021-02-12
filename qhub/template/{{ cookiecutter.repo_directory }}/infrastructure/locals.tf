@@ -8,19 +8,18 @@ locals {
   cluster_name = "${var.name}-${var.environment}"
 
   node_groups = {
+{%- if cookiecutter.provider != "azure" %}
     general = {
-{%- if cookiecutter.provider == "aws" %}
-      key   = "eks.amazonaws.com/nodegroup"
-      value = "general"
-{%- elif cookiecutter.provider == "gcp" %}
-      key   = "cloud.google.com/gke-nodepool"
-      value = "general"
-{%- elif cookiecutter.provider == "azure" %}
-      key   = "azure-node-pool"
-      value = "general"
-{%- elif cookiecutter.provider == "do" %}
-      key   = "doks.digitalocean.com/node-pool"
-      value = "general"
+      {%- if cookiecutter.provider == "aws" %}
+            key   = "eks.amazonaws.com/nodegroup"
+            value = "general"
+      {%- elif cookiecutter.provider == "gcp" %}
+            key   = "cloud.google.com/gke-nodepool"
+            value = "general"
+      {%- elif cookiecutter.provider == "do" %}
+            key   = "doks.digitalocean.com/node-pool"
+            value = "general"
+      {% endif %}
 {% endif %}
     }
 
