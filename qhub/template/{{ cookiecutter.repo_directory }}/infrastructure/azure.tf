@@ -13,10 +13,10 @@ module "registry" {
 module "kubernetes" {
   source = "github.com/quansight/qhub-terraform-modules//modules/azure/kubernetes?ref=azure"
 
-  name = local.cluster_name
-
+  name                 = local.cluster_name
+  environment          = var.environment
   location             = var.region
-  kubernetes_version = "{{ cookiecutter.azure.kubernetes_version }}"
+  kubernetes_version   = "{{ cookiecutter.azure.kubernetes_version }}"
 
   node_groups = [
 {% for nodegroup, nodegroup_config in cookiecutter.azure.node_groups.items() %}
