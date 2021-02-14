@@ -1,6 +1,7 @@
 import yaml
 
 from qhub.initialize import render_config
+from qhub.schema import ProviderEnum
 
 
 def create_init_subcommand(subparser):
@@ -9,11 +10,12 @@ def create_init_subcommand(subparser):
         "platform",
         help="Cloud to deploy qhub on",
         type=str,
-        choices=["do", "gcp", "aws"],
+        choices=[_.value for _ in ProviderEnum],
     )
     subparser.add_argument("--project", help="Namespace to assign to qhub resources")
     subparser.add_argument(
-        "--domain", help="Domain for jupyterhub clister to be deployed under"
+        "--domain",
+        help="Domain for jupyterhub clister to be deployed under",
     )
     subparser.add_argument(
         "--ci-provider",

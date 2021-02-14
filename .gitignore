@@ -30,3 +30,5 @@ config.yaml
 
 # ignore qhub files
 qhub-config.yaml
+
+.vscode/
