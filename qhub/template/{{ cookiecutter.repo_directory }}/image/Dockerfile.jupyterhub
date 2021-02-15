@@ -1,4 +1,4 @@
-FROM jupyterhub/k8s-hub:0.9.0
+FROM jupyterhub/k8s-hub:0.11.1-n128.h35ca170e
 LABEL MAINTAINER="Quansight"
 
 # ============ download qhub theme ============

@@ -1,28 +1,24 @@
+hub:
 {% if cookiecutter.security.authentication.type == 'Auth0' %}
-auth:
-  type: custom
-  custom:
-    className: "oauthenticator.auth0.Auth0OAuthenticator"
-    config:
+  config:
+    Auth0OAuthenticator:
       client_id: "{{ cookiecutter.security.authentication.config.client_id }}"
       client_secret: "{{ cookiecutter.security.authentication.config.client_secret }}"
       oauth_callback_url: "{{ cookiecutter.security.authentication.config.oauth_callback_url }}"
       scope: {{ cookiecutter.security.authentication.config.scope | jsonify }}
       auth0_subdomain: "{{ cookiecutter.security.authentication.config.auth0_subdomain }}"
-{% elif cookiecutter.security.authentication.type == 'GitHub' %}
-auth:
-  type: github
-  github:
-    clientId: "{{ cookiecutter.security.authentication.config.client_id }}"
-    clientSecret: "{{ cookiecutter.security.authentication.config.client_secret }}"
-    callbackUrl: "{{ cookiecutter.security.authentication.config.oauth_callback_url }}"
-{% endif %}
-
-
-hub:
-{% if cookiecutter.security.authentication.type == 'Auth0' %}
+    JupyterHub:
+      authenticator_class: oauthenticator.auth0.Auth0OAuthenticator
   extraEnv:
     AUTH0_SUBDOMAIN: "{{ cookiecutter.security.authentication.config.auth0_subdomain }}"
+{% elif cookiecutter.security.authentication.type == 'GitHub' %}
+  config:
+    GitHubOAuthenticator:
+      client_id: "{{ cookiecutter.security.authentication.config.client_id }}"
+      client_secret: "{{ cookiecutter.security.authentication.config.client_secret }}"
+      oauth_callback_url: "{{ cookiecutter.security.authentication.config.oauth_callback_url }}"
+    JupyterHub:
+      authenticator_class: github
 {% endif %}
   extraConfig:
     01-spawner: |
