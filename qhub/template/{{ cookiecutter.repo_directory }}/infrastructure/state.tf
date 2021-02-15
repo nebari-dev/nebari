@@ -27,11 +27,15 @@ terraform {
   }
 }
 {% elif cookiecutter.provider == "azure" -%}
+resource "random_id" "storage_account" {
+  byte_length = 8
+}
+
 terraform {
   backend "azurerm" {
     resource_group_name  = "{{ cookiecutter.project_name }}-terraform-state"
     storage_account_name = "{{ cookiecutter.project_name }}storage"
-    container_name       = "{{ cookiecutter.project_name }}state"
+    container_name       = "{{ cookiecutter.project_name }}state${random_id.storage_account.hex}"
     key                  = "terraform/{{ cookiecutter.project_name }}.tfstate"
   }
 }    
