@@ -2,6 +2,7 @@ import os
 import re
 
 import requests
+import random
 
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
@@ -110,6 +111,7 @@ AZURE = {
             "max_nodes": 4,
         },
     },
+    "storage_account_postfix": ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=8))
 }
 
 AMAZON_WEB_SERVICES = {
