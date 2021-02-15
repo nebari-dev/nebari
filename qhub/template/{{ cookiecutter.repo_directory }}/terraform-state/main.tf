@@ -38,6 +38,7 @@ module "terraform-state" {
 
   name     = "{{ cookiecutter.project_name }}"
   location = "{{ cookiecutter.azure.region }}"
+  storage_account_postfix = "{{ cookiecutter.azure.storage_account_postfix }}"
 }
 {% elif cookiecutter.provider == "do" -%}
 module "terraform-state" {
