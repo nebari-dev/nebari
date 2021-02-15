@@ -104,13 +104,21 @@ Follow [these detailed instructions] on creating a Google service account with a
 - `GOOGLE_CREDENTIALS`: Set this to the path to your credentials file
 - `PROJECT_ID`: Set this to the project ID listed on the home page of your Google console under `Project info`
 
+#### 2.4.3 Azure
+Follow [these instructions] to create a Service Principal in Azure Portal (Stop after completing steps 1-3).  Set the following environment variables as you go through the instructions.
+
+- `ARM_CLIENT_ID`: Application (client) ID
+- `ARM_CLIENT_SECRET`: Client Secret
+- `ARM_SUBSCRIPTION_ID`: Subscription ID (Available on Overview tab of Subscription)
+- `ARM_TENANT_ID`: Directory (tenant) ID
+
 We're done with the hardest part of deployment!
 
 ### 2.5 QHub init
 
 The next step is to run `qhub init` to generate the configuration file `qhub-config.yaml`. This file is where the vast majority of tweaks to the system will be made. There are are several optional (yet highly recommended) flags that deal with automating the deployment:
 
-- `--project`: Chose a name that [is a compliant name for S3/Storage buckets]. IE `test-cluster`
+- `--project`: Chose a name consisting of lowercase letters and numbers only and is between 3 and 16 characters long. IE `testcluster`
 - `--domain`: This is the base domain for your cluster. After deployment, the DNS will use the base name prepended with `jupyter`. IE if the base name is `test.qhub.dev` then the DNS will be provisioned as `jupyter.test.qhub.dev`. This pattern is also applicable if you are setting your own DNS through a different provider.
 - `--ci-provider`: This specifies what provider to use for ci-cd. Currently github-actions is supported.
 - `--oauth-provider`: This will set configuration file to use auth0 for authentication
@@ -120,7 +128,7 @@ The next step is to run `qhub init` to generate the configuration file `qhub-con
 
 Best practices is to create a new directory and run all the qhub commands inside of it. An example of the full command is below:
 
-`qhub init gcp --project test-project --domain test.qhub.dev --ci-provider github-actions --oauth-provider auth0 --oauth-auto-provision --repository github.com/quansight/qhub-test --repository-auto-provision`
+`qhub init gcp --project testcluster --domain test.qhub.dev --ci-provider github-actions --oauth-provider auth0 --oauth-auto-provision --repository github.com/quansight/qhub-test --repository-auto-provision`
 
 ### 2.6 QHub render
 
@@ -217,5 +225,6 @@ Congratulations! You have now completed your QHub cloud deployment!
 [this guide]: https://www.digitalocean.com/community/tutorials/how-to-create-a-digitalocean-space-and-api-key
 [terraform]: https://www.terraform.io/
 [these detailed instructions]: https://cloud.google.com/iam/docs/creating-managing-service-accounts
+[these instructions]: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret#creating-a-service-principal-in-the-azure-portal
 [these steps]: https://cloud.google.com/iam/docs/creating-managing-service-account-keys#iam-service-account-keys-create-console
 [is a compliant name for S3/Storage buckets]: https://www.google.com/search?q=s3+compliant+name&oq=s3+compliant+name&aqs=chrome..69i57j0.3611j0j7&sourceid=chrome&ie=UTF-8
