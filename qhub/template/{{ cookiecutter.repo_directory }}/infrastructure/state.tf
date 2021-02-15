@@ -26,16 +26,11 @@ terraform {
     skip_metadata_api_check     = true
   }
 }
-{% elif cookiecutter.provider == "azure" -%}
-resource "random_id" "storage_account" {
-  byte_length = 8
-}
-
 terraform {
   backend "azurerm" {
     resource_group_name  = "{{ cookiecutter.project_name }}-terraform-state"
-    storage_account_name = "{{ cookiecutter.project_name }}storage"
-    container_name       = "{{ cookiecutter.project_name }}state${random_id.storage_account.hex}"
+    storage_account_name = "{{ cookiecutter.project_name }}{{ range(1, 51) | random}}"
+    container_name       = "{{ cookiecutter.project_name }}state"
     key                  = "terraform/{{ cookiecutter.project_name }}.tfstate"
   }
 }    
