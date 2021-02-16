@@ -39,5 +39,3 @@ vim
 
 # for nbconvert
 pandoc
-texlive-xetex
-texlive-fonts-recommended

@@ -5,6 +5,7 @@ ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 # ============== apt installs ==============
 COPY jupyterlab /opt/jupyterlab
+COPY scripts /opt/scripts
 RUN apt-get update --fix-missing && \
     apt-get install -y wget bzip2 ca-certificates curl git && \
     /opt/scripts/install-apt.sh /opt/jupyterlab/apt.txt && \
@@ -14,9 +15,6 @@ RUN apt-get update --fix-missing && \
 # ============= conda install ===============
 ENV PATH /opt/conda/bin:$PATH
 # ========== jupyterlab install ============
-COPY scripts /opt/scripts
-ENV PATH="/opt/conda/bin:$PATH"
-
 RUN /opt/scripts/install-conda.sh && \
     /opt/scripts/install-conda-environment.sh /opt/jupyterlab/environment.yaml \
     && /opt/jupyterlab/postBuild
