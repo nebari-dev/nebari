@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -xe
 
-CONDA_DIR = /opt/conda
+CONDA_DIR=/opt/conda
 
 # Assumes conda environment to install in argument "$1"
 

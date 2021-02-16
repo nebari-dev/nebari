@@ -13,9 +13,13 @@ RUN apt-get update --fix-missing && \
     rm -rf /var/lib/apt/lists/*
 
 # ============= conda install ===============
+# ========== jupyterlab install ============
 COPY scripts /opt/scripts
-RUN /opt/scripts/install-conda.sh
 ENV PATH="/opt/conda/bin:$PATH"
+
+RUN /opt/scripts/install-conda.sh && \
+    /opt/scripts/install-conda-environment.sh /opt/jupyterlab/environment.yaml \
+    && /opt/jupyterlab/postBuild
 
 CMD [ "/bin/bash" ]
 
@@ -24,12 +28,7 @@ ARG NB_USER="jovyan"
 # UID matches GID
 ARG NB_UID="1000"
 
-ENV SHELL=/bin/bash \
-    CONDA_DIR=/opt/conda \
-    DEFAULT_ENV=default
-
-# Activate default environment
-ENV PATH=${CONDA_DIR}/envs/${DEFAULT_ENV}/bin:${CONDA_DIR}/bin:${PATH}
+ENV SHELL=/bin/bash
 
 # Enable prompt color in the skeleton .bashrc before creating the default NB_USER
 RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashrc && \
@@ -45,10 +44,6 @@ RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashr
     ${NB_USER}
 
 RUN chown -R ${NB_UID}:${NB_UID} /opt/conda/
-
-# ========== jupyterlab install ============
-RUN /opt/scripts/install-conda-environment.sh /opt/jupyterlab/environment.yaml \
-    && /opt/jupyterlab/postBuild
 
 # ========== change to regular user ============
 USER ${NB_UID}
