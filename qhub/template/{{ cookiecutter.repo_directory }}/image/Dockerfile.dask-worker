@@ -8,13 +8,10 @@ RUN apt-get update --fix-missing && \
 
 # ============== base install ===============
 COPY scripts /opt/scripts
-
-RUN /opt/scripts/install-conda.sh
-
+COPY dask-worker /opt/dask-worker
 ENV PATH="/opt/conda/bin:$PATH"
 
 # ========== dask-worker install ===========
-COPY dask-worker /opt/dask-worker
-
-RUN /opt/scripts/install-conda-environment.sh /opt/dask-worker/environment.yaml \
+RUN /opt/scripts/install-conda.sh && \
+    /opt/scripts/install-conda-environment.sh /opt/dask-worker/environment.yaml \
     && /opt/dask-worker/postBuild

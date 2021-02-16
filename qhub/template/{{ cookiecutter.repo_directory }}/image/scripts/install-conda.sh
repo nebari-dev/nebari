@@ -2,7 +2,7 @@
 set -xe
 
 # Requires environment CONDA_VERSION
-CONDA_VERSION=py38_4.9.2-5
+CONDA_VERSION=4.9.2-5
 
 wget --no-hsts --quiet https://github.com/conda-forge/miniforge/releases/download/${CONDA_VERSION}/Miniforge3-${CONDA_VERSION}-Linux-x86_64.sh
 wget --no-hsts --quiet https://github.com/conda-forge/miniforge/releases/download/${CONDA_VERSION}/Miniforge3-${CONDA_VERSION}-Linux-x86_64.sh.sha256 -O miniforge.checksum
@@ -20,4 +20,4 @@ echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
 echo "conda activate base" >> ~/.bashrc
 
 mkdir -p /etc/conda
-cp ./condarc /etc/conda/condarc
+cp /opt/scripts/condarc /etc/conda/condarc

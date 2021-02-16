@@ -2,7 +2,6 @@ FROM ubuntu:20.04
 LABEL MAINTAINER="Quansight"
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
-ENV PATH /opt/conda/bin:$PATH
 
 # ============== apt installs ==============
 COPY jupyterlab /opt/jupyterlab
@@ -13,6 +12,7 @@ RUN apt-get update --fix-missing && \
     rm -rf /var/lib/apt/lists/*
 
 # ============= conda install ===============
+ENV PATH /opt/conda/bin:$PATH
 # ========== jupyterlab install ============
 COPY scripts /opt/scripts
 ENV PATH="/opt/conda/bin:$PATH"
