@@ -36,8 +36,8 @@ jobs:
           IMAGE_TAG: {{ '${{ github.sha }}' }}
           IMAGE_NAME: {{ '${{ steps.login-ecr.outputs.registry }}' }}/{{ cookiecutter.project_name }}-{{ '${{ matrix.dockerfile }}' }}
         run: |
-          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
-          docker push $IMAGE_NAME:$IMAGE_TAG
+          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest image
+          docker push $IMAGE_NAME -a
       - name: Logout of Amazon ECR
         if: always()
         run: docker logout {{ '${{ steps.login-ecr.outputs.registry }}' }}
@@ -61,8 +61,8 @@ jobs:
           PROJECT_ID: {{ '${{ secrets.PROJECT_ID }}' }}
         run: |
           export IMAGE_NAME="gcr.io/$PROJECT_ID/{{ cookiecutter.project_name }}/qhub-{{ '${{ matrix.dockerfile }}' }}"
-          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
-          docker push $IMAGE_NAME:$IMAGE_TAG
+          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest image
+          docker push $IMAGE_NAME -a
       - name: Docker Logout
         run: |
           docker logout
@@ -79,8 +79,8 @@ jobs:
           IMAGE_TAG: {{ '${{ github.sha }}' }}
           IMAGE_NAME: registry.digitalocean.com/{{ cookiecutter.project_name }}/qhub-{{ '${{ matrix.dockerfile }}' }}
         run: |
-          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
-          docker push $IMAGE_NAME:$IMAGE_TAG
+          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest image
+          docker push $IMAGE_NAME -a
       - name: Docker Logout
         run: |
           docker logout

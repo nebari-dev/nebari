@@ -1,20 +1,20 @@
-FROM debian:10.3-slim
+FROM ubuntu:20.04
 LABEL MAINTAINER="Quansight"
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV PATH /opt/conda/bin:$PATH
 
+# ============== apt installs ==============
+COPY jupyterlab /opt/jupyterlab
 RUN apt-get update --fix-missing && \
-    apt-get install -y wget bzip2 ca-certificates curl git
+    apt-get install -y wget bzip2 ca-certificates curl git && \
+    /opt/scripts/install-apt.sh /opt/jupyterlab/apt.txt && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# ============= base install ===============
-ENV CONDA_VERSION py37_4.8.2
-ENV CONDA_SHA256 957d2f0f0701c3d1335e3b39f235d197837ad69a944fa6f5d8ad2c686b69df3b
-
+# ============= conda install ===============
 COPY scripts /opt/scripts
-
 RUN /opt/scripts/install-conda.sh
-
 ENV PATH="/opt/conda/bin:$PATH"
 
 CMD [ "/bin/bash" ]
@@ -47,14 +47,8 @@ RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashr
 RUN chown -R ${NB_UID}:${NB_UID} /opt/conda/
 
 # ========== jupyterlab install ============
-COPY jupyterlab /opt/jupyterlab
-
-RUN /opt/scripts/install-apt.sh                  /opt/jupyterlab/apt.txt \
-    && /opt/scripts/install-conda-environment.sh /opt/jupyterlab/environment.yaml \
+RUN /opt/scripts/install-conda-environment.sh /opt/jupyterlab/environment.yaml \
     && /opt/jupyterlab/postBuild
-
-RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 # ========== change to regular user ============
 USER ${NB_UID}

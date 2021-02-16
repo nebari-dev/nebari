@@ -6,6 +6,8 @@ libnss-wrapper
 # utilities
 wget
 curl
+zip
+unzip
 
 # development utilities
 git
@@ -25,3 +27,17 @@ libxcomposite1
 libasound2
 libxi6
 libxtst6
+
+# Useful utils that folks sort of take for granted
+htop
+less
+man
+screen
+tar
+tmux
+vim
+
+# for nbconvert
+pandoc
+texlive-xetex
+texlive-fonts-recommended

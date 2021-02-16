@@ -1,10 +1,7 @@
-FROM debian:10.3-slim
+FROM ubuntu:20.04
 LABEL MAINTAINER="Quansight"
 
 # ============== base install ===============
-ENV CONDA_VERSION py37_4.8.2
-ENV CONDA_SHA256 957d2f0f0701c3d1335e3b39f235d197837ad69a944fa6f5d8ad2c686b69df3b
-
 COPY scripts /opt/scripts
 
 RUN /opt/scripts/install-conda.sh

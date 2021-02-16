@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
 set -xe
 
-# Assumes conda packages to install in argument "$1"
+CONDA_DIR = /opt/conda
+
+# Assumes conda environment to install in argument "$1"
 
 # ==== install conda dependencies ====
-/opt/conda/bin/conda env update -f $1
+conda env update -f $1
 
 # ========= list dependencies ========
-/opt/conda/bin/conda list
+conda list
 
 # ========== cleanup conda ===========
-/opt/conda/bin/conda clean -afy
+conda clean -afy
 # remove unnecissary files (statis, js.maps)
-find /opt/conda/ -follow -type f -name '*.a' -delete
-find /opt/conda/ -follow -type f -name '*.js.map' -delete
+find ${CONDA_DIR} -follow -type f -name '*.a' -delete
+find ${CONDA_DIR} -follow -type f -name '*.js.map' -delete
+find ${CONDA_DIR} -follow -type f -name '*.pyc' -delete
+
+# Remove the pip cache created as part of installing miniconda
+rm -rf /root/.cache

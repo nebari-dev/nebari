@@ -9,6 +9,9 @@ jupyter labextension install --clean $(cat /opt/jupyterlab/labextensions.txt)
 
 jupyter serverextension enable --sys-prefix jupyter_videochat
 
+# Install jupyter-contrib-nbextensions
+jupyter contrib nbextension install --sys-prefix --symlink
+
 # ====== cleanup labextension install =======
 rm -rf ${HOME}/.cache ${HOME}/.npm ${HOME}/.yarn
 rm -rf /opt/conda/share/jupyter/lab/staging
