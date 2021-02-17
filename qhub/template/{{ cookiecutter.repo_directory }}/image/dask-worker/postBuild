@@ -16,7 +16,7 @@ cat <<EOF > /opt/conda-run-scheduler
 set -xe
 
 source activate \$CONDA_ENVIRONMENT
-dask-worker "\$@"
+dask-scheduler "\$@"
 EOF
 
 chmod 755 /opt/conda-run-worker
