@@ -54,6 +54,7 @@ module "kubernetes-conda-store-server" {
   name         = "conda-store"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.conda_store }}"
+  node-group   = local.node_groups.general
   environments = {
 {% for key in cookiecutter.environments %}
     "{{ key }}" = file("../environments/{{ key }}")
