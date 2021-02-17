@@ -105,7 +105,7 @@ Follow [these detailed instructions] on creating a Google service account with a
 - `PROJECT_ID`: Set this to the project ID listed on the home page of your Google console under `Project info`
 
 #### 2.4.3 Azure
-Follow [these instructions] to create a Service Principal in Azure Portal (Stop after completing steps 1-3).  Set the following environment variables as you go through the instructions.
+Follow [these instructions](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret#creating-a-service-principal-in-the-azure-portal) to create a Service Principal in Azure Portal (Stop after completing steps 1-3).  Set the following environment variables as you go through the instructions.
 
 - `ARM_CLIENT_ID`: Application (client) ID
 - `ARM_CLIENT_SECRET`: Client Secret
