@@ -225,6 +225,5 @@ Congratulations! You have now completed your QHub cloud deployment!
 [this guide]: https://www.digitalocean.com/community/tutorials/how-to-create-a-digitalocean-space-and-api-key
 [terraform]: https://www.terraform.io/
 [these detailed instructions]: https://cloud.google.com/iam/docs/creating-managing-service-accounts
-[these instructions]: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret#creating-a-service-principal-in-the-azure-portal
 [these steps]: https://cloud.google.com/iam/docs/creating-managing-service-account-keys#iam-service-account-keys-create-console
 [is a compliant name for S3/Storage buckets]: https://www.google.com/search?q=s3+compliant+name&oq=s3+compliant+name&aqs=chrome..69i57j0.3611j0j7&sourceid=chrome&ie=UTF-8
