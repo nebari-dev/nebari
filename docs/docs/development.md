@@ -138,7 +138,7 @@ following line. This will override any dns server.
 172.17.10.100 jupyter.github-actions.qhub.dev
 ```
 
-Finally if everything is set properly you should be able to curl the
+Finally, if everything is set properly you should be able to `curl` the JupyterHub Server.
 jupyterhub server.
 
 ```
