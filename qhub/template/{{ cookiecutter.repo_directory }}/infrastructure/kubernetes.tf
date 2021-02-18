@@ -36,6 +36,7 @@ module "kubernetes-nfs-server" {
   name         = "nfs-server"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
+  node-group   = local.node_groups.general
 }
 
 module "kubernetes-nfs-mount" {
