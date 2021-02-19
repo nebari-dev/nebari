@@ -1,22 +1,21 @@
 # Configuration
 
 The configuration file is split into several sections. In this page, we detail the requirements necessary for
-the YAML config file.
+the YAML configuration file.
 
 ## General
 
 ```yaml
-project_name: do-jupyterhub
-provider: do
-ci_cd: github-actions
-domain: "do.qhub.dev"
+project_name: do-jupyterhub # name of the kubernetes/Cloud deployment 
+provider: <provider_alias> # determines the choice of cloud provider for the deployment
+ci_cd: github-actions # continuous integration and continuous deployment framework to use
+domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 ```
 
-`project_name` is the name that resources within the cloud
-deployment/kubernetes will be deployed with.
+`project_name` should be compatible with the Cloud provider naming convention.
 
-`provider` determines which cloud provider to use for the
-deployment. Possible values are `do` for DigitalOcean, `aws` for Amazon AWS and `gcp` for Google Could Provider.
+`provider` possible values are `do` for DigitalOcean, `aws` for Amazon AWS, `gcp` for Google Could Provider and `azure`
+for Microsoft Azure.
 
 `ci_cd` is the continuous integration and continuous deployment
 framework to use. Currently `github-actions` is supported.

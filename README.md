@@ -8,6 +8,8 @@ QHub is an open source tool that enables users to build and maintain
 cost-effective and scalable compute/data science platforms [on-premises](#qhub-on-prem) or on 
 [cloud providers](#qhub-cloud) with minimal DevOps experience.
 
+Not sure what to choose? Check out our [FAQ](../9_faq/1_faqs.md/#).
+
 **This repository details the [QHub Cloud](https://qhub.dev/ "Official QHub docs") version.**
 
 ## QHub On-Prem

@@ -18,7 +18,7 @@ The aim is to make it easier for users to set up infrastructure that is ready to
 > QHub is also entirely customisable, although to properly adapt the default settings will require more in-depth DevOps knowledge.
 
 
-## What is Infrastructure as Code and how is it related to QHub?
+## What is Infrastructure as Code and how it relates to QHub?
   
   + [Infrastructure as Code](https://docs.aws.amazon.com/whitepapers/latest/introduction-devops-aws/infrastructure-as-code.html) (IaC)
     is a system that handles the management of infrastructure (networks, virtual machines, load balancers, and connection
@@ -106,31 +106,10 @@ Interestingly, the kernel name is "python3", but contains,  ...-myenv/share ...,
       
 You should get a `my-notebook.html` file that was executed with the `myenv` kernel. 
 
-## How do I update/edit a conda environment?
-To update your current conda environment and redeploy you will need to:
-* Create a new branch on your repository
-* Make changes to the `qhub-config.yaml` file under the `environments` key.
-> NOTE: in [YAML](https://yaml.org/spec/1.2/spec.html#mapping//),
-  each level is a dictionary key, and every 2 white spaces represent values for those keys.
-  
-TO add a new environment, add two spaces below the `environments` key such as the example below.
-```yaml
-environments:
-  "example.yaml":
-    name: example
-    channels:
-    - conda-forge
-    dependencies:
-    - python
-    - pandas
-```
-
-Commit the changes, and make a [PR](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request)
-into a master branch. The update will take from 5 to 30 minutes to complete, depending on the environment's complexity. 
-If after 30 minutes the new environment is still not available, check the latest log files from the user instance in the
-`/home/conda/store/.logs` directory to troubleshoot.
 
 ## What is Infrastructure as Code?
+
+## Should I choose QHub Cloud, or the OnPrem version?
 
 
 ## What is QHub?

@@ -1,8 +1,8 @@
-# **QHub for Admins**
+# Developer docs
 
 QHub admins are **DevOps engineers**, **system administrators**, **scientists**, and **network architects** who are responsible for the critical infrastructure that data scientists and engineers need to thrive. QHub is bundled with features that make installation easy while providing the ability to scale with your organization and data.
 
-> The content below is particularly for QHub producers and those looking to learn more about the QHub architecture.
+> The content below is particularly for QHub producers, and those looking to learn more about the QHub architecture.
 
 ## Installation
 
@@ -86,7 +86,7 @@ The architecture of AWS uses [**Virtual Private Cloud (VPC)**](https://docs.aws.
 
 QHub uses AWS’s managed Kubernetes service: [**Elastic Kubernetes Service (EKS)**](https://aws.amazon.com/eks/) to create a Kubernetes Cluster. Since VPC is an isolated part of the AWS, you need a way to expose the services running inside the Kubernetes to the Internet, so that others can access it. This is achieved by an [**Internet Gateway**](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html). It’s a VPC component that allows communication between the VPC and the Internet.
 
-[QHub AWS Architecture](#)
+[QHub AWS Architecture]()
 
 ### DO Deployment
 
@@ -94,7 +94,7 @@ The configuration file template for Digital Ocean can be found at the following 
 
     tests/assets/config_do.yaml
 
-[QHub DO Architecture](#)
+[QHub DO Architecture]()
 
 ### GCP Deployment
 
@@ -102,7 +102,7 @@ The configuration file template for GCP can be found at the following path:
 
     tests/assets/config_gcp.yaml
 
-[QHub GCP Architecture](#)
+[QHub GCP Architecture]()
 
 ### Autoscaling
 

@@ -36,9 +36,9 @@ The purpose of all these environment variables is that one gets to use APIs to d
 In order to fully automate the deployment, several environment variables must be set. The following subsections will 
 describe the purpose and method for obtaining the values for these variables. An introduction to unix environment variables can be found [here](https://en.wikipedia.org/wiki/Environment_variable).
 
-### 2.1 Cloudflare
+### 2.1 Domain Name Server Registry
 
-Cloudflare will automate the DNS registration. First a [Cloudflare][Cloudflare_signup] account needs to be created and 
+Cloudflare will handle the automation of the DNS registration. First ,a [Cloudflare][Cloudflare_signup] account needs to be created and 
 [domain name] registered through it. If an alternate DNS provider is desired, then omit the `--dns-provider cloudflare`
 flag for `qhub deploy`. At the end of deployment an IP address (or CNAME for AWS) will be output that can be registered
 to your desired URL.
@@ -81,7 +81,10 @@ Your github username and access token will automate the creation of the reposito
 
 
 ### 2.4 Cloud Provider Credentials
-The access key for the cloud providers require fairly wide permissions in order for QHub to deploy. As such, all testing for QHUb has been done with owner/admin level permissions. We welcome testing to determine the minimum required permissions for deployment [(open issue)](https://github.com/Quansight/qhub/issues/173).
+To deploy QHub, the access key for the Cloud providers will require fairly wide permissions.
+
+As such, all testing for QHUb has been done with owner/admin level permissions.
+We welcome testing to determine the minimum required permissions for deployment [(open issue)](https://github.com/Quansight/qhub/issues/173).
 
 #### 2.4.1 Amazon Web Services
 
@@ -116,7 +119,7 @@ The next step is to run `qhub init` to generate the configuration file `qhub-con
 
 - `--project`: Chose a name that [is a compliant name for S3/Storage buckets]. IE `test-cluster`
 - `--domain`: This is the base domain for your cluster. After deployment, the DNS will use the base name prepended with `jupyter`. IE if the base name is `test.qhub.dev` then the DNS will be provisioned as `jupyter.test.qhub.dev`. This pattern is also applicable if you are setting your own DNS through a different provider.
-- `--ci-provider`: This specifies what provider to use for ci-cd. Currently github-actions is supported.
+- `--ci-provider`: This specifies what provider to use for ci-cd. Currently, github-actions is supported.
 - `--oauth-provider`: This will set configuration file to use auth0 for authentication
 - `--oauth-auto-provision`: This will automatically create and configure an auth0 application
 - `--repository`: The repository name that will be used to store the infrastructure as code

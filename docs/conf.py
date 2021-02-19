@@ -25,24 +25,24 @@ master_doc = "index"
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
-# source_suffix = ".md .rst .ipynb .py".split()
+source_suffix = ".md .rst .ipynb .py".split()
 
 extensions = (
     "myst_parser nbsphinx sphinx.ext.autodoc sphinx.ext.napoleon".split()
-)  # autoapi.extension
-
-exclude_patterns = ["_build", "*checkpoint*", "output", "outputs"]
+    )  # autoapi.extension
+exclude_patterns = [
+    "_build", "*checkpoint*", "output", "outputs", "README.md"
+    ]
 autoapi_type = "python"
 autoapi_dirs = []
 # ["qhapi"]
 
 THEME = "material-theme"
-DEFAULT_LANG = None
+DEFAULT_LANG = 'en'
 
 NAVIGATION_LINKS = {
     DEFAULT_LANG: tuple(),
-}
-
+    }
 THEME_COLOR = "4f28a8"  # "#7B699F"
 
 POSTS = (
@@ -52,18 +52,14 @@ POSTS = (
     ("posts/*.html", "posts", "post.tmpl"),
     ("posts/*.ipynb", "posts", "post.tmpl"),
     ("posts/*.md.ipynb", "posts", "post.tmpl"),
-)
-
+    )
 templates_path = ['_templates']
-
 # Material theme options (see theme.conf for more information)
 html_theme_options = {
-    # Set the name of the project to appear in the navigation.
+# Set the name of the project to appear in the navigation.
     "nav_title": "Welcome to QHub's documentation!",
-    # Set you GA account ID to enable tracking
-    # 'google_analytics_account': 'UA-XXXXX',
-    # Specify a base_url used to generate sitemap.xml. If not
-    # specified, then no sitemap will be built.
+    # 'google_analytics_account': 'UA-XXXXX',     # Set you GA account ID to enable tracking
+    # Specify a base_url used to generate sitemap.xml. If not, no sitemap will be built.
     "base_url": "https://qhub.dev/",
 
     # Set the color and the accent color
@@ -81,32 +77,30 @@ html_theme_options = {
     "globaltoc_collapse": True,
     # If True, show hidden TOC entries
     "globaltoc_includehidden": False,
-
     "nav_links": [
-        {
-            "href": "https://www.quansight.com/jupyter-consulting",
-            "title": "Quansight",
-            "internal": False
-        },
-        {
-            "href": "https://github.com/quansight/qhub-onprem",
-            "title": "QHub OnPrem",
-            "internal": False,
-        },
-        {
-            "href": "https://pypi.org/project/qhub/",
-            "title": "Pypi",
-            "internal": False,
-        },
+    {
+        "href": "https://www.quansight.com/jupyter-consulting",
+        "title": "Quansight",
+        "internal": False
+    },
+    {
+        "href": "https://github.com/quansight/qhub-onprem",
+        "title": "QHub OnPrem",
+        "internal": False,
+    },
+    {
+        "href": "https://pypi.org/project/qhub/",
+        "title": "Pypi",
+        "internal": False,
+    },
     ],
 }
 html_sidebars = {
     "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
-}
+    }
 
 # Exclude build directory and Jupyter backup files:
 exclude_patterns = ["_build", "*checkpoint*", "site", "jupyter_execute"]
-
 
 latex_documents = [
     (

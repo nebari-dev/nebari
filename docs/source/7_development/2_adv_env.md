@@ -2,7 +2,7 @@
 
 Efficient data-driven teams take full advantage of distributed computing without worrying about its maintenance. The user is provided the Jupyter platform interface while QHub handles all the complexities of [**Kubernetes**](https://kubernetes.io/docs/home/), a cloud-agnostic and open source orchestration system for managing containerized workloads and services for deployments. QHub uses Kubernetes architecture on the backend for cloud computing that works seamlessly with the cloud provider of your choice.
 
-## **Why Your Team Should Use QHub**
+## Why Your Team Should Use QHub
 
 ### The Solution
 
@@ -13,7 +13,7 @@ QHub is the tool for teams that experience many of the pain points of doing data
 
 Data scientists often have to circumvent limitations of the tools and platforms they use for distributed computing. Most of their energy is spent trying to manage unstable development environments, deciphering cloud specific details, and suffering from unsuccessful, as well as costly, deployments, keeping up with constantly changing tooling, resolving package conflicts, and handling authentication problems among others.
 
-The creators of QHub are data scientsits and DevOps engineers, who have experienced such highly common frustrations on a daily basis and decided to work towards creating an open source tool that answers the need for seamless distributed computing and deployment.
+The creators of QHub are data scientists and DevOps engineers, who have experienced such highly common frustrations on a daily basis and decided to work towards creating an open source tool that answers the need for seamless distributed computing and deployment.
 
 
 ### QHub Architecture

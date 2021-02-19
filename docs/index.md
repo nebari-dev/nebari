@@ -21,24 +21,80 @@ Contents:
 :maxdepth: 2
 :caption: Introduction
     
-source/1_intro/1_intro
-source/2_get_started/1_installation
-source/2_get_started/2_setup
-source/2_get_started/3_configuration
-source/2_get_started/4_usage
-source/3_tutorials/1_project_setup_tutorial
-source/4_how_to_guides/1_qhub-aws-deploy_guide
-source/4_how_to_guides/2_qhub-gcp-deploy_guide
-source/4_how_to_guides/3_qhub-aws-deploy_guide
-source/4_how_to_guides/4_system_backup
-source/4_how_to_guides/5_conda_env_update
-source/5_theme/1_theme
-source/6_reference/1_qhub_infrastructure
-source/6_reference/2_system_maintenance
-source/7_development/1_architecture
-source/7_development/2_adv_env
-source/8_integrations/1_prefect
-source/9_faq/1_faqs
-source/10_resources/1_logos
-source/10_resources/2_glossary
+source/1_intro/1_intro.md
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Get Started
+
+source/2_get_started/1_installation.md
+source/2_get_started/2_setup.md
+source/2_get_started/3_usage.md
+source/2_get_started/4_configuration.md
+
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Tutorials
+
+source/3_tutorials/1_project_setup_tutorial.md
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: How-To Guides
+
+source/4_how_to_guides/1_qhub-aws-deploy_guide.md
+source/4_how_to_guides/2_qhub-gcp-deploy_guide.md
+source/4_how_to_guides/3_qhub-do-deploy_guide.md
+source/4_how_to_guides/4_system_backup.md
+source/4_how_to_guides/5_conda_env_update.md
+source/4_how_to_guides/6_terraform_install.md
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Theme
+
+source/5_theme/1_theme.md
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Reference
+
+source/6_reference/1_qhub_infrastructure.md
+source/6_reference/2_system_maintenance.md
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Development
+
+source/7_development/1_architecture.md
+source/7_development/2_adv_env.md
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Integrations
+
+source/8_integrations/1_prefect.md
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: FAQ
+
+source/9_faq/1_faqs.md
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Resources
+
+source/10_resources/1_logos.md
+source/10_resources/2_glossary.md
 ```
