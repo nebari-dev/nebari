@@ -27,22 +27,28 @@ master_doc = "index"
 source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 source_suffix = ".md .rst .ipynb .py".split()
 
-extensions = (
-    "myst_parser nbsphinx sphinx.ext.autodoc sphinx.ext.napoleon".split()
-    )  # autoapi.extension
-exclude_patterns = [
+extensions = [
+    "myst_parser",
+    "nbsphinx",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx_copybutton",
+    # .split()
+]
+# autoapi.extension
+exclude_patterns = (
     "_build", "*checkpoint*", "output", "outputs", "README.md"
-    ]
+)
 autoapi_type = "python"
-autoapi_dirs = []
-# ["qhapi"]
+autoapi_dirs = ()
 
 THEME = "material-theme"
 DEFAULT_LANG = 'en'
 
 NAVIGATION_LINKS = {
     DEFAULT_LANG: tuple(),
-    }
+}
+
 THEME_COLOR = "4f28a8"  # "#7B699F"
 
 POSTS = (

@@ -16,3 +16,4 @@ sphinx-autoapi
 sphinx-material
 pydata-sphinx-theme
 sphinx_rtd_theme
+sphinx-copybutton
