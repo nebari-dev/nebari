@@ -165,6 +165,6 @@ export CLOUDFLARE_TOKEN="cloudflaretokenforthisapplication"
 
 ```
 
-Now we are all set!
+You are now done with the hardest part of deployment!
 
-On the next section, we will generate the main configuration file.
+On the next section, we will generate the main configuration file and render the Terraform modules to generate the infrastructure.

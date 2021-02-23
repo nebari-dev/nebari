@@ -32,8 +32,7 @@ extensions = [
     "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    "sphinx_copybutton",
-    # .split()
+    "sphinx_copybutton"
 ]
 # autoapi.extension
 exclude_patterns = (

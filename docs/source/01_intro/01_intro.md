@@ -11,7 +11,7 @@ organizations that need a shared compute platform that is flexible, accessible, 
 
 ![Qhub Cloud tech_stack](../meta_images/tech_stack_diagram.png)
 
-### Underlying structure
+### Components
 
 The technology stack is an integration of the following existing open source libraries:
 

@@ -5,7 +5,7 @@ Pull-Requests.
 
 ## Common Modifications
 
-### Modifying docker images: jupyterlab, jupyterhub, dask-worker
+### Modifying docker images: jupyterlab, jupyterhub, dask-workers
 
 The docker images used for dask-worker and jupyterlab user
 environments are pulled from a docker container registry. The images
