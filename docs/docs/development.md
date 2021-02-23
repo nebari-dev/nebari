@@ -23,6 +23,13 @@ dependencies and have them available in your path.
 Testing is done with minikube. Note that this will download a ~500MB
 docker image.
 
+Note: The testing instructions mentioned below works well on Linux. They
+don't work very well with Mac OS at the moment, due to the
+[limitations of docker for Mac](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds),
+the primary limitation being Docker Desktop for Mac can’t route traffic
+to containers. It should be possible to achieve these with hyperkit driver
+with minikube, but it has not been tested yet.
+
 ```shell
 minikube start --cpus 2 --memory 4096 --driver=docker
 ```
