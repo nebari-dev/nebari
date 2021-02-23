@@ -1,11 +1,23 @@
 # Release :tada:
 > Contains description of QHub releases.
 ---
-## To create a release:
+## To create a new release:
 
 1. Increment the version number in `qhub/VERSION`
 2. Ensure that the version number in `qhub/VERSION` is used in pinning QHub in the github actions 
 `qhub/template/{{ cookiecutter.repo_directory }}/.github/workflows/qhub-ops.yaml`
+
+---
+## Upcoming release 0.3.0
+### Feature changes and enhancements
+* Implemented the option to locally deploy QHub allowing for local testing.
+* Removed requirement for DNS, authorization is now password-based (no more OAuth requirements).
+
+### Bug fixes
+
+### Breaking changes
+
+### Migration guide
 ---
 ## Release 0.2.0
 ### Feature changes, and enhancements
@@ -23,19 +35,7 @@
 ### Breaking changes
 * Removed the registry for DigitalOcean.
 
-## Thank you for your contribution!
-> [Brian Larsen](https://github.com/brl0), [Rajat Goyal](https://github.com/RajatGoyal), 
-> [Prasun Anand](https://github.com/prasunanand), and  [Rich Signell](https://github.com/rsignell-usgs) and  
-> [Josef Kellndorfer](https://github.com/jkellndorfer) for the insightful discussions.
-
+## Thank you for your contributions!
+> [Brian Larsen](https://github.com/brl0), [Rajat Goyal](https://github.com/RajatGoyal), [Prasun Anand](https://github.com/prasunanand), and  [Rich Signell](https://github.com/rsignell-usgs) and [Josef Kellndorfer](https://github.com/jkellndorfer) for the insightful discussions.
 ---
-## Upcoming release 0.3.0
-### Feature changes and enhancements
-* Implemented the option to locally deploy QHub allowing for local testing.
-* Removed requirement for DNS, authorization is now password-based (no more OAuth requirements).
 
-### Bug fixes
-
-### Breaking changes
-
-### Migration guide
