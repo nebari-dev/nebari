@@ -7,6 +7,7 @@ from qhub.constants import SUPPORTED_TERRAFORM_VERSIONS
 
 
 class ProviderEnum(str, enum.Enum):
+    local = "local"
     do = "do"
     aws = "aws"
     gcp = "gcp"
@@ -100,11 +101,6 @@ class LabProfile(Base):
     kubespawner_override: KubeSpawner
 
 
-class Project(Base):
-    project_name: str
-    provider: Provider
-
-
 class User(Base):
     uid: str
     primary_group: str
@@ -130,7 +126,7 @@ class GithubAuth(Base):
 
 class Authentication(Base):
     type: str
-    config: AuthConfig
+    config: typing.Optional[AuthConfig]
 
 
 class Security(Base):
@@ -182,8 +178,11 @@ class Profiles(Base):
     dask_worker: typing.Dict[str, DaskWorker] = {}
 
 
+project_name_regex_type = pydantic.constr(regex="^[A-Za-z-_]+$")
+
+
 class Main(Base):
-    project_name: str
+    project_name: project_name_regex_type
     provider: ProviderEnum
     ci_cd: CiEnum
     security: Security
