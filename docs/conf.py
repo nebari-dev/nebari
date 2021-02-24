@@ -57,8 +57,10 @@ POSTS = (
     ("posts/*.html", "posts", "post.tmpl"),
     ("posts/*.ipynb", "posts", "post.tmpl"),
     ("posts/*.md.ipynb", "posts", "post.tmpl"),
-    )
-templates_path = ['_templates']
+)
+
+templates_path = ["_templates"]
+
 # Material theme options (see theme.conf for more information)
 html_theme_options = {
 # Set the name of the project to appear in the navigation.
@@ -83,6 +85,7 @@ html_theme_options = {
     # If True, show hidden TOC entries
     "globaltoc_includehidden": False,
     "nav_links": [
+<<<<<<< HEAD
     {
         "href": "https://www.quansight.com/jupyter-consulting",
         "title": "Quansight",
@@ -98,6 +101,23 @@ html_theme_options = {
         "title": "Pypi",
         "internal": False,
     },
+=======
+        {
+            "href": "index",
+            "title": "QHub Home",
+            "internal": True,
+        },
+        {
+            "href": "https://pypi.org/project/qhub/",
+            "title": "Pypi",
+            "internal": False,
+        },
+        {
+            "href": "docs/faqs",
+            "title": "FAQ",
+            "internal": True,
+        },
+>>>>>>> 2c20f32e2f3b78547203e052a28ab11ee119a121
     ],
 }
 html_sidebars = {

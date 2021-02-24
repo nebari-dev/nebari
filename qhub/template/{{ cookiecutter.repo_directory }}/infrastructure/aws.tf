@@ -5,7 +5,7 @@ provider "aws" {
 
 # ==================== ACCOUNTING ======================
 module "accounting" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/aws/accounting"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/accounting?ref={{ cookiecutter.terraform_modules.rev }}"
 
   project     = var.name
   environment = var.environment
@@ -14,7 +14,7 @@ module "accounting" {
 
 # ======================= NETWORK ======================
 module "network" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/aws/network"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/network?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name = local.cluster_name
 
@@ -39,7 +39,7 @@ module "network" {
 
 # ==================== REGISTRIES =====================
 module "registry-jupyterlab" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/aws/registry"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/registry?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name = "${local.cluster_name}-jupyterlab"
   tags = local.additional_tags
@@ -48,7 +48,7 @@ module "registry-jupyterlab" {
 
 # ====================== EFS =========================
 module "efs" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/aws/efs"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/efs?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name = "${local.cluster_name}-jupyterhub-shared"
   tags = local.additional_tags
@@ -60,7 +60,7 @@ module "efs" {
 
 # ==================== KUBERNETES =====================
 module "kubernetes" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/aws/kubernetes"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/kubernetes?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name = local.cluster_name
   tags = local.additional_tags

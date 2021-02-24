@@ -5,6 +5,11 @@
     "ci_cd": null,
     "endpoint": null,
     "terraform_version": null,
+    "terraform_state": null,
+    "terraform_modules": {
+        "repository": "github.com/quansight/qhub-terraform-modules",
+        "rev": "dev"
+    },
     "prefect": null,
     "security": null,
     "default_images": null,

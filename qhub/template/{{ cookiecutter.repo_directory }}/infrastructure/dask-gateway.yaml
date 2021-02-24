@@ -1,38 +1,6 @@
 gateway:
   extraConfig:
-    profiles: |
-      from dask_gateway_server.options import Options, Select
-
-      # A mapping from profile name to configuration overrides
-      profiles = {{ cookiecutter.profiles.dask_worker }}
-      environments = [
-      {% for filename, config in cookiecutter.environments.items() %}
-          "{{config['name']}}",
-      {% endfor %}
-      ]
-
-      def worker_profile(options):
-           config = profiles[options.profile]
-           config['worker_cmd'] = '/opt/conda-run-worker'
-           config['scheduler_cmd'] = '/opt/conda-run-scheduler'
-           config['environment'] = {
-               'CONDA_ENVIRONMENT': options.environment
-           }
-           return config
-
-      # Expose a list of profiles for workers
-      c.DaskGateway.cluster_manager_options = Options(
-          Select(
-              "environment",
-              environments,
-              default=environments[0],
-              label='Environment',
-          ),
-          Select(
-              "profile",
-              {{ cookiecutter.profiles.dask_worker.keys() | list() }},
-              default='{{ cookiecutter.profiles.dask_worker.keys() | list() | first() }}',
-              label="Cluster Profile",
-          ),
-          handler=worker_profile,
-      )
+    dask_gateway_config: |
+{% filter indent(width=6) %}
+{% include "templates/dask_gateway_config.py.j2" %}
+{% endfilter %}
