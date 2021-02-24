@@ -19,7 +19,7 @@ setup(
     url="https://github.com/quansight/qhub",
     author="Quansight",
     classifiers=[
-        "07_development Status :: 3 - Alpha",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "Topic :: Software 07_development :: Build Tools",
         "Programming Language :: Python :: 3",
