@@ -11,7 +11,7 @@ VPCs, managed Kubernetes cluster, and managed container registries cannot be loc
 TODO: explain in more detail which parts can be tested by the local deployment. And which QHub components cannot be.  
 
 ### Compatibility
-QHUb local deployment is **only compatible with Linux Operating Systems**. The primary limitation for the 
+Currently, **QHUb local deployment is only compatible with Linux Operating Systems**. The primary limitation for the 
 installation on macOS relates to [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)
 being unable to route traffic to containers.
 Theoretically, the installation of HyperKit Driver could solve the issue, although the proposed solution has not yet been tested.

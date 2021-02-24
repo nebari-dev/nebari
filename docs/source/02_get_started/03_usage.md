@@ -98,21 +98,19 @@ The command above will generate the `qhub-config.yaml` config file with an infra
 as the continuous integration (CI) provider, automatically provisioned and authenticated by `auth0`, initialized on 
 GitHub under the URL `github.com/quansight/project-name `.
 
-<p> **I am not 100% sure how to detail this part.**
 
 There are several **optional** (yet highly recommended) flags that allow to configure the deployment:
 
 + `aws` indicates that the project will be deployed on the Amazon AWS Cloud provider.
-- `--project`: project-name is required to be a string compliant with the Cloud provider recommendations (see official provider docs).
+- `--project`: project-name is required to be a string compliant with the Cloud provider recommendations (see official Cloud provider docs on naming policies).
   + `jupyter.qhub.dev` is the domain registered on CloudFlare. In case you chose not to use Cloudflare, skip this flag.
-- `--domain`: base domain for your cluster. After deployment, the DNS will use the base name prepended with `jupyter`. IE if the base name is `test.qhub.dev` then the DNS will be provisioned as `jupyter.test.qhub.dev`. This pattern is also applicable if you are setting your own DNS through a different provider.
-- `--ci-provider`: This specifies what provider to use for CI/CD. Currently, GitHub Actions is supported.
-- `--oauth-provider`: This will set configuration file to use Auth0 for authentication
-- `--oauth-auto-provision`: This will automatically create and configure an Auth0 application
-- `--repository`: The repository name that will be used to store the Infrastructure-as-Code
-- `--repository-auto-provision`: This sets the secrets for the GitHub repository
-
-</p>
+- `--domain`: base domain for your cluster. After deployment, the DNS will use the base name prepended with `jupyter`, i.e.
+  if the base name is `test.qhub.dev` then the DNS will be provisioned as `jupyter.test.qhub.dev`. This pattern is also applicable if you are setting your own DNS through a different provider.
+- `--ci-provider`: specifies what provider to use for CI/CD. Currently, only supports GitHub Actions.
+- `--oauth-provider`: This will set configuration file to use the specified provider for authentication.
+- `--oauth-auto-provision`: This will automatically create and configure an application using OAuth.
+- `--repository`: Repository name that will be used to store the Infrastructure-as-Code on GitHub.
+- `--repository-auto-provision`: Sets the secrets for the GitHub repository used for CI/CD actions.
 
 
 ### Render config files
@@ -124,7 +122,7 @@ qhub render -c qhub-config.yaml -o ./ -f
 ```
 
 This will create the following folder structure:
-```txt
+```
 .
 ├── environments        # stores the conda environments
 ├── image               # docker images used on deployment: jupyterhub, jupyterlab, and dask-gateway
