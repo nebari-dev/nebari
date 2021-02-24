@@ -10,7 +10,16 @@ VPCs, managed Kubernetes cluster, and managed container registries cannot be loc
 
 TODO: explain in more detail which parts can be tested by the local deployment. And which QHub components cannot be.  
 
+### Compatibility
+QHUb local deployment is **only compatible with Linux Operating Systems**. The primary limitation for the 
+installation on macOS relates to [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)
+being unable to route traffic to containers.
+Theoretically, the installation of HyperKit Driver could solve the issue, although the proposed solution has not yet been tested.
+
 ### Dependencies
+
+> NOTE: The following instructions apply **only to Linux OS**.
+
 To deploy QHub locally requires the installation of the following dependencies:
 + [Minukube](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-minikube/) version 1.10.0-beta and up
 + [Docker](https://docs.docker.com/engine/install/) install.
@@ -22,7 +31,8 @@ The installation of a hypervisor is **not** necessary.
 
 ### Initialize Kubernetes cluster
 
-The following command will initialise a cluster using Minikube with 2 CPUs and 4Gb of RAM, where Docker is the chosen driver.
+The following command will download a Docker image of around 500Mb in size and initialise a cluster with 2 CPUs and 4Gb
+of RAM, with Docker as the chosen driver.
 
 ```bash
 minikube start --cpus 2 --memory 4096 --driver=docker
@@ -45,14 +55,36 @@ For more details on PVs and PVCs, read the [JupyterHub documentation](https://ze
 
 [MetalLB](https://metallb.universe.tf/) is the load balancer for bare metal Kubernetes clusters. We will need to configure
 MetalLB to match the QHub configuration. 
-To configure `metallb` run:
+
+Here, we will choose to configure the load balancer to have an IP address of 172.17.10.100 (start) and of 172.17.10.200 (stop). 
+Make sure that the IP range is within the Docker interface subnet, in this case, within the 172.17.0.0/16 range.
+ 
+To verify your Docker subnet IP address use:
+```shell
+$ ip route
+```
+Where the output will be something similar to:
+```shell
+default via 192.168.1.1 dev wlp4s0 proto dhcp metric 600 
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 
+```
+This means that you have to ensure that the start/stop IP range for the load balancer is within the 172.17.0.0/16 subnet.
+> NOTE: Your docker subnet may be different from the one shown above.
+
+---
+
+You can run MetalLB manually or dynamically by using the Python command below.
+
+To manually configure `metallb` run:
 
 ```shell
 minikube addons configure metallb
 ```
-Since Minikube does not provide a simple interactive way to configure addons, 
-([as shown in this repository issue](https://github.com/kubernetes/minikube/issues/8283)). We will set up the configuration
-directly. To do so, paste the bash script below on your terminal.
+
+Minikube does not provide a simple interactive way to configure addons, 
+([as shown in this repository issue](https://github.com/kubernetes/minikube/issues/8283)). Hence, we suggest setting up 
+the configuration using the Python script below with the given values, since there is a DNS name that already points to 
+the address. To do so, paste the bash script below on your terminal.
 
 <details><summary>Click to expand</summary>
 
@@ -74,20 +106,14 @@ EOF
 ```
 </details>
 
-TODO: test the docs on macOS and check if this installation of MetalLB works. 
+If successful, the output should be `✅  metallb was successfully configured`.
 
-If successful, the output will be similar to
-```shell
-✅  metallb was successfully configured
-```
 Lastly, enable MetalLB by running
 ```bash
 minikube addons enable metallb
 ```
-To which the output should be:
-```
-  The 'metallb' addon is enabled
-```
+To which the output should be `The 'metallb' addon is enabled`.
+
 ---
 
 ## Cloud Deployment
@@ -132,7 +158,7 @@ export AUTH_DOMAIN="qhub-test.auth0.com" # in case the account was called 'qhub-
 #### GitHub 
 QHub uses GitHub Actions to trigger the CI/CD checks on the configuration file that automatically generates
 the Terraform modules for the deployment infrastructure. To do that, it will be necessary to set the GitHub username and
-token to the environment variables.
+token as environment variables.
 ```shell
 export GITHUB_USERNAME="quansight"
 export GITHUB_TOKEN="GitHubAccessTokenGenerated"
@@ -140,12 +166,12 @@ export GITHUB_TOKEN="GitHubAccessTokenGenerated"
 ### Domain registry
 Finally, you will need to have a domain name for hosting QHub. This domain will be where your application will be exposed.
 
-Currently, QHub only supports CloudFlare for automatic DNS registration. if an alternate DNS provider is desired, 
+Currently, QHub only supports CloudFlare for automatic DNS registration. If an alternate DNS provider is desired, 
 change the `--dns-provider` flag from `cloudflare` to `none` on the `qhub deploy` command. The deployment then will be 
-paused when it has an IP address (or CNAME, if using AWS) and prompt to register the desired URL.
+paused when it asks for an IP address (or CNAME, if using AWS) and prompt to register the desired URL.
 
 #### CloudFlare
-First, create a Cloudflare account and register your application domain name on it.
+If using Cloudflare, first create a Cloudflare account and register your application domain name on it.
 
 To generate a token:
 - Under `Profile`, select the `API Tokens` menu and click on `Create API Token`.
