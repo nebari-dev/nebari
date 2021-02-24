@@ -4,7 +4,7 @@
 
 ### Environment Variables
 To deploy QHub set the environment variable `PYTHONPATH` and create a new sub-directory running:
-```bash
+```shell
 export PYTHONPATH=$PWD:$PYTHONPATH
 mkdir -p data
 ```
@@ -25,8 +25,7 @@ bcrypt.hashpw(b'<password>', bcrypt.gensalt())
 ```
 Where `<password>` can be changed to any value.
 
-
-TODO: describe this section with more precision. Where should the script be imported? Any exceptions for password characters?
+TODO: describe this section more precisely. Where should the script be imported? Any exceptions for password characters?
 
 ### Render config file
 Next, we will render the files from `qhub-config.yaml` running
@@ -41,11 +40,12 @@ And finally, to deploy QHub:
 python -m qhub deploy --config qhub-config.yaml --disable-prompt
 ```
 
+To ease the development, we have already pointed the project's DNS record `jupyter.github-actions.qhub.dev` to the IP address 
+`172.17.10.100`.
 
-To ease development we have already pointed the project's DNS record `jupyter.github-actions.qhub.dev` to the IP address 
-`172.17.10.100`. TO make sure all is correctly set, check the load balancer IP address:
+To make sure all is correctly set, check the load balancer IP address:
 ```shell
-$ > load balancer ip command
+$ > ip route
 ```
 
 In case the address does not correspond to `172.17.10.100`, point the DNS domain to the address by running
@@ -58,7 +58,7 @@ Finally, if everything was set properly you should be able to cURL the JupyterHu
 curl -k https://jupyter.github-actions.qhub.dev/hub/login
 ```
 
-It is also possible to visit `https://jupyter.github-actions.qhub.dev` using the web browser.
+It is also possible to visit `https://jupyter.github-actions.qhub.dev` using the web browser to check the deployment.
 
 ### Cleanup
 To clean up the installation use the command
@@ -69,7 +69,7 @@ Followed by
 ```shell
 minikube delete
 ```
-The commands will delete all instances of QHub.
+The commands will delete all instances of QHub, cleaning up the deployment environment.
 
 ---
 
@@ -80,6 +80,7 @@ Once all environment variables have been set, you will be able to run commands o
 ### Initialize configuration
 There are several ways to generate your configuration file. You can type your commands according to the terminal prompts,
 or you can set it all automatically from the start. In any case, we advise you to start by creating a new project folder.
+Here, we will name the new folder `qhub-test`.
 
 On your terminal run:
 ```shell
@@ -93,8 +94,9 @@ qhub init aws --project project-name --domain jupyter.qhub.dev --ci-provider git
 --oauth-auto-provision --repository github.com/quansight/project-name --repository-auto-provision
 ```
 The command above will generate the `qhub-config.yaml` config file with an infrastructure deployed on `aws`, named 
-`project-name`, where the domain will be `jupyter.qhub.dev`. The deployment will use `github-actions` as the continuous integration (CI)
-provider, automatically provisioned and authenticated by `auth0`, initialized on GitHub under the URL `github.com/quansight/project-name `.
+`project-name`, where the domain will be `jupyter.github-actions.qhub.dev`. The deployment will use `github-actions` 
+as the continuous integration (CI) provider, automatically provisioned and authenticated by `auth0`, initialized on 
+GitHub under the URL `github.com/quansight/project-name `.
 
 <p> **I am not 100% sure how to detail this part.**
 
@@ -114,9 +116,9 @@ There are several **optional** (yet highly recommended) flags that allow to conf
 
 
 ### Render config files
-This file will handle the creating of all Terraform modules for QHub infrastructure.
+This file will handle the creation of all Terraform modules for the QHub infrastructure.
 
-After initializing, we then need to create all of Terraform configuration. This done by running the local command:
+After initializing, we then need to create all Terraform configuration. This done by running the local command:
 ```shell
 qhub render -c qhub-config.yaml -o ./ -f
 ```
@@ -124,14 +126,14 @@ qhub render -c qhub-config.yaml -o ./ -f
 This will create the following folder structure:
 ```txt
 .
-├── environments        # conda environments are stored
-├── image               # docker images used in QHub deployment including: jupyterhub, jupyterlab, and dask-gateway
+├── environments        # stores the conda environments
+├── image               # docker images used on deployment: jupyterhub, jupyterlab, and dask-gateway
 │   ├── dask-worker
 │   ├── jupyterlab
 │   │   └── __pycache__
 │   └── scripts
-├── infrastructure      # terraform files that declare state of infrastructure
-└── terraform-state     # required by terraform to securely store the state of the Terraform deployment
+├── infrastructure      # contains Terraform files that declare state of infrastructure
+└── terraform-state     # required by terraform to securely store the state of the deployment
 ```
         
 ### Deploy QHub
@@ -141,61 +143,51 @@ Finally, we can deploy QHub with:
 qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
 ```
 
-The terminal will prompt to press `[enter]` to check oauth credentials (which were added by QHub init). After pressing `enter` the deployment will continue and take roughly 10 minutes. Part of the output will show an "ip" address (DO/GCP) or a CNAME "hostname" (AWS) based on the the cloud service provider:
+The terminal will prompt to press `[enter]` to check oauth credentials (which were added by the `qhub init` command). 
+That will trigger the deployment which will take around 10 minutes to complete.
 
-    Digital Ocean/Google Cloud Platform:
-       
-        Outputs:
+Part of the output will show an "ip" address (DigitalOcean or GCP), or a CNAME "hostname" (for AWS)
+according to the Cloud service provider. Such as:
 
-        ingress_jupyter = {
-        "hostname" = ""
-        "ip" = "xxx.xxx.xxx.xxx"
-        }
-
-    AWS:       
-        Outputs:
-
-        ingress_jupyter = {
-        "hostname" = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxx.us-east-1.elb.amazonaws.com"
-        "ip" = ""
-        }
-
++ Digital Ocean/Google Cloud Platform
+```shell
+    ingress_jupyter = {
+            "hostname" = ""
+            "ip" = "xxx.xxx.xxx.xxx"
+            }
+```
++ AWS:
+```shell
+    ingress_jupyter = {
+    "hostname" = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxx.us-east-1.elb.amazonaws.com"
+    "ip" = ""
+    }
+```
         
-### 2.8 Push repository
+### GitOps
+QHub uses a GitHub Action to automatically handle the deployment of the infrastructure. For that, the project must be 
+pushed to GitHub. Using the URL under the `--repository` flag on the `qhub init` command, set the CI/CD changes to be triggered.
 
-Add all files to github:
+To add the project to the initialized GitHub repository run:
+```shell
+git add .github/ .gitignore README.md environments/ image/ infrastructure/ qhub-config.yaml  terraform-state/
+```
 
-    git add .github/ .gitignore README.md environments/ image/ infrastructure/ qhub-config.yaml  terraform-state/
-
-Push the changes to your repo:
+Push the changes to the repository:
 ```shell
 git push origin main
 ```
 
+Once the files are in Github, all CI/CD changes will be triggered by commits to main, and deployed via GitHub actions.
+Since the infrastructure state is reflected in the repository, this workflow allows for team members to submit pull 
+requests that can be reviewed before modifying the infrastructure, easing the maintenance process.
 
+To automatically deploy:
+- make changes to the `qhub-ops.yaml` file on a new branch. 
+- create a pull request (PR) to main.
+- Trigger the deployment by merging the PR. All changes will be automatically applied to the new QHub instance.
 
-## 3. Post GitHub deployment:
+Congratulations, you have now completed your QHub cloud deployment! :tada
 
-After the files are in Github all CI/CD changes will be triggered by a commit to main and deployed via GitHub actions. To use gitops, make a change to `qhub-ops.yaml` in a new branch and create a pull request into main. When the pull request is merged, it will trigger a deployment of all of those changes to your QHub.
-
-The first thing you will want to do is add users to your new QHub. Any type of supported authorization from auth0 can be used as a username. Below is an example configuration of 2 users:
-
-        joeuser@example:
-            uid: 1000000
-            primary_group: users
-            secondary_groups:
-                - billing
-                - admin
-        janeuser@example.com:
-            uid: 1000001
-            primary_group: users
-
-As seen above, each username has a unique `uid` and a `primary_group`. 
-Optional `secondary_groups` may also be set for each user.
-
-## 4. GitOps enabled
-
-Since the infrastructure state is reflected in the repository, it allows self-documenting of infrastructure and team
-members to submit pull requests that can be reviewed before modifying the infrastructure.
-
-Congratulations! You have now completed your QHub cloud deployment!
+Having issues? Head over to our [Troubleshooting](../02_get_started/06_troubleshooting.md) section for tips on how to 
+debug your QHub. Or try our [FAQ](../02_get_started/07_support.md).
