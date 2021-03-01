@@ -1,5 +1,17 @@
 # Testing
 
+## Modifying Docker Images
+
+All QHub docker images are located in [qhub/templates/{{
+cookiecutter.repo_directory
+}}/image/](https://github.com/Quansight/qhub-cloud/tree/main/qhub/template/%7B%7B%20cookiecutter.repo_directory%20%7D%7D/image). You
+can build any image locally. Additionally on PRs each docker build
+will be tested.
+
+```shell
+docker build -f Dockerfile.<filename> .
+```
+
 ## Local Testing
 
 Local testing is a great way to test the components of QHub. While it
