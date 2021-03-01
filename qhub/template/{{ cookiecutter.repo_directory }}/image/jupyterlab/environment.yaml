@@ -11,7 +11,7 @@ dependencies:
  - jupyter-server-proxy
  - jupyterlab-git
  - ipywidgets
- - jupyterlab >= 2
+ - jupyterlab ==2
  - jupyter_client
  - jupyter_console
  - jupyterhub
