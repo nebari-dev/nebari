@@ -98,8 +98,9 @@ minikube addons enable metallb
 ### Deploy qhub
 
 ```shell
-export PYTHONPATH=$PWD:$PYTHONPATH
+pip install -e .
 mkdir -p data
+cd data
 ```
 
 Initialize the `qhub-config.yaml`
@@ -109,11 +110,13 @@ python -m qhub init local --project=thisisatest  --domain github-actions.qhub.de
 ```
 
 Give a password to the default user. For this the example password is
-`<password>`. You can generate your own via `import bcrypt;
-bcrypt.hashpw(b'<password>', bcrypt.gensalt())`. Where you can change
-`<password>` to be the password you want.
+`<password>`. You can generate your own via `python -c "import bcrypt;
+bcrypt.hashpw(b'<password>', bcrypt.gensalt())"`. Where you can change
+`<password>` to be the password you want. This requires the bcrypt python 
+package to be installed. 
 
 ```
+  users:
     costrouc:
       uid: 1000
       ...
