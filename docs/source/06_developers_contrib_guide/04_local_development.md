@@ -122,7 +122,7 @@ python -m qhub init local --project=thisisatest  --domain github-actions.qhub.de
 ```
 
 Give a password to the default user. For this the example password is
-`<password>`. You can generate your own via `python -c "import bcrypt;
+`example-user`. You can generate your own via `python -c "import bcrypt;
 bcrypt.hashpw(b'<password>', bcrypt.gensalt())"`. Where you can change
 `<password>` to be the password you want. This requires the bcrypt python 
 package to be installed. This must be added to the `qhub-config.yaml` in 
@@ -130,10 +130,10 @@ the users section shown like below.
 
 ```
   users:
-    costrouc:
+    example-user:
       uid: 1000
       ...
-      password: '$2b$12$VsGc2HK1HF0o.8eJGHLlDenkseUf6B1pxizxgAN6/elR.ZaX8u0OG'
+      password: '$2b$12$lAk2Bhw8mu0QJkSecPiABOX2m87RF8N7vv7rBw9JksOgewI2thUuO'
       ...
       primary_group: users
 

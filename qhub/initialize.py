@@ -20,7 +20,7 @@ BASE_CONFIGURATION = {
     "security": {
         "authentication": None,
         "users": {
-            "costrouc": {
+            "example-user": {
                 "uid": 1000,
                 "primary_group": "users",
                 "secondary_groups": ["admin"],
