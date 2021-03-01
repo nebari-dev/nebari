@@ -18,7 +18,7 @@ dependencies:
 
  # jupyterlab extensions
  - dask_labextension >=5.0.0
- # jupyterlab-git >= #
+ # jupyterlab-git >=0.30.0 # uncomment when 0.30.0 is released
  - jupyter-videochat
  - ipywidgets >=7.6
  - ipyleaflet >=0.13.5
