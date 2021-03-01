@@ -33,10 +33,7 @@ BASE_CONFIGURATION = {
         "jupyterlab": "quansight/qhub-jupyterlab:7bbe490d586771045289139cffe8cfb3dff3c3d4",
         "dask_worker": "quansight/qhub-dask-worker:7bbe490d586771045289139cffe8cfb3dff3c3d4",
     },
-    "storage": {
-        "conda_store": "20Gi",
-        "shared_filesystem": "10Gi",
-    },
+    "storage": {"conda_store": "20Gi", "shared_filesystem": "10Gi",},
     "theme": {
         "jupyterhub": {
             "hub_title": None,
@@ -50,7 +47,7 @@ BASE_CONFIGURATION = {
             "h1_color": "#652e8e",
             "h2_color": "#652e8e",
         }
-    }
+    },
 }
 
 AUTH_PASSWORD = {
@@ -83,11 +80,7 @@ DIGITAL_OCEAN = {
     "node_groups": {
         "general": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
-        "worker": {
-            "instance": "s-2vcpu-4gb",
-            "min_nodes": 1,
-            "max_nodes": 4,
-        },
+        "worker": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4,},
     },
 }
 
@@ -98,17 +91,9 @@ GOOGLE_PLATFORM = {
     "availability_zones": ["us-central1-c"],
     "kubernetes_version": "1.14.10-gke.31",
     "node_groups": {
-        "general": {
-            "instance": "n1-standard-2",
-            "min_nodes": 1,
-            "max_nodes": 1,
-        },
+        "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1,},
         "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
-        "worker": {
-            "instance": "n1-standard-2",
-            "min_nodes": 1,
-            "max_nodes": 4,
-        },
+        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4,},
     },
 }
 
@@ -117,21 +102,9 @@ AMAZON_WEB_SERVICES = {
     "availability_zones": ["us-west-2a", "us-west-2b"],
     "kubernetes_version": "1.14",
     "node_groups": {
-        "general": {
-            "instance": "m5.large",
-            "min_nodes": 1,
-            "max_nodes": 1,
-        },
-        "user": {
-            "instance": "m5.large",
-            "min_nodes": 1,
-            "max_nodes": 2,
-        },
-        "worker": {
-            "instance": "m5.large",
-            "min_nodes": 1,
-            "max_nodes": 2,
-        },
+        "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1,},
+        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2,},
+        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2,},
     },
 }
 
@@ -220,7 +193,9 @@ def render_config(
     config["terraform_state"] = terraform_state
 
     config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
-    config["theme"]["jupyterhub"]["welcome"] = f"""Welcome to jupyter.{ qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
+    config["theme"]["jupyterhub"][
+        "welcome"
+    ] = f"""Welcome to jupyter.{ qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
@@ -257,7 +232,9 @@ def render_config(
         config["security"]["authentication"] = AUTH_PASSWORD
 
     if cloud_provider == "do":
-        config["theme"]["jupyterhub"]["hub_subtitle"] = f"Autoscaling Compute Environment on Digital Ocean"
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = f"Autoscaling Compute Environment on Digital Ocean"
         config["digital_ocean"] = DIGITAL_OCEAN
         if kubernetes_version:
             config["digital_ocean"]["kubernetes_version"] = kubernetes_version
@@ -270,7 +247,9 @@ def render_config(
                 "kubernetes_version"
             ] = digital_ocean.kubernetes_versions()[0]["slug"]
     elif cloud_provider == "gcp":
-        config["theme"]["jupyterhub"]["hub_subtitle"] = f"Autoscaling Compute Environment on Google Cloud Platform"
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = f"Autoscaling Compute Environment on Google Cloud Platform"
         config["google_cloud_platform"] = GOOGLE_PLATFORM
         if kubernetes_version:
             config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
@@ -282,12 +261,16 @@ def render_config(
                 "Enter Google Cloud Platform Project ID: "
             )
     elif cloud_provider == "aws":
-        config["theme"]["jupyterhub"]["hub_subtitle"] = f"Autoscaling Compute Environment on Amazon Web Services"
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = f"Autoscaling Compute Environment on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
         if kubernetes_version:
             config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
     elif cloud_provider == "local":
-        config["theme"]["jupyterhub"]["hub_subtitle"] = f"Autoscaling Compute Environment"
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = f"Autoscaling Compute Environment"
 
     config["profiles"] = DEFAULT_PROFILES
     config["environments"] = DEFAULT_ENVIRONMENTS
