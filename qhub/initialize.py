@@ -33,7 +33,7 @@ BASE_CONFIGURATION = {
         "jupyterlab": "quansight/qhub-jupyterlab:7bbe490d586771045289139cffe8cfb3dff3c3d4",
         "dask_worker": "quansight/qhub-dask-worker:7bbe490d586771045289139cffe8cfb3dff3c3d4",
     },
-    "storage": {"conda_store": "20Gi", "shared_filesystem": "10Gi",},
+    "storage": {"conda_store": "20Gi", "shared_filesystem": "10Gi"},
     "theme": {
         "jupyterhub": {
             "hub_title": None,
@@ -80,7 +80,7 @@ DIGITAL_OCEAN = {
     "node_groups": {
         "general": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
-        "worker": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4,},
+        "worker": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
     },
 }
 
@@ -91,9 +91,9 @@ GOOGLE_PLATFORM = {
     "availability_zones": ["us-central1-c"],
     "kubernetes_version": "1.14.10-gke.31",
     "node_groups": {
-        "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1,},
+        "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
-        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4,},
+        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
     },
 }
 
@@ -102,9 +102,9 @@ AMAZON_WEB_SERVICES = {
     "availability_zones": ["us-west-2a", "us-west-2b"],
     "kubernetes_version": "1.14",
     "node_groups": {
-        "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1,},
-        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2,},
-        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2,},
+        "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
+        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2},
+        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2},
     },
 }
 
@@ -234,7 +234,7 @@ def render_config(
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = f"Autoscaling Compute Environment on Digital Ocean"
+        ] = "Autoscaling Compute Environment on Digital Ocean"
         config["digital_ocean"] = DIGITAL_OCEAN
         if kubernetes_version:
             config["digital_ocean"]["kubernetes_version"] = kubernetes_version
@@ -249,7 +249,7 @@ def render_config(
     elif cloud_provider == "gcp":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = f"Autoscaling Compute Environment on Google Cloud Platform"
+        ] = "Autoscaling Compute Environment on Google Cloud Platform"
         config["google_cloud_platform"] = GOOGLE_PLATFORM
         if kubernetes_version:
             config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
@@ -263,14 +263,14 @@ def render_config(
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = f"Autoscaling Compute Environment on Amazon Web Services"
+        ] = "Autoscaling Compute Environment on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
         if kubernetes_version:
             config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = f"Autoscaling Compute Environment"
+        ] = "Autoscaling Compute Environment"
 
     config["profiles"] = DEFAULT_PROFILES
     config["environments"] = DEFAULT_ENVIRONMENTS
