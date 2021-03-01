@@ -113,7 +113,8 @@ Give a password to the default user. For this the example password is
 `<password>`. You can generate your own via `python -c "import bcrypt;
 bcrypt.hashpw(b'<password>', bcrypt.gensalt())"`. Where you can change
 `<password>` to be the password you want. This requires the bcrypt python 
-package to be installed. 
+package to be installed. This must be added to the `qhub-config.yaml` in 
+the users section shown like below.
 
 ```
   users:
