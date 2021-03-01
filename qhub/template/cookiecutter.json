@@ -14,6 +14,11 @@
     "security": null,
     "default_images": null,
     "profiles": null,
+    "theme": {
+      "juypterhub": {
+
+      }
+    },
     "environments": null,
     "storage": null,
 
