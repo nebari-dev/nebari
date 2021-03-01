@@ -85,23 +85,21 @@ html_theme_options = {
     # If True, show hidden TOC entries
     "globaltoc_includehidden": False,
     "nav_links": [
-<<<<<<< HEAD
-    {
-        "href": "https://www.quansight.com/jupyter-consulting",
-        "title": "Quansight",
-        "internal": False
-    },
-    {
-        "href": "https://github.com/quansight/qhub-onprem",
-        "title": "QHub OnPrem",
-        "internal": False,
-    },
-    {
-        "href": "https://pypi.org/project/qhub/",
-        "title": "Pypi",
-        "internal": False,
-    },
-=======
+        {
+            "href": "https://www.quansight.com/jupyter-consulting",
+            "title": "Quansight",
+            "internal": False
+        },
+        {
+            "href": "https://github.com/quansight/qhub-onprem",
+            "title": "QHub OnPrem",
+            "internal": False,
+        },
+        {
+            "href": "https://pypi.org/project/qhub/",
+            "title": "Pypi",
+            "internal": False,
+        },
         {
             "href": "index",
             "title": "QHub Home",
@@ -117,7 +115,6 @@ html_theme_options = {
             "title": "FAQ",
             "internal": True,
         },
->>>>>>> 2c20f32e2f3b78547203e052a28ab11ee119a121
     ],
 }
 html_sidebars = {

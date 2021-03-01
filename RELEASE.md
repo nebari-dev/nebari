@@ -2,7 +2,6 @@
 > Contains description of QHub releases.
 ---
 ## To create a new release:
-<<<<<<< HEAD
 
 1. Increment the version number in `qhub/VERSION`
 2. Ensure that the version number in `qhub/VERSION` is used in pinning QHub in the github actions 
@@ -10,7 +9,10 @@
 
 ---
 ## Upcoming release 0.3.0
+
 ### Feature changes and enhancements
+* Jupyterhub docker image now independent from zero-to-jupyterhub
+* Jupyterlab 3 now default user docker image
 * Implemented the option to locally deploy QHub allowing for local testing.
 * Removed requirement for DNS, authorization is now password-based (no more OAuth requirements).
 
@@ -19,7 +21,6 @@
 ### Breaking changes
 
 ### Migration guide
-=======
 
 0. Version `<version>` is in format `X.Y.Z`
 1. Create release branch `release-<version>` based off `dev`
