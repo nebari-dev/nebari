@@ -37,7 +37,7 @@ security:
       client_secret: <CLIENT_SECRET>
       oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
   users:
-    costrouc:
+    example-user:
       uid: 1000
       primary_group: users
       secondary_groups:
@@ -228,7 +228,7 @@ profiles:
     - display_name: Small Instance
       description: Stable environment with 1 cpu / 1 GB ram
       users:
-        - costrouc
+        - example-user
       groups:
         - admin
       default: true
@@ -342,7 +342,7 @@ security:
       client_secret: CLIENT_SECRET
       oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
   users:
-    costrouc:
+    example-user:
       uid: 1000
       primary_group: users
       secondary_groups:

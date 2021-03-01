@@ -130,7 +130,7 @@ the users section shown like below.
 
 ```
   users:
-    costrouc:
+    example-user:
       uid: 1000
       ...
       password: '$2b$12$VsGc2HK1HF0o.8eJGHLlDenkseUf6B1pxizxgAN6/elR.ZaX8u0OG'
