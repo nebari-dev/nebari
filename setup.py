@@ -21,7 +21,7 @@ setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
-        "Topic :: Software 07_development :: Build Tools",
+        "Topic :: Software Development :: Build Tools",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
@@ -38,7 +38,7 @@ setup(
         "pydantic",
         "pynacl",
     ],
-    extras_require={"dev": ["flake8", "black", "twine", "pytest", "diagrams"]},
+    extras_require={"dev": ["flake8==3.8.3", "black==19.10b0", "twine", "pytest", "diagrams"]},
     include_package_data=True,
     entry_points={"console_scripts": ["qhub = qhub.__main__:main"]},
     project_urls={

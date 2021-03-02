@@ -1,15 +1,19 @@
 # ==================== THEME =========================
-c.JupyterHub.template_paths = ['/usr/local/share/jupyterhub/custom_templates/']
+import tornado.web
+import qhub_jupyterhub_theme
+
+c.JupyterHub.extra_handlers = [
+    (r'/custom/(.*)', tornado.web.StaticFileHandler, {"path": qhub_jupyterhub_theme.STATIC_PATH}),
+]
+
+c.JupyterHub.template_paths = [
+    qhub_jupyterhub_theme.TEMPLATE_PATH
+]
+
 c.JupyterHub.template_vars = {
-    'pangeo_hub_title': 'QHub - {{ cookiecutter.project_name }}',
-{%- if cookiecutter.provider == "do" -%}
-    'pangeo_hub_subtitle': 'Autoscaling Compute Environment on Digital Ocean',
-{%- elif cookiecutter.provider == "gcp" -%}
-    'pangeo_hub_subtitle': 'Autoscaling Compute Environment on Google Cloud Platform',
-{%- elif cookiecutter.provider == "aws" -%}
-    'pangeo_hub_subtitle': 'Autoscaling Compute Environment on AWS',
-{% endif %}
-    'pangeo_welcome': """Welcome to jupyter.{{ cookiecutter.domain }}. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
+{%- for key, value in cookiecutter.theme.jupyterhub.items() %}
+    "{{ key }}": "{{ value | replace('\"', '\\"') }}",
+{%- endfor %}
 }
 
 # ================= Profiles =====================

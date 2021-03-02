@@ -85,7 +85,6 @@ html_theme_options = {
     # If True, show hidden TOC entries
     "globaltoc_includehidden": False,
     "nav_links": [
-
     {
         "href": "index",
         "title": "Docs",
@@ -97,7 +96,7 @@ html_theme_options = {
         "internal": False
     },
     {
-        "href": "https://github.com/quansight/qhub-onprem",
+        "href": "https://onprem.qhub.dev/",
         "title": "QHub OnPrem",
         "internal": False,
     },
