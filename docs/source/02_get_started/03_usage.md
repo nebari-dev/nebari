@@ -169,7 +169,7 @@ pushed to GitHub. Using the URL under the `--repository` flag on the `qhub init`
 To add the project to the initialized GitHub repository run:
 ```shell
 git add .github/ .gitignore environments/ image/ infrastructure/ qhub-config.yaml terraform-state/
-git commit -m"First commit"
+git commit -m "First commit"
 ```
 
 Push the changes to the repository (your primary branch may be called `master` instead of `main`):
