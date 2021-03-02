@@ -28,6 +28,7 @@ dependencies:
  - panel
  - param
  - python-graphviz
+ - cdsdashboards-singleuser
 
  # testing, docs, linting
  - pytest
