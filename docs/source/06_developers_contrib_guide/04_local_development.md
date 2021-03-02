@@ -176,7 +176,7 @@ context (in this case minkube). To view all the current process press `0`:
   network traffic tunnel configuration it may limit or block the user's 
   access to destination resources over the connection. 
 
-K9s port-forward option `<shift-f>` allows you to access and interact 
+K9s port-forward option `<kbd>shift</kbd> + <kbd>f</kbd>` allows you to access and interact 
 with internal Kubernetes cluster processes from your localhost you can 
 then use this method to investigate issues and adjust your services 
 locally without the need to expose them beforehand.
