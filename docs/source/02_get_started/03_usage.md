@@ -168,10 +168,11 @@ pushed to GitHub. Using the URL under the `--repository` flag on the `qhub init`
 
 To add the project to the initialized GitHub repository run:
 ```shell
-git add .github/ .gitignore README.md environments/ image/ infrastructure/ qhub-config.yaml  terraform-state/
+git add .github/ .gitignore environments/ image/ infrastructure/ qhub-config.yaml terraform-state/
+git commit -m"First commit"
 ```
 
-Push the changes to the repository:
+Push the changes to the repository (your primary branch may be called `master` instead of `main`):
 ```shell
 git push origin main
 ```
@@ -181,7 +182,7 @@ Since the infrastructure state is reflected in the repository, this workflow all
 requests that can be reviewed before modifying the infrastructure, easing the maintenance process.
 
 To automatically deploy:
-- make changes to the `qhub-ops.yaml` file on a new branch. 
+- make changes to the `qhub-config.yaml` file on a new branch. 
 - create a pull request (PR) to main.
 - Trigger the deployment by merging the PR. All changes will be automatically applied to the new QHub instance.
 
