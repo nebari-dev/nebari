@@ -63,9 +63,9 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         # to parse cmd_output as json on Github Actions.
         ip_matches = re.findall(rb'"ip": "(?!string)(.*)"', cmd_output)
         hostname_matches = re.findall(rb'"hostname": "(?!string)(.*)"', cmd_output)
-        if ip_matches[0]:
+        if ip_matches:
             ip_or_hostname = ip_matches[0].decode()
-        elif hostname_matches[0]:
+        elif hostname_matches:
             ip_or_hostname = hostname_matches[0].decode()
         else:
             raise ValueError(f"IP Address not found in: {cmd_output}")
