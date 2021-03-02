@@ -151,7 +151,7 @@ minikube addons enable metallb
 
 ### Debug your Kubernets cluster 
 
- K9s is a terminal-based UI to manage Kubernetes clusters that aims to 
+ [K9s](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to 
  simplify navigating, observing, and managing your applications in K8s. 
  K9s continuously monitors Kubernetes clusters for changes and provides 
  shortcut commands to interact with the observed resources becoming a 
