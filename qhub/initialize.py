@@ -29,9 +29,9 @@ BASE_CONFIGURATION = {
         "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
     },
     "default_images": {
-        "jupyterhub": "quansight/qhub-jupyterhub:7bbe490d586771045289139cffe8cfb3dff3c3d4",
-        "jupyterlab": "quansight/qhub-jupyterlab:7bbe490d586771045289139cffe8cfb3dff3c3d4",
-        "dask_worker": "quansight/qhub-dask-worker:7bbe490d586771045289139cffe8cfb3dff3c3d4",
+        "jupyterhub": "quansight/qhub-jupyterhub:1ece8e33b4b957c843c6f63150f0507bab60c422",
+        "jupyterlab": "quansight/qhub-jupyterlab:1ece8e33b4b957c843c6f63150f0507bab60c422",
+        "dask_worker": "quansight/qhub-dask-worker:1ece8e33b4b957c843c6f63150f0507bab60c422",
     },
     "storage": {"conda_store": "20Gi", "shared_filesystem": "10Gi"},
     "theme": {
