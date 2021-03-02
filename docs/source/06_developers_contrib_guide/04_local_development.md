@@ -156,7 +156,7 @@ minikube addons enable metallb
  K9s continuously monitors Kubernetes clusters for changes and provides 
  shortcut commands to interact with the observed resources becoming a 
  fast way to review and resolve day-to-day issues in Kubernetes. It's 
- defiitly a huge improvement to the general workflow and a best-t-have 
+ definitely a huge improvement to the general workflow and a best-to-have 
  tool for debugging yout Kubernets cluster sessions. 
 
 Installation can be done on a Mac, in Windows, and Linux. Instructions 
