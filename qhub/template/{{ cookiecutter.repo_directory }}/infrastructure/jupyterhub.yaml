@@ -19,11 +19,21 @@ auth:
 {% endif %}
 
 hub:
+  allowNamedServers: true
 {% if cookiecutter.security.authentication.type == 'Auth0' %}
   extraEnv:
     AUTH0_SUBDOMAIN: "{{ cookiecutter.security.authentication.config.auth0_subdomain }}"
 {% endif %}
   extraConfig:
+    cds-handlers: |
+      from cdsdashboards.hubextension import cds_extra_handlers
+      c.JupyterHub.extra_handlers = cds_extra_handlers
+    cds-templates: |
+      from cdsdashboards.app import CDS_TEMPLATE_PATHS
+      c.JupyterHub.template_paths = CDS_TEMPLATE_PATHS
+    cds-kube: |
+      c.JupyterHub.spawner_class = 'cdsdashboards.hubextension.spawners.variablekube.VariableKubeSpawner'
+      c.CDSDashboardsConfig.builder_class = 'cdsdashboards.builder.kubebuilder.KubeBuilder'
     jupyterhub_config: |
 {% filter indent(width=6) %}
 {% include "templates/jupyterhub_config.py.j2" %}
