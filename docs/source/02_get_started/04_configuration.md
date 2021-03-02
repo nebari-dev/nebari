@@ -273,6 +273,35 @@ Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the
 cores and memory.
 
+## Themes
+
+### Customizing JupyterHub theme
+
+JupyterHub can be customized since QHub uses
+[Quansight/qhub-jupyterhub-theme](https://github.com/quansight/qhub-jupyterhub-theme). Available
+theme options. Note that if you want to change the logo it must be an
+accessible url to the logo.
+
+```yaml
+theme:
+  jupyterhub:
+    hub_title: QHub - thisisatest
+    hub_subtitle: Autoscaling Compute Environment
+    welcome: |
+      Welcome to jupyter.github-actions.qhub.dev. It is maintained by <a href="http://quansight.com">Quansight
+      staff</a>. The hub's configuration is stored in a github repository based on
+      <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>.
+      To provide feedback and report any technical problems, please use the 
+      <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>.
+    logo: /hub/custom/images/jupyter_qhub_logo.svg
+    primary_color: '#4f4173'
+    secondary_color: '#957da6'
+    accent_color: '#32C574'
+    text_color: '#111111'
+    h1_color: '#652e8e'
+    h2_color: '#652e8e'
+```
+
 ## Environments
 
 ```yaml
@@ -390,6 +419,24 @@ default_images:
   jupyterhub: "quansight/qhub-jupyterhub:b89526c59a5c269c776b535b887bd110771ad601"
   jupyterlab: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
   dask_worker: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
+
+theme:
+  jupyterhub:
+    hub_title: QHub - thisisatest
+    hub_subtitle: Autoscaling Compute Environment
+    welcome: |
+      Welcome to jupyter.github-actions.qhub.dev. It is maintained by <a href="http://quansight.com">Quansight
+      staff</a>. The hub's configuration is stored in a github repository based on
+      <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>.
+      To provide feedback and report any technical problems, please use the 
+      <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>.
+    logo: /hub/custom/images/jupyter_qhub_logo.svg
+    primary_color: '#4f4173'
+    secondary_color: '#957da6'
+    accent_color: '#32C574'
+    text_color: '#111111'
+    h1_color: '#652e8e'
+    h2_color: '#652e8e'
 
 profiles:
   jupyterlab:

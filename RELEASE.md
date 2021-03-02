@@ -11,6 +11,7 @@
 ## Upcoming release 0.3.0
 
 ### Feature changes and enhancements
+* Full JupyterHub theming including colors now
 * Jupyterhub docker image now independent from zero-to-jupyterhub
 * Jupyterlab 3 now default user docker image
 * Implemented the option to locally deploy QHub allowing for local testing.
