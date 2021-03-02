@@ -30,6 +30,16 @@ dependencies and have them available in your path.
  - [terraform](https://www.terraform.io/downloads.html)
  - [minikube](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-minikube/)
 
+---
+**NOTE**
+  Qhub-cloud currently runs `Terraform 0.13.5` which can lead to some incompatibility
+  if you install a newer version of it. In order to avoid such situations you can 
+  download the `Terraform 0.13.5` binary from [releases](https://releases.hashicorp.com/terraform/0.13.5/)
+  and move the downloaded file to `~/.local/bin`. Be sure to add it to your path 
+  `export PATH=$HOME/.local/bin:$PATH` if it's not already added. 
+
+---
+
 ### Initialize kubernetes cluster
 
 Testing is done with minikube. Note that this will download a ~500MB
@@ -42,12 +52,44 @@ the primary limitation being Docker Desktop for Mac can’t route traffic
 to containers. It should be possible to achieve these with hyperkit driver
 with minikube, but it has not been tested yet.
 
+Before running the code below, be sure to have installed the docker [driver](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository). 
+Also to save yourself time after the install add yourself to the docker 
+group by executing `sudo usermod -aG docker <username>`.
+
+To confirm successful installation of both Docker and Minikube, 
+you can run the following command to start up a local Kubernetes 
+cluster:
 ```shell
 minikube start --cpus 2 --memory 4096 --driver=docker
 ```
+Once Minikube start finishes, run the command below to check the 
+status of the cluster:
+```bash
+minikube status
+```
+If your cluster is running, the output from minikube status should 
+be similar to:
+
+```bash
+minikube
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+timeToStop: Nonexistent
+```
+
+After you have confirmed Minikube is working, you can continue to 
+use or you can stop your cluster. To stop your cluster, run:
+```bash 
+minikube stop
+```
+### Configure the `metallb`
 
 The jupyterlab instances require mounting nfs pvcs. This requires
-nfs-common drivers be installed on the nodes themselves.
+nfs-common drivers be installed on the nodes themselves. For that, 
+please ensure `nfs-common` is installed in the cluster:
 
 ```shell
 minikube ssh "sudo apt update; sudo apt install nfs-common -y"
@@ -106,6 +148,40 @@ minikube addons enable metallb
 ```
   The 'metallb' addon is enabled
 ```
+
+### Debug your Kubernets cluster 
+
+ [K9s](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to 
+ simplify navigating, observing, and managing your applications in K8s. 
+ K9s continuously monitors Kubernetes clusters for changes and provides 
+ shortcut commands to interact with the observed resources becoming a 
+ fast way to review and resolve day-to-day issues in Kubernetes. It's 
+ definitely a huge improvement to the general workflow and a best-to-have 
+ tool for debugging yout Kubernets cluster sessions. 
+
+Installation can be done on a Mac, in Windows, and Linux. Instructions 
+for each operating system can be found [here](https://github.com/derailed/k9s). 
+Be sure to complete installation to be able to follow along.
+
+By default, K9s starts with the standard directory that is set as the 
+context (in this case minkube). To view all the current process press `0`:
+
+![Image of K9s termina UI](image_here)
+
+---
+**NOTE**
+  In some circumstances you will be confronted with the 
+  necessity to inspect in your ‘localhost’ any services launched by 
+  your cluster. For instance, if your cluster has some problem with the 
+  network traffic tunnel configuration it may limit or block the user's 
+  access to destination resources over the connection. 
+
+K9s port-forward option `<kbd>shift</kbd> + <kbd>f</kbd>` allows you to access and interact 
+with internal Kubernetes cluster processes from your localhost you can 
+then use this method to investigate issues and adjust your services 
+locally without the need to expose them beforehand.
+
+---
 
 ### Deploy qhub
 
