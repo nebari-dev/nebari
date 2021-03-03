@@ -131,7 +131,7 @@ jobs:
           ip route
       - name: Configure LoadBalancer IPs
         run: |
-          bash tests/scripts/minikube-loadbalancer-ip.sh
+          python tests/scripts/minikube-loadbalancer-ip.py
       - name: Enable Minikube metallb
         run: |
           minikube addons enable metallb

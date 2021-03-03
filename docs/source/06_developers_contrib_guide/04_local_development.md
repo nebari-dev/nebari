@@ -134,7 +134,7 @@ bash/python command. This is also used in github actions since the
 minikube command does not [provide a non interactive way to configure
 addons](https://github.com/kubernetes/minikube/issues/8283). Here is a
 script to set the load balancer ip address
-[tests/assets/minikube-loadbalancer-ip.sh](tests/assets/minikube-loadbalancer-ip.sh).
+[tests/assets/minikube-loadbalancer-ip.py](tests/assets/minikube-loadbalancer-ip.py).
 
 Enable metallb
 
