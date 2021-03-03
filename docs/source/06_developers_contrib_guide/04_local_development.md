@@ -112,9 +112,9 @@ must inspect the running docker minikube image.
 
 ```shell
 $ docker ps --format "{{.Names}} {{.ID}}"
-minikube 023a8f9d380d
+minikube <image-id>
 
-$ docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}/{{.IPPrefixLen}}{{end}}' 023a8f9d380d
+$ docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}/{{.IPPrefixLen}}{{end}}' <image-id>
 192.168.49.2/24
 ```
 
@@ -134,7 +134,7 @@ bash/python command. This is also used in github actions since the
 minikube command does not [provide a non interactive way to configure
 addons](https://github.com/kubernetes/minikube/issues/8283). Here is a
 script to set the load balancer ip address
-[tests/assets/minikube-loadbalancer-ip.py](tests/assets/minikube-loadbalancer-ip.py).
+[tests/scripts/minikube-loadbalancer-ip.py](tests/scripts/minikube-loadbalancer-ip.py).
 
 Enable metallb
 
