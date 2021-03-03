@@ -131,20 +131,7 @@ jobs:
           ip route
       - name: Configure LoadBalancer IPs
         run: |
-          python <<EOF
-          import json
-          import os
-
-          filename = os.path.expanduser('~/.minikube/profiles/minikube/config.json')
-          with open(filename) as f:
-               data = json.load(f)
-
-          data['KubernetesConfig']['LoadBalancerStartIP'] = '172.17.10.100'
-          data['KubernetesConfig']['LoadBalancerEndIP'] = '172.17.10.200'
-
-          with open(filename, 'w') as f:
-               json.dump(data, f)
-          EOF
+          bash tests/scripts/minikube-loadbalancer-ip.sh
       - name: Enable Minikube metallb
         run: |
           minikube addons enable metallb

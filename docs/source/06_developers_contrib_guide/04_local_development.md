@@ -17,7 +17,8 @@ docker build -f Dockerfile.<filename> .
 Local testing is a great way to test the components of QHub. While it
 does test most of everything it does not test cloud provisioned
 components such as the managed kubernetes cluster, vpcs, managed
-container registries, etc.
+container registries, etc. Currently this only supports Linux based
+OSs for testing due to docker networking limitations in OSX.
 
 This guide assumes that you have the QHub Cloud repository downloaded
 and you are at the root of the repository.
@@ -45,28 +46,34 @@ dependencies and have them available in your path.
 Testing is done with minikube. Note that this will download a ~500MB
 docker image.
 
-Note: The testing instructions mentioned below works well on Linux. They
-don't work very well with Mac OS at the moment, due to the
-[limitations of docker for Mac](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds),
-the primary limitation being Docker Desktop for Mac can’t route traffic
-to containers. It should be possible to achieve these with hyperkit driver
-with minikube, but it has not been tested yet.
+Note: The testing instructions mentioned below works well on
+Linux. They don't work very well with Mac OS at the moment, due to the
+[limitations of docker for
+Mac](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds),
+the primary limitation being Docker Desktop for Mac can’t route
+traffic to containers. It should be possible to achieve these with
+hyperkit driver with minikube, but it has not been tested yet.
 
-Before running the code below, be sure to have installed the docker [driver](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository). 
-Also to save yourself time after the install add yourself to the docker 
-group by executing `sudo usermod -aG docker <username>`.
+Before running the code below, be sure to have installed the docker
+[driver](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository).
+Also to save yourself time after the install add yourself to the
+docker group by executing `sudo usermod -aG docker <username>`.
 
 To confirm successful installation of both Docker and Minikube, 
 you can run the following command to start up a local Kubernetes 
 cluster:
+
 ```shell
 minikube start --cpus 2 --memory 4096 --driver=docker
 ```
+
 Once Minikube start finishes, run the command below to check the 
 status of the cluster:
+
 ```bash
 minikube status
 ```
+
 If your cluster is running, the output from minikube status should 
 be similar to:
 
@@ -82,9 +89,11 @@ timeToStop: Nonexistent
 
 After you have confirmed Minikube is working, you can continue to 
 use or you can stop your cluster. To stop your cluster, run:
+
 ```bash 
 minikube stop
 ```
+
 ### Configure the `metallb`
 
 The jupyterlab instances require mounting nfs pvcs. This requires
@@ -98,18 +107,21 @@ minikube ssh "sudo apt update; sudo apt install nfs-common -y"
 Configure the `metallb` load balancer to have a start ip of
 `172.17.10.100` and an end ip of `172.17.10.200`. These ips were not
 randomly chosen. You must make sure that the ip range is within the
-docker interface subnet. You can see your docker subnet via
+docker interface subnet. To determine the range of ip addresses you
+must inspect the running docker minikube image.
 
 ```shell
-$ ip route
-default via 192.168.1.1 dev wlp4s0 proto dhcp metric 600 
-172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 
+$ docker ps --format "{{.Names}} {{.ID}}"
+minikube 023a8f9d380d
+
+$ docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}/{{.IPPrefixLen}}{{end}}' 023a8f9d380d
+172.17.0.3/16
 ```
 
-This means that you have to ensure that the start/stop ip range
-for the load balancer is within the `172.17.0.0/16` subnet. Your
-docker subnet may be different. You can run `metallb` manually as
-shown below or use the python command shown below. We suggest using
+This means that you have to ensure that the start/stop ip range for
+the load balancer is within the `172.17.0.0/16` subnet. Your docker
+subnet may (and likely is) different. You can run `metallb` manually
+as shown below or use the python command shown below. We suggest using
 these values since there is a dns name that already points to the
 address.
 
@@ -118,26 +130,11 @@ minikube addons configure metallb
 ```
 
 If you don't want to configure metallb interactively run the below
-bash/python command. This is also used in github actions since
-the minikube command does not [provide a non interactive way to
-configure addons](https://github.com/kubernetes/minikube/issues/8283)
-
-```shell
-python <<EOF
-import json
-import os
-
-filename = os.path.expanduser('~/.minikube/profiles/minikube/config.json')
-with open(filename) as f:
-     data = json.load(f)
-
-data['KubernetesConfig']['LoadBalancerStartIP'] = '172.17.10.100'
-data['KubernetesConfig']['LoadBalancerEndIP'] = '172.17.10.200'
-
-with open(filename, 'w') as f:
-     json.dump(data, f)
-EOF
-```
+bash/python command. This is also used in github actions since the
+minikube command does not [provide a non interactive way to configure
+addons](https://github.com/kubernetes/minikube/issues/8283). Here is a
+script to set the load balancer ip address
+[tests/assets/minikube-loadbalancer-ip.sh](tests/assets/minikube-loadbalancer-ip.sh).
 
 Enable metallb
 
