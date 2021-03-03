@@ -165,8 +165,7 @@ jobs:
           nslookup jupyter.github-actions.qhub.dev
       - name: Curl jupyterhub login page
         run: |
-          # TODO: make tests better
-          # curl -k https://jupyter.github-actions.qhub.dev/hub/login
+          curl -k https://jupyter.github-actions.qhub.dev/hub/login
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment

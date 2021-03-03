@@ -105,7 +105,7 @@ minikube ssh "sudo apt update; sudo apt install nfs-common -y"
 ```
 
 Configure the `metallb` load balancer to have a start ip of
-`172.17.10.100` and an end ip of `172.17.10.200`. These ips were not
+`192.168.49.100` and an end ip of `192.168.49.150`. These ips were not
 randomly chosen. You must make sure that the ip range is within the
 docker interface subnet. To determine the range of ip addresses you
 must inspect the running docker minikube image.
@@ -115,11 +115,11 @@ $ docker ps --format "{{.Names}} {{.ID}}"
 minikube 023a8f9d380d
 
 $ docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}/{{.IPPrefixLen}}{{end}}' 023a8f9d380d
-172.17.0.3/16
+192.168.49.2/24
 ```
 
 This means that you have to ensure that the start/stop ip range for
-the load balancer is within the `172.17.0.0/16` subnet. Your docker
+the load balancer is within the `192.168.49.0/24` subnet. Your docker
 subnet may (and likely is) different. You can run `metallb` manually
 as shown below or use the python command shown below. We suggest using
 these values since there is a dns name that already points to the
@@ -223,17 +223,17 @@ python -m qhub deploy --config qhub-config.yaml --disable-prompt
 ```
 
 To ease development we have already pointed the dns record
-`jupyter.github-actions.qhub.dev` to `172.17.10.100` so the next step
+`jupyter.github-actions.qhub.dev` to `192.168.49.100` so the next step
 is optional unless you end up with the load-balancer giving you
 a different ip address.
 
 Make sure to point the dns domain `jupyter.github-actions.qhub.dev` to
-`172.17.10.100` from the previous commands. This can be done in many
+`192.168.49.100` from the previous commands. This can be done in many
 ways possibly the easiest is modifying `/etc/hosts` and adding the
 following line. This will override any dns server.
 
 ```ini
-172.17.10.100 jupyter.github-actions.qhub.dev
+192.168.49.100 jupyter.github-actions.qhub.dev
 ```
 
 Finally, if everything is set properly you should be able to `curl` the JupyterHub Server.
