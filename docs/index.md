@@ -18,83 +18,66 @@ the deployment of data science infrastructure.
 Contents:
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Introduction
     
-source/01_intro/1_intro.md
+source/01_intro/01_intro.md
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Get Started
 
-source/02_get_started/1_installation.md
-source/02_get_started/2_setup.md
-source/02_get_started/3_usage.md
-source/02_get_started/4_configuration.md
-
+source/02_get_started/01_installation.md
+source/02_get_started/02_setup.md
+source/02_get_started/03_usage.md
+source/02_get_started/04_configuration.md
+source/02_get_started/05_management.md
+source/02_get_started/06_troubleshooting.md
+source/02_get_started/07_support.md
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Tutorials
 
-source/03_tutorials/1_project_setup_tutorial.md
+source/03_tutorials_and_samples/1_project_setup_tutorial.md
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: How-To Guides
 
 source/04_how_to_guides/1_qhub-aws-deploy_guide.md
 source/04_how_to_guides/2_qhub-gcp-deploy_guide.md
 source/04_how_to_guides/3_qhub-do-deploy_guide.md
 source/04_how_to_guides/4_system_backup.md
-source/04_how_to_guides/5_conda_env_update.md
-source/04_how_to_guides/6_terraform_install.md
 ```
 
 ```{toctree}
-:maxdepth: 2
-:caption: Theme
-
-source/05_theme/1_theme.md
-```
-
-```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Reference
 
-source/06_reference/1_qhub_infrastructure.md
-source/06_reference/2_system_maintenance.md
+source/05_reference/01_qhub_infrastructure.md
+source/05_reference/02_system_maintenance.md
+source/05_reference/03_base_cost.md
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Development
 
-source/07_development/1_architecture.md
-source/07_development/2_adv_env.md
+source/06_developers_contrib_guide/01_architecture.md
+source/06_developers_contrib_guide/02_adv_docs.md
+source/06_developers_contrib_guide/04_tests.md
+source/06_developers_contrib_guide/05_changelog.md
+source/06_developers_contrib_guide/06_versioning.md
 ```
 
 ```{toctree}
-:maxdepth: 2
-:caption: Integrations
-
-source/08_integrations/1_prefect.md
-```
-
-```{toctree}
-:maxdepth: 2
-:caption: FAQ
-
-source/09_faq/1_faqs.md
-```
-
-```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Resources
 
-source/10_resources/1_logos.md
-source/10_resources/2_glossary.md
+source/07_resources/1_logos.md
+source/07_resources/2_glossary.md
 ```

@@ -11,15 +11,22 @@
 ## Upcoming release 0.3.0
 
 ### Feature changes and enhancements
-* Full JupyterHub theming including colors now
-* Jupyterhub docker image now independent from zero-to-jupyterhub
-* Jupyterlab 3 now default user docker image
+* Full JupyterHub theming including colors now.
+* JupyterHub docker image now independent from zero-to-jupyterhub.
+* JupyterLab 3 now default user Docker image.
 * Implemented the option to locally deploy QHub allowing for local testing.
-* Removed requirement for DNS, authorization is now password-based (no more OAuth requirements).
+* Removed the requirement for DNS, authorization is now password-based (no more OAuth requirements).
+* Added option for password-based authentication
+* CI now tests local deployment on each commit/PR.
+* QHub Terraform modules are now pinned to specific git branch via
+  `terraform_modules.repository` and `terraform_modules.ref`.
 
 ### Bug fixes
 
 ### Breaking changes
+
+* Terraform version is now pinned to specific version
+
 
 ### Migration guide
 
@@ -28,9 +35,9 @@
 2. Ensure full functionality of QHub Cloud this involves at a minimum
    ensuring
   - [ ] GCP, AWS, DO, and local deployment
-  - [ ] lets encrypt successfully provisioned 
-  - [ ] dask gateway functions properly on each
-  - [ ] jupyterlab functions properly on each
+  - [ ] "Let's Encrypt" successfully provisioned 
+  - [ ] Dask Gateway functions properly on each
+  - [ ] JupyterLab functions properly on each
 3. Increment the version number in `qhub/VERSION` in format `X.Y.Z`
 4. Ensure that the version number in `qhub/VERSION` is used in pinning
    QHub in the github actions `qhub/template/{{
@@ -39,28 +46,6 @@
 5. Create a git tag pointing to the release branch once fully tested
    and version numbers are incremented `v<version>`
 
----
-
-## Upcoming release 0.3.0
-### Feature changes and enhancements
-* Implemented the option to deploy QHub on an existing kubernetes
-  deployment allowing for local testing `provider=local`.
-* Removed requirement for DNS, a self-signed certificate is by default
-  created
-* Added option for password-based authentication
-* CI now tests local deployment on each commit/PR
-* QHub Terraform modules are now pinned to specific git branch via
-  `terraform_modules.repository` and `terraform_modules.ref`
-
-### Bug fixes
-
-### Breaking changes
-
-* Terraform version is now pinned to specific version
-
-### Migration guide
-
->>>>>>> 2c20f32e2f3b78547203e052a28ab11ee119a121
 ---
 
 ## Release 0.2.0
