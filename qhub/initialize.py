@@ -373,7 +373,7 @@ def git_repository_initialize(git_repository):
 
 
 def auth0_auto_provision(config):
-    auth0_config = create_client(config['domain'], config["project_name"])
+    auth0_config = create_client(config["domain"], config["project_name"])
     config["security"]["authentication"]["config"]["client_id"] = auth0_config[
         "client_id"
     ]
