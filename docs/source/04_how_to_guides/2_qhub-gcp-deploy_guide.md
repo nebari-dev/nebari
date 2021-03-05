@@ -204,9 +204,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - dask==2.14.0
-      - distributed==2.14.0
-      - dask-gateway=0.6.1
+      - qhub-dask==0.2.3
       - numpy
       - numba
       - pandas
