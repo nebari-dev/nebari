@@ -146,6 +146,7 @@ jobs:
           mkdir -p local-deployment
           cd local-deployment
           qhub init local --project=thisisatest  --domain jupyter.github-actions.qhub.dev --auth-provider=password --terraform-state=local
+          cat qhub-config.yaml
       - name: Render QHub Cloud
         run: |
           cd local-deployment
