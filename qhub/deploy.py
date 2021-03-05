@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def deploy_configuration(config, dns_provider, dns_auto_provision, disable_prompt):
-    logger.info(f'All qhub endpoints will be under *.{config["domain"]}')
+    logger.info(f'All qhub endpoints will be under https://{config["domain"]}')
 
     with timer(logger, "deploying QHub"):
         guided_install(config, dns_provider, dns_auto_provision, disable_prompt)
@@ -76,7 +76,7 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
             config["domain"].split(".")[:-2],
             config["domain"].split(".")[-2:],
         )
-        record_name = f'jupyter.{".".join(record_name)}'
+        record_name = ".".join(record_name)
         zone_name = ".".join(zone_name)
         if config["provider"] in {"do", "gcp", "azure"}:
             update_record(zone_name, record_name, "A", ip_or_hostname)
@@ -89,7 +89,7 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
     elif not disable_prompt:
         input(
             f"Take IP Address {ip_or_hostname} and update DNS to point to "
-            f'"jupyter.{config["domain"]}" [Press Enter when Complete]'
+            f'"{config["domain"]}" [Press Enter when Complete]'
         )
 
     # 08 Full deploy QHub
