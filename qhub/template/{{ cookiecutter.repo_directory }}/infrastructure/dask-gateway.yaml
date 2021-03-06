@@ -1,6 +1,6 @@
 gateway:
   extraConfig:
-    profiles: |
+    dask_gateway_config: |
 {% filter indent(width=6) %}
 {% include "templates/dask_gateway_config.py.j2" %}
 {% endfilter %}
