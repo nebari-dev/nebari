@@ -12,8 +12,7 @@ RUN /opt/scripts/install-conda.sh
 ENV PATH="/opt/conda/bin:$PATH"
 
 # ========== dask-worker install ===========
-COPY dask-worker/environment.yaml /opt/dask-worker/environment.yaml
-RUN /opt/scripts/install-conda-environment.sh /opt/dask-worker/environment.yaml
+COPY dask-worker /opt/dask-worker
 
-COPY dask-worker/postBuild /opt/dask-worker/postBuild
-RUN /opt/dask-worker/postBuild
+RUN /opt/scripts/install-conda-environment.sh /opt/dask-worker/environment.yaml \
+    && /opt/dask-worker/postBuild
