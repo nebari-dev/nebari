@@ -38,9 +38,12 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         )
 
     # 05 Create terraform backend remote state bucket
-    with change_directory("terraform-state"):
-        run(["terraform", "init"])
-        run(["terraform", "apply", "-auto-approve"])
+    # backwards compatible with `qhub-config.yaml` which
+    # don't have `terraform_state` key
+    if config.get("terraform_state") != "local":
+        with change_directory("terraform-state"):
+            run(["terraform", "init"])
+            run(["terraform", "apply", "-auto-approve"])
 
     # 06 Create qhub initial state (up to nginx-ingress)
     with change_directory("infrastructure"):
@@ -66,6 +69,7 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
             ip_or_hostname = hostname_matches[0].decode()
         else:
             raise ValueError(f"IP Address not found in: {cmd_output}")
+
     # 07 Update DNS to point to qhub deployment
     if dns_auto_provision and dns_provider == "cloudflare":
         record_name, zone_name = (
@@ -82,7 +86,7 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
             logger.info(
                 f"Couldn't update the DNS record for cloud provider: {config['provider']}"
             )
-    else:
+    elif not disable_prompt:
         input(
             f"Take IP Address {ip_or_hostname} and update DNS to point to "
             f'"jupyter.{config["domain"]}" [Press Enter when Complete]'

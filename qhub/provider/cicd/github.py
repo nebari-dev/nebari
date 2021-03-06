@@ -50,10 +50,7 @@ def update_secret(owner, repo, secret_name, secret_value):
     return github_request(
         f"repos/{owner}/{repo}/actions/secrets/{secret_name}",
         method="PUT",
-        json={
-            "encrypted_value": encrypted_value,
-            "key_id": key["key_id"],
-        },
+        json={"encrypted_value": encrypted_value, "key_id": key["key_id"]},
     )
 
 
