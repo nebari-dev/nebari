@@ -15,7 +15,7 @@
     "default_images": null,
     "profiles": null,
     "theme": {
-      "juypterhub": {
+      "jupyterhub": {
 
       }
     },
