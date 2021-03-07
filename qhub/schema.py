@@ -3,10 +3,11 @@ import typing
 import re
 
 import pydantic
-from qhub.constants import SUPPORTED_TERRAFORM_MINOR_RELEASES
+from qhub.constants import SUPPORTED_TERRAFORM_VERSIONS
 
 
 class ProviderEnum(str, enum.Enum):
+    local = "local"
     do = "do"
     aws = "aws"
     gcp = "gcp"
@@ -101,11 +102,6 @@ class LabProfile(Base):
     kubespawner_override: KubeSpawner
 
 
-class Project(Base):
-    project_name: str
-    provider: Provider
-
-
 class User(Base):
     uid: str
     primary_group: str
@@ -131,7 +127,7 @@ class GithubAuth(Base):
 
 class Authentication(Base):
     type: str
-    config: AuthConfig
+    config: typing.Optional[AuthConfig]
 
 
 class Security(Base):
@@ -183,8 +179,11 @@ class Profiles(Base):
     dask_worker: typing.Dict[str, DaskWorker] = {}
 
 
+project_name_regex_type = pydantic.constr(regex="^[A-Za-z-_]+$")
+
+
 class Main(Base):
-    project_name: str
+    project_name: project_name_regex_type
     provider: ProviderEnum
     ci_cd: CiEnum
     security: Security
@@ -193,10 +192,10 @@ class Main(Base):
 
     @pydantic.validator("terraform_version")
     def verify_terraform_version(cls, v):
-        minor_release = re.search(r"(\d+)\.(\d+)", v).group(0)
-        if minor_release not in SUPPORTED_TERRAFORM_MINOR_RELEASES:
+        minor_release = re.search(r"(\d+)\.(\d+).(\d+)", v).group(0)
+        if minor_release not in SUPPORTED_TERRAFORM_VERSIONS:
             raise ValueError(
-                f"terraform_version must be defined in qhub-config.yaml and a release of one of the following minor versions: {SUPPORTED_TERRAFORM_MINOR_RELEASES}"
+                f"terraform_version must be defined in qhub-config.yaml and a release of one of the following minor versions: {SUPPORTED_TERRAFORM_VERSIONS}"
             )
 
 

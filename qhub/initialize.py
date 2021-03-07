@@ -16,10 +16,11 @@ BASE_CONFIGURATION = {
     "ci_cd": None,
     "domain": None,
     "terraform_version": "0.13.15",
+    "terraform_state": None,
     "security": {
         "authentication": None,
         "users": {
-            "costrouc": {
+            "example-user": {
                 "uid": 1000,
                 "primary_group": "users",
                 "secondary_groups": ["admin"],
@@ -28,17 +29,32 @@ BASE_CONFIGURATION = {
         "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
     },
     "default_images": {
-        "jupyterhub": "quansight/qhub-jupyterhub:1abd4efb8428a9d851b18e89b6f6e5ef94854334",
-        "jupyterlab": "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334",
-        "dask_worker": "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334",
+        "jupyterhub": "quansight/qhub-jupyterhub:7bbe490d586771045289139cffe8cfb3dff3c3d4",
+        "jupyterlab": "quansight/qhub-jupyterlab:7bbe490d586771045289139cffe8cfb3dff3c3d4",
+        "dask_worker": "quansight/qhub-dask-worker:7bbe490d586771045289139cffe8cfb3dff3c3d4",
     },
-    "storage": {
-        "conda_store": "20Gi",
-        "shared_filesystem": "10Gi",
+    "storage": {"conda_store": "20Gi", "shared_filesystem": "10Gi"},
+    "theme": {
+        "jupyterhub": {
+            "hub_title": None,
+            "hub_subtitle": None,
+            "welcome": None,
+            "logo": "/hub/custom/images/jupyter_qhub_logo.svg",
+            "primary_color": "#4f4173",
+            "secondary_color": "#957da6",
+            "accent_color": "#32C574",
+            "text_color": "#111111",
+            "h1_color": "#652e8e",
+            "h2_color": "#652e8e",
+        }
     },
 }
 
-OAUTH_GITHUB = {
+AUTH_PASSWORD = {
+    "type": "password",
+}
+
+AUTH_OAUTH_GITHUB = {
     "type": "GitHub",
     "config": {
         "client_id": "PLACEHOLDER",
@@ -47,7 +63,7 @@ OAUTH_GITHUB = {
     },
 }
 
-OAUTH_AUTH0 = {
+AUTH_OAUTH_AUTH0 = {
     "type": "Auth0",
     "config": {
         "client_id": "PLACEHOLDER",
@@ -64,11 +80,7 @@ DIGITAL_OCEAN = {
     "node_groups": {
         "general": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
-        "worker": {
-            "instance": "s-2vcpu-4gb",
-            "min_nodes": 1,
-            "max_nodes": 4,
-        },
+        "worker": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
     },
 }
 
@@ -79,17 +91,9 @@ GOOGLE_PLATFORM = {
     "availability_zones": ["us-central1-c"],
     "kubernetes_version": "1.14.10-gke.31",
     "node_groups": {
-        "general": {
-            "instance": "n1-standard-2",
-            "min_nodes": 1,
-            "max_nodes": 1,
-        },
+        "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
-        "worker": {
-            "instance": "n1-standard-2",
-            "min_nodes": 1,
-            "max_nodes": 4,
-        },
+        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
     },
 }
 
@@ -98,21 +102,9 @@ AMAZON_WEB_SERVICES = {
     "availability_zones": ["us-west-2a", "us-west-2b"],
     "kubernetes_version": "1.14",
     "node_groups": {
-        "general": {
-            "instance": "m5.large",
-            "min_nodes": 1,
-            "max_nodes": 1,
-        },
-        "user": {
-            "instance": "m5.large",
-            "min_nodes": 1,
-            "max_nodes": 2,
-        },
-        "worker": {
-            "instance": "m5.large",
-            "min_nodes": 1,
-            "max_nodes": 2,
-        },
+        "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
+        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2},
+        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2},
     },
 }
 
@@ -127,7 +119,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1,
                 "mem_limit": "1G",
                 "mem_guarantee": "1G",
-                "image": "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334",
+                "image": "quansight/qhub-jupyterlab:7bbe490d586771045289139cffe8cfb3dff3c3d4",
             },
         },
         {
@@ -138,7 +130,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1.25,
                 "mem_limit": "2G",
                 "mem_guarantee": "2G",
-                "image": "quansight/qhub-jupyterlab:1abd4efb8428a9d851b18e89b6f6e5ef94854334",
+                "image": "quansight/qhub-jupyterlab:7bbe490d586771045289139cffe8cfb3dff3c3d4",
             },
         },
     ],
@@ -148,14 +140,14 @@ DEFAULT_PROFILES = {
             "worker_cores": 1,
             "worker_memory_limit": "1G",
             "worker_memory": "1G",
-            "image": "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334",
+            "image": "quansight/qhub-dask-worker:7bbe490d586771045289139cffe8cfb3dff3c3d4",
         },
         "Medium Worker": {
             "worker_cores_limit": 1.5,
             "worker_cores": 1.25,
             "worker_memory_limit": "2G",
             "worker_memory": "2G",
-            "image": "quansight/qhub-dask-worker:1abd4efb8428a9d851b18e89b6f6e5ef94854334",
+            "image": "quansight/qhub-dask-worker:7bbe490d586771045289139cffe8cfb3dff3c3d4",
         },
     },
 }
@@ -174,6 +166,7 @@ DEFAULT_ENVIRONMENTS = {
             "numpy",
             "numba",
             "pandas",
+            "cdsdashboards-singleuser",
         ],
     }
 }
@@ -185,10 +178,11 @@ def render_config(
     cloud_provider,
     ci_provider,
     repository,
-    oauth_provider,
-    terraform_version=DEFAULT_TERRAFORM_VERSION,
+    auth_provider,
     repository_auto_provision=False,
-    oauth_auto_provision=False,
+    auth_auto_provision=False,
+    terraform_version=DEFAULT_TERRAFORM_VERSION,
+    terraform_state=None,
     kubernetes_version=None,
     disable_prompt=False,
 ):
@@ -197,6 +191,12 @@ def render_config(
     config["ci_cd"] = ci_provider
 
     config["terraform_version"] = terraform_version
+    config["terraform_state"] = terraform_state
+
+    config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
+    config["theme"]["jupyterhub"][
+        "welcome"
+    ] = f"""Welcome to jupyter.{ qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
@@ -207,8 +207,8 @@ def render_config(
     config["domain"] = qhub_domain
     oauth_callback_url = f"https://jupyter.{qhub_domain}/hub/oauth_callback"
 
-    if oauth_provider == "github":
-        config["security"]["authentication"] = OAUTH_GITHUB
+    if auth_provider == "github":
+        config["security"]["authentication"] = AUTH_OAUTH_GITHUB
         print(
             "Visit https://github.com/settings/developers and create oauth application"
         )
@@ -224,13 +224,18 @@ def render_config(
             config["security"]["authentication"]["config"][
                 "oauth_callback_url"
             ] = oauth_callback_url
-    elif oauth_provider == "auth0":
-        config["security"]["authentication"] = OAUTH_AUTH0
+    elif auth_provider == "auth0":
+        config["security"]["authentication"] = AUTH_OAUTH_AUTH0
         config["security"]["authentication"]["config"][
             "oauth_callback_url"
         ] = oauth_callback_url
+    elif auth_provider == "password":
+        config["security"]["authentication"] = AUTH_PASSWORD
 
     if cloud_provider == "do":
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = "Autoscaling Compute Environment on Digital Ocean"
         config["digital_ocean"] = DIGITAL_OCEAN
         if kubernetes_version:
             config["digital_ocean"]["kubernetes_version"] = kubernetes_version
@@ -243,6 +248,9 @@ def render_config(
                 "kubernetes_version"
             ] = digital_ocean.kubernetes_versions()[0]["slug"]
     elif cloud_provider == "gcp":
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = "Autoscaling Compute Environment on Google Cloud Platform"
         config["google_cloud_platform"] = GOOGLE_PLATFORM
         if kubernetes_version:
             config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
@@ -254,15 +262,22 @@ def render_config(
                 "Enter Google Cloud Platform Project ID: "
             )
     elif cloud_provider == "aws":
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = "Autoscaling Compute Environment on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
         if kubernetes_version:
             config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
+    elif cloud_provider == "local":
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = "Autoscaling Compute Environment"
 
     config["profiles"] = DEFAULT_PROFILES
     config["environments"] = DEFAULT_ENVIRONMENTS
 
-    if oauth_auto_provision:
-        if oauth_provider == "auth0":
+    if auth_auto_provision:
+        if auth_provider == "auth0":
             auth0_auto_provision(config)
 
     if repository_auto_provision:

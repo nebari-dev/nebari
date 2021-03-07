@@ -21,6 +21,9 @@ locals {
 {%- elif cookiecutter.provider == "kind" %}
       key   = "node-group"
       value = "general"
+{%- else %}
+      key   = "kubernetes.io/os"
+      value = "linux"
 {% endif %}
     }
 
@@ -37,6 +40,9 @@ locals {
 {%- elif cookiecutter.provider == "kind" %}
       key   = "node-group"
       value = "user"
+{%- else %}
+      key   = "kubernetes.io/os"
+      value = "linux"
 {% endif %}
     }
 
@@ -53,6 +59,9 @@ locals {
 {%- elif cookiecutter.provider == "kind" %}
       key   = "node-group"
       value = "worker"
+{%- else %}
+      key   = "kubernetes.io/os"
+      value = "linux"
 {% endif %}
     }
   }

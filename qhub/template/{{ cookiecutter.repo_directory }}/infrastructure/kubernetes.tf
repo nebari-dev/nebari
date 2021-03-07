@@ -1,61 +1,67 @@
 provider "kubernetes" {
+{% if cookiecutter.provider == "local" %}
+  config_path = "~/.kube/config"
+{% elif cookiecutter.provider == "kind" %}
+  host           = module.kubernetes.credentials.endpoint
+  config_path    = "~/.kube/config"
+  config_context = "kind-{{ cookiecutter.project_name }}-dev"
+  insecure       = true
+{% else %}
   host                   = module.kubernetes.credentials.endpoint
-{% if cookiecutter.provider == "kind" %}
-  config_path            = "~/.kube/config"
-  config_context         = "kind-{{ cookiecutter.project_name }}-dev"
-  insecure               = true
-{% else -%}
   token                  = module.kubernetes.credentials.token
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
 {% endif %}
 }
 
 module "kubernetes-initialization" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/initialization"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/initialization?ref={{ cookiecutter.terraform_modules.rev }}"
 
   namespace = var.environment
   secrets   = []
-  dependencies = [
-{% if cookiecutter.provider == "aws" %}
-    module.kubernetes.depended_on
-{% endif %}
-  ]
 }
-
 
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-nfs-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "nfs-mount"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.efs.credentials.dns_name
-  dependencies = [
-    module.kubernetes-initialization.depended_on
+
+  depends_on = [
+    module.kubernetes-nfs-server
   ]
 }
 {% else -%}
 module "kubernetes-nfs-server" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-server"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-server?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "nfs-server"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
+
+  depends_on = [
+    module.kubernetes-initialization
+  ]
 }
 
 module "kubernetes-nfs-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "nfs-mount"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.kubernetes-nfs-server.endpoint_ip
+
+  depends_on = [
+    module.kubernetes-nfs-server
+  ]
 }
 {% endif %}
 
 module "kubernetes-conda-store-server" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/conda-store"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/conda-store?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "conda-store"
   namespace    = var.environment
@@ -65,26 +71,39 @@ module "kubernetes-conda-store-server" {
     "{{ key }}" = file("../environments/{{ key }}")
 {% endfor %}
   }
+
+  depends_on = [
+    module.kubernetes-initialization
+  ]
 }
 
 module "kubernetes-conda-store-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "conda-store"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.conda_store }}"
   nfs_endpoint = module.kubernetes-conda-store-server.endpoint_ip
+
+  depends_on = [
+    module.kubernetes-conda-store-server
+  ]
 }
 
 provider "helm" {
+  debug = true
   kubernetes {
+{% if cookiecutter.provider == "local" %}
+    config_path = "~/.kube/config"
+{% elif cookiecutter.provider == "kind" %}
     host                   = module.kubernetes.credentials.endpoint
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
-{% if cookiecutter.provider != "kind" %}
-    load_config_file       = false
-    token                  = module.kubernetes.credentials.token
-{% else %}
     load_config_file       = true
+{% else %}
+    load_config_file       = false
+    host                   = module.kubernetes.credentials.endpoint
+    token                  = module.kubernetes.credentials.token
+    cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
 {% endif %}
   }
   version = "1.0.0"
@@ -92,37 +111,31 @@ provider "helm" {
 
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-autoscaling" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/cluster-autoscaler"
-
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/cluster-autoscaler?ref={{ cookiecutter.terraform_modules.rev }}"
   namespace = var.environment
-
   aws-region   = var.region
   cluster-name = local.cluster_name
-
-  dependencies = [
-    module.kubernetes.depended_on
+  depends_on = [
+    module.kubernetes-initialization
   ]
 }
 {% endif -%}
 
 module "kubernetes-ingress" {
-{% if cookiecutter.provider != "kind" -%}
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/ingress"
-
-  namespace = var.environment
-
-  node-group = local.node_groups.general
+{% if cookiecutter.provider == "kind" %}
+  source     = "{{ cookiecutter.terraform_modules.repository }}//modules/kind/ingress?ref={{ cookiecutter.terraform_modules.rev }}"
 {% else %}
-  source = "github.com/brl0/qhub-terraform-modules//modules/kind/ingress?ref=local_kind"
+  source     = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/ingress?ref={{ cookiecutter.terraform_modules.rev }}"
+  node-group = local.node_groups.general
 {% endif -%}
-
-  dependencies = [
-    module.kubernetes-initialization.depended_on
+  namespace  = var.environment
+  depends_on = [
+    module.kubernetes-initialization
   ]
 }
 
 module "qhub" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/meta/qhub"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/meta/qhub?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name      = "qhub"
   namespace = var.environment
@@ -148,8 +161,8 @@ module "qhub" {
     file("dask-gateway.yaml")
   ]
 
-  dependencies = [
-    module.kubernetes-ingress.depended_on
+  depends_on = [
+    module.kubernetes-ingress
   ]
 }
 
@@ -157,8 +170,8 @@ module "qhub" {
 module "prefect" {
   source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect"
 
-  dependencies = [
-    module.qhub.depended_on
+  depends_on = [
+    module.qhub
   ]
   namespace            = var.environment
   jupyterhub_api_token = module.qhub.jupyterhub_api_token
