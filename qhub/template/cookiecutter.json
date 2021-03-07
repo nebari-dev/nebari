@@ -7,8 +7,8 @@
     "terraform_version": null,
     "terraform_state": null,
     "terraform_modules": {
-        "repository": "github.com/quansight/qhub-terraform-modules",
-        "rev": "dev"
+        "repository": "github.com/brl0/qhub-terraform-modules",
+        "rev": "local_kind_dev"
     },
     "prefect": null,
     "security": null,
