@@ -145,6 +145,8 @@ module "qhub" {
 
   external-url = var.endpoint
 
+  annotations = module.kubernetes-ingress.annotations
+
   jupyterhub-image  = var.jupyterhub-image
   jupyterlab-image  = var.jupyterlab-image
   dask-worker-image = var.dask-worker-image
