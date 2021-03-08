@@ -130,6 +130,7 @@ module "kubernetes-ingress" {
 {% endif -%}
 
   namespace  = var.environment
+
   depends_on = [
     module.kubernetes-initialization
   ]
