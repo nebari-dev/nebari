@@ -154,8 +154,7 @@ DEFAULT_PROFILES = {
 
 DEFAULT_ENVIRONMENTS = {
     "environment-default.yaml": {
-        "name":
-        "default",
+        "name": "default",
         "channels": ["conda-forge", "defaults"],
         "dependencies": [
             "python=3.8",
