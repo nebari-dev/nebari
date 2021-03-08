@@ -166,6 +166,7 @@ DEFAULT_ENVIRONMENTS = {
             "numpy",
             "numba",
             "pandas",
+            "cdsdashboards-singleuser",
         ],
     }
 }

@@ -131,20 +131,7 @@ jobs:
           ip route
       - name: Configure LoadBalancer IPs
         run: |
-          python <<EOF
-          import json
-          import os
-
-          filename = os.path.expanduser('~/.minikube/profiles/minikube/config.json')
-          with open(filename) as f:
-               data = json.load(f)
-
-          data['KubernetesConfig']['LoadBalancerStartIP'] = '172.17.10.100'
-          data['KubernetesConfig']['LoadBalancerEndIP'] = '172.17.10.200'
-
-          with open(filename, 'w') as f:
-               json.dump(data, f)
-          EOF
+          python tests/scripts/minikube-loadbalancer-ip.py
       - name: Enable Minikube metallb
         run: |
           minikube addons enable metallb
@@ -178,8 +165,7 @@ jobs:
           nslookup jupyter.github-actions.qhub.dev
       - name: Curl jupyterhub login page
         run: |
-          # TODO: make tests better
-          # curl -k https://jupyter.github-actions.qhub.dev/hub/login
+          curl -k https://jupyter.github-actions.qhub.dev/hub/login
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment
