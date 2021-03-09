@@ -72,12 +72,12 @@ security:
 
 `users` and `groups` allows one to provision UNIX permissions to each
 user. Any user is assigned a `uid`, `primary_group`, and optionally
-any number of `secondary_groups`. 
-* The `primary_group` is the group name assigned to files that are 
+any number of `secondary_groups`.
+* The `primary_group` is the group name assigned to files that are
 written for the user.
-* `groups` are a mapping of group name to group IDs. It is 
+* `groups` are a mapping of group name to group IDs. It is
   recommended to not change the IDs assigned to groups and users
-  after creation, since it may lead to login issues. 
+  after creation, since it may lead to login issues.
   > NOTE: While the demo shows IDs between `100` and
 `1000`, it is recommended to start with high User ID numbers
 e.g. `10000000`. `ids` technically supports 2 billion `ids`.
@@ -107,7 +107,7 @@ and **Kubernetes versions** will be DIFFERENT. [duplicated info]
 ### Providers
 #### DigitalOcean
 
-DigitalOcean has a restriction with autoscaling in that the minimum 
+DigitalOcean has a restriction with autoscaling in that the minimum
 nodes allowed (`min_nodes` = 1) is one. Below is the recommended setup.
 > Note: DigitalOcean regularly updates Kubernetes versions hence, the
 > field `kubernetes_version` will most likely have to be changed.
@@ -138,7 +138,7 @@ digital_ocean:
 Google Cloud has the best support for QHub. It allows auto-scaling to
 zero within the node group. There are no major restrictions.
 
-To see available instance types refer to 
+To see available instance types refer to
 [GCP docs](https://cloud.google.com/compute/docs/machine-types).
 
 ```yaml
@@ -315,7 +315,9 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.2.3
+      - dask==2.30.0
+      - distributed==2.30.1
+      - dask-gateway=0.9.0
       - numpy
       - numba
       - pandas
@@ -329,7 +331,9 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.2.3
+      - dask==2.30.0
+      - distributed==2.30.1
+      - dask-gateway=0.9.0
       - numpy
       - numba
       - pandas
@@ -344,8 +348,8 @@ expect this environment distribution method to change over time.
 Each environment configuration is a `environment.<filename>` mapping to a
 conda environment definition file. If you need to pin a specific version,
 please include it in the definition. One current requirement is that
-each environment include `ipykernel`, `ipywidgets`, `dask==2.14.0`,
-`distributed==2.14.0`, `dask-gateway==0.6.1`. Upon changing the
+each environment include `ipykernel`, `ipywidgets`, `dask==2.30.0`,
+`distributed==2.30.1`, `dask-gateway==0.9.0`. Upon changing the
 environment definition expect 1-10 minutes upon deployment of the
 configuration for the environment to appear.
 
@@ -480,7 +484,9 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.2.3
+      - dask==2.30.0
+      - distributed==2.30.1
+      - dask-gateway=0.9.0
       - numpy
       - numba
       - pandas
@@ -494,7 +500,9 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.2.3
+      - dask==2.30.0
+      - distributed==2.30.1
+      - dask-gateway=0.9.0
       - numpy
       - numba
       - pandas
