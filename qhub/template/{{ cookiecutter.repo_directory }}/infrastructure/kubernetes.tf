@@ -1,16 +1,16 @@
 provider "kubernetes" {
-# {% if cookiecutter.provider == "local" %}
+{% if cookiecutter.provider == "local" %}
   config_path = "~/.kube/config"
-# {% elif cookiecutter.provider == "kind" %}
+{% elif cookiecutter.provider == "kind" %}
   host           = module.kubernetes.credentials.endpoint
   config_path    = "~/.kube/config"
   config_context = "kind-{{ cookiecutter.project_name }}-dev"
   insecure       = true
-# {% else %}
+{% else %}
   host                   = module.kubernetes.credentials.endpoint
   token                  = module.kubernetes.credentials.token
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
-# {% endif %}
+{% endif %}
 }
 
 module "kubernetes-initialization" {
@@ -20,7 +20,7 @@ module "kubernetes-initialization" {
   secrets   = []
 }
 
-# {% if cookiecutter.provider == "aws" %}
+{% if cookiecutter.provider == "aws" %}
 module "kubernetes-nfs-mount" {
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
 
@@ -33,7 +33,7 @@ module "kubernetes-nfs-mount" {
     module.kubernetes-nfs-server
   ]
 }
-# {% else %}
+{% else %}
 module "kubernetes-nfs-server" {
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-server?ref={{ cookiecutter.terraform_modules.rev }}"
 
@@ -58,7 +58,7 @@ module "kubernetes-nfs-mount" {
     module.kubernetes-nfs-server
   ]
 }
-# {% endif %}
+{% endif %}
 
 module "kubernetes-conda-store-server" {
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/conda-store?ref={{ cookiecutter.terraform_modules.rev }}"
@@ -67,9 +67,9 @@ module "kubernetes-conda-store-server" {
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.conda_store }}"
   environments = {
-# {% for key in cookiecutter.environments %}
+{% for key in cookiecutter.environments %}
     "{{ key }}" = file("../environments/{{ key }}")
-# {% endfor %}
+{% endfor %}
   }
 
   depends_on = [
@@ -93,23 +93,23 @@ module "kubernetes-conda-store-mount" {
 provider "helm" {
   debug = true
   kubernetes {
-# {% if cookiecutter.provider == "local" %}
+{% if cookiecutter.provider == "local" %}
     config_path = "~/.kube/config"
-# {% elif cookiecutter.provider == "kind" %}
+{% elif cookiecutter.provider == "kind" %}
     host                   = module.kubernetes.credentials.endpoint
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
     load_config_file       = true
-# {% else %}
+{% else %}
     load_config_file       = false
     host                   = module.kubernetes.credentials.endpoint
     token                  = module.kubernetes.credentials.token
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
-# {% endif %}
+{% endif %}
   }
   version = "1.0.0"
 }
 
-# {% if cookiecutter.provider == "aws" %}
+{% if cookiecutter.provider == "aws" %}
 module "kubernetes-autoscaling" {
   source       = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/cluster-autoscaler?ref={{ cookiecutter.terraform_modules.rev }}"
   namespace    = var.environment
@@ -119,16 +119,18 @@ module "kubernetes-autoscaling" {
     module.kubernetes-initialization
   ]
 }
-# {% endif %}
+{% endif %}
 
 module "kubernetes-ingress" {
-# {% if cookiecutter.provider != "kind" %}
+{% if cookiecutter.provider != "kind" %}
   source     = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/ingress?ref={{ cookiecutter.terraform_modules.rev }}"
   node-group = local.node_groups.general
-# {% else %}
+{% else %}
   source     = "{{ cookiecutter.terraform_modules.repository }}//modules/kind/ingress?ref={{ cookiecutter.terraform_modules.rev }}"
-# {% endif %}
-  namespace  = var.environment
+{% endif %}
+
+  namespace = var.environment
+
   depends_on = [
     module.kubernetes-initialization
   ]
@@ -168,7 +170,7 @@ module "qhub" {
   ]
 }
 
-# {% if cookiecutter.prefect is true %}
+{% if cookiecutter.prefect is true %}
 module "prefect" {
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/prefect?ref={{ cookiecutter.terraform_modules.rev }}"
 
@@ -179,4 +181,4 @@ module "prefect" {
   jupyterhub_api_token = module.qhub.jupyterhub_api_token
   prefect_token        = var.prefect_token
 }
-# {% endif %}
+{% endif %}
