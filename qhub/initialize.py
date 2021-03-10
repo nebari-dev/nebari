@@ -48,6 +48,9 @@ BASE_CONFIGURATION = {
             "h2_color": "#652e8e",
         }
     },
+    "cdsdashboards": {
+        "enabled": True
+    }
 }
 
 AUTH_PASSWORD = {

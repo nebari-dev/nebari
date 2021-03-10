@@ -7,7 +7,7 @@ dependencies:
  - bcrypt
  - oauthenticator
  - escapism
- - cdsdashboards
  - pip:
    - jupyterhub-kubespawner >= 0.16.1
-   - qhub-jupyterhub-theme
+   - https://github.com/Quansight/qhub-jupyterhub-theme/archive/b78749053d5ddd094c684cf48a0b4e227880ea65.tar.gz
+   - https://github.com/ideonate/cdsdashboards/archive/946fa025dc6522e0aaa64c682820038fb7c4e217.tar.gz

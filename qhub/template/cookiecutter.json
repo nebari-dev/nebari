@@ -21,7 +21,7 @@
     },
     "environments": null,
     "storage": null,
-
+    "cdsdashboards": {},
     "digital_ocean": {
         "region": null,
         "kubernetes_version": null,

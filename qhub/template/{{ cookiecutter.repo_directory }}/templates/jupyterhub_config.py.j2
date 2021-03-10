@@ -1,3 +1,5 @@
+{% if cookiecutter.cdsdashboards.enabled %}
+
 # ================ CDSDASHBOARDS =====================
 c.JupyterHub.allow_named_servers = True
 from cdsdashboards.hubextension import cds_extra_handlers
@@ -7,7 +9,18 @@ c.JupyterHub.template_paths = CDS_TEMPLATE_PATHS
 c.JupyterHub.spawner_class = 'cdsdashboards.hubextension.spawners.variablekube.VariableKubeSpawner'
 c.CDSDashboardsConfig.builder_class = 'cdsdashboards.builder.kubebuilder.KubeBuilder'
 c.VariableMixin.default_presentation_cmd = ['python3', '-m', 'jhsingle_native_proxy.main']
-# c.CDSDashboardsConfig.conda_envs = ['default', 'base', 'dashboards']
+
+c.JupyterHub.default_url = '/hub/home'
+
+{% else %}
+
+c.JupyterHub.allow_named_servers = False
+c.JupyterHub.spawner_class = 'kubespawner.KubeSpawner'
+c.JupyterHub.template_paths = []
+c.JupyterHub.extra_handlers = []
+
+{% endif %}
+
 # ==================== THEME =========================
 import tornado.web
 import qhub_jupyterhub_theme
@@ -16,14 +29,15 @@ c.JupyterHub.extra_handlers += [
     (r'/custom/(.*)', tornado.web.StaticFileHandler, {"path": qhub_jupyterhub_theme.STATIC_PATH}),
 ]
 
-c.JupyterHub.template_paths += [
+c.JupyterHub.template_paths = [
     qhub_jupyterhub_theme.TEMPLATE_PATH
-]
+] + c.JupyterHub.template_paths
 
 c.JupyterHub.template_vars = {
 {%- for key, value in cookiecutter.theme.jupyterhub.items() %}
     "{{ key }}": "{{ value | replace('\"', '\\"') }}",
 {%- endfor %}
+{% if cookiecutter.cdsdashboards.enabled %}"cdsdashboards_enabled": True{% endif %}
 }
 
 # ================= Profiles =====================
