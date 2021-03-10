@@ -4,6 +4,7 @@ provider "kubernetes" {
 {% else %}
   host                   = module.kubernetes.credentials.endpoint
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+{% endif -%}
 {% if cookiecutter.provider == "azure" %}
   username               = module.kubernetes.credentials.username
   password               = module.kubernetes.credentials.password
@@ -108,6 +109,7 @@ provider "helm" {
     {% else -%}
     token                  = module.kubernetes.credentials.token
     {% endif -%}
+{% endif -%}
   }
   version = "1.0.0"
 }
