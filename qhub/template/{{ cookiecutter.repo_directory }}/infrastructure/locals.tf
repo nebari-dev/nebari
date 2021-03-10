@@ -21,6 +21,9 @@ locals {
 {%- elif cookiecutter.provider == "do" %}
       key   = "doks.digitalocean.com/node-pool"
       value = "general"
+{%- else %}
+      key   = "kubernetes.io/os"
+      value = "linux"
 {% endif %}
     }
 
@@ -37,6 +40,9 @@ locals {
 {%- elif cookiecutter.provider == "do" %}
       key   = "doks.digitalocean.com/node-pool"
       value = "user"
+{%- else %}
+      key   = "kubernetes.io/os"
+      value = "linux"
 {% endif %}
     }
 
@@ -53,6 +59,9 @@ locals {
 {%- elif cookiecutter.provider == "do" %}
       key   = "doks.digitalocean.com/node-pool"
       value = "worker"
+{%- else %}
+      key   = "kubernetes.io/os"
+      value = "linux"
 {% endif %}
     }
   }

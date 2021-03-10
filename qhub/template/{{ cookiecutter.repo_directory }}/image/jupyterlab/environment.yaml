@@ -9,22 +9,26 @@ dependencies:
  - nb_conda_kernels
  - ipython > 7
  - jupyter-server-proxy
- - jupyterlab-git
- - ipywidgets
- - jupyterlab >= 2
+ - jupyterlab >=3
  - jupyter_client
  - jupyter_console
  - jupyterhub
- - nodejs >= 10
  - nbconvert
  - nbval
- - dask_labextension
+
+ # jupyterlab extensions
+ - dask_labextension >=5.0.0
+ # jupyterlab-git >=0.30.0 # uncomment when 0.30.0 is released
+ - jupyter-videochat
+ - ipywidgets >=7.6
+ - ipyleaflet >=0.13.5
+ - pyviz_comms >=2.0.1
 
  # viz tools
  - panel
  - param
  - python-graphviz
- - ipyleaflet
+ - cdsdashboards-singleuser
 
  # testing, docs, linting
  - pytest
@@ -36,5 +40,4 @@ dependencies:
  - isort
  - importnb
 
- - pip:
-   - jupyter-videochat
+ - pip: []
