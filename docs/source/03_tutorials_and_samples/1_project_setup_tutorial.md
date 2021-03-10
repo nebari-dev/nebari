@@ -129,14 +129,14 @@ The next step is to run `qhub init` to generate the configuration file `qhub-con
 - `--project`: Chose a name consisting of lowercase letters and numbers only and is between 3 and 16 characters long. IE `testcluster`
 - `--domain`: This is the base domain for your cluster. After deployment, the DNS will use the base name prepended with `jupyter`. IE if the base name is `test.qhub.dev` then the DNS will be provisioned as `jupyter.test.qhub.dev`. This pattern is also applicable if you are setting your own DNS through a different provider.
 - `--ci-provider`: This specifies what provider to use for ci-cd. Currently, github-actions is supported.
-- `--oauth-provider`: This will set configuration file to use auth0 for authentication
-- `--oauth-auto-provision`: This will automatically create and configure an auth0 application
+- `--auth-provider`: This will set configuration file to use auth0 for authentication
+- `--auth-auto-provision`: This will automatically create and configure an auth0 application
 - `--repository`: The repository name that will be used to store the infrastructure as code
 - `--repository-auto-provision`: This sets the secrets for the github repository
 
 Best practices is to create a new directory and run all the qhub commands inside of it. An example of the full command is below:
 
-`qhub init gcp --project testcluster --domain test.qhub.dev --ci-provider github-actions --oauth-provider auth0 --oauth-auto-provision --repository github.com/quansight/qhub-test --repository-auto-provision`
+`qhub init gcp --project test-project --domain test.qhub.dev --ci-provider github-actions --auth-provider auth0 --auth-auto-provision --repository github.com/quansight/qhub-test --repository-auto-provision`
 
 ### 2.6 QHub render
 
