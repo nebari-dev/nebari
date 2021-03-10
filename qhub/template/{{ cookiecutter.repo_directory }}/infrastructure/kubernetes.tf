@@ -24,11 +24,7 @@ module "kubernetes-initialization" {
 
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-nfs-mount" {
-<<<<<<< HEAD
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount?ref=azure"
-=======
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
->>>>>>> dev
 
   name         = "nfs-mount"
   namespace    = var.environment
@@ -41,11 +37,7 @@ module "kubernetes-nfs-mount" {
 }
 {% else -%}
 module "kubernetes-nfs-server" {
-<<<<<<< HEAD
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-server?ref=azure"
-=======
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-server?ref={{ cookiecutter.terraform_modules.rev }}"
->>>>>>> dev
 
   name         = "nfs-server"
   namespace    = var.environment
@@ -57,11 +49,7 @@ module "kubernetes-nfs-server" {
 }
 
 module "kubernetes-nfs-mount" {
-<<<<<<< HEAD
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount?ref=azure"
-=======
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
->>>>>>> dev
 
   name         = "nfs-mount"
   namespace    = var.environment
@@ -75,11 +63,7 @@ module "kubernetes-nfs-mount" {
 {% endif %}
 
 module "kubernetes-conda-store-server" {
-<<<<<<< HEAD
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/conda-store?ref=azure"
-=======
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/conda-store?ref={{ cookiecutter.terraform_modules.rev }}"
->>>>>>> dev
 
   name         = "conda-store"
   namespace    = var.environment
@@ -96,11 +80,7 @@ module "kubernetes-conda-store-server" {
 }
 
 module "kubernetes-conda-store-mount" {
-<<<<<<< HEAD
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount?ref=azure"
-=======
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
->>>>>>> dev
 
   name         = "conda-store"
   namespace    = var.environment
@@ -120,7 +100,6 @@ provider "helm" {
     load_config_file       = false
     host                   = module.kubernetes.credentials.endpoint
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
-<<<<<<< HEAD
     {% if cookiecutter.provider == "azure" -%}    
     username               = module.kubernetes.credentials.username
     password               = module.kubernetes.credentials.password
@@ -129,9 +108,6 @@ provider "helm" {
     {% else -%}
     token                  = module.kubernetes.credentials.token
     {% endif -%}
-=======
-{% endif %}
->>>>>>> dev
   }
   version = "1.0.0"
 }
@@ -152,22 +128,11 @@ module "kubernetes-autoscaling" {
 {% endif -%}
 
 module "kubernetes-ingress" {
-<<<<<<< HEAD
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/ingress?ref=azure"
-=======
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/ingress?ref={{ cookiecutter.terraform_modules.rev }}"
->>>>>>> dev
 
   namespace = var.environment
 
   node-group = local.node_groups.general
-<<<<<<< HEAD
-  depends_on = [module.kubernetes-initialization]
-}
-
-module "qhub" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/meta/qhub?ref=azure"
-=======
 
   depends_on = [
     module.kubernetes-initialization
@@ -176,7 +141,6 @@ module "qhub" {
 
 module "qhub" {
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/meta/qhub?ref={{ cookiecutter.terraform_modules.rev }}"
->>>>>>> dev
 
   name      = "qhub"
   namespace = var.environment
@@ -201,27 +165,19 @@ module "qhub" {
   dask-gateway-overrides = [
     file("dask-gateway.yaml")
   ]
-<<<<<<< HEAD
-  depends_on = [module.kubernetes-ingress]
-=======
 
   depends_on = [
     module.kubernetes-ingress
   ]
->>>>>>> dev
 }
 
 {% if cookiecutter.prefect is true -%}
 module "prefect" {
   source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect?ref=azure"
 
-<<<<<<< HEAD
-  depends_on = [ module.qhub ]
-=======
   depends_on = [
     module.qhub
   ]
->>>>>>> dev
   namespace            = var.environment
   jupyterhub_api_token = module.qhub.jupyterhub_api_token
   prefect_token        = var.prefect_token
