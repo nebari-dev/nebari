@@ -1,120 +1,18 @@
 # Setup Initialization
 
-QHub Cloud offers two usage options: [local](#local-deployment) and [Cloud](#cloud-deployment) deployment.
-We advise newcomers to start with local deployment and once their initial setup is tested, move on to the Cloud option.
+QHub Cloud offers two usage options: [Local](source/06_developers_contrib_guide/04_tests) used for testing and 
+[Cloud](#cloud-deployment) deployment for all else.
+We advise users with existing Kubernetes clusters to start with local deployment to test those clusters, since local 
+testing is significantly easier to perform than testing clusters on the Cloud. On the other hand, if you don't have clusters
+and would like to test the _default_ QHub install, try the Cloud option.
 
 ## Local Deployment
 The local version is recommended for testing QHub's components due to its simplicity. It is important to highlight that 
 while it is possible to test most of QHub with this version, components which are Cloud provisioned such as, 
 VPCs, managed Kubernetes cluster, and managed container registries cannot be locally tested due to their Cloud dependencies.
+For more information on how to setup Local deployment, follow the [Tests section](source/06_developers_contrib_guide/04_tests)
+on the Developers documentation. 
 
-TODO: explain in more detail which parts can be tested by the local deployment. And which QHub components cannot be.  
-
-### Compatibility
-Currently, **QHUb local deployment is only compatible with Linux Operating Systems**. The primary limitation for the 
-installation on macOS relates to [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)
-being unable to route traffic to containers.
-Theoretically, the installation of HyperKit Driver could solve the issue, although the proposed solution has not yet been tested.
-
-### Dependencies
-
-> NOTE: The following instructions apply **only to Linux OS**.
-
-To deploy QHub locally requires the installation of the following dependencies:
-+ [Minukube](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-minikube/) version 1.10.0-beta and up
-+ [Docker](https://docs.docker.com/engine/install/) install.
-  
-The installation of a hypervisor is **not** necessary.
-
-> NOTE: Minikube requires `kubectl`. To install `kubectl`, 
-> [follow the instructions](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-kubectl/) according to your operating system.
-
-### Initialize Kubernetes cluster
-
-The following command will download a Docker image of around 500Mb in size and initialise a cluster with 2 CPUs and 4Gb
-of RAM, with Docker as the chosen driver.
-
-```bash
-minikube start --cpus 2 --memory 4096 --driver=docker
-```
-If successful, the command above should output the following on your terminal:
-```bash
-...
-🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
-```
-
-Next, we will install `nfs-common` drivers. This is required by the JupyterLab instances, which require NFS mount for 
-`PersistentVolumeClaims` (PVCs). To install it, run:
-
-```shell
-minikube ssh "sudo apt update; sudo apt install nfs-common -y"
-```
-For more details on PVs and PVCs, read the [JupyterHub documentation](https://zero-to-jupyterhub.readthedocs.io/en/latest/jupyterhub/customizing/user-storage.html).
-
-#### MetalLB
-
-[MetalLB](https://metallb.universe.tf/) is the load balancer for bare metal Kubernetes clusters. We will need to configure
-MetalLB to match the QHub configuration. 
-
-Here, we will choose to configure the load balancer to have an IP address of 172.17.10.100 (start) and of 172.17.10.200 (stop). 
-Make sure that the IP range is within the Docker interface subnet, in this case, within the 172.17.0.0/16 range.
- 
-To verify your Docker subnet IP address use:
-```shell
-$ ip route
-```
-Where the output will be something similar to:
-```shell
-default via 192.168.1.1 dev wlp4s0 proto dhcp metric 600 
-172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 
-```
-This means that you have to ensure that the start/stop IP range for the load balancer is within the 172.17.0.0/16 subnet.
-> NOTE: Your docker subnet may be different from the one shown above.
-
----
-
-You can run MetalLB manually or dynamically by using the Python command below.
-
-To manually configure `metallb` run:
-
-```shell
-minikube addons configure metallb
-```
-
-Minikube does not provide a simple interactive way to configure addons, 
-([as shown in this repository issue](https://github.com/kubernetes/minikube/issues/8283)). Hence, we suggest setting up 
-the configuration using the Python script below with the given values, since there is a DNS name that already points to 
-the address. To do so, paste the bash script below on your terminal.
-
-<details><summary>Click to expand</summary>
-
-```bash
-python <<EOF
-import json
-import os
-
-filename = os.path.expanduser('~/.minikube/profiles/minikube/config.json')
-with open(filename) as f:
-     data = json.load(f)
-
-data['KubernetesConfig']['LoadBalancerStartIP'] = '172.17.10.100'
-data['KubernetesConfig']['LoadBalancerEndIP'] = '172.17.10.200'
-
-with open(filename, 'w') as f:
-     json.dump(data, f)
-EOF
-```
-</details>
-
-If successful, the output should be `✅  metallb was successfully configured`.
-
-Lastly, enable MetalLB by running
-```bash
-minikube addons enable metallb
-```
-To which the output should be `The 'metallb' addon is enabled`.
-
----
 
 ## Cloud Deployment
 The Cloud version of QHub requires a choice of [Cloud provider](#cloud-provider), 
