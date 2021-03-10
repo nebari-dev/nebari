@@ -53,9 +53,9 @@ With QHub, you can create and handle both prebuilt and ad-hoc conda environments
 
         ipykernel
         ipywidgets
-        dask==2.14.0
-        distributed==2.14.0
-        dask-gateway==0.6.1
+        dask==2.30.0
+        distributed==2.30.1
+        dask-gateway==0.9.0
 
 ### How to Authenticate Users
 

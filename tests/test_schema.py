@@ -25,7 +25,7 @@ def test_schema(
         auth_provider=auth_provider,
         repository_auto_provision=False,
         auth_auto_provision=False,
-        kubernetes_version='1.18.0',
+        kubernetes_version="1.18.0",
         disable_prompt=True,
     )
     assert qhub.schema.verify(config) is None
