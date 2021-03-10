@@ -145,7 +145,7 @@ jobs:
         run: |
           mkdir -p local-deployment
           cd local-deployment
-          qhub init local --project=thisisatest  --domain jupyter.github-actions.qhub.dev --auth-provider=password --terraform-state=local
+          qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
           cat qhub-config.yaml
       - name: Render QHub Cloud
         run: |
@@ -161,12 +161,12 @@ jobs:
           kubectl get namespaces
           kubectl get pods -A
           kubectl get services -A
-      - name: Check jupyter.github-actions.qhub.dev resolves
+      - name: Check github-actions.qhub.dev resolves
         run: |
-          nslookup jupyter.github-actions.qhub.dev
+          nslookup github-actions.qhub.dev
       - name: Curl jupyterhub login page
         run: |
-          curl -k https://jupyter.github-actions.qhub.dev/hub/login
+          curl -k https://github-actions.qhub.dev/hub/login
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment
