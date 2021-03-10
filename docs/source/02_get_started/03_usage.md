@@ -90,8 +90,8 @@ mkdir qhub-test && cd qhub-test
 #### Fully automated deployment
 To generate a fully automated deployment, on your terminal run:
 ```shell
-qhub init aws --project project-name --domain jupyter.qhub.dev --ci-provider github-actions --oauth-provider auth0 
---oauth-auto-provision --repository github.com/quansight/project-name --repository-auto-provision
+qhub init aws --project project-name --domain jupyter.qhub.dev --ci-provider github-actions --auth-provider auth0 
+--auth-auto-provision --repository github.com/quansight/project-name --repository-auto-provision
 ```
 The command above will generate the `qhub-config.yaml` config file with an infrastructure deployed on `aws`, named 
 `project-name`, where the domain will be `jupyter.github-actions.qhub.dev`. The deployment will use `github-actions` 
@@ -107,8 +107,8 @@ There are several **optional** (yet highly recommended) flags that allow to conf
 - `--domain`: base domain for your cluster. After deployment, the DNS will use the base name prepended with `jupyter`, i.e.
   if the base name is `test.qhub.dev` then the DNS will be provisioned as `jupyter.test.qhub.dev`. This pattern is also applicable if you are setting your own DNS through a different provider.
 - `--ci-provider`: specifies what provider to use for CI/CD. Currently, only supports GitHub Actions.
-- `--oauth-provider`: This will set configuration file to use the specified provider for authentication.
-- `--oauth-auto-provision`: This will automatically create and configure an application using OAuth.
+- `--auth-provider`: This will set configuration file to use the specified provider for authentication.
+- `--auth-auto-provision`: This will automatically create and configure an application using OAuth.
 - `--repository`: Repository name that will be used to store the Infrastructure-as-Code on GitHub.
 - `--repository-auto-provision`: Sets the secrets for the GitHub repository used for CI/CD actions.
 
@@ -141,7 +141,7 @@ Finally, we can deploy QHub with:
 qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
 ```
 
-The terminal will prompt to press `[enter]` to check oauth credentials (which were added by the `qhub init` command). 
+The terminal will prompt to press `[enter]` to check auth credentials (which were added by the `qhub init` command). 
 That will trigger the deployment which will take around 10 minutes to complete.
 
 Part of the output will show an "ip" address (DigitalOcean or GCP), or a CNAME "hostname" (for AWS)
