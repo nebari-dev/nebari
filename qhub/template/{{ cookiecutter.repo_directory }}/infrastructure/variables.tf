@@ -39,8 +39,8 @@ variable "availability_zones" {
 {% elif cookiecutter.provider == "azure" %}
 variable "region" {
   description = "azure location"
-  type    = string
-  default = "{{ cookiecutter.azure.region }}"
+  type        = string
+  default     = "{{ cookiecutter.azure.region }}"
 }
 {% elif cookiecutter.provider == "do" %}
 variable "region" {

@@ -6,7 +6,7 @@ terraform {
     }
 {%- elif cookiecutter.provider == "azure" %}
     azure = {
-      source = "hashicorp/azurerm"
+      source  = "hashicorp/azurerm"
       version = "=2.44.0"
     }
 {%- elif cookiecutter.provider == "gcp" %}
@@ -22,7 +22,7 @@ terraform {
       source = "hashicorp/helm"
     }
     kubernetes = {
-      source = "hashicorp/kubernetes"
+      source  = "hashicorp/kubernetes"
       version = "2.0.2"
     }
   }
