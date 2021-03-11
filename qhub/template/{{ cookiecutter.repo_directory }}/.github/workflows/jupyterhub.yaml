@@ -9,10 +9,9 @@ on:
       - "charts/**"
       - "environments/**"
       - ".github/workflows/jupyterhub.yaml"
-
+env:
 {% if cookiecutter.provider == 'aws' %}
 {% raw %}
-env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -20,7 +19,6 @@ env:
 {% endraw %}
 {% elif cookiecutter.provider == 'do' %}
 {% raw %}
-env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
@@ -30,9 +28,16 @@ env:
 {% endraw %}
 {% elif cookiecutter.provider == 'gcp' %}
 {% raw %}
-env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+{% endraw %}
+{% elif cookiecutter.provider == 'azure' %}
+{% raw %}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT: ${{ secrets.ARM_TENANT }}
 {% endraw %}
 {% endif %}
 

@@ -30,7 +30,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
 {% endraw %}
-{% if cookiecutter.provider == 'azure' %}
+{% elif cookiecutter.provider == 'azure' %}
 {% raw %}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
