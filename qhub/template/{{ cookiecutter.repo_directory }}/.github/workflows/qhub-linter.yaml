@@ -1,0 +1,24 @@
+name: "qhub auto linter"
+
+on:
+  push:
+    branches:
+      - qhub_linter
+    paths:
+      - "qhub-config.yaml"
+
+jobs:
+  qhub_linter:
+    name: qhub-linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout Image'
+        uses: actions/checkout@v2
+        with:
+          token: {{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: linterfy
+        run: python -c "import pathlib; print(pathlib.Path(__file__).parent.absolute())"
