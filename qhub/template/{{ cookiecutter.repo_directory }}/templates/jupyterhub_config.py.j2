@@ -129,7 +129,6 @@ def qhub_list_available_profiles(username):
 c.JupyterHub.admin_access = True
 c.Authenticator.admin_users = qhub_list_admins(QHUB_USER_MAPPING)
 c.Authenticator.whitelist = qhub_list_users(QHUB_USER_MAPPING)
-c.Spawner.start_timeout = 600
 
 {% if cookiecutter.security.authentication.type == 'password' %}
 # ==================== AUTHENTICATION ======================
