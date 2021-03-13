@@ -78,7 +78,7 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         )
         record_name = f'jupyter.{".".join(record_name)}'
         zone_name = ".".join(zone_name)
-        if config["provider"] in {"do", "gcp"}:
+        if config["provider"] in {"do", "gcp", "azure"}:
             update_record(zone_name, record_name, "A", ip_or_hostname)
         elif config["provider"] == "aws":
             update_record(zone_name, record_name, "CNAME", ip_or_hostname)
