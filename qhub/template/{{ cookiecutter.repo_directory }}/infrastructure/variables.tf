@@ -47,7 +47,7 @@ variable "region" {
 variable "endpoint" {
   description = "Jupyterhub endpoint"
   type        = string
-  default     = "jupyter.{{ cookiecutter.domain }}"
+  default     = "{{ cookiecutter.domain }}"
 }
 
 variable "jupyterhub-image" {
