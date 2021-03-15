@@ -123,8 +123,7 @@ def comment_on_pr(owner, repo_name, pr_id, logger):
     message = lint["message"]
     exit_code = lint["code"]
 
-    github_token = os.environ["GITHUB_TOKEN"]
-    gh = github.Github(github_token)
+    gh = github.Github(os.environ["GITHUB_TOKEN"])
 
     user = gh.get_user(owner)
     repo = user.get_repo(repo_name)
