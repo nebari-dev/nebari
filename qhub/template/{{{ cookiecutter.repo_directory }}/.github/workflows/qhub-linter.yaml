@@ -1,0 +1,38 @@
+name: "QHub validate-linter"
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "qhub-config.yaml"
+env:
+  GITHUB_TOKEN: {{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}
+
+jobs:
+  qhub-validate:
+    name: 'Linter'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout Infastructure'
+        uses: actions/checkout@master
+        with:
+          token: {{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Git linter
+        run: |
+          git config user.email "qhub@quansight.com"
+          git config user.name "github action"
+      - name: Install qhub
+        run: |
+          pip install qhub==0.2.3
+          pip install gitpython
+          pip install pygithub
+      - name: 'Qhub Linterfy'
+        env:
+          REPO_NAME: {{ '${{ github.repository }}' }}
+        run: |
+          python scripts/linter.py ${REPO_NAME} $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH") --enable-commenting
