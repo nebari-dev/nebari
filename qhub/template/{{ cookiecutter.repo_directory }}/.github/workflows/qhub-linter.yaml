@@ -8,7 +8,7 @@ on:
       - "qhub-config.yaml"
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: {{ '${{ secrets.GITHUB_TOKEN }}' }}
 
 jobs:
   qhub-validate:
@@ -27,4 +27,8 @@ jobs:
         run: |
           pip install qhub==0.2.3
       - name: 'Qhub Linterfy'
-        run: python scripts/linter.py
+        env: 
+          REPO_NAME: {{ '${{ github.repository }}' }}
+          PR_ID: {{ '$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")' }}
+        run: |
+          qhub validate --enable-commenting
