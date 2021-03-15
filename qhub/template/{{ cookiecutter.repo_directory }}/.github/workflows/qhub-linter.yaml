@@ -1,24 +1,30 @@
-name: "qhub auto linter"
+name: "QHub validate linter - Pull Request"
 
 on:
-  push:
+  pull_request:
     branches:
-      - qhub_linter
+      - master
     paths:
       - "qhub-config.yaml"
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
-  qhub_linter:
-    name: qhub-linter
+  qhub-validate:
+    name: 'Qhub'
     runs-on: ubuntu-latest
     steps:
-      - name: 'Checkout Image'
-        uses: actions/checkout@v2
+      - name: 'Checkout Infastructure'
+        uses: actions/checkout@master
         with:
           token: {{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - name: linterfy
-        run: python -c "import pathlib; print(pathlib.Path(__file__).parent.absolute())"
+      - name: Install qhub
+        run: |
+          pip install qhub==0.2.3
+      - name: 'Qhub Linterfy'
+        run: python scripts/linter.py
