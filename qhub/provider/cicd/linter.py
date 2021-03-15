@@ -1,10 +1,8 @@
 import os
 import textwrap
-import shutil
 import pathlib
 import subprocess
 
-from git import GitCommandError, Repo
 import github
 
 
@@ -30,6 +28,7 @@ def qhub_validate(logger):
         return True, msg, validate_output
     else:
         msg = f"validate: error: failed to validate QHub configuration."
+        logger.info(msg)
         validate_comment = parse_validation(validate_output.stderr.decode("utf-8"))
         validate_comment_wrapper = f" ```{validate_comment}``` "
         return False, validate_comment_wrapper, validate_output.returncode
@@ -49,13 +48,11 @@ def generate_lint_message(repo_owner, repo_name, pr_id, logger):
     # Raise an error if the PR is not mergeable.
     if not mergeable:
         status = "merge_conflict"
-        message = textwrap.dedent(
-            """
+        message = textwrap.dedent("""
                 This is an automatic response from the QHub-cloud linter. 
                 I was trying to look for the QHub-configuration file to lint for you, but it appears we have a merge 
                 conflict.
-                """
-        )
+                """)
 
         lint = {"message": f"#### `qhub validate` {status} \n" + message, "code": 1}
         return lint
@@ -70,33 +67,25 @@ def generate_lint_message(repo_owner, repo_name, pr_id, logger):
     # lint/validate qhub-config.yaml
     all_pass, messages, validate_code = qhub_validate(logger)
 
-    pass_lint = textwrap.dedent(
-        f"""
+    pass_lint = textwrap.dedent(f"""
             This is an automatic response from the QHub-cloud linter.
             I just wanted to let you know that I linted your `qhub-config.yaml` in your PR and I didn't find any 
             problems.
-            """
-    )
+            """)
 
-    bad_lint = (
-        textwrap.dedent(
-            f"""
+    # it should be better to parse this messages first
+    bad_lint = (textwrap.dedent(f"""
             This is an automatic response from the QHub-cloud linter. 
             I just wanted to let you know that I linted your `qhub-config.yaml` in your PR and found some errors.
             Here's what I've got... \n"""
-        )
-        + f"{messages}"
-    )
-    # it should be better to parse this messages first
+                                ) + f"{messages}")
 
     if not pr_config:
         status = "no configuration file"
-        message = textwrap.dedent(
-            """
+        message = textwrap.dedent("""
             This is an automatic response from the qQHub-cloud linter.
             I was trying to look for the `qhub-config.yaml` file to lint for you, but couldn't find any...
-            """
-        )
+            """)
 
     elif all_pass:
         status = "Success"
@@ -107,13 +96,10 @@ def generate_lint_message(repo_owner, repo_name, pr_id, logger):
 
     pull_request = remote_repo.get_pull(pr_id)
     if pull_request.state == "open":
-        lint = {
-            "message": f"#### `qhub validate` {status} \n" + message,
-            "code": validate_code,
-        }
+        lint = {"message": f"#### `qhub validate` {status} \n" + message,
+                "code": validate_code, }
     else:
         lint = {}
-
     return lint
 
 
@@ -158,9 +144,7 @@ def qhub_linter():
 
     lint_info = comment_on_pr(owner, repo_name, pr_id, logger=logger)
 
-    print(
-        "Comments not published, but the following would "
-        "have been the message:\n{}".format(lint_info[0])
-    )
+    print("Comments not published, but the following would "
+          "have been the message:\n{}".format(lint_info[0]))
 
     return exit(lint_info[1])
