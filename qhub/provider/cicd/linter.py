@@ -27,7 +27,7 @@ def qhub_validate(logger):
         logger.info(msg)
         return True, msg, validate_output
     else:
-        msg = f"validate: error: failed to validate QHub configuration."
+        msg = "validate: error: failed to validate QHub configuration."
         logger.info(msg)
         validate_comment = parse_validation(validate_output.stderr.decode("utf-8"))
         validate_comment_wrapper = f" ```{validate_comment}``` "
@@ -50,8 +50,8 @@ def generate_lint_message(repo_owner, repo_name, pr_id, logger):
         status = "merge_conflict"
         message = textwrap.dedent(
             """
-                This is an automatic response from the QHub-cloud linter. 
-                I was trying to look for the QHub-configuration file to lint for you, but it appears we have a merge 
+                This is an automatic response from the QHub-cloud linter.
+                I was trying to look for the QHub-configuration file to lint for you, but it appears we have a merge
                 conflict.
                 """
         )
@@ -70,9 +70,9 @@ def generate_lint_message(repo_owner, repo_name, pr_id, logger):
     all_pass, messages, validate_code = qhub_validate(logger)
 
     pass_lint = textwrap.dedent(
-        f"""
+        """
             This is an automatic response from the QHub-cloud linter.
-            I just wanted to let you know that I linted your `qhub-config.yaml` in your PR and I didn't find any 
+            I just wanted to let you know that I linted your `qhub-config.yaml` in your PR and I didn't find any
             problems.
             """
     )
@@ -80,8 +80,8 @@ def generate_lint_message(repo_owner, repo_name, pr_id, logger):
     # it should be better to parse this messages first
     bad_lint = (
         textwrap.dedent(
-            f"""
-            This is an automatic response from the QHub-cloud linter. 
+            """
+            This is an automatic response from the QHub-cloud linter.
             I just wanted to let you know that I linted your `qhub-config.yaml` in your PR and found some errors.
             Here's what I've got... \n"""
         )
