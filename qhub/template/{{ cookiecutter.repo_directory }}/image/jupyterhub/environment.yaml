@@ -9,5 +9,5 @@ dependencies:
  - escapism
  - pip:
    - jupyterhub-kubespawner >= 0.16.1
-   - https://github.com/Quansight/qhub-jupyterhub-theme/archive/b78749053d5ddd094c684cf48a0b4e227880ea65.tar.gz
-   - https://github.com/ideonate/cdsdashboards/archive/946fa025dc6522e0aaa64c682820038fb7c4e217.tar.gz
+   - https://github.com/Quansight/qhub-jupyterhub-theme/archive/423de213cfea3754e42030f1b4abd92b25779aa2.tar.gz
+   - cdsdashboards==0.5.0-b1
