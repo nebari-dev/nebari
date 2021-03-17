@@ -30,4 +30,4 @@ jobs:
           REPO_NAME : {{ '${{ github.repository }}' }}
           GITHUB_TOKEN: {{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}
         run: |
-          qhub validate --enable-commenting
+          qhub linter --enable-commenting
