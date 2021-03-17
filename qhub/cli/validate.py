@@ -11,8 +11,7 @@ def create_validate_subcommand(subparser):
     subparser.set_defaults(func=handle_validate)
 
     linter_parser = subparser.add_parser("linter")
-    linter_parser.add_argument(
-        "--enable-commenting", help="Turn on PR commenting")
+    linter_parser.add_argument("--enable-commenting", help="Turn on PR commenting")
     linter_parser.set_defaults(func=qhub_linter)
 
 
