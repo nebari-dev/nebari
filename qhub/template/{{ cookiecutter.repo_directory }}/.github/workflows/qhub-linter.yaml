@@ -1,4 +1,4 @@
-name: "QHub validate linter - Pull Request"
+name: "QHub validate linter"
 
 on:
   pull_request:
@@ -7,8 +7,6 @@ on:
     paths:
       - "qhub-config.yaml"
 
-env:
-  GITHUB_TOKEN: {{ '${{ secrets.GITHUB_TOKEN }}' }}
 
 jobs:
   qhub-validate:
@@ -26,11 +24,10 @@ jobs:
       - name: Install qhub
         run: |
           pip install qhub==0.2.3
-          pip install gitpython
-          pip install pygithub
       - name: 'Qhub Linterfy'
-        env: 
-          REPO_NAME: {{ '${{ github.repository }}' }}
-          PR_ID: {{ '$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")' }}
+        env:
+          PR_NUMBER: {{ '${{ github.event.number }}' }}
+          REPO_NAME : {{ '${{ github.repository }}' }}
+          GITHUB_TOKEN: {{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}
         run: |
           qhub validate --enable-commenting
