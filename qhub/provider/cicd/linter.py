@@ -79,8 +79,8 @@ def generate_lint_message():
 
 def comment_on_pr():
     lint = generate_lint_message()
-    message = lint['message']
-    exitcode = lint['code']
+    message = lint["message"]
+    exitcode = lint["code"]
 
     print(
         "If the comment was not published, the following would "
