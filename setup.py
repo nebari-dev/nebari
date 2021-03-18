@@ -37,6 +37,7 @@ setup(
         "auth0-python",
         "pydantic",
         "pynacl",
+        "bcrypt",
     ],
     extras_require={"dev": ["flake8==3.8.3", "black==19.10b0", "twine", "pytest", "diagrams"]},
     include_package_data=True,

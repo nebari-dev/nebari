@@ -232,6 +232,12 @@ def render_config(
     elif auth_provider == "password":
         config["security"]["authentication"] = AUTH_PASSWORD
 
+        # Generate a random password
+        import bcrypt, string, random
+        example_password = ''.join(random.choice(string.ascii_letters+string.digits) for i in range(16))
+        config["security"]["users"]["example-user"]["password"] = bcrypt.hashpw(example_password.encode('utf-8'), bcrypt.gensalt()).decode()
+        print(f'Your QHub password for example-user is {example_password}')
+
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
