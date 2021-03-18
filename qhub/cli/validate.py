@@ -24,8 +24,8 @@ def handle_validate(args):
     with config_filename.open() as f:
         config = yaml.safe_load(f.read())
 
-    verify(config)
-
     if "enable-commenting" in args:
         # for PR's only
         qhub_linter()
+        
+    verify(config)

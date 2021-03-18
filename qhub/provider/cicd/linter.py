@@ -30,13 +30,9 @@ def qhub_validate(logger):
 
 
 def generate_lint_message(logger):
-    def find_config(path):
-        for root, dirs, files in os.walk(path):
-            if "qhub-config.yaml" in files:
-                return os.path.join(root, "qhub-config.yaml")
 
     # prep for linting
-    pr_config = find_config(pathlib.Path().absolute())
+    pr_config = pathlib.Path("qhub-config.yaml")
     # lint/validate qhub-config.yaml
     all_pass, messages, validate_code = qhub_validate(logger)
 
@@ -96,7 +92,7 @@ def make_comment(message):
 
 def qhub_linter():
     import logging
-
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
     logger = logging.getLogger("qhub-cloud.linting")
     lint = generate_lint_message(logger)
 
