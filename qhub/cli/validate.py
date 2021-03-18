@@ -8,11 +8,10 @@ from qhub.provider.cicd.linter import qhub_linter
 def create_validate_subcommand(subparser):
     subparser = subparser.add_parser("validate")
     subparser.add_argument("config", help="qhub configuration")
-    subparser.set_defaults(func=handle_validate)
     subparser.add_argument(
-        "--enable-commenting", help="Turn on PR commenting", default=qhub_linter
-    )
-
+        "--enable-commenting", help="Turn on PR commenting")
+    subparser.set_defaults(func=handle_validate)
+    
 
 def handle_validate(args):
     config_filename = pathlib.Path(args.config)
@@ -25,3 +24,7 @@ def handle_validate(args):
         config = yaml.safe_load(f.read())
 
     verify(config)
+
+    if 'enable-commenting' in args:
+        # for PR's only
+        qhub_linter()
