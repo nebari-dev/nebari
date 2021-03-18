@@ -3,6 +3,4 @@ channels:
   - conda-forge
 dependencies:
  # dask
- - dask==2.30.0
- - distributed==2.30.1
- - dask-gateway==0.9.0
+ - qhub-dask==0.2.3
