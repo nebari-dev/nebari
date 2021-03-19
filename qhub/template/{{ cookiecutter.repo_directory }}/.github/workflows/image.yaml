@@ -66,6 +66,23 @@ jobs:
       - name: Docker Logout
         run: |
           docker logout
+{% elif cookiecutter.provider == "azure" %}
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: {{ cookiecutter.project_name }}.azurecr.io
+          username: {{ '${{ secrets.ARM_CLIENT_ID }}' }}
+          password: {{ '${{ secrets.ARM_CLIENT_SECRET }}' }}
+      - name: Docker Build, Tag, and Push Image
+        env:
+            IMAGE_TAG: {{ '${{ github.sha }}' }}
+            IMAGE_NAME: azureqhubdev.azurecr.io/qhub-{{ '${{ matrix.dockerfile }}' }}
+        run: |
+          docker build -f image/Dockerfile.{{ '${{ matrix.dockerfile }}' }} -t $IMAGE_NAME:$IMAGE_TAG image
+          docker push $IMAGE_NAME:$IMAGE_TAG
+      - name: Docker Logout
+        run: |
+          docker logout
 {% elif cookiecutter.provider == "do" %}
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
