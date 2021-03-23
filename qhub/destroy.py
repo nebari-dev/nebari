@@ -27,10 +27,10 @@ def destroy_configuration(config):
         check_cloud_credentials(config)
 
         # 03 Remove all infrastructure
-        terraform.destroy(directory='infrastructure')
+        terraform.destroy(directory="infrastructure")
 
         # 06 Remove terraform backend remote state bucket
         # backwards compatible with `qhub-config.yaml` which
         # don't have `terraform_state` key
         if config.get("terraform_state") != "local":
-            terraform.destroy(directory='terraform-state')
+            terraform.destroy(directory="terraform-state")
