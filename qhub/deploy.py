@@ -38,18 +38,21 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
     # backwards compatible with `qhub-config.yaml` which
     # don't have `terraform_state` key
     if config.get("terraform_state") != "local":
-        terraform.init(directory='terraform-state')
-        terraform.apply(directory='terraform-state')
+        terraform.init(directory="terraform-state")
+        terraform.apply(directory="terraform-state")
 
     # 05 Create qhub initial state (up to nginx-ingress)
-    terraform.init(directory='infrastructure')
-    terraform.apply(directory='infrastructure', targets=[
-        "module.kubernetes",
-        "module.kubernetes-initialization",
-        "module.kubernetes-ingress",
-    ])
+    terraform.init(directory="infrastructure")
+    terraform.apply(
+        directory="infrastructure",
+        targets=[
+            "module.kubernetes",
+            "module.kubernetes-initialization",
+            "module.kubernetes-ingress",
+        ],
+    )
 
-    cmd_output = check_output(["terraform", "output", "--json"], cwd='infrastructure')
+    cmd_output = check_output(["terraform", "output", "--json"], cwd="infrastructure")
     # This is a bit ugly, but the issue we have at the moment is being unable
     # to parse cmd_output as json on Github Actions.
     ip_matches = re.findall(rb'"ip": "(?!string)(.*)"', cmd_output)
@@ -84,4 +87,4 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         )
 
     # 07 Full deploy QHub
-    terraform.apply(directory='infrastructure')
+    terraform.apply(directory="infrastructure")
