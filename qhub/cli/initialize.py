@@ -14,7 +14,8 @@ def create_init_subcommand(subparser):
     )
     subparser.add_argument("--project", help="Namespace to assign to qhub resources")
     subparser.add_argument(
-        "--domain", help="Domain for jupyterhub cluster to be deployed under",
+        "--domain",
+        help="Domain for jupyterhub cluster to be deployed under",
     )
     subparser.add_argument(
         "--ci-provider",
