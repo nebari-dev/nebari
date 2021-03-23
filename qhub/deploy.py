@@ -1,11 +1,10 @@
 import logging
 import re
-from subprocess import check_output, run
+from subprocess import check_output
 
 from qhub.provider import terraform
 from qhub.utils import (
     timer,
-    change_directory,
     check_cloud_credentials,
     verify_configuration_file_exists,
 )
