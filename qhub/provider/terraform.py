@@ -4,7 +4,6 @@ import logging
 import os
 import platform
 import re
-import shutil
 import subprocess
 import sys
 import tempfile

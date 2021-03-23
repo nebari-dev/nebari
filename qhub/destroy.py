@@ -1,9 +1,7 @@
 import logging
-from subprocess import run
 
 from qhub.utils import (
     timer,
-    change_directory,
     check_cloud_credentials,
     verify_configuration_file_exists,
 )
