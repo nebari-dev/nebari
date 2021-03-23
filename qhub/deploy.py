@@ -2,12 +2,12 @@ import logging
 import re
 from subprocess import check_output, run
 
+from qhub.provider import terraform
 from qhub.utils import (
     timer,
     change_directory,
     check_cloud_credentials,
     verify_configuration_file_exists,
-    check_terraform,
 )
 from qhub.provider.dns.cloudflare import update_record
 
@@ -25,52 +25,43 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
     # 01 Verify configuration file exists
     verify_configuration_file_exists()
 
-    # 02 Check terraform
-    check_terraform()
-
-    # 03 Check Environment Variables
+    # 02 Check Environment Variables
     check_cloud_credentials(config)
 
-    # 04 Check that oauth settings are set
+    # 03 Check that oauth settings are set
     if not disable_prompt:
         input(
             'Ensure that oauth settings are in configuration [Press "Enter" to continue]'
         )
 
-    # 05 Create terraform backend remote state bucket
+    # 04 Create terraform backend remote state bucket
     # backwards compatible with `qhub-config.yaml` which
     # don't have `terraform_state` key
     if config.get("terraform_state") != "local":
-        with change_directory("terraform-state"):
-            run(["terraform", "init"])
-            run(["terraform", "apply", "-auto-approve"])
+        terraform.init(directory='terraform-state')
+        terraform.apply(directory='terraform-state')
 
-    # 06 Create qhub initial state (up to nginx-ingress)
-    with change_directory("infrastructure"):
-        run(["terraform", "init"])
-        run(
-            [
-                "terraform",
-                "apply",
-                "-auto-approve",
-                "-target=module.kubernetes",
-                "-target=module.kubernetes-initialization",
-                "-target=module.kubernetes-ingress",
-            ]
-        )
-        cmd_output = check_output(["terraform", "output", "--json"])
-        # This is a bit ugly, but the issue we have at the moment is being unable
-        # to parse cmd_output as json on Github Actions.
-        ip_matches = re.findall(rb'"ip": "(?!string)(.*)"', cmd_output)
-        hostname_matches = re.findall(rb'"hostname": "(?!string)(.*)"', cmd_output)
-        if ip_matches:
-            ip_or_hostname = ip_matches[0].decode()
-        elif hostname_matches:
-            ip_or_hostname = hostname_matches[0].decode()
-        else:
-            raise ValueError(f"IP Address not found in: {cmd_output}")
+    # 05 Create qhub initial state (up to nginx-ingress)
+    terraform.init(directory='infrastructure')
+    terraform.apply(directory='infrastructure', targets=[
+        "module.kubernetes",
+        "module.kubernetes-initialization",
+        "module.kubernetes-ingress",
+    ])
 
-    # 07 Update DNS to point to qhub deployment
+    cmd_output = check_output(["terraform", "output", "--json"], cwd='infrastructure')
+    # This is a bit ugly, but the issue we have at the moment is being unable
+    # to parse cmd_output as json on Github Actions.
+    ip_matches = re.findall(rb'"ip": "(?!string)(.*)"', cmd_output)
+    hostname_matches = re.findall(rb'"hostname": "(?!string)(.*)"', cmd_output)
+    if ip_matches:
+        ip_or_hostname = ip_matches[0].decode()
+    elif hostname_matches:
+        ip_or_hostname = hostname_matches[0].decode()
+    else:
+        raise ValueError(f"IP Address not found in: {cmd_output}")
+
+    # 06 Update DNS to point to qhub deployment
     if dns_auto_provision and dns_provider == "cloudflare":
         record_name, zone_name = (
             config["domain"].split(".")[:-2],
@@ -92,6 +83,5 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
             f'"{config["domain"]}" [Press Enter when Complete]'
         )
 
-    # 08 Full deploy QHub
-    with change_directory("infrastructure"):
-        run(["terraform", "apply", "-auto-approve"])
+    # 07 Full deploy QHub
+    terraform.apply(directory='infrastructure')

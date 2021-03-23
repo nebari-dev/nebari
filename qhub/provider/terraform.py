@@ -18,9 +18,7 @@ from qhub import constants
 logger = logging.getLogger(__name__)
 
 
-def download_terraform_binary(version=None):
-    version = version or constants.DEFAULT_TERRAFORM_VERSION
-
+def download_terraform_binary(version=constants.TERRAFORM_VERSION):
     os_mapping = {
         "linux": "linux",
         "win32": "windows",
@@ -54,8 +52,8 @@ def download_terraform_binary(version=None):
     return filename_path
 
 
-def version(terraform_path="terraform"):
-    terraform_path = shutil.which(terraform_path) or download_terraform_binary()
+def version():
+    terraform_path = download_terraform_binary()
     logger.info(f"checking terraform={terraform_path} version")
 
     version_output = subprocess.check_output([terraform_path, "--version"]).decode(
@@ -64,17 +62,17 @@ def version(terraform_path="terraform"):
     return re.search(r"(\d+)\.(\d+).(\d+)", version_output).group(0)
 
 
-def init(terraform_path="terraform", directory=None):
-    terraform_path = shutil.which(terraform_path) or download_terraform_binary()
+def init(directory=None):
+    terraform_path = download_terraform_binary()
 
     logger.info(f"terraform={terraform_path} init directory={directory}")
     with timer(logger, "terraform init"):
         subprocess.check_output([terraform_path, "init"], shell=True, cwd=directory)
 
 
-def apply(terraform_path="terraform", directory=None, targets=None):
+def apply(directory=None, targets=None):
     targets = targets or []
-    terraform_path = shutil.which(terraform_path) or download_terraform_binary()
+    terraform_path = download_terraform_binary()
 
     logger.info(
         f"terraform={terraform_path} apply directory={directory} targets={targets}"
@@ -88,8 +86,8 @@ def apply(terraform_path="terraform", directory=None, targets=None):
         subprocess.check_output(command, shell=True, cwd=directory)
 
 
-def output(terraform_path="terraform", directory=None):
-    terraform_path = shutil.which(terraform_path) or download_terraform_binary()
+def output(directory=None):
+    terraform_path = download_terraform_binary()
 
     logger.info(f"terraform={terraform_path} output directory={directory}")
     with timer(logger, "terraform output"):
@@ -99,10 +97,10 @@ def output(terraform_path="terraform", directory=None):
         return json.loads(output)
 
 
-def destroy(terraform_path="terraform", directory=None):
-    terraform_path = shutil.which(terraform_path) or download_terraform_binary()
+def destroy(directory=None):
+    terraform_path = download_terraform_binary()
 
-    logger.info(f"terraform destroy directory={directory}")
+    logger.info(f"terraform={terraform_path} destroy directory={directory}")
 
     with timer(logger, "terraform destroy"):
         subprocess.check_output(
