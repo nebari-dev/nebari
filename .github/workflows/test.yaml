@@ -131,20 +131,7 @@ jobs:
           ip route
       - name: Configure LoadBalancer IPs
         run: |
-          python <<EOF
-          import json
-          import os
-
-          filename = os.path.expanduser('~/.minikube/profiles/minikube/config.json')
-          with open(filename) as f:
-               data = json.load(f)
-
-          data['KubernetesConfig']['LoadBalancerStartIP'] = '172.17.10.100'
-          data['KubernetesConfig']['LoadBalancerEndIP'] = '172.17.10.200'
-
-          with open(filename, 'w') as f:
-               json.dump(data, f)
-          EOF
+          python tests/scripts/minikube-loadbalancer-ip.py
       - name: Enable Minikube metallb
         run: |
           minikube addons enable metallb
@@ -159,6 +146,7 @@ jobs:
           mkdir -p local-deployment
           cd local-deployment
           qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
+          cat qhub-config.yaml
       - name: Render QHub Cloud
         run: |
           cd local-deployment
@@ -173,13 +161,12 @@ jobs:
           kubectl get namespaces
           kubectl get pods -A
           kubectl get services -A
-      - name: Check jupyter.github-actions.qhub.dev resolves
+      - name: Check github-actions.qhub.dev resolves
         run: |
-          nslookup jupyter.github-actions.qhub.dev
+          nslookup github-actions.qhub.dev
       - name: Curl jupyterhub login page
         run: |
-          # TODO: make tests better
-          # curl -k https://jupyter.github-actions.qhub.dev/hub/login
+          curl -k https://github-actions.qhub.dev/hub/login
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment

@@ -163,8 +163,8 @@ module "qhub" {
 module "prefect" {
   source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect"
 
-  dependencies = [
-    module.qhub.depended_on
+  depends_on = [
+    module.qhub
   ]
   namespace            = var.environment
   jupyterhub_api_token = module.qhub.jupyterhub_api_token

@@ -7,14 +7,16 @@ cat <<EOF > /opt/conda-run-worker
 #!/bin/bash
 set -xe
 
-conda run -n \$CONDA_ENVIRONMENT dask-gateway-worker "\$@"
+source activate \$CONDA_ENVIRONMENT
+dask-worker "\$@"
 EOF
 
 cat <<EOF > /opt/conda-run-scheduler
 #!/bin/bash
 set -xe
 
-conda run -n \$CONDA_ENVIRONMENT dask-gateway-scheduler "\$@"
+source activate \$CONDA_ENVIRONMENT
+dask-scheduler "\$@"
 EOF
 
 chmod 755 /opt/conda-run-worker

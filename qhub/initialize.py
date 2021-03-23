@@ -1,6 +1,9 @@
 import os
 import re
+import string
+import random
 
+import bcrypt
 import requests
 
 from qhub.provider.oauth.auth0 import create_client
@@ -163,9 +166,9 @@ DEFAULT_ENVIRONMENTS = {
             "python=3.8",
             "ipykernel",
             "ipywidgets",
-            "dask==2.14.0",
-            "distributed==2.14",
-            "dask-gateway=0.6.1",
+            "dask==2.30.0",
+            "distributed==2.30.1",
+            "dask-gateway=0.9.0",
             "numpy",
             "numba",
             "pandas",
@@ -199,23 +202,23 @@ def render_config(
     config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
     config["theme"]["jupyterhub"][
         "welcome"
-    ] = f"""Welcome to jupyter.{ qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
+    ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
     config["project_name"] = project_name
 
     if qhub_domain is None and not disable_prompt:
-        qhub_domain = input("Provide domain jupyter.<domain name>: ")
+        qhub_domain = input("Provide domain: ")
     config["domain"] = qhub_domain
-    oauth_callback_url = f"https://jupyter.{qhub_domain}/hub/oauth_callback"
+    oauth_callback_url = f"https://{qhub_domain}/hub/oauth_callback"
 
     if auth_provider == "github":
         config["security"]["authentication"] = AUTH_OAUTH_GITHUB
         print(
             "Visit https://github.com/settings/developers and create oauth application"
         )
-        print(f"  set the homepage to: https://jupyter.{qhub_domain}/")
+        print(f"  set the homepage to: https://{qhub_domain}/")
         print(f"  set the callback_url to: {oauth_callback_url}")
         if not disable_prompt:
             config["security"]["authentication"]["config"]["client_id"] = input(
@@ -234,6 +237,15 @@ def render_config(
         ] = oauth_callback_url
     elif auth_provider == "password":
         config["security"]["authentication"] = AUTH_PASSWORD
+
+        # Generate a random password
+        example_password = "".join(
+            random.choice(string.ascii_letters + string.digits) for i in range(16)
+        )
+        config["security"]["users"]["example-user"]["password"] = bcrypt.hashpw(
+            example_password.encode("utf-8"), bcrypt.gensalt()
+        ).decode()
+        print(f"Your QHub password for example-user is {example_password}")
 
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
@@ -304,7 +316,7 @@ def github_auto_provision(config, owner, repo):
             owner,
             repo,
             description=f'QHub {config["project_name"]}-{config["provider"]}',
-            homepage='https://jupyter.{config["domain"]}',
+            homepage='https://{config["domain"]}',
         )
 
     # Secrets
@@ -343,7 +355,7 @@ def git_repository_initialize(git_repository):
 
 
 def auth0_auto_provision(config):
-    auth0_config = create_client(f"jupyter.{config['domain']}", config["project_name"])
+    auth0_config = create_client(config["domain"], config["project_name"])
     config["security"]["authentication"]["config"]["client_id"] = auth0_config[
         "client_id"
     ]

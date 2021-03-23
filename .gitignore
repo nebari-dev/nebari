@@ -31,3 +31,5 @@ data
 
 # ignore qhub files
 qhub-config.yaml
+
+.vscode/

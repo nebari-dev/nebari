@@ -84,7 +84,7 @@ module "kubernetes" {
 {% endfor %}
   ]
 
-  dependencies = [
-    module.network.depended_on
+  depends_on = [
+    module.network
   ]
 }

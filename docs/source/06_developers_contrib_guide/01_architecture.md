@@ -111,4 +111,3 @@ With QHub, system admins can customize and maintain their teams' compute needs a
 ### Authentication
 
 QHub uses Github for authentication.
-
