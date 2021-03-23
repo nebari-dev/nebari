@@ -40,7 +40,7 @@ def download_terraform_binary(version=constants.TERRAFORM_VERSION):
 
     if not os.path.isfile(filename_path):
         logger.info(
-            "downloading and extracting terraform binary from url={download_url} to path={filename_path}"
+            f"downloading and extracting terraform binary from url={download_url} to path={filename_path}"
         )
         with urllib.request.urlopen(download_url) as f:
             bytes_io = io.BytesIO(f.read())
