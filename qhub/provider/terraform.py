@@ -63,10 +63,9 @@ def version():
 
 def init(directory=None):
     terraform_path = download_terraform_binary()
-
     logger.info(f"terraform={terraform_path} init directory={directory}")
     with timer(logger, "terraform init"):
-        subprocess.check_output([terraform_path, "init"], shell=True, cwd=directory)
+        subprocess.check_output([terraform_path, "init"], cwd=directory)
 
 
 def apply(directory=None, targets=None):
@@ -77,12 +76,11 @@ def apply(directory=None, targets=None):
         f"terraform={terraform_path} apply directory={directory} targets={targets}"
     )
     with timer(logger, "terraform apply"):
-        command = " ".join(
+        subprocess.check_output(
             [terraform_path, "apply", "-auto-approve"]
-            + ["-target=" + _ for _ in targets]
+            + ["-target=" + _ for _ in targets],
+            cwd=directory,
         )
-
-        subprocess.check_output(command, shell=True, cwd=directory)
 
 
 def output(directory=None):
@@ -91,7 +89,7 @@ def output(directory=None):
     logger.info(f"terraform={terraform_path} output directory={directory}")
     with timer(logger, "terraform output"):
         output = subprocess.check_output(
-            [terraform_path, "output", "-json"], shell=True, cwd=directory
+            [terraform_path, "output", "-json"], cwd=directory
         ).decode("utf8")
         return json.loads(output)
 
@@ -108,6 +106,5 @@ def destroy(directory=None):
                 "destroy",
                 "-auto-approve",
             ],
-            shell=True,
             cwd=directory,
         )
