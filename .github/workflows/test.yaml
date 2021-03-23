@@ -110,10 +110,6 @@ jobs:
           curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
           chmod +x kubectl
 
-          curl -LO https://releases.hashicorp.com/terraform/0.13.5/terraform_0.13.5_linux_amd64.zip
-          unzip terraform_0.13.5_linux_amd64.zip
-          chmod +x terraform
-
           echo "$PWD" >> $GITHUB_PATH
           popd
       - name: Start Minikube
