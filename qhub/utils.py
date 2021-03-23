@@ -1,13 +1,9 @@
 import time
 import os
 import contextlib
-import re
 from os import path
-from subprocess import check_output
-from shutil import which
 
 from qhub.constants import SUPPORTED_TERRAFORM_VERSIONS
-from qhub.provider import terraform
 
 DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
 AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
@@ -95,6 +91,8 @@ def check_cloud_credentials(config):
 
 
 def check_terraform():
+    from qhub.provider import terraform
+
     if terraform.version() not in SUPPORTED_TERRAFORM_VERSIONS:
         raise Exception(
             f"Unsupported Terraform version. Supported terraform version(s): {SUPPORTED_TERRAFORM_VERSIONS}"
