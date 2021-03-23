@@ -83,7 +83,7 @@ def check_terraform():
 
     if terraform.version() not in SUPPORTED_TERRAFORM_VERSIONS:
         raise Exception(
-            f"Unsupported Terraform version. Supported terraform version(s): {SUPPORTED_TERRAFORM_VERSIONS}"
+            f"Unsupported Terraform version={terraform.version()}. Supported terraform version(s): {SUPPORTED_TERRAFORM_VERSIONS}"
         )
 
 
