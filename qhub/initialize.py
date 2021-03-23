@@ -10,7 +10,6 @@ import random
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
-from qhub.constants import DEFAULT_TERRAFORM_VERSION
 from qhub.provider.cloud import digital_ocean
 
 
@@ -19,7 +18,6 @@ BASE_CONFIGURATION = {
     "provider": None,
     "ci_cd": None,
     "domain": None,
-    "terraform_version": "0.13.15",
     "terraform_state": None,
     "security": {
         "authentication": None,
@@ -205,7 +203,6 @@ def render_config(
     auth_provider,
     repository_auto_provision=False,
     auth_auto_provision=False,
-    terraform_version=DEFAULT_TERRAFORM_VERSION,
     terraform_state=None,
     kubernetes_version=None,
     disable_prompt=False,
@@ -214,7 +211,6 @@ def render_config(
     config["provider"] = cloud_provider
     config["ci_cd"] = ci_provider
 
-    config["terraform_version"] = terraform_version
     config["terraform_state"] = terraform_state
 
     config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
