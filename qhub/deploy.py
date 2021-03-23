@@ -1,6 +1,6 @@
 import logging
 import re
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
 from qhub.provider import terraform
 from qhub.utils import (
@@ -17,7 +17,11 @@ def deploy_configuration(config, dns_provider, dns_auto_provision, disable_promp
     logger.info(f'All qhub endpoints will be under https://{config["domain"]}')
 
     with timer(logger, "deploying QHub"):
-        guided_install(config, dns_provider, dns_auto_provision, disable_prompt)
+        try:
+            guided_install(config, dns_provider, dns_auto_provision, disable_prompt)
+        except CalledProcessError as e:
+            logger.error(e.output)
+            raise e
 
 
 def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=False):
