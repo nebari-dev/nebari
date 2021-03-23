@@ -162,7 +162,7 @@ jobs:
           nslookup github-actions.qhub.dev
       - name: Curl jupyterhub login page
         run: |
-          curl -k https://github-actions.qhub.dev/hub/login
+          curl -k --retry 5 --retry-connrefused https://github-actions.qhub.dev/hub/login
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment
