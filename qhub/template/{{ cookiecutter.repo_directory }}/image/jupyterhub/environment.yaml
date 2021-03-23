@@ -11,4 +11,4 @@ dependencies:
  - pip:
    - jupyterhub-kubespawner >= 0.16.1
    - qhub-jupyterhub-theme==0.3.1
-   - cdsdashboards==0.5.0-b2
+   - cdsdashboards==0.5.0
