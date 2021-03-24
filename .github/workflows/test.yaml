@@ -143,10 +143,6 @@ jobs:
           cd local-deployment
           qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
           cat qhub-config.yaml
-      - name: Render QHub Cloud
-        run: |
-          cd local-deployment
-          qhub render --config qhub-config.yaml -f
       - name: Deploy QHub Cloud
         run: |
           cd local-deployment

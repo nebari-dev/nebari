@@ -212,11 +212,7 @@ the users section shown like below.
 
 ```
 
-Render the files from the `qhub-config.yaml`
-
-```shell
-python -m qhub render --config qhub-config.yaml -f
-```
+Deploy and render the infrastructure
 
 ```shell
 python -m qhub deploy --config qhub-config.yaml --disable-prompt

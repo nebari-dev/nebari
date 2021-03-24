@@ -87,7 +87,6 @@ Once all the necessary credentials are gathered and set as [UNIX environment var
 QHub can be deployed in under 20 minutes using:
 ```bash
 qhub init   ... # generates initial config file and optionally automates deployment steps
-qhub render ... # creates the Terraform config module
 qhub deploy ... # creates and configures the cloud infrastructure
 ```
 

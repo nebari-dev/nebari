@@ -130,23 +130,17 @@ Best practices is to create a new directory and run all the qhub commands inside
 
 `qhub init gcp --project test-project --domain test.qhub.dev --ci-provider github-actions --auth-provider auth0 --auth-auto-provision --repository github.com/quansight/qhub-test --repository-auto-provision`
 
-### 2.6 QHub render
+### 2.6 QHub deploy
 
-After initializing, we then need to create all of Terraform configuration. This done by running the local command:
+Finally we can deploy with:
 
-        qhub render -c qhub-config.yaml -o ./ -f
-        
+    qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
+
 You will notice that several directories are created: 
   - `environments` : conda environments are stored
   - `infrastructure` : terraform files that declare state of infrastructure
   - `terraform-state` : required by terraform to securely store the state of the Terraform deployment
   - `image` : docker images used in QHub deployment including: jupyterhub, jupyterlab, and dask-gateway
-        
-### 2.7 QHub deploy
-
-Finally we can deploy with:
-
-    qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
 
 The terminal will prompt to press `[enter]` to check oauth credentials (which were added by qhub init). After pressing `enter` the deployment will continue and take roughly 10 minutes. Part of the output will show an "ip" address (DO/GCP) or a CNAME "hostname" (AWS) based on the the cloud service provider:
 
@@ -168,7 +162,7 @@ The terminal will prompt to press `[enter]` to check oauth credentials (which we
         }
 
         
-### 2.8 Push repository
+### 2.7 Push repository
 
 Add all files to github:
 
