@@ -30,7 +30,9 @@ def create_deploy_subcommand(subparser):
         help="Disable human intervention",
     )
     subparser.add_argument(
-        "--disable-render", action="store_true", help="Disable auto-rendering in deploy stage"
+        "--disable-render",
+        action="store_true",
+        help="Disable auto-rendering in deploy stage",
     )
     subparser.set_defaults(func=handle_deploy)
 
