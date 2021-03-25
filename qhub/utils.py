@@ -6,6 +6,7 @@ from os import path
 DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
 AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
 GCP_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables"
+AZURE_ENV_DOCS = "Coming Soon"
 
 
 @contextlib.contextmanager
@@ -30,6 +31,18 @@ def check_cloud_credentials(config):
                 raise Exception(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {GCP_ENV_DOCS}"""
+                )
+    elif config["provider"] == "azure":
+        for variable in {
+            "ARM_CLIENT_ID",
+            "ARM_CLIENT_SECRET",
+            "ARM_SUBSCRIPTION_ID",
+            "ARM_TENANT_ID",
+        }:
+            if variable not in os.environ:
+                raise Exception(
+                    f"""Missing the following required environment variable: {variable}\n
+                    Please see the documentation for more information: {AZURE_ENV_DOCS}"""
                 )
     elif config["provider"] == "aws":
         for variable in {

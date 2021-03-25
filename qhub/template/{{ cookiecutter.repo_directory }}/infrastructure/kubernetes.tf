@@ -1,10 +1,16 @@
 provider "kubernetes" {
 {% if cookiecutter.provider == "local" %}
   config_path = "~/.kube/config"
+{% elif cookiecutter.provider == "azure" %}
+  username           = module.kubernetes.credentials.username
+  password           = module.kubernetes.credentials.password
+  client_certificate = module.kubernetes.credentials.client_certificate
+  client_key         = module.kubernetes.credentials.client_key
+  token              = module.kubernetes.credentials.token
 {% else %}
   host                   = module.kubernetes.credentials.endpoint
-  token                  = module.kubernetes.credentials.token
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+  token                  = module.kubernetes.credentials.token
 {% endif %}
 }
 
@@ -92,11 +98,18 @@ provider "helm" {
   kubernetes {
 {% if cookiecutter.provider == "local" %}
     config_path = "~/.kube/config"
-{% else %}
+{%- else %}
     load_config_file       = false
     host                   = module.kubernetes.credentials.endpoint
-    token                  = module.kubernetes.credentials.token
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+    {% if cookiecutter.provider == "azure" -%}
+    username               = module.kubernetes.credentials.username
+    password               = module.kubernetes.credentials.password
+    client_certificate     = module.kubernetes.credentials.client_certificate
+    client_key             = module.kubernetes.credentials.client_key
+    {%- else -%}
+    token                  = module.kubernetes.credentials.token
+    {%- endif -%}
 {% endif %}
   }
   version = "1.0.0"
@@ -163,7 +176,7 @@ module "qhub" {
 
 {% if cookiecutter.prefect is true -%}
 module "prefect" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect"
+  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect?ref={{ cookiecutter.terraform_modules.rev }}"
 
   depends_on = [
     module.qhub

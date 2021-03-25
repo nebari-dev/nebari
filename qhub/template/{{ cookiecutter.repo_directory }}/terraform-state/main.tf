@@ -27,6 +27,19 @@ module "terraform-state" {
   name     = "{{ cookiecutter.project_name }}"
   location = "{{ cookiecutter.google_cloud_platform.region }}"
 }
+{% elif cookiecutter.provider == "azure" -%}
+provider "azurerm" {
+  version = "=2.44.0"
+  features {}
+}
+
+module "terraform-state" {
+  source = "github.com/quansight/qhub-terraform-modules//modules/azure/terraform-state?ref={{ cookiecutter.terraform_modules.rev }}"
+
+  name                    = "{{ cookiecutter.project_name }}"
+  location                = "{{ cookiecutter.azure.region }}"
+  storage_account_postfix = "{{ cookiecutter.azure.storage_account_postfix }}"
+}
 {% elif cookiecutter.provider == "do" -%}
 module "terraform-state" {
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/digitalocean/terraform-state?ref={{ cookiecutter.terraform_modules.rev }}"

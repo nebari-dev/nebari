@@ -49,8 +49,9 @@ jobs:
       matrix:
         provider:
           - aws
-          - gcp
+          - azure
           - do
+          - gcp
           - local
     steps:
       - name: 'Checkout Infrastructure'

@@ -15,6 +15,9 @@ locals {
 {%- elif cookiecutter.provider == "gcp" %}
       key   = "cloud.google.com/gke-nodepool"
       value = "general"
+{%- elif cookiecutter.provider == "azure" %}
+      key   = "azure-node-pool"
+      value = "general"
 {%- elif cookiecutter.provider == "do" %}
       key   = "doks.digitalocean.com/node-pool"
       value = "general"
@@ -31,6 +34,9 @@ locals {
 {%- elif cookiecutter.provider == "gcp" %}
       key   = "cloud.google.com/gke-nodepool"
       value = "user"
+{%- elif cookiecutter.provider == "azure" %}
+      key   = "azure-node-pool"
+      value = "user"
 {%- elif cookiecutter.provider == "do" %}
       key   = "doks.digitalocean.com/node-pool"
       value = "user"
@@ -46,6 +52,9 @@ locals {
       value = "worker"
 {%- elif cookiecutter.provider == "gcp" %}
       key   = "cloud.google.com/gke-nodepool"
+      value = "worker"
+{%- elif cookiecutter.provider == "azure" %}
+      key   = "azure-node-pool"
       value = "worker"
 {%- elif cookiecutter.provider == "do" %}
       key   = "doks.digitalocean.com/node-pool"

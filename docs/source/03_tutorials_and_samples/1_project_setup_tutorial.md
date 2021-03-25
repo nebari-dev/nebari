@@ -112,13 +112,21 @@ Follow [these detailed instructions] on creating a Google service account with a
 - `GOOGLE_CREDENTIALS`: Set this to the path to your credentials file
 - `PROJECT_ID`: Set this to the project ID listed on the home page of your Google console under `Project info`
 
+#### 2.4.3 Azure
+Follow [these instructions](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret#creating-a-service-principal-in-the-azure-portal) to create a Service Principal in Azure Portal (Stop after completing steps 1-3).  Set the following environment variables as you go through the instructions.
+
+- `ARM_CLIENT_ID`: Application (client) ID
+- `ARM_CLIENT_SECRET`: Client Secret
+- `ARM_SUBSCRIPTION_ID`: Subscription ID (Available on Overview tab of Subscription)
+- `ARM_TENANT_ID`: Directory (tenant) ID
+
 We're done with the hardest part of deployment!
 
 ### 2.5 QHub init
 
 The next step is to run `qhub init` to generate the configuration file `qhub-config.yaml`. This file is where the vast majority of tweaks to the system will be made. There are are several optional (yet highly recommended) flags that deal with automating the deployment:
 
-- `--project`: Chose a name that [is a compliant name for S3/Storage buckets]. IE `test-cluster`
+- `--project`: Chose a name consisting of lowercase letters and numbers only and is between 3 and 16 characters long. IE `testcluster`
 - `--domain`: This is the base domain for your cluster. After deployment, the DNS will use the base name prepended with `jupyter`. IE if the base name is `test.qhub.dev` then the DNS will be provisioned as `jupyter.test.qhub.dev`. This pattern is also applicable if you are setting your own DNS through a different provider.
 - `--ci-provider`: This specifies what provider to use for ci-cd. Currently, github-actions is supported.
 - `--auth-provider`: This will set configuration file to use auth0 for authentication
@@ -181,7 +189,7 @@ Push the changes to your repo:
 
 ## 3. Post GitHub deployment:
 
-After the files are in Github all CI/CD changes will be triggered by a commit to main and deployed via GitHub actions. To use gitops, make a change to `qhub-ops.yaml` in a new branch and create a pull request into main. When the pull request is merged, it will trigger a deployment of all of those changes to your QHub.
+After the files are in Github all CI/CD changes will be triggered by a commit to main and deployed via GitHub actions. To use gitops, make a change to `qhub-config.yaml` in a new branch and create a pull request into main. When the pull request is merged, it will trigger a deployment of all of those changes to your QHub.
 
 The first thing you will want to do is add users to your new QHub. Any type of supported authorization from auth0 can be used as a username. Below is an example configuration of 2 users:
 

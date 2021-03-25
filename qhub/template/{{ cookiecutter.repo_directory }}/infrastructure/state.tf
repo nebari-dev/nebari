@@ -26,4 +26,15 @@ terraform {
     skip_metadata_api_check     = true
   }
 }
-{% endif -%}
+{% elif cookiecutter.provider == "azure" -%}
+
+terraform {
+  backend "azurerm" {
+    resource_group_name = "{{ cookiecutter.project_name }}-terraform-state"
+    # storage account must be globally unique
+    storage_account_name = "{{ cookiecutter.project_name }}{{ cookiecutter.azure.storage_account_postfix }}"
+    container_name       = "{{ cookiecutter.project_name }}state"
+    key                  = "terraform/{{ cookiecutter.project_name }}.tfstate"
+  }
+}
+{%- endif -%}
