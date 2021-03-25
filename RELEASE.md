@@ -11,6 +11,7 @@
 ## Upcoming release 0.3.0
 
 ### Feature changes and enhancements
+* Terraform binary is auto-installed and version managed by qhub
 * Full JupyterHub theming including colors now.
 * JupyterHub docker image now independent from zero-to-jupyterhub.
 * JupyterLab 3 now default user Docker image.

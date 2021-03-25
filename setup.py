@@ -40,8 +40,8 @@ setup(
         "bcrypt",
     ],
     extras_require={"dev": [
-        "flake8==3.8.3",
-        "black==19.10b0",
+        "flake8==3.8.4",
+        "black==20.8b1",
         "twine",
         "pytest",
         "diagrams",
