@@ -11,6 +11,7 @@
 ## Upcoming release 0.3.0
 
 ### Feature changes and enhancements
+* Adding ability to specify node selector label for general, user, and worker
 * Terraform binary is auto-installed and version managed by qhub
 * Full JupyterHub theming including colors now.
 * JupyterHub docker image now independent from zero-to-jupyterhub.

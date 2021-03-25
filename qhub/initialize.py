@@ -75,6 +75,23 @@ AUTH_OAUTH_AUTH0 = {
     },
 }
 
+LOCAL = {
+    "node_selectors": {
+        "general": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "user": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "worker": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+    }
+}
+
 DIGITAL_OCEAN = {
     "region": "nyc3",
     "kubernetes_version": "PLACEHOLDER",
@@ -307,6 +324,7 @@ def render_config(
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment"
+        config["local"] = LOCAL
 
     config["profiles"] = DEFAULT_PROFILES
     config["environments"] = DEFAULT_ENVIRONMENTS

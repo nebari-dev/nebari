@@ -22,8 +22,8 @@ locals {
       key   = "doks.digitalocean.com/node-pool"
       value = "general"
 {%- else %}
-      key   = "kubernetes.io/os"
-      value = "linux"
+      key   = "{{ cookiecutter.local.node_selectors.general.key }}"
+      value = "{{ cookiecutter.local.node_selectors.general.value }}"
 {% endif %}
     }
 
@@ -41,8 +41,8 @@ locals {
       key   = "doks.digitalocean.com/node-pool"
       value = "user"
 {%- else %}
-      key   = "kubernetes.io/os"
-      value = "linux"
+      key   = "{{ cookiecutter.local.node_selectors.user.key }}"
+      value = "{{ cookiecutter.local.node_selectors.user.value }}"
 {% endif %}
     }
 
@@ -60,8 +60,8 @@ locals {
       key   = "doks.digitalocean.com/node-pool"
       value = "worker"
 {%- else %}
-      key   = "kubernetes.io/os"
-      value = "linux"
+      key   = "{{ cookiecutter.local.node_selectors.worker.key }}"
+      value = "{{ cookiecutter.local.node_selectors.worker.value }}"
 {% endif %}
     }
   }
