@@ -1,18 +1,17 @@
 provider "kubernetes" {
 {% if cookiecutter.provider == "local" %}
   config_path = "~/.kube/config"
-{% else %}
-  host                   = module.kubernetes.credentials.endpoint
-  cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
-{% endif -%}
-{%- if cookiecutter.provider == "azure" %}
+{% elif cookiecutter.provider == "azure" %}
   username           = module.kubernetes.credentials.username
   password           = module.kubernetes.credentials.password
   client_certificate = module.kubernetes.credentials.client_certificate
   client_key         = module.kubernetes.credentials.client_key
-{% else -%}
   token              = module.kubernetes.credentials.token
-{% endif -%}
+{% else %}
+  host                   = module.kubernetes.credentials.endpoint
+  cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+  token                  = module.kubernetes.credentials.token
+{% endif %}
 }
 
 module "kubernetes-initialization" {

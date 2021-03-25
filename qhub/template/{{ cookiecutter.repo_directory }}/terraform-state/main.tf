@@ -36,8 +36,8 @@ provider "azurerm" {
 module "terraform-state" {
   source = "github.com/quansight/qhub-terraform-modules//modules/azure/terraform-state?ref={{ cookiecutter.terraform_modules.rev }}"
 
-  name     = "{{ cookiecutter.project_name }}"
-  location = "{{ cookiecutter.azure.region }}"
+  name                    = "{{ cookiecutter.project_name }}"
+  location                = "{{ cookiecutter.azure.region }}"
   storage_account_postfix = "{{ cookiecutter.azure.storage_account_postfix }}"
 }
 {% elif cookiecutter.provider == "do" -%}
