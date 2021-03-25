@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def deploy_configuration(config, dns_provider, dns_auto_provision, disable_prompt):
-    logger.info(f'All qhub endpoints will be under *.{config["domain"]}')
+    logger.info(f'All qhub endpoints will be under https://{config["domain"]}')
 
     with timer(logger, "deploying QHub"):
         guided_install(config, dns_provider, dns_auto_provision, disable_prompt)
@@ -38,9 +38,12 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         )
 
     # 05 Create terraform backend remote state bucket
-    with change_directory("terraform-state"):
-        run(["terraform", "init"])
-        run(["terraform", "apply", "-auto-approve"])
+    # backwards compatible with `qhub-config.yaml` which
+    # don't have `terraform_state` key
+    if config.get("terraform_state") != "local":
+        with change_directory("terraform-state"):
+            run(["terraform", "init"])
+            run(["terraform", "apply", "-auto-approve"])
 
     # 06 Create qhub initial state (up to nginx-ingress)
     with change_directory("infrastructure"):
@@ -60,19 +63,20 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         # to parse cmd_output as json on Github Actions.
         ip_matches = re.findall(rb'"ip": "(?!string)(.*)"', cmd_output)
         hostname_matches = re.findall(rb'"hostname": "(?!string)(.*)"', cmd_output)
-        if ip_matches[0]:
+        if ip_matches:
             ip_or_hostname = ip_matches[0].decode()
-        elif hostname_matches[0]:
+        elif hostname_matches:
             ip_or_hostname = hostname_matches[0].decode()
         else:
             raise ValueError(f"IP Address not found in: {cmd_output}")
+
     # 07 Update DNS to point to qhub deployment
     if dns_auto_provision and dns_provider == "cloudflare":
         record_name, zone_name = (
             config["domain"].split(".")[:-2],
             config["domain"].split(".")[-2:],
         )
-        record_name = f'jupyter.{".".join(record_name)}'
+        record_name = ".".join(record_name)
         zone_name = ".".join(zone_name)
         if config["provider"] in {"do", "gcp"}:
             update_record(zone_name, record_name, "A", ip_or_hostname)
@@ -82,10 +86,10 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
             logger.info(
                 f"Couldn't update the DNS record for cloud provider: {config['provider']}"
             )
-    else:
+    elif not disable_prompt:
         input(
             f"Take IP Address {ip_or_hostname} and update DNS to point to "
-            f'"jupyter.{config["domain"]}" [Press Enter when Complete]'
+            f'"{config["domain"]}" [Press Enter when Complete]'
         )
 
     # 08 Full deploy QHub

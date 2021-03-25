@@ -3,14 +3,16 @@ terraform {
 {%- if cookiecutter.provider == "aws" %}
     aws = {
       source = "hashicorp/aws"
+    }
 {%- elif cookiecutter.provider == "gcp" %}
     google = {
       source = "hashicorp/google"
+    }
 {%- elif cookiecutter.provider == "do" %}
     digitalocean = {
       source = "digitalocean/digitalocean"
-{% endif %}
     }
+{% endif %}
     helm = {
       source = "hashicorp/helm"
     }

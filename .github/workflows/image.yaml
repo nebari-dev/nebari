@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - dev
     paths:
       - "qhub/template/{{ cookiecutter.repo_directory }}/image/**"
       - ".github/workflows/image.yaml"

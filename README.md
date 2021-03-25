@@ -8,6 +8,8 @@ QHub is an open source tool that enables users to build and maintain
 cost-effective and scalable compute/data science platforms [on-premises](#qhub-on-prem) or on 
 [cloud providers](#qhub-cloud) with minimal DevOps experience.
 
+Not sure what to choose? Check out our [FAQ](../02_get_started/07_support.md#faq).
+
 **This repository details the [QHub Cloud](https://qhub.dev/ "Official QHub docs") version.**
 
 ## QHub On-Prem
@@ -35,13 +37,14 @@ QHub offers out-of-the-box support for [Digital Ocean](https://www.digitalocean.
 will be added soon.
 
 
-![image](docs/images/brand-diagram.png "architecture diagram")
+[comment]: <> (![image]&#40;docs/source/meta_images/tech_stack_diagram.png "architecture diagram"&#41;)
+![High-level illustration of QHub architecture](docs/source/meta_images/qhub-cloud_architecture.png)
 
 For more details, check out the release [blog post](https://www.quansight.com/post/announcing-qhub).
 
 ## Installation
 ### Pre-requisites
-* QHub is supported by macOS and Linux operating systems (Windows is **NOT** currently supported
+* QHub is supported by macOS and Linux operating systems (Windows is **NOT** currently supported).
 * Compatible with Python 3.6+. New to Python? We recommend using [Anaconda](https://www.anaconda.com/products/individual).
 * Adoption of virtual environments (`conda`, `pipenv` or `venv`) is also encouraged. 
 
@@ -89,6 +92,8 @@ qhub deploy ... # creates and configures the cloud infrastructure
 ```
 
 ## Questions?
+Have a look at our [FAQ](https://qhub.dev/docs/faqs.html) to see if your query has been answered.
+
 We separate the queries for QHub into:
 * [GitHub Discussions](https://github.com/Quansight/qhub/discussions) used to raise discussions about a subject, such as:
 "What is the recommended way to do X with QHub?"
@@ -104,9 +109,9 @@ To guarantee a welcoming and friendly community, we require contributors to foll
 
 
 ## Developer
-To install the latest developer version use:
+To install the latest developer version (unstable) use:
 ```bash
-pip install git+https://github.com/Quansight/qhub.git
+pip install git+https://github.com/Quansight/qhub.git@dev
 ```
 
 ## Contributions
