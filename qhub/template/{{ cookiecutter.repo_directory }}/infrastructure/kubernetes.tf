@@ -116,7 +116,7 @@ provider "helm" {
 
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-autoscaling" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/cluster-autoscaler?ref=azure"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/cluster-autoscaler?ref={{ cookiecutter.terraform_modules.rev }}"
 
   namespace = var.environment
 
