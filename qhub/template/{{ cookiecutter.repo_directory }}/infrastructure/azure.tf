@@ -4,14 +4,14 @@ provider "azure" {
 
 
 module "registry" {
-  source   = "github.com/quansight/qhub-terraform-modules//modules/azure/registry?ref={{ cookiecutter.terraform_modules.rev }}"
+  source   = "github.com/quansight/qhub-terraform-modules//modules/azure/registry?ref=azure"
   name     = "{{ cookiecutter.project_name }}"
   location = "{{ cookiecutter.azure.region }}"
 }
 
 
 module "kubernetes" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/azure/kubernetes?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "github.com/quansight/qhub-terraform-modules//modules/azure/kubernetes?ref=azure"
 
   name               = local.cluster_name
   environment        = var.environment

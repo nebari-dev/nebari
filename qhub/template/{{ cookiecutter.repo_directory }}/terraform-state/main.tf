@@ -4,7 +4,7 @@ provider "aws" {
 }
 
 module "terraform-state" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/terraform-state?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/terraform-state?ref=azure"
 
   name = "{{ cookiecutter.project_name }}"
 
@@ -22,7 +22,7 @@ provider "google" {
 }
 
 module "terraform-state" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/gcp/terraform-state?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/gcp/terraform-state?ref=azure"
 
   name     = "{{ cookiecutter.project_name }}"
   location = "{{ cookiecutter.google_cloud_platform.region }}"
@@ -34,7 +34,7 @@ provider "azurerm" {
 }
 
 module "terraform-state" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/azure/terraform-state?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "github.com/quansight/qhub-terraform-modules//modules/azure/terraform-state?ref=azure"
 
   name     = "{{ cookiecutter.project_name }}"
   location = "{{ cookiecutter.azure.region }}"
@@ -42,7 +42,7 @@ module "terraform-state" {
 }
 {% elif cookiecutter.provider == "do" -%}
 module "terraform-state" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/digitalocean/terraform-state?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/digitalocean/terraform-state?ref=azure"
 
   name   = "{{ cookiecutter.project_name }}"
   region = "{{ cookiecutter.digital_ocean.region }}"
