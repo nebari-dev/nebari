@@ -5,7 +5,6 @@ import random
 
 import bcrypt
 import requests
-import random
 
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
