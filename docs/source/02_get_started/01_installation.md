@@ -1,6 +1,6 @@
 # Installation
 ## Pre-requisites
-* QHub is supported by MacOS and Linux operating systems.
+* QHub is supported by macOS and Linux operating systems.
   > NOTE: **Currently, QHub cannot be installed on Windows**.
 * We recommend the adoption of virtual environments (`conda`, `pipenv` or `venv`) for successful usage. 
 
