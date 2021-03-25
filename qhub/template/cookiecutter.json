@@ -1,6 +1,7 @@
 {
     "repo_directory": null,
     "project_name": null,
+    "namespace": null,
     "provider": null,
     "ci_cd": null,
     "endpoint": null,

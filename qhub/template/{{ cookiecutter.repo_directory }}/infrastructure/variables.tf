@@ -5,7 +5,7 @@ variable "name" {
 
 variable "environment" {
   type    = string
-  default = "dev"
+  default = "{{ cookiecutter.namespace }}"
 }
 
 {% if cookiecutter.provider == "aws" %}

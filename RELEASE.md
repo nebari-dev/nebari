@@ -16,6 +16,7 @@
 * Strict schema validation for `qhub-config.yaml`
 * Terraform binary is auto-installed and version managed by qhub
 * Deploy stage will auto render by default removing the need for render command for end users
+* Support for namespaces with qhub deployments on kubernetes clusters
 * Full JupyterHub theming including colors now.
 * JupyterHub docker image now independent from zero-to-jupyterhub.
 * JupyterLab 3 now default user Docker image.
