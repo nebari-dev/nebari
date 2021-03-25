@@ -8,6 +8,7 @@ AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/inst
 GCP_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables"
 AZURE_ENV_DOCS = "Coming Soon"
 
+
 @contextlib.contextmanager
 def timer(logger, prefix):
     start_time = time.time()
