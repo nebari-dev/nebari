@@ -30,6 +30,9 @@ class AuthenticationEnum(str, enum.Enum):
 class Base(pydantic.BaseModel):
     ...
 
+    class Config:
+        extra = "forbid"
+
 
 # =========== Authentication ==============
 
@@ -58,6 +61,7 @@ class Authentication(Base):
 
 class User(Base):
     uid: str
+    password: typing.Optional[str]
     primary_group: str
     secondary_groups: typing.Optional[typing.List[str]]
 
@@ -70,7 +74,7 @@ class Group(Base):
 
 
 class Security(Base):
-    # authentication
+    authentication: Authentication
     users: typing.Dict[str, User]
     groups: typing.Dict[str, Group]
 
@@ -93,6 +97,9 @@ class NodeGroup(Base):
     instance: str = "s-2vcpu-4gb"
     min_nodes: int = 1
     max_nodes: int = 1
+
+    class Config:
+        extra = "allow"
 
 
 class DigitalOceanProvider(Base):
@@ -147,10 +154,14 @@ class KubeSpawner(Base):
     mem_guarantee: str
     image: str
 
+    class Config:
+        extra = "allow"
+
 
 class JupyterLabProfile(Base):
     display_name: str
     description: str
+    default: typing.Optional[bool]
     users: typing.Optional[typing.List[str]]
     groups: typing.Optional[typing.List[str]]
     kubespawner_override: typing.Optional[KubeSpawner]
@@ -162,6 +173,9 @@ class DaskWorkerProfile(Base):
     worker_memory_limit: str
     worker_memory: str
     image: str
+
+    class Config:
+        extra = "allow"
 
 
 class Profiles(Base):
