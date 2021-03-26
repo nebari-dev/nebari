@@ -194,9 +194,12 @@ class CondaEnvironment(Base):
 
 # ==================== Main ===================
 
+letter_dash_underscore_regex = pydantic.constr(regex=r"^[A-Za-z-_]+$")
+
+
 class Main(Base):
-    project_name: pydantic.constr(regex="^[A-Za-z-_]+$")
-    namespace: typing.Optional[pydantic.constr(regex="^[A-Za-z-_]+$")] = "dev"
+    project_name: letter_dash_underscore_regex
+    namespace: typing.Optional[letter_dash_underscore_regex]
     provider: ProviderEnum
     ci_cd: CiEnum
     domain: str

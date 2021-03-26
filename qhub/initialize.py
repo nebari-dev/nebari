@@ -229,7 +229,8 @@ def render_config(
     config["provider"] = cloud_provider
     config["ci_cd"] = ci_provider
 
-    config["terraform_state"] = terraform_state
+    if terraform_state is not None:
+        config["terraform_state"] = terraform_state
 
     config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
     config["theme"]["jupyterhub"][

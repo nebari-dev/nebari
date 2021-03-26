@@ -14,7 +14,7 @@ from qhub.initialize import render_config
     ],
 )
 def test_schema(
-        project, namespace, domain, cloud_provider, ci_provider, auth_provider
+    project, namespace, domain, cloud_provider, ci_provider, auth_provider
 ):
     config = render_config(
         project_name=project,
