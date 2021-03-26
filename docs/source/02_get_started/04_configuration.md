@@ -7,12 +7,17 @@ the YAML configuration file.
 
 ```yaml
 project_name: do-jupyterhub # name of the kubernetes/Cloud deployment 
+namespace: dev
 provider: <provider_alias> # determines the choice of cloud provider for the deployment
 ci_cd: github-actions # continuous integration and continuous deployment framework to use
 domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 ```
 
 `project_name` should be compatible with the Cloud provider naming convention.
+
+`namespace` is used in combination with `project_name` to label
+resources. In addition `namespace` also determines the `namespace`
+that used when deploying kubernetes resources for qhub.
 
 `provider` possible values are `do` for DigitalOcean, `aws` for Amazon AWS, `gcp` for Google Could Provider and `azure`
 for Microsoft Azure.
