@@ -80,6 +80,18 @@ export ARM_SUBSCRIPTION_ID="00000000-0000-0000-0000-000000000000" # subscription
 export ARM_TENANT_ID="00000000-0000-0000-0000-000000000000"       # directory (tenant) ID
 ```
 
+#### Local (Existing) Kubernetes Cluster
+
+To deploy on an existing kubernetes cluster kubectl must be setup and
+have the cluster available as one of the kubectl contexts. In the
+`qhub-config.yaml` you can specify a non-default context name
+`local.kube_context` but is not required since it will use the default
+(current) context.
+
+```shell
+kubectl config get-contexts
+```
+
 ### Authentication
 #### Auth0
 To create the necessary access tokens you will need to have an [Auth0](https://auth0.com/) account and be logged in.
