@@ -192,6 +192,30 @@ amazon_web_services:
       max_nodes: 2
 ```
 
+#### Local (Existing) Kubernetes Cluster
+
+Deploying to a local existing kuberentes cluster has different options
+than the cloud providers. `kube_context` is an optional key that can
+be used to deploy to a non-default context. The default node selectors
+will allow pods to be scheduled anywhere. This can be adjusted to
+schedule pods on different labeled nodes. Allowing for similar
+functionality to node groups in the cloud.
+
+```yaml
+local:
+  kube_context: minikube
+  node_selectors:
+    general:
+      key: kubernetes.io/os
+      value: linux
+    user:
+      key: kubernetes.io/os
+      value: linux
+    worker:
+      key: kubernetes.io/os
+      value: linux
+```
+
 ## Default Images
 
 Default images are to the default image run if not specified in a

@@ -1,6 +1,9 @@
 provider "kubernetes" {
 {% if cookiecutter.provider == "local" %}
   config_path = "~/.kube/config"
+{% if cookiecutter.local.kube_context is defined %}
+  config_context = "{{ cookiecutter.local.kube_context }}"
+{% endif %}
 {% elif cookiecutter.provider == "azure" %}
   username           = module.kubernetes.credentials.username
   password           = module.kubernetes.credentials.password

@@ -24,6 +24,7 @@ def test_render(project, domain, cloud_provider, ci_provider, auth_provider, tmp
         auth_provider=auth_provider,
         repository_auto_provision=False,
         auth_auto_provision=False,
+        terraform_state="remote",
         kubernetes_version="1.18.0",
         disable_prompt=True,
     )

@@ -75,6 +75,23 @@ AUTH_OAUTH_AUTH0 = {
     },
 }
 
+LOCAL = {
+    "node_selectors": {
+        "general": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "user": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "worker": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+    }
+}
+
 DIGITAL_OCEAN = {
     "region": "nyc3",
     "kubernetes_version": "PLACEHOLDER",
@@ -292,6 +309,9 @@ def render_config(
                 "Enter Google Cloud Platform Project ID: "
             )
     elif cloud_provider == "azure":
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = "Autoscaling Compute Environment on Azure"
         config["azure"] = AZURE
         if kubernetes_version:
             config["azure"]["kubernetes_version"] = kubernetes_version
@@ -307,6 +327,7 @@ def render_config(
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment"
+        config["local"] = LOCAL
 
     config["profiles"] = DEFAULT_PROFILES
     config["environments"] = DEFAULT_ENVIRONMENTS

@@ -22,6 +22,23 @@
     "environments": null,
     "storage": null,
 
+    "local": {
+        "node_selectors": {
+            "general": {
+                "key": null,
+                "value": null
+            },
+            "user": {
+                "key": null,
+                "value": null
+            },
+            "worker": {
+                "key": null,
+                "value": null
+            }
+        }
+    },
+
     "digital_ocean": {
         "region": null,
         "kubernetes_version": null,

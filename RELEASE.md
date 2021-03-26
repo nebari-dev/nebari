@@ -11,6 +11,9 @@
 ## Upcoming release 0.3.0
 
 ### Feature changes and enhancements
+* Adding ability to specify node selector label for general, user, and worker
+* Ability to specify `kube_context` for local deployments otherwise will use default
+* Strict schema validation for `qhub-config.yaml`
 * Terraform binary is auto-installed and version managed by qhub
 * Deploy stage will auto render by default removing the need for render command for end users
 * Full JupyterHub theming including colors now.
