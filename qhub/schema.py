@@ -3,9 +3,11 @@ import typing
 
 import pydantic
 
+
 class TerraformStateEnum(str, enum.Enum):
     remote = "remote"
     local = "local"
+
 
 class ProviderEnum(str, enum.Enum):
     local = "local"
@@ -14,23 +16,29 @@ class ProviderEnum(str, enum.Enum):
     gcp = "gcp"
     azure = "azure"
 
+
 class CiEnum(str, enum.Enum):
     github_actions = "github-actions"
+
 
 class AuthenticationEnum(str, enum.Enum):
     password = "password"
     github = "GitHub"
     auth0 = "Auth0"
 
+
 class Base(pydantic.BaseModel):
     ...
 
+
 # =========== Authentication ==============
+
 
 class GitHubConfig(Base):
     oauth_callback_url: str
     client_id: str
     client_secret: str
+
 
 class Auth0Config(Base):
     client_id: str
@@ -39,47 +47,59 @@ class Auth0Config(Base):
     scope: typing.List[str]
     auth0_subdomain: str
 
+
 class Authentication(Base):
     type: AuthenticationEnum
     config: typing.Optional[typing.Union[Auth0Config, GitHubConfig]]
 
+
 # =========== Users and Groups =============
+
 
 class User(Base):
     uid: str
     primary_group: str
-    secondary_groups: Optional[typing.List[str]]
+    secondary_groups: typing.Optional[typing.List[str]]
+
 
 class Group(Base):
     gid: int
 
+
 # ============== Security ================
+
 
 class Security(Base):
     # authentication
     users: typing.Dict[str, User]
     groups: typing.Dict[str, Group]
 
+
 # ================ Providers ===============
+
 
 class KeyValueDict(Base):
     key: str
     value: str
+
 
 class NodeSelector(Base):
     general: KeyValueDict
     user: KeyValueDict
     worker: KeyValueDict
 
+
 class NodeGroup(Base):
     instance: str = "s-2vcpu-4gb"
     min_nodes: int = 1
     max_nodes: int = 1
 
+
 class DigitalOceanProvider(Base):
     region: str
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
+
 
 class GoogleCloudPlatformProvider(Base):
     project: str
@@ -89,6 +109,7 @@ class GoogleCloudPlatformProvider(Base):
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
 
+
 class AzureProvider(Base):
     project: str
     region: str
@@ -96,11 +117,13 @@ class AzureProvider(Base):
     node_groups: typing.Dict[str, NodeGroup]
     storage_account_postfix: str
 
+
 class AmazonWebServicesProvider(Base):
     region: str
     availability_zones: typing.List[str]
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
+
 
 class LocalProvider(Base):
     kube_context: typing.Optional[str]
@@ -109,10 +132,13 @@ class LocalProvider(Base):
 
 # ================= Theme ==================
 
+
 class Theme(Base):
     jupyterhub: typing.Dict[str, str]
 
+
 # ================== Profiles ==================
+
 
 class KubeSpawner(Base):
     cpu_limit: int
@@ -121,11 +147,13 @@ class KubeSpawner(Base):
     mem_guarantee: str
     image: str
 
+
 class JupyterLabProfile(Base):
     display_name: str
     description: str
     groups: typing.List[str]
     kubespawner_override: KubeSpawner
+
 
 class DaskWorkerProfile(Base):
     worker_cores_limit: int
@@ -134,16 +162,20 @@ class DaskWorkerProfile(Base):
     worker_memory: str
     image: str
 
+
 class Profiles(Base):
     jupyterlab: typing.List[JupyterLabProfile]
     dask_worker: typing.Dict[str, DaskWorkerProfile]
 
+
 # ================ Environment ================
+
 
 class CondaEnvironment(Base):
     name: str
     channels: typing.Optional[typing.List[str]]
     dependencies: typing.List[typing.Union[str, typing.Dict[str, str]]]
+
 
 # ==================== Main ===================
 
