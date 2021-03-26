@@ -309,6 +309,9 @@ def render_config(
                 "Enter Google Cloud Platform Project ID: "
             )
     elif cloud_provider == "azure":
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = "Autoscaling Compute Environment on Azure"
         config["azure"] = AZURE
         if kubernetes_version:
             config["azure"]["kubernetes_version"] = kubernetes_version

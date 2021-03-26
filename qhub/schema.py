@@ -151,8 +151,9 @@ class KubeSpawner(Base):
 class JupyterLabProfile(Base):
     display_name: str
     description: str
-    groups: typing.List[str]
-    kubespawner_override: KubeSpawner
+    users: typing.Optional[typing.List[str]]
+    groups: typing.Optional[typing.List[str]]
+    kubespawner_override: typing.Optional[KubeSpawner]
 
 
 class DaskWorkerProfile(Base):
