@@ -194,15 +194,13 @@ class CondaEnvironment(Base):
 
 # ==================== Main ===================
 
-project_name_regex_type = pydantic.constr(regex="^[A-Za-z-_]+$")
-
-
 class Main(Base):
-    project_name: project_name_regex_type
+    project_name: pydantic.constr(regex="^[A-Za-z-_]+$")
+    namespace: typing.Optional[pydantic.constr(regex="^[A-Za-z-_]+$")] = "dev"
     provider: ProviderEnum
     ci_cd: CiEnum
     domain: str
-    terraform_state: TerraformStateEnum
+    terraform_state: typing.Optional[TerraformStateEnum] = "remote"
     security: Security
     default_images: typing.Dict[str, str]
     storage: typing.Dict[str, str]

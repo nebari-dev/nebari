@@ -1,12 +1,12 @@
 {
     "repo_directory": null,
     "project_name": null,
-    "namespace": null,
+    "namespace": "dev",
     "provider": null,
     "ci_cd": null,
     "endpoint": null,
     "terraform_version": "0.13.5",
-    "terraform_state": null,
+    "terraform_state": "remote",
     "terraform_modules": {
         "repository": "github.com/quansight/qhub-terraform-modules",
         "rev": "dev"

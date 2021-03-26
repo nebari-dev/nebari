@@ -14,11 +14,9 @@ from qhub.provider.cloud import digital_ocean
 
 BASE_CONFIGURATION = {
     "project_name": None,
-    "namespace": None,
     "provider": None,
     "ci_cd": None,
     "domain": None,
-    "terraform_state": None,
     "security": {
         "authentication": None,
         "users": {
@@ -215,12 +213,12 @@ DEFAULT_ENVIRONMENTS = {
 
 def render_config(
     project_name,
-    namespace,
     qhub_domain,
     cloud_provider,
     ci_provider,
     repository,
     auth_provider,
+    namespace=None,
     repository_auto_provision=False,
     auth_auto_provision=False,
     terraform_state=None,
@@ -242,9 +240,8 @@ def render_config(
         project_name = input("Provide project name: ")
     config["project_name"] = project_name
 
-    if namespace is None and not disable_prompt:
-        namespace = input("Provide namespace: ")
-    config["namespace"] = namespace
+    if namespace is not None:
+        config["namespace"] = namespace
 
     if qhub_domain is None and not disable_prompt:
         qhub_domain = input("Provide domain: ")
