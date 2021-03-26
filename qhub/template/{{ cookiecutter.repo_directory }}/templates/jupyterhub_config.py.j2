@@ -130,6 +130,15 @@ c.JupyterHub.admin_access = True
 c.Authenticator.admin_users = qhub_list_admins(QHUB_USER_MAPPING)
 c.Authenticator.whitelist = qhub_list_users(QHUB_USER_MAPPING)
 
+async def custom_options_form(self):
+     self.profile_list = qhub_list_available_profiles(self.user.name)
+
+     # Let KubeSpawner inspect profile_list and decide what to return
+     return self._options_form_default()
+
+c.KubeSpawner.options_form = custom_options_form
+c.LocalProcessSpawner.shell_cmd = ['bash', '-l', '-c']
+
 {% if cookiecutter.security.authentication.type == 'password' %}
 # ==================== AUTHENTICATION ======================
 # create passwords via
