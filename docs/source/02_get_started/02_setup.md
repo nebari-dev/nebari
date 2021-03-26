@@ -105,7 +105,6 @@ to create a Service Principal in the Azure Portal. After completing the 3 steps 
  - `ARM_CLIENT_SECRET`: client's secret
  - `ARM_SUBSCRIPTION_ID`: [Subscription ID](https://docs.microsoft.com/en-us/azure/media-services/latest/how-to-set-azure-subscription?tabs=portal) (Available at the Subscription section under the **Overview** tab)
  - `ARM_TENANT_ID`: [Tenant ID](https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-how-to-find-tenant)
-```
 
 #### Local (Existing) Kubernetes Cluster
 
