@@ -1,7 +1,11 @@
 # Configuration
 
-The configuration file is split into several sections. In this page, we detail the requirements necessary for
-the YAML configuration file.
+The configuration file is split into several sections. In this page,
+we detail the requirements necessary for the YAML configuration
+file. The configuration file is always validated by a [pydantic
+schema](https://pydantic-docs.helpmanual.io/) in `qhub/schema.py`. For
+the ultimate source of truth visit this file though these docs should
+be accurate.
 
 ## General
 
@@ -14,31 +18,37 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 terraform_state: remote
 ```
 
-`project_name` should be compatible with the Cloud provider naming convention.
+ - `project_name`: should be compatible with the Cloud provider naming
+   convention. Generally only use `A-Z`, `a-z`, `-`, and `_`.
 
-`namespace` is used in combination with `project_name` to label
-resources. In addition `namespace` also determines the `namespace`
-that used when deploying kubernetes resources for qhub. Has a default
-value of `dev`.
+ - `namespace`: is used in combination with `project_name` to label
+   resources. In addition `namespace` also determines the `namespace`
+   that used when deploying kubernetes resources for qhub. Has a
+   default value of `dev`.
 
-`provider` possible values are `do` for DigitalOcean, `aws` for Amazon AWS, `gcp` for Google Could Provider and `azure`
-for Microsoft Azure.
+ - `provider` possible values are `do` for DigitalOcean, `aws` for
+    Amazon AWS, `gcp` for Google Could Provider, `azure` for Microsoft
+    Azure, and `local` for a local or existing kubernetes deployment.
 
-`ci_cd` is the continuous integration and continuous deployment
-framework to use. Currently `github-actions` is supported.
+ - `ci_cd`: is the continuous integration and continuous deployment
+   framework to use. Currently only `github-actions` is supported.
 
-`domain` is the top level URL to put JupyterLab and future services
-under such a monitoring. For example `jupyter.do.qhub.dev` would be
-the domain for JupyterHub to be exposed under.
+ - `domain`: is the top level URL to put JupyterLab and future
+   services under such a monitoring. For example `jupyter.qhub.dev`
+   would be the domain for JupyterHub to be exposed under. Note that
+   this domain does not have to have `jupyter` in it.
 
-`terraform_state` is either `remote` or `local` with a default value
-of `remote`. This decides whether to control the state of the cluster
-locally or remotely. See [terraform remote
-state](https://www.terraform.io/docs/language/state/index.html) docs.
+ - `terraform_state` is either `remote` or `local` with a default
+   value of `remote`. This decides whether to control the state of the
+   cluster locally or remotely. See [terraform remote
+   state](https://www.terraform.io/docs/language/state/index.html)
+   docs. If you are doing anything other than testing we highly
+   recommend `remote` unless you know what you are doing.
 
 ## Security
 
-This section is for configuring security relating to the QHub deployment. [obvious sentence]
+This section is for configuring security relating to the QHub
+deployment. [obvious sentence]
 
 ```yaml
 security:
@@ -66,9 +76,12 @@ security:
       gid: 102
 ```
 
-`security.authentication` is for configuring the OAuth provider used
-for authentication. Currently, the configuration shows GitHub but Auth0
-is also supported.
+`security.authentication` is for configuring the OAuth Provider or
+password based authentication used for authentication. Currently, the
+configuration shows GitHub but Auth0 and password based is also
+supported.
+
+For Auth0 based authentication.
 
 ```yaml
 security:
@@ -82,9 +95,42 @@ security:
       auth0_subdomain: ...
 ```
 
+For Password based authentication. Note that users will require a
+`password` field that can be generated via the following command:
+`python -c "import bcrypt; bcrypt.hashpw(b'<password>',
+bcrypt.gensalt())"`.
+
+```yaml
+security:
+  authentication:
+    type: password
+```
+
 `users` and `groups` allows one to provision UNIX permissions to each
 user. Any user is assigned a `uid`, `primary_group`, and optionally
-any number of `secondary_groups`.
+any number of `secondary_groups`. Note that `uid` and `gid` fields
+must be unique and are required.
+
+```yaml
+security:
+  users:
+    example-user:
+      uid: 1000
+      primary_group: users
+      secondary_groups:
+        - billing
+    dharhas:
+      uid: 1001
+      primary_group: admin
+  groups:
+    users:
+      gid: 100
+    admin:
+      gid: 101
+    billing:
+      gid: 102
+```
+
 * The `primary_group` is the group name assigned to files that are
 written for the user.
 * `groups` are a mapping of group name to group IDs. It is
@@ -96,34 +142,52 @@ e.g. `10000000`. `ids` technically supports 2 billion `ids`.
 
 ## Provider Infrastructure
 
-Finally, comes the Kubernetes infrastructure deployment. Although quite similar,
-each provider has a different configuration.
+Finally, comes the Kubernetes infrastructure deployment. Although
+quite similar, each provider has a different configuration.
 
 The following configuration sets up a kubernetes deployment with
-autoscaling node groups. Depending on the cloud provider there
-might be restrictions, which are detailed on each section.
+autoscaling node groups. Depending on the cloud provider there might
+be restrictions, which are detailed on each section.
 
-For any of the providers, adding a node group is as easy as
-the following, which adds a `high-memory` group:
+For any of the providers (besides local), adding a node group is as
+easy as the following, which adds a `high-memory` group:
 
 ```yaml
-high-memory:
-  instance: "s-2vcpu-4gb"
-  min_nodes: 1
-  max_nodes: 50
+<provider>:
+  node_groups:
+    ...
+    high-memory:
+      instance: "s-2vcpu-4gb"
+      min_nodes: 1
+      max_nodes: 50
+    ...
 ```
 
 > For each provider details such as **instance names**, **availability zones**,
 and **Kubernetes versions** will be DIFFERENT. [duplicated info]
 
 ### Providers
+
 #### DigitalOcean
 
 DigitalOcean has a restriction with autoscaling in that the minimum
-nodes allowed (`min_nodes` = 1) is one. Below is the recommended setup.
+nodes allowed (`min_nodes` = 1) is one but is by far the cheapest
+provider even accounting for spot/premptible instances. In addition
+Digital Ocean does not have accelerator/gpu support. Digital Ocean is
+a great default choice for tying out QHub. Below is the recommended
+setup.
+
 > Note: DigitalOcean regularly updates Kubernetes versions hence, the
 > field `kubernetes_version` will most likely have to be changed.
-> [See available instance types for DigitalOcean](https://www.digitalocean.com/docs/droplets/).
+> [See available instance types for
+> DigitalOcean](https://www.digitalocean.com/docs/droplets/).  If you
+> used `qhub init` this version will automatically be compute for you
+> Do not copy the version you see bellow
+
+To see available instance types refer to [Digital Ocean Instance
+Types](https://www.digitalocean.com/docs/droplets/). Additionally the
+digial ocean cli `doctl` has [support for listing
+droplets](https://www.digitalocean.com/docs/apis-clis/doctl/reference/compute/droplet/list/).
 
 ```yaml
 digital_ocean:
@@ -144,11 +208,11 @@ digital_ocean:
       max_nodes: 4
 ```
 
-
 #### Google Cloud Provider (GCP)
 
-Google Cloud has the best support for QHub. It allows auto-scaling to
-zero within the node group. There are no major restrictions.
+Google Cloud has the best support for QHub and is a great default
+choice for a production deployment. It allows auto-scaling to zero
+within the node group. There are no major restrictions.
 
 To see available instance types refer to
 [GCP docs](https://cloud.google.com/compute/docs/machine-types).
@@ -232,7 +296,9 @@ local:
 
 Default images are to the default image run if not specified in a
 profile (described in the next section). The `jupyterhub` key controls
-the jupyterhub image run.
+the jupyterhub image run. These control the docker image used to run
+JupyterHub, the default JupyterLab image, and default Dask worker
+image.
 
 ```yaml
 default_images:
@@ -244,8 +310,9 @@ default_images:
 ## Storage
 
 Control the amount of storage allocated to shared filesystems.
-> Note: when the storage size is changed, it will automatically
-> delete (!) the previous storage place.
+
+> Note: when the storage size is changed, in most providers it will
+> automatically delete (!) the previous storage place.
 
 ```yaml
 storage:
@@ -302,8 +369,8 @@ For each `profiles.jupyterlab` is a named JupyterLab profile. It
 closely follows the
 [KubeSpawner](https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html)
 API. The only exception is that two keys are added `users` and
-`groups` which allow restriction of profiles to a given set of groups and users.
-We recommend using groups to manage profile access.
+`groups` which allow restriction of profiles to a given set of groups
+and users.  We recommend using groups to manage profile access.
 
 Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the
@@ -545,21 +612,3 @@ environments:
       - jinja2
       - pyyaml
 ```
-
-# Initializing Repository
-
-1. Create a repository
-
-2. Put configuration file in directory in name `qhub-config.yaml`
-
-~2. Put configuration file in the directory with name `qhub-config.yaml` [???]
-
-3. Initialize the QHub repository
-
-```shell
-pip install qhub-ops
-qhub render -c qhub-config.yaml
-```
-This will initialize the repository and next proceed to
-installation. Do not commit to repo to GitHub until you have
-initialized the `terraform-state` directory seen in installation.
