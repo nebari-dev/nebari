@@ -78,7 +78,7 @@ optional arguments:
 
 ## Usage
 QHub requires the setting of environment variables to automate the deployments fully. For details on how to obtain those
-variables, check the [Step-by-Step](https://qhub.dev/docs/step-by-step-walkthrough.html) guide in the docs.
+variables, check the [Step-by-Step](https://cloud.qhub.dev/en/latest/source/03_tutorials_and_samples/1_project_setup_tutorial.html) guide in the docs.
 
 Once all the necessary credentials are gathered and set as [UNIX environment variables](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/),
 QHub can be deployed in under 20 minutes using:
