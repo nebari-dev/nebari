@@ -38,34 +38,25 @@ There are several **optional** (yet highly recommended) flags that allow to conf
 - `--auth-auto-provision`: This will automatically create and configure an application using OAuth.
 - `--repository`: Repository name that will be used to store the Infrastructure-as-Code on GitHub.
 - `--repository-auto-provision`: Sets the secrets for the GitHub repository used for CI/CD actions.
-
-
-### Render config files
-This file will handle the creation of all Terraform modules for the QHub infrastructure.
-
-After initializing, we then need to create all Terraform configuration. This done by running the local command:
-```shell
-qhub render -c qhub-config.yaml -o ./ -f
-```
-
-This will create the following folder structure:
-```
-.
-├── environments        # stores the conda environments
-├── image               # docker images used on deployment: jupyterhub, jupyterlab, and dask-gateway
-│   ├── dask-worker
-│   ├── jupyterlab
-│   │   └── __pycache__
-│   └── scripts
-├── infrastructure      # contains Terraform files that declare state of infrastructure
-└── terraform-state     # required by terraform to securely store the state of the deployment
-```
         
 ### Deploy QHub
 
 Finally, we can deploy QHub with:
 ```shell
 qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
+```
+
+This will create the following folder structure:
+
+```
+.
+├── environments        # stores the conda environments
+├── image               # docker images used on deployment: jupyterhub, jupyterlab, and dask-gateway
+│   ├── dask-worker
+│   ├── jupyterlab
+│   └── scripts
+├── infrastructure      # contains Terraform files that declare state of infrastructure
+└── terraform-state     # required by terraform to securely store the state of the deployment
 ```
 
 The terminal will prompt to press `[enter]` to check auth credentials (which were added by the `qhub init` command). 

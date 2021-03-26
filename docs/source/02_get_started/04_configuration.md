@@ -522,7 +522,7 @@ environments:
 
 ```shell
 pip install qhub-ops
-qhub-ops render -c qhub-config.yaml -o ./ -f
+qhub render -c qhub-config.yaml
 ```
 This will initialize the repository and next proceed to
 installation. Do not commit to repo to GitHub until you have

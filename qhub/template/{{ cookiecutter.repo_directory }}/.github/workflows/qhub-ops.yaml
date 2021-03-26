@@ -25,7 +25,7 @@ jobs:
           pip install qhub==0.2.3
       - name: Render Changes to Template
         run: |
-          qhub render -c qhub-config.yaml -o ./ -f
+          qhub render -c qhub-config.yaml
       - name: Push Changes
         run: |
           git config user.email "qhub@quansight.com"

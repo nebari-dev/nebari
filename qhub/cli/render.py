@@ -5,9 +5,6 @@ from qhub.schema import verify
 def create_render_subcommand(subparser):
     subparser = subparser.add_parser("render")
     subparser.add_argument("-i", "--input", help="input directory")
-    subparser.add_argument(
-        "-f", "--force", action="store_true", help="overwrite existing files"
-    )
     subparser.add_argument("-o", "--output", default="./", help="output directory")
     subparser.add_argument("-c", "--config", help="cookiecutter configuration")
     subparser.set_defaults(func=handle_render)
@@ -29,6 +26,6 @@ def handle_render(args):
     verify(config)
 
     if args.input is None:
-        render_default_template(args.output, args.config, force=args.force)
+        render_default_template(args.output, args.config, force=True)
     else:
-        render_template(args.input, args.output, args.config, force=args.force)
+        render_template(args.input, args.output, args.config, force=True)
