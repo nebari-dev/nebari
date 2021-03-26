@@ -43,7 +43,7 @@ There are several **optional** (yet highly recommended) flags that allow to conf
 
 Finally, we can deploy QHub with:
 ```shell
-qhub deploy -c qhub-config.yaml -f --dns-provider cloudflare --dns-auto-provision
+qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
 ```
 
 This will create the following folder structure:
