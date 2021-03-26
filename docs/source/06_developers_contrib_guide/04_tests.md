@@ -28,18 +28,8 @@ and you are at the root of the repository.
 In order to develop with QHub you will need to download the following
 dependencies and have them available in your path.
 
- - [terraform](https://www.terraform.io/downloads.html)
+ - [kubectl](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-kubectl/)
  - [minikube](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-minikube/)
-
----
-**NOTE**
-  Qhub-cloud currently runs `Terraform 0.13.5` which can lead to some incompatibility
-  if you install a newer version of it. In order to avoid such situations you can 
-  download the `Terraform 0.13.5` binary from [releases](https://releases.hashicorp.com/terraform/0.13.5/)
-  and move the downloaded file to `~/.local/bin`. Be sure to add it to your path 
-  `export PATH=$HOME/.local/bin:$PATH` if it's not already added. 
-
----
 
 ### Initialize kubernetes cluster
 
@@ -74,8 +64,8 @@ status of the cluster:
 minikube status
 ```
 
-If your cluster is running, the output from minikube status should 
-be similar to:
+If your cluster is running, the output from minikube status should be
+similar to:
 
 ```bash
 minikube
@@ -130,8 +120,9 @@ minikube addons configure metallb
 ```
 
 If you don't want to configure metallb interactively run the below
-bash/python command. This is also used in github actions since the
-minikube command does not [provide a non interactive way to configure
+bash/python command (**recommended**). This is also used in github
+actions since the minikube command does not [provide a non interactive
+way to configure
 addons](https://github.com/kubernetes/minikube/issues/8283). Here is a
 script to set the load balancer ip address
 [tests/scripts/minikube-loadbalancer-ip.py](tests/scripts/minikube-loadbalancer-ip.py).
@@ -146,7 +137,7 @@ minikube addons enable metallb
   The 'metallb' addon is enabled
 ```
 
-### Debug your Kubernets cluster 
+### Debug your Kubernetes cluster 
 
  [K9s](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to 
  simplify navigating, observing, and managing your applications in K8s. 
@@ -163,7 +154,7 @@ Be sure to complete installation to be able to follow along.
 By default, K9s starts with the standard directory that is set as the 
 context (in this case minkube). To view all the current process press `0`:
 
-![Image of K9s termina UI](image_here)
+![Image of K9s termina UI](https://k9scli.io/assets/screens/pods.png)
 
 ---
 **NOTE**
@@ -180,7 +171,7 @@ locally without the need to expose them beforehand.
 
 ---
 
-### Deploy qhub
+### Deploy QHub
 
 ```shell
 pip install -e .
@@ -194,12 +185,14 @@ Initialize the `qhub-config.yaml`
 python -m qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
 ```
 
-Give a password to the default user. For this the example password is
-`example-user`. You can generate your own via `python -c "import bcrypt;
-bcrypt.hashpw(b'<password>', bcrypt.gensalt())"`. Where you can change
-`<password>` to be the password you want. This requires the bcrypt python 
-package to be installed. This must be added to the `qhub-config.yaml` in 
-the users section shown like below.
+A random password is auto generated for the user `example-user` when
+the auth provider `password` is used and is printed to stdout. If you
+would like to change the password (not required) you can generate your
+own via `python -c "import bcrypt; bcrypt.hashpw(b'<password>',
+bcrypt.gensalt())"`. Where you can change `<password>` to be the
+password you want. This requires the bcrypt python package to be
+installed. This must be added to the `qhub-config.yaml` in the users
+section shown like below.
 
 ```
   users:
@@ -239,14 +232,29 @@ jupyterhub server.
 curl -k https://github-actions.qhub.dev/hub/login
 ```
 
-You can also visit `https://github-actions.qhub.dev` in your
-web browser.
+You can also visit `https://github-actions.qhub.dev` in your web
+browser. Since this is a local deployment not visible to the internet
+`https` certificates will not be signed by [Let's
+Encrypt](https://letsencrypt.org/) thus the certificates will be
+[self-signed by
+traefik](https://en.wikipedia.org/wiki/Self-signed_certificate). Several
+browsers will make it difficult to view a self-signed certificate that
+has not been added to your certificate registry. Each web browser
+handles this differently. 
+
+ - firefox :: visit `about:config` and change the `network.stricttransportsecurity.preloadlist` to `false`
 
 ### Cleanup
+
+To delete all the QHub resources run the `destroy` command. Note that
+this will not delete your `qhub-config.yaml` and related rendered
+files thus a re-deployment via `deploy` is possible afterwards.
 
 ```shell
 python -m qhub destroy --config qhub-config.yaml 
 ```
+
+To delete the minikube kuberenetes cluster run the following command.
 
 ```shell
 minikube delete
