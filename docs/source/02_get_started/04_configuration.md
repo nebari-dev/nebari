@@ -7,12 +7,19 @@ the YAML configuration file.
 
 ```yaml
 project_name: do-jupyterhub # name of the kubernetes/Cloud deployment 
+namespace: dev
 provider: <provider_alias> # determines the choice of cloud provider for the deployment
 ci_cd: github-actions # continuous integration and continuous deployment framework to use
 domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
+terraform_state: remote
 ```
 
 `project_name` should be compatible with the Cloud provider naming convention.
+
+`namespace` is used in combination with `project_name` to label
+resources. In addition `namespace` also determines the `namespace`
+that used when deploying kubernetes resources for qhub. Has a default
+value of `dev`.
 
 `provider` possible values are `do` for DigitalOcean, `aws` for Amazon AWS, `gcp` for Google Could Provider and `azure`
 for Microsoft Azure.
@@ -23,6 +30,11 @@ framework to use. Currently `github-actions` is supported.
 `domain` is the top level URL to put JupyterLab and future services
 under such a monitoring. For example `jupyter.do.qhub.dev` would be
 the domain for JupyterHub to be exposed under.
+
+`terraform_state` is either `remote` or `local` with a default value
+of `remote`. This decides whether to control the state of the cluster
+locally or remotely. See [terraform remote
+state](https://www.terraform.io/docs/language/state/index.html) docs.
 
 ## Security
 

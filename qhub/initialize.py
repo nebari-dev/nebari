@@ -17,7 +17,6 @@ BASE_CONFIGURATION = {
     "provider": None,
     "ci_cd": None,
     "domain": None,
-    "terraform_state": None,
     "security": {
         "authentication": None,
         "users": {
@@ -219,6 +218,7 @@ def render_config(
     ci_provider,
     repository,
     auth_provider,
+    namespace=None,
     repository_auto_provision=False,
     auth_auto_provision=False,
     terraform_state=None,
@@ -229,7 +229,8 @@ def render_config(
     config["provider"] = cloud_provider
     config["ci_cd"] = ci_provider
 
-    config["terraform_state"] = terraform_state
+    if terraform_state is not None:
+        config["terraform_state"] = terraform_state
 
     config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
     config["theme"]["jupyterhub"][
@@ -239,6 +240,9 @@ def render_config(
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
     config["project_name"] = project_name
+
+    if namespace is not None:
+        config["namespace"] = namespace
 
     if qhub_domain is None and not disable_prompt:
         qhub_domain = input("Provide domain: ")
