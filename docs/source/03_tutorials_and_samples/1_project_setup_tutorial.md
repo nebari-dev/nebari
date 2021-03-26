@@ -1,20 +1,23 @@
 # Step-by-Step QHub Cloud Deployment
 
-The list below is our suggestion. Other providers may be used, but you will need to consult their documentation. When using a different provider the corresponding flag in the `qhub` command-line argument should be omitted.
+The list below is our suggestion. Other providers may be used, but you
+will need to consult their documentation. When using a different
+provider the corresponding flag in the `qhub` command-line argument
+should be omitted.
 
-For this initial tutorial, we assume that you will use the following tools:
+For this initial tutorial, we assume that you will use the following
+tools:
 
-
-- [Github actions] will be used for CI/CD
-- Oauth will be via [auth0]
-- DNS registry will be through [Cloudflare]
-- Terraform v0.13.5 is installed
-
+- [Github Actions](https://github.com/features/actions) will be used for CI/CD
+- Oauth will be via [Auth0](https://auth0.com/)
+- DNS registry will be through [Cloudflare](https://www.cloudflare.com/)
 
 ## 1. Install QHub
-Following best practice, we recommend that you create a virtual environment previously and from there install QHub on machine:
+Following best practice, we recommend that you create a virtual
+environment previously and from there install QHub on machine:
 
-- If you prefer conda, install the latest stable release with : 
+- If you prefer conda, install the latest stable release with :
+
 ```bash
     conda install -c conda-forge qhub
 ```
