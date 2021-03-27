@@ -1,7 +1,7 @@
 # Setup Initialization
 
-QHub Cloud offers two usage options: 
-+ [Local](../06_developers_contrib_guide/04_tests#local-testing) deployment, used for testing.
+QHub Cloud offers several usage options: 
++ [Local](../06_developers_contrib_guide/04_tests.md#local-testing) deployment, used for testing.
 + [Cloud](#cloud-deployment) deployment for all else (_default_).
 
 We advise users with existing Kubernetes clusters to start with local
@@ -44,7 +44,7 @@ The first required step is to **choose a Cloud Provider to host the
 project deployment**. The cloud installation is based on Kubernetes,
 but knowledge of Kubernetes is **NOT** required nor is in depth
 knowledge about the specific provider required either. QHub supports
-[Amazon AWS](#amazon-web-services-(aws)),
+[Amazon AWS](#amazon-web-services-aws),
 [DigitalOcean](#digital-ocean), [GCP](#google-cloud-platform), and
 [Azure](#microsoft-azure).
 
