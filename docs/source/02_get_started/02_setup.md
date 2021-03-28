@@ -174,7 +174,7 @@ export AUTH_DOMAIN="qhub-test.auth0.com" # in case the account was called 'qhub-
 QHub uses GitHub Actions to enable [Infrastructure as
 Code](https://en.wikipedia.org/wiki/Infrastructure_as_code) and
 trigger the CI/CD checks on the configuration file that automatically
-generates the Terraform modules for the deployment infrastructure. To
+generates the deployment modules for the infrastructure. To
 do that, it will be necessary to set the GitHub username and token as
 environment variables. First create a github personal access token via
 [these
