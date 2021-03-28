@@ -2,7 +2,7 @@
 This guide aims to provide useful information to developers in the detection and correction of issues within QHub.
 
 ## General Troubleshooting
-To minimize the occurrence of errors on your QHub application, please follow the best practices described on the 
+To minimize the occurrence of errors on your QHub application, please follow the best practices described on the
 [Installation](01_installation.md), [Setup](02_setup.md) and [Usage](03_usage.md) sections.
 
 ### Solutions for common problems
@@ -31,32 +31,32 @@ Finally, check if the correct version was installed with `terraform -v`, the out
 
 ---
 
-#### Debug your Kubernetes cluster 
+#### Debug your Kubernetes cluster
 
- [K9s](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to 
- simplify navigating, observing, and managing your applications in K8s. 
- K9s continuously monitors Kubernetes clusters for changes and provides 
- shortcut commands to interact with the observed resources becoming a 
- fast way to review and resolve day-to-day issues in Kubernetes. It's 
- definitely a huge improvement to the general workflow, and a best-to-have 
- tool for debugging your Kubernetes cluster sessions. 
+ [K9s](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to
+ simplify navigating, observing, and managing your applications in K8s.
+ K9s continuously monitors Kubernetes clusters for changes and provides
+ shortcut commands to interact with the observed resources becoming a
+ fast way to review and resolve day-to-day issues in Kubernetes. It's
+ definitely a huge improvement to the general workflow, and a best-to-have
+ tool for debugging your Kubernetes cluster sessions.
 
-Installation can be done on macOS, Windows, and Linux. Instructions 
-for each operating system can be found [here](https://github.com/derailed/k9s). 
+Installation can be done on macOS, Windows, and Linux. Instructions
+for each operating system can be found [here](https://github.com/derailed/k9s).
 Complete installation to follow along.
 
-By default, K9s starts with the standard directory that is set as the 
+By default, K9s starts with the standard directory that is set as the
 context (in this case Minkube). To view all the current process press `0`:
 
-![Image of K9s termina UI](image_here)
+![Image of K9s termina UI](../meta_images/k9s_UI.png)
 
-> **NOTE**: In some circumstances you will be confronted with the 
+> **NOTE**: In some circumstances you will be confronted with the
   need to inspect any services launched by your cluster at your ‘localhost’. For instance, if your cluster has problem
-with the network traffic tunnel configuration, it may limit or block the user's 
-  access to destination resources over the connection. 
+with the network traffic tunnel configuration, it may limit or block the user's
+  access to destination resources over the connection.
 
-K9s port-forward option `<kbd>shift</kbd> + <kbd>f</kbd>` allows you to access and interact 
-with internal Kubernetes cluster processes from your localhost. Use this method to investigate issues and adjust your 
+K9s port-forward option `<kbd>shift</kbd> + <kbd>f</kbd>` allows you to access and interact
+with internal Kubernetes cluster processes from your localhost. Use this method to investigate issues and adjust your
 services locally without the need to expose them beforehand.
 
 
@@ -125,7 +125,3 @@ docker run -p 8000:8000 -it Quansight/qhub-jupyterlab:latest jupyter lab --port 
 TODO
 #### Bodo
 TODO
-
-
-
-
