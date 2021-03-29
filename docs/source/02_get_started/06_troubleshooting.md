@@ -43,7 +43,7 @@ Finally, check if the correct version was installed with `terraform -v`, the out
 
 Installation can be done on macOS, Windows, and Linux. Instructions
 for each operating system can be found [here](https://github.com/derailed/k9s).
-Complete the qinstallation to follow along.
+Complete the installation to follow along.
 
 By default, K9s starts with the standard directory that is set as the
 context (in this case Minikube). To view all the current process press `0`:
