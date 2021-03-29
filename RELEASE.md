@@ -26,6 +26,7 @@
 * CI now tests local deployment on each commit/PR.
 * QHub Terraform modules are now pinned to specific git branch via
   `terraform_modules.repository` and `terraform_modules.ref`.
+* Adds support for Azure cloud provider.
 
 ### Bug fixes
 
