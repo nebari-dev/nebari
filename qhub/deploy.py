@@ -1,6 +1,6 @@
 import logging
 import re
-from subprocess import check_output, CalledProcessError
+from subprocess import CalledProcessError
 
 from qhub.provider import terraform
 from qhub.utils import (
