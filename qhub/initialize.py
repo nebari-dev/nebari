@@ -2,6 +2,7 @@ import os
 import re
 import string
 import random
+import tempfile
 
 import bcrypt
 import requests
@@ -274,14 +275,20 @@ def render_config(
     elif auth_provider == "password":
         config["security"]["authentication"] = AUTH_PASSWORD
 
-        # Generate a random password
-        example_password = "".join(
-            random.choice(string.ascii_letters + string.digits) for i in range(16)
+        # Generate default password for qhub-init
+        default_password = "".join(
+            secrets.choice(string.ascii_letters + string.digits) for i in range(16)
         )
         config["security"]["users"]["example-user"]["password"] = bcrypt.hashpw(
             example_password.encode("utf-8"), bcrypt.gensalt()
         ).decode()
-        print(f"Your QHub password for example-user is {example_password}")
+
+        default_password_filename = os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')
+        with open(default_password_filename, "w") as f:
+            f.write(default_password)
+        os.chmod(default_password_filename, 0o700)
+
+        print(f"Securely generated default random password={default_password} for example-user stored at path={default_password_filename}")
 
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
