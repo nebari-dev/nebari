@@ -46,7 +46,7 @@ for each operating system can be found [here](https://github.com/derailed/k9s).
 Complete installation to follow along.
 
 By default, K9s starts with the standard directory that is set as the
-context (in this case Minkube). To view all the current process press `0`:
+context (in this case Minikube). To view all the current process press `0`:
 
 ![Image of K9s termina UI](../meta_images/k9s_UI.png)
 
@@ -55,9 +55,10 @@ context (in this case Minkube). To view all the current process press `0`:
 with the network traffic tunnel configuration, it may limit or block the user's
   access to destination resources over the connection.
 
-K9s port-forward option `<kbd>shift</kbd> + <kbd>f</kbd>` allows you to access and interact
-with internal Kubernetes cluster processes from your localhost. Use this method to investigate issues and adjust your
-services locally without the need to expose them beforehand.
+K9s port-forward option <kbd>shift</kbd> + <kbd>f</kbd> allows you to access and interact
+with internal Kubernetes cluster processes from your localhost you can
+then use this method to investigate issues and adjust your services
+locally without the need to expose them beforehand.
 
 
 ---
