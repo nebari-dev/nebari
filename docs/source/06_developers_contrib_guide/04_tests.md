@@ -144,37 +144,6 @@ minikube addons enable metallb
 ```
 To which the output should be `The 'metallb' addon is enabled`.
 
-### Debug your Kubernetes cluster
-
- [K9s](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to
- simplify navigating, observing, and managing your applications in K8s.
- K9s continuously monitors Kubernetes clusters for changes and provides
- shortcut commands to interact with the observed resources becoming a
- fast way to review and resolve day-to-day issues in Kubernetes. It's
- definitely a huge improvement to the general workflow, and a best-to-have
- tool for debugging your Kubernetes cluster sessions.
-
-Installation can be done on a macOS, in Windows, and Linux. Instructions
-for each operating system can be found [here](https://github.com/derailed/k9s).
-Be sure to complete installation to be able to follow along.
-
-By default, K9s starts with the standard directory that is set as the
-context (in this case Minkube). To view all the current process press `0`:
-
-![Image of K9s termina UI](https://k9scli.io/assets/screens/pods.png)
-
----
-> NOTE: In some circumstances you will be confronted with the
-  necessity to inspect in your ‘localhost’ any services launched by
-  your cluster. For instance, if your cluster has issues with the
-  network traffic tunnel configuration it may limit or block the user's
-  access to destination resources over the connection.
-
-K9s port-forward option `<kbd>shift</kbd> + <kbd>f</kbd>` allows you to access and interact
-with internal Kubernetes cluster processes from your localhost you can
-then use this method to investigate issues and adjust your services
-locally without the need to expose them beforehand.
-
 ---
 
 ### Deploy QHub
@@ -277,6 +246,18 @@ To delete the Minikube Kubernetes cluster run the following command:
 minikube delete
 ```
 The command will delete all instances of QHub, cleaning up the deployment environment.
+
+## Debug Kubernetes clusters
+
+ To debug Kubernetes clusters, we advise you to use [K9s](https://k9scli.io/), a terminal-based UI that aims to
+ simplify navigation, observation, and management of applications in Kubernetes.
+ K9s continuously monitors Kubernetes clusters for changes and provides
+ shortcut commands to interact with the observed resources becoming a
+ fast way to review and resolve day-to-day issues in deployed clusters.
+
+Installation can be done on a macOS, in Windows, and Linux and instructions
+ can be found [here](https://github.com/derailed/k9s). For more details on usage,
+check out the [Troubleshooting documentation](../02_get_started/06_troubleshooting.md#debug-your-kubernetes-cluster)
 
 ## Cloud Testing
 

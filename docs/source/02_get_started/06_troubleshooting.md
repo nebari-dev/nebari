@@ -43,7 +43,7 @@ Finally, check if the correct version was installed with `terraform -v`, the out
 
 Installation can be done on macOS, Windows, and Linux. Instructions
 for each operating system can be found [here](https://github.com/derailed/k9s).
-Complete installation to follow along.
+Complete the installation to follow along.
 
 By default, K9s starts with the standard directory that is set as the
 context (in this case Minikube). To view all the current process press `0`:
@@ -59,7 +59,6 @@ K9s port-forward option <kbd>shift</kbd> + <kbd>f</kbd> allows you to access and
 with internal Kubernetes cluster processes from your localhost you can
 then use this method to investigate issues and adjust your services
 locally without the need to expose them beforehand.
-
 
 ---
 
