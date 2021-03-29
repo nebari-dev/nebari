@@ -1,3 +1,5 @@
+import subprocess
+import sys
 import time
 import os
 import contextlib
@@ -22,6 +24,14 @@ def change_directory(directory):
     os.chdir(directory)
     yield
     os.chdir(current_directory)
+
+
+def run_subprocess_cmd(*args, **kwargs):
+    """Runs subprocess command with realtime stdout logging."""
+    process = subprocess.Popen(*args, **kwargs, stdout=subprocess.PIPE)
+    for c in iter(lambda: process.stdout.read(1), b''):
+        sys.stdout.buffer.write(c)
+        sys.stdout.flush()
 
 
 def check_cloud_credentials(config):

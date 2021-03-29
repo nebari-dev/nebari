@@ -9,7 +9,7 @@ import tempfile
 import urllib.request
 import zipfile
 
-from qhub.utils import timer
+from qhub.utils import timer, run_subprocess_cmd
 from qhub import constants
 
 
@@ -64,7 +64,7 @@ def init(directory=None):
     terraform_path = download_terraform_binary()
     logger.info(f"terraform={terraform_path} init directory={directory}")
     with timer(logger, "terraform init"):
-        subprocess.check_output([terraform_path, "init"], cwd=directory)
+        run_subprocess_cmd([terraform_path, "init"], cwd=directory)
 
 
 def apply(directory=None, targets=None):
@@ -74,12 +74,9 @@ def apply(directory=None, targets=None):
     logger.info(
         f"terraform={terraform_path} apply directory={directory} targets={targets}"
     )
+    command = [terraform_path, "apply", "-auto-approve"] + ["-target=" + _ for _ in targets]
     with timer(logger, "terraform apply"):
-        subprocess.check_output(
-            [terraform_path, "apply", "-auto-approve"]
-            + ["-target=" + _ for _ in targets],
-            cwd=directory,
-        )
+        run_subprocess_cmd(command, cwd=directory)
 
 
 def output(directory=None):
