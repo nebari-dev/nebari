@@ -1,5 +1,4 @@
 import io
-import json
 import logging
 import os
 import platform
@@ -88,10 +87,9 @@ def output(directory=None):
 
     logger.info(f"terraform={terraform_path} output directory={directory}")
     with timer(logger, "terraform output"):
-        output = subprocess.check_output(
+        return subprocess.check_output(
             [terraform_path, "output", "-json"], cwd=directory
-        ).decode("utf8")
-        return json.loads(output)
+        ).decode("utf8")[:-1]
 
 
 def destroy(directory=None):
