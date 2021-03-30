@@ -29,7 +29,7 @@ def change_directory(directory):
 def run_subprocess_cmd(*args, **kwargs):
     """Runs subprocess command with realtime stdout logging."""
     process = subprocess.Popen(*args, **kwargs, stdout=subprocess.PIPE)
-    for c in iter(lambda: process.stdout.read(1), b''):
+    for c in iter(lambda: process.stdout.read(1), b""):
         sys.stdout.buffer.write(c)
         sys.stdout.flush()
 

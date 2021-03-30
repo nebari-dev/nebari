@@ -74,7 +74,9 @@ def apply(directory=None, targets=None):
     logger.info(
         f"terraform={terraform_path} apply directory={directory} targets={targets}"
     )
-    command = [terraform_path, "apply", "-auto-approve"] + ["-target=" + _ for _ in targets]
+    command = [terraform_path, "apply", "-auto-approve"] + [
+        "-target=" + _ for _ in targets
+    ]
     with timer(logger, "terraform apply"):
         run_subprocess_cmd(command, cwd=directory)
 
