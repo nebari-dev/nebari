@@ -25,10 +25,14 @@ dependencies:
  - pyviz_comms >=2.0.1
 
  # viz tools
- - panel
  - param
  - python-graphviz
- - cdsdashboards-singleuser
+ - matplotlib >= 3.3.4
+ - panel >= 0.10.3
+ - voila >= 0.2.7
+ - streamlit >= 0.76
+ - dash >= 1.19
+ - cdsdashboards-singleuser >= 0.5.0
 
  # testing, docs, linting
  - pytest

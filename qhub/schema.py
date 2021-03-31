@@ -200,6 +200,13 @@ class CondaEnvironment(Base):
     dependencies: typing.List[typing.Union[str, typing.Dict[str, str]]]
 
 
+# =============== CDSDashboards ==============
+
+
+class CDSDashboards(Base):
+    enabled: bool
+
+
 # ==================== Main ===================
 
 letter_dash_underscore_regex = pydantic.constr(regex=r"^[A-Za-z-_]+$")
@@ -213,6 +220,7 @@ class Main(Base):
     domain: str
     terraform_state: typing.Optional[TerraformStateEnum] = "remote"
     terraform_modules: typing.Optional[TerraformModules]
+    cdsdashboards: CDSDashboards
     security: Security
     default_images: typing.Dict[str, str]
     storage: typing.Dict[str, str]
