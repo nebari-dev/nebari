@@ -26,11 +26,17 @@ def change_directory(directory):
     os.chdir(current_directory)
 
 
-def run_subprocess_cmd(prefix, *args, **kwargs):
-    """Runs subprocess command with realtime stdout logging."""
+def run_subprocess_cmd(*args, **kwargs):
+    """Runs subprocess command with realtime stdout logging with optional line prefix"""
+    if "prefix" in kwargs:
+        line_prefix = f"[{kwargs['prefix']}]".encode("utf-8")
+        kwargs.pop("prefix")
+    else:
+        line_prefix = b""
+
     process = subprocess.Popen(*args, **kwargs, stdout=subprocess.PIPE)
-    for c in iter(lambda: process.stdout.readline(), b""):
-        sys.stdout.buffer.write(bytes(f"[{prefix}]: ", "utf-8") + c)
+    for line in iter(lambda: process.stdout.readline(), b""):
+        sys.stdout.buffer.write(line_prefix + line)
         sys.stdout.flush()
 
 
