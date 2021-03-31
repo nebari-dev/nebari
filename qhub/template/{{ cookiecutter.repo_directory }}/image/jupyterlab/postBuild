@@ -5,7 +5,7 @@ set -euo pipefail
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
 # ====== setup ipython conifiguration ======
-mkdir /etc/ipython
+mkdir -p /etc/ipython
 cp /opt/jupyterlab/ipython_config.py /etc/ipython/ipython_config.py
 
 # ====== setup juypterlab configuration overrides ======

@@ -10,4 +10,4 @@ dependencies:
  - cdsdashboards
  - pip:
    - jupyterhub-kubespawner >= 0.16.1
-   - qhub-jupyterhub-theme
+   - qhub-jupyterhub-theme >= 0.3.1
