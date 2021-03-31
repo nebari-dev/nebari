@@ -115,7 +115,6 @@ provider "helm" {
     {%- endif -%}
 {% endif %}
   }
-  version = "1.0.0"
 }
 
 {% if cookiecutter.provider == "aws" -%}
