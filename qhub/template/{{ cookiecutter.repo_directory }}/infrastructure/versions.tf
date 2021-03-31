@@ -19,7 +19,7 @@ terraform {
     }
 {% endif %}
     helm = {
-      source = "hashicorp/helm"
+      source  = "hashicorp/helm"
       version = "1.0.0"
     }
     kubernetes = {
