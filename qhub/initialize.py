@@ -2,6 +2,8 @@ import os
 import re
 import string
 import random
+import secrets
+import tempfile
 
 import bcrypt
 import requests
@@ -9,7 +11,6 @@ import requests
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
-from qhub.constants import DEFAULT_TERRAFORM_VERSION
 from qhub.provider.cloud import digital_ocean
 
 
@@ -18,8 +19,6 @@ BASE_CONFIGURATION = {
     "provider": None,
     "ci_cd": None,
     "domain": None,
-    "terraform_version": "0.13.15",
-    "terraform_state": None,
     "security": {
         "authentication": None,
         "users": {
@@ -32,9 +31,9 @@ BASE_CONFIGURATION = {
         "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
     },
     "default_images": {
-        "jupyterhub": "quansight/qhub-jupyterhub:1ece8e33b4b957c843c6f63150f0507bab60c422",
-        "jupyterlab": "quansight/qhub-jupyterlab:1ece8e33b4b957c843c6f63150f0507bab60c422",
-        "dask_worker": "quansight/qhub-dask-worker:1ece8e33b4b957c843c6f63150f0507bab60c422",
+        "jupyterhub": "quansight/qhub-jupyterhub:69a3cd545f75e4bbaadae8442c2ef0c900ed4898",
+        "jupyterlab": "quansight/qhub-jupyterlab:69a3cd545f75e4bbaadae8442c2ef0c900ed4898",
+        "dask_worker": "quansight/qhub-dask-worker:69a3cd545f75e4bbaadae8442c2ef0c900ed4898",
     },
     "storage": {"conda_store": "20Gi", "shared_filesystem": "10Gi"},
     "theme": {
@@ -78,6 +77,23 @@ AUTH_OAUTH_AUTH0 = {
     },
 }
 
+LOCAL = {
+    "node_selectors": {
+        "general": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "user": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "worker": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+    }
+}
+
 DIGITAL_OCEAN = {
     "region": "nyc3",
     "kubernetes_version": "PLACEHOLDER",
@@ -99,6 +115,28 @@ GOOGLE_PLATFORM = {
         "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
         "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
     },
+}
+
+AZURE = {
+    "project": "PLACEHOLDER",
+    "region": "Central US",
+    "kubernetes_version": "1.18.14",
+    "node_groups": {
+        "general": {
+            "instance": "Standard_D2_v2",
+            "min_nodes": 1,
+            "max_nodes": 1,
+        },
+        "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 4},
+        "worker": {
+            "instance": "Standard_D2_v2",
+            "min_nodes": 0,
+            "max_nodes": 4,
+        },
+    },
+    "storage_account_postfix": "".join(
+        random.choices("abcdefghijklmnopqrstuvwxyz0123456789", k=8)
+    ),
 }
 
 AMAZON_WEB_SERVICES = {
@@ -123,7 +161,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1,
                 "mem_limit": "1G",
                 "mem_guarantee": "1G",
-                "image": "quansight/qhub-jupyterlab:1ece8e33b4b957c843c6f63150f0507bab60c422",
+                "image": "quansight/qhub-jupyterlab:69a3cd545f75e4bbaadae8442c2ef0c900ed4898",
             },
         },
         {
@@ -134,7 +172,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1.25,
                 "mem_limit": "2G",
                 "mem_guarantee": "2G",
-                "image": "quansight/qhub-jupyterlab:1ece8e33b4b957c843c6f63150f0507bab60c422",
+                "image": "quansight/qhub-jupyterlab:69a3cd545f75e4bbaadae8442c2ef0c900ed4898",
             },
         },
     ],
@@ -144,14 +182,14 @@ DEFAULT_PROFILES = {
             "worker_cores": 1,
             "worker_memory_limit": "1G",
             "worker_memory": "1G",
-            "image": "quansight/qhub-dask-worker:1ece8e33b4b957c843c6f63150f0507bab60c422",
+            "image": "quansight/qhub-dask-worker:69a3cd545f75e4bbaadae8442c2ef0c900ed4898",
         },
         "Medium Worker": {
             "worker_cores_limit": 1.5,
             "worker_cores": 1.25,
             "worker_memory_limit": "2G",
             "worker_memory": "2G",
-            "image": "quansight/qhub-dask-worker:1ece8e33b4b957c843c6f63150f0507bab60c422",
+            "image": "quansight/qhub-dask-worker:69a3cd545f75e4bbaadae8442c2ef0c900ed4898",
         },
     },
 }
@@ -183,9 +221,9 @@ def render_config(
     ci_provider,
     repository,
     auth_provider,
+    namespace=None,
     repository_auto_provision=False,
     auth_auto_provision=False,
-    terraform_version=DEFAULT_TERRAFORM_VERSION,
     terraform_state=None,
     kubernetes_version=None,
     disable_prompt=False,
@@ -194,8 +232,8 @@ def render_config(
     config["provider"] = cloud_provider
     config["ci_cd"] = ci_provider
 
-    config["terraform_version"] = terraform_version
-    config["terraform_state"] = terraform_state
+    if terraform_state is not None:
+        config["terraform_state"] = terraform_state
 
     config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
     config["theme"]["jupyterhub"][
@@ -205,6 +243,9 @@ def render_config(
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
     config["project_name"] = project_name
+
+    if namespace is not None:
+        config["namespace"] = namespace
 
     if qhub_domain is None and not disable_prompt:
         qhub_domain = input("Provide domain: ")
@@ -236,14 +277,24 @@ def render_config(
     elif auth_provider == "password":
         config["security"]["authentication"] = AUTH_PASSWORD
 
-        # Generate a random password
-        example_password = "".join(
-            random.choice(string.ascii_letters + string.digits) for i in range(16)
+        # Generate default password for qhub-init
+        default_password = "".join(
+            secrets.choice(string.ascii_letters + string.digits) for i in range(16)
         )
         config["security"]["users"]["example-user"]["password"] = bcrypt.hashpw(
-            example_password.encode("utf-8"), bcrypt.gensalt()
+            default_password.encode("utf-8"), bcrypt.gensalt()
         ).decode()
-        print(f"Your QHub password for example-user is {example_password}")
+
+        default_password_filename = os.path.join(
+            tempfile.gettempdir(), "QHUB_DEFAULT_PASSWORD"
+        )
+        with open(default_password_filename, "w") as f:
+            f.write(default_password)
+        os.chmod(default_password_filename, 0o700)
+
+        print(
+            f"Securely generated default random password={default_password} for example-user stored at path={default_password_filename}"
+        )
 
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
@@ -274,6 +325,14 @@ def render_config(
             config["google_cloud_platform"]["project"] = input(
                 "Enter Google Cloud Platform Project ID: "
             )
+    elif cloud_provider == "azure":
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = "Autoscaling Compute Environment on Azure"
+        config["azure"] = AZURE
+        if kubernetes_version:
+            config["azure"]["kubernetes_version"] = kubernetes_version
+
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
@@ -285,6 +344,7 @@ def render_config(
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment"
+        config["local"] = LOCAL
 
     config["profiles"] = DEFAULT_PROFILES
     config["environments"] = DEFAULT_ENVIRONMENTS
@@ -338,7 +398,14 @@ def github_auto_provision(config, owner, repo):
         github.update_secret(owner, repo, "PROJECT_ID", os.environ["PROJECT_ID"])
         with open(os.environ["GOOGLE_CREDENTIALS"]) as f:
             github.update_secret(owner, repo, "GOOGLE_CREDENTIALS", f.read())
-
+    elif config["provider"] == "azure":
+        for name in {
+            "ARM_CLIENT_ID",
+            "ARM_CLIENT_SECRET",
+            "ARM_SUBSCRIPTION_ID",
+            "ARM_TENANT_ID",
+        }:
+            github.update_secret(owner, repo, name, os.environ[name])
     github.update_secret(
         owner, repo, "REPOSITORY_ACCESS_TOKEN", os.environ["GITHUB_TOKEN"]
     )

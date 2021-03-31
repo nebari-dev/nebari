@@ -8,7 +8,7 @@ QHub is an open source tool that enables users to build and maintain
 cost-effective and scalable compute/data science platforms [on-premises](#qhub-on-prem) or on 
 [cloud providers](#qhub-cloud) with minimal DevOps experience.
 
-Not sure what to choose? Check out our [FAQ](../9_faq/1_faqs.md/#).
+Not sure what to choose? Check out our [FAQ](../02_get_started/07_support.md#faq).
 
 **This repository details the [QHub Cloud](https://qhub.dev/ "Official QHub docs") version.**
 
@@ -37,13 +37,14 @@ QHub offers out-of-the-box support for [Digital Ocean](https://www.digitalocean.
 will be added soon.
 
 
-![image](docs/source/meta_images/tech_stack_diagram.png "architecture diagram")
+[comment]: <> (![image]&#40;docs/source/meta_images/tech_stack_diagram.png "architecture diagram"&#41;)
+![High-level illustration of QHub architecture](docs/source/meta_images/qhub-cloud_architecture.png)
 
 For more details, check out the release [blog post](https://www.quansight.com/post/announcing-qhub).
 
 ## Installation
 ### Pre-requisites
-* QHub is supported by macOS and Linux operating systems (Windows is **NOT** currently supported
+* QHub is supported by macOS and Linux operating systems (Windows is **NOT** currently supported).
 * Compatible with Python 3.6+. New to Python? We recommend using [Anaconda](https://www.anaconda.com/products/individual).
 * Adoption of virtual environments (`conda`, `pipenv` or `venv`) is also encouraged. 
 
@@ -80,13 +81,12 @@ optional arguments:
 
 ## Usage
 QHub requires the setting of environment variables to automate the deployments fully. For details on how to obtain those
-variables, check the [Step-by-Step](https://qhub.dev/docs/step-by-step-walkthrough.html) guide in the docs.
+variables, check the [Step-by-Step](https://cloud.qhub.dev/en/latest/source/03_tutorials_and_samples/1_project_setup_tutorial.html) guide in the docs.
 
 Once all the necessary credentials are gathered and set as [UNIX environment variables](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/),
 QHub can be deployed in under 20 minutes using:
 ```bash
 qhub init   ... # generates initial config file and optionally automates deployment steps
-qhub render ... # creates the Terraform config module
 qhub deploy ... # creates and configures the cloud infrastructure
 ```
 
@@ -108,9 +108,9 @@ To guarantee a welcoming and friendly community, we require contributors to foll
 
 
 ## Developer
-To install the latest developer version use:
+To install the latest developer version (unstable) use:
 ```bash
-pip install git+https://github.com/Quansight/qhub.git
+pip install git+https://github.com/Quansight/qhub.git@dev
 ```
 
 ## Contributions

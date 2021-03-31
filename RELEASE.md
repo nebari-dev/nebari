@@ -11,6 +11,12 @@
 ## Upcoming release 0.3.0
 
 ### Feature changes and enhancements
+* Adding ability to specify node selector label for general, user, and worker
+* Ability to specify `kube_context` for local deployments otherwise will use default
+* Strict schema validation for `qhub-config.yaml`
+* Terraform binary is auto-installed and version managed by qhub
+* Deploy stage will auto render by default removing the need for render command for end users
+* Support for namespaces with qhub deployments on kubernetes clusters
 * Full JupyterHub theming including colors now.
 * JupyterHub docker image now independent from zero-to-jupyterhub.
 * JupyterLab 3 now default user Docker image.
@@ -20,6 +26,7 @@
 * CI now tests local deployment on each commit/PR.
 * QHub Terraform modules are now pinned to specific git branch via
   `terraform_modules.repository` and `terraform_modules.ref`.
+* Adds support for Azure cloud provider.
 
 ### Bug fixes
 

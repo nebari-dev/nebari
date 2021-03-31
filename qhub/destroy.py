@@ -1,13 +1,11 @@
 import logging
-from subprocess import run
 
 from qhub.utils import (
     timer,
-    change_directory,
     check_cloud_credentials,
     verify_configuration_file_exists,
-    check_terraform,
 )
+from qhub.provider import terraform
 
 
 logger = logging.getLogger(__name__)
@@ -23,19 +21,14 @@ def destroy_configuration(config):
         # 01 Verify configuration file exists
         verify_configuration_file_exists()
 
-        # 02 Check terraform
-        check_terraform()
-
-        # 03 Check Environment Variables
+        # 02 Check Environment Variables
         check_cloud_credentials(config)
 
-        # 04 Remove all infrastructure
-        with change_directory("infrastructure"):
-            run(["terraform", "destroy", "-auto-approve"])
+        # 03 Remove all infrastructure
+        terraform.destroy(directory="infrastructure")
 
         # 06 Remove terraform backend remote state bucket
         # backwards compatible with `qhub-config.yaml` which
         # don't have `terraform_state` key
         if config.get("terraform_state") != "local":
-            with change_directory("terraform-state"):
-                run(["terraform", "destroy", "-auto-approve"])
+            terraform.destroy(directory="terraform-state")

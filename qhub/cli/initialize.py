@@ -12,9 +12,13 @@ def create_init_subcommand(subparser):
         type=str,
         choices=[_.value for _ in ProviderEnum],
     )
-    subparser.add_argument("--project", help="Namespace to assign to qhub resources")
+    subparser.add_argument("--project", help="Name to assign to qhub resources")
     subparser.add_argument(
-        "--domain", help="Domain for jupyterhub cluster to be deployed under",
+        "--namespace", default="dev", help="Namespace to assign to qhub resources"
+    )
+    subparser.add_argument(
+        "--domain",
+        help="Domain for jupyterhub cluster to be deployed under",
     )
     subparser.add_argument(
         "--ci-provider",
@@ -61,6 +65,7 @@ def create_init_subcommand(subparser):
 def handle_init(args):
     config = render_config(
         project_name=args.project,
+        namespace=args.namespace,
         qhub_domain=args.domain,
         cloud_provider=args.platform,
         ci_provider=args.ci_provider,

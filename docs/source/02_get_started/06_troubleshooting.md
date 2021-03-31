@@ -6,6 +6,7 @@ To minimize the occurrence of errors on your QHub application, please follow the
 [Installation](01_installation.md), [Setup](02_setup.md) and [Usage](03_usage.md) sections.
 
 ### Solutions for common problems
+
 #### Downgrade an installed Terraform version
 
 QHub is currently ONLY compatible with Terraform version 0.13.5. To check your installed version on terminal type `terrafrom -v`.
@@ -30,6 +31,21 @@ mv ~/Downloads/terraform /usr/bin/
 Finally, check if the correct version was installed with `terraform -v`, the output should be `Terraform v0.13.5`.
 
 ---
+
+#### Getting Kubernetes Context
+
+##### Digital Ocean
+
+To get the kubernetes context to interact with a Digital Ocean cluster
+use the [following
+instructions](https://www.digitalocean.com/docs/kubernetes/how-to/connect-to-cluster/).
+
+1. [Download Digital Ocean command line utility](https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/)
+2. [Create Digital Ocean API Token](https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/) likely already done
+3. [doctl access via api token](https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/) `doctl auth init`
+4. `doctl kuberentes cluster kubeconfig save "<project-name>-<namespace>"`
+
+After completing these steps. `kubectl` should be able to access the cluster.
 
 #### Debug your Kubernetes cluster 
 
@@ -63,7 +79,9 @@ services locally without the need to expose them beforehand.
 ---
 
 ## Further Setup
+
 ### Theming
+
 #### JupyterHub Theme
 
 The QHub theme was originally based off the [work of the pangeo

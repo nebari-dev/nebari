@@ -99,7 +99,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:fb3489522cde4b0fe6b2b0d4f24522d0fffcabc8"
+        image: "quansight/qhub-jupyterlab:69a3cd545f75e4bbaadae8442c2ef0c900ed4898"
 ```
 
 We add the `node_selector` attribute. Note that for AWS, GCP, and DO they have different keys for the nodegroup name.
@@ -122,7 +122,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:fb3489522cde4b0fe6b2b0d4f24522d0fffcabc8"
+        image: "quansight/qhub-jupyterlab:69a3cd545f75e4bbaadae8442c2ef0c900ed4898"
         node_selector:
           "doks.digitalocean.com/node-pool": worker-high-memory
 ```
@@ -140,10 +140,10 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:fb3489522cde4b0fe6b2b0d4f24522d0fffcabc8"
+      image: "quansight/qhub-dask-worker:69a3cd545f75e4bbaadae8442c2ef0c900ed4898"
 ```
 
-[Dask-gateway](https://gateway.dask.org/api-server.html#kube-cluster-config)
+[Dask-gateway](https:/69a3cd545f75e4bbaadae8442c2ef0c900ed4898/gateway.dask.org/api-server.html#kube-cluster-config)
 takes additional configuration for the scheduler pods and
 workers. Remember similar to assigning node groups to specific
 jupyterlab instances we must get the key for the node pool.
@@ -162,7 +162,7 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:fb3489522cde4b0fe6b2b0d4f24522d0fffcabc8"
+      image: "quansight/qhub-dask-worker:69a3cd545f75e4bbaadae8442c2ef0c900ed4898"
       scheduler_extra_pod_config:
         nodeSelector:
           "doks.digitalocean.com/node-pool": worker-high-memory
