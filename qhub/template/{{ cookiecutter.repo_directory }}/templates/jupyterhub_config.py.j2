@@ -62,6 +62,7 @@ def qhub_configure_profile(username, safe_username, profile):
        'LD_PRELOAD': 'libnss_wrapper.so',
        'NSS_WRAPPER_PASSWD': '/tmp/passwd',
        'NSS_WRAPPER_GROUP': '/tmp/group',
+       'NB_UMASK': '0002',
        'HOME': '/home/jovyan',
     }
 

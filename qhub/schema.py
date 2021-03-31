@@ -34,6 +34,14 @@ class Base(pydantic.BaseModel):
         extra = "forbid"
 
 
+# ============= Terraform ===============
+
+
+class TerraformModules(Base):
+    repository: str = "github.com/quansight/qhub-terraform-modules"
+    rev: str = "dev"
+
+
 # =========== Authentication ==============
 
 
@@ -204,6 +212,7 @@ class Main(Base):
     ci_cd: CiEnum
     domain: str
     terraform_state: typing.Optional[TerraformStateEnum] = "remote"
+    terraform_modules: typing.Optional[TerraformModules]
     security: Security
     default_images: typing.Dict[str, str]
     storage: typing.Dict[str, str]

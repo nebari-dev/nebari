@@ -31,20 +31,14 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
     # 02 Check Environment Variables
     check_cloud_credentials(config)
 
-    # 03 Check that oauth settings are set
-    if not disable_prompt:
-        input(
-            'Ensure that oauth settings are in configuration [Press "Enter" to continue]'
-        )
-
-    # 04 Create terraform backend remote state bucket
+    # 03 Create terraform backend remote state bucket
     # backwards compatible with `qhub-config.yaml` which
     # don't have `terraform_state` key
     if config.get("terraform_state") != "local":
         terraform.init(directory="terraform-state")
         terraform.apply(directory="terraform-state")
 
-    # 05 Create qhub initial state (up to nginx-ingress)
+    # 04 Create qhub initial state (up to nginx-ingress)
     terraform.init(directory="infrastructure")
     terraform.apply(
         directory="infrastructure",
@@ -67,7 +61,7 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
     else:
         raise ValueError(f"IP Address not found in: {cmd_output}")
 
-    # 06 Update DNS to point to qhub deployment
+    # 05 Update DNS to point to qhub deployment
     if dns_auto_provision and dns_provider == "cloudflare":
         record_name, zone_name = (
             config["domain"].split(".")[:-2],
@@ -89,5 +83,5 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
             f'"{config["domain"]}" [Press Enter when Complete]'
         )
 
-    # 07 Full deploy QHub
+    # 06 Full deploy QHub
     terraform.apply(directory="infrastructure")
