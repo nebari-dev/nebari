@@ -64,7 +64,7 @@ def init(directory=None):
     terraform_path = download_terraform_binary()
     logger.info(f"terraform={terraform_path} init directory={directory}")
     with timer(logger, "terraform init"):
-        run_subprocess_cmd([terraform_path, "init"], cwd=directory)
+        run_subprocess_cmd("terraform", [terraform_path, "init"], cwd=directory)
 
 
 def apply(directory=None, targets=None):
@@ -78,7 +78,7 @@ def apply(directory=None, targets=None):
         "-target=" + _ for _ in targets
     ]
     with timer(logger, "terraform apply"):
-        run_subprocess_cmd(command, cwd=directory)
+        run_subprocess_cmd("terraform", command, cwd=directory)
 
 
 def output(directory=None):
