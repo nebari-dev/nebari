@@ -29,7 +29,7 @@ def change_directory(directory):
 def run_subprocess_cmd(*args, **kwargs):
     """Runs subprocess command with realtime stdout logging with optional line prefix."""
     if "prefix" in kwargs:
-        line_prefix = f"[{kwargs['prefix']}]".encode("utf-8")
+        line_prefix = f"[{kwargs['prefix']}]: ".encode("utf-8")
         kwargs.pop("prefix")
     else:
         line_prefix = b""
