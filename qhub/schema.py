@@ -49,10 +49,12 @@ class TerraformModules(Base):
 
 # ============ Certificate =============
 
+
 class Certificate(Base):
     type: CertificateEnum
     acme_email: typing.Optional[str]
     acme_server: typing.Optional[str]
+
 
 # =========== Authentication ==============
 
