@@ -11,6 +11,9 @@
         "repository": "github.com/quansight/qhub-terraform-modules",
         "rev": "dev"
     },
+    "certificate": {
+      "type": "self-signed"
+    },
     "prefect": null,
     "security": null,
     "default_images": null,

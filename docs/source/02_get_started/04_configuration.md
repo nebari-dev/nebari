@@ -45,6 +45,30 @@ terraform_state: remote
    docs. If you are doing anything other than testing we highly
    recommend `remote` unless you know what you are doing.
 
+## Certificate
+
+By default to simplify initial deployment `QHub` uses traefik to
+create a self-signed certificate. In order to create a certificate
+that is signed so that web browsers do not throw errors we currently
+support [Let's Encrypt](https://letsencrypt.org/).
+
+```yaml
+certificate:
+  type: self-signed
+```
+
+To use Let's Encrypt you must specify an email address that let's
+encrypt will associate the generated certificate with and whether to
+use the [staging server](https://acme-staging-v02.api.letsencrypt.org/directory) or [production server](https://acme-v02.api.letsencrypt.org/directory). In general you
+should use the production server.
+
+```yaml
+certificate:
+  type: lets-encrypt
+  acme_email: <your-email-address>
+  acme_server:
+```
+
 ## Security
 
 This section is for configuring security relating to the QHub
@@ -465,6 +489,9 @@ project_name: do-jupyterhub
 provider: do
 ci_cd: github-actions
 domain: "do.qhub.dev"
+
+certificate:
+  type: self-signed
 
 security:
   authentication:

@@ -139,6 +139,12 @@ module "kubernetes-ingress" {
 
   node-group = local.node_groups.general
 
+{% if cookiecutter.certificate.type == "lets-encrypt" %}
+  enable-certificates = true
+  acme-email = "{{ cookiecutter.certificate.acme_email }}"
+  acme-server = "{{ cookiecutter.certificate.acme_server }}"
+{% endif %}
+
   depends_on = [
     module.kubernetes-initialization
   ]

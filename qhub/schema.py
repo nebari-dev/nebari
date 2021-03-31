@@ -4,6 +4,11 @@ import typing
 import pydantic
 
 
+class CertificateEnum(str, enum.Enum):
+    selfsigned = "self-signed"
+    letsencrypt = "lets-encrypt"
+
+
 class TerraformStateEnum(str, enum.Enum):
     remote = "remote"
     local = "local"
@@ -41,6 +46,13 @@ class TerraformModules(Base):
     repository: str = "github.com/quansight/qhub-terraform-modules"
     rev: str = "dev"
 
+
+# ============ Certificate =============
+
+class Certificate(Base):
+    type: CertificateEnum
+    acme_email: typing.Optional[str]
+    acme_server: typing.Optional[str]
 
 # =========== Authentication ==============
 
@@ -220,6 +232,7 @@ class Main(Base):
     domain: str
     terraform_state: typing.Optional[TerraformStateEnum] = "remote"
     terraform_modules: typing.Optional[TerraformModules]
+    certificate: Certificate
     cdsdashboards: CDSDashboards
     security: Security
     default_images: typing.Dict[str, str]

@@ -19,6 +19,9 @@ BASE_CONFIGURATION = {
     "provider": None,
     "ci_cd": None,
     "domain": None,
+    "certificate": {
+        "type": "self-signed",
+    },
     "security": {
         "authentication": None,
         "users": {
