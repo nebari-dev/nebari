@@ -95,13 +95,11 @@ def destroy(directory=None):
     terraform_path = download_terraform_binary()
 
     logger.info(f"terraform={terraform_path} destroy directory={directory}")
+    command = [
+        terraform_path,
+        "destroy",
+        "-auto-approve",
+    ]
 
     with timer(logger, "terraform destroy"):
-        subprocess.check_output(
-            [
-                terraform_path,
-                "destroy",
-                "-auto-approve",
-            ],
-            cwd=directory,
-        )
+        run_subprocess_cmd(command, cwd=directory, prefix="terraform")
