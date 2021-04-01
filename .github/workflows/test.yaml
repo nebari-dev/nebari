@@ -70,6 +70,9 @@ jobs:
         run: |
           qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
       - name: 'Terraform Format'
+        # local provider for qhub uses kubernetes
+        # no terraform-state directory present
+        if: ${{ matrix.provider != 'local' }}
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: 0.13.5
@@ -134,15 +137,12 @@ jobs:
           minikube addons enable metallb
       - name: Basic kubectl checks before deployment
         run: |
-          kubectl get nodes
-          kubectl get namespaces
-          kubectl get pods -A
-          kubectl get services -A
+          kubectl get all,cm,secret,ing -A
       - name: Initialize QHub Cloud
         run: |
           mkdir -p local-deployment
           cd local-deployment
-          qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
+          qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password
           cat qhub-config.yaml
       - name: Deploy QHub Cloud
         run: |
@@ -150,10 +150,7 @@ jobs:
           qhub deploy --config qhub-config.yaml --disable-prompt
       - name: Basic kubectl checks after deployment
         run: |
-          kubectl get nodes
-          kubectl get namespaces
-          kubectl get pods -A
-          kubectl get services -A
+          kubectl get all,cm,secret,ing -A
       - name: Check github-actions.qhub.dev resolves
         run: |
           nslookup github-actions.qhub.dev
@@ -166,7 +163,4 @@ jobs:
           qhub destroy --config qhub-config.yaml
       - name: Basic kubectl checks after cleanup
         run: |
-          kubectl get nodes
-          kubectl get namespaces
-          kubectl get pods -A
-          kubectl get services -A
+          kubectl get all,cm,secret,ing -A

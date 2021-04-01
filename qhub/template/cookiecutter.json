@@ -6,7 +6,9 @@
     "ci_cd": null,
     "endpoint": null,
     "terraform_version": "0.14.9",
-    "terraform_state": "remote",
+    "terraform_state": {
+      "type": "remote"
+    },
     "terraform_modules": {
         "repository": "github.com/quansight/qhub-terraform-modules",
         "rev": "dev"

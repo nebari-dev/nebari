@@ -12,6 +12,7 @@ class CertificateEnum(str, enum.Enum):
 class TerraformStateEnum(str, enum.Enum):
     remote = "remote"
     local = "local"
+    existing = "existing"
 
 
 class ProviderEnum(str, enum.Enum):
@@ -40,6 +41,12 @@ class Base(pydantic.BaseModel):
 
 
 # ============= Terraform ===============
+
+
+class TerraformState(Base):
+    type: TerraformStateEnum = "remote"
+    backend: typing.Optional[str]
+    config: typing.Optional[typing.Dict[str, str]]
 
 
 class TerraformModules(Base):
@@ -232,7 +239,7 @@ class Main(Base):
     provider: ProviderEnum
     ci_cd: CiEnum
     domain: str
-    terraform_state: typing.Optional[TerraformStateEnum] = "remote"
+    terraform_state: typing.Optional[TerraformState]
     terraform_modules: typing.Optional[TerraformModules]
     certificate: Certificate
     cdsdashboards: CDSDashboards

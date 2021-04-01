@@ -45,9 +45,9 @@ def create_init_subcommand(subparser):
     )
     subparser.add_argument(
         "--terraform-state",
-        choices=["remote", "local"],
+        choices=["remote", "local", "existing"],
         default="remote",
-        help="Terraform state to be stored remotely on s3 or locally on the filesystem",
+        help="Terraform state to be provisioned and stored remotely, locally on the filesystem, or using existing terraform state backend",
     )
     subparser.add_argument(
         "--kubernetes-version",

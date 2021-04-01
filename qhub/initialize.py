@@ -236,7 +236,7 @@ def render_config(
     config["ci_cd"] = ci_provider
 
     if terraform_state is not None:
-        config["terraform_state"] = terraform_state
+        config["terraform_state"] = {"type": terraform_state}
 
     config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
     config["theme"]["jupyterhub"][
