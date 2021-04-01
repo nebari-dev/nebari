@@ -406,6 +406,25 @@ Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the
 cores and memory.
 
+### JupyterLab Profile Node Selectors
+
+A common operation is to target jupyterlab profiles to specific node
+labels. In order to target a specific node groups add the
+following. This example shows a GKE node groups with name
+`user-large`. Other cloud providers will have different node labels.
+
+```yaml
+profiles:
+  jupyterlab:
+    - display_name: Small Instance
+      ...
+      kubespawner_override:
+        ...
+        node_selector:
+          "cloud.google.com/gke-nodepool": "user-large"
+        ...
+```
+
 ## Themes
 
 ### Customizing JupyterHub theme
