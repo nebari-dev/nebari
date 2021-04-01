@@ -2,6 +2,8 @@ import os
 import re
 import string
 import random
+import secrets
+import tempfile
 
 import bcrypt
 import requests
@@ -17,6 +19,9 @@ BASE_CONFIGURATION = {
     "provider": None,
     "ci_cd": None,
     "domain": None,
+    "certificate": {
+        "type": "self-signed",
+    },
     "security": {
         "authentication": None,
         "users": {
@@ -29,9 +34,9 @@ BASE_CONFIGURATION = {
         "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
     },
     "default_images": {
-        "jupyterhub": "quansight/qhub-jupyterhub:7bbe490d586771045289139cffe8cfb3dff3c3d4",
-        "jupyterlab": "quansight/qhub-jupyterlab:7bbe490d586771045289139cffe8cfb3dff3c3d4",
-        "dask_worker": "quansight/qhub-dask-worker:7bbe490d586771045289139cffe8cfb3dff3c3d4",
+        "jupyterhub": "quansight/qhub-jupyterhub:d52cea07f70cc8b35c29b327bbd2682f29d576ad",
+        "jupyterlab": "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad",
+        "dask_worker": "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad",
     },
     "storage": {"conda_store": "20Gi", "shared_filesystem": "10Gi"},
     "theme": {
@@ -48,6 +53,7 @@ BASE_CONFIGURATION = {
             "h2_color": "#652e8e",
         }
     },
+    "cdsdashboards": {"enabled": True},
 }
 
 AUTH_PASSWORD = {
@@ -158,7 +164,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1,
                 "mem_limit": "1G",
                 "mem_guarantee": "1G",
-                "image": "quansight/qhub-jupyterlab:7bbe490d586771045289139cffe8cfb3dff3c3d4",
+                "image": "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad",
             },
         },
         {
@@ -169,7 +175,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1.25,
                 "mem_limit": "2G",
                 "mem_guarantee": "2G",
-                "image": "quansight/qhub-jupyterlab:7bbe490d586771045289139cffe8cfb3dff3c3d4",
+                "image": "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad",
             },
         },
     ],
@@ -179,14 +185,14 @@ DEFAULT_PROFILES = {
             "worker_cores": 1,
             "worker_memory_limit": "1G",
             "worker_memory": "1G",
-            "image": "quansight/qhub-dask-worker:7bbe490d586771045289139cffe8cfb3dff3c3d4",
+            "image": "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad",
         },
         "Medium Worker": {
             "worker_cores_limit": 1.5,
             "worker_cores": 1.25,
             "worker_memory_limit": "2G",
             "worker_memory": "2G",
-            "image": "quansight/qhub-dask-worker:7bbe490d586771045289139cffe8cfb3dff3c3d4",
+            "image": "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad",
         },
     },
 }
@@ -274,14 +280,24 @@ def render_config(
     elif auth_provider == "password":
         config["security"]["authentication"] = AUTH_PASSWORD
 
-        # Generate a random password
-        example_password = "".join(
-            random.choice(string.ascii_letters + string.digits) for i in range(16)
+        # Generate default password for qhub-init
+        default_password = "".join(
+            secrets.choice(string.ascii_letters + string.digits) for i in range(16)
         )
         config["security"]["users"]["example-user"]["password"] = bcrypt.hashpw(
-            example_password.encode("utf-8"), bcrypt.gensalt()
+            default_password.encode("utf-8"), bcrypt.gensalt()
         ).decode()
-        print(f"Your QHub password for example-user is {example_password}")
+
+        default_password_filename = os.path.join(
+            tempfile.gettempdir(), "QHUB_DEFAULT_PASSWORD"
+        )
+        with open(default_password_filename, "w") as f:
+            f.write(default_password)
+        os.chmod(default_password_filename, 0o700)
+
+        print(
+            f"Securely generated default random password={default_password} for example-user stored at path={default_password_filename}"
+        )
 
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][

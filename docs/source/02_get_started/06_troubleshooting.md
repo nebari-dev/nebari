@@ -6,30 +6,21 @@ To minimize the occurrence of errors on your QHub application, please follow the
 [Installation](01_installation.md), [Setup](02_setup.md) and [Usage](03_usage.md) sections.
 
 ### Solutions for common problems
-#### Downgrade an installed Terraform version
 
-QHub is currently ONLY compatible with Terraform version 0.13.5. To check your installed version on terminal type `terrafrom -v`.
-If your local version is more recent than the recommended, follow these steps:
-On terminal type `which terraform` to find out where the binary installation file is located.
-The output will be a filepath, such as: `/usr/bin/terraform`
-Then, remove the binary file with:
-```shell
-rm -r /usr/bin/terraform
-```
-> `/usr/bin/terraform` corresponds to the location of the installed binary file.
+#### Getting Kubernetes Context
 
-Next, download the binary for the compatible version with:
-```shell
-wget https://releases.hashicorp.com/terraform/0.13.5/
-```
-Unzip the file, and move it to the same location as the previous one:
-```shell
-unzip terraform_0.13.5
-mv ~/Downloads/terraform /usr/bin/
-```
-Finally, check if the correct version was installed with `terraform -v`, the output should be `Terraform v0.13.5`.
+##### Digital Ocean
 
----
+To get the kubernetes context to interact with a Digital Ocean cluster
+use the [following
+instructions](https://www.digitalocean.com/docs/kubernetes/how-to/connect-to-cluster/).
+
+1. [Download Digital Ocean command line utility](https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/)
+2. [Create Digital Ocean API Token](https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/) likely already done
+3. [doctl access via api token](https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/) `doctl auth init`
+4. `doctl kuberentes cluster kubeconfig save "<project-name>-<namespace>"`
+
+After completing these steps. `kubectl` should be able to access the cluster.
 
 #### Debug your Kubernetes cluster
 
@@ -63,7 +54,9 @@ locally without the need to expose them beforehand.
 ---
 
 ## Further Setup
+
 ### Theming
+
 #### JupyterHub Theme
 
 The QHub theme was originally based off the [work of the pangeo

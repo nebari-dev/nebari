@@ -32,7 +32,7 @@ terraform {
   backend "azurerm" {
     resource_group_name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}-terraform-state"
     # storage account must be globally unique
-    storage_account_name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}{{ cookiecutter.azure.storage_account_postfix }}"
+    storage_account_name = "{{ cookiecutter.project_name }}{{ cookiecutter.namespace }}{{ cookiecutter.azure.storage_account_postfix }}"
     container_name       = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}state"
     key                  = "terraform/{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}.tfstate"
   }

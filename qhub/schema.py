@@ -4,6 +4,11 @@ import typing
 import pydantic
 
 
+class CertificateEnum(str, enum.Enum):
+    selfsigned = "self-signed"
+    letsencrypt = "lets-encrypt"
+
+
 class TerraformStateEnum(str, enum.Enum):
     remote = "remote"
     local = "local"
@@ -32,6 +37,23 @@ class Base(pydantic.BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+# ============= Terraform ===============
+
+
+class TerraformModules(Base):
+    repository: str = "github.com/quansight/qhub-terraform-modules"
+    rev: str = "dev"
+
+
+# ============ Certificate =============
+
+
+class Certificate(Base):
+    type: CertificateEnum
+    acme_email: typing.Optional[str]
+    acme_server: typing.Optional[str]
 
 
 # =========== Authentication ==============
@@ -192,6 +214,13 @@ class CondaEnvironment(Base):
     dependencies: typing.List[typing.Union[str, typing.Dict[str, str]]]
 
 
+# =============== CDSDashboards ==============
+
+
+class CDSDashboards(Base):
+    enabled: bool
+
+
 # ==================== Main ===================
 
 letter_dash_underscore_regex = pydantic.constr(regex=r"^[A-Za-z-_]+$")
@@ -204,6 +233,9 @@ class Main(Base):
     ci_cd: CiEnum
     domain: str
     terraform_state: typing.Optional[TerraformStateEnum] = "remote"
+    terraform_modules: typing.Optional[TerraformModules]
+    certificate: Certificate
+    cdsdashboards: CDSDashboards
     security: Security
     default_images: typing.Dict[str, str]
     storage: typing.Dict[str, str]

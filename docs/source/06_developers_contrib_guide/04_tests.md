@@ -263,6 +263,24 @@ check out the [Troubleshooting documentation](../02_get_started/06_troubleshooti
 
 TODO: Write detailed documentation on Cloud testing
 
-Cloud testing on AWS, GCP, Azure, and DigitalOcean is significantly
-more complicated and time-consuming. When possible, you should always
-prefer to perform your tests locally.
+Cloud testing on aws, gcp, azure, and digital ocean is significantly
+more complicated and time consuming. You should always prefer the
+local testing when possible.
+
+## Testing on Mac
+
+The earlier instructions for minikube on Linux should work on Mac except:
+
+1 - When working out the IP addresses to configure metallb try this:
+```
+docker ps --format "{{.Names}} {{.ID}}"
+docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}/{{.IPPrefixLen}}{{end}}' <ID of minikube from previous cmd>
+```
+
+This will display something like `192.168.49.2/24`, in which case a suitable IP range would be on the same subnet, e.g. start IP 192.168.49.100, end IP 192.168.49.150.
+
+2 - This load balancer won't actually work, so you need to port-forward directly to the JupyterHub service:
+```
+minikube kubectl -- --namespace=dev port-forward svc/proxy-public 8000:80
+```
+Then you can access QHub on http://127.0.0.1:8000/

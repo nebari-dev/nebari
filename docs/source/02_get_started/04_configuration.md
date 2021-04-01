@@ -45,6 +45,30 @@ terraform_state: remote
    docs. If you are doing anything other than testing we highly
    recommend `remote` unless you know what you are doing.
 
+## Certificate
+
+By default to simplify initial deployment `QHub` uses traefik to
+create a self-signed certificate. In order to create a certificate
+that is signed so that web browsers do not throw errors we currently
+support [Let's Encrypt](https://letsencrypt.org/).
+
+```yaml
+certificate:
+  type: self-signed
+```
+
+To use Let's Encrypt you must specify an email address that let's
+encrypt will associate the generated certificate with and whether to
+use the [staging server](https://acme-staging-v02.api.letsencrypt.org/directory) or [production server](https://acme-v02.api.letsencrypt.org/directory). In general you
+should use the production server.
+
+```yaml
+certificate:
+  type: lets-encrypt
+  acme_email: <your-email-address>
+  acme_server:
+```
+
 ## Security
 
 This section is for configuring security relating to the QHub
@@ -302,9 +326,9 @@ image.
 
 ```yaml
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:b89526c59a5c269c776b535b887bd110771ad601"
-  jupyterlab: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
-  dask_worker: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
+  jupyterhub: "quansight/qhub-jupyterhub:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+  jupyterlab: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+  dask_worker: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
 ```
 
 ## Storage
@@ -340,7 +364,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
+        image: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       kubespawner_override:
@@ -348,7 +372,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
+        image: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
 
   dask_worker:
     "Small Worker":
@@ -356,13 +380,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
+      image: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
+      image: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
 ```
 
 For each `profiles.jupyterlab` is a named JupyterLab profile. It
@@ -466,6 +490,9 @@ provider: do
 ci_cd: github-actions
 domain: "do.qhub.dev"
 
+certificate:
+  type: self-signed
+
 security:
   authentication:
     type: GitHub
@@ -519,9 +546,9 @@ digital_ocean:
       max_nodes: 4
 
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:b89526c59a5c269c776b535b887bd110771ad601"
-  jupyterlab: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
-  dask_worker: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
+  jupyterhub: "quansight/qhub-jupyterhub:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+  jupyterlab: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+  dask_worker: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
 
 theme:
   jupyterhub:
@@ -552,7 +579,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
+        image: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       default: true
@@ -561,7 +588,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
+        image: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
 
   dask_worker:
     "Small Worker":
@@ -569,13 +596,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
+      image: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
+      image: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
 
 environments:
   "environment-default.yaml":

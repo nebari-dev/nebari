@@ -1,5 +1,4 @@
 import io
-import json
 import logging
 import os
 import platform
@@ -10,7 +9,7 @@ import tempfile
 import urllib.request
 import zipfile
 
-from qhub.utils import timer
+from qhub.utils import timer, run_subprocess_cmd
 from qhub import constants
 
 
@@ -65,7 +64,7 @@ def init(directory=None):
     terraform_path = download_terraform_binary()
     logger.info(f"terraform={terraform_path} init directory={directory}")
     with timer(logger, "terraform init"):
-        subprocess.check_output([terraform_path, "init"], cwd=directory)
+        run_subprocess_cmd([terraform_path, "init"], cwd=directory, prefix="terraform")
 
 
 def apply(directory=None, targets=None):
@@ -75,12 +74,11 @@ def apply(directory=None, targets=None):
     logger.info(
         f"terraform={terraform_path} apply directory={directory} targets={targets}"
     )
+    command = [terraform_path, "apply", "-auto-approve"] + [
+        "-target=" + _ for _ in targets
+    ]
     with timer(logger, "terraform apply"):
-        subprocess.check_output(
-            [terraform_path, "apply", "-auto-approve"]
-            + ["-target=" + _ for _ in targets],
-            cwd=directory,
-        )
+        run_subprocess_cmd(command, cwd=directory, prefix="terraform")
 
 
 def output(directory=None):
@@ -88,23 +86,20 @@ def output(directory=None):
 
     logger.info(f"terraform={terraform_path} output directory={directory}")
     with timer(logger, "terraform output"):
-        output = subprocess.check_output(
+        return subprocess.check_output(
             [terraform_path, "output", "-json"], cwd=directory
-        ).decode("utf8")
-        return json.loads(output)
+        ).decode("utf8")[:-1]
 
 
 def destroy(directory=None):
     terraform_path = download_terraform_binary()
 
     logger.info(f"terraform={terraform_path} destroy directory={directory}")
+    command = [
+        terraform_path,
+        "destroy",
+        "-auto-approve",
+    ]
 
     with timer(logger, "terraform destroy"):
-        subprocess.check_output(
-            [
-                terraform_path,
-                "destroy",
-                "-auto-approve",
-            ],
-            cwd=directory,
-        )
+        run_subprocess_cmd(command, cwd=directory, prefix="terraform")

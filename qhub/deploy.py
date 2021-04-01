@@ -1,6 +1,6 @@
 import logging
 import re
-from subprocess import check_output, CalledProcessError
+from subprocess import CalledProcessError
 
 from qhub.provider import terraform
 from qhub.utils import (
@@ -31,20 +31,14 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
     # 02 Check Environment Variables
     check_cloud_credentials(config)
 
-    # 03 Check that oauth settings are set
-    if not disable_prompt:
-        input(
-            'Ensure that oauth settings are in configuration [Press "Enter" to continue]'
-        )
-
-    # 04 Create terraform backend remote state bucket
+    # 03 Create terraform backend remote state bucket
     # backwards compatible with `qhub-config.yaml` which
     # don't have `terraform_state` key
     if config.get("terraform_state") != "local":
         terraform.init(directory="terraform-state")
         terraform.apply(directory="terraform-state")
 
-    # 05 Create qhub initial state (up to nginx-ingress)
+    # 04 Create qhub initial state (up to nginx-ingress)
     terraform.init(directory="infrastructure")
     terraform.apply(
         directory="infrastructure",
@@ -55,19 +49,19 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         ],
     )
 
-    cmd_output = check_output(["terraform", "output", "--json"], cwd="infrastructure")
+    cmd_output = terraform.output(directory="infrastructure")
     # This is a bit ugly, but the issue we have at the moment is being unable
     # to parse cmd_output as json on Github Actions.
-    ip_matches = re.findall(rb'"ip": "(?!string)(.*)"', cmd_output)
-    hostname_matches = re.findall(rb'"hostname": "(?!string)(.*)"', cmd_output)
+    ip_matches = re.findall(r'"ip": "(?!string)(.*)"', cmd_output)
+    hostname_matches = re.findall(r'"hostname": "(?!string)(.*)"', cmd_output)
     if ip_matches:
-        ip_or_hostname = ip_matches[0].decode()
+        ip_or_hostname = ip_matches[0]
     elif hostname_matches:
-        ip_or_hostname = hostname_matches[0].decode()
+        ip_or_hostname = hostname_matches[0]
     else:
         raise ValueError(f"IP Address not found in: {cmd_output}")
 
-    # 06 Update DNS to point to qhub deployment
+    # 05 Update DNS to point to qhub deployment
     if dns_auto_provision and dns_provider == "cloudflare":
         record_name, zone_name = (
             config["domain"].split(".")[:-2],
@@ -89,5 +83,5 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
             f'"{config["domain"]}" [Press Enter when Complete]'
         )
 
-    # 07 Full deploy QHub
+    # 06 Full deploy QHub
     terraform.apply(directory="infrastructure")

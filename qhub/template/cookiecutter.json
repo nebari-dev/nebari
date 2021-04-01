@@ -5,11 +5,14 @@
     "provider": null,
     "ci_cd": null,
     "endpoint": null,
-    "terraform_version": "0.13.5",
+    "terraform_version": "0.14.9",
     "terraform_state": "remote",
     "terraform_modules": {
         "repository": "github.com/quansight/qhub-terraform-modules",
         "rev": "dev"
+    },
+    "certificate": {
+      "type": "self-signed"
     },
     "prefect": null,
     "security": null,
@@ -22,6 +25,7 @@
     },
     "environments": null,
     "storage": null,
+    "cdsdashboards": {},
 
     "local": {
         "node_selectors": {
