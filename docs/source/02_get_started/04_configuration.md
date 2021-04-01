@@ -406,6 +406,24 @@ Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the
 cores and memory.
 
+### Limiting profiles to specific users and groups
+
+Sometimes on a select set of users should have access to specific
+resources e.g. gpus, high memory nodes etc. QHub has support for
+limiting resources.
+
+```yaml
+profiles:
+  jupyterlab:
+    - display_name: Small Instance
+      ...
+      users:
+        - example-user
+      groups:
+        - admin
+        - users
+```
+
 ### JupyterLab Profile Node Selectors
 
 A common operation is to target jupyterlab profiles to specific node
