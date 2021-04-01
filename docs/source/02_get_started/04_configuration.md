@@ -121,13 +121,19 @@ security:
 
 For Password based authentication. Note that users will require a
 `password` field that can be generated via the following command:
-`python -c "import bcrypt; bcrypt.hashpw(b'<password>',
-bcrypt.gensalt())"`.
+`python -c "import bcrypt; print(bcrypt.hashpw(b'<password>',
+bcrypt.gensalt()).decode('utf-8'))"`. Make sure to replace
+`<password>` with whatever password you are wanting.
 
 ```yaml
 security:
   authentication:
     type: password
+  users:
+    ...
+    <username>:
+      ...
+      password: $2b$....
 ```
 
 `users` and `groups` allows one to provision UNIX permissions to each
