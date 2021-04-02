@@ -164,8 +164,9 @@ async def custom_options_form(self):
 c.KubeSpawner.options_form = custom_options_form
 c.LocalProcessSpawner.shell_cmd = ['bash', '-l', '-c']
 
-{% if cookiecutter.security.authentication.type == 'password' %}
 # ==================== AUTHENTICATION ======================
+{% if cookiecutter.security.authentication.type == 'password' %}
+# =================== PASSWORD BASED =======================
 # create passwords via
 # >>> bcrypt.hashpw(b'<password>', bcrypt.gensalt())
 import bcrypt
@@ -186,4 +187,23 @@ class QHubPasswordAuthenticator(Authenticator):
         return None
 
 c.JupyterHub.authenticator_class = QHubPasswordAuthenticator
+{% elif cookiecutter.security.authentication.type == 'GitHub' %}
+# =================== GITHUB BASED =======================
+
+from oauthenticator.github import GitHubOAuthenticator
+c.JupyterHub.authenticator_class = GitHubOAuthenticator
+c.GitHubOAuthenticator.client_id = "{{ cookiecutter.security.authentication.config.client_id }}"
+c.GitHubOAuthenticator.client_secret = "{{ cookiecutter.security.authentication.config.client_secret }}"
+c.GitHubOAuthenticator.oauth_callback_url = "{{ cookiecutter.security.authentication.config.oauth_callback_url }}"
+
+{% elif cookiecutter.security.authentication.type == 'Auth0' %}
+# =================== AUTH0 BASED ========================
+
+from oauthenticator.auth0 import Auth0OAuthenticator
+c.JupyterHub.authenticator_class = Auth0OAuthenticator
+c.Auth0OAuthenticator.client_id = "{{ cookiecutter.security.authentication.config.client_id }}"
+c.Auth0OAuthenticator.client_secret = "{{ cookiecutter.security.authentication.config.client_secret }}"
+c.Auth0OAuthenticator.oauth_callback_url = "{{ cookiecutter.security.authentication.config.oauth_callback_url }}"
+c.Auth0OAuthenticator.scope = {{ cookiecutter.security.authentication.config.scope | jsonify }}
+c.Auth0OAuthenticator.auth0_subdomain = "{{ cookiecutter.security.authentication.config.auth0_subdomain }}"
 {% endif %}
