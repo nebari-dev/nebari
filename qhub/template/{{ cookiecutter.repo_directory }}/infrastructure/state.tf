@@ -47,7 +47,7 @@ terraform {
 {% endif %}
   }
 }
-{% elif cookiecutter.terraform_state == "existing" %}
+{% elif cookiecutter.terraform_state.type == "existing" %}
 terraform {
   backend "{{ cookiecutter.terraform_state.backend }}" {
 {% for key, value in cookiecutter.terraform_state.config.items() %}
