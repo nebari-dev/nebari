@@ -34,7 +34,9 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
     # 03 Create terraform backend remote state bucket
     # backwards compatible with `qhub-config.yaml` which
     # don't have `terraform_state` key
-    if config.get("terraform_state") != "local":
+    if (config.get("terraform_state", {}).get("type") == "remote") and (
+        config.get("provider") != "local"
+    ):
         terraform.init(directory="terraform-state")
         terraform.apply(directory="terraform-state")
 

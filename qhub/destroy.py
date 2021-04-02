@@ -30,5 +30,7 @@ def destroy_configuration(config):
         # 06 Remove terraform backend remote state bucket
         # backwards compatible with `qhub-config.yaml` which
         # don't have `terraform_state` key
-        if config.get("terraform_state") != "local":
+        if (config.get("terraform_state", {}).get("type") == "remote") and (
+            config.get("provider") != "local"
+        ):
             terraform.destroy(directory="terraform-state")
