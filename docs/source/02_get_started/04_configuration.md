@@ -15,7 +15,6 @@ namespace: dev
 provider: <provider_alias> # determines the choice of cloud provider for the deployment
 ci_cd: github-actions # continuous integration and continuous deployment framework to use
 domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
-terraform_state: remote
 ```
 
  - `project_name`: should be compatible with the Cloud provider naming
@@ -37,13 +36,6 @@ terraform_state: remote
    services under such a monitoring. For example `jupyter.qhub.dev`
    would be the domain for JupyterHub to be exposed under. Note that
    this domain does not have to have `jupyter` in it.
-
- - `terraform_state` is either `remote` or `local` with a default
-   value of `remote`. This decides whether to control the state of the
-   cluster locally or remotely. See [terraform remote
-   state](https://www.terraform.io/docs/language/state/index.html)
-   docs. If you are doing anything other than testing we highly
-   recommend `remote` unless you know what you are doing.
 
 ## Certificate
 
@@ -321,6 +313,51 @@ local:
       key: kubernetes.io/os
       value: linux
 ```
+
+## Terraform State
+
+Terraform manages the state of all the deployed resources via
+[backends](https://www.terraform.io/docs/language/settings/backends/index.html). Terraform
+requires storing the state in order to keep track of the names, ids,
+and states of deployed resources. The simplest approach is storing the
+state on the local filesystem but is not recommended and is not the
+default of QHub. `terraform_state` is either `remote`, `existing` or
+`local` with a default value of `remote`. This decides whether to
+control the state of the cluster `local` via tfstate file (not
+recommended), on an already `existing` terraform state store or
+remotely and auto creating the terraform state store. See [terraform
+remote state](https://www.terraform.io/docs/language/state/index.html)
+docs. If you are doing anything other than testing we highly recommend
+`remote` unless you know what you are doing.
+
+The following are examples. `remote` and `local` are
+straightforward. For a `local` provider that deploys on an existing
+kubernetes cluster the kubernetes remote backend is used.
+
+```yaml
+terraform_state:
+  type: remote
+```
+
+```yaml
+terraform_state:
+  type: local
+```
+
+Using an existing terraform backend can be done by specifying the
+`backend` and arbitrary key/value pairs in the `config`.
+
+```yaml
+terraform_state:
+  type: existing
+  backend: s3
+  config:
+    bucket: mybucket
+    key: "path/to/my/key"
+    region: "us-east-1"
+```
+
+
 
 ## Terraform Modules
 
