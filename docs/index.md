@@ -11,7 +11,7 @@ Open source tooling for data science research, development, and deployment.
 
 ## What is Qhub?
 Integrated data science environment designed and developed by scientists at [**Quansight**](https://www.quansight.com/).
-It enables teams to build and maintain a cost effective and scalable compute/data science platform in the Cloud, providing 
+It enables teams to build and maintain a cost effective and scalable compute/data science platform in the Cloud, providing
 an [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) platform that streamlines
 the deployment of data science infrastructure.
 
@@ -20,7 +20,7 @@ Contents:
 ```{toctree}
 :maxdepth: 1
 :caption: Introduction
-    
+
 source/01_intro/01_intro.md
 ```
 
@@ -42,6 +42,8 @@ source/02_get_started/07_support.md
 :caption: Tutorials
 
 source/03_tutorials_and_samples/1_project_setup_tutorial.md
+source/03_tutorials_and_samples/01_cloud_setup.md
+source/03_tutorials_and_samples/02_qhub_pangeo.md
 ```
 
 ```{toctree}
@@ -71,7 +73,6 @@ source/06_developers_contrib_guide/01_architecture.md
 source/06_developers_contrib_guide/02_adv_docs.md
 source/06_developers_contrib_guide/04_tests.md
 source/06_developers_contrib_guide/05_changelog.md
-source/06_developers_contrib_guide/06_versioning.md
 ```
 
 ```{toctree}
