@@ -31,6 +31,7 @@ class AuthenticationEnum(str, enum.Enum):
     password = "password"
     github = "GitHub"
     auth0 = "Auth0"
+    custom = "custom"
 
 
 class Base(pydantic.BaseModel):
@@ -82,7 +83,9 @@ class Auth0Config(Base):
 
 class Authentication(Base):
     type: AuthenticationEnum
-    config: typing.Optional[typing.Union[Auth0Config, GitHubConfig]]
+    config: typing.Optional[
+        typing.Union[Auth0Config, GitHubConfig, typing.Dict[str, typing.Any]]
+    ]
 
 
 # =========== Users and Groups =============

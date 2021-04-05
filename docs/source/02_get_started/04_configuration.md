@@ -92,10 +92,13 @@ security:
       gid: 102
 ```
 
-`security.authentication` is for configuring the OAuth Provider or
-password based authentication used for authentication. Currently, the
-configuration shows GitHub but Auth0 and password based is also
-supported.
+### Authentication
+
+`security.authentication` is for configuring the OAuth and GitHub
+Provider, password based authentication, or custom
+authentication. 
+
+#### Auth0 Based Authentication
 
 For Auth0 based authentication.
 
@@ -106,10 +109,26 @@ security:
     config:
       client_id: ...
       client_secret: ...
-      oauth_callback_url: ...
+      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
       scope: ["openid", "email", "profile"]
       auth0_subdomain: ...
 ```
+
+#### GitHub Based Authentication
+
+For Auth0 based authentication.
+
+```yaml
+security:
+  authentication:
+    type: GitHub
+    config:
+      client_id: ...
+      client_secret: ...
+      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
+```
+
+#### Password Based Authentication
 
 For Password based authentication. Note that users will require a
 `password` field that can be generated via the following command:
@@ -127,6 +146,27 @@ security:
       ...
       password: $2b$....
 ```
+
+#### Custom Authentication
+
+You can specify arbitrary authentication via the `custom` type. All
+`config` attributes will be set as traitlets to the configured
+authentication class. The attributes will obey the type set via yaml
+(e.g. True -> will be a boolean True for Traitets).
+
+```yaml
+security:
+  authentication:
+    type: custom
+    class: "oauthenticator.google.GoogleOAuthenticator"
+    config:
+      login_service: "My Login Button"
+      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
+      client_id: 'your-client-id'
+      client_secret: 'your-client-secret'
+```
+
+### User Management
 
 `users` and `groups` allows one to provision UNIX permissions to each
 user. Any user is assigned a `uid`, `primary_group`, and optionally
