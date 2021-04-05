@@ -12,6 +12,25 @@ will be tested.
 docker build -f Dockerfile.<filename> .
 ```
 
+### Testing the JupyterLab Docker Image
+
+Often times you would like to modify the jupyterlab default docker
+image and run the resulting configuration.
+
+```shell
+docker run -p 8888:8888 -it <image-sha> jupyter lab --ip=0.0.0.0
+```
+
+Then open the localhost (127.0.0.1) link that is in the terminal
+
+```
+[I 2021-04-05 17:37:17.345 ServerApp] Jupyter Server 1.5.1 is running at:
+...
+[I 2021-04-05 17:37:17.346 ServerApp]  or http://127.0.0.1:8888/lab?token=8dbb7ff1dcabc5fab860996b6622ac24dc71d1efc34fcbed
+...
+[I 2021-04-05 17:37:17.346 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+```
+
 ## Local Testing
 
 Local testing is a great way to test the components of QHub. It is
