@@ -206,4 +206,11 @@ c.Auth0OAuthenticator.client_secret = "{{ cookiecutter.security.authentication.c
 c.Auth0OAuthenticator.oauth_callback_url = "{{ cookiecutter.security.authentication.config.oauth_callback_url }}"
 c.Auth0OAuthenticator.scope = {{ cookiecutter.security.authentication.config.scope | jsonify }}
 c.Auth0OAuthenticator.auth0_subdomain = "{{ cookiecutter.security.authentication.config.auth0_subdomain }}"
+{% else %}
+
+c.JupyterHub.authenticator_class = {{ cookiecutter.security.authentication.class }}
+{% for key, value in cookiecutter.security.authentication.config %}
+c.{{ cookiecutter.security.authentication.class }}.{{ key }} = "{{ value }}"
+{% endfor %}
+
 {% endif %}
