@@ -13,7 +13,6 @@ be accurate.
 project_name: do-jupyterhub # name of the kubernetes/Cloud deployment 
 namespace: dev
 provider: <provider_alias> # determines the choice of cloud provider for the deployment
-ci_cd: github-actions # continuous integration and continuous deployment framework to use
 domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 ```
 
@@ -29,13 +28,27 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
     Amazon AWS, `gcp` for Google Could Provider, `azure` for Microsoft
     Azure, and `local` for a local or existing kubernetes deployment.
 
- - `ci_cd`: is the continuous integration and continuous deployment
-   framework to use. Currently only `github-actions` is supported.
-
  - `domain`: is the top level URL to put JupyterLab and future
    services under such a monitoring. For example `jupyter.qhub.dev`
    would be the domain for JupyterHub to be exposed under. Note that
    this domain does not have to have `jupyter` in it.
+
+## Infrastructure As Code and CI/CD
+
+CI (Continuous Integration) and CD (Continuous Deployment) are used to
+ensure the state of configuration always matches the state of the
+actual deployment. Current allowable values are `gitlab-ci`,
+`github-actions`, and `none` with a default of `github-actions`.
+
+```yaml
+ci_cd: github-actions
+```
+
+If a value of `none` is supplied no CI/CD will be
+auto-generated. However, we will advise that having infrastructure as
+code allows teams to more quickly modify their QHub deployment often
+allowing developers and data sciences to request the changes to be
+approved by an administrator.
 
 ## Certificate
 

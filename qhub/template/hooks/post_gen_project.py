@@ -5,6 +5,7 @@ import yaml
 
 PROJECT_DIRECTORY = os.path.realpath(os.path.curdir)
 PROVIDER = "{{ cookiecutter.provider }}"
+CI_PROVIDER = "{{ cookiecutter.ci_cd }}"
 ENVIRONMENTS = eval("{{ cookiecutter.environments }}")
 TERRAFORM_STATE = "{{ cookiecutter.terraform_state.type }}"
 
@@ -24,6 +25,7 @@ if __name__ == "__main__":
             with open(f"environments/{name}", "w") as f:
                 yaml.dump(spec, f)
 
+    # Managing provider terraform scripts
     if PROVIDER == "aws":
         remove_file("infrastructure/do.tf")
         remove_file("infrastructure/gcp.tf")
@@ -46,6 +48,7 @@ if __name__ == "__main__":
         remove_file("infrastructure/gcp.tf")
         remove_file("infrastructure/azure.tf")
 
+    # Managing terraform state scripts
     if TERRAFORM_STATE == "local":
         remove_directory("terraform-state")
         remove_file("infrastructure/state.tf")
@@ -53,6 +56,15 @@ if __name__ == "__main__":
         remove_directory("terraform-state")
     elif TERRAFORM_STATE == "remote" and PROVIDER == "local":
         remove_directory("terraform-state")
+
+    # Managing ci/cd providers
+    if CI_PROVIDER == "github-actions":
+        remove_file(".gitlab-ci.yml")
+    elif CI_PROVIDER == "gitlab-ci":
+        remove_directory(".github")
+    elif CI_PROVIDER == "none":
+        remove_file(".gitlab-ci.yml")
+        remove_directory(".github")
 
     # templates directory is only used by includes
     remove_directory("templates")

@@ -1,0 +1,17 @@
+render-qhub:
+  image: "python:3.9"
+  variables:
+    COMMIT_MSG: |
+      qhub-config.yaml automated commit: {{ '$CI_COMMIT_SHA' }}
+  script:
+    - pip install qhub==0.2.3
+    - qhub render -c qhub-config.yaml
+    - git config user.email "qhub@quansight.com"
+    - git config user.name "gitlab ci"
+    - git add .
+    - git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
+  only:
+    refs:
+      - master
+    changes:
+      - "qhub-config.yaml"

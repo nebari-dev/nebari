@@ -25,6 +25,7 @@ class ProviderEnum(str, enum.Enum):
 
 class CiEnum(str, enum.Enum):
     github_actions = "github-actions"
+    gitlab_ci = "gitlab-ci"
 
 
 class AuthenticationEnum(str, enum.Enum):
