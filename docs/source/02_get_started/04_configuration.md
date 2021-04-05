@@ -158,7 +158,7 @@ authentication class. The attributes will obey the type set via yaml
 security:
   authentication:
     type: custom
-    class: "oauthenticator.google.GoogleOAuthenticator"
+    authentication_class: "oauthenticator.google.GoogleOAuthenticator"
     config:
       login_service: "My Login Button"
       oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'

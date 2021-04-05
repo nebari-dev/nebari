@@ -83,6 +83,7 @@ class Auth0Config(Base):
 
 class Authentication(Base):
     type: AuthenticationEnum
+    authentication_class: typing.Optional[str]
     config: typing.Optional[
         typing.Union[Auth0Config, GitHubConfig, typing.Dict[str, typing.Any]]
     ]
