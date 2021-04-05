@@ -109,9 +109,23 @@ security:
     config:
       client_id: ...
       client_secret: ...
-      oauth_callback_url: ...
+      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
       scope: ["openid", "email", "profile"]
       auth0_subdomain: ...
+```
+
+#### GitHub Based Authentication
+
+For Auth0 based authentication.
+
+```yaml
+security:
+  authentication:
+    type: GitHub
+    config:
+      client_id: ...
+      client_secret: ...
+      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
 ```
 
 #### Password Based Authentication
