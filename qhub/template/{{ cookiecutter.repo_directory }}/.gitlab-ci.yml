@@ -1,3 +1,6 @@
+services:
+  - docker:dind
+
 render-qhub:
   image: "python:3.9"
   variables:
@@ -15,3 +18,20 @@ render-qhub:
       - master
     changes:
       - "qhub-config.yaml"
+
+build-docker-images:
+  image: "docker:19.03.12"
+  parallel:
+    matrix:
+      - DOCKERFILE:
+          - jupyterlab
+          - jupyterhub
+          - dask-worker
+  variables:
+    IMAGE_TAG: {{ '$CI_COMMIT_SHA' }}
+    IMAGE_NAME: {{ cookiecutter.project_name }}-{{ '$DOCKERFILE' }}
+  script:
+    - docker build -f "image/Dockerfile.{{ '$DOCKERFILE' }}" -t "$IMAGE_NAME:$IMAGE_TAG" image
+  only:
+    changes:
+      - "image/**"
