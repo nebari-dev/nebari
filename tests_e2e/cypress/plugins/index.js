@@ -9,17 +9,24 @@ module.exports = (on, config) => {
     const yaml = require('js-yaml');
 
     let new_config = {};
+
+    try {
   
-    let fileContents = fs.readFileSync(process.env.QHUB_CONFIG_PATH, 'utf8');
-    let data = yaml.load(fileContents);
+        let fileContents = fs.readFileSync(process.env.QHUB_CONFIG_PATH, 'utf8');
+        let data = yaml.load(fileContents);
 
-    console.log(data);
+        console.log(data);
 
-    new_config['env'] = _.fromPairs(
-            _.map(yaml_fields, 
-                field => ['qhub_'+field.replace(/\./g, '_') , _.get(data, field, '')]
-                    )
+        new_config['env'] = _.fromPairs(
+                _.map(yaml_fields, 
+                    field => ['qhub_'+field.replace(/\./g, '_') , _.get(data, field, '')]
+                        )
         );
+
+    }
+    catch (e) {
+        console.log(e);
+    }
 
     return new_config;
   };
