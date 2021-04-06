@@ -159,18 +159,27 @@ jobs:
         run: |
           nslookup github-actions.qhub.dev
       - name: Curl jupyterhub login page
-        continue-on-error: true
         run: |
           curl -k --retry 5 --retry-connrefused https://github-actions.qhub.dev/hub/login
 
-      - name: PWD
-        run: pwd
+      - name: Get QHub Config YAML values for Cypress
+        uses: CumulusDS/get-yaml-paths-action@v0.1.0
+        id: qhubyaml
+        with:
+          file: ./local-deployment/qhub-config.yml
+          security_authentication_type: security.authentication.type
+
+      - name: Read example-user password
+        run: python -c "import tempfile, os; print('CYPRESS_EXAMPLE_USER_PASSWORD='+open(os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')).read())" >> $GITHUB_ENV
+
       - name: Cypress run
         uses: cypress-io/github-action@v2
         env:
           CYPRESS_BASE_URL: https://github-actions.qhub.dev/
+          CYPRESS_security_authentication_type: ${{ steps.qhubyaml.security_authentication_type }}
         with:
           working-directory: tests_e2e
+
       - name: Save Cypress screenshots and videos
         if: always()
         uses: actions/upload-artifact@v2
