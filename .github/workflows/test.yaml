@@ -166,7 +166,7 @@ jobs:
         uses: CumulusDS/get-yaml-paths-action@v0.1.0
         id: qhubyaml
         with:
-          file: ./local-deployment/qhub-config.yml
+          file: ./local-deployment/qhub-config.yaml
           security_authentication_type: security.authentication.type
 
       - name: Read example-user password
