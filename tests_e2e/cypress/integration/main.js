@@ -29,6 +29,8 @@ describe('First Test', () => {
       cy.get('#start')
         .should('contain', 'My Server')
 
+    } else {
+      throw new Error("No security_authentication_type env var is set");
     }
 
   })
