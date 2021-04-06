@@ -1,4 +1,5 @@
-const security_authentication_type = Cypress.env('security_authentication_type');
+const security_authentication_type = Cypress.env('qhub_security_authentication_type');
+
 
 describe('First Test', () => {
 

@@ -37,3 +37,5 @@ Cypress.Commands.add('loginWithPassword', (username, password) => {
   
     cy.get('form').submit();
 });
+
+

@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "cypress": "^6.8.0"
+    "cypress": "^6.8.0",
+    "js-yaml": "^4.0.0",
+    "lodash": "^4.17.21"
   }
 }
