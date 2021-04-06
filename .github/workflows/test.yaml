@@ -103,11 +103,6 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
-
-      - name: Get qhub-config.yaml full path
-        run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`"
-
-
       - name: Install QHub
         run: |
           pip install .[dev]
@@ -169,6 +164,9 @@ jobs:
 
       - name: Read example-user password
         run: python -c "import tempfile, os; print('CYPRESS_EXAMPLE_USER_PASSWORD='+open(os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')).read())" >> $GITHUB_ENV
+        
+      - name: Get qhub-config.yaml full path
+        run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`"
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
