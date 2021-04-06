@@ -164,9 +164,9 @@ jobs:
 
       - name: Read example-user password
         run: python -c "import tempfile, os; print('CYPRESS_EXAMPLE_USER_PASSWORD='+open(os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')).read())" >> $GITHUB_ENV
-        
+
       - name: Get qhub-config.yaml full path
-        run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`"
+        run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`" >> $GITHUB_ENV
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
