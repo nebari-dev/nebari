@@ -103,6 +103,11 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
+
+      - name: Get qhub-config.yaml full path
+        run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`"
+
+
       - name: Install QHub
         run: |
           pip install .[dev]
@@ -169,7 +174,6 @@ jobs:
         uses: cypress-io/github-action@v2
         env:
           CYPRESS_BASE_URL: https://github-actions.qhub.dev/
-          QHUB_CONFIG_PATH: ./local-deployment/qhub-config.yaml
         with:
           working-directory: tests_e2e
 
