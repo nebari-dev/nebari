@@ -170,7 +170,7 @@ jobs:
         env:
           CYPRESS_BASE_URL: https://github-actions.qhub.dev/
         with:
-          project: ./tests_e2e
+          working-directory: tests_e2e
       - name: Save Cypress screenshots and videos
         if: always()
         uses: actions/upload-artifact@v2
