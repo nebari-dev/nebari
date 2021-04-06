@@ -48,7 +48,6 @@ jobs:
     if: ${{ false }}
     name: 'Test QHub Provider'
     runs-on: ubuntu-latest
-    needs: test-general
     strategy:
       matrix:
         provider:
@@ -97,7 +96,6 @@ jobs:
   test-kubernetes:
     name: "Kubernetes Tests"
     runs-on: ubuntu-latest
-    #needs: test-render-providers
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
@@ -162,12 +160,7 @@ jobs:
         run: |
           curl -k --retry 5 --retry-connrefused https://github-actions.qhub.dev/hub/login
 
-      - name: Get QHub Config YAML values for Cypress
-        uses: CumulusDS/get-yaml-paths-action@v0.1.0
-        id: qhubyaml
-        with:
-          file: ./local-deployment/qhub-config.yaml
-          security_authentication_type: security.authentication.type
+      ### CYPRESS TESTS 
 
       - name: Read example-user password
         run: python -c "import tempfile, os; print('CYPRESS_EXAMPLE_USER_PASSWORD='+open(os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')).read())" >> $GITHUB_ENV
@@ -176,7 +169,7 @@ jobs:
         uses: cypress-io/github-action@v2
         env:
           CYPRESS_BASE_URL: https://github-actions.qhub.dev/
-          CYPRESS_security_authentication_type: ${{ steps.qhubyaml.security_authentication_type }}
+          QHUB_CONFIG_PATH: ./local-deployment/qhub-config.yaml
         with:
           working-directory: tests_e2e
 
@@ -188,6 +181,8 @@ jobs:
           path: |
             ./tests_e2e/cypress/screenshots/
             ./tests_e2e/cypress/videos/
+
+      ### CLEANUP AFTER CYPRESS
 
       - name: Cleanup qhub deployment
         run: |
