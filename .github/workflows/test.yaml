@@ -10,11 +10,9 @@ on:
       - main
       - dev
       - cypress-local
-  workflow_dispatch:
 
 jobs:
   test-general:
-    if: ${{ false }}
     name: 'Test Package'
     runs-on: ubuntu-latest
     strategy:
@@ -45,7 +43,6 @@ jobs:
           pytest
 
   test-render-providers:
-    if: ${{ false }}
     name: 'Test QHub Provider'
     runs-on: ubuntu-latest
     strategy:
