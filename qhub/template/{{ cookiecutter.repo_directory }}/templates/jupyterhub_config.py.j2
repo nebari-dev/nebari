@@ -37,7 +37,15 @@ c.JupyterHub.template_vars = {
 {%- for key, value in cookiecutter.theme.jupyterhub.items() %}
     "{{ key }}": "{{ value | replace('\"', '\\"') }}",
 {%- endfor %}
-{% if cookiecutter.cdsdashboards.enabled %}"cdsdashboards_enabled": True{% endif %}
+{% if cookiecutter.cdsdashboards.enabled %}
+    "cdsdashboards_enabled": True,
+    {% if cookiecutter.cdsdashboards.cds_hide_user_named_servers is defined %}
+    "cds_hide_user_named_servers": {{ cookiecutter.cdsdashboards.cds_hide_user_named_servers }},
+    {% endif %}
+    {% if cookiecutter.cdsdashboards.cds_hide_user_dashboard_servers is defined %}
+    "cds_hide_user_dashboard_servers": {{ cookiecutter.cdsdashboards.cds_hide_user_dashboard_servers }},
+    {% endif %}
+{% endif %}
 }
 
 # ================= Profiles =====================

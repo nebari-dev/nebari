@@ -53,7 +53,11 @@ BASE_CONFIGURATION = {
             "h2_color": "#652e8e",
         }
     },
-    "cdsdashboards": {"enabled": True},
+    "cdsdashboards": {
+        "enabled": True,
+        "cds_hide_user_named_servers": True,
+        "cds_hide_user_dashboard_servers": False
+    },
 }
 
 AUTH_PASSWORD = {
