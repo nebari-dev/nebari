@@ -236,6 +236,7 @@ class CDSDashboards(Base):
     enabled: bool
     cds_hide_user_named_servers: typing.Optional[bool]
     cds_hide_user_dashboard_servers: typing.Optional[bool]
+    spawn_allow_group: typing.Optional[str]
 
 
 # ==================== Main ===================

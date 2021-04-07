@@ -1,16 +1,22 @@
+{% set dashboards_restricted = cookiecutter.cdsdashboards.spawn_allow_group is defined and cookiecutter.cdsdashboards.spawn_allow_group %}
+
 {% if cookiecutter.cdsdashboards.enabled %}
 
 # ================ CDSDASHBOARDS =====================
 c.JupyterHub.allow_named_servers = True
 from cdsdashboards.hubextension import cds_extra_handlers
 c.JupyterHub.extra_handlers = cds_extra_handlers
-from cdsdashboards.app import CDS_TEMPLATE_PATHS
-c.JupyterHub.template_paths = CDS_TEMPLATE_PATHS
+from cdsdashboards.app import CDS_TEMPLATE_PATHS{% if dashboards_restricted %}_RESTRICTED{% endif %}
+c.JupyterHub.template_paths = CDS_TEMPLATE_PATHS{% if dashboards_restricted %}_RESTRICTED{% endif %}
 c.JupyterHub.spawner_class = 'cdsdashboards.hubextension.spawners.variablekube.VariableKubeSpawner'
 c.CDSDashboardsConfig.builder_class = 'cdsdashboards.builder.kubebuilder.KubeBuilder'
 c.VariableMixin.default_presentation_cmd = ['python3', '-m', 'jhsingle_native_proxy.main']
 
-c.JupyterHub.default_url = '/hub/home'
+{% if dashboards_restricted %}
+c.CDSDashboardsConfig.spawn_allow_group = 'spawners-group'
+{% endif %}
+
+c.JupyterHub.default_url = '/hub/home{% if dashboards_restricted %}-cds{% endif %}'
 
 {% else %}
 
@@ -44,6 +50,9 @@ c.JupyterHub.template_vars = {
     {% endif %}
     {% if cookiecutter.cdsdashboards.cds_hide_user_dashboard_servers is defined %}
     "cds_hide_user_dashboard_servers": {{ cookiecutter.cdsdashboards.cds_hide_user_dashboard_servers }},
+    {% endif %}
+    {% if dashboards_restricted %}
+    "cdsdashboards_restricted": True,
     {% endif %}
 {% endif %}
 }
