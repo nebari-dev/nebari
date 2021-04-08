@@ -17,6 +17,26 @@ provider "kubernetes" {
 {% endif %}
 }
 
+provider "kubernetes-alpha" {
+{% if cookiecutter.provider == "local" %}
+  config_path = "~/.kube/config"
+{% if cookiecutter.local.kube_context is defined %}
+  config_context = "{{ cookiecutter.local.kube_context }}"
+{% endif %}
+{% elif cookiecutter.provider == "azure" %}
+  username           = module.kubernetes.credentials.username
+  password           = module.kubernetes.credentials.password
+  client_certificate = module.kubernetes.credentials.client_certificate
+  client_key         = module.kubernetes.credentials.client_key
+  token              = module.kubernetes.credentials.token
+{% else %}
+  host                   = module.kubernetes.credentials.endpoint
+  cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+  token                  = module.kubernetes.credentials.token
+{% endif %}
+}
+
+
 module "kubernetes-initialization" {
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/initialization?ref={{ cookiecutter.terraform_modules.rev }}"
 
@@ -69,7 +89,7 @@ module "kubernetes-nfs-mount" {
 module "kubernetes-conda-store-server" {
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/conda-store?ref={{ cookiecutter.terraform_modules.rev }}"
 
-  name         = "conda-store"
+  name         = "qhub"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.conda_store }}"
   node-group   = local.node_groups.general

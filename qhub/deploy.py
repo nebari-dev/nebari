@@ -40,6 +40,17 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
         terraform.init(directory="terraform-state")
         terraform.apply(directory="terraform-state")
 
+    # 3.5 kuberentes-alpha provider requires that kubernetes be
+    # provisionioned before any "kubernetes_manifests" resources
+    terraform.init(directory="infrastructure")
+    terraform.apply(
+        directory="infrastructure",
+        targets=[
+            "module.kubernetes",
+            "module.kubernetes-initialization",
+        ],
+    )
+
     # 04 Create qhub initial state (up to nginx-ingress)
     terraform.init(directory="infrastructure")
     terraform.apply(
