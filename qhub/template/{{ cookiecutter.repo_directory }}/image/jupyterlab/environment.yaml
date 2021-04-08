@@ -44,4 +44,5 @@ dependencies:
  - isort
  - importnb
 
- - pip: []
+ - pip:
+    - https://github.com/dirkcgrunwald/jupyter_codeserver_proxy-/archive/5596bc9c2fbd566180545fa242c659663755a427.tar.gz
