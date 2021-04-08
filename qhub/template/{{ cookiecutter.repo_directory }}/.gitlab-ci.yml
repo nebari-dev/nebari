@@ -21,6 +21,7 @@ render-qhub:
 
 build-docker-images:
   image: "docker:19.03.12"
+  timeout: 2h
   parallel:
     matrix:
       - DOCKERFILE:
