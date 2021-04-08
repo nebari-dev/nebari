@@ -156,7 +156,7 @@ jobs:
           nslookup github-actions.qhub.dev
       - name: Curl jupyterhub login page
         run: |
-          curl -k https://chrisotests.qhub.dev/hub/home -i
+          curl -k https://github-actions.qhub.dev/hub/home -i
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment

@@ -426,9 +426,9 @@ image.
 
 ```yaml
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
-  jupyterlab: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
-  dask_worker: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+  jupyterhub: "quansight/qhub-jupyterhub:38522eec94ed90bff066b4e187f6eddad71df0a4"
+  jupyterlab: "quansight/qhub-jupyterlab:38522eec94ed90bff066b4e187f6eddad71df0a4"
+  dask_worker: "quansight/qhub-dask-worker:38522eec94ed90bff066b4e187f6eddad71df0a4"
 ```
 
 ## Storage
@@ -464,7 +464,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+        image: "quansight/qhub-jupyterlab:38522eec94ed90bff066b4e187f6eddad71df0a4"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       kubespawner_override:
@@ -472,7 +472,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+        image: "quansight/qhub-jupyterlab:38522eec94ed90bff066b4e187f6eddad71df0a4"
 
   dask_worker:
     "Small Worker":
@@ -480,13 +480,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+      image: "quansight/qhub-dask-worker:38522eec94ed90bff066b4e187f6eddad71df0a4"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+      image: "quansight/qhub-dask-worker:38522eec94ed90bff066b4e187f6eddad71df0a4"
 ```
 
 For each `profiles.jupyterlab` is a named JupyterLab profile. It
@@ -683,9 +683,9 @@ digital_ocean:
       max_nodes: 4
 
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
-  jupyterlab: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
-  dask_worker: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+  jupyterhub: "quansight/qhub-jupyterhub:38522eec94ed90bff066b4e187f6eddad71df0a4"
+  jupyterlab: "quansight/qhub-jupyterlab:38522eec94ed90bff066b4e187f6eddad71df0a4"
+  dask_worker: "quansight/qhub-dask-worker:38522eec94ed90bff066b4e187f6eddad71df0a4"
 
 theme:
   jupyterhub:
@@ -716,7 +716,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+        image: "quansight/qhub-jupyterlab:38522eec94ed90bff066b4e187f6eddad71df0a4"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       default: true
@@ -725,7 +725,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+        image: "quansight/qhub-jupyterlab:38522eec94ed90bff066b4e187f6eddad71df0a4"
 
   dask_worker:
     "Small Worker":
@@ -733,13 +733,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+      image: "quansight/qhub-dask-worker:38522eec94ed90bff066b4e187f6eddad71df0a4"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:d52cea07f70cc8b35c29b327bbd2682f29d576ad"
+      image: "quansight/qhub-dask-worker:38522eec94ed90bff066b4e187f6eddad71df0a4"
 
 environments:
   "environment-default.yaml":
