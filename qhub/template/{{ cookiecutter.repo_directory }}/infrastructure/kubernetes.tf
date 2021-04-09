@@ -193,9 +193,7 @@ module "qhub" {
     file("jupyterhub.yaml")
   ]
 
-  dask-gateway-overrides = [
-    file("dask-gateway.yaml")
-  ]
+  dask_gateway_extra_config = file("dask_gateway_config.py.j2")
 
   depends_on = [
     module.kubernetes-ingress
