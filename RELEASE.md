@@ -11,6 +11,10 @@
 ## Upcoming release 0.3.0
 
 ### Feature changes and enhancements
+* [jupyterhub-ssh](https://github.com/yuvipanda/jupyterhub-ssh) (`ssh` and `sftp` integration) accessible on port `8022` and `8023` respectively
+* VSCode([code-server](https://github.com/cdr/code-server)) now provided in default image and integrated with jupyterlab
+* [Dask Gateway](https://gateway.dask.org/) now accessible outside of cluster
+* Moving fully towards traefik as a load balancer with tight integration with dask-gateway
 * Adding ability to specify node selector label for general, user, and worker
 * Ability to specify `kube_context` for local deployments otherwise will use default
 * Strict schema validation for `qhub-config.yaml`
@@ -33,7 +37,7 @@
 ### Breaking changes
 
 * Terraform version is now pinned to specific version
-
+* `domain` attributed in `qhub-config.yaml` is now the url for the cluster
 
 ### Migration guide
 
