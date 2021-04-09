@@ -44,7 +44,7 @@ source/02_get_started/07_support.md
 source/03_tutorials_and_samples/1_project_setup_tutorial.md
 source/03_tutorials_and_samples/01_cloud_setup.md
 source/03_tutorials_and_samples/02_qhub_pangeo.md
-source/03_totorials_abd_samples/03_dask_gateway_usage.md
+source/03_tutorials_and_samples/03_dask_gateway_usage.md
 ```
 
 ```{toctree}
