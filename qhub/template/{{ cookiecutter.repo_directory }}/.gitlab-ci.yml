@@ -34,6 +34,10 @@ build-docker-images:
   script:
     - docker build -f "image/Dockerfile.{{ '$DOCKERFILE' }}" -t "$IMAGE_NAME:$IMAGE_TAG" image
   only:
+    refs:
+      - merge_requests
+    variables:
+      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"
     changes:
       - "image/**"
 
