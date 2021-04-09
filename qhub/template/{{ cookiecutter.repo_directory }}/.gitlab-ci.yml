@@ -36,3 +36,61 @@ build-docker-images:
   only:
     changes:
       - "image/**"
+
+terraform-jupyterhub:
+  image:
+    name: "hashicorp/terraform"
+    entrypoint: [""]
+  variables: 
+    PROVIDER: ${ cookiecutter.provider }
+    PREFECT: ${ cookiecutter.prefect }   
+    WORKSPACE: infrastructure/
+    VARS: ""
+  rules:
+    - if: $CI_COMMIT_REF_NAME == /master/
+      changes:
+        - "infrastructure/**" 
+        - "environments/**"
+    
+    - if: $PREFECT
+      variables:
+        VARS: '-var="prefect_token=${{ secrets.PREFECT_TOKEN }}"'
+
+    - if: $PROVIDER == 'aws'
+      variables:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+
+    - if: $PROVIDER == 'do'
+      variables:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+        SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+        SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+        DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+
+    - if: $PROVIDER == 'gcp'
+      variables:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+    - if: $PROVIDER == 'azure'
+      variables:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+  before_script:
+    - terraform version
+
+  script: |
+    terraform fmt ${WORKSPACE}
+    terraform init ${WORKSPACE}
+    terraform validate ${WORKSPACE}
+    terraform plan ${VARS} ${WORKSPACE}
+    terraform apply ${VARS} ${WORKSPACE}
