@@ -1,5 +1,5 @@
-provider "azure" {
-  versions {}
+provider "azurerm" {
+  features {}
 }
 
 

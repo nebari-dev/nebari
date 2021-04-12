@@ -29,7 +29,6 @@ module "terraform-state" {
 }
 {% elif cookiecutter.provider == "azure" -%}
 provider "azurerm" {
-  version = "=2.44.0"
   features {}
 }
 
