@@ -61,6 +61,26 @@ certificate:
   acme_server:
 ```
 
+You may also supply a custom self signed certificate and secret
+key. Note that the kubernetes default namespace that QHub uses is
+`dev` if not specified. Otherwise it will be your `namespace` defined
+in the `qhub-config.yaml`.
+
+```yaml
+certificate:
+  type: existing
+  secret_name: <secret-name>
+```
+
+To add the tls certificate to kubernetes run the following command
+with existing files.
+
+```shell
+kubectl create secret tls <secret-name> \
+  --namespace=<namespace> \
+  --cert=path/to/cert/file --key=path/to/key/file
+```
+
 ## Security
 
 This section is for configuring security relating to the QHub
