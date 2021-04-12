@@ -46,8 +46,8 @@ terraform-jupyterhub:
     name: "hashicorp/terraform"
     entrypoint: [""]
   variables: 
-    PROVIDER: ${ cookiecutter.provider }
-    PREFECT: ${ cookiecutter.prefect }   
+    PROVIDER: {{ cookiecutter.provider }}
+    PREFECT: {{ cookiecutter.prefect }}   
     WORKSPACE: infrastructure/
     VARS: ""
   rules:
