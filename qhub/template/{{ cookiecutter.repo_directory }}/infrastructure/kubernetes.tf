@@ -9,7 +9,6 @@ provider "kubernetes" {
   password           = module.kubernetes.credentials.password
   client_certificate = module.kubernetes.credentials.client_certificate
   client_key         = module.kubernetes.credentials.client_key
-  token              = module.kubernetes.credentials.token
 {% else %}
   host                   = module.kubernetes.credentials.endpoint
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
