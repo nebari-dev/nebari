@@ -189,6 +189,10 @@ module "qhub" {
   user-node-group    = local.node_groups.user
   worker-node-group  = local.node_groups.worker
 
+{% if cookiecutter.certificate.type == "existing" %}
+  certificate-secret-name = "{{ cookiecutter.certificate.secret_name }}"
+{% endif %}
+
   jupyterhub-overrides = [
     file("jupyterhub.yaml")
   ]

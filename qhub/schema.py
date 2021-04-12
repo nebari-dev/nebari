@@ -5,8 +5,9 @@ import pydantic
 
 
 class CertificateEnum(str, enum.Enum):
-    selfsigned = "self-signed"
     letsencrypt = "lets-encrypt"
+    selfsigned = "self-signed"
+    existing = "existing"
 
 
 class TerraformStateEnum(str, enum.Enum):
@@ -60,6 +61,9 @@ class TerraformModules(Base):
 
 class Certificate(Base):
     type: CertificateEnum
+    # existing
+    secret_name: typing.Optional[str]
+    # lets-encrypt
     acme_email: typing.Optional[str]
     acme_server: typing.Optional[str]
 
