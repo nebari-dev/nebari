@@ -11,6 +11,7 @@
 ## Upcoming release 0.3.0
 
 ### Feature changes and enhancements
+* Support for self-signed certificate/secret keys via kubernetes secrets
 * [jupyterhub-ssh](https://github.com/yuvipanda/jupyterhub-ssh) (`ssh` and `sftp` integration) accessible on port `8022` and `8023` respectively
 * VSCode([code-server](https://github.com/cdr/code-server)) now provided in default image and integrated with jupyterlab
 * [Dask Gateway](https://gateway.dask.org/) now accessible outside of cluster
