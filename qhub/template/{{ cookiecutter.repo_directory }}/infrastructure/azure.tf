@@ -7,16 +7,18 @@ module "registry" {
   source   = "github.com/quansight/qhub-terraform-modules//modules/azure/registry?ref={{ cookiecutter.terraform_modules.rev }}"
   name     = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}"
   location = "{{ cookiecutter.azure.region }}"
+  resource_group_name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}"
 }
 
 
 module "kubernetes" {
   source = "github.com/quansight/qhub-terraform-modules//modules/azure/kubernetes?ref={{ cookiecutter.terraform_modules.rev }}"
 
-  name               = local.cluster_name
-  environment        = var.environment
-  location           = var.region
-  kubernetes_version = "{{ cookiecutter.azure.kubernetes_version }}"
+  name                = local.cluster_name
+  environment         = var.environment
+  location            = var.region
+  resource_group_name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}"
+  kubernetes_version  = "{{ cookiecutter.azure.kubernetes_version }}"
 
   node_groups = [
 {% for nodegroup, nodegroup_config in cookiecutter.azure.node_groups.items() %}
