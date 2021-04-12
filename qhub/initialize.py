@@ -19,7 +19,9 @@ BASE_CONFIGURATION = {
     "provider": None,
     "ci_cd": None,
     "domain": None,
-    "certificate": {"type": "self-signed",},
+    "certificate": {
+        "type": "self-signed",
+    },
     "security": {
         "authentication": None,
         "users": {
@@ -84,9 +86,18 @@ AUTH_OAUTH_AUTH0 = {
 
 LOCAL = {
     "node_selectors": {
-        "general": {"key": "kubernetes.io/os", "value": "linux",},
-        "user": {"key": "kubernetes.io/os", "value": "linux",},
-        "worker": {"key": "kubernetes.io/os", "value": "linux",},
+        "general": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "user": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "worker": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
     }
 }
 
@@ -118,9 +129,17 @@ AZURE = {
     "region": "Central US",
     "kubernetes_version": "1.18.14",
     "node_groups": {
-        "general": {"instance": "Standard_D2_v2", "min_nodes": 1, "max_nodes": 1,},
+        "general": {
+            "instance": "Standard_D2_v2",
+            "min_nodes": 1,
+            "max_nodes": 1,
+        },
         "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 4},
-        "worker": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 4,},
+        "worker": {
+            "instance": "Standard_D2_v2",
+            "min_nodes": 0,
+            "max_nodes": 4,
+        },
     },
     "storage_account_postfix": "".join(
         random.choices("abcdefghijklmnopqrstuvwxyz0123456789", k=8)
