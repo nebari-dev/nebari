@@ -25,9 +25,7 @@ def create_deploy_subcommand(subparser):
         help="Attempt to automatically provision DNS. For Auth0 is requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
     )
     subparser.add_argument(
-        "--disable-prompt",
-        action="store_true",
-        help="Disable human intervention",
+        "--disable-prompt", action="store_true", help="Disable human intervention",
     )
     subparser.add_argument(
         "--disable-render",
