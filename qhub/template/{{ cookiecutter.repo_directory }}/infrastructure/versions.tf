@@ -5,7 +5,7 @@ terraform {
       source = "hashicorp/aws"
     }
 {%- elif cookiecutter.provider == "azure" %}
-    azure = {
+    azurerm = {
       source  = "hashicorp/azurerm"
       version = "=2.44.0"
     }

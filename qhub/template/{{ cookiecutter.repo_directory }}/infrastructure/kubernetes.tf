@@ -9,7 +9,8 @@ provider "kubernetes" {
   password           = module.kubernetes.credentials.password
   client_certificate = module.kubernetes.credentials.client_certificate
   client_key         = module.kubernetes.credentials.client_key
-  token              = module.kubernetes.credentials.token
+  cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+  host                   = module.kubernetes.credentials.endpoint
 {% else %}
   host                   = module.kubernetes.credentials.endpoint
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
@@ -28,7 +29,8 @@ provider "kubernetes-alpha" {
   password           = module.kubernetes.credentials.password
   client_certificate = module.kubernetes.credentials.client_certificate
   client_key         = module.kubernetes.credentials.client_key
-  token              = module.kubernetes.credentials.token
+  cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+  host                   = module.kubernetes.credentials.endpoint
 {% else %}
   host                   = module.kubernetes.credentials.endpoint
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate

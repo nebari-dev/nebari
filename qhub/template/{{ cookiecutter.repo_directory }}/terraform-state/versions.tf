@@ -19,7 +19,7 @@ terraform {
 {%- elif cookiecutter.provider == "azure" %}
 terraform {
   required_providers {
-    azure = {
+    azurerm = {
       source  = "hashicorp/azurerm"
       version = "=2.44.0"
     }
