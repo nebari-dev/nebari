@@ -1,6 +1,3 @@
-services:
-  - docker:dind
-
 render-qhub:
   image: "python:3.9"
   variables:
@@ -20,6 +17,8 @@ render-qhub:
       - "qhub-config.yaml"
 
 build-docker-images:
+  services:
+    - docker:dind
   image: "docker:19.03.12"
   timeout: 2h
   parallel:
@@ -98,3 +97,50 @@ terraform-jupyterhub:
     terraform validate ${WORKSPACE}
     terraform plan ${VARS} ${WORKSPACE}
     terraform apply ${VARS} ${WORKSPACE}
+
+qhub-build-dockerfiles:
+  services:
+    - docker:dind
+  image:
+    name: amazon/aws-cli
+    entrypoint: [""]
+  parallel:
+    matrix:
+      - DOCKERFILE:
+          - jupyterlab
+          - jupyterhub
+          - dask-worker
+{% if cookiecutter.provider == "aws" %}
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_IMAGE_NAME: {{ cookiecutter.project_name }}-{{ '$DOCKERFILE' }}
+    IMAGE_TAG: {{ '$CI_COMMIT_SHA' }}
+    AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}'
+    AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'
+    AWS_DEFAULT_REGION: '${{ secrets.AWS_DEFAULT_REGION }}'
+  
+  before_script:
+    - amazon-linux-extras install docker
+    - aws --version
+    - docker --version
+
+  script:
+    - yum -y install jq
+    - export ACCOUNT_ID=$( aws sts get-caller-identity | jq -r '.Account' ) 
+    - export ECR_REGISTRY=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+    - export IMAGE_NAME=$ECR_REGISTRY/$DOCKER_IMAGE_NAME
+    - docker build -f "image/Dockerfile.$DOCKERFILE" -t $IMAGE_NAME:$IMAGE_TAG image
+    - aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
+    - docker push $IMAGE_NAME:$IMAGE_TAG
+    - docker logout "$ECR_REGISTRY"
+{% endif %}
+  only:
+    refs:
+      - master
+    changes:
+      - "image/**"
+
+
+
+
+
