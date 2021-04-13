@@ -111,7 +111,7 @@ qhub-build-dockerfiles:
   image:
     name: amazon/aws-cli
     entrypoint: [""]
-    
+
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_IMAGE_NAME: {{ cookiecutter.project_name }}-{{ '$DOCKERFILE' }}
@@ -134,6 +134,29 @@ qhub-build-dockerfiles:
     - aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_REGISTRY
     - docker push $IMAGE_NAME:$IMAGE_TAG
     - docker logout "$ECR_REGISTRY"
+{% elif cookiecutter.provider == "gcp" %}
+  image:
+    name: google/cloud-sdk
+
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_IMAGE_NAME: {{ cookiecutter.project_name }}/qhub-{{ '$DOCKERFILE' }}
+    IMAGE_TAG: {{ '$CI_COMMIT_SHA' }}
+    PROJECT_ID: {{ '${{ secrets.PROJECT_ID }}' }}
+    GOOGLE_CREDENTIALS: {{ '${{ secrets.GOOGLE_CREDENTIALS }}' }}
+
+
+  before_script:
+    - docker --version
+    - echo "$GOOGLE_CREDENTIALS" > /tmp/service-account.json
+    - gcloud auth activate-service-account --key-file=/tmp/service-account.json
+
+  script:
+    - gcloud auth configure-docker
+    - export IMAGE_NAME="gcr.io/$PROJECT_ID/$DOCKER_IMAGE_NAME"
+    - docker build -f "image/Dockerfile.$DOCKERFILE" -t $IMAGE_NAME:$IMAGE_TAG image
+    - docker push $IMAGE_NAME:$IMAGE_TAG
+    - docker logout
 {% endif %}
   only:
     refs:
