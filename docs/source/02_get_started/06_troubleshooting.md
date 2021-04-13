@@ -22,6 +22,28 @@ instructions](https://www.digitalocean.com/docs/kubernetes/how-to/connect-to-clu
 
 After completing these steps. `kubectl` should be able to access the cluster.
 
+##### Google Cloud Platform
+
+To get the kubernetes context to interact with a GCP use the [following
+instructions](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl).
+
+1. [Download the GCP SDK](https://cloud.google.com/sdk/downloads)
+2. Login to GCP via `gcloud init`
+3. `gcloud container clusters get-credentials <project-name>-<namespace>`
+
+After completing these steps. `kubectl` should be able to access the cluster.
+
+##### Amazon Web Services
+
+To get the kubernetes context to interact with a AWS use the [following
+instructions](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html).
+
+1. Download the [aws command line](https://aws.amazon.com/cli/)
+2. [Create AWS Access Key and Secret Key](https://aws.amazon.com/premiumsupport/knowledge-center/create-access-key/) likely already done
+2. `aws eks --region <region-code> update-kubeconfig --name <project-name>-<namespace>`
+
+After completing these steps. `kubectl` should be able to access the cluster.
+
 #### Debug your Kubernetes cluster
 
  [K9s](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to
