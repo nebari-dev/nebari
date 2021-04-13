@@ -4,9 +4,9 @@ provider "azurerm" {
 
 
 module "registry" {
-  source   = "{{ cookiecutter.terraform_modules.repository }}//modules/azure/registry?ref={{ cookiecutter.terraform_modules.rev }}"
-  name     = "{{ cookiecutter.project_name }}{{ cookiecutter.namespace }}"
-  location = "{{ cookiecutter.azure.region }}"
+  source              = "{{ cookiecutter.terraform_modules.repository }}//modules/azure/registry?ref={{ cookiecutter.terraform_modules.rev }}"
+  name                = "{{ cookiecutter.project_name }}{{ cookiecutter.namespace }}"
+  location            = "{{ cookiecutter.azure.region }}"
   resource_group_name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}"
 }
 

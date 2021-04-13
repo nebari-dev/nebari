@@ -5,10 +5,10 @@ provider "kubernetes" {
   config_context = "{{ cookiecutter.local.kube_context }}"
 {% endif %}
 {% elif cookiecutter.provider == "azure" %}
-  username           = module.kubernetes.credentials.username
-  password           = module.kubernetes.credentials.password
-  client_certificate = module.kubernetes.credentials.client_certificate
-  client_key         = module.kubernetes.credentials.client_key
+  username               = module.kubernetes.credentials.username
+  password               = module.kubernetes.credentials.password
+  client_certificate     = module.kubernetes.credentials.client_certificate
+  client_key             = module.kubernetes.credentials.client_key
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
   host                   = module.kubernetes.credentials.endpoint
 {% else %}
@@ -25,10 +25,10 @@ provider "kubernetes-alpha" {
   config_context = "{{ cookiecutter.local.kube_context }}"
 {% endif %}
 {% elif cookiecutter.provider == "azure" %}
-  username           = module.kubernetes.credentials.username
-  password           = module.kubernetes.credentials.password
-  client_certificate = module.kubernetes.credentials.client_certificate
-  client_key         = module.kubernetes.credentials.client_key
+  username               = module.kubernetes.credentials.username
+  password               = module.kubernetes.credentials.password
+  client_certificate     = module.kubernetes.credentials.client_certificate
+  client_key             = module.kubernetes.credentials.client_key
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
   host                   = module.kubernetes.credentials.endpoint
 {% else %}
