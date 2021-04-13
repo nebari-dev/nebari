@@ -234,6 +234,8 @@ class CondaEnvironment(Base):
 
 class CDSDashboards(Base):
     enabled: bool
+    cds_hide_user_named_servers: typing.Optional[bool]
+    cds_hide_user_dashboard_servers: typing.Optional[bool]
 
 
 # ==================== Main ===================
