@@ -17,38 +17,52 @@ On your terminal run:
 
 ```shell
 mkdir qhub-test && cd qhub-test
-``` 
+```
 
 #### Fully automated deployment
 
 To generate a fully automated deployment, on your terminal run:
 
 ```shell
-qhub init aws --project project-name --domain jupyter.qhub.dev --ci-provider github-actions --auth-provider auth0 
+qhub init aws --project projectname --domain qhub.dev --ci-provider github-actions --auth-provider auth0
 --auth-auto-provision --repository github.com/quansight/project-name --repository-auto-provision
 ```
 
 The command above will generate the `qhub-config.yaml` config file
-with an infrastructure deployed on `aws`, named `project-name`, where
-the domain will be `jupyter.github-actions.qhub.dev`. The deployment
+with an infrastructure deployed on `aws`, named `projectname`, where
+the domain will be `qhub.dev`. The deployment
 will use `github-actions` as the continuous integration (CI) provider,
 automatically provisioned and authenticated by `auth0`, initialized on
-GitHub under the URL `github.com/quansight/project-name `.
+GitHub under the URL `github.com/quansight/projectname`.
 
 There are several **optional** (yet highly recommended) flags that
 allow to configure the deployment:
 
-+ `aws` indicates that the project will be deployed on the Amazon AWS Cloud provider.
-- `--project`: project-name is required to be a string compliant with the Cloud provider recommendations (see official Cloud provider docs on naming policies).
+- `aws` indicates that the project will be deployed on the Amazon AWS Cloud provider.
+    + Optional flags are: `gcp`, `do` and `azure`.
+- `--project`: the name of the project is required to be a string compliant with the Cloud provider recommendations. For
+  more details see official Cloud provider docs on naming policies and check our docs on [naming convention](#project-naming-convention).
+- `--domain`: base domain for your cluster. This pattern is also applicable if you are setting your own DNS through a different provider.
   + `jupyter.qhub.dev` is the domain registered on CloudFlare. In case you chose not to use Cloudflare, skip this flag.
-- `--domain`: base domain for your cluster. After deployment, the DNS will use the base name prepended with `jupyter`, i.e.
-  if the base name is `test.qhub.dev` then the DNS will be provisioned as `jupyter.test.qhub.dev`. This pattern is also applicable if you are setting your own DNS through a different provider.
 - `--ci-provider`: specifies what provider to use for CI/CD. Currently, only supports GitHub Actions.
 - `--auth-provider`: This will set configuration file to use the specified provider for authentication.
 - `--auth-auto-provision`: This will automatically create and configure an application using OAuth.
 - `--repository`: Repository name that will be used to store the Infrastructure-as-Code on GitHub.
 - `--repository-auto-provision`: Sets the secrets for the GitHub repository used for CI/CD actions.
-        
+
+##### Project Naming Convention
+In order to successfully deploy QHub, there are some project naming conventions which need to be followed. For starters,
+make sure your name is compatible with the specific one for your chosen Cloud provider. In addition, QHub `projectname`
+should also obey to the following format requirements:
++ letters from A to Z (upper and lower case) and numbers;
++ Special characters are **NOT** allowed;
++ Maximum accepted length of the name string is 16 characters.
+
++ If using AWS:
+  - names **SHOULD NOT** start with the string `aws`;
++ If using Azure:
+  - project names should be unique in the storage account.
+
 ### Deploy QHub
 
 Finally, we can deploy QHub with:
@@ -92,7 +106,7 @@ provider. Such as:
     "ip" = ""
     }
 ```
-        
+
 ### GitOps
 
 QHub uses a GitHub Action to automatically handle the deployment of
@@ -114,18 +128,18 @@ Push the changes to the repository (your primary branch may be called
 git push origin main
 ```
 
-Once the files are in Github, all CI/CD changes will be triggered by
+Once the files are in GitHub, all CI/CD changes will be triggered by
 commits to main, and deployed via GitHub actions.  Since the
 infrastructure state is reflected in the repository, this workflow
 allows for team members to submit pull requests that can be reviewed
 before modifying the infrastructure, easing the maintenance process.
 
 To automatically deploy:
-- make changes to the `qhub-config.yaml` file on a new branch. 
+- make changes to the `qhub-config.yaml` file on a new branch.
 - create a pull request (PR) to main.
 - Trigger the deployment by merging the PR. All changes will be automatically applied to the new QHub instance.
 
-Congratulations, you have now completed your QHub cloud deployment! :tada
+Congratulations, you have now completed your QHub cloud deployment!
 
 Having issues? Head over to our
 [Troubleshooting](../02_get_started/06_troubleshooting.md) section for
