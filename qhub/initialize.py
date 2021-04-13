@@ -116,7 +116,7 @@ GOOGLE_PLATFORM = {
     "region": "us-central1",
     "zone": "us-central1-c",
     "availability_zones": ["us-central1-c"],
-    "kubernetes_version": "1.14.10-gke.31",
+    "kubernetes_version": "1.18.16-gke.502",
     "node_groups": {
         "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
