@@ -149,7 +149,7 @@ AZURE = {
 AMAZON_WEB_SERVICES = {
     "region": "us-west-2",
     "availability_zones": ["us-west-2a", "us-west-2b"],
-    "kubernetes_version": "1.14",
+    "kubernetes_version": "1.18",
     "node_groups": {
         "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2},
