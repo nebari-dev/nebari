@@ -22,27 +22,27 @@ environment previously and from there install QHub on machine:
     conda install -c conda-forge qhub
 ```
 
-- If you are a PyPI user instead, download the latest stable release with: 
+- If you are a PyPI user instead, download the latest stable release with:
 ```bash
     pip install qhub
 ```
-    
-- (For developers) The latest development version can be installed using PyPI: 
+
+- (For developers) The latest development version can be installed using PyPI:
 ```bash
     pip install git+https://github.com/Quansight/qhub.git
 ```
-> NOTE: Download the 'development version' to try out features which have not been yet officially released. 
-    
+> NOTE: Download the 'development version' to try out features which have not been yet officially released.
+
 
 ## 2. Environment variables
 
 The purpose of all these environment variables is that one gets to use APIs to deploy QHub.
-In order to fully automate the deployment, several environment variables must be set. The following subsections will 
+In order to fully automate the deployment, several environment variables must be set. The following subsections will
 describe the purpose and method for obtaining the values for these variables. An introduction to unix environment variables can be found [here](https://en.wikipedia.org/wiki/Environment_variable).
 
 ### 2.1 Domain Name Server Registry
 
-Cloudflare will handle the automation of the DNS registration. First ,a [Cloudflare][Cloudflare_signup] account needs to be created and 
+Cloudflare will handle the automation of the DNS registration. First, a [Cloudflare][Cloudflare_signup] account needs to be created and
 [domain name] registered through it. If an alternate DNS provider is desired, then omit the `--dns-provider cloudflare`
 flag for `qhub deploy`. At the end of deployment an IP address (or CNAME for AWS) will be output that can be registered
 to your desired URL.
@@ -66,7 +66,7 @@ Within your Cloudflare account, follow these steps to generate a token
 
 ### 2.2 Auth0
 
-After creating an [Auth0](https://auth0.com/) account and logging in, follow these steps to create a access token: 
+After creating an [Auth0](https://auth0.com/) account and logging in, follow these steps to create a access token:
 
 - Click Applications on the left
 - Click `Create Application`
@@ -78,9 +78,9 @@ After creating an [Auth0](https://auth0.com/) account and logging in, follow the
 - `AUTH0_DOMAIN`: Set this variable to be equal to your account name (indicated on the upper right) appended with `.auth0.com`. IE an account called `qhub-test` would have this variable set to `qhub-test.auth0.com`
 
 ### 2.3 GitHub
-Your github username and access token will automate the creation of the repository that will hold the infrastructure code as well as the github secrets
+Your GitHub username and access token will automate the creation of the repository that will hold the infrastructure code as well as the github secrets
 
-- `GITHUB_USERNAME`: Set this to your github username
+- `GITHUB_USERNAME`: Set this to your GitHub username
 - `GITHUB_TOKEN`: Set this equal to your [github access token]
 
 
@@ -102,7 +102,7 @@ Please see these instructions for [creating an IAM role] with admin permissions 
 
 In order to get the DigitalOcean access keys follow this [digitalocean tutorial].
 
-- `DIGITALOCEAN_TOKEN`: Follow [these instructions] to create a digital ocean token 
+- `DIGITALOCEAN_TOKEN`: Follow [these instructions] to create a digital ocean token
 - `SPACES_ACCESS_KEY_ID`: Follow [this guide] to create a spaces access key/secret
 - `SPACES_SECRET_ACCESS_KEY`: The secret from the above instructions
 - `AWS_ACCESS_KEY_ID`: Due to a [terraform] quirk, set to the same as `SPACES_ACCESS_KEY_ID`
@@ -143,20 +143,20 @@ Best practices is to create a new directory and run all the qhub commands inside
 
 ### 2.6 QHub deploy
 
-Finally we can deploy with:
+Finally, we can deploy with:
 
     qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
 
-You will notice that several directories are created: 
+You will notice that several directories are created:
   - `environments` : conda environments are stored
-  - `infrastructure` : terraform files that declare state of infrastructure
-  - `terraform-state` : required by terraform to securely store the state of the Terraform deployment
+  - `infrastructure` : Terraform files that declare state of infrastructure
+  - `terraform-state` : required by Terraform to securely store the state of the Terraform deployment
   - `image` : docker images used in QHub deployment including: jupyterhub, jupyterlab, and dask-gateway
 
 The terminal will prompt to press `[enter]` to check oauth credentials (which were added by qhub init). After pressing `enter` the deployment will continue and take roughly 10 minutes. Part of the output will show an "ip" address (DO/GCP) or a CNAME "hostname" (AWS) based on the the cloud service provider:
 
     Digital Ocean/Google Cloud Platform:
-       
+
         Outputs:
 
         ingress_jupyter = {
@@ -164,7 +164,7 @@ The terminal will prompt to press `[enter]` to check oauth credentials (which we
         "ip" = "xxx.xxx.xxx.xxx"
         }
 
-    AWS:       
+    AWS:
         Outputs:
 
         ingress_jupyter = {
@@ -172,7 +172,7 @@ The terminal will prompt to press `[enter]` to check oauth credentials (which we
         "ip" = ""
         }
 
-        
+
 ### 2.7 Push repository
 
 Add all files to github:
@@ -200,7 +200,7 @@ The first thing you will want to do is add users to your new QHub. Any type of s
             uid: 1000001
             primary_group: users
 
-As seen above, each username has a unique `uid` and a `primary_group`. 
+As seen above, each username has a unique `uid` and a `primary_group`.
 Optional `secondary_groups` may also be set for each user.
 
 ## 4. GitOps enabled
