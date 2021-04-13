@@ -5,7 +5,7 @@ terraform {
     key            = "terraform/{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}.tfstate"
     region         = "{{ cookiecutter.amazon_web_services.region }}"
     encrypt        = true
-    dynamodb_table = "{{ cookiecutter.project_name }}-terraform-state-lock"
+    dynamodb_table = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}-terraform-state-lock"
   }
 }
 {% elif cookiecutter.provider == "gcp" and cookiecutter.terraform_state.type == "remote" -%}
