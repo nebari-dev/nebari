@@ -101,9 +101,6 @@ terraform-jupyterhub:
 qhub-build-dockerfiles:
   services:
     - docker:dind
-  image:
-    name: amazon/aws-cli
-    entrypoint: [""]
   parallel:
     matrix:
       - DOCKERFILE:
@@ -111,6 +108,10 @@ qhub-build-dockerfiles:
           - jupyterhub
           - dask-worker
 {% if cookiecutter.provider == "aws" %}
+  image:
+    name: amazon/aws-cli
+    entrypoint: [""]
+    
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_IMAGE_NAME: {{ cookiecutter.project_name }}-{{ '$DOCKERFILE' }}
