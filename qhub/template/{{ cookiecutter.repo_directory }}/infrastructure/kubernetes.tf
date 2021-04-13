@@ -55,10 +55,6 @@ module "kubernetes-nfs-mount" {
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.efs.credentials.dns_name
-
-  depends_on = [
-    module.kubernetes-nfs-server
-  ]
 }
 {% else -%}
 module "kubernetes-nfs-server" {
