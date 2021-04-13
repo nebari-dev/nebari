@@ -65,8 +65,8 @@ def guided_install(config, dns_provider, dns_auto_provision, disable_prompt=Fals
     cmd_output = terraform.output(directory="infrastructure")
     # This is a bit ugly, but the issue we have at the moment is being unable
     # to parse cmd_output as json on Github Actions.
-    ip_matches = re.findall(r'"ip": "(?!string)(.*)"', cmd_output)
-    hostname_matches = re.findall(r'"hostname": "(?!string)(.*)"', cmd_output)
+    ip_matches = re.findall(r'"ip": "(?!string)(.+)"', cmd_output)
+    hostname_matches = re.findall(r'"hostname": "(?!string)(.+)"', cmd_output)
     if ip_matches:
         ip_or_hostname = ip_matches[0]
     elif hostname_matches:
