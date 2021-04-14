@@ -34,8 +34,7 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 
  - `domain`: is the top level URL to put JupyterLab and future
    services under such a monitoring. For example `qhub.dev`
-   would be the domain for JupyterHub to be exposed under. Note that
-   this domain does not have to have `jupyter` in it.
+   would be the domain for JupyterHub to be exposed under.
 
 ## Certificate
 
