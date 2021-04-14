@@ -10,14 +10,13 @@ RUN apt-get update --fix-missing && \
 # ============= base install ===============
 ENV CONDA_VERSION py37_4.8.2
 ENV CONDA_SHA256 957d2f0f0701c3d1335e3b39f235d197837ad69a944fa6f5d8ad2c686b69df3b
+ENV SHELL=/bin/bash \
+    CONDA_DIR=/opt/conda \
+    DEFAULT_ENV=default
 
-COPY scripts /opt/scripts
-
-RUN /opt/scripts/install-conda.sh
-
-ENV PATH="/opt/conda/bin:$PATH"
-
-CMD [ "/bin/bash" ]
+# Prepend the default conda env to path for when it is installed, this allows
+# the environment to function during the docker build. Also add scripts to PATH
+ENV PATH="/opt/conda/envs/${DEFAULT_ENV}/bin:$PATH:/opt/scripts"
 
 ARG NB_USER="jovyan"
 # We assume only one user per container, so make it unique
@@ -45,13 +44,23 @@ RUN sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/skel/.bashr
     ${NB_USER}
 
 RUN chown -R ${NB_UID}:${NB_UID} /opt/conda/
-
 # ========== jupyterlab install ============
-COPY jupyterlab /opt/jupyterlab
+COPY jupyterlab/apt.txt /opt/jupyterlab/apt.txt
+COPY scripts/install-apt.sh /opt/scripts/install-apt.sh
+COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
+ARG SKIP_CONDA_SOLVE=no
+RUN /opt/scripts/install-apt.sh /opt/jupyterlab/apt.txt
 
-RUN /opt/scripts/install-apt.sh                  /opt/jupyterlab/apt.txt \
-    && /opt/scripts/install-conda-environment.sh /opt/jupyterlab/environment.yaml \
-    && /opt/jupyterlab/postBuild
+COPY jupyterlab /opt/jupyterlab
+RUN \
+    if [ "${SKIP_CONDA_SOLVE}" != "no" ];then  \
+        ENV_FILE=/opt/jupyterlab/conda-linux-64.lock ; \
+    else  \
+        exit 1; \
+        ENV_FILE=/opt/jupyterlab/environment.yaml ; \
+    fi ; \
+    /opt/scripts/install-conda-environment.sh "${ENV_FILE}"
+RUN /opt/jupyterlab/postBuild
 
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
