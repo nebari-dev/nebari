@@ -143,11 +143,12 @@ qhub-build-dockerfiles:
     DOCKER_IMAGE_NAME: {{ cookiecutter.project_name }}/qhub-{{ '$DOCKERFILE' }}
     IMAGE_TAG: {{ '$CI_COMMIT_SHA' }}
     PROJECT_ID: {{ '${{ secrets.PROJECT_ID }}' }}
-    GOOGLE_CREDENTIALS: {{ '${{ secrets.GOOGLE_CREDENTIALS }}' }}
+    GCP_CREDENTIALS: {{ '${{ secrets.GCP_CREDENTIALS }}' }}
 
 
   before_script:
     - docker --version
+    - export GOOGLE_CREDENTIALS=$(echo $GCP_CREDENTIALS | base64 -d)
     - echo "$GOOGLE_CREDENTIALS" > /tmp/service-account.json
     - gcloud auth activate-service-account --key-file=/tmp/service-account.json
 
