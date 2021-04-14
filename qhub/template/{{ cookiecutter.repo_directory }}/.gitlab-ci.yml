@@ -158,6 +158,27 @@ qhub-build-dockerfiles:
     - docker build -f "image/Dockerfile.$DOCKERFILE" -t $IMAGE_NAME:$IMAGE_TAG image
     - docker push $IMAGE_NAME:$IMAGE_TAG
     - docker logout
+{% elif cookiecutter.provider == "azure" %}
+  image:
+    name: microsoft/azure-cli
+
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    IMAGE_NAME: azureqhubdev.azurecr.io/qhub-{{ '$DOCKERFILE' }}
+    IMAGE_TAG: {{ '$CI_COMMIT_SHA' }}
+    LOGIN_SERVER: {{ cookiecutter.project_name }}.azurecr.io
+    AZURE_USER: {{ '${{ secrets.ARM_CLIENT_ID }}' }}
+    AZURE_PASS: {{ '${{ secrets.ARM_CLIENT_SECRET }}' }}
+
+
+  before_script:
+    - docker --version
+
+  script:
+    - docker login $LOGIN_SERVER --username $AZURE_USER --password $AZURE_PASS
+    - docker build -f "image/Dockerfile.$DOCKERFILE" -t $IMAGE_NAME:$IMAGE_TAG image
+    - docker push $IMAGE_NAME:$IMAGE_TAG
+    - docker logout
 {% endif %}
   only:
     refs:
