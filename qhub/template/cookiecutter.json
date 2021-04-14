@@ -1,16 +1,50 @@
 {
     "repo_directory": null,
     "project_name": null,
+    "namespace": "dev",
     "provider": null,
     "ci_cd": null,
     "endpoint": null,
-    "terraform_version": null,
+    "terraform_version": "0.14.9",
+    "terraform_state": {
+      "type": "remote"
+    },
+    "terraform_modules": {
+        "repository": "github.com/quansight/qhub-terraform-modules",
+        "rev": "main"
+    },
+    "certificate": {
+      "type": "self-signed"
+    },
     "prefect": null,
     "security": null,
     "default_images": null,
     "profiles": null,
+    "theme": {
+      "juypterhub": {
+
+      }
+    },
     "environments": null,
     "storage": null,
+    "cdsdashboards": {},
+
+    "local": {
+        "node_selectors": {
+            "general": {
+                "key": null,
+                "value": null
+            },
+            "user": {
+                "key": null,
+                "value": null
+            },
+            "worker": {
+                "key": null,
+                "value": null
+            }
+        }
+    },
 
     "digital_ocean": {
         "region": null,
@@ -35,6 +69,31 @@
     },
 
     "google_cloud_platform": {
+        "project": null,
+        "region": null,
+        "zone": null,
+        "availability_zones": [],
+        "kubernetes_version": null,
+        "node_groups": {
+            "general": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            },
+            "user": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            },
+            "worker": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null
+            }
+        }
+    },
+
+    "azure": {
         "project": null,
         "region": null,
         "zone": null,

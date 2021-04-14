@@ -18,11 +18,11 @@ with open(path.join(root_dir, "VERSION")) as version_file:
 def cli(args):
     parser = argparse.ArgumentParser(description="QHub command line")
     parser.add_argument(
-        "-v", "--version", action="version", version=version, help="QHub Ops version"
+        "-v", "--version", action="version", version=version, help="QHub version"
     )
     parser.set_defaults(func=None)
 
-    subparser = parser.add_subparsers(help=f"QHub Ops - {version}")
+    subparser = parser.add_subparsers(help=f"QHub - {version}")
     create_deploy_subcommand(subparser)
     create_render_subcommand(subparser)
     create_init_subcommand(subparser)

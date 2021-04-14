@@ -9,22 +9,30 @@ dependencies:
  - nb_conda_kernels
  - ipython > 7
  - jupyter-server-proxy
- - jupyterlab-git
- - ipywidgets
- - jupyterlab >= 2
+ - jupyterlab >=3
  - jupyter_client
  - jupyter_console
  - jupyterhub
- - nodejs >= 10
  - nbconvert
  - nbval
- - dask_labextension
+
+ # jupyterlab extensions
+ - dask_labextension >=5.0.0
+ # jupyterlab-git >=0.30.0 # uncomment when 0.30.0 is released
+ - jupyter-videochat
+ - ipywidgets >=7.6
+ - ipyleaflet >=0.13.5
+ - pyviz_comms >=2.0.1
 
  # viz tools
- - panel
  - param
  - python-graphviz
- - ipyleaflet
+ - matplotlib >= 3.3.4
+ - panel >= 0.10.3
+ - voila >= 0.2.7
+ - streamlit >= 0.76
+ - dash >= 1.19
+ - cdsdashboards-singleuser >= 0.5.3
 
  # testing, docs, linting
  - pytest
@@ -37,4 +45,4 @@ dependencies:
  - importnb
 
  - pip:
-   - jupyter-videochat
+    - https://github.com/dirkcgrunwald/jupyter_codeserver_proxy-/archive/5596bc9c2fbd566180545fa242c659663755a427.tar.gz

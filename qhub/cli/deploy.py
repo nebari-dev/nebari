@@ -4,6 +4,7 @@ import logging
 
 from qhub.deploy import deploy_configuration
 from qhub.schema import verify
+from qhub.render import render_default_template, render_template
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +12,8 @@ logger = logging.getLogger(__name__)
 def create_deploy_subcommand(subparser):
     subparser = subparser.add_parser("deploy")
     subparser.add_argument("-c", "--config", help="qhub configuration", required=True)
+    subparser.add_argument("-i", "--input", help="input directory")
+    subparser.add_argument("-o", "--output", default="./", help="output directory")
     subparser.add_argument(
         "--dns-provider",
         choices=["cloudflare"],
@@ -26,6 +29,11 @@ def create_deploy_subcommand(subparser):
         action="store_true",
         help="Disable human intervention",
     )
+    subparser.add_argument(
+        "--disable-render",
+        action="store_true",
+        help="Disable auto-rendering in deploy stage",
+    )
     subparser.set_defaults(func=handle_deploy)
 
 
@@ -40,6 +48,12 @@ def handle_deploy(args):
         config = yaml.safe_load(f.read())
 
     verify(config)
+
+    if not args.disable_render:
+        if args.input is None:
+            render_default_template(args.output, args.config, force=True)
+        else:
+            render_template(args.input, args.output, args.config, force=True)
 
     deploy_configuration(
         config, args.dns_provider, args.dns_auto_provision, args.disable_prompt

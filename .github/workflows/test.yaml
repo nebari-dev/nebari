@@ -4,9 +4,11 @@ on:
   pull_request:
     branches:
       - main
+      - dev
   push:
     branches:
       - main
+      - dev
 
 jobs:
   test-general:
@@ -47,8 +49,10 @@ jobs:
       matrix:
         provider:
           - aws
-          - gcp
+          - azure
           - do
+          - gcp
+          - local
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
@@ -61,11 +65,14 @@ jobs:
           pip install .[dev]
       - name: QHub Initialize
         run: |
-          qhub init "${{ matrix.provider }}" --project "${{ matrix.provider }}-test" --domain "${{ matrix.provider }}.qhub.dev" --oauth-provider github --kubernetes-version "1.18.0" --disable-prompt
+          qhub init "${{ matrix.provider }}" --project "${{ matrix.provider }}-test" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --kubernetes-version "1.18.0" --disable-prompt
       - name: QHub Render
         run: |
           qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
       - name: 'Terraform Format'
+        # local provider for qhub uses kubernetes
+        # no terraform-state directory present
+        if: ${{ matrix.provider != 'local' }}
         uses: hashicorp/terraform-github-actions@master
         with:
           tf_actions_version: 0.13.5
@@ -82,3 +89,78 @@ jobs:
         with:
           name: "qhub-${{ matrix.provider }}-artifact"
           path: "qhub-${{ matrix.provider }}-deployment"
+
+  test-kubernetes:
+    name: "Kubernetes Tests"
+    runs-on: ubuntu-latest
+    needs: test-render-providers
+    steps:
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@main
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install QHub
+        run: |
+          pip install .[dev]
+      - name: Download and Install Minikube and Kubectl
+        run: |
+          mkdir -p bin
+          pushd bin
+          curl -L https://github.com/kubernetes/minikube/releases/download/v1.15.0/minikube-linux-amd64 -o minikube
+          chmod +x minikube
+
+          curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
+          chmod +x kubectl
+
+          echo "$PWD" >> $GITHUB_PATH
+          popd
+      - name: Start Minikube
+        run: |
+          minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 2 --memory 4096 --wait=all
+      - name: Versions
+        run: |
+          minikube version
+          kubectl version
+      - name: Add nfs client to kubernetes docker node
+        run: |
+          minikube ssh "sudo apt update; sudo apt install nfs-common -y"
+      - name: Get routing table for docker pods
+        run: |
+          ip route
+      - name: Configure LoadBalancer IPs
+        run: |
+          python tests/scripts/minikube-loadbalancer-ip.py
+      - name: Enable Minikube metallb
+        run: |
+          minikube addons enable metallb
+      - name: Basic kubectl checks before deployment
+        run: |
+          kubectl get all,cm,secret,ing -A
+      - name: Initialize QHub Cloud
+        run: |
+          mkdir -p local-deployment
+          cd local-deployment
+          qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password
+          cat qhub-config.yaml
+      - name: Deploy QHub Cloud
+        run: |
+          cd local-deployment
+          qhub deploy --config qhub-config.yaml --disable-prompt
+      - name: Basic kubectl checks after deployment
+        run: |
+          kubectl get all,cm,secret,ing -A
+      - name: Check github-actions.qhub.dev resolves
+        run: |
+          nslookup github-actions.qhub.dev
+      - name: Curl jupyterhub login page
+        run: |
+          curl -k https://github-actions.qhub.dev/hub/home -i
+      - name: Cleanup qhub deployment
+        run: |
+          cd local-deployment
+          qhub destroy --config qhub-config.yaml
+      - name: Basic kubectl checks after cleanup
+        run: |
+          kubectl get all,cm,secret,ing -A

@@ -1,114 +1,175 @@
 provider "kubernetes" {
-  host                   = module.kubernetes.credentials.endpoint
-  token                  = module.kubernetes.credentials.token
+{% if cookiecutter.provider == "local" %}
+  config_path = "~/.kube/config"
+{% if cookiecutter.local.kube_context is defined %}
+  config_context = "{{ cookiecutter.local.kube_context }}"
+{% endif %}
+{% elif cookiecutter.provider == "azure" %}
+  username               = module.kubernetes.credentials.username
+  password               = module.kubernetes.credentials.password
+  client_certificate     = module.kubernetes.credentials.client_certificate
+  client_key             = module.kubernetes.credentials.client_key
   cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+  host                   = module.kubernetes.credentials.endpoint
+{% else %}
+  host                   = module.kubernetes.credentials.endpoint
+  cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+  token                  = module.kubernetes.credentials.token
+{% endif %}
 }
 
+provider "kubernetes-alpha" {
+{% if cookiecutter.provider == "local" %}
+  config_path = "~/.kube/config"
+{% if cookiecutter.local.kube_context is defined %}
+  config_context = "{{ cookiecutter.local.kube_context }}"
+{% endif %}
+{% elif cookiecutter.provider == "azure" %}
+  username               = module.kubernetes.credentials.username
+  password               = module.kubernetes.credentials.password
+  client_certificate     = module.kubernetes.credentials.client_certificate
+  client_key             = module.kubernetes.credentials.client_key
+  cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+  host                   = module.kubernetes.credentials.endpoint
+{% else %}
+  host                   = module.kubernetes.credentials.endpoint
+  cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+  token                  = module.kubernetes.credentials.token
+{% endif %}
+}
+
+
 module "kubernetes-initialization" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/initialization"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/initialization?ref={{ cookiecutter.terraform_modules.rev }}"
 
   namespace = var.environment
   secrets   = []
-  dependencies = [
-{% if cookiecutter.provider == "aws" %}
-    module.kubernetes.depended_on
-{% endif %}
-  ]
 }
 
 
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-nfs-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "nfs-mount"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.efs.credentials.dns_name
-  dependencies = [
-    module.kubernetes-initialization.depended_on
-  ]
 }
 {% else -%}
 module "kubernetes-nfs-server" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-server"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-server?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "nfs-server"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
+  node-group   = local.node_groups.general
+
+  depends_on = [
+    module.kubernetes-initialization
+  ]
 }
 
 module "kubernetes-nfs-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "nfs-mount"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.kubernetes-nfs-server.endpoint_ip
+
+  depends_on = [
+    module.kubernetes-nfs-server
+  ]
 }
 {% endif %}
 
 module "kubernetes-conda-store-server" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/conda-store"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/conda-store?ref={{ cookiecutter.terraform_modules.rev }}"
 
-  name         = "conda-store"
+  name         = "qhub"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.conda_store }}"
+  node-group   = local.node_groups.general
   environments = {
 {% for key in cookiecutter.environments %}
     "{{ key }}" = file("../environments/{{ key }}")
 {% endfor %}
   }
+
+  depends_on = [
+    module.kubernetes-initialization
+  ]
 }
 
 module "kubernetes-conda-store-mount" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/nfs-mount"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name         = "conda-store"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.conda_store }}"
   nfs_endpoint = module.kubernetes-conda-store-server.endpoint_ip
+
+  depends_on = [
+    module.kubernetes-conda-store-server
+  ]
 }
 
 provider "helm" {
   kubernetes {
+{% if cookiecutter.provider == "local" %}
+    config_path = "~/.kube/config"
+{%- else %}
     load_config_file       = false
     host                   = module.kubernetes.credentials.endpoint
-    token                  = module.kubernetes.credentials.token
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
+    {% if cookiecutter.provider == "azure" -%}
+    username               = module.kubernetes.credentials.username
+    password               = module.kubernetes.credentials.password
+    client_certificate     = module.kubernetes.credentials.client_certificate
+    client_key             = module.kubernetes.credentials.client_key
+    {%- else -%}
+    token                  = module.kubernetes.credentials.token
+    {%- endif -%}
+{% endif %}
   }
-  version = "1.0.0"
 }
 
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-autoscaling" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/cluster-autoscaler"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/cluster-autoscaler?ref={{ cookiecutter.terraform_modules.rev }}"
 
   namespace = var.environment
 
   aws-region   = var.region
   cluster-name = local.cluster_name
 
-  dependencies = [
-    module.kubernetes.depended_on
+  depends_on = [
+    module.kubernetes-initialization
   ]
 }
 {% endif -%}
 
 module "kubernetes-ingress" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/ingress"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/ingress?ref={{ cookiecutter.terraform_modules.rev }}"
 
   namespace = var.environment
 
   node-group = local.node_groups.general
 
-  dependencies = [
-    module.kubernetes-initialization.depended_on
+{% if cookiecutter.certificate.type == "lets-encrypt" %}
+  enable-certificates = true
+  acme-email = "{{ cookiecutter.certificate.acme_email }}"
+  acme-server = "{{ cookiecutter.certificate.acme_server }}"
+{% endif %}
+
+  depends_on = [
+    module.kubernetes-initialization
   ]
 }
 
 module "qhub" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/meta/qhub"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/meta/qhub?ref={{ cookiecutter.terraform_modules.rev }}"
 
   name      = "qhub"
   namespace = var.environment
@@ -126,25 +187,27 @@ module "qhub" {
   user-node-group    = local.node_groups.user
   worker-node-group  = local.node_groups.worker
 
+{% if cookiecutter.certificate.type == "existing" %}
+  certificate-secret-name = "{{ cookiecutter.certificate.secret_name }}"
+{% endif %}
+
   jupyterhub-overrides = [
     file("jupyterhub.yaml")
   ]
 
-  dask-gateway-overrides = [
-    file("dask-gateway.yaml")
-  ]
+  dask_gateway_extra_config = file("dask_gateway_config.py.j2")
 
-  dependencies = [
-    module.kubernetes-ingress.depended_on
+  depends_on = [
+    module.kubernetes-ingress
   ]
 }
 
 {% if cookiecutter.prefect is true -%}
 module "prefect" {
-  source = "github.com/quansight/qhub-terraform-modules//modules/kubernetes/services/prefect"
+  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/prefect?ref={{ cookiecutter.terraform_modules.rev }}"
 
-  dependencies = [
-    module.qhub.depended_on
+  depends_on = [
+    module.qhub
   ]
   namespace            = var.environment
   jupyterhub_api_token = module.qhub.jupyterhub_api_token

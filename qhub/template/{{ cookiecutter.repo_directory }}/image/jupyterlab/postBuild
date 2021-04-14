@@ -4,20 +4,13 @@ set -euo pipefail
 # install classic notebook extensions
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
-# install jupyterlab extensions
-jupyter labextension install --clean $(cat /opt/jupyterlab/labextensions.txt)
-
-jupyter serverextension enable --sys-prefix jupyter_videochat
-
-# ====== cleanup labextension install =======
-rm -rf ${HOME}/.cache ${HOME}/.npm ${HOME}/.yarn
-rm -rf /opt/conda/share/jupyter/lab/staging
-find /opt/conda -follow -type f -name '*.js.map' -delete
-
 # ====== setup ipython conifiguration ======
-mkdir /etc/ipython
+mkdir -p /etc/ipython
 cp /opt/jupyterlab/ipython_config.py /etc/ipython/ipython_config.py
 
 # ====== setup juypterlab configuration overrides ======
 mkdir -p /opt/conda/share/jupyter/lab/settings
 cp /opt/jupyterlab/overrides.json /opt/conda/share/jupyter/lab/settings
+
+# ====== code-server install/config 
+curl -fsSL https://code-server.dev/install.sh | sh

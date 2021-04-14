@@ -5,7 +5,7 @@ variable "name" {
 
 variable "environment" {
   type    = string
-  default = "dev"
+  default = "{{ cookiecutter.namespace }}"
 }
 
 {% if cookiecutter.provider == "aws" %}
@@ -36,6 +36,12 @@ variable "availability_zones" {
   type        = list(string)
   default     = {{ cookiecutter.google_cloud_platform.availability_zones | jsonify }}
 }
+{% elif cookiecutter.provider == "azure" %}
+variable "region" {
+  description = "azure location"
+  type        = string
+  default     = "{{ cookiecutter.azure.region }}"
+}
 {% elif cookiecutter.provider == "do" %}
 variable "region" {
   type    = string
@@ -47,7 +53,7 @@ variable "region" {
 variable "endpoint" {
   description = "Jupyterhub endpoint"
   type        = string
-  default     = "jupyter.{{ cookiecutter.domain }}"
+  default     = "{{ cookiecutter.domain }}"
 }
 
 variable "jupyterhub-image" {
