@@ -179,6 +179,27 @@ qhub-build-dockerfiles:
     - docker build -f "image/Dockerfile.$DOCKERFILE" -t $IMAGE_NAME:$IMAGE_TAG image
     - docker push $IMAGE_NAME:$IMAGE_TAG
     - docker logout
+{% elif cookiecutter.provider == "do" %}
+  image:
+    name: docker:latest
+
+  variables:
+    IMAGE_NAME: registry.digitalocean.com/{{ cookiecutter.project_name }}/qhub-{{ '$DOCKERFILE' }}
+    IMAGE_TAG: {{ '$CI_COMMIT_SHA' }}
+    DIGITALOCEAN_ACCESS_TOKEN: {{ '${{ secrets.DIGITALOCEAN_TOKEN }}' }}
+
+  before_script:
+    - docker --version
+    - apk update
+    - apk upgrade
+    - apk add doctl --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
+
+  script:
+    - doctl auth init --access-token $DIGITALOCEAN_ACCESS_TOKEN
+    - doctl registry login
+    - docker build -f "image/Dockerfile.$DOCKERFILE" -t $IMAGE_NAME:$IMAGE_TAG image
+    - docker push $IMAGE_NAME:$IMAGE_TAG
+    - docker logout
 {% endif %}
   only:
     refs:
