@@ -433,7 +433,7 @@ the `qhub-config.yaml` file.
 ```yaml
 terraform_modules:
   repository: "github.com/quansight/qhub-terraform-modules"
-  rev: dev
+  rev: main
 ```
 
 ## Default Images

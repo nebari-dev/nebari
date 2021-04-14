@@ -53,7 +53,7 @@ class TerraformState(Base):
 
 class TerraformModules(Base):
     repository: str = "github.com/quansight/qhub-terraform-modules"
-    rev: str = "dev"
+    rev: str = "main"
 
 
 # ============ Certificate =============
