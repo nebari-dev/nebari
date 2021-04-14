@@ -37,4 +37,7 @@ def cli(args):
 
     logging.basicConfig(level=logging.INFO)
 
-    args.func(args)
+    try:
+        args.func(args)
+    except ValueError as ve:
+        print("\nProblem encountered:", ve, "\n")
