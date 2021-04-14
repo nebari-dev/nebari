@@ -10,7 +10,7 @@ be accurate.
 ## General
 
 ```yaml
-project_name: do-jupyterhub # name of the kubernetes/Cloud deployment
+project_name: dojupyterhub # name of the kubernetes/Cloud deployment
 namespace: dev
 provider: <provider_alias> # determines the choice of cloud provider for the deployment
 ci_cd: github-actions # continuous integration and continuous deployment framework to use
@@ -33,7 +33,7 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
    framework to use. Currently, only `github-actions` is supported.
 
  - `domain`: is the top level URL to put JupyterLab and future
-   services under such a monitoring. For example `jupyter.qhub.dev`
+   services under such a monitoring. For example `qhub.dev`
    would be the domain for JupyterHub to be exposed under. Note that
    this domain does not have to have `jupyter` in it.
 
@@ -84,8 +84,7 @@ kubectl create secret tls <secret-name> \
 ## Security
 
 This section is for configuring security relating to the QHub
-deployment. [obvious sentence]
-
+deployment.
 ```yaml
 security:
   authentication:
@@ -93,7 +92,7 @@ security:
     config:
       client_id: <CLIENT_ID>
       client_secret: <CLIENT_SECRET>
-      oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
+      oauth_callback_url: https://do.qhub.dev/hub/oauth_callback
   users:
     example-user:
       uid: 1000
