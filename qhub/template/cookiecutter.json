@@ -11,7 +11,7 @@
     },
     "terraform_modules": {
         "repository": "github.com/quansight/qhub-terraform-modules",
-        "rev": "main"
+        "rev": "release-0.3.0"
     },
     "certificate": {
       "type": "self-signed"
