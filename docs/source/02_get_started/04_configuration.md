@@ -120,7 +120,20 @@ authentication.
 
 #### Auth0 Based Authentication
 
-For Auth0 based authentication.
+[Auth0](https://auth0.com/#!) can be used for authentication. While it
+is not free there is a reasonable free tier that allows deployment of
+QHub clusters on many different social providers, passwordless, and
+email based authentication. QHub has command line options with running
+`qhub init` which allow for automation of creation of the application
+via `--auth-provider=auth0 --auth-auto-provision`. However for most
+users this may not be the most convenient solution. Here are docs on
+[creating an Auth0
+Application](https://auth0.com/docs/applications). Make sure to select
+`Regular Web Application`. Important to note is the `auth0_subdomain`
+field which must be only the `<auth0_subdomain>.auth0.com`. So for the
+following `qhub-dev.auth0.com` the subdomain would be `qhub-dev`. Note
+that all the usernames will be the email addresses of users (not
+usernames).
 
 ```yaml
 security:
@@ -136,7 +149,9 @@ security:
 
 #### GitHub Based Authentication
 
-For Auth0 based authentication.
+Github has instructions for [creating OAuth
+applications](https://docs.github.com/en/developers/apps/creating-an-oauth-app). Note
+that QHub usernames will their GitHub usernames.
 
 ```yaml
 security:
