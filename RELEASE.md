@@ -8,9 +8,18 @@
 `qhub/template/{{ cookiecutter.repo_directory }}/.github/workflows/qhub-ops.yaml`
 
 ---
-## Upcoming release 0.3.0
+## Upcoming Release
 
 ### Feature changes and enhancements
+
+### Bug fixes
+
+### Breaking changes
+
+## Release 0.3.0
+
+### Feature changes and enhancements
+
 * Support for self-signed certificate/secret keys via kubernetes secrets
 * [jupyterhub-ssh](https://github.com/yuvipanda/jupyterhub-ssh) (`ssh` and `sftp` integration) accessible on port `8022` and `8023` respectively
 * VSCode([code-server](https://github.com/cdr/code-server)) now provided in default image and integrated with jupyterlab
@@ -43,7 +52,7 @@
 ### Migration guide
 
 0. Version `<version>` is in format `X.Y.Z`
-1. Create release branch `release-<version>` based off `dev`
+1. Create release branch `release-<version>` based off `main`
 2. Ensure full functionality of QHub this involves at a minimum
    ensuring
   - [ ] GCP, AWS, DO, and local deployment
@@ -61,7 +70,9 @@
 ---
 
 ## Release 0.2.0
+
 ### Feature changes, and enhancements
+
 * Added conda prerequisites for GUI packages.
 * Added `qhub destroy` functionality that tears down the QHub deployment.
 * Changed the default repository branch from `master` to `main`.
@@ -69,11 +80,13 @@
 * Added templates for GitHub issues.
 
 ### Bug fixes
+
 * `qhub deploy -c qhub-config.yaml` no longer prompts unsuported argument for `load_config_file`.
 * Minor changes on the Step-by-Step walkthrough on the docs.
 * Revamp of README.md to make it concise and highlight QHub HPC.
 
 ### Breaking changes
+
 * Removed the registry for DigitalOcean.
 
 ## Thank you for your contributions!
