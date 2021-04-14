@@ -5,8 +5,8 @@
 
 # -- Project information -----------------------------------------------------
 
-project = "QHub Cloud"
-copyright = "2020, Quansight"
+project = "QHub"
+copyright = "2021, Quansight"
 author = "Quansight"
 
 # The short X.Y version
@@ -71,8 +71,8 @@ html_theme_options = {
     "color_primary": THEME_COLOR,
     "color_accent": "light-yellow",
     # Set the repo location to get a badge with stats
-    "repo_url": "https://github.com/Quansight/qhub-cloud",
-    "repo_name": "QHub Cloud",
+    "repo_url": "https://github.com/Quansight/qhub",
+    "repo_name": "QHub",
     # Visible levels of the global TOC; -1 means unlimited
     "globaltoc_depth": 2,
     # If False, expand all TOC entries
@@ -87,8 +87,8 @@ html_theme_options = {
             "internal": False,
         },
         {
-            "href": "https://onprem.qhub.dev/",
-            "title": "QHub OnPrem",
+            "href": "https://hpc.qhub.dev/",
+            "title": "QHub HPC",
             "internal": False,
         },
         {"href": "https://pypi.org/project/qhub/", "title": "PyPI", "internal": False,},

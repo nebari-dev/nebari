@@ -1,10 +1,10 @@
-# QHub Cloud
+# QHub
 ![quansight_logo](source/meta_images/qhub_logo.png)
 
 [![Python version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/qhub/)
 [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
 [![Conda version](https://img.shields.io/badge/conda--forge-v0.2.3-%234f28a8)](https://anaconda.org/conda-forge/qhub)
-[![GitHub issues](https://img.shields.io/github/issues/quansight/qhub-cloud?style=plastic)](https://github.com/Quansight/qhub-cloud/issues/new/choose)
+[![GitHub issues](https://img.shields.io/github/issues/quansight/qhub?style=plastic)](https://github.com/Quansight/qhub/issues/new/choose)
 
 
 Open source tooling for data science research, development, and deployment.

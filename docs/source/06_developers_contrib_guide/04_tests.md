@@ -119,6 +119,7 @@ For more details on PVs and PVCs, read the [JupyterHub documentation](https://ze
 MetalLB to match the QHub configuration.
 
 #### Configure MetalLB
+
 Configure the `metallb` load balancer to have a start IP address of
 `192.168.49.100` and an end of `192.168.49.150`. These IP addresses were not
 randomly chosen. Make sure that the IP range is within the Docker interface subnet.
@@ -152,7 +153,7 @@ Minikube does not provide a simple interactive way to configure addons,
 ([as shown in this repository issue](https://github.com/kubernetes/minikube/issues/8283)). Hence, we suggest setting the
 load balancer IP address using a Python script with pre-established values. The recommendation to keep the values is due
 to an existing DNS name that already points to the address. To do so, paste
-[this Python script](https://github.com/Quansight/qhub-cloud/blob/dev/tests/scripts/minikube-loadbalancer-ip.py) on your terminal.
+[this Python script](https://github.com/Quansight/qhub/blob/dev/tests/scripts/minikube-loadbalancer-ip.py) on your terminal.
 
 
 #### Enable MetalLB

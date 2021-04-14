@@ -21,15 +21,15 @@ qhub --help
 ```
 If successful, the CLI output will be similar to the following:
 ```bash
-usage: qhub [-h] [-v] {deploy,render,init,validate,destroy} ...
+usage: qhub [-h] [-v] {deploy,destroy,render,init,validate,destroy} ...
 
 QHub command line
 
 positional arguments:
-  {deploy,render,init,validate,destroy}
-                        QHub Ops - 0.2.3
+  {deploy,destroy,render,init,validate,destroy}
+                        QHub - 0.2.3
 
 optional arguments:
   -h, --help            show this help message and exit
-  -v, --version         QHub Ops version
+  -v, --version         QHub version
 ```

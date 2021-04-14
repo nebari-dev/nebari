@@ -1,4 +1,4 @@
-# What is QHub Cloud?
+# What is QHub?
 Open source tool for data science research, development, and deployment.
 
 QHub is [**Infrastructure as Code**](docs/source/9_faq/1_faqs.html#what-is-infrastructure-as-code-and-how-it-relates-to-qhub)

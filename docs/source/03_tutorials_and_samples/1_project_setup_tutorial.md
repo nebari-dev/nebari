@@ -1,4 +1,4 @@
-# Step-by-Step QHub Cloud Deployment
+# Step-by-Step QHub Deployment
 
 The list below is our suggestion. Other providers may be used, but you
 will need to consult their documentation. When using a different

@@ -19,22 +19,24 @@ have a production environment.
 
 Found your match? Head over to the [Local install docs](../06_developers_contrib_guide/04_tests.md#local-testing) for more details.
 
-## On Premises deployment
-The [QHub HPC](https://onprem.qhub.dev/en/latest/) should be your choice if:
-- You require high compute resources
-- You have an either physical or Cloud existing infrastructure available
-- You expect that your infrastructure will **not** exert the existing resources capabilities
+## HPC Deployment
+
+The [QHub HPC](https://hpc.qhub.dev/en/latest/) should be your choice if:
+- You have highly optimized code that require highly performant infrastructure
+- You have existing infrastructure already available
+- You expect that your infrastructure will **not** exceed the existing resources capabilities
 > NOTE: Although it is possible to deploy QHub HPC on the Cloud, it is not generally recommended due to possible high
 > costs. For more information, check out the [base cost](../05_reference/03_base_cost.md) section of the docs.
 
-## Cloud Deployment
+## Kubernetes Deployment
 
-The Cloud version of QHub is considered to be the default option. If you are not sure which option to choose, try this
-one. It is suitable to most use cases, specially when:
+The Kubernetes version of QHub is considered to be the default
+option. If you are not sure which option to choose, try this one. It
+is suitable to most use cases, specially when:
 - You require a scalable infrastructure
 - You aim to have a production environment with GitOps enabled by default
 
-The QHub cloud version requires a choice of [Cloud
+The QHub version requires a choice of [Cloud
 provider](#cloud-provider), [authentication (using Auth0, GitHub, or
 password based)](#authentication), [domain
 registration](#domain-registry), and CI provider (GitHub Actions).

@@ -44,7 +44,7 @@
 
 0. Version `<version>` is in format `X.Y.Z`
 1. Create release branch `release-<version>` based off `dev`
-2. Ensure full functionality of QHub Cloud this involves at a minimum
+2. Ensure full functionality of QHub this involves at a minimum
    ensuring
   - [ ] GCP, AWS, DO, and local deployment
   - [ ] "Let's Encrypt" successfully provisioned 
@@ -71,7 +71,7 @@
 ### Bug fixes
 * `qhub deploy -c qhub-config.yaml` no longer prompts unsuported argument for `load_config_file`.
 * Minor changes on the Step-by-Step walkthrough on the docs.
-* Revamp of README.md to make it concise and highlight QHub OnPrem.
+* Revamp of README.md to make it concise and highlight QHub HPC.
 
 ### Breaking changes
 * Removed the registry for DigitalOcean.
