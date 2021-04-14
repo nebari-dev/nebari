@@ -32,7 +32,12 @@ describe('First Test', () => {
         .should('contain', 'Server Options');
 
       cy.get('input.btn.btn-jupyter')
-        .should('have.attr', 'value', 'Start').click();
+        .should('have.attr', 'value', 'Start');
+        
+        
+        /* 
+        // Attempt at checking JupyterLab and saving notebook - but too complicated for now
+        .click();
 
       cy.get('div.jp-LauncherCard[data-category="Notebook"] > div.jp-LauncherCard-label[title="Python 3"] > p', { timeout: 20000 })
         .click(); // Launch new Python notebook
@@ -40,6 +45,8 @@ describe('First Test', () => {
       cy.get('div.jp-Notebook textarea').type('print("HELLO"+"QHUB")');
 
       cy.get('div.jp-NotebookPanel-toolbar > div:nth-child(1) > button').click(); // Save
+
+      */
       
 
     } else {
