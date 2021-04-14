@@ -67,10 +67,14 @@ def create_init_subcommand(subparser):
 def handle_init(args):
 
     if not re.match(namestr_regex, args.project):
-        raise ValueError('--project name should contain only letters and hyphens/underscores (but not at the start or end)')
+        raise ValueError(
+            "--project name should contain only letters and hyphens/underscores (but not at the start or end)"
+        )
 
     if not re.match(namestr_regex, args.namespace):
-        raise ValueError('--namespace should contain only letters and hyphens/underscores (but not at the start or end)')
+        raise ValueError(
+            "--namespace should contain only letters and hyphens/underscores (but not at the start or end)"
+        )
 
     config = render_config(
         project_name=args.project,
@@ -91,4 +95,6 @@ def handle_init(args):
         with open("qhub-config.yaml", "x") as f:
             yaml.dump(config, f, default_flow_style=False, sort_keys=False)
     except FileExistsError as fee:
-        raise ValueError("A qhub-config.yaml file already exists. Please move or delete it and try again.")
+        raise ValueError(
+            "A qhub-config.yaml file already exists. Please move or delete it and try again."
+        )

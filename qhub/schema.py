@@ -241,6 +241,7 @@ class CDSDashboards(Base):
 # ==================== Main ===================
 
 from .utils import namestr_regex
+
 letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 
 
