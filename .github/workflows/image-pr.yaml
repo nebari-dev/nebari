@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - main
-      - dev
     paths:
       - "qhub/template/{{ cookiecutter.repo_directory }}/image/**"
       - ".github/workflows/image-pr.yaml"

@@ -3,8 +3,7 @@ name: "Build Docker Images"
 on:
   push:
     branches:
-      - master
-      - dev
+      - main
     paths:
       - "qhub/template/{{ cookiecutter.repo_directory }}/image/**"
       - ".github/workflows/image.yaml"
