@@ -16,7 +16,7 @@
 
 ### Breaking changes
 
-## Release 0.3.0
+## Release 0.3.0 - 04/14/2021
 
 ### Feature changes and enhancements
 
@@ -69,7 +69,7 @@
 
 ---
 
-## Release 0.2.0
+## Release 0.2.3 - 02/05/2021
 
 ### Feature changes, and enhancements
 
