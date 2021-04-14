@@ -42,7 +42,6 @@ jobs:
   test-render-providers:
     name: 'Test QHub Provider'
     runs-on: ubuntu-latest
-    needs: test-general
     strategy:
       matrix:
         provider:
@@ -91,7 +90,6 @@ jobs:
   test-kubernetes:
     name: "Kubernetes Tests"
     runs-on: ubuntu-latest
-    needs: test-render-providers
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
@@ -155,6 +153,33 @@ jobs:
       - name: Curl jupyterhub login page
         run: |
           curl -k https://github-actions.qhub.dev/hub/home -i
+
+      ### CYPRESS TESTS 
+
+      - name: Read example-user password
+        run: python -c "import tempfile, os; print('CYPRESS_EXAMPLE_USER_PASSWORD='+open(os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')).read())" >> $GITHUB_ENV
+
+      - name: Get qhub-config.yaml full path
+        run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`" >> $GITHUB_ENV
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        env:
+          CYPRESS_BASE_URL: https://github-actions.qhub.dev/
+        with:
+          working-directory: tests_e2e
+
+      - name: Save Cypress screenshots and videos
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: e2e-cypress
+          path: |
+            ./tests_e2e/cypress/screenshots/
+            ./tests_e2e/cypress/videos/
+
+      ### CLEANUP AFTER CYPRESS
+
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment
