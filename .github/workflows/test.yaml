@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - cypress-main
 
 jobs:
   test-general:
@@ -153,7 +152,7 @@ jobs:
           nslookup github-actions.qhub.dev
       - name: Curl jupyterhub login page
         run: |
-          curl -k --retry 5 --retry-connrefused https://github-actions.qhub.dev/hub/login
+          curl -k https://github-actions.qhub.dev/hub/home -i
 
       ### CYPRESS TESTS 
 
