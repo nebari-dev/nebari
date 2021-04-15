@@ -10,17 +10,10 @@ sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/profile.d/term_
 cat << EOF > /etc/profile.d/PATH_modification.sh
 PATH="\$PATH:/opt/scripts"
 
-# initialize conda last
-if [ -f /opt/conda/etc/profile.d/conda.sh ];then
-  # conda has been successfully installed and the conda.sh has been linked
-  # appropriately...
-  . /opt/conda/etc/profile.d/conda.sh
-  conda activate "${DEFAULT_ENV}"
-fi
 EOF
 
 # Define ETC_BASHRC_WAS_SOURCED in bash.bashrc which is sourced for interactive
-# shells. 
+# shells.
 echo "ETC_BASHRC_WAS_SOURCED=yes" >> /etc/bash.bashrc
 echo "source /etc/profile" >> /etc/bash.bashrc
 
@@ -40,6 +33,8 @@ else
 fi
 export PATH
 
+umask 002
+
 if [ "${PS1-}" ]; then
   if [ "${BASH-}" ] && [ "$BASH" != "/bin/sh" ]; then
     # The file bash.bashrc already sets the default PS1.
@@ -54,6 +49,9 @@ if [ "${PS1-}" ]; then
   fi
 fi
 
+##### Always run after /etc/bash.bashrc ####
+
+# basic config for all users
 if [ -d /etc/profile.d ]; then
   for i in /etc/profile.d/*.sh; do
     if [ -r $i ]; then
@@ -62,4 +60,26 @@ if [ -d /etc/profile.d ]; then
   done
   unset i
 fi
+
+# custom config that can be set on a deployment specific basis
+if [ -d /etc/profile.d/custom_config_scripts ]; then
+  for i in /etc/profile.d/custom_config_scripts/*.sh; do
+    if [ -r $i ]; then
+      . $i
+    fi
+  done
+  unset i
+fi
+
+# modify the PATH to activate the appropriate default conda environment last...
+if [ -f /opt/conda/etc/profile.d/conda.sh ];then
+  # conda has been successfully installed and the conda.sh
+  # has been linked appropriately... if nothing has been
+  # activated already we should do that...
+  if ! which conda; then
+    . /opt/conda/etc/profile.d/conda.sh
+    conda activate "${DEFAULT_ENV}"
+  fi
+fi
+
 EOF
