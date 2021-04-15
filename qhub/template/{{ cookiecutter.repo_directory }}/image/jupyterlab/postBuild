@@ -19,4 +19,5 @@ curl -fsSL https://code-server.dev/install.sh > install.sh
 sh install.sh --prefix /opt/code_server
 
 # ====== fix perms ======
-fix-permissions /opt/conda /opt/jupyterlab /etc/ipython /opt/code_server
+fix-permissions /opt/jupyterlab /etc/ipython /opt/code_server
+fix-permissions "/opt/conda/envs/${ENV_NAME}" || fix-permissions /opt/conda/bin
