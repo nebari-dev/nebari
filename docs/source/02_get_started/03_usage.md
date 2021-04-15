@@ -60,8 +60,6 @@ should also obey to the following format requirements:
 
 + If using AWS:
   - names **SHOULD NOT** start with the string `aws`;
-+ If using Azure:
-  - project names should be unique in the storage account.
 
 ### Deploy QHub
 
