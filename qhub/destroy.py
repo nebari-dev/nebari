@@ -25,6 +25,7 @@ def destroy_configuration(config):
         check_cloud_credentials(config)
 
         # 03 Remove all infrastructure
+        terraform.init(directory="infrastructure")
         terraform.destroy(directory="infrastructure")
 
         # 06 Remove terraform backend remote state bucket
@@ -33,4 +34,5 @@ def destroy_configuration(config):
         if (config.get("terraform_state", {}).get("type") == "remote") and (
             config.get("provider") != "local"
         ):
+            terraform.init(directory="terraform-state")
             terraform.destroy(directory="terraform-state")
