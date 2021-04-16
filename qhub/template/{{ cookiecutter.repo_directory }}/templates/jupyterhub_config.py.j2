@@ -218,7 +218,7 @@ c.Auth0OAuthenticator.auth0_subdomain = "{{ cookiecutter.security.authentication
 # =================== CUSTOM AUTHENTICATION BASED ========================
 
 c.JupyterHub.authenticator_class = "{{ cookiecutter.security.authentication.authentication_class }}"
-{% for key, value in cookiecutter.security.authentication.config %}
+{% for key, value in cookiecutter.security.authentication.config.items() %}
 c.{{ cookiecutter.security.authentication.authentication_class.split('.')[-1] }}.{{ key }} = {{ value | pprint }}
 {% endfor %}
 
