@@ -572,6 +572,22 @@ profiles:
         ...
 ```
 
+### Specifying GPU/Accelerator Requirements
+
+If you want to ensure that you have GPU resources use the following annotations.
+
+```yaml
+profiles:
+  jupyterlab:
+    - display_name: Small Instance
+      ...
+      kubespawner_override:
+        ...
+        extra_resource_limits:
+          nvidia.com/gpu: 1
+        ...
+```
+
 ## Themes
 
 ### Customizing JupyterHub theme

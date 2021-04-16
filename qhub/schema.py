@@ -226,7 +226,7 @@ class Profiles(Base):
 class CondaEnvironment(Base):
     name: str
     channels: typing.Optional[typing.List[str]]
-    dependencies: typing.List[typing.Union[str, typing.Dict[str, str]]]
+    dependencies: typing.List[typing.Union[str, typing.Dict[str, typing.List[str]]]]
 
 
 # =============== CDSDashboards ==============
