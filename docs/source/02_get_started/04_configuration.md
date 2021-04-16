@@ -237,6 +237,13 @@ written for the user.
 `1000`, it is recommended to start with high User ID numbers
 e.g. `10000000`. `ids` technically supports 2 billion `ids`.
 
+### Admin Group
+
+The admin group has special significance. If a user's `primary_group`
+is admin they will be able to access the jupyterhub admin page. The
+admin page allows a user to stop user's servers and launch a given
+user's server and impersonate them.
+
 ## Provider Infrastructure
 
 Finally, comes the Kubernetes infrastructure deployment. Although
