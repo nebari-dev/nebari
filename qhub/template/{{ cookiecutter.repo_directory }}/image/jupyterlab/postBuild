@@ -12,7 +12,7 @@ cp /opt/jupyterlab/ipython_config.py /etc/ipython/ipython_config.py
 mkdir -p /opt/conda/share/jupyter/lab/settings
 cp /opt/jupyterlab/overrides.json /opt/conda/share/jupyter/lab/settings
 
-# ====== code-server install/config 
+# ====== code-server install/config
 mkdir -p /opt/code_server
 cd /opt/code_server
 curl -fsSL https://code-server.dev/install.sh > install.sh
@@ -20,8 +20,12 @@ sh install.sh --prefix /opt/code_server
 
 # ====== fix perms ======
 fix-permissions /opt/jupyterlab /etc/ipython /opt/code_server
-if [[ -z "${ENV_NAME+x}" ]]; then
-    fix-permissions "/opt/conda/envs/${ENV_NAME}" 
-else
+
+# if DEFAULT_ENV is unset ${DEFAULT_ENV+x} expands to nothing otherwise
+# it substitutes the string x. This allows us to check if the variable
+# is set without triggering an unbound variable error
+if [[ -z "${DEFAULT_ENV+x}" ]]; then
     fix-permissions /opt/conda/bin
+else
+    fix-permissions "/opt/conda/envs/${DEFAULT_ENV}"
 fi
