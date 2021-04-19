@@ -14,6 +14,8 @@ def initialize_git(path=None):
     path = path or os.getcwd()
     with change_directory(path):
         subprocess.check_output(["git", "init"])
+        # Ensure initial branch is called main
+        subprocess.check_output(["git", "checkout", "-b", "main"])
 
 
 def add_git_remote(remote_path, path=None, remote_name="origin"):
