@@ -1,5 +1,6 @@
-import yaml
 import re
+
+from ruamel import yaml
 
 from qhub.initialize import render_config
 from qhub.schema import ProviderEnum
@@ -92,7 +93,7 @@ def handle_init(args):
 
     try:
         with open("qhub-config.yaml", "x") as f:
-            yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+            yaml.dump(config, f)
     except FileExistsError:
         raise ValueError(
             "A qhub-config.yaml file already exists. Please move or delete it and try again."

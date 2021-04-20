@@ -1,6 +1,6 @@
 import pathlib
 
-import yaml
+from ruamel import yaml
 
 from qhub.schema import verify
 

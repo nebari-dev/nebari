@@ -1,6 +1,7 @@
-import yaml
 import pathlib
 import logging
+
+from ruamel import yaml
 
 from qhub.deploy import deploy_configuration
 from qhub.schema import verify

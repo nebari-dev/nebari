@@ -1,7 +1,7 @@
 import os
 import shutil
 
-import yaml
+from ruamel import yaml
 
 PROJECT_DIRECTORY = os.path.realpath(os.path.curdir)
 PROVIDER = "{{ cookiecutter.provider }}"
