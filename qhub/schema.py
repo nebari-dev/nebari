@@ -28,6 +28,7 @@ class ProviderEnum(str, enum.Enum):
 
 class CiEnum(str, enum.Enum):
     github_actions = "github-actions"
+    gitlab_ci = "gitlab-ci"
 
 
 class AuthenticationEnum(str, enum.Enum):
@@ -257,7 +258,7 @@ class Main(Base):
     project_name: letter_dash_underscore_pydantic
     namespace: typing.Optional[letter_dash_underscore_pydantic]
     provider: ProviderEnum
-    ci_cd: CICD
+    ci_cd: typing.Optional[CICD]
     domain: str
     terraform_state: typing.Optional[TerraformState]
     terraform_modules: typing.Optional[TerraformModules]

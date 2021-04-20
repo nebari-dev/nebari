@@ -17,10 +17,6 @@ from qhub.provider.cloud import digital_ocean
 BASE_CONFIGURATION = {
     "project_name": None,
     "provider": None,
-    "ci_cd": {
-        "type": "PLACEHOLDER",
-        "branch": "main",
-    },
     "domain": None,
     "certificate": {
         "type": "self-signed",
@@ -61,6 +57,11 @@ BASE_CONFIGURATION = {
         "cds_hide_user_named_servers": True,
         "cds_hide_user_dashboard_servers": False,
     },
+}
+
+CICD_CONFIGURATION = {
+    "type": "PLACEHOLDER",
+    "branch": "main"
 }
 
 AUTH_PASSWORD = {
@@ -239,7 +240,12 @@ def render_config(
 ):
     config = BASE_CONFIGURATION
     config["provider"] = cloud_provider
-    config["ci_cd"]["type"] = ci_provider
+
+    if ci_provider is not None:
+        config["ci_cd"] = {
+            "type": ci_provider,
+            "branch": "main"
+        }
 
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}
