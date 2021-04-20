@@ -4,7 +4,6 @@ import typing
 import pydantic
 
 
-<<<<<<< HEAD
 class CertificateEnum(str, enum.Enum):
     letsencrypt = "lets-encrypt"
     selfsigned = "self-signed"
@@ -15,11 +14,6 @@ class TerraformStateEnum(str, enum.Enum):
     remote = "remote"
     local = "local"
     existing = "existing"
-=======
-class TerraformStateEnum(str, enum.Enum):
-    remote = "remote"
-    local = "local"
->>>>>>> 77d1d27ef5bf7431ce4636e917d21b7113b2ce1f
 
 
 class ProviderEnum(str, enum.Enum):
@@ -38,10 +32,7 @@ class AuthenticationEnum(str, enum.Enum):
     password = "password"
     github = "GitHub"
     auth0 = "Auth0"
-<<<<<<< HEAD
     custom = "custom"
-=======
->>>>>>> 77d1d27ef5bf7431ce4636e917d21b7113b2ce1f
 
 
 class Base(pydantic.BaseModel):
@@ -51,7 +42,6 @@ class Base(pydantic.BaseModel):
         extra = "forbid"
 
 
-<<<<<<< HEAD
 # ============= Terraform ===============
 
 
@@ -78,8 +68,6 @@ class Certificate(Base):
     acme_server: typing.Optional[str]
 
 
-=======
->>>>>>> 77d1d27ef5bf7431ce4636e917d21b7113b2ce1f
 # =========== Authentication ==============
 
 
@@ -99,14 +87,10 @@ class Auth0Config(Base):
 
 class Authentication(Base):
     type: AuthenticationEnum
-<<<<<<< HEAD
     authentication_class: typing.Optional[str]
     config: typing.Optional[
         typing.Union[Auth0Config, GitHubConfig, typing.Dict[str, typing.Any]]
     ]
-=======
-    config: typing.Optional[typing.Union[Auth0Config, GitHubConfig]]
->>>>>>> 77d1d27ef5bf7431ce4636e917d21b7113b2ce1f
 
 
 # =========== Users and Groups =============
@@ -206,7 +190,6 @@ class KubeSpawner(Base):
     mem_limit: str
     mem_guarantee: str
     image: str
-<<<<<<< HEAD
 
     class Config:
         extra = "allow"
@@ -219,12 +202,6 @@ class JupyterLabProfile(Base):
     users: typing.Optional[typing.List[str]]
     groups: typing.Optional[typing.List[str]]
     kubespawner_override: typing.Optional[KubeSpawner]
-=======
-
-    class Config:
-        extra = "allow"
-
->>>>>>> 77d1d27ef5bf7431ce4636e917d21b7113b2ce1f
 
 class JupyterLabProfile(Base):
     display_name: str
@@ -234,10 +211,6 @@ class JupyterLabProfile(Base):
     groups: typing.Optional[typing.List[str]]
     kubespawner_override: typing.Optional[KubeSpawner]
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 77d1d27ef5bf7431ce4636e917d21b7113b2ce1f
 class DaskWorkerProfile(Base):
     worker_cores_limit: int
     worker_cores: int
@@ -263,7 +236,6 @@ class CondaEnvironment(Base):
     dependencies: typing.List[typing.Union[str, typing.Dict[str, str]]]
 
 
-<<<<<<< HEAD
 # =============== CDSDashboards ==============
 
 
@@ -273,8 +245,6 @@ class CDSDashboards(Base):
     cds_hide_user_dashboard_servers: typing.Optional[bool]
 
 
-=======
->>>>>>> 77d1d27ef5bf7431ce4636e917d21b7113b2ce1f
 # ==================== Main ===================
 
 letter_dash_underscore_regex = pydantic.constr(regex=r"^[A-Za-z-_]+$")
@@ -286,14 +256,10 @@ class Main(Base):
     provider: ProviderEnum
     ci_cd: CiEnum
     domain: str
-<<<<<<< HEAD
     terraform_state: typing.Optional[TerraformState]
     terraform_modules: typing.Optional[TerraformModules]
     certificate: Certificate
     cdsdashboards: CDSDashboards
-=======
-    terraform_state: typing.Optional[TerraformStateEnum] = "remote"
->>>>>>> 77d1d27ef5bf7431ce4636e917d21b7113b2ce1f
     security: Security
     default_images: typing.Dict[str, str]
     storage: typing.Dict[str, str]
