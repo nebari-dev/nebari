@@ -13,7 +13,6 @@ be accurate.
 project_name: do-jupyterhub # name of the kubernetes/Cloud deployment 
 namespace: dev
 provider: <provider_alias> # determines the choice of cloud provider for the deployment
-ci_cd: github-actions # continuous integration and continuous deployment framework to use
 domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 ```
 
@@ -29,13 +28,25 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
     Amazon AWS, `gcp` for Google Could Provider, `azure` for Microsoft
     Azure, and `local` for a local or existing kubernetes deployment.
 
- - `ci_cd`: is the continuous integration and continuous deployment
-   framework to use. Currently only `github-actions` is supported.
-
  - `domain`: is the top level URL to put JupyterLab and future
    services under such a monitoring. For example `jupyter.qhub.dev`
    would be the domain for JupyterHub to be exposed under. Note that
    this domain does not have to have `jupyter` in it.
+
+## Continuous Integration and Continuous Deployment
+
+`ci_cd`: is the continuous integration and continuous deployment
+framework to use. QHub uses infrastructure as code to allow developers
+and users of QHub to request change to the environment via PRs which
+then get approved by administration. Currently only `github-actions`
+is supported. You may configure the branch that github-actions watches
+for pull requests and commits.
+
+```yaml
+ci_cd:
+  type: github-actions
+  branch: main
+```
 
 ## Certificate
 
@@ -682,8 +693,11 @@ Everything in the configuration is set besides [???]
 ```yaml
 project_name: do-jupyterhub
 provider: do
-ci_cd: github-actions
 domain: "do.qhub.dev"
+
+ci_cd: 
+  type: github-actions
+  branch: main
 
 certificate:
   type: self-signed

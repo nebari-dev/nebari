@@ -14,8 +14,10 @@ This section allows setting up the general information about your project.
 
 ```yaml
 project_name: qhub-aws-deployment
+ci_cd:
+  type: github-actions
+  branch: main
 provider: aws
-ci_cd: github-actions
 domain: "aws.qhub.dev"
 ```
 
@@ -23,7 +25,7 @@ domain: "aws.qhub.dev"
 
 * `provider` specifies which cloud provider to use for the deployment. For AWS, you will write `aws`. Other options include `do` for Digital Ocean and `gcp` for Google Cloud Platform.
 
-* `ci_cd` refers to the continuous integration and continuous deployment framework to use. Currently, [github-actions](https://help.github.com/en/actions) is the supported framework.
+* `ci_cd` refers to the continuous integration and continuous deployment framework to use. Currently, [github-actions](https://help.github.com/en/actions) is the supported framework. The `branch` parameter allow the user to control the main branch that is watched for PRs and commits.
 
 * `domain` is the top level url to put qhub and future services under such a monitoring. In this example, `aws.qhub.dev` would be the domain for qhub to be exposed under.
 

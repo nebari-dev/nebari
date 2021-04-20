@@ -3,7 +3,10 @@
     "project_name": null,
     "namespace": "dev",
     "provider": null,
-    "ci_cd": null,
+    "ci_cd": {
+      "type": "github-actions",
+      "branch": "main"
+    },
     "endpoint": null,
     "terraform_version": "0.14.9",
     "terraform_state": {

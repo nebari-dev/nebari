@@ -3,7 +3,7 @@ name: "Docker Image Build"
 on:
   push:
     branches:
-      - master
+      - "{{ cookiecutter.ci_cd.branch }}"
     paths:
       - "image/**"
       - ".github/workflows/image.yaml"
