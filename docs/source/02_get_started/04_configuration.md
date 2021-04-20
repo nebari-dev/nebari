@@ -38,11 +38,10 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 `ci_cd`: is optional and specifies the continuous integration and
 continuous deployment framework to use. QHub uses infrastructure as
 code to allow developers and users of QHub to request change to the
-environment via PRs which then get approved by
-administration. Currently only `github-actions` is supported. You may
+environment via PRs which then get approved by administration. You may
 configure the branch that github-actions watches for pull requests and
 commits. Current allowable values are `gitlab-ci`, `github-actions`,
-and `none` with a default of `github-actions`.
+and not specifying the key `ci_cd`.
 
 ```yaml
 ci_cd:
