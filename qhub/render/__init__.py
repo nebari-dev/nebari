@@ -2,7 +2,7 @@ import pathlib
 import collections
 import json
 
-import yaml
+from ruamel import yaml
 from cookiecutter.main import cookiecutter
 from cookiecutter.generate import generate_files
 

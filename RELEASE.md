@@ -14,6 +14,8 @@
 
 ### Bug fixes
 
+ - Moved to ruamel as yaml parser to throw errors on duplicate keys
+
 ### Breaking changes
 
 ## Release 0.3.2 - 04/20/2021

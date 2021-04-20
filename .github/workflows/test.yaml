@@ -66,6 +66,7 @@ jobs:
       - name: QHub Render
         run: |
           qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
+          cp "qhub-config.yaml" "qhub-${{ matrix.provider }}-deployment/qhub-config.yaml"
       - name: 'Terraform Format'
         # local provider for qhub uses kubernetes
         # no terraform-state directory present
@@ -154,7 +155,7 @@ jobs:
         run: |
           curl -k https://github-actions.qhub.dev/hub/home -i
 
-      ### CYPRESS TESTS 
+      ### CYPRESS TESTS
 
       - name: Read example-user password
         run: python -c "import tempfile, os; print('CYPRESS_EXAMPLE_USER_PASSWORD='+open(os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')).read())" >> $GITHUB_ENV

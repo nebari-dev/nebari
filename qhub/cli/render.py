@@ -1,3 +1,7 @@
+import pathlib
+
+from ruamel import yaml
+
 from qhub.render import render_default_template, render_template
 from qhub.schema import verify
 
@@ -11,9 +15,6 @@ def create_render_subcommand(subparser):
 
 
 def handle_render(args):
-    import pathlib
-    import yaml
-
     config_filename = pathlib.Path(args.config)
     if not config_filename.is_file():
         raise ValueError(
