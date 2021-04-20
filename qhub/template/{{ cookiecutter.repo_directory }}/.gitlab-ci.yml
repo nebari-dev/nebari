@@ -5,7 +5,7 @@ render-qhub:
       qhub-config.yaml automated commit: {{ '$CI_COMMIT_SHA' }}
   script:
     - pip install qhub==0.3.1
-    - qhub deploy --config qhub-config.yaml
+    - qhub deploy --config qhub-config.yaml --disable-prompt
     - git config user.email "qhub@quansight.com"
     - git config user.name "gitlab ci"
     - git add .
