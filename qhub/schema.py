@@ -172,7 +172,7 @@ class AzureProvider(Base):
 
 class AmazonWebServicesProvider(Base):
     region: str
-    availability_zones: typing.List[str]
+    availability_zones: typing.Optional[typing.List[str]]
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
 

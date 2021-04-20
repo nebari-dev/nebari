@@ -151,7 +151,6 @@ AZURE = {
 
 AMAZON_WEB_SERVICES = {
     "region": "us-west-2",
-    "availability_zones": ["us-west-2a", "us-west-2b"],
     "kubernetes_version": "1.18",
     "node_groups": {
         "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
@@ -348,6 +347,8 @@ def render_config(
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
+        if "AWS_DEFAULT_REGION" in os.environ:
+            config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
         if kubernetes_version:
             config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
     elif cloud_provider == "local":
