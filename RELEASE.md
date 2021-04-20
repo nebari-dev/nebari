@@ -14,6 +14,8 @@
 
 ### Bug fixes
 
+ - not all branches were configured via the `branch` option in `ci_cd`
+
 ### Breaking changes
 
 ## Release 0.3.1 - 04/20/2021

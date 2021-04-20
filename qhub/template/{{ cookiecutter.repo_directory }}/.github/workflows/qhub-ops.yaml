@@ -3,7 +3,7 @@ name: "qhub auto update"
 on:
   push:
     branches:
-      - master
+      - "{{ cookiecutter.ci_cd.branch }}"
     paths:
       - "qhub-config.yaml"
 

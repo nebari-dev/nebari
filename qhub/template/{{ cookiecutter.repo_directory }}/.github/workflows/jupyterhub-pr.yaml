@@ -3,7 +3,7 @@ name: "Jupyterhub Infrastructure - Pull Request"
 on:
   pull_request:
     branches:
-      - master
+      - "{{ cookiecutter.ci_cd.branch }}"
     paths:
       - "infrastructure/**"
       - "environments/**"
@@ -78,5 +78,3 @@ jobs:
           args: '-var="prefect_token=${{ secrets.PREFECT_TOKEN }}"'
           {% endraw %}
           {%- endif %}
-
-    

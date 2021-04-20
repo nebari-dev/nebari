@@ -3,7 +3,7 @@ name: "Jupyterhub Infrastructure"
 on:
   push:
     branches:
-      - master
+      - "{{ cookiecutter.ci_cd.branch }}"
     paths:
       - "infrastructure/**"
       - "charts/**"
