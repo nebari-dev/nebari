@@ -3,6 +3,8 @@ import typing
 
 import pydantic
 
+from qhub.utils import namestr_regex
+
 
 class CertificateEnum(str, enum.Enum):
     letsencrypt = "lets-encrypt"
@@ -239,8 +241,6 @@ class CDSDashboards(Base):
 
 
 # ==================== Main ===================
-
-from .utils import namestr_regex
 
 letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 
