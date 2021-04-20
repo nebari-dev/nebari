@@ -42,6 +42,14 @@ class Base(pydantic.BaseModel):
         extra = "forbid"
 
 
+# ============== CI/CD =============
+
+
+class CICD(Base):
+    type: CiEnum = "github-actions"
+    branch: str = "main"
+
+
 # ============= Terraform ===============
 
 
@@ -247,7 +255,7 @@ class Main(Base):
     project_name: letter_dash_underscore_regex
     namespace: typing.Optional[letter_dash_underscore_regex]
     provider: ProviderEnum
-    ci_cd: CiEnum
+    ci_cd: CICD
     domain: str
     terraform_state: typing.Optional[TerraformState]
     terraform_modules: typing.Optional[TerraformModules]

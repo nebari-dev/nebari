@@ -17,7 +17,10 @@ from qhub.provider.cloud import digital_ocean
 BASE_CONFIGURATION = {
     "project_name": None,
     "provider": None,
-    "ci_cd": None,
+    "ci_cd": {
+        "type": "PLACEHOLDER",
+        "branch": "main",
+    },
     "domain": None,
     "certificate": {
         "type": "self-signed",
@@ -237,7 +240,7 @@ def render_config(
 ):
     config = BASE_CONFIGURATION
     config["provider"] = cloud_provider
-    config["ci_cd"] = ci_provider
+    config["ci_cd"]["type"] = ci_provider
 
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}
