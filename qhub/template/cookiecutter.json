@@ -4,7 +4,6 @@
     "namespace": "dev",
     "provider": null,
     "ci_cd": {
-      "type": "github-actions",
       "branch": "main"
     },
     "endpoint": null,

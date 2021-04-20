@@ -35,18 +35,27 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 
 ## Continuous Integration and Continuous Deployment
 
-`ci_cd`: is the continuous integration and continuous deployment
-framework to use. QHub uses infrastructure as code to allow developers
-and users of QHub to request change to the environment via PRs which
-then get approved by administration. Currently only `github-actions`
-is supported. You may configure the branch that github-actions watches
-for pull requests and commits.
+`ci_cd`: is optional and specifies the continuous integration and
+continuous deployment framework to use. QHub uses infrastructure as
+code to allow developers and users of QHub to request change to the
+environment via PRs which then get approved by
+administration. Currently only `github-actions` is supported. You may
+configure the branch that github-actions watches for pull requests and
+commits. Current allowable values are `gitlab-ci`, `github-actions`,
+and `none` with a default of `github-actions`.
 
 ```yaml
 ci_cd:
   type: github-actions
   branch: main
 ```
+
+
+If `ci_cd` is not supplied no CI/CD will be auto-generated. However,
+we advise that having infrastructure as code allows teams to more
+quickly modify their QHub deployment often allowing developers and
+data sciences to request the changes to be approved by an
+administrator.
 
 ## Certificate
 
