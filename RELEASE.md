@@ -16,6 +16,19 @@
 
 ### Breaking changes
 
+## Release 0.3.1 - 04/20/2021
+
+### Feature changes an enhancements
+ - added gitlab support for CI
+ - `ci_cd` field is now optional
+ - AWS provider now respects the region set
+ - More robust errors messages in cli around project name and namespace
+ - `git init` default branch is now `main`
+ - branch for CI/CD is now configurable
+
+### Bug fixes
+ - typo in `authenticator_class` for custom authentication
+
 ## Release 0.3.0 - 04/14/2021
 
 ### Feature changes and enhancements
