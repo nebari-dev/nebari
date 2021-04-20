@@ -14,10 +14,14 @@
 
 ### Bug fixes
 
+### Breaking changes
+
+## Release 0.3.2 - 04/20/2021
+
+### Bug fixes
+
  - prevent gitlab-ci from freezing on gitlab deployment
  - not all branches were configured via the `branch` option in `ci_cd`
-
-### Breaking changes
 
 ## Release 0.3.1 - 04/20/2021
 
