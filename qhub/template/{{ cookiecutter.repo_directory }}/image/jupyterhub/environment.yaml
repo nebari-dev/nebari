@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
  - pip
- - jupyterhub>=1.3.0
+- jupyterhub>=1.3.0
  - bcrypt
  - oauthenticator
  - escapism

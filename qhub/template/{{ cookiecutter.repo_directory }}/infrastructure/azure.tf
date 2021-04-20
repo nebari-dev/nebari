@@ -19,7 +19,6 @@ module "kubernetes" {
   location            = var.region
   resource_group_name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}"
   kubernetes_version  = "{{ cookiecutter.azure.kubernetes_version }}"
-
   node_groups = [
 {% for nodegroup, nodegroup_config in cookiecutter.azure.node_groups.items() %}
     {

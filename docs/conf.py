@@ -66,13 +66,16 @@ html_theme_options = {
     # 'google_analytics_account': 'UA-XXXXX',     # Set you GA account ID to enable tracking
     # Specify a base_url used to generate sitemap.xml. If not, no sitemap will be built.
     "base_url": "https://qhub.dev/",
+
     # Set the color and the accent color
     "theme_color": THEME_COLOR,
     "color_primary": THEME_COLOR,
     "color_accent": "light-yellow",
+
     # Set the repo location to get a badge with stats
-    "repo_url": "https://github.com/Quansight/qhub",
-    "repo_name": "QHub",
+    "repo_url": "https://github.com/Quansight/qhub-cloud",
+    "repo_name": "QHub Cloud",
+
     # Visible levels of the global TOC; -1 means unlimited
     "globaltoc_depth": 2,
     # If False, expand all TOC entries
@@ -96,7 +99,7 @@ html_theme_options = {
 }
 html_sidebars = {
     "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
-}
+    }
 
 # Exclude build directory and Jupyter backup files:
 exclude_patterns = ["_build", "*checkpoint*", "site", "jupyter_execute"]

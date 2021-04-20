@@ -25,6 +25,7 @@ c.JupyterHub.extra_handlers = []
 import tornado.web
 import qhub_jupyterhub_theme
 
+
 c.JupyterHub.extra_handlers += [
     (r'/custom/(.*)', tornado.web.StaticFileHandler, {"path": qhub_jupyterhub_theme.STATIC_PATH}),
 ]

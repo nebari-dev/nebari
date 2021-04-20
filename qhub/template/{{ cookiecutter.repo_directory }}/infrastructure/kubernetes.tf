@@ -55,6 +55,10 @@ module "kubernetes-nfs-mount" {
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.efs.credentials.dns_name
+
+  depends_on = [
+    module.kubernetes-nfs-server
+  ]
 }
 {% else -%}
 module "kubernetes-nfs-server" {
@@ -205,7 +209,6 @@ module "qhub" {
 {% if cookiecutter.prefect is true -%}
 module "prefect" {
   source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/prefect?ref={{ cookiecutter.terraform_modules.rev }}"
-
   depends_on = [
     module.qhub
   ]

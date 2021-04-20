@@ -1,4 +1,4 @@
-# Configuration
+## Configuration
 
 The configuration file is split into several sections. In this page,
 we detail the requirements necessary for the YAML configuration
@@ -15,6 +15,7 @@ namespace: dev
 provider: <provider_alias> # determines the choice of cloud provider for the deployment
 ci_cd: github-actions # continuous integration and continuous deployment framework to use
 domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
+terraform_state: remote
 ```
 
  - `project_name`: should be compatible with the Cloud provider naming
@@ -37,49 +38,12 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
    would be the domain for JupyterHub to be exposed under. Note that
    this domain does not have to have `jupyter` in it.
 
-## Certificate
-
-By default to simplify initial deployment `QHub` uses traefik to
-create a self-signed certificate. In order to create a certificate
-that is signed so that web browsers do not throw errors we currently
-support [Let's Encrypt](https://letsencrypt.org/).
-
-```yaml
-certificate:
-  type: self-signed
-```
-
-To use Let's Encrypt you must specify an email address that let's
-encrypt will associate the generated certificate with and whether to
-use the [staging server](https://acme-staging-v02.api.letsencrypt.org/directory) or [production server](https://acme-v02.api.letsencrypt.org/directory). In general you
-should use the production server.
-
-```yaml
-certificate:
-  type: lets-encrypt
-  acme_email: <your-email-address>
-  acme_server:
-```
-
-You may also supply a custom self signed certificate and secret
-key. Note that the kubernetes default namespace that QHub uses is
-`dev` if not specified. Otherwise it will be your `namespace` defined
-in the `qhub-config.yaml`.
-
-```yaml
-certificate:
-  type: existing
-  secret_name: <secret-name>
-```
-
-To add the tls certificate to kubernetes run the following command
-with existing files.
-
-```shell
-kubectl create secret tls <secret-name> \
-  --namespace=<namespace> \
-  --cert=path/to/cert/file --key=path/to/key/file
-```
+ - `terraform_state` is either `remote` or `local` with a default
+   value of `remote`. This decides whether to control the state of the
+   cluster locally or remotely. See [terraform remote
+   state](https://www.terraform.io/docs/language/state/index.html)
+   docs. If you are doing anything other than testing we highly
+   recommend `remote` unless you know what you are doing.
 
 ## Security
 
@@ -112,28 +76,12 @@ security:
       gid: 102
 ```
 
-### Authentication
+`security.authentication` is for configuring the OAuth Provider or
+password based authentication used for authentication. Currently, the
+configuration shows GitHub but Auth0 and password based is also
+supported.
 
-`security.authentication` is for configuring the OAuth and GitHub
-Provider, password based authentication, or custom
-authentication. 
-
-#### Auth0 Based Authentication
-
-[Auth0](https://auth0.com/#!) can be used for authentication. While it
-is not free there is a reasonable free tier that allows deployment of
-QHub clusters on many different social providers, passwordless, and
-email based authentication. QHub has command line options with running
-`qhub init` which allow for automation of creation of the application
-via `--auth-provider=auth0 --auth-auto-provision`. However for most
-users this may not be the most convenient solution. Here are docs on
-[creating an Auth0
-Application](https://auth0.com/docs/applications). Make sure to select
-`Regular Web Application`. Important to note is the `auth0_subdomain`
-field which must be only the `<auth0_subdomain>.auth0.com`. So for the
-following `qhub-dev.auth0.com` the subdomain would be `qhub-dev`. Note
-that all the usernames will be the email addresses of users (not
-usernames).
+For Auth0 based authentication.
 
 ```yaml
 security:
@@ -142,66 +90,21 @@ security:
     config:
       client_id: ...
       client_secret: ...
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
+      oauth_callback_url: ...
       scope: ["openid", "email", "profile"]
       auth0_subdomain: ...
 ```
 
-#### GitHub Based Authentication
-
-Github has instructions for [creating OAuth
-applications](https://docs.github.com/en/developers/apps/creating-an-oauth-app). Note
-that QHub usernames will their GitHub usernames.
-
-```yaml
-security:
-  authentication:
-    type: GitHub
-    config:
-      client_id: ...
-      client_secret: ...
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
-```
-
-#### Password Based Authentication
-
 For Password based authentication. Note that users will require a
 `password` field that can be generated via the following command:
-`python -c "import bcrypt; print(bcrypt.hashpw(b'<password>',
-bcrypt.gensalt()).decode('utf-8'))"`. Make sure to replace
-`<password>` with whatever password you are wanting.
+`python -c "import bcrypt; bcrypt.hashpw(b'<password>',
+bcrypt.gensalt())"`.
 
 ```yaml
 security:
   authentication:
     type: password
-  users:
-    ...
-    <username>:
-      ...
-      password: $2b$....
 ```
-
-#### Custom Authentication
-
-You can specify arbitrary authentication via the `custom` type. All
-`config` attributes will be set as traitlets to the configured
-authentication class. The attributes will obey the type set via yaml
-(e.g. True -> will be a boolean True for Traitets).
-
-```yaml
-security:
-  authentication:
-    type: custom
-    authentication_class: "oauthenticator.google.GoogleOAuthenticator"
-    config:
-      login_service: "My Login Button"
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
-      client_id: 'your-client-id'
-      client_secret: 'your-client-secret'
-```
-
-### User Management
 
 `users` and `groups` allows one to provision UNIX permissions to each
 user. Any user is assigned a `uid`, `primary_group`, and optionally
@@ -389,68 +292,6 @@ local:
       value: linux
 ```
 
-## Terraform State
-
-Terraform manages the state of all the deployed resources via
-[backends](https://www.terraform.io/docs/language/settings/backends/index.html). Terraform
-requires storing the state in order to keep track of the names, ids,
-and states of deployed resources. The simplest approach is storing the
-state on the local filesystem but is not recommended and is not the
-default of QHub. `terraform_state` is either `remote`, `existing` or
-`local` with a default value of `remote`. This decides whether to
-control the state of the cluster `local` via tfstate file (not
-recommended), on an already `existing` terraform state store or
-remotely and auto creating the terraform state store. See [terraform
-remote state](https://www.terraform.io/docs/language/state/index.html)
-docs. If you are doing anything other than testing we highly recommend
-`remote` unless you know what you are doing.
-
-The following are examples. `remote` and `local` are
-straightforward. For a `local` provider that deploys on an existing
-kubernetes cluster the kubernetes remote backend is used.
-
-```yaml
-terraform_state:
-  type: remote
-```
-
-```yaml
-terraform_state:
-  type: local
-```
-
-Using an existing terraform backend can be done by specifying the
-`backend` and arbitrary key/value pairs in the `config`.
-
-```yaml
-terraform_state:
-  type: existing
-  backend: s3
-  config:
-    bucket: mybucket
-    key: "path/to/my/key"
-    region: "us-east-1"
-```
-
-
-
-## Terraform Modules
-
-By default QHub uses a set terraform modules developed by Quansight
-managed at https://github.com/quansight/qhub-terraform-modules. This
-collection is used to provide a consistent interface between cloud
-providers and manage how jupyterlab, dask-gateway and related
-resources are deployed. However, if you want to make modifications on
-the deployed resources you can tweak the repository used. This field
-is optional. This is usually the easiest way to tweak QHub outside of
-the `qhub-config.yaml` file.
-
-```yaml
-terraform_modules:
-  repository: "github.com/quansight/qhub-terraform-modules"
-  rev: main
-```
-
 ## Default Images
 
 Default images are to the default image run if not specified in a
@@ -461,9 +302,9 @@ image.
 
 ```yaml
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:c36eace493739be280c71bec59b80659115db5d5"
-  jupyterlab: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
-  dask_worker: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+  jupyterhub: "quansight/qhub-jupyterhub:b89526c59a5c269c776b535b887bd110771ad601"
+  jupyterlab: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
+  dask_worker: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
 ```
 
 ## Storage
@@ -499,7 +340,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       kubespawner_override:
@@ -507,7 +348,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
 
   dask_worker:
     "Small Worker":
@@ -515,13 +356,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
 ```
 
 For each `profiles.jupyterlab` is a named JupyterLab profile. It
@@ -534,43 +375,6 @@ and users.  We recommend using groups to manage profile access.
 Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the
 cores and memory.
-
-### Limiting profiles to specific users and groups
-
-Sometimes on a select set of users should have access to specific
-resources e.g. gpus, high memory nodes etc. QHub has support for
-limiting resources.
-
-```yaml
-profiles:
-  jupyterlab:
-    - display_name: Small Instance
-      ...
-      users:
-        - example-user
-      groups:
-        - admin
-        - users
-```
-
-### JupyterLab Profile Node Selectors
-
-A common operation is to target jupyterlab profiles to specific node
-labels. In order to target a specific node groups add the
-following. This example shows a GKE node groups with name
-`user-large`. Other cloud providers will have different node labels.
-
-```yaml
-profiles:
-  jupyterlab:
-    - display_name: Small Instance
-      ...
-      kubespawner_override:
-        ...
-        node_selector:
-          "cloud.google.com/gke-nodepool": "user-large"
-        ...
-```
 
 ## Themes
 
@@ -662,9 +466,6 @@ provider: do
 ci_cd: github-actions
 domain: "do.qhub.dev"
 
-certificate:
-  type: self-signed
-
 security:
   authentication:
     type: GitHub
@@ -718,9 +519,9 @@ digital_ocean:
       max_nodes: 4
 
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:c36eace493739be280c71bec59b80659115db5d5"
-  jupyterlab: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
-  dask_worker: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+  jupyterhub: "quansight/qhub-jupyterhub:b89526c59a5c269c776b535b887bd110771ad601"
+  jupyterlab: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
+  dask_worker: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
 
 theme:
   jupyterhub:
@@ -751,7 +552,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       default: true
@@ -760,7 +561,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:b89526c59a5c269c776b535b887bd110771ad601"
 
   dask_worker:
     "Small Worker":
@@ -768,13 +569,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-dask-worker:b89526c59a5c269c776b535b887bd110771ad601"
 
 environments:
   "environment-default.yaml":
