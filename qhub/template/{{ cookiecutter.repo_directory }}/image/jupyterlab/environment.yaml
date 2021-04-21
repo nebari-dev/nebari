@@ -4,6 +4,8 @@ channels:
 dependencies:
  # general
  - pip
+ - vim
+ - emacs
 
  # jupyterhub/jupyterlab
  - nb_conda_kernels
