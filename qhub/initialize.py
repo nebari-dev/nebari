@@ -4,7 +4,6 @@ import string
 import random
 import secrets
 import tempfile
-
 import bcrypt
 import requests
 
@@ -130,6 +129,17 @@ AZURE = {
     "region": "Central US",
     "kubernetes_version": "1.18.14",
     "node_groups": {
+        "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1},
+        "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
+        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
+    },
+}
+
+AZURE = {
+    "project": "PLACEHOLDER",
+    "region": "Central US",
+    "kubernetes_version": "1.18.14",
+    "node_groups": {
         "general": {
             "instance": "Standard_D2_v2",
             "min_nodes": 1,
@@ -243,7 +253,6 @@ def render_config(
 
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}
-
     config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
     config["theme"]["jupyterhub"][
         "welcome"

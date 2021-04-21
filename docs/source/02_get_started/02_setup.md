@@ -63,6 +63,7 @@ To deploy QHub, all access keys require fairly wide permissions to
 create all the resources. Hence, once the Cloud provider has been
 chosen, follow the steps below and set the environment variables as
 specified with **owner/admin** level permissions.
+specified with owner/admin level permissions.
 
 For more details on configuration for each Cloud provider, check the
 How-To Guides section of the documentation.
@@ -145,6 +146,7 @@ export ARM_TENANT_ID=""           # field available under `Azure Active Director
 > NOTE 2: [Tenant ID](https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-how-to-find-tenant)
 > values can be also found using Power Shell and CLI.
 
+
 ### Authentication
 
 #### Auth0
@@ -160,6 +162,7 @@ application](https://auth0.com/docs/applications/set-up-an-application/register-
 - Next, click `All` next to `Select all` and click `Authorize`
 - Set the variable `AUTH0_CLIENT_ID` equal to the `Cliend ID` string, and do the same for the `Client secret` by running the command below.
 
+<<<<<<< HEAD
 The following environment variables must be set:
 
  - `AUTH0_CLIENT_ID`: client ID of Auth0 machine-to-machine application

@@ -215,6 +215,15 @@ class JupyterLabProfile(Base):
     kubespawner_override: typing.Optional[KubeSpawner]
 
 
+class JupyterLabProfile(Base):
+    display_name: str
+    description: str
+    default: typing.Optional[bool]
+    users: typing.Optional[typing.List[str]]
+    groups: typing.Optional[typing.List[str]]
+    kubespawner_override: typing.Optional[KubeSpawner]
+
+      
 class DaskWorkerProfile(Base):
     worker_cores_limit: int
     worker_cores: int
@@ -247,7 +256,6 @@ class CDSDashboards(Base):
     enabled: bool
     cds_hide_user_named_servers: typing.Optional[bool]
     cds_hide_user_dashboard_servers: typing.Optional[bool]
-
 
 # ==================== Main ===================
 

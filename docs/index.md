@@ -74,6 +74,7 @@ source/06_developers_contrib_guide/01_architecture.md
 source/06_developers_contrib_guide/02_adv_docs.md
 source/06_developers_contrib_guide/04_tests.md
 source/06_developers_contrib_guide/05_changelog.md
+source/06_developers_contrib_guide/06_versioning.md
 ```
 
 ```{toctree}

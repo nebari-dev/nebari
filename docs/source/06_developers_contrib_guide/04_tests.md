@@ -135,7 +135,7 @@ $ docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}/{{.
 ```
 
 This means that you have to ensure that the start/stop ip range for
-the load balancer is within the `192.168.49.0/24` subnet. Your docker
+the load balancer is within the `192.168.49.0/24` subnet. Your Docker
 subnet may (and likely is) different.
 
 You can run `metallb` manually or use a python script to do so. We suggest using

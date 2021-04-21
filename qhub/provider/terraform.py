@@ -66,7 +66,6 @@ def init(directory=None):
     with timer(logger, "terraform init"):
         run_subprocess_cmd([terraform_path, "init"], cwd=directory, prefix="terraform")
 
-
 def apply(directory=None, targets=None):
     targets = targets or []
     terraform_path = download_terraform_binary()
