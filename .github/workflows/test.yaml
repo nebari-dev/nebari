@@ -179,7 +179,13 @@ jobs:
             ./tests_e2e/cypress/screenshots/
             ./tests_e2e/cypress/videos/
 
-      ### CLEANUP AFTER CYPRESS
+      ### JHub Client TESTS
+
+      - name: Notebook Tests
+        run: |
+          export JUPYTERHUB_USERNAME=example-user
+          export JUPYTERHUB_PASSWORD=$(cat /tmp/QHUB_DEFAULT_PASSWORD)
+          jhubctl --verbose run --notebook tests/notebooks/test-ipython-basic.ipynb --auth-type=basic --hub=https://github-actions.qhub.dev --no-verify-ssl --validate --user-options="{\"profile\": \"small-instance\"}"
 
       - name: Cleanup qhub deployment
         run: |

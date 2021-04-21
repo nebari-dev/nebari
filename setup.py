@@ -46,7 +46,7 @@ setup(
         "twine",
         "pytest",
         "diagrams",
-        "jhub-client",
+        "jhub-client>=0.1.4",
     ]},
     include_package_data=True,
     entry_points={"console_scripts": ["qhub = qhub.__main__:main"]},
