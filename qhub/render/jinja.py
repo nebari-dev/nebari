@@ -1,6 +1,7 @@
-import yaml
 import json
+
 from jinja2.ext import Extension
+from ruamel import yaml
 
 
 class YamlifyExtension(Extension):

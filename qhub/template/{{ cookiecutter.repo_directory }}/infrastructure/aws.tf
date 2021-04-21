@@ -2,6 +2,12 @@ provider "aws" {
   region = "{{ cookiecutter.amazon_web_services.region }}"
 }
 
+data "aws_availability_zones" "awszones" {
+  filter {
+    name   = "opt-in-status"
+    values = ["opt-in-not-required"]
+  }
+}
 
 # ==================== ACCOUNTING ======================
 module "accounting" {
@@ -33,7 +39,7 @@ module "network" {
   }
 
   vpc_cidr_block         = var.vpc_cidr_block
-  aws_availability_zones = var.availability_zones
+  aws_availability_zones = length(var.availability_zones) >= 2 ? var.availability_zones : [data.aws_availability_zones.awszones.names[0], data.aws_availability_zones.awszones.names[1]]
 }
 
 

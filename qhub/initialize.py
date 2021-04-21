@@ -16,7 +16,6 @@ from qhub.provider.cloud import digital_ocean
 BASE_CONFIGURATION = {
     "project_name": None,
     "provider": None,
-    "ci_cd": None,
     "domain": None,
     "certificate": {
         "type": "self-signed",
@@ -58,6 +57,8 @@ BASE_CONFIGURATION = {
         "cds_hide_user_dashboard_servers": False,
     },
 }
+
+CICD_CONFIGURATION = {"type": "PLACEHOLDER", "branch": "main"}
 
 AUTH_PASSWORD = {
     "type": "password",
@@ -158,7 +159,6 @@ AZURE = {
 
 AMAZON_WEB_SERVICES = {
     "region": "us-west-2",
-    "availability_zones": ["us-west-2a", "us-west-2b"],
     "kubernetes_version": "1.18",
     "node_groups": {
         "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
@@ -247,7 +247,9 @@ def render_config(
 ):
     config = BASE_CONFIGURATION
     config["provider"] = cloud_provider
-    config["ci_cd"] = ci_provider
+
+    if ci_provider is not None:
+        config["ci_cd"] = {"type": ci_provider, "branch": "main"}
 
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}
@@ -354,6 +356,8 @@ def render_config(
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
+        if "AWS_DEFAULT_REGION" in os.environ:
+            config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
         if kubernetes_version:
             config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
     elif cloud_provider == "local":

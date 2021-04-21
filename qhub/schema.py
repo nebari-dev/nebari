@@ -3,6 +3,8 @@ import typing
 
 import pydantic
 
+from qhub.utils import namestr_regex
+
 
 class CertificateEnum(str, enum.Enum):
     letsencrypt = "lets-encrypt"
@@ -26,6 +28,7 @@ class ProviderEnum(str, enum.Enum):
 
 class CiEnum(str, enum.Enum):
     github_actions = "github-actions"
+    gitlab_ci = "gitlab-ci"
 
 
 class AuthenticationEnum(str, enum.Enum):
@@ -40,6 +43,14 @@ class Base(pydantic.BaseModel):
 
     class Config:
         extra = "forbid"
+
+
+# ============== CI/CD =============
+
+
+class CICD(Base):
+    type: CiEnum = "github-actions"
+    branch: str = "main"
 
 
 # ============= Terraform ===============
@@ -164,7 +175,7 @@ class AzureProvider(Base):
 
 class AmazonWebServicesProvider(Base):
     region: str
-    availability_zones: typing.List[str]
+    availability_zones: typing.Optional[typing.List[str]]
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
 
@@ -233,7 +244,7 @@ class Profiles(Base):
 class CondaEnvironment(Base):
     name: str
     channels: typing.Optional[typing.List[str]]
-    dependencies: typing.List[typing.Union[str, typing.Dict[str, str]]]
+    dependencies: typing.List[typing.Union[str, typing.Dict[str, typing.List[str]]]]
 
 
 # =============== CDSDashboards ==============
@@ -247,14 +258,14 @@ class CDSDashboards(Base):
 
 # ==================== Main ===================
 
-letter_dash_underscore_regex = pydantic.constr(regex=r"^[A-Za-z-_]+$")
+letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 
 
 class Main(Base):
-    project_name: letter_dash_underscore_regex
-    namespace: typing.Optional[letter_dash_underscore_regex]
+    project_name: letter_dash_underscore_pydantic
+    namespace: typing.Optional[letter_dash_underscore_pydantic]
     provider: ProviderEnum
-    ci_cd: CiEnum
+    ci_cd: typing.Optional[CICD]
     domain: str
     terraform_state: typing.Optional[TerraformState]
     terraform_modules: typing.Optional[TerraformModules]

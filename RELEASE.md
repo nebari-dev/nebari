@@ -14,7 +14,29 @@
 
 ### Bug fixes
 
+ - Moved to ruamel as yaml parser to throw errors on duplicate keys
+
 ### Breaking changes
+
+## Release 0.3.2 - 04/20/2021
+
+### Bug fixes
+
+ - prevent gitlab-ci from freezing on gitlab deployment
+ - not all branches were configured via the `branch` option in `ci_cd`
+
+## Release 0.3.1 - 04/20/2021
+
+### Feature changes an enhancements
+ - added gitlab support for CI
+ - `ci_cd` field is now optional
+ - AWS provider now respects the region set
+ - More robust errors messages in cli around project name and namespace
+ - `git init` default branch is now `main`
+ - branch for CI/CD is now configurable
+
+### Bug fixes
+ - typo in `authenticator_class` for custom authentication
 
 ## Release 0.3.0 - 04/14/2021
 

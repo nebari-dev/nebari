@@ -13,7 +13,6 @@ be accurate.
 project_name: do-jupyterhub # name of the kubernetes/Cloud deployment 
 namespace: dev
 provider: <provider_alias> # determines the choice of cloud provider for the deployment
-ci_cd: github-actions # continuous integration and continuous deployment framework to use
 domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 terraform_state: remote
 ```
@@ -30,20 +29,77 @@ terraform_state: remote
     Amazon AWS, `gcp` for Google Could Provider, `azure` for Microsoft
     Azure, and `local` for a local or existing kubernetes deployment.
 
- - `ci_cd`: is the continuous integration and continuous deployment
-   framework to use. Currently only `github-actions` is supported.
-
  - `domain`: is the top level URL to put JupyterLab and future
    services under such a monitoring. For example `jupyter.qhub.dev`
    would be the domain for JupyterHub to be exposed under. Note that
    this domain does not have to have `jupyter` in it.
+   
+## Continuous Integration and Continuous Deployment
 
- - `terraform_state` is either `remote` or `local` with a default
-   value of `remote`. This decides whether to control the state of the
-   cluster locally or remotely. See [terraform remote
-   state](https://www.terraform.io/docs/language/state/index.html)
-   docs. If you are doing anything other than testing we highly
-   recommend `remote` unless you know what you are doing.
+`ci_cd`: is optional and specifies the continuous integration and
+continuous deployment framework to use. QHub uses infrastructure as
+code to allow developers and users of QHub to request change to the
+environment via PRs which then get approved by administration. You may
+configure the branch that github-actions watches for pull requests and
+commits. Current allowable values are `gitlab-ci`, `github-actions`,
+and not specifying the key `ci_cd`.
+
+```yaml
+ci_cd:
+  type: github-actions
+  branch: main
+```
+
+
+If `ci_cd` is not supplied no CI/CD will be auto-generated. However,
+we advise that having infrastructure as code allows teams to more
+quickly modify their QHub deployment often allowing developers and
+data sciences to request the changes to be approved by an
+administrator.
+
+## Certificate
+
+By default to simplify initial deployment `QHub` uses traefik to
+create a self-signed certificate. In order to create a certificate
+that is signed so that web browsers do not throw errors we currently
+support [Let's Encrypt](https://letsencrypt.org/).
+
+```yaml
+certificate:
+  type: self-signed
+```
+
+To use Let's Encrypt you must specify an email address that let's
+encrypt will associate the generated certificate with and whether to
+use the [staging server](https://acme-staging-v02.api.letsencrypt.org/directory) or [production server](https://acme-v02.api.letsencrypt.org/directory). In general you
+should use the production server.
+
+```yaml
+certificate:
+  type: lets-encrypt
+  acme_email: <your-email-address>
+  acme_server:
+```
+
+You may also supply a custom self signed certificate and secret
+key. Note that the kubernetes default namespace that QHub uses is
+`dev` if not specified. Otherwise it will be your `namespace` defined
+in the `qhub-config.yaml`.
+
+```yaml
+certificate:
+  type: existing
+  secret_name: <secret-name>
+```
+
+To add the tls certificate to kubernetes run the following command
+with existing files.
+
+```shell
+kubectl create secret tls <secret-name> \
+  --namespace=<namespace> \
+  --cert=path/to/cert/file --key=path/to/key/file
+```
 
 ## Security
 
@@ -139,6 +195,13 @@ written for the user.
   > NOTE: While the demo shows IDs between `100` and
 `1000`, it is recommended to start with high User ID numbers
 e.g. `10000000`. `ids` technically supports 2 billion `ids`.
+
+### Admin Group
+
+The admin group has special significance. If a user's `primary_group`
+is admin they will be able to access the jupyterhub admin page. The
+admin page allows a user to stop user's servers and launch a given
+user's server and impersonate them.
 
 ## Provider Infrastructure
 
@@ -376,6 +439,59 @@ Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the
 cores and memory.
 
+### Limiting profiles to specific users and groups
+
+Sometimes on a select set of users should have access to specific
+resources e.g. gpus, high memory nodes etc. QHub has support for
+limiting resources.
+
+```yaml
+profiles:
+  jupyterlab:
+    - display_name: Small Instance
+      ...
+      users:
+        - example-user
+      groups:
+        - admin
+        - users
+```
+
+### JupyterLab Profile Node Selectors
+
+A common operation is to target jupyterlab profiles to specific node
+labels. In order to target a specific node groups add the
+following. This example shows a GKE node groups with name
+`user-large`. Other cloud providers will have different node labels.
+
+```yaml
+profiles:
+  jupyterlab:
+    - display_name: Small Instance
+      ...
+      kubespawner_override:
+        ...
+        node_selector:
+          "cloud.google.com/gke-nodepool": "user-large"
+        ...
+```
+
+### Specifying GPU/Accelerator Requirements
+
+If you want to ensure that you have GPU resources use the following annotations.
+
+```yaml
+profiles:
+  jupyterlab:
+    - display_name: Small Instance
+      ...
+      kubespawner_override:
+        ...
+        extra_resource_limits:
+          nvidia.com/gpu: 1
+        ...
+```
+
 ## Themes
 
 ### Customizing JupyterHub theme
@@ -463,8 +579,14 @@ Everything in the configuration is set besides [???]
 ```yaml
 project_name: do-jupyterhub
 provider: do
-ci_cd: github-actions
 domain: "do.qhub.dev"
+
+ci_cd: 
+  type: github-actions
+  branch: main
+
+certificate:
+  type: self-signed
 
 security:
   authentication:

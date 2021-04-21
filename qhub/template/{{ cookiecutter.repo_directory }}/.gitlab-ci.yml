@@ -1,0 +1,41 @@
+render-qhub:
+  image: "python:3.9"
+  variables:
+    COMMIT_MSG: |
+      qhub-config.yaml automated commit: {{ '$CI_COMMIT_SHA' }}
+  script:
+    - pip install qhub==0.3.2
+    - qhub deploy --config qhub-config.yaml --disable-prompt
+    - git config user.email "qhub@quansight.com"
+    - git config user.name "gitlab ci"
+    - git add .
+    - git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
+  only:
+    refs:
+      - "{{ cookiecutter.ci_cd.branch }}"
+    changes:
+      - "qhub-config.yaml"
+
+build-docker-images:
+  services:
+    - docker:dind
+  image: "docker:19.03.12"
+  timeout: 2h
+  parallel:
+    matrix:
+      - DOCKERFILE:
+          - jupyterlab
+          - jupyterhub
+          - dask-worker
+  variables:
+    IMAGE_TAG: {{ '$CI_COMMIT_SHA' }}
+    IMAGE_NAME: {{ cookiecutter.project_name }}-{{ '$DOCKERFILE' }}
+  script:
+    - docker build -f "image/Dockerfile.{{ '$DOCKERFILE' }}" -t "$IMAGE_NAME:$IMAGE_TAG" image
+  only:
+    refs:
+      - merge_requests
+    variables:
+      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"
+    changes:
+      - "image/**"

@@ -1,6 +1,6 @@
 import pytest
 
-import yaml
+from ruamel import yaml
 
 from qhub.render import render_default_template
 from qhub.initialize import render_config

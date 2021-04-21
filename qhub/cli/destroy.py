@@ -1,6 +1,7 @@
-import yaml
 import pathlib
 import logging
+
+from ruamel import yaml
 
 from qhub.destroy import destroy_configuration
 from qhub.schema import verify

@@ -17,7 +17,11 @@ variable "region" {
 variable "availability_zones" {
   description = "AWS availability zones within AWS region"
   type        = list(string)
+{%- if cookiecutter.amazon_web_services.availability_zones is defined %}
   default     = {{ cookiecutter.amazon_web_services.availability_zones | jsonify }}
+{%- else %}
+  default     = []
+{%- endif %}
 }
 
 variable "vpc_cidr_block" {

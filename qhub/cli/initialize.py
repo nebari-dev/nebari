@@ -1,7 +1,10 @@
-import yaml
+import re
+
+from ruamel import yaml
 
 from qhub.initialize import render_config
 from qhub.schema import ProviderEnum
+from qhub.utils import namestr_regex
 
 
 def create_init_subcommand(subparser):
@@ -22,8 +25,7 @@ def create_init_subcommand(subparser):
     )
     subparser.add_argument(
         "--ci-provider",
-        choices=["github-actions"],
-        default="github-actions",
+        choices=["github-actions", "gitlab-ci"],
         help="continuous integration to use for infrastructure as code",
     )
     subparser.add_argument(
@@ -63,6 +65,17 @@ def create_init_subcommand(subparser):
 
 
 def handle_init(args):
+
+    if not re.match(namestr_regex, args.project):
+        raise ValueError(
+            "--project name should contain only letters and hyphens/underscores (but not at the start or end)"
+        )
+
+    if not re.match(namestr_regex, args.namespace):
+        raise ValueError(
+            "--namespace should contain only letters and hyphens/underscores (but not at the start or end)"
+        )
+
     config = render_config(
         project_name=args.project,
         namespace=args.namespace,
@@ -78,5 +91,10 @@ def handle_init(args):
         disable_prompt=args.disable_prompt,
     )
 
-    with open("qhub-config.yaml", "x") as f:
-        yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+    try:
+        with open("qhub-config.yaml", "x") as f:
+            yaml.dump(config, f, default_flow_style=False)
+    except FileExistsError:
+        raise ValueError(
+            "A qhub-config.yaml file already exists. Please move or delete it and try again."
+        )
