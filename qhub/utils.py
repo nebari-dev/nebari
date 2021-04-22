@@ -29,7 +29,7 @@ def change_directory(directory):
     os.chdir(current_directory)
 
 
-def run_subprocess_cmd(*args, **kwargs):
+def run_subprocess_cmd(processargs, **kwargs):
     """Runs subprocess command with realtime stdout logging with optional line prefix."""
     if "prefix" in kwargs:
         line_prefix = f"[{kwargs['prefix']}]: ".encode("utf-8")
@@ -37,10 +37,13 @@ def run_subprocess_cmd(*args, **kwargs):
     else:
         line_prefix = b""
 
-    process = subprocess.Popen(*args, **kwargs, stdout=subprocess.PIPE)
+    process = subprocess.Popen(processargs, **kwargs, stdout=subprocess.PIPE)
     for line in iter(lambda: process.stdout.readline(), b""):
         sys.stdout.buffer.write(line_prefix + line)
         sys.stdout.flush()
+    return process.wait(
+        timeout=10
+    )  # Should already have finished because we have drained stdout
 
 
 def check_cloud_credentials(config):

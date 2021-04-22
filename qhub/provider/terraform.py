@@ -16,6 +16,10 @@ from qhub import constants
 logger = logging.getLogger(__name__)
 
 
+class TerraformException(Exception):
+    pass
+
+
 def download_terraform_binary(version=constants.TERRAFORM_VERSION):
     os_mapping = {
         "linux": "linux",
@@ -50,6 +54,13 @@ def download_terraform_binary(version=constants.TERRAFORM_VERSION):
     return filename_path
 
 
+def run_terraform_subprocess(processargs, **kwargs):
+    terraform_path = download_terraform_binary()
+    logger.info(f" terraform at {terraform_path}")
+    if run_subprocess_cmd([terraform_path] + processargs, **kwargs):
+        raise TerraformException("Terraform returned an error")
+
+
 def version():
     terraform_path = download_terraform_binary()
     logger.info(f"checking terraform={terraform_path} version")
@@ -61,24 +72,18 @@ def version():
 
 
 def init(directory=None):
-    terraform_path = download_terraform_binary()
-    logger.info(f"terraform={terraform_path} init directory={directory}")
+    logger.info(f"terraform init directory={directory}")
     with timer(logger, "terraform init"):
-        run_subprocess_cmd([terraform_path, "init"], cwd=directory, prefix="terraform")
+        run_terraform_subprocess(["init"], cwd=directory, prefix="terraform")
 
 
 def apply(directory=None, targets=None):
     targets = targets or []
-    terraform_path = download_terraform_binary()
 
-    logger.info(
-        f"terraform={terraform_path} apply directory={directory} targets={targets}"
-    )
-    command = [terraform_path, "apply", "-auto-approve"] + [
-        "-target=" + _ for _ in targets
-    ]
+    logger.info(f"terraform= apply directory={directory} targets={targets}")
+    command = ["apply", "-auto-approve"] + ["-target=" + _ for _ in targets]
     with timer(logger, "terraform apply"):
-        run_subprocess_cmd(command, cwd=directory, prefix="terraform")
+        run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
 def output(directory=None):
@@ -92,14 +97,11 @@ def output(directory=None):
 
 
 def destroy(directory=None):
-    terraform_path = download_terraform_binary()
-
-    logger.info(f"terraform={terraform_path} destroy directory={directory}")
+    logger.info(f"terraform= destroy directory={directory}")
     command = [
-        terraform_path,
         "destroy",
         "-auto-approve",
     ]
 
     with timer(logger, "terraform destroy"):
-        run_subprocess_cmd(command, cwd=directory, prefix="terraform")
+        run_terraform_subprocess(command, cwd=directory, prefix="terraform")

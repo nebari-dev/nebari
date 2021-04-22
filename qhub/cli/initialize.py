@@ -1,10 +1,7 @@
-import re
-
 from ruamel import yaml
 
 from qhub.initialize import render_config
 from qhub.schema import ProviderEnum
-from qhub.utils import namestr_regex
 
 
 def create_init_subcommand(subparser):
@@ -65,16 +62,6 @@ def create_init_subcommand(subparser):
 
 
 def handle_init(args):
-
-    if not re.match(namestr_regex, args.project):
-        raise ValueError(
-            "--project name should contain only letters and hyphens/underscores (but not at the start or end)"
-        )
-
-    if not re.match(namestr_regex, args.namespace):
-        raise ValueError(
-            "--namespace should contain only letters and hyphens/underscores (but not at the start or end)"
-        )
 
     config = render_config(
         project_name=args.project,

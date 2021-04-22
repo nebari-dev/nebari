@@ -12,6 +12,7 @@ from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
 from qhub.provider.cloud import digital_ocean
+from qhub.utils import namestr_regex
 
 
 BASE_CONFIGURATION = {
@@ -253,8 +254,18 @@ def render_config(
         project_name = input("Provide project name: ")
     config["project_name"] = project_name
 
+    if not re.match(namestr_regex, project_name):
+        raise ValueError(
+            "project name should contain only letters and hyphens/underscores (but not at the start or end)"
+        )
+
     if namespace is not None:
         config["namespace"] = namespace
+
+    if not re.match(namestr_regex, namespace):
+        raise ValueError(
+            "namespace should contain only letters and hyphens/underscores (but not at the start or end)"
+        )
 
     if qhub_domain is None and not disable_prompt:
         qhub_domain = input("Provide domain: ")
