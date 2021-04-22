@@ -8,6 +8,7 @@ from qhub.cli.initialize import create_init_subcommand
 from qhub.cli.render import create_render_subcommand
 from qhub.cli.validate import create_validate_subcommand
 from qhub.cli.destroy import create_destroy_subcommand
+from qhub.provider.terraform import TerraformException
 
 root_dir = path.abspath(path.join(path.dirname(__file__), path.pardir))
 
@@ -41,3 +42,5 @@ def cli(args):
         args.func(args)
     except ValueError as ve:
         sys.exit("\nProblem encountered: "+str(ve)+"\n")
+    except TerraformException as te:
+        sys.exit("\nProblem encountered: Terraform error\n")
