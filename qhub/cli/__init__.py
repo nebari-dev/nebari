@@ -40,4 +40,4 @@ def cli(args):
     try:
         args.func(args)
     except ValueError as ve:
-        print("\nProblem encountered:", ve, "\n")
+        sys.exit("\nProblem encountered: "+str(ve)+"\n")
