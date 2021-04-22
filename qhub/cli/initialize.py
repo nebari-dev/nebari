@@ -1,5 +1,3 @@
-import re
-
 from ruamel import yaml
 
 from qhub.initialize import render_config
