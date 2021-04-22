@@ -41,6 +41,6 @@ def cli(args):
     try:
         args.func(args)
     except ValueError as ve:
-        sys.exit("\nProblem encountered: "+str(ve)+"\n")
+        sys.exit("\nProblem encountered: " + str(ve) + "\n")
     except TerraformException as te:
         sys.exit("\nProblem encountered: Terraform error\n")

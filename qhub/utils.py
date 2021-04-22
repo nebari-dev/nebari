@@ -36,12 +36,14 @@ def run_subprocess_cmd(processargs, **kwargs):
         kwargs.pop("prefix")
     else:
         line_prefix = b""
-    
+
     process = subprocess.Popen(processargs, **kwargs, stdout=subprocess.PIPE)
     for line in iter(lambda: process.stdout.readline(), b""):
         sys.stdout.buffer.write(line_prefix + line)
         sys.stdout.flush()
-    return process.wait(timeout=10) # Should already have finished because we have drained stdout
+    return process.wait(
+        timeout=10
+    )  # Should already have finished because we have drained stdout
 
 
 def check_cloud_credentials(config):

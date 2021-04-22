@@ -15,6 +15,7 @@ from qhub import constants
 
 logger = logging.getLogger(__name__)
 
+
 class TerraformException(Exception):
     pass
 
@@ -59,6 +60,7 @@ def run_terraform_subprocess(processargs, **kwargs):
     if run_subprocess_cmd([terraform_path] + processargs, **kwargs):
         raise TerraformException("Terraform returned an error")
 
+
 def version():
     terraform_path = download_terraform_binary()
     logger.info(f"checking terraform={terraform_path} version")
@@ -78,12 +80,8 @@ def init(directory=None):
 def apply(directory=None, targets=None):
     targets = targets or []
 
-    logger.info(
-        f"terraform= apply directory={directory} targets={targets}"
-    )
-    command = ["apply", "-auto-approve"] + [
-        "-target=" + _ for _ in targets
-    ]
+    logger.info(f"terraform= apply directory={directory} targets={targets}")
+    command = ["apply", "-auto-approve"] + ["-target=" + _ for _ in targets]
     with timer(logger, "terraform apply"):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
