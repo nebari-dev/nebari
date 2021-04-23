@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
+set -x
 # install classic notebook extensions
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
@@ -16,6 +16,11 @@ cp /opt/jupyterlab/overrides.json /opt/conda/share/jupyter/lab/settings
 mkdir -p /opt/code_server
 cd /opt/code_server
 curl -fsSL https://code-server.dev/install.sh > install.sh
+expected_sum=4f66ead4b4ed2be7c746f1eaf6672f3e0cddad66924d9b6c513d108d68a0127c
+if [[ ! $(sha256sum install.sh) == "${expected_sum}  install.sh" ]];then
+    echo Unexpected hash from code-server install script
+    exit 1
+fi
 sh install.sh --prefix /opt/code_server
 
 # ====== fix perms ======

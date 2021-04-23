@@ -35,7 +35,8 @@ RUN /opt/scripts/install-apt.sh /opt/jupyterlab/apt.txt
 
 ARG SKIP_CONDA_SOLVE=no
 COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
-COPY jupyterlab /opt/jupyterlab
+COPY jupyterlab/environment.yaml /opt/jupyterlab/environment.yaml
+COPY jupyterlab/conda-linux-64.lock /opt/jupyterlab/conda-linux-64.lock
 RUN \
     if [ "${SKIP_CONDA_SOLVE}" != "no" ];then  \
         ENV_FILE=/opt/jupyterlab/conda-linux-64.lock ; \
@@ -44,7 +45,8 @@ RUN \
     fi ; \
     /opt/scripts/install-conda-environment.sh "${ENV_FILE}" 'true'
 
-RUN env; /opt/jupyterlab/postBuild
+COPY jupyterlab /opt/jupyterlab
+RUN /opt/jupyterlab/postBuild
 
 
 # ========== users configuration ============
