@@ -71,13 +71,13 @@ certificate:
 To use Let's Encrypt you must specify an email address that let's
 encrypt will associate the generated certificate with and whether to
 use the [staging server](https://acme-staging-v02.api.letsencrypt.org/directory) or [production server](https://acme-v02.api.letsencrypt.org/directory). In general you
-should use the production server.
+should use the production server, as seen below.
 
 ```yaml
 certificate:
   type: lets-encrypt
   acme_email: <your-email-address>
-  acme_server:
+  acme_server: https://acme-v02.api.letsencrypt.org/directory
 ```
 
 You may also supply a custom self signed certificate and secret
