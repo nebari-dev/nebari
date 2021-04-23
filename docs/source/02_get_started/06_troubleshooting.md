@@ -29,7 +29,7 @@ instructions](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-acc
 
 1. [Download the GCP SDK](https://cloud.google.com/sdk/downloads)
 2. Login to GCP via `gcloud init`
-3. `gcloud container clusters get-credentials <project-name>-<namespace>`
+3. `gcloud container clusters get-credentials <project-name>-<namespace> --region <region>`
 
 After completing these steps. `kubectl` should be able to access the cluster.
 
