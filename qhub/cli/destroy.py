@@ -5,6 +5,7 @@ from ruamel import yaml
 
 from qhub.destroy import destroy_configuration
 from qhub.schema import verify
+from qhub.render import render_default_template, render_template
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,13 @@ logger = logging.getLogger(__name__)
 def create_destroy_subcommand(subparser):
     subparser = subparser.add_parser("destroy")
     subparser.add_argument("-c", "--config", help="qhub configuration", required=True)
+    subparser.add_argument("-i", "--input", help="input directory")
+    subparser.add_argument("-o", "--output", default="./", help="output directory")
+    subparser.add_argument(
+        "--disable-render",
+        action="store_true",
+        help="Disable auto-rendering before destroy",
+    )
     subparser.set_defaults(func=handle_destroy)
 
 
@@ -26,5 +34,11 @@ def handle_destroy(args):
         config = yaml.safe_load(f.read())
 
     verify(config)
+
+    if not args.disable_render:
+        if args.input is None:
+            render_default_template(args.output, args.config, force=True)
+        else:
+            render_template(args.input, args.output, args.config, force=True)
 
     destroy_configuration(config)

@@ -109,8 +109,3 @@ def check_cloud_credentials(config):
         pass
     else:
         raise Exception("Cloud Provider configuration not supported")
-
-
-def verify_configuration_file_exists():
-    if not path.exists("qhub-config.yaml"):
-        raise Exception('Configuration file "qhub-config.yaml" does not exist')

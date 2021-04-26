@@ -80,7 +80,7 @@ def init(directory=None):
 def apply(directory=None, targets=None):
     targets = targets or []
 
-    logger.info(f"terraform= apply directory={directory} targets={targets}")
+    logger.info(f"terraform apply directory={directory} targets={targets}")
     command = ["apply", "-auto-approve"] + ["-target=" + _ for _ in targets]
     with timer(logger, "terraform apply"):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
@@ -96,8 +96,15 @@ def output(directory=None):
         ).decode("utf8")[:-1]
 
 
+def tfimport(addr, id, directory=None):
+    logger.info(f"terraform import directory={directory} addr={addr} id={id}")
+    command = ["import", addr, id]
+    with timer(logger, "terraform import"):
+        run_terraform_subprocess(command, cwd=directory, prefix="terraform")
+
+
 def destroy(directory=None):
-    logger.info(f"terraform= destroy directory={directory}")
+    logger.info(f"terraform destroy directory={directory}")
     command = [
         "destroy",
         "-auto-approve",
@@ -105,3 +112,13 @@ def destroy(directory=None):
 
     with timer(logger, "terraform destroy"):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
+
+
+def rm_local_state(directory=None):
+    logger.info(f"rm local state file terraform.tfstate directory={directory}")
+    tfstate_path = "terraform.tfstate"
+    if directory:
+        tfstate_path = os.path.join(directory, tfstate_path)
+
+    if os.path.isfile(tfstate_path):
+        os.remove(tfstate_path)
