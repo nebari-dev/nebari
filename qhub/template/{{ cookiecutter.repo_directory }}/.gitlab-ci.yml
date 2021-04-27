@@ -4,12 +4,12 @@ render-qhub:
     COMMIT_MSG: |
       qhub-config.yaml automated commit: {{ '$CI_COMMIT_SHA' }}
   script:
-    - pip install qhub==0.3.3
+    - pip install qhub==0.3.4
     - qhub deploy --config qhub-config.yaml --disable-prompt
     - git config user.email "qhub@quansight.com"
     - git config user.name "gitlab ci"
     - git add .
-    - git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
+    - git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin "{{ cookiecutter.ci_cd.branch }}")
   only:
     refs:
       - "{{ cookiecutter.ci_cd.branch }}"
@@ -36,6 +36,6 @@ build-docker-images:
     refs:
       - merge_requests
     variables:
-      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"
+      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "{{ cookiecutter.ci_cd.branch }}"
     changes:
       - "image/**"
