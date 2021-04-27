@@ -128,9 +128,9 @@ An image is the term used to refer to a serialized copy of the state of an envir
 
 ```yaml
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:c36eace493739be280c71bec59b80659115db5d5"
-  jupyterlab: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
-  dask_worker: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+  jupyterhub: "quansight/qhub-jupyterhub:71645f84ec3ebe5fe6aab86fe9b381190ab7645c"
+  jupyterlab: "quansight/qhub-jupyterlab:71645f84ec3ebe5fe6aab86fe9b381190ab7645c"
+  dask_worker: "quansight/qhub-dask-worker:71645f84ec3ebe5fe6aab86fe9b381190ab7645c"
 ```
 
 ### Storage
@@ -162,7 +162,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:71645f84ec3ebe5fe6aab86fe9b381190ab7645c"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       kubespawner_override:
@@ -170,7 +170,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:71645f84ec3ebe5fe6aab86fe9b381190ab7645c"
 
   dask_worker:
     "Small Worker":
@@ -178,13 +178,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-jupyterlab:71645f84ec3ebe5fe6aab86fe9b381190ab7645c"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-jupyterlab:71645f84ec3ebe5fe6aab86fe9b381190ab7645c"
 ```
 
 For each `profiles.jupyterlab` is a named jupyterlab profile. It closely follows the [KubeSpawner](<https://jupyterhub> kubespawner.readthedocs.io/en/latest/spawner.html) api. The only exception is that two keys are added `users` and `groups` which allow restriction of profiles to  a given set of groups and users. We recommend using groups to manage profile access. Finally, we allow for configuration of the [dask workers](https://distributed.dask.org/en/latest/worker.html). In general, similar to the jupyterlab instances, you only need to configure the cores and memory.
