@@ -14,7 +14,19 @@
 
 ### Bug fixes
 
+## Release 0.3.3 - 04/27/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+### Bug fixes
+
  - Moved to ruamel as yaml parser to throw errors on duplicate keys
+ - fixed a url link error in cds dashboards
+ - Azure fixes to enable multiple deployments under one account
+ - Terraform formatting issue in acme_server deployment
+ - Terraform errors are caught by qhub and return error code
 
 ### Breaking changes
 
