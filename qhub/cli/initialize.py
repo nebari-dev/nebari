@@ -80,7 +80,9 @@ def handle_init(args):
 
     try:
         with open("qhub-config.yaml", "x") as f:
-            yaml.dump(config, f, default_flow_style=False)
+            yaml.dump(
+                config, f, default_flow_style=False, Dumper=yaml.RoundTripDumper
+            )  # RoundTripDumper avoids alphabetical sorting of yaml file
     except FileExistsError:
         raise ValueError(
             "A qhub-config.yaml file already exists. Please move or delete it and try again."

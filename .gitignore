@@ -27,7 +27,7 @@ gcp-jupyterhub
 modules
 quansight-terraform-modules
 config.yaml
-data
+data*
 
 # ignore qhub files
 qhub-config.yaml
