@@ -159,8 +159,8 @@ module "kubernetes-ingress" {
 
 {% if cookiecutter.certificate.type == "lets-encrypt" %}
   enable-certificates = true
-  acme-email = "{{ cookiecutter.certificate.acme_email }}"
-  acme-server = "{{ cookiecutter.certificate.acme_server }}"
+  acme-email          = "{{ cookiecutter.certificate.acme_email }}"
+  acme-server         = "{{ cookiecutter.certificate.acme_server }}"
 {% endif %}
 
   depends_on = [
