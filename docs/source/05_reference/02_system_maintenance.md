@@ -47,11 +47,11 @@ digital_ocean:
     user:
       instance: "s-2vcpu-4gb"
       min_nodes: 1
-      max_nodes: 4
+      max_nodes: 5
     worker:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
-      max_nodes: 4
+      max_nodes: 5
 ```
 
 To add a node group for a node group called `worker-high-mem` simply
@@ -67,11 +67,11 @@ digital_ocean:
       min_nodes: 1
       max_nodes: 1
     user:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
       max_nodes: 4
     worker:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
       max_nodes: 4
     worker-high-memory:
