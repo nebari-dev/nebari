@@ -38,7 +38,7 @@ BASE_CONFIGURATION = {
         "jupyterlab": "quansight/qhub-jupyterlab:71645f84ec3ebe5fe6aab86fe9b381190ab7645c",
         "dask_worker": "quansight/qhub-dask-worker:71645f84ec3ebe5fe6aab86fe9b381190ab7645c",
     },
-    "storage": {"conda_store": "20Gi", "shared_filesystem": "10Gi"},
+    "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
     "theme": {
         "jupyterhub": {
             "hub_title": None,
@@ -108,8 +108,8 @@ DIGITAL_OCEAN = {
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
-        "worker": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
+        "user": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
+        "worker": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
     },
 }
 
@@ -121,8 +121,8 @@ GOOGLE_PLATFORM = {
     "kubernetes_version": "1.18.16-gke.502",
     "node_groups": {
         "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
-        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
+        "user": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
+        "worker": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
     },
 }
 
@@ -136,11 +136,11 @@ AZURE = {
             "min_nodes": 1,
             "max_nodes": 1,
         },
-        "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 4},
+        "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 5},
         "worker": {
             "instance": "Standard_D2_v2",
             "min_nodes": 0,
-            "max_nodes": 4,
+            "max_nodes": 5,
         },
     },
     "storage_account_postfix": "".join(
@@ -153,8 +153,8 @@ AMAZON_WEB_SERVICES = {
     "kubernetes_version": "1.18",
     "node_groups": {
         "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2},
-        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2},
+        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
+        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
     },
 }
 
@@ -162,24 +162,24 @@ DEFAULT_PROFILES = {
     "jupyterlab": [
         {
             "display_name": "Small Instance",
-            "description": "Stable environment with 1 cpu / 1 GB ram",
+            "description": "Stable environment with 1 cpu / 4 GB ram",
             "default": True,
             "kubespawner_override": {
                 "cpu_limit": 1,
-                "cpu_guarantee": 1,
-                "mem_limit": "1G",
-                "mem_guarantee": "1G",
+                "cpu_guarantee": 0.75,
+                "mem_limit": "4G",
+                "mem_guarantee": "2.5G",
                 "image": "quansight/qhub-jupyterlab:71645f84ec3ebe5fe6aab86fe9b381190ab7645c",
             },
         },
         {
             "display_name": "Medium Instance",
-            "description": "Stable environment with 1.5 cpu / 2 GB ram",
+            "description": "Stable environment with 2 cpu / 8 GB ram",
             "kubespawner_override": {
-                "cpu_limit": 1.5,
-                "cpu_guarantee": 1.25,
-                "mem_limit": "2G",
-                "mem_guarantee": "2G",
+                "cpu_limit": 2,
+                "cpu_guarantee": 1.5,
+                "mem_limit": "8G",
+                "mem_guarantee": "5G",
                 "image": "quansight/qhub-jupyterlab:71645f84ec3ebe5fe6aab86fe9b381190ab7645c",
             },
         },
@@ -188,15 +188,17 @@ DEFAULT_PROFILES = {
         "Small Worker": {
             "worker_cores_limit": 1,
             "worker_cores": 1,
-            "worker_memory_limit": "1G",
-            "worker_memory": "1G",
+            "worker_memory_limit": "4G",
+            "worker_memory": "2.5G",
+            "worker_threads": 1,
             "image": "quansight/qhub-dask-worker:71645f84ec3ebe5fe6aab86fe9b381190ab7645c",
         },
         "Medium Worker": {
-            "worker_cores_limit": 1.5,
-            "worker_cores": 1.25,
-            "worker_memory_limit": "2G",
-            "worker_memory": "2G",
+            "worker_cores_limit": 2,
+            "worker_cores": 1.5,
+            "worker_memory_limit": "8G",
+            "worker_memory": "5G",
+            "worker_threads": 2,
             "image": "quansight/qhub-dask-worker:71645f84ec3ebe5fe6aab86fe9b381190ab7645c",
         },
     },
