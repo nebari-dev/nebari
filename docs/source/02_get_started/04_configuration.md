@@ -47,8 +47,22 @@ and not specifying the key `ci_cd`.
 ci_cd:
   type: github-actions
   branch: main
+  before_script: |
+    echo "running commands before ci completes"
+  after_script: |
+    echo "running commands after ci completes"
 ```
 
+ - `type`: current supported CI providers are `github-actions` and `gitlab-ci`
+ - `branch`: branch to use to commit `qhub render` changes to
+ - `before_script`: optional script to run before CI starts QHub
+   infrastructure deployment. This is useful in cases that additional
+   setup is required for Qhub to deploy the resources. Only supported
+   on `gitlab-ci` at the moment.
+ - `after_script`: optional script to run after CI ends QHub
+   infrastructure deployment. This is useful in cases to notify
+   resources of successful QHub deployment. Only supported on
+   `gitlab-ci` at the moment.
 
 If `ci_cd` is not supplied no CI/CD will be auto-generated. However,
 we advise that having infrastructure as code allows teams to more
