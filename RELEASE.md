@@ -14,6 +14,16 @@
 
 ### Bug fixes
 
+## Release 0.3.4 - 04/27/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+### Bug fixes
+
+ - remaining issues with ci_cd branch not being fully changed
+
 ## Release 0.3.3 - 04/27/2021
 
 ### Breaking changes

@@ -32,7 +32,7 @@ jobs:
           git config user.name "github action"
           git add .
           # only commit and push if we have changes
-          git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin "{{ cookiecutter.ci_cd.branch }}")
         env:
           COMMIT_MSG: |
             qhub-config.yaml automated commit: {{ '${{ github.sha }}' }}
