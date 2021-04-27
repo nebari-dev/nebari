@@ -12,6 +12,9 @@ c.VariableMixin.default_presentation_cmd = ['python3', '-m', 'jhsingle_native_pr
 
 c.JupyterHub.default_url = '/hub/home'
 
+# Force dashboard creator to select an instance size
+c.CDSDashboardsConfig.spawn_default_options = False
+
 {% else %}
 
 c.JupyterHub.allow_named_servers = False
