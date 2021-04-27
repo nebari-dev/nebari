@@ -51,6 +51,8 @@ class Base(pydantic.BaseModel):
 class CICD(Base):
     type: CiEnum = "github-actions"
     branch: str = "main"
+    before_script: typing.Optional[str]
+    after_script: typing.Optional[str]
 
 
 # ============= Terraform ===============

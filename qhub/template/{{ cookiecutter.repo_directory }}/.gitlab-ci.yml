@@ -3,6 +3,14 @@ render-qhub:
   variables:
     COMMIT_MSG: |
       qhub-config.yaml automated commit: {{ '$CI_COMMIT_SHA' }}
+{%- if cookiecutter.ci_cd.before_script is defined %}
+  before_script: |
+    {{ cookiecutter.ci_cd.before_script | indent(width=4) }}
+{%- endif -%}
+{%- if cookiecutter.ci_cd.after_script is defined %}
+  after_script: |
+    {{ cookiecutter.ci_cd.after_script | indent(width=4) }}
+{%- endif %}
   script:
     - pip install qhub==0.3.4
     - qhub deploy --config qhub-config.yaml --disable-prompt
