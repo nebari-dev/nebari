@@ -336,13 +336,13 @@ digital_ocean:
       min_nodes: 1
       max_nodes: 1
     user:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
-      max_nodes: 4
+      max_nodes: 5
     worker:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
-      max_nodes: 4
+      max_nodes: 5
 ```
 
 #### Google Cloud Provider (GCP)
@@ -360,7 +360,7 @@ google_cloud_platform:
   region: us-central1
   zone: us-central1-c
   availability_zones: ["us-central1-c"]
-  kubernetes_version: "1.14.10-gke.31"
+  kubernetes_version: "1.18.16-gke.502"
   node_groups:
     general:
       instance: n1-standard-2
@@ -369,7 +369,7 @@ google_cloud_platform:
     user:
       instance: n1-standard-2
       min_nodes: 0
-      max_nodes: 2
+      max_nodes: 5
     worker:
       instance: n1-standard-2
       min_nodes: 0
@@ -389,7 +389,7 @@ for possible options.
 amazon_web_services:
   region: us-west-2
   availability_zones: ["us-west-2a", "us-west-2b"]
-  kubernetes_version: "1.14"
+  kubernetes_version: "1.18"
   node_groups:
     general:
       instance: "m5.large"
@@ -398,11 +398,11 @@ amazon_web_services:
     user:
       instance: "m5.large"
       min_nodes: 1
-      max_nodes: 2
+      max_nodes: 5
     worker:
       instance: "m5.large"
       min_nodes: 1
-      max_nodes: 2
+      max_nodes: 5
 ```
 
 #### Local (Existing) Kubernetes Cluster
@@ -574,6 +574,23 @@ and users.  We recommend using groups to manage profile access.
 Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the
 cores and memory.
+
+When configuring the memory and cpus for profiles there are some
+important considerations to make. Two important terms to understand are:
+ - `limit`: the absolute max memory that a given pod can consume. If a
+   process within the pod consumes more than the `limit` memory the
+   linux OS will kill the process. Limit is not used for scheduling
+   purposes with kubernetes.
+ - `guarantee`: is the amount of memory the kubernetes scheduler uses
+   to place a given pod. In general the `guarantee` will be less than
+   the limit. Often times the node itself has less available memory
+   than the node specification. See this [guide from digital
+   ocean](https://docs.digitalocean.com/products/kubernetes/#allocatable-memory)
+   which is generally applicable to other clouds.
+   
+For example if a node is 8 GB of ram and 2 cpu you should
+guarantee/schedule roughly 75% and follow the digital ocean guide
+linked above. E.g. 1.5 cpu guarantee and 5.5 GB guaranteed.
 
 ### Limiting profiles to specific users and groups
 
@@ -768,13 +785,13 @@ digital_ocean:
       min_nodes: 1
       max_nodes: 1
     user:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
-      max_nodes: 4
+      max_nodes: 5
     worker:
-      instance: "s-2vcpu-4gb"
-      min_nodes: 2
-      max_nodes: 4
+      instance: "g-2vcpu-8gb"
+      min_nodes: 1
+      max_nodes: 5
 
 default_images:
   jupyterhub: "quansight/qhub-jupyterhub:71645f84ec3ebe5fe6aab86fe9b381190ab7645c"
