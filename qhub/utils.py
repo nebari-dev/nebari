@@ -2,6 +2,7 @@ import subprocess
 import sys
 import time
 import os
+import re
 import contextlib
 from os import path
 
@@ -37,9 +38,21 @@ def run_subprocess_cmd(processargs, **kwargs):
     else:
         line_prefix = b""
 
-    process = subprocess.Popen(processargs, **kwargs, stdout=subprocess.PIPE)
+    strip_errors = kwargs.pop("strip_errors", False)
+
+    process = subprocess.Popen(
+        processargs, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    )
     for line in iter(lambda: process.stdout.readline(), b""):
-        sys.stdout.buffer.write(line_prefix + line)
+        full_line = line_prefix + line
+        if strip_errors:
+            full_line = full_line.decode("utf-8")
+            full_line = re.sub(
+                r"\x1b\[31m", "", full_line
+            )  # Remove red ANSI escape code
+            full_line = full_line.encode("utf-8")
+
+        sys.stdout.buffer.write(full_line)
         sys.stdout.flush()
     return process.wait(
         timeout=10
