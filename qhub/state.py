@@ -1,3 +1,4 @@
+import os
 from .provider import terraform
 
 
@@ -54,7 +55,40 @@ def terraform_state_sync(config, logger=None):
             )
 
         elif provider == "azure":
-            raise Exception("Need to import azure terraform-state")
+            storage_account_postfix = config.get("azure", {}).get(
+                "storage_account_postfix", ""
+            )
+
+            if storage_account_postfix == "":
+                raise ValueError(
+                    "azure: storage_account_postfix not present in config file"
+                )
+
+            subscription_id = os.environ.get("ARM_SUBSCRIPTION_ID", "")
+
+            if subscription_id == "":
+                raise ValueError("ARM_SUBSCRIPTION_ID environment variable is not set")
+
+            resource_group_name = f"{project_name}-{namespace}"
+            resource_group_name_safe = resource_group_name.replace("-", "")
+
+            resource_group_url = f"/subscriptions/{subscription_id}/resourceGroups/{project_name}-{namespace}"
+
+            terraform.tfimport(
+                "module.terraform-state.azurerm_resource_group.terraform-resource-group",
+                resource_group_url,
+                directory="terraform-state",
+            )
+            terraform.tfimport(
+                "module.terraform-state.azurerm_storage_account.terraform-storage-account",
+                f"{resource_group_url}/providers/Microsoft.Storage/storageAccounts/{resource_group_name_safe}{storage_account_postfix}",
+                directory="terraform-state",
+            )
+            terraform.tfimport(
+                "module.terraform-state.azurerm_storage_container.storage_container",
+                f"https://{resource_group_name_safe}{storage_account_postfix}.blob.core.windows.net/{resource_group_name}state",
+                directory="terraform-state",
+            )
 
     except terraform.TerraformException:
         if logger:
