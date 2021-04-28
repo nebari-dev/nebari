@@ -14,6 +14,20 @@
 
 ### Bug fixes
 
+## Release 0.3.5 - 04/28/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+ - added a `--skip-remote-state-provision` flag to allow `qhub deploy` within CI to skip the remote state creation
+ - added saner defaults for instance sizes and jupyterlab/dask profiles
+ - `qhub init` no longer renders `qhub-config.yaml` in alphabetical order
+ - `spawn_default_options` to False to force dashboard owner to pick profile
+ - adding `before_script` and `after_script` key to `ci_cd` to allow customization of CI process
+
+### Bug fixes
+
 ## Release 0.3.4 - 04/27/2021
 
 ### Breaking changes

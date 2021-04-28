@@ -12,7 +12,7 @@ render-qhub:
     {{ cookiecutter.ci_cd.after_script | indent(width=4) }}
 {%- endif %}
   script:
-    - pip install qhub==0.3.4
+    - pip install qhub==0.3.5
     - qhub deploy --config qhub-config.yaml --disable-prompt --skip-remote-state-provision
     - git config user.email "qhub@quansight.com"
     - git config user.name "gitlab ci"
