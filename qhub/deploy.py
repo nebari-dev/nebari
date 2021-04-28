@@ -2,9 +2,10 @@ import logging
 import re
 from subprocess import CalledProcessError
 
-from qhub.provider import terraform
-from qhub.utils import timer, check_cloud_credentials
-from qhub.provider.dns.cloudflare import update_record
+from .provider import terraform
+from .utils import timer, check_cloud_credentials
+from .provider.dns.cloudflare import update_record
+from .state import terraform_state_sync
 
 logger = logging.getLogger(__name__)
 
@@ -50,8 +51,7 @@ def guided_install(
         and (config.get("terraform_state", {}).get("type") == "remote")
         and (config.get("provider") != "local")
     ):
-        terraform.init(directory="terraform-state")
-        terraform.apply(directory="terraform-state")
+        terraform_state_sync(config)
 
     # 3 kuberentes-alpha provider requires that kubernetes be
     # provisionioned before any "kubernetes_manifests" resources
