@@ -16,6 +16,11 @@ def create_destroy_subcommand(subparser):
     subparser.add_argument("-i", "--input", help="input directory")
     subparser.add_argument("-o", "--output", default="./", help="output directory")
     subparser.add_argument(
+        "--skip-remote-state-provision",
+        action="store_true",
+        help="Skip terraform state import and destroy",
+    )
+    subparser.add_argument(
         "--disable-render",
         action="store_true",
         help="Disable auto-rendering before destroy",
@@ -41,4 +46,7 @@ def handle_destroy(args):
         else:
             render_template(args.input, args.output, args.config, force=True)
 
-    destroy_configuration(config)
+    destroy_configuration(
+        config,
+        args.skip_remote_state_provision,
+    )
