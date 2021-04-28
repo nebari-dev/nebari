@@ -38,4 +38,4 @@ positional arguments:
 ...
 ```
 
-9. Finally [create a Release on QHub](https://github.com/Quansight/qhub/releases/new). The tag should be `v<version>` off of branch `release-<version>`. Use the `RELEASE.md` to get the title `Release <version> - <month>/<day>/<year>` and set the text description to the `RELEASE.md` for the given version. Click `Publish Release` if this worked a new version will be [uploaded to pypi for QHub](https://pypi.org/project/qhub/)
+9. Finally [create a Release on QHub](https://github.com/Quansight/qhub/releases/new). The tag should be `v<version>` off of branch `release-<version>` (**not main**!). Use the `RELEASE.md` to get the title `Release <version> - <month>/<day>/<year>` and set the text description to the `RELEASE.md` for the given version. Click `Publish Release` if this worked a new version will be [uploaded to pypi for QHub](https://pypi.org/project/qhub/)
