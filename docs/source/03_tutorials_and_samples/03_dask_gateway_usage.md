@@ -121,3 +121,26 @@ Now your gateway is properly configured! You can follow the usage
 tutorial above. If your dask, distributed, and dask-gateway versions
 do not match connecting to these apis may (most likely) will break in
 unexpected ways.
+
+## Common Errors
+
+As mentioned previously above version mismatches between dask,
+dask-gateway, and distributed are extremely common. Here are some
+common errors and the most likely fix for the issue:
+
+```python
+...
+GatewayClusterError(msg)
+
+ValueError: 404: Not Found
+```
+
+This errors is due to a version mismatch between the dask-gateway
+client and dask-gateway server.
+
+If you get struct unpack related errors when using dask this is most
+likely a mismatch in versions for
+[dask](https://pypi.org/project/dask/) or
+[distributed](https://pypi.org/project/distributed/). The last issue
+Quansight has run into in the past was due to the version of bokeh
+being used for the dask dashboard.
