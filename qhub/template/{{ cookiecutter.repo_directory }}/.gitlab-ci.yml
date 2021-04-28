@@ -13,7 +13,7 @@ render-qhub:
 {%- endif %}
   script:
     - pip install qhub==0.3.4
-    - qhub deploy --config qhub-config.yaml --disable-prompt
+    - qhub deploy --config qhub-config.yaml --disable-prompt --skip-remote-state-provision
     - git config user.email "qhub@quansight.com"
     - git config user.name "gitlab ci"
     - git add .

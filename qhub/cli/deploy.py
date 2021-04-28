@@ -21,6 +21,11 @@ def create_deploy_subcommand(subparser):
         help="dns provider to use for registering domain name mapping",
     )
     subparser.add_argument(
+        "--skip-remote-state-provision",
+        action="store_true",
+        help="Skip terraform state deployment which is often required in CI once the terraform remote state bootstrapping phase is complete",
+    )
+    subparser.add_argument(
         "--dns-auto-provision",
         action="store_true",
         help="Attempt to automatically provision DNS. For Auth0 is requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
@@ -57,5 +62,9 @@ def handle_deploy(args):
             render_template(args.input, args.output, args.config, force=True)
 
     deploy_configuration(
-        config, args.dns_provider, args.dns_auto_provision, args.disable_prompt
+        config,
+        args.dns_provider,
+        args.dns_auto_provision,
+        args.disable_prompt,
+        args.skip_remote_state_provision,
     )
