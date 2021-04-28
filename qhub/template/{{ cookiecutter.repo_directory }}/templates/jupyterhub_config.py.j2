@@ -15,6 +15,12 @@ c.JupyterHub.default_url = '/hub/home'
 # Force dashboard creator to select an instance size
 c.CDSDashboardsConfig.spawn_default_options = False
 
+c.CDSDashboardsConfig.conda_envs = [
+{%- for key in cookiecutter.environments %}
+    "{{ cookiecutter.environments[key].name }}", 
+{%- endfor %}
+]
+
 {% else %}
 
 c.JupyterHub.allow_named_servers = False
