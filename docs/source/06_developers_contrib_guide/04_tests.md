@@ -2,9 +2,9 @@
 
 ## Modifying Docker Images
 
-All QHub docker images are located in [qhub/templates/{{
+All QHub docker images are located in [`qhub/templates/{{
 cookiecutter.repo_directory
-}}/image/](https://github.com/Quansight/qhub-cloud/tree/main/qhub/template/%7B%7B%20cookiecutter.repo_directory%20%7D%7D/image). You
+}}/image/`](https://github.com/Quansight/qhub-cloud/tree/main/qhub/template/%7B%7B%20cookiecutter.repo_directory%20%7D%7D/image). You
 can build any image locally. Additionally, on Pull Requests each Docker-build
 will be tested.
 

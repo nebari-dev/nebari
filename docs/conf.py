@@ -1,7 +1,6 @@
 # Configuration file for the Sphinx documentation builder.
 
-# import re
-# from qhub import __version__ as release
+import os
 
 # -- Project information -----------------------------------------------------
 
@@ -119,5 +118,15 @@ latex_documents = [
 jupyter_execute_notebooks = "off"
 
 myst_update_mathjax = False
+
+myst_enable_extensions = ['substitution']
+
+# Import qhub version number
+here = os.path.abspath(os.path.dirname(__file__))
+__version__ = None
+exec(open(os.path.join(here,'../qhub/version.py')).read())
+myst_substitutions = {
+  "QHUB_VERSION": __version__
+}
 
 # SITE_URL = "https://quansight.github.io/qhub-home/"
