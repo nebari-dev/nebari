@@ -13,6 +13,8 @@ openssh-client
 
 # editors
 nano
+vim
+emacs
 
 # conda prerequisites for GUI packages
 # See https://docs.anaconda.com/anaconda/install/linux/
