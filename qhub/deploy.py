@@ -3,12 +3,9 @@ import re
 from subprocess import CalledProcessError
 
 from qhub.provider import terraform
-from qhub.utils import (
-    timer,
-    check_cloud_credentials,
-    verify_configuration_file_exists,
-)
+from qhub.utils import timer, check_cloud_credentials
 from qhub.provider.dns.cloudflare import update_record
+from qhub.state import terraform_state_sync
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +40,10 @@ def guided_install(
     disable_prompt=False,
     skip_remote_state_provision=False,
 ):
-    # 01 Verify configuration file exists
-    verify_configuration_file_exists()
-
-    # 02 Check Environment Variables
+    # 01 Check Environment Variables
     check_cloud_credentials(config)
 
-    # 03 Create terraform backend remote state bucket
+    # 02 Create terraform backend remote state bucket
     # backwards compatible with `qhub-config.yaml` which
     # don't have `terraform_state` key
     if (
@@ -57,10 +51,9 @@ def guided_install(
         and (config.get("terraform_state", {}).get("type") == "remote")
         and (config.get("provider") != "local")
     ):
-        terraform.init(directory="terraform-state")
-        terraform.apply(directory="terraform-state")
+        terraform_state_sync(config)
 
-    # 3.5 kuberentes-alpha provider requires that kubernetes be
+    # 3 kuberentes-alpha provider requires that kubernetes be
     # provisionioned before any "kubernetes_manifests" resources
     terraform.init(directory="infrastructure")
     terraform.apply(
