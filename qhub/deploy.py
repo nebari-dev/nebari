@@ -2,10 +2,10 @@ import logging
 import re
 from subprocess import CalledProcessError
 
-from .provider import terraform
-from .utils import timer, check_cloud_credentials
-from .provider.dns.cloudflare import update_record
-from .state import terraform_state_sync
+from qhub.provider import terraform
+from qhub.utils import timer, check_cloud_credentials
+from qhub.provider.dns.cloudflare import update_record
+from qhub.state import terraform_state_sync
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,8 @@
 import logging
 
-from .utils import timer, check_cloud_credentials
-from .provider import terraform
-from .state import terraform_state_sync
+from qhub.utils import timer, check_cloud_credentials
+from qhub.provider import terraform
+from qhub.state import terraform_state_sync
 
 logger = logging.getLogger(__name__)
 

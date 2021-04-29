@@ -1,5 +1,6 @@
 import os
-from .provider import terraform
+
+from qhub.provider import terraform
 
 
 def terraform_state_sync(config, logger=None):
