@@ -14,6 +14,27 @@
 
 ### Bug fixes
 
+## Release 0.3.6 - 04/29/2021
+
+### Breaking changes
+
+ - simplified bash jupyterlab image to no longer have dashboard packages panel, etc.
+
+### Feature changes and enhancements
+
+ - added emacs and vim as default editors in image
+ - added jupyterlab-git and jupyterlab-sidecar since they now support 3.0
+ - improvements with `qhub destroy` cleanly deleting resources
+ - allow user to select conda environments for dashboards
+ - added command line argument `--skip-terraform-state-provision` to allow for skipping terraform state provisioning in `qhub deploy` step
+ - no longer render `qhub init` `qhub-config.yaml` file in alphabetical order
+ - allow user to select instance sizes for dashboards
+
+### Bug fixes
+
+ - fixed gitlab-ci before_script and after_script
+ - fixed jovyan -> qhub_user home directory path issue with dashboards
+
 ## Release 0.3.5 - 04/28/2021
 
 ### Breaking changes
