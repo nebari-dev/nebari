@@ -205,22 +205,39 @@ DEFAULT_PROFILES = {
 }
 
 DEFAULT_ENVIRONMENTS = {
-    "environment-default.yaml": {
-        "name": "default",
-        "channels": ["conda-forge", "defaults"],
+    "environment-dask.yaml": {
+        "name": "dask",
+        "channels": ["conda-forge"],
         "dependencies": [
-            "python=3.8",
+            "python=3.9",
             "ipykernel",
-            "ipywidgets",
+            "ipywidgets >=7.6",
             "dask==2.30.0",
             "distributed==2.30.1",
             "dask-gateway=0.9.0",
+            "python-graphviz",
             "numpy",
             "numba",
             "pandas",
-            "cdsdashboards-singleuser",
         ],
-    }
+    },
+    "environment-dashboard.yaml": {
+        "name": "dashboard",
+        "channels": ["conda-forge"],
+        "dependencies": [
+            "python=3.9",
+            "ipykernel",
+            "ipywidgets >=7.6",
+            "param",
+            "python-graphviz",
+            "matplotlib >=3.3.4",
+            "panel >=0.10.3",
+            "voila >=0.2.7",
+            "streamlit >=0.76",
+            "dash >=1.19",
+            "cdsdashboards-singleuser >=0.5.6",
+        ],
+    },
 }
 
 
