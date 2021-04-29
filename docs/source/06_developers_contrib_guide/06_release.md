@@ -29,7 +29,7 @@ positional arguments:
 
 8. Inside of the `release-<version>` branch of [Quansight/qhub](https://github.com/Quansight/qhub) update `qhub/template/cookiecutter.json` to use the `release-<version>` branch from qhub-terraform-modules.
 
-```json
+```python
 ...
     "terraform_modules": {
         "repository": "github.com/quansight/qhub-terraform-modules",

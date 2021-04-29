@@ -10,7 +10,7 @@ Pull-Requests.
 The docker images used for dask-worker and jupyterlab user
 environments are pulled from a docker container registry. The images
 are built based on the images specified in
-[image](../image). There are four images that are currently built
+the `image` folder. There are three images that are currently built
 
 - jupyterlab :: modification of jupyterlab instances for each user
 - dask-worker :: modification of dask workers and dask scheduler
