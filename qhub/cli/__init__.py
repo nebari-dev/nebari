@@ -1,7 +1,6 @@
 import argparse
 import logging
 import sys
-from os import path
 
 from qhub.cli.deploy import create_deploy_subcommand
 from qhub.cli.initialize import create_init_subcommand

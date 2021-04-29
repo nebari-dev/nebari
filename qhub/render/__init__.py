@@ -39,16 +39,16 @@ def patch_versioning_extra_config(config):
     Set defaults for qhub_version and terraform_modules
     because they depend on __version__ so cannot be static in cookiecutter.json
     """
-    if not "qhub_version" in config:
+    if "qhub_version" not in config:
         config["qhub_version"] = __version__
 
-    if not "terraform_modules" in config:
+    if "terraform_modules" not in config:
         config["terraform_modules"] = {
             "repository": "github.com/quansight/qhub-terraform-modules",
             "rev": f"release-{__version__}",
         }
 
-    if not "terraform_version" in config:
+    if "terraform_version" not in config:
         config["terraform_version"] = TERRAFORM_VERSION
 
 
