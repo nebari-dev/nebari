@@ -99,7 +99,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
+        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
 ```
 
 We add the `node_selector` attribute. Note that for AWS, GCP, and DO they have different keys for the nodegroup name.
@@ -122,7 +122,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
+        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
         node_selector:
           "doks.digitalocean.com/node-pool": worker-high-memory
 ```
@@ -140,7 +140,7 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
+      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
 ```
 
 [Dask-gateway](https://gateway.dask.org/api-server.html#kube-cluster-config)
@@ -162,7 +162,7 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
+      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
       scheduler_extra_pod_config:
         nodeSelector:
           "doks.digitalocean.com/node-pool": worker-high-memory
