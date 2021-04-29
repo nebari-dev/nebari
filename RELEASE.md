@@ -1,4 +1,5 @@
-# Release :tada:
+# Changelog
+
 > Contains description of QHub releases.
 ---
 ## To create a new release:
