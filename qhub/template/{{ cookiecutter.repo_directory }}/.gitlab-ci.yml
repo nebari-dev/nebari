@@ -4,14 +4,17 @@ render-qhub:
     COMMIT_MSG: |
       qhub-config.yaml automated commit: {{ '$CI_COMMIT_SHA' }}
 {%- if cookiecutter.ci_cd.before_script is defined %}
-  before_script: |
-    {{ cookiecutter.ci_cd.before_script | indent(width=4) }}
+  before_script:
+{%- for command in cookiecutter.ci_cd.before_script %}
+   - {{ command }}{% endfor %}
 {%- endif -%}
 {%- if cookiecutter.ci_cd.after_script is defined %}
-  after_script: |
-    {{ cookiecutter.ci_cd.after_script | indent(width=4) }}
+  after_script:
+{%- for command in cookiecutter.ci_cd.after_script %}
+   - {{ command }}{% endfor %}
 {%- endif %}
   script:
+    - git checkout "{{ cookiecutter.ci_cd.branch }}"
     - pip install qhub==0.3.5
     - qhub deploy --config qhub-config.yaml --disable-prompt --skip-remote-state-provision
     - git config user.email "qhub@quansight.com"

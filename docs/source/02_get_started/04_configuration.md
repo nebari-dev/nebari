@@ -47,10 +47,11 @@ and not specifying the key `ci_cd`.
 ci_cd:
   type: github-actions
   branch: main
-  before_script: |
-    echo "running commands before ci completes"
-  after_script: |
-    echo "running commands after ci completes"
+  before_script:
+    - echo "running commands before ci completes"
+  after_script:
+    - echo "running commands after ci completes"
+    - echo "additional commands to run"
 ```
 
  - `type`: current supported CI providers are `github-actions` and `gitlab-ci`
