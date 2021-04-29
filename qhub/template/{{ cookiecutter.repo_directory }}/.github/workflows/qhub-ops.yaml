@@ -22,7 +22,7 @@ jobs:
           python-version: 3.8
       - name: Install qhub
         run: |
-          pip install qhub==0.3.7
+          pip install qhub=={{ cookiecutter.qhub_version }}
       - name: Render Changes to Template
         run: |
           qhub render -c qhub-config.yaml

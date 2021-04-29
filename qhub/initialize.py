@@ -27,8 +27,8 @@ BASE_CONFIGURATION = {
         "users": {
             "example-user": {
                 "uid": 1000,
-                "primary_group": "users",
-                "secondary_groups": ["admin"],
+                "primary_group": "admin",
+                "secondary_groups": ["users"],
             }
         },
         "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
