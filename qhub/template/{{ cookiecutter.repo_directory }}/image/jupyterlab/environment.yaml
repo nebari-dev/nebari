@@ -25,6 +25,9 @@ dependencies:
  - ipyleaflet >=0.13.5
  - pyviz_comms >=2.0.1
 
+ # cds dashboards
+ - cdsdashboards-singleuser >=0.5.6
+
  # viz tools
  - param
  - python-graphviz
