@@ -235,9 +235,9 @@ DEFAULT_ENVIRONMENTS = {
             "voila >=0.2.7",
             "streamlit >=0.76",
             "dash >=1.19",
-            "cdsdashboards-singleuser >=0.5.6"
-        ]
-    }
+            "cdsdashboards-singleuser >=0.5.6",
+        ],
+    },
 }
 
 
