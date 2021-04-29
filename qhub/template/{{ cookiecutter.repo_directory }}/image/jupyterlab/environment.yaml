@@ -1,4 +1,4 @@
-name: base
+name: default
 channels:
   - conda-forge
 dependencies:
@@ -27,6 +27,7 @@ dependencies:
 
  # cds dashboards
  - cdsdashboards-singleuser >=0.5.6
+ - jhsingle-native-proxy >=0.7.6
 
  # viz tools
  - param
