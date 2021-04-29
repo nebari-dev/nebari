@@ -5,6 +5,10 @@ hub:
 {% include "templates/jupyterhub_config.py.j2" %}
 {% endfilter %}
 
+singleuser:
+  storage:
+    homeMountPath: /home/qhub_user
+
 cull:
   enabled: true
   timeout: 1800 # cull after 30min of inactivity

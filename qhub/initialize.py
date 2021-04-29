@@ -187,7 +187,7 @@ DEFAULT_PROFILES = {
     "dask_worker": {
         "Small Worker": {
             "worker_cores_limit": 1,
-            "worker_cores": 1,
+            "worker_cores": 0.75,
             "worker_memory_limit": "4G",
             "worker_memory": "2.5G",
             "worker_threads": 1,

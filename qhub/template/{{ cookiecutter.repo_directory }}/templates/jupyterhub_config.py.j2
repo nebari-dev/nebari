@@ -17,7 +17,7 @@ c.CDSDashboardsConfig.spawn_default_options = False
 
 c.CDSDashboardsConfig.conda_envs = [
 {%- for key in cookiecutter.environments %}
-    "{{ cookiecutter.environments[key].name }}", 
+    "{{ cookiecutter.environments[key].name }}",
 {%- endfor %}
 ]
 
@@ -65,7 +65,7 @@ QHUB_PROFILES = {{ cookiecutter.profiles.jupyterlab }}
 
 def qhub_generate_nss_files():
     passwd = []
-    passwd_format = '{username}:x:{uid}:{gid}:{username}:/home/jovyan:/bin/bash'
+    passwd_format = '{username}:x:{uid}:{gid}:{username}:/home/qhub_user:/bin/bash'
     for username, config in QHUB_USER_MAPPING.items():
         uid = config['uid']
         gid = QHUB_GROUP_MAPPING[config['primary_group']]['gid']
@@ -104,7 +104,7 @@ def qhub_configure_profile(username, safe_username, profile):
        'NSS_WRAPPER_PASSWD': '/tmp/passwd',
        'NSS_WRAPPER_GROUP': '/tmp/group',
        'NB_UMASK': '0002',
-       'HOME': '/home/jovyan',
+       'HOME': '/home/qhub_user',
     }
 
     passwd, group = qhub_generate_nss_files()
@@ -114,7 +114,7 @@ def qhub_configure_profile(username, safe_username, profile):
                 "command": ["/bin/sh", "-c", (
                      "echo '{passwd}' > /tmp/passwd && "
                      "echo '{group}' > /tmp/group && "
-                     "ln -sfn /home/shared /home/jovyan/shared"
+                     "ln -sfn /home/shared /home/qhub_user/shared"
                 ).format(passwd=passwd, group=group)]
             }
         }
