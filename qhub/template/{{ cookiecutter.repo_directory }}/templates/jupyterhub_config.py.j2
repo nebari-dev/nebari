@@ -111,7 +111,7 @@ def qhub_configure_profile(username, safe_username, profile):
     profile['kubespawner_override']['lifecycle_hooks'] = {
         "postStart": {
             "exec": {
-                "command": ["/bin/sh", "-c", (
+                "command": ["/bin/bash", "-c", (
                      "echo '{passwd}' > /tmp/passwd && "
                      "echo '{group}' > /tmp/group && "
                      "ln -sfn /home/shared /home/qhub_user/shared"
