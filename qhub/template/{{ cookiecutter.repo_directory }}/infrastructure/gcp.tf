@@ -34,10 +34,10 @@ module "kubernetes" {
       instance_type = "{{ nodegroup_config.instance }}"
       min_size      = {{ nodegroup_config.min_nodes }}
       max_size      = {{ nodegroup_config.max_nodes }}
-      {%- if "preemptible" in nodegroup_config %}
+      {%- if nodegroup_config.preemptible is defined %}
       preemptible   = {{ "true" if nodegroup_config.preemptible else "false" }}
       {%- endif %}
-      {%- if nodegroup.guest_accelerators is defined %}
+      {%- if nodegroup_config.guest_accelerators is defined %}
       guest_accelerators = [
         {% for accelerator in nodegroup_config.guest_accelerators %}
         {
