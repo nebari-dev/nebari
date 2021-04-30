@@ -22,7 +22,6 @@ COPY scripts/install-conda.sh /opt/scripts/install-conda.sh
 
 RUN /opt/scripts/install-conda.sh
 
-
 # ========== dask-worker install ===========
 COPY dask-worker/environment.yaml /opt/dask-worker/environment.yaml
 COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
