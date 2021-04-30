@@ -34,9 +34,9 @@ BASE_CONFIGURATION = {
         "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
     },
     "default_images": {
-        "jupyterhub": "quansight/qhub-jupyterhub:fade946b1cf3a685c2231bf8997e73dcf2456f1f",
-        "jupyterlab": "quansight/qhub-jupyterlab:fade946b1cf3a685c2231bf8997e73dcf2456f1f",
-        "dask_worker": "quansight/qhub-dask-worker:fade946b1cf3a685c2231bf8997e73dcf2456f1f",
+        "jupyterhub": "quansight/qhub-jupyterhub:0a4150d28162c641944e60ae41e04ac96dd2f890",
+        "jupyterlab": "quansight/qhub-jupyterlab:0a4150d28162c641944e60ae41e04ac96dd2f890",
+        "dask_worker": "quansight/qhub-dask-worker:0a4150d28162c641944e60ae41e04ac96dd2f890",
     },
     "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
     "theme": {
@@ -169,7 +169,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 0.75,
                 "mem_limit": "4G",
                 "mem_guarantee": "2.5G",
-                "image": "quansight/qhub-jupyterlab:fade946b1cf3a685c2231bf8997e73dcf2456f1f",
+                "image": "quansight/qhub-jupyterlab:0a4150d28162c641944e60ae41e04ac96dd2f890",
             },
         },
         {
@@ -180,7 +180,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1.5,
                 "mem_limit": "8G",
                 "mem_guarantee": "5G",
-                "image": "quansight/qhub-jupyterlab:fade946b1cf3a685c2231bf8997e73dcf2456f1f",
+                "image": "quansight/qhub-jupyterlab:0a4150d28162c641944e60ae41e04ac96dd2f890",
             },
         },
     ],
@@ -191,7 +191,7 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "4G",
             "worker_memory": "2.5G",
             "worker_threads": 1,
-            "image": "quansight/qhub-dask-worker:fade946b1cf3a685c2231bf8997e73dcf2456f1f",
+            "image": "quansight/qhub-dask-worker:0a4150d28162c641944e60ae41e04ac96dd2f890",
         },
         "Medium Worker": {
             "worker_cores_limit": 2,
@@ -199,7 +199,7 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "8G",
             "worker_memory": "5G",
             "worker_threads": 2,
-            "image": "quansight/qhub-dask-worker:fade946b1cf3a685c2231bf8997e73dcf2456f1f",
+            "image": "quansight/qhub-dask-worker:0a4150d28162c641944e60ae41e04ac96dd2f890",
         },
     },
 }

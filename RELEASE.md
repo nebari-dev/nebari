@@ -14,6 +14,18 @@
 
 ### Bug fixes
 
+## Release 0.3.7 - 04/30/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+ - setting `/bin/bash` as the default terminal
+
+### Bug fixes
+
+ - `jhsingle-native-proxy` added to the base jupyterlab image
+
 ## Release 0.3.6 - 04/29/2021
 
 ### Breaking changes
