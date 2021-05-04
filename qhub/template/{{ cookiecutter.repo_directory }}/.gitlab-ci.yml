@@ -38,6 +38,7 @@ build-docker-images:
           - jupyterlab
           - jupyterhub
           - dask-worker
+          - dask-gateway
   variables:
     IMAGE_TAG: {{ '$CI_COMMIT_SHA' }}
     IMAGE_NAME: {{ cookiecutter.project_name }}-{{ '$DOCKERFILE' }}

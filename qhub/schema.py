@@ -81,6 +81,16 @@ class Certificate(Base):
     acme_server: typing.Optional[str]
 
 
+# ========== Default Images ==============
+
+
+class DefaultImages(Base):
+    jupyterhub: str
+    jupyterlab: str
+    dask_worker: str
+    dask_gateway: str
+
+
 # =========== Authentication ==============
 
 
@@ -267,7 +277,7 @@ class Main(Base):
     certificate: Certificate
     cdsdashboards: CDSDashboards
     security: Security
-    default_images: typing.Dict[str, str]
+    default_images: DefaultImages
     storage: typing.Dict[str, str]
     local: typing.Optional[LocalProvider]
     google_cloud_platform: typing.Optional[GoogleCloudPlatformProvider]

@@ -179,9 +179,9 @@ module "qhub" {
 
   external-url = var.endpoint
 
-  jupyterhub-image  = var.jupyterhub-image
-  jupyterlab-image  = var.jupyterlab-image
-  dask-worker-image = var.dask-worker-image
+  jupyterhub-image   = var.jupyterhub-image
+  jupyterlab-image   = var.jupyterlab-image
+  dask-worker-image  = var.dask-worker-image
   dask-gateway-image = var.dask-gateway-image
 
   general-node-group = local.node_groups.general

@@ -115,6 +115,7 @@ default_images:
   jupyterhub: "quansight/qhub-jupyterhub:0a4150d28162c641944e60ae41e04ac96dd2f890"
   jupyterlab: "quansight/qhub-jupyterlab:0a4150d28162c641944e60ae41e04ac96dd2f890"
   dask_worker: "quansight/qhub-dask-worker:0a4150d28162c641944e60ae41e04ac96dd2f890"
+  dask_gateway: "daskgateway/dask-gateway-server:0.9.0"
 ```
 
 ### Storage
