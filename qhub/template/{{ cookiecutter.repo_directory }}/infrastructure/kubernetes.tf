@@ -182,6 +182,7 @@ module "qhub" {
   jupyterhub-image  = var.jupyterhub-image
   jupyterlab-image  = var.jupyterlab-image
   dask-worker-image = var.dask-worker-image
+  dask-gateway-image = var.dask-gateway-image
 
   general-node-group = local.node_groups.general
   user-node-group    = local.node_groups.user

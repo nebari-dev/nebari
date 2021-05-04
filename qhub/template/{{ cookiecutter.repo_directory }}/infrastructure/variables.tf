@@ -96,6 +96,18 @@ variable "dask-worker-image" {
   }
 }
 
+variable "dask-gateway-image" {
+  description = "Dask worker image"
+  type = object({
+    name = string
+    tag  = string
+  })
+  default = {
+    name = "{{ cookiecutter.default_images.dask_gateway.split(':')[0] }}"
+    tag  = "{{ cookiecutter.default_images.dask_gateway.split(':')[1] }}"
+  }
+}
+
 {% if cookiecutter.prefect is true -%}
 variable "prefect_token" {
   type = string
