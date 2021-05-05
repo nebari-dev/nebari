@@ -9,6 +9,7 @@ from qhub.cli.validate import create_validate_subcommand
 from qhub.cli.destroy import create_destroy_subcommand
 from qhub.provider.terraform import TerraformException
 from qhub.version import __version__
+from qhub.utils import QHUB_GH_BRANCH
 
 
 def cli(args):
@@ -32,6 +33,9 @@ def cli(args):
         sys.exit(1)
 
     logging.basicConfig(level=logging.INFO)
+
+    if QHUB_GH_BRANCH:
+        logging.info(f"Modifying for development branch {QHUB_GH_BRANCH}")
 
     try:
         args.func(args)

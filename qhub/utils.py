@@ -5,10 +5,23 @@ import os
 import re
 import contextlib
 
+from .version import __version__
+
 DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
 AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
 GCP_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables"
 AZURE_ENV_DOCS = "Coming Soon"
+
+qhub_image_tag = f"v{__version__}"
+pip_install_qhub = f"pip install qhub=={__version__}"
+
+QHUB_GH_BRANCH = os.environ.get("QHUB_GH_BRANCH", "")
+if QHUB_GH_BRANCH:
+    qhub_image_tag = QHUB_GH_BRANCH
+    pip_install_qhub = (
+        f"pip install https://github.com/Quansight/qhub/archive/{QHUB_GH_BRANCH}.zip"
+    )
+
 
 # Regex for suitable project names
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"

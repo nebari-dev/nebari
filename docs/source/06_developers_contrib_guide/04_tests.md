@@ -1,5 +1,26 @@
 # Testing
 
+## Using a development branch
+
+To use qhub from a development branch such as `main` set the environment variable `QHUB_GH_BRANCH` before running qhub commands:
+
+```
+export QHUB_GH_BRANCH=main
+```
+
+Then `qhub init` will create a qhub-config.yaml containing, for example, `quansight/qhub-jupyterlab:main` which is the Docker image 
+built based on the Dockerfiles specified in the main branch of the qhub repo (see below for more info on how these are specified). 
+There is a GitHub workflow that will build these images and push to Docker Hub whenever a change is made to the relevant files on GitHub.
+
+In addition, `qhub deploy` can use QHUB_GH_BRANCH to create GitHub/GitLab workflows which install the development branch of qhub 
+for their own deploy steps.
+
+If you want to use the development version of qhub for your init and deploy but want your resulting deployment to be based on a 
+full release version, do not set the QHUB_GH_BRANCH environment variable. In that case, Docker tags and workflow `pip install qhub` 
+commands will be based on the qhub version specified in the qhub/version.py file, but these tags and releases may not yet exist, 
+perhaps if the version has been updated to include a beta/dev component which has not been released. 
+So you may need to manually modify the qhub-config.yaml to 'downgrade' the tags to a full release version.
+
 ## Modifying Docker Images
 
 All QHub docker images are located in [`qhub/templates/{{

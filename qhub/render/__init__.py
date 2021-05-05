@@ -7,6 +7,7 @@ from cookiecutter.main import cookiecutter
 from cookiecutter.generate import generate_files
 from ..version import __version__
 from ..constants import TERRAFORM_VERSION
+from ..utils import pip_install_qhub, QHUB_GH_BRANCH
 
 
 def patch_dask_gateway_extra_config(config):
@@ -42,10 +43,12 @@ def patch_versioning_extra_config(config):
     if "qhub_version" not in config:
         config["qhub_version"] = __version__
 
+    config["pip_install_qhub"] = pip_install_qhub
+
     if "terraform_modules" not in config:
         config["terraform_modules"] = {
             "repository": "github.com/quansight/qhub-terraform-modules",
-            "rev": f"release-{__version__}",
+            "rev": QHUB_GH_BRANCH and QHUB_GH_BRANCH or f"release-{__version__}",
         }
 
     if "terraform_version" not in config:

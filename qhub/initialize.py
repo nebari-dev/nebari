@@ -13,7 +13,7 @@ from qhub.provider.cicd import github
 from qhub.provider import git
 from qhub.provider.cloud import digital_ocean
 from qhub.utils import namestr_regex
-from qhub.version import __version__
+from qhub.utils import qhub_image_tag
 
 BASE_CONFIGURATION = {
     "project_name": None,
@@ -34,10 +34,10 @@ BASE_CONFIGURATION = {
         "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
     },
     "default_images": {
-        "jupyterhub": f"quansight/qhub-jupyterhub:v{__version__}",
-        "jupyterlab": f"quansight/qhub-jupyterlab:v{__version__}",
-        "dask_worker": f"quansight/qhub-dask-worker:{__version__}",
-        "dask_gateway": f"quansight/qhub-dask-gateway:{__version__}",
+        "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
+        "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
+        "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
+        "dask_gateway": f"quansight/qhub-dask-gateway:{qhub_image_tag}",
     },
     "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
     "theme": {
@@ -170,7 +170,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 0.75,
                 "mem_limit": "4G",
                 "mem_guarantee": "2.5G",
-                "image": f"quansight/qhub-jupyterlab:v{__version__}",
+                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
         {
@@ -181,7 +181,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1.5,
                 "mem_limit": "8G",
                 "mem_guarantee": "5G",
-                "image": f"quansight/qhub-jupyterlab:v{__version__}",
+                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
     ],
@@ -192,7 +192,7 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "4G",
             "worker_memory": "2.5G",
             "worker_threads": 1,
-            "image": f"quansight/qhub-dask-worker:v{__version__}",
+            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
         "Medium Worker": {
             "worker_cores_limit": 2,
@@ -200,7 +200,7 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "8G",
             "worker_memory": "5G",
             "worker_threads": 2,
-            "image": f"quansight/qhub-dask-worker:v{__version__}",
+            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
     },
 }
