@@ -15,6 +15,20 @@
 
 ### Bug fixes
 
+## Release 0.3.8 - 05/05/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+ - creating releases for QHub simplified
+ - added an image for overriding the dask-gateway being used
+
+### Bug fixes
+
+ - dask-gateway exposed by default now properly
+ - typo in cookiecutter for enabling GPUs on GCP
+
 ## Release 0.3.7 - 04/30/2021
 
 ### Breaking changes
