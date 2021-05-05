@@ -8,7 +8,7 @@ with open(path.join(root_dir, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
 __version__ = None
-exec(open(path.join(root_dir, "qhub/version.py")).read()) # Load __version__
+exec(open(path.join(root_dir, "qhub/version.py")).read())  # Load __version__
 
 setup(
     name="qhub",
