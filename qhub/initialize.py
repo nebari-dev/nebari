@@ -4,6 +4,7 @@ import string
 import random
 import secrets
 import tempfile
+import logging
 
 import bcrypt
 import requests
@@ -12,8 +13,9 @@ from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
 from qhub.provider.cloud import digital_ocean
-from qhub.utils import namestr_regex
-from qhub.utils import qhub_image_tag
+from qhub.utils import namestr_regex, qhub_image_tag, check_cloud_credentials
+
+logger = logging.getLogger(__name__)
 
 BASE_CONFIGURATION = {
     "project_name": None,
@@ -396,61 +398,85 @@ def render_config(
             auth0_auto_provision(config)
 
     if repository_auto_provision:
-        GITHUB_REGEX = "github.com/(.*)/(.*)"
+        GITHUB_REGEX = "(https://)?github.com/([^/]+)/([^/]+)/?"
         if re.search(GITHUB_REGEX, repository):
             match = re.search(GITHUB_REGEX, repository)
             git_repository = github_auto_provision(
-                config, match.group(1), match.group(2)
+                config, match.group(2), match.group(3)
             )
             git_repository_initialize(git_repository)
+        else:
+            raise ValueError(
+                f"Repository to be auto-provisioned is not the full URL of a GitHub repo: {repository}"
+            )
 
     return config
 
 
 def github_auto_provision(config, owner, repo):
+    check_cloud_credentials(
+        config
+    )  # We may need env vars such as AWS_ACCESS_KEY_ID depending on provider
+
+    already_exists = True
     try:
         github.get_repository(owner, repo)
     except requests.exceptions.HTTPError:
         # repo not found
-        github.create_repository(
-            owner,
-            repo,
-            description=f'QHub {config["project_name"]}-{config["provider"]}',
-            homepage='https://{config["domain"]}',
-        )
+        already_exists = False
 
-    # Secrets
-    if config["provider"] == "do":
-        for name in {
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "SPACES_ACCESS_KEY_ID",
-            "SPACES_SECRET_ACCESS_KEY",
-            "DIGITALOCEAN_TOKEN",
-        }:
-            github.update_secret(owner, repo, name, os.environ[name])
-    elif config["provider"] == "aws":
-        for name in {
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "AWS_DEFAULT_REGION",
-        }:
-            github.update_secret(owner, repo, name, os.environ[name])
-    elif config["provider"] == "gcp":
-        github.update_secret(owner, repo, "PROJECT_ID", os.environ["PROJECT_ID"])
-        with open(os.environ["GOOGLE_CREDENTIALS"]) as f:
-            github.update_secret(owner, repo, "GOOGLE_CREDENTIALS", f.read())
-    elif config["provider"] == "azure":
-        for name in {
-            "ARM_CLIENT_ID",
-            "ARM_CLIENT_SECRET",
-            "ARM_SUBSCRIPTION_ID",
-            "ARM_TENANT_ID",
-        }:
-            github.update_secret(owner, repo, name, os.environ[name])
-    github.update_secret(
-        owner, repo, "REPOSITORY_ACCESS_TOKEN", os.environ["GITHUB_TOKEN"]
-    )
+    if not already_exists:
+        try:
+            github.create_repository(
+                owner,
+                repo,
+                description=f'QHub {config["project_name"]}-{config["provider"]}',
+                homepage=f'https://{config["domain"]}',
+            )
+        except requests.exceptions.HTTPError as he:
+            raise ValueError(
+                f"Unable to create GitHub repo https://github.com/{owner}/{repo} - error message from GitHub is: {he}"
+            )
+    else:
+        logger.warn(f"GitHub repo https://github.com/{owner}/{repo} already exists")
+
+    try:
+        # Secrets
+        if config["provider"] == "do":
+            for name in {
+                "AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY",
+                "SPACES_ACCESS_KEY_ID",
+                "SPACES_SECRET_ACCESS_KEY",
+                "DIGITALOCEAN_TOKEN",
+            }:
+                github.update_secret(owner, repo, name, os.environ[name])
+        elif config["provider"] == "aws":
+            for name in {
+                "AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY",
+                "AWS_DEFAULT_REGION",
+            }:
+                github.update_secret(owner, repo, name, os.environ[name])
+        elif config["provider"] == "gcp":
+            github.update_secret(owner, repo, "PROJECT_ID", os.environ["PROJECT_ID"])
+            with open(os.environ["GOOGLE_CREDENTIALS"]) as f:
+                github.update_secret(owner, repo, "GOOGLE_CREDENTIALS", f.read())
+        elif config["provider"] == "azure":
+            for name in {
+                "ARM_CLIENT_ID",
+                "ARM_CLIENT_SECRET",
+                "ARM_SUBSCRIPTION_ID",
+                "ARM_TENANT_ID",
+            }:
+                github.update_secret(owner, repo, name, os.environ[name])
+        github.update_secret(
+            owner, repo, "REPOSITORY_ACCESS_TOKEN", os.environ["GITHUB_TOKEN"]
+        )
+    except requests.exceptions.HTTPError as he:
+        raise ValueError(
+            f"Unable to set Secrets on GitHub repo https://github.com/{owner}/{repo} - error message from GitHub is: {he}"
+        )
 
     return f"git@github.com:{owner}/{repo}.git"
 
