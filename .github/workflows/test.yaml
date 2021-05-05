@@ -91,6 +91,8 @@ jobs:
   test-kubernetes:
     name: "Kubernetes Tests"
     runs-on: ubuntu-latest
+    env:
+      QHUB_GH_BRANCH: main
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
