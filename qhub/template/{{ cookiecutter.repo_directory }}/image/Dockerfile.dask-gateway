@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir \
     aiohttp==3.7.2 \
     colorlog \
     cryptography \
-    traitlets>=5.0.0 \
+    traitlets==4.3.3 \
     pyyaml \
     kubernetes-asyncio==11.0.0
 
