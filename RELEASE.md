@@ -15,6 +15,16 @@
 
 ### Bug fixes
 
+## Release 0.3.9 - 05/05/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+### Bug fixes
+
+ - terraform formatting in cookiecutter for enabling GPUs on GCP
+
 ## Release 0.3.8 - 05/05/2021
 
 ### Breaking changes
