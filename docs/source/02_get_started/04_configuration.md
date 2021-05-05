@@ -502,10 +502,10 @@ image, and dask gateway docker image.
 
 ```yaml
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:89c365443a3911f4fd01925e913b35a5465511e3"
-  jupyterlab: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
-  dask_worker: "quansight/qhub-dask-worker:89c365443a3911f4fd01925e913b35a5465511e3"
-  dask_gateway: "quansight/qhub-dask-gateway:89c365443a3911f4fd01925e913b35a5465511e3"
+  jupyterhub: "quansight/qhub-jupyterhub:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
+  jupyterlab: "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
+  dask_worker: "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
+  dask_gateway: "quansight/qhub-dask-gateway:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
 ```
 
 ## Storage
@@ -541,7 +541,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
+        image: "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       kubespawner_override:
@@ -549,7 +549,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
+        image: "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
 
   dask_worker:
     "Small Worker":
@@ -557,13 +557,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:89c365443a3911f4fd01925e913b35a5465511e3"
+      image: "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:89c365443a3911f4fd01925e913b35a5465511e3"
+      image: "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
 ```
 
 For each `profiles.jupyterlab` is a named JupyterLab profile. It
@@ -796,9 +796,9 @@ digital_ocean:
       max_nodes: 5
 
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:89c365443a3911f4fd01925e913b35a5465511e3"
-  jupyterlab: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
-  dask_worker: "quansight/qhub-dask-worker:89c365443a3911f4fd01925e913b35a5465511e3"
+  jupyterhub: "quansight/qhub-jupyterhub:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
+  jupyterlab: "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
+  dask_worker: "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
 
 theme:
   jupyterhub:
@@ -829,7 +829,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
+        image: "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       default: true
@@ -838,7 +838,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
+        image: "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
 
   dask_worker:
     "Small Worker":
@@ -846,13 +846,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:89c365443a3911f4fd01925e913b35a5465511e3"
+      image: "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:89c365443a3911f4fd01925e913b35a5465511e3"
+      image: "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
 
 environments:
   "environment-default.yaml":

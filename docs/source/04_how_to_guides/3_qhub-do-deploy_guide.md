@@ -115,7 +115,7 @@ default_images:
   jupyterhub: "quansight/qhub-jupyterhub:0a4150d28162c641944e60ae41e04ac96dd2f890"
   jupyterlab: "quansight/qhub-jupyterlab:0a4150d28162c641944e60ae41e04ac96dd2f890"
   dask_worker: "quansight/qhub-dask-worker:0a4150d28162c641944e60ae41e04ac96dd2f890"
-  dask_gateway: "quansight/qhub-dask-gateway:89c365443a3911f4fd01925e913b35a5465511e3"
+  dask_gateway: "quansight/qhub-dask-gateway:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
 ```
 
 ### Storage
@@ -147,7 +147,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
+        image: "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       kubespawner_override:
@@ -155,7 +155,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
+        image: "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
 
   dask_worker:
     "Small Worker":
@@ -163,13 +163,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
+      image: "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3"
+      image: "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
 ```
 
 For each `profiles.jupyterlab` is a named jupyterlab profile. It closely follows the [KubeSpawner](https://jupyterhub kubespawner.readthedocs.io/en/latest/spawner.html) api. The only exception is that two keys are added `users` and `groups` which allow restriction of profiles to  a given set of groups and users. We recommend using groups to manage profile access. Finally, we allow for configuration of the [dask workers](https://distributed.dask.org/en/latest/worker.html). In general, similar to the jupyterlab instances, you only need to configure the cores and memory.

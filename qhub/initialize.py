@@ -34,10 +34,10 @@ BASE_CONFIGURATION = {
         "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
     },
     "default_images": {
-        "jupyterhub": "quansight/qhub-jupyterhub:89c365443a3911f4fd01925e913b35a5465511e3",
-        "jupyterlab": "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3",
-        "dask_worker": "quansight/qhub-dask-worker:89c365443a3911f4fd01925e913b35a5465511e3",
-        "dask_gateway": "quansight/qhub-dask-gateway:89c365443a3911f4fd01925e913b35a5465511e3",
+        "jupyterhub": "quansight/qhub-jupyterhub:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
+        "jupyterlab": "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
+        "dask_worker": "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
+        "dask_gateway": "quansight/qhub-dask-gateway:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
     },
     "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
     "theme": {
@@ -170,7 +170,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 0.75,
                 "mem_limit": "4G",
                 "mem_guarantee": "2.5G",
-                "image": "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3",
+                "image": "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
             },
         },
         {
@@ -181,7 +181,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1.5,
                 "mem_limit": "8G",
                 "mem_guarantee": "5G",
-                "image": "quansight/qhub-jupyterlab:89c365443a3911f4fd01925e913b35a5465511e3",
+                "image": "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
             },
         },
     ],
@@ -192,7 +192,7 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "4G",
             "worker_memory": "2.5G",
             "worker_threads": 1,
-            "image": "quansight/qhub-dask-worker:89c365443a3911f4fd01925e913b35a5465511e3",
+            "image": "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
         },
         "Medium Worker": {
             "worker_cores_limit": 2,
@@ -200,7 +200,7 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "8G",
             "worker_memory": "5G",
             "worker_threads": 2,
-            "image": "quansight/qhub-dask-worker:89c365443a3911f4fd01925e913b35a5465511e3",
+            "image": "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
         },
     },
 }

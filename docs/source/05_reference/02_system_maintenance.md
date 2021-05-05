@@ -140,7 +140,7 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:89c365443a3911f4fd01925e913b35a5465511e3"
+      image: "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
 ```
 
 [Dask-gateway](https://gateway.dask.org/api-server.html#kube-cluster-config)
@@ -162,7 +162,7 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:89c365443a3911f4fd01925e913b35a5465511e3"
+      image: "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1"
       scheduler_extra_pod_config:
         nodeSelector:
           "doks.digitalocean.com/node-pool": worker-high-memory
