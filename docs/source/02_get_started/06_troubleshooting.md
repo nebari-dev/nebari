@@ -133,8 +133,6 @@ docker run -p 8000:8000 -it Quansight/qhub-jupyterlab:latest jupyter lab --port 
 
 ### Useful Kubernetes commands
 
----
-
 ### Integrations
 #### Prefect
 TODO

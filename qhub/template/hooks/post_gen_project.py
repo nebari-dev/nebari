@@ -25,43 +25,38 @@ if __name__ == "__main__":
             with open(f"environments/{name}", "w") as f:
                 yaml.dump(spec, f)
 
-    if PROVIDER == "aws":
-        remove_file("infrastructure/do.tf")
-        remove_file("infrastructure/gcp.tf")
-        remove_file("infrastructure/azure.tf")
-    elif PROVIDER == "do":
+    # Remove any unused cloud infrastructure
+    if PROVIDER != "aws":
         remove_file("infrastructure/aws.tf")
-        remove_file("infrastructure/gcp.tf")
-        remove_file("infrastructure/azure.tf")
-    elif PROVIDER == "gcp":
-        remove_file("infrastructure/aws.tf")
+
+    if PROVIDER != "do":
         remove_file("infrastructure/do.tf")
-        remove_file("infrastructure/azure.tf")
-    elif PROVIDER == "azure":
-        remove_file("infrastructure/aws.tf")
-        remove_file("infrastructure/do.tf")
+
+    if PROVIDER != "gcp":
         remove_file("infrastructure/gcp.tf")
-    elif PROVIDER == "local":
-        remove_file("infrastructure/aws.tf")
-        remove_file("infrastructure/do.tf")
-        remove_file("infrastructure/gcp.tf")
+
+    if PROVIDER != "azure":
         remove_file("infrastructure/azure.tf")
+
+    # if PROVIDER == "local" all above will have been removed
+
+    # Remove any unused state
 
     if TERRAFORM_STATE == "local":
-        remove_directory("terraform-state")
         remove_file("infrastructure/state.tf")
-    elif TERRAFORM_STATE == "existing":
-        remove_directory("terraform-state")
-    elif TERRAFORM_STATE == "remote" and PROVIDER == "local":
+
+    if TERRAFORM_STATE != "remote" or PROVIDER == "local":
         remove_directory("terraform-state")
 
-    if CI_PROVIDER == "github-actions":
-        remove_file(".gitlab-ci.yml")
-    elif CI_PROVIDER == "gitlab-ci":
+    # Remove any unused CI
+
+    if CI_PROVIDER != "github-actions":
         remove_directory(".github")
-    elif CI_PROVIDER == "none":
+
+    if CI_PROVIDER != "gitlab-ci":
         remove_file(".gitlab-ci.yml")
-        remove_directory(".github")
+
+    # if CI_PROVIDER == "none" all above will have been removed
 
     # templates directory is only used by includes
     remove_directory("templates")

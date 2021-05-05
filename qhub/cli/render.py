@@ -10,7 +10,9 @@ def create_render_subcommand(subparser):
     subparser = subparser.add_parser("render")
     subparser.add_argument("-i", "--input", help="input directory")
     subparser.add_argument("-o", "--output", default="./", help="output directory")
-    subparser.add_argument("-c", "--config", help="cookiecutter configuration")
+    subparser.add_argument(
+        "-c", "--config", help="qhub configuration yaml file", required=True
+    )
     subparser.set_defaults(func=handle_render)
 
 

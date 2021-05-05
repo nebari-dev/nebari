@@ -13,7 +13,7 @@ from qhub.provider.cicd import github
 from qhub.provider import git
 from qhub.provider.cloud import digital_ocean
 from qhub.utils import namestr_regex
-
+from qhub.utils import qhub_image_tag
 
 BASE_CONFIGURATION = {
     "project_name": None,
@@ -27,17 +27,17 @@ BASE_CONFIGURATION = {
         "users": {
             "example-user": {
                 "uid": 1000,
-                "primary_group": "users",
-                "secondary_groups": ["admin"],
+                "primary_group": "admin",
+                "secondary_groups": ["users"],
             }
         },
         "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
     },
     "default_images": {
-        "jupyterhub": "quansight/qhub-jupyterhub:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
-        "jupyterlab": "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
-        "dask_worker": "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
-        "dask_gateway": "quansight/qhub-dask-gateway:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
+        "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
+        "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
+        "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
+        "dask_gateway": f"quansight/qhub-dask-gateway:{qhub_image_tag}",
     },
     "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
     "theme": {
@@ -170,7 +170,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 0.75,
                 "mem_limit": "4G",
                 "mem_guarantee": "2.5G",
-                "image": "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
+                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
         {
@@ -181,7 +181,7 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1.5,
                 "mem_limit": "8G",
                 "mem_guarantee": "5G",
-                "image": "quansight/qhub-jupyterlab:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
+                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
     ],
@@ -192,7 +192,7 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "4G",
             "worker_memory": "2.5G",
             "worker_threads": 1,
-            "image": "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
+            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
         "Medium Worker": {
             "worker_cores_limit": 2,
@@ -200,7 +200,7 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "8G",
             "worker_memory": "5G",
             "worker_threads": 2,
-            "image": "quansight/qhub-dask-worker:50120d8bc8fe7e451e7f67cb1dad4f7c6dcf63c1",
+            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
     },
 }

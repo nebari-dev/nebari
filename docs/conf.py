@@ -1,7 +1,6 @@
 # Configuration file for the Sphinx documentation builder.
 
-# import re
-# from qhub import __version__ as release
+import os, sys
 
 # -- Project information -----------------------------------------------------
 
@@ -24,8 +23,10 @@ master_doc = "index"
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 source_suffix = ".md .rst .ipynb .py".split()
+
+# To find the local substitute extension
+sys.path.append(os.path.abspath("./ext"))
 
 extensions = [
     "myst_parser",
@@ -33,9 +34,10 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx_copybutton",
-]
+    "substitute",
+    ]
+
 # autoapi.extension
-exclude_patterns = ("_build", "*checkpoint*", "output", "outputs", "README.md")
 autoapi_type = "python"
 autoapi_dirs = ()
 
@@ -44,7 +46,7 @@ DEFAULT_LANG = "en"
 
 NAVIGATION_LINKS = {
     DEFAULT_LANG: tuple(),
-}
+    }
 
 THEME_COLOR = "4f28a8"  # "#7B699F"
 
@@ -55,15 +57,16 @@ POSTS = (
     ("posts/*.html", "posts", "post.tmpl"),
     ("posts/*.ipynb", "posts", "post.tmpl"),
     ("posts/*.md.ipynb", "posts", "post.tmpl"),
-)
+    )
 
 templates_path = ["_templates"]
 
 # Material theme options (see theme.conf for more information)
+
 html_theme_options = {
-    # Set the name of the project to appear in the navigation.
     "nav_title": "Welcome to QHub's documentation!",
-    # 'google_analytics_account': 'UA-XXXXX',     # Set you GA account ID to enable tracking
+    # 'google_analytics_account': 'UA-XXXXX',     
+    # Set you GA account ID to enable tracking
     # Specify a base_url used to generate sitemap.xml. If not, no sitemap will be built.
     "base_url": "https://qhub.dev/",
     # Set the color and the accent color
@@ -79,32 +82,50 @@ html_theme_options = {
     "globaltoc_collapse": True,
     # If True, show hidden TOC entries
     "globaltoc_includehidden": False,
+
     "nav_links": [
-        {"href": "index", "title": "Docs", "internal": True,},
-        {
+            {
             "href": "https://www.quansight.com/jupyter-consulting",
             "title": "Quansight",
             "internal": False,
+
         },
-        {
+            {
             "href": "https://hpc.qhub.dev/",
             "title": "QHub HPC",
             "internal": False,
+
         },
-        {"href": "https://pypi.org/project/qhub/", "title": "PyPI", "internal": False,},
-    ],
-}
+            {
+                "href": "https://pypi.org/project/qhub/",
+                "title": "PyPI",
+                "internal": False,
+
+        },
+        ],
+
+    }
+
 html_sidebars = {
     "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
-}
+    }
 
 # Exclude build directory and Jupyter backup files:
-exclude_patterns = ["_build", "*checkpoint*", "site", "jupyter_execute"]
+exclude_patterns = ["_build", "*checkpoint*", "site", "jupyter_execute", "conf.py", "README.md", "ext"]
 
 latex_documents = [
     (master_doc, "qhub.tex", "Infrastructure as Code", "QHub", "manual",)
-]
+    ]
 
 jupyter_execute_notebooks = "off"
+
+myst_update_mathjax = False
+
+# Import qhub version number
+here = os.path.abspath(os.path.dirname(__file__))
+__version__ = None
+exec(open(os.path.join(here,'../qhub/version.py')).read())
+
+qhub_version_string = __version__
 
 # SITE_URL = "https://quansight.github.io/qhub-home/"

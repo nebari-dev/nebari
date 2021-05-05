@@ -48,7 +48,6 @@ RUN \
 COPY jupyterlab /opt/jupyterlab
 RUN /opt/jupyterlab/postBuild
 
-
 # ========== users configuration ============
 # Establish some default shell behaviors for all users. This writes to /etc so
 # that the shell setup will always be used by users

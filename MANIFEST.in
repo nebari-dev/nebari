@@ -1,4 +1,3 @@
-include qhub VERSION
 graft qhub
 prune home
 prune docs

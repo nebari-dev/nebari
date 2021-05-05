@@ -5,6 +5,9 @@ import json
 from ruamel import yaml
 from cookiecutter.main import cookiecutter
 from cookiecutter.generate import generate_files
+from ..version import __version__
+from ..constants import TERRAFORM_VERSION
+from ..utils import pip_install_qhub, QHUB_GH_BRANCH
 
 
 def patch_dask_gateway_extra_config(config):
@@ -30,6 +33,26 @@ def patch_dask_gateway_extra_config(config):
                     worker_config[config_name] = deep_merge(
                         worker_config[config_name], extra_pod_config
                     )
+
+
+def patch_versioning_extra_config(config):
+    """
+    Set defaults for qhub_version and terraform_modules
+    because they depend on __version__ so cannot be static in cookiecutter.json
+    """
+    if "qhub_version" not in config:
+        config["qhub_version"] = __version__
+
+    config["pip_install_qhub"] = pip_install_qhub
+
+    if "terraform_modules" not in config:
+        config["terraform_modules"] = {
+            "repository": "github.com/quansight/qhub-terraform-modules",
+            "rev": QHUB_GH_BRANCH and QHUB_GH_BRANCH or f"release-{__version__}",
+        }
+
+    if "terraform_version" not in config:
+        config["terraform_version"] = TERRAFORM_VERSION
 
 
 def deep_merge(d1, d2):
@@ -106,6 +129,8 @@ def render_template(
         with (input_directory / "cookiecutter.json").open() as f:
             config = collections.ChainMap(config, json.load(f))
 
+        patch_versioning_extra_config(config)
+
         generate_files(
             repo_dir=str(input_directory),
             context={"cookiecutter": config},
@@ -119,6 +144,8 @@ def render_template(
         global_context = {}
         exec(content, global_context, global_context)
         config = global_context["COOKIECUTTER_CONFIG"]
+
+        patch_versioning_extra_config(config)
 
         cookiecutter(
             str(input_directory),

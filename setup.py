@@ -7,12 +7,12 @@ root_dir = path.abspath(path.dirname(__file__))
 with open(path.join(root_dir, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-with open(path.join(root_dir, "qhub/VERSION")) as version_file:
-    version = version_file.read().strip()
+__version__ = None
+exec(open(path.join(root_dir, "qhub/version.py")).read())  # Load __version__
 
 setup(
     name="qhub",
-    version=version,
+    version=__version__,
     description="Management of QHub on Cloud Infrastructure",
     long_description=long_description,
     long_description_content_type="text/markdown",

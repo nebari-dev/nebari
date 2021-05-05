@@ -17,7 +17,7 @@ After the installation, the next step is to configure QHub.
 QHub is entirely controlled from a configuration file, which allows you to manage multiple environments and multiple teams, as well as their permissions and authorization in a robust way.
 
 + **The Configuration File**
-  + QHub comes with configuration file templates for each of the cloud providers it currently supports: **AWS**, **DO**, and **GCP**. The templates can be found [**here**]('#').
+  + QHub comes with configuration file templates for each of the cloud providers it currently supports: **AWS**, **DO**, **GCP**, and **Azure**. The templates can be found [**here**](../02_get_started/04_configuration.md).
   
 ## Why QHub
 
@@ -86,23 +86,17 @@ The architecture of AWS uses [**Virtual Private Cloud (VPC)**](https://docs.aws.
 
 QHub uses AWS’s managed Kubernetes service: [**Elastic Kubernetes Service (EKS)**](https://aws.amazon.com/eks/) to create a Kubernetes Cluster. Since VPC is an isolated part of the AWS, you need a way to expose the services running inside the Kubernetes to the Internet, so that others can access it. This is achieved by an [**Internet Gateway**](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html). It’s a VPC component that allows communication between the VPC and the Internet.
 
-[QHub AWS Architecture]()
-
 ### DO Deployment
 
 The configuration file template for Digital Ocean can be found at the following path:
 
     tests/assets/config_do.yaml
 
-[QHub DO Architecture]()
-
 ### GCP Deployment
 
 The configuration file template for GCP can be found at the following path:
 
     tests/assets/config_gcp.yaml
-
-[QHub GCP Architecture]()
 
 ### Autoscaling
 

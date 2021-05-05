@@ -12,7 +12,9 @@ logger = logging.getLogger(__name__)
 
 def create_deploy_subcommand(subparser):
     subparser = subparser.add_parser("deploy")
-    subparser.add_argument("-c", "--config", help="qhub configuration", required=True)
+    subparser.add_argument(
+        "-c", "--config", help="qhub configuration yaml file", required=True
+    )
     subparser.add_argument("-i", "--input", help="input directory")
     subparser.add_argument("-o", "--output", default="./", help="output directory")
     subparser.add_argument(
