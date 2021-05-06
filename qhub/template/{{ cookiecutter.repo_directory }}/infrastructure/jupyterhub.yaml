@@ -7,7 +7,7 @@ hub:
 
 singleuser:
   storage:
-    homeMountPath: /home/qhub_user
+    homeMountPath: /home/jovyan
 
 cull:
   enabled: true

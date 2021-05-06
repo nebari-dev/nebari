@@ -24,9 +24,9 @@ auto_update_conda: false
 aggressive_update_packages: []
 envs_dirs:
  - /home/conda/environments
- - /home/qhub_user/.conda/envs
+ - /home/jovyan/.conda/envs
 pkgs_dirs:
- - /home/qhub_user/.conda/pkgs
+ - /home/jovyan/.conda/pkgs
 EOF
 
 # Fix permissions in accordance with jupyter stack permissions
