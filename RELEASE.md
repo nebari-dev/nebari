@@ -15,6 +15,16 @@
 
 ### Bug fixes
 
+## Release 0.3.10 - 05/06/2021
+
+### Breaking changes
+
+ - reverting `qhub_user` default name to `jovyan`
+
+### Feature changes and enhancements
+
+### Bug fixes
+
 ## Release 0.3.9 - 05/05/2021
 
 ### Breaking changes
