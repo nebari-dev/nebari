@@ -51,6 +51,8 @@ def patch_versioning_extra_config(config):
             "rev": QHUB_GH_BRANCH and QHUB_GH_BRANCH or f"release-{__version__}",
         }
 
+    config["QHUB_GH_BRANCH"] = QHUB_GH_BRANCH
+
     if "terraform_version" not in config:
         config["terraform_version"] = TERRAFORM_VERSION
 
