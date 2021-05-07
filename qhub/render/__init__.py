@@ -1,13 +1,16 @@
 import pathlib
 import collections
 import json
+import os
+from shutil import copyfile
+from gitignore_parser import parse_gitignore
 
 from ruamel import yaml
 from cookiecutter.main import cookiecutter
 from cookiecutter.generate import generate_files
 from ..version import __version__
 from ..constants import TERRAFORM_VERSION
-from ..utils import pip_install_qhub, QHUB_GH_BRANCH
+from ..utils import pip_install_qhub
 
 
 def patch_dask_gateway_extra_config(config):
@@ -127,6 +130,11 @@ def render_template(
 
         patch_versioning_extra_config(config)
 
+        remove_existing_renders(
+            source_repo_dir=input_directory / "{{ cookiecutter.repo_directory }}",
+            dest_repo_dir=output_directory / repo_directory,
+        )
+
         generate_files(
             repo_dir=str(input_directory),
             context={"cookiecutter": config},
@@ -156,3 +164,59 @@ def render_template(
             output_dir=str(output_directory),
             overwrite_if_exists=force,
         )
+
+
+def remove_existing_renders(source_repo_dir, dest_repo_dir):
+    """
+    Remove existing folder structure in output_dir apart from:
+    Files matching gitignore entries from the source template
+    Anything the user has added to a .qhubignore file in the output_dir (maybe their own github workflows)
+
+    No FILES in the dest_repo_dir are deleted.
+
+    The .git folder remains intact
+
+    Inputs must be pathlib.Path
+    """
+    copyfile(str(source_repo_dir / ".gitignore"), str(dest_repo_dir / ".gitignore"))
+
+    gitignore_matches = parse_gitignore(dest_repo_dir / ".gitignore")
+
+    if (dest_repo_dir / ".qhubignore").is_file():
+        qhubignore_matches = parse_gitignore(dest_repo_dir / ".qhubignore")
+    else:
+
+        def qhubignore_matches(_):
+            return False  # Dummy blank qhubignore
+
+    for root, dirs, files in os.walk(dest_repo_dir, topdown=False):
+        if (
+            root.startswith(f"{str(dest_repo_dir)}/.git/")
+            or root == f"{str(dest_repo_dir)}/.git"
+        ):
+            # Leave everything in the .git folder
+            continue
+
+        root_path = pathlib.Path(root)
+
+        if root != str(
+            dest_repo_dir
+        ):  # Do not delete top-level files such as qhub-config.yaml!
+            for file in files:
+
+                if not gitignore_matches(root_path / file) and not qhubignore_matches(
+                    root_path / file
+                ):
+
+                    os.remove(root_path / file)
+
+        for dir in dirs:
+            if (
+                not gitignore_matches(root_path / dir)
+                and not (dir == ".git" and root_path == dest_repo_dir)
+                and not qhubignore_matches(root_path / file)
+            ):
+                try:
+                    os.rmdir(root_path / dir)
+                except OSError:
+                    pass  # Silently fail if 'saved' files are present so dir not empty
