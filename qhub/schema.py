@@ -49,8 +49,8 @@ class Base(pydantic.BaseModel):
 
 
 class CICD(Base):
-    type: CiEnum = "github-actions"
-    branch: str = "main"
+    type: CiEnum
+    branch: str
     before_script: typing.Optional[typing.List[str]]
     after_script: typing.Optional[typing.List[str]]
 
@@ -59,14 +59,14 @@ class CICD(Base):
 
 
 class TerraformState(Base):
-    type: TerraformStateEnum = "remote"
+    type: TerraformStateEnum
     backend: typing.Optional[str]
     config: typing.Optional[typing.Dict[str, str]]
 
 
 class TerraformModules(Base):
-    repository: str = "github.com/quansight/qhub-terraform-modules"
-    rev: str = "main"
+    repository: str
+    rev: str
 
 
 # ============ Certificate =============
@@ -154,9 +154,9 @@ class NodeSelector(Base):
 
 
 class NodeGroup(Base):
-    instance: str = "s-2vcpu-4gb"
-    min_nodes: int = 1
-    max_nodes: int = 1
+    instance: str
+    min_nodes: int
+    max_nodes: int
 
     class Config:
         extra = "allow"

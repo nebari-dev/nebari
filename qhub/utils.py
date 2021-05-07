@@ -7,10 +7,12 @@ import contextlib
 
 from .version import __version__
 
-DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
-AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
-GCP_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables"
-AZURE_ENV_DOCS = "Coming Soon"
+DO_ENV_DOCS = (
+    "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#digital-ocean"
+)
+AWS_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#amazon-web-services-aws"
+GCP_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#google-cloud-platform"
+AZURE_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#microsoft-azure"
 
 qhub_image_tag = f"v{__version__}"
 pip_install_qhub = f"pip install qhub=={__version__}"
@@ -75,7 +77,7 @@ def check_cloud_credentials(config):
     if config["provider"] == "gcp":
         for variable in {"GOOGLE_CREDENTIALS"}:
             if variable not in os.environ:
-                raise Exception(
+                raise ValueError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {GCP_ENV_DOCS}"""
                 )
@@ -87,7 +89,7 @@ def check_cloud_credentials(config):
             "ARM_TENANT_ID",
         }:
             if variable not in os.environ:
-                raise Exception(
+                raise ValueError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {AZURE_ENV_DOCS}"""
                 )
@@ -98,7 +100,7 @@ def check_cloud_credentials(config):
             "AWS_DEFAULT_REGION",
         }:
             if variable not in os.environ:
-                raise Exception(
+                raise ValueError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {AWS_ENV_DOCS}"""
                 )
@@ -111,13 +113,13 @@ def check_cloud_credentials(config):
             "DIGITALOCEAN_TOKEN",
         }:
             if variable not in os.environ:
-                raise Exception(
+                raise ValueError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {DO_ENV_DOCS}"""
                 )
 
         if os.environ["AWS_ACCESS_KEY_ID"] != os.environ["SPACES_ACCESS_KEY_ID"]:
-            raise Exception(
+            raise ValueError(
                 f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must be equal\n
                 See {DO_ENV_DOCS} for more information"""
             )
@@ -126,11 +128,11 @@ def check_cloud_credentials(config):
             os.environ["AWS_SECRET_ACCESS_KEY"]
             != os.environ["SPACES_SECRET_ACCESS_KEY"]
         ):
-            raise Exception(
+            raise ValueError(
                 f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must be equal\n
                 See {DO_ENV_DOCS} for more information"""
             )
     elif config["provider"] == "local":
         pass
     else:
-        raise Exception("Cloud Provider configuration not supported")
+        raise ValueError("Cloud Provider configuration not supported")

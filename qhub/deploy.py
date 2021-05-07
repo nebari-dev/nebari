@@ -48,7 +48,7 @@ def guided_install(
     # don't have `terraform_state` key
     if (
         (not skip_remote_state_provision)
-        and (config.get("terraform_state", {}).get("type") == "remote")
+        and (config.get("terraform_state", {}).get("type", "") == "remote")
         and (config.get("provider") != "local")
     ):
         terraform_state_sync(config)
