@@ -1,0 +1,56 @@
+hub:
+  db:
+    type: sqlite-pvc
+    pvc:
+      storage: 1Gi
+  baseUrl: "/"
+
+proxy:
+  secretToken: "<placeholder>"
+  service:
+    type: ClusterIP
+
+scheduling:
+  userScheduler:
+    enabled: true
+  podPriority:
+    enabled: true
+  userPlaceholder:
+    enabled: false
+    replicas: 1
+
+
+singleuser:
+  defaultUrl: "/lab"
+  image:
+    name: jupyter/datascience-notebook
+    tag: 73a577b006b4
+  startTimeout: 600  # 10 minutes
+  profileList:
+    - display_name: "Small Instance"
+      description: "Stable environment with 1 cpu / 1GB ram"
+      default: true
+  storage:
+    type: static
+    static:
+      pvcName: "<placeholder>"
+      subPath: 'home/{username}'
+    extraVolumeMounts:
+      - mountPath: "/home/shared"
+        name: home
+        subPath: "home/shared"
+  initContainers:
+    - name: init-nfs
+      image: busybox:1.31
+      command: ['sh', '-c', 'mkdir -p /mnt/home/{username} && chmod 777 /mnt/home/{username} && mkdir -p /mnt/home/shared && chmod 777 /mnt/home/shared']
+      securityContext:
+        runAsUser: 0
+      volumeMounts:
+        - mountPath: "/mnt"
+          name: home
+  cpu:
+    limit: 1
+    guarantee: 1
+  memory:
+    limit: "1G"
+    guarantee: "1G"
