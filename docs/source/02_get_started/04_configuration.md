@@ -473,25 +473,6 @@ terraform_state:
     region: "us-east-1"
 ```
 
-
-
-## Terraform Modules
-
-By default QHub uses a set terraform modules developed by Quansight
-managed at https://github.com/quansight/qhub-terraform-modules. This
-collection is used to provide a consistent interface between cloud
-providers and manage how jupyterlab, dask-gateway and related
-resources are deployed. However, if you want to make modifications on
-the deployed resources you can tweak the repository used. This field
-is optional. This is usually the easiest way to tweak QHub outside of
-the `qhub-config.yaml` file.
-
-```yaml
-terraform_modules:
-  repository: "github.com/quansight/qhub-terraform-modules"
-  rev: main
-```
-
 ## Default Images
 
 Default images are to the default image run if not specified in a

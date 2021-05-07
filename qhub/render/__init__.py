@@ -37,19 +37,13 @@ def patch_dask_gateway_extra_config(config):
 
 def patch_versioning_extra_config(config):
     """
-    Set defaults for qhub_version and terraform_modules
+    Set defaults for qhub_version and pip install command
     because they depend on __version__ so cannot be static in cookiecutter.json
     """
     if "qhub_version" not in config:
         config["qhub_version"] = __version__
 
     config["pip_install_qhub"] = pip_install_qhub
-
-    if "terraform_modules" not in config:
-        config["terraform_modules"] = {
-            "repository": "github.com/quansight/qhub-terraform-modules",
-            "rev": QHUB_GH_BRANCH and QHUB_GH_BRANCH or f"release-{__version__}",
-        }
 
     config["QHUB_GH_BRANCH"] = QHUB_GH_BRANCH
 
