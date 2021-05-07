@@ -1,7 +1,7 @@
 provider "digitalocean" {}
 
 module "kubernetes" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/digitalocean/kubernetes?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./digitalocean/kubernetes"
 
   name = local.cluster_name
 

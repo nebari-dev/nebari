@@ -28,15 +28,19 @@ if __name__ == "__main__":
     # Remove any unused cloud infrastructure
     if PROVIDER != "aws":
         remove_file("infrastructure/aws.tf")
+        remove_directory("infrastructure/aws")
 
     if PROVIDER != "do":
         remove_file("infrastructure/do.tf")
+        remove_directory("infrastructure/digitalocean")
 
     if PROVIDER != "gcp":
         remove_file("infrastructure/gcp.tf")
+        remove_directory("infrastructure/gcp")
 
     if PROVIDER != "azure":
         remove_file("infrastructure/azure.tf")
+        remove_directory("infrastructure/azure")
 
     # if PROVIDER == "local" all above will have been removed
 
@@ -47,6 +51,19 @@ if __name__ == "__main__":
 
     if TERRAFORM_STATE != "remote" or PROVIDER == "local":
         remove_directory("terraform-state")
+    else:
+        # Remove the clouds we don't need:
+        if PROVIDER != "aws":
+            remove_directory("terraform-state/aws")
+
+        if PROVIDER != "do":
+            remove_directory("terraform-state/digitalocean")
+
+        if PROVIDER != "gcp":
+            remove_directory("terraform-state/gcp")
+
+        if PROVIDER != "azure":
+            remove_directory("terraform-state/azure")
 
     # Remove any unused CI
 

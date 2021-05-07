@@ -11,7 +11,7 @@ data "aws_availability_zones" "awszones" {
 
 # ==================== ACCOUNTING ======================
 module "accounting" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/accounting?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./aws/accounting"
 
   project     = var.name
   environment = var.environment
@@ -20,7 +20,7 @@ module "accounting" {
 
 # ======================= NETWORK ======================
 module "network" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/network?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./aws/network"
 
   name = local.cluster_name
 
@@ -45,7 +45,7 @@ module "network" {
 
 # ==================== REGISTRIES =====================
 module "registry-jupyterlab" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/registry?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./aws/registry"
 
   name = "${local.cluster_name}-jupyterlab"
   tags = local.additional_tags
@@ -54,7 +54,7 @@ module "registry-jupyterlab" {
 
 # ====================== EFS =========================
 module "efs" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/efs?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./aws/efs"
 
   name = "${local.cluster_name}-jupyterhub-shared"
   tags = local.additional_tags
@@ -66,7 +66,7 @@ module "efs" {
 
 # ==================== KUBERNETES =====================
 module "kubernetes" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/aws/kubernetes?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./aws/kubernetes"
 
   name = local.cluster_name
   tags = local.additional_tags
