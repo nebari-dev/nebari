@@ -15,6 +15,19 @@
 
 ### Bug fixes
 
+## Release 0.3.11 - 05/07/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+ - better validation messages on github auto provisioning
+
+### Bug fixes
+
+ - removing default values from pydantic schema which caused invalid yaml files to unexpectly pass validation
+ - make kubespawner_override.environment overriadable (prior changes were overwritten)
+
 ## Release 0.3.10 - 05/06/2021
 
 ### Breaking changes
