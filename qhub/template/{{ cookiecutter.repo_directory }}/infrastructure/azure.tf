@@ -12,7 +12,7 @@ module "registry" {
 
 
 module "kubernetes" {
-  source = "./azure/kubernetes"
+  source = "./modules/azure/kubernetes"
 
   name                     = local.cluster_name
   environment              = var.environment

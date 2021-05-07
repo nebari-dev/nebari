@@ -141,5 +141,10 @@
     "_extensions": [
         "qhub.render.jinja.YamlifyExtension",
         "qhub.render.jinja.JsonifyExtension"
+    ],
+
+    "_copy_without_render": [
+        "infrastructure/modules/*",
+        "terraform-state/modules/*"
     ]
 }

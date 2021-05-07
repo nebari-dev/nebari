@@ -274,7 +274,9 @@ class Main(Base):
     ci_cd: typing.Optional[CICD]
     domain: str
     terraform_state: typing.Optional[TerraformState]
-    terraform_modules: typing.Optional[TerraformModules]  # No longer used, so ignored, but could still be in qhub-config.yaml
+    terraform_modules: typing.Optional[
+        TerraformModules
+    ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
     cdsdashboards: CDSDashboards
     security: Security

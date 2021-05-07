@@ -1,7 +1,7 @@
 provider "digitalocean" {}
 
 module "kubernetes" {
-  source = "./digitalocean/kubernetes"
+  source = "./modules/digitalocean/kubernetes"
 
   name = local.cluster_name
 

@@ -6,12 +6,12 @@ provider "google" {
 
 
 module "registry-jupyterhub" {
-  source = "./gcp/registry"
+  source = "./modules/gcp/registry"
 }
 
 
 module "kubernetes" {
-  source = "./gcp/kubernetes"
+  source = "./modules/gcp/kubernetes"
 
   name     = local.cluster_name
   location = var.region

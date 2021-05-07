@@ -1,4 +1,0 @@
-prefectImage: prefecthq/prefect:0.12.2-python3.6
-namespace: dev
-serviceAccount: prefect
-prefectToken: "<placeholder>"
