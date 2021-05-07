@@ -106,6 +106,7 @@ def qhub_configure_profile(username, safe_username, profile):
        'NB_UMASK': '0002',
        'SHELL': '/bin/bash',
        'HOME': '/home/jovyan',
+       **(profile.get('kubespawner_override', {}).get('environment', {}))
     }
 
     passwd, group = qhub_generate_nss_files()
