@@ -89,16 +89,11 @@ def deep_merge(d1, d2):
         return d1
 
 
-def render_default_template(output_directory, config_filename=None, force=False):
+def render_default_template(output_directory, config_filename, force=False):
     import qhub
 
     input_directory = pathlib.Path(qhub.__file__).parent / "template"
-    render_template(input_directory, output_directory, config_filename, force=force)
 
-
-def render_template(
-    input_directory, output_directory, config_filename=None, force=False
-):
     # would be nice to remove assumption that input directory
     # is in local filesystem
     input_directory = pathlib.Path(input_directory)
@@ -112,58 +107,32 @@ def render_template(
     output_directory = output_directory.parent
     output_directory.mkdir(exist_ok=True, parents=True)
 
-    prompt_filename = input_directory / "hooks" / "prompt_gen_project.py"
+    filename = pathlib.Path(config_filename)
 
-    if config_filename is not None:
-        filename = pathlib.Path(config_filename)
+    if not filename.is_file():
+        raise ValueError(f"cookiecutter configuration={filename} is not filename")
 
-        if not filename.is_file():
-            raise ValueError(f"cookiecutter configuration={filename} is not filename")
+    with filename.open() as f:
+        config = yaml.safe_load(f)
+        config["repo_directory"] = repo_directory
+        patch_dask_gateway_extra_config(config)
 
-        with filename.open() as f:
-            config = yaml.safe_load(f)
-            config["repo_directory"] = repo_directory
-            patch_dask_gateway_extra_config(config)
+    with (input_directory / "cookiecutter.json").open() as f:
+        config = collections.ChainMap(config, json.load(f))
 
-        with (input_directory / "cookiecutter.json").open() as f:
-            config = collections.ChainMap(config, json.load(f))
+    patch_versioning_extra_config(config)
 
-        patch_versioning_extra_config(config)
+    remove_existing_renders(
+        source_repo_dir=input_directory / "{{ cookiecutter.repo_directory }}",
+        dest_repo_dir=output_directory / repo_directory,
+    )
 
-        remove_existing_renders(
-            source_repo_dir=input_directory / "{{ cookiecutter.repo_directory }}",
-            dest_repo_dir=output_directory / repo_directory,
-        )
-
-        generate_files(
-            repo_dir=str(input_directory),
-            context={"cookiecutter": config},
-            output_dir=str(output_directory),
-            overwrite_if_exists=force,
-        )
-    elif prompt_filename.is_file():
-        with prompt_filename.open() as f:
-            content = f.read()
-
-        global_context = {}
-        exec(content, global_context, global_context)
-        config = global_context["COOKIECUTTER_CONFIG"]
-
-        patch_versioning_extra_config(config)
-
-        cookiecutter(
-            str(input_directory),
-            no_input=True,
-            extra_context=config,
-            output_dir=str(output_directory),
-            overwrite_if_exists=force,
-        )
-    else:
-        cookiecutter(
-            str(input_directory),
-            output_dir=str(output_directory),
-            overwrite_if_exists=force,
-        )
+    generate_files(
+        repo_dir=str(input_directory),
+        context={"cookiecutter": config},
+        output_dir=str(output_directory),
+        overwrite_if_exists=force,
+    )
 
 
 def remove_existing_renders(source_repo_dir, dest_repo_dir):

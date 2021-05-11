@@ -2,13 +2,12 @@ import pathlib
 
 from ruamel import yaml
 
-from qhub.render import render_default_template, render_template
+from qhub.render import render_default_template
 from qhub.schema import verify
 
 
 def create_render_subcommand(subparser):
     subparser = subparser.add_parser("render")
-    subparser.add_argument("-i", "--input", help="input directory")
     subparser.add_argument("-o", "--output", default="./", help="output directory")
     subparser.add_argument(
         "-c", "--config", help="qhub configuration yaml file", required=True
@@ -28,7 +27,4 @@ def handle_render(args):
 
     verify(config)
 
-    if args.input is None:
-        render_default_template(args.output, args.config, force=True)
-    else:
-        render_template(args.input, args.output, args.config, force=True)
+    render_default_template(args.output, args.config, force=True)
