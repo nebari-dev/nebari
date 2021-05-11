@@ -23,7 +23,7 @@ def qhub_validate(config):
     except BaseException as e:
         msg = "validate: error: failed to validate QHub configuration."
         print(msg)
-        validate_comment = parse_validation(e.stderr.decode("utf-8"))
+        validate_comment = parse_validation(e)
         validate_comment_wrapper = f" ```{validate_comment}``` "
         return False, validate_comment_wrapper, 0
 
