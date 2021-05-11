@@ -6,7 +6,6 @@ from shutil import copyfile
 from gitignore_parser import parse_gitignore
 
 from ruamel import yaml
-from cookiecutter.main import cookiecutter
 from cookiecutter.generate import generate_files
 from ..version import __version__
 from ..constants import TERRAFORM_VERSION
