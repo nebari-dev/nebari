@@ -13,6 +13,7 @@ def qhub_validate(config):
     def parse_validation(message: str):
         # this will just separate things for now, but can be enhanced
         return message.split("ValidationError:")[1]
+
     try:
         verify(config)
         msg = "validate: info: successfully validated QHub configuration"
