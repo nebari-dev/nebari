@@ -104,7 +104,9 @@ def render_default_template(output_directory, config_filename, force=False):
     # we take the output directory and split into two components
     repo_directory = output_directory.name
     output_directory = output_directory.parent
-    output_directory.mkdir(exist_ok=True, parents=True)
+
+    # mkdir all the way down to repo dir so we can copy .gitignore into it in remove_existing_renders
+    (output_directory / repo_directory).mkdir(exist_ok=True, parents=True)
 
     filename = pathlib.Path(config_filename)
 

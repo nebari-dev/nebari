@@ -36,4 +36,4 @@ def test_render(project, namespace, domain, cloud_provider, ci_provider, auth_pr
         yaml.dump(config, f)
 
     output_directory = tmp_path / "test"
-    render_default_template(str(output_directory), config_filename)
+    render_default_template(str(output_directory), config_filename, force=True)
