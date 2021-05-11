@@ -18,14 +18,14 @@ def qhub_validate(config):
         verify(config)
         msg = "validate: info: successfully validated QHub configuration"
         print(msg)
-        return True, msg, 1
+        return True, msg, 0
 
     except BaseException as e:
         msg = "validate: error: failed to validate QHub configuration."
         print(msg)
         validate_comment = parse_validation(e)
         validate_comment_wrapper = f" ```{validate_comment}``` "
-        return False, validate_comment_wrapper, 0
+        return False, validate_comment_wrapper, 1
 
 
 def generate_lint_message(config):
