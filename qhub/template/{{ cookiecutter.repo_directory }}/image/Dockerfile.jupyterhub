@@ -44,3 +44,4 @@ RUN fix-permissions /srv/jupyterhub
 
 USER ${NB_USER}
 CMD ["jupyterhub", "--config", "/usr/local/etc/jupyterhub/jupyterhub_config.py"]
+

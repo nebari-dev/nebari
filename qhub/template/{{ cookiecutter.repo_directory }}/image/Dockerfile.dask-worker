@@ -29,3 +29,4 @@ RUN /opt/scripts/install-conda-environment.sh /opt/dask-worker/environment.yaml 
 
 COPY dask-worker /opt/dask-worker
 RUN /opt/dask-worker/postBuild
+
