@@ -10,9 +10,9 @@ def qhub_validate(config):
     # Gather the output of `qhub validate`.
     print("Validate: info: validating QHub configuration in qhub-config.yaml")
 
-    def parse_validation(message: str):
+    def parse_validation(message):
         # this will just separate things for now, but can be enhanced
-        return message.split("ValidationError:")[1]
+        return str(message)
 
     try:
         verify(config)
