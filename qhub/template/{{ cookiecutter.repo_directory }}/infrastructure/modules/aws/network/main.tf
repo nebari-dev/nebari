@@ -17,6 +17,12 @@ resource "aws_subnet" "main" {
   map_public_ip_on_launch = true
 
   tags = merge({ Name = "${var.name}-subnet-${count.index}" }, var.tags, var.subnet_tags)
+
+  lifecycle {
+    ignore_changes = [
+      availability_zone
+    ]
+  }
 }
 
 resource "aws_internet_gateway" "main" {
