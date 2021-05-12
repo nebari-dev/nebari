@@ -184,7 +184,7 @@ def remove_existing_renders(source_repo_dir, dest_repo_dir):
             if (
                 not gitignore_matches(root_path / dir)
                 and not (dir == ".git" and root_path == dest_repo_dir)
-                and not qhubignore_matches(root_path / file)
+                and not qhubignore_matches(root_path / dir)
             ):
                 try:
                     os.rmdir(root_path / dir)
