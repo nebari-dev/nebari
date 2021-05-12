@@ -96,7 +96,6 @@ Please see these instructions for [creating an IAM role] with admin permissions 
 
 - `AWS_ACCESS_KEY_ID`: The public key for an IAM account
 - `AWS_SECRET_ACCESS_KEY`: The Private key for an IAM account
-- `AWS_DEFAULT_REGION`: The region where you intend to deploy QHub
 
 #### 2.4.2 Digital Ocean
 

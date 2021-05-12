@@ -380,8 +380,6 @@ def render_config(
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
-        if "AWS_DEFAULT_REGION" in os.environ:
-            config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
         if kubernetes_version:
             config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
     elif cloud_provider == "local":
@@ -455,7 +453,6 @@ def github_auto_provision(config, owner, repo):
             for name in {
                 "AWS_ACCESS_KEY_ID",
                 "AWS_SECRET_ACCESS_KEY",
-                "AWS_DEFAULT_REGION",
             }:
                 github.update_secret(owner, repo, name, os.environ[name])
         elif config["provider"] == "gcp":
