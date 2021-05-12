@@ -119,7 +119,6 @@ DIGITAL_OCEAN = {
 GOOGLE_PLATFORM = {
     "project": "PLACEHOLDER",
     "region": "us-central1",
-    "availability_zones": ["us-central1-c"],
     "kubernetes_version": "1.18.16-gke.502",
     "node_groups": {
         "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1},

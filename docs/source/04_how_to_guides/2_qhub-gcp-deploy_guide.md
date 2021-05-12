@@ -91,7 +91,7 @@ Among the cloud service providers on which QHub can be deployed, GCP has the bes
 google_cloud_platform:
   project: <project_id>
   region: us-central1
-  availability_zones: ["us-central1-c"]
+  availability_zones: ["us-central1-a", "us-central1-b"]
   kubernetes_version: "1.14.10-gke.31"
   node_groups:
     general:

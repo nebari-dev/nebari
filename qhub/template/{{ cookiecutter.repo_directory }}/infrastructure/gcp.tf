@@ -3,6 +3,9 @@ provider "google" {
   region  = "{{ cookiecutter.google_cloud_platform.region }}"
 }
 
+data "google_compute_zones" "gcpzones" {
+  region = "{{ cookiecutter.google_cloud_platform.region }}"
+}
 
 module "registry-jupyterhub" {
   source = "./modules/gcp/registry"
@@ -15,7 +18,7 @@ module "kubernetes" {
   name     = local.cluster_name
   location = var.region
 
-  availability_zones = var.availability_zones
+  availability_zones = length(var.availability_zones) >= 1 ? var.availability_zones : [data.google_compute_zones.gcpzones.names[0]]
 
   additional_node_group_roles = [
     "roles/storage.objectViewer",
