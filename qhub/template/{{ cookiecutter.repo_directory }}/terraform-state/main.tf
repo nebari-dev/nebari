@@ -18,7 +18,6 @@ module "terraform-state" {
 provider "google" {
   project = "{{ cookiecutter.google_cloud_platform.project }}"
   region  = "{{ cookiecutter.google_cloud_platform.region }}"
-  zone    = "{{ cookiecutter.google_cloud_platform.zone }}"
 }
 
 module "terraform-state" {

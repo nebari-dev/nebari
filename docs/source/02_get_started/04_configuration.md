@@ -359,7 +359,6 @@ To see available instance types refer to
 google_cloud_platform:
   project: test-test-test
   region: us-central1
-  zone: us-central1-c
   availability_zones: ["us-central1-c"]
   kubernetes_version: "1.18.16-gke.502"
   node_groups:

@@ -172,7 +172,7 @@ class DigitalOceanProvider(Base):
 class GoogleCloudPlatformProvider(Base):
     project: str
     region: str
-    zone: str
+    zone: typing.Optional[str]  # No longer used
     availability_zones: typing.List[str]
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
