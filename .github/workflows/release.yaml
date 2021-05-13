@@ -19,11 +19,8 @@ jobs:
 
       # Could check that the version.py version number matches the tag
       # and that the branch release-<version> also points to this tag
-<<<<<<< HEAD
       # and that terraform-modules tag release-{version} exists.
       # See https://github.com/Quansight/qhub/issues/544
-=======
->>>>>>> c15be0c (remove tf modules note)
 
       - name: Install QHub
         run: |
