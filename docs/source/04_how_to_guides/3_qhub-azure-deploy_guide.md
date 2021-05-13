@@ -37,7 +37,7 @@ domain: "azure.qhub.dev"
 
 ### 2. Security
 
-The security section of the configuration file is for configuring security and authentication details, relating to your QHub deployment. You will need to provide your Digital Ocean account credentials on the appropriate lines of the configuration file as shown below.
+The security section of the configuration file specifies security and authentication details. You will need to provide your Azure account credentials on the appropriate lines of the configuration file as shown below.
 
 ```yaml
 security:
