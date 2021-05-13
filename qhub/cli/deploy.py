@@ -5,7 +5,7 @@ from ruamel import yaml
 
 from qhub.deploy import deploy_configuration
 from qhub.schema import verify
-from qhub.render import render_default_template
+from qhub.render import render_template
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ def handle_deploy(args):
     verify(config)
 
     if not args.disable_render:
-        render_default_template(args.output, args.config, force=True)
+        render_template(args.output, args.config, force=True)
 
     deploy_configuration(
         config,

@@ -4,7 +4,7 @@ provider "azurerm" {
 
 
 module "registry" {
-  source              = "./azure/registry"
+  source              = "./modules/azure/registry"
   name                = "{{ cookiecutter.project_name }}{{ cookiecutter.namespace }}"
   location            = "{{ cookiecutter.azure.region }}"
   resource_group_name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}"

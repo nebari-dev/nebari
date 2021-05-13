@@ -2,7 +2,7 @@ import pathlib
 
 from ruamel import yaml
 
-from qhub.render import render_default_template
+from qhub.render import render_template
 from qhub.schema import verify
 
 
@@ -27,4 +27,4 @@ def handle_render(args):
 
     verify(config)
 
-    render_default_template(args.output, args.config, force=True)
+    render_template(args.output, args.config, force=True)

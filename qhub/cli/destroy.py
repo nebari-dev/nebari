@@ -5,7 +5,7 @@ from ruamel import yaml
 
 from qhub.destroy import destroy_configuration
 from qhub.schema import verify
-from qhub.render import render_default_template
+from qhub.render import render_template
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def handle_destroy(args):
     verify(config)
 
     if not args.disable_render:
-        render_default_template(args.output, args.config, force=True)
+        render_template(args.output, args.config, force=True)
 
     destroy_configuration(
         config,
