@@ -6,7 +6,9 @@ This guide walks you through the steps to create a QHub deployment on Microsoft 
 A deployment runs multiple replicas of an application and automatically replaces any instances that fail or become unresponsive. This ensures that one or more instances of the application are always available to serve user requests. Deployments are managed by the [Kubernetes Deployment Controller](https://kubernetes.io/docs/concepts/architecture/controller/).
 
 
-A **configuration** defines the structure of your deployment, including the type and properties of the resources that are part of the deployment, any templates the configuration should use, and additional subfiles that can be executed to create your final configuration. You must specify a configuration in order to create a deployment. A configuration allows you to define a variety of resources and features that you would like to setup for your deployment. Let's have a closer look into how you can configure your QHub deployment for Azure.
+To create a deployment, a configuration file **must** be specified. The file will define the deployment's structure, including the type and properties of the resources, any templates that should be used, and additional subfiles that can be executed to create the final configuration.
+
+Have a look below at how you can configure your QHub deployment for Azure.
 
 ## Configuration
 
