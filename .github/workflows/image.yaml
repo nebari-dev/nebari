@@ -1,6 +1,8 @@
 name: "Build Docker Images"
 
 on:
+  create: # Branch (so that the Docker image tags exist for a new branch when pushed)
+          # But not sure if this means tags will be run twice (one for create:, one for push: tags) 
   push:
     paths:
       - "qhub/template/{{ cookiecutter.repo_directory }}/image/**"
