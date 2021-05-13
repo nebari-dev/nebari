@@ -9,7 +9,7 @@ from ruamel import yaml
 from cookiecutter.generate import generate_files
 from ..version import __version__
 from ..constants import TERRAFORM_VERSION
-from ..utils import pip_install_qhub
+from ..utils import pip_install_qhub, QHUB_GH_BRANCH
 
 
 def patch_dask_gateway_extra_config(config):
