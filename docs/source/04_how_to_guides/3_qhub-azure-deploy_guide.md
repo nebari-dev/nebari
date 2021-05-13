@@ -1,6 +1,9 @@
 # QHub Deployment on Microsoft Azure
 
-This quide walks you through the steps to create a QHub deployment on Microsoft Azure. **Deployments** represent a set of multiple, identical Pods with no unique identities. A deployment runs multiple replicas of your application and automatically replaces any instances that fail or become unresponsive. In this way, deployments help ensure that one or more instances of your application are available to serve user requests. Deployments are managed by the Kubernetes Deployment controller.
+
+This guide walks you through the steps to create a QHub deployment on Microsoft Azure. 
+**Deployments** are a set of multiple identical Pods with distinct identities. 
+A deployment runs multiple replicas of an application and automatically replaces any instances that fail or become unresponsive. This ensures that one or more instances of the application are always available to serve user requests. Deployments are managed by the [Kubernetes Deployment Controller](https://kubernetes.io/docs/concepts/architecture/controller/).
 
 
 A **configuration** defines the structure of your deployment, including the type and properties of the resources that are part of the deployment, any templates the configuration should use, and additional subfiles that can be executed to create your final configuration. You must specify a configuration in order to create a deployment. A configuration allows you to define a variety of resources and features that you would like to setup for your deployment. Let's have a closer look into how you can configure your QHub deployment for Azure.
