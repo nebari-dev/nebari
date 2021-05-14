@@ -24,10 +24,12 @@ build.nix
 do-jupyterhub
 jupyterhub-aws
 gcp-jupyterhub
-modules
 quansight-terraform-modules
 config.yaml
 data*
+
+# modules - removed this because .terraform folder is in .gitignore of deployments, 
+# this should cover imported modules while not gitignoring our new direct 'modules' folder.
 
 # ignore qhub files
 qhub-config.yaml

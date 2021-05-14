@@ -40,7 +40,7 @@ provider "kubernetes-alpha" {
 
 
 module "kubernetes-initialization" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/initialization?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./modules/kubernetes/initialization"
 
   namespace = var.environment
   secrets   = []
@@ -49,7 +49,7 @@ module "kubernetes-initialization" {
 
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-nfs-mount" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./modules/kubernetes/nfs-mount"
 
   name         = "nfs-mount"
   namespace    = var.environment
@@ -58,7 +58,7 @@ module "kubernetes-nfs-mount" {
 }
 {% else -%}
 module "kubernetes-nfs-server" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-server?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./modules/kubernetes/nfs-server"
 
   name         = "nfs-server"
   namespace    = var.environment
@@ -71,7 +71,7 @@ module "kubernetes-nfs-server" {
 }
 
 module "kubernetes-nfs-mount" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./modules/kubernetes/nfs-mount"
 
   name         = "nfs-mount"
   namespace    = var.environment
@@ -85,7 +85,7 @@ module "kubernetes-nfs-mount" {
 {% endif %}
 
 module "kubernetes-conda-store-server" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/conda-store?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./modules/kubernetes/services/conda-store"
 
   name         = "qhub"
   namespace    = var.environment
@@ -103,7 +103,7 @@ module "kubernetes-conda-store-server" {
 }
 
 module "kubernetes-conda-store-mount" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/nfs-mount?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./modules/kubernetes/nfs-mount"
 
   name         = "conda-store"
   namespace    = var.environment
@@ -137,7 +137,7 @@ provider "helm" {
 
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-autoscaling" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/cluster-autoscaler?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./modules/kubernetes/services/cluster-autoscaler"
 
   namespace = var.environment
 
@@ -151,7 +151,7 @@ module "kubernetes-autoscaling" {
 {% endif -%}
 
 module "kubernetes-ingress" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/ingress?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./modules/kubernetes/ingress"
 
   namespace = var.environment
 
@@ -169,7 +169,7 @@ module "kubernetes-ingress" {
 }
 
 module "qhub" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/meta/qhub?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./modules/kubernetes/services/meta/qhub"
 
   name      = "qhub"
   namespace = var.environment
@@ -205,7 +205,7 @@ module "qhub" {
 
 {% if cookiecutter.prefect is true -%}
 module "prefect" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/kubernetes/services/prefect?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./modules/kubernetes/services/prefect"
 
   depends_on = [
     module.qhub

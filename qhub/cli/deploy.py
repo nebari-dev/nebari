@@ -5,7 +5,7 @@ from ruamel import yaml
 
 from qhub.deploy import deploy_configuration
 from qhub.schema import verify
-from qhub.render import render_default_template, render_template
+from qhub.render import render_template
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,6 @@ def create_deploy_subcommand(subparser):
     subparser.add_argument(
         "-c", "--config", help="qhub configuration yaml file", required=True
     )
-    subparser.add_argument("-i", "--input", help="input directory")
     subparser.add_argument("-o", "--output", default="./", help="output directory")
     subparser.add_argument(
         "--dns-provider",
@@ -58,10 +57,7 @@ def handle_deploy(args):
     verify(config)
 
     if not args.disable_render:
-        if args.input is None:
-            render_default_template(args.output, args.config, force=True)
-        else:
-            render_template(args.input, args.output, args.config, force=True)
+        render_template(args.output, args.config, force=True)
 
     deploy_configuration(
         config,

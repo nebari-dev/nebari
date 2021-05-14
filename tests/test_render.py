@@ -2,7 +2,7 @@ import pytest
 
 from ruamel import yaml
 
-from qhub.render import render_default_template
+from qhub.render import render_template
 from qhub.initialize import render_config
 
 
@@ -36,4 +36,4 @@ def test_render(project, namespace, domain, cloud_provider, ci_provider, auth_pr
         yaml.dump(config, f)
 
     output_directory = tmp_path / "test"
-    render_default_template(str(output_directory), config_filename)
+    render_template(str(output_directory), config_filename, force=True)

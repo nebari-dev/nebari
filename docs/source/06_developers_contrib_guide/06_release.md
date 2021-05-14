@@ -10,8 +10,6 @@ In order to create a release:
 
 3. Commit these changes to `main` branch
 
-4. Create a Release branch in [Quansight/qhub-terraform-modules](https://github.com/quansight/qhub-terraform-modules) with name `release-<version>` off of the `main` branch.
-
-5. Finally [create a Release on QHub](https://github.com/Quansight/qhub/releases/new). The tag should be `v<version>` off of the branch `main`. Use the `RELEASE.md` to get the title `Release <version> - <month>/<day>/<year>` and set the text description to the `RELEASE.md` for the given version. Click `Publish Release`.
+4. Finally [create a Release on QHub](https://github.com/Quansight/qhub/releases/new). The tag should be `v<version>` off of the branch `main`. Use the `RELEASE.md` to get the title `Release <version> - <month>/<day>/<year>` and set the text description to the `RELEASE.md` for the given version. Click `Publish Release`.
 
 If this worked a new version will be [uploaded to pypi for QHub](https://pypi.org/project/qhub/)
