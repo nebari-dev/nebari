@@ -23,6 +23,10 @@ module "kubernetes-jupyterhub" {
             apiToken = random_password.jupyterhub_api_token.result
           }
         }
+
+        extraConfig = {
+          forwardauthservice = "c.JupyterHub.services += [{ 'name': 'forwardauth-jupyterhub-service', 'api_token': '${var.forwardauth-jh-client-secret}', 'oauth_client_id': '${var.forwardauth-jh-client-id}', 'oauth_redirect_uri': 'https://${var.external-url}${var.forwardauth-callback-url-path}', 'oauth_no_confirm': True, }]"
+        }
       }
 
       scheduling = {
@@ -82,9 +86,17 @@ module "kubernetes-jupyterhub" {
             }
           ]
         }
+
       }
+
     })
   ])
+
+  # hub.services in z2jh does not currently support more than apiToken -> api_token, 
+  # but we need oauth_client_id and oauth_redirect_uri too for forwardauth,
+  # so that is in an extraConfig block above.
+  # Using += seems to work but ultimately relies on z2jh parsing services.dask-gateway 
+  # before forwardauthservice.extraConfig
 }
 
 
@@ -304,6 +316,43 @@ resource "kubernetes_manifest" "jupyterhub-sftp-ingress" {
           ]
         }
       ]
+    }
+  }
+}
+
+resource "kubernetes_manifest" "forwardauth" {
+  provider = kubernetes-alpha
+
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "IngressRoute"
+    metadata = {
+      name      = "forwardauth"
+      namespace = var.namespace
+    }
+    spec = {
+      entryPoints = ["websecure"]
+      routes = [
+        {
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`) && PathPrefix(`${var.forwardauth-callback-url-path}`)"
+
+          middlewares = [
+            {
+              name      = "traefik-forward-auth"
+              namespace = var.namespace
+            }
+          ]
+
+          services = [
+            {
+              name = "forwardauth-service"
+              port = 4181
+            }
+          ]
+        }
+      ]
+      tls = local.tls
     }
   }
 }
