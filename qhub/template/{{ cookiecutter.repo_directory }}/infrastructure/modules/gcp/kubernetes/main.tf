@@ -12,6 +12,12 @@ resource "google_container_cluster" "main" {
   # node pool and immediately delete it.
   remove_default_node_pool = true
   initial_node_count       = 1
+
+  lifecycle {
+    ignore_changes = [
+      node_locations
+    ]
+  }
 }
 
 resource "google_container_node_pool" "main" {
