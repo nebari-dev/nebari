@@ -199,9 +199,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - dask==2.30.0
-      - distributed==2.30.1
-      - dask-gateway=0.9.0
+      - qhub-dask==0.2.3
       - numpy
       - numba
       - pandas
@@ -215,9 +213,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - dask==2.30.0
-      - distributed==2.30.1
-      - dask-gateway=0.9.0
+      - qhub-dask==0.2.3
       - numpy
       - numba
       - pandas
