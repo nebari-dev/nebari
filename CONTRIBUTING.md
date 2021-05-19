@@ -1,16 +1,16 @@
-# Contributing to qhub-cloud
+# Contributing to qhub
 
-:sparkles: :raised_hands:  Welcome to the qhub-cloud repository! :sparkles: :raised_hands:
+:sparkles: :raised_hands:  Welcome to the qhub repository! :sparkles: :raised_hands:
 
-You're probably reading this because you are interested in contributing to qhub-cloud. That's great to hear! This document will help you through your journey of open source. Here, you'll get a quick overview of how we organize things and, most importantly, how to get involved.
+You're probably reading this because you are interested in contributing to qhub. That's great to hear! This document will help you through your journey of open source. Here, you'll get a quick overview of how we organize things and, most importantly, how to get involved.
 
-We welcome all contributions to this project via GitHub issues and pull requests. Please follow these guidelines to make sure your contributions can be easily integrated into the projects. As you start contributing to qhub-cloud, don't forget that your ideas are more important than perfect pull requests.
+We welcome all contributions to this project via GitHub issues and pull requests. Please follow these guidelines to make sure your contributions can be easily integrated into the projects. As you start contributing to qhub, don't forget that your ideas are more important than perfect pull requests.
 
 If you have any questions that aren't discussed below, please let us know through one of the many ways to get in touch.
 
 ## Table of contents
 
-- [Contributing to qhub-cloud](#contributing-to-qhub-cloud)
+- [Contributing to qhub](#contributing-to-qhub)
   - [Table of contents](#table-of-contents)
   - [:computer: Contributing through GitHub](#computer-contributing-through-github)
   - [:pencil: Writing in Markdown](#pencil-writing-in-markdown)
@@ -25,7 +25,7 @@ If you have any questions that aren't discussed below, please let us know throug
 [Git][git] is a handy tool for version control.
 [GitHub][github] sits on top of Git and supports collaborative and distributed working.
 
-We know that it can be daunting to start using Git and GitHub if you haven't worked with them in the past, but _qhub-cloud_ maintainers are here to help you figure out any of the jargon or confusing instructions you encounter!
+We know that it can be daunting to start using Git and GitHub if you haven't worked with them in the past, but _qhub_ maintainers are here to help you figure out any of the jargon or confusing instructions you encounter!
 
 To contribute via GitHub, you'll need to set up a free account and sign in.
 Here are some [instructions](https://help.github.com/articles/signing-up-for-a-new-github-account/) to help you get going.
@@ -43,19 +43,19 @@ While these formats in the same way as if the new line wasn't included, it makes
 
 ## :sparkle: Where to start: issues
 
-Before you open a new issue, please check the [open issues][qhub-cloud-issues]. See if the issue has already been reported or if your idea has already been discussed. If so, it's often better to leave a comment on a current issue, rather than opening a new one. Old issues also often include helpful tips and solutions to common problems.
+Before you open a new issue, please check the [open issues][qhub-issues]. See if the issue has already been reported or if your idea has already been discussed. If so, it's often better to leave a comment on a current issue, rather than opening a new one. Old issues also often include helpful tips and solutions to common problems.
 
-If you are looking for specific help with qhub-cloud or its configuration, check our [Github discussions][qhub-cloud-qa].
+If you are looking for specific help with qhub or its configuration, check our [Github discussions][qhub-qa].
 
 ### Submitting issues
 
-When opening an issue, use a **descriptive title** and provide your environment details (i.e. operating system, Python, Kubernetes and Conda version). Our [issue templates][qhub-cloud-templates] help you remember the most important details to include.
+When opening an issue, use a **descriptive title** and provide your environment details (i.e. operating system, Python, Kubernetes and Conda version). Our [issue templates][qhub-templates] help you remember the most important details to include.
 
 There are three issues templates to choose from:
 
 1. **Bug Report**: With this template, create an issue report that can help others fix something that's currently broken.
 2. **Documentation**: Use this template to provide feedback on our documentation or suggest additions and improvements.
-3. **Feature request**: Is there anything that would make the community work better? Have you spotted something missing in qhub-cloud? Use this template to share your feature ideas with the qhub-cloud team.
+3. **Feature request**: Is there anything that would make the community work better? Have you spotted something missing in qhub? Use this template to share your feature ideas with the qhub team.
 
 A few more tips:
 
@@ -66,11 +66,11 @@ This will make it easier for us to reproduce the error. Screenshots are also gre
 
 ### Issue labels
 
-Check our [labels page][qhub-cloud-labels] for an overview of the system we use to tag our issues and pull requests.
+Check our [labels page][qhub-labels] for an overview of the system we use to tag our issues and pull requests.
 
 ## :computer: Contributing to the codebase
 
-You don't have to be a Python or Kubernetes pro to contribute, and we're happy to help you get started. If you're new to qhub-cloud, an excellent place to start are the issues marked with the [type: good first issue](https://github.com/Quansight/qhub-cloud/labels/type%3A%20good%20first%20issue) label, which we use to tag bugs and feature requests that are easy (i.e. low entry-barrier or little in-depth knowledge needed) and self-contained. If you've decided to take on one of these problems and you're making good progress, don't forget to add a quick comment to the issue to assign this to yourself. You can also use the issue to ask questions or share your work in progress.
+You don't have to be a Python or Kubernetes pro to contribute, and we're happy to help you get started. If you're new to qhub, an excellent place to start are the issues marked with the [type: good first issue](https://github.com/Quansight/qhub/labels/type%3A%20good%20first%20issue) label, which we use to tag bugs and feature requests that are easy (i.e. low entry-barrier or little in-depth knowledge needed) and self-contained. If you've decided to take on one of these problems and you're making good progress, don't forget to add a quick comment to the issue to assign this to yourself. You can also use the issue to ask questions or share your work in progress.
 
 ### Step-by-step guide to your first contribution
 
@@ -80,12 +80,12 @@ Never made an open-source contribution before? Wondering how contributions work 
 2. Fork the repository associated with the issue to your local GitHub organization.
 
 
-[qhub-cloud-repo]: https://github.com/Quansight/qhub-cloud/
-[qhub-cloud-issues]: https://github.com/Quansight/qhub-cloud/issues
-[qhub-cloud-labels]: https://github.com/Quansight/qhub-cloud/labels
-[qhub-cloud-templates]: https://github.com/Quansight/qhub-cloud/issues/new/choose
-[qhub-cloud-qa]: https://github.com/Quansight/qhub-cloud/discussions/categories/q-a
-[issue-template]: https://github.com/Quansight/qhub-cloudb/lob/master/ISSUE_TEMPLATE.md
+[qhub-repo]: https://github.com/Quansight/qhub/
+[qhub-issues]: https://github.com/Quansight/qhub/issues
+[qhub-labels]: https://github.com/Quansight/qhub/labels
+[qhub-templates]: https://github.com/Quansight/qhub/issues/new/choose
+[qhub-qa]: https://github.com/Quansight/qhub/discussions/categories/q-a
+[issue-template]: https://github.com/Quansight/qhub/blob/master/ISSUE_TEMPLATE.md
 [git]: https://git-scm.com
 [github]: https://github.com
 [github-branches]: https://help.github.com/articles/creating-and-deleting-branches-within-your-repository
