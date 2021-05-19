@@ -139,7 +139,7 @@ storage:
 
 ### Profiles
 
-Profiles are used to control the jupyterlab user instances and dask-workers provided by dask-gateway.
+Profiles are used to control the `jupyterlab` user instances and `dask-workers` provided by Dask-Gateway.
 
 ```yaml
 profiles:
