@@ -18,6 +18,7 @@ jobs:
           - jupyterlab
           - jupyterhub
           - dask-worker
+          - dask-gateway
     steps:
       - name: 'Checkout Image'
         uses: actions/checkout@master

@@ -1,12 +1,12 @@
 name: "Tests"
 
 on:
-  pull_request:
-    branches:
-      - main
+  pull_request: # Workflow only runs for PR against main anyway
   push:
     branches:
       - main
+    tags:
+      - 'v*'
 
 jobs:
   test-general:
@@ -91,7 +91,21 @@ jobs:
   test-kubernetes:
     name: "Kubernetes Tests"
     runs-on: ubuntu-latest
+
     steps:
+      - name: 'QHUB_GH_BRANCH set for PR'
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo "QHUB_GH_BRANCH=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+          echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
+          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
+          echo "GITHUB_REF: ${GITHUB_REF}"
+      - name: 'QHUB_GH_BRANCH set for a branch (not a tag)'
+        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') }}
+        # should be branch main as only 'push: branches: main' is set for this workflow
+        run: |
+          echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> $GITHUB_ENV
+
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
       - name: Set up Python

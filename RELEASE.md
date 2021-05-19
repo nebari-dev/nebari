@@ -1,4 +1,5 @@
-# Release :tada:
+# Changelog
+
 > Contains description of QHub releases.
 ---
 ## To create a new release:
@@ -14,7 +15,123 @@
 
 ### Bug fixes
 
+## Release 0.3.11 - 05/07/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+ - better validation messages on github auto provisioning
+
+### Bug fixes
+
+ - removing default values from pydantic schema which caused invalid yaml files to unexpectly pass validation
+ - make kubespawner_override.environment overriadable (prior changes were overwritten)
+
+## Release 0.3.10 - 05/06/2021
+
+### Breaking changes
+
+ - reverting `qhub_user` default name to `jovyan`
+
+### Feature changes and enhancements
+
+### Bug fixes
+
+## Release 0.3.9 - 05/05/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+### Bug fixes
+
+ - terraform formatting in cookiecutter for enabling GPUs on GCP
+
+## Release 0.3.8 - 05/05/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+ - creating releases for QHub simplified
+ - added an image for overriding the dask-gateway being used
+
+### Bug fixes
+
+ - dask-gateway exposed by default now properly
+ - typo in cookiecutter for enabling GPUs on GCP
+
+## Release 0.3.7 - 04/30/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+ - setting `/bin/bash` as the default terminal
+
+### Bug fixes
+
+ - `jhsingle-native-proxy` added to the base jupyterlab image
+
+## Release 0.3.6 - 04/29/2021
+
+### Breaking changes
+
+ - simplified bash jupyterlab image to no longer have dashboard packages panel, etc.
+
+### Feature changes and enhancements
+
+ - added emacs and vim as default editors in image
+ - added jupyterlab-git and jupyterlab-sidecar since they now support 3.0
+ - improvements with `qhub destroy` cleanly deleting resources
+ - allow user to select conda environments for dashboards
+ - added command line argument `--skip-terraform-state-provision` to allow for skipping terraform state provisioning in `qhub deploy` step
+ - no longer render `qhub init` `qhub-config.yaml` file in alphabetical order
+ - allow user to select instance sizes for dashboards
+
+### Bug fixes
+
+ - fixed gitlab-ci before_script and after_script
+ - fixed jovyan -> qhub_user home directory path issue with dashboards
+
+## Release 0.3.5 - 04/28/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+ - added a `--skip-remote-state-provision` flag to allow `qhub deploy` within CI to skip the remote state creation
+ - added saner defaults for instance sizes and jupyterlab/dask profiles
+ - `qhub init` no longer renders `qhub-config.yaml` in alphabetical order
+ - `spawn_default_options` to False to force dashboard owner to pick profile
+ - adding `before_script` and `after_script` key to `ci_cd` to allow customization of CI process
+
+### Bug fixes
+
+## Release 0.3.4 - 04/27/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+### Bug fixes
+
+ - remaining issues with ci_cd branch not being fully changed
+
+## Release 0.3.3 - 04/27/2021
+
+### Breaking changes
+
+### Feature changes and enhancements
+
+### Bug fixes
+
  - Moved to ruamel as yaml parser to throw errors on duplicate keys
+ - fixed a url link error in cds dashboards
+ - Azure fixes to enable multiple deployments under one account
+ - Terraform formatting issue in acme_server deployment
+ - Terraform errors are caught by qhub and return error code
 
 ### Breaking changes
 

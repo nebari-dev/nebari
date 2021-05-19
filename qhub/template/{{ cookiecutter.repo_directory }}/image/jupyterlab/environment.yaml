@@ -1,4 +1,4 @@
-name: base
+name: default
 channels:
   - conda-forge
 dependencies:
@@ -18,21 +18,20 @@ dependencies:
 
  # jupyterlab extensions
  - dask_labextension >=5.0.0
- # jupyterlab-git >=0.30.0 # uncomment when 0.30.0 is released
- - jupyter-videochat
+ - jupyterlab-git >=0.30.0
+ - sidecar >=0.5.0
+ - jupyter-videochat >=0.5.0
  - ipywidgets >=7.6
  - ipyleaflet >=0.13.5
  - pyviz_comms >=2.0.1
 
+ # cds dashboards
+ - cdsdashboards-singleuser >=0.5.6
+ - jhsingle-native-proxy >=0.7.6
+
  # viz tools
  - param
  - python-graphviz
- - matplotlib >= 3.3.4
- - panel >= 0.10.3
- - voila >= 0.2.7
- - streamlit >= 0.76
- - dash >= 1.19
- - cdsdashboards-singleuser >= 0.5.6
 
  # testing, docs, linting
  - pytest
@@ -45,4 +44,5 @@ dependencies:
  - importnb
 
  - pip:
+   # See install-conda-environment.sh when editing this section.
     - https://github.com/dirkcgrunwald/jupyter_codeserver_proxy-/archive/5596bc9c2fbd566180545fa242c659663755a427.tar.gz

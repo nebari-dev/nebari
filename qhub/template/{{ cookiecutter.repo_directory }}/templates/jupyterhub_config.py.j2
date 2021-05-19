@@ -12,6 +12,15 @@ c.VariableMixin.default_presentation_cmd = ['python3', '-m', 'jhsingle_native_pr
 
 c.JupyterHub.default_url = '/hub/home'
 
+# Force dashboard creator to select an instance size
+c.CDSDashboardsConfig.spawn_default_options = False
+
+c.CDSDashboardsConfig.conda_envs = [
+{%- for key in cookiecutter.environments %}
+    "{{ cookiecutter.environments[key].name }}",
+{%- endfor %}
+]
+
 {% else %}
 
 c.JupyterHub.allow_named_servers = False
@@ -95,7 +104,9 @@ def qhub_configure_profile(username, safe_username, profile):
        'NSS_WRAPPER_PASSWD': '/tmp/passwd',
        'NSS_WRAPPER_GROUP': '/tmp/group',
        'NB_UMASK': '0002',
+       'SHELL': '/bin/bash',
        'HOME': '/home/jovyan',
+       **(profile.get('kubespawner_override', {}).get('environment', {}))
     }
 
     passwd, group = qhub_generate_nss_files()

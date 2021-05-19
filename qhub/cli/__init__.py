@@ -1,7 +1,6 @@
 import argparse
 import logging
 import sys
-from os import path
 
 from qhub.cli.deploy import create_deploy_subcommand
 from qhub.cli.initialize import create_init_subcommand
@@ -9,21 +8,18 @@ from qhub.cli.render import create_render_subcommand
 from qhub.cli.validate import create_validate_subcommand
 from qhub.cli.destroy import create_destroy_subcommand
 from qhub.provider.terraform import TerraformException
-
-root_dir = path.abspath(path.join(path.dirname(__file__), path.pardir))
-
-with open(path.join(root_dir, "VERSION")) as version_file:
-    version = version_file.read().strip()
+from qhub.version import __version__
+from qhub.utils import QHUB_GH_BRANCH
 
 
 def cli(args):
     parser = argparse.ArgumentParser(description="QHub command line")
     parser.add_argument(
-        "-v", "--version", action="version", version=version, help="QHub version"
+        "-v", "--version", action="version", version=__version__, help="QHub version"
     )
     parser.set_defaults(func=None)
 
-    subparser = parser.add_subparsers(help=f"QHub - {version}")
+    subparser = parser.add_subparsers(help=f"QHub - {__version__}")
     create_deploy_subcommand(subparser)
     create_render_subcommand(subparser)
     create_init_subcommand(subparser)
@@ -37,6 +33,9 @@ def cli(args):
         sys.exit(1)
 
     logging.basicConfig(level=logging.INFO)
+
+    if QHUB_GH_BRANCH:
+        logging.info(f"Modifying for development branch {QHUB_GH_BRANCH}")
 
     try:
         args.func(args)

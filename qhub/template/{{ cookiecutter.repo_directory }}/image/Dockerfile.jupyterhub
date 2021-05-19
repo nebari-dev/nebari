@@ -1,27 +1,35 @@
 FROM debian:10.3-slim
 LABEL MAINTAINER="Quansight"
 
-# ============== base install ===============
-ENV CONDA_VERSION py37_4.8.2
-ENV CONDA_SHA256 957d2f0f0701c3d1335e3b39f235d197837ad69a944fa6f5d8ad2c686b69df3
+COPY scripts/install-apt-minimal.sh /opt/scripts/install-apt-minimal.sh
+RUN /opt/scripts/install-apt-minimal.sh
 
-COPY scripts /opt/scripts
+COPY scripts/fix-permissions /opt/scripts/fix-permissions
 
-RUN /opt/scripts/install-conda.sh
-
-ENV PATH="/opt/conda/bin:$PATH"
-
-# ========== jupyterhub install ===========
-COPY jupyterhub /opt/jupyterhub
-
-RUN /opt/scripts/install-conda-environment.sh /opt/jupyterhub/environment.yaml \
-    && /opt/jupyterhub/postBuild
-
-# ========= Create USER =============
+# These can but should not be changed. ids will be arbitrary at run time.
 ARG NB_USER=jovyan
 ARG NB_UID=1000
-ARG HOME=/home/jovyan
+ARG NB_GID=100
 
+ENV CONDA_VERSION py37_4.8.2
+ENV CONDA_SHA256 957d2f0f0701c3d1335e3b39f235d197837ad69a944fa6f5d8ad2c686b69df3
+SHELL ["/bin/bash", "-c"]
+
+ENV PATH="/opt/conda/bin:$PATH:/opt/scripts"
+
+# ============== base install ===============
+COPY scripts/install-conda.sh /opt/scripts/install-conda.sh
+RUN /opt/scripts/install-conda.sh
+
+# ========== jupyterhub install ===========
+COPY jupyterhub/environment.yaml /opt/jupyterhub/environment.yaml
+COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
+RUN /opt/scripts/install-conda-environment.sh /opt/jupyterhub/environment.yaml 'false'
+
+COPY jupyterhub /opt/jupyterhub
+RUN /opt/jupyterhub/postBuild
+
+# ========= Create USER =============
 RUN adduser --disabled-password \
     --gecos "Default user" \
     --uid ${NB_UID} \
@@ -32,7 +40,8 @@ RUN adduser --disabled-password \
 WORKDIR /srv/jupyterhub
 
 # So we can actually write a db file here
-RUN chown ${NB_USER}:${NB_USER} /srv/jupyterhub
+RUN fix-permissions /srv/jupyterhub
 
 USER ${NB_USER}
 CMD ["jupyterhub", "--config", "/usr/local/etc/jupyterhub/jupyterhub_config.py"]
+

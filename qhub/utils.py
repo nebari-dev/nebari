@@ -2,13 +2,28 @@ import subprocess
 import sys
 import time
 import os
+import re
 import contextlib
-from os import path
 
-DO_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/do/installation.md#environment-variables"
-AWS_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/aws/installation.md#environment-variables"
-GCP_ENV_DOCS = "https://github.com/Quansight/qhub/blob/master/docs/docs/gcp/installation.md#environment-variables"
-AZURE_ENV_DOCS = "Coming Soon"
+from .version import __version__
+
+DO_ENV_DOCS = (
+    "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#digital-ocean"
+)
+AWS_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#amazon-web-services-aws"
+GCP_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#google-cloud-platform"
+AZURE_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#microsoft-azure"
+
+qhub_image_tag = f"v{__version__}"
+pip_install_qhub = f"pip install qhub=={__version__}"
+
+QHUB_GH_BRANCH = os.environ.get("QHUB_GH_BRANCH", "")
+if QHUB_GH_BRANCH:
+    qhub_image_tag = QHUB_GH_BRANCH
+    pip_install_qhub = (
+        f"pip install https://github.com/Quansight/qhub/archive/{QHUB_GH_BRANCH}.zip"
+    )
+
 
 # Regex for suitable project names
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
@@ -37,9 +52,21 @@ def run_subprocess_cmd(processargs, **kwargs):
     else:
         line_prefix = b""
 
-    process = subprocess.Popen(processargs, **kwargs, stdout=subprocess.PIPE)
+    strip_errors = kwargs.pop("strip_errors", False)
+
+    process = subprocess.Popen(
+        processargs, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    )
     for line in iter(lambda: process.stdout.readline(), b""):
-        sys.stdout.buffer.write(line_prefix + line)
+        full_line = line_prefix + line
+        if strip_errors:
+            full_line = full_line.decode("utf-8")
+            full_line = re.sub(
+                r"\x1b\[31m", "", full_line
+            )  # Remove red ANSI escape code
+            full_line = full_line.encode("utf-8")
+
+        sys.stdout.buffer.write(full_line)
         sys.stdout.flush()
     return process.wait(
         timeout=10
@@ -50,7 +77,7 @@ def check_cloud_credentials(config):
     if config["provider"] == "gcp":
         for variable in {"GOOGLE_CREDENTIALS"}:
             if variable not in os.environ:
-                raise Exception(
+                raise ValueError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {GCP_ENV_DOCS}"""
                 )
@@ -62,7 +89,7 @@ def check_cloud_credentials(config):
             "ARM_TENANT_ID",
         }:
             if variable not in os.environ:
-                raise Exception(
+                raise ValueError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {AZURE_ENV_DOCS}"""
                 )
@@ -70,10 +97,9 @@ def check_cloud_credentials(config):
         for variable in {
             "AWS_ACCESS_KEY_ID",
             "AWS_SECRET_ACCESS_KEY",
-            "AWS_DEFAULT_REGION",
         }:
             if variable not in os.environ:
-                raise Exception(
+                raise ValueError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {AWS_ENV_DOCS}"""
                 )
@@ -86,13 +112,13 @@ def check_cloud_credentials(config):
             "DIGITALOCEAN_TOKEN",
         }:
             if variable not in os.environ:
-                raise Exception(
+                raise ValueError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {DO_ENV_DOCS}"""
                 )
 
         if os.environ["AWS_ACCESS_KEY_ID"] != os.environ["SPACES_ACCESS_KEY_ID"]:
-            raise Exception(
+            raise ValueError(
                 f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must be equal\n
                 See {DO_ENV_DOCS} for more information"""
             )
@@ -101,16 +127,11 @@ def check_cloud_credentials(config):
             os.environ["AWS_SECRET_ACCESS_KEY"]
             != os.environ["SPACES_SECRET_ACCESS_KEY"]
         ):
-            raise Exception(
+            raise ValueError(
                 f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must be equal\n
                 See {DO_ENV_DOCS} for more information"""
             )
     elif config["provider"] == "local":
         pass
     else:
-        raise Exception("Cloud Provider configuration not supported")
-
-
-def verify_configuration_file_exists():
-    if not path.exists("qhub-config.yaml"):
-        raise Exception('Configuration file "qhub-config.yaml" does not exist')
+        raise ValueError("Cloud Provider configuration not supported")

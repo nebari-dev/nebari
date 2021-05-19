@@ -3,13 +3,24 @@ render-qhub:
   variables:
     COMMIT_MSG: |
       qhub-config.yaml automated commit: {{ '$CI_COMMIT_SHA' }}
+{%- if cookiecutter.ci_cd.before_script is defined %}
+  before_script:
+{%- for command in cookiecutter.ci_cd.before_script %}
+   - {{ command }}{% endfor %}
+{%- endif -%}
+{%- if cookiecutter.ci_cd.after_script is defined %}
+  after_script:
+{%- for command in cookiecutter.ci_cd.after_script %}
+   - {{ command }}{% endfor %}
+{%- endif %}
   script:
-    - pip install qhub==0.3.2
-    - qhub deploy --config qhub-config.yaml --disable-prompt
+    - git checkout "{{ cookiecutter.ci_cd.branch }}"
+    - {{ cookiecutter.pip_install_qhub }}
+    - qhub deploy --config qhub-config.yaml --disable-prompt --skip-remote-state-provision
     - git config user.email "qhub@quansight.com"
     - git config user.name "gitlab ci"
     - git add .
-    - git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
+    - git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin "{{ cookiecutter.ci_cd.branch }}")
   only:
     refs:
       - "{{ cookiecutter.ci_cd.branch }}"
@@ -27,6 +38,7 @@ build-docker-images:
           - jupyterlab
           - jupyterhub
           - dask-worker
+          - dask-gateway
   variables:
     IMAGE_TAG: {{ '$CI_COMMIT_SHA' }}
     IMAGE_NAME: {{ cookiecutter.project_name }}-{{ '$DOCKERFILE' }}
@@ -36,6 +48,6 @@ build-docker-images:
     refs:
       - merge_requests
     variables:
-      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"
+      - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "{{ cookiecutter.ci_cd.branch }}"
     changes:
       - "image/**"

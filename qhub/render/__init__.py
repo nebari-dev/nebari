@@ -1,10 +1,15 @@
 import pathlib
 import collections
 import json
+import os
+from shutil import copyfile
+from gitignore_parser import parse_gitignore
 
 from ruamel import yaml
-from cookiecutter.main import cookiecutter
 from cookiecutter.generate import generate_files
+from ..version import __version__
+from ..constants import TERRAFORM_VERSION
+from ..utils import pip_install_qhub, QHUB_GH_BRANCH
 
 
 def patch_dask_gateway_extra_config(config):
@@ -30,6 +35,22 @@ def patch_dask_gateway_extra_config(config):
                     worker_config[config_name] = deep_merge(
                         worker_config[config_name], extra_pod_config
                     )
+
+
+def patch_versioning_extra_config(config):
+    """
+    Set defaults for qhub_version and pip install command
+    because they depend on __version__ so cannot be static in cookiecutter.json
+    """
+    if "qhub_version" not in config:
+        config["qhub_version"] = __version__
+
+    config["pip_install_qhub"] = pip_install_qhub
+
+    config["QHUB_GH_BRANCH"] = QHUB_GH_BRANCH
+
+    if "terraform_version" not in config:
+        config["terraform_version"] = TERRAFORM_VERSION
 
 
 def deep_merge(d1, d2):
@@ -67,16 +88,11 @@ def deep_merge(d1, d2):
         return d1
 
 
-def render_default_template(output_directory, config_filename=None, force=False):
+def render_template(output_directory, config_filename, force=False):
     import qhub
 
     input_directory = pathlib.Path(qhub.__file__).parent / "template"
-    render_template(input_directory, output_directory, config_filename, force=force)
 
-
-def render_template(
-    input_directory, output_directory, config_filename=None, force=False
-):
     # would be nice to remove assumption that input directory
     # is in local filesystem
     input_directory = pathlib.Path(input_directory)
@@ -88,48 +104,89 @@ def render_template(
     # we take the output directory and split into two components
     repo_directory = output_directory.name
     output_directory = output_directory.parent
-    output_directory.mkdir(exist_ok=True, parents=True)
 
-    prompt_filename = input_directory / "hooks" / "prompt_gen_project.py"
+    # mkdir all the way down to repo dir so we can copy .gitignore into it in remove_existing_renders
+    (output_directory / repo_directory).mkdir(exist_ok=True, parents=True)
 
-    if config_filename is not None:
-        filename = pathlib.Path(config_filename)
+    filename = pathlib.Path(config_filename)
 
-        if not filename.is_file():
-            raise ValueError(f"cookiecutter configuration={filename} is not filename")
+    if not filename.is_file():
+        raise ValueError(f"cookiecutter configuration={filename} is not filename")
 
-        with filename.open() as f:
-            config = yaml.safe_load(f)
-            config["repo_directory"] = repo_directory
-            patch_dask_gateway_extra_config(config)
+    with filename.open() as f:
+        config = yaml.safe_load(f)
+        config["repo_directory"] = repo_directory
+        patch_dask_gateway_extra_config(config)
 
-        with (input_directory / "cookiecutter.json").open() as f:
-            config = collections.ChainMap(config, json.load(f))
+    with (input_directory / "cookiecutter.json").open() as f:
+        config = collections.ChainMap(config, json.load(f))
 
-        generate_files(
-            repo_dir=str(input_directory),
-            context={"cookiecutter": config},
-            output_dir=str(output_directory),
-            overwrite_if_exists=force,
-        )
-    elif prompt_filename.is_file():
-        with prompt_filename.open() as f:
-            content = f.read()
+    patch_versioning_extra_config(config)
 
-        global_context = {}
-        exec(content, global_context, global_context)
-        config = global_context["COOKIECUTTER_CONFIG"]
+    remove_existing_renders(
+        source_repo_dir=input_directory / "{{ cookiecutter.repo_directory }}",
+        dest_repo_dir=output_directory / repo_directory,
+    )
 
-        cookiecutter(
-            str(input_directory),
-            no_input=True,
-            extra_context=config,
-            output_dir=str(output_directory),
-            overwrite_if_exists=force,
-        )
+    generate_files(
+        repo_dir=str(input_directory),
+        context={"cookiecutter": config},
+        output_dir=str(output_directory),
+        overwrite_if_exists=force,
+    )
+
+
+def remove_existing_renders(source_repo_dir, dest_repo_dir):
+    """
+    Remove existing folder structure in output_dir apart from:
+    Files matching gitignore entries from the source template
+    Anything the user has added to a .qhubignore file in the output_dir (maybe their own github workflows)
+
+    No FILES in the dest_repo_dir are deleted.
+
+    The .git folder remains intact
+
+    Inputs must be pathlib.Path
+    """
+    copyfile(str(source_repo_dir / ".gitignore"), str(dest_repo_dir / ".gitignore"))
+
+    gitignore_matches = parse_gitignore(dest_repo_dir / ".gitignore")
+
+    if (dest_repo_dir / ".qhubignore").is_file():
+        qhubignore_matches = parse_gitignore(dest_repo_dir / ".qhubignore")
     else:
-        cookiecutter(
-            str(input_directory),
-            output_dir=str(output_directory),
-            overwrite_if_exists=force,
-        )
+
+        def qhubignore_matches(_):
+            return False  # Dummy blank qhubignore
+
+    for root, dirs, files in os.walk(dest_repo_dir, topdown=False):
+        if (
+            root.startswith(f"{str(dest_repo_dir)}/.git/")
+            or root == f"{str(dest_repo_dir)}/.git"
+        ):
+            # Leave everything in the .git folder
+            continue
+
+        root_path = pathlib.Path(root)
+
+        if root != str(
+            dest_repo_dir
+        ):  # Do not delete top-level files such as qhub-config.yaml!
+            for file in files:
+
+                if not gitignore_matches(root_path / file) and not qhubignore_matches(
+                    root_path / file
+                ):
+
+                    os.remove(root_path / file)
+
+        for dir in dirs:
+            if (
+                not gitignore_matches(root_path / dir)
+                and not (dir == ".git" and root_path == dest_repo_dir)
+                and not qhubignore_matches(root_path / dir)
+            ):
+                try:
+                    os.rmdir(root_path / dir)
+                except OSError:
+                    pass  # Silently fail if 'saved' files are present so dir not empty

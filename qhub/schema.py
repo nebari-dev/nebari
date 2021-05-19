@@ -49,22 +49,25 @@ class Base(pydantic.BaseModel):
 
 
 class CICD(Base):
-    type: CiEnum = "github-actions"
-    branch: str = "main"
+    type: CiEnum
+    branch: str
+    before_script: typing.Optional[typing.List[str]]
+    after_script: typing.Optional[typing.List[str]]
 
 
 # ============= Terraform ===============
 
 
 class TerraformState(Base):
-    type: TerraformStateEnum = "remote"
+    type: TerraformStateEnum
     backend: typing.Optional[str]
     config: typing.Optional[typing.Dict[str, str]]
 
 
 class TerraformModules(Base):
-    repository: str = "github.com/quansight/qhub-terraform-modules"
-    rev: str = "main"
+    # No longer used, so ignored, but could still be in qhub-config.yaml
+    repository: str
+    rev: str
 
 
 # ============ Certificate =============
@@ -77,6 +80,16 @@ class Certificate(Base):
     # lets-encrypt
     acme_email: typing.Optional[str]
     acme_server: typing.Optional[str]
+
+
+# ========== Default Images ==============
+
+
+class DefaultImages(Base):
+    jupyterhub: str
+    jupyterlab: str
+    dask_worker: str
+    dask_gateway: str
 
 
 # =========== Authentication ==============
@@ -142,9 +155,9 @@ class NodeSelector(Base):
 
 
 class NodeGroup(Base):
-    instance: str = "s-2vcpu-4gb"
-    min_nodes: int = 1
-    max_nodes: int = 1
+    instance: str
+    min_nodes: int
+    max_nodes: int
 
     class Config:
         extra = "allow"
@@ -159,8 +172,8 @@ class DigitalOceanProvider(Base):
 class GoogleCloudPlatformProvider(Base):
     project: str
     region: str
-    zone: str
-    availability_zones: typing.List[str]
+    zone: typing.Optional[str]  # No longer used
+    availability_zones: typing.Optional[typing.List[str]]  # Genuinely optional
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
 
@@ -261,11 +274,13 @@ class Main(Base):
     ci_cd: typing.Optional[CICD]
     domain: str
     terraform_state: typing.Optional[TerraformState]
-    terraform_modules: typing.Optional[TerraformModules]
+    terraform_modules: typing.Optional[
+        TerraformModules
+    ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
     cdsdashboards: CDSDashboards
     security: Security
-    default_images: typing.Dict[str, str]
+    default_images: DefaultImages
     storage: typing.Dict[str, str]
     local: typing.Optional[LocalProvider]
     google_cloud_platform: typing.Optional[GoogleCloudPlatformProvider]

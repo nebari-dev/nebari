@@ -1,18 +1,32 @@
 FROM debian:10.3-slim
 LABEL MAINTAINER="Quansight"
 
-# ============== base install ===============
+COPY scripts/install-apt-minimal.sh /opt/scripts/install-apt-minimal.sh
+RUN /opt/scripts/install-apt-minimal.sh
+
+COPY scripts/fix-permissions /opt/scripts/fix-permissions
+
+# These can but should not be changed. ids will be arbitrary at run time.
+ARG NB_USER=jovyan
+ARG NB_UID=1000
+ARG NB_GID=100
+
 ENV CONDA_VERSION py37_4.8.2
 ENV CONDA_SHA256 957d2f0f0701c3d1335e3b39f235d197837ad69a944fa6f5d8ad2c686b69df3b
+SHELL ["/bin/bash", "-c"]
 
-COPY scripts /opt/scripts
+ENV PATH=/opt/conda/bin:${PATH}:/opt/scripts
+
+# ============== base install ===============
+COPY scripts/install-conda.sh /opt/scripts/install-conda.sh
 
 RUN /opt/scripts/install-conda.sh
 
-ENV PATH="/opt/conda/bin:$PATH"
-
 # ========== dask-worker install ===========
-COPY dask-worker /opt/dask-worker
+COPY dask-worker/environment.yaml /opt/dask-worker/environment.yaml
+COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
+RUN /opt/scripts/install-conda-environment.sh /opt/dask-worker/environment.yaml 'false'
 
-RUN /opt/scripts/install-conda-environment.sh /opt/dask-worker/environment.yaml \
-    && /opt/dask-worker/postBuild
+COPY dask-worker /opt/dask-worker
+RUN /opt/dask-worker/postBuild
+

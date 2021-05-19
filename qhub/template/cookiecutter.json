@@ -7,13 +7,8 @@
       "branch": "main"
     },
     "endpoint": null,
-    "terraform_version": "0.14.9",
     "terraform_state": {
       "type": "remote"
-    },
-    "terraform_modules": {
-        "repository": "github.com/quansight/qhub-terraform-modules",
-        "rev": "main"
     },
     "certificate": {
       "type": "self-signed"
@@ -73,7 +68,6 @@
     "google_cloud_platform": {
         "project": null,
         "region": null,
-        "zone": null,
         "availability_zones": [],
         "kubernetes_version": null,
         "node_groups": {
@@ -146,5 +140,10 @@
     "_extensions": [
         "qhub.render.jinja.YamlifyExtension",
         "qhub.render.jinja.JsonifyExtension"
+    ],
+
+    "_copy_without_render": [
+        "infrastructure/modules/*",
+        "terraform-state/modules/*"
     ]
 }

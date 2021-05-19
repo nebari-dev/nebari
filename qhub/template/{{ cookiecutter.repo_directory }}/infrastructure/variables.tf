@@ -17,11 +17,7 @@ variable "region" {
 variable "availability_zones" {
   description = "AWS availability zones within AWS region"
   type        = list(string)
-{%- if cookiecutter.amazon_web_services.availability_zones is defined %}
-  default     = {{ cookiecutter.amazon_web_services.availability_zones | jsonify }}
-{%- else %}
-  default     = []
-{%- endif %}
+  default     = {{ cookiecutter.amazon_web_services.availability_zones | default([],true) | jsonify }}
 }
 
 variable "vpc_cidr_block" {
@@ -38,7 +34,7 @@ variable "region" {
 variable "availability_zones" {
   description = "GCP availability zones within region"
   type        = list(string)
-  default     = {{ cookiecutter.google_cloud_platform.availability_zones | jsonify }}
+  default     = {{ cookiecutter.google_cloud_platform.availability_zones | default([],true) | jsonify }}
 }
 {% elif cookiecutter.provider == "azure" %}
 variable "region" {
@@ -93,6 +89,18 @@ variable "dask-worker-image" {
   default = {
     name = "{{ cookiecutter.default_images.dask_worker.split(':')[0] }}"
     tag  = "{{ cookiecutter.default_images.dask_worker.split(':')[1] }}"
+  }
+}
+
+variable "dask-gateway-image" {
+  description = "Dask worker image"
+  type = object({
+    name = string
+    tag  = string
+  })
+  default = {
+    name = "{{ cookiecutter.default_images.dask_gateway.split(':')[0] }}"
+    tag  = "{{ cookiecutter.default_images.dask_gateway.split(':')[1] }}"
   }
 }
 

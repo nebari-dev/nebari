@@ -16,6 +16,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
+
+      # Could check that the version.py version number matches the tag
+      # and that the branch release-<version> also points to this tag
+      # and that terraform-modules tag release-{version} exists.
+      # See https://github.com/Quansight/qhub/issues/544
+
       - name: Install QHub
         run: |
           pip install twine

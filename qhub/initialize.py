@@ -4,6 +4,7 @@ import string
 import random
 import secrets
 import tempfile
+import logging
 
 import bcrypt
 import requests
@@ -12,8 +13,9 @@ from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
 from qhub.provider.cloud import digital_ocean
-from qhub.utils import namestr_regex
+from qhub.utils import namestr_regex, qhub_image_tag, check_cloud_credentials
 
+logger = logging.getLogger(__name__)
 
 BASE_CONFIGURATION = {
     "project_name": None,
@@ -27,18 +29,19 @@ BASE_CONFIGURATION = {
         "users": {
             "example-user": {
                 "uid": 1000,
-                "primary_group": "users",
-                "secondary_groups": ["admin"],
+                "primary_group": "admin",
+                "secondary_groups": ["users"],
             }
         },
         "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
     },
     "default_images": {
-        "jupyterhub": "quansight/qhub-jupyterhub:c36eace493739be280c71bec59b80659115db5d5",
-        "jupyterlab": "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5",
-        "dask_worker": "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5",
+        "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
+        "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
+        "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
+        "dask_gateway": f"quansight/qhub-dask-gateway:{qhub_image_tag}",
     },
-    "storage": {"conda_store": "20Gi", "shared_filesystem": "10Gi"},
+    "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
     "theme": {
         "jupyterhub": {
             "hub_title": None,
@@ -108,21 +111,19 @@ DIGITAL_OCEAN = {
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
-        "worker": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 4},
+        "user": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
+        "worker": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
     },
 }
 
 GOOGLE_PLATFORM = {
     "project": "PLACEHOLDER",
     "region": "us-central1",
-    "zone": "us-central1-c",
-    "availability_zones": ["us-central1-c"],
     "kubernetes_version": "1.18.16-gke.502",
     "node_groups": {
         "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
-        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 4},
+        "user": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
+        "worker": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
     },
 }
 
@@ -136,11 +137,11 @@ AZURE = {
             "min_nodes": 1,
             "max_nodes": 1,
         },
-        "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 4},
+        "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 5},
         "worker": {
             "instance": "Standard_D2_v2",
             "min_nodes": 0,
-            "max_nodes": 4,
+            "max_nodes": 5,
         },
     },
     "storage_account_postfix": "".join(
@@ -153,8 +154,8 @@ AMAZON_WEB_SERVICES = {
     "kubernetes_version": "1.18",
     "node_groups": {
         "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2},
-        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 2},
+        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
+        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
     },
 }
 
@@ -162,63 +163,82 @@ DEFAULT_PROFILES = {
     "jupyterlab": [
         {
             "display_name": "Small Instance",
-            "description": "Stable environment with 1 cpu / 1 GB ram",
+            "description": "Stable environment with 1 cpu / 4 GB ram",
             "default": True,
             "kubespawner_override": {
                 "cpu_limit": 1,
-                "cpu_guarantee": 1,
-                "mem_limit": "1G",
-                "mem_guarantee": "1G",
-                "image": "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5",
+                "cpu_guarantee": 0.75,
+                "mem_limit": "4G",
+                "mem_guarantee": "2.5G",
+                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
         {
             "display_name": "Medium Instance",
-            "description": "Stable environment with 1.5 cpu / 2 GB ram",
+            "description": "Stable environment with 2 cpu / 8 GB ram",
             "kubespawner_override": {
-                "cpu_limit": 1.5,
-                "cpu_guarantee": 1.25,
-                "mem_limit": "2G",
-                "mem_guarantee": "2G",
-                "image": "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5",
+                "cpu_limit": 2,
+                "cpu_guarantee": 1.5,
+                "mem_limit": "8G",
+                "mem_guarantee": "5G",
+                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
     ],
     "dask_worker": {
         "Small Worker": {
             "worker_cores_limit": 1,
-            "worker_cores": 1,
-            "worker_memory_limit": "1G",
-            "worker_memory": "1G",
-            "image": "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5",
+            "worker_cores": 0.75,
+            "worker_memory_limit": "4G",
+            "worker_memory": "2.5G",
+            "worker_threads": 1,
+            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
         "Medium Worker": {
-            "worker_cores_limit": 1.5,
-            "worker_cores": 1.25,
-            "worker_memory_limit": "2G",
-            "worker_memory": "2G",
-            "image": "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5",
+            "worker_cores_limit": 2,
+            "worker_cores": 1.5,
+            "worker_memory_limit": "8G",
+            "worker_memory": "5G",
+            "worker_threads": 2,
+            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
     },
 }
 
 DEFAULT_ENVIRONMENTS = {
-    "environment-default.yaml": {
-        "name": "default",
-        "channels": ["conda-forge", "defaults"],
+    "environment-dask.yaml": {
+        "name": "dask",
+        "channels": ["conda-forge"],
         "dependencies": [
-            "python=3.8",
+            "python",
             "ipykernel",
             "ipywidgets",
-            "dask==2.30.0",
-            "distributed==2.30.1",
-            "dask-gateway=0.9.0",
+            "python-graphviz",
+            "dask ==2.30.0",
+            "distributed ==2.30.1",
+            "dask-gateway ==0.9.0",
             "numpy",
             "numba",
             "pandas",
-            "cdsdashboards-singleuser",
         ],
-    }
+    },
+    "environment-dashboard.yaml": {
+        "name": "dashboard",
+        "channels": ["conda-forge"],
+        "dependencies": [
+            "python",
+            "ipykernel",
+            "ipywidgets >=7.6",
+            "param",
+            "python-graphviz",
+            "matplotlib >=3.3.4",
+            "panel >=0.10.3",
+            "voila >=0.2.7",
+            "streamlit >=0.76",
+            "dash >=1.19",
+            "cdsdashboards-singleuser >=0.5.6",
+        ],
+    },
 }
 
 
@@ -358,8 +378,6 @@ def render_config(
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
-        if "AWS_DEFAULT_REGION" in os.environ:
-            config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
         if kubernetes_version:
             config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
     elif cloud_provider == "local":
@@ -376,61 +394,84 @@ def render_config(
             auth0_auto_provision(config)
 
     if repository_auto_provision:
-        GITHUB_REGEX = "github.com/(.*)/(.*)"
+        GITHUB_REGEX = "(https://)?github.com/([^/]+)/([^/]+)/?"
         if re.search(GITHUB_REGEX, repository):
             match = re.search(GITHUB_REGEX, repository)
             git_repository = github_auto_provision(
-                config, match.group(1), match.group(2)
+                config, match.group(2), match.group(3)
             )
             git_repository_initialize(git_repository)
+        else:
+            raise ValueError(
+                f"Repository to be auto-provisioned is not the full URL of a GitHub repo: {repository}"
+            )
 
     return config
 
 
 def github_auto_provision(config, owner, repo):
+    check_cloud_credentials(
+        config
+    )  # We may need env vars such as AWS_ACCESS_KEY_ID depending on provider
+
+    already_exists = True
     try:
         github.get_repository(owner, repo)
     except requests.exceptions.HTTPError:
         # repo not found
-        github.create_repository(
-            owner,
-            repo,
-            description=f'QHub {config["project_name"]}-{config["provider"]}',
-            homepage='https://{config["domain"]}',
-        )
+        already_exists = False
 
-    # Secrets
-    if config["provider"] == "do":
-        for name in {
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "SPACES_ACCESS_KEY_ID",
-            "SPACES_SECRET_ACCESS_KEY",
-            "DIGITALOCEAN_TOKEN",
-        }:
-            github.update_secret(owner, repo, name, os.environ[name])
-    elif config["provider"] == "aws":
-        for name in {
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "AWS_DEFAULT_REGION",
-        }:
-            github.update_secret(owner, repo, name, os.environ[name])
-    elif config["provider"] == "gcp":
-        github.update_secret(owner, repo, "PROJECT_ID", os.environ["PROJECT_ID"])
-        with open(os.environ["GOOGLE_CREDENTIALS"]) as f:
-            github.update_secret(owner, repo, "GOOGLE_CREDENTIALS", f.read())
-    elif config["provider"] == "azure":
-        for name in {
-            "ARM_CLIENT_ID",
-            "ARM_CLIENT_SECRET",
-            "ARM_SUBSCRIPTION_ID",
-            "ARM_TENANT_ID",
-        }:
-            github.update_secret(owner, repo, name, os.environ[name])
-    github.update_secret(
-        owner, repo, "REPOSITORY_ACCESS_TOKEN", os.environ["GITHUB_TOKEN"]
-    )
+    if not already_exists:
+        try:
+            github.create_repository(
+                owner,
+                repo,
+                description=f'QHub {config["project_name"]}-{config["provider"]}',
+                homepage=f'https://{config["domain"]}',
+            )
+        except requests.exceptions.HTTPError as he:
+            raise ValueError(
+                f"Unable to create GitHub repo https://github.com/{owner}/{repo} - error message from GitHub is: {he}"
+            )
+    else:
+        logger.warn(f"GitHub repo https://github.com/{owner}/{repo} already exists")
+
+    try:
+        # Secrets
+        if config["provider"] == "do":
+            for name in {
+                "AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY",
+                "SPACES_ACCESS_KEY_ID",
+                "SPACES_SECRET_ACCESS_KEY",
+                "DIGITALOCEAN_TOKEN",
+            }:
+                github.update_secret(owner, repo, name, os.environ[name])
+        elif config["provider"] == "aws":
+            for name in {
+                "AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY",
+            }:
+                github.update_secret(owner, repo, name, os.environ[name])
+        elif config["provider"] == "gcp":
+            github.update_secret(owner, repo, "PROJECT_ID", os.environ["PROJECT_ID"])
+            with open(os.environ["GOOGLE_CREDENTIALS"]) as f:
+                github.update_secret(owner, repo, "GOOGLE_CREDENTIALS", f.read())
+        elif config["provider"] == "azure":
+            for name in {
+                "ARM_CLIENT_ID",
+                "ARM_CLIENT_SECRET",
+                "ARM_SUBSCRIPTION_ID",
+                "ARM_TENANT_ID",
+            }:
+                github.update_secret(owner, repo, name, os.environ[name])
+        github.update_secret(
+            owner, repo, "REPOSITORY_ACCESS_TOKEN", os.environ["GITHUB_TOKEN"]
+        )
+    except requests.exceptions.HTTPError as he:
+        raise ValueError(
+            f"Unable to set Secrets on GitHub repo https://github.com/{owner}/{repo} - error message from GitHub is: {he}"
+        )
 
     return f"git@github.com:{owner}/{repo}.git"
 

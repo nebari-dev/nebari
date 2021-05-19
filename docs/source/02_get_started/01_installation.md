@@ -27,7 +27,7 @@ QHub command line
 
 positional arguments:
   {deploy,destroy,render,init,validate,destroy}
-                        QHub - 0.3.0
+                        QHub - ||QHUB_VERSION||
 
 optional arguments:
   -h, --help            show this help message and exit

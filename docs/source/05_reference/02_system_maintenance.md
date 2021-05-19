@@ -10,7 +10,7 @@ Pull-Requests.
 The docker images used for dask-worker and jupyterlab user
 environments are pulled from a docker container registry. The images
 are built based on the images specified in
-[image](../image). There are four images that are currently built
+the `image` folder. There are three images that are currently built
 
 - jupyterlab :: modification of jupyterlab instances for each user
 - dask-worker :: modification of dask workers and dask scheduler
@@ -47,11 +47,11 @@ digital_ocean:
     user:
       instance: "s-2vcpu-4gb"
       min_nodes: 1
-      max_nodes: 4
+      max_nodes: 5
     worker:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
-      max_nodes: 4
+      max_nodes: 5
 ```
 
 To add a node group for a node group called `worker-high-mem` simply
@@ -67,11 +67,11 @@ digital_ocean:
       min_nodes: 1
       max_nodes: 1
     user:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
       max_nodes: 4
     worker:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
       max_nodes: 4
     worker-high-memory:
@@ -99,7 +99,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
 ```
 
 We add the `node_selector` attribute. Note that for AWS, GCP, and DO they have different keys for the nodegroup name.
@@ -122,7 +122,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
         node_selector:
           "doks.digitalocean.com/node-pool": worker-high-memory
 ```
@@ -140,10 +140,10 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
 ```
 
-[Dask-gateway](https:/c36eace493739be280c71bec59b80659115db5d5/gateway.dask.org/api-server.html#kube-cluster-config)
+[Dask-gateway](https://gateway.dask.org/api-server.html#kube-cluster-config)
 takes additional configuration for the scheduler pods and
 workers. Remember similar to assigning node groups to specific
 jupyterlab instances we must get the key for the node pool.
@@ -162,7 +162,7 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
       scheduler_extra_pod_config:
         nodeSelector:
           "doks.digitalocean.com/node-pool": worker-high-memory

@@ -47,8 +47,23 @@ and not specifying the key `ci_cd`.
 ci_cd:
   type: github-actions
   branch: main
+  before_script:
+    - echo "running commands before ci completes"
+  after_script:
+    - echo "running commands after ci completes"
+    - echo "additional commands to run"
 ```
 
+ - `type`: current supported CI providers are `github-actions` and `gitlab-ci`
+ - `branch`: branch to use to commit `qhub render` changes to
+ - `before_script`: optional script to run before CI starts QHub
+   infrastructure deployment. This is useful in cases that additional
+   setup is required for Qhub to deploy the resources. Only supported
+   on `gitlab-ci` at the moment.
+ - `after_script`: optional script to run after CI ends QHub
+   infrastructure deployment. This is useful in cases to notify
+   resources of successful QHub deployment. Only supported on
+   `gitlab-ci` at the moment.
 
 If `ci_cd` is not supplied no CI/CD will be auto-generated. However,
 we advise that having infrastructure as code allows teams to more
@@ -71,13 +86,13 @@ certificate:
 To use Let's Encrypt you must specify an email address that let's
 encrypt will associate the generated certificate with and whether to
 use the [staging server](https://acme-staging-v02.api.letsencrypt.org/directory) or [production server](https://acme-v02.api.letsencrypt.org/directory). In general you
-should use the production server.
+should use the production server, as seen below.
 
 ```yaml
 certificate:
   type: lets-encrypt
   acme_email: <your-email-address>
-  acme_server:
+  acme_server: https://acme-v02.api.letsencrypt.org/directory
 ```
 
 You may also supply a custom self signed certificate and secret
@@ -322,13 +337,13 @@ digital_ocean:
       min_nodes: 1
       max_nodes: 1
     user:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
-      max_nodes: 4
+      max_nodes: 5
     worker:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
-      max_nodes: 4
+      max_nodes: 5
 ```
 
 #### Google Cloud Provider (GCP)
@@ -344,9 +359,8 @@ To see available instance types refer to
 google_cloud_platform:
   project: test-test-test
   region: us-central1
-  zone: us-central1-c
   availability_zones: ["us-central1-c"]
-  kubernetes_version: "1.14.10-gke.31"
+  kubernetes_version: "1.18.16-gke.502"
   node_groups:
     general:
       instance: n1-standard-2
@@ -355,7 +369,7 @@ google_cloud_platform:
     user:
       instance: n1-standard-2
       min_nodes: 0
-      max_nodes: 2
+      max_nodes: 5
     worker:
       instance: n1-standard-2
       min_nodes: 0
@@ -375,7 +389,7 @@ for possible options.
 amazon_web_services:
   region: us-west-2
   availability_zones: ["us-west-2a", "us-west-2b"]
-  kubernetes_version: "1.14"
+  kubernetes_version: "1.18"
   node_groups:
     general:
       instance: "m5.large"
@@ -384,11 +398,11 @@ amazon_web_services:
     user:
       instance: "m5.large"
       min_nodes: 1
-      max_nodes: 2
+      max_nodes: 5
     worker:
       instance: "m5.large"
       min_nodes: 1
-      max_nodes: 2
+      max_nodes: 5
 ```
 
 #### Local (Existing) Kubernetes Cluster
@@ -458,38 +472,20 @@ terraform_state:
     region: "us-east-1"
 ```
 
-
-
-## Terraform Modules
-
-By default QHub uses a set terraform modules developed by Quansight
-managed at https://github.com/quansight/qhub-terraform-modules. This
-collection is used to provide a consistent interface between cloud
-providers and manage how jupyterlab, dask-gateway and related
-resources are deployed. However, if you want to make modifications on
-the deployed resources you can tweak the repository used. This field
-is optional. This is usually the easiest way to tweak QHub outside of
-the `qhub-config.yaml` file.
-
-```yaml
-terraform_modules:
-  repository: "github.com/quansight/qhub-terraform-modules"
-  rev: main
-```
-
 ## Default Images
 
 Default images are to the default image run if not specified in a
 profile (described in the next section). The `jupyterhub` key controls
 the jupyterhub image run. These control the docker image used to run
-JupyterHub, the default JupyterLab image, and default Dask worker
-image.
+JupyterHub, the default JupyterLab image, the default Dask worker
+image, and dask gateway docker image.
 
 ```yaml
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:c36eace493739be280c71bec59b80659115db5d5"
-  jupyterlab: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
-  dask_worker: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+  jupyterhub: "quansight/qhub-jupyterhub:v||QHUB_VERSION||"
+  jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
+  dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
+  dask_gateway: "quansight/qhub-dask-gateway:v||QHUB_VERSION||"
 ```
 
 ## Storage
@@ -525,7 +521,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       kubespawner_override:
@@ -533,7 +529,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
 
   dask_worker:
     "Small Worker":
@@ -541,13 +537,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
 ```
 
 For each `profiles.jupyterlab` is a named JupyterLab profile. It
@@ -560,6 +556,23 @@ and users.  We recommend using groups to manage profile access.
 Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the
 cores and memory.
+
+When configuring the memory and cpus for profiles there are some
+important considerations to make. Two important terms to understand are:
+ - `limit`: the absolute max memory that a given pod can consume. If a
+   process within the pod consumes more than the `limit` memory the
+   linux OS will kill the process. Limit is not used for scheduling
+   purposes with kubernetes.
+ - `guarantee`: is the amount of memory the kubernetes scheduler uses
+   to place a given pod. In general the `guarantee` will be less than
+   the limit. Often times the node itself has less available memory
+   than the node specification. See this [guide from digital
+   ocean](https://docs.digitalocean.com/products/kubernetes/#allocatable-memory)
+   which is generally applicable to other clouds.
+   
+For example if a node is 8 GB of ram and 2 cpu you should
+guarantee/schedule roughly 75% and follow the digital ocean guide
+linked above. E.g. 1.5 cpu guarantee and 5.5 GB guaranteed.
 
 ### Limiting profiles to specific users and groups
 
@@ -754,18 +767,18 @@ digital_ocean:
       min_nodes: 1
       max_nodes: 1
     user:
-      instance: "s-2vcpu-4gb"
+      instance: "g-2vcpu-8gb"
       min_nodes: 1
-      max_nodes: 4
+      max_nodes: 5
     worker:
-      instance: "s-2vcpu-4gb"
-      min_nodes: 2
-      max_nodes: 4
+      instance: "g-2vcpu-8gb"
+      min_nodes: 1
+      max_nodes: 5
 
 default_images:
-  jupyterhub: "quansight/qhub-jupyterhub:c36eace493739be280c71bec59b80659115db5d5"
-  jupyterlab: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
-  dask_worker: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+  jupyterhub: "quansight/qhub-jupyterhub:v||QHUB_VERSION||"
+  jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
+  dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
 
 theme:
   jupyterhub:
@@ -796,7 +809,7 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       default: true
@@ -805,7 +818,7 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:c36eace493739be280c71bec59b80659115db5d5"
+        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
 
   dask_worker:
     "Small Worker":
@@ -813,13 +826,13 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:c36eace493739be280c71bec59b80659115db5d5"
+      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
 
 environments:
   "environment-default.yaml":

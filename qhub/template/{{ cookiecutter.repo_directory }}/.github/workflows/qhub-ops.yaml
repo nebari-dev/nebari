@@ -7,6 +7,43 @@ on:
     paths:
       - "qhub-config.yaml"
 
+env:
+{% if cookiecutter.provider == 'aws' %}
+{% raw %}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+{% endraw %}
+{% elif cookiecutter.provider == 'do' %}
+{% raw %}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+  SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+  SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
+  DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+{% endraw %}
+{% elif cookiecutter.provider == 'gcp' %}
+{% raw %}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+{% endraw %}
+{% elif cookiecutter.provider == 'azure' %}
+{% raw %}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+{% endraw %}
+{% endif %}
+
+{%- if cookiecutter.QHUB_GH_BRANCH != '' %}
+  # Preserve dev branch so pip_install_qhub doesn't get overridden on next render
+  QHUB_GH_BRANCH: {{ cookiecutter.QHUB_GH_BRANCH }}
+{% endif %}
+
 jobs:
   build:
     name: qhub
@@ -22,17 +59,17 @@ jobs:
           python-version: 3.8
       - name: Install qhub
         run: |
-          pip install qhub==0.3.2
-      - name: Render Changes to Template
+          {{ cookiecutter.pip_install_qhub }}
+      - name: Deploy Changes made in qhub-config.yaml
         run: |
-          qhub render -c qhub-config.yaml
+          qhub deploy -c qhub-config.yaml --disable-prompt --skip-remote-state-provision
       - name: Push Changes
         run: |
           git config user.email "qhub@quansight.com"
           git config user.name "github action"
           git add .
           # only commit and push if we have changes
-          git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin "{{ cookiecutter.ci_cd.branch }}")
         env:
           COMMIT_MSG: |
             qhub-config.yaml automated commit: {{ '${{ github.sha }}' }}

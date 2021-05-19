@@ -73,16 +73,13 @@ How-To Guides section of the documentation.
 Please see these instructions for [creating an IAM
 role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create.html)
 with administrator permissions. Upon generation, the IAM role will provide a public **access
-key ID** and a **secret key** which will need to be added to the environment variables. Additionally, you will also need to
-set the [AWS region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)
-where you intend to deploy your QHub infrastructure.
+key ID** and a **secret key** which will need to be added to the environment variables.
 
 To define the environment variables paste the commands below with your respective keys.
 
 ```bash
 export AWS_ACCESS_KEY_ID="HAKUNAMATATA"
 export AWS_SECRET_ACCESS_KEY="iNtheJUng1etheMightyJUNgleTHEl10N51eEpsT0n1ghy;"
-export AWS_DEFAULT_REGION="eu-west-2"
 ```
 </details>
 

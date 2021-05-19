@@ -4,7 +4,7 @@ provider "azurerm" {
 
 
 module "registry" {
-  source              = "{{ cookiecutter.terraform_modules.repository }}//modules/azure/registry?ref={{ cookiecutter.terraform_modules.rev }}"
+  source              = "./modules/azure/registry"
   name                = "{{ cookiecutter.project_name }}{{ cookiecutter.namespace }}"
   location            = "{{ cookiecutter.azure.region }}"
   resource_group_name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}"
@@ -12,13 +12,14 @@ module "registry" {
 
 
 module "kubernetes" {
-  source = "{{ cookiecutter.terraform_modules.repository }}//modules/azure/kubernetes?ref={{ cookiecutter.terraform_modules.rev }}"
+  source = "./modules/azure/kubernetes"
 
-  name                = local.cluster_name
-  environment         = var.environment
-  location            = var.region
-  resource_group_name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}"
-  kubernetes_version  = "{{ cookiecutter.azure.kubernetes_version }}"
+  name                     = local.cluster_name
+  environment              = var.environment
+  location                 = var.region
+  resource_group_name      = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}"
+  node_resource_group_name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}-node-resource-group"
+  kubernetes_version       = "{{ cookiecutter.azure.kubernetes_version }}"
 
   node_groups = [
 {% for nodegroup, nodegroup_config in cookiecutter.azure.node_groups.items() %}
