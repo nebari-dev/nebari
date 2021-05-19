@@ -46,7 +46,7 @@ security:
     config:
       client_id: <CLIENT_ID>
       client_secret: <CLIENT_SECRET>
-      oauth_callback_url: https://jupyter.azure.qhub.dev/hub/oauth_callback
+      oauth_callback_url: https://azure.qhub.dev/hub/oauth_callback
 ```
 
 You can choose the authentication type you would like to use. In the example above, the configuration shows authentication type as Github, but `Auth0` is also supported as seen below.
