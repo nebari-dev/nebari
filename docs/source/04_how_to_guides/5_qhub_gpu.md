@@ -44,11 +44,19 @@ google_cloud_platform:
 
 ```
 
-Note: One of the restrictions regarding GPUs on GCP is they can only be used
+Notes:
+
+- One of the restrictions regarding GPUs on GCP is they can only be used
 with general-purpose *[N1 machine types](https://cloud.google.com/compute/docs/machine-types#n1_machine_types)*,
 except A100 GPUs, which are only supported on *[a2 machine types](https://cloud.google.com/blog/products/compute/announcing-google-cloud-a2-vm-family-based-on-nvidia-a100-gpu)*
 
+- If you are not using the gcp provider in QHub but are using gcp (let's say deploying
+  on an existing gcp cluster). You will need to manually install NVIDIA drivers to the
+  cluster, See documentation for the same here: https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#installing_drivers
+
+
 See limitations here: https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#limitations
+
 
 #### 2. Add GPU instance in the JupyterLab profiles
 
