@@ -28,9 +28,6 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
     Amazon AWS, `gcp` for Google Could Provider, `azure` for Microsoft
     Azure, and `local` for a local or existing kubernetes deployment.
 
- - `ci_cd`: is the continuous integration and continuous deployment
-   framework to use. Currently, only `github-actions` is supported.
-
  - `domain`: is the top level URL to put JupyterLab and future
    services under such a monitoring. For example `qhub.dev`
    would be the domain for JupyterHub to be exposed under.
