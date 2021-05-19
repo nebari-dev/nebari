@@ -54,8 +54,9 @@ source/03_tutorials_and_samples/03_dask_gateway_usage.md
 
 source/04_how_to_guides/1_qhub-aws-deploy_guide.md
 source/04_how_to_guides/2_qhub-gcp-deploy_guide.md
-source/04_how_to_guides/3_qhub-do-deploy_guide.md
-source/04_how_to_guides/4_system_backup.md
+source/04_how_to_guides/3_qhub-azure-deploy_guide.md
+source/04_how_to_guides/4_qhub-do-deploy_guide.md
+source/04_how_to_guides/5_system_backup.md
 ```
 
 ```{toctree}
