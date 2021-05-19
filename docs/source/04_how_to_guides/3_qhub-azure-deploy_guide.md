@@ -128,7 +128,8 @@ default_images:
 
 ### Storage
 
-This section allows you to control the amount of storage allocated to shared filesystems. Please note, when you change the storage size, it will delete the previous storage.
+This section controls the amount of storage allocated to shared filesystems.
+> NOTE: When the storage size is changed, the previous storage will be deleted.
 
 ```yaml
 storage:
