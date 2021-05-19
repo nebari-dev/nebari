@@ -67,7 +67,7 @@ If the `config` is left blank (i.e.`config: {}`) the client will be auto provisi
 
 #### 2.1 Users and Groups
 
-The configuration file also allows you to specify `users` and `groups` that you would like to give access to your project and its deployment. This portion of the file enables you to provision unix permissions to each user. All users are assigned a `uid`, `primary_group`.
+The configuration file also allows you to specify `users` and `groups` that you would like to give access to your project and its deployment. This portion of the file enables you to provision unix permissions to each user. All users are assigned a `uid`, `primary_group`. This portion of the file enables you to provision UNIX permissions to each user. All users are assigned a `uid`, `primary_group`.
 
 The `primary_group` is the group name assigned to files that are written for the user while `groups` is simply a mapping of group name to group ids. It is recommended to not change the ids assigned to groups and users after creation since it may lead to login problems. While the example below shows ids around 1000, it is recommended to start with high uid numbers, such as 10000000. `ids`, technically, supports 2 billion `ids`.
 
