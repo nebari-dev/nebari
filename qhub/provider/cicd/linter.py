@@ -37,7 +37,7 @@ def generate_lint_message(config):
 
     pass_lint = textwrap.dedent(
         """
-            This is an automatic response from the QHub-cloud linter.
+            This is an automatic response from the QHub linter.
             I just wanted to let you know that I linted your `qhub-config.yaml` in your PR and I didn't find any
             problems.
             """
@@ -47,7 +47,7 @@ def generate_lint_message(config):
     bad_lint = (
         textwrap.dedent(
             """
-            This is an automatic response from the QHub-cloud linter.
+            This is an automatic response from the QHub linter.
             I just wanted to let you know that I linted your `qhub-config.yaml` in your PR and found some errors:\n"""
         )
         + f"{messages}"
@@ -57,7 +57,7 @@ def generate_lint_message(config):
         status = "no configuration file"
         message = textwrap.dedent(
             """
-            This is an automatic response from the QHub-cloud linter.
+            This is an automatic response from the QHub linter.
             I was trying to look for the `qhub-config.yaml` file to lint for you, but couldn't find any...
             """
         )
