@@ -20,7 +20,7 @@ fi
 if ! ${NEW_ENV};then
     if [[ $(basename "${ENV_FILE}") =~ "*lock*" ]];then
         echo "${ENV_FILE} should not be a lock file as this is not  supported when \
-            only updating the conda environent. Consider setting NEW_ENV to yes."
+            only updating the conda environment. Consider setting NEW_ENV to yes."
         exit 1
     fi
     echo Installing into current conda environment

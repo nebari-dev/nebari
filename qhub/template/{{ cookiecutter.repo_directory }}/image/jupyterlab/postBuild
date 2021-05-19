@@ -18,6 +18,7 @@ cd /opt/code_server
 # Fetch the snapshot of https://code-server.dev/install.sh as of the time of writing
 curl -fsSL https://raw.githubusercontent.com/cdr/code-server/003dc0feeb5d437be1d6a4565fec7808b5aac69b/install.sh > install.sh
 expected_sum=4f66ead4b4ed2be7c746f1eaf6672f3e0cddad66924d9b6c513d108d68a0127c
+
 if [[ ! $(sha256sum install.sh) == "${expected_sum}  install.sh" ]];then
     echo Unexpected hash from code-server install script
     exit 1

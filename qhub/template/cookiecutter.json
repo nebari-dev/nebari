@@ -68,7 +68,6 @@
     "google_cloud_platform": {
         "project": null,
         "region": null,
-        "zone": null,
         "availability_zones": [],
         "kubernetes_version": null,
         "node_groups": {

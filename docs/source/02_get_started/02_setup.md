@@ -73,16 +73,13 @@ How-To Guides section of the documentation.
 Please see these instructions for [creating an IAM
 role](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create.html)
 with administrator permissions. Upon generation, the IAM role will provide a public **access
-key ID** and a **secret key** which will need to be added to the environment variables. Additionally, you will also need to
-set the [AWS region](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)
-where you intend to deploy your QHub infrastructure.
+key ID** and a **secret key** which will need to be added to the environment variables.
 
 To define the environment variables paste the commands below with your respective keys.
 
 ```bash
 export AWS_ACCESS_KEY_ID="HAKUNAMATATA"
 export AWS_SECRET_ACCESS_KEY="iNtheJUng1etheMightyJUNgleTHEl10N51eEpsT0n1ghy;"
-export AWS_DEFAULT_REGION="eu-west-2"
 ```
 </details>
 
@@ -139,11 +136,11 @@ export ARM_CLIENT_SECRET=""       # client's secret
 export ARM_SUBSCRIPTION_ID=""     # value available at the `Subscription` section under the `Overview` tab
 export ARM_TENANT_ID=""           # field available under `Azure Active Directories` > `Properties` > `Tenant ID`
 ```
-> NOTE 1: Having trouble finding your Subscrition ID? [Azure's official docs](https://docs.microsoft.com/en-us/azure/media-services/latest/how-to-set-azure-subscription?tabs=portal)
+> NOTE 1: Having trouble finding your Subscription ID? [Azure's official docs](https://docs.microsoft.com/en-us/azure/media-services/latest/how-to-set-azure-subscription?tabs=portal)
 > might help.
 
 > NOTE 2: [Tenant ID](https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-how-to-find-tenant)
-> values can be also found using Power Shell and CLI.
+> values can be also found using PowerShell and CLI.
 
 ### Authentication
 
