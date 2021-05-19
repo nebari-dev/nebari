@@ -74,10 +74,17 @@ You don't have to be a Python or Kubernetes pro to contribute, and we're happy t
 
 ### Step-by-step guide to your first contribution
 
-Never made an open-source contribution before? Wondering how contributions work in the q-hub world? Here's a quick rundown!
+Never made an open-source contribution before? Wondering how contributions work in the qhub world? Here's a quick rundown!
 
 1. Find an issue that you are interested in addressing or a feature you would like to address.
 2. Fork the repository associated with the issue to your local GitHub organization.
+3. Create a new branch for your changes.
+4. Commit and push your changes, then on your repo page in GitHub find the branch, click Contribute and 'Open Pull Request'.
+5. Please provide a description of what the changes do so we can understand them.
+
+These steps are fine for minor uncontroversial changes, but before undertaking major work that you would want to see accepted into the main qhub repo, please 
+ensure you first create an open Pull Request on our repo with WIP (work in progress) in the title, explaining what you want to do. That way we can discuss it 
+to be sure it makes sense for qhub. Or simply create an issue and indicate that you would be interested in solving the problem yourself.
 
 
 [qhub-repo]: https://github.com/Quansight/qhub/
