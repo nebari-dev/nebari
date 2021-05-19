@@ -136,11 +136,11 @@ export ARM_CLIENT_SECRET=""       # client's secret
 export ARM_SUBSCRIPTION_ID=""     # value available at the `Subscription` section under the `Overview` tab
 export ARM_TENANT_ID=""           # field available under `Azure Active Directories` > `Properties` > `Tenant ID`
 ```
-> NOTE 1: Having trouble finding your Subscrition ID? [Azure's official docs](https://docs.microsoft.com/en-us/azure/media-services/latest/how-to-set-azure-subscription?tabs=portal)
+> NOTE 1: Having trouble finding your Subscription ID? [Azure's official docs](https://docs.microsoft.com/en-us/azure/media-services/latest/how-to-set-azure-subscription?tabs=portal)
 > might help.
 
 > NOTE 2: [Tenant ID](https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-how-to-find-tenant)
-> values can be also found using Power Shell and CLI.
+> values can be also found using PowerShell and CLI.
 
 ### Authentication
 
