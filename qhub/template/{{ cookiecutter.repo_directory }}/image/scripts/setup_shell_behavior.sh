@@ -7,9 +7,9 @@ cp /etc/skel/.bashrc /etc/profile.d/term_settings.sh
 sed -i 's/^#force_color_prompt=yes/force_color_prompt=yes/' /etc/profile.d/term_settings.sh
 
 # Always try to activate default conda environment (in /etc/profile.d)
-cat << EOF > /etc/profile.d/PATH_modification.sh
-PATH="\$PATH:/opt/scripts"
-
+cat << \EOF > /etc/profile.d/PATH_modification.sh
+PATH="$PATH:/opt/scripts"
+PATH="$NVIDIA_PATH:$PATH"
 EOF
 
 # Define ETC_BASHRC_WAS_SOURCED in bash.bashrc which is sourced for interactive
