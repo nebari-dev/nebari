@@ -117,7 +117,7 @@ The `storage_account_postfix` are eight random lowercase characters (number incl
 
 ### Default Images
 
-An image is the term used to refer to a serialized copy of the state of an environment stored in a file. Default images section in the configuration file lists the images used to run the default image if it is not already specified in a *profile* (described in the next section). The `jupyterhub` key controls the jupyterhub image run.
+An **image** is the term used to refer to a serialized copy of the state of an environment stored in a file. The `default images` section in the QHub configuration file lists the images used to run the default image (if not already specified in a *profile* - described in the next section). For example, the `jupyterhub` key controls the JupyterHub image run.
 
 ```yaml
 default_images:
