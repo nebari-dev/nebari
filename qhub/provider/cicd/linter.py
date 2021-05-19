@@ -24,7 +24,7 @@ def qhub_validate(config):
         msg = "validate: error: failed to validate QHub configuration."
         print(msg)
         validate_comment = parse_validation(e)
-        validate_comment_wrapper = f" ```{validate_comment}``` "
+        validate_comment_wrapper = f"\n```\n{validate_comment}\n``` "
         return False, validate_comment_wrapper, 1
 
 
