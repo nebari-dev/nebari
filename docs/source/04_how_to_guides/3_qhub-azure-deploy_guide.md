@@ -225,5 +225,3 @@ environments:
       - jinja2
       - pyyaml
 ```
-
-After you edit the configuration file, run `./scripts/00-guided-install.sh` to complete the QHub Azure deployment steps!
