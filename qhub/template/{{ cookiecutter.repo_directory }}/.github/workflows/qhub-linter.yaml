@@ -7,6 +7,12 @@ on:
     paths:
       - "qhub-config.yaml"
 
+{%- if cookiecutter.QHUB_GH_BRANCH != '' %}
+env:
+  # Preserve dev branch so pip_install_qhub doesn't get overridden on next render.
+  # Although currently no deploy/render step in this workflow so should be OK.
+  QHUB_GH_BRANCH: {{ cookiecutter.QHUB_GH_BRANCH }}
+{% endif %}
 
 jobs:
   qhub-validate:
