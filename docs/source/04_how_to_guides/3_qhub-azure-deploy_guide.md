@@ -113,7 +113,7 @@ azure:
   storage_account_postfix: m5tzjrcg
 ```
 
-The storage_account_postfix is 8 random, lowercase characters to help ensure that the storage account created by qhub in Azure is unique across all of Azure as required by Azure.
+The `storage_account_postfix` are eight random lowercase characters (number included) that help ensure the storage account created by QHub in Azure is unique.
 
 ### Default Images
 
