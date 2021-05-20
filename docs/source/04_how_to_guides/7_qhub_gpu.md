@@ -4,9 +4,9 @@ Having access to  GPUs is of prime importance for speeding up many computations
 by several orders of magnitude. QHub provides a way to achieve that, we will go
 through achieving that for each Cloud provider.
 
-## Google Cloud Platform
+## Clouds
 
-### Pre-requisites
+### Google Cloud Platform
 
 By default the quota to spin up GPUs on GCP is 0. Make sure you have requested
 GCP Support to increase quota of allowed GPUs for your billing account to be the
@@ -78,6 +78,60 @@ profiles:
           "cloud.google.com/gke-nodepool": "gpu-tesla-t4"
 ```
 
-## DigitalOcean
+
+### DigitalOcean
 
 DigitalOcean does not support GPUs at the time of writing this.
+
+## Create conda environment to take advantage of gpus
+
+First you need to consult the driver version of nvidia being
+used. This can easily be checked via the command `nvidia-smi`.
+
+```shell
+$ nvidia-smi
+Thu May 20 18:05:14 2021       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 450.51.06    Driver Version: 450.51.06    CUDA Version: 11.0     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla K80           Off  | 00000000:00:04.0 Off |                    0 |
+| N/A   32C    P8    29W / 149W |      0MiB / 11441MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+```
+
+The important section is `CUDA Version`. In general you should install
+a version of cudatoolkit that is less than or equal to the cuda
+version (but not too old).  If you install `cudatoolkit-dev` and
+`cudatoolkit` make sure that they are the same version exactly
+including minor version. Also in the near future cuda should have
+better [ABI
+compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/index.html).
+
+Bellow is an example gpu environment. 
+
+```yaml
+name: gpu-environment
+channels:
+ - conda-forge
+dependencies:
+ - python
+ - cudatoolkit ==11.0.3
+ - cudatoolkit-dev ==11.0.3
+ - cupy
+ - numba
+```
+
+We are working hard to make the GPU expeirence on Qhub as streamlined
+as possible. There are many small gotchas when working with GPUs and
+getting all the drivers installed properly.
