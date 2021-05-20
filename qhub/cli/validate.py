@@ -1,10 +1,10 @@
 import pathlib
 
+from pydantic.error_wrappers import ValidationError
 from ruamel import yaml
-
 from qhub.schema import verify
 from qhub.provider.cicd.linter import comment_on_pr
-
+import sys
 
 def create_validate_subcommand(subparser):
     subparser = subparser.add_parser("validate")
@@ -31,7 +31,7 @@ def handle_validate(args):
     else:
         try:
             verify(config)
-        except pydantic.error_wrappers.ValidationError as err:
+        except ValidationError as err:
             print(err)
             print(
                 "Error: The schema validation of the qhub-config.yaml failed."
