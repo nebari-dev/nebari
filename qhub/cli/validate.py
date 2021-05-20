@@ -29,4 +29,12 @@ def handle_validate(args):
         # for PR's only
         comment_on_pr(config)
     else:
-        verify(config)
+        try:
+            verify(config)
+        except pydantic.error_wrappers.ValidationError as err:
+            print(err)
+            print(
+                "Error: The schema validation of the qhub-config.yaml failed."
+                " The above error message may be helpful in determining what went wrong."
+            )
+            sys.exit(1)
