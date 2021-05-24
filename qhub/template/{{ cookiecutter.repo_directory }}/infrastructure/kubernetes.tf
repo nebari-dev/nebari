@@ -358,3 +358,14 @@ module "forwardauth" {
   jh-client-secret  = random_password.forwardauth-jhsecret.result
   callback-url-path = local.forwardauth-callback-url-path
 }
+resource "kubernetes_config_map" "qhub-nfsuserinfo-migration" {
+  metadata {
+    name      = "qhub-nfsuserinfo-migration"
+    namespace = var.environment
+  }
+
+  data = {
+    "initial-users.json" = jsonencode({{ cookiecutter.security.users | jsonify }})
+    "initial-groups.json" = jsonencode({{ cookiecutter.security.groups | jsonify }})
+  }
+}

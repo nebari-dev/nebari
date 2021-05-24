@@ -63,6 +63,18 @@ resource "kubernetes_deployment" "main" {
             value = "1"
           }
 
+          volume_mount {
+            name       = "migration"
+            mount_path = "/etc/migration-state"
+            read_only  = true
+          }
+        }
+
+        volume {
+          name = "migration"
+          config_map {
+            name = "qhub-nfsuserinfo-migration"
+          }
         }
 
       }
