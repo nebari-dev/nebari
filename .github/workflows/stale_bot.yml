@@ -2,7 +2,7 @@ name: "Close stale issues"
 on:
   schedule:
   # runs at 00:15 on every Monday
-  - cron: "15 00 * * MON"
+  - cron: "15 00 * * MON-FRI"
 
 jobs:
   stale:
