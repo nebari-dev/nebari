@@ -76,6 +76,39 @@ z.compute()
 
 If a result was returned your cluster is working!
 
+## Cluster Options
+
+Dask Gateway allow users to configure their clusters via cluster options, here
+are some configuration options exposed in QHub's Dask Gateway deployment.
+
+* Get cluster options
+
+```python
+import dask_gateway
+gateway = dask_gateway.Gateway()
+options = gateway.cluster_options()
+```
+
+### Setting Environment variables for Dask Workers
+
+```python
+options.environment_vars = {
+    "ENV_VAR_1": "VALUE_1",
+    "ENV_VAR_2": "VALUE_2",
+}
+```
+
+### Setting Conda Environment for Dask Workers
+
+```python
+options.conda_environment = "tensorflow"
+```
+
+Note: The above configurations options are valid for QHub's Dask Gateway deployment,
+these might be different for a non QHub deployments, like say Pangeo's
+Dask Gateway deployment.
+
+
 ## Accessing Cluster Outside of QHub
 
 A long requested feature was the ability to access a dask cluster from
