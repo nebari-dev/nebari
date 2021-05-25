@@ -5,13 +5,12 @@ Cloud environments with [Dask Gateway](https://docs.dask.org/ "Parallel computin
 [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
 
 QHub is an open source tool that enables users to build and maintain
-cost-effective and scalable compute/data science platforms [on
-hpc](#qhub-hpc) or on [kubernetes](#qhub) with minimal DevOps
+cost-effective and scalable compute/data science platforms on [HPC](#qhub-hpc) or on [Kubernetes](#qhub) with minimal DevOps
 experience.
 
-Not sure what to choose? Check out our [FAQ](../02_get_started/07_support.md#faq).
+**This repository details the [QHub](https://qhub.dev/ "Official QHub docs") (Kubernetes) version.**
 
-**This repository details the [QHub](https://qhub.dev/ "Official QHub docs") version.**
+Not sure what to choose? Check out our [Setup Initialization](docs/source/02_get_started/02_setup.md) page.
 
 ## QHub HPC
 
@@ -26,20 +25,17 @@ The Kubernetes version of QHub is built using [Terraform](https://www.terraform.
 Terraform handles the build, change, and versioning of the infrastructure. Helm helps to define, install, and manage
 [Kubernetes](https://kubernetes.io/ "Automated container deployment, scaling, and management"). GitHub
 Actions is used to automatically create commits when the configuration file (`qhub-config.yaml`) is rendered, as well as
-to kick of the deployment action.
+to kick off the deployment action.
 
-QHub aims to abstract all these complexities for our users. Hence, it is not necessary to know any of the above mentioned
+QHub aims to abstract all these complexities for its users. Hence, it is not necessary to know any of the above mentioned
 technologies to have your project successfully deployed.
 
 > TLDR:
 > If you know GitHub and feel comfortable generating and using API keys, you should have all it takes to deploy
-> and maintain your system without the need for a dedicated DevOps team. No Kubernetes, no Terraform, no Helm.
+> and maintain your system without the need for a dedicated DevOps team. No need to learn Kubernetes, Terraform, or Helm.
 
 ### Cloud Providers
-QHub offers out-of-the-box support for [Digital Ocean](https://www.digitalocean.com/), Amazon [AWS](https://aws.amazon.com/)
- and [GCP](https://cloud.google.com/ "Google Cloud Provider"). Support for Microsoft [Azure](https://azure.microsoft.com/en-us/)
-will be added soon.
-
+QHub offers out-of-the-box support for [Digital Ocean](https://www.digitalocean.com/), Amazon [AWS](https://aws.amazon.com/), [GCP](https://cloud.google.com/ "Google Cloud Provider"), and Microsoft [Azure](https://azure.microsoft.com/en-us/).
 
 ![High-level illustration of QHub architecture](docs/source/meta_images/qhub-cloud_architecture.png)
 
@@ -94,15 +90,14 @@ qhub deploy ... # creates and configures the cloud infrastructure
 ```
 
 ## Questions?
-Have a look at our [FAQ](https://qhub.dev/docs/faqs.html) to see if your query has been answered.
+Have a look at our [FAQ](docs/source/02_get_started/07_support.md#faq) to see if your query has been answered.
 
 We separate the queries for QHub into:
 * [GitHub Discussions](https://github.com/Quansight/qhub/discussions) used to raise discussions about a subject, such as:
 "What is the recommended way to do X with QHub?"
 * [Issues](https://github.com/Quansight/qhub/issues/new/choose) for queries, bug reporting, feature requests,
   documentation, etc.
-> We work around the clock to make QHub more excellent. Which implies that sometimes your
-> query might take a while to get a reply. We apologise in advance and ask you to please, be patient.
+> We work around the clock to make QHub more excellent, but sometimes your query might take a while to get a reply. We apologise in advance and ask you to please, be patient.
 
 
 ## Code of Conduct
@@ -117,7 +112,7 @@ pip install git+https://github.com/Quansight/qhub.git@dev
 ```
 
 ## Contributions
-Thinking about contributing? Check out our [Contribution Guidelines](https://github.com/Quansight/qhub/CONTRIBUTING.md).
+Thinking about contributing? Check out our [Contribution Guidelines](https://github.com/Quansight/qhub/blob/main/CONTRIBUTING.md).
 
 ## License
 [QHub is BSD3 licensed](LICENSE).
