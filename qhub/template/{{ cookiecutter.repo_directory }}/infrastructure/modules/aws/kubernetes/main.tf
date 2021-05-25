@@ -24,7 +24,7 @@ resource "aws_eks_node_group" "main" {
   subnet_ids      = var.cluster_subnets
 
   instance_types = [var.node_groups[count.index].instance_type]
-  ami_type = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU": "AL2_x86_64"
+  ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" : "AL2_x86_64"
 
   scaling_config {
     min_size     = var.node_groups[count.index].min_size
