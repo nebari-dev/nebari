@@ -46,7 +46,7 @@ resource "kubernetes_deployment" "main" {
       spec {
         container {
           name  = "nfsuserinfo"
-          image = "quansight/qhub-nfsuserinfo:1"
+          image = "quansight/qhub-nfsuserinfo:3"
 
           port {
             name           = "http"
@@ -68,6 +68,13 @@ resource "kubernetes_deployment" "main" {
             mount_path = "/etc/migration-state"
             read_only  = true
           }
+
+          volume_mount {
+            name       = "nfs-mount"
+            mount_path = "/etc/nfsuserinfo-state"
+            sub_path   = "nfsuserinfo-state"
+            read_only  = false
+          }
         }
 
         volume {
@@ -75,6 +82,10 @@ resource "kubernetes_deployment" "main" {
           config_map {
             name = "qhub-nfsuserinfo-migration"
           }
+        }
+
+        volume {
+          name = "nfs-mount"
         }
 
       }

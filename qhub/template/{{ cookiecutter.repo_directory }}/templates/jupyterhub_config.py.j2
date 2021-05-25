@@ -132,7 +132,6 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
                      "curl 'http://qhub-nfsuserinfo:8091/etc/passwd' > /tmp/passwd && "
                      "curl 'http://qhub-nfsuserinfo:8091/etc/group' > /tmp/group && "
                      "ln -sfn /home/shared /home/jovyan/shared "
-                     " && cat /tmp/passwd && cat /tmp/group "
                 )]
             }
         }
