@@ -8,9 +8,9 @@ QHub is an open source tool that enables users to build and maintain
 cost-effective and scalable compute/data science platforms on [HPC](#qhub-hpc) or on [Kubernetes](#qhub) with minimal DevOps
 experience.
 
-Not sure what to choose? Check out our [Setup Initialization](docs/source/02_get_started/02_setup.md) page.
-
 **This repository details the [QHub](https://qhub.dev/ "Official QHub docs") (Kubernetes) version.**
+
+Not sure what to choose? Check out our [Setup Initialization](docs/source/02_get_started/02_setup.md) page.
 
 ## QHub HPC
 
