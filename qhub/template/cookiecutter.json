@@ -122,17 +122,20 @@
             "general": {
                 "instance": null,
                 "min_nodes": null,
-                "max_nodes": null
+                "max_nodes": null,
+                "gpu": null
             },
             "user": {
                 "instance": null,
                 "min_nodes": null,
-                "max_nodes": null
+                "max_nodes": null,
+                "gpu": null
             },
             "worker": {
                 "instance": null,
                 "min_nodes": null,
-                "max_nodes": null
+                "max_nodes": null,
+                "gpu": null
             }
         }
     },

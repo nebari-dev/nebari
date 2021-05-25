@@ -78,6 +78,46 @@ profiles:
           "cloud.google.com/gke-nodepool": "gpu-tesla-t4"
 ```
 
+### Amazon Web Services
+
+#### 1. Add GPU node group in `qhub-config.yml` file
+
+```yaml
+amazon_web_services:
+  region: us-west-2
+#   ...
+    gpu-g4:
+      instance: g4dn.2xlarge     # NVIDIA Tesla T4
+      min_nodes: 1
+      max_nodes: 5
+      gpu: true     # This marks the given instance type is gpu enabled.
+```
+
+#### 2. Add GPU instance in the JupyterLab profiles
+
+```yml
+profiles:
+  jupyterlab:
+# ....
+    - display_name: GPU Instance
+      description: Stable environment with 8 cpu / 32 GB ram and 1 Nvidia Tesla T4
+      kubespawner_override:
+        cpu_limit: 8
+        cpu_guarantee: 7.25
+        mem_limit: 32G
+        mem_guarantee: 24G
+        image: quansight/qhub-jupyterlab:main
+        extra_resource_limits:
+          nvidia.com/gpu: 1
+        node_selector:
+          "eks.amazonaws.com/nodegroup": "gpu-g4"
+```
+
+Notes:
+
+- If you are not using the gcp provider in QHub but are using aws (let's say deploying
+  on an existing aws cluster). You will need to manually install NVIDIA drivers to the
+    cluster, See documentation for the same here: https://github.com/NVIDIA/k8s-device-plugin
 
 ### DigitalOcean
 
@@ -101,7 +141,7 @@ Thu May 20 18:05:14 2021
 |   0  Tesla K80           Off  | 00000000:00:04.0 Off |                    0 |
 | N/A   32C    P8    29W / 149W |      0MiB / 11441MiB |      0%      Default |
 |                               |                      |                  N/A |
-+-------------------------------+----------------------+----------------------++-----------------------------------------------------------------------------+
++-------------------------------+----------------------+----------------------+
 | Processes:                                                                  |
 |  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
 |        ID   ID                                                   Usage      |
