@@ -13,7 +13,7 @@ Preemptible instances can be defined via using the `preemptible` flag in the
 QHub config file as following:
 
 
-```yml
+```yaml
 google_cloud_platform:
   project: project-name
   region: us-central1

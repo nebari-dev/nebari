@@ -43,8 +43,6 @@ source/02_get_started/08_upgrade.md
 :caption: Tutorials
 
 source/03_tutorials_and_samples/1_project_setup_tutorial.md
-source/03_tutorials_and_samples/01_cloud_setup.md
-source/03_tutorials_and_samples/02_qhub_pangeo.md
 source/03_tutorials_and_samples/03_dask_gateway_usage.md
 ```
 
