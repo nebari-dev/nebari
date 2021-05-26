@@ -158,6 +158,7 @@ class NodeGroup(Base):
     instance: str
     min_nodes: int
     max_nodes: int
+    gpu: typing.Optional[bool] = False
 
     class Config:
         extra = "allow"

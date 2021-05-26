@@ -86,6 +86,7 @@ module "kubernetes" {
       min_size      = {{ nodegroup_config.min_nodes }}
       desired_size  = {{ nodegroup_config.min_nodes }}
       max_size      = {{ nodegroup_config.max_nodes }}
+      gpu           = {{ "true" if nodegroup_config.gpu is defined and nodegroup_config.gpu else "false"}}
     },
 {% endfor %}
   ]
