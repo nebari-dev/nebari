@@ -1,5 +1,7 @@
 # How to log in on QHub (training)
-This guide aims to explain to newcomers how to log in on the QHub server (for training purposes).
+
+This guide aims to explain to newcomers how to log in to Quansight's own QHub Training server (for training sessions). 
+Your own organization's QHub is likely to have a different procedure.
 
 To access the training platform, you will need to:
 1. Register on [https://training.qhub.dev](https://training.qhub.dev).
