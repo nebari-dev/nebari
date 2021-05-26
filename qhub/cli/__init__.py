@@ -1,6 +1,7 @@
 import argparse
 import logging
 import sys
+from pydantic.error_wrappers import ValidationError
 
 from qhub.cli.deploy import create_deploy_subcommand
 from qhub.cli.initialize import create_init_subcommand
@@ -39,6 +40,12 @@ def cli(args):
 
     try:
         args.func(args)
+    except ValidationError as valerr:
+        sys.exit(
+            "Error: The schema validation of the qhub-config.yaml failed."
+            " The following error message may be helpful in determining what went wrong:\n\n"
+            + str(valerr)
+        )
     except ValueError as ve:
         sys.exit("\nProblem encountered: " + str(ve) + "\n")
     except TerraformException:

@@ -36,4 +36,4 @@ jobs:
           REPO_NAME : {{ '${{ github.repository }}' }}
           GITHUB_TOKEN: {{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}
         run: |
-          qhub validate qhub-config.yaml --enable-commenting
+          qhub validate --config qhub-config.yaml --enable-commenting
