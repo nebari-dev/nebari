@@ -99,3 +99,21 @@ variable "certificate-secret-name" {
   type        = string
   default     = ""
 }
+
+variable "forwardauth-jh-client-id" {
+  description = "JupyterHub Client ID for use with ForwardAuth"
+  type        = string
+  default     = ""
+}
+
+variable "forwardauth-jh-client-secret" {
+  description = "JupyterHub Client Secret for use with ForwardAuth"
+  type        = string
+  default     = ""
+}
+
+variable "forwardauth-callback-url-path" {
+  description = "Callback URL Path for ForwardAuth"
+  type        = string
+  default     = ""
+}

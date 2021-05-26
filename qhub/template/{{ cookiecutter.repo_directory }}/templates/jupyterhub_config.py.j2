@@ -62,6 +62,8 @@ QHUB_USER_MAPPING = {{ cookiecutter.security.users }}
 QHUB_GROUP_MAPPING = {{ cookiecutter.security.groups }}
 QHUB_PROFILES = {{ cookiecutter.profiles.jupyterlab }}
 
+import escapism
+import string
 
 def qhub_generate_nss_files():
     passwd = []
@@ -142,11 +144,17 @@ def qhub_configure_profile(username, safe_username, profile):
     profile['kubespawner_override']['gid'] = primary_gid
     profile['kubespawner_override']['supplemental_gids'] = secondary_gids
     profile['kubespawner_override']['fs_gid'] = primary_gid
+
+    # Cost monitoring labels
+    k8s_safe_chars = set(string.ascii_lowercase + string.digits + '.-_')
+    k8s_safe_username = escapism.escape(username.lower().replace('@', '_'), safe=k8s_safe_chars, escape_char='-')
+    profile['kubespawner_override']['extra_labels'] = {
+        'owner': k8s_safe_username,
+        'team': user['primary_group']
+    }
     return profile
 
 def qhub_list_available_profiles(username):
-    import escapism
-    import string
     safe_chars = set(string.ascii_lowercase + string.digits)
     safe_username = escapism.escape(username, safe=safe_chars, escape_char='-').lower()
 
@@ -234,3 +242,4 @@ c.{{ cookiecutter.security.authentication.authentication_class.split('.')[-1] }}
 {% endfor %}
 
 {% endif %}
+

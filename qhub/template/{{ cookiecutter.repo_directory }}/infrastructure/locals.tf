@@ -65,4 +65,7 @@ locals {
 {% endif %}
     }
   }
+
+  forwardauth-jh-client-id      = "forwardauthjupyterhubserviceclient"
+  forwardauth-callback-url-path = "/forwardauth/_oauth"
 }
