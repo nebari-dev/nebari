@@ -1,4 +1,4 @@
-from dask_gateway_server.options import Options, Select
+from dask_gateway_server.options import Options, Select, Mapping
 
 # A mapping from profile name to configuration overrides
 profiles = {{ cookiecutter.profiles.dask_worker }}
@@ -13,14 +13,15 @@ def worker_profile(options):
     config['worker_cmd'] = '/opt/conda-run-worker'
     config['scheduler_cmd'] = '/opt/conda-run-scheduler'
     config['environment'] = {
-        'CONDA_ENVIRONMENT': options.environment
+        **options.environment_vars,
+        'CONDA_ENVIRONMENT': options.conda_environment
     }
     return config
 
 # Expose a list of profiles for workers
 c.Backend.cluster_options = Options(
     Select(
-        "environment",
+        "conda_environment",
         environments,
         default=environments[0],
         label='Environment',
@@ -31,5 +32,6 @@ c.Backend.cluster_options = Options(
         default='{{ cookiecutter.profiles.dask_worker.keys() | list() | first() }}',
         label="Cluster Profile",
     ),
+    Mapping("environment_vars", {}, label="Environment Variables"),
     handler=worker_profile,
 )
