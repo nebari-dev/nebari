@@ -26,7 +26,7 @@ dependencies:
  - pyviz_comms >=2.0.1
 
  # cds dashboards
- - cdsdashboards-singleuser >=0.5.6
+ - cdsdashboards-singleuser >=0.5.7
  - jhsingle-native-proxy >=0.7.6
 
  # viz tools
