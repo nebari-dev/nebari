@@ -30,7 +30,8 @@ The version of [conda-store](https://conda-store.readthedocs.io/) used in QHub v
     ```    
     These will not be available to the Dask workers.    
 
-6. How to use google credentials on qhub - you can add as env var to bashrc (be sure to source from bash_profile) but that DOES NOT make it available inside of notebooks.  
+6. How to use .bashrc on QHub?   
+You can use `.bashrc` on QHub, but its important to note that only `.bash_profile` is sourced by default so you'll need to be sure to source the `.bashrc` inside of the `.bash_profile`. Its important to note that if you set environment variables in this way, they WILL NOT be available inside of notebooks.  
 
 
 7. How do I use environment variables on dask workers (not loaded via a package)?  
