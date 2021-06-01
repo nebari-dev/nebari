@@ -2,7 +2,7 @@ FROM quansight/conda-store:e2051a36e60bd3abd9aa44105f240b359ee6bab7
 
 RUN apt-get update \
     && apt-get install nano \
-    && apt-get install \ 
+    && apt-get install -y \ 
     libgl1-mesa-glx \ 
     libegl1-mesa \
     libxrandr2 \
