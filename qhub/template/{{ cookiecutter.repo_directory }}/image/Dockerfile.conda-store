@@ -2,5 +2,5 @@ FROM quansight/conda-store:e2051a36e60bd3abd9aa44105f240b359ee6bab7
 
 RUN apt update && \
     apt install nano && \
-    apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6 \
+    apt-get install libgl1-mesa-glx libegl1-mesa libxrandr2 libxrandr2 libxss1 libxcursor1 libxcomposite1 libasound2 libxi6 libxtst6 && \
     rm -rf /apt/source/*
