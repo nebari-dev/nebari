@@ -27,3 +27,15 @@ variable "node-group" {
     value = string
   })
 }
+
+variable "conda-store-image" {
+  description = "Conda-store image"
+  type = object({
+    name = string
+    tag  = string
+  })
+  default = {
+    name = "{{ cookiecutter.default_images.conda_Store.split(':')[0] }}"
+    tag  = "{{ cookiecutter.default_images.conda_store.split(':')[1] }}"
+  }
+}

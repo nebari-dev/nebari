@@ -87,7 +87,7 @@ resource "kubernetes_deployment" "main" {
 
         container {
           name  = "conda-store"
-          image = "${var.gateway-image.name}:${var.gateway-image.tag}"
+          image = "${var.conda-store-image.name}:${var.conda-store-image.tag}"
 
           command = [
             "python", "/opt/conda-store/conda-store.py",
