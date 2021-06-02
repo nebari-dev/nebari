@@ -183,7 +183,6 @@ module "qhub" {
   jupyterlab-image   = var.jupyterlab-image
   dask-worker-image  = var.dask-worker-image
   dask-gateway-image = var.dask-gateway-image
-  conda-store-image  = var.conda-store-image
 
   general-node-group = local.node_groups.general
   user-node-group    = local.node_groups.user
