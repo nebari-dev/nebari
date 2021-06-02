@@ -19,7 +19,7 @@ The version of [conda-store](https://conda-store.readthedocs.io/) used in QHub v
 
     See the answer to #2 for information on how to modify environments properly. In the near future the QHub team will be adding support for user-defined environments via conda-store.  
 
-4. I have a local package - how can it be installed? Will it be available to my Dask workers?  
+5. I have a local package - how can it be installed? Will it be available to my Dask workers?  
     If you're using a `setuptools` package, you can install it into your local user environment using   
     ```shell
     pip install --no-build-isolation --user -e .
