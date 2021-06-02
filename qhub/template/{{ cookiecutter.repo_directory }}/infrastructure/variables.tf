@@ -104,6 +104,18 @@ variable "dask-gateway-image" {
   }
 }
 
+variable "conda-store-image" {
+  description = "Conda Store image"
+  type = object({
+    name = string
+    tag  = string
+  })
+  default = {
+    name = "{{ cookiecutter.default_images.conda_store.split(':')[0] }}"
+    tag  = "{{ cookiecutter.default_images.conda_store.split(':')[1] }}"
+  }
+}
+
 {% if cookiecutter.prefect is true -%}
 variable "prefect_token" {
   type = string
