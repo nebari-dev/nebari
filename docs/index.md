@@ -36,6 +36,7 @@ source/02_get_started/05_management.md
 source/02_get_started/06_troubleshooting.md
 source/02_get_started/07_support.md
 source/02_get_started/08_upgrade.md
+source/02_get_started/09_end_user_faq.md
 ```
 
 ```{toctree}
