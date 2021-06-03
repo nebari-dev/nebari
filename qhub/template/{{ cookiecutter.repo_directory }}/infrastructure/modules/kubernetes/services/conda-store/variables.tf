@@ -35,7 +35,7 @@ variable "conda-store-image" {
     tag  = string
   })
   default = {
-    name = "{{ cookiecutter.default_images.conda_Store.split(':')[0] }}"
+    name = "{{ cookiecutter.default_images.conda_store.split(':')[0] }}"
     tag  = "{{ cookiecutter.default_images.conda_store.split(':')[1] }}"
   }
 }
