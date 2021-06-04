@@ -1,0 +1,13 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "clearml.fullname" . }}-agentservices-data
+  labels:
+    {{- include "clearml.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.agentservices.storage.data.size | quote }}
+  storageClassName: {{ .Values.agentservices.storage.data.class | quote }}

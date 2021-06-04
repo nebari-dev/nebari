@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "clearml.fullname" . }}-webserver
+  labels:
+    {{- include "clearml.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.webserver.service.type }}
+  ports:
+    - port: {{ .Values.webserver.service.port }}
+      targetPort: {{ .Values.webserver.service.port }}
+      nodePort: 30080
+      protocol: TCP
+  selector:
+    {{- include "clearml.selectorLabelsWebServer" . | nindent 4 }}

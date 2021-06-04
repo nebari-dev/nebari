@@ -120,7 +120,6 @@ provider "helm" {
 {% if cookiecutter.provider == "local" %}
     config_path = "~/.kube/config"
 {%- else %}
-    load_config_file       = false
     host                   = module.kubernetes.credentials.endpoint
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
     {% if cookiecutter.provider == "azure" -%}
@@ -219,6 +218,15 @@ module "prefect" {
   prefect_token        = var.prefect_token
 }
 {% endif -%}
+
+module "clearml" {
+source = "./modules/kubernetes/services/clearml"
+
+depends_on = [
+module.qhub
+]
+}
+
 
 resource "random_password" "forwardauth-jhsecret" {
   length  = 32

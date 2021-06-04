@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "clearml.fullname" . }}-agentservices
+  labels:
+    {{- include "clearml.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.agentservices.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "clearml.selectorLabelsAgentServices" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.agentservices.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "clearml.selectorLabelsAgentServices" . | nindent 8 }}
+    spec:
+      volumes:
+        - name: agentservices-data
+          persistentVolumeClaim:
+            claimName: {{ include "clearml.fullname" . }}-agentservices-data
+      initContainers:
+          - name: init-agentservices
+            image: "{{ .Values.agentservices.image.repository }}:{{ .Values.agentservices.image.tag | default .Chart.AppVersion }}"
+            command:
+              - /bin/sh
+              - -c
+              - >
+                set -x;
+                while [ $(curl -sw '%{http_code}' "http://{{ include "clearml.fullname" . }}-apiserver:{{ .Values.apiserver.service.port }}/debug.ping" -o /dev/null) -ne 200 ] ; do
+                  echo "waiting for apiserver" ;
+                  sleep 5 ;
+                done
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.agentservices.image.repository }}:{{ .Values.agentservices.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.agentservices.image.pullPolicy }}
+          env:
+          - name: CLEARML_HOST_IP
+            value: {{ .Values.agentservices.clearmlHostIp }}
+          - name: CLEARML_API_HOST
+            value: "http://{{ include "clearml.fullname" . }}-apiserver:{{ .Values.apiserver.service.port }}"
+          - name: CLEARML_WEB_HOST
+            value: {{ .Values.agentservices.clearmlWebHost }}
+          - name: CLEARML_FILES_HOST
+            value: {{ .Values.agentservices.clearmlFilesHost }}
+          - name: CLEARML_AGENT_GIT_USER
+            value: {{ .Values.agentservices.clearmlGitUser }}
+          - name: CLEARML_AGENT_GIT_PASS
+            value: {{ .Values.agentservices.clearmlGitPassword }}
+          - name: CLEARML_AGENT_UPDATE_VERSION
+            value: {{ .Values.agentservices.agentVersion }}
+          - name: CLEARML_AGENT_DEFAULT_BASE_DOCKER
+            value: {{ .Values.agentservices.defaultBaseDocker }}
+          - name: AWS_ACCESS_KEY_ID
+            value: {{ .Values.agentservices.awsAccessKeyId }}
+          - name: AWS_SECRET_ACCESS_KEY
+            value: {{ .Values.agentservices.awsSecretAccessKey }}
+          - name: AWS_DEFAULT_REGION
+            value: {{ .Values.agentservices.awsDefaultRegion }}
+          - name: AZURE_STORAGE_ACCOUNT
+            value: {{ .Values.agentservices.azureStorageAccount }}
+          - name: AZURE_STORAGE_KEY
+            value: {{ .Values.agentservices.azureStorageKey }}
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: {{ .Values.agentservices.googleCredentials }}
+          - name: CLEARML_WORKER_ID
+            value: {{ .Values.agentservices.clearmlWorkerId }}
+          - name: CLEARML_API_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: clearml-conf
+                key: tests_user_key
+          - name: CLEARML_API_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: clearml-conf
+                key: tests_user_secret
+          args:
+          - agentservices
+          volumeMounts:
+            - name: agentservices-data
+              mountPath: /root/.clearml
+          resources:
+            {{- toYaml .Values.agentservices.resources | nindent 12 }}
+      {{- with .Values.agentservices.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.agentservices.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.agentservices.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

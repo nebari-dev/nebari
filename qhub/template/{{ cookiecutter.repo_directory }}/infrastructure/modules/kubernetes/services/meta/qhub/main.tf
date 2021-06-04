@@ -356,3 +356,103 @@ resource "kubernetes_manifest" "forwardauth" {
     }
   }
 }
+
+locals {
+  clearml_webserver_subdomain = "clearml.app"
+  clearml_fileserver_subdomain = "clearml.files"
+  clearml_apiserver_subdomain = "clearml.api"
+
+  clearml_webserver = "clearml-server-clearml-server-cloud-ready-webserver"
+  clearml_fileserver = "clearml-server-clearml-server-cloud-ready-fileserver"
+  clearml_apiserver = "clearml-server-clearml-server-cloud-ready-apiserver"
+}
+
+resource "kubernetes_manifest" "clearml-app" {
+  provider = kubernetes-alpha
+
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "IngressRoute"
+    metadata = {
+      name      = "clearml-app"
+      namespace = var.namespace
+    }
+    spec = {
+      entryPoints = ["websecure"]
+      routes = [
+        {
+          kind  = "Rule"
+          match = "Host(`${local.clearml_webserver_subdomain}.${var.external-url}`)"
+          services = [
+            {
+              name = local.clearml_webserver
+              port = 80
+              namespace = var.namespace
+            }
+          ]
+        }
+      ]
+      tls = local.tls
+    }
+  }
+}
+
+resource "kubernetes_manifest" "clearml-files" {
+  provider = kubernetes-alpha
+
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "IngressRoute"
+    metadata = {
+      name      = "clearml-files"
+      namespace = var.namespace
+    }
+    spec = {
+      entryPoints = ["websecure"]
+      routes = [
+        {
+          kind  = "Rule"
+          match = "Host(`${local.clearml_fileserver_subdomain}.${var.external-url}`)"
+          services = [
+            {
+              name = local.clearml_fileserver
+              port = 8081
+              namespace = var.namespace
+            }
+          ]
+        }
+      ]
+      tls = local.tls
+    }
+  }
+}
+
+resource "kubernetes_manifest" "clearml-api" {
+  provider = kubernetes-alpha
+
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "IngressRoute"
+    metadata = {
+      name      = "clearml-api"
+      namespace = var.namespace
+    }
+    spec = {
+      entryPoints = ["websecure"]
+      routes = [
+        {
+          kind  = "Rule"
+          match = "Host(`${local.clearml_apiserver_subdomain}.${var.external-url}`)"
+          services = [
+            {
+              name = local.clearml_apiserver
+              port = 8008
+              namespace = var.namespace
+            }
+          ]
+        }
+      ]
+      tls = local.tls
+    }
+  }
+}

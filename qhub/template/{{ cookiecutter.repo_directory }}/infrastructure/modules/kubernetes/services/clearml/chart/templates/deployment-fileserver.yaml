@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "clearml.fullname" . }}-fileserver
+  labels:
+    {{- include "clearml.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.fileserver.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "clearml.selectorLabelsFileServer" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.fileserver.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "clearml.selectorLabelsFileServer" . | nindent 8 }}
+    spec:
+      volumes:
+        - name: fileserver-data
+          persistentVolumeClaim:
+            claimName: {{ include "clearml.fullname" . }}-fileserver-data
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.fileserver.image.repository }}:{{ .Values.fileserver.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.fileserver.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8081
+              protocol: TCP
+          env:
+          - name: CLEARML_CONFIG_DIR
+            value: /opt/clearml/config
+          {{- if .Values.fileserver.extraEnvs }}
+          {{ toYaml .Values.fileserver.extraEnvs | nindent 10 }}
+          {{- end }}
+          args:
+            - fileserver
+          livenessProbe:
+            exec:
+              command:
+                - curl
+                - -X OPTIONS
+                - http://localhost:8081/
+          readinessProbe:
+            exec:
+              command:
+                - curl
+                - -X OPTIONS
+                - http://localhost:8081/
+          volumeMounts:
+            - name: fileserver-data
+              mountPath: /mnt/fileserver
+          resources:
+            {{- toYaml .Values.fileserver.resources | nindent 12 }}
+      {{- with .Values.fileserver.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.fileserver.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.fileserver.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

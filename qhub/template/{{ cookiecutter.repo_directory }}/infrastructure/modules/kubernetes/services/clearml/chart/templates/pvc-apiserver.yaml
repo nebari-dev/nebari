@@ -1,0 +1,15 @@
+{{- if .Values.apiserver.storage.enableConfigVolume }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "clearml.fullname" . }}-apiserver-config
+  labels:
+    {{- include "clearml.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.apiserver.storage.config.size | quote }}
+  storageClassName: {{ .Values.apiserver.storage.config.class | quote }}
+{{- end }}

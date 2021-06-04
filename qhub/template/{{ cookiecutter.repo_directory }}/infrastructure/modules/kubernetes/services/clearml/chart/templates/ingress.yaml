@@ -1,0 +1,48 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "clearml.fullname" . -}}
+{{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include "clearml.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.tls.secretName }}
+  tls:
+    - hosts:
+        - "app.{{ .Values.ingress.host }}"
+        - "files.{{ .Values.ingress.host }}"
+        - "api.{{ .Values.ingress.host }}"
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: "app.{{ .Values.ingress.host }}"
+      http:
+        paths:
+          - path: "/*"
+            backend:
+              serviceName: {{ include "clearml.fullname" . }}-webserver
+              servicePort: {{ .Values.webserver.service.port }}
+    - host: "api.{{ .Values.ingress.host }}"
+      http:
+        paths:
+          - path: "/*"
+            backend:
+              serviceName: {{ include "clearml.fullname" . }}-apiserver
+              servicePort: {{ .Values.apiserver.service.port }}
+    - host: "files.{{ .Values.ingress.host }}"
+      http:
+        paths:
+          - path: "/*"
+            backend:
+              serviceName: {{ include "clearml.fullname" . }}-fileserver
+              servicePort: {{ .Values.fileserver.service.port }}
+{{- end }}

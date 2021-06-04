@@ -1,0 +1,105 @@
+{{- range .Values.agentGroups }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "clearml.fullname" $ }}-{{ .name }}-agent
+  labels:
+    {{- include "clearml.labels" $ | nindent 4 }}
+spec:
+  replicas: {{ .replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "clearml.selectorLabelsAgent" $ | nindent 6 }}
+  template:
+    metadata:
+      {{- with .podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "clearml.selectorLabelsAgent" $ | nindent 8 }}
+    spec:
+      volumes:
+        {{ if .clearmlConfig }}
+        - name: agent-clearml-conf-volume
+          secret:
+            secretName: {{ .name }}-conf
+            items:
+            - key: clearml.conf
+              path: clearml.conf
+        {{ end }}
+      initContainers:
+        - name: init-agent-{{ .name }}
+          image: "{{ .image.repository }}:{{ .image.tag | default $.Chart.AppVersion }}"
+          command:
+            - /bin/sh
+            - -c
+            - >
+              set -x;
+              while [ $(curl -sw '%{http_code}' "http://{{ include "clearml.fullname" $ }}-apiserver:{{ $.Values.apiserver.service.port }}/debug.ping" -o /dev/null) -ne 200 ] ; do
+                echo "waiting for apiserver" ;
+                sleep 5 ;
+              done
+      containers:
+        - name: {{ $.Chart.Name }}-{{ .name }}
+          image: "{{ .image.repository }}:{{ .image.tag }}"
+          imagePullPolicy: {{ .image.pullPolicy }}
+          securityContext:
+            privileged: true
+          resources:
+            limits:
+              nvidia.com/gpu:
+                {{ .nvidiaGpusPerAgent }}
+          env:
+          - name: CLEARML_API_HOST
+            value: 'http://{{ include "clearml.fullname" $ }}-apiserver:{{ $.Values.apiserver.service.port }}'
+          - name: CLEARML_WEB_HOST
+            value: 'http://{{ include "clearml.fullname" $ }}-webserver:{{ $.Values.webserver.service.port }}'
+          - name: CLEARML_FILES_HOST
+            value: 'http://{{ include "clearml.fullname" $ }}-fileserver:{{ $.Values.fileserver.service.port }}'
+          - name: CLEARML_AGENT_GIT_USER
+            value: {{ .clearmlGitUser}}
+          - name: CLEARML_AGENT_GIT_PASS
+            value: {{ .clearmlGitPassword}}
+          - name: AWS_ACCESS_KEY_ID
+            value: {{ .awsAccessKeyId}}
+          - name: AWS_SECRET_ACCESS_KEY
+            value: {{ .awsSecretAccessKey}}
+          - name: AWS_DEFAULT_REGION
+            value: {{ .awsDefaultRegion}}
+          - name: AZURE_STORAGE_ACCOUNT
+            value: {{ .azureStorageAccount}}
+          - name: AZURE_STORAGE_KEY
+            value: {{ .azureStorageKey}}
+          - name: CLEARML_API_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: clearml-conf
+                key: tests_user_key
+          - name: CLEARML_API_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: clearml-conf
+                key: tests_user_secret
+          command:
+            - /bin/sh
+            - -c
+            - "apt-get update ;
+               apt-get install -y curl python3-pip git;
+               python3 -m pip install -U pip ;
+               python3 -m pip install clearml-agent{{ .agentVersion}} ;
+               CLEARML_AGENT_K8S_HOST_MOUNT=/root/.clearml:/root/.clearml clearml-agent daemon --queue {{ .queues}}"
+      {{- with .nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
