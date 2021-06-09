@@ -129,7 +129,7 @@ We're done with the hardest part of deployment!
 The next step is to run `qhub init` to generate the configuration file `qhub-config.yaml`. This file is where the vast majority of tweaks to the system will be made. There are are several optional (yet highly recommended) flags that deal with automating the deployment:
 
 - `--project`: Chose a name consisting of lowercase letters and numbers only and is between 3 and 16 characters long. IE `testcluster`
-- `--domain`: This is the base domain for your cluster. After deployment, the DNS will use the base name prepended with `jupyter`. IE if the base name is `test.qhub.dev` then the DNS will be provisioned as `jupyter.test.qhub.dev`. This pattern is also applicable if you are setting your own DNS through a different provider.
+- `--domain`: This is the base domain for your cluster IE `test.qhub.dev`
 - `--ci-provider`: This specifies what provider to use for ci-cd. Currently, github-actions is supported.
 - `--auth-provider`: This will set configuration file to use auth0 for authentication
 - `--auth-auto-provision`: This will automatically create and configure an auth0 application
