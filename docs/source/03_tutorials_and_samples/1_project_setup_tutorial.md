@@ -130,7 +130,7 @@ The next step is to run `qhub init` to generate the configuration file `qhub-con
 
 - `--project`: Chose a name consisting of lowercase letters and numbers only and is between 3 and 16 characters long. IE `testcluster`
 - `--domain`: This is the base domain for your cluster IE `test.qhub.dev`
-- `--ci-provider`: This specifies what provider to use for ci-cd. Currently, github-actions is supported.
+- `--ci-provider`: This specifies what provider to use for ci-cd (optional). Currently, `github-actions`, `gitlab-ci`, or `none` are supported.
 - `--auth-provider`: This will set configuration file to use auth0 for authentication
 - `--auth-auto-provision`: This will automatically create and configure an auth0 application
 - `--repository`: The repository name that will be used to store the infrastructure as code
