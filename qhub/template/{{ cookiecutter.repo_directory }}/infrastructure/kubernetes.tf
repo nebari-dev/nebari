@@ -219,14 +219,15 @@ module "prefect" {
 }
 {% endif -%}
 
+{% if cookiecutter.clearml is true -%}
 module "clearml" {
 source = "./modules/kubernetes/services/clearml"
 
-depends_on = [
-module.qhub
-]
+  depends_on = [
+    module.qhub
+  ]
 }
-
+{% endif -%}
 
 resource "random_password" "forwardauth-jhsecret" {
   length  = 32

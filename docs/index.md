@@ -94,5 +94,6 @@ source/07_resources/2_glossary.md
 :maxdepth: 1
 :caption: Integrations
 
-source/07_resources/1_logos.md
+source/08_integrations/1_prefect.md
+source/08_integrations/2_clearml.md
 ```

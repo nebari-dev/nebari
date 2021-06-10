@@ -12,6 +12,9 @@ for the following subdomains on your QHub.
 - files.clearml.your-qhub-domain.com
 - api.clearml.your-qhub-domain.com
 
+Note: These domains are automatically setup for you, if you're using Cloudflare and the
+args `--dns-provider cloudflare --dns-auto-provision` passed to `qhub deploy`.
+
 
 ## Create a node group
 
@@ -31,3 +34,7 @@ google_cloud_platform:
       min_nodes: 1
       max_nodes: 5
 ```
+
+## Accessing the ClearML server
+
+The ClearML server can be accessed at: `app.clearml.your-qhub-domain.com`

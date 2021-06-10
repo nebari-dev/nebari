@@ -116,7 +116,9 @@ def guided_install(
 
 
 def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
-    logger.info(f'Setting DNS record for ClearML for record: {record_name}')
+    logger.info(f"Setting DNS record for ClearML for record: {record_name}")
     update_record(zone_name, f"clearml.app.{record_name}", record_type, ip_or_hostname)
     update_record(zone_name, f"clearml.api.{record_name}", record_type, ip_or_hostname)
-    update_record(zone_name, f"clearml.files.{record_name}", record_type, ip_or_hostname)
+    update_record(
+        zone_name, f"clearml.files.{record_name}", record_type, ip_or_hostname
+    )
