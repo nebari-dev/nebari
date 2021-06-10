@@ -28,7 +28,7 @@ resource "kubernetes_manifest" "chain-middleware" {
     apiVersion = "traefik.containo.us/v1alpha1"
     kind       = "Middleware"
     metadata = {
-      name      = "qhub-dask-gateway-chain"  # Updated name to -chain from -cluster to avoid upgrade confusion
+      name      = "qhub-dask-gateway-chain" # Updated name to -chain from -cluster to avoid upgrade confusion
       namespace = var.namespace
     }
     spec = {
