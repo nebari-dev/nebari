@@ -4,7 +4,7 @@ on:
   pull_request: # Workflow only runs for PR against main anyway
   push:
     branches:
-      - main
+      - '**'
     tags:
       - 'v*'
 
@@ -102,7 +102,7 @@ jobs:
           echo "GITHUB_REF: ${GITHUB_REF}"
       - name: 'QHUB_GH_BRANCH set for a branch (not a tag)'
         if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') }}
-        # should be branch main as only 'push: branches: main' is set for this workflow
+        # e.g. QHUB_GH_BRANCH="main"
         run: |
           echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> $GITHUB_ENV
 
