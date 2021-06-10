@@ -84,7 +84,7 @@ The installation of a hypervisor is **not** necessary.
 ### Initialize kubernetes cluster
 
 Before proceeding with the initialization, make sure to add yourself to the
-Docker group by executing the command `sudo usermod -aG docker <username>`.
+Docker group by executing the command `sudo usermod -aG docker <username> && newgrp docker`.
 
 Testing is done with Minikube.
 
