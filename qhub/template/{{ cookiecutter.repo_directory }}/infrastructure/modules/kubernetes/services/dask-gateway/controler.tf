@@ -9,8 +9,8 @@ resource "kubernetes_config_map" "controller" {
       "${path.module}/templates/controller_config.py", {
         gateway_service_name                 = kubernetes_service.gateway.metadata.0.name
         gateway_service_namespace            = kubernetes_service.gateway.metadata.0.namespace
-        gateway_cluster_middleware_name      = kubernetes_manifest.cluster-middleware.manifest.metadata.name
-        gateway_cluster_middleware_namespace = kubernetes_manifest.cluster-middleware.manifest.metadata.namespace
+        gateway_cluster_middleware_name      = kubernetes_manifest.chain-middleware.manifest.metadata.name
+        gateway_cluster_middleware_namespace = kubernetes_manifest.chain-middleware.manifest.metadata.namespace
         gateway                              = var.gateway
         controller                           = var.controller
     })
