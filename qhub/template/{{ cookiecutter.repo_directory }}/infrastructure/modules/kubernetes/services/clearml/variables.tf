@@ -1,7 +1,7 @@
 variable "namespace" {
   description = "namespace to deploy clearml"
   type        = string
-  default = "dev"
+  default     = "dev"
 }
 
 variable "node_selector" {
@@ -14,5 +14,5 @@ variable "node_selector" {
 variable "elasticsearch_image" {
   description = "Elasticsearch docker image"
   type        = string
-  default = "balast/elasticsearch:6_50"
+  default     = "balast/elasticsearch:6_50"
 }
