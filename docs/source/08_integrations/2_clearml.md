@@ -27,4 +27,4 @@ clearml:
 
 ## Accessing the ClearML server
 
-The ClearML server can be accessed at: `app.clearml.your-qhub-domain.com`
+The ClearML server can be accessed at: `clearml.app.your-qhub-domain.com`
