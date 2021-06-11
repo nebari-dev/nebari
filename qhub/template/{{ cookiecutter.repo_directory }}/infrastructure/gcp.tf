@@ -64,14 +64,12 @@ module "kubernetes" {
       instance_type = "n1-highmem-16"
       min_size      = 1 
       max_size      = 5
-{%- if cookiecutter.clearml.labels is defined %}
       labels        = {
           app = "clearml"
 {%- for key, value in cookiecutter.clearml.labels.items() %}
           {{ key }} = "{{ value }}"
 {%- endfor %} 
       }
-{%- endif %}
     },
 {%- endif %}
   ]
