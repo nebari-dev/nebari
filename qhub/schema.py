@@ -56,6 +56,12 @@ class CICD(Base):
     after_script: typing.Optional[typing.List[str]]
 
 
+# ============== ClearML =============
+
+class ClearML(Base):
+    enabled: bool
+    labels: typing.Dict[str, str]
+
 # ============= Terraform ===============
 
 
@@ -154,7 +160,6 @@ class NodeSelector(Base):
     general: KeyValueDict
     user: KeyValueDict
     worker: KeyValueDict
-    clearml: KeyValueDict
 
 
 
@@ -163,7 +168,6 @@ class NodeGroup(Base):
     min_nodes: int
     max_nodes: int
     gpu: typing.Optional[bool] = False
-    labels: typing.Optional[typing.List[str]]
 
     class Config:
         extra = "allow"
@@ -297,6 +301,7 @@ class Main(Base):
     theme: Theme
     profiles: Profiles
     environments: typing.Dict[str, CondaEnvironment]
+    clearml: typing.Optional[ClearML] 
 
 
 def verify(config):

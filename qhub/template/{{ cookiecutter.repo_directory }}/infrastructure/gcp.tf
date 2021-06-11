@@ -36,6 +36,13 @@ module "kubernetes" {
       instance_type = "{{ nodegroup_config.instance }}"
       min_size      = {{ nodegroup_config.min_nodes }}
       max_size      = {{ nodegroup_config.max_nodes }}
+{%- if nodegroup_config.labels is defined %}
+      labels        = {
+{%- for key, value in nodegroup_config.labels %}
+          {{ key }} = "{{ value }}"
+{%- endfor -%} 
+      }
+{%- endif %}
 {%- if nodegroup_config.preemptible is defined %}
       preemptible   = {{ "true" if nodegroup_config.preemptible else "false" }}
 {%- endif %}
@@ -46,10 +53,26 @@ module "kubernetes" {
           type  = "{{ accelerator.name }}"
           count = {{ accelerator.count }}
         },
-{%- endfor %}
+{%- endfor %} 
       ]
 {%- endif %}
     },
 {% endfor %}
+{%- if cookiecutter.clearml.enabled %}
+    {
+      name          = "clearml"
+      instance_type = "n1-highmem-16"
+      min_size      = 1 
+      max_size      = 5
+{%- if cookiecutter.clearml.labels is defined %}
+      labels        = {
+          app = "clearml"
+{%- for key, value in cookiecutter.clearml.labels.items() %}
+          {{ key }} = "{{ value }}"
+{%- endfor %} 
+      }
+{%- endif %}
+    },
+{%- endif %}
   ]
 }

@@ -220,11 +220,9 @@ module "prefect" {
 }
 {% endif -%}
 
-{% if cookiecutter.clearml is true -%}
+{% if cookiecutter.clearml.enabled -%}
 module "clearml" {
   source = "./modules/kubernetes/services/clearml"
-  namespace  = var.environment
-  node-group = local.node_groups.clearml
 
   depends_on = [
     module.qhub
