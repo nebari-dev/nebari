@@ -39,6 +39,11 @@
             "worker": {
                 "key": null,
                 "value": null
+            },
+            "clearml": {
+                "key": null,
+                "value": null,
+                "label": null
             }
         }
     },
@@ -61,6 +66,12 @@
                 "instance": null,
                 "min_nodes": null,
                 "max_nodes": null
+            },
+            "clearml": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null,
+                "labels": null
             }
         }
     },
@@ -85,6 +96,12 @@
                 "instance": null,
                 "min_nodes": null,
                 "max_nodes": null
+            },
+            "clearml": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null,
+                "labels": null
             }
         }
     },
@@ -110,6 +127,12 @@
                 "instance": null,
                 "min_nodes": null,
                 "max_nodes": null
+            },
+            "clearml": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null,
+                "labels": null
             }
         }
     },
@@ -136,6 +159,13 @@
                 "min_nodes": null,
                 "max_nodes": null,
                 "gpu": null
+            },
+            "clearml": {
+                "instance": null,
+                "min_nodes": null,
+                "max_nodes": null,
+                "gpu": null,
+                "labels": null
             }
         }
     },

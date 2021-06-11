@@ -104,6 +104,11 @@ LOCAL = {
             "key": "kubernetes.io/os",
             "value": "linux",
         },
+        "clearml": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+            "labels": ["app:clearml",]
+        },
     }
 }
 
@@ -114,6 +119,8 @@ DIGITAL_OCEAN = {
         "general": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
         "worker": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
+        "clearml": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5, "labels" : ["app:clearml"]},
+
     },
 }
 
@@ -125,6 +132,8 @@ GOOGLE_PLATFORM = {
         "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
         "worker": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
+        "clearml": {"instance": "n1-highmem-16", "min_nodes": 1, "max_nodes": 5, "labels" : ["app:clearml"]},
+
     },
 }
 
@@ -144,6 +153,8 @@ AZURE = {
             "min_nodes": 0,
             "max_nodes": 5,
         },
+        "clearml": {"instance": "Standard_D2_v2", "min_nodes": 1, "max_nodes": 5, "labels": ["app:clearml"]},
+
     },
     "storage_account_postfix": "".join(
         random.choices("abcdefghijklmnopqrstuvwxyz0123456789", k=8)
@@ -157,6 +168,8 @@ AMAZON_WEB_SERVICES = {
         "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
         "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
+        "clearml": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5, "labels": ["app:clearml"]},
+
     },
 }
 

@@ -154,6 +154,8 @@ class NodeSelector(Base):
     general: KeyValueDict
     user: KeyValueDict
     worker: KeyValueDict
+    clearml: KeyValueDict
+
 
 
 class NodeGroup(Base):
@@ -161,6 +163,7 @@ class NodeGroup(Base):
     min_nodes: int
     max_nodes: int
     gpu: typing.Optional[bool] = False
+    labels: typing.Optional[typing.List[str]]
 
     class Config:
         extra = "allow"
