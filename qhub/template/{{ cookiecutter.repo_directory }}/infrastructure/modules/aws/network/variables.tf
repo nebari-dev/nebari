@@ -33,6 +33,12 @@ variable "aws_availability_zones" {
 }
 
 variable "vpc_cidr_block" {
-  description = "VPC cidr for subnets to inside of"
+  description = "VPC cidr for subnets to be inside of"
   type        = string
+}
+
+variable "vpc_cidr_newbits" {
+  description = "VPC cidr number of bits to support 2^N subnets"
+  type        = number
+  default     = 4
 }

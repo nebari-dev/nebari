@@ -84,7 +84,7 @@ The installation of a hypervisor is **not** necessary.
 ### Initialize kubernetes cluster
 
 Before proceeding with the initialization, make sure to add yourself to the
-Docker group by executing the command `sudo usermod -aG docker <username>`.
+Docker group by executing the command `sudo usermod -aG docker <username> && newgrp docker`.
 
 Testing is done with Minikube.
 
@@ -302,8 +302,6 @@ check out the [Troubleshooting documentation](../02_get_started/06_troubleshooti
 
 ## Cloud Testing
 
-TODO: Write detailed documentation on Cloud testing
-
 Cloud testing on aws, gcp, azure, and digital ocean is significantly
 more complicated and time consuming. You should always prefer the
 local testing when possible.
@@ -325,3 +323,29 @@ This will display something like `192.168.49.2/24`, in which case a suitable IP 
 minikube kubectl -- --namespace=dev port-forward svc/proxy-public 8000:80
 ```
 Then you can access QHub on http://127.0.0.1:8000/
+
+## Cypress Tests
+
+Cypress automates testing within a web browser environment. It is integrated into the GitHub Actions tests.yaml workflows in this repo, and 
+you can also run it locally. To do so:
+
+```
+cd tests_e2e
+npm install
+
+export CYPRESS_BASE_URL=http://127.0.0.1:8000/
+export QHUB_CONFIG_PATH=/Users/dan/qhub/data-mk/qhub-config.yaml
+export CYPRESS_EXAMPLE_USER_PASSWORD=<password>
+
+npm run cypress:open
+```
+
+The Base URL can point anywhere that should be accessible - it can be the URL of a QHub cloud deployment.
+The QHub Config Path should point to the associated yaml file for that site. Most importantly, the tests will inspect the yaml file to understand 
+what tests are relevant. To start with, it checks security.authentication.type to determine what should be available on the login page, and 
+how to test it. If the login type is 'password' then it uses the value in CYPRESS_EXAMPLE_USER_PASSWORD as the password (default username is 
+`example-user` but this can be changed by setting CYPRESS_EXAMPLE_USER_NAME).
+
+The final command above should open the Cypress UI where you can run the tests manually and see the actions in the browser.
+
+Note that tests are heavily state dependent, so any changes or use of the deployed QHub could affect the results.

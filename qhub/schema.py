@@ -280,6 +280,7 @@ class Main(Base):
         TerraformModules
     ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
+    prefect: typing.Optional[bool]
     cdsdashboards: CDSDashboards
     security: Security
     default_images: DefaultImages
