@@ -66,9 +66,11 @@ module "kubernetes" {
       max_size      = 5
       labels        = {
           app = "clearml"
+{%- if cookiecutter.clearml.labels is defined %}
 {%- for key, value in cookiecutter.clearml.labels.items() %}
           {{ key }} = "{{ value }}"
 {%- endfor %} 
+{%- endif %}
       }
     },
 {%- endif %}
