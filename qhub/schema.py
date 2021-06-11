@@ -58,9 +58,11 @@ class CICD(Base):
 
 # ============== ClearML =============
 
+
 class ClearML(Base):
     enabled: bool
     labels: typing.Optional[typing.Dict[str, str]]
+
 
 # ============= Terraform ===============
 
@@ -160,7 +162,6 @@ class NodeSelector(Base):
     general: KeyValueDict
     user: KeyValueDict
     worker: KeyValueDict
-
 
 
 class NodeGroup(Base):
@@ -301,7 +302,7 @@ class Main(Base):
     theme: Theme
     profiles: Profiles
     environments: typing.Dict[str, CondaEnvironment]
-    clearml: typing.Optional[ClearML] 
+    clearml: typing.Optional[ClearML]
 
 
 def verify(config):

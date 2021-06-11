@@ -144,7 +144,6 @@ AZURE = {
             "min_nodes": 0,
             "max_nodes": 5,
         },
-
     },
     "storage_account_postfix": "".join(
         random.choices("abcdefghijklmnopqrstuvwxyz0123456789", k=8)
@@ -158,7 +157,6 @@ AMAZON_WEB_SERVICES = {
         "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
         "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
-
     },
 }
 
