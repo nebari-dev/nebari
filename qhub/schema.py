@@ -60,7 +60,7 @@ class CICD(Base):
 
 class ClearML(Base):
     enabled: bool
-    labels: typing.Dict[str, str]
+    labels: typing.Optional[typing.Dict[str, str]]
 
 # ============= Terraform ===============
 
