@@ -44,7 +44,7 @@ allow to configure the deployment:
   more details see official Cloud provider docs on naming policies and check our docs on [naming convention](#project-naming-convention).
 - `--domain`: base domain for your cluster. This pattern is also applicable if you are setting your own DNS through a different provider.
   + `jupyter.qhub.dev` is the domain registered on CloudFlare. In case you chose not to use Cloudflare, skip this flag.
-- `--ci-provider`: specifies what provider to use for CI/CD. Currently, only supports GitHub Actions.
+- `--ci-provider`: specifies what provider to use for CI/CD. Currently, supports GitHub Actions, GitLab CI, or none.
 - `--auth-provider`: This will set configuration file to use the specified provider for authentication.
 - `--auth-auto-provision`: This will automatically create and configure an application using OAuth.
 - `--repository`: Repository name that will be used to store the Infrastructure-as-Code on GitHub.

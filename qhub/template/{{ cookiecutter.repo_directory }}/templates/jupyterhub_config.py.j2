@@ -101,7 +101,7 @@ def qhub_configure_profile(username, safe_username, profile):
     primary_gid = QHUB_GROUP_MAPPING[user['primary_group']]['gid']
     secondary_gids = [QHUB_GROUP_MAPPING[_]['gid'] for _ in user.get('secondary_groups', [])]
 
-    profile['kubespawner_override']['environment'] = {
+    envvars_fixed = {
        'LD_PRELOAD': 'libnss_wrapper.so',
        'NSS_WRAPPER_PASSWD': '/tmp/passwd',
        'NSS_WRAPPER_GROUP': '/tmp/group',
@@ -110,6 +110,13 @@ def qhub_configure_profile(username, safe_username, profile):
        'HOME': '/home/jovyan',
        **(profile.get('kubespawner_override', {}).get('environment', {}))
     }
+
+    def preserve_envvars(spawner):
+        # This adds in JUPYTERHUB_ANYONE/GROUP rather than overwrite all env vars,
+        # if set for a dashboard to control access.
+        return {**envvars_fixed, **spawner.environment}
+
+    profile['kubespawner_override']['environment'] = preserve_envvars
 
     passwd, group = qhub_generate_nss_files()
     profile['kubespawner_override']['lifecycle_hooks'] = {
@@ -165,13 +172,19 @@ def qhub_list_available_profiles(username):
     safe_chars = set(string.ascii_lowercase + string.digits)
     safe_username = escapism.escape(username, safe=safe_chars, escape_char='-').lower()
 
-    exclude_keys = {'users', 'groups'}
+    exclude_keys = {'users', 'groups', 'kubespawner_override'}
 
     groups = qhub_list_user_groups(username)
 
     available_profiles = []
     for profile in QHUB_PROFILES:
-        filtered_profile = qhub_configure_profile(username, safe_username, {k: v for k,v in profile.items() if k not in exclude_keys})
+        restricted_profile = {k: v for k,v in profile.items() if k not in exclude_keys}
+        if 'kubespawner_override' in profile:
+            # This is to remove typing from kubespawner_override so that we can set
+            # kubespawner_override['environment'] as a function instead of a mapping
+            restricted_profile['kubespawner_override'] = {**profile['kubespawner_override']}
+
+        filtered_profile = qhub_configure_profile(username, safe_username, restricted_profile)
 
         if 'users' in profile:
             if username in profile['users']:

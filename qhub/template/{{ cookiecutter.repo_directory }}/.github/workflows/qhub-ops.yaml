@@ -62,7 +62,7 @@ jobs:
           {{ cookiecutter.pip_install_qhub }}
       - name: Deploy Changes made in qhub-config.yaml
         run: |
-          qhub deploy -c qhub-config.yaml --disable-prompt --skip-remote-state-provision
+          qhub deploy -c qhub-config.yaml --disable-prompt {% if cookiecutter.QHUB_GH_BRANCH == '' %}--skip-remote-state-provision{% endif %}
       - name: Push Changes
         run: |
           git config user.email "qhub@quansight.com"

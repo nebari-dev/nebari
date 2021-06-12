@@ -19,6 +19,7 @@ def destroy_configuration(config, skip_remote_state_provision=False):
 
         # 02 Remove all infrastructure
         terraform.init(directory="infrastructure")
+        terraform.refresh(directory="infrastructure")
         terraform.destroy(directory="infrastructure")
 
         # 03 Remove terraform backend remote state bucket

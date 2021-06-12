@@ -29,6 +29,7 @@ class ProviderEnum(str, enum.Enum):
 class CiEnum(str, enum.Enum):
     github_actions = "github-actions"
     gitlab_ci = "gitlab-ci"
+    none = "none"
 
 
 class AuthenticationEnum(str, enum.Enum):
@@ -280,6 +281,7 @@ class Main(Base):
         TerraformModules
     ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
+    prefect: typing.Optional[bool]
     cdsdashboards: CDSDashboards
     security: Security
     default_images: DefaultImages

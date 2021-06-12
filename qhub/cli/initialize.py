@@ -22,7 +22,7 @@ def create_init_subcommand(subparser):
     )
     subparser.add_argument(
         "--ci-provider",
-        choices=["github-actions", "gitlab-ci"],
+        choices=["github-actions", "gitlab-ci", "none"],
         help="continuous integration to use for infrastructure as code",
     )
     subparser.add_argument(

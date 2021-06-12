@@ -105,6 +105,16 @@ def tfimport(addr, id, directory=None):
         )
 
 
+def refresh(directory=None):
+    logger.info(f"terraform refresh directory={directory}")
+    command = [
+        "refresh",
+    ]
+
+    with timer(logger, "terraform refresh"):
+        run_terraform_subprocess(command, cwd=directory, prefix="terraform")
+
+
 def destroy(directory=None):
     logger.info(f"terraform destroy directory={directory}")
     command = [
