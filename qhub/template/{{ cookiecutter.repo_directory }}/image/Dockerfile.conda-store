@@ -12,4 +12,5 @@ RUN apt-get update \
     libasound2 \
     libxi6 \
     libxtst6 \
+    build-essential \
     && rm -rf /apt/source/*
