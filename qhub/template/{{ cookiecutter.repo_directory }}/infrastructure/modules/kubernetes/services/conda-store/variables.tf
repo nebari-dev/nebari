@@ -27,3 +27,11 @@ variable "node-group" {
     value = string
   })
 }
+
+variable "conda-store-image" {
+  description = "Conda-store image"
+  type = object({
+    name = string
+    tag  = string
+  })
+}
