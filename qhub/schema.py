@@ -56,6 +56,14 @@ class CICD(Base):
     after_script: typing.Optional[typing.List[str]]
 
 
+# ============== ClearML =============
+
+
+class ClearML(Base):
+    enabled: bool
+    labels: typing.Optional[typing.Dict[str, str]]
+
+
 # ============= Terraform ===============
 
 
@@ -294,6 +302,7 @@ class Main(Base):
     theme: Theme
     profiles: Profiles
     environments: typing.Dict[str, CondaEnvironment]
+    clearml: typing.Optional[ClearML]
 
 
 def verify(config):

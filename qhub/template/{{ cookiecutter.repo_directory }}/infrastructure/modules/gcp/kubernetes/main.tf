@@ -50,7 +50,7 @@ resource "google_container_node_pool" "main" {
     metadata = {
       disable-legacy-endpoints = "true"
     }
-
+    labels   = local.merged_node_groups[count.index].labels
     dynamic "guest_accelerator" {
       for_each = local.merged_node_groups[count.index].guest_accelerators
 

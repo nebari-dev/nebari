@@ -1,7 +1,7 @@
 # ClearML
 
-ClearML Integration comes built in with QHub, here is how you would
-enable this integration.
+ClearML integration comes built in with QHub, here is how you would
+enable this integration.  Currently ClearML integration is only supported on Google Cloud Platform.
 
 ## Setting subdomain DNS Record for ClearML
 
@@ -18,23 +18,13 @@ args `--dns-provider cloudflare --dns-auto-provision` passed to `qhub deploy`.
 
 ## Create a node group
 
-ClearML has a bunch of components, so it is necessary to create a separate node
-group dedicated for ClearML. For example:
+To enable ClearML integration on GCP QHub deployments, simply enable the feature flag within your `qhub-config.yaml` file. For example:
 
 ```yaml
-
-google_cloud_platform:
-  project: your-qhub
-  region: us-central1
-  kubernetes_version: 1.18.16-gke.502
-  node_groups:
-    #....
-    clearml:
-      instance: n1-highmem-16
-      min_nodes: 1
-      max_nodes: 5
+clearml:
+  enabled: true
 ```
 
 ## Accessing the ClearML server
 
-The ClearML server can be accessed at: `app.clearml.your-qhub-domain.com`
+The ClearML server can be accessed at: `clearml.app.your-qhub-domain.com`

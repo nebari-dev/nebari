@@ -358,13 +358,14 @@ resource "kubernetes_manifest" "forwardauth" {
 }
 
 locals {
-  clearml_webserver_subdomain = "clearml.app"
+  clearml_webserver_subdomain  = "clearml.app"
   clearml_fileserver_subdomain = "clearml.files"
-  clearml_apiserver_subdomain = "clearml.api"
+  clearml_apiserver_subdomain  = "clearml.api"
 
-  clearml_webserver = "clearml-clearml-server-cloud-ready-webserver"
+  clearml_webserver  = "clearml-clearml-server-cloud-ready-webserver"
   clearml_fileserver = "clearml-clearml-server-cloud-ready-fileserver"
-  clearml_apiserver = "clearml-clearml-server-cloud-ready-apiserver"
+  clearml_apiserver  = "clearml-clearml-server-cloud-ready-apiserver"
+
 }
 
 resource "kubernetes_manifest" "clearml-app" {
@@ -385,8 +386,8 @@ resource "kubernetes_manifest" "clearml-app" {
           match = "Host(`${local.clearml_webserver_subdomain}.${var.external-url}`)"
           services = [
             {
-              name = local.clearml_webserver
-              port = 80
+              name      = local.clearml_webserver
+              port      = 80
               namespace = var.namespace
             }
           ]
@@ -415,8 +416,8 @@ resource "kubernetes_manifest" "clearml-files" {
           match = "Host(`${local.clearml_fileserver_subdomain}.${var.external-url}`)"
           services = [
             {
-              name = local.clearml_fileserver
-              port = 8081
+              name      = local.clearml_fileserver
+              port      = 8081
               namespace = var.namespace
             }
           ]
@@ -445,8 +446,8 @@ resource "kubernetes_manifest" "clearml-api" {
           match = "Host(`${local.clearml_apiserver_subdomain}.${var.external-url}`)"
           services = [
             {
-              name = local.clearml_apiserver
-              port = 8008
+              name      = local.clearml_apiserver
+              port      = 8008
               namespace = var.namespace
             }
           ]
