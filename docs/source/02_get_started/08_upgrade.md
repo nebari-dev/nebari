@@ -29,6 +29,7 @@ default_images:
   jupyterlab: quansight/qhub-jupyterlab:v<version>
   dask_worker: quansight/qhub-dask-worker:v<version>
   dask_gateway: quansight/qhub-dask-gateway:v<version>
+  conda_store: "quansight/qhub-conda-store:v<version>"
 ...
 profiles:
   jupyterlab:

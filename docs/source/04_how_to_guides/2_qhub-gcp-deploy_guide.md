@@ -131,6 +131,7 @@ default_images:
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
   dask_gateway: "quansight/qhub-dask-gateway:v||QHUB_VERSION||"
+  conda_store: "quansight/qhub-conda-store:v||QHUB_VERSION||"
 ```
 
 ### Storage

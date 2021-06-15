@@ -1,5 +1,6 @@
 import enum
 import typing
+import ipaddress
 
 import pydantic
 
@@ -276,6 +277,8 @@ class Main(Base):
     provider: ProviderEnum
     ci_cd: typing.Optional[CICD]
     domain: str
+    load_balancer_ip: typing.Optional[ipaddress.IPv4Address]
+    load_balancer_annotations: typing.Optional[typing.Dict[str, str]]
     terraform_state: typing.Optional[TerraformState]
     terraform_modules: typing.Optional[
         TerraformModules

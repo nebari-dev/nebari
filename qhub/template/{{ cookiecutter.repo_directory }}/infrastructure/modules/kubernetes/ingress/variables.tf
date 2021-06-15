@@ -32,16 +32,19 @@ variable "traefik-image" {
 
 variable "loglevel" {
   description = "traefik log level"
+  type        = string
   default     = "WARN"
 }
 
 variable "enable-certificates" {
   description = "Enable certificates"
+  type        = bool
   default     = false
 }
 
 variable "acme-email" {
   description = "ACME server email"
+  type        = string
   default     = "costrouchov@quansight.com"
 }
 
@@ -50,5 +53,18 @@ variable "acme-server" {
   # for testing use the letencrypt staging server
   #  - staging:    https://acme-staging-v02.api.letsencrypt.org/directory
   #  - production: https://acme-v02.api.letsencrypt.org/directory
+  type    = string
   default = "https://acme-staging-v02.api.letsencrypt.org/directory"
+}
+
+variable "load-balancer-ip" {
+  description = "Fixed load balancer IP Address"
+  type        = string
+  default     = null
+}
+
+variable "load-balancer-annotations" {
+  description = "Annotations to apply to load balancer"
+  type        = map(string)
+  default     = {}
 }

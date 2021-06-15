@@ -484,6 +484,7 @@ default_images:
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
   dask_gateway: "quansight/qhub-dask-gateway:v||QHUB_VERSION||"
+  conda_store: "quansight/qhub-conda-store:v||QHUB_VERSION||"
 ```
 
 ## Storage
@@ -498,6 +499,24 @@ storage:
   conda_store: 20Gi
   shared_filesystem: 10Gi
 ```
+
+## Load Balancer
+
+The kubernetes load balancer is used for exposing Qhub. Often times
+the load balancer may need to be configured with a static IP or
+additional annotations to use an internal vpc. QHub optionally
+supports these features.
+
+```yaml
+load_balancer_ip: "10.11.12.13"
+load_balancer_annotations:
+  "networking.gke.io/load-balancer-type": "Internal"
+```
+
+These settings will configure QHub to use an existing vpc for the load
+balancer with a fixed IP address. You many also want to pin the
+external IP address to prevent having to change the dns entries
+frequently.
 
 ## Profiles
 
