@@ -91,6 +91,7 @@ class DefaultImages(Base):
     jupyterlab: str
     dask_worker: str
     dask_gateway: str
+    conda_store: str
 
 
 # =========== Authentication ==============

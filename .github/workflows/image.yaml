@@ -28,6 +28,7 @@ jobs:
           - jupyterhub
           - dask-worker
           - dask-gateway
+          - conda-store
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
