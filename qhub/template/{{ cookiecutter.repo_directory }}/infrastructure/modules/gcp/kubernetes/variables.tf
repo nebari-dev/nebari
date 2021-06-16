@@ -73,7 +73,7 @@ variable "node_group_defaults" {
     instance_type = "n1-standard-2"
     min_size      = 0
     max_size      = 1
-    labels        = {app: "qhub"}
+    labels        = { app : "qhub"}
     preemptible   = false
     # https://www.terraform.io/docs/providers/google/r/container_cluster.html#guest_accelerator
     guest_accelerators = []
