@@ -187,6 +187,9 @@ To which the output should be `The 'metallb' addon is enabled`.
 
 ---
 
+### Note for Development on Windows Subsystem for Linux 2 (WSL2)
+The browser can have trouble reaching the load balancer running on WSL2. A workaround is to port forward the proxy-... pod to the host (ip 0.0.0.0). Get the ip address of the WSL2 machine via ```ip a```, it should be a 127.x.x.x address. To change the port forwarding after opening k9s you can type ```:pods <enter>```, hover over the proxy-... pod and type ```<shift-s>```, and enter the ip addresses.
+
 ### Deploy QHub
 To deploy QHub handle setup dependencies and create a new sub-directory by running:
 ```bash
