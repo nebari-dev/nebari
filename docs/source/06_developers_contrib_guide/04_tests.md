@@ -139,7 +139,7 @@ For more details on PVs and PVCs, read the [JupyterHub documentation](https://ze
 [MetalLB](https://metallb.universe.tf/) is the load balancer for bare-metal Kubernetes clusters. We will need to configure
 MetalLB to match the QHub configuration.
 
-### Automation of Metallb IP with Python Script
+### Automation of MetalLB with Python Script
 *Skip to next section for configuration without python*
 
 Minikube does not provide a simple interactive way to configure addons,
@@ -151,7 +151,7 @@ To do so, paste
 python minikube-loadbalancer-ip.py
 ```
 
-#### Configure MetalLB
+#### Manually Configure MetalLB
 *Skip this section if above python script was used*
 
 First we need to obtain the the Docker image ID:
