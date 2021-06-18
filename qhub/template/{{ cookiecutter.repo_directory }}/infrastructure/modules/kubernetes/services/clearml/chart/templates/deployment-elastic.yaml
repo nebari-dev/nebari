@@ -1,0 +1,264 @@
+# Source: clearml-server-cloud-ready/charts/elasticsearch/templates/poddisruptionbudget.yaml
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: "clearml-elastic-master-pdb"
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: "clearml-elastic-master"
+---
+# Source: clearml-server-cloud-ready/charts/elasticsearch/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clearml-elastic-master-config
+  labels:
+    heritage: "Helm"
+    release: "clearml-server"
+    chart: "elasticsearch"
+    app: "clearml-elastic-master"
+data:
+  elasticsearch.yml: |
+    xpack.security.enabled: false
+---
+# Source: clearml-server-cloud-ready/charts/elasticsearch/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: clearml-elastic-master
+  labels:
+    heritage: "Helm"
+    release: "clearml-server"
+    chart: "elasticsearch"
+    app: "clearml-elastic-master"
+  annotations:
+    {}
+spec:
+  type: ClusterIP
+  selector:
+    heritage: "Helm"
+    chart: "elasticsearch"
+    release: "clearml-server"
+    app: "clearml-elastic-master"
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9200
+    - name: transport
+      protocol: TCP
+      port: 9300
+---
+# Source: clearml-server-cloud-ready/charts/elasticsearch/templates/service.yaml
+kind: Service
+apiVersion: v1
+metadata:
+  name: clearml-elastic-master-headless
+  labels:
+    heritage: "Helm"
+    release: "clearml-server"
+    chart: "elasticsearch"
+    app: "clearml-elastic-master"
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  clusterIP: None # This is needed for statefulset hostnames like elasticsearch-0 to resolve
+  # Create endpoints also if the related pod isn't ready
+  publishNotReadyAddresses: true
+  selector:
+    app: "clearml-elastic-master"
+  ports:
+    - name: http
+      port: 9200
+    - name: transport
+      port: 9300
+---
+# Source: clearml-server-cloud-ready/charts/elasticsearch/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clearml-elastic-master
+  labels:
+    heritage: "Helm"
+    release: "clearml-server"
+    chart: "elasticsearch"
+    app: "clearml-elastic-master"
+  annotations:
+    esMajorVersion: "7"
+spec:
+  serviceName: clearml-elastic-master-headless
+  selector:
+    matchLabels:
+      app: "clearml-elastic-master"
+  replicas: 1
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+    - metadata:
+        name: clearml-elastic-master
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi
+  template:
+    metadata:
+      name: "clearml-elastic-master"
+      labels:
+        heritage: "Helm"
+        release: "clearml-server"
+        chart: "elasticsearch"
+        app: "clearml-elastic-master"
+      annotations:
+
+        configchecksum: 74bf3a32b86b711225b81f59050eb46d9c7e332399326f6fd4ee8627b4febfa
+    spec:
+      {{- with .Values.elasticsearch.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - "clearml-elastic-master"
+              topologyKey: kubernetes.io/hostname
+      terminationGracePeriodSeconds: 120
+      volumes:
+        - name: esconfig
+          configMap:
+            name: clearml-elastic-master-config
+      initContainers:
+        - name: configure-sysctl
+          securityContext:
+            runAsUser: 0
+            privileged: true
+          image: "docker.elastic.co/elasticsearch/elasticsearch:7.6.2"
+          imagePullPolicy: "IfNotPresent"
+          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          resources:
+            {}
+
+      containers:
+        - name: "elasticsearch"
+          securityContext:
+            capabilities:
+              # drop:
+              # - ALL
+              add:
+                - IPC_LOCK
+                - SYS_RESOURCE
+            # runAsNonRoot: true
+            runAsUser: 0
+            # privileged: true
+            # runAsUser: 1000
+          image: {{ .Values.elasticsearch.image }}
+          imagePullPolicy: "Always" #"IfNotPresent"
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  #!/usr/bin/env bash -e
+                  # If the node is starting up wait for the cluster to be ready (request params: 'wait_for_status=yellow&timeout=1s' )
+                  # Once it has started only check that the node itself is responding
+                  START_FILE=/tmp/.es_start_file
+
+                  http () {
+                      local path="${1}"
+                      if [ -n "${ELASTIC_USERNAME}" ] && [ -n "${ELASTIC_PASSWORD}" ]; then
+                        BASIC_AUTH="-u ${ELASTIC_USERNAME}:${ELASTIC_PASSWORD}"
+                      else
+                        BASIC_AUTH=''
+                      fi
+                      curl -XGET -s -k --fail ${BASIC_AUTH} http://127.0.0.1:9200${path}
+                  }
+
+                  if [ -f "${START_FILE}" ]; then
+                      echo 'Elasticsearch is already running, lets check the node is healthy and there are master nodes available'
+                      http "/_cluster/health?timeout=0s"
+                  else
+                      echo 'Waiting for elasticsearch cluster to become ready (request params: "wait_for_status=yellow&timeout=1s" )'
+                      if http "/_cluster/health?wait_for_status=yellow&timeout=1s" ; then
+                          touch ${START_FILE}
+                          exit 0
+                      else
+                          echo 'Cluster is not yet ready (request params: "wait_for_status=yellow&timeout=1s" )'
+                          exit 1
+                      fi
+                  fi
+            failureThreshold: 3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 3
+            timeoutSeconds: 5
+          ports:
+            - name: http
+              containerPort: 9200
+            - name: transport
+              containerPort: 9300
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 4Gi
+            requests:
+              cpu: 1000m
+              memory: 4Gi
+          env:
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: cluster.initial_master_nodes
+              value: "clearml-elastic-master-0,"
+            - name: discovery.seed_hosts
+              value: "clearml-elastic-master-headless"
+            - name: cluster.name
+              value: "clearml-elastic"
+            - name: network.host
+              value: "0.0.0.0"
+            - name: ES_JAVA_OPTS
+              value: "-Xmx2g -Xms2g"
+            - name: node.data
+              value: "true"
+            - name: node.ingest
+              value: "true"
+            - name: node.master
+              value: "true"
+            - name: bootstrap.memory_lock
+              value: "true"
+            - name: cluster.routing.allocation.node_initial_primaries_recoveries
+              value: "500"
+            - name: cluster.routing.allocation.disk.watermark.low
+              value: 500mb
+            - name: cluster.routing.allocation.disk.watermark.high
+              value: 500mb
+            - name: cluster.routing.allocation.disk.watermark.flood_stage
+              value: 500mb
+            - name: http.compression_level
+              value: "7"
+            - name: reindex.remote.whitelist
+              value: '*.*'
+            - name: xpack.monitoring.enabled
+              value: "false"
+            - name: xpack.security.enabled
+              value: "false"
+          volumeMounts:
+            - name: "clearml-elastic-master"
+              mountPath: /usr/share/elasticsearch/data
+
+            - name: esconfig
+              mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+              subPath: elasticsearch.yml
+---

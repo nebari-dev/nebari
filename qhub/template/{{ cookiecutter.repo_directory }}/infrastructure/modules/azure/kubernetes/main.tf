@@ -64,3 +64,4 @@ resource "azurerm_kubernetes_cluster_node_pool" "worker_node_group" {
   }
   orchestrator_version = var.kubernetes_version
 }
+

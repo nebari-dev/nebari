@@ -56,6 +56,20 @@ class CICD(Base):
     after_script: typing.Optional[typing.List[str]]
 
 
+# ============== ClearML =============
+
+
+class ClearML(Base):
+    enabled: bool
+
+
+# ============== Prefect =============
+
+
+class Prefect(Base):
+    enabled: bool
+
+
 # ============= Terraform ===============
 
 
@@ -281,7 +295,7 @@ class Main(Base):
         TerraformModules
     ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
-    prefect: typing.Optional[bool]
+    prefect: typing.Optional[Prefect]
     cdsdashboards: CDSDashboards
     security: Security
     default_images: DefaultImages
@@ -294,6 +308,7 @@ class Main(Base):
     theme: Theme
     profiles: Profiles
     environments: typing.Dict[str, CondaEnvironment]
+    clearml: typing.Optional[ClearML]
 
 
 def verify(config):

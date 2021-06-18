@@ -97,8 +97,10 @@ def guided_install(
         zone_name = ".".join(zone_name)
         if config["provider"] in {"do", "gcp", "azure"}:
             update_record(zone_name, record_name, "A", ip_or_hostname)
+            add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
         elif config["provider"] == "aws":
             update_record(zone_name, record_name, "CNAME", ip_or_hostname)
+            add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
         else:
             logger.info(
                 f"Couldn't update the DNS record for cloud provider: {config['provider']}"
@@ -111,3 +113,15 @@ def guided_install(
 
     # 06 Full deploy QHub
     terraform.apply(directory="infrastructure")
+
+
+def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
+    logger.info(f"Setting DNS record for ClearML for record: {record_name}")
+    dns_records = [
+        f"app.clearml.{record_name}",
+        f"api.clearml.{record_name}",
+        f"files.clearml.{record_name}",
+    ]
+
+    for dns_record in dns_records:
+        update_record(zone_name, dns_record, record_type, ip_or_hostname)

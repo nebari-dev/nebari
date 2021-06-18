@@ -121,7 +121,6 @@ provider "helm" {
 {% if cookiecutter.provider == "local" %}
     config_path = "~/.kube/config"
 {%- else %}
-    load_config_file       = false
     host                   = module.kubernetes.credentials.endpoint
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
     {% if cookiecutter.provider == "azure" -%}
@@ -218,6 +217,16 @@ module "prefect" {
   namespace            = var.environment
   jupyterhub_api_token = module.qhub.jupyterhub_api_token
   prefect_token        = var.prefect_token
+}
+{% endif -%}
+
+{% if cookiecutter.clearml.enabled -%}
+module "clearml" {
+  source     = "./modules/kubernetes/services/clearml"
+  namespace  = var.environment
+  depends_on = [
+    module.qhub
+  ]
 }
 {% endif -%}
 

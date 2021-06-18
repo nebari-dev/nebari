@@ -36,6 +36,13 @@ module "kubernetes" {
       instance_type = "{{ nodegroup_config.instance }}"
       min_size      = {{ nodegroup_config.min_nodes }}
       max_size      = {{ nodegroup_config.max_nodes }}
+{%- if nodegroup_config.labels is defined %}
+      labels        = {
+{%- for key, value in nodegroup_config.labels.items() %}
+          {{ key }} = "{{ value }}"
+{%- endfor -%} 
+      }
+{%- endif %}
 {%- if nodegroup_config.preemptible is defined %}
       preemptible   = {{ "true" if nodegroup_config.preemptible else "false" }}
 {%- endif %}
@@ -46,7 +53,7 @@ module "kubernetes" {
           type  = "{{ accelerator.name }}"
           count = {{ accelerator.count }}
         },
-{%- endfor %}
+{%- endfor %} 
       ]
 {%- endif %}
     },

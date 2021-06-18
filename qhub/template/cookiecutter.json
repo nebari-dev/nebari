@@ -14,6 +14,9 @@
       "type": "self-signed"
     },
     "prefect": null,
+    "clearml": {
+        "enabled": null
+    },
     "security": null,
     "default_images": null,
     "profiles": null,
