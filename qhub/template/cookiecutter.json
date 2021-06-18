@@ -15,7 +15,7 @@
     },
     "prefect": null,
     "clearml": {
-        "enabled": null,
+        "enabled": null
     },
     "security": null,
     "default_images": null,

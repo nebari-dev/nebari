@@ -38,7 +38,7 @@ module "kubernetes" {
       max_size      = {{ nodegroup_config.max_nodes }}
 {%- if nodegroup_config.labels is defined %}
       labels        = {
-{%- for key, value in nodegroup_config.labels %}
+{%- for key, value in nodegroup_config.labels.items() %}
           {{ key }} = "{{ value }}"
 {%- endfor -%} 
       }

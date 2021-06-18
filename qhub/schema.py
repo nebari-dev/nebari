@@ -61,7 +61,12 @@ class CICD(Base):
 
 class ClearML(Base):
     enabled: bool
-    labels: typing.Optional[typing.Dict[str, str]]
+
+# ============== Prefect =============
+
+
+class Prefect(Base):
+    enabled: bool
 
 
 # ============= Terraform ===============
@@ -289,7 +294,7 @@ class Main(Base):
         TerraformModules
     ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
-    prefect: typing.Optional[bool]
+    prefect: typing.Optional[Prefect]
     cdsdashboards: CDSDashboards
     security: Security
     default_images: DefaultImages
