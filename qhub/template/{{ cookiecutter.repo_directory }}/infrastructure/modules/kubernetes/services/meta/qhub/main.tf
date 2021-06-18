@@ -358,14 +358,13 @@ resource "kubernetes_manifest" "forwardauth" {
 }
 
 locals {
-  clearml_webserver_subdomain  = "clearml.app"
-  clearml_fileserver_subdomain = "clearml.files"
-  clearml_apiserver_subdomain  = "clearml.api"
-
-  clearml_webserver  = "clearml-clearml-server-cloud-ready-webserver"
-  clearml_fileserver = "clearml-clearml-server-cloud-ready-fileserver"
-  clearml_apiserver  = "clearml-clearml-server-cloud-ready-apiserver"
-
+  clearml_webserver_subdomain  = "app.clearml"
+  clearml_fileserver_subdomain = "files.clearml"
+  clearml_apiserver_subdomain  = "api.clearml"
+  clearml-prefix = "clearml-clearml-server-cloud-ready"
+  clearml_webserver  = "${local.clearml-prefix}-webserver"
+  clearml_fileserver = "${local.clearml-prefix}-fileserver"
+  clearml_apiserver  = "${local.clearml-prefix}-apiserver"
 }
 
 resource "kubernetes_manifest" "clearml-app" {
