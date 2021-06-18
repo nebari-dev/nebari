@@ -14,17 +14,17 @@ resource "helm_release" "prefect" {
   }
 
   set {
-    name = "prefectImage"
+    name  = "prefectImage"
     value = var.image
   }
 
   set {
-    name = "namespace"
+    name  = "namespace"
     value = var.namespace
   }
 
   set {
-    name = "cloudApi"
+    name  = "cloudApi"
     value = var.cloud_api
   }
 }
