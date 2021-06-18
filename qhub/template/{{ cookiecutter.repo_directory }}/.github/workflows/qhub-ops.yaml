@@ -43,6 +43,11 @@ env:
   # Preserve dev branch so pip_install_qhub doesn't get overridden on next render
   QHUB_GH_BRANCH: {{ cookiecutter.QHUB_GH_BRANCH }}
 {% endif %}
+{% if cookiecutter.prefect.enabled -%}
+{% raw %}
+  TF_VAR_prefect_token: ${{ secrets.TF_VAR_PREFECT_TOKEN }}
+{% endraw %}
+{%- endif %}
 
 jobs:
   build:

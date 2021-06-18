@@ -68,7 +68,7 @@ class ClearML(Base):
 
 class Prefect(Base):
     enabled: bool
-
+    image: typing.Optional[str]
 
 # ============= Terraform ===============
 

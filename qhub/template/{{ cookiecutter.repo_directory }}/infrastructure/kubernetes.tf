@@ -207,7 +207,7 @@ module "qhub" {
   ]
 }
 
-{% if cookiecutter.prefect is true -%}
+{% if cookiecutter.prefect.enabled -%}
 module "prefect" {
   source = "./modules/kubernetes/services/prefect"
 
@@ -217,6 +217,9 @@ module "prefect" {
   namespace            = var.environment
   jupyterhub_api_token = module.qhub.jupyterhub_api_token
   prefect_token        = var.prefect_token
+  {% if cookiecutter.prefect.image is defined -%}
+  image                = "{{ cookiecutter.prefect.image }}"
+  {% endif -%}
 }
 {% endif -%}
 

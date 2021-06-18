@@ -116,7 +116,7 @@ variable "conda-store-image" {
   }
 }
 
-{% if cookiecutter.prefect is true -%}
+{% if cookiecutter.prefect.enabled -%}
 variable "prefect_token" {
   type = string
 }

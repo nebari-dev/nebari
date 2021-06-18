@@ -12,4 +12,19 @@ resource "helm_release" "prefect" {
     name  = "jupyterHubToken"
     value = var.jupyterhub_api_token
   }
+
+  set {
+    name = "prefectImage"
+    value = var.image
+  }
+
+  set {
+    name = "namespace"
+    value = var.namespace
+  }
+
+  set {
+    name = "cloudApi"
+    value = var.cloud_api
+  }
 }
