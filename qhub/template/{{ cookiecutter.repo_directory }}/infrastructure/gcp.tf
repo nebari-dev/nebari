@@ -58,21 +58,5 @@ module "kubernetes" {
 {%- endif %}
     },
 {% endfor %}
-{%- if cookiecutter.clearml.enabled %}
-    {
-      name          = "clearml"
-      instance_type = "n1-highmem-16"
-      min_size      = 1 
-      max_size      = 5
-      labels        = {
-          app = "clearml"
-{%- if cookiecutter.clearml.labels is defined %}
-{%- for key, value in cookiecutter.clearml.labels.items() %}
-          {{ key }} = "{{ value }}"
-{%- endfor %} 
-{%- endif %}
-      }
-    },
-{%- endif %}
   ]
 }
