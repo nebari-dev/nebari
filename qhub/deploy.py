@@ -120,7 +120,7 @@ def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
     dns_records = [
         f"app.clearml.{record_name}",
         f"api.clearml.{record_name}",
-        f"files.clearml.{record_name}"
+        f"files.clearml.{record_name}",
     ]
 
     for dns_record in dns_records:
