@@ -37,7 +37,7 @@ google_cloud_platform:
       min_nodes: 1
       max_nodes: 5
       labels:
-        - app: clearml
+        app: clearml
 ```
 
 ## Accessing the ClearML server
