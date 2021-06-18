@@ -361,10 +361,10 @@ locals {
   clearml_webserver_subdomain  = "app.clearml"
   clearml_fileserver_subdomain = "files.clearml"
   clearml_apiserver_subdomain  = "api.clearml"
-  clearml-prefix = "clearml-clearml-server-cloud-ready"
-  clearml_webserver  = "${local.clearml-prefix}-webserver"
-  clearml_fileserver = "${local.clearml-prefix}-fileserver"
-  clearml_apiserver  = "${local.clearml-prefix}-apiserver"
+  clearml-prefix               = "clearml-clearml-server-cloud-ready"
+  clearml_webserver            = "${local.clearml-prefix}-webserver"
+  clearml_fileserver           = "${local.clearml-prefix}-fileserver"
+  clearml_apiserver            = "${local.clearml-prefix}-apiserver"
 }
 
 resource "kubernetes_manifest" "clearml-app" {
