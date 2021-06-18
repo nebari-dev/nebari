@@ -222,8 +222,8 @@ module "prefect" {
 
 {% if cookiecutter.clearml.enabled -%}
 module "clearml" {
-  source = "./modules/kubernetes/services/clearml"
-
+  source     = "./modules/kubernetes/services/clearml"
+  namespace  = var.environment
   depends_on = [
     module.qhub
   ]
