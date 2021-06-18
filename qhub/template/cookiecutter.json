@@ -13,9 +13,12 @@
     "certificate": {
       "type": "self-signed"
     },
-    "prefect": null,
     "clearml": {
         "enabled": null
+    },
+    "prefect": {
+        "enabled": null,
+        "image": null
     },
     "security": null,
     "default_images": null,

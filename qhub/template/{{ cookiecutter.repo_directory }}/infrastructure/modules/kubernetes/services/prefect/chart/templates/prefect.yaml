@@ -34,7 +34,7 @@ spec:
                   name: jupyterhub-token
                   key: jupyterHubToken
             - name: PREFECT__CLOUD__API
-              value: https://api.prefect.io
+              value: {{ .Values.cloudApi }}
             - name: NAMESPACE
               value: {{ .Values.namespace }}
             - name: IMAGE_PULL_SECRETS

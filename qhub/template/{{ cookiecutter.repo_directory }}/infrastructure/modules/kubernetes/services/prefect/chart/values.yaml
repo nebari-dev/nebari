@@ -1,4 +1,5 @@
-prefectImage: prefecthq/prefect:0.12.2-python3.6
-namespace: dev
+prefectImage: <placeholder>
+namespace: <placeholder>
 serviceAccount: prefect
 prefectToken: "<placeholder>"
+cloudApi: "<placeholder>"
