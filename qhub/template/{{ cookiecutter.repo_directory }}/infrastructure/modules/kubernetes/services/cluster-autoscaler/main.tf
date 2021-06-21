@@ -3,7 +3,7 @@ resource "helm_release" "autoscaler" {
   namespace = var.namespace
 
   repository = "https://charts.helm.sh/stable"
-  chart      = "stable/cluster-autoscaler"
+  chart      = "cluster-autoscaler"
   version    = "7.1.0"
 
   values = concat([
