@@ -139,51 +139,55 @@ For more details on PVs and PVCs, read the [JupyterHub documentation](https://ze
 [MetalLB](https://metallb.universe.tf/) is the load balancer for bare-metal Kubernetes clusters. We will need to configure
 MetalLB to match the QHub configuration.
 
-#### Configure MetalLB
+### Automation of MetalLB with Python Script
+*Skip to next section for configuration without python*
 
-Configure the `metallb` load balancer to have a start IP address of
-`192.168.49.100` and an end of `192.168.49.150`. These IP addresses were not
-randomly chosen. Make sure that the IP range is within the Docker interface subnet.
-To determine the range of IP addresses, inspect the running Docker-Minikube
-image with the following command:
+Minikube does not provide a simple interactive way to configure addons,
+([as shown in this repository issue](https://github.com/kubernetes/minikube/issues/8283)). It is recommended to set load balancer start/stop IP address using a Python script with pre-established values. This recommendation is due to an existing DNS name that uses some addresses.
 
+To do so, paste
+[this Python script](https://github.com/Quansight/qhub/blob/dev/tests/scripts/minikube-loadbalancer-ip.py) in a text file named `minikube-loadbalancer-ip.py` and then run:
+```shell
+python minikube-loadbalancer-ip.py
+```
+
+#### Manually Configure MetalLB
+*Skip this section if above python script was used*
+
+First we need to obtain the the Docker image ID:
 ```shell
 $ docker ps --format "{{.Names}} {{.ID}}"
 minikube <image-id>
-
-$ docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}/{{.IPPrefixLen}}{{end}}' <image-id>
-192.168.49.2/24
 ```
 
-This means that you have to ensure that the start/stop ip range for
-the load balancer is within the `192.168.49.0/24` subnet. Your docker
-subnet may (and likely is) different.
+Copy the output image id and use it in the following command to obtain the Docker interface subnet CIDR range:
 
-You can run `metallb` manually or use a python script to do so. We suggest using
-the commands below.
+```shell
+$ docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}/{{.IPPrefixLen}}{{end}}' <image-id>
+```
 
-To manually configure `metallb` run:
+A example subnet range will look like `192.168.49.2/24`. This CIDR range will have a starting IP of `192.168.49.0` and ending address of `192.168.49.255`. The `metallb` load balancer needs to be given a range of IP addresses that are contained in the docker CIDR range. If your CIDR is different, you can determine your range IP addresses from a CIDR address at [this website](https://www.ipaddressguide.com/cidr).
+
+For this example case, we will assign `metallb` a start IP address of
+`192.168.49.100` and an end of `192.168.49.150`. 
+
+We can the `metallb` below CLI interface which will prompt for the start and stop IP range:
 
 ```shell
 minikube addons configure metallb
+-- Enter Load Balancer Start IP: 192.168.49.100
+-- Enter Load Balancer End IP: 192.168.49.150
 ```
+
 If successful, the output should be `✅  metallb was successfully configured`.
-
-
-Minikube does not provide a simple interactive way to configure addons,
-([as shown in this repository issue](https://github.com/kubernetes/minikube/issues/8283)). Hence, we suggest setting the
-load balancer IP address using a Python script with pre-established values. The recommendation to keep the values is due
-to an existing DNS name that already points to the address. To do so, paste
-[this Python script](https://github.com/Quansight/qhub/blob/dev/tests/scripts/minikube-loadbalancer-ip.py) on your terminal.
-
 
 #### Enable MetalLB
 
-Lastly, enable MetalLB by running
+After configuration enable MetalLB by running
 ```shell
 minikube addons enable metallb
 ```
-To which the output should be `The 'metallb' addon is enabled`.
+The output should be `The 'metallb' addon is enabled`.
 
 ---
 
