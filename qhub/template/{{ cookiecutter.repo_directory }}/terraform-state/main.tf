@@ -9,9 +9,9 @@ module "terraform-state" {
   name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}"
 
   tags = {
-    Project      = "{{ cookiecutter.project_name }}"
-    Owner        = "terraform-state"
-    Environment  = "{{ cookiecutter.namespace }}"
+    Project     = "{{ cookiecutter.project_name }}"
+    Owner       = "terraform-state"
+    Environment = "{{ cookiecutter.namespace }}"
   }
 }
 {% elif cookiecutter.provider == "gcp" -%}
