@@ -1,9 +1,8 @@
 import enum
-from os import pread
 import typing
 
 import pydantic
-from pydantic import validator, ValidationError
+from pydantic import validator
 from qhub.utils import namestr_regex, check_for_duplicates
 
 
