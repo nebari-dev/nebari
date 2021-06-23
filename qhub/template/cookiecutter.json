@@ -26,6 +26,15 @@
     "storage": null,
     "cdsdashboards": {},
 
+    "optional_features": {
+        "load_balancer": {
+            "enabled": null,
+            "dns_config": {
+                "ip": null,
+                "annotations": null
+            }
+        }
+    },
     "local": {
         "node_selectors": {
             "general": {

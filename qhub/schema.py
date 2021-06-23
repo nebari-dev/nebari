@@ -1,7 +1,6 @@
 import enum
 import typing
 import ipaddress
-
 import pydantic
 
 from qhub.utils import namestr_regex
@@ -46,7 +45,6 @@ class Base(pydantic.BaseModel):
     class Config:
         extra = "forbid"
 
-
 # ============== CI/CD =============
 
 
@@ -56,6 +54,26 @@ class CICD(Base):
     before_script: typing.Optional[typing.List[str]]
     after_script: typing.Optional[typing.List[str]]
 
+
+# ============== Settings for a new DNS A record =============
+
+
+class DnsConfig(Base):
+    ip: typing.Optional[ipaddress.IPv4Address]
+    annotations: typing.Optional[typing.Dict[str, str]]
+
+# ============== Extra load balancer config =============
+
+
+class LoadBalancer(Base):
+    enabled: bool
+    dns_config: typing.Optional[DnsConfig]
+
+# ============== Optional features =============
+
+
+class OptionalFeatures(Base):
+    load_balancer: typing.Optional[LoadBalancer]
 
 # ============= Terraform ===============
 
@@ -272,13 +290,13 @@ letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 
 
 class Main(Base):
+
+    optional_features: typing.Optional[OptionalFeatures]
     project_name: letter_dash_underscore_pydantic
     namespace: typing.Optional[letter_dash_underscore_pydantic]
     provider: ProviderEnum
     ci_cd: typing.Optional[CICD]
     domain: str
-    load_balancer_ip: typing.Optional[ipaddress.IPv4Address]
-    load_balancer_annotations: typing.Optional[typing.Dict[str, str]]
     terraform_state: typing.Optional[TerraformState]
     terraform_modules: typing.Optional[
         TerraformModules

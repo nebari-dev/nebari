@@ -158,13 +158,13 @@ module "kubernetes-ingress" {
 
   node-group = local.node_groups.general
 
-{% if cookiecutter.load_balancer_ip is defined %}
-  load-balancer-ip = "{{ cookiecutter.load_balancer_ip }}"
+{% if cookiecutter.optional_features.load_balancer.ip is defined %}
+  load-balancer-ip = "{{ cookiecutter.optional_features.load_balancer.ip }}"
 {% endif %}
 
 {% if cookiecutter.load_balancer_annotations is defined %}
   load-balancer-annotations = {
-{% for key, value in cookiecutter.load_balancer_annotations.items() %}
+{% for key, value in cookiecutter.optional_features.load_balancer.annotations.items() %}
     "{{ "%s" | format(key) }}" = "{{ value }}"
 {% endfor %}
   }
