@@ -144,4 +144,4 @@ def check_for_duplicates(users: Sequence[dict]) -> Set:
             raise TypeError(f"Found duplicate uid ({attrs['uid']}) for {user}.")
         else:
             uids.add(attrs['uid'])
-    return uids
+    return users

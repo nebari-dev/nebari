@@ -256,7 +256,7 @@ class Profiles(Base):
         default = [attrs['default'] for attrs in v if 'default' in attrs]
         if default.count(True) > 1:
             raise TypeError('Multiple default Jupyterlab profiles may cause unexpected problems.')
-
+        return v
 
 
 # ================ Environment ================
