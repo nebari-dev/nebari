@@ -137,11 +137,12 @@ def check_cloud_credentials(config):
     else:
         raise ValueError("Cloud Provider configuration not supported")
 
+
 def check_for_duplicates(users: Sequence[dict]) -> Set:
     uids = set([])
     for user, attrs in users.items():
-        if attrs['uid'] in uids:
+        if attrs["uid"] in uids:
             raise TypeError(f"Found duplicate uid ({attrs['uid']}) for {user}.")
         else:
-            uids.add(attrs['uid'])
+            uids.add(attrs["uid"])
     return users
