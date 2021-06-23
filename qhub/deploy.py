@@ -97,10 +97,12 @@ def guided_install(
         zone_name = ".".join(zone_name)
         if config["provider"] in {"do", "gcp", "azure"}:
             update_record(zone_name, record_name, "A", ip_or_hostname)
-            add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
+            if config.get('clearml', {}).get('enabled'):
+                add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
         elif config["provider"] == "aws":
             update_record(zone_name, record_name, "CNAME", ip_or_hostname)
-            add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
+            if config.get('clearml', {}).get('enabled'):
+                add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
         else:
             logger.info(
                 f"Couldn't update the DNS record for cloud provider: {config['provider']}"
