@@ -13,12 +13,17 @@ resource "aws_resourcegroups_group" "main" {
         {
           Key    = "Environment"
           Values = [var.environment]
+        },
+        {
+          Key    = "Owner"
+          Values = ["terraform", "terraform-state"]
         }
       ]
     })
   }
 
-  tags = {
+  tags = merge({
     Description = "AWS resources project=${var.project} and environment=${var.environment}"
-  }
+  }, var.tags)
+
 }

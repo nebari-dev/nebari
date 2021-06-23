@@ -9,8 +9,8 @@ module "terraform-state" {
   name = "{{ cookiecutter.project_name }}-{{ cookiecutter.namespace }}"
 
   tags = {
-    Organization = "{{ cookiecutter.project_name }}"
-    Project      = "terraform-state"
+    Project      = "{{ cookiecutter.project_name }}"
+    Owner        = "terraform-state"
     Environment  = "{{ cookiecutter.namespace }}"
   }
 }
