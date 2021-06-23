@@ -1,9 +1,10 @@
 import enum
+from os import pread
 import typing
 
 import pydantic
-
-from qhub.utils import namestr_regex
+from pydantic import validator, ValidationError
+from qhub.utils import namestr_regex, check_for_duplicates
 
 
 class CertificateEnum(str, enum.Enum):
@@ -140,6 +141,10 @@ class Security(Base):
     users: typing.Dict[str, User]
     groups: typing.Dict[str, Group]
 
+    @validator('users', pre=True)
+    def validate_uderids(cls, v):
+        # raise TypeError if duplicated
+        return check_for_duplicates(v)
 
 # ================ Providers ===============
 
@@ -244,6 +249,14 @@ class DaskWorkerProfile(Base):
 class Profiles(Base):
     jupyterlab: typing.List[JupyterLabProfile]
     dask_worker: typing.Dict[str, DaskWorkerProfile]
+
+    @validator('jupyterlab', pre=True)
+    def check_default(cls, v, values):
+        """Check if only one default value is present"""
+        default = [attrs['default'] for attrs in v if 'default' in attrs]
+        if default.count(True) > 1:
+            raise TypeError('Multiple default Jupyterlab profiles may cause unexpected problems.')
+
 
 
 # ================ Environment ================
