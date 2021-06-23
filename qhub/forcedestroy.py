@@ -96,7 +96,7 @@ def force_destroy_configuration(config):
                 **filter_params, PaginationToken=token)
             resources.extend(response['ResourceTagMappingList'])
 
-        # Load Balancer will need to be queried separately:
+        # Load Balancer and other K8s-generated resources will need to be queried separately:
 
         filter_params = dict(
             TagFilters=[
@@ -113,6 +113,24 @@ def force_destroy_configuration(config):
                 **filter_params)
         resources.extend(response['ResourceTagMappingList'])
 
+        # IAM
+
+        iam = boto3.resource('iam')
+        for suffix in ('eks-cluster-role', 'eks-node-group-role'):
+            
+            try:
+                role = iam.Role(f'{project_name}-{env}-{suffix}')
+
+                if role.tags is not None:
+
+                    tags_dict = dict([(t['Key'], t.get('Value', '')) for t in role.tags])
+
+                    if tags_dict.get('Owner', '') == 'terraform' and tags_dict.get('Environment', '') == env and tags_dict.get('Project', '') == project_name:
+                        resources.append({'ResourceARN': role.arn})
+                        
+            except iam.meta.client.exceptions.NoSuchEntityException:
+                pass
+
         # Summarize resources
 
         type_groups = {}
@@ -123,7 +141,6 @@ def force_destroy_configuration(config):
             logger.info(r['ResourceARN'])
 
         logger.info([(k,len(v)) for k,v in type_groups.items()])
-
 
         # Order
         priority_types = (
@@ -140,6 +157,7 @@ def force_destroy_configuration(config):
             'dynamodb-table',
             's3-None',
             'resource-groups-group',
+            'iam-role',
         )
 
         for pt in priority_types:
@@ -227,8 +245,6 @@ def force_destroy_configuration(config):
 
                     logger.info(f"Delete security group {r['resource']}")
                     security_group.delete(DryRun=False)
-
-
 
                 elif pt == 'ec2-internet-gateway':
                     logger.info(f"Inspect internet gateway {r['resource']}")
@@ -334,4 +350,18 @@ def force_destroy_configuration(config):
                     response = client.delete_group(
                         Group=r['arn']
                     )
+
+                elif pt == 'iam-role':
+                    logger.info(f"Inspect IAM Role {r['resource']}")
+                    iam = boto3.resource('iam')                       
+                    role = iam.Role(r['resource'])
+
+                    for policy in role.attached_policies.all():
+                        logger.info(f"Detach Role policy {policy.arn}")
+                        response = role.detach_policy(
+                            PolicyArn=policy.arn
+                        )
+
+                    logger.info(f"Delete IAM Role {r['resource']}")
+                    role.delete()
 
