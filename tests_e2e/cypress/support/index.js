@@ -45,7 +45,7 @@ Cypress.Commands.add('runJHubClient', (JHUB_CLIENT_PYTHON_PATH, hub_url, usernam
 
   Cypress.config('execTimeout', timeout);
 
-  let notebookpath = path.resolve(__dirname, "../notebooks", notebook_filename);
+  let notebookpath = path.resolve(Cypress.env('full_path_of_cypress_folder'), "notebooks", notebook_filename);
 
   return cy.exec(
     [
