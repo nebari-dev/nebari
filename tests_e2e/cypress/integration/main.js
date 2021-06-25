@@ -52,7 +52,7 @@ describe('First Test', () => {
 
       // Minimal check that JupyterLab has opened
 
-      cy.get('div#jp-MainLogo', { timeout: 30000 }).should('exist');
+      cy.get('div#jp-MainLogo', { timeout: 30000 }).should('exist').wait(500);
 
 
       if (JHUB_CLIENT_PYTHON_PATH) {
