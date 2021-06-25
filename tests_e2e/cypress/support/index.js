@@ -39,3 +39,20 @@ Cypress.Commands.add('loginWithPassword', (username, password) => {
 });
 
 
+Cypress.Commands.add('runJHubClient', (JHUB_CLIENT_PYTHON_PATH, hub_url, username, password, notebookpath, timeout=20000) => {
+
+  Cypress.config('execTimeout', timeout);
+
+  return cy.exec(
+    [
+      JHUB_CLIENT_PYTHON_PATH, "-m", "jhub_client", "run", 
+      "--hub", hub_url, "--notebook", notebookpath, 
+      "--auth-type", "basic", "--validate"
+    ].join(" "), 
+    {
+      env: { JUPYTERHUB_USERNAME: username, JUPYTERHUB_PASSWORD: password } 
+    }
+  )
+
+});
+
