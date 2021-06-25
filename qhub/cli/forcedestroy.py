@@ -4,8 +4,6 @@ import logging
 from ruamel import yaml
 
 from qhub.forcedestroy import force_destroy_configuration
-from qhub.schema import verify
-from qhub.render import render_template
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +24,6 @@ def handle_force_destroy(args):
     with config_filename.open() as f:
         config = yaml.safe_load(f.read())
 
-    #verify(config)
+    # Don't verify(config) in case the schema has changed - just pick out the important bits and tear down
 
-    force_destroy_configuration(
-        config
-    )
+    force_destroy_configuration(config)
