@@ -19,6 +19,8 @@
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
+const path = require('path');
+
 Cypress.on('uncaught:exception', (err, runnable) => {
     // returning false here prevents Cypress from
     // failing the test
@@ -39,15 +41,19 @@ Cypress.Commands.add('loginWithPassword', (username, password) => {
 });
 
 
-Cypress.Commands.add('runJHubClient', (JHUB_CLIENT_PYTHON_PATH, hub_url, username, password, notebookpath, timeout=20000) => {
+Cypress.Commands.add('runJHubClient', (JHUB_CLIENT_PYTHON_PATH, hub_url, username, password, notebook_filename, kernel="python3", timeout=20000) => {
 
   Cypress.config('execTimeout', timeout);
 
+  let notebookpath = path.join(__dirname, "../notebooks", notebook_filename);
+
   return cy.exec(
     [
-      JHUB_CLIENT_PYTHON_PATH, "-m", "jhub_client", "run", 
-      "--hub", hub_url, "--notebook", notebookpath, 
-      "--auth-type", "basic", "--validate"
+      JHUB_CLIENT_PYTHON_PATH, "-m", "jhub_client", "run",
+      "--hub", hub_url, "--notebook", "\"" + notebookpath + "\"",
+      "--auth-type", "basic",
+      "--kernel", kernel,
+      "--validate"
     ].join(" "), 
     {
       env: { JUPYTERHUB_USERNAME: username, JUPYTERHUB_PASSWORD: password } 

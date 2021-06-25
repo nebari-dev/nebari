@@ -57,11 +57,11 @@ describe('First Test', () => {
 
       if (JHUB_CLIENT_PYTHON_PATH) {
 
-
-          var notebookpath = "/Users/dan/Dev/qhub/tests_e2e/cypress/notebooks/DaskGatewayTest.ipynb";
-
-          cy.runJHubClient(JHUB_CLIENT_PYTHON_PATH, Cypress.config().baseUrl, EXAMPLE_USER_NAME, EXAMPLE_USER_PASSWORD, notebookpath).its('code').should('eq', 0);
-    
+          cy.runJHubClient(
+                  JHUB_CLIENT_PYTHON_PATH, Cypress.config().baseUrl, EXAMPLE_USER_NAME, EXAMPLE_USER_PASSWORD, 
+                  "BasicTest.ipynb", "python3"
+            )
+            .its('code').should('eq', 0);
 
       }
 
@@ -75,7 +75,7 @@ describe('First Test', () => {
       cy.get('#stop')
         .should('contain', 'Stop My Server').wait(500).click();
 
-      cy.get('#start', { timeout: 30000 })
+      cy.get('#start', { timeout: 40000 })
         .should('contain', 'Start My Server');
 
     })
