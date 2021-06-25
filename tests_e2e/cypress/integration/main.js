@@ -60,7 +60,10 @@ describe('First Test', () => {
           cy.runJHubClient(
                   JHUB_CLIENT_PYTHON_PATH, Cypress.config().baseUrl, EXAMPLE_USER_NAME, EXAMPLE_USER_PASSWORD, 
                   "BasicTest.ipynb", "python3"
-            )
+            ).then(result => {
+              cy.log(result.stdout);
+              cy.log(result.stderr);
+            })
             .its('code').should('eq', 0);
 
       }
