@@ -61,6 +61,13 @@ describe('First Test', () => {
                   JHUB_CLIENT_PYTHON_PATH, Cypress.config().baseUrl, EXAMPLE_USER_NAME, EXAMPLE_USER_PASSWORD, 
                   "BasicTest.ipynb", "python3"
             ).then(result => {
+              if (result.code) {
+                throw new Error(`Execution of "${command}" failed
+                  Exit code: ${result.code}
+                  Stdout:\n${result.stdout}
+                  Stderr:\n${result.stderr}`);
+              }
+              
               cy.log(result.stdout);
               cy.log(result.stderr);
             })

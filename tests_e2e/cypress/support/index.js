@@ -56,7 +56,8 @@ Cypress.Commands.add('runJHubClient', (JHUB_CLIENT_PYTHON_PATH, hub_url, usernam
       "--validate"
     ].join(" "), 
     {
-      env: { JUPYTERHUB_USERNAME: username, JUPYTERHUB_PASSWORD: password } 
+      env: { JUPYTERHUB_USERNAME: username, JUPYTERHUB_PASSWORD: password } ,
+      failOnNonZeroExit: false
     }
   )
 
