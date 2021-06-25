@@ -62,7 +62,7 @@ describe('First Test', () => {
                   "BasicTest.ipynb", "python3"
             ).then(result => {
               if (result.code) {
-                throw new Error(`Execution of "${command}" failed
+                throw new Error(`Execution of exec failed
                   Exit code: ${result.code}
                   Stdout:\n${result.stdout}
                   Stderr:\n${result.stderr}`);
