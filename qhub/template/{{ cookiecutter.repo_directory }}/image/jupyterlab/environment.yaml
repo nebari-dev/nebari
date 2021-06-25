@@ -32,6 +32,7 @@ dependencies:
  # viz tools
  - param
  - python-graphviz
+ - plotly >=5.0
 
  # testing, docs, linting
  - pytest
