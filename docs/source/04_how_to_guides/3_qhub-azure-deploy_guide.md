@@ -214,7 +214,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.2.3
+      - qhub-dask==0.3.12
       - numpy
       - numba
       - pandas
