@@ -12,7 +12,7 @@ The environment specifications are located in `qhub_config.yml` in the deploymen
 The proper solution is to add the package to the `qhub_config.yml` (See #1). If you don't have access to the deployment repo, you will need to contact your QHub maintainer to get the required package. Just to note: you *can* do a user install for pip packages in a pinch (this is not recommended) but they will not be available to Dask workers.
 
 3. I want to use Dask. What needs to be included in my user environment?   
-You will need to include the QHub Dask metapackage, e.g. `qhub-dask==0.2.3`. This will replace `distributed`, `dask`, ad `dask-gateway`.  
+You will need to include the QHub Dask metapackage, e.g. `qhub-dask==0.3.12`. This will replace `distributed`, `dask`, ad `dask-gateway`.  
 
 4. Why can't I just create my own local conda environment or edit the existing conda environments?  
 The version of [conda-store](https://conda-store.readthedocs.io/) used in QHub versions 0.3.11 and earlier is an alpha version. This version doesn't support using local conda environments or editing pre-exising environments directly.  
