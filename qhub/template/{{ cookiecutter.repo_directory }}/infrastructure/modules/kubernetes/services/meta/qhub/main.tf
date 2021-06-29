@@ -361,6 +361,7 @@ locals {
   clearml_webserver_subdomain  = "app.clearml"
   clearml_fileserver_subdomain = "files.clearml"
   clearml_apiserver_subdomain  = "api.clearml"
+
   clearml-prefix               = "clearml-clearml-server-cloud-ready"
   clearml_webserver            = "${local.clearml-prefix}-webserver"
   clearml_fileserver           = "${local.clearml-prefix}-fileserver"
@@ -456,3 +457,34 @@ resource "kubernetes_manifest" "clearml-api" {
     }
   }
 }
+
+resource "kubernetes_manifest" "grafana-route" {
+  provider = kubernetes-alpha
+
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "IngressRoute"
+    metadata = {
+      name      = "grafana"
+      namespace = var.namespace
+    }
+    spec = {
+      entryPoints = ["websecure"]
+      routes = [
+        {
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`) && PathPrefix(`/monitoring/`)"
+          services = [
+            {
+              name      = "grafana" #local.grafana
+              port      = 80
+              namespace = var.namespace
+            }
+          ]
+        }
+      ]
+      tls = local.tls
+    }
+  }
+}
+
