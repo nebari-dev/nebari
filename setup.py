@@ -50,7 +50,6 @@ setup(
             "diagrams",
             "jhub-client",
         ],
-        "aws": ["boto3==1.17.98"],
     },
     include_package_data=True,
     entry_points={"console_scripts": ["qhub = qhub.__main__:main"]},

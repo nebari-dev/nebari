@@ -1,9 +1,36 @@
 import logging
 import time
+import pathlib
+import logging
+import argparse
+
+from ruamel import yaml
 
 from qhub.utils import timer, check_cloud_credentials
 
-logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+def main():
+    parser = argparse.ArgumentParser(description='Force Destroy AWS environment.')
+    parser.add_argument("-c", "--config", help="qhub configuration", required=True)
+    args = parser.parse_args()
+
+    handle_force_destroy(args)
+
+
+def handle_force_destroy(args):
+    config_filename = pathlib.Path(args.config)
+    if not config_filename.is_file():
+        raise ValueError(
+            f"passed in configuration filename={config_filename} must exist"
+        )
+
+    with config_filename.open() as f:
+        config = yaml.safe_load(f.read())
+
+    # Don't verify(config) in case the schema has changed - just pick out the important bits and tear down
+
+    force_destroy_configuration(config)
 
 
 def parse_arn(arn):
@@ -27,9 +54,9 @@ def parse_arn(arn):
 
 
 def force_destroy_configuration(config):
-    logger.info("""FORCE Removing all infrastructure (not using terraform).""")
+    logging.info("""FORCE Removing all infrastructure (not using terraform).""")
 
-    with timer(logger, "destroying QHub"):
+    with timer(logging, "destroying QHub"):
         # 01 Check we have cloud details we need
         check_cloud_credentials(config)
 
@@ -53,7 +80,7 @@ def force_destroy_configuration(config):
                 "amazon_web_services.region must exist in qhub-config.yaml"
             )
 
-        logger.info(f"Remove AWS project {project_name} in region {region}")
+        logging.info(f"Remove AWS project {project_name} in region {region}")
 
         env = config.get("namespace", "dev").strip()
 
@@ -62,7 +89,7 @@ def force_destroy_configuration(config):
             import boto3
         except ImportError:
             raise ValueError(
-                "Please ensure boto3 package is installed using: pip install qhub[aws]"
+                "Please ensure boto3 package is installed using: pip install boto3==1.17.98"
             )
 
         restag = boto3.client("resourcegroupstaggingapi", region_name=region)
@@ -151,9 +178,9 @@ def force_destroy_configuration(config):
             de_arned = parse_arn(r["ResourceARN"])
             t = f"{de_arned['service']}-{de_arned['resource_type']}"
             type_groups.setdefault(t, []).append(de_arned)
-            logger.info(r["ResourceARN"])
+            logging.info(r["ResourceARN"])
 
-        logger.info([(k, len(v)) for k, v in type_groups.items()])
+        logging.info([(k, len(v)) for k, v in type_groups.items()])
 
         # Order
         priority_types = (
@@ -174,7 +201,7 @@ def force_destroy_configuration(config):
         )
 
         for pt in priority_types:
-            logger.info(f"Inspect {pt}")
+            logging.info(f"Inspect {pt}")
             for r in type_groups.get(pt, []):
                 if pt == "eks-nodegroup":
                     nodegroup_resource = r["resource"].split("/")
@@ -182,7 +209,7 @@ def force_destroy_configuration(config):
                     cluster_name = nodegroup_resource[0]
                     nodegroup_name = nodegroup_resource[1]
 
-                    logger.info(f"Delete {nodegroup_name} on cluster {cluster_name}")
+                    logging.info(f"Delete {nodegroup_name} on cluster {cluster_name}")
 
                     client = boto3.client("eks", region_name=region)
                     client.delete_nodegroup(
@@ -190,7 +217,7 @@ def force_destroy_configuration(config):
                     )
 
                 elif pt == "eks-cluster":
-                    logger.info(f"Delete EKS cluster {r['resource']}")
+                    logging.info(f"Delete EKS cluster {r['resource']}")
 
                     client = boto3.client("eks", region_name=region)
 
@@ -205,29 +232,29 @@ def force_destroy_configuration(config):
                 elif pt == "elasticloadbalancing-loadbalancer":
                     client = boto3.client("elb", region_name=region)
 
-                    logger.info(f"Inspect Load balancer {r['resource']}")
+                    logging.info(f"Inspect Load balancer {r['resource']}")
 
-                    logger.info(f"Delete Load balancer {r['resource']}")
+                    logging.info(f"Delete Load balancer {r['resource']}")
                     response = client.delete_load_balancer(
                         LoadBalancerName=r["resource"]
                     )
 
                 elif pt == "ec2-route-table":
-                    logger.info(f"Inspect route table {r['resource']}")
+                    logging.info(f"Inspect route table {r['resource']}")
                     ec2 = boto3.resource("ec2", region_name=region)
                     route_table = ec2.RouteTable(r["resource"])
 
                     for assoc in route_table.associations:
-                        logger.info(f"Delete route table assoc {assoc.id}")
+                        logging.info(f"Delete route table assoc {assoc.id}")
                         assoc.delete()
 
                     time.sleep(10)
 
-                    logger.info(f"Delete route table {r['resource']}")
+                    logging.info(f"Delete route table {r['resource']}")
                     route_table.delete()
 
                 elif pt == "ec2-subnet":
-                    logger.info(f"Inspect subnet {r['resource']}")
+                    logging.info(f"Inspect subnet {r['resource']}")
                     ec2 = boto3.resource("ec2", region_name=region)
                     subnet = ec2.Subnet(r["resource"])
 
@@ -238,11 +265,11 @@ def force_destroy_configuration(config):
 
                         ni.delete()
 
-                    logger.info(f"Delete subnet {r['resource']}")
+                    logging.info(f"Delete subnet {r['resource']}")
                     subnet.delete(DryRun=False)
 
                 elif pt == "ec2-security-group":
-                    logger.info(f"Inspect security group {r['resource']}")
+                    logging.info(f"Inspect security group {r['resource']}")
                     ec2 = boto3.resource("ec2", region_name=region)
                     security_group = ec2.SecurityGroup(r["resource"])
 
@@ -256,30 +283,30 @@ def force_destroy_configuration(config):
                             DryRun=False, IpPermissions=[ipperms]
                         )
 
-                    logger.info(f"Delete security group {r['resource']}")
+                    logging.info(f"Delete security group {r['resource']}")
                     security_group.delete(DryRun=False)
 
                 elif pt == "ec2-internet-gateway":
-                    logger.info(f"Inspect internet gateway {r['resource']}")
+                    logging.info(f"Inspect internet gateway {r['resource']}")
 
                     ec2 = boto3.resource("ec2", region_name=region)
                     internet_gateway = ec2.InternetGateway(r["resource"])
 
                     for attach in internet_gateway.attachments:
-                        logger.info(f"Inspect IG attachment {attach['VpcId']}")
+                        logging.info(f"Inspect IG attachment {attach['VpcId']}")
                         if attach.get("State", "") == "available":
-                            logger.info(f"Detach from VPC {attach['VpcId']}")
+                            logging.info(f"Detach from VPC {attach['VpcId']}")
                             internet_gateway.detach_from_vpc(VpcId=attach["VpcId"])
 
                     time.sleep(10)
 
-                    logger.info(f"Delete internet gateway {r['resource']}")
+                    logging.info(f"Delete internet gateway {r['resource']}")
                     internet_gateway.delete(DryRun=False)
 
                 elif pt == "elasticfilesystem-file-system":
                     client = boto3.client("efs", region_name=region)
 
-                    logger.info(f"Delete efs {r['resource']}")
+                    logging.info(f"Delete efs {r['resource']}")
 
                     mts = client.describe_mount_targets(FileSystemId=r["resource"])
 
@@ -294,27 +321,27 @@ def force_destroy_configuration(config):
                     # )
 
                 elif pt == "ec2-vpc":
-                    logger.info(f"Inspect VPC {r['resource']}")
+                    logging.info(f"Inspect VPC {r['resource']}")
 
                     ec2 = boto3.resource("ec2", region_name=region)
 
                     vpc = ec2.Vpc(r["resource"])
 
                     # for cidr_assoc in vpc.cidr_block_association_set:
-                    #    logger.info(cidr_assoc)
+                    #    logging.info(cidr_assoc)
                     #    r = vpc.disassociate_subnet_cidr_block(
                     #        AssociationId=cidr_assoc['AssociationId']
                     #    )
-                    #    logger.info(r)
+                    #    logging.info(r)
 
-                    logger.info(f"Delete VPC {r['resource']}")
+                    logging.info(f"Delete VPC {r['resource']}")
                     vpc.delete()
 
                 elif pt == "ecr-repository":
-                    logger.info(f"Inspect ECR {r['resource']}")
+                    logging.info(f"Inspect ECR {r['resource']}")
                     client = boto3.client("ecr", region_name=region)
 
-                    logger.info(f"Delete ecr {r['account']} / {r['resource']}")
+                    logging.info(f"Delete ecr {r['account']} / {r['resource']}")
 
                     response = response = client.delete_repository(
                         registryId=r["account"],
@@ -323,10 +350,10 @@ def force_destroy_configuration(config):
                     )
 
                 elif pt == "s3-None":
-                    logger.info(f"Inspect S3 {r['resource']}")
+                    logging.info(f"Inspect S3 {r['resource']}")
                     s3 = boto3.resource("s3", region_name=region)
 
-                    logger.info(f"Delete s3 {r['resource']}")
+                    logging.info(f"Delete s3 {r['resource']}")
 
                     bucket = s3.Bucket(r["resource"])
 
@@ -337,31 +364,35 @@ def force_destroy_configuration(config):
                     response = bucket.delete()
 
                 elif pt == "dynamodb-table":
-                    logger.info(f"Inspect DynamoDB {r['resource']}")
+                    logging.info(f"Inspect DynamoDB {r['resource']}")
 
                     client = boto3.client("dynamodb", region_name=region)
 
-                    logger.info(f"Delete DynamoDB {r['resource']}")
+                    logging.info(f"Delete DynamoDB {r['resource']}")
 
                     response = client.delete_table(TableName=r["resource"])
 
                 elif pt == "resource-groups-group":
-                    logger.info(f"Inspect Resource Group {r['resource']}")
+                    logging.info(f"Inspect Resource Group {r['resource']}")
 
                     client = boto3.client("resource-groups", region_name=region)
 
-                    logger.info(f"Delete Resource Group {r['resource']}")
+                    logging.info(f"Delete Resource Group {r['resource']}")
 
                     response = client.delete_group(Group=r["arn"])
 
                 elif pt == "iam-role":
-                    logger.info(f"Inspect IAM Role {r['resource']}")
+                    logging.info(f"Inspect IAM Role {r['resource']}")
                     iam = boto3.resource("iam")
                     role = iam.Role(r["resource"])
 
                     for policy in role.attached_policies.all():
-                        logger.info(f"Detach Role policy {policy.arn}")
+                        logging.info(f"Detach Role policy {policy.arn}")
                         response = role.detach_policy(PolicyArn=policy.arn)
 
-                    logger.info(f"Delete IAM Role {r['resource']}")
+                    logging.info(f"Delete IAM Role {r['resource']}")
                     role.delete()
+
+
+if __name__ == "__main__":
+    main()
