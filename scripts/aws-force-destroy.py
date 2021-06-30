@@ -1,7 +1,6 @@
 import logging
 import time
 import pathlib
-import logging
 import argparse
 
 from ruamel import yaml
