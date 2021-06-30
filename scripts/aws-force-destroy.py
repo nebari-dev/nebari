@@ -10,8 +10,9 @@ from qhub.utils import timer, check_cloud_credentials
 
 logging.basicConfig(level=logging.INFO)
 
+
 def main():
-    parser = argparse.ArgumentParser(description='Force Destroy AWS environment.')
+    parser = argparse.ArgumentParser(description="Force Destroy AWS environment.")
     parser.add_argument("-c", "--config", help="qhub configuration", required=True)
     args = parser.parse_args()
 
