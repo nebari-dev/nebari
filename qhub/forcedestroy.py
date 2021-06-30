@@ -232,7 +232,10 @@ def force_destroy_configuration(config):
                     subnet = ec2.Subnet(r["resource"])
 
                     for ni in subnet.network_interfaces.all():
+                        ni.load()
+                        # But can only detach if attached...
                         ni.detach(DryRun=False, Force=True)
+
                         ni.delete()
 
                     logger.info(f"Delete subnet {r['resource']}")
