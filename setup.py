@@ -41,14 +41,16 @@ setup(
         "pynacl",
         "bcrypt",
     ],
-    extras_require={"dev": [
-        "flake8==3.8.4",
-        "black==20.8b1",
-        "twine",
-        "pytest",
-        "diagrams",
-        "jhub-client",
-    ]},
+    extras_require={
+        "dev": [
+            "flake8==3.8.4",
+            "black==20.8b1",
+            "twine",
+            "pytest",
+            "diagrams",
+            "jhub-client",
+        ],
+    },
     include_package_data=True,
     entry_points={"console_scripts": ["qhub = qhub.__main__:main"]},
     project_urls={
