@@ -20,9 +20,10 @@ def patch_dask_gateway_extra_config(config):
     directory.
 
     """
+    namespace = config["namespace"]
     conda_store_volume = {
         "name": "conda-store",
-        "persistentVolumeClaim": {"claimName": "conda-store-dev-share"},
+        "persistentVolumeClaim": {"claimName": f"conda-store-{namespace}-share"},
     }
     extra_pod_config = {"volumes": [conda_store_volume]}
 
