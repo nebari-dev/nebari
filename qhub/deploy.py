@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 from subprocess import CalledProcessError
 
@@ -42,6 +43,9 @@ def guided_install(
 ):
     # 01 Check Environment Variables
     check_cloud_credentials(config)
+    # Check that secrets required for terraform
+    # variables are set as required
+    check_secrets(config)
 
     # 02 Create terraform backend remote state bucket
     # backwards compatible with `qhub-config.yaml` which
@@ -127,3 +131,32 @@ def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
 
     for dns_record in dns_records:
         update_record(zone_name, dns_record, record_type, ip_or_hostname)
+
+
+def check_secrets(config):
+    """
+    Checks that the appropriate variables are set based on the current config.
+    These variables are prefixed with TF_VAR_ and are used to populate the
+    corresponding variables in the terraform deployment. e.g.
+    TF_VAR_prefect_token sets the prefect_token variable in Terraform. These
+    values are set in the terraform state but are not leaked when the
+    terraform render occurs.
+    """
+
+    missing_env_vars = []
+
+    # Check prefect integration set up.
+    if "prefect" in config:
+        var = "TF_VAR_prefect_token"
+        if not var in os.environ:
+            missing_env_vars.append(var)
+
+
+
+    if missing_env_vars:
+        raise EnvironmentError(
+            "Some environment variables used to propagate secrets to the "
+            "terraform deployment were not set. Please set these before "
+            f"continuing: {', '.join(missing_env_vars)}"
+        )
+
