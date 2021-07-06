@@ -95,12 +95,12 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
           }
           env {
             name  = "AUTH_HOST"
-            value = "${var.external-url}"
+            value = var.external-url
           }
 
           env {
             name  = "COOKIE_DOMAIN"
-            value = "${var.external-url}"
+            value = var.external-url
           }
 
           port {
