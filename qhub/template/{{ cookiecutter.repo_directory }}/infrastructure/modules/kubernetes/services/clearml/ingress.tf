@@ -8,6 +8,12 @@ locals {
   clearml_apiserver            = "${local.clearml-prefix}-apiserver"
 
   forward_auth_middleware      = "traefik-forward-auth"
+  clearml_middleware = [
+    {
+      name = local.forward_auth_middleware
+      namespace = var.namespace
+    }
+  ]
 }
 
 resource "kubernetes_manifest" "clearml-app" {
@@ -26,12 +32,7 @@ resource "kubernetes_manifest" "clearml-app" {
         {
           kind  = "Rule"
           match = "Host(`${local.clearml_webserver_subdomain}.${var.external-url}`)"
-          middlewares = [
-            {
-              name      = local.forward_auth_middleware
-              namespace = var.namespace
-            }
-          ]
+          middlewares = local.clearml_middleware
           services = [
             {
               name      = local.clearml_webserver
@@ -62,6 +63,7 @@ resource "kubernetes_manifest" "clearml-files" {
         {
           kind  = "Rule"
           match = "Host(`${local.clearml_fileserver_subdomain}.${var.external-url}`)"
+          middlewares = local.clearml_middleware
           services = [
             {
               name      = local.clearml_fileserver
@@ -92,6 +94,7 @@ resource "kubernetes_manifest" "clearml-api" {
         {
           kind  = "Rule"
           match = "Host(`${local.clearml_apiserver_subdomain}.${var.external-url}`)"
+          middlewares = local.clearml_middleware
           services = [
             {
               name      = local.clearml_apiserver
