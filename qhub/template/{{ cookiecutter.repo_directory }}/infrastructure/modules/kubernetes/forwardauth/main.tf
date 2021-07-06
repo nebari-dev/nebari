@@ -93,6 +93,15 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
             name  = "LOG_LEVEL"
             value = "trace"
           }
+          env {
+            name  = "AUTH_HOST"
+            value = var.external-url
+          }
+
+          env {
+            name  = "COOKIE_DOMAIN"
+            value = var.external-url
+          }
 
           port {
             container_port = 4181

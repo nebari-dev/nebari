@@ -24,5 +24,4 @@ variable "external-url" {
 
 variable "tls" {
   description = "TLS configuration"
-  type        = object({})
 }
