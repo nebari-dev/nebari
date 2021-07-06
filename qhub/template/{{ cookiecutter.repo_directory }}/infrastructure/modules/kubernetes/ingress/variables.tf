@@ -32,7 +32,7 @@ variable "traefik-image" {
 
 variable "loglevel" {
   description = "traefik log level"
-  default     = "DEBUG"
+  default     = "WARN"
 }
 
 variable "enable-certificates" {
