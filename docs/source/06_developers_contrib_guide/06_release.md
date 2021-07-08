@@ -1,5 +1,31 @@
 # Release Process for QHub
 
+## Pre-release Checklist
+
+Currently Qhub is not fully automated. This makes it especially
+important to manually check the features. This is a minimal set of
+features that are guaranteed with each release.
+
+Validate successful `qhub deploy` and `qhub destroy` of QHub on all
+providers.
+
+ - [ ] Azure
+ - [ ] Amazon Web Services
+ - [ ] Digital Ocean
+ - [ ] Google Cloud Platform
+ - [ ] Existing Kubernetes Cluster
+
+Check services of Qhub on each.
+ - [ ] Login and launch jupyterlab notebook and able to run basic python calculations
+ - [ ] Launch dask-gateway
+    - able to scale to 2 workers
+    - run basic dask calculation
+    - view dask gateway dashboard
+ - [ ] Conda-store environments are created and available in jupyterlab notebook as kernels (dask, dashboard)
+ - [ ] Create basic panel dashboard
+
+## Release
+
 In order to create a release:
 
 1. Make sure the `RELEASE.md` is up to date with change, bug fixes,
