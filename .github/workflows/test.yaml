@@ -7,6 +7,9 @@ on:
       - '**'
     tags:
       - 'v*'
+    paths:
+      - "!docs/**"
+      - "!*.md"
 
 jobs:
   test-general:
