@@ -1,6 +1,7 @@
-# End User FAQ
+# User Frequently Asked Questions
 
 ## Environments
+
 1. How are QHub conda user environments created? Who creates them?  
 The environment specifications are located in `qhub_config.yml` in the deployment repo. These are served to the QHub deployment using [conda-store](https://conda-store.readthedocs.io/). When you manage your environments in this way you get all of the benefits of environment versioning that QHub does under the hood, including future features such as convenient environment rollback and environment encapsulation in containers.  
 

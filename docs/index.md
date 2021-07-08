@@ -1,5 +1,6 @@
 # QHub
-![quansight_logo](source/meta_images/qhub_logo.png)
+
+![quansight_logo](source/images/qhub_logo.png)
 
 [![Python version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://pypi.org/project/qhub/)
 [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
@@ -10,90 +11,67 @@
 Open source tooling for data science research, development, and deployment.
 
 ## What is Qhub?
-Integrated data science environment designed and developed by scientists at [**Quansight**](https://www.quansight.com/).
-It enables teams to build and maintain a cost effective and scalable compute/data science platform in the Cloud, providing
-an [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) platform that streamlines
-the deployment of data science infrastructure.
 
-Contents:
+Integrated data science environment designed and developed by
+scientists at [**Quansight**](https://www.quansight.com/).  It enables
+teams to build and maintain a cost effective and scalable compute/data
+science platform in the Cloud, providing an [**Infrastructure as
+Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) platform
+that streamlines the deployment of data science infrastructure. 
+
+## Contents
 
 ```{toctree}
 :maxdepth: 1
 :caption: Introduction
 
-source/01_intro/01_intro.md
+source/introduction.md
 ```
 
 ```{toctree}
 :maxdepth: 1
-:caption: Get Started
+:caption: Installation
 
-source/02_get_started/01_installation.md
-source/02_get_started/02_setup.md
-source/02_get_started/03_usage.md
-source/02_get_started/04_configuration.md
-source/02_get_started/05_management.md
-source/02_get_started/06_troubleshooting.md
-source/02_get_started/07_support.md
-source/02_get_started/08_upgrade.md
-source/02_get_started/09_end_user_faq.md
+source/installation/installation.md
+source/installation/setup.md
+source/installation/usage.md
+source/installation/configuration.md
+source/installation/management.md
 ```
 
 ```{toctree}
 :maxdepth: 1
-:caption: Tutorials
+:caption: User Guide
 
-source/03_tutorials_and_samples/1_project_setup_tutorial.md
-source/03_tutorials_and_samples/03_dask_gateway_usage.md
+source/user_guide/getting_started.md
+source/user_guide/dask_gateway.md
+source/user_guide/faq.md
 ```
 
 ```{toctree}
 :maxdepth: 1
-:caption: How-To Guides
+:caption: Administration Guide
 
-source/04_how_to_guides/1_qhub-aws-deploy_guide.md
-source/04_how_to_guides/2_qhub-gcp-deploy_guide.md
-source/04_how_to_guides/3_qhub-azure-deploy_guide.md
-source/04_how_to_guides/4_qhub-do-deploy_guide.md
-source/04_how_to_guides/5_system_backup.md
-source/04_how_to_guides/6_preemptible_instance_with_qhub.md
-source/04_how_to_guides/7_qhub_gpu.md
-source/04_how_to_guides/8_login_qhub_training.md
-```
-
-```{toctree}
-:maxdepth: 1
-:caption: Reference
-
-source/05_reference/01_qhub_infrastructure.md
-source/05_reference/02_system_maintenance.md
-source/05_reference/03_base_cost.md
+source/admin_guide/backup.md
+source/admin_guide/cost.md
+source/admin_guide/troubleshooting.md
+source/admin_guide/upgrade.md
+source/admin_guide/gpu.md
+source/admin_guide/preemptible-spot-instances.md
+source/admin_guide/system_maintenance.md
+source/admin_guide/clearml.md
+source/admin_guide/prefect.md
 ```
 
 ```{toctree}
 :maxdepth: 1
 :caption: Development
 
-source/06_developers_contrib_guide/01_architecture.md
-source/06_developers_contrib_guide/02_adv_docs.md
-source/06_developers_contrib_guide/03_contrib_guidelines.md
-source/06_developers_contrib_guide/04_tests.md
-source/06_developers_contrib_guide/05_changelog.md
-source/06_developers_contrib_guide/06_release.md
+source/development/architecture.md
+source/development/contribution.md
+source/development/release.md
+source/development/testing.md
+source/development/changelog.md
+source/development/logo.md
 ```
 
-```{toctree}
-:maxdepth: 1
-:caption: Resources
-
-source/07_resources/1_logos.md
-source/07_resources/2_glossary.md
-```
-
-```{toctree}
-:maxdepth: 1
-:caption: Integrations
-
-source/08_integrations/1_prefect.md
-source/08_integrations/2_clearml.md
-```

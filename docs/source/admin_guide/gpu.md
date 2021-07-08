@@ -1,16 +1,17 @@
 # GPUs on QHub
 
-Having access to  GPUs is of prime importance for speeding up many computations
-by several orders of magnitude. QHub provides a way to achieve that, we will go
-through achieving that for each Cloud provider.
+Having access to GPUs is of prime importance for speeding up many
+computations by several orders of magnitude. QHub provides a way to
+achieve that, we will go through achieving that for each Cloud
+provider.
 
 ## Clouds
 
 ### Google Cloud Platform
 
-By default the quota to spin up GPUs on GCP is 0. Make sure you have requested
-GCP Support to increase quota of allowed GPUs for your billing account to be the
-number of GPUs you need access to.
+By default the quota to spin up GPUs on GCP is 0. Make sure you have
+requested GCP Support to increase quota of allowed GPUs for your
+billing account to be the number of GPUs you need access to.
 
 See [GCP Pre-requisites here](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#requirements)
 
@@ -18,9 +19,11 @@ Here are the changes needed in your `qhub-config.yml` file to get GPUs working w
 
 #### 1. Add GPU node group
 
-Add a node group for GPU instance in the `node_groups` section of `google_cloud_platform` section,
-and under the `guest_accelerators` section add the name of the GPU. A comprehensive list of GPU
-types can be found in at the Official GCP docs here: https://cloud.google.com/compute/docs/gpus
+Add a node group for GPU instance in the `node_groups` section of
+`google_cloud_platform` section, and under the `guest_accelerators`
+section add the name of the GPU. A comprehensive list of GPU types can
+be found in at the Official GCP docs here:
+https://cloud.google.com/compute/docs/gpus
 
 An example of getting GPUs on GCP:
 
@@ -79,7 +82,9 @@ profiles:
 
 ### Amazon Web Services
 
-Here are the changes needed in your `qhub-config.yml` file to get GPUs working with AWS:
+Here are the changes needed in your `qhub-config.yml` file to get GPUs
+working with AWS. Unlike GCP gpus are specified in the instance type
+this is due to how AWS exposes gpus to the user.
 
 #### 1. Add GPU node group
 
@@ -126,7 +131,8 @@ DigitalOcean does not support GPUs at the time of writing this.
 
 ### Azure
 
-Azure does support GPUs in Kubernetes, but QHub doesn't currently have official support for this.
+Azure does support GPUs in Kubernetes, but QHub doesn't currently have
+official support for this.
 
 ## Create conda environment to take advantage of GPUs
 

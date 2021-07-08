@@ -1,4 +1,5 @@
 # Troubleshooting and further setup
+
 This guide aims to provide useful information to developers in the detection and correction of issues within QHub.
 
 ## General Troubleshooting
@@ -61,7 +62,7 @@ Complete the installation to follow along.
 By default, K9s starts with the standard directory that is set as the
 context (in this case Minikube). To view all the current process press `0`:
 
-![Image of K9s termina UI](../meta_images/k9s_UI.png)
+![Image of K9s termina UI](../images/k9s_UI.png)
 
 > **NOTE**: In some circumstances you will be confronted with the
   need to inspect any services launched by your cluster at your ‘localhost’. For instance, if your cluster has problem

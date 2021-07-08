@@ -3,7 +3,8 @@
 The configuration file is split into several sections. In this page,
 we detail the requirements necessary for the YAML configuration
 file. The configuration file is always validated by a [pydantic
-schema](https://pydantic-docs.helpmanual.io/) in `qhub/schema.py`. For
+schema](https://pydantic-docs.helpmanual.io/) in
+[qhub/schema.py](https://github.com/Quansight/qhub/blob/main/qhub/schema.py). For
 the ultimate source of truth visit this file though these docs should
 be accurate.
 
@@ -84,8 +85,13 @@ certificate:
 
 To use Let's Encrypt you must specify an email address that let's
 encrypt will associate the generated certificate with and whether to
-use the [staging server](https://acme-staging-v02.api.letsencrypt.org/directory) or [production server](https://acme-v02.api.letsencrypt.org/directory). In general you
-should use the production server, as seen below.
+use the [staging
+server](https://acme-staging-v02.api.letsencrypt.org/directory) or
+[production
+server](https://acme-v02.api.letsencrypt.org/directory). In general
+you should use the production server, as seen below. Please note that
+let's encrypt heavily rate limits their production endpoint and
+provisioning https certificates can often fail due to this limit.
 
 ```yaml
 certificate:

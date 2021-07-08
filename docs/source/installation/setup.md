@@ -1,23 +1,31 @@
 # Setup Initialization
 
-QHub handles the initial setup and management of configurable data science environments, allowing to users to attain
-seamless deployment with Github Actions.
+QHub handles the initial setup and management of configurable data
+science environments, allowing to users to attain seamless deployment
+with Github Actions.
 
-QHub can be installed on a bare-metal server using HPC, on a CLoud provider or even locally for testing purposes.
-Analyse the options below to discover what option suits best your specific use case.
+QHub can be installed on a bare-metal server using HPC, on a CLoud
+provider or even locally for testing purposes.  Analyse the options
+below to discover what option suits best your specific use case.
 
-## Local Deployment
+## Local Deployment or Existing Kubernetes Cluster
+
 The local version is recommended for testing QHub's components due to
 its simplicity. Choose the local mode if:
+
 - You already have Kubernetes clusters
 - You want to test these Kubernetes clusters
 - You have available local compute setup
-- You want to try out QHub with a quick-install to see how it works, without setting up environment variables
+- You want to try out QHub with a quick-install to see how it works,
+  without setting up environment variables
 
-You should choose another installation option if you are starting from scratch (i.e., no clusters yet) and aiming to
-have a production environment.
+You should choose another installation option if you are starting from
+scratch (i.e., no clusters yet) and aiming to have a production
+environment.
 
-Found your match? Head over to the [Local install docs](../06_developers_contrib_guide/04_tests.md#local-testing) for more details.
+Found your match? Head over to the [Local install
+docs](../development/testing.md#local-testing) for
+more details.
 
 ## HPC Deployment
 
@@ -26,7 +34,7 @@ The [QHub HPC](https://hpc.qhub.dev/en/latest/) should be your choice if:
 - You have existing infrastructure already available
 - You expect that your infrastructure will **not** exceed the existing resources capabilities
 > NOTE: Although it is possible to deploy QHub HPC on the Cloud, it is not generally recommended due to possible high
-> costs. For more information, check out the [base cost](../05_reference/03_base_cost.md) section of the docs.
+> costs. For more information, check out the [base cost](../admini/03_base_cost.md) section of the docs.
 
 ## Kubernetes Deployment
 
@@ -213,15 +221,15 @@ To generate a token [follow these steps](https://developers.cloudflare.com/api/t
 
 - Under `Profile`, select the `API Tokens` menu and click on `Create API Token`.
 - On `Edit zone DNS` click on `Use Template`.
-![screenshot Cloudflare edit Zone DNS](../meta_images/cloudflare_auth_1.png)
+![screenshot Cloudflare edit Zone DNS](../images/cloudflare_auth_1.png)
 - Configure `Permissions` such as the image below:
-![screenshot Cloudflare Permissions edit](../meta_images/cloudflare_permissions_2.1.1.png)
+![screenshot Cloudflare Permissions edit](../images/cloudflare_permissions_2.1.1.png)
 - On `Account Resources` set the configuration to include your desired account
-![screenshot Cloudflare account resources](../meta_images/cloudflare_account_resources_scr.png)
+![screenshot Cloudflare account resources](../images/cloudflare_account_resources_scr.png)
 - On `Zone Resources` set it to `Include | Specific zone` and your domain name
-![screenshot Cloudflare account resources](../meta_images/cloudflare_zone_resources.png)
+![screenshot Cloudflare account resources](../images/cloudflare_zone_resources.png)
 - Click continue to summary
-![screenshot Cloudflare summary](../meta_images/cloudflare_summary.png)
+![screenshot Cloudflare summary](../images/cloudflare_summary.png)
 - Click on the `Create Token` button and set the token generated as an environment variable on your machine.
 
 Finally, set the environment variable such as:

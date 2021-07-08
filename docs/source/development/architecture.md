@@ -38,7 +38,7 @@ QHub comes with staging and production environments, as well as JupyterHub deplo
 NFS shares files directly from a container in a Kubernetes Pod, and sets up a [**Kubernetes Persistent Volume**](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) accessed via NFS. Kubernetes' built‑in configuration for HTTP load balancing [**Ingress**](https://kubernetes.io/docs/concepts/services-networking/ingress/) defines and controls the rules for external connectivity to Kubernetes services. Users who need to provide external access to their Kubernetes services create an Ingress resource that defines rules.
 
 QHub streamlines and manages all the Kubernetes architecture detailed above and delivers a smooth deployment process to its users through its intuitive interface.
-![QHub_Architecture](../meta_images/high_level_architecture.png)
+![QHub_Architecture](../images/high_level_architecture.png)
 
 QHub architecture and features allows you to:
 

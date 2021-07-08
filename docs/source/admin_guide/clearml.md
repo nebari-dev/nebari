@@ -1,12 +1,13 @@
 # ClearML
 
 ClearML integration comes built in with QHub, here is how you would
-enable this integration.  Currently ClearML integration is only supported on Google Cloud Platform.
+enable this integration.  Currently ClearML integration is only
+supported on Google Cloud Platform.
 
 ## Setting subdomain DNS Record for ClearML
 
-ClearML components requires subdomains, you would need to set an A record
-for the following subdomains on your QHub.
+ClearML components requires subdomains, you would need to set a CNMAE
+or A record for the following subdomains on your QHub.
 
 - app.clearml.your-qhub-domain.com
 - files.clearml.your-qhub-domain.com

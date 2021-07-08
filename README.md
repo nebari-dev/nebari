@@ -37,7 +37,7 @@ technologies to have your project successfully deployed.
 ### Cloud Providers
 QHub offers out-of-the-box support for [Digital Ocean](https://www.digitalocean.com/), Amazon [AWS](https://aws.amazon.com/), [GCP](https://cloud.google.com/ "Google Cloud Provider"), and Microsoft [Azure](https://azure.microsoft.com/en-us/).
 
-![High-level illustration of QHub architecture](docs/source/meta_images/qhub-cloud_architecture.png)
+![High-level illustration of QHub architecture](docs/source/images/qhub-cloud_architecture.png)
 
 For more details, check out the release [blog post](https://www.quansight.com/post/announcing-qhub).
 
