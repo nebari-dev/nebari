@@ -144,6 +144,25 @@ security:
       gid: 102
 ```
 
+### Omitting sensitive values
+
+If you wish to avoid storing secrets etc. directly in the config yaml file you
+can instead set the values in environment variables. This substitution is
+triggered by setting config values to "QHUB_SECRET_" followed by the
+environment variable name. For example, you could set the environment variables
+"github_client_id" and "github_client_key" and write the following in your config
+file:
+
+```yaml
+security:
+  authentication:
+    type: GitHub
+    config:
+      client_id: QHUB_SECRET_github_client_id
+      client_secret: QHUB_SECRET_github_client_key
+      oauth_callback_url: https://do.qhub.dev/hub/oauth_callback
+```
+
 ### Authentication
 
 `security.authentication` is for configuring the OAuth and GitHub
