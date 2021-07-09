@@ -9,7 +9,7 @@ variable "namespace" {
 }
 
 variable "prefect_token" {
-  type    = string
+  type = string
 }
 
 variable "image" {
