@@ -150,7 +150,7 @@ If you wish to avoid storing secrets etc. directly in the config yaml file you
 can instead set the values in environment variables. This substitution is
 triggered by setting config values to "QHUB_SECRET_" followed by the
 environment variable name. For example, you could set the environment variables
-github_client_id and github_client_key and write the following in your config
+"github_client_id" and "github_client_key" and write the following in your config
 file:
 
 ```yaml
