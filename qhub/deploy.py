@@ -143,9 +143,9 @@ def check_secrets(config):
     missing_env_vars = []
 
     # Check prefect integration set up.
-    if "prefect" in config:
+    if "prefect" in config and config["prefect"]["enabled"]:
         var = "TF_VAR_prefect_token"
-        if not var in os.environ:
+        if var not in os.environ:
             missing_env_vars.append(var)
 
     if missing_env_vars:
