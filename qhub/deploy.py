@@ -62,7 +62,10 @@ def guided_install(
     terraform.init(directory="infrastructure")
     terraform.apply(
         directory="infrastructure",
-        targets=["module.kubernetes", "module.kubernetes-initialization",],
+        targets=[
+            "module.kubernetes",
+            "module.kubernetes-initialization",
+        ],
     )
 
     # 04 Create qhub initial state (up to nginx-ingress)
