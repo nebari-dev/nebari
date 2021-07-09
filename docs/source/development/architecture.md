@@ -1,6 +1,10 @@
 # Developer docs
 
-QHub admins are **DevOps engineers**, **system administrators**, **scientists**, and **network architects** who are responsible for the critical infrastructure that data scientists and engineers need to thrive. QHub is bundled with features that make installation easy while providing the ability to scale with your organization and data.
+QHub admins are **DevOps engineers**, **system administrators**,
+**scientists**, and **network architects** who are responsible for the
+critical infrastructure that data scientists and engineers need to
+thrive. QHub is bundled with features that make installation easy
+while providing the ability to scale with your organization and data.
 
 > The content below is particularly for QHub producers, and those looking to learn more about the QHub architecture.
 

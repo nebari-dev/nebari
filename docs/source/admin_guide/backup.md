@@ -9,13 +9,14 @@ This specific guide will show how to do this on a cluster on AWS
 
 ## Pre-requisites
 
--   [Install kubectl](<https://kubernetes.io/docs/tasks/tools/>)
--   [Install AWS CLI](<https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html>)
+ - [Install kubectl](<https://kubernetes.io/docs/tasks/tools/>)
+ - [Install AWS CLI](<https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html>)
 
 ## Kubectl configuration
-To setup kubectl, first we must obtain the name of
-the cluster. So long as you know the region your current cluster is
-deployed in, this is straightforward:
+
+To setup kubectl, first we must obtain the name of the cluster. So
+long as you know the region your current cluster is deployed in, this
+is straightforward:
 
 ```shell
 aws eks list-clusters --region=us-west-2
@@ -65,9 +66,8 @@ With the name of the nfs volume saved in the file, run:
 kubectl apply -f pod.yaml -n dev
 ```
 
-If you have a namespace other than the default dev, replace `dev` with your namespace.
-
-To get a shell to this running pod, run:
+If you have a namespace other than the default dev, replace `dev` with
+your namespace. To get a shell to this running pod, run:
 
 ```shell
 kubectl exec -n dev --stdin --tty volume-debugger-ubuntu -- /bin/bash
@@ -77,7 +77,8 @@ Again replacing the `dev` namespace as needed.
 
 ## Installations
 
-The pod we spun up is a basic pod, so several apt packages must be installed. The following commands will install them:
+The pod we spun up is a basic pod, so several apt packages must be
+installed. The following commands will install them:
 
 ```shell
 apt update
@@ -108,9 +109,9 @@ tar -cvf <custom_name>.tar /home
 ```
 
 My preferred naming scheme includes a year-month-day,
-e.g. `2021-04-23<sub>home</sub><sub>backup.tar</sub>`. This helps when multiple backups
-are used. This step will take several minutes depending on the size of
-the home directories.
+e.g. `2021-04-23<sub>home</sub><sub>backup.tar</sub>`. This helps when
+multiple backups are used. This step will take several minutes
+depending on the size of the home directories.
 
 ## Upload to block storage
 Once this is complete, the AWS CLI can be used to upload the tar file to s3.
@@ -119,8 +120,9 @@ Once this is complete, the AWS CLI can be used to upload the tar file to s3.
 aws s3 cp 2021-04-23.tar s3://<your_bucket_name>/backups/2021-04-23.tar
 ```
 
-Replacing your <your<sub>bucket</sub><sub>name</sub>> with a bucket you have created. If
-you don't have an existing bucket, instructions are here:
+Replacing your <your<sub>bucket</sub><sub>name</sub>> with a bucket
+you have created. If you don't have an existing bucket, instructions
+are here:
 <https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html>
 
 \## Download from block storage and decompress
@@ -147,9 +149,8 @@ cd /data
 tar -xvf 2021-04-23.tar
 ```
 
-By default tar will keep all of the same file permissions as the original files that were tarballed.
-
-That's it! Enjoy.
+By default tar will keep all of the same file permissions as the
+original files that were tarballed. That's it! Enjoy.
 
 ## Google Cloud Provider
 

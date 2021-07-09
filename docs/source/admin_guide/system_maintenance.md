@@ -9,8 +9,8 @@ Pull-Requests.
 
 The docker images used for dask-worker and jupyterlab user
 environments are pulled from a docker container registry. The images
-are built based on the images specified in
-the `image` folder. There are three images that are currently built
+are built based on the images specified in the `image` folder. There
+are three images that are currently built
 
 - jupyterlab :: modification of jupyterlab instances for each user
 - dask-worker :: modification of dask workers and dask scheduler
@@ -148,9 +148,9 @@ takes additional configuration for the scheduler pods and
 workers. Remember similar to assigning node groups to specific
 jupyterlab instances we must get the key for the node pool.
 
-- AWS :: `eks.amazonaws.com/nodegroup`
-- GCP :: `cloud.google.com/gke-nodepool`
-- DO :: `doks.digitalocean.com/node-pool`
+ - AWS :: `eks.amazonaws.com/nodegroup`
+ - GCP :: `cloud.google.com/gke-nodepool`
+ - DO :: `doks.digitalocean.com/node-pool`
 
 Since we are using digital ocean in this example we then need to set the following.
 

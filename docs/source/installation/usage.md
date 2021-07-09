@@ -135,11 +135,12 @@ before modifying the infrastructure, easing the maintenance process.
 To automatically deploy:
 - make changes to the `qhub-config.yaml` file on a new branch.
 - create a pull request (PR) to main.
-- Trigger the deployment by merging the PR. All changes will be automatically applied to the new QHub instance.
+- Trigger the deployment by merging the PR. All changes will be
+  automatically applied to the new QHub instance.
 
 Congratulations, you have now completed your QHub cloud deployment!
 
 Having issues? Head over to our
-[Troubleshooting](../02_get_started/06_troubleshooting.md) section for
-tips on how to debug your QHub. Or try our
-[FAQ](../02_get_started/07_support.md).
+[Troubleshooting](../admin_guide/troubleshooting.md) section for tips
+on how to debug your QHub. Or try our
+[FAQ](../admin_guide/faq.md).
