@@ -62,10 +62,7 @@ def guided_install(
     terraform.init(directory="infrastructure")
     terraform.apply(
         directory="infrastructure",
-        targets=[
-            "module.kubernetes",
-            "module.kubernetes-initialization",
-        ],
+        targets=["module.kubernetes", "module.kubernetes-initialization",],
     )
 
     # 04 Create qhub initial state (up to nginx-ingress)
@@ -151,12 +148,9 @@ def check_secrets(config):
         if not var in os.environ:
             missing_env_vars.append(var)
 
-
-
     if missing_env_vars:
         raise EnvironmentError(
             "Some environment variables used to propagate secrets to the "
             "terraform deployment were not set. Please set these before "
             f"continuing: {', '.join(missing_env_vars)}"
         )
-

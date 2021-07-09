@@ -214,41 +214,43 @@ def set_env_vars_in_config(config):
     """
     private_entries = get_secret_config_entries(config)
     for idx in private_entries:
-        set_qhub_secret(config,idx)
+        set_qhub_secret(config, idx)
 
 
-def get_secret_config_entries(config,config_idx=None,private_entries=None):
+def get_secret_config_entries(config, config_idx=None, private_entries=None):
     output = private_entries or []
     if config_idx is None:
         sub_dict = config
         config_idx = []
     else:
-        sub_dict = get_sub_config(config,config_idx)
+        sub_dict = get_sub_config(config, config_idx)
 
     for key, value in sub_dict.items():
         if type(value) is dict:
-            sub_dict_outputs = get_secret_config_entries(config,[*config_idx,key],private_entries)
-            output = [*output,*sub_dict_outputs]
+            sub_dict_outputs = get_secret_config_entries(
+                config, [*config_idx, key], private_entries
+            )
+            output = [*output, *sub_dict_outputs]
         else:
             if "QHUB_SECRET_" in str(value):
-                output = [*output,[*config_idx, key]]
+                output = [*output, [*config_idx, key]]
     return output
 
 
 def get_sub_config(conf, conf_idx):
-    sub_config = functools.reduce(dict.__getitem__,conf_idx,conf)
+    sub_config = functools.reduce(dict.__getitem__, conf_idx, conf)
     return sub_config
 
 
-def set_sub_config(conf, conf_idx,value):
+def set_sub_config(conf, conf_idx, value):
 
-    get_sub_config(conf,conf_idx[:-1])[conf_idx[-1]] = value
+    get_sub_config(conf, conf_idx[:-1])[conf_idx[-1]] = value
 
 
-def set_qhub_secret(config,idx):
-    placeholder = get_sub_config(config,idx)
+def set_qhub_secret(config, idx):
+    placeholder = get_sub_config(config, idx)
     secret_var = get_qhub_secret(placeholder)
-    set_sub_config(config,idx,secret_var)
+    set_sub_config(config, idx, secret_var)
 
 
 def get_qhub_secret(secret_var):
@@ -261,5 +263,3 @@ def get_qhub_secret(secret_var):
             f" '{env_var}' must be set."
         )
     return val
-
-
