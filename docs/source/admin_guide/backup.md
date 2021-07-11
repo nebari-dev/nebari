@@ -44,14 +44,14 @@ spec:
   volumes:
     - name: volume-to-debug-ubuntu
       persistentVolumeClaim:
-       claimName: <mount-share-drive>
+        claimName: "<mount-share-drive>"
   containers:
     - name: debugger
       image: ubuntu
-      command: ['sleep', '36000']
+      command: ["sleep", "36000"]
       volumeMounts:
-	- mountPath: "/data"
-	  name: volume-to-debug-ubuntu
+        - mountPath: "/data"
+          name: volume-to-debug-ubuntu
 ```
 
 To determine what should replace `<mount-share-drive>` run `kubectl

@@ -34,7 +34,7 @@ The [QHub HPC](https://hpc.qhub.dev/en/latest/) should be your choice if:
 - You have existing infrastructure already available
 - You expect that your infrastructure will **not** exceed the existing resources capabilities
 > NOTE: Although it is possible to deploy QHub HPC on the Cloud, it is not generally recommended due to possible high
-> costs. For more information, check out the [base cost](../admini/03_base_cost.md) section of the docs.
+> costs. For more information, check out the [base cost](../admin_guide/cost.md) section of the docs.
 
 ## Kubernetes Deployment
 

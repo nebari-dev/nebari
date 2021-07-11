@@ -21,7 +21,7 @@ After the installation, the next step is to configure QHub.
 QHub is entirely controlled from a configuration file, which allows you to manage multiple environments and multiple teams, as well as their permissions and authorization in a robust way.
 
 + **The Configuration File**
-  + QHub comes with configuration file templates for each of the cloud providers it currently supports: **AWS**, **DO**, **GCP**, and **Azure**. The templates can be found [**here**](../02_get_started/04_configuration.md).
+  + QHub comes with configuration file templates for each of the cloud providers it currently supports: **AWS**, **DO**, **GCP**, and **Azure**. The templates can be found [**here**](../installation/configuration.md).
   
 ## Why QHub
 

@@ -9,7 +9,7 @@ organizations that need a shared compute platform that is flexible, accessible, 
 
 ## QHub Technology Stack
 
-![High-level illustration of QHub architecture](../images/qhub-cloud_architecture.png)
+![High-level illustration of QHub architecture](images/qhub-cloud_architecture.png)
 
 ### Components
 

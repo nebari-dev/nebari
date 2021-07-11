@@ -61,7 +61,7 @@ source/admin_guide/preemptible-spot-instances.md
 source/admin_guide/system_maintenance.md
 source/admin_guide/clearml.md
 source/admin_guide/prefect.md
-source/user_guide/faq.md
+source/admin_guide/faq.md
 ```
 
 ```{toctree}

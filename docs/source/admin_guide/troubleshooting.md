@@ -4,7 +4,7 @@ This guide aims to provide useful information to developers in the detection and
 
 ## General Troubleshooting
 To minimize the occurrence of errors on your QHub application, please follow the best practices described on the
-[Installation](01_installation.md), [Setup](02_setup.md) and [Usage](03_usage.md) sections.
+[Installation](../installation/installation.md), [Setup](../installation/setup.md) and [Usage](../installation/usage.md) sections.
 
 ### Solutions for common problems
 
