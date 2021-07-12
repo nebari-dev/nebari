@@ -1,4 +1,4 @@
-# User Frequently Asked Questions
+# Frequently Asked Questions
 
 ## Environments
 

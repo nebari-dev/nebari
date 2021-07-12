@@ -1,44 +1,51 @@
-# How to log in on QHub (training)
+# Log into QHub
 
-This guide aims to explain to newcomers how to log in to Quansight's own QHub Training server (for training sessions). 
-Your own organization's QHub is likely to have a different procedure.
+This guide aims to explain to newcomers how to log in to QHub.  Your
+own organization's QHub is likely to have a slighly different
+procedure for the authentication due to the many authentication
+providers that QHub can integrate into.
 
-To access the training platform, you will need to:
-1. Register on [https://training.qhub.dev](https://training.qhub.dev).
+Get the url of your QHub cluster. For this example we will use
+`https://training.qhub.dev`.
 
-![Screenshot of the training platform](../images/training_gen_qhub_1.png)
+![Qhub login screen](../images/qhub_login_screen.png)
+
+Upon visiting the website you will be prompted by a login page similar
+to the login page shown above. The login process will greatly differ
+between authentication providers. Qhub supports LDAP, OAuth2,
+Passwordless Auth, password based authentication and many others (any
+that jupyterhub supports) meaning that it is hard to detail the exact
+login process.
+
+![QHub select profile](../images/qhub_select_profile.png)
+
+Once authenticated the user will be prompted with a set of profiles
+that are available for the authenticated user to use. Your given
+selections will likely differ from the image shown. The customized
+profiles will give you access to fixed resources e.g. 2 cpu, 8 GB ram,
+and 1 dedicated gpu. All of this is configured by the
+administrator. Click `start` once the appropriate profile has been
+chosen. The cluster may take several minutes to launch. This is due to
+Qhub using autoscaling behind the scenes to reduce costs when the
+cluster is idle.
+
+![QHub kernel selection](../images/qhub_kernel_selection.png)
+
+Finally once your cluster has launched you will notice a huge
+selection of available python environments. These environments are
+configured by your administrator.
+
+![Qhub notebook](../images/qhub_notebook.png)
+
+When you click on a given kernel a jupyterlab notebook with that given
+environment will launch. Note that kernels can take several seconds to
+become responsive. The circle in the top right hand corner is a good
+indicator at the status of the kernel. A lightning bold means that the
+kernel has started but it not yet ready to run code.
 
 
-2. Enter your email address (the same one associated with this invitation).
-
-![Login screen using Auth0](../images/training_auth_screen_2.png)
 
 
-3. Next, you should then receive an email from **Quansight-training** with a 6-digit code (remember to check your spam folder, just in case).
-
-![Screenshot of email with the login code](../images/training_email_screen_3.png)
 
 
-4. Copy the code, head back over to the [https://training.qhub.dev](https://training.qhub.dev) webpage and paste it when prompted.
 
-![Screenshot showing the code to be pasted on QHub login webpage](../images/training_auth_screen_4.png)
-
-
-5. This should allow you to launch the QHub instance for training. Once logged in, you should see the page below.
-
-![Screenshot of initial QHub login page](../images/training_server_start_5.png)
-
-
-6. Once the `Start my Server` button is clicked, you will be prompted with different server instances to choose from.
-
-![Screenshot of initial QHub page once user logged in](../images/training_instances_6.png)
-
-
-7. Click on the `Training Default` option (or whichever option your instructor has directed you to) and wait  to access your new JupyterHub instance, similar to the image below.
-
-![QHub instance started and populated with many environments](../images/training_env_7.png)
-
-
-Congratulations, you are now logged in to QHub!
-
-> In case you run into any issues, please contact your instructor via email.
