@@ -66,13 +66,13 @@ source/admin_guide/faq.md
 
 ```{toctree}
 :maxdepth: 1
-:caption: Development
+:caption: Development Guide
 
-source/development/architecture.md
-source/development/contribution.md
-source/development/release.md
-source/development/testing.md
-source/development/changelog.md
-source/development/logo.md
+source/dev_guide/architecture.md
+source/dev_guide/contribution.md
+source/dev_guide/release.md
+source/dev_guide/testing.md
+source/dev_guide/changelog.md
+source/dev_guide/logo.md
 ```
 
