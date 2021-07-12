@@ -46,6 +46,7 @@ source/installation/management.md
 source/user_guide/getting_started.md
 source/user_guide/code_server.md
 source/user_guide/ssh.md
+source/user_guide/dashboard.md
 source/user_guide/dask_gateway.md
 source/user_guide/faq.md
 source/user_guide/training.md

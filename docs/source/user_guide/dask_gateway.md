@@ -32,7 +32,10 @@ be accessed via dask gateway options. Once the
 [ipywidget](https://ipywidgets.readthedocs.io/en/latest/) shows up the
 user can select the options they care about. If you are interacting in
 a terminal there are also ways to configure the options. Please see
-the dask-gateway docs.
+the dask-gateway docs. It is important that the environment used for
+your notebook matches the dask worker environment.
+
+![qhub dask options](../images/qhub_dask_cluster_options.png)
 
 ```python
 options = gateway.cluster_options()
@@ -41,6 +44,8 @@ options
 
 Once the desired settings have been chosen the user creates a cluster
 (launches a dask scheduler).
+
+![qhub dask cluster start](../images/qhub_dask_cluster_start.png)
 
 ```python
 cluster = gateway.new_cluster(options)
@@ -51,14 +56,17 @@ The user is presented with a gui where you can select to scale up the
 workers. You originally start with `0` workers. In addition you can
 scale up via python functions. Additionally the gui has a `dashboard`
 link that you can click to view [cluster
-diagnostics](https://docs.dask.org/en/latest/diagnostics-distributed.html)
+diagnostics](https://docs.dask.org/en/latest/diagnostics-distributed.html). This
+link is especially useful for debugging and benchmarking.
 
 ```python
 cluster.scale(1)
 ```
 
 Once you have created a cluster and scaled to an appropriate number of
-workers we can grab our dask client to start the computation.
+workers we can grab our dask client to start the computation. You may
+also use the cluster menu with the dashboard link to scale the number
+of workers.
 
 ```python
 client = cluster.get_client()
