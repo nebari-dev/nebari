@@ -24,7 +24,7 @@ dependencies:
  - ipywidgets >=7.6
  - ipyleaflet >=0.13.5
  - pyviz_comms >=2.0.1
- - jupyter-resource-usage
+ - jupyter-resource-usage >=0.6.0
  - nbgitpuller
 
  # cds dashboards
