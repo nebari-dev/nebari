@@ -35,7 +35,7 @@ resource "kubernetes_manifest" "grafana-ingress-route" {
     apiVersion = "traefik.containo.us/v1alpha1"
     kind       = "IngressRoute"
     metadata = {
-      name      = "prometheus-grafana-metadata"
+      name      = "grafana-ingress-route"
       namespace = var.namespace
     }
     spec = {
@@ -52,7 +52,7 @@ resource "kubernetes_manifest" "grafana-ingress-route" {
           ]
           services = [
             {
-              name      = "prometheus-grafana"
+              name      = "kube-prometheus-stack-grafana"
               port      = 80
               namespace = var.namespace
             }
