@@ -1,14 +1,9 @@
-resource "helm_release" "grafana" {
-  name              = "grafana"
+resource "helm_release" "kube-prometheus-stack-helm-deployment" {
+  name              = "kube-prometheus-stack"
   namespace         = var.namespace
   chart             = "${path.module}/chart"
   dependency_update = true
   values            = [file("${path.module}/chart/values-monitoring-qhub.yaml")]
-
-  set {    
-      name  = "ingress.enabled"
-      value = "true"
-  }
 
 }
 
