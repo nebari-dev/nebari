@@ -64,7 +64,7 @@ resource "kubernetes_manifest" "grafana-ingress-route" {
           ]
         }
       ]
-      tls = local.tls
+      tls = var.tls
     }
   }
 }
