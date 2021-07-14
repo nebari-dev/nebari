@@ -357,106 +357,57 @@ resource "kubernetes_manifest" "forwardauth" {
   }
 }
 
-locals {
-  clearml_webserver_subdomain  = "app.clearml"
-  clearml_fileserver_subdomain = "files.clearml"
-  clearml_apiserver_subdomain  = "api.clearml"
+# resource "kubernetes_manifest" "grafana-route" {
+#   provider = kubernetes-alpha
 
-  clearml-prefix               = "clearml-clearml-server-cloud-ready"
-  clearml_webserver            = "${local.clearml-prefix}-webserver"
-  clearml_fileserver           = "${local.clearml-prefix}-fileserver"
-  clearml_apiserver            = "${local.clearml-prefix}-apiserver"
-}
+#   manifest = {
+#     apiVersion = "traefik.containo.us/v1alpha1"
+#     kind       = "IngressRoute"
+#     metadata = {
+#       name      = "grafana-metadata"
+#       namespace = var.namespace
+#     }
+#     spec = {
+#       entryPoints = ["websecure"]
+#       routes = [
+#         {
+#           kind  = "Rule"
+#           match = "Host(`${var.external-url}`) && PathPrefix(`/monitoring1`)"
+#           services = [
+#             {
+#               name      = "grafana" #local.grafana
+#               port      = 80
+#               namespace = var.namespace
+#             }
+#           ]
+#         }
+#       ]
+#       tls = local.tls
+#     }
+#   }
+# }
 
-resource "kubernetes_manifest" "clearml-app" {
+resource "kubernetes_manifest" "my-grafana-middleware" {
   provider = kubernetes-alpha
 
   manifest = {
     apiVersion = "traefik.containo.us/v1alpha1"
-    kind       = "IngressRoute"
+    kind       = "Middleware"
     metadata = {
-      name      = "clearml-app"
+      name      = "grafana-middleware"
       namespace = var.namespace
     }
     spec = {
-      entryPoints = ["websecure"]
-      routes = [
-        {
-          kind  = "Rule"
-          match = "Host(`${local.clearml_webserver_subdomain}.${var.external-url}`)"
-          services = [
-            {
-              name      = local.clearml_webserver
-              port      = 80
-              namespace = var.namespace
-            }
-          ]
-        }
-      ]
-      tls = local.tls
+      stripPrefixRegex = {
+        regex = [
+          "/monitoring"
+        ]
+      }
     }
   }
 }
 
-resource "kubernetes_manifest" "clearml-files" {
-  provider = kubernetes-alpha
 
-  manifest = {
-    apiVersion = "traefik.containo.us/v1alpha1"
-    kind       = "IngressRoute"
-    metadata = {
-      name      = "clearml-files"
-      namespace = var.namespace
-    }
-    spec = {
-      entryPoints = ["websecure"]
-      routes = [
-        {
-          kind  = "Rule"
-          match = "Host(`${local.clearml_fileserver_subdomain}.${var.external-url}`)"
-          services = [
-            {
-              name      = local.clearml_fileserver
-              port      = 8081
-              namespace = var.namespace
-            }
-          ]
-        }
-      ]
-      tls = local.tls
-    }
-  }
-}
-
-resource "kubernetes_manifest" "clearml-api" {
-  provider = kubernetes-alpha
-
-  manifest = {
-    apiVersion = "traefik.containo.us/v1alpha1"
-    kind       = "IngressRoute"
-    metadata = {
-      name      = "clearml-api"
-      namespace = var.namespace
-    }
-    spec = {
-      entryPoints = ["websecure"]
-      routes = [
-        {
-          kind  = "Rule"
-          match = "Host(`${local.clearml_apiserver_subdomain}.${var.external-url}`)"
-          services = [
-            {
-              name      = local.clearml_apiserver
-              port      = 8008
-              namespace = var.namespace
-            }
-          ]
-        }
-      ]
-      tls = local.tls
-    }
-  }
-}
 
 resource "kubernetes_manifest" "grafana-route" {
   provider = kubernetes-alpha
@@ -465,7 +416,7 @@ resource "kubernetes_manifest" "grafana-route" {
     apiVersion = "traefik.containo.us/v1alpha1"
     kind       = "IngressRoute"
     metadata = {
-      name      = "grafana"
+      name      = "prometheus-grafana-metadata"
       namespace = var.namespace
     }
     spec = {
@@ -473,10 +424,16 @@ resource "kubernetes_manifest" "grafana-route" {
       routes = [
         {
           kind  = "Rule"
-          match = "Host(`${var.external-url}`) && PathPrefix(`/monitoring/`)"
+          match = "Host(`${var.external-url}`) && PathPrefix(`/monitoring`)"
+          middlewares = [
+            {
+              name      = "grafana-middleware"
+              namespace = var.namespace
+            }
+          ]
           services = [
             {
-              name      = "grafana" #local.grafana
+              name      = "grafana" # local.grafana # grafana
               port      = 80
               namespace = var.namespace
             }

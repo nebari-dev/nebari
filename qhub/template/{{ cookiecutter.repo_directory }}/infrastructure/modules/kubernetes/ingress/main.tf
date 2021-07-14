@@ -172,7 +172,7 @@ resource "kubernetes_deployment" "main" {
             "--api.dashboard=true",
             "--ping=true",
             # Start the Traefik Kubernetes Ingress Controller
-            "--providers.kubernetesingress",
+            "--providers.kubernetesingress=true",
             "--providers.kubernetesingress.namespaces=${var.namespace}",
             "--providers.kubernetesingress.ingressclass=traefik",
             # Start the Traefik Kubernetes CRD Controller Provider
@@ -191,7 +191,7 @@ resource "kubernetes_deployment" "main" {
             "--entrypoints.web.http.redirections.entryPoint.scheme=https",
             # Enable debug logging. Useful to work out why something might not be
             # working. Fetch logs of the pod.
-            "--log.level=${var.loglevel}",
+            "--log.level=DEBUG", #${var.loglevel}",
             ], var.enable-certificates ? [
             "--certificatesresolvers.default.acme.tlschallenge",
             "--certificatesresolvers.default.acme.email=${var.acme-email}",
