@@ -123,8 +123,8 @@ GOOGLE_PLATFORM = {
     "kubernetes_version": "1.18.16-gke.502",
     "node_groups": {
         "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
-        "worker": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
+        "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
+        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
     },
 }
 
@@ -141,7 +141,7 @@ AZURE = {
         "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 5},
         "worker": {
             "instance": "Standard_D2_v2",
-            "min_nodes": 0,
+            "min_nodes": 1,
             "max_nodes": 5,
         },
     },
@@ -214,7 +214,7 @@ DEFAULT_ENVIRONMENTS = {
             "python",
             "ipykernel",
             "ipywidgets",
-            "qhub-dask ==0.2.3",
+            "qhub-dask ==0.3.12",
             "python-graphviz",
             "numpy",
             "numba",
@@ -228,7 +228,7 @@ DEFAULT_ENVIRONMENTS = {
             "python",
             "ipykernel",
             "ipywidgets >=7.6",
-            "qhub-dask ==0.2.3",
+            "qhub-dask ==0.3.12",
             "param",
             "python-graphviz",
             "matplotlib >=3.3.4",

@@ -356,4 +356,3 @@ resource "kubernetes_manifest" "forwardauth" {
     }
   }
 }
-

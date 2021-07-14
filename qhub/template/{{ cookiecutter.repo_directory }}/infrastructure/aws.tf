@@ -15,6 +15,8 @@ module "accounting" {
 
   project     = var.name
   environment = var.environment
+
+  tags = local.additional_tags
 }
 
 

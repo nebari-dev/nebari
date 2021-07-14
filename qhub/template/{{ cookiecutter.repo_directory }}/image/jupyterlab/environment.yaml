@@ -24,6 +24,8 @@ dependencies:
  - ipywidgets >=7.6
  - ipyleaflet >=0.13.5
  - pyviz_comms >=2.0.1
+ - jupyter-resource-usage >=0.6.0
+ - nbgitpuller
 
  # cds dashboards
  - cdsdashboards-singleuser >=0.5.7
@@ -32,6 +34,7 @@ dependencies:
  # viz tools
  - param
  - python-graphviz
+ - plotly >=5.0
 
  # testing, docs, linting
  - pytest
@@ -46,3 +49,4 @@ dependencies:
  - pip:
    # See install-conda-environment.sh when editing this section.
     - https://github.com/dirkcgrunwald/jupyter_codeserver_proxy-/archive/5596bc9c2fbd566180545fa242c659663755a427.tar.gz
+

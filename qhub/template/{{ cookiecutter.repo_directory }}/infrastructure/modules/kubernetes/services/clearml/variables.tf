@@ -16,3 +16,12 @@ variable "elasticsearch_image" {
   type        = string
   default     = "balast/elasticsearch:6_50"
 }
+
+variable "external-url" {
+  description = "External url that jupyterhub cluster is accessible"
+  type        = string
+}
+
+variable "tls" {
+  description = "TLS configuration"
+}
