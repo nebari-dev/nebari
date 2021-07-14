@@ -56,6 +56,13 @@ class CICD(Base):
     after_script: typing.Optional[typing.List[str]]
 
 
+# ============== Monitoring =============
+
+
+class Monitoring(Base):
+    enabled: bool
+
+
 # ============== ClearML =============
 
 
@@ -309,6 +316,7 @@ class Main(Base):
     theme: Theme
     profiles: Profiles
     environments: typing.Dict[str, CondaEnvironment]
+    monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
 
 

@@ -13,6 +13,9 @@
     "certificate": {
       "type": "self-signed"
     },
+    "monitoring": {
+        "enabled": null
+    },
     "clearml": {
         "enabled": null
     },
