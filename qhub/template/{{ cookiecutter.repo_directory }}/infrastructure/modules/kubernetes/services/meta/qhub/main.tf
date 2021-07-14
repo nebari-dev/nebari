@@ -357,36 +357,6 @@ resource "kubernetes_manifest" "forwardauth" {
   }
 }
 
-# resource "kubernetes_manifest" "grafana-route" {
-#   provider = kubernetes-alpha
-
-#   manifest = {
-#     apiVersion = "traefik.containo.us/v1alpha1"
-#     kind       = "IngressRoute"
-#     metadata = {
-#       name      = "grafana-metadata"
-#       namespace = var.namespace
-#     }
-#     spec = {
-#       entryPoints = ["websecure"]
-#       routes = [
-#         {
-#           kind  = "Rule"
-#           match = "Host(`${var.external-url}`) && PathPrefix(`/monitoring1`)"
-#           services = [
-#             {
-#               name      = "grafana" #local.grafana
-#               port      = 80
-#               namespace = var.namespace
-#             }
-#           ]
-#         }
-#       ]
-#       tls = local.tls
-#     }
-#   }
-# }
-
 resource "kubernetes_manifest" "my-grafana-middleware" {
   provider = kubernetes-alpha
 
@@ -406,7 +376,6 @@ resource "kubernetes_manifest" "my-grafana-middleware" {
     }
   }
 }
-
 
 
 resource "kubernetes_manifest" "grafana-route" {
@@ -433,7 +402,7 @@ resource "kubernetes_manifest" "grafana-route" {
           ]
           services = [
             {
-              name      = "grafana" # local.grafana # grafana
+              name      = "prometheus-grafana" # local.grafana # "grafana"
               port      = 80
               namespace = var.namespace
             }
@@ -444,4 +413,3 @@ resource "kubernetes_manifest" "grafana-route" {
     }
   }
 }
-
