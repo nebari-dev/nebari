@@ -229,7 +229,7 @@ module "monitoring" {
   namespace    = var.environment
   external-url = var.endpoint
   tls          = module.qhub.tls
-  depends_on   = [
+  depends_on = [
     module.qhub
   ]
 }
