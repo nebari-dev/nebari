@@ -122,7 +122,7 @@ jobs:
         run: |
           mkdir -p bin
           pushd bin
-          curl -L https://github.com/kubernetes/minikube/releases/download/v1.15.0/minikube-linux-amd64 -o minikube
+          curl -L https://github.com/kubernetes/minikube/releases/download/v1.22.0/minikube-linux-amd64 -o minikube
           chmod +x minikube
 
           curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
