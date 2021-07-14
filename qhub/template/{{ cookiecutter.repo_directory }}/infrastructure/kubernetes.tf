@@ -225,10 +225,11 @@ module "prefect" {
 
 {% if cookiecutter.monitoring.enabled -%}
 module "monitoring" {
-  source     = "./modules/kubernetes/services/monitoring"
-  namespace  = var.environment
+  source       = "./modules/kubernetes/services/monitoring"
+  namespace    = var.environment
   external-url = var.endpoint
-  depends_on = [
+  tls          = module.qhub.tls
+  depends_on   = [
     module.qhub
   ]
 }
