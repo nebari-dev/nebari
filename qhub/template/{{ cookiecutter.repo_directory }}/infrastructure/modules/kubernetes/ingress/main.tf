@@ -191,7 +191,7 @@ resource "kubernetes_deployment" "main" {
             "--entrypoints.web.http.redirections.entryPoint.scheme=https",
             # Enable debug logging. Useful to work out why something might not be
             # working. Fetch logs of the pod.
-            "--log.level=DEBUG", #${var.loglevel}",
+            "--log.level=${var.loglevel}",
             ], var.enable-certificates ? [
             "--certificatesresolvers.default.acme.tlschallenge",
             "--certificatesresolvers.default.acme.email=${var.acme-email}",
