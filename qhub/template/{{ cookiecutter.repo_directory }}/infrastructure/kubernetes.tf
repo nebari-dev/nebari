@@ -227,6 +227,7 @@ module "prefect" {
 module "monitoring" {
   source     = "./modules/kubernetes/services/monitoring"
   namespace  = var.environment
+  external-url = var.endpoint
   depends_on = [
     module.qhub
   ]
