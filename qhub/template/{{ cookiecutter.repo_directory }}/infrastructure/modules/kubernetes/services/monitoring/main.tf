@@ -4,7 +4,8 @@ resource "helm_release" "kube-prometheus-stack-helm-deployment" {
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
   version    = "16.12.0"
-  values     = [file("${path.module}/chart/values-monitoring-qhub.yaml")]
+  values     = [file("${path.module}/values-monitoring-qhub.yaml")]
+
 }
 
 resource "kubernetes_manifest" "grafana-strip-prefix-middleware" {
