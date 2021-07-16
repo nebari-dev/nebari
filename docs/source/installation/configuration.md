@@ -1,12 +1,7 @@
 # Configuration
 
-The configuration file is split into several sections. In this page,
-we detail the requirements necessary for the YAML configuration
-file. The configuration file is always validated by a [pydantic
-schema](https://pydantic-docs.helpmanual.io/) in
-[qhub/schema.py](https://github.com/Quansight/qhub/blob/main/qhub/schema.py). For
-the ultimate source of truth visit this file though these docs should
-be accurate.
+This is a page dedicated to the `qhub-config.yaml` file, the file that `qhub` uses to deploy and redeploy changes to your infrastructure. The `qhub-config.yaml` configuration file is split into several sections and in this page, we detail the requirements necessary for this YAML-formatted configuration file. In the [Usage](usage.md) section we covered how you can auto-generate this file using `qhub init` (and properly set options/flags and environment variables).
+> NOTE: The configuration file is always validated by a [pydantic schema](https://pydantic-docs.helpmanual.io/) in [qhub/schema.py](https://github.com/Quansight/qhub/blob/main/qhub/schema.py)
 
 ## General
 
@@ -18,19 +13,23 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 ```
 
  - `project_name`: should be compatible with the Cloud provider naming
-   convention. Generally only use `A-Z`, `a-z`, `-`, and `_`.
+   convention. Generally only use `A-Z`, `a-z`, `-`, and `_`
+   (see [Project Naming Conventions](usage.md#project-naming-convention) for more details).
 
  - `namespace`: is used in combination with `project_name` to label
    resources. In addition `namespace` also determines the `namespace`
-   that used when deploying kubernetes resources for qhub. Has a
-   default value of `dev`.
+   that used when deploying kubernetes resources for qhub.
+    - Default value: `dev`
 
- - `provider` possible values are `do` for DigitalOcean, `aws` for
-    Amazon AWS, `gcp` for Google Could Provider, `azure` for Microsoft
-    Azure, and `local` for a local or existing kubernetes deployment.
+ - `provider`: possible values are
+   - `do` for DigitalOcean
+   - `aws` for Amazon AWS
+   - `gcp` for Google Could Provider
+   - `azure` for Microsoft Azure
+   - `local` for a local or existing kubernetes deployment
 
  - `domain`: is the top level URL to put JupyterLab and future
-   services under such a monitoring. For example `qhub.dev`
+   services under (such a monitoring). For example `qhub.dev`
    would be the domain for JupyterHub to be exposed under.
 
 ## Continuous Integration and Continuous Deployment
@@ -38,14 +37,13 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 `ci_cd`: is optional and specifies the continuous integration and
 continuous deployment framework to use. QHub uses infrastructure as
 code to allow developers and users of QHub to request change to the
-environment via PRs which then get approved by administration. You may
-configure the branch that github-actions watches for pull requests and
-commits. Current allowable values are `gitlab-ci`, `github-actions`,
-and not specifying the key `ci_cd`.
+environment via pull requests (PRs) which then get approved by administration.
+You may configure CI/CD process to watch for pull-requests or commits on
+specific branches. Currently CI/CD can be setup for either GitHub Actions or GitLab CI.
 
 ```yaml
 ci_cd:
-  type: github-actions
+  type: gitlab-ci
   branch: main
   before_script:
     - echo "running commands before ci completes"
@@ -58,22 +56,22 @@ ci_cd:
  - `branch`: branch to use to commit `qhub render` changes to
  - `before_script`: optional script to run before CI starts QHub
    infrastructure deployment. This is useful in cases that additional
-   setup is required for Qhub to deploy the resources. Only supported
+   setup is required for QHub to deploy the resources. Only supported
    on `gitlab-ci` at the moment.
  - `after_script`: optional script to run after CI ends QHub
    infrastructure deployment. This is useful in cases to notify
    resources of successful QHub deployment. Only supported on
    `gitlab-ci` at the moment.
 
-If `ci_cd` is not supplied no CI/CD will be auto-generated. However,
-we advise that having infrastructure as code allows teams to more
-quickly modify their QHub deployment often allowing developers and
-data sciences to request the changes to be approved by an
+If `ci_cd` is not supplied, no CI/CD will be auto-generated. However,
+we advise that employing an infrastructure-as-code approach allows teams
+to more quickly modify their QHub deployment, allowing developers and
+data sciencist to request the changes and approved by an
 administrator.
 
 ## Certificate
 
-By default, to simplify initial deployment `QHub` uses traefik to
+By default, to simplify initial deployment `qhub` uses traefik to
 create a self-signed certificate. In order to create a certificate
 that is signed so that web browsers do not throw errors we currently
 support [Let's Encrypt](https://letsencrypt.org/).
@@ -83,15 +81,15 @@ certificate:
   type: self-signed
 ```
 
-To use Let's Encrypt you must specify an email address that let's
-encrypt will associate the generated certificate with and whether to
+To use Let's Encrypt you must specify an email address that Let's
+Encrypt will associate the generated certificate with and whether to
 use the [staging
 server](https://acme-staging-v02.api.letsencrypt.org/directory) or
 [production
 server](https://acme-v02.api.letsencrypt.org/directory). In general
-you should use the production server, as seen below. Please note that
-let's encrypt heavily rate limits their production endpoint and
-provisioning https certificates can often fail due to this limit.
+you should use the production server, as seen below.
+> NOTE: Let's Encrypt heavily rate limits their production endpoint and
+> provisioning https certificates can often fail due to this limit.
 
 ```yaml
 certificate:
@@ -100,10 +98,7 @@ certificate:
   acme_server: https://acme-v02.api.letsencrypt.org/directory
 ```
 
-You may also supply a custom self-signed certificate and secret
-key. Note that the kubernetes default namespace that QHub uses is
-`dev` if not specified. Otherwise, it will be your `namespace` defined
-in the `qhub-config.yaml`.
+You may also supply a custom self-signed certificate and secret key.
 
 ```yaml
 certificate:
@@ -119,11 +114,18 @@ kubectl create secret tls <secret-name> \
   --namespace=<namespace> \
   --cert=path/to/cert/file --key=path/to/key/file
 ```
+> NOTE: the default kubernetes namespace that QHub uses is `dev`, however you can change the `namespace` key in the `qhub-config.yaml`.
 
 ## Security
 
-This section is for configuring security relating to the QHub
-deployment.
+This section walks through security and user authentication as it
+relates to QHub deployments. There are a few different ways to handle
+user authentication:
+- Auth0
+- GitHub
+- Password
+- Custom OAuth
+
 ```yaml
 security:
   authentication:
@@ -178,12 +180,16 @@ authentication.
 #### Auth0 Based Authentication
 
 [Auth0](https://auth0.com/#!) can be used for authentication. While it
-is not free there is a reasonable free tier that allows deployment of
-QHub clusters on many different social providers, passwordless, and
-email based authentication. QHub has command line options with running
-`qhub init` which allow for automation of creation of the application
-via `--auth-provider=auth0 --auth-auto-provision`. However for most
-users this may not be the most convenient solution. Here are docs on
+is not free, there is a reasonable free tier that allows deployment of
+QHub clusters using many different social providers, passwordless, and
+email based authentication methods.
+
+QHub has command line options with running `qhub init` which allow for
+automation of creation of the application via:
+`--auth-provider=auth0 --auth-auto-provision`.
+
+However for most users this may not be the most convenient solution.
+Here are docs on
 [creating an Auth0
 Application](https://auth0.com/docs/applications). Make sure to select
 `Regular Web Application`. Important to note is the `auth0_subdomain`
@@ -191,6 +197,8 @@ field which must be only the `<auth0_subdomain>.auth0.com`. So for the
 following `qhub-dev.auth0.com` the subdomain would be `qhub-dev`. Note
 that all the usernames will be the email addresses of users (not
 usernames).
+> NOTE: This is a different and distinct step from one outlined in the [Setup](setup.md#auth0)
+stage.
 
 ```yaml
 security:
@@ -206,9 +214,9 @@ security:
 
 #### GitHub Based Authentication
 
-Github has instructions for [creating OAuth
+GitHub has instructions for [creating OAuth
 applications](https://docs.github.com/en/developers/apps/creating-an-oauth-app). Note
-that QHub usernames will their GitHub usernames.
+that QHub usernames will be their GitHub usernames.
 
 ```yaml
 security:
@@ -226,7 +234,7 @@ For Password based authentication. Note that users will require a
 `password` field that can be generated via the following command:
 `python -c "import bcrypt; print(bcrypt.hashpw(b'<password>',
 bcrypt.gensalt()).decode('utf-8'))"`. Make sure to replace
-`<password>` with whatever password you are wanting.
+`<password>` with whatever secure password you want.
 
 ```yaml
 security:
@@ -262,8 +270,8 @@ security:
 
 `users` and `groups` allows one to provision UNIX permissions to each
 user. Any user is assigned a `uid`, `primary_group`, and optionally
-any number of `secondary_groups`. Note that `uid` and `gid` fields
-must be unique and are required.
+any number of `secondary_groups`.
+> NOTE: the `uid` and `gid` fields must be unique and are required.
 
 ```yaml
 security:
@@ -294,7 +302,7 @@ written for the user.
 `1000`, it is recommended to start with high User ID numbers
 e.g. `10000000`. `ids` technically supports 2 billion `ids`.
 
-### Admin Group
+#### Admin Group
 
 The admin group has special significance. If a user's `primary_group`
 is admin they will be able to access the jupyterhub admin page. The
@@ -303,29 +311,29 @@ user's server and impersonate them.
 
 ## Provider Infrastructure
 
-Finally, comes the Kubernetes infrastructure deployment. Although
-quite similar, each provider has a different configuration.
+Finally, the Kubernetes infrastructure deployment. Although
+quite similar, each provider has a slightly different configuration.
 
 The following configuration sets up a kubernetes deployment with
 autoscaling node groups. Depending on the cloud provider there might
 be restrictions, which are detailed on each section.
 
 For any of the providers (besides local), adding a node group is as
-easy as the following, which adds a `high-memory` group:
+easy as the following: which adds a `high-memory` group:
 
 ```yaml
 <provider>:
   node_groups:
     ...
     high-memory:
-      instance: "s-2vcpu-4gb"
+      instance: "s-2vcpu-4gb"     # name of cloud provider instance type
       min_nodes: 1
       max_nodes: 50
     ...
 ```
 
-> For each provider details such as **instance names**, **availability zones**,
-and **Kubernetes versions** will be DIFFERENT. [duplicated info]
+> NOTE: For each provider, details such as **instance names**, **availability zones**,
+and **Kubernetes versions** will be DIFFERENT.
 
 ### Providers
 
@@ -338,12 +346,9 @@ Digital Ocean does not have accelerator/gpu support. Digital Ocean is
 a great default choice for tying out QHub. Below is the recommended
 setup.
 
-> Note: DigitalOcean regularly updates Kubernetes versions hence, the
-> field `kubernetes_version` will most likely have to be changed.
-> [See available instance types for
-> DigitalOcean](https://www.digitalocean.com/docs/droplets/).  If you
-> used `qhub init` this version will automatically be compute for you
-> Do not copy the version you see bellow
+> NOTE: DigitalOcean regularly updates Kubernetes versions hence, the field `kubernetes_version` will most likely have to be changed. [See available instance types for DigitalOcean](https://www.digitalocean.com/docs/droplets/).
+> If you used `qhub init` this version will automatically be computed for you.
+> Do not copy the version you see below.
 
 To see available instance types refer to [Digital Ocean Instance
 Types](https://www.digitalocean.com/docs/droplets/). Additionally the
@@ -501,7 +506,7 @@ Default images are to the default image run if not specified in a
 profile (described in the next section). The `jupyterhub` key controls
 the jupyterhub image run. These control the docker image used to run
 JupyterHub, the default JupyterLab image, the default Dask worker
-image, and dask gateway docker image.
+image, and Dask Gateway docker image.
 
 ```yaml
 default_images:
@@ -515,8 +520,11 @@ default_images:
 
 Control the amount of storage allocated to shared filesystems.
 
-> Note: when the storage size is changed, in most providers it will
+> NOTE 1: when the storage size is changed, for most providers it will
 > automatically delete (!) the previous storage place.
+> NOTE 2: changing the storage size on an AWS deployment after the initial
+> deployment can be especially tricky so it might be worthwhile padding
+> these storage sizes.
 
 ```yaml
 storage:
@@ -527,7 +535,7 @@ storage:
 ## Profiles
 
 Profiles are used to control the JupyterLab user instances and
-Dask-workers provided by Dask-gateway.
+Dask workers provided by Dask Gateway.
 
 ```yaml
 profiles:
@@ -580,7 +588,7 @@ Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the
 cores and memory.
 
-When configuring the memory and cpus for profiles there are some
+When configuring the memory and CPUs for profiles there are some
 important considerations to make. Two important terms to understand are:
  - `limit`: the absolute max memory that a given pod can consume. If a
    process within the pod consumes more than the `limit` memory the
@@ -593,14 +601,34 @@ important considerations to make. Two important terms to understand are:
    ocean](https://docs.digitalocean.com/products/kubernetes/#allocatable-memory)
    which is generally applicable to other clouds.
    
-For example if a node is 8 GB of ram and 2 cpu you should
+For example if a node has 8 GB of ram and 2 CPUs you should
 guarantee/schedule roughly 75% and follow the digital ocean guide
-linked above. E.g. 1.5 cpu guarantee and 5.5 GB guaranteed.
+linked above. E.g. 1.5 CPU guarantee and 5.5 GB guaranteed.
+
+#### Dask Scheduler
+
+In a few instances, the Dask worker node-group might be running on quite a large
+instance, perhaps with 8 CPUs and 32 GB of memory (or more). When this is the case, you
+might also want to increase the resource levels associated with the Dask Scheduler.
+
+```yaml
+dask_worker:
+    "Huge Worker":
+      worker_cores_limit: 7
+      worker_cores: 6
+      worker_memory_limit: 30G
+      worker_memory: 28G
+      scheduler_cores_limit: 7
+      scheduler_cores: 6
+      scheduler_memory_limit: 30G
+      scheduler_memory: 28G
+      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
+```
 
 ### Limiting profiles to specific users and groups
 
 Sometimes on a select set of users should have access to specific
-resources e.g. gpus, high memory nodes etc. QHub has support for
+resources e.g. GPUs, high memory nodes etc. QHub has support for
 limiting resources.
 
 ```yaml
@@ -656,8 +684,8 @@ profiles:
 
 JupyterHub can be customized since QHub uses
 [Quansight/qhub-jupyterhub-theme](https://github.com/quansight/qhub-jupyterhub-theme). Available
-theme options. Note that if you want to change the logo it must be an
-accessible url to the logo.
+theme options.
+> NOTE: if you want to change the logo it must be an accessible URL to the logo.
 
 ```yaml
 theme:
@@ -726,8 +754,6 @@ environment definition expect 1-10 minutes upon deployment of the
 configuration for the environment to appear.
 
 # Full Configuration Example
-
-Everything in the configuration is set besides [???]
 
 ```yaml
 project_name: do-jupyterhub
@@ -862,7 +888,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas
@@ -876,7 +902,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas

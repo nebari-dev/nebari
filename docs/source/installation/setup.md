@@ -1,12 +1,12 @@
 # Setup Initialization
 
 QHub handles the initial setup and management of configurable data
-science environments, allowing to users to attain seamless deployment
-with Github Actions.
+science environments, allowing users to deploy seamlessly
+using Github Actions.
 
-QHub can be installed on a bare-metal server using HPC, on a CLoud
-provider or even locally for testing purposes.  Analyse the options
-below to discover what option suits best your specific use case.
+QHub can be installed on a bare-metal server using HPC, on a Cloud
+provider or even locally for testing purposes. Review the options
+below to discover which option best suits your needs.
 
 ## Local Deployment or Existing Kubernetes Cluster
 
@@ -38,21 +38,21 @@ The [QHub HPC](https://hpc.qhub.dev/en/latest/) should be your choice if:
 
 ## Kubernetes Deployment
 
-The Kubernetes version of QHub is considered to be the default
+The Kubernetes deployment of QHub is considered to be the default
 option. If you are not sure which option to choose, try this one. It
-is suitable to most use cases, specially when:
-- You require a scalable infrastructure
+is suitable for most use cases, especially if:
+- You require scalable infrastructure
 - You aim to have a production environment with GitOps enabled by default
 
 The QHub version requires a choice of [Cloud
-provider](#cloud-provider), [authentication (using Auth0, GitHub, or
+provider](#cloud-provider), [authentication (using Auth0, GitHub, custom OAuth provider, or
 password based)](#authentication), [domain
-registration](#domain-registry), and CI provider (GitHub Actions).
+registration](#domain-registry), and CI provider (GitHub Actions, GitLab CI).
 
 These services require global [environment
 variables](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/)
-that once set up will trigger QHub's automatic deploy using GitHub
-Actions.
+that once set up, will trigger QHub's automatic deploy using your 
+CI/CD platform of choice.
 
 To find and set the environment variables, follow the steps described
 on the subsections below.
@@ -68,9 +68,10 @@ knowledge about the specific provider required either. QHub supports
 [Azure](#microsoft-azure).
 
 To deploy QHub, all access keys require fairly wide permissions to
-create all the resources. Hence, once the Cloud provider has been
-chosen, follow the steps below and set the environment variables as
-specified with **owner/admin** level permissions.
+create all the necessary cloud resources. Hence, once the Cloud 
+provider has been chosen, follow the steps below and set the 
+environment variables as specified with **owner/admin** level 
+permissions.
 
 For more details on configuration for each Cloud provider, check the
 How-To Guides section of the documentation.
@@ -106,8 +107,6 @@ Set the required environment variables as specified below:
 export DIGITALOCEAN_TOKEN=""          # API token required to generate resources
 export SPACES_ACCESS_KEY_ID=""        # public access key for access spaces
 export SPACES_SECRET_ACCESS_KEY=""    # the private key for access spaces
-export AWS_ACCESS_KEY_ID=""           # set this variable with the same value as `SPACES_ACCESS_KEY_ID`
-export AWS_SECRET_ACCESS_KEY=""       # set this variable identical to `SPACES_SECRET_ACCESS_KEY`
 ```
 </details>
 
@@ -149,6 +148,7 @@ export ARM_TENANT_ID=""           # field available under `Azure Active Director
 
 > NOTE 2: [Tenant ID](https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-how-to-find-tenant)
 > values can be also found using PowerShell and CLI.
+</details>
 
 ### Authentication
 
@@ -163,7 +163,7 @@ application](https://auth0.com/docs/applications/set-up-an-application/register-
 - Click on the `Applications` button on the left
 - Select `Create Application` > `Machine to Machine Applications` > `Auth0 Management API` from the dropdown menu
 - Next, click `All` next to `Select all` and click `Authorize`
-- Set the variable `AUTH0_CLIENT_ID` equal to the `Cliend ID` string, and do the same for the `Client secret` by running the command below.
+- Set the variable `AUTH0_CLIENT_ID` equal to the `Client ID` string, and do the same for the `Client secret` by running the command below.
 
 The following environment variables must be set:
 
@@ -173,7 +173,7 @@ The following environment variables must be set:
    corner) appended with `.auth0.com`, for example:
 
 ```bash
-export AUTH_DOMAIN="qhub-test.auth0.com" # in case the account was called 'qhub-test'
+export AUTH_DOMAIN="qhub-test.auth0.com" # in this example the account is 'qhub-test'
 ```
 
 #### GitHub
@@ -198,15 +198,17 @@ to be on the safe side enable all permissions.
 Finally, you will need to have a domain name for hosting QHub. This
 domain will be where your application will be exposed.
 
-Currently, QHub only supports CloudFlare for automatic DNS
+Currently, QHub only supports CloudFlare for **automatic** DNS
 registration. If an alternate DNS provider is desired, change the
 `--dns-provider` flag from `cloudflare` to `none` on the `qhub deploy`
-command. The deployment then will be paused when it asks for an IP
-address (or CNAME, if using AWS) and prompt to register the desired
-URL. Setting a DNS record heavily depends on the provider thus it is
-not possible to have detailed docs on how to create a record on your
-provider. Googling `setting <A/CNAME> record on <provider name>`
-should yield good results on doing it for your specific provider.
+command. During the initial deployment, the deployment script will 
+pause as it asks for an IP address (or CNAME, if using AWS) and will 
+prompt you to register the desired URL. How to set a DNS record heavily 
+depends on the provider thus it is not possible to have detailed docs 
+on how to create a record on your provider. 
+
+Googling `setting <A/CNAME> record on <provider name>` should yield 
+good results on doing it for your specific provider.
 
 #### Cloudflare
 

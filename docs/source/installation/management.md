@@ -3,10 +3,10 @@
 ## Add users to QHub
 
 One of the first things you might want to do is to **add new users**
-to your QHub.
+to your QHub deployment.
 
-Any type of supported authorization from auth0 can be used as a
-username. Below is an example configuration of 2 users:
+Below we have added two users (by their username in this case).
+> NOTE: Auth0 authorization uses the user's email.
 
 ```yaml
      joeuser@example:
@@ -61,8 +61,3 @@ user's own home folder whenever they start a new JupyterLab
 session. Existing files with the same name will not be
 overwritten. Admin users are defined as members of the admin group as
 specified in your qhub-config.yaml file.
-
-## Monitor your QHub deployment
-
-TODO: add instruction on how to install and use K9s for monitoring the
-system deployment.
