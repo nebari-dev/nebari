@@ -5,7 +5,6 @@ resource "helm_release" "kube-prometheus-stack-helm-deployment" {
   chart      = "kube-prometheus-stack"
   version    = "16.12.0"
   values     = [file("${path.module}/chart/values-monitoring-qhub.yaml")]
-
 }
 
 resource "kubernetes_manifest" "grafana-strip-prefix-middleware" {
