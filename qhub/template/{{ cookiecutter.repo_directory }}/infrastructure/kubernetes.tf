@@ -181,8 +181,8 @@ module "qhub" {
   name      = "qhub"
   namespace = var.environment
 
-  home-pvc        = module.kubernetes-nfs-mount.persistent_volume_claim.name
-  conda-store-pvc = module.kubernetes-conda-store-mount.persistent_volume_claim.name
+  home-pvc        = "nfs-mount-${var.environment}-share"
+  conda-store-pvc = "conda-store-${var.environment}-share"
 
   external-url = var.endpoint
 

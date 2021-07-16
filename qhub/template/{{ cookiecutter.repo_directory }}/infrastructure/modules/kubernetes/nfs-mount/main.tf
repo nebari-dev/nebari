@@ -2,7 +2,6 @@ resource "kubernetes_storage_class" "main" {
   metadata {
     name = "${var.name}-${var.namespace}-share"
   }
-
   storage_provisioner = "kubernetes.io/fake-nfs"
 }
 
