@@ -294,6 +294,14 @@ class CDSDashboards(Base):
     cds_hide_user_named_servers: typing.Optional[bool]
     cds_hide_user_dashboard_servers: typing.Optional[bool]
 
+# ======== External Container Registry ========
+
+class ExtContainerReg(Base):
+    enabled: bool
+    access_key_id: typing.Optional[str]
+    secret_access_key: typing.Optional[str]
+    extcr_account: typing.Optional[str]
+    extcr_region: typing.Optional[str]
 
 # ==================== Main ===================
 
@@ -314,6 +322,7 @@ class Main(Base):
     prefect: typing.Optional[Prefect]
     cdsdashboards: CDSDashboards
     security: Security
+    external_container_reg: typing.Optional[ExtContainerReg]
     default_images: DefaultImages
     storage: typing.Dict[str, str]
     local: typing.Optional[LocalProvider]
