@@ -2,7 +2,7 @@ import enum
 import typing
 
 import pydantic
-from pydantic import validator
+from pydantic import validator, root_validator
 from qhub.utils import namestr_regex, check_for_duplicates
 
 
@@ -294,7 +294,16 @@ class CDSDashboards(Base):
     cds_hide_user_named_servers: typing.Optional[bool]
     cds_hide_user_dashboard_servers: typing.Optional[bool]
 
+
 # ======== External Container Registry ========
+
+# This allows the user to set a private AWS ECR as a replacement for
+# Docker Hub for some images - those where you provide the full path
+# to the image on the ECR.
+# extcr_account and extcr_region are the AWS account number and region
+# of the ECR respectively. access_key_id and secret_access_key are
+# AWS access keys that should have read access to the ECR.
+
 
 class ExtContainerReg(Base):
     enabled: bool
@@ -302,6 +311,26 @@ class ExtContainerReg(Base):
     secret_access_key: typing.Optional[str]
     extcr_account: typing.Optional[str]
     extcr_region: typing.Optional[str]
+
+    @root_validator
+    def enabled_must_have_fields(cls, values):
+        if values["enabled"]:
+            for fldname in (
+                "access_key_id",
+                "secret_access_key",
+                "extcr_account",
+                "extcr_region",
+            ):
+                if (
+                    fldname not in values
+                    or values[fldname] is None
+                    or values[fldname].strip() == ""
+                ):
+                    raise ValueError(
+                        f"external_container_reg must contain a non-blank {fldname} when enabled is true"
+                    )
+        return values
+
 
 # ==================== Main ===================
 
