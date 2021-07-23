@@ -119,6 +119,6 @@ variable "forwardauth-callback-url-path" {
 }
 
 variable "extcr_config" {
-  description = "Customer's access key id for external container reg"
-  type        = map
+  description = "Customer's access details for external container reg"
+  type        = map(any)
 }
