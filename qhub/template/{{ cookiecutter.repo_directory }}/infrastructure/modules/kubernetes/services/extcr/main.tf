@@ -1,14 +1,14 @@
 resource "kubernetes_secret" "customer_extcr_key" {
   metadata {
-    name = "customer-extcr-key"
+    name      = "customer-extcr-key"
     namespace = var.namespace
   }
 
   data = {
-    "access-key-id" = var.access_key_id
+    "access-key-id"     = var.access_key_id
     "secret-access-key" = var.secret_access_key
-    "extcr-account" = var.extcr_account
-    "extcr-region" = var.extcr_region
+    "extcr-account"     = var.extcr_account
+    "extcr-region"      = var.extcr_region
   }
 }
 
@@ -16,9 +16,9 @@ resource "kubernetes_manifest" "role_extcr_cred_updater" {
   provider = kubernetes-alpha
   manifest = {
     "apiVersion" = "rbac.authorization.k8s.io/v1"
-    "kind" = "Role"
+    "kind"       = "Role"
     "metadata" = {
-      "name" = "extcr-cred-updater"
+      "name"      = "extcr-cred-updater"
       "namespace" = var.namespace
     }
     "rules" = [
@@ -55,9 +55,9 @@ resource "kubernetes_manifest" "serviceaccount_extcr_cred_updater" {
   provider = kubernetes-alpha
   manifest = {
     "apiVersion" = "v1"
-    "kind" = "ServiceAccount"
+    "kind"       = "ServiceAccount"
     "metadata" = {
-      "name" = "extcr-cred-updater"
+      "name"      = "extcr-cred-updater"
       "namespace" = var.namespace
     }
   }
@@ -67,15 +67,15 @@ resource "kubernetes_manifest" "rolebinding_extcr_cred_updater" {
   provider = kubernetes-alpha
   manifest = {
     "apiVersion" = "rbac.authorization.k8s.io/v1"
-    "kind" = "RoleBinding"
+    "kind"       = "RoleBinding"
     "metadata" = {
-      "name" = "extcr-cred-updater"
+      "name"      = "extcr-cred-updater"
       "namespace" = var.namespace
     }
     "roleRef" = {
       "apiGroup" = "rbac.authorization.k8s.io"
-      "kind" = "Role"
-      "name" = "extcr-cred-updater"
+      "kind"     = "Role"
+      "name"     = "extcr-cred-updater"
     }
     "subjects" = [
       {
@@ -90,9 +90,9 @@ resource "kubernetes_manifest" "job_extcr_cred_updater" {
   provider = kubernetes-alpha
   manifest = {
     "apiVersion" = "batch/v1"
-    "kind" = "Job"
+    "kind"       = "Job"
     "metadata" = {
-      "name" = "extcr-cred-updater"
+      "name"      = "extcr-cred-updater"
       "namespace" = var.namespace
     }
     "spec" = {
@@ -124,7 +124,7 @@ resource "kubernetes_manifest" "job_extcr_cred_updater" {
                   "name" = "AWS_ACCESS_KEY_ID"
                   "valueFrom" = {
                     "secretKeyRef" = {
-                      "key" = "access-key-id"
+                      "key"  = "access-key-id"
                       "name" = "customer-extcr-key"
                     }
                   }
@@ -133,7 +133,7 @@ resource "kubernetes_manifest" "job_extcr_cred_updater" {
                   "name" = "AWS_SECRET_ACCESS_KEY"
                   "valueFrom" = {
                     "secretKeyRef" = {
-                      "key" = "secret-access-key"
+                      "key"  = "secret-access-key"
                       "name" = "customer-extcr-key"
                     }
                   }
@@ -142,7 +142,7 @@ resource "kubernetes_manifest" "job_extcr_cred_updater" {
                   "name" = "AWS_ACCOUNT"
                   "valueFrom" = {
                     "secretKeyRef" = {
-                      "key" = "extcr-account"
+                      "key"  = "extcr-account"
                       "name" = "customer-extcr-key"
                     }
                   }
@@ -151,18 +151,18 @@ resource "kubernetes_manifest" "job_extcr_cred_updater" {
                   "name" = "AWS_REGION"
                   "valueFrom" = {
                     "secretKeyRef" = {
-                      "key" = "extcr-region"
+                      "key"  = "extcr-region"
                       "name" = "customer-extcr-key"
                     }
                   }
                 },
               ]
               "image" = "xynova/aws-kubectl"
-              "name" = "kubectl"
+              "name"  = "kubectl"
             },
           ]
-          "restartPolicy" = "Never"
-          "serviceAccountName" = "extcr-cred-updater"
+          "restartPolicy"                 = "Never"
+          "serviceAccountName"            = "extcr-cred-updater"
           "terminationGracePeriodSeconds" = 0
         }
       }
@@ -174,9 +174,9 @@ resource "kubernetes_manifest" "cronjob_extcr_cred_updater" {
   provider = kubernetes-alpha
   manifest = {
     "apiVersion" = "batch/v1beta1"
-    "kind" = "CronJob"
+    "kind"       = "CronJob"
     "metadata" = {
-      "name" = "extcr-cred-updater"
+      "name"      = "extcr-cred-updater"
       "namespace" = var.namespace
     }
     "spec" = {
@@ -210,7 +210,7 @@ resource "kubernetes_manifest" "cronjob_extcr_cred_updater" {
                       "name" = "AWS_ACCESS_KEY_ID"
                       "valueFrom" = {
                         "secretKeyRef" = {
-                          "key" = "access-key-id"
+                          "key"  = "access-key-id"
                           "name" = "customer-extcr-key"
                         }
                       }
@@ -219,42 +219,42 @@ resource "kubernetes_manifest" "cronjob_extcr_cred_updater" {
                       "name" = "AWS_SECRET_ACCESS_KEY"
                       "valueFrom" = {
                         "secretKeyRef" = {
-                          "key" = "secret-access-key"
+                          "key"  = "secret-access-key"
                           "name" = "customer-extcr-key"
                         }
                       }
                     },
                     {
-                    "name" = "AWS_ACCOUNT"
-                    "valueFrom" = {
+                      "name" = "AWS_ACCOUNT"
+                      "valueFrom" = {
                         "secretKeyRef" = {
-                        "key" = "extcr-account"
-                        "name" = "customer-extcr-key"
+                          "key"  = "extcr-account"
+                          "name" = "customer-extcr-key"
                         }
-                    }
+                      }
                     },
                     {
-                    "name" = "AWS_REGION"
-                    "valueFrom" = {
+                      "name" = "AWS_REGION"
+                      "valueFrom" = {
                         "secretKeyRef" = {
-                        "key" = "extcr-region"
-                        "name" = "customer-extcr-key"
+                          "key"  = "extcr-region"
+                          "name" = "customer-extcr-key"
                         }
-                    }
+                      }
                     },
                   ]
                   "image" = "xynova/aws-kubectl"
-                  "name" = "kubectl"
+                  "name"  = "kubectl"
                 },
               ]
-              "restartPolicy" = "Never"
-              "serviceAccountName" = "extcr-cred-updater"
+              "restartPolicy"                 = "Never"
+              "serviceAccountName"            = "extcr-cred-updater"
               "terminationGracePeriodSeconds" = 0
             }
           }
         }
       }
-      "schedule" = "* */8 * * *"
+      "schedule"                   = "* */8 * * *"
       "successfulJobsHistoryLimit" = 1
     }
   }
