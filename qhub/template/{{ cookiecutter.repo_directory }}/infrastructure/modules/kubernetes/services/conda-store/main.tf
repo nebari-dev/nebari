@@ -3,7 +3,7 @@ resource "kubernetes_persistent_volume_claim" "main" {
     name      = "${var.name}-conda-store-storage"
     namespace = var.namespace
   }
-
+  wait_until_bound = true
   spec {
     access_modes = ["ReadWriteOnce"]
     resources {
