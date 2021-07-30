@@ -406,6 +406,8 @@ def render_config(
                 f"Repository to be auto-provisioned is not the full URL of a GitHub repo: {repository}"
             )
 
+    generate_kubeconfig_tempdir()
+
     return config
 
 
@@ -475,6 +477,17 @@ def github_auto_provision(config, owner, repo):
 
     return f"git@github.com:{owner}/{repo}.git"
 
+def generate_kubeconfig_tempdir():
+    # Generate local kubeconfig filename for qhub-init
+    default_local_kubeconfig_filename = os.path.join(
+            tempfile.gettempdir(), "QHUB_KUBECONFIG"
+        )
+    with open(default_local_kubeconfig_filename, "w") as f:
+            f.write('')
+    os.chmod(default_local_kubeconfig_filename, 0o700)
+    print(
+            f"Securely generated local Kubeconfig filepath stored at path={default_local_kubeconfig_filename}"
+        )
 
 def git_repository_initialize(git_repository):
     if not git.is_git_repo("./"):
