@@ -43,7 +43,7 @@ with.
 
 + [**prefect**](https://www.prefect.io/) workflow management
 + [**clearml**](https://clear.ml/) machine learning platform
-+ [**prometheus**](https://grafana.com/) cluster monitoring
++ [**prometheus**](https://prometheus.io/) cluster monitoring
 + [**grafana**](https://grafana.com/) cluster monitoring visualizations
 
 # Why use QHub?

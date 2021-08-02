@@ -4,7 +4,21 @@ resource "helm_release" "kube-prometheus-stack-helm-deployment" {
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
   version    = "16.12.0"
-  values     = [file("${path.module}/values-monitoring-qhub.yaml")]
+
+  set {
+      name = "grafana.grafana\\.ini.server.domain"
+      value = var.external-url
+  }
+
+  set {
+      name = "grafana.grafana\\.ini.server.root_url"
+      value = "%(protocol)s://%(domain)s/monitoring"
+  }
+
+  set {
+      name = "grafana.grafana\\.ini.server.server_from_sub_path"
+      value = "true"
+  }
 
 }
 
