@@ -6,18 +6,18 @@ resource "helm_release" "kube-prometheus-stack-helm-deployment" {
   version    = "16.12.0"
 
   set {
-      name = "grafana.grafana\\.ini.server.domain"
-      value = var.external-url
+    name = "grafana.grafana\\.ini.server.domain"
+    value = var.external-url
   }
 
   set {
-      name = "grafana.grafana\\.ini.server.root_url"
-      value = "%(protocol)s://%(domain)s/monitoring"
+    name = "grafana.grafana\\.ini.server.root_url"
+    value = "%(protocol)s://%(domain)s/monitoring"
   }
 
   set {
-      name = "grafana.grafana\\.ini.server.server_from_sub_path"
-      value = "true"
+    name = "grafana.grafana\\.ini.server.server_from_sub_path"
+    value = "true"
   }
 
 }
