@@ -130,12 +130,21 @@ command and open your web browser to `localhost:8000`.
 ```shell
 docker run -p 8000:8000 -it Quansight/qhub-jupyterlab:latest jupyter lab --port 8000 --ip 0.0.0.0
 ```
----
 
-### Useful Kubernetes commands
+### Using a Private AWS ECR Container Registry
 
-### Integrations
-#### Prefect
-TODO
-#### Bodo
-TODO
+By default, images such as the default JupyterLab image specified as `quansight/qhub-jupyterhub:v||QHUB_VERSION||` will be pulled from Docker Hub.
+
+To specify a private AWS ECR (and this technique should work regardless of which cloud your QHub is deployed to), first provide details of the ECR and AWS access keys in `qhub-config.yaml`:
+
+```yaml
+external_container_reg:
+  enabled: true
+  access_key_id: <AWS access key id>
+  secret_access_key: <AWS secret key>
+  extcr_account: 12345678
+  extcr_region: us-west-1
+```
+
+This will mean you can specify private Docker images such as `12345678.dkr.ecr.us-west-1.amazonaws.com/quansight/qhub-jupyterlab:mytag` in your `qhub-config.yaml` file. The AWS key and secret provided must have relevant ecr IAMS permissions to authenticate and read from the ECR container registry.
+
