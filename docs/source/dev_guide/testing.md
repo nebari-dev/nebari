@@ -161,7 +161,7 @@ Minikube does not provide a simple interactive way to configure addons,
 ([as shown in this repository issue](https://github.com/kubernetes/minikube/issues/8283)). It is recommended to set load balancer start/stop IP address using a Python script with pre-established values. This recommendation is due to an existing DNS name that uses some addresses.
 
 To do so, paste
-[this Python script](https://github.com/Quansight/qhub/blob/dev/tests/scripts/minikube-loadbalancer-ip.py) in a text file named `minikube-loadbalancer-ip.py` and then run:
+[this Python script](https://github.com/Quansight/qhub/blob/main/tests/scripts/minikube-loadbalancer-ip.py) in a text file named `minikube-loadbalancer-ip.py` and then run:
 ```shell
 python minikube-loadbalancer-ip.py
 ```
