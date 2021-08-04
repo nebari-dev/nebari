@@ -302,6 +302,16 @@ class CDSDashboards(Base):
     cds_hide_user_dashboard_servers: typing.Optional[bool]
 
 
+# =============== Extensions = = ==============
+
+
+class QHubExtension(Base):
+    name: str
+    image: str
+    urlslug: str
+    private: bool
+
+
 # ======== External Container Registry ========
 
 # This allows the user to set a private AWS ECR as a replacement for
@@ -371,6 +381,7 @@ class Main(Base):
     environments: typing.Dict[str, CondaEnvironment]
     monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
+    extensions: typing.Optional[typing.List[QHubExtension]]
 
 
 def verify(config):
