@@ -46,8 +46,15 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
       spec {
 
         container {
+          # image = "thomseddon/traefik-forward-auth:2.2.0"
+          # Use PR #159 https://github.com/thomseddon/traefik-forward-auth/pull/159
+          image = "maxisme/traefik-forward-auth:sha-a98e568"
           name  = "forwardauth-container"
-          image = "thomseddon/traefik-forward-auth:2.2.0"
+
+          env {
+            name  = "USER_ID_PATH"
+            value = "name"
+          }
 
           env {
             name  = "PROVIDERS_GENERIC_OAUTH_AUTH_URL"
