@@ -217,6 +217,10 @@ module "qhub" {
     extcr_region : "{{ cookiecutter.external_container_reg.extcr_region | default("",true) }}"
   }
 
+  keycloak = {
+    enabled : {{ cookiecutter.keycloak.enabled | default(false,true) | jsonify }}
+  }
+
   depends_on = [
     module.kubernetes-ingress
   ]

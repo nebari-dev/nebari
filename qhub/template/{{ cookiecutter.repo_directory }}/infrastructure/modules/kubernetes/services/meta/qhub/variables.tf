@@ -122,3 +122,9 @@ variable "extcr_config" {
   description = "Customer's access details for external container reg"
   type        = map(any)
 }
+
+variable "keycloak" {
+  description = "Keycloak module settings"
+  type        = map(any)
+  default     = {}
+}

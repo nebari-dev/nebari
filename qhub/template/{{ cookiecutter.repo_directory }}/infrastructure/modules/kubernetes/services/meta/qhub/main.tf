@@ -368,3 +368,15 @@ module "external-container-reg" {
   extcr_account     = var.extcr_config.extcr_account
   extcr_region      = var.extcr_config.extcr_region
 }
+
+module "kubernetes-keycloak" {
+  source = "../../keycloak"
+
+  count = lookup(var.keycloak, "enabled", false) ? 1 : 0
+
+  namespace = var.namespace
+
+  external-url = var.external-url
+
+  tls = local.tls
+}

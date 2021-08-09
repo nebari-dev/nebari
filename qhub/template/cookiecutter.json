@@ -37,6 +37,7 @@
     "storage": null,
     "cdsdashboards": {},
     "external_container_reg": {},
+    "keycloak": {},
 
     "local": {
         "node_selectors": {
