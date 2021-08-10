@@ -8,3 +8,10 @@ extraEnv: |
     value: "true"
   - name: KEYCLOAK_LOGLEVEL
     value: DEBUG
+
+startupScripts:
+  keycloak.cli: |
+    {{- .Files.Get "scripts/keycloak.cli" | nindent 2 }}
+
+  qhubadminuser.sh: |
+    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u admin -p password
