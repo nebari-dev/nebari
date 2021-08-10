@@ -131,7 +131,7 @@ jobs:
           popd
       - name: Start Minikube
         run: |
-          minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 2 --memory 7000 --wait=all
+          minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 2 --memory 6500 --wait=all
       - name: Versions
         run: |
           minikube version
