@@ -114,7 +114,7 @@ DIGITAL_OCEAN = {
     "region": "nyc3",
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
-        "general": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 1},
+        "general": {"instance": "s-4vcpu-8gb", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
         "worker": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
     },

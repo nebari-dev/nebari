@@ -209,6 +209,14 @@ module "qhub" {
   forwardauth-jh-client-secret  = random_password.forwardauth-jhsecret.result
   forwardauth-callback-url-path = local.forwardauth-callback-url-path
 
+  extcr_config = {
+    enabled : {{ cookiecutter.external_container_reg.enabled | default(false,true) | jsonify }}
+    access_key_id : "{{ cookiecutter.external_container_reg.access_key_id | default("",true) }}"
+    secret_access_key : "{{ cookiecutter.external_container_reg.secret_access_key | default("",true) }}"
+    extcr_account : "{{ cookiecutter.external_container_reg.extcr_account | default("",true) }}"
+    extcr_region : "{{ cookiecutter.external_container_reg.extcr_region | default("",true) }}"
+  }
+
   depends_on = [
     module.kubernetes-ingress
   ]
