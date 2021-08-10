@@ -1,5 +1,6 @@
 import enum
 import typing
+import re
 
 import pydantic
 from pydantic import validator, root_validator
@@ -333,12 +334,22 @@ class ExtContainerReg(Base):
 
 
 # ==================== Main ===================
-
 letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 
+class ProjectName(str):
+    project_name : str
+
+    @validator("project_name")
+    def project_name_convention(cls, value:typing.Any):
+        if len(value) > 16:
+            raise ValueError("Maximum accepted length of the project name string is 16 characters.")
+        elif re.findall(r'^(?!aws)[A-Za-z0-9][^\|\\?_-]*[A-Za-z0-9]$', value):
+            return letter_dash_underscore_pydantic
+        else:
+            raise ValueError("The project name contains unexpected caracters.")
 
 class Main(Base):
-    project_name: letter_dash_underscore_pydantic
+    project_name: ProjectName
     namespace: typing.Optional[letter_dash_underscore_pydantic]
     provider: ProviderEnum
     ci_cd: typing.Optional[CICD]
