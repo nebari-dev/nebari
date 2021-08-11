@@ -1,8 +1,16 @@
+terraform {
+  required_providers {
+    keycloak = {
+      source = "mrparkers/keycloak"
+      version = "3.3.0"
+    }
+  }
+}
+
 resource "random_password" "jupyterhub_api_token" {
   length  = 32
   special = false
 }
-
 
 module "kubernetes-jupyterhub" {
   source = "../../jupyterhub"

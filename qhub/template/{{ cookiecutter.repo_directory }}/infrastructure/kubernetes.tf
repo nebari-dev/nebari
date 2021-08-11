@@ -142,6 +142,13 @@ provider "helm" {
   }
 }
 
+provider "keycloak" {
+    client_id     = "admin-cli"
+    username      = "admin"
+    password      = "testpass"
+    url           = "http://localhost:8080"
+}
+
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-autoscaling" {
   source = "./modules/kubernetes/services/cluster-autoscaler"

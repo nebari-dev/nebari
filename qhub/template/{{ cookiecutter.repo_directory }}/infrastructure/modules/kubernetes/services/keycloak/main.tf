@@ -1,6 +1,9 @@
-resource "kubernetes_namespace" "keycloak" {
-  metadata {
-    name = "keycloak"
+terraform {
+  required_providers {
+    keycloak = {
+      source = "mrparkers/keycloak"
+      version = "3.3.0"
+    }
   }
 }
 
@@ -53,86 +56,20 @@ resource "kubernetes_manifest" "keycloak-http" {
   }
 }
 
-resource "kubernetes_service" "keycloak-headless-external" {
-  metadata {
-    name      = "keycloak-headless-external"
-    namespace = var.namespace
-  }
+resource "keycloak_realm" "realm-master" {
+  provider = keycloak
+  
+  realm = "master"
 
-  spec {
-    type = "ExternalName"
-    external_name = "keycloak-headless.keycloak.svc.cluster.local"
+  smtp_server {
+    host = "smtp.gmail.com"
+    from = "<email>"
 
-    port {
-      name        = "http"
-      protocol    = "TCP"
-      port        = 80
-      target_port = 80
+    auth {
+      username = "<email>"
+      password = "<password>"
     }
   }
-}
 
-# Converted from https://github.com/keycloak/keycloak-operator/blob/master/deploy/operator.yaml
-# using https://github.com/jrhouston/tfk8s
-resource "kubernetes_manifest" "deployment_keycloak_operator" {
-  provider = kubernetes-alpha
-
-  manifest = {
-    "apiVersion" = "apps/v1"
-    "kind" = "Deployment"
-    "metadata" = {
-      "name" = "keycloak-operator"
-      "namespace" = "keycloak"
-    }
-    "spec" = {
-      "replicas" = 1
-      "selector" = {
-        "matchLabels" = {
-          "name" = "keycloak-operator"
-        }
-      }
-      "template" = {
-        "metadata" = {
-          "labels" = {
-            "name" = "keycloak-operator"
-          }
-        }
-        "spec" = {
-          "containers" = [
-            {
-              "command" = [
-                "keycloak-operator",
-              ]
-              "env" = [
-                {
-                  "name" = "WATCH_NAMESPACE"
-                  "valueFrom" = {
-                    "fieldRef" = {
-                      "fieldPath" = "metadata.namespace"
-                    }
-                  }
-                },
-                {
-                  "name" = "POD_NAME"
-                  "valueFrom" = {
-                    "fieldRef" = {
-                      "fieldPath" = "metadata.name"
-                    }
-                  }
-                },
-                {
-                  "name" = "OPERATOR_NAME"
-                  "value" = "keycloak-operator"
-                },
-              ]
-              "image" = "quay.io/keycloak/keycloak-operator:14.0.0"
-              "imagePullPolicy" = "Always"
-              "name" = "keycloak-operator"
-            },
-          ]
-          "serviceAccountName" = "keycloak-operator"
-        }
-      }
-    }
-  }
+  depends_on = [helm_release.keycloak]
 }
