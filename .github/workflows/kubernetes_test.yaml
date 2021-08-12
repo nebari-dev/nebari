@@ -14,7 +14,9 @@ jobs:
   test-kubernetes:
     name: "Kubernetes Tests"
     runs-on: self-hosted
-
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
       - name: 'QHUB_GH_BRANCH set for PR'
         if: ${{ github.event_name == 'pull_request' }}
@@ -32,12 +34,29 @@ jobs:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: conda-incubator/setup-miniconda@v2
+        env:
+          CONDA: /home/runnerx/miniconda3
         with:
           python-version: 3.8
+          miniconda-version: "latest"
       - name: Install QHub
         run: |
+          conda install -c anaconda pip
           pip install .[dev]
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install Cypress dependencies
+        run: |
+           sudo apt-get -y update
+           sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+
+      - name: Test npm
+        run: |
+          npm --version
       - name: Download and Install Minikube and Kubectl
         run: |
           mkdir -p bin

@@ -1,8 +1,0 @@
-runners:
-  - name: cirun-runner
-    cloud: do
-    instance_type: s-4vcpu-8gb
-    machine_image: ubuntu-20-04-x64
-    workflow: .github/workflows/kubernetes_test.yaml
-    count: 1
-
