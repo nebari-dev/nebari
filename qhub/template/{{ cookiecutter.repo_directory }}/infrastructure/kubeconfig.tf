@@ -12,7 +12,7 @@ locals {
       certificate-authority-data = module.kubernetes.credentials.cluster_ca
       server                     = module.kubernetes.credentials.endpoint
     },
-    name    = local.kubeconfig_cluster_name
+    name = local.kubeconfig_cluster_name
   }
 
   kubeconfig_contexts = {
@@ -20,7 +20,7 @@ locals {
       cluster = local.kubeconfig_cluster_name
       user    = local.kubeconfig_cluster_name
     },
-    name    = local.kubeconfig_cluster_name
+    name = local.kubeconfig_cluster_name
   }
 
   kubeconfig_users = {
