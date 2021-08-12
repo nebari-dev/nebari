@@ -53,5 +53,5 @@ resource "local_file" "kubeconfig" {
       local.kubeconfig_users
     ]
   }), "\"", "")
-  filename = "${var.kubeconfig_path}./test.tf"
+  filename = "${var.kubeconfig_path}"
 }
