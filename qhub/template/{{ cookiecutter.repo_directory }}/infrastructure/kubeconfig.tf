@@ -34,22 +34,22 @@ locals {
 
 # Kubeconfig
 variable "kubeconfig_path" {
-   type=string
+   type =string
 }
 
 resource "local_file" "kubeconfig" {
   content = replace(yamlencode({
-    "apiVersion": "v1",
-    "kind": "Config",
-    "preferences": "{}",
-    "current-context": local.kubeconfig_current_context,
-    "clusters": [
+    "apiVersion" : "v1",
+    "kind" : "Config",
+    "preferences" : "{}",
+    "current-context" : local.kubeconfig_current_context,
+    "clusters" : [
       local.kubeconfig_clusters
     ],
-    "contexts": [
+    "contexts" : [
       local.kubeconfig_contexts
     ],
-    "users": [
+    "users" : [
       local.kubeconfig_users
     ]
   }), "\"", "")
