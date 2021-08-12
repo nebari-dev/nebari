@@ -5,5 +5,6 @@ output "credentials" {
     token    = data.google_client_config.main.access_token
     cluster_ca_certificate = base64decode(
     google_container_cluster.main.master_auth.0.cluster_ca_certificate)
+    cluster_ca = google_container_cluster.main.master_auth.0.cluster_ca_certificate
   }
 }

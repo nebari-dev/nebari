@@ -484,6 +484,9 @@ def generate_kubeconfig_tempdir():
         )
     with open(default_local_kubeconfig_filename, "w") as f:
             f.write('')
+    # Export path to terraform future usage
+    os.environ['TF_VAR_kubeconfig_path'] = default_local_kubeconfig_filename
+
     os.chmod(default_local_kubeconfig_filename, 0o700)
     print(
             f"Securely generated local Kubeconfig filepath stored at path={default_local_kubeconfig_filename}"
