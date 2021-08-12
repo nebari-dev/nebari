@@ -53,5 +53,5 @@ resource "local_file" "kubeconfig" {
       local.kubeconfig_users
     ]
   }), "\"", "")
-  filename = "${var.kubeconfig_path}"
+  filename = var.kubeconfig_path
 }
