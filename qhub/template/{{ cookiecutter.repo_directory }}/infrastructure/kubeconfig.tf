@@ -35,8 +35,8 @@ locals {
 # Kubeconfig
 variable "kubeconfig_path" {
   # This should receive the TF_VAR_kubeconfig_path value
-  type = string
-  default = "${path.module}./QHUB_KUBECONFIG"
+  type    = string
+  default = "./QHUB_KUBECONFIG"
 }
 
 resource "local_file" "kubeconfig" {
