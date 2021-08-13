@@ -369,7 +369,7 @@ class Main(Base):
         convention = """
         In order to successfully deploy QHub, there are some project naming conventions which need
         to be followed. First, ensure your name is compatible with the specific one for
-        your chosen Cloud provider. In addition, QHub projectname should also obey to the following
+        your chosen Cloud provider. In addition, the QHub project name should also obey the following
         format requirements:
         - letters from A to Z (upper and lower case) and numbers;
         - Special characters are not allowed, such as "!@#$%^&*()";
