@@ -368,7 +368,7 @@ class Main(Base):
     def project_name_convention(cls, value: typing.Any):
         convention = """
         In order to successfully deploy QHub, there are some project naming conventions which need
-        to be followed. For starters, make sure your name is compatible with the specific one for
+        to be followed. First, ensure your name is compatible with the specific one for
         your chosen Cloud provider. In addition, QHub projectname should also obey to the following
         format requirements:
         - letters from A to Z (upper and lower case) and numbers;
