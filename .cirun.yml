@@ -1,0 +1,15 @@
+# Self-Hosted Github Action Runners on DigitalOcean via Cirun.io
+# Reference: https://docs.cirun.io/reference/yaml.html
+runners:
+  - name: run-k8s-tests
+    # Cloud Provider: DigitalOcean
+    cloud: digitalocean
+    # Cheapest VM on DigitalOcean
+    instance_type: s-4vcpu-8gb
+    # Ubuntu-20.4  image"
+    machine_image: docker-20-04
+    region: nyc1
+    # Path of the relevant workflow file
+    workflow: .github/workflows/kubernetes_test.yaml
+    # Number of runners to provision on every trigger on Actions job
+    count: 1

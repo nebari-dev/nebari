@@ -12,6 +12,8 @@
 ## Upcoming Release
 
 ### Feature changes and enhancements
+ 
+ - Added basic cluster monitoring capability via Grafana/Prometheus integration
 
 ### Bug fixes
 

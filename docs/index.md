@@ -63,6 +63,7 @@ source/admin_guide/upgrade.md
 source/admin_guide/gpu.md
 source/admin_guide/preemptible-spot-instances.md
 source/admin_guide/system_maintenance.md
+source/admin_guide/monitoring.md
 source/admin_guide/clearml.md
 source/admin_guide/prefect.md
 source/admin_guide/faq.md

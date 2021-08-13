@@ -238,6 +238,19 @@ module "prefect" {
 }
 {% endif -%}
 
+{% if cookiecutter.monitoring.enabled -%}
+module "monitoring" {
+  source       = "./modules/kubernetes/services/monitoring"
+  namespace    = var.environment
+  external-url = var.endpoint
+  tls          = module.qhub.tls
+  depends_on = [
+    module.qhub
+  ]
+}
+{% endif -%}
+
+
 {% if cookiecutter.clearml.enabled -%}
 module "clearml" {
   source       = "./modules/kubernetes/services/clearml"

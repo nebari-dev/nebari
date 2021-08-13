@@ -172,7 +172,7 @@ resource "kubernetes_deployment" "main" {
             "--api.dashboard=true",
             "--ping=true",
             # Start the Traefik Kubernetes Ingress Controller
-            "--providers.kubernetesingress",
+            "--providers.kubernetesingress=true",
             "--providers.kubernetesingress.namespaces=${var.namespace}",
             "--providers.kubernetesingress.ingressclass=traefik",
             # Start the Traefik Kubernetes CRD Controller Provider
