@@ -336,6 +336,7 @@ class ExtContainerReg(Base):
 # ==================== Main ===================
 letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 
+
 class Main(Base):
     project_name: str
     namespace: typing.Optional[letter_dash_underscore_pydantic]
@@ -364,7 +365,7 @@ class Main(Base):
     clearml: typing.Optional[ClearML]
 
     @validator("project_name")
-    def project_name_convention(cls, value:typing.Any):
+    def project_name_convention(cls, value: typing.Any):
         convention = """
         In order to successfully deploy QHub, there are some project naming conventions which need
         to be followed. For starters, make sure your name is compatible with the specific one for
@@ -376,11 +377,14 @@ class Main(Base):
         - If using AWS: names SHOULD NOT start with the string aws;
         """
         if len(value) > 16:
-            raise ValueError("Maximum accepted length of the project name string is 16 characters.")
-        elif re.findall(r'^(?!aws)[A-Za-z0-9][^\|\\?_-]*[A-Za-z0-9]$', value):
+            raise ValueError(
+                "Maximum accepted length of the project name string is 16 characters."
+            )
+        elif re.findall(r"^(?!aws)[A-Za-z0-9][^\|\\?_-]*[A-Za-z0-9]$", value):
             return letter_dash_underscore_pydantic
         else:
             raise ValueError(convention)
+
 
 def verify(config):
     Main(**config)
