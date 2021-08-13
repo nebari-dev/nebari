@@ -380,7 +380,7 @@ class Main(Base):
             raise ValueError(
                 "Maximum accepted length of the project name string is 16 characters."
             )
-        elif re.findall(r"^(?!aws)[A-Za-z0-9][^\|\\?_]*[A-Za-z0-9]$", value):
+        elif re.findall(r"^(?!aws)[A-Za-z0-9][^/|.~!?@#$%^=&*\\()_]*[A-Za-z0-9]$", value):
             return letter_dash_underscore_pydantic
         else:
             raise ValueError(convention)
