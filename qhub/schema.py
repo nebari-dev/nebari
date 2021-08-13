@@ -372,7 +372,7 @@ class Main(Base):
         your chosen Cloud provider. In addition, QHub projectname should also obey to the following
         format requirements:
         - letters from A to Z (upper and lower case) and numbers;
-        - Special characters are NOT allowed;
+        - Special characters are not allowed, such as "!@#$%^&*()";
         - Maximum accepted length of the name string is 16 characters.
         - If using AWS: names should not start with the string "aws";
         """
