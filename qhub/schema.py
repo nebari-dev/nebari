@@ -374,7 +374,7 @@ class Main(Base):
         - letters from A to Z (upper and lower case) and numbers;
         - Special characters are NOT allowed;
         - Maximum accepted length of the name string is 16 characters.
-        - If using AWS: names SHOULD NOT start with the string aws;
+        - If using AWS: names should not start with the string "aws";
         """
         if len(value) > 16:
             raise ValueError(
