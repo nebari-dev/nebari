@@ -336,20 +336,8 @@ class ExtContainerReg(Base):
 # ==================== Main ===================
 letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 
-class ProjectName(str):
-    project_name : str
-
-    @validator("project_name")
-    def project_name_convention(cls, value:typing.Any):
-        if len(value) > 16:
-            raise ValueError("Maximum accepted length of the project name string is 16 characters.")
-        elif re.findall(r'^(?!aws)[A-Za-z0-9][^\|\\?_-]*[A-Za-z0-9]$', value):
-            return letter_dash_underscore_pydantic
-        else:
-            raise ValueError("The project name contains unexpected caracters.")
-
 class Main(Base):
-    project_name: ProjectName
+    project_name: str
     namespace: typing.Optional[letter_dash_underscore_pydantic]
     provider: ProviderEnum
     ci_cd: typing.Optional[CICD]
@@ -375,6 +363,24 @@ class Main(Base):
     environments: typing.Dict[str, CondaEnvironment]
     clearml: typing.Optional[ClearML]
 
+    @validator("project_name")
+    def project_name_convention(cls, value:typing.Any):
+        convention = """
+        In order to successfully deploy QHub, there are some project naming conventions which need
+        to be followed. For starters, make sure your name is compatible with the specific one for
+        your chosen Cloud provider. In addition, QHub projectname should also obey to the following
+        format requirements:
+        - letters from A to Z (upper and lower case) and numbers;
+        - Special characters are NOT allowed;
+        - Maximum accepted length of the name string is 16 characters.
+        - If using AWS: names SHOULD NOT start with the string aws;
+        """
+        if len(value) > 16:
+            raise ValueError("Maximum accepted length of the project name string is 16 characters.")
+        elif re.findall(r'^(?!aws)[A-Za-z0-9][^\|\\?_-]*[A-Za-z0-9]$', value):
+            return letter_dash_underscore_pydantic
+        else:
+            raise ValueError(convention)
 
 def verify(config):
     Main(**config)
