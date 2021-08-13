@@ -44,19 +44,7 @@ jobs:
         run: |
           conda install -c anaconda pip
           pip install .[dev]
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
 
-      - name: Install Cypress dependencies
-        run: |
-           sudo apt-get -y update
-           sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-
-      - name: Test npm
-        run: |
-          npm --version
       - name: Download and Install Minikube and Kubectl
         run: |
           mkdir -p bin
@@ -117,6 +105,17 @@ jobs:
           curl -k https://github-actions.qhub.dev/hub/home -i
 
       ### CYPRESS TESTS
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: npm version
+        run: |
+          npm --version
+      - name: Install Cypress dependencies
+        run: |
+          sudo apt-get -y update
+          sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
       - name: Read example-user password
         run: python -c "import tempfile, os; print('CYPRESS_EXAMPLE_USER_PASSWORD='+open(os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')).read())" >> $GITHUB_ENV
