@@ -1,3 +1,9 @@
+resource "kubernetes_namespace" "keycloak" {
+  metadata {
+    name = "keycloak"
+  }
+}
+
 resource "helm_release" "keycloak" {
   name      = "keycloak"
   namespace = "keycloak"
