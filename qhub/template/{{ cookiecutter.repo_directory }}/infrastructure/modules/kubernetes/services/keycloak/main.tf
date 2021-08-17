@@ -59,14 +59,16 @@ resource "kubernetes_manifest" "keycloak-http" {
 resource "keycloak_realm" "realm-master" {
   provider = keycloak
   
-  realm = "master"
+  realm = "providerrealm"
+
+  display_name = "Provider Updated Again2"
 
   smtp_server {
     host = "smtp.gmail.com"
-    from = "<email>"
+    from = "email@test.com"
 
     auth {
-      username = "<email>"
+      username = "email@test.com"
       password = "<password>"
     }
   }

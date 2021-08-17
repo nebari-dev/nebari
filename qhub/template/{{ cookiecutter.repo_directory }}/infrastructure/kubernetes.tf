@@ -145,8 +145,8 @@ provider "helm" {
 provider "keycloak" {
     client_id     = "admin-cli"
     username      = "admin"
-    password      = "testpass"
-    url           = "http://localhost:8080"
+    password      = "password"
+    url           = "https://${var.endpoint}"
 }
 
 {% if cookiecutter.provider == "aws" -%}
