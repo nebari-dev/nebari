@@ -19,10 +19,10 @@ resource "helm_release" "keycloak" {
     file("${path.module}/values.yaml"),
   ], var.overrides)
 
-  set {
-    name  = "ingress.rules[0].host"
-    value = var.external-url
-  }
+#  set {
+#    name  = "ingress.rules[0].host"
+#    value = var.external-url
+#  }
 }
 
 resource "kubernetes_manifest" "keycloak-http" {
@@ -52,6 +52,25 @@ resource "kubernetes_manifest" "keycloak-http" {
         }
       ]
       tls = var.tls
+    }
+  }
+}
+
+resource "kubernetes_service" "keycloak-headless-external" {
+  metadata {
+    name      = "keycloak-headless-external"
+    namespace = var.namespace
+  }
+
+  spec {
+    type = "ExternalName"
+    external_name = "keycloak-headless.keycloak.svc.cluster.local"
+
+    port {
+      name        = "http"
+      protocol    = "TCP"
+      port        = 80
+      target_port = 80
     }
   }
 }
