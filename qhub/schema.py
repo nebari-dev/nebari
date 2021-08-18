@@ -391,8 +391,10 @@ class ExtContainerReg(Base):
 
 # ================= Keycloak ==================
 
+
 class Keycloak(Base):
-    enabled: bool
+    enabled: bool  # Currently ignored
+
 
 # ==================== Main ===================
 

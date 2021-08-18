@@ -14,6 +14,8 @@ variable "overrides" {
   default     = []
 }
 
-variable "tls" {
-  description = "TLS configuration"
+variable "certificate-secret-name" {
+  description = "tls certificate secret name to use"
+  type        = string
+  default     = ""
 }

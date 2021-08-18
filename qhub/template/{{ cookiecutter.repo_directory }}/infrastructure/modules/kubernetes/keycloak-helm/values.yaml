@@ -15,8 +15,5 @@ startupScripts:
 
   qhubadminuser.sh: |
     /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u admin -p password
+    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u qhub-bot -p qhubpassword
 
-# Don't think this works, because the server is not yet running...
-#  qhubrealm.sh: |
-#    /opt/jboss/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080/auth --realm master --user admin --password testpass
-#    /opt/jboss/keycloak/bin/kcadm.sh update realms/master -s displayName=Keycloak661

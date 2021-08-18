@@ -182,6 +182,30 @@ module "kubernetes-ingress" {
   ]
 }
 
+module "kubernetes-keycloak-helm" {
+  source = "./modules/kubernetes/keycloak-helm"
+
+  namespace = var.environment
+
+  external-url = var.endpoint
+
+  depends_on = [
+    module.kubernetes-ingress
+  ]
+}
+
+module "kubernetes-keycloak-config" {
+  source = "./modules/kubernetes/keycloak-config"
+
+  name = var.name
+
+  external-url = var.endpoint
+
+  depends_on = [
+    module.kubernetes-keycloak-helm
+  ]
+}
+
 module "qhub" {
   source = "./modules/kubernetes/services/meta/qhub"
 
@@ -224,13 +248,6 @@ module "qhub" {
     extcr_region : "{{ cookiecutter.external_container_reg.extcr_region | default("",true) }}"
   }
 
-  keycloak = {
-    enabled : {{ cookiecutter.keycloak.enabled | default(false,true) | jsonify }}
-  }
-
-  depends_on = [
-    module.kubernetes-ingress
-  ]
 }
 
 {% if cookiecutter.prefect.enabled -%}

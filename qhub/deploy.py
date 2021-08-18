@@ -59,24 +59,26 @@ def guided_install(
 
     # 3 kubernetes-alpha provider requires that kubernetes be
     # provisionioned before any "kubernetes_manifests" resources
+    logger.info("Running terraform init")
     terraform.init(directory="infrastructure")
+
+    targets = [
+        "module.kubernetes",
+        "module.kubernetes-initialization",
+    ]
+
+    logger.info(f"Running Terraform Stage: {targets}")
     terraform.apply(
         directory="infrastructure",
-        targets=[
-            "module.kubernetes",
-            "module.kubernetes-initialization",
-        ],
+        targets=targets,
     )
 
     # 04 Create qhub initial state (up to nginx-ingress)
-    terraform.init(directory="infrastructure")
+    targets.extend(["module.kubernetes-ingress"])
+    logger.info(f"Running Terraform Stage: {targets}")
     terraform.apply(
         directory="infrastructure",
-        targets=[
-            "module.kubernetes",
-            "module.kubernetes-initialization",
-            "module.kubernetes-ingress",
-        ],
+        targets=targets,
     )
 
     cmd_output = terraform.output(directory="infrastructure")
@@ -117,7 +119,24 @@ def guided_install(
             f'"{config["domain"]}" [Press Enter when Complete]'
         )
 
-    # 06 Full deploy QHub
+    # Now Keycloak Helm chart
+    targets.extend(["module.kubernetes-keycloak-helm"])
+    logger.info(f"Running Terraform Stage: {targets}")
+    terraform.apply(
+        directory="infrastructure",
+        targets=targets,
+    )
+
+    # Now Keycloak realm and config
+    targets.extend(["module.kubernetes-keycloak-config"])
+    logger.info(f"Running Terraform Stage: {targets}")
+    terraform.apply(
+        directory="infrastructure",
+        targets=targets,
+    )
+
+    # Full deploy QHub
+    logger.info("Running Terraform Stage: FULL")
     terraform.apply(directory="infrastructure")
 
 
