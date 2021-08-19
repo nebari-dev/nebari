@@ -73,9 +73,15 @@ class ClearML(Base):
 # ============== Prefect =============
 
 
+class PrefectAgent(Base):
+  prefectLabels: typing.Optional[typing.List[str]]
+  envVars: typing.Optional[typing.Dict[str, str]]
+
+
 class Prefect(Base):
     enabled: bool
     image: typing.Optional[str]
+    agent: typing.Optional[PrefectAgent]
 
 
 # ============= Terraform ===============

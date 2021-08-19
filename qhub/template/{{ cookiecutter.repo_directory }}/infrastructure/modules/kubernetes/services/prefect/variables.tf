@@ -21,3 +21,13 @@ variable "cloud_api" {
   type    = string
   default = "https://api.prefect.io"
 }
+
+variable "agent.prefectLabels" {
+  type    = list
+  default = []
+}
+
+variable "agent.prefectLabels" {
+  type    = map
+  default = {}
+}

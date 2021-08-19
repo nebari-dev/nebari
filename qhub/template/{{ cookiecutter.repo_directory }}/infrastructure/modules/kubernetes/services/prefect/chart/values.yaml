@@ -3,3 +3,6 @@ namespace: <placeholder>
 serviceAccount: prefect
 prefectToken: "<placeholder>"
 cloudApi: "<placeholder>"
+agent:
+  prefectLabels: []
+  envVars: {}

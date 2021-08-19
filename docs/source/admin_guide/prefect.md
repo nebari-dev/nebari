@@ -16,6 +16,8 @@ prefect:
   image: prefecthq/prefect:0.14.22-python3.8
 ```
 
+TODO: add docs for `prefectLabels` and `envVars`.
+
 There are a bunch of components in getting Prefect working for you, here
 is a brief description of them:
 

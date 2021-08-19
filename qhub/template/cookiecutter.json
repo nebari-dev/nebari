@@ -21,7 +21,11 @@
     },
     "prefect": {
         "enabled": null,
-        "image": null
+        "image": null,
+        "agent": {
+            "prefectLabels": [],
+            "envVars": {}
+        }
     },
     "security": null,
     "default_images": null,
