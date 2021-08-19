@@ -19,3 +19,9 @@ variable "groups" {
   type        = list(map(any))
   default     = []
 }
+
+variable "user_groups" {
+  description = "list of user_groups data"
+  type        = list(list(number))
+  default     = []
+}

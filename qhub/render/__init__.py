@@ -58,18 +58,6 @@ def patch_terraform_users(config):
     """
     Add terraform-friendly user information
     """
-    incoming_users = config.get("security", {}).get("users", {})
-    config["tf_users"] = [
-        {
-            "name": k,
-            "uid": str(v.get("uid", "")),
-            "password": v.get("password", ""),
-            "email": "@" in k and k or "",
-            "primary_group": v.get("primary_group", "users"),
-        }
-        for (k, v) in incoming_users.items()
-    ]
-
     incoming_groups = config.get("security", {}).get("groups", {})
     config["tf_groups"] = [
         {
@@ -78,6 +66,28 @@ def patch_terraform_users(config):
         }
         for (k, v) in incoming_groups.items()
     ]
+
+    group_index_lookup = {
+        obj[0]: index for (index, obj) in enumerate(incoming_groups.items())
+    }
+
+    incoming_users = config.get("security", {}).get("users", {})
+    config["tf_users"] = [
+        {
+            "name": k,
+            "uid": str(v.get("uid", "")),
+            "password": v.get("password", ""),
+            "email": "@" in k and k or None,
+            "primary_group": v.get("primary_group", "users"),
+        }
+        for (k, v) in incoming_users.items()
+    ]
+
+    config["tf_user_groups"] = []
+    for (k, v) in incoming_users.items():
+        users_group_names = set([v.get("primary_group", "")] + v.get("secondary_groups", [])) - set([""])
+        config["tf_user_groups"].append([group_index_lookup[gname] for gname in users_group_names])
+
 
 def deep_merge(d1, d2):
     """Deep merge two dictionaries.

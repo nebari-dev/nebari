@@ -36,7 +36,7 @@ resource "keycloak_user" "user" {
 
   lifecycle {
     ignore_changes = [
-      first_name, last_name
+      first_name, last_name, email, enabled
     ]
   }
 
@@ -59,4 +59,16 @@ resource "keycloak_group" "group" {
   attributes = {
     gid = var.groups[count.index].gid
   }
+}
+
+resource "keycloak_user_groups" "user_groups" {
+  count = length(var.user_groups)
+
+  realm_id = keycloak_realm.realm-qhub.id
+
+  user_id = keycloak_user.user[count.index].id
+
+  group_ids  = [
+    for i in var.user_groups[count.index] : keycloak_group.group[i].id
+  ]
 }

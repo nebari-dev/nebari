@@ -214,6 +214,8 @@ module "kubernetes-keycloak-config" {
 
   groups = jsondecode("{{ cookiecutter.tf_groups | jsonify | replace('"', '\\"') }}")
 
+  user_groups = jsondecode("{{ cookiecutter.tf_user_groups | jsonify | replace('"', '\\"') }}")
+
   depends_on = [
     module.kubernetes-keycloak-helm
   ]
