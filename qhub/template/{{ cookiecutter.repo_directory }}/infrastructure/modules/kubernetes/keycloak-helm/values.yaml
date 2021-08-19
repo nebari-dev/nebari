@@ -14,6 +14,6 @@ startupScripts:
     {{- .Files.Get "scripts/keycloak.cli" | nindent 2 }}
 
   qhubadminuser.sh: |
-    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u admin -p password
-    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u qhub-bot -p qhubpassword
+    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u root -p password
+    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u qhub-bot -p "{{ .Values.qhub_bot_password }}"
 

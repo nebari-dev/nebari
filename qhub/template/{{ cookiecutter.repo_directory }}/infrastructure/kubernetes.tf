@@ -142,13 +142,6 @@ provider "helm" {
   }
 }
 
-provider "keycloak" {
-    client_id     = "admin-cli"
-    username      = "admin"
-    password      = "password"
-    url           = "https://${var.endpoint}"
-}
-
 {% if cookiecutter.provider == "aws" -%}
 module "kubernetes-autoscaling" {
   source = "./modules/kubernetes/services/cluster-autoscaler"
@@ -182,6 +175,8 @@ module "kubernetes-ingress" {
   ]
 }
 
+### Keycloak
+
 module "kubernetes-keycloak-helm" {
   source = "./modules/kubernetes/keycloak-helm"
 
@@ -192,6 +187,13 @@ module "kubernetes-keycloak-helm" {
   depends_on = [
     module.kubernetes-ingress
   ]
+}
+
+provider "keycloak" {
+    client_id     = "admin-cli"
+    username      = "qhub-bot"
+    password      = module.kubernetes-keycloak-helm.qhub-bot-password
+    url           = "https://${var.endpoint}"
 }
 
 module "kubernetes-keycloak-config" {

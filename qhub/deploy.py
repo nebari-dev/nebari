@@ -74,7 +74,7 @@ def guided_install(
     )
 
     # 04 Create qhub initial state (up to nginx-ingress)
-    targets.extend(["module.kubernetes-ingress"])
+    targets = ["module.kubernetes-ingress"]
     logger.info(f"Running Terraform Stage: {targets}")
     terraform.apply(
         directory="infrastructure",
@@ -120,7 +120,7 @@ def guided_install(
         )
 
     # Now Keycloak Helm chart
-    targets.extend(["module.kubernetes-keycloak-helm"])
+    targets = ["module.kubernetes-keycloak-helm"]
     logger.info(f"Running Terraform Stage: {targets}")
     terraform.apply(
         directory="infrastructure",
@@ -128,7 +128,7 @@ def guided_install(
     )
 
     # Now Keycloak realm and config
-    targets.extend(["module.kubernetes-keycloak-config"])
+    targets = ["module.kubernetes-keycloak-config"]
     logger.info(f"Running Terraform Stage: {targets}")
     terraform.apply(
         directory="infrastructure",
