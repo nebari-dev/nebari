@@ -1,8 +1,3 @@
-resource "random_password" "keycloak-qhub-bot-password" {
-  length  = 32
-  special = false
-}
-
 resource "helm_release" "keycloak" {
   name      = "keycloak"
   namespace = var.namespace
@@ -17,7 +12,7 @@ resource "helm_release" "keycloak" {
 
   set {
     name = "qhub_bot_password"
-    value = random_password.keycloak-qhub-bot-password.result
+    value = var.qhub-bot-password
   }
 }
 

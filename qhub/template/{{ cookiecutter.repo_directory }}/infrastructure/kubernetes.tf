@@ -177,12 +177,19 @@ module "kubernetes-ingress" {
 
 ### Keycloak
 
+resource "random_password" "keycloak-qhub-bot-password" {
+  length  = 32
+  special = false
+}
+
 module "kubernetes-keycloak-helm" {
   source = "./modules/kubernetes/keycloak-helm"
 
   namespace = var.environment
 
   external-url = var.endpoint
+
+  qhub-bot-password = random_password.keycloak-qhub-bot-password.result
 
   depends_on = [
     module.kubernetes-ingress
@@ -192,7 +199,7 @@ module "kubernetes-keycloak-helm" {
 provider "keycloak" {
     client_id     = "admin-cli"
     username      = "qhub-bot"
-    password      = module.kubernetes-keycloak-helm.qhub-bot-password
+    password      = random_password.keycloak-qhub-bot-password.result
     url           = "https://${var.endpoint}"
 }
 
@@ -202,6 +209,10 @@ module "kubernetes-keycloak-config" {
   name = var.name
 
   external-url = var.endpoint
+
+  users = jsondecode("{{ cookiecutter.tf_users | jsonify | replace('"', '\\"') }}")
+
+  groups = jsondecode("{{ cookiecutter.tf_groups | jsonify | replace('"', '\\"') }}")
 
   depends_on = [
     module.kubernetes-keycloak-helm

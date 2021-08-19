@@ -54,6 +54,31 @@ def patch_versioning_extra_config(config):
         config["terraform_version"] = TERRAFORM_VERSION
 
 
+def patch_terraform_users(config):
+    """
+    Add terraform-friendly user information
+    """
+    incoming_users = config.get("security", {}).get("users", {})
+    config["tf_users"] = [
+        {
+            "name": k,
+            "uid": str(v.get("uid", "")),
+            "password": v.get("password", ""),
+            "email": "@" in k and k or "",
+            "primary_group": v.get("primary_group", "users"),
+        }
+        for (k, v) in incoming_users.items()
+    ]
+
+    incoming_groups = config.get("security", {}).get("groups", {})
+    config["tf_groups"] = [
+        {
+            "name": k,
+            "gid": str(v.get("gid", "")),
+        }
+        for (k, v) in incoming_groups.items()
+    ]
+
 def deep_merge(d1, d2):
     """Deep merge two dictionaries.
     >>> value_1 = {
@@ -129,6 +154,8 @@ def render_template(output_directory, config_filename, force=False):
         config = collections.ChainMap(config, json.load(f))
 
     patch_versioning_extra_config(config)
+
+    patch_terraform_users(config)
 
     remove_existing_renders(
         dest_repo_dir=output_directory / repo_directory,

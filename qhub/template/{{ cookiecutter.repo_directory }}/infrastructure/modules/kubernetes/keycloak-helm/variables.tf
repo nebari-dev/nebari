@@ -19,3 +19,8 @@ variable "certificate-secret-name" {
   type        = string
   default     = ""
 }
+
+variable "qhub-bot-password" {
+  description = "qhub-bot password for keycloak"
+  type        = string
+}
