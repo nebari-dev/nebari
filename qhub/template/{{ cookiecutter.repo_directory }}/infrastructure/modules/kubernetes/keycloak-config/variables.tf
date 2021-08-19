@@ -3,6 +3,21 @@ variable "external-url" {
   type        = string
 }
 
+variable "forwardauth-callback-url-path" {
+  description = "URL Path for the ForwardAuth callback"
+  type        = string
+}
+
+variable "forwardauth-keycloak-client-id" {
+  description = "ForwardAuth Client ID within Keycloak"
+  type        = string
+}
+
+variable "forwardauth-keycloak-client-secret" {
+  description = "ForwardAuth Client Secret within Keycloak"
+  type        = string
+}
+
 variable "name" {
   description = "Project name for the QHub deployment"
   type        = string

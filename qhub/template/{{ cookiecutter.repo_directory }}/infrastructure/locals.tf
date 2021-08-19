@@ -66,6 +66,7 @@ locals {
     }
   }
 
-  forwardauth-jh-client-id      = "forwardauthjupyterhubserviceclient"
-  forwardauth-callback-url-path = "/forwardauth/_oauth"
+  forwardauth-jh-client-id       = "forwardauthjupyterhubserviceclient"
+  forwardauth-keycloak-client-id = "forwardauthkeycloakclient"
+  forwardauth-callback-url-path  = "/forwardauth/_oauth"
 }

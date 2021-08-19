@@ -210,6 +210,10 @@ module "kubernetes-keycloak-config" {
 
   external-url = var.endpoint
 
+  forwardauth-callback-url-path      = local.forwardauth-callback-url-path
+  forwardauth-keycloak-client-id     = local.forwardauth-keycloak-client-id
+  forwardauth-keycloak-client-secret = random_password.forwardauth-jhsecret.result
+
   users = jsondecode("{{ cookiecutter.tf_users | jsonify | replace('"', '\\"') }}")
 
   groups = jsondecode("{{ cookiecutter.tf_groups | jsonify | replace('"', '\\"') }}")
@@ -325,7 +329,7 @@ module "forwardauth" {
   namespace    = var.environment
   external-url = var.endpoint
 
-  jh-client-id      = local.forwardauth-jh-client-id
+  jh-client-id      = local.forwardauth-keycloak-client-id
   jh-client-secret  = random_password.forwardauth-jhsecret.result
   callback-url-path = local.forwardauth-callback-url-path
 }

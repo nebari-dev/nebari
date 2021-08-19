@@ -51,17 +51,17 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
 
           env {
             name  = "PROVIDERS_GENERIC_OAUTH_AUTH_URL"
-            value = "https://${var.external-url}/hub/api/oauth2/authorize"
+            value = "https://${var.external-url}/auth/realms/qhub/protocol/openid-connect/auth"
           }
 
           env {
             name  = "PROVIDERS_GENERIC_OAUTH_TOKEN_URL"
-            value = "http://proxy-public.${var.namespace}/hub/api/oauth2/token"
+            value = "http://keycloak-headless.${var.namespace}:8080/auth/realms/qhub/protocol/openid-connect/token"
           }
 
           env {
             name  = "PROVIDERS_GENERIC_OAUTH_USER_URL"
-            value = "http://proxy-public.${var.namespace}/hub/api/user"
+            value = "http://keycloak-headless.${var.namespace}:8080/auth/realms/qhub/protocol/openid-connect/userinfo"
           }
 
           env {

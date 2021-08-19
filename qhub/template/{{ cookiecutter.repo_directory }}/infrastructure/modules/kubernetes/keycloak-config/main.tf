@@ -72,3 +72,21 @@ resource "keycloak_user_groups" "user_groups" {
     for i in var.user_groups[count.index] : keycloak_group.group[i].id
   ]
 }
+
+resource "keycloak_openid_client" "qhub_client" {
+  realm_id      = keycloak_realm.realm-qhub.id
+  client_id     = var.forwardauth-keycloak-client-id
+  client_secret = var.forwardauth-keycloak-client-secret
+
+  name    = "QHub Client"
+  enabled = true
+
+  access_type           = "CONFIDENTIAL"
+  standard_flow_enabled = true
+
+  valid_redirect_uris = [
+    "https://${var.external-url}${var.forwardauth-callback-url-path}"
+  ]
+
+  login_theme = "keycloak"
+}
