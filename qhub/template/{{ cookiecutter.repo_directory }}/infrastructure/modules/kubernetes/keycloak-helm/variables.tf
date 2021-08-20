@@ -24,3 +24,8 @@ variable "qhub-bot-password" {
   description = "qhub-bot password for keycloak"
   type        = string
 }
+
+variable "initial-root-password" {
+  description = "initial root password for keycloak"
+  type        = string
+}

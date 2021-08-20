@@ -85,8 +85,12 @@ def patch_terraform_users(config):
 
     config["tf_user_groups"] = []
     for (k, v) in incoming_users.items():
-        users_group_names = set([v.get("primary_group", "")] + v.get("secondary_groups", [])) - set([""])
-        config["tf_user_groups"].append([group_index_lookup[gname] for gname in users_group_names])
+        users_group_names = set(
+            [v.get("primary_group", "")] + v.get("secondary_groups", [])
+        ) - set([""])
+        config["tf_user_groups"].append(
+            [group_index_lookup[gname] for gname in users_group_names]
+        )
 
 
 def deep_merge(d1, d2):

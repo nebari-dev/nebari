@@ -9,7 +9,6 @@ dependencies:
   - auth0-python
   - pydantic
   - pynacl
-  - bcrypt
 
   # dev dependencies
   - flake8 ==3.8.4

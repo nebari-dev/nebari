@@ -14,6 +14,11 @@ resource "helm_release" "keycloak" {
     name = "qhub_bot_password"
     value = var.qhub-bot-password
   }
+
+  set {
+    name = "initial_root_password"
+    value = var.initial-root-password
+  }
 }
 
 resource "kubernetes_manifest" "keycloak-http" {

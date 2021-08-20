@@ -6,7 +6,6 @@ import secrets
 import tempfile
 import logging
 
-import bcrypt
 import requests
 
 from qhub.provider.oauth.auth0 import create_client
@@ -329,9 +328,11 @@ def render_config(
         default_password = "".join(
             secrets.choice(string.ascii_letters + string.digits) for i in range(16)
         )
-        config["security"]["users"]["example-user"]["password"] = bcrypt.hashpw(
-            default_password.encode("utf-8"), bcrypt.gensalt()
-        ).decode()
+        config["security"]["users"]["example-user"]["password"] = default_password
+
+        config["security"].setdefault("keycloak", {})[
+            "initial_root_password"
+        ] = default_password
 
         default_password_filename = os.path.join(
             tempfile.gettempdir(), "QHUB_DEFAULT_PASSWORD"

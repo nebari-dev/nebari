@@ -191,6 +191,8 @@ module "kubernetes-keycloak-helm" {
 
   qhub-bot-password = random_password.keycloak-qhub-bot-password.result
 
+  initial-root-password = {{ cookiecutter.security.get('keycloak',{}).initial_root_password | default("password",true) | jsonify }}
+
   depends_on = [
     module.kubernetes-ingress
   ]
