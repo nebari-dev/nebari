@@ -15,12 +15,12 @@ resource "keycloak_realm" "realm-qhub" {
   display_name = "QHub ${var.name}"
 
   smtp_server {
-    host = "smtp.gmail.com"
-    from = "email@test.com"
+    host = var.smtp.host
+    from = var.smtp.email
 
     auth {
-      username = "email@test.com"
-      password = "<password>"
+      username = var.smtp.username
+      password = var.smtp.password
     }
   }
 }

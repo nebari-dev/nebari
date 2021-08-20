@@ -55,3 +55,9 @@ variable "user_groups" {
   type        = list(list(number))
   default     = []
 }
+
+variable "smtp" {
+  description = "map of SMTP settings"
+  type = map(string)
+  default = {}
+}

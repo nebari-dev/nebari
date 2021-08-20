@@ -224,6 +224,13 @@ module "kubernetes-keycloak-config" {
 
   user_groups = jsondecode("{{ cookiecutter.tf_user_groups | jsonify | replace('"', '\\"') }}")
 
+  smtp = {
+    host : {{ cookiecutter.smtp.host | default("",true) | jsonify }}
+    email : {{ cookiecutter.smtp.email | default("",true) | jsonify }}
+    username : {{ cookiecutter.smtp.username | default("",true) | jsonify }}
+    password : {{ cookiecutter.smtp.password | default("",true) | jsonify }}
+  }
+
   depends_on = [
     module.kubernetes-keycloak-helm
   ]

@@ -38,6 +38,7 @@
     "cdsdashboards": {},
     "external_container_reg": {},
     "keycloak": {},
+    "smtp": {},
 
     "local": {
         "node_selectors": {
