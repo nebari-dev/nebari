@@ -214,6 +214,10 @@ module "kubernetes-keycloak-config" {
   forwardauth-keycloak-client-id     = local.forwardauth-keycloak-client-id
   forwardauth-keycloak-client-secret = random_password.forwardauth-jhsecret.result
 
+  jupyterhub-callback-url-path      = local.jupyterhub-callback-url-path
+  jupyterhub-keycloak-client-id     = local.jupyterhub-keycloak-client-id
+  jupyterhub-keycloak-client-secret = random_password.jupyterhub-jhsecret.result
+
   users = jsondecode("{{ cookiecutter.tf_users | jsonify | replace('"', '\\"') }}")
 
   groups = jsondecode("{{ cookiecutter.tf_groups | jsonify | replace('"', '\\"') }}")
@@ -255,10 +259,6 @@ module "qhub" {
 
   dask_gateway_extra_config = file("dask_gateway_config.py.j2")
 
-  forwardauth-jh-client-id      = local.forwardauth-jh-client-id
-  forwardauth-jh-client-secret  = random_password.forwardauth-jhsecret.result
-  forwardauth-callback-url-path = local.forwardauth-callback-url-path
-
   extcr_config = {
     enabled : {{ cookiecutter.external_container_reg.enabled | default(false,true) | jsonify }}
     access_key_id : "{{ cookiecutter.external_container_reg.access_key_id | default("",true) }}"
@@ -266,6 +266,15 @@ module "qhub" {
     extcr_account : "{{ cookiecutter.external_container_reg.extcr_account | default("",true) }}"
     extcr_region : "{{ cookiecutter.external_container_reg.extcr_region | default("",true) }}"
   }
+
+  forwardauth-callback-url-path = local.forwardauth-callback-url-path
+
+  OAUTH_CLIENT_ID = local.jupyterhub-keycloak-client-id
+  OAUTH_CLIENT_SECRET = random_password.jupyterhub-jhsecret.result
+  OAUTH_CALLBACK_URL = "https://${var.endpoint}${local.jupyterhub-callback-url-path}"
+  keycloak_authorize_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth"
+  keycloak_token_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"
+  keycloak_userdata_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"
 
 }
 
@@ -320,6 +329,11 @@ module "clearml" {
 {% endif -%}
 
 resource "random_password" "forwardauth-jhsecret" {
+  length  = 32
+  special = false
+}
+
+resource "random_password" "jupyterhub-jhsecret" {
   length  = 32
   special = false
 }

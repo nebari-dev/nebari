@@ -100,16 +100,9 @@ variable "certificate-secret-name" {
   default     = ""
 }
 
-variable "forwardauth-jh-client-id" {
-  description = "JupyterHub Client ID for use with ForwardAuth"
-  type        = string
-  default     = ""
-}
-
-variable "forwardauth-jh-client-secret" {
-  description = "JupyterHub Client Secret for use with ForwardAuth"
-  type        = string
-  default     = ""
+variable "extcr_config" {
+  description = "Customer's access details for external container reg"
+  type        = map(any)
 }
 
 variable "forwardauth-callback-url-path" {
@@ -118,7 +111,32 @@ variable "forwardauth-callback-url-path" {
   default     = ""
 }
 
-variable "extcr_config" {
-  description = "Customer's access details for external container reg"
-  type        = map(any)
+variable "OAUTH_CLIENT_ID" {
+  description = "ID for JupyterHub client in Keycloak"
+  type        = string
+}
+
+variable "OAUTH_CLIENT_SECRET" {
+  description = "Secret for JupyterHub client in Keycloak"
+  type        = string
+}
+
+variable "OAUTH_CALLBACK_URL" {
+  description = "Callback URL for JupyterHub client in Keycloak"
+  type        = string
+}
+
+variable "keycloak_authorize_url" {
+  description = "Keycloak OAuth start URL"
+  type        = string
+}
+
+variable "keycloak_token_url" {
+  description = "Keycloak OAuth start URL"
+  type        = string
+}
+
+variable "keycloak_userdata_url" {
+  description = "Keycloak OAuth start URL"
+  type        = string
 }

@@ -18,6 +18,21 @@ variable "forwardauth-keycloak-client-secret" {
   type        = string
 }
 
+variable "jupyterhub-callback-url-path" {
+  description = "URL Path for the jupyterhub callback"
+  type        = string
+}
+
+variable "jupyterhub-keycloak-client-id" {
+  description = "jupyterhub Client ID within Keycloak"
+  type        = string
+}
+
+variable "jupyterhub-keycloak-client-secret" {
+  description = "jupyterhub Client Secret within Keycloak"
+  type        = string
+}
+
 variable "name" {
   description = "Project name for the QHub deployment"
   type        = string

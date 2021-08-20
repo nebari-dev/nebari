@@ -90,3 +90,21 @@ resource "keycloak_openid_client" "qhub_client" {
 
   login_theme = "keycloak"
 }
+
+resource "keycloak_openid_client" "jupyterhub_client" {
+  realm_id      = keycloak_realm.realm-qhub.id
+  client_id     = var.jupyterhub-keycloak-client-id
+  client_secret = var.jupyterhub-keycloak-client-secret
+
+  name    = "JupyterHub Client"
+  enabled = true
+
+  access_type           = "CONFIDENTIAL"
+  standard_flow_enabled = true
+
+  valid_redirect_uris = [
+    "https://${var.external-url}${var.jupyterhub-callback-url-path}"
+  ]
+
+  login_theme = "keycloak"
+}
