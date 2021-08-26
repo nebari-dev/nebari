@@ -53,6 +53,8 @@ minutes the new environment is still not available, check the latest
 log files from the user instance in the `/home/conda/store/.logs`
 directory to troubleshoot.
 
+* Note that the current version will not notify you if an environment fails to solve. The only way to see failures is by manually checking the above logs.*
+
 ## Copy Files into Users' Home Folders
 
 Within their own JupyterLab sessions, admins can add files to a folder
