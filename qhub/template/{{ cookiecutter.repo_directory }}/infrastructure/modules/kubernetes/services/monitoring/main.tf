@@ -20,11 +20,6 @@ resource "helm_release" "kube-prometheus-stack-helm-deployment" {
     value = "true"
   }
 
-# set {
-#    name  = "prometheus.prometheusSpec.additionalScrapeConfigs"
-    # value = "[{job_name: 'traefik', static_configs: [{targets: ['10.244.0.196:9617']}]}]"
-#    value = "[job_name: 'traefik'\n    static_configs:\n    - targets: ['10.244.0.196:9617']]"
-#  }
 }
 
 resource "kubernetes_manifest" "grafana-strip-prefix-middleware" {
