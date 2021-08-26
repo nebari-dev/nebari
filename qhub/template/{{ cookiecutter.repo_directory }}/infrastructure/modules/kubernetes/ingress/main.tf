@@ -197,6 +197,9 @@ resource "kubernetes_deployment" "main" {
             "--certificatesresolvers.default.acme.email=${var.acme-email}",
             "--certificatesresolvers.default.acme.storage=acme.json",
             "--certificatesresolvers.default.acme.caserver=${var.acme-server}",
+            "--metrics.prometheus=true",
+            "--metrics.prometheus.entryPoint=metrics",
+            "--entryPoints.metrics.address=:8080",
           ] : [])
 
           port {
