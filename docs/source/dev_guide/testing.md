@@ -231,7 +231,7 @@ In case you would like to change the generated password (optional), You can use
 script:
 
 ```bash
-python -c "import bcrypt; bcrypt.hashpw(b'<password>', bcrypt.gensalt())"
+python -c "import bcrypt; print(bcrypt.hashpw(b'admin', bcrypt.gensalt()).decode('utf-8'))"
 ```
 Where `<password>` can be changed to any desired value.
 
