@@ -111,17 +111,17 @@ resource "kubernetes_service" "traefik_internal" {
   wait_for_load_balancer = true
 
   metadata {
-    name        = "${var.name}-traefik-internal"
-    namespace   = var.namespace
+    name      = "${var.name}-traefik-internal"
+    namespace = var.namespace
     annotations = {
       "prometheus.io/scrape" = "true"
       "prometheus.io/path"   = "/metrics"
       "prometheus.io/port"   = 9000
     }
     labels = {
-          "app.kubernetes.io/component" = "traefik-internal-service"
-          "app.kubernetes.io/part-of" = "traefik-ingress"
-        }
+      "app.kubernetes.io/component" = "traefik-internal-service"
+      "app.kubernetes.io/part-of"   = "traefik-ingress"
+    }
   }
 
   spec {
