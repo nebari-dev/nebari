@@ -5,7 +5,7 @@ resource "helm_release" "kube-prometheus-stack-helm-deployment" {
   chart      = "kube-prometheus-stack"
   version    = "16.12.0"
 
-values = [<<EOT
+  values = [<<EOT
 prometheus:    
   prometheusSpec:    
     additionalScrapeConfigs:    
@@ -34,7 +34,7 @@ prometheus:
         replacement: $1:$2    
         target_label: __address__
 EOT
-]
+  ]
 
   set {
     name  = "grafana.grafana\\.ini.server.domain"
