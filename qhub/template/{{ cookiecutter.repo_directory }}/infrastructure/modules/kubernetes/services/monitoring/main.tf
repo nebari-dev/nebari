@@ -9,7 +9,9 @@ values = [<<EOT
 prometheus:    
   prometheusSpec:    
     additionalScrapeConfigs:    
-    # This job will scrape from any service with the label app.kubernetes.io/component=traefik-internal-service 
+    
+    # This job will scrape from any service with the label app.kubernetes.io/component=traefik-internal-service
+    # and the annotation app.kubernetes.io/scrape=true 
     - job_name: 'traefik'    
     
       kubernetes_sd_configs:    
