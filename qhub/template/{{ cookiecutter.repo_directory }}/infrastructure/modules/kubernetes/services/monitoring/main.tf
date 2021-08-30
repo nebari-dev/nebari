@@ -48,31 +48,6 @@ EOT
     name  = "grafana.grafana\\.ini.server.server_from_sub_path"
     value = "true"
   }
-#   set {
-#     name  = "prometheus.prometheusSpec.additionalScrapeConfigs"
-#     value = <<EOT
-# - job_name: traefik
-#   kubernetes_sd_configs:
-#   - role: service
-#   relabel_configs:    
-#   - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_component]    
-#     action: keep    
-#     regex: traefik-internal-service    
-#   - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]    
-#     action: keep    
-#     regex: true    
-#   - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]    
-#     action: replace    
-#     target_label: __metrics_path__    
-#     regex: (.+)    
-#   - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
-#     action: replace    
-#     regex: ([^:]+)(?::\d+)?;(\d+)    
-#     replacement: $1:$2    
-#     target_label: __address__
-# EOT
-
-#   }
 
 }
 
