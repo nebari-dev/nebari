@@ -16,16 +16,12 @@
   "editable": true,
   "gnetId": 13165,
   "graphTooltip": 1,
-  "iteration": 1630443257028,
+  "iteration": 1630447790321,
   "links": [],
   "panels": [
     {
       "collapsed": false,
       "datasource": "${Prometheus}",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -103,7 +99,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "count(kube_pod_status_ready{namespace=\"dev\",condition=\"true\",pod=~\".*traefik.*\"})",
+          "expr": "count(kube_pod_status_ready{namespace=\"$namespace\",condition=\"true\",pod=~\".*traefik.*\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -160,7 +156,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "histogram_quantile(0.$percentiles, sum(rate(traefik_entrypoint_request_duration_seconds_bucket{namespace=\"$namespace\",code=~\"2..\"}[5m])) by (instance, le))",
+          "expr": "histogram_quantile(0.$percentiles, sum(rate(traefik_entrypoint_request_duration_seconds_bucket{code=~\"2..\"}[5m])) by (instance, le))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -212,10 +208,6 @@
     {
       "collapsed": false,
       "datasource": "${Prometheus}",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -275,7 +267,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(traefik_entrypoint_open_connections{namespace=\"$namespace\"}) by (method)",
+          "exemplar": true,
+          "expr": "sum(traefik_entrypoint_open_connections) by (method)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -373,7 +366,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(sum(rate(traefik_entrypoint_request_duration_seconds_bucket{namespace=\"$namespace\",le=\"0.1\",code=\"200\"}[5m])) by (job) + sum(rate(traefik_entrypoint_request_duration_seconds_bucket{namespace=\"$namespace\",le=\"0.3\",code=\"200\"}[5m])) by (job)) / 2 / sum(rate(traefik_entrypoint_request_duration_seconds_count{namespace=\"$namespace\",code=\"200\"}[5m])) by (job)",
+          "exemplar": true,
+          "expr": "(sum(rate(traefik_entrypoint_request_duration_seconds_bucket{le=\"0.1\",code=\"200\"}[5m])) by (job) + sum(rate(traefik_entrypoint_request_duration_seconds_bucket{le=\"0.3\",code=\"200\"}[5m])) by (job)) / 2 / sum(rate(traefik_entrypoint_request_duration_seconds_count{code=\"200\"}[5m])) by (job)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -428,7 +422,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$Prometheus",
+      "datasource": null,
       "decimals": 2,
       "description": "",
       "fill": 1,
@@ -473,7 +467,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(traefik_entrypoint_requests_total{namespace=\"$namespace\"}[1m])) by (entrypoint)",
+          "exemplar": true,
+          "expr": "sum(rate(traefik_entrypoint_requests_total[1m])) by (entrypoint)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -527,10 +522,6 @@
     {
       "collapsed": false,
       "datasource": "${Prometheus}",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -591,7 +582,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(traefik_service_open_connections{namespace=\"$namespace\"}) by (method)",
+          "exemplar": true,
+          "expr": "sum(traefik_service_open_connections) by (method)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -688,7 +680,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "(sum(rate(traefik_service_request_duration_seconds_bucket{namespace=\"$namespace\",le=\"0.1\",code=\"200\"}[5m])) by (job) + sum(rate(traefik_service_request_duration_seconds_bucket{namespace=\"$namespace\",le=\"0.3\",code=\"200\"}[5m])) by (job)) / 2 / sum(rate(traefik_service_request_duration_seconds_count{namespace=\"$namespace\",code=\"200\"}[5m])) by (job)",
+          "expr": "(sum(rate(traefik_service_request_duration_seconds_bucket{le=\"0.1\",code=\"200\"}[5m])) by (job) + sum(rate(traefik_service_request_duration_seconds_bucket{le=\"0.3\",code=\"200\"}[5m])) by (job)) / 2 / sum(rate(traefik_service_request_duration_seconds_count{code=\"200\"}[5m])) by (job)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -697,7 +689,7 @@
         },
         {
           "exemplar": true,
-          "expr": "traefik_service_request_duration_seconds_bucket{namespace=\"$namespace\",le=\"0.1\",code=\"200\"}",
+          "expr": "traefik_service_request_duration_seconds_bucket{le=\"0.1\",code=\"200\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "",
@@ -751,7 +743,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$Prometheus",
+      "datasource": null,
       "decimals": 2,
       "description": "",
       "fill": 1,
@@ -796,7 +788,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(traefik_service_requests_total{namespace=\"$namespace\"}[1m])) by (service)",
+          "exemplar": true,
+          "expr": "sum(rate(traefik_service_requests_total[1m])) by (service)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -850,10 +843,6 @@
     {
       "collapsed": false,
       "datasource": "${Prometheus}",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -916,7 +905,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(traefik_service_requests_total{namespace=\"$namespace\",code=~\"2..\"}[5m])) by (method, code)",
+          "exemplar": true,
+          "expr": "sum(rate(traefik_service_requests_total{code=~\"2..\"}[5m])) by (method, code)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1015,7 +1005,8 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(traefik_service_requests_total{namespace=\"$namespace\",code=~\"4.*\"}[5m])) by (method, code)",
+          "exemplar": true,
+          "expr": "sum(rate(traefik_service_requests_total{code=~\"4.*\"}[5m])) by (method, code)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1070,7 +1061,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$Prometheus",
+      "datasource": null,
       "decimals": 2,
       "description": "",
       "fill": 1,
@@ -1114,8 +1105,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(traefik_service_requests_total{namespace=\"$namespace\",code!~\"2..|4..|5..\"}[5m])) by (method, code)",
+          "exemplar": true,
+          "expr": "sum(rate(traefik_service_requests_total{code!~\"2..|4..|5..\"}[5m])) by (method, code)",
           "format": "time_series",
+          "hide": false,
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{ method }} : {{code}}",
@@ -1169,7 +1162,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$Prometheus",
+      "datasource": null,
       "decimals": 2,
       "fill": 1,
       "fillGradient": 0,
@@ -1211,8 +1204,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(traefik_service_requests_total{namespace=\"$namespace\",code=~\"5..\"}[5m])) by (method, code)",
+          "exemplar": false,
+          "expr": "sum(rate(traefik_service_requests_total{code=~\"5..\"}[5m])) by (method, code)",
           "format": "time_series",
+          "instant": false,
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{method}} : {{code}}",
@@ -1264,10 +1259,6 @@
     {
       "collapsed": false,
       "datasource": "${Prometheus}",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1325,7 +1316,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(container_memory_usage_bytes{namespace=\"$namespace\",container=~\".*traefik.*\"})",
+          "expr": "sum(container_memory_usage_bytes{namespace=\"$namespace\",pod=~\".*traefik.*\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1334,7 +1325,7 @@
         },
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_requests_memory_bytes{namespace=\"$namespace\",container=~\".*traefik.*\"})",
+          "expr": "sum(kube_pod_container_resource_requests_memory_bytes{namespace=\"$namespace\",pod=~\".*traefik.*\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1343,7 +1334,7 @@
         },
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_limits_memory_bytes{namespace=\"$namespace\",container=~\".*traefik.*\"})",
+          "expr": "sum(kube_pod_container_resource_limits_memory_bytes{namespace=\"$namespace\",pod=~\".*traefik.*\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1438,7 +1429,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",container=~\".*traefik.*\"}[2m]))",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\".*traefik.*\"}[2m]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1446,7 +1437,8 @@
           "refId": "A"
         },
         {
-          "expr": "sum(kube_pod_container_resource_requests_cpu_cores{namespace=\"$namespace\",container=\"traefik\"})",
+          "exemplar": true,
+          "expr": "sum(kube_pod_container_resource_requests_cpu_cores{namespace=\"$namespace\",pod=\".*traefik.*\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1454,7 +1446,8 @@
           "refId": "B"
         },
         {
-          "expr": "sum(kube_pod_container_resource_limits_cpu_cores{namespace=\"$namespace\",container=\"traefik\"})",
+          "exemplar": true,
+          "expr": "sum(kube_pod_container_resource_limits_cpu_cores{namespace=\"$namespace\",pod=\".*traefik.*\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1537,10 +1530,9 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
+          "selected": false,
+          "text": "dev",
+          "value": "dev"
         },
         "datasource": "${Prometheus}",
         "definition": "label_values(traefik_config_reloads_total, namespace)",
@@ -1627,5 +1619,5 @@
   "timezone": "",
   "title": "Traefik",
   "uid": "k8sTv24ops",
-  "version": 12
+  "version": 163
 }
