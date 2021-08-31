@@ -46,7 +46,7 @@ resource "kubernetes_deployment" "main" {
       spec {
         container {
           name  = "nfsuserinfo"
-          image = "quansight/qhub-nfsuserinfo:3"
+          image = "danlester/qhub-nfsuserinfo:3"
 
           port {
             name           = "http"

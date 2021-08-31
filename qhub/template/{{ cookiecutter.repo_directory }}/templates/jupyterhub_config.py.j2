@@ -58,7 +58,7 @@ c.JupyterHub.template_vars = {
 }
 
 # ================= Profiles =====================
-from urllib.request import urlopen
+from urllib.request import urlopen, Request
 import json
 
 QHUB_USER_MAPPING = {{ cookiecutter.security.users }}
@@ -73,7 +73,13 @@ def qhub_get_nss_user(username):
     groupnames.extend(QHUB_USER_MAPPING[username].get('secondary_groups', []))
 
     grouplist = json.dumps(groupnames)
-    r = urlopen(f"http://qhub-nfsuserinfo:8091/user?username={username}", grouplist.encode("utf-8"))
+    
+    r = urlopen(Request(
+                        f"http://qhub-nfsuserinfo:8091/user?username={username}",
+                        headers={'Content-Type': 'application/json'}
+                    ),
+                grouplist.encode("utf-8")
+               )
     user = json.load(r)
 
     # Example:
@@ -101,9 +107,11 @@ def qhub_list_user_groups(username):
 def qhub_configure_profile(user_nss_json, safe_username, profile):
     #user = QHUB_USER_MAPPING[username]
     uid = user_nss_json['uid']
+    username = user_nss_json['username']
     #primary_gid = QHUB_GROUP_MAPPING[user['primary_group']]['gid']
     groups = user_nss_json['groups']
     primary_gid = groups[0]['gid']
+    primary_group_name = groups[0]['groupname']
     secondary_gids = [g['gid'] for g in groups[1:]]
 
     envvars_fixed = {
@@ -121,10 +129,8 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
         # if set for a dashboard to control access.
         return {**envvars_fixed, **spawner.environment}
 
-    profile['kubespawner_override']['environment'] = preserve_envvars
+    profile.setdefault('kubespawner_override', {})['environment'] = preserve_envvars
 
-    passwd, group = qhub_generate_nss_files()
-    #passwd, group = qhub_get_nss_files()
     profile['kubespawner_override']['lifecycle_hooks'] = {
         "postStart": {
             "exec": {
@@ -163,14 +169,11 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
     k8s_safe_username = escapism.escape(username.lower().replace('@', '_'), safe=k8s_safe_chars, escape_char='-')
     profile['kubespawner_override']['extra_labels'] = {
         'owner': k8s_safe_username,
-        'team': user['primary_group']
+        'team': primary_group_name
     }
     return profile
 
 def qhub_list_available_profiles(user_nss_json):
-    import escapism
-    import string
-
     username = user_nss_json['username']
 
     safe_chars = set(string.ascii_lowercase + string.digits)
