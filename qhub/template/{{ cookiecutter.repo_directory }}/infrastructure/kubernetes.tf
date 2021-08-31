@@ -203,6 +203,8 @@ provider "keycloak" {
     username      = "qhub-bot"
     password      = random_password.keycloak-qhub-bot-password.result
     url           = "https://${var.endpoint}"
+
+    tls_insecure_skip_verify = {% if cookiecutter.provider == "local" %}true{% else %}false{% endif %}
 }
 
 module "kubernetes-keycloak-config" {
