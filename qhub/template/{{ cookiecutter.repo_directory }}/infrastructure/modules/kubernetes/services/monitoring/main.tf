@@ -50,7 +50,27 @@ EOT
     name  = "grafana.grafana\\.ini.server.server_from_sub_path"
     value = "true"
   }
+}
 
+resource "kubernetes_manifest" "traefik_dashboard_configmap" {
+  provider = kubernetes-alpha
+
+  manifest = {
+    apiVersion = "v1"
+    kind       = "ConfigMap"
+    metadata = {
+      name      = "grafana-traefik-dashboard"
+      namespace = var.namespace
+      labels = {
+        # grafana_dashboard label needed for grafana to pick it up automatically
+        grafana_dashboard = "1"
+      }
+    }
+
+    data = {
+      "traefik-dashboard.json" = local.traefik_dashboard
+    }
+  }
 }
 
 resource "kubernetes_manifest" "grafana-strip-prefix-middleware" {
