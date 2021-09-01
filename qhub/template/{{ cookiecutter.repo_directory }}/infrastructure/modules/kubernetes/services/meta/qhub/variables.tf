@@ -140,3 +140,8 @@ variable "keycloak_userdata_url" {
   description = "Keycloak OAuth start URL"
   type        = string
 }
+
+variable "keycloak_logout_url" {
+  description = "Keycloak logout URL"
+  type        = string
+}

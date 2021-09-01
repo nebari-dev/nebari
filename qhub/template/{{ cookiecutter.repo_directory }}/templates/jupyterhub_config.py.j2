@@ -234,4 +234,7 @@ c.GenericOAuthenticator.authorize_url = os.environ.get('KEYCLOAK_AUTHORIZE_URL')
 c.GenericOAuthenticator.token_url = os.environ.get('KEYCLOAK_TOKEN_URL')
 c.GenericOAuthenticator.userdata_url = os.environ.get('KEYCLOAK_USERDATA_URL')
 
+# TODO Keycloak logout not currently working (only clears JupyterHub session)
+c.OAuthenticator.logout_redirect_url = os.environ.get('KEYCLOAK_LOGOUT_URL')
+
 c.GenericOAuthenticator.username_key = 'preferred_username'

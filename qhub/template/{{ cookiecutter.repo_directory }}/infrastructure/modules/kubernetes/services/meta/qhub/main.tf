@@ -30,7 +30,9 @@ module "kubernetes-jupyterhub" {
           {name = "KEYCLOAK_TOKEN_URL",
           value = var.keycloak_token_url},
           {name = "KEYCLOAK_USERDATA_URL",
-          value = var.keycloak_userdata_url}
+          value = var.keycloak_userdata_url},
+          {name = "KEYCLOAK_LOGOUT_URL",
+          value = var.keycloak_logout_url}
         ]
         nodeSelector = {
           (var.general-node-group.key) = var.general-node-group.value

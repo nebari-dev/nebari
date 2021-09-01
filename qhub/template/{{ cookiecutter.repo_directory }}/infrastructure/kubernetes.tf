@@ -286,6 +286,7 @@ module "qhub" {
   keycloak_authorize_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth"
   keycloak_token_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"
   keycloak_userdata_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"
+  keycloak_logout_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/logout"
 
 }
 
