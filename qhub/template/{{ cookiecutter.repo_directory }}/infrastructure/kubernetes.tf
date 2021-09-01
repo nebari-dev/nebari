@@ -359,9 +359,9 @@ module "forwardauth" {
   jh-client-secret  = random_password.forwardauth-jhsecret.result
   callback-url-path = local.forwardauth-callback-url-path
 }
-resource "kubernetes_config_map" "qhub-nfsuserinfo-migration" {
+resource "kubernetes_config_map" "qhub-userinfo-migration" {
   metadata {
-    name      = "qhub-nfsuserinfo-migration"
+    name      = "qhub-userinfo-migration"
     namespace = var.environment
   }
 

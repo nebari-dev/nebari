@@ -75,7 +75,7 @@ def qhub_get_nss_user(username):
     grouplist = json.dumps(groupnames)
     
     r = urlopen(Request(
-                        f"http://qhub-nfsuserinfo:8091/user?username={username}",
+                        f"http://qhub-userinfo:8091/user?username={username}",
                         headers={'Content-Type': 'application/json'}
                     ),
                 grouplist.encode("utf-8")
@@ -135,8 +135,8 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
         "postStart": {
             "exec": {
                 "command": ["/bin/sh", "-c", (
-                     "curl 'http://qhub-nfsuserinfo:8091/etc/passwd' > /tmp/passwd && "
-                     "curl 'http://qhub-nfsuserinfo:8091/etc/group' > /tmp/group && "
+                     "curl 'http://qhub-userinfo:8091/etc/passwd' > /tmp/passwd && "
+                     "curl 'http://qhub-userinfo:8091/etc/group' > /tmp/group && "
                      "ln -sfn /home/shared /home/jovyan/shared "
                 )]
             }

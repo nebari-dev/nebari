@@ -3,8 +3,8 @@ resource "random_password" "jupyterhub_api_token" {
   special = false
 }
 
-module "kubernetes-nfsuserinfo" {
-  source = "../../nfsuserinfo"
+module "kubernetes-userinfo" {
+  source = "../../userinfo"
 
   namespace = var.namespace
 }

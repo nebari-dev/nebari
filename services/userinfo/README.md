@@ -2,7 +2,7 @@
 
 Start server:
 ```
-cd services/nfsuserinfo
+cd services/userinfo
 export MIGRATION_FILEPATH_GROUPS=`pwd`/example-initial-groups.json
 export MIGRATION_FILEPATH_USERS=`pwd`/example-initial-users.json
 export STATE_FOLDER_PATH=`pwd`/state
@@ -23,5 +23,5 @@ curl http://localhost:8000/etc/group
 
 To build as Docker image:
 ```
-docker build -t quansight/qhub-nfsuserinfo:3 .
+docker build -t quansight/qhub-userinfo:3 .
 ```

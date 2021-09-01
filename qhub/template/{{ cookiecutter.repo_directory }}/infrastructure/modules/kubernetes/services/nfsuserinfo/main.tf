@@ -1,12 +1,12 @@
 resource "kubernetes_service" "main" {
   metadata {
-    name      = "qhub-nfsuserinfo"
+    name      = "qhub-userinfo"
     namespace = var.namespace
   }
 
   spec {
     selector = {
-      role = "qhub-nfsuserinfo"
+      role = "qhub-userinfo"
     }
 
     port {
@@ -20,10 +20,10 @@ resource "kubernetes_service" "main" {
 
 resource "kubernetes_deployment" "main" {
   metadata {
-    name      = "qhub-nfsuserinfo"
+    name      = "qhub-userinfo"
     namespace = var.namespace
     labels = {
-      role = "qhub-nfsuserinfo"
+      role = "qhub-userinfo"
     }
   }
 
@@ -32,21 +32,21 @@ resource "kubernetes_deployment" "main" {
 
     selector {
       match_labels = {
-        role = "qhub-nfsuserinfo"
+        role = "qhub-userinfo"
       }
     }
 
     template {
       metadata {
         labels = {
-          role = "qhub-nfsuserinfo"
+          role = "qhub-userinfo"
         }
       }
 
       spec {
         container {
-          name  = "nfsuserinfo"
-          image = "danlester/qhub-nfsuserinfo:3"
+          name  = "userinfo"
+          image = "danlester/qhub-userinfo:3"
 
           port {
             name           = "http"
@@ -71,8 +71,8 @@ resource "kubernetes_deployment" "main" {
 
           volume_mount {
             name       = "nfs-mount"
-            mount_path = "/etc/nfsuserinfo-state"
-            sub_path   = "nfsuserinfo-state"
+            mount_path = "/etc/userinfo-state"
+            sub_path   = "userinfo-state"
             read_only  = false
           }
         }
@@ -80,7 +80,7 @@ resource "kubernetes_deployment" "main" {
         volume {
           name = "migration"
           config_map {
-            name = "qhub-nfsuserinfo-migration"
+            name = "qhub-userinfo-migration"
           }
         }
 
