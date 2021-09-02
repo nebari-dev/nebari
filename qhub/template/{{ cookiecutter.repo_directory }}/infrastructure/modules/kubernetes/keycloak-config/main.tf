@@ -61,6 +61,13 @@ resource "keycloak_group" "group" {
   }
 }
 
+resource "keycloak_default_groups" "default" {
+  realm_id  = keycloak_realm.realm-qhub.id
+  group_ids = [
+    for g in keycloak_group.group : g.id if g.name == "users"
+  ]
+}
+
 resource "keycloak_user_groups" "user_groups" {
   count = length(var.user_groups)
 

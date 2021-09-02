@@ -61,7 +61,6 @@ c.JupyterHub.template_vars = {
 from urllib.request import urlopen, Request
 import json
 
-QHUB_USER_MAPPING = {{ cookiecutter.security.users }}
 QHUB_PROFILES = {{ cookiecutter.profiles.jupyterlab }}
 
 import escapism
@@ -84,10 +83,6 @@ def qhub_get_nss_user(username):
 
     assert username == user['username']
     return user
-
-def qhub_list_admins(users):
-    return [k for k,v in users.items() if v['primary_group'] == 'admin']
-
 
 def qhub_configure_profile(user_nss_json, safe_username, profile):
     uid = user_nss_json['uid']
@@ -190,7 +185,6 @@ def qhub_list_available_profiles(user_nss_json):
 
 
 c.JupyterHub.admin_access = True
-c.Authenticator.admin_users = qhub_list_admins(QHUB_USER_MAPPING)
 
 async def custom_options_form(self):
     # Save user and generate uid if not seen before
@@ -220,3 +214,13 @@ c.GenericOAuthenticator.userdata_url = os.environ.get('KEYCLOAK_USERDATA_URL')
 c.OAuthenticator.logout_redirect_url = os.environ.get('KEYCLOAK_LOGOUT_URL')
 
 c.GenericOAuthenticator.username_key = 'preferred_username'
+
+def admin_hook(authenticator, handler, authentication):
+    user_nss_json = qhub_get_nss_user(authentication['name'])
+    groupnames = [g['groupname'] for g in user_nss_json.get('groups',[])]
+
+    authentication['admin'] = 'admin' in groupnames
+
+    return authentication
+
+c.Authenticator.post_auth_hook = admin_hook
