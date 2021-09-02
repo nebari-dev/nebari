@@ -3,7 +3,7 @@ import os
 import json
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from fastapi.logger import logger as fastapi_logger
 
@@ -29,10 +29,12 @@ logger.setLevel(logging.DEBUG)
 class Group(BaseModel):
     groupname: str
     gid: int
+    id: str
 
 class User(BaseModel):
     username: str
     uid: int
+    id: str
     groups: List[Group]
 
 class Holdall(BaseModel):
@@ -53,81 +55,124 @@ STATE_FOLDER_PATH = os.environ.get('STATE_FOLDER_PATH', '/etc/userinfo-state')
 
 state_file = os.path.join(STATE_FOLDER_PATH, "state.json")
 
+# Keycloak config
 
-def read_state():
+
+
+from keycloak import KeycloakAdmin
+
+class KeycloakStore:
+    def __init__(self, server_url, username, password, realm_name):
+        self.server_url = server_url
+        self.username = username
+        self.password = password
+        self.realm_name = realm_name
+    
+    def _get_keycloak_admin(self):
+        return KeycloakAdmin(server_url=self.server_url, username=self.username, password=self.password, realm_name=self.realm_name, user_realm_name="master")
+
+    def get_user_groups(self):
+        keycloak_admin = self._get_keycloak_admin()
+
+        # [{'id': '2804321d-1b19-4bbb-950b-0b969b91b421', 'createdTimestamp': 1630572243430, 'username': 'dan', 
+        # 'enabled': True, 'totp': False, 'emailVerified': False, 'attributes': {'uid': ['100']}, 
+        # 'disableableCredentialTypes': [], 'requiredActions': [], 'notBefore': 0, 
+        # 'access': {'manageGroupMembership': True, 'view': True, 'mapRoles': True, 'impersonate': True, 'manage': True}}]
+        k_users = keycloak_admin.get_users()
+
+        # [{'id': '2bc355e5-e942-46a4-bab3-54c6831542a2', 'name': 'admin', 'path': '/admin', 'subGroups': []}, 
+        # {'id': 'd983e73c-a4c1-4ead-8230-ce85035cb0dc', 'name': 'users', 'path': '/users', 'subGroups': []}]
+        k_groups = keycloak_admin.get_groups()
+
+        max_gid = 1000
+        need_gids = []
+        groups = {}
+
+        for kg in k_groups:
+            # {'id': '2bc355e5-e942-46a4-bab3-54c6831542a2', 'name': 'admin', 'path': '/admin', 
+            # 'attributes': {'gid': ['200']}, 'realmRoles': [], 'clientRoles': {}, 'subGroups': [], 
+            # 'access': {'view': True, 'manage': True, 'manageMembership': True}}
+            k_group = keycloak_admin.get_group(kg['id'])
+
+            # If no gid, we will need to assign one
+            gid = int(k_group.get('attributes', {}).get('gid', ['0'])[0])
+            if gid == 0:
+                need_gids.append(kg['name'])
+            else:
+                if gid > max_gid:
+                    max_gid = gid
+
+            groups[kg['name']] = {'groupname': kg['name'], 'gid': gid, 'id': kg['id']}
+
+        # Generate new gid for groups that need one
+        for groupname in need_gids:
+            max_gid += 1
+            keycloak_admin.update_group(groups[groupname]['id'], {'attributes': {'gid': [str(max_gid)]}, 'name': groupname})
+            groups[groupname]['gid'] = max_gid
+
+        print(groups)
+
+        # Get group members
+        user_memberships = {}
+
+        for groupname, group in groups.items():
+            members = keycloak_admin.get_group_members(group['id'])
+            for u in members:
+                username = u['username']
+                user_memberships.setdefault(username, []).append(groupname)
+
+        print(user_memberships)
+
+        # Filter users and assign any uids
+        users = {}
+        max_uid = 1000
+        need_uids = []
+        for ku in k_users:
+
+            # If no uid, we will need to assign one
+            uid = int(ku.get('attributes', {}).get('uid', ['0'])[0])
+            if uid == 0:
+                need_uids.append(ku['username'])
+            else:
+                if uid > max_uid:
+                    max_uid = uid
+
+            users[ku['username']] = {'username': ku['username'], 'uid': uid, 'id': ku['id'],
+                'groups': [groups[g] for g in user_memberships.get(ku['username'], [])]
+                }
+
+        # Generate new uid for users that need one
+        for username in need_uids:
+            max_uid += 1
+            keycloak_admin.update_user(users[username]['id'], {'attributes': {'uid': [str(max_uid)]}})
+            users[username]['uid'] = max_uid
+
+        # Get users
+        return {'groups': groups, 'users': users}
+
+KEYCLOAK_SERVER_URL = os.environ.get('KEYCLOAK_SERVER_URL', 'http://localhost:8080/auth/')
+KEYCLOAK_USERNAME = os.environ.get('KEYCLOAK_USERNAME', 'admin')
+KEYCLOAK_PASSWORD = os.environ.get('KEYCLOAK_PASSWORD', 'admin')
+KEYCLOAK_REALM_NAME = os.environ.get('KEYCLOAK_REALM_NAME', 'qhub')
+
+keycloak_store = KeycloakStore(KEYCLOAK_SERVER_URL, KEYCLOAK_USERNAME, KEYCLOAK_PASSWORD, KEYCLOAK_REALM_NAME)
+
+def refresh_store():
     global HOLDALL
-    with open(state_file, "rt") as f:
-        HOLDALL = Holdall(**json.load(f))
+    global keycloak_store
+    HOLDALL = Holdall(**keycloak_store.get_user_groups())
 
-def save_state():
-    with open(state_file, "wt") as f:
-        f.write(HOLDALL.json())
-
-if os.path.isfile(state_file):
-    read_state()
-
-# Read in migration users/groups (i.e. hard-coded uid/gid as specified in earlier versions of qhub-config.yaml)
-
-# /etc/migration-state/initial-users.json
-# {'user1': {'uid': 1000, 'primary_group': 'admin', 'secondary_groups': ['users'], 'password': ''}, 'user2':...
-
-# /etc/migration-state/initial-groups.json
-# {'users': {'gid': 100}, 'admin': {'gid': 101}}
-
-MIGRATION_FILEPATH_GROUPS = os.environ.get('MIGRATION_FILEPATH_GROUPS', '/etc/migration-state/initial-groups.json')
-if os.path.isfile(MIGRATION_FILEPATH_GROUPS):
-    logger.info(f"Reading migration groups from {MIGRATION_FILEPATH_GROUPS}")
-    with open(MIGRATION_FILEPATH_GROUPS, "rt") as f:
-        migration_groups = json.load(f)
-        for k, g in migration_groups.items():
-            HOLDALL.groups[k] = Group(groupname=k, gid=g['gid'])
-
-MIGRATION_FILEPATH_USERS = os.environ.get('MIGRATION_FILEPATH_USERS', '/etc/migration-state/initial-users.json')
-if os.path.isfile(MIGRATION_FILEPATH_USERS):
-    logger.info(f"Reading migration users from {MIGRATION_FILEPATH_USERS}")
-    with open(MIGRATION_FILEPATH_USERS, "rt") as f:
-        migration_users = json.load(f)
-        for k, u in migration_users.items():
-            primary_group = u.get('primary_group', 0)
-            secondary_groups = u.get('secondary_groups', [])
-
-            usergroups = [HOLDALL.groups[gname] for gname in [primary_group] + secondary_groups if gname in HOLDALL.groups]
-            
-            if 'uid' in u and u['uid']:
-                HOLDALL.users[k] = User(username=k, uid=u['uid'], groups=usergroups)
-
-# App
-
-save_state()
-
-print("print at startup")
+refresh_store()
 
 app = FastAPI()
 
 @app.post("/user")
-async def putuser(username: str, groupnames: List[str]):
-    updated = False
-
-    groups = []
-    for groupname in groupnames:
-        if not groupname in HOLDALL.groups:
-            groups.append(HOLDALL.groups.setdefault(groupname, Group(groupname=groupname, gid=HOLDALL.new_gid())))
-            updated = True
-        else:
-            groups.append(HOLDALL.groups[groupname])
+async def putuser(username: str):
+    refresh_store()
 
     user = HOLDALL.users.get(username, None)
     if user is None:
-        user = User(username=username, uid=HOLDALL.new_uid(), groups=groups)
-        HOLDALL.users[username] = user
-        updated = True
-    elif user.groups != groups:
-        print("Updating groups")
-        user.groups = groups
-        updated = True
-
-    if updated:
-        save_state()
+        raise HTTPException(status_code=404, detail=f"{username} not found")
 
     return user
 
@@ -135,7 +180,9 @@ async def putuser(username: str, groupnames: List[str]):
 async def getetcpasswd():
     lines = []
     for _, u in HOLDALL.users.items():
-        gid = u.groups[0].gid
+        gid = 0
+        if len(u.groups) > 0:
+            gid = u.groups[0].gid
         print(u)
         lines.append(f'{u.username}:x:{u.uid}:{gid}:{u.username}:/home/jovyan:/bin/bash')
     return "\n".join(lines)
