@@ -132,8 +132,8 @@ def render_template(output_directory, config_filename, force=False):
     patch_versioning_extra_config(config)
 
     remove_existing_renders(
-        source_repo_dir=input_directory / "{{ cookiecutter.repo_directory }}",
         dest_repo_dir=output_directory / repo_directory,
+        verbosity=0,
     )
 
     generate_files(
@@ -144,45 +144,34 @@ def render_template(output_directory, config_filename, force=False):
     )
 
 
-def remove_existing_renders(source_repo_dir, dest_repo_dir):
+def remove_existing_renders(dest_repo_dir, verbosity=0):
     """
-    Remove existing folder structure in output_dir apart from:
-    Files matching gitignore entries from the source template
-    Anything the user has added to a .qhubignore file in the output_dir (maybe their own github workflows)
-
-    No FILES in the dest_repo_dir are deleted.
-
-    The .git folder remains intact
+    Remove all files and directories beneath each directory in `deletable_dirs`. These files and directories will be regenerated in the next step (`generate_files`) based on the configurations set in `qhub-config.yml`.
 
     Inputs must be pathlib.Path
     """
     home_dir = pathlib.Path.home()
     if pathlib.Path.cwd() == home_dir:
-        raise ValueError(f"Deploying from user's home directory, {home_dir}, is not permitted.")
+        raise ValueError(f"Deploying QHub from the home directory, {home_dir}, is not permitted.")
 
-    copyfile(str(source_repo_dir / ".gitignore"), str(dest_repo_dir / ".gitignore"))
-
-    gitignore_matches = parse_gitignore(dest_repo_dir / ".gitignore")
-
-    if (dest_repo_dir / ".qhubignore").is_file():
-        qhubignore_matches = parse_gitignore(dest_repo_dir / ".qhubignore")
-    else:
-
-        def qhubignore_matches(_):
-            return False  # Dummy blank qhubignore
-
-    deletable_dirs = ["terraform-state", ".github", "infrastructure", "images"]
+    deletable_dirs = ["terraform-state", ".github", "infrastructure", "image"]
 
     for deletable_dir in deletable_dirs:
         deletable_dir = dest_repo_dir / deletable_dir
-        print(f"Deleting all files and directories beneath {deletable_dir} ...")
-        for root, dirs, files in os.walk(deletable_dir, topdown=False):
-            for f in files:
-                p = pathlib.Path(root) / f
-                p.unlink(missing_ok=True)
-            for d in dirs:
-                p = pathlib.Path(root) / d
-                p.rmdir()
+        if deletable_dir.exists():
+            if verbosity > 0:
+                print(f"Deleting all files and directories beneath {deletable_dir} ...")
+            for root, dirs, files in os.walk(deletable_dir, topdown=False):
+                for f in files:
+                    fp = pathlib.Path(root) / fp
+                    if verbosity > 1:
+                        print(f"... deleting: {fp}")
+                    fp.unlink(missing_ok=True)
+                for d in dirs:
+                    dp = pathlib.Path(root) / dp
+                    if verbosity > 1:
+                        print(f"... deleting: {dp}")
+                    dp.rmdir()
 
 
 
