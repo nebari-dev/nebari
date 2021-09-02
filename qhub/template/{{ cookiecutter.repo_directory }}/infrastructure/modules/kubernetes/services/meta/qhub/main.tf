@@ -7,6 +7,10 @@ module "kubernetes-userinfo" {
   source = "../../userinfo"
 
   namespace = var.namespace
+
+  keycloak_server_url = var.keycloak_server_url
+  keycloak_username   = var.keycloak_username
+  keycloak_password   = var.keycloak_password
 }
 
 

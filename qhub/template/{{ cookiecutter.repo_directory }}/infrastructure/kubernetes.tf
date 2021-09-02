@@ -288,6 +288,10 @@ module "qhub" {
   keycloak_userdata_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"
   keycloak_logout_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/logout"
 
+  keycloak_username   = "qhub-bot"
+  keycloak_password   = random_password.keycloak-qhub-bot-password.result
+  keycloak_server_url = "http://keycloak-headless.${var.environment}:8080/auth/"
+
 }
 
 {% if cookiecutter.prefect.enabled -%}

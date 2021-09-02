@@ -46,7 +46,7 @@ resource "kubernetes_deployment" "main" {
       spec {
         container {
           name  = "userinfo"
-          image = "danlester/qhub-userinfo:3"
+          image = "danlester/qhub-userinfo:5"
 
           port {
             name           = "http"
@@ -63,29 +63,21 @@ resource "kubernetes_deployment" "main" {
             value = "1"
           }
 
-          volume_mount {
-            name       = "migration"
-            mount_path = "/etc/migration-state"
-            read_only  = true
+          env {
+            name  = "KEYCLOAK_SERVER_URL"
+            value = var.keycloak_server_url
           }
 
-          volume_mount {
-            name       = "nfs-mount"
-            mount_path = "/etc/userinfo-state"
-            sub_path   = "userinfo-state"
-            read_only  = false
+          env {
+            name  = "KEYCLOAK_USERNAME"
+            value = var.keycloak_username
           }
-        }
 
-        volume {
-          name = "migration"
-          config_map {
-            name = "qhub-userinfo-migration"
+          env {
+            name  = "KEYCLOAK_PASSWORD"
+            value = var.keycloak_password
           }
-        }
 
-        volume {
-          name = "nfs-mount"
         }
 
       }

@@ -49,15 +49,8 @@ class Holdall(BaseModel):
 
 HOLDALL = Holdall(users={}, groups={})
 
-# Read new state if saved
-
-STATE_FOLDER_PATH = os.environ.get('STATE_FOLDER_PATH', '/etc/userinfo-state')
-
-state_file = os.path.join(STATE_FOLDER_PATH, "state.json")
 
 # Keycloak config
-
-
 
 from keycloak import KeycloakAdmin
 

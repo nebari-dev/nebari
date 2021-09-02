@@ -69,16 +69,16 @@ import escapism
 import string
 def qhub_get_nss_user(username):
 
-    groupnames = [QHUB_USER_MAPPING[username]['primary_group']]
-    groupnames.extend(QHUB_USER_MAPPING[username].get('secondary_groups', []))
+    #groupnames = [QHUB_USER_MAPPING[username]['primary_group']]
+    #groupnames.extend(QHUB_USER_MAPPING[username].get('secondary_groups', []))
 
-    grouplist = json.dumps(groupnames)
+    #grouplist = json.dumps(groupnames)
     
     r = urlopen(Request(
                         f"http://qhub-userinfo:8091/user?username={username}",
-                        headers={'Content-Type': 'application/json'}
-                    ),
-                grouplist.encode("utf-8")
+                        headers={'Content-Type': 'application/json'},
+                        method="POST"
+                    )
                )
     user = json.load(r)
 
