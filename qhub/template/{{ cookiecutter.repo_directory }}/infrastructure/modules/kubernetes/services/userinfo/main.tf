@@ -46,7 +46,7 @@ resource "kubernetes_deployment" "main" {
       spec {
         container {
           name  = "userinfo"
-          image = "danlester/qhub-userinfo:5"
+          image = "danlester/qhub-userinfo:6"
 
           port {
             name           = "http"

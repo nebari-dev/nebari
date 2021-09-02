@@ -62,18 +62,12 @@ from urllib.request import urlopen, Request
 import json
 
 QHUB_USER_MAPPING = {{ cookiecutter.security.users }}
-QHUB_GROUP_MAPPING = {{ cookiecutter.security.groups }}
 QHUB_PROFILES = {{ cookiecutter.profiles.jupyterlab }}
 
 import escapism
 import string
-def qhub_get_nss_user(username):
 
-    #groupnames = [QHUB_USER_MAPPING[username]['primary_group']]
-    #groupnames.extend(QHUB_USER_MAPPING[username].get('secondary_groups', []))
-
-    #grouplist = json.dumps(groupnames)
-    
+def qhub_get_nss_user(username): 
     r = urlopen(Request(
                         f"http://qhub-userinfo:8091/user?username={username}",
                         headers={'Content-Type': 'application/json'},
@@ -95,20 +89,9 @@ def qhub_list_admins(users):
     return [k for k,v in users.items() if v['primary_group'] == 'admin']
 
 
-def qhub_list_users(users):
-    return [k for k,v in users.items() if v['primary_group'] != 'admin']
-
-
-def qhub_list_user_groups(username):
-    user = QHUB_USER_MAPPING[username]
-    return set([user['primary_group']] + user.get('secondary_groups', []))
-
-
 def qhub_configure_profile(user_nss_json, safe_username, profile):
-    #user = QHUB_USER_MAPPING[username]
     uid = user_nss_json['uid']
     username = user_nss_json['username']
-    #primary_gid = QHUB_GROUP_MAPPING[user['primary_group']]['gid']
     groups = user_nss_json['groups']
     primary_gid = groups[0]['gid']
     primary_group_name = groups[0]['groupname']
@@ -181,7 +164,7 @@ def qhub_list_available_profiles(user_nss_json):
 
     exclude_keys = {'users', 'groups', 'kubespawner_override'}
 
-    groups = qhub_list_user_groups(username)
+    groups = set([g['groupname'] for g in user_nss_json['groups']])
 
     available_profiles = []
     for profile in QHUB_PROFILES:
@@ -208,7 +191,6 @@ def qhub_list_available_profiles(user_nss_json):
 
 c.JupyterHub.admin_access = True
 c.Authenticator.admin_users = qhub_list_admins(QHUB_USER_MAPPING)
-c.Authenticator.whitelist = qhub_list_users(QHUB_USER_MAPPING)
 
 async def custom_options_form(self):
     # Save user and generate uid if not seen before

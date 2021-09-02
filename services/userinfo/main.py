@@ -88,7 +88,11 @@ class KeycloakStore:
             k_group = keycloak_admin.get_group(kg['id'])
 
             # If no gid, we will need to assign one
-            gid = int(k_group.get('attributes', {}).get('gid', ['0'])[0])
+            try:
+                gid = int(k_group.get('attributes', {}).get('gid', ['0'])[0])
+            except ValueError:
+                gid = 0
+                
             if gid == 0:
                 need_gids.append(kg['name'])
             else:
@@ -123,7 +127,11 @@ class KeycloakStore:
         for ku in k_users:
 
             # If no uid, we will need to assign one
-            uid = int(ku.get('attributes', {}).get('uid', ['0'])[0])
+            try:
+                uid = int(ku.get('attributes', {}).get('uid', ['0'])[0])
+            except ValueError:
+                uid = 0
+
             if uid == 0:
                 need_uids.append(ku['username'])
             else:
