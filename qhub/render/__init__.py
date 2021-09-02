@@ -156,11 +156,9 @@ def remove_existing_renders(source_repo_dir, dest_repo_dir):
 
     Inputs must be pathlib.Path
     """
-    home = pathlib.Path.home()
-    if pathlib.Path.cwd() == pathlib.Path.home():
-        raise ValueError(f"Deploying from user's home directory, {str(home)}, is not permitted.")
-
-    deletable_dirs = ["terraform-state", ".github", "infrastructure", "images"]
+    home_dir = pathlib.Path.home()
+    if pathlib.Path.cwd() == home_dir:
+        raise ValueError(f"Deploying from user's home directory, {home_dir}, is not permitted.")
 
     copyfile(str(source_repo_dir / ".gitignore"), str(dest_repo_dir / ".gitignore"))
 
@@ -173,9 +171,11 @@ def remove_existing_renders(source_repo_dir, dest_repo_dir):
         def qhubignore_matches(_):
             return False  # Dummy blank qhubignore
 
+    deletable_dirs = ["terraform-state", ".github", "infrastructure", "images"]
+
     for deletable_dir in deletable_dirs:
         deletable_dir = dest_repo_dir / deletable_dir
-        print(f"Deleting all files and directories in {deletable_dir}...")
+        print(f"Deleting all files and directories beneath {deletable_dir} ...")
         for root, dirs, files in os.walk(deletable_dir, topdown=False):
             for f in files:
                 p = pathlib.Path(root) / f
@@ -184,36 +184,6 @@ def remove_existing_renders(source_repo_dir, dest_repo_dir):
                 p = pathlib.Path(root) / d
                 p.rmdir()
 
-            # if (
-            #     root.startswith(f"{str(dest_repo_dir)}/.git_test/")
-            #     or root == f"{str(dest_repo_dir)}/.git_test"
-            # ):
-            #     # Leave everything in the .git folder
-            #     continue
-
-            # root_path = pathlib.Path(root)
-
-            # if root != str(
-            #     dest_repo_dir
-            # ):  # Do not delete top-level files such as qhub-config.yaml!
-            #     for file in files:
-
-            #         if not gitignore_matches(root_path / file) and not qhubignore_matches(
-            #             root_path / file
-            #         ):
-
-            #             os.remove(root_path / file)
-
-            # for dir in dirs:
-            #     if (
-            #         not gitignore_matches(root_path / dir)
-            #         and not (dir == ".git" and root_path == dest_repo_dir)
-            #         and not qhubignore_matches(root_path / dir)
-            #     ):
-            #         try:
-            #             os.rmdir(root_path / dir)
-            #         except OSError:
-            #             pass  # Silently fail if 'saved' files are present so dir not empty
 
 
 def set_env_vars_in_config(config):
