@@ -18,9 +18,6 @@ prometheus:
         - role: service    
           
       relabel_configs:    
-      - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_component]    
-        action: keep    
-        regex: traefik-internal-service    
       - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]    
         action: keep    
         regex: true    
