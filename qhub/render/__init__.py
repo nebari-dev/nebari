@@ -3,7 +3,7 @@ import collections
 import functools
 import json
 import os
-from shutil import copyfile
+from shutil import copyfile, rmtree
 from gitignore_parser import parse_gitignore
 
 from ruamel import yaml
@@ -133,7 +133,7 @@ def render_template(output_directory, config_filename, force=False):
 
     remove_existing_renders(
         dest_repo_dir=output_directory / repo_directory,
-        verbosity=0,
+        verbosity=2,
     )
 
     generate_files(
@@ -152,27 +152,24 @@ def remove_existing_renders(dest_repo_dir, verbosity=0):
     """
     home_dir = pathlib.Path.home()
     if pathlib.Path.cwd() == home_dir:
-        raise ValueError(f"Deploying QHub from the home directory, {home_dir}, is not permitted.")
+        raise ValueError(
+            f"Deploying QHub from the home directory, {home_dir}, is not permitted."
+        )
 
-    deletable_dirs = ["terraform-state", ".github", "infrastructure", "image"]
+    deletable_dirs = [
+        "terraform-state",
+        ".github",
+        "infrastructure",
+        "image",
+        ".gitlab-ci.yml",
+    ]
 
     for deletable_dir in deletable_dirs:
         deletable_dir = dest_repo_dir / deletable_dir
         if deletable_dir.exists():
             if verbosity > 0:
                 print(f"Deleting all files and directories beneath {deletable_dir} ...")
-            for root, dirs, files in os.walk(deletable_dir, topdown=False):
-                for f in files:
-                    fp = pathlib.Path(root) / fp
-                    if verbosity > 1:
-                        print(f"... deleting: {fp}")
-                    fp.unlink(missing_ok=True)
-                for d in dirs:
-                    dp = pathlib.Path(root) / dp
-                    if verbosity > 1:
-                        print(f"... deleting: {dp}")
-                    dp.rmdir()
-
+            rmtree(deletable_dir)
 
 
 def set_env_vars_in_config(config):
