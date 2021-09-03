@@ -49,6 +49,13 @@ EOT
   }
 }
 
+data "template_file" "traefik_dashboard" {
+  template = file("${path.module}/traefik.json")
+  vars = {
+    namespace = var.namespace
+  }
+}
+
 resource "kubernetes_manifest" "traefik_dashboard_configmap" {
   provider = kubernetes-alpha
 
@@ -65,7 +72,7 @@ resource "kubernetes_manifest" "traefik_dashboard_configmap" {
     }
 
     data = {
-      "traefik-dashboard.json" = local.traefik_dashboard
+      "traefik-dashboard.json" = data.template_file.traefik_dashboard.rendered
     }
   }
 }

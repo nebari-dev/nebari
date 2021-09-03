@@ -16,12 +16,12 @@
   "editable": true,
   "gnetId": 13165,
   "graphTooltip": 1,
-  "iteration": 1630447790321,
+  "iteration": 1630701184661,
   "links": [],
   "panels": [
     {
       "collapsed": false,
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -99,8 +99,9 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "count(kube_pod_status_ready{namespace=\"$namespace\",condition=\"true\",pod=~\".*traefik.*\"})",
+          "expr": "count(kube_pod_status_ready{namespace=\"$namespace\",condition=\"true\",pod=~\".*traefik.*\", job=\"traefik\"})",
           "format": "time_series",
+          "hide": false,
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "",
@@ -207,7 +208,7 @@
     },
     {
       "collapsed": false,
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -521,7 +522,7 @@
     },
     {
       "collapsed": false,
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -842,7 +843,7 @@
     },
     {
       "collapsed": false,
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1258,7 +1259,7 @@
     },
     {
       "collapsed": false,
-      "datasource": "${Prometheus}",
+      "datasource": "Prometheus",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1531,10 +1532,10 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "dev",
-          "value": "dev"
+          "text": "${namespace}",
+          "value": "${namespace}"
         },
-        "datasource": "${Prometheus}",
+        "datasource": "Prometheus",
         "definition": "label_values(traefik_config_reloads_total, namespace)",
         "description": null,
         "error": null,
@@ -1545,7 +1546,7 @@
         "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(traefik_config_reloads_total, namespace)",
+          "query": "label_values(kube_pod_container_info{pod=~\".*traefik.*\", job=\"traefik\"}, namespace)",
           "refId": "Prometheus-namespace-Variable-Query"
         },
         "refresh": 1,
@@ -1619,5 +1620,5 @@
   "timezone": "",
   "title": "Traefik",
   "uid": "k8sTv24ops",
-  "version": 163
+  "version": 1
 }
