@@ -289,7 +289,11 @@ deployment. The current list of docker images can be seen
 need to be pulled like so:
 
 ```bash
-	docker pull quansight/qhub-jupyterhub:v0.x.x
+docker pull quansight/qhub-jupyterhub:v0.x.x
+docker pull quansight/qhub-jupyterlab:v0.x.x
+docker pull quansight/qhub-dask-worker:v0.x.x
+docker pull quansight/qhub-dask-gateway:v0.x.x
+docker pull quansight/qhub-conda-store:v0.x.x
 ```
 Replacing `v0.x.x` with the current version that is listed
 </details>
