@@ -235,6 +235,9 @@ module "prefect" {
   {% if cookiecutter.prefect.image is defined -%}
   image                = "{{ cookiecutter.prefect.image }}"
   {% endif -%}
+  {% if cookiecutter.prefect.overrides is defined %}
+  overrides            = ["{{ cookiecutter.prefect.overrides }}"]
+  {% endif %}
 }
 {% endif -%}
 

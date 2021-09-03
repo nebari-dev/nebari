@@ -21,3 +21,9 @@ variable "cloud_api" {
   type    = string
   default = "https://api.prefect.io"
 }
+
+variable "overrides" {
+  description = "Prefect helm chart list of overrides"
+  type        = list(string)
+  default     = []
+}

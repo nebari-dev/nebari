@@ -38,7 +38,6 @@ class AuthenticationEnum(str, enum.Enum):
     auth0 = "Auth0"
     custom = "custom"
 
-
 class Base(pydantic.BaseModel):
     ...
 
@@ -76,6 +75,7 @@ class ClearML(Base):
 class Prefect(Base):
     enabled: bool
     image: typing.Optional[str]
+    overrides: typing.Optional[typing.List]
 
 
 # ============= Terraform ===============

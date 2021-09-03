@@ -21,7 +21,8 @@
     },
     "prefect": {
         "enabled": null,
-        "image": null
+        "image": null,
+        "overrides": null
     },
     "security": null,
     "default_images": null,
