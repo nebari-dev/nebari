@@ -70,7 +70,6 @@ resource "kubernetes_manifest" "traefik_dashboard_configmap" {
         grafana_dashboard = "1"
       }
     }
-
     data = {
       "traefik-dashboard.json" = data.template_file.traefik_dashboard.rendered
     }
