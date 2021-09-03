@@ -62,7 +62,7 @@ def patch_terraform_users(config):
     config["tf_groups"] = [
         {
             "name": k,
-            "gid": str(v.get("gid", "")),
+            "gid": str((v or {}).get("gid", "")),
         }
         for (k, v) in incoming_groups.items()
     ]

@@ -36,7 +36,7 @@ resource "keycloak_user" "user" {
 
   lifecycle {
     ignore_changes = [
-      first_name, last_name, email, enabled
+      first_name, last_name, email, enabled, attributes
     ]
   }
 
@@ -55,6 +55,12 @@ resource "keycloak_group" "group" {
 
   realm_id = keycloak_realm.realm-qhub.id
   name     = var.groups[count.index].name
+
+  lifecycle {
+    ignore_changes = [
+      attributes
+    ]
+  }
 
   attributes = {
     gid = var.groups[count.index].gid

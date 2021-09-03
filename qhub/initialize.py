@@ -28,12 +28,11 @@ BASE_CONFIGURATION = {
         "authentication": None,
         "users": {
             "example-user": {
-                "uid": 1000,
                 "primary_group": "admin",
                 "secondary_groups": ["users"],
             }
         },
-        "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
+        "groups": {"users": None, "admin": None},
     },
     "default_images": {
         "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
