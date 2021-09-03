@@ -37,26 +37,8 @@ spec:
               value: {{ .Values.cloudApi }}
             - name: NAMESPACE
               value: {{ .Values.namespace }}
-            - name: IMAGE_PULL_SECRETS
-              value: ''
-            - name: PREFECT__CLOUD__AGENT__LABELS
-              value: '[]'
-            - name: JOB_MEM_REQUEST
-              value: ''
-            - name: JOB_MEM_LIMIT
-              value: ''
-            - name: JOB_CPU_REQUEST
-              value: ''
-            - name: JOB_CPU_LIMIT
-              value: ''
-            - name: IMAGE_PULL_POLICY
-              value: ''
             - name: SERVICE_ACCOUNT_NAME
               value: {{ .Values.serviceAccount }}
-            - name: PREFECT__BACKEND
-              value: cloud
-            - name: PREFECT__CLOUD__AGENT__AGENT_ADDRESS
-              value: http://:8080
           image: {{ .Values.prefectImage }}
           imagePullPolicy: Always
           livenessProbe:

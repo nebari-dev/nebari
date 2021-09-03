@@ -3,7 +3,8 @@ resource "helm_release" "prefect" {
   namespace = var.namespace
   chart     = "${path.module}/chart"
 
-  values = var.overrides
+  values = concat([
+    file("${path.module}/values.yaml")], var.overrides)
 
   set_sensitive {
     name  = "prefectToken"
