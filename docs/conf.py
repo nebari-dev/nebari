@@ -16,7 +16,7 @@ author = "Quansight"
 
 BLOG_TITLE = title = html_title = "Docs"
 BLOG_AUTHOR = author = "Quansight"
-html_theme = "sphinx_material"
+html_theme = "pydata_sphinx_theme"
 
 # The master toctree document.
 master_doc = "index"
@@ -63,54 +63,56 @@ templates_path = ["_templates"]
 
 # Material theme options (see theme.conf for more information)
 
-html_theme_options = {
-    "nav_title": "Welcome to QHub's documentation!",
-    # 'google_analytics_account': 'UA-XXXXX',     
-    # Set you GA account ID to enable tracking
-    # Specify a base_url used to generate sitemap.xml. If not, no sitemap will be built.
-    "base_url": "https://qhub.dev/",
-    # Set the color and the accent color
-    "theme_color": THEME_COLOR,
-    "color_primary": THEME_COLOR,
-    "color_accent": "light-yellow",
-    # Set the repo location to get a badge with stats
-    "repo_url": "https://github.com/Quansight/qhub",
-    "repo_name": "QHub",
-    # Visible levels of the global TOC; -1 means unlimited
-    "globaltoc_depth": 2,
-    # If False, expand all TOC entries
-    "globaltoc_collapse": True,
-    # If True, show hidden TOC entries
-    "globaltoc_includehidden": False,
+# html_theme_options = {
+#     "nav_title": "Welcome to QHub's documentation!",
+#     # 'google_analytics_account': 'UA-XXXXX',     
+#     # Set you GA account ID to enable tracking
+#     # Specify a base_url used to generate sitemap.xml. If not, no sitemap will be built.
+#     "base_url": "https://qhub.dev/",
+#     # Set the color and the accent color
+#     "theme_color": THEME_COLOR,
+#     "color_primary": THEME_COLOR,
+#     "color_accent": "light-yellow",
+#     # Set the repo location to get a badge with stats
+#     "repo_url": "https://github.com/Quansight/qhub",
+#     "repo_name": "QHub",
+#     # Visible levels of the global TOC; -1 means unlimited
+#     "globaltoc_depth": 2,
+#     # If False, expand all TOC entries
+#     "globaltoc_collapse": True,
+#     # If True, show hidden TOC entries
+#     "globaltoc_includehidden": False,
 
-    "nav_links": [
-            {
-            "href": "https://www.quansight.com/jupyter-consulting",
-            "title": "Quansight",
-            "internal": False,
+#     "nav_links": [
+#             {
+#             "href": "https://www.quansight.com/jupyter-consulting",
+#             "title": "Quansight",
+#             "internal": False,
 
-        },
-            {
-            "href": "https://hpc.qhub.dev/",
-            "title": "QHub HPC",
-            "internal": False,
+#         },
+#             {
+#             "href": "https://hpc.qhub.dev/",
+#             "title": "QHub HPC",
+#             "internal": False,
 
-        },
-            {
-                "href": "https://pypi.org/project/qhub/",
-                "title": "PyPI",
-                "internal": False,
+#         },
+#             {
+#                 "href": "https://pypi.org/project/qhub/",
+#                 "title": "PyPI",
+#                 "internal": False,
 
-        },
-        ],
+#         },
+#         ],
 
-    }
+#     }
 
-html_sidebars = {
-    "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
-    }
+# html_sidebars = {
+#     "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
+#     }
 
-# Exclude build directory and Jupyter backup files:
+html_logo = "source/images/qhub_logo.png"
+
+# exclude build directory and Jupyter backup files:
 exclude_patterns = ["_build", "*checkpoint*", "site", "jupyter_execute", "conf.py", "README.md", "ext"]
 
 latex_documents = [
