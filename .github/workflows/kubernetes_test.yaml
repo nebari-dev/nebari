@@ -148,3 +148,4 @@ jobs:
       - name: Basic kubectl checks after cleanup
         run: |
           kubectl get all,cm,secret,ing -A
+
