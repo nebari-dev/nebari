@@ -17,35 +17,29 @@ science platform in the Cloud, providing an [**Infrastructure as
 Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) platform
 that streamlines the deployment of data science infrastructure. 
 
-## Contents
 
 ```{toctree}
-:maxdepth: 2
-
+:maxdepth: 1
 source/introduction/index.md
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 source/installation/index.md
 ``` 
 
 ```{toctree}
-:maxdepth: 2
-
-
+:maxdepth: 1
 source/user_guide/index.md
 ```
 
 ```{toctree}
-:maxdepth: 2
-
+:maxdepth: 1
 source/admin_guide/index.md
 ```
 
 ```{toctree}
-:maxdepth: 2
-
+:maxdepth: 1
 source/dev_guide/index.md
 ```
 
