@@ -1,8 +1,5 @@
 # User Guide
 
-
-User Guidy stuff
-
 ```{toctree}
 :maxdepth: 2
 

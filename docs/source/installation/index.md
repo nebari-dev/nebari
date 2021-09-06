@@ -1,9 +1,6 @@
 
 # Installation
 
-
-Installs stuff
-
 ```{toctree}
 :maxdepth: 2
 installation.md
