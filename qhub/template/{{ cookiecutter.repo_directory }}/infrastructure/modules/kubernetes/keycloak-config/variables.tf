@@ -23,6 +23,11 @@ variable "jupyterhub-callback-url-path" {
   type        = string
 }
 
+variable "jupyterhub-logout-redirect-url-path" {
+  description = "URL Path for the jupyterhub logout redirect"
+  type        = string
+}
+
 variable "jupyterhub-keycloak-client-id" {
   description = "jupyterhub Client ID within Keycloak"
   type        = string

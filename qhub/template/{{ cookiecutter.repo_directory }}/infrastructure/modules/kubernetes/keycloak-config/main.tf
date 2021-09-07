@@ -116,7 +116,8 @@ resource "keycloak_openid_client" "jupyterhub_client" {
   standard_flow_enabled = true
 
   valid_redirect_uris = [
-    "https://${var.external-url}${var.jupyterhub-callback-url-path}"
+    "https://${var.external-url}${var.jupyterhub-callback-url-path}",
+    "https://${var.external-url}${var.jupyterhub-logout-redirect-url-path}"
   ]
 
   login_theme = "keycloak"
