@@ -203,15 +203,13 @@ c.LocalProcessSpawner.shell_cmd = ['bash', '-l', '-c']
 from oauthenticator.generic import GenericOAuthenticator
 c.JupyterHub.authenticator_class = GenericOAuthenticator
 
-# OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_CALLBACK_URL should all be imported from env vars automatically
+# OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_CALLBACK_URL, and OAUTH_LOGOUT_REDIRECT_URL
+# should all be imported from env vars automatically
 import os
 
 c.GenericOAuthenticator.authorize_url = os.environ.get('KEYCLOAK_AUTHORIZE_URL')
 c.GenericOAuthenticator.token_url = os.environ.get('KEYCLOAK_TOKEN_URL')
 c.GenericOAuthenticator.userdata_url = os.environ.get('KEYCLOAK_USERDATA_URL')
-
-# TODO Keycloak logout not currently working (only clears JupyterHub session)
-c.OAuthenticator.logout_redirect_url = os.environ.get('KEYCLOAK_LOGOUT_URL')
 
 c.GenericOAuthenticator.username_key = 'preferred_username'
 

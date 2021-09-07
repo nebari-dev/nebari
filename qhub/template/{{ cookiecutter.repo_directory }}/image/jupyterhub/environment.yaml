@@ -5,7 +5,7 @@ dependencies:
  - pip==21.1.2
  - jupyterhub==1.4.1
  - jupyterhub-kubespawner==1.0.0
- - oauthenticator==14.0.0
+ - oauthenticator==14.2.0
  - escapism==1.0.1
  - cdsdashboards==0.5.7
  - pip:
