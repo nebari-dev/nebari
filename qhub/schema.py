@@ -218,7 +218,9 @@ class Keycloak(Base):
 class Security(Base):
     authentication: Authentication
     users: typing.Dict[str, User]
-    groups: typing.Dict[str, typing.Union[Group, None]]  # If gid is omitted, no attributes in Group means it appears as None
+    groups: typing.Dict[
+        str, typing.Union[Group, None]
+    ]  # If gid is omitted, no attributes in Group means it appears as None
     keycloak: typing.Optional[Keycloak]
 
     @validator("users", pre=True)
@@ -228,10 +230,10 @@ class Security(Base):
 
     @root_validator
     def user_groups_must_exist(cls, values):
-        groupnames = set(values.get('groups', {}).keys())
-        for username, user in values.get('users', {}).items():
+        groupnames = set(values.get("groups", {}).keys())
+        for username, user in values.get("users", {}).items():
             usersgroupnames = set([user.primary_group])
-            secondary_groups = getattr(user, 'secondary_groups', None)
+            secondary_groups = getattr(user, "secondary_groups", None)
             if secondary_groups is not None and len(secondary_groups) > 0:
                 usersgroupnames.update(secondary_groups)
             if not usersgroupnames.issubset(groupnames):
@@ -240,6 +242,7 @@ class Security(Base):
                     f"user {username} is a member of non-existent group(s): {missinggroups}"
                 )
         return values
+
 
 # ================ Providers ===============
 
