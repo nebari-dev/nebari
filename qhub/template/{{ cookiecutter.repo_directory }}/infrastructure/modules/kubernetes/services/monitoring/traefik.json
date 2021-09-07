@@ -16,7 +16,8 @@
   "editable": true,
   "gnetId": 13165,
   "graphTooltip": 1,
-  "iteration": 1630701184661,
+  "id": 27,
+  "iteration": 1630948875428,
   "links": [],
   "panels": [
     {
@@ -861,7 +862,8 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "$Prometheus",
-      "decimals": 2,
+      "decimals": 0,
+      "description": "",
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -872,20 +874,19 @@
       },
       "hiddenSeries": false,
       "id": 5,
+      "interval": null,
       "legend": {
         "alignAsTable": true,
-        "avg": true,
-        "current": true,
+        "avg": false,
+        "current": false,
         "hideEmpty": false,
         "hideZero": true,
-        "max": true,
+        "max": false,
         "min": false,
         "rightSide": true,
         "show": true,
         "sideWidth": null,
-        "sort": "avg",
-        "sortDesc": true,
-        "total": false,
+        "total": true,
         "values": true
       },
       "lines": false,
@@ -907,9 +908,9 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(traefik_service_requests_total{code=~\"2..\"}[5m])) by (method, code)",
+          "expr": "count(rate(traefik_service_requests_total{code=~\"[2|3|4|5]..\"}[5m])) by (method, code)",
           "format": "time_series",
-          "interval": "",
+          "interval": "1",
           "intervalFactor": 2,
           "legendFormat": "{{method}} : {{code}}",
           "refId": "A"
@@ -919,7 +920,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Status code 2xx over 5min",
+      "title": "Status method/codes over 5min",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -951,305 +952,6 @@
           "max": null,
           "min": "0",
           "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "$Prometheus",
-      "decimals": 2,
-      "description": "",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 45
-      },
-      "hiddenSeries": false,
-      "id": 27,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": true,
-        "hideZero": true,
-        "max": true,
-        "min": true,
-        "rightSide": true,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.0.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": true,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(rate(traefik_service_requests_total{code=~\"4.*\"}[5m])) by (method, code)",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{method}} : {{code}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Status code 4xx over 5min",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": null,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "decimals": 2,
-      "description": "",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 0,
-        "y": 54
-      },
-      "hiddenSeries": false,
-      "id": 6,
-      "legend": {
-        "alignAsTable": true,
-        "avg": true,
-        "current": true,
-        "hideZero": true,
-        "max": true,
-        "min": true,
-        "rightSide": true,
-        "show": true,
-        "sortDesc": false,
-        "total": false,
-        "values": true
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.0.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": true,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "sum(rate(traefik_service_requests_total{code!~\"2..|4..|5..\"}[5m])) by (method, code)",
-          "format": "time_series",
-          "hide": false,
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{ method }} : {{code}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Status code 3xx over 5min",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": null,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "decimals": 2,
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 54
-      },
-      "hiddenSeries": false,
-      "id": 36,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": true,
-        "hideZero": true,
-        "max": true,
-        "min": true,
-        "rightSide": true,
-        "show": true,
-        "total": false,
-        "values": true
-      },
-      "lines": false,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.0.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": true,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": false,
-          "expr": "sum(rate(traefik_service_requests_total{code=~\"5..\"}[5m])) by (method, code)",
-          "format": "time_series",
-          "instant": false,
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{method}} : {{code}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Status code 5xx over 5min",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "decimals": null,
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": false
         }
       ],
       "yaxis": {
@@ -1264,7 +966,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 63
+        "y": 54
       },
       "id": 35,
       "panels": [],
@@ -1283,7 +985,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 64
+        "y": 55
       },
       "hiddenSeries": false,
       "id": 31,
@@ -1397,7 +1099,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 64
+        "y": 55
       },
       "hiddenSeries": false,
       "id": 33,
@@ -1498,13 +1200,10 @@
       }
     }
   ],
-  "refresh": "30s",
+  "refresh": "",
   "schemaVersion": 30,
   "style": "dark",
-  "tags": [
-    "Traefik",
-    "Ingress"
-  ],
+  "tags": [],
   "templating": {
     "list": [
       {
@@ -1532,8 +1231,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "${namespace}",
-          "value": "${namespace}"
+          "text": "dev",
+          "value": "dev"
         },
         "datasource": "Prometheus",
         "definition": "label_values(traefik_config_reloads_total, namespace)",
@@ -1592,7 +1291,7 @@
     ]
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -1618,7 +1317,7 @@
     ]
   },
   "timezone": "",
-  "title": "Traefik",
-  "uid": "k8sTv24ops",
-  "version": 1
+  "title": "Traefik Copy",
+  "uid": "2p6nlgS7z",
+  "version": 4
 }
