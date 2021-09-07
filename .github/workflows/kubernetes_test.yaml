@@ -123,14 +123,15 @@ jobs:
       - name: Get qhub-config.yaml full path
         run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`" >> $GITHUB_ENV
       
+      - name: Sleep to see if it fixes flaky Kubernetes Tests 
+        run: sleep 60
+
       - name: Cypress run
         uses: cypress-io/github-action@v2
         env:
           CYPRESS_BASE_URL: https://github-actions.qhub.dev/
         with:
           working-directory: tests_e2e
-          wait-on: https://github-actions.qhub.dev/
-          wait-on-timeout: 60
 
       - name: Save Cypress screenshots and videos
         if: always()
