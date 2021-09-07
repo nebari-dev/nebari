@@ -10,8 +10,8 @@ resource "kubernetes_service" "main" {
     }
 
     port {
-      name = "http"
-      port = 8091
+      name        = "http"
+      port        = 8091
       target_port = 80
     }
 

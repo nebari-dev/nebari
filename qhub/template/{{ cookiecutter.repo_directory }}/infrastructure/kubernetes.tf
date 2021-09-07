@@ -199,12 +199,12 @@ module "kubernetes-keycloak-helm" {
 }
 
 provider "keycloak" {
-    client_id     = "admin-cli"
-    username      = "qhub-bot"
-    password      = random_password.keycloak-qhub-bot-password.result
-    url           = "https://${var.endpoint}"
+  client_id = "admin-cli"
+  username  = "qhub-bot"
+  password  = random_password.keycloak-qhub-bot-password.result
+  url       = "https://${var.endpoint}"
 
-    tls_insecure_skip_verify = {% if cookiecutter.provider == "local" %}true{% else %}false{% endif %}
+  tls_insecure_skip_verify = {% if cookiecutter.provider == "local" %}true{% else %}false{% endif %}
 }
 
 module "kubernetes-keycloak-config" {
@@ -282,13 +282,13 @@ module "qhub" {
 
   forwardauth-callback-url-path = local.forwardauth-callback-url-path
 
-  OAUTH_CLIENT_ID = local.jupyterhub-keycloak-client-id
-  OAUTH_CLIENT_SECRET = random_password.jupyterhub-jhsecret.result
-  OAUTH_CALLBACK_URL = "https://${var.endpoint}${local.jupyterhub-callback-url-path}"
+  OAUTH_CLIENT_ID        = local.jupyterhub-keycloak-client-id
+  OAUTH_CLIENT_SECRET    = random_password.jupyterhub-jhsecret.result
+  OAUTH_CALLBACK_URL     = "https://${var.endpoint}${local.jupyterhub-callback-url-path}"
   keycloak_authorize_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth"
-  keycloak_token_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"
-  keycloak_userdata_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"
-  keycloak_logout_url = format("%s?redirect_uri=%s", "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/logout", urlencode("https://${var.endpoint}${local.jupyterhub-logout-redirect-url-path}"))
+  keycloak_token_url     = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"
+  keycloak_userdata_url  = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"
+  keycloak_logout_url    = format("%s?redirect_uri=%s", "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/logout", urlencode("https://${var.endpoint}${local.jupyterhub-logout-redirect-url-path}"))
 
   keycloak_username   = "qhub-bot"
   keycloak_password   = random_password.keycloak-qhub-bot-password.result
@@ -364,15 +364,4 @@ module "forwardauth" {
   jh-client-id      = local.forwardauth-keycloak-client-id
   jh-client-secret  = random_password.forwardauth-jhsecret.result
   callback-url-path = local.forwardauth-callback-url-path
-}
-resource "kubernetes_config_map" "qhub-userinfo-migration" {
-  metadata {
-    name      = "qhub-userinfo-migration"
-    namespace = var.environment
-  }
-
-  data = {
-    "initial-users.json" = jsonencode({{ cookiecutter.security.users | jsonify }})
-    "initial-groups.json" = jsonencode({{ cookiecutter.security.groups | jsonify }})
-  }
 }

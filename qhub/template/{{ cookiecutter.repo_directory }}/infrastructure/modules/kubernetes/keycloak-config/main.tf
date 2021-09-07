@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     keycloak = {
-      source = "mrparkers/keycloak"
+      source  = "mrparkers/keycloak"
       version = "3.3.0"
     }
   }
@@ -9,7 +9,7 @@ terraform {
 
 resource "keycloak_realm" "realm-qhub" {
   provider = keycloak
-  
+
   realm = "qhub"
 
   display_name = "QHub ${var.name}"
@@ -68,7 +68,8 @@ resource "keycloak_group" "group" {
 }
 
 resource "keycloak_default_groups" "default" {
-  realm_id  = keycloak_realm.realm-qhub.id
+  realm_id = keycloak_realm.realm-qhub.id
+
   group_ids = [
     for g in keycloak_group.group : g.id if g.name == "users"
   ]
@@ -81,7 +82,7 @@ resource "keycloak_user_groups" "user_groups" {
 
   user_id = keycloak_user.user[count.index].id
 
-  group_ids  = [
+  group_ids = [
     for i in var.user_groups[count.index] : keycloak_group.group[i].id
   ]
 }

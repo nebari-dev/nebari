@@ -23,20 +23,20 @@ module "kubernetes-jupyterhub" {
     jsonencode({
       hub = {
         extraEnv = [
-          {name = "OAUTH_CLIENT_ID",
-          value = var.OAUTH_CLIENT_ID},
-          {name = "OAUTH_CLIENT_SECRET",
-          value = var.OAUTH_CLIENT_SECRET},
-          {name = "OAUTH_CALLBACK_URL",
-          value = var.OAUTH_CALLBACK_URL},
-          {name = "KEYCLOAK_AUTHORIZE_URL",
-          value = var.keycloak_authorize_url},
-          {name = "KEYCLOAK_TOKEN_URL",
-          value = var.keycloak_token_url},
-          {name = "KEYCLOAK_USERDATA_URL",
-          value = var.keycloak_userdata_url},
-          {name = "OAUTH_LOGOUT_REDIRECT_URL",
-          value = var.keycloak_logout_url}
+          { name = "OAUTH_CLIENT_ID",
+          value = var.OAUTH_CLIENT_ID },
+          { name = "OAUTH_CLIENT_SECRET",
+          value = var.OAUTH_CLIENT_SECRET },
+          { name = "OAUTH_CALLBACK_URL",
+          value = var.OAUTH_CALLBACK_URL },
+          { name = "KEYCLOAK_AUTHORIZE_URL",
+          value = var.keycloak_authorize_url },
+          { name = "KEYCLOAK_TOKEN_URL",
+          value = var.keycloak_token_url },
+          { name = "KEYCLOAK_USERDATA_URL",
+          value = var.keycloak_userdata_url },
+          { name = "OAUTH_LOGOUT_REDIRECT_URL",
+          value = var.keycloak_logout_url }
         ]
         nodeSelector = {
           (var.general-node-group.key) = var.general-node-group.value

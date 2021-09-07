@@ -11,12 +11,12 @@ resource "helm_release" "keycloak" {
   ], var.overrides)
 
   set {
-    name = "qhub_bot_password"
+    name  = "qhub_bot_password"
     value = var.qhub-bot-password
   }
 
   set {
-    name = "initial_root_password"
+    name  = "initial_root_password"
     value = var.initial-root-password
   }
 }
@@ -35,11 +35,11 @@ resource "kubernetes_manifest" "keycloak-http" {
       entryPoints = ["websecure"]
       routes = [
         {
-          kind        = "Rule"
-          match       = "Host(`${var.external-url}`) && PathPrefix(`/auth`) "
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`) && PathPrefix(`/auth`) "
           services = [
             {
-              name      = "keycloak-headless"
+              name = "keycloak-headless"
               # Really not sure why 8080 works here
               port      = 80
               namespace = var.namespace

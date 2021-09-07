@@ -31,7 +31,7 @@ terraform {
       version = "0.3.2"
     }
     keycloak = {
-      source = "mrparkers/keycloak"
+      source  = "mrparkers/keycloak"
       version = "3.3.0"
     }
   }
