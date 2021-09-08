@@ -44,7 +44,7 @@ c.JupyterHub.template_paths = [
 
 c.JupyterHub.template_vars = {
 {%- for key, value in cookiecutter.theme.jupyterhub.items() %}
-    "{{ key }}": "{{ value | replace('\"', '\\"') }}",
+    "{{ key }}": {{ value | jsonify }},
 {%- endfor %}
 {% if cookiecutter.cdsdashboards.enabled %}
     "cdsdashboards_enabled": True,

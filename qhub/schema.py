@@ -307,7 +307,7 @@ class LocalProvider(Base):
 
 
 class Theme(Base):
-    jupyterhub: typing.Dict[str, str]
+    jupyterhub: typing.Dict[str, typing.Union[str, list]]
 
 
 # ================== Profiles ==================
