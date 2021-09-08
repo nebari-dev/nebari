@@ -9,4 +9,4 @@ dependencies:
  - escapism==1.0.1
  - cdsdashboards==0.5.7
  - pip:
-   - qhub-jupyterhub-theme==0.3.1
+   - qhub-jupyterhub-theme==0.3.2
