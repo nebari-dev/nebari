@@ -21,25 +21,9 @@ that streamlines the deployment of data science infrastructure.
 ```{toctree}
 :maxdepth: 1
 source/introduction/index.md
-```
-
-```{toctree}
-:maxdepth: 1
 source/installation/index.md
-``` 
-
-```{toctree}
-:maxdepth: 1
 source/user_guide/index.md
-```
-
-```{toctree}
-:maxdepth: 1
 source/admin_guide/index.md
-```
-
-```{toctree}
-:maxdepth: 1
 source/dev_guide/index.md
 ```
 
