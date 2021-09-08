@@ -46,7 +46,7 @@ resource "keycloak_user" "user" {
 
   initial_password {
     value     = var.users[count.index].password
-    temporary = false
+    temporary = true
   }
 }
 

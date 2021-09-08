@@ -44,12 +44,6 @@ class Holdall(BaseModel):
     users: Dict[str, User]
     groups: Dict[str, Group]
 
-    def new_uid(self):
-        return 1 + max([2000] + [u.uid for _, u in self.users.items()])
-
-    def new_gid(self):
-        return 1 + max([10] + [g.gid for _, g in self.groups.items()])
-
 
 HOLDALL = Holdall(users={}, groups={})
 
