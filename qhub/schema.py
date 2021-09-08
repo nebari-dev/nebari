@@ -38,6 +38,7 @@ class AuthenticationEnum(str, enum.Enum):
     auth0 = "Auth0"
     custom = "custom"
 
+
 class Base(pydantic.BaseModel):
     ...
 

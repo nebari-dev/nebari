@@ -4,7 +4,7 @@ resource "helm_release" "prefect" {
   chart     = "${path.module}/chart"
 
   values = concat([
-    file("${path.module}/values.yaml")], var.overrides)
+  file("${path.module}/values.yaml")], var.overrides)
 
   set_sensitive {
     name  = "prefectToken"
