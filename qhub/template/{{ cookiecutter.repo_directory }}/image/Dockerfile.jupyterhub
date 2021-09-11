@@ -1,4 +1,4 @@
-FROM debian:10.3-slim
+FROM ubuntu:20.04
 LABEL MAINTAINER="Quansight"
 
 COPY scripts/install-apt-minimal.sh /opt/scripts/install-apt-minimal.sh
