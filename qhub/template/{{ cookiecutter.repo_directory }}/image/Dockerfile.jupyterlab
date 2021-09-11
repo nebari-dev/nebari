@@ -17,6 +17,9 @@ ENV CONDA_SHA256 957d2f0f0701c3d1335e3b39f235d197837ad69a944fa6f5d8ad2c686b69df3
 SHELL ["/bin/bash", "-c"]
 ENV CONDA_DIR=/opt/conda \
     DEFAULT_ENV=default
+# Set timezone
+ENV TZ=America/Chicago
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Set PATH for Dockerfile so that conda works and some useful scripts are
 # available. Any changes intended to propagate to runtime containers should be
