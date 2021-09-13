@@ -2,13 +2,16 @@
 # Reference: https://docs.cirun.io/reference/yaml.html
 runners:
   - name: run-k8s-tests
-    # Cloud Provider: DigitalOcean
-    cloud: digitalocean
-    # Cheapest VM on DigitalOcean
-    instance_type: g-4vcpu-16gb
-    # Ubuntu-20.4  image"
-    machine_image: docker-20-04
-    region: nyc1
+    # Cloud Provider: AWS
+    cloud: aws
+    # ec2 instance
+    instance_type: m5.xlarge
+    # Ubuntu-20.4, ami image"
+    machine_image: ami-06fd8a495a537da8b
+    # Ability to interrupt ec2-instance
+    preemptible: true
+    # Region
+    region: us-east-1 # not sure this does anything
     # Path of the relevant workflow file
     workflow: .github/workflows/kubernetes_test.yaml
     # Number of runners to provision on every trigger on Actions job
