@@ -79,6 +79,9 @@ RUN groupadd --gid ${NB_UID} ${NB_USER} && \
     --uid ${NB_UID} \
     ${NB_USER}
 
+# Have jovyan user own /home/jovyan/.local for local testing.
+RUN chown jovyan /home/jovyan
+
 USER ${NB_UID}
 WORKDIR /home/${NB_USER}
 
