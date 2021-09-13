@@ -49,6 +49,14 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
             value = "80"
           }
 
+          dynamic "env" {
+            for_each = var.envs
+            content {
+              name  = env.value["name"]
+              value = env.value["value"]
+            }
+          }
+
           port {
             container_port = 80
           }

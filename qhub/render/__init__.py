@@ -92,6 +92,23 @@ def patch_terraform_users(config):
             [group_index_lookup[gname] for gname in users_group_names]
         )
 
+def patch_terraform_extensions(config):
+    """
+    Add terraform-friendly extension details
+    """
+    config["tf_extensions"] = []
+    for ext in config.get("extensions", []):
+        tf_ext = {"name": ext["name"], "image": ext["image"], "urlslug": ext["urlslug"], "private": ext["private"]}
+        tf_ext["envs"] = []
+        for env in ext.get("envs", []):
+            if env.get("code") == "KEYCLOAK":
+                tf_ext["envs"].append({"name": "KEYCLOAK_SERVER_URL", "rawvalue": "\"http://keycloak-headless.${var.environment}:8080/auth/\""})
+                tf_ext["envs"].append({"name": "KEYCLOAK_ADMIN_USERNAME", "rawvalue": "\"qhub-bot\""})
+                tf_ext["envs"].append({"name": "KEYCLOAK_ADMIN_PASSWORD", "rawvalue": "random_password.keycloak-qhub-bot-password.result"})
+            else:
+                raise ValueError("No such QHub extension code "+env.get("code"))
+
+        config["tf_extensions"].append(tf_ext)
 
 def deep_merge(d1, d2):
     """Deep merge two dictionaries.
@@ -170,6 +187,8 @@ def render_template(output_directory, config_filename, force=False):
     patch_versioning_extra_config(config)
 
     patch_terraform_users(config)
+
+    patch_terraform_extensions(config)
 
     remove_existing_renders(
         dest_repo_dir=output_directory / repo_directory,

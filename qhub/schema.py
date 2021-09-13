@@ -380,11 +380,15 @@ class CDSDashboards(Base):
 # =============== Extensions = = ==============
 
 
+class QHubExtensionEnv(Base):
+    code: str
+
 class QHubExtension(Base):
     name: str
     image: str
     urlslug: str
     private: bool
+    envs: typing.Optional[typing.List[QHubExtensionEnv]]
 
 
 # ======== External Container Registry ========

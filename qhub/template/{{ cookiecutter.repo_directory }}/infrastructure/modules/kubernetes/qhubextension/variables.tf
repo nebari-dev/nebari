@@ -34,3 +34,9 @@ variable "private" {
   type        = bool
   default     = true
 }
+
+variable "envs" {
+  description = "List of env var objects"
+  type       = list(map(any))
+  default    = []
+}
