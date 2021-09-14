@@ -105,6 +105,19 @@ resource "keycloak_openid_client" "qhub_client" {
   login_theme = "keycloak"
 }
 
+# Add a property 'name' to userinfo response (and others)
+# because traefik forwardauth expects 'name' (rather than 'preferred_name')
+# and there does not seem to be a way to configure this in forwardauth.
+
+resource "keycloak_openid_user_property_protocol_mapper" "user_property_mapper" {
+  realm_id  = keycloak_realm.realm-qhub.id
+  client_id = keycloak_openid_client.qhub_client.id
+  name      = "user-property-mapper"
+
+  user_property = "username"
+  claim_name    = "name"
+}
+
 resource "keycloak_openid_client" "jupyterhub_client" {
   realm_id      = keycloak_realm.realm-qhub.id
   client_id     = var.jupyterhub-keycloak-client-id
