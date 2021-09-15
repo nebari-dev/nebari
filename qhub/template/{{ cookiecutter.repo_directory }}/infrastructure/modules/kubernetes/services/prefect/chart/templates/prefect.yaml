@@ -23,6 +23,10 @@ spec:
             - /bin/bash
             - -c
           env:
+            {{- range $k, $v := .Values.envVars }}
+            - name: {{ $k }}
+              value: {{ $v -}}
+            {{ end }}
             - name: PREFECT__CLOUD__AGENT__AUTH_TOKEN
               valueFrom:
                 secretKeyRef:
