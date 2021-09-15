@@ -42,7 +42,7 @@ spec:
             - name: PREFECT__CLOUD__AGENT__LABELS
               value: {{ .Values.prefect_agent.prefectLabels | toJson | quote }}
             - name: PREFECT__CONTEXT__SECRETS__GCP_CREDENTIALS
-              value: {{ .Values.prefect_agent.job.imagePullSecrets | toJson | quote }}
+              value: {{ .Values.prefect_agent.context.secrets.gcp_credentials | toJson | quote }}
             - name: JOB_MEM_REQUEST
               value: {{ .Values.prefect_agent.job.resources.requests.memory | quote }}
             - name: JOB_MEM_LIMIT
