@@ -10,3 +10,7 @@ prefect_agent:
         memory: ''
         cpu: ''
   prefectLabels: '[]'
+  prefect:
+    context:
+      secrets:
+        gcp_credentials: '{}'
