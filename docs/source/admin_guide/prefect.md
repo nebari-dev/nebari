@@ -33,6 +33,34 @@ The `TF_VAR_prefect_token` API key is set as `PREFECT__CLOUD__AGENT__AUTH_TOKEN`
 environment variable in the agent. It is used while deploying Prefect Agent so that
 it can connect to Prefect Cloud and query flows.
 
+## Configuration overrides
+You can override your agent configurations without having to modify the cluster configuration files.  The extra variable `overrides` makes this possible by changing the default values for the Agent based on an overriding setting presented on your qhub-config.yaml file.
+
+The current variables that can be overridden include:
+
+```
+- IMAGE_PULL_SECRETS
+- PREFECT__CLOUD__AGENT__LABELS
+- PREFECT__CONTEXT__SECRETS__GCP_CREDENTIALS
+- JOB_MEM_REQUEST
+- JOB_MEM_LIMIT
+- JOB_CPU_REQUEST
+- JOB_CPU_LIMIT
+- IMAGE_PULL_POLICY
+```
+
+For example, if you just want to override the amount of CPU limits for each job, you would need to craft a declarative configuration, in you qhub-config.yaml file, as follows:
+
+```yaml
+prefect:
+  enabled: true
+  overrides:
+      prefect_agent:
+        job:
+          resources:
+            limit:
+              cpu: 4
+```
 
 ## Prefect Cloud
 
