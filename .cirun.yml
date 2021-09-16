@@ -1,18 +1,37 @@
-# Self-Hosted Github Action Runners on DigitalOcean via Cirun.io
+# Self-Hosted Github Action Runners on AWS via Cirun.io
 # Reference: https://docs.cirun.io/reference/yaml.html
 runners:
   - name: run-k8s-tests
     # Cloud Provider: AWS
     cloud: aws
-    # ec2 instance
-    instance_type: t2.xlarge # m5.xlarge
-    # Ubuntu-20.4, ami image" # ami-0229f8cfc24033d05
-    machine_image: ami-00399ec92321828f5 # ami-06fd8a495a537da8b 
-    # Ability to interrupt ec2-instance
+    # Cheapest VM on AWS
+    instance_type: t2.xlarge
+    # Ubuntu-20.4, ami image"
+    machine_image: ami-06fd8a495a537da8b
+    # preemptible instances seems quite less reliable.
     preemptible: false
-    # Region
-    region: us-east-1 # not sure this does anything
     # Path of the relevant workflow file
     workflow: .github/workflows/kubernetes_test.yaml
     # Number of runners to provision on every trigger on Actions job
+    # 3 because testing on Python 3.7, 3.8
+    # See .github/workflows/build-gpu.yml
     count: 1
+
+# # Self-Hosted Github Action Runners on DigitalOcean via Cirun.io
+# # Reference: https://docs.cirun.io/reference/yaml.html
+# runners:
+#   - name: run-k8s-tests
+#     # Cloud Provider: AWS
+#     cloud: aws
+#     # ec2 instance
+#     instance_type: t2.xlarge # m5.xlarge
+#     # Ubuntu-20.4, ami image" # ami-0229f8cfc24033d05
+#     machine_image: ami-00399ec92321828f5 # ami-06fd8a495a537da8b 
+#     # Ability to interrupt ec2-instance
+#     preemptible: false
+#     # Region
+#     region: us-east-1 # not sure this does anything
+#     # Path of the relevant workflow file
+#     workflow: .github/workflows/kubernetes_test.yaml
+#     # Number of runners to provision on every trigger on Actions job
+#     count: 1
