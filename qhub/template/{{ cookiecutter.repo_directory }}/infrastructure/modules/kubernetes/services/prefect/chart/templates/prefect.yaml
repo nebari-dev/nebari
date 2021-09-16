@@ -23,9 +23,9 @@ spec:
             - /bin/bash
             - -c
           env:
-            {{- range $k, $v := .Values.envVars }}
+            {{- range $k, $v := .Values.extraVars }}
             - name: {{ $k }}
-              value: {{ $v -}}
+              value: {{ $v | b64dec | quote -}}
             {{ end }}
             - name: PREFECT__CLOUD__AGENT__AUTH_TOKEN
               valueFrom:
@@ -61,10 +61,6 @@ spec:
               value: cloud
             - name: PREFECT__CLOUD__AGENT__AGENT_ADDRESS
               value: http://:8080
-            {{- range $k, $v := .Values.extraVars }}
-            - name: {{ $k }}
-              value: {{ $v | b64dec | quote -}}
-            {{ end }}
           image: {{ .Values.prefectImage }}
           imagePullPolicy: Always
           livenessProbe:
