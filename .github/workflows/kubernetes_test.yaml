@@ -44,7 +44,11 @@ jobs:
         run: |
           conda install -c anaconda pip
           pip install .[dev]
-
+      - name: Download and Install Docker
+        run: |
+          sudo apt-get update -y && \
+          sudo apt-get install docker git && \ 
+          sudo systemctl enable docker
       - name: Download and Install Minikube and Kubectl
         run: |
           mkdir -p bin
