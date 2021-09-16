@@ -9,7 +9,7 @@ runners:
     # Ubuntu-20.4, ami image"
     machine_image: ami-06fd8a495a537da8b
     # Ability to interrupt ec2-instance
-    preemptible: true
+    preemptible: false
     # Region
     region: us-east-1 # not sure this does anything
     # Path of the relevant workflow file
