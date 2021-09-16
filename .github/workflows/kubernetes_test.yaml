@@ -28,9 +28,17 @@ jobs:
           
           sudo groupadd docker
           sudo usermod -aG docker $USER
+          echo $USER > user.txt
+          sudo su
+          su $(cat user.txt)
 
           sudo systemctl enable docker
+          sudo systemctl restart docker
           echo 'systemctl enable docker done' 
+      
+      - name: Run Docker
+        run: |
+          docker run hello-world
 
       - name: 'QHUB_GH_BRANCH set for PR'
         if: ${{ github.event_name == 'pull_request' }}
