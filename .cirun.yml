@@ -5,9 +5,9 @@ runners:
     # Cloud Provider: AWS
     cloud: aws
     # ec2 instance
-    instance_type: m5.xlarge
+    instance_type: g4dn.xlarge # m5.xlarge
     # Ubuntu-20.4, ami image"
-    machine_image: ami-06fd8a495a537da8b
+    machine_image: ami-0229f8cfc24033d05 # ami-06fd8a495a537da8b
     # Ability to interrupt ec2-instance
     preemptible: false
     # Region
