@@ -20,10 +20,12 @@ jobs:
     steps:
       - name: Download and Install Docker
         run: |
-          sudo yum update -y && \
-          sudo yum install docker -y && \
-          sudo yum install git -y && \
+          sudo apt-get update -y 
+          echo 'update done'
+          sudo apt-get install git docker.io -y
+          echo 'install docker git done'
           sudo systemctl enable docker
+          echo 'systemctl enable docker done' 
       - name: 'QHUB_GH_BRANCH set for PR'
         if: ${{ github.event_name == 'pull_request' }}
         run: |
