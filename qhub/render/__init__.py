@@ -3,8 +3,7 @@ import collections
 import functools
 import json
 import os
-from shutil import copyfile, rmtree
-from gitignore_parser import parse_gitignore
+from shutil import rmtree
 
 from ruamel import yaml
 from cookiecutter.generate import generate_files
