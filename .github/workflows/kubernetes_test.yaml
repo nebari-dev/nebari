@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Download and Install Docker
         run: |
-          apt-get update -y 
+          sudo apt-get update -y 
           echo 'update done'
           apt-get install docker git -y
           echo 'install docker git done'
