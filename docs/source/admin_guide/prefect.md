@@ -34,7 +34,8 @@ environment variable in the agent. It is used while deploying Prefect Agent so t
 it can connect to Prefect Cloud and query flows.
 
 ## Configuration overrides
-You can override your agent configurations without having to modify the cluster configuration files.  The extra variable `overrides` makes this possible by changing the default values for the Agent based on an overriding setting presented on your qhub-config.yaml file.
+You can override your agent configurations without having to modify the cluster configuration files.  The extra variable `overrides` makes this
+possible by changing the default values for the Agent based on an overriding setting presented on your qhub-config.yaml file.
 
 The current variables that can be overridden include:
 
@@ -49,7 +50,8 @@ The current variables that can be overridden include:
 - IMAGE_PULL_POLICY
 ```
 
-For example, if you just want to override the amount of CPU limits for each job, you would need to craft a declarative configuration, in you qhub-config.yaml file, as follows:
+For example, if you just want to override the amount of CPU limits for each job, you would need to craft a declarative configuration,
+in you qhub-config.yaml file, as follows:
 
 ```yaml
 prefect:
@@ -61,6 +63,18 @@ prefect:
             limit:
               cpu: 4
 ```
+Also, if you would like to include an extra variable to the agent environment configuration, you can do it by including it under
+the `extraVars` field in the overrides block. For example, when using local secrets, your Prefect Agent can be configured
+to authenticate to GCP automatically by adding that specific `GCP_CREDENTIALS` key value pair into your secrets context like so:
+
+```yalm
+prefect:
+  enabled: true
+  overrides:
+    extraVars:
+        PREFECT__CONTEXT__SECRETS__GCP_CREDENTIALS: '<Your value>'
+```
+It's important to keep in mind that all variables defined under `extraVars` must be base64 encoded before passing it's value to the qhub-config file.
 
 ## Prefect Cloud
 

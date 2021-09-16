@@ -1,3 +1,6 @@
+
+extraVars: {}
+
 prefect_agent:
   job:
     imagePullSecrets: ''
@@ -10,6 +13,3 @@ prefect_agent:
         memory: ''
         cpu: ''
   prefectLabels: '[]'
-  context:
-    secrets:
-      gcp_credentials: '{}'

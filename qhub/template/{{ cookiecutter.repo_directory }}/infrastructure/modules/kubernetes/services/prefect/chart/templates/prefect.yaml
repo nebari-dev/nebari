@@ -41,8 +41,6 @@ spec:
               value: {{ .Values.prefect_agent.job.imagePullSecrets | toJson | quote }}
             - name: PREFECT__CLOUD__AGENT__LABELS
               value: {{ .Values.prefect_agent.prefectLabels | toJson | quote }}
-            - name: PREFECT__CONTEXT__SECRETS__GCP_CREDENTIALS
-              value: {{ .Values.prefect_agent.context.secrets.gcp_credentials | toJson | quote }}
             - name: JOB_MEM_REQUEST
               value: {{ .Values.prefect_agent.job.resources.requests.memory | quote }}
             - name: JOB_MEM_LIMIT
@@ -59,6 +57,10 @@ spec:
               value: cloud
             - name: PREFECT__CLOUD__AGENT__AGENT_ADDRESS
               value: http://:8080
+            {{- range $k, $v := .Values.extraVars }}
+            - name: {{ $k }}
+              value: {{ $v | b64dec | quote -}}
+            {{ end }}
           image: {{ .Values.prefectImage }}
           imagePullPolicy: Always
           livenessProbe:
