@@ -35,7 +35,7 @@ jobs:
           sudo systemctl enable docker
           sudo systemctl restart docker
           echo 'systemctl enable docker done' 
-          df -h *
+          df -h 
           df -h /var/lib/docker
       # groupadd: group 'docker' already exists
       # Password: su: Authentication failure

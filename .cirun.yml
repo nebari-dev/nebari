@@ -5,7 +5,7 @@ runners:
     # Cloud Provider: DigitalOcean
     cloud: aws
     # Cheapest VM on DigitalOcean
-    instance_type: t3a.2xlarge
+    instance_type: t3a.xlarge
     # Ubuntu-20.4 image"
     machine_image: ami-08939857cf6893cde
     region: us-west-2
