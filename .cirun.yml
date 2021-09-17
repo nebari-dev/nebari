@@ -5,7 +5,7 @@ runners:
     # Cloud Provider: AWS
     cloud: aws
     # Cheapest VM on AWS
-    instance_type: l3.xlarge # t2.2xlarge
+    instance_type: c5ad.xlarge # l3.xlarge # t2.2xlarge
     # Ubuntu-20.4, ami image"
     machine_image: ami-06fd8a495a537da8b
     # preemptible instances seems quite less reliable.
