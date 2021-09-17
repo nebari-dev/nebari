@@ -35,11 +35,10 @@ jobs:
           sudo systemctl enable docker
           sudo systemctl restart docker
           echo 'systemctl enable docker done' 
+      # groupadd: group 'docker' already exists
+      # Password: su: Authentication failure
+      # systemctl enable docker done
       
-      - name: Run Docker
-        run: |
-          docker run hello-world
-
       - name: 'QHUB_GH_BRANCH set for PR'
         if: ${{ github.event_name == 'pull_request' }}
         run: |
@@ -52,6 +51,13 @@ jobs:
         # e.g. QHUB_GH_BRANCH="main"
         run: |
           echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> $GITHUB_ENV
+      - name: Run Docker
+        run: |
+          docker pull quansight/qhub-jupyterhub:v0.3.12
+          docker pull quansight/qhub-jupyterlab:v0.3.12
+          docker pull quansight/qhub-dask-worker:v0.3.12
+          docker pull quansight/qhub-dask-gateway:v0.3.12
+          docker pull quansight/qhub-conda-store:v0.3.12
 
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
