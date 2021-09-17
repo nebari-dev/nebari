@@ -13,6 +13,4 @@ runners:
     workflow: .github/workflows/kubernetes_test.yaml
     preemptible: true
     # Number of runners to provision on every trigger on Actions job
-    # 3 because testing on Python 3.7, 3.8
-    # See .github/workflows/build-gpu.yml
     count: 1
