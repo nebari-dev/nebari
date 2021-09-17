@@ -53,11 +53,11 @@ jobs:
           echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> $GITHUB_ENV
       - name: Run Docker
         run: |
-          docker pull quansight/qhub-jupyterhub:v0.3.12
-          docker pull quansight/qhub-jupyterlab:v0.3.12
-          docker pull quansight/qhub-dask-worker:v0.3.12
-          docker pull quansight/qhub-dask-gateway:v0.3.12
-          docker pull quansight/qhub-conda-store:v0.3.12
+          docker pull quansight/qhub-jupyterhub:aws_ci
+          docker pull quansight/qhub-jupyterlab:aws_ci
+          docker pull quansight/qhub-dask-worker:aws_ci
+          docker pull quansight/qhub-dask-gateway:aws_ci
+          docker pull quansight/qhub-conda-store:aws_ci
 
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
