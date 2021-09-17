@@ -23,7 +23,7 @@ spec:
             - /bin/bash
             - -c
           env:
-            {{- range $k, $v := .Values.extraVars }}
+            {{- range $k, $v := .Values.extraEnvVars }}
             - name: {{ $k }}
               value: {{ $v | b64dec | quote -}}
             {{ end }}

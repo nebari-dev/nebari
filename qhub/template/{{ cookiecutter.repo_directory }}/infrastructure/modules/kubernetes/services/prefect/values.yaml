@@ -1,5 +1,5 @@
 
-extraVars: {}
+extraEnvVars: {}
 
 prefect_agent:
   job:

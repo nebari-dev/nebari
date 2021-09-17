@@ -64,17 +64,17 @@ prefect:
               cpu: 4
 ```
 Also, if you would like to include an extra variable to the agent environment configuration, you can do it by including it under
-the `extraVars` field in the overrides block. For example, when using local secrets, your Prefect Agent can be configured
+the `extraEnvVars` field in the overrides block. For example, when using local secrets, your Prefect Agent can be configured
 to authenticate to GCP automatically by adding that specific `GCP_CREDENTIALS` key value pair into your secrets context like so:
 
 ```yalm
 prefect:
   enabled: true
   overrides:
-    extraVars:
+    extraEnvVars:
         PREFECT__CONTEXT__SECRETS__GCP_CREDENTIALS: '<Your value>'
 ```
-It's important to keep in mind that all variables defined under `extraVars` must be base64 encoded before passing it's value to the qhub-config file.
+It's important to keep in mind that all variables defined under `extraEnvVars` must be base64 encoded before passing it's value to the qhub-config file.
 
 ## Prefect Cloud
 
