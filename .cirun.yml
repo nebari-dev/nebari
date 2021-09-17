@@ -3,12 +3,12 @@
 runners:
   - name: run-k8s-tests
     # Cloud Provider: DigitalOcean
-    cloud: digitalocean
+    cloud: aws
     # Cheapest VM on DigitalOcean
-    instance_type: g-4vcpu-16gb
-    # Ubuntu-20.4  image"
-    machine_image: docker-20-04
-    region: nyc1
+    instance_type: t3a.2xlarge
+    # Ubuntu-20.4 image"
+    machine_image: ami-08939857cf6893cde
+    region: us-west-2
     # Path of the relevant workflow file
     workflow: .github/workflows/kubernetes_test.yaml
     # Number of runners to provision on every trigger on Actions job
