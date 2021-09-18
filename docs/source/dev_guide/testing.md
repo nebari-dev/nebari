@@ -320,6 +320,10 @@ has not been added to your certificate registry.
 Each web browser handles this differently. A workaround for Firefox:
 
  - Visit `about:config` and change the `network.stricttransportsecurity.preloadlist` to `false`
+  
+And a workaround for Chrome:
+
+ - Type `badidea` or `thisisunsafe` while viewing the rendered page (this has to do with [how Chrome preloads some domains for its HTTP Strict Transport Security](https://hstspreload.org/) list in a way that cannot be manually removed)
 
 ### Cleanup
 
