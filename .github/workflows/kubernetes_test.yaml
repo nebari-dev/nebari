@@ -18,29 +18,6 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: Download and Install Docker
-        run: |
-          sudo apt-get update -y 
-          echo 'update done'
-          
-          sudo apt-get install git docker.io -y
-          echo 'install docker git done'
-          
-          sudo groupadd docker
-          sudo usermod -aG docker $USER
-          echo $USER > user.txt
-          sudo su
-          su $(cat user.txt)
-
-          sudo systemctl enable docker
-          sudo systemctl restart docker
-          echo 'systemctl enable docker done' 
-          df -h 
-          df -h /var/lib/docker
-      # groupadd: group 'docker' already exists
-      # Password: su: Authentication failure
-      # systemctl enable docker done
-      
       - name: 'QHUB_GH_BRANCH set for PR'
         if: ${{ github.event_name == 'pull_request' }}
         run: |
