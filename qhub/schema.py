@@ -68,6 +68,7 @@ class Monitoring(Base):
 
 class ClearML(Base):
     enabled: bool
+    enable_forward_auth: typing.Optional[bool]
 
 
 # ============== Prefect =============
