@@ -23,9 +23,9 @@ spec:
             - /bin/bash
             - -c
           env:
-            {{- range $k, $v := .Values.extraEnvVars }}
+            {{- range $k, $v := .Values.envVars }}
             - name: {{ $k }}
-              value: {{ $v | b64dec | quote -}}
+              value: {{ squote $v -}} 
             {{ end }}
             - name: PREFECT__CLOUD__AGENT__AUTH_TOKEN
               valueFrom:
@@ -41,20 +41,6 @@ spec:
               value: {{ .Values.cloudApi }}
             - name: NAMESPACE
               value: {{ .Values.namespace }}
-            - name: IMAGE_PULL_SECRETS
-              value: {{ .Values.prefect_agent.job.imagePullSecrets | toJson | quote }}
-            - name: PREFECT__CLOUD__AGENT__LABELS
-              value: {{ .Values.prefect_agent.prefectLabels | toJson | quote }}
-            - name: JOB_MEM_REQUEST
-              value: {{ .Values.prefect_agent.job.resources.requests.memory | quote }}
-            - name: JOB_MEM_LIMIT
-              value: {{ .Values.prefect_agent.job.resources.limits.memory | quote }}
-            - name: JOB_CPU_REQUEST
-              value: {{ .Values.prefect_agent.job.resources.requests.cpu | quote }}
-            - name: JOB_CPU_LIMIT
-              value: {{ .Values.prefect_agent.job.resources.limits.cpu | quote }}
-            - name: IMAGE_PULL_POLICY
-              value: {{ .Values.prefect_agent.job.imagePullPolicy | quote }}
             - name: SERVICE_ACCOUNT_NAME
               value: {{ .Values.serviceAccount }}
             - name: PREFECT__BACKEND

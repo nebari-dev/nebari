@@ -236,7 +236,10 @@ module "prefect" {
   image                = "{{ cookiecutter.prefect.image }}"
   {% endif -%}
   {% if cookiecutter.prefect.overrides is defined %}
-  overrides            = ["{{ cookiecutter.prefect.overrides }}"]
+  overrides            = [<<EOT
+{{ cookiecutter.prefect.overrides|yamlify -}}
+    EOT
+    ]
   {% endif %}
 }
 {% endif -%}
