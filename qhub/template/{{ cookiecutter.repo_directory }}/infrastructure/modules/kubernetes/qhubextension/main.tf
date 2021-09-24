@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    keycloak = {
+      source  = "mrparkers/keycloak"
+      version = "3.3.0"
+    }
+  }
+}
+
 resource "kubernetes_service" "qhub-extension-service" {
   metadata {
     name      = "${var.name}-qhubext-service"

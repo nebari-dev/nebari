@@ -35,8 +35,20 @@ variable "private" {
   default     = true
 }
 
+variable "oauth2client" {
+  description = "Create a Keycloak client"
+  type        = bool
+  default     = false
+}
+
 variable "envs" {
   description = "List of env var objects"
   type       = list(map(any))
   default    = []
+}
+
+variable "qhub-realm-id" {
+  description = "Keycloak qhub realm id"
+  type       = string
+  default    = ""
 }

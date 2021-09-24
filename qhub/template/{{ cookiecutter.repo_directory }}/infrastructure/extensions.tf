@@ -10,7 +10,9 @@ module "ext-{{ ext.name }}" {
   image        = "{{ ext.image }}"
   urlslug      = "{{ ext.urlslug }}"
   private      = {{ ext.private | jsonify }}
+  oauth2client = {{ ext.oauth2client | jsonify }}
   external-url = var.endpoint
+  qhub-realm-id = module.kubernetes-keycloak-config.qhub-realm-id
 
   envs = [
   {% for env in ext.envs | default([]) -%}

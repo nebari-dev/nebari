@@ -98,13 +98,21 @@ def patch_terraform_extensions(config):
     """
     config["tf_extensions"] = []
     for ext in config.get("extensions", []):
-        tf_ext = {"name": ext["name"], "image": ext["image"], "urlslug": ext["urlslug"], "private": ext["private"]}
+        tf_ext = {"name": ext["name"], "image": ext["image"], "urlslug": ext["urlslug"], "private": ext["private"], "oauth2client": ext["oauth2client"]}
         tf_ext["envs"] = []
         for env in ext.get("envs", []):
             if env.get("code") == "KEYCLOAK":
                 tf_ext["envs"].append({"name": "KEYCLOAK_SERVER_URL", "rawvalue": "\"http://keycloak-headless.${var.environment}:8080/auth/\""})
                 tf_ext["envs"].append({"name": "KEYCLOAK_ADMIN_USERNAME", "rawvalue": "\"qhub-bot\""})
                 tf_ext["envs"].append({"name": "KEYCLOAK_ADMIN_PASSWORD", "rawvalue": "random_password.keycloak-qhub-bot-password.result"})
+            elif env.get("code") == "OAUTH2CLIENT":
+                tf_ext["envs"].append({"name": "OAUTH2_AUTHORIZE_URL", "rawvalue": "\"https://${var.environment}/auth/realms/qhub/protocol/openid-connect/auth\""})
+                tf_ext["envs"].append({"name": "OAUTH2_ACCESS_TOKEN_URL", "rawvalue": "\"https://${var.environment}/auth/realms/qhub/protocol/openid-connect/token\""})
+                tf_ext["envs"].append({"name": "OAUTH2_USER_DATA_URL", "rawvalue": "\"https://${var.environment}/auth/realms/qhub/protocol/openid-connect/userinfo\""})
+                tf_ext["envs"].append({"name": "OAUTH2_CLIENT_ID", "rawvalue": "\"${var.name}-client\""})
+                tf_ext["envs"].append({"name": "OAUTH2_CLIENT_SECRET", "rawvalue": "random_password.keycloak-ext-client-password.result"})
+            elif env.get("code") == "JWT":
+                tf_ext["envs"].append({"name": "JWT_SECRET_KEY", "rawvalue": "\"kjgdgkuailuigwiel12i123kg1236\""})
             else:
                 raise ValueError("No such QHub extension code "+env.get("code"))
 
