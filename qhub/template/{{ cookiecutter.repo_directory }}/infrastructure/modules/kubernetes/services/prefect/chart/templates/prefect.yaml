@@ -27,10 +27,6 @@ spec:
             - name: {{ $k }}
               value: {{ squote $v -}}
             {{ end }}
-            # {{- range $k, $v := .Values.secretEnvVars }}
-            # - name: {{ $k }}
-            #   value: {{ squote $v -}}
-            # {{ end }}
             {{- range $i, $k := keys .Values.secretEnvVars }}
             - name: {{ $k }}
               valueFrom:
