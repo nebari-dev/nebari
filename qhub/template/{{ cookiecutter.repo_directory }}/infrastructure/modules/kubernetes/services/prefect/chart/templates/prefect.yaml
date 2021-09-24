@@ -18,14 +18,25 @@ spec:
       serviceAccountName: {{ .Values.serviceAccount }}
       containers:
         - args:
-            - prefect agent start kubernetes -e JUPYTERHUB_API_TOKEN=$JUPYTERHUB_API_TOKEN
+            - prefect agent start kubernetes -e JUPYTERHUB_API_TOKEN=$JUPYTERHUB_API_TOKEN {{- range $k, $v := .Values.secretEnvVars }} {{ printf " -e %s=$%s" $k  $k -}} {{ end }}
           command:
             - /bin/bash
             - -c
           env:
             {{- range $k, $v := .Values.envVars }}
             - name: {{ $k }}
-              value: {{ squote $v -}} 
+              value: {{ squote $v -}}
+            {{ end }}
+            # {{- range $k, $v := .Values.secretEnvVars }}
+            # - name: {{ $k }}
+            #   value: {{ squote $v -}}
+            # {{ end }}
+            {{- range $i, $k := keys .Values.secretEnvVars }}
+            - name: {{ $k }}
+              valueFrom:
+                secretKeyRef:
+                  name: prefect-envsecret-{{ $i }}
+                  key: prefectEnvSecret{{ $i -}}
             {{ end }}
             - name: PREFECT__CLOUD__AGENT__AUTH_TOKEN
               valueFrom:
