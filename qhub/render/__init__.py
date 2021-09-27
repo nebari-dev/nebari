@@ -111,7 +111,7 @@ def patch_terraform_extensions(config):
                 tf_ext["envs"].append({"name": "OAUTH2_USER_DATA_URL", "rawvalue": "\"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo\""})
                 tf_ext["envs"].append({"name": "OAUTH2_CLIENT_ID", "rawvalue": f"\"qhub-ext-{ext['name']}-client\""})
                 tf_ext["envs"].append({"name": "OAUTH2_CLIENT_SECRET", "rawvalue": f"random_password.qhub-ext-{ext['name']}-keycloak-client-pw.result"})
-                tf_ext["envs"].append({"name": "OAUTH2_REDIRECT_URL", "rawvalue": f"\"https://${var.endpoint}/{ext['urlslug']}/oauth_callback\""})
+                tf_ext["envs"].append({"name": "OAUTH2_REDIRECT_URL", "rawvalue": f"\"https://${{var.endpoint}}/{ext['urlslug']}/oauth_callback\""})
             elif env.get("code") == "JWT":
                 tf_ext["envs"].append({"name": "JWT_SECRET_KEY", "rawvalue": "\"kjgdgkuailuigwiel12i123kg1236\""})
             else:
