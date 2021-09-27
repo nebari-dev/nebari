@@ -98,7 +98,7 @@ def patch_terraform_extensions(config):
     """
     config["tf_extensions"] = []
     for ext in config.get("extensions", []):
-        tf_ext = {"name": ext["name"], "image": ext["image"], "urlslug": ext["urlslug"], "private": ext["private"], "oauth2client": ext["oauth2client"]}
+        tf_ext = {"name": ext["name"], "image": ext["image"], "urlslug": ext["urlslug"], "private": ext["private"], "oauth2client": ext["oauth2client"], "jwt": False}
         tf_ext["envs"] = []
         for env in ext.get("envs", []):
             if env.get("code") == "KEYCLOAK":
@@ -113,7 +113,8 @@ def patch_terraform_extensions(config):
                 tf_ext["envs"].append({"name": "OAUTH2_CLIENT_SECRET", "rawvalue": f"random_password.qhub-ext-{ext['name']}-keycloak-client-pw.result"})
                 tf_ext["envs"].append({"name": "OAUTH2_REDIRECT_BASE", "rawvalue": f"\"https://${{var.endpoint}}/{ext['urlslug']}/\""})
             elif env.get("code") == "JWT":
-                tf_ext["envs"].append({"name": "JWT_SECRET_KEY", "rawvalue": "\"kjgdgkuailuigwiel12i123kg1236\""})
+                tf_ext["envs"].append({"name": "JWT_SECRET_KEY", "rawvalue": f"random_password.qhub-ext-{ext['name']}-jwt-secret.result"})
+                tf_ext["jwt"] = True
             else:
                 raise ValueError("No such QHub extension code "+env.get("code"))
 

@@ -26,11 +26,18 @@ module "ext-{{ ext.name }}" {
   {% if ext.oauth2client %}
   keycloak-client-password = random_password.qhub-ext-{{ ext.name }}-keycloak-client-pw.result
   {% endif %}
-  
+
 }
 
 {% if ext.oauth2client %}
 resource "random_password" "qhub-ext-{{ ext.name }}-keycloak-client-pw" {
+  length  = 32
+  special = false
+}
+{% endif %}
+
+{% if ext.jwt %}
+resource "random_password" "qhub-ext-{{ ext.name }}-jwt-secret" {
   length  = 32
   special = false
 }
