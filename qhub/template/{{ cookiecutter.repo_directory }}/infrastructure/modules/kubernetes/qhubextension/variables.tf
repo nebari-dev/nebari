@@ -52,3 +52,9 @@ variable "qhub-realm-id" {
   type       = string
   default    = ""
 }
+
+variable "keycloak-client-password" {
+  description = "Keycloak client password"
+  type       = string
+  default    = ""
+}

@@ -23,6 +23,17 @@ module "ext-{{ ext.name }}" {
   {% endfor -%}
   ]
 
+  {% if ext.oauth2client %}
+  keycloak-client-password = random_password.qhub-ext-{{ ext.name }}-keycloak-client-pw.result
+  {% endif %}
+  
 }
+
+{% if ext.oauth2client %}
+resource "random_password" "qhub-ext-{{ ext.name }}-keycloak-client-pw" {
+  length  = 32
+  special = false
+}
+{% endif %}
 
 {% endfor %}

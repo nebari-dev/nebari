@@ -106,11 +106,12 @@ def patch_terraform_extensions(config):
                 tf_ext["envs"].append({"name": "KEYCLOAK_ADMIN_USERNAME", "rawvalue": "\"qhub-bot\""})
                 tf_ext["envs"].append({"name": "KEYCLOAK_ADMIN_PASSWORD", "rawvalue": "random_password.keycloak-qhub-bot-password.result"})
             elif env.get("code") == "OAUTH2CLIENT":
-                tf_ext["envs"].append({"name": "OAUTH2_AUTHORIZE_URL", "rawvalue": "\"https://${var.environment}/auth/realms/qhub/protocol/openid-connect/auth\""})
-                tf_ext["envs"].append({"name": "OAUTH2_ACCESS_TOKEN_URL", "rawvalue": "\"https://${var.environment}/auth/realms/qhub/protocol/openid-connect/token\""})
-                tf_ext["envs"].append({"name": "OAUTH2_USER_DATA_URL", "rawvalue": "\"https://${var.environment}/auth/realms/qhub/protocol/openid-connect/userinfo\""})
-                tf_ext["envs"].append({"name": "OAUTH2_CLIENT_ID", "rawvalue": "\"${var.name}-client\""})
-                tf_ext["envs"].append({"name": "OAUTH2_CLIENT_SECRET", "rawvalue": "random_password.keycloak-ext-client-password.result"})
+                tf_ext["envs"].append({"name": "OAUTH2_AUTHORIZE_URL", "rawvalue": "\"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth\""})
+                tf_ext["envs"].append({"name": "OAUTH2_ACCESS_TOKEN_URL", "rawvalue": "\"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token\""})
+                tf_ext["envs"].append({"name": "OAUTH2_USER_DATA_URL", "rawvalue": "\"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo\""})
+                tf_ext["envs"].append({"name": "OAUTH2_CLIENT_ID", "rawvalue": f"\"qhub-ext-{ext['name']}-client\""})
+                tf_ext["envs"].append({"name": "OAUTH2_CLIENT_SECRET", "rawvalue": f"random_password.qhub-ext-{ext['name']}-keycloak-client-pw.result"})
+                tf_ext["envs"].append({"name": "OAUTH2_REDIRECT_URL", "rawvalue": f"\"https://${var.endpoint}/{ext['urlslug']}/oauth_callback\""})
             elif env.get("code") == "JWT":
                 tf_ext["envs"].append({"name": "JWT_SECRET_KEY", "rawvalue": "\"kjgdgkuailuigwiel12i123kg1236\""})
             else:
