@@ -33,7 +33,26 @@ The `TF_VAR_prefect_token` API key is set as `PREFECT__CLOUD__AGENT__AUTH_TOKEN`
 environment variable in the agent. It is used while deploying Prefect Agent so that
 it can connect to Prefect Cloud and query flows.
 
-## Configuration overrides
+## Prefect Cloud
+
+Prefect Cloud is a fully hosted, production-ready backend for Prefect Core.
+Checkout [prefect documentation](https://docs.prefect.io/orchestration/#prefect-cloud)
+to know more.
+
+
+## Prefect Agent
+
+Prefect Agents is a lightweight processes for orchestrating flow runs. Agents
+run inside a user's architecture, and are responsible for starting and monitoring
+flow runs.
+
+During operation the agent process queries the Prefect API for any scheduled flow
+runs, and allocates resources for them on their respective deployment platforms.
+
+When you enable prefect via `qhub-config.yml` prefect agent is deployed on the
+QHub's kubernetes cluster, which querys the Prefect Cloud for flow runs.
+
+## Agent configuration overrides
 You can override your agent configuration without having to modify the helm files directly.  The extra variable `overrides` makes this
 possible by changing the default values for the Agent chart according to the settings presented on your qhub-config.yaml file.
 
@@ -83,25 +102,6 @@ prefect:
        PREFECT__CONTEXT__SECRETS__GCP_CREDENTIALS: '<Your value>'
 ```
 This secret will then be stored as a [kubernetes secret](https://kubernetes.io/docs/concepts/configuration/secret/) variable into you QHub secrets volume.
-
-## Prefect Cloud
-
-Prefect Cloud is a fully hosted, production-ready backend for Prefect Core.
-Checkout [prefect documentation](https://docs.prefect.io/orchestration/#prefect-cloud)
-to know more.
-
-
-## Prefect Agent
-
-Prefect Agents is a lightweight processes for orchestrating flow runs. Agents
-run inside a user's architecture, and are responsible for starting and monitoring
-flow runs.
-
-During operation the agent process queries the Prefect API for any scheduled flow
-runs, and allocates resources for them on their respective deployment platforms.
-
-When you enable prefect via `qhub-config.yml` prefect agent is deployed on the
-QHub's kubernetes cluster, which querys the Prefect Cloud for flow runs.
 
 ## Flows
 
