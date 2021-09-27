@@ -37,12 +37,11 @@ it can connect to Prefect Cloud and query flows.
 You can override your agent configurations without having to modify the cluster configuration files.  The extra variable `overrides` makes this
 possible by changing the default values for the Agent based on an overriding setting presented on your qhub-config.yaml file.
 
-The current variables that can be overridden include:
+The current variables, orignaly available in the [Agent helm chart](https://github.com/PrefectHQ/server/blob/master/helm/prefect-server/templates/agent/deployment.yaml) that can be overridden include:
 
 ```
 - IMAGE_PULL_SECRETS
 - PREFECT__CLOUD__AGENT__LABELS
-- PREFECT__CONTEXT__SECRETS__GCP_CREDENTIALS
 - JOB_MEM_REQUEST
 - JOB_MEM_LIMIT
 - JOB_CPU_REQUEST
@@ -55,26 +54,35 @@ in you qhub-config.yaml file, as follows:
 
 ```yaml
 prefect:
-  enabled: true
-  overrides:
-      prefect_agent:
-        job:
-          resources:
-            limit:
-              cpu: 4
+ enabled: true
+ overrides:
+     prefect_agent:
+       job:
+         resources:
+           limit:
+             cpu: 4
 ```
 Also, if you would like to include an extra variable to the agent environment configuration, you can do it by including it under
-the `extraEnvVars` field in the overrides block. For example, when using local secrets, your Prefect Agent can be configured
-to authenticate to GCP automatically by adding that specific `GCP_CREDENTIALS` key value pair into your secrets context like so:
+the `envVars` field in the overrides block. For example, if you would like to add `MY_VAR: "<value>"` to you agent environment, you can do so by adding the following to your qhub-config
+
+```yaml
+prefect:
+ enabled: true
+ overrides:
+     envVars:
+       MY_VAR: "<value>"
+```
+### Adding secrets to you Agent configuration
+Overrides also allow you to define extra secrets to pass through your agent configuration, for example, when using [default secrets](https://docs.prefect.io/core/concepts/secrets.html#default-secrets) to automatically authenticate your flow with the listed service. In the Google cloud case, for `GCP_CREDENTIALS` context secret, you can do it by adding that specific key value pair into your configuration:
 
 ```yalm
 prefect:
-  enabled: true
-  overrides:
-    extraEnvVars:
-        PREFECT__CONTEXT__SECRETS__GCP_CREDENTIALS: '<Your value>'
+ enabled: true
+ overrides:
+   secretEnvVars:
+       PREFECT__CONTEXT__SECRETS__GCP_CREDENTIALS: '<Your value>'
 ```
-It's important to keep in mind that all variables defined under `extraEnvVars` must be base64 encoded before passing it's value to the qhub-config file.
+This secret will then be stored as a [kubernetes secret](https://kubernetes.io/docs/concepts/configuration/secret/) variable into you QHub secrets volume.
 
 ## Prefect Cloud
 
