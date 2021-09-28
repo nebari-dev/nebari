@@ -383,6 +383,7 @@ class CDSDashboards(Base):
 class QHubExtensionEnv(Base):
     code: str
 
+
 class QHubExtension(Base):
     name: str
     image: str
@@ -390,6 +391,7 @@ class QHubExtension(Base):
     private: bool = False
     oauth2client: bool = False
     envs: typing.Optional[typing.List[QHubExtensionEnv]]
+    logout: typing.Optional[str]
 
 
 # ======== External Container Registry ========

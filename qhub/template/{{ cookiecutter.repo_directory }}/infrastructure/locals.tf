@@ -71,5 +71,4 @@ locals {
 
   jupyterhub-keycloak-client-id       = "jupyterhubkeycloakclient"
   jupyterhub-callback-url-path        = "/hub/oauth_callback"
-  jupyterhub-logout-redirect-url-path = "/hub/login"
 }

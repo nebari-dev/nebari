@@ -218,8 +218,8 @@ module "kubernetes-keycloak-config" {
   forwardauth-keycloak-client-id     = local.forwardauth-keycloak-client-id
   forwardauth-keycloak-client-secret = random_password.forwardauth-jhsecret.result
 
-  jupyterhub-callback-url-path        = local.jupyterhub-callback-url-path
-  jupyterhub-logout-redirect-url-path = local.jupyterhub-logout-redirect-url-path
+  jupyterhub-callback-url-path   = local.jupyterhub-callback-url-path
+  jupyterhub-logout-redirect-url = "{{ cookiecutter.final_logout_uri }}"
 
   jupyterhub-keycloak-client-id     = local.jupyterhub-keycloak-client-id
   jupyterhub-keycloak-client-secret = random_password.jupyterhub-jhsecret.result
@@ -288,7 +288,7 @@ module "qhub" {
   keycloak_authorize_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth"
   keycloak_token_url     = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"
   keycloak_userdata_url  = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"
-  keycloak_logout_url    = format("%s?redirect_uri=%s", "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/logout", urlencode("https://${var.endpoint}${local.jupyterhub-logout-redirect-url-path}"))
+  keycloak_logout_url    = format("%s?redirect_uri=%s", "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/logout", urlencode("{{ cookiecutter.final_logout_uri }}"))
 
   keycloak_username   = "qhub-bot"
   keycloak_password   = random_password.keycloak-qhub-bot-password.result

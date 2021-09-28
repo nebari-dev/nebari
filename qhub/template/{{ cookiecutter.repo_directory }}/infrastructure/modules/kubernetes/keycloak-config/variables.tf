@@ -23,7 +23,7 @@ variable "jupyterhub-callback-url-path" {
   type        = string
 }
 
-variable "jupyterhub-logout-redirect-url-path" {
+variable "jupyterhub-logout-redirect-url" {
   description = "URL Path for the jupyterhub logout redirect"
   type        = string
 }

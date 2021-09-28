@@ -4,6 +4,9 @@ import functools
 import json
 import os
 from shutil import rmtree
+from urllib.parse import urlencode
+from shutil import copyfile
+from gitignore_parser import parse_gitignore
 
 from ruamel import yaml
 from cookiecutter.generate import generate_files
@@ -92,33 +95,116 @@ def patch_terraform_users(config):
             [group_index_lookup[gname] for gname in users_group_names]
         )
 
+
 def patch_terraform_extensions(config):
     """
     Add terraform-friendly extension details
     """
     config["tf_extensions"] = []
+    logout_uris = []
     for ext in config.get("extensions", []):
-        tf_ext = {"name": ext["name"], "image": ext["image"], "urlslug": ext["urlslug"], "private": ext["private"], "oauth2client": ext["oauth2client"], "jwt": False}
+        tf_ext = {
+            "name": ext["name"],
+            "image": ext["image"],
+            "urlslug": ext["urlslug"],
+            "private": ext["private"],
+            "oauth2client": ext["oauth2client"],
+            "logout": ext.get("logout", ""),
+            "jwt": False,
+        }
         tf_ext["envs"] = []
         for env in ext.get("envs", []):
             if env.get("code") == "KEYCLOAK":
-                tf_ext["envs"].append({"name": "KEYCLOAK_SERVER_URL", "rawvalue": "\"http://keycloak-headless.${var.environment}:8080/auth/\""})
-                tf_ext["envs"].append({"name": "KEYCLOAK_ADMIN_USERNAME", "rawvalue": "\"qhub-bot\""})
-                tf_ext["envs"].append({"name": "KEYCLOAK_ADMIN_PASSWORD", "rawvalue": "random_password.keycloak-qhub-bot-password.result"})
+                tf_ext["envs"].append(
+                    {
+                        "name": "KEYCLOAK_SERVER_URL",
+                        "rawvalue": '"http://keycloak-headless.${var.environment}:8080/auth/"',
+                    }
+                )
+                tf_ext["envs"].append(
+                    {"name": "KEYCLOAK_ADMIN_USERNAME", "rawvalue": '"qhub-bot"'}
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "KEYCLOAK_ADMIN_PASSWORD",
+                        "rawvalue": "random_password.keycloak-qhub-bot-password.result",
+                    }
+                )
             elif env.get("code") == "OAUTH2CLIENT":
-                tf_ext["envs"].append({"name": "OAUTH2_AUTHORIZE_URL", "rawvalue": "\"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth\""})
-                tf_ext["envs"].append({"name": "OAUTH2_ACCESS_TOKEN_URL", "rawvalue": "\"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token\""})
-                tf_ext["envs"].append({"name": "OAUTH2_USER_DATA_URL", "rawvalue": "\"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo\""})
-                tf_ext["envs"].append({"name": "OAUTH2_CLIENT_ID", "rawvalue": f"\"qhub-ext-{ext['name']}-client\""})
-                tf_ext["envs"].append({"name": "OAUTH2_CLIENT_SECRET", "rawvalue": f"random_password.qhub-ext-{ext['name']}-keycloak-client-pw.result"})
-                tf_ext["envs"].append({"name": "OAUTH2_REDIRECT_BASE", "rawvalue": f"\"https://${{var.endpoint}}/{ext['urlslug']}/\""})
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_AUTHORIZE_URL",
+                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth"',
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_ACCESS_TOKEN_URL",
+                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"',
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_USER_DATA_URL",
+                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"',
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_CLIENT_ID",
+                        "rawvalue": f"\"qhub-ext-{ext['name']}-client\"",
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_CLIENT_SECRET",
+                        "rawvalue": f"random_password.qhub-ext-{ext['name']}-keycloak-client-pw.result",
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_REDIRECT_BASE",
+                        "rawvalue": f"\"https://${{var.endpoint}}/{ext['urlslug']}/\"",
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "COOKIE_OAUTH2STATE_NAME",
+                        "rawvalue": f"\"qhub-o2state-{ext['name']}\"",
+                    }
+                )
             elif env.get("code") == "JWT":
-                tf_ext["envs"].append({"name": "JWT_SECRET_KEY", "rawvalue": f"random_password.qhub-ext-{ext['name']}-jwt-secret.result"})
+                tf_ext["envs"].append(
+                    {
+                        "name": "JWT_SECRET_KEY",
+                        "rawvalue": f"random_password.qhub-ext-{ext['name']}-jwt-secret.result",
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "COOKIE_AUTHORIZATION_NAME",
+                        "rawvalue": f"\"qhub-jwt-{ext['name']}\"",
+                    }
+                )
                 tf_ext["jwt"] = True
             else:
-                raise ValueError("No such QHub extension code "+env.get("code"))
+                raise ValueError("No such QHub extension code " + env.get("code"))
+
+        if ext.get("logout", "") != "":
+            logout_uris.append(f"https://{config['domain']}/{ext['urlslug']}{ext['logout']}")
 
         config["tf_extensions"].append(tf_ext)
+
+    final_logout_uri = f"https://{config['domain']}/hub/login"
+
+    for uri in logout_uris:
+        final_logout_uri = "{}?{}".format(
+            uri, urlencode({"redirect_uri": final_logout_uri})
+        )
+
+    config["final_logout_uri"] = final_logout_uri
+    config["logout_uris"] = logout_uris
+
 
 def deep_merge(d1, d2):
     """Deep merge two dictionaries.
