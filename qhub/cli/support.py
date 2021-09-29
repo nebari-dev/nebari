@@ -48,7 +48,7 @@ def handle_support(args):
                 )
             except client.exceptions.ApiException as e:
                 file.write("%s not available" % pod.metadata.name)
-
+                raise e
     with ZipFile("./qhub-support.zip", "w") as zip:
         for file in list(Path("./log/dev").glob("*.txt")):
             print(file)
