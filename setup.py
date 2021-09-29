@@ -40,6 +40,7 @@ setup(
         "pydantic",
         "pynacl",
         "bcrypt",
+        "kubernetes",
     ],
     extras_require={
         "dev": [
