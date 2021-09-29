@@ -61,8 +61,3 @@ variable "user_groups" {
   default     = []
 }
 
-variable "smtp" {
-  description = "map of SMTP settings"
-  type        = map(string)
-  default     = {}
-}

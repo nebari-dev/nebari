@@ -13,16 +13,6 @@ resource "keycloak_realm" "realm-qhub" {
   realm = "qhub"
 
   display_name = "QHub ${var.name}"
-
-  smtp_server {
-    host = var.smtp.host
-    from = var.smtp.email
-
-    auth {
-      username = var.smtp.username
-      password = var.smtp.password
-    }
-  }
 }
 
 resource "keycloak_user" "user" {

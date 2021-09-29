@@ -37,8 +37,6 @@
     "storage": null,
     "cdsdashboards": {},
     "external_container_reg": {},
-    "smtp": {},
-
     "local": {
         "node_selectors": {
             "general": {
