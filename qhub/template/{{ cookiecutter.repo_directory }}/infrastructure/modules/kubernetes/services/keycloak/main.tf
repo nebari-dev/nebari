@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     keycloak = {
-      source = "mrparkers/keycloak"
+      source  = "mrparkers/keycloak"
       version = "3.3.0"
     }
   }
@@ -19,10 +19,10 @@ resource "helm_release" "keycloak" {
     file("${path.module}/values.yaml"),
   ], var.overrides)
 
-#  set {
-#    name  = "ingress.rules[0].host"
-#    value = var.external-url
-#  }
+  #  set {
+  #    name  = "ingress.rules[0].host"
+  #    value = var.external-url
+  #  }
 }
 
 resource "kubernetes_manifest" "keycloak-http" {
@@ -39,11 +39,11 @@ resource "kubernetes_manifest" "keycloak-http" {
       entryPoints = ["websecure"]
       routes = [
         {
-          kind        = "Rule"
-          match       = "Host(`${var.external-url}`) && PathPrefix(`/auth`) "
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`) && PathPrefix(`/auth`) "
           services = [
             {
-              name      = "keycloak-headless-external"
+              name = "keycloak-headless-external"
               # Really not sure why 8080 works here
               port      = 8080
               namespace = var.namespace
@@ -63,7 +63,7 @@ resource "kubernetes_service" "keycloak-headless-external" {
   }
 
   spec {
-    type = "ExternalName"
+    type          = "ExternalName"
     external_name = "keycloak-headless.keycloak.svc.cluster.local"
 
     port {
@@ -77,7 +77,7 @@ resource "kubernetes_service" "keycloak-headless-external" {
 
 resource "keycloak_realm" "realm-master" {
   provider = keycloak
-  
+
   realm = "providerrealm"
 
   display_name = "Master Realm"

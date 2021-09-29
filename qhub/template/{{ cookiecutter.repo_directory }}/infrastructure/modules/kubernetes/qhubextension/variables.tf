@@ -43,18 +43,18 @@ variable "oauth2client" {
 
 variable "envs" {
   description = "List of env var objects"
-  type       = list(map(any))
-  default    = []
+  type        = list(map(any))
+  default     = []
 }
 
 variable "qhub-realm-id" {
   description = "Keycloak qhub realm id"
-  type       = string
-  default    = ""
+  type        = string
+  default     = ""
 }
 
 variable "keycloak-client-password" {
   description = "Keycloak client password"
-  type       = string
-  default    = ""
+  type        = string
+  default     = ""
 }

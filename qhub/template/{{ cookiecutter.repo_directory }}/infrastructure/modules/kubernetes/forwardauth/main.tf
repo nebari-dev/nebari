@@ -62,13 +62,13 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
           }
 
           env {
-            name  = "PROVIDERS_GENERIC_OAUTH_TOKEN_URL"
+            name = "PROVIDERS_GENERIC_OAUTH_TOKEN_URL"
             # http://keycloak-headless.${var.namespace}:8080 works fine here actually
             value = "https://${var.external-url}/auth/realms/qhub/protocol/openid-connect/token"
           }
 
           env {
-            name  = "PROVIDERS_GENERIC_OAUTH_USER_URL"
+            name = "PROVIDERS_GENERIC_OAUTH_USER_URL"
             # But http://keycloak-headless.${var.namespace}:8080 does not work here - Token verification failed
             value = "https://${var.external-url}/auth/realms/qhub/protocol/openid-connect/userinfo"
           }
