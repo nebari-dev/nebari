@@ -191,7 +191,9 @@ def patch_terraform_extensions(config):
                 raise ValueError("No such QHub extension code " + env.get("code"))
 
         if ext.get("logout", "") != "":
-            logout_uris.append(f"https://{config['domain']}/{ext['urlslug']}{ext['logout']}")
+            logout_uris.append(
+                f"https://{config['domain']}/{ext['urlslug']}{ext['logout']}"
+            )
 
         config["tf_extensions"].append(tf_ext)
 
