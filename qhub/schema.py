@@ -380,7 +380,9 @@ class Main(Base):
             raise ValueError(
                 "Maximum accepted length of the project name string is 16 characters."
             )
-        elif ProviderEnum == "azure" and re.findall(r"^[A-Za-z0-9][^/|.~!?@#$%^=&*\\()_]*[A-Za-z0-9]$", value):
+        elif ProviderEnum == "azure" and re.findall(
+            r"^[A-Za-z0-9][^/|.~!?@#$%^=&*\\()_]*[A-Za-z0-9]$", value
+        ):
             return letter_dash_underscore_pydantic
         elif ProviderEnum == "aws" and re.findall(r"^(?!aws)", value):
             return letter_dash_underscore_pydantic
