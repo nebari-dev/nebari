@@ -77,6 +77,7 @@ class ClearML(Base):
 class Prefect(Base):
     enabled: bool
     image: typing.Optional[str]
+    overrides: typing.Optional[typing.Dict]
 
 
 # ============= Terraform ===============
