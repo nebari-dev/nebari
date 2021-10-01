@@ -384,8 +384,6 @@ class Main(Base):
             r"^[A-Za-z0-9][^/|.~!?@#$%^=&*\\()_]*[A-Za-z0-9]$", value
         ):
             return letter_dash_underscore_pydantic
-        elif ProviderEnum == "aws" and re.findall(r"^(?!aws)", value):
-            return letter_dash_underscore_pydantic
         else:
             raise ValueError(convention)
 
