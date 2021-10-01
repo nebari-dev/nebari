@@ -230,6 +230,17 @@ module "kubernetes-keycloak-config" {
 
   user_groups = jsondecode("{{ cookiecutter.tf_user_groups | jsonify | replace('"', '\\"') }}")
 
+  {% if cookiecutter.security.authentication.type == "GitHub" %}
+  github_client_id     = {{ cookiecutter.security.authentication.get('config', {}).get('client_id','') | jsonify }}
+  github_client_secret = {{ cookiecutter.security.authentication.get('config', {}).get('client_secret','') | jsonify }}
+  {% endif %}
+
+  {% if cookiecutter.security.authentication.type == "Auth0" %}
+  auth0_client_id     = {{ cookiecutter.security.authentication.get('config', {}).get('client_id','') | jsonify }}
+  auth0_client_secret = {{ cookiecutter.security.authentication.get('config', {}).get('client_secret','') | jsonify }}
+  auth0_subdomain     = {{ cookiecutter.security.authentication.get('config', {}).get('auth0_subdomain','') | jsonify }}
+  {% endif %}
+
   depends_on = [
     module.kubernetes-keycloak-helm
   ]

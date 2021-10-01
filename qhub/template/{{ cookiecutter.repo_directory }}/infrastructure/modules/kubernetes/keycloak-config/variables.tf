@@ -61,3 +61,33 @@ variable "user_groups" {
   default     = []
 }
 
+variable "github_client_id" {
+  description = "GitHub OAuth2 Client ID"
+  type        = string
+  default     = ""
+}
+
+variable "github_client_secret" {
+  description = "GitHub OAuth2 Client Secret"
+  type        = string
+  default     = ""
+}
+
+variable "auth0_client_id" {
+  description = "Auth0 OAuth2 Client ID"
+  type        = string
+  default     = ""
+}
+
+variable "auth0_client_secret" {
+  description = "Auth0 OAuth2 Client Secret"
+  type        = string
+  default     = ""
+}
+
+variable "auth0_subdomain" {
+  description = "Auth0 Subdomain"
+  type        = string
+  default     = ""
+}
+

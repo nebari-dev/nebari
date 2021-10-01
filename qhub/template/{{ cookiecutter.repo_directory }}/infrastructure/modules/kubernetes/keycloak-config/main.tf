@@ -126,3 +126,74 @@ resource "keycloak_openid_client" "jupyterhub_client" {
 
   login_theme = "keycloak"
 }
+
+### Login Flow for GitHub/Auth0 to map to existing users only
+
+resource "keycloak_authentication_flow" "flow" {
+  realm_id    = keycloak_realm.realm-qhub.id
+  alias       = "detect-existing2"
+  provider_id = "basic-flow"
+}
+
+resource "keycloak_authentication_execution" "idp-detect-existing-broker-user" {
+  realm_id          = keycloak_realm.realm-qhub.id
+  parent_flow_alias = keycloak_authentication_flow.flow.alias
+  authenticator     = "idp-detect-existing-broker-user"
+  requirement       = "REQUIRED"
+}
+
+resource "keycloak_authentication_execution" "idp-auto-link" {
+  realm_id          = keycloak_realm.realm-qhub.id
+  parent_flow_alias = keycloak_authentication_flow.flow.alias
+  authenticator     = "idp-auto-link"
+  requirement       = "REQUIRED"
+}
+
+## GitHub Identity provider
+
+resource "keycloak_oidc_identity_provider" "github_identity_provider" {
+  count = var.github_client_id == "" || var.github_client_secret == "" ? 0 : 1
+
+  realm             = keycloak_realm.realm-qhub.id
+  alias             = "github2"
+  provider_id       = "github"
+  authorization_url = ""
+  client_id         = var.github_client_id
+  client_secret     = var.github_client_secret
+  token_url         = ""
+  default_scopes    = "user:email"
+  store_token       = false
+  sync_mode         = "IMPORT"
+
+  first_broker_login_flow_alias = keycloak_authentication_flow.flow.alias
+  trust_email = true
+
+  extra_config = {
+    "clientAuthMethod" = "client_secret_post"
+  }
+}
+
+## Auth0 Identity provider
+
+resource "keycloak_oidc_identity_provider" "auth0_identity_provider" {
+  count = var.auth0_client_id == "" || var.auth0_client_secret == "" ? 0 : 1
+
+  realm             = keycloak_realm.realm-qhub.id
+  alias             = "auth02"
+  provider_id       = "oidc"
+  authorization_url = "https://${var.auth0_subdomain}/authorize"
+  client_id         = var.auth0_client_id
+  client_secret     = var.auth0_client_secret
+  token_url         = "https://${var.auth0_subdomain}/oauth/token"
+  user_info_url     = "https://${var.auth0_subdomain}/userinfo"
+  default_scopes    = "openid email profile"
+  store_token       = false
+  sync_mode         = "IMPORT"
+
+  first_broker_login_flow_alias = keycloak_authentication_flow.flow.alias
+  trust_email = true
+
+  extra_config = {
+    "clientAuthMethod" = "client_secret_post"
+  }
+}

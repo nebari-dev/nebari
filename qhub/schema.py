@@ -124,7 +124,7 @@ class DefaultImages(Base):
 
 
 class GitHubConfig(Base):
-    oauth_callback_url: str
+    oauth_callback_url: typing.Optional[str]
     client_id: str
     client_secret: str
 
@@ -132,7 +132,7 @@ class GitHubConfig(Base):
 class Auth0Config(Base):
     client_id: str
     client_secret: str
-    oauth_callback_url: str
+    oauth_callback_url: typing.Optional[str]
     scope: typing.List[str]
     auth0_subdomain: str
 

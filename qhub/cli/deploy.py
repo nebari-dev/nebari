@@ -41,6 +41,11 @@ def create_deploy_subcommand(subparser):
         action="store_true",
         help="Disable auto-rendering in deploy stage",
     )
+    subparser.add_argument(
+        "--full-only",
+        action="store_true",
+        help="Only carry out one full pass instead of targeted sections (for development purposes)",
+    )
     subparser.set_defaults(func=handle_deploy)
 
 
@@ -65,4 +70,5 @@ def handle_deploy(args):
         args.dns_auto_provision,
         args.disable_prompt,
         args.skip_remote_state_provision,
+        args.full_only,
     )
