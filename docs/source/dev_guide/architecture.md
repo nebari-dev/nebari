@@ -10,10 +10,11 @@ while providing the ability to scale with your organization and data.
 
 ## Installation
 
-After you have cloned the QHub locally, you can install QHub through `pip`:
+After you have cloned the QHub repo locally, you can install QHub through `pip`:
 
-    python -m pip install -e .
+    python -m pip install -e .[dev]
 
+> NOTE: `zsh` users may need to escape the square brackets `\[dev\]`
 To install the pre-commit hooks, run:
 
     pre-commit install
