@@ -10,9 +10,13 @@ while providing the ability to scale with your organization and data.
 
 ## Installation
 
-You can install QHub through `pip`:
+After you have cloned the QHub locally, you can install QHub through `pip`:
 
-    pip install qhub-ops
+    python -m pip install -e .
+
+To install the pre-commit hooks, run:
+
+    pre-commit install
 
 After the installation, the next step is to configure QHub.
 
@@ -22,7 +26,7 @@ QHub is entirely controlled from a configuration file, which allows you to manag
 
 + **The Configuration File**
   + QHub comes with configuration file templates for each of the cloud providers it currently supports: **AWS**, **DO**, **GCP**, and **Azure**. The templates can be found [**here**](../installation/configuration.md).
-  
+
 ## Why QHub
 
 With QHub, managing configurable data science environments and attaining seamless deployment with [**Github Actions**](https://github.com/marketplace/actions/deployment-action) become remarkably easy. Let's look at how you can customize QHub for a data science architecture that meets  **your team's needs**.
