@@ -293,7 +293,22 @@ def render_config(
 
     config["qhub_version"] = __version__
 
-    oauth_callback_url = f"https://{qhub_domain}/hub/oauth_callback"
+    # Generate default password for Keycloak root user and also example-user if using password auth
+    default_password = "".join(
+        secrets.choice(string.ascii_letters + string.digits) for i in range(16)
+    )
+
+    # Save default password to file
+    default_password_filename = os.path.join(
+        tempfile.gettempdir(), "QHUB_DEFAULT_PASSWORD"
+    )
+    with open(default_password_filename, "w") as f:
+        f.write(default_password)
+    os.chmod(default_password_filename, 0o700)
+
+    print(
+        f"Securely generated default random password={default_password} for example-user stored at path={default_password_filename}"
+    )
 
     if auth_provider == "github":
         config["security"]["authentication"] = AUTH_OAUTH_GITHUB
@@ -301,7 +316,8 @@ def render_config(
             "Visit https://github.com/settings/developers and create oauth application"
         )
         print(f"  set the homepage to: https://{qhub_domain}/")
-        print(f"  set the callback_url to: {oauth_callback_url}")
+        print(f"  set the callback_url to: https://{qhub_domain}/auth/realms/qhub/broker/github/endpoint")
+        
         if not disable_prompt:
             config["security"]["authentication"]["config"]["client_id"] = input(
                 "Github client_id: "
@@ -309,38 +325,19 @@ def render_config(
             config["security"]["authentication"]["config"]["client_secret"] = input(
                 "Github client_secret: "
             )
-            config["security"]["authentication"]["config"][
-                "oauth_callback_url"
-            ] = oauth_callback_url
     elif auth_provider == "auth0":
         config["security"]["authentication"] = AUTH_OAUTH_AUTH0
-        config["security"]["authentication"]["config"][
-            "oauth_callback_url"
-        ] = oauth_callback_url
+
     elif auth_provider == "password":
         config["security"]["authentication"] = AUTH_PASSWORD
 
-        # Generate default password for qhub-init
-        default_password = "".join(
-            secrets.choice(string.ascii_letters + string.digits) for i in range(16)
-        )
         config["security"]["users"]["example-user"]["password"] = default_password
 
-        config["security"].setdefault("keycloak", {})[
-            "initial_root_password"
-        ] = default_password
-
-        default_password_filename = os.path.join(
-            tempfile.gettempdir(), "QHUB_DEFAULT_PASSWORD"
-        )
-        with open(default_password_filename, "w") as f:
-            f.write(default_password)
-        os.chmod(default_password_filename, 0o700)
-
-        print(
-            f"Securely generated default random password={default_password} for example-user stored at path={default_password_filename}"
-        )
-
+    # Always use default password for keycloak root
+    config["security"].setdefault("keycloak", {})[
+        "initial_root_password"
+    ] = default_password
+    
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
