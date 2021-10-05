@@ -22,7 +22,7 @@ def create_client(jupyterhub_endpoint, project_name, reuse_existing=True):
 
     auth0 = Auth0(os.environ["AUTH0_DOMAIN"], mgmt_api_token)
 
-    oauth_callback_url = f"https://{jupyterhub_endpoint}/hub/oauth_callback"
+    oauth_callback_url = f"https://{jupyterhub_endpoint}/auth/realms/qhub/broker/auth0/endpoint"
 
     for client in auth0.clients.all(
         fields=["name", "client_id", "client_secret", "callbacks"], include_fields=True
@@ -41,15 +41,13 @@ def create_client(jupyterhub_endpoint, project_name, reuse_existing=True):
                 "auth0_subdomain": ".".join(os.environ["AUTH0_DOMAIN"].split(".")[:-2]),
                 "client_id": client["client_id"],
                 "client_secret": client["client_secret"],
-                "scope": ["openid", "email", "profile"],
-                "oauth_callback_url": f"https://{jupyterhub_endpoint}/hub/oauth_callback",
             }
 
     client = auth0.clients.create(
         {
             "name": project_name,
             "description": f"QHub - {project_name} - {jupyterhub_endpoint}",
-            "callbacks": [f"https://{jupyterhub_endpoint}/hub/oauth_callback"],
+            "callbacks": [oauth_callback_url],
             "app_type": "regular_web",
         }
     )
@@ -58,6 +56,4 @@ def create_client(jupyterhub_endpoint, project_name, reuse_existing=True):
         "auth0_subdomain": ".".join(os.environ["AUTH0_DOMAIN"].split(".")[:-2]),
         "client_id": client["client_id"],
         "client_secret": client["client_secret"],
-        "scope": ["openid", "email", "profile"],
-        "oauth_callback_url": f"https://{jupyterhub_endpoint}/hub/oauth_callback",
     }

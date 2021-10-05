@@ -131,7 +131,7 @@ resource "keycloak_openid_client" "jupyterhub_client" {
 
 resource "keycloak_authentication_flow" "flow" {
   realm_id    = keycloak_realm.realm-qhub.id
-  alias       = "detect-existing2"
+  alias       = "detect-existing"
   provider_id = "basic-flow"
 }
 
@@ -155,7 +155,7 @@ resource "keycloak_oidc_identity_provider" "github_identity_provider" {
   count = var.github_client_id == "" || var.github_client_secret == "" ? 0 : 1
 
   realm             = keycloak_realm.realm-qhub.id
-  alias             = "github2"
+  alias             = "github"
   provider_id       = "github"
   authorization_url = ""
   client_id         = var.github_client_id
@@ -176,10 +176,10 @@ resource "keycloak_oidc_identity_provider" "github_identity_provider" {
 ## Auth0 Identity provider
 
 resource "keycloak_oidc_identity_provider" "auth0_identity_provider" {
-  count = var.auth0_client_id == "" || var.auth0_client_secret == "" ? 0 : 1
+  count = var.auth0_client_id == "" || var.auth0_client_secret == "" || var.auth0_subdomain == "" ? 0 : 1
 
   realm             = keycloak_realm.realm-qhub.id
-  alias             = "auth02"
+  alias             = "auth0"
   provider_id       = "oidc"
   authorization_url = "https://${var.auth0_subdomain}/authorize"
   client_id         = var.auth0_client_id

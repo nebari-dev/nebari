@@ -124,7 +124,6 @@ class DefaultImages(Base):
 
 
 class GitHubConfig(Base):
-    oauth_callback_url: typing.Optional[str]
     client_id: str
     client_secret: str
 
@@ -132,8 +131,6 @@ class GitHubConfig(Base):
 class Auth0Config(Base):
     client_id: str
     client_secret: str
-    oauth_callback_url: typing.Optional[str]
-    scope: typing.List[str]
     auth0_subdomain: str
 
 
@@ -174,16 +171,13 @@ class Authentication(Base, ABC):
 class PasswordAuthentication(Authentication):
     _typ = AuthenticationEnum.password
 
-
 class Auth0Authentication(Authentication):
     _typ = AuthenticationEnum.auth0
     config: Auth0Config
 
-
 class GitHubAuthentication(Authentication):
     _typ = AuthenticationEnum.github
     config: GitHubConfig
-
 
 class CustomAuthentication(Authentication):
     _typ = AuthenticationEnum.custom
