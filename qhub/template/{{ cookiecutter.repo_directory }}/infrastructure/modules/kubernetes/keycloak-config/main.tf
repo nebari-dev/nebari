@@ -25,9 +25,7 @@ resource "keycloak_user" "user" {
   email    = var.users[count.index].email
 
   lifecycle {
-    ignore_changes = [
-      first_name, last_name, email, enabled, attributes, initial_password
-    ]
+    ignore_changes = all
   }
 
   attributes = {
@@ -50,9 +48,7 @@ resource "keycloak_group" "group" {
   name     = var.groups[count.index].name
 
   lifecycle {
-    ignore_changes = [
-      attributes
-    ]
+    ignore_changes = all
   }
 
   attributes = {
@@ -78,6 +74,8 @@ resource "keycloak_user_groups" "user_groups" {
   group_ids = [
     for i in var.user_groups[count.index] : keycloak_group.group[i].id
   ]
+
+  exhaustive = false
 }
 
 resource "keycloak_openid_client" "qhub_client" {

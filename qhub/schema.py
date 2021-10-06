@@ -188,7 +188,7 @@ class GitHubAuthentication(Authentication):
 class User(Base):
     uid: typing.Optional[str]
     password: typing.Optional[str]
-    primary_group: str
+    primary_group: typing.Optional[str]
     secondary_groups: typing.Optional[typing.List[str]]
 
 
@@ -208,7 +208,7 @@ class Keycloak(Base):
 
 class Security(Base):
     authentication: Authentication
-    users: typing.Dict[str, User]
+    users: typing.Dict[str, typing.Union[User, None]]
     groups: typing.Dict[
         str, typing.Union[Group, None]
     ]  # If gid is omitted, no attributes in Group means it appears as None
@@ -221,8 +221,10 @@ class Security(Base):
 
     @root_validator
     def user_groups_must_exist(cls, values):
-        groupnames = set(values.get("groups", {}).keys())
+        groupnames = set(values.get("groups", {}).keys()) | {"admin", "users"}
         for username, user in values.get("users", {}).items():
+            if user is None:
+                continue
             usersgroupnames = set([user.primary_group])
             secondary_groups = getattr(user, "secondary_groups", None)
             if secondary_groups is not None and len(secondary_groups) > 0:

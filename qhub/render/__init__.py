@@ -67,29 +67,36 @@ def patch_terraform_users(config):
             "name": k,
             "gid": str((v or {}).get("gid", "")),
         }
-        for (k, v) in incoming_groups.items()
+        for (k, v) in {"users":{},"admin":{}, **incoming_groups}.items()
+        # Above forces existence of users and admin groups if not already provided in config
     ]
 
     group_index_lookup = {
-        obj[0]: index for (index, obj) in enumerate(incoming_groups.items())
+        obj["name"]: index for (index, obj) in enumerate(config["tf_groups"])
     }
 
     incoming_users = config.get("security", {}).get("users", {})
-    config["tf_users"] = [
+
+    config["tf_users"] = []
+    for (k, v) in incoming_users.items():
+        if v is None:
+            v = {}
+        config["tf_users"].append(
         {
             "name": k,
             "uid": str(v.get("uid", "")),
             "password": v.get("password", ""),
             "email": "@" in k and k or None,
             "primary_group": v.get("primary_group", "users"),
-        }
-        for (k, v) in incoming_users.items()
-    ]
+        })
 
     config["tf_user_groups"] = []
     for (k, v) in incoming_users.items():
+        if v is None:
+            v = {}
+        # Every user should be in the 'users' group
         users_group_names = set(
-            [v.get("primary_group", "")] + v.get("secondary_groups", [])
+            [v.get("primary_group", "")] + v.get("secondary_groups", []) + ["users"]
         ) - set([""])
         config["tf_user_groups"].append(
             [group_index_lookup[gname] for gname in users_group_names]
