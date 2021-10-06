@@ -9,10 +9,10 @@ from qhub.initialize import render_config
 @pytest.mark.parametrize(
     "project, namespace, domain, cloud_provider, ci_provider, auth_provider",
     [
-        ("do-pytest", "dev", "do.qhub.dev", "do", "github-actions", "github"),
-        ("aws-pytest", "dev", "aws.qhub.dev", "aws", "github-actions", "github"),
-        ("gcp-pytest", "dev", "gcp.qhub.dev", "gcp", "github-actions", "github"),
-        ("azure-pytest", "dev", "azure.qhub.dev", "azure", "github-actions", "github"),
+        ("pytest-do", "dev", "do.qhub.dev", "do", "github-actions", "github"),
+        ("pytest-aws", "dev", "aws.qhub.dev", "aws", "github-actions", "github"),
+        ("pytest-gcp", "dev", "gcp.qhub.dev", "gcp", "github-actions", "github"),
+        ("pytest-azure", "dev", "azure.qhub.dev", "azure", "github-actions", "github"),
     ],
 )
 def test_render(
