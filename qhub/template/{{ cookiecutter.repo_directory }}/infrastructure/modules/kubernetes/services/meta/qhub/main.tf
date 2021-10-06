@@ -356,3 +356,15 @@ resource "kubernetes_manifest" "forwardauth" {
     }
   }
 }
+
+module "external-container-reg" {
+  source = "../../extcr"
+
+  count = var.extcr_config.enabled ? 1 : 0
+
+  namespace         = var.namespace
+  access_key_id     = var.extcr_config.access_key_id
+  secret_access_key = var.extcr_config.secret_access_key
+  extcr_account     = var.extcr_config.extcr_account
+  extcr_region      = var.extcr_config.extcr_region
+}

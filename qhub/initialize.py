@@ -57,6 +57,9 @@ BASE_CONFIGURATION = {
             "h2_color": "#652e8e",
         }
     },
+    "monitoring": {
+        "enabled": True,
+    },
     "cdsdashboards": {
         "enabled": True,
         "cds_hide_user_named_servers": True,
@@ -111,11 +114,12 @@ DIGITAL_OCEAN = {
     "region": "nyc3",
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
-        "general": {"instance": "s-2vcpu-4gb", "min_nodes": 1, "max_nodes": 1},
+        "general": {"instance": "g-4vcpu-16gb", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
         "worker": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
     },
 }
+# Digital Ocean image slugs are listed here https://slugs.do-api.dev/
 
 GOOGLE_PLATFORM = {
     "project": "PLACEHOLDER",

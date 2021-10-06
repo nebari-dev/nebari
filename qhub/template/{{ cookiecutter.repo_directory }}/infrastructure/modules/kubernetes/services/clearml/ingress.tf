@@ -8,12 +8,12 @@ locals {
   clearml_apiserver            = "${local.clearml-prefix}-apiserver"
 
   forward_auth_middleware = "traefik-forward-auth"
-  clearml_middleware = [
+  clearml_middleware = var.enable-forward-auth ? [
     {
       name      = local.forward_auth_middleware
       namespace = var.namespace
     }
-  ]
+  ] : []
 }
 
 resource "kubernetes_manifest" "clearml-app" {

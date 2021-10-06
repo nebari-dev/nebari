@@ -181,8 +181,8 @@ module "qhub" {
   name      = "qhub"
   namespace = var.environment
 
-  home-pvc        = module.kubernetes-nfs-mount.persistent_volume_claim.name
-  conda-store-pvc = module.kubernetes-conda-store-mount.persistent_volume_claim.name
+  home-pvc        = "nfs-mount-${var.environment}-share"
+  conda-store-pvc = "conda-store-${var.environment}-share"
 
   external-url = var.endpoint
 
@@ -209,6 +209,14 @@ module "qhub" {
   forwardauth-jh-client-secret  = random_password.forwardauth-jhsecret.result
   forwardauth-callback-url-path = local.forwardauth-callback-url-path
 
+  extcr_config = {
+    enabled : {{ cookiecutter.external_container_reg.enabled | default(false,true) | jsonify }}
+    access_key_id : "{{ cookiecutter.external_container_reg.access_key_id | default("",true) }}"
+    secret_access_key : "{{ cookiecutter.external_container_reg.secret_access_key | default("",true) }}"
+    extcr_account : "{{ cookiecutter.external_container_reg.extcr_account | default("",true) }}"
+    extcr_region : "{{ cookiecutter.external_container_reg.extcr_region | default("",true) }}"
+  }
+
   depends_on = [
     module.kubernetes-ingress
   ]
@@ -227,8 +235,27 @@ module "prefect" {
   {% if cookiecutter.prefect.image is defined -%}
   image                = "{{ cookiecutter.prefect.image }}"
   {% endif -%}
+  {% if cookiecutter.prefect.overrides is defined %}
+  overrides            = [<<EOT
+{{ cookiecutter.prefect.overrides|yamlify -}}
+    EOT
+    ]
+  {% endif %}
 }
 {% endif -%}
+
+{% if cookiecutter.monitoring.enabled -%}
+module "monitoring" {
+  source       = "./modules/kubernetes/services/monitoring"
+  namespace    = var.environment
+  external-url = var.endpoint
+  tls          = module.qhub.tls
+  depends_on = [
+    module.qhub
+  ]
+}
+{% endif -%}
+
 
 {% if cookiecutter.clearml.enabled -%}
 module "clearml" {
@@ -236,6 +263,9 @@ module "clearml" {
   namespace    = var.environment
   external-url = var.endpoint
   tls          = module.qhub.tls
+{% if cookiecutter.clearml.enable_forward_auth is defined -%}
+  enable-forward-auth = {{ cookiecutter.clearml.enable_forward_auth | default(false,true) | jsonify }}
+{% endif -%}
   depends_on = [
     module.qhub
   ]

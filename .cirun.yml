@@ -1,0 +1,18 @@
+# Self-Hosted Github Action Runners on AWS via Cirun.io
+# Reference: https://docs.cirun.io/reference/yaml.html
+runners:
+  - name: run-k8s-tests
+    # Cloud Provider: AWS
+    cloud: aws
+    # Instance Type has 4 vcpu, 16 GiB memory, Up to 5 Gbps Network Performance
+    instance_type: t3a.xlarge
+    # Custom AMI with docker is pre-installed
+    machine_image: ami-08939857cf6893cde
+    # Region: Oregon
+    region: us-west-2
+    # Path of the relevant workflow file
+    workflow: .github/workflows/kubernetes_test.yaml
+    # Use Spot Instances for cost savings
+    preemptible: true
+    # Number of runners to provision on every trigger on Actions job
+    count: 1

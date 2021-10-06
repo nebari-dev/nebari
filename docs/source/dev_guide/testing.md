@@ -161,7 +161,7 @@ Minikube does not provide a simple interactive way to configure addons,
 ([as shown in this repository issue](https://github.com/kubernetes/minikube/issues/8283)). It is recommended to set load balancer start/stop IP address using a Python script with pre-established values. This recommendation is due to an existing DNS name that uses some addresses.
 
 To do so, paste
-[this Python script](https://github.com/Quansight/qhub/blob/dev/tests/scripts/minikube-loadbalancer-ip.py) in a text file named `minikube-loadbalancer-ip.py` and then run:
+[this Python script](https://github.com/Quansight/qhub/blob/main/tests/scripts/minikube-loadbalancer-ip.py) in a text file named `minikube-loadbalancer-ip.py` and then run:
 ```shell
 python minikube-loadbalancer-ip.py
 ```
@@ -207,7 +207,11 @@ The output should be `The 'metallb' addon is enabled`.
 ---
 
 ### Note for Development on Windows Subsystem for Linux 2 (WSL2)
+<details>
+  <summary>Click to expand note</summary>
+  
 The browser can have trouble reaching the load balancer running on WSL2. A workaround is to port forward the proxy-... pod to the host (ip 0.0.0.0). Get the ip address of the WSL2 machine via ```ip a```, it should be a 127.x.x.x address. To change the port forwarding after opening k9s you can type ```:pods <enter>```, hover over the proxy-... pod and type ```<shift-s>```, and enter the ip addresses.
+</details>
 
 ### Deploy QHub
 To deploy QHub handle setup dependencies and create a new sub-directory by running:
@@ -231,7 +235,7 @@ In case you would like to change the generated password (optional), You can use
 script:
 
 ```bash
-python -c "import bcrypt; bcrypt.hashpw(b'<password>', bcrypt.gensalt())"
+python -c "import bcrypt; print(bcrypt.hashpw(b'admin', bcrypt.gensalt()).decode('utf-8'))"
 ```
 Where `<password>` can be changed to any desired value.
 
@@ -270,6 +274,30 @@ line below. The command will override any DNS server.
 ```ini
 192.168.49.100 github-actions.qhub.dev
 ```
+
+#### Note for those with slow internet (<10Mb/s)
+<details>
+  <summary>Click to expand note</summary>
+  
+As part of deployment, QHub will download several docker images
+(~3-5GB total). If using a slower internet connection, terraform will
+timeout before the images can get downloaded.
+
+A workaround for this is to pull docker images locally before
+deployment. The current list of docker images can be seen
+`qhub-config.yaml` under the `default_images` key. Each image will
+need to be pulled like so:
+
+```bash
+docker pull quansight/qhub-jupyterhub:v0.x.x
+docker pull quansight/qhub-jupyterlab:v0.x.x
+docker pull quansight/qhub-dask-worker:v0.x.x
+docker pull quansight/qhub-dask-gateway:v0.x.x
+docker pull quansight/qhub-conda-store:v0.x.x
+```
+Replacing `v0.x.x` with the current version that is listed
+</details>
+
 ### Verify the local deployment
 
 Finally, if everything is set properly you should be able to `cURL` the JupyterHub Server. Run
@@ -292,6 +320,10 @@ has not been added to your certificate registry.
 Each web browser handles this differently. A workaround for Firefox:
 
  - Visit `about:config` and change the `network.stricttransportsecurity.preloadlist` to `false`
+  
+And a workaround for Chrome:
+
+ - Type `badidea` or `thisisunsafe` while viewing the rendered page (this has to do with [how Chrome preloads some domains for its HTTP Strict Transport Security](https://hstspreload.org/) list in a way that cannot be manually removed)
 
 ### Cleanup
 

@@ -1,8 +1,9 @@
 import enum
 import typing
+from abc import ABC
 
 import pydantic
-from pydantic import validator
+from pydantic import validator, root_validator
 from qhub.utils import namestr_regex, check_for_duplicates
 
 
@@ -56,11 +57,19 @@ class CICD(Base):
     after_script: typing.Optional[typing.List[str]]
 
 
+# ============== Monitoring =============
+
+
+class Monitoring(Base):
+    enabled: bool
+
+
 # ============== ClearML =============
 
 
 class ClearML(Base):
     enabled: bool
+    enable_forward_auth: typing.Optional[bool]
 
 
 # ============== Prefect =============
@@ -69,6 +78,7 @@ class ClearML(Base):
 class Prefect(Base):
     enabled: bool
     image: typing.Optional[str]
+    overrides: typing.Optional[typing.Dict]
 
 
 # ============= Terraform ===============
@@ -126,12 +136,58 @@ class Auth0Config(Base):
     auth0_subdomain: str
 
 
-class Authentication(Base):
+class Authentication(Base, ABC):
+    _types: typing.Dict[str, type] = {}
+
     type: AuthenticationEnum
-    authentication_class: typing.Optional[str]
-    config: typing.Optional[
-        typing.Union[Auth0Config, GitHubConfig, typing.Dict[str, typing.Any]]
-    ]
+
+    # Based on https://github.com/samuelcolvin/pydantic/issues/2177#issuecomment-739578307
+
+    # This allows type field to determine which subclass of Authentication should be used for validation.
+
+    # Used to register automatically all the submodels in `_types`.
+    def __init_subclass__(cls):
+        cls._types[cls._typ.value] = cls
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, value: typing.Dict[str, typing.Any]) -> "Authentication":
+        if "type" not in value:
+            raise ValueError("type field is missing from security.authentication")
+
+        specified_type = value.get("type")
+        sub_class = cls._types.get(specified_type, None)
+
+        if not sub_class:
+            raise ValueError(
+                f"No registered Authentication type called {specified_type}"
+            )
+
+        # init with right submodel
+        return sub_class(**value)
+
+
+class PasswordAuthentication(Authentication):
+    _typ = AuthenticationEnum.password
+
+
+class Auth0Authentication(Authentication):
+    _typ = AuthenticationEnum.auth0
+    config: Auth0Config
+
+
+class GitHubAuthentication(Authentication):
+    _typ = AuthenticationEnum.github
+    config: GitHubConfig
+
+
+class CustomAuthentication(Authentication):
+    _typ = AuthenticationEnum.custom
+    authentication_class: str
+    config: typing.Dict[str, typing.Any]
 
 
 # =========== Users and Groups =============
@@ -295,6 +351,43 @@ class CDSDashboards(Base):
     cds_hide_user_dashboard_servers: typing.Optional[bool]
 
 
+# ======== External Container Registry ========
+
+# This allows the user to set a private AWS ECR as a replacement for
+# Docker Hub for some images - those where you provide the full path
+# to the image on the ECR.
+# extcr_account and extcr_region are the AWS account number and region
+# of the ECR respectively. access_key_id and secret_access_key are
+# AWS access keys that should have read access to the ECR.
+
+
+class ExtContainerReg(Base):
+    enabled: bool
+    access_key_id: typing.Optional[str]
+    secret_access_key: typing.Optional[str]
+    extcr_account: typing.Optional[str]
+    extcr_region: typing.Optional[str]
+
+    @root_validator
+    def enabled_must_have_fields(cls, values):
+        if values["enabled"]:
+            for fldname in (
+                "access_key_id",
+                "secret_access_key",
+                "extcr_account",
+                "extcr_region",
+            ):
+                if (
+                    fldname not in values
+                    or values[fldname] is None
+                    or values[fldname].strip() == ""
+                ):
+                    raise ValueError(
+                        f"external_container_reg must contain a non-blank {fldname} when enabled is true"
+                    )
+        return values
+
+
 # ==================== Main ===================
 
 letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
@@ -314,6 +407,7 @@ class Main(Base):
     prefect: typing.Optional[Prefect]
     cdsdashboards: CDSDashboards
     security: Security
+    external_container_reg: typing.Optional[ExtContainerReg]
     default_images: DefaultImages
     storage: typing.Dict[str, str]
     local: typing.Optional[LocalProvider]
@@ -324,6 +418,7 @@ class Main(Base):
     theme: Theme
     profiles: Profiles
     environments: typing.Dict[str, CondaEnvironment]
+    monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
 
 
