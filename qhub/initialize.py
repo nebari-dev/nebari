@@ -316,8 +316,10 @@ def render_config(
             "Visit https://github.com/settings/developers and create oauth application"
         )
         print(f"  set the homepage to: https://{qhub_domain}/")
-        print(f"  set the callback_url to: https://{qhub_domain}/auth/realms/qhub/broker/github/endpoint")
-        
+        print(
+            f"  set the callback_url to: https://{qhub_domain}/auth/realms/qhub/broker/github/endpoint"
+        )
+
         if not disable_prompt:
             config["security"]["authentication"]["config"]["client_id"] = input(
                 "Github client_id: "
@@ -337,7 +339,7 @@ def render_config(
     config["security"].setdefault("keycloak", {})[
         "initial_root_password"
     ] = default_password
-    
+
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
             "hub_subtitle"

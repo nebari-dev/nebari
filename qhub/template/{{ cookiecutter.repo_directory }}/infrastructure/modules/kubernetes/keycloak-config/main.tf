@@ -26,7 +26,7 @@ resource "keycloak_user" "user" {
 
   lifecycle {
     ignore_changes = [
-      first_name, last_name, email, enabled, attributes
+      first_name, last_name, email, enabled, attributes, initial_password
     ]
   }
 
@@ -34,9 +34,12 @@ resource "keycloak_user" "user" {
     uid = var.users[count.index].uid
   }
 
-  initial_password {
-    value     = var.users[count.index].password
-    temporary = true
+  dynamic "initial_password" {
+    for_each = [for pwd in [var.users[count.index].password] : pwd if pwd != ""]
+    content {
+      value     = initial_password.value
+      temporary = false
+    }
   }
 }
 
@@ -181,11 +184,11 @@ resource "keycloak_oidc_identity_provider" "auth0_identity_provider" {
   realm             = keycloak_realm.realm-qhub.id
   alias             = "auth0"
   provider_id       = "oidc"
-  authorization_url = "https://${var.auth0_subdomain}/authorize"
+  authorization_url = "https://${var.auth0_subdomain}.auth0.com/authorize"
   client_id         = var.auth0_client_id
   client_secret     = var.auth0_client_secret
-  token_url         = "https://${var.auth0_subdomain}/oauth/token"
-  user_info_url     = "https://${var.auth0_subdomain}/userinfo"
+  token_url         = "https://${var.auth0_subdomain}.auth0.com/oauth/token"
+  user_info_url     = "https://${var.auth0_subdomain}.auth0.com/userinfo"
   default_scopes    = "openid email profile"
   store_token       = false
   sync_mode         = "IMPORT"

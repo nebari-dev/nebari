@@ -22,7 +22,9 @@ def create_client(jupyterhub_endpoint, project_name, reuse_existing=True):
 
     auth0 = Auth0(os.environ["AUTH0_DOMAIN"], mgmt_api_token)
 
-    oauth_callback_url = f"https://{jupyterhub_endpoint}/auth/realms/qhub/broker/auth0/endpoint"
+    oauth_callback_url = (
+        f"https://{jupyterhub_endpoint}/auth/realms/qhub/broker/auth0/endpoint"
+    )
 
     for client in auth0.clients.all(
         fields=["name", "client_id", "client_secret", "callbacks"], include_fields=True

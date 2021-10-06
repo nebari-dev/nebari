@@ -86,7 +86,7 @@ variable "auth0_client_secret" {
 }
 
 variable "auth0_subdomain" {
-  description = "Auth0 Subdomain"
+  description = "Auth0 Subdomain (without auth0.com)"
   type        = string
   default     = ""
 }

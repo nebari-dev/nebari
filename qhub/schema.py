@@ -171,18 +171,15 @@ class Authentication(Base, ABC):
 class PasswordAuthentication(Authentication):
     _typ = AuthenticationEnum.password
 
+
 class Auth0Authentication(Authentication):
     _typ = AuthenticationEnum.auth0
     config: Auth0Config
 
+
 class GitHubAuthentication(Authentication):
     _typ = AuthenticationEnum.github
     config: GitHubConfig
-
-class CustomAuthentication(Authentication):
-    _typ = AuthenticationEnum.custom
-    authentication_class: str
-    config: typing.Dict[str, typing.Any]
 
 
 # =========== Users and Groups =============
