@@ -167,9 +167,9 @@ resource "keycloak_oidc_identity_provider" "github_identity_provider" {
   default_scopes    = "user:email"
   store_token       = false
   sync_mode         = "IMPORT"
+  trust_email       = true
 
   first_broker_login_flow_alias = keycloak_authentication_flow.flow.alias
-  trust_email = true
 
   extra_config = {
     "clientAuthMethod" = "client_secret_post"
@@ -192,9 +192,9 @@ resource "keycloak_oidc_identity_provider" "auth0_identity_provider" {
   default_scopes    = "openid email profile"
   store_token       = false
   sync_mode         = "IMPORT"
+  trust_email       = true
 
   first_broker_login_flow_alias = keycloak_authentication_flow.flow.alias
-  trust_email = true
 
   extra_config = {
     "clientAuthMethod" = "client_secret_post"

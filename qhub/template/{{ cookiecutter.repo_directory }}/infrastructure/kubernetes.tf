@@ -204,7 +204,7 @@ provider "keycloak" {
   password  = random_password.keycloak-qhub-bot-password.result
   url       = "https://${var.endpoint}"
 
-  tls_insecure_skip_verify = {% if cookiecutter.provider == "local" %}true{% else %}false{% endif %}
+  tls_insecure_skip_verify = {% if cookiecutter.provider == "local" or cookiecutter.get('certificate', {}).get('type','') == "self-signed" %}true{% else %}false{% endif %}
 }
 
 module "kubernetes-keycloak-config" {
@@ -230,17 +230,17 @@ module "kubernetes-keycloak-config" {
 
   user_groups = jsondecode("{{ cookiecutter.tf_user_groups | jsonify | replace('"', '\\"') }}")
 
-  {% if cookiecutter.security.authentication.type == "GitHub" %}
+  {% if cookiecutter.security.authentication.type == "GitHub" -%}
   github_client_id     = {{ cookiecutter.security.authentication.config.client_id | jsonify }}
   github_client_secret = {{ cookiecutter.security.authentication.config.client_secret | jsonify }}
-  {% endif %}
+  {%- endif %}
 
-  {% if cookiecutter.security.authentication.type == "Auth0" %}
+  {% if cookiecutter.security.authentication.type == "Auth0" -%}
   auth0_client_id     = {{ cookiecutter.security.authentication.config.client_id | jsonify }}
   auth0_client_secret = {{ cookiecutter.security.authentication.config.client_secret | jsonify }}
   # auth0_subdomain should be e.g. dev-5xltvsfy.eu or qhub-dev (i.e. without auth0.com at the end)
   auth0_subdomain     = {{ cookiecutter.security.authentication.config.auth0_subdomain | jsonify }}
-  {% endif %}
+  {%- endif %}
 
   depends_on = [
     module.kubernetes-keycloak-helm
