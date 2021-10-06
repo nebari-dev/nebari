@@ -9,7 +9,7 @@ from qhub.initialize import render_config
         ("pytest-do", "dev", "do.qhub.dev", "do", "github-actions", "github"),
         ("pytest-aws", "dev", "aws.qhub.dev", "aws", "github-actions", "github"),
         ("pytest-gcp", "dev", "gcp.qhub.dev", "gcp", "github-actions", "github"),
-        ("pytest-azure", "dev", "azure.qhub.dev", "azure", "github-actions", "github"),
+        ("pytestazure", "dev", "azure.qhub.dev", "azure", "github-actions", "github"),
     ],
 )
 def test_init(project, namespace, domain, cloud_provider, ci_provider, auth_provider):
