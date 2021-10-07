@@ -44,3 +44,17 @@ google_cloud_platform:
 ## Accessing the ClearML server
 
 The ClearML server can be accessed at: `app.clearml.your-qhub-domain.com`
+
+## Authentication
+
+The ClearML dashboard is secured by default with JupyterHub OAuth
+via Traefik ForwardAuth. You can disable it via a flag in the QHub
+config yaml:
+
+```yaml
+clearml:
+  enabled: true
+  enable_forward_auth: false
+```
+
+This is especially useful for accessing ClearML programmatically.

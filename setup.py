@@ -49,6 +49,7 @@ setup(
             "pytest",
             "diagrams",
             "jhub-client",
+            "pre-commit",
         ],
     },
     include_package_data=True,

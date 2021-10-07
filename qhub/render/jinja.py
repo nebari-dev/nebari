@@ -12,7 +12,7 @@ class YamlifyExtension(Extension):
         super().__init__(environment)
 
         def yamlify(obj):
-            return yaml.dump(obj)
+            return yaml.dump(obj, default_flow_style=False)
 
         environment.filters["yamlify"] = yamlify
 

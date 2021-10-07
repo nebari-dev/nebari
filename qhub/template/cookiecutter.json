@@ -17,11 +17,13 @@
         "enabled": null
     },
     "clearml": {
-        "enabled": null
+        "enabled": null,
+        "enable_forward_auth": null
     },
     "prefect": {
         "enabled": null,
-        "image": null
+        "image": null,
+        "overrides": null
     },
     "security": null,
     "default_images": null,

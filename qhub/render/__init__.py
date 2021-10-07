@@ -3,8 +3,7 @@ import collections
 import functools
 import json
 import os
-from shutil import copyfile
-from gitignore_parser import parse_gitignore
+from shutil import rmtree
 
 from ruamel import yaml
 from cookiecutter.generate import generate_files
@@ -132,8 +131,8 @@ def render_template(output_directory, config_filename, force=False):
     patch_versioning_extra_config(config)
 
     remove_existing_renders(
-        source_repo_dir=input_directory / "{{ cookiecutter.repo_directory }}",
         dest_repo_dir=output_directory / repo_directory,
+        verbosity=2,
     )
 
     generate_files(
@@ -144,60 +143,32 @@ def render_template(output_directory, config_filename, force=False):
     )
 
 
-def remove_existing_renders(source_repo_dir, dest_repo_dir):
+def remove_existing_renders(dest_repo_dir, verbosity=0):
     """
-    Remove existing folder structure in output_dir apart from:
-    Files matching gitignore entries from the source template
-    Anything the user has added to a .qhubignore file in the output_dir (maybe their own github workflows)
-
-    No FILES in the dest_repo_dir are deleted.
-
-    The .git folder remains intact
+    Remove all files and directories beneath each directory in `deletable_dirs`. These files and directories will be regenerated in the next step (`generate_files`) based on the configurations set in `qhub-config.yml`.
 
     Inputs must be pathlib.Path
     """
-    copyfile(str(source_repo_dir / ".gitignore"), str(dest_repo_dir / ".gitignore"))
+    home_dir = pathlib.Path.home()
+    if pathlib.Path.cwd() == home_dir:
+        raise ValueError(
+            f"Deploying QHub from the home directory, {home_dir}, is not permitted."
+        )
 
-    gitignore_matches = parse_gitignore(dest_repo_dir / ".gitignore")
+    deletable_dirs = [
+        "terraform-state",
+        ".github",
+        "infrastructure",
+        "image",
+        ".gitlab-ci.yml",
+    ]
 
-    if (dest_repo_dir / ".qhubignore").is_file():
-        qhubignore_matches = parse_gitignore(dest_repo_dir / ".qhubignore")
-    else:
-
-        def qhubignore_matches(_):
-            return False  # Dummy blank qhubignore
-
-    for root, dirs, files in os.walk(dest_repo_dir, topdown=False):
-        if (
-            root.startswith(f"{str(dest_repo_dir)}/.git/")
-            or root == f"{str(dest_repo_dir)}/.git"
-        ):
-            # Leave everything in the .git folder
-            continue
-
-        root_path = pathlib.Path(root)
-
-        if root != str(
-            dest_repo_dir
-        ):  # Do not delete top-level files such as qhub-config.yaml!
-            for file in files:
-
-                if not gitignore_matches(root_path / file) and not qhubignore_matches(
-                    root_path / file
-                ):
-
-                    os.remove(root_path / file)
-
-        for dir in dirs:
-            if (
-                not gitignore_matches(root_path / dir)
-                and not (dir == ".git" and root_path == dest_repo_dir)
-                and not qhubignore_matches(root_path / dir)
-            ):
-                try:
-                    os.rmdir(root_path / dir)
-                except OSError:
-                    pass  # Silently fail if 'saved' files are present so dir not empty
+    for deletable_dir in deletable_dirs:
+        deletable_dir = dest_repo_dir / deletable_dir
+        if deletable_dir.exists():
+            if verbosity > 0:
+                print(f"Deleting all files and directories beneath {deletable_dir} ...")
+            rmtree(deletable_dir)
 
 
 def set_env_vars_in_config(config):
