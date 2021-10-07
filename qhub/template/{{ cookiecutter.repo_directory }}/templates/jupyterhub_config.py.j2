@@ -137,10 +137,21 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
              "command": ["sh", "-c", ' && '.join([
                   "mkdir -p /mnt/home/{username}",
                   "chmod 700 /mnt/home/{username}",
-                  "chown -R 1000:100 /mnt/home/{username}",
+                  #"chown 1000:100 /mnt/home/{username}",
+                  "if [ ! -f /mnt/home/.migrateuser-{username}.txt ] ; then chown -R 1000:100 /mnt/home/{username} ; touch /mnt/home/.migrateuser-{username}.txt ; fi",
                   "mkdir -p /mnt/home/shared",
                   "chmod 777 /mnt/home/shared",
-             ] + ["mkdir -p /mnt/home/shared/{groupname} && chmod 2770 /mnt/home/shared/{groupname} && chown -R 1000:100 /mnt/home/shared/{groupname}".format(groupname=g['groupname']) for g in groups]).format(username=safe_username)],
+                  ] + [
+                    (' && '.join([
+                        "mkdir -p /mnt/home/shared/{groupname}",
+                        "chmod 2770 /mnt/home/shared/{groupname}",
+                        #"chown 1000:100 /mnt/home/shared/{groupname}",
+                        "if [ ! -f /mnt/home/.migrategroup-{groupname}.txt ] ; then chown -R 1000:100 /mnt/home/shared/{groupname} ; touch /mnt/home/.migrategroup-{groupname}.txt ; fi",
+                    ])
+                    ).format(groupname=g['groupname'])
+                     for g in groups[:1]
+                  ]
+                ).format(username=safe_username)],
              "securityContext": {"runAsUser": 0},
              "volumeMounts": [{"mountPath": "/mnt", "name": "home"}]
         }
