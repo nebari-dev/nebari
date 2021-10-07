@@ -100,11 +100,6 @@ module "kubernetes-jupyterhub" {
             {
               name      = "etc-dask"
               mountPath = "/etc/dask"
-            },
-            {
-              name      = "home"
-              mountPath = "/home/shared"
-              subPath   = "home/shared"
             }
           ]
         }
