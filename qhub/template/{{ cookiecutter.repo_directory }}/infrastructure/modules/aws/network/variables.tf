@@ -40,5 +40,5 @@ variable "vpc_cidr_block" {
 variable "vpc_cidr_newbits" {
   description = "VPC cidr number of bits to support 2^N subnets"
   type        = number
-  default     = 4
+  default     = 2
 }
