@@ -120,6 +120,16 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
 
     profile.setdefault('kubespawner_override', {})['environment'] = preserve_envvars
 
+    profile['kubespawner_override']['lifecycle_hooks'] = {
+        "postStart": {
+            "exec": {
+                "command": ["/bin/sh", "-c", (
+                     "ln -sfn /home/shared /home/jovyan/shared"
+                )]
+            }
+        }
+    }
+
     profile['kubespawner_override']['init_containers'] = [
         {
              "name": "init-nfs",
@@ -130,7 +140,6 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
                   "chown -R 1000:100 /mnt/home/{username}",
                   "mkdir -p /mnt/home/shared",
                   "chmod 777 /mnt/home/shared",
-                  "ln -sfn /home/shared /home/{username}/shared",
              ] + ["mkdir -p /mnt/home/shared/{groupname} && chmod 2770 /mnt/home/shared/{groupname} && chown -R 1000:100 /mnt/home/shared/{groupname}".format(groupname=g['groupname']) for g in groups]).format(username=safe_username)],
              "securityContext": {"runAsUser": 0},
              "volumeMounts": [{"mountPath": "/mnt", "name": "home"}]
@@ -152,6 +161,12 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
     # Cost monitoring labels
     k8s_safe_chars = set(string.ascii_lowercase + string.digits + '.-_')
     k8s_safe_username = escapism.escape(username.lower().replace('@', '_'), safe=k8s_safe_chars, escape_char='-')
+
+    primary_group_name = "users"
+    groupnames_not_users = set([g['groupname'] for g in groups]) - {"users"}
+    if len(groupnames_not_users) > 0:
+        primary_group_name = sorted(groupnames_not_users)[0]
+
     profile['kubespawner_override']['extra_labels'] = {
         'owner': k8s_safe_username,
         'team': primary_group_name
