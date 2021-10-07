@@ -57,6 +57,21 @@ c.JupyterHub.template_vars = {
 {% endif %}
 }
 
+# ================= Keycloak =====================
+
+from keycloak import KeycloakAdmin
+
+keycloak_admin = KeycloakAdmin(
+    server_url=os.environ.get(
+        "KEYCLOAK_SERVER_URL", "http://localhost:8080/auth/"
+    ),
+    username=os.environ.get("KEYCLOAK_USERNAME", "admin"),
+    password=os.environ.get("KEYCLOAK_PASSWORD", "admin"),
+    realm_name=os.environ.get("KEYCLOAK_REALM_NAME", "qhub"),
+    user_realm_name="master",
+    auto_refresh_token=("get", "put", "post", "delete"),
+)
+
 # ================= Profiles =====================
 from urllib.request import urlopen, Request
 import json
@@ -66,14 +81,18 @@ QHUB_PROFILES = {{ cookiecutter.profiles.jupyterlab }}
 import escapism
 import string
 
-def qhub_get_nss_user(username): 
-    r = urlopen(Request(
-                        f"http://qhub-userinfo:8091/user?username={username}",
-                        headers={'Content-Type': 'application/json'},
-                        method="POST"
-                    )
-               )
-    user = json.load(r)
+def qhub_get_nss_user(username):
+    kid = keycloak_admin.get_user_id(username)
+
+    usergroups = keycloak_admin.get_user_groups(kid)
+
+    return {
+        "username": username,
+        "groups": [
+            {"groupname": g["name"]}
+            for g in usergroups
+        ]
+    }
 
     # Example:
     # { "username": "dan","uid": 2000,
@@ -81,21 +100,13 @@ def qhub_get_nss_user(username):
     #    { "groupname": "users", "gid": 100 }
     #    ]  }
 
-    assert username == user['username']
-    return user
 
 def qhub_configure_profile(user_nss_json, safe_username, profile):
-    uid = user_nss_json['uid']
+    # uid = user_nss_json['uid']
     username = user_nss_json['username']
     groups = user_nss_json['groups']
-    primary_gid = groups[0]['gid']
-    primary_group_name = groups[0]['groupname']
-    secondary_gids = [g['gid'] for g in groups[1:]]
 
     envvars_fixed = {
-       'LD_PRELOAD': 'libnss_wrapper.so',
-       'NSS_WRAPPER_PASSWD': '/tmp/passwd',
-       'NSS_WRAPPER_GROUP': '/tmp/group',
        'NB_UMASK': '0002',
        'SHELL': '/bin/bash',
        'HOME': '/home/jovyan',
@@ -109,18 +120,6 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
 
     profile.setdefault('kubespawner_override', {})['environment'] = preserve_envvars
 
-    profile['kubespawner_override']['lifecycle_hooks'] = {
-        "postStart": {
-            "exec": {
-                "command": ["/bin/sh", "-c", (
-                     "curl 'http://qhub-userinfo:8091/etc/passwd' > /tmp/passwd && "
-                     "curl 'http://qhub-userinfo:8091/etc/group' > /tmp/group && "
-                     "ln -sfn /home/shared /home/jovyan/shared "
-                )]
-            }
-        }
-    }
-
     profile['kubespawner_override']['init_containers'] = [
         {
              "name": "init-nfs",
@@ -128,20 +127,19 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
              "command": ["sh", "-c", ' && '.join([
                   "mkdir -p /mnt/home/{username}",
                   "chmod 700 /mnt/home/{username}",
-                  "chown {uid}:{primary_gid} /mnt/home/{username}",
+                  "chown -R 1000:100 /mnt/home/{username}",
                   "mkdir -p /mnt/home/shared",
-                  "chmod 777 /mnt/home/shared"
-             ] + ["mkdir -p /mnt/home/shared/{groupname} && chmod 2770 /mnt/home/shared/{groupname} && chown 0:{gid} /mnt/home/shared/{groupname}".format(groupname=g['groupname'], gid=g['gid']) for g in groups]).format(username=safe_username, uid=uid, primary_gid=primary_gid)],
+                  "chmod 777 /mnt/home/shared",
+                  "ln -sfn /home/shared /home/{username}/shared",
+             ] + ["mkdir -p /mnt/home/shared/{groupname} && chmod 2770 /mnt/home/shared/{groupname} && chown -R 1000:100 /mnt/home/shared/{groupname}".format(groupname=g['groupname']) for g in groups]).format(username=safe_username)],
              "securityContext": {"runAsUser": 0},
              "volumeMounts": [{"mountPath": "/mnt", "name": "home"}]
         }
     ]
 
     profile['kubespawner_override']['uid'] = 1000
-    # profile['kubespawner_override']['args'] = ["--allow-root"] # for uid 0
-    profile['kubespawner_override']['gid'] = primary_gid
-    profile['kubespawner_override']['supplemental_gids'] = secondary_gids
-    profile['kubespawner_override']['fs_gid'] = primary_gid
+    profile['kubespawner_override']['gid'] = 100
+    profile['kubespawner_override']['fs_gid'] = 100
     profile['kubespawner_override']['volume_mounts'] = c.KubeSpawner.volume_mounts + [
         {
             "name"      : "home",
@@ -178,7 +176,6 @@ def qhub_list_available_profiles(user_nss_json):
             # kubespawner_override['environment'] as a function instead of a mapping
             restricted_profile['kubespawner_override'] = {**profile['kubespawner_override']}
 
-        #filtered_profile = qhub_configure_profile(username, safe_username, restricted_profile)
         filtered_profile = qhub_configure_profile(user_nss_json, safe_username, {k: v for k,v in profile.items() if k not in exclude_keys})
 
         if 'users' in profile:

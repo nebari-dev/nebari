@@ -10,3 +10,4 @@ dependencies:
  - cdsdashboards==0.5.7
  - pip:
    - qhub-jupyterhub-theme==0.3.2
+   - python-keycloak==0.26.1
