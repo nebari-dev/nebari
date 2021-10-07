@@ -67,7 +67,7 @@ def patch_terraform_users(config):
             "name": k,
             "gid": str((v or {}).get("gid", "")),
         }
-        for (k, v) in {"users":{},"admin":{}, **incoming_groups}.items()
+        for (k, v) in {"users": {}, "admin": {}, **incoming_groups}.items()
         # Above forces existence of users and admin groups if not already provided in config
     ]
 
@@ -82,13 +82,14 @@ def patch_terraform_users(config):
         if v is None:
             v = {}
         config["tf_users"].append(
-        {
-            "name": k,
-            "uid": str(v.get("uid", "")),
-            "password": v.get("password", ""),
-            "email": "@" in k and k or None,
-            "primary_group": v.get("primary_group", "users"),
-        })
+            {
+                "name": k,
+                "uid": str(v.get("uid", "")),
+                "password": v.get("password", ""),
+                "email": "@" in k and k or None,
+                "primary_group": v.get("primary_group", "users"),
+            }
+        )
 
     config["tf_user_groups"] = []
     for (k, v) in incoming_users.items():
