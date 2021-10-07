@@ -130,6 +130,12 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
         }
     }
 
+    # The recursive chown is important when migrating from an 
+    # older uid/gid-based NFS, but may be slow for a lot of files. 
+    # The .migrateuser-{username}.txt files below are checks so this only 
+    # needs to happen the first time a user/group is encountered post-upgrade.
+    # Those checks can probably be removed in a future release.
+
     profile['kubespawner_override']['init_containers'] = [
         {
              "name": "init-nfs",

@@ -3,16 +3,6 @@ resource "random_password" "jupyterhub_api_token" {
   special = false
 }
 
-module "kubernetes-userinfo" {
-  source = "../../userinfo"
-
-  namespace = var.namespace
-
-  keycloak_server_url = var.keycloak_server_url
-  keycloak_username   = var.keycloak_username
-  keycloak_password   = var.keycloak_password
-}
-
 
 module "kubernetes-jupyterhub" {
   source = "../../jupyterhub"
@@ -23,20 +13,34 @@ module "kubernetes-jupyterhub" {
     jsonencode({
       hub = {
         extraEnv = [
-          { name = "OAUTH_CLIENT_ID",
-          value = var.OAUTH_CLIENT_ID },
-          { name = "OAUTH_CLIENT_SECRET",
-          value = var.OAUTH_CLIENT_SECRET },
-          { name = "OAUTH_CALLBACK_URL",
-          value = var.OAUTH_CALLBACK_URL },
-          { name = "KEYCLOAK_AUTHORIZE_URL",
-          value = var.keycloak_authorize_url },
-          { name = "KEYCLOAK_TOKEN_URL",
-          value = var.keycloak_token_url },
-          { name = "KEYCLOAK_USERDATA_URL",
-          value = var.keycloak_userdata_url },
-          { name = "OAUTH_LOGOUT_REDIRECT_URL",
-          value = var.keycloak_logout_url },
+          {
+            name = "OAUTH_CLIENT_ID",
+            value = var.OAUTH_CLIENT_ID
+          },
+          {
+            name = "OAUTH_CLIENT_SECRET",
+            value = var.OAUTH_CLIENT_SECRET
+          },
+          {
+            name = "OAUTH_CALLBACK_URL",
+            value = var.OAUTH_CALLBACK_URL
+          },
+          {
+            name = "KEYCLOAK_AUTHORIZE_URL",
+            value = var.keycloak_authorize_url
+          },
+          {
+            name = "KEYCLOAK_TOKEN_URL",
+            value = var.keycloak_token_url
+          },
+          {
+            name = "KEYCLOAK_USERDATA_URL",
+            value = var.keycloak_userdata_url
+          },
+          { 
+            name = "OAUTH_LOGOUT_REDIRECT_URL",
+            value = var.keycloak_logout_url
+          },
           {
             name  = "KEYCLOAK_SERVER_URL"
             value = var.keycloak_server_url
