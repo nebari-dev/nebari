@@ -86,23 +86,20 @@ def qhub_get_nss_user(username):
 
     usergroups = keycloak_admin.get_user_groups(kid)
 
+    groups = [keycloak_admin.get_group(group_id=g["id"]) for g in usergroups]
+
     return {
         "username": username,
-        "groups": [
-            {"groupname": g["name"]}
-            for g in usergroups
-        ]
+        "groups": groups
     }
 
     # Example:
-    # { "username": "dan","uid": 2000,
-    # "groups": [ { "groupname": "admin", "gid": 101 },
-    #    { "groupname": "users", "gid": 100 }
-    #    ]  }
-
+    # { "username": "dan",
+    # "groups": [ { "name": "admin", "attributes": {"profiles": ["small"]} },
+    #    { "name": "users", "attributes": {"profiles": ["small"]}, }
+    #  ] }
 
 def qhub_configure_profile(user_nss_json, safe_username, profile):
-    # uid = user_nss_json['uid']
     username = user_nss_json['username']
     groups = user_nss_json['groups']
 
@@ -132,7 +129,7 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
 
     # The recursive chown is important when migrating from an 
     # older uid/gid-based NFS, but may be slow for a lot of files. 
-    # The .migrateuser-{username}.txt files below are checks so this only 
+    # The .migrateuser-{username}.txt etc files below are checks so this only 
     # needs to happen the first time a user/group is encountered post-upgrade.
     # Those checks can probably be removed in a future release.
 
@@ -154,7 +151,7 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
                         #"chown 1000:100 /mnt/home/shared/{groupname}",
                         "if [ ! -f /mnt/home/.migrategroup-{groupname}.txt ] ; then chown -R 1000:100 /mnt/home/shared/{groupname} ; touch /mnt/home/.migrategroup-{groupname}.txt ; fi",
                     ])
-                    ).format(groupname=g['groupname'])
+                    ).format(groupname=g['name'])
                      for g in groups[:1]
                   ]
                 ).format(username=safe_username)],
@@ -169,18 +166,18 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
     profile['kubespawner_override']['volume_mounts'] = c.KubeSpawner.volume_mounts + [
         {
             "name"      : "home",
-            "mountPath" : f"/home/shared/{g['groupname']}",
-            "subPath"   : f"home/shared/{g['groupname']}",
+            "mountPath" : f"/home/shared/{g['name']}",
+            "subPath"   : f"home/shared/{g['name']}",
         }
         for g in groups
     ]
 
     # Cost monitoring labels
     k8s_safe_chars = set(string.ascii_lowercase + string.digits + '.-_')
-    k8s_safe_username = escapism.escape(username.lower().replace('@', '_'), safe=k8s_safe_chars, escape_char='-')
+    k8s_safe_username = escapism.escape(username.lower().replace('@', '_'), safe=k8s_safe_chars, escape_char='-', allow_collisions=True)
 
     primary_group_name = "users"
-    groupnames_not_users = set([g['groupname'] for g in groups]) - {"users"}
+    groupnames_not_users = set([g['name'] for g in groups]) - {"users"}
     if len(groupnames_not_users) > 0:
         primary_group_name = sorted(groupnames_not_users)[0]
 
@@ -194,11 +191,17 @@ def qhub_list_available_profiles(user_nss_json):
     username = user_nss_json['username']
 
     safe_chars = set(string.ascii_lowercase + string.digits)
-    safe_username = escapism.escape(username, safe=safe_chars, escape_char='-').lower()
+    safe_username = escapism.escape(username, safe=safe_chars, escape_char='-', allow_collisions=True).lower()
 
     exclude_keys = {'users', 'groups', 'kubespawner_override'}
 
-    groups = set([g['groupname'] for g in user_nss_json['groups']])
+    groups = set([g['name'] for g in user_nss_json['groups']])
+
+    group_profiles_nested_list = [g["attributes"].get("profiles", []) for g in user_nss_json['groups'] if type(g.get("attributes", None)) == dict]
+    # e.g. [['small'], ['small', 'medium']]
+
+    group_profile_names = set([p for sublist in group_profiles_nested_list for p in sublist])
+    # e.g. {"small", "medium"}
 
     available_profiles = []
     for profile in QHUB_PROFILES:
@@ -208,15 +211,21 @@ def qhub_list_available_profiles(user_nss_json):
             # kubespawner_override['environment'] as a function instead of a mapping
             restricted_profile['kubespawner_override'] = {**profile['kubespawner_override']}
 
-        filtered_profile = qhub_configure_profile(user_nss_json, safe_username, {k: v for k,v in profile.items() if k not in exclude_keys})
+        include_profile = True
 
         if 'users' in profile:
-            if username in profile['users']:
-                available_profiles.append(filtered_profile)
+            if username not in profile['users']:
+                include_profile = False                
         elif 'groups' in profile:
-            if len(groups & set(profile['groups'])) != 0:
-                available_profiles.append(filtered_profile)
-        else:
+            if profile['groups'] is None or len(groups & set(profile['groups'])) == 0:
+            # None of the YAML groups match
+                # How about Keycloak-attributes?
+                # Note use "##" as a delimiter if setting multiple 'profiles' attributes (i.e. a list)
+                if profile["display_name"] not in group_profile_names:
+                    include_profile = False
+
+        if include_profile:
+            filtered_profile = qhub_configure_profile(user_nss_json, safe_username, {k: v for k,v in profile.items() if k not in exclude_keys})
             available_profiles.append(filtered_profile)
 
     return available_profiles
@@ -224,14 +233,12 @@ def qhub_list_available_profiles(user_nss_json):
 
 c.JupyterHub.admin_access = True
 
-async def custom_options_form(self):
-    # Save user and generate uid if not seen before
-    user_nss_json = qhub_get_nss_user(self.user.name)
-
-    self.profile_list = qhub_list_available_profiles(user_nss_json)
-
+async def custom_options_form(spawner):
     # Let KubeSpawner inspect profile_list and decide what to return
-    return self._options_form_default()
+    user_nss_json = qhub_get_nss_user(spawner.user.name)
+    spawner.profile_list = qhub_list_available_profiles(user_nss_json)
+
+    return spawner._options_form_default()
 
 c.KubeSpawner.options_form = custom_options_form
 
@@ -254,7 +261,7 @@ c.GenericOAuthenticator.login_service = 'Keycloak'
 
 def admin_hook(authenticator, handler, authentication):
     user_nss_json = qhub_get_nss_user(authentication['name'])
-    groupnames = [g['groupname'] for g in user_nss_json.get('groups',[])]
+    groupnames = [g['name'] for g in user_nss_json.get('groups',[])]
 
     authentication['admin'] = 'admin' in groupnames
 
