@@ -337,9 +337,9 @@ letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 
 
 class Main(Base):
+    provider: ProviderEnum
     project_name: str
     namespace: typing.Optional[letter_dash_underscore_pydantic]
-    provider: ProviderEnum
     ci_cd: typing.Optional[CICD]
     domain: str
     terraform_state: typing.Optional[TerraformState]
@@ -364,7 +364,7 @@ class Main(Base):
     clearml: typing.Optional[ClearML]
 
     @validator("project_name")
-    def project_name_convention(cls, value: typing.Any, values, **kwargs):
+    def project_name_convention(cls, value: typing.Any, values):
         convention = """
         In order to successfully deploy QHub, there are some project naming conventions which need
         to be followed. First, ensure your name is compatible with the specific one for
@@ -377,12 +377,28 @@ class Main(Base):
         """
         if len(value) > 16:
             raise ValueError(
-                "Maximum accepted length of the project name string is 16 characters."
+                "\n".join(
+                    [
+                        convention,
+                        "Maximum accepted length of the project name string is 16 characters.",
+                    ]
+                )
             )
-        elif ProviderEnum == AzureProvider and ("-" in value):
-            raise ValueError(convention)
-        elif ProviderEnum == AmazonWebServicesProvider and value.startswith("aws"):
-            raise ValueError(convention)
+        elif values["provider"] == "azure" and ("-" in value):
+            raise ValueError(
+                "\n".join(
+                    [convention, "Provider [azure] does not allow '-' in project name."]
+                )
+            )
+        elif values["provider"] == "aws" and value.startswith("aws"):
+            raise ValueError(
+                "\n".join(
+                    [
+                        convention,
+                        "Provider [aws] does not allow 'aws' as starting sequence in project name.",
+                    ]
+                )
+            )
         else:
             return letter_dash_underscore_pydantic
 
