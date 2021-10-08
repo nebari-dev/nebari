@@ -380,7 +380,7 @@ class Main(Base):
             raise ValueError(
                 "Maximum accepted length of the project name string is 16 characters."
             )
-        elif ProviderEnum == AzureProvider and ("-" in value):       
+        elif ProviderEnum == AzureProvider and ("-" in value):
             raise ValueError(convention)
         elif ProviderEnum == AmazonWebServicesProvider and value.startswith("aws"):
             raise ValueError(convention)
