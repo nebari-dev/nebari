@@ -1,6 +1,5 @@
 import enum
 import typing
-import re
 
 import pydantic
 from pydantic import validator, root_validator
