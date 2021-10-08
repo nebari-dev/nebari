@@ -509,6 +509,7 @@ default_images:
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
   dask_gateway: "quansight/qhub-dask-gateway:v||QHUB_VERSION||"
+  conda_store: "quansight/qhub-conda-store:v||QHUB_VERSION||"
 ```
 
 ## Storage
@@ -592,7 +593,7 @@ important considerations to make. Two important terms to understand are:
    than the node specification. See this [guide from digital
    ocean](https://docs.digitalocean.com/products/kubernetes/#allocatable-memory)
    which is generally applicable to other clouds.
-   
+
 For example if a node is 8 GB of ram and 2 cpu you should
 guarantee/schedule roughly 75% and follow the digital ocean guide
 linked above. E.g. 1.5 cpu guarantee and 5.5 GB guaranteed.
@@ -734,7 +735,7 @@ project_name: do-jupyterhub
 provider: do
 domain: "do.qhub.dev"
 
-ci_cd: 
+ci_cd:
   type: github-actions
   branch: main
 
@@ -797,6 +798,7 @@ default_images:
   jupyterhub: "quansight/qhub-jupyterhub:v||QHUB_VERSION||"
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
+  conda_store: "quansight/qhub-conda-store:v||QHUB_VERSION||"
 
 theme:
   jupyterhub:
