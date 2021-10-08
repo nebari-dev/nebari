@@ -365,27 +365,27 @@ class Main(Base):
     clearml: typing.Optional[ClearML]
 
     @validator("project_name")
-    def project_name_convention(cls, value: typing.Any):
+    def project_name_convention(cls, value: typing.Any, values, **kwargs):
         convention = """
         In order to successfully deploy QHub, there are some project naming conventions which need
         to be followed. First, ensure your name is compatible with the specific one for
         your chosen Cloud provider. In addition, the QHub project name should also obey the following
         format requirements:
-        - letters from A to Z (upper and lower case) and numbers;
-        - Special characters are not allowed, such as "!@#$%^&*()";
+        - Letters from A to Z (upper and lower case) and numbers;
         - Maximum accepted length of the name string is 16 characters.
         - If using AWS: names should not start with the string "aws";
+        - If using Azure: names should not contain "-".
         """
         if len(value) > 16:
             raise ValueError(
                 "Maximum accepted length of the project name string is 16 characters."
             )
-        elif ProviderEnum == AzureProvider and re.findall(
-            r"^[A-Za-z0-9][^/|.~!?@#$%^=&*\\()_]*[A-Za-z0-9]$", value
-        ):
-            return letter_dash_underscore_pydantic
-        else:
+        elif ProviderEnum == AzureProvider and ("-" in value):       
             raise ValueError(convention)
+        elif ProviderEnum == AmazonWebServicesProvider and value.startswith("aws"):
+            raise ValueError(convention)
+        else:
+            return letter_dash_underscore_pydantic
 
 
 def verify(config):
