@@ -12,7 +12,7 @@ import requests
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
-from qhub.provider.cloud import digital_ocean
+from qhub.provider.cloud import digital_ocean, azure_cloud
 from qhub.utils import namestr_regex, qhub_image_tag, check_cloud_credentials
 
 logger = logging.getLogger(__name__)
@@ -135,7 +135,7 @@ GOOGLE_PLATFORM = {
 AZURE = {
     "project": "PLACEHOLDER",
     "region": "Central US",
-    "kubernetes_version": "1.18.19",
+    "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {
             "instance": "Standard_D2_v2",
@@ -374,8 +374,16 @@ def render_config(
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Azure"
         config["azure"] = AZURE
+
         if kubernetes_version:
             config["azure"]["kubernetes_version"] = kubernetes_version
+        else:
+            # first kubernetes version returned by azure sdk is
+            # the newest version of kubernetes supported this field needs
+            # to be dynamically filled since digital ocean updates the
+            # versions so frequently
+            config["azure"]["kubernetes_version"] = azure_cloud.kubernetes_versions(config["azure"]["region"])[0]
+
 
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
