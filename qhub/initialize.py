@@ -382,8 +382,9 @@ def render_config(
             # the newest version of kubernetes supported this field needs
             # to be dynamically filled since digital ocean updates the
             # versions so frequently
-            config["azure"]["kubernetes_version"] = azure_cloud.kubernetes_versions(config["azure"]["region"])[0]
-
+            config["azure"]["kubernetes_version"] = azure_cloud.kubernetes_versions(
+                config["azure"]["region"]
+            )[0]
 
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
