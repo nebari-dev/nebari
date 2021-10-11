@@ -149,6 +149,57 @@ minikube ssh "sudo apt update; sudo apt install nfs-common -y"
 ```
 For more details on PVs and PVCs, read the [JupyterHub documentation](https://zero-to-jupyterhub.readthedocs.io/en/latest/jupyterhub/customizing/user-storage.html).
 
+### Optional pre-pulling and caching of docker images
+<details>
+  <summary>Click to expand note</summary>
+
+#### Why Pre-pull Docker Images
+
+As part of deployment, Minikube will download docker images that have a combined size of several Gigabytes. Each time minikube is destroyed and created it will re-pull these images. Also, terraform will timeout on slower internet connections if it takes longer than 10 minutes to pull the images.
+
+Images can be pre-pulled and added to the Minikube cache. This greatly reduce the time required for future deployments and reduces the data requiring download during deployment.
+
+#### Pre-pulling and Caching
+
+The following assumes that docker is currently installed.
+
+The first step is to configure the minikube home directory environment variable. To set this to the home directory of the current user, run:
+
+```bash
+export MINIKUBE_HOME=$HOME/.minikube
+```
+
+The current list of docker images can be seen in `qhub-config.yaml`
+under the `default_images` key. Each image will need to be pulled like
+so:
+
+```bash
+docker pull quansight/qhub-jupyterhub:v0.x.x
+docker pull quansight/qhub-jupyterlab:v0.x.x
+docker pull quansight/qhub-dask-worker:v0.x.x
+docker pull quansight/qhub-dask-gateway:v0.x.x
+docker pull quansight/qhub-conda-store:v0.x.x
+```
+
+Replacing `v0.x.x` with the current version that is listed. Note this may take several minutes.
+
+After the images are pulled, they can be copied to the Minikube cache like so:
+
+```bash
+minikube cache add quansight/qhub-jupyterhub:v0.x.x
+minikube cache add quansight/qhub-jupyterlab:v0.x.x
+minikube cache add quansight/qhub-dask-worker:v0.x.x
+minikube cache add quansight/qhub-dask-gateway:v0.x.x
+minikube cache add quansight/qhub-conda-store:v0.x.x
+```
+
+Again, adding the correct version. With this completed local Minikube deployment will no longer require pulling the above docker images.
+
+The above process will need to be repeated with the updated tags when a new version of QHub is being deploy.
+
+</details>
+
+
 ### MetalLB
 
 [MetalLB](https://metallb.universe.tf/) is the load balancer for bare-metal Kubernetes clusters. We will need to configure
@@ -274,29 +325,6 @@ line below. The command will override any DNS server.
 ```ini
 192.168.49.100 github-actions.qhub.dev
 ```
-
-#### Note for those with slow internet (<10Mb/s)
-<details>
-  <summary>Click to expand note</summary>
-  
-As part of deployment, QHub will download several docker images
-(~3-5GB total). If using a slower internet connection, terraform will
-timeout before the images can get downloaded.
-
-A workaround for this is to pull docker images locally before
-deployment. The current list of docker images can be seen
-`qhub-config.yaml` under the `default_images` key. Each image will
-need to be pulled like so:
-
-```bash
-docker pull quansight/qhub-jupyterhub:v0.x.x
-docker pull quansight/qhub-jupyterlab:v0.x.x
-docker pull quansight/qhub-dask-worker:v0.x.x
-docker pull quansight/qhub-dask-gateway:v0.x.x
-docker pull quansight/qhub-conda-store:v0.x.x
-```
-Replacing `v0.x.x` with the current version that is listed
-</details>
 
 ### Verify the local deployment
 
