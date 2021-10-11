@@ -5,8 +5,6 @@ import json
 import os
 from shutil import rmtree
 from urllib.parse import urlencode
-from shutil import copyfile
-from gitignore_parser import parse_gitignore
 
 from ruamel import yaml
 from cookiecutter.generate import generate_files

@@ -3,7 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - cookiecutter ==1.7.2
-  - gitignore-parser==0.0.8
   - ruamel.yaml
   - cloudflare
   - auth0-python
