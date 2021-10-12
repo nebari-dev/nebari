@@ -380,7 +380,7 @@ def render_config(
         else:
             # first kubernetes version returned by azure sdk is
             # the newest version of kubernetes supported this field needs
-            # to be dynamically filled since digital ocean updates the
+            # to be dynamically filled since azure updates the
             # versions so frequently
             config["azure"]["kubernetes_version"] = azure_cloud.kubernetes_versions(
                 config["azure"]["region"]
