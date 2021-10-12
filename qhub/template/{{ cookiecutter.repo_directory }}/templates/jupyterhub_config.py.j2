@@ -152,7 +152,7 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
                         "if [ ! -f /mnt/home/.migrategroup-{groupname}.txt ] ; then chown -R 1000:100 /mnt/home/shared/{groupname} ; touch /mnt/home/.migrategroup-{groupname}.txt ; fi",
                     ])
                     ).format(groupname=g['name'])
-                     for g in groups[:1]
+                     for g in groups
                   ]
                 ).format(username=safe_username)],
              "securityContext": {"runAsUser": 0},
@@ -191,7 +191,7 @@ def qhub_list_available_profiles(user_nss_json):
     username = user_nss_json['username']
 
     safe_chars = set(string.ascii_lowercase + string.digits)
-    safe_username = escapism.escape(username, safe=safe_chars, escape_char='-', allow_collisions=True).lower()
+    safe_username = escapism.escape(username, safe=safe_chars, escape_char='-', allow_collisions=False).lower()
 
     exclude_keys = {'users', 'groups', 'kubespawner_override'}
 
