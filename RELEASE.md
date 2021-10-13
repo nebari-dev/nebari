@@ -34,12 +34,12 @@
 
 ### Bug fixes
 
-- Add force-destory command (only for AWS at the moment) ([#694](https://github.com/Quansight/qhub/pull/694))
+- Add force-destore command (only for AWS at the moment) ([#694](https://github.com/Quansight/qhub/pull/694))
 - Include namespace in conda-store PVC ([#716](https://github.com/Quansight/qhub/pull/716))
 - Secure ClearML behind ForwardAuth ([#721](https://github.com/Quansight/qhub/pull/721))
 - Fix connectivity issues with AWS EKS via Terraform ([#734](https://github.com/Quansight/qhub/pull/734))
-- Fix conda-store pod eviction and volumne conflicts ([#740](https://github.com/Quansight/qhub/pull/740))
-- Update `remove_existing_renders` to only delete qhub related files/directories ([#800](https://github.com/Quansight/qhub/pull/800))
+- Fix conda-store pod eviction and volume conflicts ([#740](https://github.com/Quansight/qhub/pull/740))
+- Update `remove_existing_renders` to only delete QHub related files/directories ([#800](https://github.com/Quansight/qhub/pull/800))
 - Reduce number of AWS subnets down to 4 to increase the number of availble nodes by a factor of 4 ([#839](https://github.com/Quansight/qhub/pull/839))
 
 ## Release 0.3.11 - 05/07/2021
