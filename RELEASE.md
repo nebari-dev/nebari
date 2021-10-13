@@ -5,17 +5,36 @@
 ## To create a new release:
 
 1. Increment the version number in `qhub/VERSION`
-2. Ensure that the version number in `qhub/VERSION` is used in pinning QHub in the github actions 
+2. Ensure that the version number in `qhub/VERSION` is used in pinning QHub in the github actions
 `qhub/template/{{ cookiecutter.repo_directory }}/.github/workflows/qhub-ops.yaml`
 
 ---
-## Upcoming Release
+
+## Release 0.3.13 - 10/13/2021
+
+### Breaking changes
+
+- No known breaking changes
 
 ### Feature changes and enhancements
- 
- - Added basic cluster monitoring capability via Grafana/Prometheus integration
+
+- Allow users to specify external Container Registry ([#741](https://github.com/Quansight/qhub/pull/741))
+- Integrate Prometheus and Grafana into QHub ([#733](https://github.com/Quansight/qhub/pull/733))
+- Add Traefik Dashboard ([#797](https://github.com/Quansight/qhub/pull/797))
+- Make ForwardAuth optional for ClearML ([#830](https://github.com/Quansight/qhub/pull/830))
+- Include override configuration for Prefect Agent ([#813](https://github.com/Quansight/qhub/pull/813))
+- Improve authentication type checking ([#834](https://github.com/Quansight/qhub/pull/834))
+- Switch to pydata Sphinx theme ([#805](https://github.com/Quansight/qhub/pull/805))
 
 ### Bug fixes
+
+- Add force-destory command (only for AWS at the moment) ([#694](https://github.com/Quansight/qhub/pull/694))
+- Include namespace in conda-store PVC ([#716](https://github.com/Quansight/qhub/pull/716))
+- Secure ClearML behind ForwardAuth ([#721](https://github.com/Quansight/qhub/pull/721))
+- Fix connectivity issues with AWS EKS via Terraform ([#734](https://github.com/Quansight/qhub/pull/734))
+- Fix conda-store pod eviction and volumne conflicts ([#740](https://github.com/Quansight/qhub/pull/740))
+- Update `remove_existing_renders` to only delete qhub related files/directories ([#800](https://github.com/Quansight/qhub/pull/800))
+- Reduce number of AWS subnets down to 4 to increase the number of availble nodes by a factor of 4 ([#839](https://github.com/Quansight/qhub/pull/839))
 
 ## Release 0.3.11 - 05/07/2021
 
@@ -197,7 +216,7 @@
 2. Ensure full functionality of QHub this involves at a minimum
    ensuring
   - [ ] GCP, AWS, DO, and local deployment
-  - [ ] "Let's Encrypt" successfully provisioned 
+  - [ ] "Let's Encrypt" successfully provisioned
   - [ ] Dask Gateway functions properly on each
   - [ ] JupyterLab functions properly on each
 3. Increment the version number in `qhub/VERSION` in format `X.Y.Z`
