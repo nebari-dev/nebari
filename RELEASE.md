@@ -34,7 +34,7 @@
 
 ### Bug fixes
 
-- Add force-destore command (only for AWS at the moment) ([#694](https://github.com/Quansight/qhub/pull/694))
+- Add force-destroy command (only for AWS at the moment) ([#694](https://github.com/Quansight/qhub/pull/694))
 - Include namespace in conda-store PVC ([#716](https://github.com/Quansight/qhub/pull/716))
 - Secure ClearML behind ForwardAuth ([#721](https://github.com/Quansight/qhub/pull/721))
 - Fix connectivity issues with AWS EKS via Terraform ([#734](https://github.com/Quansight/qhub/pull/734))
