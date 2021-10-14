@@ -269,11 +269,6 @@ def render_config(
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}
 
-    config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
-    config["theme"]["jupyterhub"][
-        "welcome"
-    ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
-
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
     config["project_name"] = project_name
@@ -295,6 +290,11 @@ def render_config(
         qhub_domain = input("Provide domain: ")
     config["domain"] = qhub_domain
     oauth_callback_url = f"https://{qhub_domain}/hub/oauth_callback"
+
+    config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
+    config["theme"]["jupyterhub"][
+        "welcome"
+    ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if auth_provider == "github":
         config["security"]["authentication"] = AUTH_OAUTH_GITHUB
