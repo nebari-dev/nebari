@@ -126,6 +126,11 @@ variable "OAUTH_CALLBACK_URL" {
   type        = string
 }
 
+variable "OAUTH2_TLS_VERIFY" {
+  description = "Whether OAuthenticator should check HTTPS certs (true/false as string)"
+  type        = string
+}
+
 variable "keycloak_authorize_url" {
   description = "Keycloak OAuth start URL"
   type        = string
