@@ -204,7 +204,7 @@ provider "keycloak" {
   password  = random_password.keycloak-qhub-bot-password.result
   url       = "https://${var.endpoint}"
 
-  tls_insecure_skip_verify = {% if cookiecutter.provider == "local" or cookiecutter.get('certificate', {}).get('type','') == "self-signed" %}true{% else %}false{% endif %}
+  tls_insecure_skip_verify = local.tls-insecure-skip-verify
 }
 
 module "kubernetes-keycloak-config" {
@@ -290,6 +290,7 @@ module "qhub" {
   OAUTH_CLIENT_ID        = local.jupyterhub-keycloak-client-id
   OAUTH_CLIENT_SECRET    = random_password.jupyterhub-jhsecret.result
   OAUTH_CALLBACK_URL     = "https://${var.endpoint}${local.jupyterhub-callback-url-path}"
+  OAUTH2_TLS_VERIFY      = local.tls-insecure-skip-verify ? "false" : "true"
   keycloak_authorize_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth"
   keycloak_token_url     = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"
   keycloak_userdata_url  = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"

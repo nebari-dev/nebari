@@ -26,6 +26,10 @@ module "kubernetes-jupyterhub" {
             value = var.OAUTH_CALLBACK_URL
           },
           {
+            name = "OAUTH2_TLS_VERIFY",
+            value = var.OAUTH2_TLS_VERIFY
+          },
+          {
             name = "KEYCLOAK_AUTHORIZE_URL",
             value = var.keycloak_authorize_url
           },

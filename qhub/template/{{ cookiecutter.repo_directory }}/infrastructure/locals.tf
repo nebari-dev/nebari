@@ -71,4 +71,6 @@ locals {
 
   jupyterhub-keycloak-client-id = "jupyterhubkeycloakclient"
   jupyterhub-callback-url-path  = "/hub/oauth_callback"
+
+  tls-insecure-skip-verify = {% if cookiecutter.provider == "local" or cookiecutter.get('certificate', {}).get('type','') == "self-signed" %}true{% else %}false{% endif %}
 }
