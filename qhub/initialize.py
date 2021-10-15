@@ -138,7 +138,7 @@ AZURE = {
     "kubernetes_version": "1.18.19",
     "node_groups": {
         "general": {
-            "instance": "Standard_D2_v2",
+            "instance": "Standard_D4_v3",
             "min_nodes": 1,
             "max_nodes": 1,
         },
