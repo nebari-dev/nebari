@@ -59,6 +59,10 @@ class UpgradeStep(ABC):
         cls._steps[cls.version] = cls
 
     @classmethod
+    def has_step(cls, version):
+        return version in cls._steps
+
+    @classmethod
     def upgrade(cls, config, start_version, finish_version):
         starting_ver = ver_parse(start_version)
         finish_ver = ver_parse(finish_version)
@@ -89,7 +93,14 @@ class UpgradeStep(ABC):
     def _version_specific_upgrade(self, config, start_version):
         return config
 
-class Upgrade_0_3_12(UpgradeStep):
-    version = '0.3.12'
+
+class Upgrade_0_3_11(UpgradeStep):
+    version = '0.3.11'
 
 
+# Manually-added upgrade steps must go above this line
+if not UpgradeStep.has_step(__version__):
+    # Always have a way to upgrade to the latest version number, even if no customizations
+    class UpgradeLatest(UpgradeStep):
+        version = __version__
+    
