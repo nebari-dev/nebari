@@ -16,7 +16,7 @@ features such as convenient environment rollback and environment
 encapsulation in containers.
 
 Anyone with access to the QHub deployment repo can add an environment, and there are no limits to the number of environments that can be included.
-  
+
 > Do be careful of the yaml indentation as it will differ from a conda `environment.yml`
 
 ### I need X package and it's not in any available user environments - what do I do?
@@ -30,7 +30,7 @@ is not recommended) but they will not be available to Dask workers.
 ### I want to use Dask. What needs to be included in my user environment?
 
 You will need to include the QHub Dask metapackage,
-e.g. `qhub-dask==0.3.12`. This will replace `distributed`, `dask`, ad
+e.g. `qhub-dask==||QHUB_VERSION||`. This will replace `distributed`, `dask`, ad
 `dask-gateway`.
 
 ### Why can't I just create my own local conda environment or edit the existing conda environments?
@@ -40,7 +40,7 @@ in QHub versions 0.3.11 and earlier is an alpha version. This version
 doesn't support using local conda environments or editing pre-exising
 environments directly.
 
-> See the answer to #2 for information on how to modify environments properly. In the near future the QHub team will be adding support for user-defined environments via conda-store.  
+> See the answer to #2 for information on how to modify environments properly. In the near future the QHub team will be adding support for user-defined environments via conda-store.
 
 ### I have a local package - how can it be installed? Will it be available to my Dask workers?
 
@@ -51,7 +51,7 @@ local user environment using
 pip install --no-build-isolation --user -e .
 ```
 
-If you're using a `flit` package, you can install with 
+If you're using a `flit` package, you can install with
 
 ```shell
 flit install -s
@@ -68,8 +68,8 @@ note that if you set environment variables in this way, they WILL NOT
 be available inside of notebooks.
 
 
-7. How do I use environment variables on dask workers (not loaded via a package)?  
-This can be achieved through the UI:  
+7. How do I use environment variables on dask workers (not loaded via a package)?
+This can be achieved through the UI:
     ```python
     import dask_gateway
 
@@ -77,23 +77,23 @@ This can be achieved through the UI:
     options = gateway.cluster_options()
     options
     ```
-    Or programmatically:  
+    Or programmatically:
     ```python
     env_vars = {
         "ENV_1": "VALUE_1",
         "ENV_2": "VALUE_2"
     }
     options.environment_vars = env_vars
-    ```  
-    This functionality is available in release 0.3.12 or later.   
+    ```
+    This functionality is available in release 0.3.12 or later.
 
-8. I can't see the active conda env in the terminal.   
-    Set the `changeps1` value in the conda config:  
-    ```shell  
+8. I can't see the active conda env in the terminal.
+    Set the `changeps1` value in the conda config:
+    ```shell
     conda config --set changeps1 true
-    ```  
+    ```
 
-9. I want to use QHub server to compute a new pinned environment (which I'll the serve via the qhub_config.yml). I understand it's not recommended I use this environment for working.  
+9. I want to use QHub server to compute a new pinned environment (which I'll the serve via the qhub_config.yml). I understand it's not recommended I use this environment for working.
 If you need to solve a conda env on a QHub server (not recommended,
 but there are valid usecases for this), you'll need to specify the
 prefix. For example, `conda env create -f env_test.yml --prefix

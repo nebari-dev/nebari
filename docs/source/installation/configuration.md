@@ -693,7 +693,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas
@@ -707,7 +707,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas
@@ -864,7 +864,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas
@@ -878,7 +878,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas
