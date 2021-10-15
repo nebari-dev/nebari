@@ -158,7 +158,7 @@ AMAZON_WEB_SERVICES = {
     "region": "us-west-2",
     "kubernetes_version": "1.18",
     "node_groups": {
-        "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
+        "general": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
         "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
     },
