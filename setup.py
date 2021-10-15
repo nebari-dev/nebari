@@ -40,6 +40,8 @@ setup(
         "pydantic",
         "pynacl",
         "bcrypt",
+        "azure-identity==1.6.1",
+        "azure-mgmt-containerservice==16.2.0",
     ],
     extras_require={
         "dev": [
