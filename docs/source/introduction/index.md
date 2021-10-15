@@ -1,5 +1,6 @@
-# What is QHub?
-Open source tool for data science research, development, and deployment.
+# Introduction
+
+QHub is an open source tool for data science research, development, and deployment.
 
 QHub is [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code)
 that simplifies the deployment of data science projects using JupyterHub and Dask Gateway for you and your team.
@@ -46,7 +47,7 @@ with.
 + [**prometheus**](https://prometheus.io/) cluster monitoring
 + [**grafana**](https://grafana.com/) cluster monitoring visualizations
 
-# Why use QHub?
+## Why use QHub?
 
 QHub provides enables teams to build their own scalable compute infrastructure with:
 

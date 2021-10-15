@@ -2,8 +2,8 @@
 
 Qhub does not charge a fee for infrastructure but cloud providers
 themselves have pricing for all their services. A digital ocean
-cluster's minimum fixed cost is around $60/month. While other cloud
-providers fixed cost is around $200/month. Each cloud vendor has
+cluster's minimum fixed cost is around \$60/month. While other cloud
+providers fixed cost is around \$200/month. Each cloud vendor has
 different pricing and capabilities of their kubernetes offerings which
 can significantly affect the pricing of QHub. Cost alone does not
 determine which cloud is best for your use case. Often times you
@@ -67,7 +67,7 @@ type of storage has well known advantages and limitations.
 | Cloud                 | Object   | Block         | Filesystem                       |
 |:----------------------|:---------|:--------------|----------------------------------|
 | Digital Ocean         | $0.02/GB | $0.10/GB      | N/A                              |
-| Google Cloud Platform | $0.02/GB | $0.4-0.12/GB  | $0.20-0.30/GB (1TB minimum $200) |
+| Google Cloud Platform | $0.02/GB | $0.4-0.12/GB  | \$0.20-0.30/GB (1TB minimum \$200) |
 | Amazon Web Services   | $0.02/GB | $0.05-0.12/GB | $0.30/GB                         |
 | Azure                 | $0.02/GB | $0.6-0.12/GB  | $0.16/GB                         |
 

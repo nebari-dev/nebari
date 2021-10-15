@@ -12,7 +12,7 @@ import requests
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
-from qhub.provider.cloud import digital_ocean
+from qhub.provider.cloud import digital_ocean, azure_cloud
 from qhub.utils import namestr_regex, qhub_image_tag, check_cloud_credentials
 
 logger = logging.getLogger(__name__)
@@ -126,7 +126,7 @@ GOOGLE_PLATFORM = {
     "region": "us-central1",
     "kubernetes_version": "1.18.16-gke.502",
     "node_groups": {
-        "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1},
+        "general": {"instance": "n1-standard-4", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
         "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
     },
@@ -135,10 +135,10 @@ GOOGLE_PLATFORM = {
 AZURE = {
     "project": "PLACEHOLDER",
     "region": "Central US",
-    "kubernetes_version": "1.18.19",
+    "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {
-            "instance": "Standard_D2_v2",
+            "instance": "Standard_D4_v3",
             "min_nodes": 1,
             "max_nodes": 1,
         },
@@ -158,7 +158,7 @@ AMAZON_WEB_SERVICES = {
     "region": "us-west-2",
     "kubernetes_version": "1.18",
     "node_groups": {
-        "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
+        "general": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
         "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
     },
@@ -229,18 +229,18 @@ DEFAULT_ENVIRONMENTS = {
         "name": "dashboard",
         "channels": ["conda-forge"],
         "dependencies": [
-            "python",
-            "ipykernel",
-            "ipywidgets >=7.6",
-            "qhub-dask ==0.3.13",
-            "param",
-            "python-graphviz",
-            "matplotlib >=3.3.4",
-            "panel >=0.10.3",
-            "voila >=0.2.7",
-            "streamlit >=0.76",
-            "dash >=1.19",
-            "cdsdashboards-singleuser >=0.5.7",
+            "python==3.9.7",
+            "ipykernel==6.4.1",
+            "ipywidgets==7.6.5",
+            "qhub-dask==0.3.13",
+            "param==1.11.1",
+            "python-graphviz==0.17",
+            "matplotlib==3.4.3",
+            "panel==0.12.4",
+            "voila==0.2.16",
+            "streamlit==1.0.0",
+            "dash==2.0.0",
+            "cdsdashboards-singleuser==0.5.7",
         ],
     },
 }
@@ -374,8 +374,17 @@ def render_config(
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Azure"
         config["azure"] = AZURE
+
         if kubernetes_version:
             config["azure"]["kubernetes_version"] = kubernetes_version
+        else:
+            # first kubernetes version returned by azure sdk is
+            # the newest version of kubernetes supported this field needs
+            # to be dynamically filled since azure updates the
+            # versions so frequently
+            config["azure"]["kubernetes_version"] = azure_cloud.kubernetes_versions(
+                config["azure"]["region"]
+            )[0]
 
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
