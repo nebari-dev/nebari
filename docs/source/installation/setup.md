@@ -51,7 +51,7 @@ registration](#domain-registry), and CI provider (GitHub Actions, GitLab CI).
 
 These services require global [environment
 variables](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/)
-that once set up, will trigger QHub's automatic deploy using your 
+that once set up, will trigger QHub's automatic deploy using your
 CI/CD platform of choice.
 
 To find and set the environment variables, follow the steps described
@@ -68,9 +68,9 @@ knowledge about the specific provider required either. QHub supports
 [Azure](#microsoft-azure).
 
 To deploy QHub, all access keys require fairly wide permissions to
-create all the necessary cloud resources. Hence, once the Cloud 
-provider has been chosen, follow the steps below and set the 
-environment variables as specified with **owner/admin** level 
+create all the necessary cloud resources. Hence, once the Cloud
+provider has been chosen, follow the steps below and set the
+environment variables as specified with **owner/admin** level
 permissions.
 
 For more details on configuration for each Cloud provider, check the
@@ -107,6 +107,8 @@ Set the required environment variables as specified below:
 export DIGITALOCEAN_TOKEN=""          # API token required to generate resources
 export SPACES_ACCESS_KEY_ID=""        # public access key for access spaces
 export SPACES_SECRET_ACCESS_KEY=""    # the private key for access spaces
+export AWS_ACCESS_KEY_ID=""           # set this variable with the same value as `SPACES_ACCESS_KEY_ID`
+export AWS_SECRET_ACCESS_KEY=""       # set this variable identical to `SPACES_SECRET_ACCESS_KEY`
 ```
 </details>
 
@@ -201,13 +203,13 @@ domain will be where your application will be exposed.
 Currently, QHub only supports CloudFlare for **automatic** DNS
 registration. If an alternate DNS provider is desired, change the
 `--dns-provider` flag from `cloudflare` to `none` on the `qhub deploy`
-command. During the initial deployment, the deployment script will 
-pause as it asks for an IP address (or CNAME, if using AWS) and will 
-prompt you to register the desired URL. How to set a DNS record heavily 
-depends on the provider thus it is not possible to have detailed docs 
-on how to create a record on your provider. 
+command. During the initial deployment, the deployment script will
+pause as it asks for an IP address (or CNAME, if using AWS) and will
+prompt you to register the desired URL. How to set a DNS record heavily
+depends on the provider thus it is not possible to have detailed docs
+on how to create a record on your provider.
 
-Googling `setting <A/CNAME> record on <provider name>` should yield 
+Googling `setting <A/CNAME> record on <provider name>` should yield
 good results on doing it for your specific provider.
 
 #### Cloudflare
