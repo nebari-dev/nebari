@@ -1,0 +1,21 @@
+name: Documentation linter
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**.md'
+
+jobs:
+  check-all-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: documentation quality check
+        uses: errata-ai/vale-action@v1.4.0
+        with:
+          files: '["docs", "CONTRIBUTING.md", "README.md", "RELEASE.md"]'
+          onlyAnnotateModifiedLines: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
