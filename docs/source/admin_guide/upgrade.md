@@ -33,6 +33,10 @@ This will output a newer version of qhub-config.yaml that is compatible with the
 
 If you are deploying qhub from your local machine (i.e. not using CI/CD) then you will now have a qhub-config.yaml file that you can use to `qhub deploy -c qhub-config.yaml` through the latest version of the qhub command package.
 
+## Special customizations
+
+You may have made special customizations to your qhub config, such as using your own versions of Docker images. Please check your qhub-config.yaml and decide if you need to update any values that would not have been changed automatically - or, for example, you may need to build new versions of your custom Docker images to match any changes in QHub's images.
+
 ## Render and Commit to Git
 
 For CI/CD (GitHub/GitLab) workflows, then as well as generating the updated qhub-config.yaml files as above, you will also need to regenerate the workflow files based on the latest qhub version's templates.
