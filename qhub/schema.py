@@ -7,6 +7,7 @@ from pydantic import validator, root_validator
 from qhub.utils import namestr_regex, check_for_duplicates
 from .version import __version__
 
+
 class CertificateEnum(str, enum.Enum):
     letsencrypt = "lets-encrypt"
     selfsigned = "self-signed"
@@ -397,7 +398,7 @@ class Main(Base):
     project_name: letter_dash_underscore_pydantic
     namespace: typing.Optional[letter_dash_underscore_pydantic]
     provider: ProviderEnum
-    qhub_version: str = ''
+    qhub_version: str = ""
     ci_cd: typing.Optional[CICD]
     domain: str
     terraform_state: typing.Optional[TerraformState]
@@ -428,11 +429,14 @@ class Main(Base):
         Always called even if qhub_version is not supplied at all (so defaults to ''). That way we can give a more helpful error message.
         """
         if v != __version__:
-            if v == '':
-                v = 'not supplied'
-            raise ValueError(f"qhub_version in the config file must equal {__version__} to be processed by this version of qhub (your value is {v})."
-                " Install a different version of qhub or run qhub upgrade to ensure your config file is compatible.")
+            if v == "":
+                v = "not supplied"
+            raise ValueError(
+                f"qhub_version in the config file must equal {__version__} to be processed by this version of qhub (your value is {v})."
+                " Install a different version of qhub or run qhub upgrade to ensure your config file is compatible."
+            )
         return v
+
 
 def verify(config):
     Main(**config)
