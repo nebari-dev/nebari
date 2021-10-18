@@ -44,7 +44,7 @@ variable "node_groups" {
 }
 
 variable "node_group_instance_type" {
-  description = "AWS instance types to use for kuberentes nodes"
+  description = "AWS instance types to use for kubernetes nodes"
   type        = string
   default     = "m5.large"
 }

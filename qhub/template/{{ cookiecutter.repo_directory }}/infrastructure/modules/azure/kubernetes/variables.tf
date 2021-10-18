@@ -20,7 +20,7 @@ variable "node_resource_group_name" {
 }
 
 variable "kubernetes_version" {
-  description = "Version of kuberenetes"
+  description = "Version of Kubernetes"
   type        = string
 }
 

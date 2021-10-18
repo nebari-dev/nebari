@@ -57,7 +57,7 @@ def guided_install(
     ):
         terraform_state_sync(config)
 
-    # 3 kuberentes-alpha provider requires that kubernetes be
+    # 3 kubernetes-alpha provider requires that kubernetes be
     # provisionioned before any "kubernetes_manifests" resources
     terraform.init(directory="infrastructure")
     terraform.apply(

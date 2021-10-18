@@ -30,7 +30,7 @@ aws eks update-kubeconfig  --region us-west-2 --name <relevant-name>
 
 ## Pod deployment
 
-With kubectl configred, we now need to deploy the pod that will allow
+With kubectl configured, we now need to deploy the pod that will allow
 us to access the cluster files. First save the follow pod spec to a
 file named `pod.yaml`
 

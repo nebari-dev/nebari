@@ -18,7 +18,7 @@ Often cloud providers have a fixed cost for using kubernetes. Here we
 try to provide a table of capabilities of each cloud kubernetes
 offering along with costs.
 
-| Cloud                                                                         | Pricing   | Scale to 0? | Spot/Premptible? | GPUs |
+| Cloud                                                                         | Pricing   | Scale to 0? | Spot/Preemptible? | GPUs |
 |:------------------------------------------------------------------------------|:----------|:------------|------------------|:-----|
 | [Digital Ocean Kubernetes](https://www.digitalocean.com/products/kubernetes/) | 0         | No          | No               | No   |
 | [Google Compute Platform GKE](https://cloud.google.com/kubernetes-engine/)    | $75/month | Yes         | Yes              | Yes  |
@@ -95,7 +95,3 @@ comparison due to computer architecture and clock rate.
 From the chart above we can see that cloud prices are pretty much the
 same between cloud providers. For smaller instances (not shown in this
 table) digital ocean can same some money.
-
-
-
-
