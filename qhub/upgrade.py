@@ -42,9 +42,13 @@ def do_upgrade(config_filename):
     backup_filename = pathlib.Path(f"{config_filename}.{start_version}backup")
 
     if backup_filename.exists():
-        raise ValueError(
-            f"Cannot rename {config_filename} to {backup_filename} as destination file already exists. Aborting - please remove file and try again."
-        )
+        i = 1
+        while True:
+            next_backup_filename = pathlib.Path(f"{backup_filename}~{i}")
+            if not next_backup_filename.exists():
+                backup_filename = next_backup_filename
+                break
+            i = i + 1  
 
     config_filename.rename(backup_filename)
     print(f"Backing up old config in {backup_filename}")
@@ -97,6 +101,9 @@ class UpgradeStep(ABC):
     def get_version(self):
         return self.version
 
+    def requires_qhub_version_field(self):
+        return ver_parse(self.version) >= ver_parse("0.3.14")
+
     def upgrade_step(self, config, start_version):
 
         finish_version = self.get_version()
@@ -109,8 +116,9 @@ class UpgradeStep(ABC):
         assert config.get("qhub_version", "") == start_version
         assert self.version != start_version
 
-        print(f"Setting qhub_version to {self.version}")
-        config["qhub_version"] = self.version
+        if self.requires_qhub_version_field():
+            print(f"Setting qhub_version to {self.version}")
+            config["qhub_version"] = self.version
 
         # Update images
         start_version_regex = start_version.replace(".", "\\.")
@@ -162,11 +170,14 @@ class UpgradeStep(ABC):
         return config
 
 
-## Example upgrade class
-# class Upgrade_0_3_11(UpgradeStep):
-#    version = "0.3.11"
-#    def _version_specific_upgrade(self, config, start_version):
-#        return config
+class Upgrade_0_3_12(UpgradeStep):
+    version = "0.3.12"
+    def _version_specific_upgrade(self, config, start_version):
+        if config.get('default_images', {}).get('conda_store', None) is None:
+            newimage = f"quansight/qhub-conda-store:v{self.version}"
+            print(f"Adding default_images: conda_store image as {newimage}")
+            config['default_images']['conda_store'] = newimage
+        return config
 
 
 # Manually-added upgrade steps must go above this line
