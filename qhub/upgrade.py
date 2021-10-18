@@ -39,7 +39,7 @@ def do_upgrade(config_filename):
     UpgradeStep.upgrade(config, start_version, __version__)
 
     # Backup old file
-    backup_filename = pathlib.Path(f"{config_filename}.{start_version}backup")
+    backup_filename = pathlib.Path(f"{config_filename}.{start_version or 'old'}.backup")
 
     if backup_filename.exists():
         i = 1
@@ -48,7 +48,7 @@ def do_upgrade(config_filename):
             if not next_backup_filename.exists():
                 backup_filename = next_backup_filename
                 break
-            i = i + 1  
+            i = i + 1
 
     config_filename.rename(backup_filename)
     print(f"Backing up old config in {backup_filename}")
@@ -59,6 +59,13 @@ def do_upgrade(config_filename):
     print(
         f"Saving new config file {config_filename} ready for QHub version {__version__}"
     )
+
+    ci_cd = config.get("ci_cd", {}).get("type", "")
+    if ci_cd in ("github-actions", "gitlab-ci"):
+        print(
+            f"\nSince you are using ci_cd {ci_cd} you also need to re-render the workflows and re-commit the files to your Git repo:\n"
+            f"   qhub render -c {config_filename}\n"
+        )
 
 
 class UpgradeStep(ABC):
@@ -83,10 +90,11 @@ class UpgradeStep(ABC):
         finish_ver = ver_parse(finish_version)
         step_versions = sorted(
             [
-                ver_parse(v)
+                v
                 for v in cls._steps.keys()
                 if ver_parse(v) > starting_ver and ver_parse(v) <= finish_ver
-            ]
+            ],
+            key=ver_parse,
         )
 
         current_start_version = start_version
@@ -102,7 +110,7 @@ class UpgradeStep(ABC):
         return self.version
 
     def requires_qhub_version_field(self):
-        return ver_parse(self.version) >= ver_parse("0.3.14")
+        return ver_parse(self.version) > ver_parse("0.3.13")
 
     def upgrade_step(self, config, start_version):
 
@@ -113,7 +121,8 @@ class UpgradeStep(ABC):
         )
 
         # Set the new version
-        assert config.get("qhub_version", "") == start_version
+        if start_version == "":
+            assert "qhub_version" not in config
         assert self.version != start_version
 
         if self.requires_qhub_version_field():
@@ -172,11 +181,15 @@ class UpgradeStep(ABC):
 
 class Upgrade_0_3_12(UpgradeStep):
     version = "0.3.12"
+
     def _version_specific_upgrade(self, config, start_version):
-        if config.get('default_images', {}).get('conda_store', None) is None:
+        """
+        This verison of QHub requires a conda_store image for the first time.
+        """
+        if config.get("default_images", {}).get("conda_store", None) is None:
             newimage = f"quansight/qhub-conda-store:v{self.version}"
             print(f"Adding default_images: conda_store image as {newimage}")
-            config['default_images']['conda_store'] = newimage
+            config["default_images"]["conda_store"] = newimage
         return config
 
 
