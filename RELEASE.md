@@ -40,7 +40,7 @@
 - Fix connectivity issues with AWS EKS via Terraform ([#734](https://github.com/Quansight/qhub/pull/734))
 - Fix conda-store pod eviction and volume conflicts ([#740](https://github.com/Quansight/qhub/pull/740))
 - Update `remove_existing_renders` to only delete QHub related files/directories ([#800](https://github.com/Quansight/qhub/pull/800))
-- Reduce number of AWS subnets down to 4 to increase the number of availble nodes by a factor of 4 ([#839](https://github.com/Quansight/qhub/pull/839))
+- Reduce number of AWS subnets down to 4 to increase the number of available nodes by a factor of 4 ([#839](https://github.com/Quansight/qhub/pull/839))
 
 ## Release 0.3.11 - 05/07/2021
 
@@ -52,8 +52,8 @@
 
 ### Bug fixes
 
- - removing default values from pydantic schema which caused invalid yaml files to unexpectly pass validation
- - make kubespawner_override.environment overriadable (prior changes were overwritten)
+ - removing default values from pydantic schema which caused invalid yaml files to unexpectedly pass validation
+ - make kubespawner_override.environment overridable (prior changes were overwritten)
 
 ## Release 0.3.10 - 05/06/2021
 
@@ -247,7 +247,7 @@
 
 ### Bug fixes
 
-* `qhub deploy -c qhub-config.yaml` no longer prompts unsuported argument for `load_config_file`.
+* `qhub deploy -c qhub-config.yaml` no longer prompts unsupported argument for `load_config_file`.
 * Minor changes on the Step-by-Step walkthrough on the docs.
 * Revamp of README.md to make it concise and highlight QHub HPC.
 

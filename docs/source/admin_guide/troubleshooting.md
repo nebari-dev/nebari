@@ -19,7 +19,7 @@ instructions](https://www.digitalocean.com/docs/kubernetes/how-to/connect-to-clu
 1. [Download Digital Ocean command line utility](https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/)
 2. [Create Digital Ocean API Token](https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/) likely already done
 3. [doctl access via api token](https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/) `doctl auth init`
-4. `doctl kuberentes cluster kubeconfig save "<project-name>-<namespace>"`
+4. `doctl kubernetes cluster kubeconfig save "<project-name>-<namespace>"`
 
 After completing these steps. `kubectl` should be able to access the cluster.
 
@@ -147,4 +147,3 @@ external_container_reg:
 ```
 
 This will mean you can specify private Docker images such as `12345678.dkr.ecr.us-west-1.amazonaws.com/quansight/qhub-jupyterlab:mytag` in your `qhub-config.yaml` file. The AWS key and secret provided must have relevant ecr IAMS permissions to authenticate and read from the ECR container registry.
-

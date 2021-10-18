@@ -28,7 +28,7 @@ This guide assumes that you have the QHub repository downloaded, and you are at 
 > NOTE: The following instructions apply **only to Linux OS**.
 
 To deploy QHub locally requires the installation of the following dependencies:
-+ [Minukube](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-minikube/) version 1.10.0-beta and up
++ [Minikube](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-minikube/) version 1.10.0-beta and up
 + [Docker Engine driver](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) install.
 
 The installation of a hypervisor is **not** necessary.
@@ -161,7 +161,7 @@ python minikube-loadbalancer-ip.py
 ### Manually Configure MetalLB
 *Skip this section if above python script was used*
 
-First we need to obtain the the Docker image ID:
+First we need to obtain the Docker image ID:
 ```shell
 $ docker ps --format "{{.Names}} {{.ID}}"
 minikube <image-id>
@@ -405,7 +405,7 @@ ssh -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute
 
 ## Install Minikube etc
 
-Install Minkube and Kubectl:
+Install Minikube and Kubectl:
 
 ```bash
 curl -LO https://github.com/kubernetes/minikube/releases/download/v1.22.0/minikube-linux-amd64

@@ -121,7 +121,7 @@ Dask Gateway deployment.
 
 A long requested feature was the ability to access a dask cluster from
 outside of the cluster itself. In general this is possible but a the
-moment can break due to version missmatches between
+moment can break due to version mismatches between
 [dask](https://dask.org/),
 [distributed](https://distributed.dask.org/en/latest/), and
 [dask-gateway](https://gateway.dask.org/). Also we have had issues

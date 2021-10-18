@@ -244,7 +244,7 @@ security:
 You can specify arbitrary authentication via the `custom` type. All
 `config` attributes will be set as traitlets to the configured
 authentication class. The attributes will obey the type set via yaml
-(e.g. True -> will be a boolean True for Traitets).
+(e.g. True -> will be a boolean True for Traitlets).
 
 ```yaml
 security:
@@ -333,7 +333,7 @@ and **Kubernetes versions** will be DIFFERENT. [duplicated info]
 
 DigitalOcean has a restriction with autoscaling in that the minimum
 nodes allowed (`min_nodes` = 1) is one but is by far the cheapest
-provider even accounting for spot/premptible instances. In addition
+provider even accounting for spot/preemptible instances. In addition
 Digital Ocean does not have accelerator/gpu support. Digital Ocean is
 a great default choice for tying out QHub. Below is the recommended
 setup.
@@ -347,7 +347,7 @@ setup.
 
 To see available instance types refer to [Digital Ocean Instance
 Types](https://www.digitalocean.com/docs/droplets/). Additionally the
-digial ocean cli `doctl` has [support for listing
+Digital Ocean cli `doctl` has [support for listing
 droplets](https://www.digitalocean.com/docs/apis-clis/doctl/reference/compute/droplet/list/).
 
 ```yaml
@@ -430,7 +430,7 @@ amazon_web_services:
 
 #### Local (Existing) Kubernetes Cluster
 
-Deploying to a local existing kuberentes cluster has different options
+Deploying to a local existing kubernetes cluster has different options
 than the cloud providers. `kube_context` is an optional key that can
 be used to deploy to a non-default context. The default node selectors
 will allow pods to be scheduled anywhere. This can be adjusted to
