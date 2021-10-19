@@ -72,8 +72,7 @@ Then open the localhost (127.0.0.1) link that is in the terminal
 
 Installation can be done on a macOS, in Windows, and Linux and instructions
  can be found [here](https://github.com/derailed/k9s). For more details on usage,
-check out the [Troubleshooting documentation](../02_get_started/06_troubleshooting.md#debug-your-kubernetes-cluster)
-
+check out the [Troubleshooting documentation](https://docs.qhub.dev/en/stable/source/admin_guide/troubleshooting.html#debug-your-kubernetes-cluster).
 
 ## Cypress Tests
 

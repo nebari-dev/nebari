@@ -26,7 +26,7 @@ gateway = Gateway()
 ```
 
 QHub has [a
-section](https://docs.qhub.dev/en/latest/source/02_get_started/04_configuration.html#profiles)
+section](https://docs.qhub.dev/en/stable/source/installation/configuration.html#profiles)
 for configuring the dask profiles that users have access to. These can
 be accessed via dask gateway options. Once the
 [ipywidget](https://ipywidgets.readthedocs.io/en/latest/) shows up the
