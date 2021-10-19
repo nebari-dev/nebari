@@ -13,7 +13,7 @@ def initiate_container_service_client():
 
 
 @functools.lru_cache()
-def kubernetes_versions(azure_location="Central US"):
+def kubernetes_versions(azure_location="Central US", grap_latest_version=True):
 
     client = initiate_container_service_client()
     azure_location = azure_location.replace(" ", "").lower()
@@ -27,4 +27,8 @@ def kubernetes_versions(azure_location="Central US"):
         if key["orchestrator_type"] == "Kubernetes":
             supported_kubernetes_versions.append(key["orchestrator_version"])
 
+    supported_kubernetes_versions = sorted(supported_kubernetes_versions)
+
+    if grap_latest_version:
+        return supported_kubernetes_versions[-1]
     return supported_kubernetes_versions
