@@ -378,13 +378,9 @@ def render_config(
         if kubernetes_version:
             config["azure"]["kubernetes_version"] = kubernetes_version
         else:
-            # first kubernetes version returned by azure sdk is
-            # the newest version of kubernetes supported this field needs
-            # to be dynamically filled since azure updates the
-            # versions so frequently
             config["azure"]["kubernetes_version"] = azure_cloud.kubernetes_versions(
                 config["azure"]["region"]
-            )[0]
+            )
 
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
@@ -392,7 +388,7 @@ def render_config(
         ] = "Autoscaling Compute Environment on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
         if kubernetes_version:
-            config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
+            config["amazon_web_services"]["kubernetes_version"] = kubernetes_version()
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
