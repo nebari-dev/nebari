@@ -23,8 +23,7 @@ You should choose another installation option if you are starting from
 scratch (i.e., no clusters yet) and aiming to have a production
 environment.
 
-Found your match? Head over to the [Local install
-docs](../development/testing.md#local-testing) for
+Found your match? Head over to the [tips for testing docs](https://docs.qhub.dev/en/stable/source/dev_guide/testing.html) for
 more details.
 
 ## HPC Deployment

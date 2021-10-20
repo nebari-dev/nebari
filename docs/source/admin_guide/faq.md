@@ -3,8 +3,7 @@
 ## On AWS, why do user instances occasionally die ~30 minutes after spinning up a large dask cluster?
 
 AWS uses Amazon's Elastic Kubernetes Service (EKS) for hosting the
-kubernetes cluster. [EKS requires the use of at least two availability
-zones](https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html_). The
+kubernetes cluster. [EKS requires the use of at least two availability zones](https://docs.aws.amazon.com/eks/latest/userguide/infrastructure-security.html). The
 QHub cluster has an
 [autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html)
 that has a default service that automatically balances the number of
