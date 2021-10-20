@@ -120,6 +120,15 @@ kubectl create secret tls <secret-name> \
   --cert=path/to/cert/file --key=path/to/key/file
 ```
 
+### Wildcard certificates
+
+Some of QHub services might require special subdomains under your certificate, Wildcard certificates allow you to secure all subdomains of a domain with a single certificate. Defining a wildcard certificate will decrease the amount of CN names you would need to define under the certificate configuration and reduce the chance of generating a wrong subdomain.
+
+**Note**
+As a default behaviour of [Trafik](https://doc.traefik.io/traefik/https/tls/#default-certificate), if the DNS and CN name does not match, Traefik will generate and use a self-signed certificate. This may lead to some unexpected TLS issues, so as an alternative of including each specific domain under the certificate CN list, you may also define a wildcard certificate.
+
+
+
 ## Security
 
 This section is for configuring security relating to the QHub
