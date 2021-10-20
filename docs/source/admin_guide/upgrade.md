@@ -50,3 +50,13 @@ qhub render -c qhub-config.yaml
 (Note that `qhub deploy` would perform this render step too, but will also immediately redeploy your qhub.)
 
 Commit all the files (qhub-config.yaml and GitHub/GitLab workflow files) back to the remote repo. All files need to be commited together in the same commit.
+
+## Known versions that will require re-deployment
+
+For versions that are known to error when upgrading, the steps for upgrade include:
+
+- Deploy a new QHub with the desired version
+- Back up user data and restore to the new cluster by following [this guide](https://docs.qhub.dev/en/stable/source/admin_guide/backup.html)
+- Destroy old cluster
+
+Version `v0.3.11` on AWS has an error with the kubernetes config map. See [this discussion](https://github.com/Quansight/qhub/discussions/841) for more details.
