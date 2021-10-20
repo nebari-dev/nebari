@@ -127,11 +127,11 @@ Replacing `v0.x.x` with the current version that is listed. Note this may take s
 After the images are pulled, they can be copied to the Minikube cache like so:
 
 ```bash
-minikube cache add quansight/qhub-jupyterhub:v0.x.x
-minikube cache add quansight/qhub-jupyterlab:v0.x.x
-minikube cache add quansight/qhub-dask-worker:v0.x.x
-minikube cache add quansight/qhub-dask-gateway:v0.x.x
-minikube cache add quansight/qhub-conda-store:v0.x.x
+minikube image load quansight/qhub-jupyterhub:v0.x.x
+minikube image load quansight/qhub-jupyterlab:v0.x.x
+minikube image load quansight/qhub-dask-worker:v0.x.x
+minikube image load quansight/qhub-dask-gateway:v0.x.x
+minikube image load quansight/qhub-conda-store:v0.x.x
 ```
 
 Again, adding the correct version. With this completed local Minikube deployment will no longer require pulling the above docker images.
