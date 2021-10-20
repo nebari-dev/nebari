@@ -148,6 +148,12 @@ resource "keycloak_authentication_execution" "idp-auto-link" {
   parent_flow_alias = keycloak_authentication_flow.flow.alias
   authenticator     = "idp-auto-link"
   requirement       = "REQUIRED"
+
+  # This is the only way to encourage Keycloak Provider to set the auth execution priority order:
+  # https://github.com/mrparkers/terraform-provider-keycloak/pull/138
+  depends_on = [
+    keycloak_authentication_execution.idp-detect-existing-broker-user
+  ]
 }
 
 ## GitHub Identity provider
