@@ -6,6 +6,11 @@ on:
     paths:
       - '**.md'
 
+  push:
+    branches: [ main ]
+    paths:
+      - '**.md'
+
 jobs:
   check-all-files:
     runs-on: ubuntu-latest
