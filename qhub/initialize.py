@@ -58,6 +58,7 @@ BASE_CONFIGURATION = {
             "h2_color": "#652e8e",
         }
     },
+    "helm_extensions": [],
     "monitoring": {
         "enabled": True,
     },

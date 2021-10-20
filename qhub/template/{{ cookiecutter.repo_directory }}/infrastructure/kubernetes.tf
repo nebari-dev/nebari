@@ -222,6 +222,27 @@ module "qhub" {
   ]
 }
 
+{% for helm_extension in cookiecutter.helm_extensions -%}
+module "{{helm_extension['name'] }}-extension" {
+  source       = "./modules/kubernetes/services/extensions"
+  name       = "{{ helm_extension['name'] }}"
+  namespace  = var.environment
+  repository = "{{ helm_extension['repository'] }}"
+  chart      = "{{ helm_extension['chart'] }}"
+  chart_version    = "{{ helm_extension['version'] }}"
+  {% if 'overrides' in extension -%}
+  overrides = [<<EOT
+{{ helm_extension['overrides']|yamlify -}}
+    EOT
+    ]
+  {% endif -%}
+  depends_on = [
+    module.qhub
+  ]
+}
+
+{% endfor -%}
+
 {% if cookiecutter.prefect.enabled -%}
 module "prefect" {
   source = "./modules/kubernetes/services/prefect"

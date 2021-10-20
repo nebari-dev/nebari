@@ -57,6 +57,14 @@ class CICD(Base):
     before_script: typing.Optional[typing.List[str]]
     after_script: typing.Optional[typing.List[str]]
 
+# ======== Generic Helm Extensions ========
+class HelmExtension(Base):
+    name: str
+    repository: str
+    chart: str
+    version: str
+    overrides: typing.Optional[typing.Dict]
+
 
 # ============== Monitoring =============
 
@@ -406,6 +414,7 @@ class Main(Base):
         TerraformModules
     ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
+    helm_extensions: typing.Optional[typing.List[HelmExtension]]
     prefect: typing.Optional[Prefect]
     cdsdashboards: CDSDashboards
     security: Security
