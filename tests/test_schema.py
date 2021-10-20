@@ -13,9 +13,7 @@ from qhub.initialize import render_config
         ("azure-pytest", "dev", "azure.qhub.dev", "azure", "github-actions", "github"),
     ],
 )
-def test_schema(
-    project, namespace, domain, cloud_provider, ci_provider, auth_provider
-):
+def test_schema(project, namespace, domain, cloud_provider, ci_provider, auth_provider):
     config = render_config(
         project_name=project,
         namespace=namespace,
@@ -27,7 +25,7 @@ def test_schema(
         repository_auto_provision=False,
         auth_auto_provision=False,
         terraform_state="remote",
-        kubernetes_version="1.18.0",
+        kubernetes_version=None,
         disable_prompt=True,
     )
     assert qhub.schema.verify(config) is None

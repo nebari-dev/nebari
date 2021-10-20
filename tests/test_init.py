@@ -24,6 +24,6 @@ def test_init(project, namespace, domain, cloud_provider, ci_provider, auth_prov
         repository_auto_provision=False,
         auth_auto_provision=False,
         terraform_state="remote",
-        kubernetes_version="1.18.0",
+        kubernetes_version=None,
         disable_prompt=True,
     )
