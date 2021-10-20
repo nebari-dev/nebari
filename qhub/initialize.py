@@ -12,7 +12,7 @@ import requests
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
-from qhub.provider.cloud import digital_ocean, azure_cloud
+from qhub.provider.cloud import digital_ocean, azure_cloud, amazon_web_services
 from qhub.utils import namestr_regex, qhub_image_tag, check_cloud_credentials
 
 logger = logging.getLogger(__name__)
@@ -156,7 +156,7 @@ AZURE = {
 
 AMAZON_WEB_SERVICES = {
     "region": "us-west-2",
-    "kubernetes_version": "1.18",
+    "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
@@ -345,23 +345,14 @@ def render_config(
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Digital Ocean"
         config["digital_ocean"] = DIGITAL_OCEAN
-        if kubernetes_version:
-            config["digital_ocean"]["kubernetes_version"] = kubernetes_version
-        else:
-            # first kubernetes version returned by Digital Ocean api is
-            # the newest version of kubernetes supported this field needs
-            # to be dynamically filled since digital ocean updates the
-            # versions so frequently
-            config["digital_ocean"][
-                "kubernetes_version"
-            ] = digital_ocean.kubernetes_versions()[0]["slug"]
+        _set_kubernetes_version(config, kubernetes_version)
+
     elif cloud_provider == "gcp":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Google Cloud Platform"
         config["google_cloud_platform"] = GOOGLE_PLATFORM
-        if kubernetes_version:
-            config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
+        _set_kubernetes_version(config, kubernetes_version)
 
         if "PROJECT_ID" in os.environ:
             config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
@@ -369,26 +360,21 @@ def render_config(
             config["google_cloud_platform"]["project"] = input(
                 "Enter Google Cloud Platform Project ID: "
             )
+
     elif cloud_provider == "azure":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Azure"
         config["azure"] = AZURE
-
-        if kubernetes_version:
-            config["azure"]["kubernetes_version"] = kubernetes_version
-        else:
-            config["azure"]["kubernetes_version"] = azure_cloud.kubernetes_versions(
-                config["azure"]["region"]
-            )
+        _set_kubernetes_version(config, kubernetes_version)
 
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
-        if kubernetes_version:
-            config["amazon_web_services"]["kubernetes_version"] = kubernetes_version()
+        _set_kubernetes_version(config, kubernetes_version)
+
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
@@ -502,3 +488,55 @@ def auth0_auto_provision(config):
     config["security"]["authentication"]["config"]["auth0_subdomain"] = auth0_config[
         "auth0_subdomain"
     ]
+
+
+def _set_kubernetes_version(config, kubernetes_version):
+    cloud_provider = config["provider"]
+
+    def _raise_value_error(cloud_provider, k8s_versions):
+        raise ValueError(
+            f"\nInvalid `kubernetes-version` provided: {kubernetes_version}.\nPlease select from one of the following {cloud_provider.upper()} supported Kubernetes versions: {k8s_versions} or omit flag to use latest Kubernetes version available."
+        )
+
+    if cloud_provider == "aws":
+        if kubernetes_version:
+            aws_k8s_versions = amazon_web_services.kubernetes_versions()
+            if kubernetes_version in aws_k8s_versions:
+                config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
+            else:
+                _raise_value_error(cloud_provider, aws_k8s_versions)
+        else:
+            config["amazon_web_services"][
+                "kubernetes_version"
+            ] = amazon_web_services.kubernetes_versions(grab_latest_version=True)
+
+    elif cloud_provider == "azure":
+        if kubernetes_version:
+            azure_k8s_versions = azure_cloud.kubernetes_versions(
+                config["azure"]["region"]
+            )
+            if kubernetes_version in azure_k8s_versions:
+                config["azure"]["kubernetes_version"] = kubernetes_version
+            else:
+                _raise_value_error(cloud_provider, azure_k8s_versions)
+
+        else:
+            config["azure"]["kubernetes_version"] = azure_cloud.kubernetes_versions(
+                config["azure"]["region"], grab_latest_version=True
+            )
+
+    elif cloud_provider == "do":
+        if kubernetes_version:
+            config["digital_ocean"]["kubernetes_version"] = kubernetes_version
+        else:
+            # first kubernetes version returned by Digital Ocean api is
+            # the newest version of kubernetes supported this field needs
+            # to be dynamically filled since digital ocean updates the
+            # versions so frequently
+            config["digital_ocean"][
+                "kubernetes_version"
+            ] = digital_ocean.kubernetes_versions()[0]["slug"]
+
+    elif cloud_provider == "gcp":
+        if kubernetes_version:
+            config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version

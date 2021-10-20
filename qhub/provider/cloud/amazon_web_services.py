@@ -21,7 +21,7 @@ def zones(region):
 
 
 @functools.lru_cache()
-def kubernetes_versions(grab_latest_version=True):
+def kubernetes_versions(grab_latest_version=False):
     # AWS SDK (boto3) currently doesn't offer an intuitive way to list available kubernetes version. This implementation grabs kubernetes versions for specific EKS addons. It will therefore always be (at the very least) a subset of all kubernetes versions still supported by AWS.
     client = boto3.client("eks")
     supported_kubernetes_versions = list()
