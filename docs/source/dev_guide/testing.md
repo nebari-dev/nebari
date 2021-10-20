@@ -107,3 +107,21 @@ Cloud testing on aws, gcp, azure, and digital ocean can be significantly more co
 Even with the dev install of the qhub package, you may find that the deployed cluster doesn't actually reflect any development changes, e.g. to the Docker images for JupyterHub or JupyterLab. That will be because your qhub-config.yaml references fully released versions. See [Using a development branch](#using-a-development-branch) above for how to encourage the Docker images to be specified based on the latest development code.
 
 You should always prefer the local testing when possible as it will be easier to debug, may be quicker to deploy, and is likely to be less expensive.
+
+# Docs testing
+
+QHub uses [Vale](https://github.com/errata-ai/vale), a syntax-aware linter to lint documentation and recommend regions that needs improvement. Vale works with the [Google developer documentation style guide](https://developers.google.com/style), with specific configurations that are specific to Quansight. To test the documentation on the local machine, follow these steps:
+
+- [Install Vale command-line tool](https://docs.errata.ai/vale/install).
+- Run Vale on the entire documentation source or a specific documentation piece.
+  ```sh
+  # Run Vale on the entire documentation source
+  $ vale docs/
+
+  # Run Vale on a specific file
+  $ vale README.md
+  ```
+- Utilize the errors, warnings and the suggestions to make appropriate changes to the documentation.
+- In case of false positives, make appropriate changes to the Vale configurations hosted in the `tests/vale/styles` directory.
+
+Vale runs on the GitHub Actions CI to automatically validate the documentation language. By default, Vale only checks the modified documentation to ensure that Vale doesn't generate a lot of noise over the Pull Requests.
