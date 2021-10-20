@@ -5,7 +5,7 @@ import json
 import os
 from shutil import rmtree
 
-from ruamel import yaml
+from ruamel.yaml import YAML
 from cookiecutter.generate import generate_files
 from ..version import __version__
 from ..constants import TERRAFORM_VERSION
@@ -115,7 +115,8 @@ def render_template(output_directory, config_filename, force=False):
         raise ValueError(f"cookiecutter configuration={filename} is not filename")
 
     with filename.open() as f:
-        config = yaml.safe_load(f)
+        yaml = YAML(typ="safe", pure=True)
+        config = yaml.load(f)
 
         # For any config values that start with
         # QHUB_SECRET_, set the values using the
