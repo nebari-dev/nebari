@@ -39,5 +39,10 @@ def regions():
     return _kubernetes_options()["options"]["regions"]
 
 
-def kubernetes_versions():
-    return _kubernetes_options()["options"]["versions"]
+def kubernetes_versions(grab_latest_version=False):
+    supported_kubernetes_versions = sorted(
+        [_["slug"] for _ in _kubernetes_options()["options"]["versions"]]
+    )
+    if grab_latest_version:
+        return supported_kubernetes_versions[-1]
+    return supported_kubernetes_versions

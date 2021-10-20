@@ -12,7 +12,12 @@ import requests
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
-from qhub.provider.cloud import digital_ocean, azure_cloud, amazon_web_services
+from qhub.provider.cloud import (
+    digital_ocean,
+    azure_cloud,
+    amazon_web_services,
+    google_cloud,
+)
 from qhub.utils import namestr_regex, qhub_image_tag, check_cloud_credentials
 from .version import __version__
 
@@ -125,7 +130,7 @@ DIGITAL_OCEAN = {
 GOOGLE_PLATFORM = {
     "project": "PLACEHOLDER",
     "region": "us-central1",
-    "kubernetes_version": "1.18.16-gke.502",
+    "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {"instance": "n1-standard-4", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
@@ -531,16 +536,27 @@ def _set_kubernetes_version(config, kubernetes_version):
 
     elif cloud_provider == "do":
         if kubernetes_version:
-            config["digital_ocean"]["kubernetes_version"] = kubernetes_version
+            do_k8s_versions = digital_ocean.kubernetes_versions()
+            if kubernetes_version in do_k8s_versions:
+                config["digital_ocean"]["kubernetes_version"] = kubernetes_version
+            else:
+                _raise_value_error(cloud_provider, do_k8s_versions)
         else:
-            # first kubernetes version returned by Digital Ocean api is
-            # the newest version of kubernetes supported this field needs
-            # to be dynamically filled since digital ocean updates the
-            # versions so frequently
             config["digital_ocean"][
                 "kubernetes_version"
-            ] = digital_ocean.kubernetes_versions()[0]["slug"]
+            ] = digital_ocean.kubernetes_versions(grab_latest_version=True)
 
     elif cloud_provider == "gcp":
+        region = config["google_cloud_platform"]["region"]
         if kubernetes_version:
-            config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
+            gcp_k8s_versions = google_cloud.kubernetes_versions(region)
+            if kubernetes_version in gcp_k8s_versions:
+                config["google_cloud_platform"][
+                    "kubernetes_version"
+                ] = kubernetes_version
+            else:
+                _raise_value_error(cloud_provider, gcp_k8s_versions)
+        else:
+            config["google_cloud_platform"][
+                "kubernetes_version"
+            ] = google_cloud.kubernetes_versions(region, grab_latest_version=True)
