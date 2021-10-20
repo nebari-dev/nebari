@@ -14,6 +14,7 @@ from qhub.provider.cicd import github
 from qhub.provider import git
 from qhub.provider.cloud import digital_ocean, azure_cloud
 from qhub.utils import namestr_regex, qhub_image_tag, check_cloud_credentials
+from .version import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -294,6 +295,9 @@ def render_config(
     if qhub_domain is None and not disable_prompt:
         qhub_domain = input("Provide domain: ")
     config["domain"] = qhub_domain
+
+    config["qhub_version"] = __version__
+
     oauth_callback_url = f"https://{qhub_domain}/hub/oauth_callback"
 
     if auth_provider == "github":

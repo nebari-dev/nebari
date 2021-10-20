@@ -1,60 +1,52 @@
 # Upgrade
 
 Here we suppose a user would like to upgrade to a version
-`<version>`. Here we have outlined the following steps. These docs
-outline two paths: upgrading qhub locally on your own terminal or via
-CI.
+`<version>`, probably the latest full release of [QHub on PyPI](https://pypi.org/project/qhub/).
 
-If you are deploying QHub on your terminal locally you will need to
-upgrade via pip.
+You may be deploying QHub based on a local configuration file, or you may be using CI/CD workflows in GitHub or GitLab. Either way, you will need to locate a copy of your qhub-config.yaml configuration file to upgrade it (and commit back to your git repo in the CI/CD case).
 
-```shell
-pip install --upgrade qhub=<version>
-```
+For CI/CD deployments, you will need to `git clone <repo URL>` into a folder on your local machine.
 
-If you are using CI you will need to modify the CI provider code to reflect the new CI version:
- - github-actions `.github/workflows/qhub-ops.yaml` change the line `pip install qhub==<version>`
- - gitlab-ci `.gitlab-ci.yml` change the line to `pip install qhub==<version>`
+## Upgrade the qhub command package
 
-If you are using the default images being provided by QHub you will
-want to upgrade the images being used. As of `v0.3.9` there are docker
-images built for each release. If you are using your own QHub images
-it may be a difficult process to upgrade the images. We strive to
-minimize the number of changes to the images.
-
-```yaml
-...
-default_images:
-  jupyterhub: quansight/qhub-jupyterhub:v<version>
-  jupyterlab: quansight/qhub-jupyterlab:v<version>
-  dask_worker: quansight/qhub-dask-worker:v<version>
-  dask_gateway: quansight/qhub-dask-gateway:v<version>
-  conda_store: quansight/qhub-conda-store:v<version>
-...
-profiles:
-  jupyterlab:
-    - display_name: Small Instance
-      ...
-      kubespawner_override:
-        ...
-        image: quansight/qhub-jupyterlab:v<version>
-    ...
-  dask_worker:
-    Small Worker:
-      ...
-      image: quansight/qhub-dask-worker:v<version>
-```
-
-We try to make QHub backwards compatible with configuration in
-`qhub-config.yaml`. There is a schema [validator
-pydantic](https://pydantic-docs.helpmanual.io/) for QHub which will
-report any errors in the configuration file.
-
-If you are deploying QHub on your terminal locally run:
+To install (or upgrade) your pip installation of the Python package used to manage QHub:
 
 ```shell
-qhub deploy --config qhub-config.yaml
+pip install --upgrade qhub
 ```
 
-If you are deploying via CI commit the two changes to
-`qhub-config.yaml` and the CI at the same time.
+The above will install the latest full version of qhub. For a specific older version use:
+
+```shell
+pip install --upgrade qhub==<version>
+```
+
+## Upgrade qhub-config.yaml file
+
+In the folder containing your qhub configuration file, run:
+
+```shell
+qhub upgrade -c qhub-config.yaml
+```
+
+This will output a newer version of qhub-config.yaml that is compatible with the new version of qhub. The process will list any changes it has made. It will also tell you where it has stored a backup of the original file.
+
+If you are deploying qhub from your local machine (i.e. not using CI/CD) then you will now have a qhub-config.yaml file that you can use to `qhub deploy -c qhub-config.yaml` through the latest version of the qhub command package.
+
+## Special customizations
+
+You may have made special customizations to your qhub config, such as using your own versions of Docker images. Please check your qhub-config.yaml and decide if you need to update any values that would not have been changed automatically - or, for example, you may need to build new versions of your custom Docker images to match any changes in QHub's images.
+
+## Render and Commit to Git
+
+For CI/CD (GitHub/GitLab) workflows, then as well as generating the updated qhub-config.yaml files as above, you will also need to regenerate the workflow files based on the latest qhub version's templates.
+
+With the newly-upgraded qhub-config.yaml file, run:
+
+```shell
+qhub render -c qhub-config.yaml
+```
+
+(Note that `qhub deploy` would perform this render step too, but will also immediately redeploy your qhub.)
+
+Commit all the files (qhub-config.yaml and GitHub/GitLab workflow files) back to the remote repo. All files need to be commited together in the same commit.
