@@ -1,6 +1,6 @@
 # Contribution Guidelines
 
-Please see [QHub Contribution Guidelines](https://github.com/Quansight/qhub/CONTRIBUTING.md)
+Please see [QHub Contribution Guidelines](https://github.com/Quansight/qhub/blob/main/CONTRIBUTING.md)
 
 # Additions
 
@@ -25,4 +25,3 @@ the administration guide and user guide.
     <image-b>: <image-name>:<image-tag>
     ...
 ```
-
