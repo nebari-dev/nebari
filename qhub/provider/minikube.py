@@ -96,7 +96,7 @@ def image_load(image, overwrite=True):
     minikube_path = download_minikube_binary()
 
     overwrite_command = '--overwrite=true' if overwrite else '--overwrite=false'
-    command = ['image', 'load', image, overwrite_command]
+    command = ['image', 'load', overwrite_command, image]
     with timer(logger, "minikube image load"):
         run_minikube_subprocess(command, prefix="minikube")
 
