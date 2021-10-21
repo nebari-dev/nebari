@@ -5,12 +5,31 @@ import configparser
 from qhub.utils import change_directory
 
 
-def is_git_repo(path=None):
+class DockerException(Exception):
+    pass
+
+
+def is_git_repo(path : str = None):
+    """Determine if given path is a git repo
+
+    Returns the root of the git repository otherwise None if not a git repo
+    """
     path = path or os.getcwd()
-    return ".git" in os.listdir(path)
+    root_git_path = os.path.abspath(path)
+    while root_git_path != os.sep:
+        if ".git" in os.listdir(root_git_path):
+            return root_git_path
+        root_git_path = os.path.dirname(root_git_path)
 
 
-def initialize_git(path=None):
+def current_sha(path : str = None):
+    """Get current commit sha of git directory"""
+    if not is_git_repo(path):
+        raise DockerException('cannot get git sha of path that is not git directory')
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD'], encoding='utf-8').strip()
+
+
+def initialize_git(path : str = None):
     path = path or os.getcwd()
     with change_directory(path):
         subprocess.check_output(["git", "init"])

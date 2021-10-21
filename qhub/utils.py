@@ -30,6 +30,10 @@ if QHUB_GH_BRANCH:
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
 
 
+class QHubError(Exception):
+    pass
+
+
 @contextlib.contextmanager
 def timer(logger, prefix):
     start_time = time.time()

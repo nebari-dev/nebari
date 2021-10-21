@@ -97,6 +97,12 @@ def start(driver='docker', memory='8g', cpu='2'):
         run_minikube_subprocess(command, prefix="minikube")
 
 
+def status():
+    logger.info(f"minikube delete")
+    with timer(logger, "minikube delete"):
+        run_minikube_subprocess(["delete"], prefix="minikube")
+
+
 def delete():
     logger.info(f"minikube delete")
     with timer(logger, "minikube delete"):
