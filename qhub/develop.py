@@ -17,13 +17,7 @@ QHUB_IMAGES = [
 ]
 
 
-def develop():
-    git_repo_root = git.is_git_repo()
-    if git_repo_root is None:
-        raise utils.QHubError('QHub develop required to run within QHub git repository')
-
-    git_head_sha = git.current_sha()
-
+def build_docker_images():
     for image in QHUB_IMAGES:
         dockerfile_name = image
         build_directory = os.path.dirname(dockerfile_name)
@@ -31,3 +25,13 @@ def develop():
         image_tag = git_head_sha
         logger.info(f'qhub develop build dockerfile={dockerfile_name}')
         docker.build(dockerfile_name, build_directory, image_name, image_tag)
+
+
+def develop():
+    git_repo_root = git.is_git_repo()
+    if git_repo_root is None:
+        raise utils.QHubError('QHub develop required to run within QHub git repository')
+
+    git_head_sha = git.current_sha()
+
+    build_docker_images()
