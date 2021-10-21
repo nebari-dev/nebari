@@ -17,20 +17,9 @@ def test_init(setup_fixture, k8s_version, expected):
         auth_provider,
     ) = render_config_inputs
 
-    if expected:
-        render_config_partial(
-            project_name=project,
-            namespace=namespace,
-            qhub_domain=domain,
-            cloud_provider=cloud_provider,
-            ci_provider=ci_provider,
-            auth_provider=auth_provider,
-            kubernetes_version=k8s_version,
-        )
-
     # pass "unsupported" kubernetes version to `render_config`
     # resulting in a `ValueError`
-    elif type(expected) == type and issubclass(expected, Exception):
+    if type(expected) == type and issubclass(expected, Exception):
         with pytest.raises(expected):
             render_config_partial(
                 project_name=project,
@@ -41,3 +30,13 @@ def test_init(setup_fixture, k8s_version, expected):
                 auth_provider=auth_provider,
                 kubernetes_version=k8s_version,
             )
+    else:
+        render_config_partial(
+            project_name=project,
+            namespace=namespace,
+            qhub_domain=domain,
+            cloud_provider=cloud_provider,
+            ci_provider=ci_provider,
+            auth_provider=auth_provider,
+            kubernetes_version=k8s_version,
+        )
