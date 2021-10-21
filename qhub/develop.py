@@ -26,10 +26,11 @@ def build_docker_images(console, image_tag):
         image_name = os.path.splitext(dockerfile_name)[1][1:]
         logger.info(f'qhub develop build dockerfile={dockerfile_name}')
 
-        with console.status(f'building dockerfile {dockerfile_name}'):
+        with console.status(f'building dockerfile {dockerfile_name} image {image_name}:{image_tag}'):
             import time
-            time.sleep(10)
+            time.sleep(1)
             docker.build(dockerfile_name, build_directory, image_name, image_tag)
+        console.print(f"successfully built dockerfile {dockerfile_name} image {image_name}:{image_tag}")
 
 
 def develop():
