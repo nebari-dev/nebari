@@ -22,6 +22,12 @@ QHUB_DOCKERFILE_PATHS = [
 ]
 
 
+def start_minikube_cluster():
+    with console.status('Creating Minikube cluster'):
+        minikube.start()
+    console.print(f'Created Minikube cluster')
+
+
 def build_dockerfile_image(dockerfile_path, image_tag):
     dockerfile_name = os.path.basename(dockerfile_path)
     build_directory = os.path.dirname(dockerfile_path)
@@ -47,6 +53,8 @@ def develop():
         raise utils.QHubError('QHub develop required to run within QHub git repository')
 
     git_head_sha = git.current_sha()
+
+    start_minikube_cluster()
 
     for dockerfile_path in QHUB_DOCKERFILE_PATHS:
         image = build_dockerfile_image(dockerfile_path, git_head_sha)
