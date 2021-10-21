@@ -1,7 +1,12 @@
 import os
+import logging
 
 from qhub.provider import docker, git
 from qhub import utils
+
+
+logger = logging.getLogger(__name__)
+
 
 QHUB_IMAGES = [
     'qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.conda-store',
@@ -24,4 +29,5 @@ def develop():
         build_directory = os.path.dirname(dockerfile_name)
         image_name = os.path.splitext(dockerfile_name)[1][1:]
         image_tag = git_head_sha
+        logger.info(f'qhub develop build dockerfile={docker_filename}')
         docker.build(dockerfile_name, build_directory, image_name, image_tag)
