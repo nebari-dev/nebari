@@ -27,7 +27,7 @@ def build_docker_images(console, image_tag):
         image_name = os.path.splitext(dockerfile_path)[1][1:]
 
         with console.status(f'Building {dockerfile_name} image "{image_name}:{image_tag}"'):
-            docker.build(dockerfile_name, build_directory, image_name, image_tag)
+            docker.build(dockerfile_path, build_directory, image_name, image_tag)
         console.print(f'Built {dockerfile_name} image "{image_name}:{image_tag}"')
 
 
