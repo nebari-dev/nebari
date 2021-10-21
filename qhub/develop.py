@@ -51,7 +51,7 @@ def upload_minikube_image(image):
 
 def initialize_configuration(directory):
     config_path = os.path.join(directory, 'qhub-config.yaml')
-    config = initialize.reader_config(
+    config = initialize.render_config(
         f'local-{datetime.datetime.utcnow().strftime("%Y%m%d-%H%M")}',
         qhub_domain='github-actions.qhub.dev',
         cloud_provider='local',
