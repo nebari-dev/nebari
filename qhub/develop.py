@@ -55,6 +55,7 @@ def initialize_configuration(directory):
         f'local-{datetime.datetime.utcnow().strftime("%Y%m%d-%H%M")}',
         qhub_domain='github-actions.qhub.dev',
         cloud_provider='local',
+        ci_provider='none',
         repository=None,
         auth_provider='password',
         namespace='dev',
