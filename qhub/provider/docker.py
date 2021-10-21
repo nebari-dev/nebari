@@ -20,12 +20,12 @@ def check_docker():
     return docker_path
 
 
-def run_docker_subprocess(processargs, **kwargs):
+def run_docker_subprocess(processargs, verbose=True, **kwargs):
     docker_path = check_docker()
     logger.info(f" docker at {docker_path}")
     command = [docker_path] + processargs
     subprocess.check_output(command)
-    # if run_subprocess_cmd(, **kwargs):
+    # if run_subprocess_cmd(command, **kwargs):
     #     raise DockerException("Docker returned an error")
 
 

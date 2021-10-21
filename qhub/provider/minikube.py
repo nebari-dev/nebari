@@ -76,8 +76,10 @@ def download_minikube_binary(version=constants.MINIKUBE_VERSION):
 def run_minikube_subprocess(processargs, **kwargs):
     minikube_path = download_minikube_binary()
     logger.info(f" minikube at {minikube_path}")
-    if run_subprocess_cmd([minikube_path] + processargs, **kwargs):
-        raise MinikubeException("Minikube returned an error")
+    command = [minikube_path] + processargs
+    subprocess.check_output(command)
+    # if run_subprocess_cmd([minikube_path] + processargs, **kwargs):
+    #     raise MinikubeException("Minikube returned an error")
 
 
 def version():
@@ -88,6 +90,13 @@ def version():
         "utf-8"
     )
     return re.search(r"minikube version: v(\d+)\.(\d+).(\d+)", version_output).groups()
+
+
+def image_load(image):
+    minikube_path = download_minikube_binary()
+    command = ['image', 'load', image]
+    with timer(logger, "minikube image load"):
+        run_minikube_subprocess(command, prefix="minikube")
 
 
 def start(driver='docker', memory='8g', cpu='2'):
