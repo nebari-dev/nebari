@@ -3,6 +3,8 @@ from abc import ABC
 import pathlib
 import re
 import json
+import string
+import secrets
 
 from packaging.version import parse as ver_parse
 
@@ -253,6 +255,16 @@ class Upgrade_0_3_14(UpgradeStep):
             del security["users"]
         if "groups" in security:
             del security["groups"]
+
+        # Create root password
+        default_password = "".join(
+            secrets.choice(string.ascii_letters + string.digits) for i in range(16)
+        )
+        security.setdefault("keycloak", {})["initial_root_password"] = default_password
+
+        print(
+            f"Generated default random password={default_password} for Keycloak root user (Please change at /auth/ URL path).\n"
+        )
 
         return config
 

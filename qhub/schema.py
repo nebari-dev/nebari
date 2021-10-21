@@ -4,7 +4,7 @@ from abc import ABC
 
 import pydantic
 from pydantic import validator, root_validator
-from qhub.utils import namestr_regex, check_for_duplicates
+from qhub.utils import namestr_regex
 from .version import __version__
 
 
@@ -186,7 +186,6 @@ class GitHubAuthentication(Authentication):
 
 
 class User(Base):
-    uid: typing.Optional[str]
     password: typing.Optional[str]
     primary_group: typing.Optional[str]
     secondary_groups: typing.Optional[typing.List[str]]
@@ -208,33 +207,11 @@ class Keycloak(Base):
 
 class Security(Base):
     authentication: Authentication
-    users: typing.Dict[str, typing.Union[User, None]]
-    groups: typing.Dict[
-        str, typing.Union[Group, None]
+    users: typing.Optional[typing.Dict[str, typing.Union[User, None]]]
+    groups: typing.Optional[
+        typing.Dict[str, typing.Union[Group, None]]
     ]  # If gid is omitted, no attributes in Group means it appears as None
     keycloak: typing.Optional[Keycloak]
-
-    @validator("users", pre=True)
-    def validate_uderids(cls, v):
-        # raise TypeError if duplicated
-        return check_for_duplicates(v)
-
-    @root_validator
-    def user_groups_must_exist(cls, values):
-        groupnames = set(values.get("groups", {}).keys()) | {"admin", "users"}
-        for username, user in values.get("users", {}).items():
-            if user is None:
-                continue
-            usersgroupnames = set([user.primary_group])
-            secondary_groups = getattr(user, "secondary_groups", None)
-            if secondary_groups is not None and len(secondary_groups) > 0:
-                usersgroupnames.update(secondary_groups)
-            if not usersgroupnames.issubset(groupnames):
-                missinggroups = ", ".join(usersgroupnames - groupnames)
-                raise ValueError(
-                    f"user {username} is a member of non-existent group(s): {missinggroups}"
-                )
-        return values
 
 
 # ================ Providers ===============

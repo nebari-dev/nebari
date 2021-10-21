@@ -5,7 +5,6 @@ import time
 import os
 import re
 import contextlib
-from typing import Sequence, Set
 from ruamel.yaml import YAML
 
 from .version import __version__
@@ -143,17 +142,6 @@ def check_cloud_credentials(config):
         pass
     else:
         raise ValueError("Cloud Provider configuration not supported")
-
-
-def check_for_duplicates(users: Sequence[dict]) -> Set:
-    uids = set([])
-    for user, attrs in users.items():
-        if attrs is not None and "uid" in attrs:
-            if attrs["uid"] in uids:
-                raise TypeError(f"Found duplicate uid ({attrs['uid']}) for {user}.")
-            else:
-                uids.add(attrs["uid"])
-    return users
 
 
 def load_yaml(config_filename: pathlib.Path):

@@ -26,13 +26,6 @@ BASE_CONFIGURATION = {
     },
     "security": {
         "authentication": None,
-        "users": {
-            "example-user": {
-                "primary_group": "admin",
-                "secondary_groups": ["users"],
-            }
-        },
-        "groups": {"users": None, "admin": None},
     },
     "default_images": {
         "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
@@ -307,7 +300,7 @@ def render_config(
     os.chmod(default_password_filename, 0o700)
 
     print(
-        f"Securely generated default random password={default_password} for example-user stored at path={default_password_filename}"
+        f"Securely generated default random password={default_password} for Keycloak root user stored at path={default_password_filename}"
     )
 
     if auth_provider == "github":

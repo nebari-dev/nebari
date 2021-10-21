@@ -28,10 +28,6 @@ resource "keycloak_user" "user" {
     ignore_changes = all
   }
 
-  attributes = {
-    uid = var.users[count.index].uid
-  }
-
   dynamic "initial_password" {
     for_each = [for pwd in [var.users[count.index].password] : pwd if pwd != ""]
     content {
@@ -51,9 +47,6 @@ resource "keycloak_group" "group" {
     ignore_changes = all
   }
 
-  attributes = {
-    gid = var.groups[count.index].gid
-  }
 }
 
 resource "keycloak_default_groups" "default" {

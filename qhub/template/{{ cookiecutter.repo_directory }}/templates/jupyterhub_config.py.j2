@@ -76,7 +76,7 @@ keycloak_admin = KeycloakAdmin(
 from urllib.request import urlopen, Request
 import json
 
-QHUB_PROFILES = {{ cookiecutter.profiles.jupyterlab }}
+QHUB_PROFILES = json.loads("{{ cookiecutter.profiles.jupyterlab | jsonify | replace('"', '\\"') }}")
 
 import escapism
 import string
@@ -127,9 +127,9 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
         }
     }
 
-    # The recursive chown is important when migrating from an 
-    # older uid/gid-based NFS, but may be slow for a lot of files. 
-    # The .migrateuser-{username}.txt etc files below are checks so this only 
+    # The recursive chown is important when migrating from an
+    # older uid/gid-based NFS, but may be slow for a lot of files.
+    # The .migrateuser-{username}.txt etc files below are checks so this only
     # needs to happen the first time a user/group is encountered post-upgrade.
     # Those checks can probably be removed in a future release.
 
@@ -215,7 +215,7 @@ def qhub_list_available_profiles(user_nss_json):
 
         if 'users' in profile:
             if username not in profile['users']:
-                include_profile = False                
+                include_profile = False
         elif 'groups' in profile:
             if profile['groups'] is None or len(groups & set(profile['groups'])) == 0:
             # None of the YAML groups match

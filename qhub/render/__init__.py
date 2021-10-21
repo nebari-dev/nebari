@@ -330,7 +330,10 @@ def remove_existing_renders(dest_repo_dir, verbosity=0):
         if deletable_dir.exists():
             if verbosity > 0:
                 print(f"Deleting all files and directories beneath {deletable_dir} ...")
-            rmtree(deletable_dir)
+            if deletable_dir.is_dir():
+                rmtree(deletable_dir)
+            else:
+                deletable_dir.unlink()
 
 
 def set_env_vars_in_config(config):
