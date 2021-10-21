@@ -23,8 +23,10 @@ def check_docker():
 def run_docker_subprocess(processargs, **kwargs):
     docker_path = check_docker()
     logger.info(f" docker at {docker_path}")
-    if run_subprocess_cmd([docker_path] + processargs, **kwargs):
-        raise DockerException("Docker returned an error")
+    command = [docker_path] + processargs
+    subprocess.check_output(command)
+    # if run_subprocess_cmd(, **kwargs):
+    #     raise DockerException("Docker returned an error")
 
 
 def inspect(name):
@@ -49,7 +51,7 @@ def ps():
     return [json.loads(_) for _ in output.split('\n')]
 
 
-def build(dockerfile_path, build_directory, name, tag):
+def build(dockerfile_path, build_directory, name, tag, verbose=False):
     logger.info(f"docker build")
     with timer(logger, "docker build"):
         command = ['build', build_directory, f'--file={dockerfile_path}', f'--tag={name}:{tag}']
