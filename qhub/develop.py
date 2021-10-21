@@ -29,5 +29,5 @@ def develop():
         build_directory = os.path.dirname(dockerfile_name)
         image_name = os.path.splitext(dockerfile_name)[1][1:]
         image_tag = git_head_sha
-        logger.info(f'qhub develop build dockerfile={docker_filename}')
+        logger.info(f'qhub develop build dockerfile={dockerfile_name}')
         docker.build(dockerfile_name, build_directory, image_name, image_tag)
