@@ -1,10 +1,12 @@
 import os
 import logging
+import datetime
 
 from rich.console import Console
+from rich.pretty import pprint
 
 from qhub.provider import docker, git, minikube
-from qhub import utils
+from qhub import utils, initialize
 
 
 logger = logging.getLogger(__name__)
@@ -47,6 +49,23 @@ def upload_minikube_image(image):
     console.print(f'Upload complete of "{image}" to local Minikube cache')
 
 
+def initialize_configuration(directory):
+    config_path = os.path.join(directory, 'qhub-config.yaml')
+    config = initialize.reader_config(
+        f'local-{datetime.datetime.utcnow().strftime("%Y%m%d-%H%M")}',
+        qhub_domain='github-actions.qhub.dev',
+        cloud_provider='local',
+        repository=None,
+        auth_provider='password',
+        namespace='dev',
+        repository_auto_provision=False,
+        auth_auto_provision=False,
+        terraform_state=None,
+        disable_prompt=True
+    )
+    pprint(config)
+
+
 def develop():
     git_repo_root = git.is_git_repo()
     if git_repo_root is None:
@@ -54,8 +73,12 @@ def develop():
 
     git_head_sha = git.current_sha()
 
+    develop_directory = os.path.join(git_repo_root, ".qhub", "develop")
+
     start_minikube_cluster()
 
     for dockerfile_path in QHUB_DOCKERFILE_PATHS:
         image = build_dockerfile_image(dockerfile_path, git_head_sha)
         upload_minikube_image(image)
+
+    initialize_configuration(develop_directory)
