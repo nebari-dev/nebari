@@ -266,7 +266,7 @@ def render_config(
     kubernetes_version=None,
     disable_prompt=False,
 ):
-    config = BASE_CONFIGURATION
+    config = BASE_CONFIGURATION.copy()
     config["provider"] = cloud_provider
 
     if ci_provider is not None and ci_provider != "none":
@@ -306,7 +306,7 @@ def render_config(
     oauth_callback_url = f"https://{qhub_domain}/hub/oauth_callback"
 
     if auth_provider == "github":
-        config["security"]["authentication"] = AUTH_OAUTH_GITHUB
+        config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()
         print(
             "Visit https://github.com/settings/developers and create oauth application"
         )
@@ -323,12 +323,12 @@ def render_config(
                 "oauth_callback_url"
             ] = oauth_callback_url
     elif auth_provider == "auth0":
-        config["security"]["authentication"] = AUTH_OAUTH_AUTH0
+        config["security"]["authentication"] = AUTH_OAUTH_AUTH0.copy()
         config["security"]["authentication"]["config"][
             "oauth_callback_url"
         ] = oauth_callback_url
     elif auth_provider == "password":
-        config["security"]["authentication"] = AUTH_PASSWORD
+        config["security"]["authentication"] = AUTH_PASSWORD.copy()
 
         # Generate default password for qhub-init
         default_password = "".join(
@@ -353,15 +353,15 @@ def render_config(
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Digital Ocean"
-        config["digital_ocean"] = DIGITAL_OCEAN
-        _set_kubernetes_version(config, kubernetes_version)
+        config["digital_ocean"] = DIGITAL_OCEAN.copy()
+        _set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
     elif cloud_provider == "gcp":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Google Cloud Platform"
-        config["google_cloud_platform"] = GOOGLE_PLATFORM
-        _set_kubernetes_version(config, kubernetes_version)
+        config["google_cloud_platform"] = GOOGLE_PLATFORM.copy()
+        _set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
         if "PROJECT_ID" in os.environ:
             config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
@@ -374,24 +374,24 @@ def render_config(
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Azure"
-        config["azure"] = AZURE
-        _set_kubernetes_version(config, kubernetes_version)
+        config["azure"] = AZURE.copy()
+        _set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Amazon Web Services"
-        config["amazon_web_services"] = AMAZON_WEB_SERVICES
-        _set_kubernetes_version(config, kubernetes_version)
+        config["amazon_web_services"] = AMAZON_WEB_SERVICES.copy()
+        _set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment"
-        config["local"] = LOCAL
+        config["local"] = LOCAL.copy()
 
-    config["profiles"] = DEFAULT_PROFILES
-    config["environments"] = DEFAULT_ENVIRONMENTS
+    config["profiles"] = DEFAULT_PROFILES.copy()
+    config["environments"] = DEFAULT_ENVIRONMENTS.copy()
 
     if auth_auto_provision:
         if auth_provider == "auth0":
@@ -499,64 +499,54 @@ def auth0_auto_provision(config):
     ]
 
 
-def _set_kubernetes_version(config, kubernetes_version):
-    cloud_provider = config["provider"]
+def _set_kubernetes_version(
+    config, kubernetes_version, cloud_provider, grab_latest_version=True
+):
+    cloud_provider_dict = {
+        "aws": {
+            "full_name": "amazon_web_services",
+            "k8s_version_checker_func": amazon_web_services.kubernetes_versions,
+        },
+        "azure": {
+            "full_name": "azure",
+            "k8s_version_checker_func": azure_cloud.kubernetes_versions,
+        },
+        "do": {
+            "full_name": "digital_ocean",
+            "k8s_version_checker_func": digital_ocean.kubernetes_versions,
+        },
+        "gcp": {
+            "full_name": "google_cloud_platform",
+            "k8s_version_checker_func": google_cloud.kubernetes_versions,
+        },
+    }
+    cloud_full_name = cloud_provider_dict[cloud_provider]["full_name"]
+    func = cloud_provider_dict[cloud_provider]["k8s_version_checker_func"]
+    cloud_config = config[cloud_full_name]
 
     def _raise_value_error(cloud_provider, k8s_versions):
         raise ValueError(
             f"\nInvalid `kubernetes-version` provided: {kubernetes_version}.\nPlease select from one of the following {cloud_provider.upper()} supported Kubernetes versions: {k8s_versions} or omit flag to use latest Kubernetes version available."
         )
 
-    if cloud_provider == "aws":
-        if kubernetes_version:
-            aws_k8s_versions = amazon_web_services.kubernetes_versions()
-            if kubernetes_version in aws_k8s_versions:
-                config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
-            else:
-                _raise_value_error(cloud_provider, aws_k8s_versions)
-        else:
-            config["amazon_web_services"][
-                "kubernetes_version"
-            ] = amazon_web_services.kubernetes_versions(grab_latest_version=True)
+    def _check_and_set_kubernetes_version(
+        kubernetes_version=kubernetes_version,
+        cloud_provider=cloud_provider,
+        cloud_config=cloud_config,
+        func=func,
+    ):
+        region = cloud_config["region"]
+        k8s_versions = func(region)
 
-    elif cloud_provider == "azure":
         if kubernetes_version:
-            azure_k8s_versions = azure_cloud.kubernetes_versions(
-                config["azure"]["region"]
-            )
-            if kubernetes_version in azure_k8s_versions:
-                config["azure"]["kubernetes_version"] = kubernetes_version
+            if kubernetes_version in k8s_versions:
+                cloud_config["kubernetes_version"] = kubernetes_version
             else:
-                _raise_value_error(cloud_provider, azure_k8s_versions)
-
+                _raise_value_error(cloud_provider, k8s_versions)
+        elif grab_latest_version:
+            cloud_config["kubernetes_version"] = k8s_versions[-1]
         else:
-            config["azure"]["kubernetes_version"] = azure_cloud.kubernetes_versions(
-                config["azure"]["region"], grab_latest_version=True
-            )
+            # grab oldest version
+            cloud_config["kubernetes_version"] = k8s_versions[0]
 
-    elif cloud_provider == "do":
-        if kubernetes_version:
-            do_k8s_versions = digital_ocean.kubernetes_versions()
-            if kubernetes_version in do_k8s_versions:
-                config["digital_ocean"]["kubernetes_version"] = kubernetes_version
-            else:
-                _raise_value_error(cloud_provider, do_k8s_versions)
-        else:
-            config["digital_ocean"][
-                "kubernetes_version"
-            ] = digital_ocean.kubernetes_versions(grab_latest_version=True)
-
-    elif cloud_provider == "gcp":
-        region = config["google_cloud_platform"]["region"]
-        if kubernetes_version:
-            gcp_k8s_versions = google_cloud.kubernetes_versions(region)
-            if kubernetes_version in gcp_k8s_versions:
-                config["google_cloud_platform"][
-                    "kubernetes_version"
-                ] = kubernetes_version
-            else:
-                _raise_value_error(cloud_provider, gcp_k8s_versions)
-        else:
-            config["google_cloud_platform"][
-                "kubernetes_version"
-            ] = google_cloud.kubernetes_versions(region, grab_latest_version=True)
+    return _check_and_set_kubernetes_version()
