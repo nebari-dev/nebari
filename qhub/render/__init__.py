@@ -6,11 +6,10 @@ import os
 from shutil import rmtree
 from urllib.parse import urlencode
 
-from ruamel import yaml
 from cookiecutter.generate import generate_files
 from ..version import __version__
 from ..constants import TERRAFORM_VERSION
-from ..utils import pip_install_qhub, QHUB_GH_BRANCH
+from ..utils import pip_install_qhub, QHUB_GH_BRANCH, load_yaml
 
 
 def patch_dask_gateway_extra_config(config):
@@ -274,16 +273,15 @@ def render_template(output_directory, config_filename, force=False):
     if not filename.is_file():
         raise ValueError(f"cookiecutter configuration={filename} is not filename")
 
-    with filename.open() as f:
-        config = yaml.safe_load(f)
+    config = load_yaml(filename)
 
-        # For any config values that start with
-        # QHUB_SECRET_, set the values using the
-        # corresponding env var.
-        set_env_vars_in_config(config)
+    # For any config values that start with
+    # QHUB_SECRET_, set the values using the
+    # corresponding env var.
+    set_env_vars_in_config(config)
 
-        config["repo_directory"] = repo_directory
-        patch_dask_gateway_extra_config(config)
+    config["repo_directory"] = repo_directory
+    patch_dask_gateway_extra_config(config)
 
     with (input_directory / "cookiecutter.json").open() as f:
         config = collections.ChainMap(config, json.load(f))

@@ -3,9 +3,7 @@ import time
 import pathlib
 import argparse
 
-from ruamel import yaml
-
-from qhub.utils import timer, check_cloud_credentials
+from qhub.utils import timer, check_cloud_credentials, load_yaml
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,8 +23,7 @@ def handle_force_destroy(args):
             f"passed in configuration filename={config_filename} must exist"
         )
 
-    with config_filename.open() as f:
-        config = yaml.safe_load(f.read())
+    config = load_yaml(config_filename)
 
     # Don't verify(config) in case the schema has changed - just pick out the important bits and tear down
 

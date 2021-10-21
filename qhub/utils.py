@@ -1,3 +1,4 @@
+import pathlib
 import subprocess
 import sys
 import time
@@ -5,6 +6,7 @@ import os
 import re
 import contextlib
 from typing import Sequence, Set
+from ruamel.yaml import YAML
 
 from .version import __version__
 
@@ -28,6 +30,11 @@ if QHUB_GH_BRANCH:
 
 # Regex for suitable project names
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
+
+# Create a ruamel object with our favored config, for universal use
+yaml = YAML()
+yaml.preserve_quotes = True
+yaml.default_flow_style = False
 
 
 @contextlib.contextmanager
@@ -147,3 +154,33 @@ def check_for_duplicates(users: Sequence[dict]) -> Set:
             else:
                 uids.add(attrs["uid"])
     return users
+
+
+def load_yaml(config_filename: pathlib.Path):
+    """
+    Return yaml dict containing config loaded from config_filename.
+    """
+    with config_filename.open() as f:
+        config = yaml.load(f.read())
+
+    return config
+
+
+def backup_config_file(filename: pathlib.Path, extrasuffix: str = ""):
+    if not filename.exists():
+        return
+
+    # Backup old file
+    backup_filename = pathlib.Path(f"{filename}{extrasuffix}.backup")
+
+    if backup_filename.exists():
+        i = 1
+        while True:
+            next_backup_filename = pathlib.Path(f"{backup_filename}~{i}")
+            if not next_backup_filename.exists():
+                backup_filename = next_backup_filename
+                break
+            i = i + 1
+
+    filename.rename(backup_filename)
+    print(f"Backing up {filename} as {backup_filename}")

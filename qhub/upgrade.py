@@ -1,15 +1,15 @@
 import logging
-from ruamel import yaml
 from abc import ABC
 import pathlib
 import re
+import json
 
 from packaging.version import parse as ver_parse
 
 from pydantic.error_wrappers import ValidationError
 
-from qhub.schema import verify
-
+from .schema import verify
+from .utils import backup_config_file, load_yaml, yaml
 from .version import __version__
 
 logger = logging.getLogger(__name__)
@@ -17,8 +17,7 @@ logger = logging.getLogger(__name__)
 
 def do_upgrade(config_filename):
 
-    with config_filename.open() as f:
-        config = yaml.safe_load(f.read())
+    config = load_yaml(config_filename)
 
     try:
         verify(config)
@@ -36,25 +35,13 @@ def do_upgrade(config_filename):
 
     start_version = config.get("qhub_version", "")
 
-    UpgradeStep.upgrade(config, start_version, __version__)
+    UpgradeStep.upgrade(config, start_version, __version__, config_filename)
 
     # Backup old file
-    backup_filename = pathlib.Path(f"{config_filename}.{start_version or 'old'}.backup")
-
-    if backup_filename.exists():
-        i = 1
-        while True:
-            next_backup_filename = pathlib.Path(f"{backup_filename}~{i}")
-            if not next_backup_filename.exists():
-                backup_filename = next_backup_filename
-                break
-            i = i + 1
-
-    config_filename.rename(backup_filename)
-    print(f"Backing up old config in {backup_filename}")
+    backup_config_file(config_filename, f".{start_version or 'old'}")
 
     with config_filename.open("wt") as f:
-        yaml.dump(config, f, default_flow_style=False, Dumper=yaml.RoundTripDumper)
+        yaml.dump(config, f)
 
     print(
         f"Saving new config file {config_filename} ready for QHub version {__version__}"
@@ -85,7 +72,11 @@ class UpgradeStep(ABC):
         return version in cls._steps
 
     @classmethod
-    def upgrade(cls, config, start_version, finish_version):
+    def upgrade(cls, config, start_version, finish_version, config_filename):
+        """
+        Runs through all required upgrade steps (i.e. relevant subclasses of UpgradeStep).
+        Calls UpgradeStep.upgrade_step for each.
+        """
         starting_ver = ver_parse(start_version)
         finish_ver = ver_parse(finish_version)
         step_versions = sorted(
@@ -100,7 +91,7 @@ class UpgradeStep(ABC):
         current_start_version = start_version
         for stepcls in [cls._steps[str(v)] for v in step_versions]:
             step = stepcls()
-            config = step.upgrade_step(config, current_start_version)
+            config = step.upgrade_step(config, current_start_version, config_filename)
             current_start_version = step.get_version()
             print("\n")
 
@@ -112,12 +103,25 @@ class UpgradeStep(ABC):
     def requires_qhub_version_field(self):
         return ver_parse(self.version) > ver_parse("0.3.13")
 
-    def upgrade_step(self, config, start_version):
+    def upgrade_step(self, config, start_version, config_filename, *args, **kwargs):
+        """
+        Perform the upgrade from start_version to self.version
+
+        Generally, this will be in-place in config, but must also return config dict.
+
+        config_filename may be useful to understand the file path for qhub-config.yaml, for example
+        to output another file in the same location.
+
+        The standard body here will take care of setting qhub_version and also updating the image tags.
+
+        It should normally be left as-is for all upgrades. Use _version_specific_upgrade below
+        for any actions that are only required for the particular upgrade you are creating.
+        """
 
         finish_version = self.get_version()
 
         print(
-            f"\n---> Starting upgrade from {start_version or 'very old version'} to {finish_version}\n"
+            f"\n---> Starting upgrade from {start_version or 'old version'} to {finish_version}\n"
         )
 
         # Set the new version
@@ -173,16 +177,23 @@ class UpgradeStep(ABC):
                 config["profiles"]["dask_worker"][k]["image"] = newimage
 
         # Run any version-specific tasks
-        return self._version_specific_upgrade(config, start_version)
+        return self._version_specific_upgrade(config, start_version, config_filename)
 
-    def _version_specific_upgrade(self, config, start_version):
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename, *args, **kwargs
+    ):
+        """
+        Override this method in subclasses if you need to do anything specific to your version
+        """
         return config
 
 
 class Upgrade_0_3_12(UpgradeStep):
     version = "0.3.12"
 
-    def _version_specific_upgrade(self, config, start_version):
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename, *args, **kwargs
+    ):
         """
         This verison of QHub requires a conda_store image for the first time.
         """
@@ -190,6 +201,59 @@ class Upgrade_0_3_12(UpgradeStep):
             newimage = f"quansight/qhub-conda-store:v{self.version}"
             print(f"Adding default_images: conda_store image as {newimage}")
             config["default_images"]["conda_store"] = newimage
+        return config
+
+
+class Upgrade_0_3_14(UpgradeStep):
+    version = "0.3.14"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: pathlib.Path, *args, **kwargs
+    ):
+        """
+        Upgrade to Keycloak.
+        """
+        # Create a group/user import file for Keycloak
+        security = config.get("security", {})
+        users = security.get("users", {})
+        groups = security.get("groups", {})
+
+        realm_import_filename = config_filename.parent / "qhub-users-import.json"
+
+        realm = {"id": "qhub", "realm": "qhub"}
+        realm["users"] = [
+            {
+                "username": k,
+                "enabled": True,
+                "groups": list(
+                    ({v.get("primary_group", "")} | set(v.get("secondary_groups", [])))
+                    - {""}
+                ),
+            }
+            for k, v in users.items()
+        ]
+        realm["groups"] = [
+            {"name": k, "path": f"/{k}"}
+            for k, v in groups.items()
+            if k not in {"users", "admin"}
+        ]
+
+        backup_config_file(realm_import_filename)
+
+        with realm_import_filename.open("wt") as f:
+            json.dump(realm, f, indent=2)
+
+        print(
+            f"\nSaving user/group import file {realm_import_filename}.\n\n"
+            "ACTION REQUIRED: You must import this file into the Keycloak admin webpage after you redeploy QHub.\n"
+            "Visit the URL path /auth/ and login as 'root'. Under Manage, click Import and select this file.\n"
+        )
+
+        if "users" in security:
+            del security["users"]
+        if "groups" in security:
+            del security["groups"]
+
         return config
 
 
