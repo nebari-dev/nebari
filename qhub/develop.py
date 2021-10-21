@@ -36,9 +36,9 @@ def build_dockerfile_image(dockerfile_path, image_tag):
 
 
 def upload_minikube_image(image):
-    with console.status(f'Uploading {image} to local Minikube cache'):
-        minikube.image_load(image)
-    console.print(f'Upload complete of {image} to local Minikube cache')
+    with console.status(f'Uploading "{image}" to local Minikube cache'):
+        minikube.image_load(image, overwrite=False)
+    console.print(f'Upload complete of "{image}" to local Minikube cache')
 
 
 def develop():

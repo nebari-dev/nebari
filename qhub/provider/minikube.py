@@ -92,9 +92,11 @@ def version():
     return re.search(r"minikube version: v(\d+)\.(\d+).(\d+)", version_output).groups()
 
 
-def image_load(image):
+def image_load(image, overwrite=True):
     minikube_path = download_minikube_binary()
-    command = ['image', 'load', image]
+
+    overwrite_command = '--overwrite=true' if overwrite else '--overwrite=false'
+    command = ['image', 'load', image, overwrite_command]
     with timer(logger, "minikube image load"):
         run_minikube_subprocess(command, prefix="minikube")
 
