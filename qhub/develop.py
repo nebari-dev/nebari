@@ -17,12 +17,11 @@ QHUB_IMAGES = [
 ]
 
 
-def build_docker_images():
+def build_docker_images(image_tag):
     for image in QHUB_IMAGES:
         dockerfile_name = image
         build_directory = os.path.dirname(dockerfile_name)
         image_name = os.path.splitext(dockerfile_name)[1][1:]
-        image_tag = git_head_sha
         logger.info(f'qhub develop build dockerfile={dockerfile_name}')
         docker.build(dockerfile_name, build_directory, image_name, image_tag)
 
@@ -34,4 +33,4 @@ def develop():
 
     git_head_sha = git.current_sha()
 
-    build_docker_images()
+    build_docker_images(image_tag=git_head_sha)
