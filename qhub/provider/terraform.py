@@ -10,6 +10,7 @@ import zipfile
 
 from qhub.utils import run_subprocess_cmd, QHubError
 from qhub import constants
+from qhub.console import console
 
 
 class TerraformError(QHubError):
