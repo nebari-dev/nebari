@@ -5,7 +5,7 @@ from ruamel import yaml
 from rich.pretty import pprint
 
 from qhub.provider import docker, git, minikube
-from qhub import utils, initialize, deploy
+from qhub import utils, initialize, deploy, render
 from qhub.console import console
 
 
@@ -55,6 +55,7 @@ def initialize_configuration(directory, image_tag, verbose=True, build_images=Tr
         for name, dask_worker_profile in config["profiles"]["dask_worker"].items():
             dask_worker_profile["image"] = f"docker.io/library/dask-worker:{image_tag}"
 
+    console.print(f"Generated QHub configuration at path={config_path}")
     if verbose:
         pprint(config)
 
@@ -104,9 +105,17 @@ def develop(verbose=True, build_images=True):
                     verbose=verbose):
                 minikube.image_load(image, overwrite=False)
 
-    console.rule("Creating QHub Configuration")
+    console.rule("Installing QHub")
     config = initialize_configuration(develop_directory, image_tag, build_images=build_images)
 
-    console.rule("Deploying QHub to Minikube")
+    with utils.timer(
+            f'Rendering qhub-config.yaml terraform files to directory={develop_directory}',
+            f'Rendered qhub-config.yaml terraform files to directory={develop_directory}',
+            verbose=verbose):
+        render.render_template(
+            develop_directory,
+            os.path.join(develop_directory, "qhub-config.yaml"),
+            force=True)
+
     with utils.change_directory(develop_directory):
         deploy.guided_install(config, dns_provider=None, dns_auto_provision=False, disable_prompt=True)
