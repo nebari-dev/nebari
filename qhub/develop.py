@@ -22,7 +22,7 @@ def list_dockerfile_images(directory):
     return dockerfile_paths, image_names
 
 
-def initialize_configuration(directory, image_tag, verbose=True):
+def initialize_configuration(directory, image_tag, verbose=True, build_images=True):
     config_path = os.path.join(directory, 'qhub-config.yaml')
 
     config = initialize.render_config(
@@ -39,20 +39,21 @@ def initialize_configuration(directory, image_tag, verbose=True):
         disable_prompt=True
     )
 
-    # replace the docker images used in deployment
-    config["default_images"] = {
-        "jupyterhub": f"docker.io/library/jupyterhub:{image_tag}",
-        "jupyterlab": f"docker.io/library/jupyterlab:{image_tag}",
-        "dask_worker": f"docker.io/library/dask-worker:{image_tag}",
-        "dask_gateway": f"docker.io/library/dask-gateway:{image_tag}",
-        "conda_store": f"docker.io/library/conda-store:{image_tag}",
-    }
+    if build_images:
+        # replace the docker images used in deployment
+        config["default_images"] = {
+            "jupyterhub": f"docker.io/library/jupyterhub:{image_tag}",
+            "jupyterlab": f"docker.io/library/jupyterlab:{image_tag}",
+            "dask_worker": f"docker.io/library/dask-worker:{image_tag}",
+            "dask_gateway": f"docker.io/library/dask-gateway:{image_tag}",
+            "conda_store": f"docker.io/library/conda-store:{image_tag}",
+        }
 
-    for jupyterlab_profile in config["profiles"]["jupyterlab"]:
-        jupyterlab_profile["kubespawner_override"]["image"] = f"docker.io/library/jupyterlab:{image_tag}"
+        for jupyterlab_profile in config["profiles"]["jupyterlab"]:
+            jupyterlab_profile["kubespawner_override"]["image"] = f"docker.io/library/jupyterlab:{image_tag}"
 
-    for name, dask_worker_profile in config["profiles"]["dask_worker"].items():
-        dask_worker_profile["image"] = f"docker.io/library/dask-worker:{image_tag}"
+        for name, dask_worker_profile in config["profiles"]["dask_worker"].items():
+            dask_worker_profile["image"] = f"docker.io/library/dask-worker:{image_tag}"
 
     if verbose:
         pprint(config)
@@ -64,7 +65,7 @@ def initialize_configuration(directory, image_tag, verbose=True):
     return config
 
 
-def develop(verbose=True):
+def develop(verbose=True, build_images=True):
     git_repo_root = git.is_git_repo()
     if git_repo_root is None:
         raise utils.QHubError('QHub develop required to run within QHub git repository')
@@ -83,27 +84,28 @@ def develop(verbose=True):
         if not minikube.status():
             raise QHubError("Minikube cluster failed to start")
 
-    console.rule("Building Docker images")
-    dockerfile_paths, image_names = list_dockerfile_images(QHUB_IMAGE_DIRECTORY)
-    for dockerfile_path, image_name in zip(dockerfile_paths, image_names):
-        image = f"{image_name}:{image_tag}"
-        with utils.timer(
-                f'Building {os.path.basename(dockerfile_path)} image "{image}"',
-                f'Built {os.path.basename(dockerfile_path)} image "{image}"',
-                verbose=verbose):
-            docker.build(dockerfile_path, QHUB_IMAGE_DIRECTORY, image_name, image_tag)
+    if build_images:
+        console.rule("Building Docker images")
+        dockerfile_paths, image_names = list_dockerfile_images(QHUB_IMAGE_DIRECTORY)
+        for dockerfile_path, image_name in zip(dockerfile_paths, image_names):
+            image = f"{image_name}:{image_tag}"
+            with utils.timer(
+                    f'Building {os.path.basename(dockerfile_path)} image "{image}"',
+                    f'Built {os.path.basename(dockerfile_path)} image "{image}"',
+                    verbose=verbose):
+                docker.build(dockerfile_path, QHUB_IMAGE_DIRECTORY, image_name, image_tag)
 
-    console.rule("Uploading Docker image to Minikube cache")
-    for image_name in image_names:
-        image = f"{image_name}:{image_tag}"
-        with utils.timer(
-                f'Uploading "{image}" to local Minikube cache',
-                f'Upload complete of "{image}" to local Minikube cache',
-                verbose=verbose):
-            minikube.image_load(image, overwrite=False)
+        console.rule("Uploading Docker image to Minikube cache")
+        for image_name in image_names:
+            image = f"{image_name}:{image_tag}"
+            with utils.timer(
+                    f'Uploading "{image}" to local Minikube cache',
+                    f'Upload complete of "{image}" to local Minikube cache',
+                    verbose=verbose):
+                minikube.image_load(image, overwrite=False)
 
     console.rule("Creating QHub Configuration")
-    initialize_configuration(develop_directory, image_tag)
+    initialize_configuration(develop_directory, image_tag, build_images=build_images)
 
     console.rule("Deploying QHub to Minikube")
     with utils.change_directory(develop_directory):
