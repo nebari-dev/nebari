@@ -65,7 +65,7 @@ def version():
 
 def init(directory=None):
     command = ["init"]
-    run_terraform_subprocess(cwd=directory, prefix="terraform")
+    run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
 def apply(directory=None, targets=None):
