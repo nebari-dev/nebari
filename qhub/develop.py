@@ -16,8 +16,6 @@ QHUB_DOCKERFILE_PATHS = [
 ]
 
 
-def start_minikube_cluster():
-
 def build_dockerfile_image(dockerfile_path, image_tag):
     dockerfile_name = os.path.basename(dockerfile_path)
     build_directory = os.path.dirname(dockerfile_path)
