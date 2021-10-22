@@ -107,7 +107,11 @@ def delete(profile="qhub"):
     run_minikube_subprocess(["delete", "--profile", profile], prefix="minikube")
 
 
-def configure_metallb(start_address=None, end_address=None):
+def addons_enable(addon, profile="qhub"):
+    run_minikube_subprocess(["addons", "enable", addon, "--profile", profile], prefix="minikube")
+
+
+def configure_metallb(profile="qhub", start_address=None, end_address=None):
     """Configure metallb load balancer
 
     Assumes that minikube docker image is running
@@ -116,18 +120,18 @@ def configure_metallb(start_address=None, end_address=None):
     docker_images_output = subprocess.check_output(docker_image_cmd, encoding='utf-8')[:-1]
     docker_images = {line.split()[0]: line.split()[1] for line in docker_images_output.split('\n')}
 
-    if 'minikube' not in docker_images:
+    if profile not in docker_images:
         raise ValueError('minikube docker image not running')
 
-    docker_inspect_cmd = ['docker', 'inspect', '--format={{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}', docker_images['minikube']]
+    docker_inspect_cmd = ['docker', 'inspect', '--format={{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}', docker_images[profile]]
     address = subprocess.check_output(docker_inspect_cmd, encoding='utf-8')[:-1].split('.')
 
-    filename = os.path.expanduser('~/.minikube/profiles/minikube/config.json')
+    filename = os.path.expanduser(f'~/.minikube/profiles/{profile}/config.json')
     with open(filename) as f:
         data = json.load(f)
 
     start_address, end_address = '.'.join(address[0:3] + ['100']), '.'.join(address[0:3] + ['150'])
-    # logger.info('setting start=%s end=%s for metallb' % (start_address, end_address))
+    console.print(f"configuring MetalLB start={start_address} end={end_address}")
     data['KubernetesConfig']['LoadBalancerStartIP'] = start_address
     data['KubernetesConfig']['LoadBalancerEndIP'] = end_address
 

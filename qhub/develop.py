@@ -84,6 +84,8 @@ def develop(verbose=True, build_images=True):
         minikube.start()
         if not minikube.status():
             raise QHubError("Minikube cluster failed to start")
+        minikube.configure_metallb(profile=profile)
+        minikube.addons_enable("metallb")
 
     if build_images:
         console.rule("Building Docker images")
