@@ -48,7 +48,7 @@ def initialize_configuration(directory, image_tag, verbose=True):
         "conda_store": f"docker.io/library/conda-store:{image_tag}",
     }
 
-    for jupyterlab_profile in config["profiles"]["jupyterlab"].items():
+    for jupyterlab_profile in config["profiles"]["jupyterlab"]:
         jupyterlab_profile["kubespawner_override"]["image"] = f"docker.io/library/jupyterlab:{image_tag}"
 
     for name, dask_worker_profile in config["profiles"]["dask_worker"].items():
