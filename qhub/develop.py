@@ -1,6 +1,7 @@
 import os
 import datetime
 
+from ruamel import yaml
 from rich.pretty import pprint
 
 from qhub.provider import docker, git, minikube
@@ -57,7 +58,7 @@ def initialize_configuration(directory, image_tag, verbose=True):
         pprint(config)
 
     with open(config_path, "w") as f:
-        yaml.dump(f, config)
+        yaml.dump(config, f)
 
     return config
 
