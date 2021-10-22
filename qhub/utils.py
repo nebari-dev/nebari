@@ -74,7 +74,7 @@ def run_subprocess_cmd(process_args : List[str], prefix : str = None, **kwargs):
     process = subprocess.Popen(
         process_args, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8"
     )
-x    for line in iter(lambda: process.stdout.readline(), ""):
+    for line in iter(lambda: process.stdout.readline(), ""):
         full_line = ANSI_ESCAPE_8BIT.sub('', line_prefix + line)
         console.out(full_line, end="")
     return process.wait(
