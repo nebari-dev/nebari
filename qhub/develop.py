@@ -21,9 +21,6 @@ def list_dockerfile_images(directory):
     return dockerfile_paths, image_names
 
 
-def upload_minikube_image(image):
-
-
 def initialize_configuration(directory):
     config_path = os.path.join(directory, 'qhub-config.yaml')
     config = initialize.render_config(
