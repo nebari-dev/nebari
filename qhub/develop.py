@@ -5,7 +5,7 @@ from ruamel import yaml
 from rich.pretty import pprint
 
 from qhub.provider import docker, git, minikube
-from qhub import utils, initialize
+from qhub import utils, initialize, deploy
 from qhub.console import console
 
 
@@ -102,4 +102,9 @@ def develop(verbose=True):
                 verbose=verbose):
             minikube.image_load(image, overwrite=False)
 
+    console.rule("Creating QHub Configuration")
     initialize_configuration(develop_directory, image_tag)
+
+    console.rule("Deploying QHub to Minikube")
+    with utils.change_directory(develop_directory):
+        deploy.guided_install(config, dns_provider=None, dns_auto_provision=False, disable_prompt=True)
