@@ -51,7 +51,7 @@ def timer(in_progress, completed, verbose=True):
         else:
             with console.capture() as capture:
                 yield
-    console.print(completed + f"in {time.time() - start_time:.3f} \[s\]")
+    console.print(completed + f" in {time.time() - start_time:.3f} \[s]")
 
 
 @contextlib.contextmanager

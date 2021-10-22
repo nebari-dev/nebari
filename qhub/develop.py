@@ -23,8 +23,9 @@ def list_dockerfile_images(directory):
 
 def initialize_configuration(directory):
     config_path = os.path.join(directory, 'qhub-config.yaml')
+
     config = initialize.render_config(
-        f'local-{datetime.datetime.utcnow().strftime("%Y%m%d-%H%M")}',
+        f'qhubdevelop',
         qhub_domain='github-actions.qhub.dev',
         cloud_provider='local',
         ci_provider='none',
@@ -36,6 +37,7 @@ def initialize_configuration(directory):
         terraform_state=None,
         disable_prompt=True
     )
+
     pprint(config)
 
 
