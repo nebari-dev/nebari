@@ -24,6 +24,7 @@ def is_git_repo(path : str = None):
 
 def current_sha(path : str = None):
     """Get current commit sha of git directory"""
+    path = path or os.getcwd()
     if not is_git_repo(path):
         raise DockerException('cannot get git sha of path that is not git directory')
     with change_directory(path):
