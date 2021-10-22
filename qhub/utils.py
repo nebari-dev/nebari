@@ -55,7 +55,9 @@ def change_directory(directory):
 def run_subprocess_cmd(processargs, prefix=None, **kwargs):
     """Runs subprocess command with realtime stdout logging with optional line prefix."""
     if prefix:
-        line_prefix = f"[{kwargs['prefix']}]: "
+        line_prefix = f"[{prefix}]: "
+    else:
+        line_prefix = ""
 
     console.out(line_prefix + '$ ' + ' '.join(processargs))
     process = subprocess.Popen(
