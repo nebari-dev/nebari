@@ -1,0 +1,52 @@
+name: "Test QHub Provider"
+
+on:
+  pull_request: # Workflow only runs for PR against main anyway
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*'
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+
+env:
+  DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  test-render-providers:
+    name: 'Test QHub Provider'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        provider:
+          - aws
+          # - azure
+          - do
+          - gcp
+          - local
+    steps:
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@main
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+      - name: Install QHub
+        run: |
+          pip install .[dev]
+      - name: QHub Initialize
+        run: |
+          qhub init "${{ matrix.provider }}" --project "${{ matrix.provider }}-test" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --kubernetes-version "1.18.0" --disable-prompt
+      - name: QHub Render
+        run: |
+          qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
+          cp "qhub-config.yaml" "qhub-${{ matrix.provider }}-deployment/qhub-config.yaml"
+      - name: QHub Render Artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: "qhub-${{ matrix.provider }}-artifact"
+          path: "qhub-${{ matrix.provider }}-deployment"
