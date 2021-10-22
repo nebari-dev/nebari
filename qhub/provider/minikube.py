@@ -104,7 +104,7 @@ def image_load(image, overwrite=True):
 def start(driver='docker', memory='8g', cpu='2', profile="qhub"):
     logger.info(f"minikube start")
     with timer(logger, "minikube start"):
-        command = ["start", f"--driver={driver}", f"--memory={memory}", f"--cpus={cpu}", "-p", profile]
+        command = ["start", f"--driver={driver}", f"--memory={memory}", f"--cpus={cpu}", f"--profile={profile}"]
         run_minikube_subprocess(command, prefix="minikube")
 
 
@@ -117,7 +117,7 @@ def status():
 def delete(profile="qhub"):
     logger.info(f"minikube delete")
     with timer(logger, "minikube delete"):
-        run_minikube_subprocess(["delete", "-p", profile], prefix="minikube")
+        run_minikube_subprocess(["delete", "--profile", profile], prefix="minikube")
 
 
 def configure_metallb(start_address=None, end_address=None):
