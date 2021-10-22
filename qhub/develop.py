@@ -62,8 +62,8 @@ def develop(verbose=True):
     for dockerfile_path, image_name in zip(dockerfile_paths, image_names):
         image = f"{image_name}:{git_head_sha}"
         with utils.timer(
-                f'Building {dockerfile_name} image "{image}"',
-                f'Built {dockerfile_name} image "{image}"',
+                f'Building {os.path.basename(dockerfile_path)} image "{image}"',
+                f'Built {os.path.basename(dockerfile_path)} image "{image}"',
                 verbose=verbose):
             docker.build(dockerfile_path, QHUB_IMAGE_DIRECTORY, image_name, image_tag)
 
