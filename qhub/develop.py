@@ -105,7 +105,7 @@ def develop(verbose=True, build_images=True):
                 minikube.image_load(image, overwrite=False)
 
     console.rule("Creating QHub Configuration")
-    initialize_configuration(develop_directory, image_tag, build_images=build_images)
+    config = initialize_configuration(develop_directory, image_tag, build_images=build_images)
 
     console.rule("Deploying QHub to Minikube")
     with utils.change_directory(develop_directory):
