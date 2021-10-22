@@ -51,7 +51,7 @@ qhub render -c qhub-config.yaml
 
 Commit all the files (qhub-config.yaml and GitHub/GitLab workflow files) back to the remote repo. All files need to be commited together in the same commit.
 
-## Known versions that will require re-deployment
+## nown versions that require re-deployment
 
 For versions that are known to error when upgrading, the steps for upgrade include:
 
