@@ -17,10 +17,6 @@ QHUB_DOCKERFILE_PATHS = [
 
 
 def start_minikube_cluster():
-    with utils.timer(
-            'Creating Minikube cluster',
-            'Created Minikube cluster'):
-        minikube.start()
 
 def build_dockerfile_image(dockerfile_path, image_tag):
     dockerfile_name = os.path.basename(dockerfile_path)
@@ -61,7 +57,7 @@ def initialize_configuration(directory):
     pprint(config)
 
 
-def develop():
+def develop(verbose=True):
     git_repo_root = git.is_git_repo()
     if git_repo_root is None:
         raise utils.QHubError('QHub develop required to run within QHub git repository')
@@ -70,7 +66,12 @@ def develop():
 
     develop_directory = os.path.join(git_repo_root, ".qhub", "develop")
 
-    start_minikube_cluster()
+    console.rule("Starting Minikube Cluster")
+    with utils.timer(
+            'Creating Minikube cluster',
+            'Created Minikube cluster',
+            verbose=verbose):
+        minikube.start()
 
     for dockerfile_path in QHUB_DOCKERFILE_PATHS:
         image = build_dockerfile_image(dockerfile_path, git_head_sha)

@@ -43,11 +43,15 @@ class QHubError(Exception):
 
 
 @contextlib.contextmanager
-def timer(in_progress, completed):
+def timer(in_progress, completed, verbose=True):
     start_time = time.time()
     with console.status(in_progress):
-        yield
-    console.print(completed + f"in {time.time() - start_time:.3f} [s]")
+        if verbose:
+            yield
+        else:
+            with console.capture() as capture:
+                yield
+    console.print(completed + f"in {time.time() - start_time:.3f} \[s\]")
 
 
 @contextlib.contextmanager
@@ -70,7 +74,7 @@ def run_subprocess_cmd(process_args : List[str], prefix : str = None, **kwargs):
     process = subprocess.Popen(
         process_args, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8"
     )
-    for line in iter(lambda: process.stdout.readline(), ""):
+x    for line in iter(lambda: process.stdout.readline(), ""):
         full_line = ANSI_ESCAPE_8BIT.sub('', line_prefix + line)
         console.out(full_line, end="")
     return process.wait(
