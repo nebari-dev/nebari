@@ -62,7 +62,7 @@ def run_subprocess_cmd(process_args : List[str], prefix : str = None, **kwargs):
 
     console.out(line_prefix + '$ ' + ' '.join(process_args))
     process = subprocess.Popen(
-        processargs, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8"
+        process_args, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8"
     )
     for line in iter(lambda: process.stdout.readline(), ""):
         full_line = line_prefix + line
