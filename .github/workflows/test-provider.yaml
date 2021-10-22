@@ -11,14 +11,17 @@ on:
       - "docs/**"
       - "*.md"
 
+env:
+  DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  HELLO: hello_world
+  PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+
 jobs:
   test-render-providers:
     name: 'Test QHub Provider'
     runs-on: ubuntu-latest
-    env:
-      DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     strategy:
       matrix:
         provider:
@@ -34,6 +37,10 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
+      - name: Env Var Test
+        run: |
+          echo $HELLO
+          echo $PYPI_USERNAME
       - name: Install QHub
         run: |
           pip install .[dev]
