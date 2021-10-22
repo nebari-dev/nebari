@@ -1,18 +1,10 @@
 import os
-import logging
 import datetime
 
-from rich.console import Console
 from rich.pretty import pprint
 
 from qhub.provider import docker, git, minikube
 from qhub import utils, initialize
-
-
-logger = logging.getLogger(__name__)
-
-
-console = Console()
 
 
 QHUB_DOCKERFILE_PATHS = [
