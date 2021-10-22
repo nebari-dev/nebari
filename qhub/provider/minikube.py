@@ -89,7 +89,7 @@ def version():
     version_output = subprocess.check_output([minikube_path, "version"]).decode(
         "utf-8"
     )
-    return re.search(r"minikube version: v(\d+)\.(\d+).(\d+)", version_output).groups()
+    return re.search(r"minikube version: v(\d+\.\d+.\d+)", version_output).group(1)
 
 
 def image_load(image, overwrite=True):
@@ -101,23 +101,23 @@ def image_load(image, overwrite=True):
         run_minikube_subprocess(command, prefix="minikube")
 
 
-def start(driver='docker', memory='8g', cpu='2'):
+def start(driver='docker', memory='8g', cpu='2', profile="qhub"):
     logger.info(f"minikube start")
     with timer(logger, "minikube start"):
-        command = ["start", f"--driver={driver}", f"--memory={memory}", f"--cpus={cpu}"]
+        command = ["start", f"--driver={driver}", f"--memory={memory}", f"--cpus={cpu}", "-p", profile]
         run_minikube_subprocess(command, prefix="minikube")
 
 
 def status():
-    logger.info(f"minikube delete")
-    with timer(logger, "minikube delete"):
-        run_minikube_subprocess(["delete"], prefix="minikube")
+    logger.info(f"minikube status")
+    with timer(logger, "minikube status"):
+        run_minikube_subprocess(["status"], prefix="minikube")
 
 
-def delete():
+def delete(profile="qhub"):
     logger.info(f"minikube delete")
     with timer(logger, "minikube delete"):
-        run_minikube_subprocess(["delete"], prefix="minikube")
+        run_minikube_subprocess(["delete", "-p", profile], prefix="minikube")
 
 
 def configure_metallb(start_address=None, end_address=None):
