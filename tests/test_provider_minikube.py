@@ -9,7 +9,7 @@ def test_minikube_version():
 
 
 def test_minikube_start_status_delete():
-    profile = "pytest-test_minikube_start_status_delete"
+    profile = "pytest-start-status-delete"
 
     try:
         minikube.start(profile=profile)
