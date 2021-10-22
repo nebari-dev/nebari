@@ -57,6 +57,7 @@ def initialize_configuration(directory, image_tag, verbose=True):
     if verbose:
         pprint(config)
 
+    os.makedirs(directory, exist_ok=True)
     with open(config_path, "w") as f:
         yaml.dump(config, f)
 
