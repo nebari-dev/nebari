@@ -5,7 +5,7 @@ import json
 from qhub.utils import run_subprocess_cmd, QHubError
 
 
-class DockerError(QhubError):
+class DockerError(QHubError):
     pass
 
 
