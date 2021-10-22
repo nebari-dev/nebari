@@ -77,9 +77,9 @@ def run_minikube_subprocess(processargs, **kwargs):
     minikube_path = download_minikube_binary()
     logger.info(f" minikube at {minikube_path}")
     command = [minikube_path] + processargs
-    subprocess.check_output(command)
-    # if run_subprocess_cmd([minikube_path] + processargs, **kwargs):
-    #     raise MinikubeException("Minikube returned an error")
+    # subprocess.check_output(command)
+    if run_subprocess_cmd([minikube_path] + processargs, **kwargs):
+        raise MinikubeException("Minikube returned an error")
 
 
 def version():
