@@ -66,7 +66,7 @@ def run_subprocess_cmd(processargs, **kwargs):
     )
     for line in iter(lambda: process.stdout.readline(), ""):
         full_line = line_prefix + line
-        console.out(full_line)
+        console.out(full_line, end="")
     return process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout
