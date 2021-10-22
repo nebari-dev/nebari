@@ -45,6 +45,7 @@ def develop(verbose=True):
         raise utils.QHubError('QHub develop required to run within QHub git repository')
 
     git_head_sha = git.current_sha()
+    image_tag = git_head_sha
 
     develop_directory = os.path.join(git_repo_root, ".qhub", "develop")
 
@@ -60,7 +61,7 @@ def develop(verbose=True):
     console.rule("Building Docker Images")
     dockerfile_paths, image_names = list_dockerfile_images(QHUB_IMAGE_DIRECTORY)
     for dockerfile_path, image_name in zip(dockerfile_paths, image_names):
-        image = f"{image_name}:{git_head_sha}"
+        image = f"{image_name}:{image_tag}"
         with utils.timer(
                 f'Building {os.path.basename(dockerfile_path)} image "{image}"',
                 f'Built {os.path.basename(dockerfile_path)} image "{image}"',
@@ -69,7 +70,7 @@ def develop(verbose=True):
 
     console.rule("Uploading Docker Image to Minikube cache")
     for image_name in image_names:
-        image = f"{image_name}:{git_head_sha}"
+        image = f"{image_name}:{image_tag}"
         with utils.timer(
                 f'Uploading "{image}" to local Minikube cache',
                 f'Upload complete of "{image}" to local Minikube cache',
