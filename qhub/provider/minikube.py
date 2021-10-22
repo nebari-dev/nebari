@@ -5,6 +5,7 @@ import urllib.request
 import platform
 import subprocess
 import re
+import json
 import shutil
 
 from qhub.utils import run_subprocess_cmd, QHubError
