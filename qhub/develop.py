@@ -5,6 +5,7 @@ from rich.pretty import pprint
 
 from qhub.provider import docker, git, minikube
 from qhub import utils, initialize
+from qhub.console import console
 
 
 QHUB_DOCKERFILE_PATHS = [
