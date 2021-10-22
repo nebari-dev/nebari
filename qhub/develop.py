@@ -25,10 +25,10 @@ QHUB_DOCKERFILE_PATHS = [
 
 
 def start_minikube_cluster():
-    with console.status('Creating Minikube cluster'):
+    with utils.timer(
+            'Creating Minikube cluster',
+            'Created Minikube cluster'):
         minikube.start()
-    console.print(f'Created Minikube cluster')
-
 
 def build_dockerfile_image(dockerfile_path, image_tag):
     dockerfile_name = os.path.basename(dockerfile_path)
@@ -36,17 +36,19 @@ def build_dockerfile_image(dockerfile_path, image_tag):
     image_name = os.path.splitext(dockerfile_path)[1][1:]
     image = f"{image_name}:{image_tag}"
 
-    with console.status(f'Building {dockerfile_name} image "{image}"'):
+    with utils.timer(
+            f'Building {dockerfile_name} image "{image}"',
+            f'Built {dockerfile_name} image "{image}"'):
         docker.build(dockerfile_path, build_directory, image_name, image_tag)
-    console.print(f'Built {dockerfile_name} image "{image}"')
 
     return image
 
 
 def upload_minikube_image(image):
-    with console.status(f'Uploading "{image}" to local Minikube cache'):
+    with utils.timer(
+            f'Uploading "{image}" to local Minikube cache',
+            f'Upload complete of "{image}" to local Minikube cache'):
         minikube.image_load(image, overwrite=False)
-    console.print(f'Upload complete of "{image}" to local Minikube cache')
 
 
 def initialize_configuration(directory):
