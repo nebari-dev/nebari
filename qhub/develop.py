@@ -8,34 +8,20 @@ from qhub import utils, initialize
 from qhub.console import console
 
 
-QHUB_DOCKERFILE_PATHS = [
-    'qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.conda-store',
-    'qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.dask-gateway',
-    'qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.dask-worker',
-    'qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.jupyterhub',
-    'qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.jupyterlab',
-]
+QHUB_IMAGE_DIRECTORY = "qhub/template/{{ cookiecutter.repo_directory }}/image/"
 
 
-def build_dockerfile_image(dockerfile_path, image_tag):
-    dockerfile_name = os.path.basename(dockerfile_path)
-    build_directory = os.path.dirname(dockerfile_path)
-    image_name = os.path.splitext(dockerfile_path)[1][1:]
-    image = f"{image_name}:{image_tag}"
-
-    with utils.timer(
-            f'Building {dockerfile_name} image "{image}"',
-            f'Built {dockerfile_name} image "{image}"'):
-        docker.build(dockerfile_path, build_directory, image_name, image_tag)
-
-    return image
+def list_dockerfile_images(directory):
+    dockerfile_paths = []
+    image_names = []
+    for path in os.listdir(directory):
+        if path.startswith('Dockerfile'):
+            dockerfile_paths.append(os.path.join(directory, path))
+            image_names.append(os.path.splitext(path)[1][1:])
+    return dockerfile_paths, image_names
 
 
 def upload_minikube_image(image):
-    with utils.timer(
-            f'Uploading "{image}" to local Minikube cache',
-            f'Upload complete of "{image}" to local Minikube cache'):
-        minikube.image_load(image, overwrite=False)
 
 
 def initialize_configuration(directory):
@@ -71,9 +57,26 @@ def develop(verbose=True):
             'Created Minikube cluster',
             verbose=verbose):
         minikube.start()
+        if not minikube.status():
+            raise QHubError("Minikube cluster failed to start")
 
-    for dockerfile_path in QHUB_DOCKERFILE_PATHS:
-        image = build_dockerfile_image(dockerfile_path, git_head_sha)
-        upload_minikube_image(image)
+    console.rule("Building Docker Images")
+    dockerfile_paths, image_names = list_dockerfile_images(QHUB_IMAGE_DIRECTORY)
+    for dockerfile_path, image_name in zip(dockerfile_paths, image_names):
+        image = f"{image_name}:{git_head_sha}"
+        with utils.timer(
+                f'Building {dockerfile_name} image "{image}"',
+                f'Built {dockerfile_name} image "{image}"',
+                verbose=verbose):
+            docker.build(dockerfile_path, QHUB_IMAGE_DIRECTORY, image_name, image_tag)
+
+    console.rule("Uploading Docker Image to Minikube cache")
+    for image_name in image_names:
+        image = f"{image_name}:{git_head_sha}"
+        with utils.timer(
+                f'Uploading "{image}" to local Minikube cache',
+                f'Upload complete of "{image}" to local Minikube cache',
+                verbose=verbose):
+            minikube.image_load(image, overwrite=False)
 
     initialize_configuration(develop_directory)
