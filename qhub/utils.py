@@ -60,13 +60,13 @@ def run_subprocess_cmd(processargs, **kwargs):
     else:
         line_prefix = ""
 
-    console.log('$ ' + ' '.join(processargs))
+    console.print('$ ' + ' '.join(processargs))
     process = subprocess.Popen(
         processargs, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8"
     )
     for line in iter(lambda: process.stdout.readline(), ""):
         full_line = line_prefix + line
-        console.print(full_line)
+        console.out(full_line)
     return process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout
