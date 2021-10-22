@@ -1,5 +1,4 @@
 import tempfile
-import logging
 import os
 import sys
 import urllib.request
@@ -10,9 +9,7 @@ import shutil
 
 from qhub.utils import timer, run_subprocess_cmd
 from qhub import constants
-
-
-logger = logging.getLogger(__name__)
+from qhub.console import console
 
 
 class MinikubeException(Exception):
@@ -61,9 +58,8 @@ def download_minikube_binary(version=constants.MINIKUBE_VERSION):
     if not os.path.isfile(filename_path):
         os.makedirs(filename_directory, exist_ok=True)
 
-        logger.info(
-            f"downloading and extracting minikube binary from url={download_url} to path={filename_path}"
-        )
+        console.print(f"downloading and extracting minikube binary from url={download_url} to path={filename_path}")
+
         with urllib.request.urlopen(download_url) as resp:
             with open(filename_path, "wb") as f:
                 f.write(resp.read())
@@ -75,17 +71,13 @@ def download_minikube_binary(version=constants.MINIKUBE_VERSION):
 
 def run_minikube_subprocess(processargs, **kwargs):
     minikube_path = download_minikube_binary()
-    logger.info(f" minikube at {minikube_path}")
     command = [minikube_path] + processargs
-    # subprocess.check_output(command)
     if run_subprocess_cmd([minikube_path] + processargs, **kwargs):
         raise MinikubeException("Minikube returned an error")
 
 
 def version():
     minikube_path = download_minikube_binary()
-    logger.info(f"checking minikube={minikube_path} version")
-
     version_output = subprocess.check_output([minikube_path, "version"]).decode(
         "utf-8"
     )
@@ -97,27 +89,20 @@ def image_load(image, overwrite=True):
 
     overwrite_command = '--overwrite=true' if overwrite else '--overwrite=false'
     command = ['image', 'load', overwrite_command, image]
-    with timer(logger, "minikube image load"):
-        run_minikube_subprocess(command, prefix="minikube")
+    run_minikube_subprocess(command, prefix="minikube")
 
 
 def start(driver='docker', memory='8g', cpu='2', profile="qhub"):
-    logger.info(f"minikube start")
-    with timer(logger, "minikube start"):
-        command = ["start", f"--driver={driver}", f"--memory={memory}", f"--cpus={cpu}", f"--profile={profile}"]
-        run_minikube_subprocess(command, prefix="minikube")
+    command = ["start", f"--driver={driver}", f"--memory={memory}", f"--cpus={cpu}", f"--profile={profile}"]
+    run_minikube_subprocess(command, prefix="minikube")
 
 
 def status():
-    logger.info(f"minikube status")
-    with timer(logger, "minikube status"):
-        run_minikube_subprocess(["status"], prefix="minikube")
+    run_minikube_subprocess(["status"], prefix="minikube")
 
 
 def delete(profile="qhub"):
-    logger.info(f"minikube delete")
-    with timer(logger, "minikube delete"):
-        run_minikube_subprocess(["delete", "--profile", profile], prefix="minikube")
+    run_minikube_subprocess(["delete", "--profile", profile], prefix="minikube")
 
 
 def configure_metallb(start_address=None, end_address=None):
@@ -140,7 +125,7 @@ def configure_metallb(start_address=None, end_address=None):
         data = json.load(f)
 
     start_address, end_address = '.'.join(address[0:3] + ['100']), '.'.join(address[0:3] + ['150'])
-    logger.info('setting start=%s end=%s for metallb' % (start_address, end_address))
+-    # logger.info('setting start=%s end=%s for metallb' % (start_address, end_address))
     data['KubernetesConfig']['LoadBalancerStartIP'] = start_address
     data['KubernetesConfig']['LoadBalancerEndIP'] = end_address
 

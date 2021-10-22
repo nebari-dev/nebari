@@ -6,7 +6,9 @@ import re
 import contextlib
 from typing import Sequence, Set
 
-from .version import __version__
+from qhub.version import __version__
+from qhub.console import console
+
 
 DO_ENV_DOCS = (
     "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#digital-ocean"
@@ -35,10 +37,11 @@ class QHubError(Exception):
 
 
 @contextlib.contextmanager
-def timer(logger, prefix):
+def timer(in_progress, completed):
     start_time = time.time()
-    yield
-    logger.info(f"{prefix} took {time.time() - start_time:.3f} [s]")
+    with console.status(in_progress):
+        yield
+    console.print(completed + f"{time.time() - start_time:.3f} [s]")
 
 
 @contextlib.contextmanager
@@ -59,6 +62,7 @@ def run_subprocess_cmd(processargs, **kwargs):
 
     strip_errors = kwargs.pop("strip_errors", False)
 
+    console.log('$ ' + ' '.join(processargs))
     process = subprocess.Popen(
         processargs, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
@@ -71,8 +75,7 @@ def run_subprocess_cmd(processargs, **kwargs):
             )  # Remove red ANSI escape code
             full_line = full_line.encode("utf-8")
 
-        sys.stdout.buffer.write(full_line)
-        sys.stdout.flush()
+        console.print(full_line)
     return process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout

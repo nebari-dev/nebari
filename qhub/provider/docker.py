@@ -1,12 +1,8 @@
 import subprocess
 import shutil
 import json
-import logging
 
 from qhub.utils import timer, run_subprocess_cmd
-
-
-logger = logging.getLogger(__name__)
 
 
 class DockerException(Exception):
@@ -22,11 +18,9 @@ def check_docker():
 
 def run_docker_subprocess(processargs, verbose=True, **kwargs):
     docker_path = check_docker()
-    logger.info(f" docker at {docker_path}")
     command = [docker_path] + processargs
-    subprocess.check_output(command)
-    # if run_subprocess_cmd(command, **kwargs):
-    #     raise DockerException("Docker returned an error")
+    if run_subprocess_cmd(command, **kwargs):
+        raise DockerException("Docker returned an error")
 
 
 def inspect(name):
@@ -52,7 +46,5 @@ def ps():
 
 
 def build(dockerfile_path, build_directory, name, tag, verbose=False):
-    logger.info(f"docker build")
-    with timer(logger, "docker build"):
-        command = ['build', build_directory, f'--file={dockerfile_path}', f'--tag={name}:{tag}']
-        run_docker_subprocess(command, prefix='docker')
+    command = ['build', build_directory, f'--file={dockerfile_path}', f'--tag={name}:{tag}']
+    run_docker_subprocess(command, prefix='docker')
