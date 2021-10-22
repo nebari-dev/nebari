@@ -2,10 +2,10 @@ import subprocess
 import shutil
 import json
 
-from qhub.utils import timer, run_subprocess_cmd
+from qhub.utils import run_subprocess_cmd, QHubError
 
 
-class DockerException(Exception):
+class DockerError(QhubError):
     pass
 
 
@@ -20,7 +20,7 @@ def run_docker_subprocess(processargs, verbose=True, **kwargs):
     docker_path = check_docker()
     command = [docker_path] + processargs
     if run_subprocess_cmd(command, **kwargs):
-        raise DockerException("Docker returned an error")
+        raise DockerError("Docker returned an error")
 
 
 def inspect(name):

@@ -7,12 +7,12 @@ import subprocess
 import re
 import shutil
 
-from qhub.utils import timer, run_subprocess_cmd
+from qhub.utils import run_subprocess_cmd, QHubError
 from qhub import constants
 from qhub.console import console
 
 
-class MinikubeException(Exception):
+class MinikubeError(QHubError):
     pass
 
 
@@ -69,11 +69,11 @@ def download_minikube_binary(version=constants.MINIKUBE_VERSION):
     return filename_path
 
 
-def run_minikube_subprocess(processargs, **kwargs):
+def run_minikube_subprocess(process_args, **kwargs):
     minikube_path = download_minikube_binary()
-    command = [minikube_path] + processargs
-    if run_subprocess_cmd([minikube_path] + processargs, **kwargs):
-        raise MinikubeException("Minikube returned an error")
+    command = [minikube_path] + process_args
+    if run_subprocess_cmd([minikube_path] + process_args, **kwargs):
+        raise MinikubeError("Minikube returned an error")
 
 
 def version():

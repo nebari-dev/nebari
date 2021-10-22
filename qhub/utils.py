@@ -4,7 +4,7 @@ import time
 import os
 import re
 import contextlib
-from typing import Sequence, Set
+from typing import Sequence, Set, List
 
 from qhub.version import __version__
 from qhub.console import console
@@ -52,14 +52,15 @@ def change_directory(directory):
     os.chdir(current_directory)
 
 
-def run_subprocess_cmd(processargs, prefix=None, **kwargs):
-    """Runs subprocess command with realtime stdout logging with optional line prefix."""
+def run_subprocess_cmd(process_args : List[str], prefix : str = None, **kwargs):
+    """Runs subprocess command with realtime printing of stdout/stderr with optional line prefix
+    """
     if prefix:
         line_prefix = f"[{prefix}]: "
     else:
-        line_prefix = ""
+        line_prefix
 
-    console.out(line_prefix + '$ ' + ' '.join(processargs))
+    console.out(line_prefix + '$ ' + ' '.join(process_args))
     process = subprocess.Popen(
         processargs, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8"
     )

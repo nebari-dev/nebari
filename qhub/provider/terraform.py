@@ -1,5 +1,4 @@
 import io
-import logging
 import os
 import platform
 import re
@@ -9,14 +8,11 @@ import tempfile
 import urllib.request
 import zipfile
 
-from qhub.utils import timer, run_subprocess_cmd
+from qhub.utils import run_subprocess_cmd, QHubError
 from qhub import constants
 
 
-logger = logging.getLogger(__name__)
-
-
-class TerraformException(Exception):
+class TerraformError(QHubError):
     pass
 
 
@@ -42,7 +38,7 @@ def download_terraform_binary(version=constants.TERRAFORM_VERSION):
     filename_path = os.path.join(filename_directory, "terraform")
 
     if not os.path.isfile(filename_path):
-        logger.info(
+        console.print(
             f"downloading and extracting terraform binary from url={download_url} to path={filename_path}"
         )
         with urllib.request.urlopen(download_url) as f:
@@ -56,78 +52,54 @@ def download_terraform_binary(version=constants.TERRAFORM_VERSION):
 
 def run_terraform_subprocess(processargs, **kwargs):
     terraform_path = download_terraform_binary()
-    logger.info(f" terraform at {terraform_path}")
     if run_subprocess_cmd([terraform_path] + processargs, **kwargs):
-        raise TerraformException("Terraform returned an error")
+        raise TerraformError("Terraform returned an error")
 
 
 def version():
     terraform_path = download_terraform_binary()
-    logger.info(f"checking terraform={terraform_path} version")
-
-    version_output = subprocess.check_output([terraform_path, "--version"]).decode(
-        "utf-8"
-    )
+    command = [terraform_path, "--version"]
+    version_output = subprocess.check_output(command, encoding="utf-8")
     return re.search(r"(\d+)\.(\d+).(\d+)", version_output).group(0)
 
 
 def init(directory=None):
-    logger.info(f"terraform init directory={directory}")
-    with timer(logger, "terraform init"):
-        run_terraform_subprocess(["init"], cwd=directory, prefix="terraform")
+    command = ["init"]
+    run_terraform_subprocess(cwd=directory, prefix="terraform")
 
 
 def apply(directory=None, targets=None):
     targets = targets or []
-
-    logger.info(f"terraform apply directory={directory} targets={targets}")
     command = ["apply", "-auto-approve"] + ["-target=" + _ for _ in targets]
-    with timer(logger, "terraform apply"):
-        run_terraform_subprocess(command, cwd=directory, prefix="terraform")
+    run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
 def output(directory=None):
     terraform_path = download_terraform_binary()
-
-    logger.info(f"terraform={terraform_path} output directory={directory}")
-    with timer(logger, "terraform output"):
-        return subprocess.check_output(
-            [terraform_path, "output", "-json"], cwd=directory
-        ).decode("utf8")[:-1]
+    command = [terraform_path, "output", "-json"]
+    return subprocess.check_output(command, cwd=directory, encoding="utf-8")[:-1]
 
 
 def tfimport(addr, id, directory=None):
-    logger.info(f"terraform import directory={directory} addr={addr} id={id}")
     command = ["import", addr, id]
-    with timer(logger, "terraform import"):
-        run_terraform_subprocess(
-            command, cwd=directory, prefix="terraform"
-        )
+    run_terraform_subprocess(
+        command, cwd=directory, prefix="terraform"
+    )
 
 
 def refresh(directory=None):
-    logger.info(f"terraform refresh directory={directory}")
     command = [
         "refresh",
     ]
-
-    with timer(logger, "terraform refresh"):
-        run_terraform_subprocess(command, cwd=directory, prefix="terraform")
+    run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
 def destroy(directory=None):
-    logger.info(f"terraform destroy directory={directory}")
-    command = [
-        "destroy",
-        "-auto-approve",
-    ]
-
-    with timer(logger, "terraform destroy"):
-        run_terraform_subprocess(command, cwd=directory, prefix="terraform")
+    command = ["destroy", "-auto-approve"]
+    run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
 def rm_local_state(directory=None):
-    logger.info(f"rm local state file terraform.tfstate directory={directory}")
     tfstate_path = "terraform.tfstate"
     if directory:
         tfstate_path = os.path.join(directory, tfstate_path)

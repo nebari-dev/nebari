@@ -2,10 +2,10 @@ import os
 import subprocess
 import configparser
 
-from qhub.utils import change_directory
+from qhub.utils import change_directory, QHubError
 
 
-class DockerException(Exception):
+class GitError(QHubError):
     pass
 
 
