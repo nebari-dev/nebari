@@ -101,7 +101,7 @@ def tfimport(addr, id, directory=None):
     command = ["import", addr, id]
     with timer(logger, "terraform import"):
         run_terraform_subprocess(
-            command, cwd=directory, prefix="terraform", strip_errors=True
+            command, cwd=directory, prefix="terraform"
         )
 
 

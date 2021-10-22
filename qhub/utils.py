@@ -55,26 +55,17 @@ def change_directory(directory):
 def run_subprocess_cmd(processargs, **kwargs):
     """Runs subprocess command with realtime stdout logging with optional line prefix."""
     if "prefix" in kwargs:
-        line_prefix = f"[{kwargs['prefix']}]: ".encode("utf-8")
+        line_prefix = f"[{kwargs['prefix']}]: "
         kwargs.pop("prefix")
     else:
-        line_prefix = b""
-
-    strip_errors = kwargs.pop("strip_errors", False)
+        line_prefix = ""
 
     console.log('$ ' + ' '.join(processargs))
     process = subprocess.Popen(
-        processargs, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        processargs, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8"
     )
-    for line in iter(lambda: process.stdout.readline(), b""):
+    for line in iter(lambda: process.stdout.readline(), ""):
         full_line = line_prefix + line
-        if strip_errors:
-            full_line = full_line.decode("utf-8")
-            full_line = re.sub(
-                r"\x1b\[31m", "", full_line
-            )  # Remove red ANSI escape code
-            full_line = full_line.encode("utf-8")
-
         console.print(full_line)
     return process.wait(
         timeout=10
