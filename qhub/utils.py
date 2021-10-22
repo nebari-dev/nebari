@@ -33,7 +33,7 @@ namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
 
 
 # https://stackoverflow.com/a/14693789
-ansi_escape_8bit = re.compile(
+ANSI_ESCAPE_8BIT = re.compile(
     r'(?:\x1B[@-Z\\-_]|[\x80-\x9A\x9C-\x9F]|(?:\x1B\[|\x9B)[0-?]*[ -/]*[@-~])'
 )
 
@@ -71,7 +71,7 @@ def run_subprocess_cmd(process_args : List[str], prefix : str = None, **kwargs):
         process_args, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8"
     )
     for line in iter(lambda: process.stdout.readline(), ""):
-        full_line = ansi_escape_8bit.sub('', line_prefix + line)
+        full_line = ANSI_ESCAPE_8BIT.sub('', line_prefix + line)
         console.out(full_line, end="")
     return process.wait(
         timeout=10

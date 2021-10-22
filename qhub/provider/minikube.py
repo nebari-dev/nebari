@@ -97,8 +97,10 @@ def start(driver='docker', memory='8g', cpu='2', profile="qhub"):
     run_minikube_subprocess(command, prefix="minikube")
 
 
-def status():
-    run_minikube_subprocess(["status"], prefix="minikube")
+def status(profile="qhub"):
+    minikube_path = download_minikube_binary()
+    command = [minikube_path, "status", f"--profile={profile}"]
+    return subprocess.call(command) == 0
 
 
 def delete(profile="qhub"):

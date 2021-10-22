@@ -13,5 +13,6 @@ def test_minikube_start_status_delete():
 
     try:
         minikube.start(profile=profile)
+        assert minikube.status(profile=profile)
     finally:
         minikube.delete(profile=profile)
