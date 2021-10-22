@@ -125,7 +125,7 @@ def configure_metallb(start_address=None, end_address=None):
         data = json.load(f)
 
     start_address, end_address = '.'.join(address[0:3] + ['100']), '.'.join(address[0:3] + ['150'])
--    # logger.info('setting start=%s end=%s for metallb' % (start_address, end_address))
+    # logger.info('setting start=%s end=%s for metallb' % (start_address, end_address))
     data['KubernetesConfig']['LoadBalancerStartIP'] = start_address
     data['KubernetesConfig']['LoadBalancerEndIP'] = end_address
 
