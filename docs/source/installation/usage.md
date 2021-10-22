@@ -3,16 +3,15 @@
 ## Cloud Deployment
 
 Great, you've gone through the `qhub` [Installation](installation.md) and [Setup Initialization](setup.md) steps,
-and have ensured that all the necessary environment variables have been properly set, it is time to deploy QHub
+and have ensured that all the necessary environment variables have been properly set, it's time to deploy QHub
 from your terminal.
 
 ### Initialize configuration
 
 There are several ways to generate your configuration file. You can
 type the commands when prompted by terminal, or you can set
-it all automatically from the start. In any case, we advise you to
-start by creating a new project folder.  Here, let's  name the new
-folder `qhub-test`.
+it all automatically from the start. In any case, start by creating
+a new project folder.  Start by creating a directory `qhub-test`.
 
 On your terminal run:
 
@@ -54,8 +53,8 @@ If employing an infrastructure-as-code approach, this is where you would make th
 including adding users, changing Dask worker instance type and much more. Once you're happy with your changes you would redeploy those changes using using GitHub Actions. For more details on on the `qhub-config.yaml` please see [Configuration](configuration.md)
 
 ##### Project Naming Convention
-In order to successfully deploy QHub, there are some project naming conventions which need to be followed. For starters,
-make sure your project name is compatible with the specifics of your chosen Cloud provider. In addition, QHub `projectname`
+In order to successfully deploy QHub, please follow some project naming conventions. For starters,
+make sure your project name is compatible with the specifics of your chosen cloud provider. In addition, QHub `projectname`
 should also obey to the following format requirements:
 + letters from A to Z (upper and lower case) and numbers;
 + Special characters are **NOT** allowed;
@@ -66,7 +65,7 @@ should also obey to the following format requirements:
 
 ### Deploy QHub
 
-Finally, with the `qhub-config.yaml` created, we can deploy QHub for the first time:
+Finally, with the `qhub-config.yaml` created, QHub can be deployed for the first time:
 
 ```shell
 qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
@@ -128,11 +127,11 @@ Push the changes to the repository (your primary branch may be called
 git push origin main
 ```
 
-Once pushed to GitHub, future CI/CD changes are triggered by
-commits to main, and deployed via GitHub Actions.  Since the
-infrastructure state is reflected in the repository, this workflow
-allows for team members to submit pull requests that can be reviewed
-before modifying the infrastructure, easing the maintenance process.
+Once pushed to GitHub, future commits to `main`  trigger CI/CD to redeploy
+changes the QHub clusger.  Since the infrastructure state is reflected in
+the repository, this workflow allows for team members to submit pull requests
+that can be reviewed before modifying the infrastructure, easing the
+maintenance process.
 
 To automatically deploy (and to keep track of changes more effectively):
 - make changes to the `qhub-config.yaml` file on a new branch.
