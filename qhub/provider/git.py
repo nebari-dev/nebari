@@ -26,7 +26,8 @@ def current_sha(path : str = None):
     """Get current commit sha of git directory"""
     if not is_git_repo(path):
         raise DockerException('cannot get git sha of path that is not git directory')
-    return subprocess.check_output(['git', 'rev-parse', 'HEAD'], encoding='utf-8').strip()
+    with change_directory(path):
+        return subprocess.check_output(['git', 'rev-parse', 'HEAD'], encoding='utf-8').strip()
 
 
 def initialize_git(path : str = None):
