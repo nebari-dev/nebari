@@ -60,7 +60,7 @@ def run_subprocess_cmd(processargs, **kwargs):
     else:
         line_prefix = ""
 
-    console.print(line_prefix + '$ ' + ' '.join(processargs))
+    console.out(line_prefix + '$ ' + ' '.join(processargs))
     process = subprocess.Popen(
         processargs, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8"
     )
