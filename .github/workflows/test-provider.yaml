@@ -15,8 +15,8 @@ env:
   DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  HELLO: hello_world
-  PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+  GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
 
 jobs:
   test-render-providers:
@@ -37,16 +37,12 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
-      - name: Env Var Test
-        run: |
-          echo $HELLO
-          echo $PYPI_USERNAME
       - name: Install QHub
         run: |
           pip install .[dev]
       - name: QHub Initialize
         run: |
-          qhub init "${{ matrix.provider }}" --project "${{ matrix.provider }}-test" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --kubernetes-version "1.18.0" --disable-prompt
+          qhub init "${{ matrix.provider }}" --project "${{ matrix.provider }}-test" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
       - name: QHub Render
         run: |
           qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
