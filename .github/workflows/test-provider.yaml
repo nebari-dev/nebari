@@ -15,11 +15,6 @@ env:
   DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-
 
 jobs:
   test-render-providers:
@@ -42,11 +37,21 @@ jobs:
           python-version: 3.8
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@master
+        if: "${{ matrix.provider == gcp }}"
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GOOGLE_CREDENTIALS }}
       - name: Use gcloud CLI
+        if: "${{ matrix.provider == gcp }}"
         run: gcloud info
+      - name: Login to Azure
+        uses: azure/login@v1
+        if: "${{ maxtrix.provider == azure }}"
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Use az CLI
+        if: "${{ maxtrix.provider == azure }}"
+        run: az version
       - name: Install QHub
         run: |
           pip install .[dev]
