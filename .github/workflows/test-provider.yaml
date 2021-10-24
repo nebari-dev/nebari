@@ -37,6 +37,13 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: $PROJECT_ID
+          service_account_key: $GOOGLE_CREDENTIALS
+      - name: Use gcloud CLI
+        run: gcloud info
       - name: Install QHub
         run: |
           pip install .[dev]
