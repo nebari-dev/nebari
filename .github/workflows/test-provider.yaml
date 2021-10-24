@@ -37,20 +37,16 @@ jobs:
           python-version: 3.8
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@master
-        if: "${{ matrix.provider == gcp }}"
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GOOGLE_CREDENTIALS }}
       - name: Use gcloud CLI
-        if: "${{ matrix.provider == gcp }}"
         run: gcloud info
       - name: Login to Azure
         uses: azure/login@v1
-        if: "${{ maxtrix.provider == azure }}"
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Use az CLI
-        if: "${{ maxtrix.provider == azure }}"
         run: az version
       - name: Install QHub
         run: |
