@@ -28,6 +28,7 @@ def kubernetes_versions(region="Central US"):
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
 
     client = initiate_container_service_client()
+    azure_location = region.replace(" ", "").lower()
 
     k8s_versions_list = client.container_services.list_orchestrators(
         azure_location, resource_type="managedClusters"
