@@ -80,6 +80,10 @@ jobs:
       - name: Basic kubectl checks before deployment
         run: |
           kubectl get all,cm,secret,ing -A
+      - name: Set MINIKUBE_HOME
+        run: |
+          echo "{MINIKUBE_HOME}={$HOME/.minikube}" >> $GITHUB_ENV
+          echo $GITHUB_ENV
       - name: Initialize QHub Cloud
         run: |
           mkdir -p local-deployment
