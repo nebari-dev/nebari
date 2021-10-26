@@ -84,7 +84,7 @@ jobs:
           kubectl get all,cm,secret,ing -A
       - name: Set MINIKUBE_HOME
         run: |
-          echo "MINIKUBE_HOME=$HOME/.minikube" >> $GITHUB_ENV
+          echo "MINIKUBE_HOME=$HOME/.minikube" >> "$GITHUB_ENV"
       - name: Pre-Pull and Cache QHub Docker Images
         run: |
           echo "${{ env.MINIKUBE_HOME }}"
