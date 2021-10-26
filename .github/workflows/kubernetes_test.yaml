@@ -46,7 +46,7 @@ jobs:
           pip install .[dev]
       - name: Set MINIKUBE_HOME
         run: |
-          echo "{MINIKUBE_HOME}=${${HOME}/.minikube}" >> $GITHUB_ENV
+          echo "{MINIKUBE_HOME}=${{$HOME}/.minikube}" >> $GITHUB_ENV
       - name: Download and Install Minikube and Kubectl
         run: |
           mkdir -p bin
