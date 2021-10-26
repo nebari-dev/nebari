@@ -56,6 +56,7 @@ jobs:
 
           echo "$PWD" >> "$GITHUB_PATH"
           ls -al
+          ls -al ~
           popd
       # - name: Start Minikube
       #   run: |
