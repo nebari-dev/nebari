@@ -44,10 +44,6 @@ jobs:
         run: |
           conda install -c anaconda pip
           pip install .[dev]
-      - name: Set MINIKUBE_HOME
-        run: |
-          minikube_home="${HOME}/.minikube"
-          echo "{MINIKUBE_HOME}=${!minikube_home}" >> $GITHUB_ENV
       - name: Download and Install Minikube and Kubectl
         run: |
           mkdir -p bin
@@ -72,38 +68,43 @@ jobs:
         run: |
           minikube version
           kubectl version
-      # - name: Add nfs client to kubernetes docker node
-      #   run: |
-      #     minikube ssh "sudo apt update; sudo apt install nfs-common -y"
-      # - name: Get routing table for docker pods
-      #   run: |
-      #     ip route
-      # - name: Configure LoadBalancer IPs
-      #   run: |
-      #     python tests/scripts/minikube-loadbalancer-ip.py
-      # - name: Enable Minikube metallb
-      #   run: |
-      #     minikube addons enable metallb
-      # - name: Basic kubectl checks before deployment
-      #   run: |
-      #     kubectl get all,cm,secret,ing -A
+      - name: Add nfs client to kubernetes docker node
+        run: |
+          minikube ssh "sudo apt update; sudo apt install nfs-common -y"
+      - name: Get routing table for docker pods
+        run: |
+          ip route
+      - name: Configure LoadBalancer IPs
+        run: |
+          python tests/scripts/minikube-loadbalancer-ip.py
+      - name: Enable Minikube metallb
+        run: |
+          minikube addons enable metallb
+      - name: Basic kubectl checks before deployment
+        run: |
+          kubectl get all,cm,secret,ing -A
+      - name: Set MINIKUBE_HOME
+        run: |
+          echo "{MINIKUBE_HOME}=${/home/runnerx/.minikube}" >> $GITHUB_ENV
+      - name: Pre-Pull and Cache QHub Docker Images
+        run: |
+          echo "${{ env.MINIKUBE_HOME }}"
+          docker pull quansight/qhub-jupyterhub:v0.3.13
+          docker pull quansight/qhub-jupyterlab:v0.3.13
+          docker pull quansight/qhub-dask-worker:v0.3.13
+          docker pull quansight/qhub-dask-gateway:v0.3.13
+          docker pull quansight/qhub-conda-store:v0.3.13
 
-      # - name: Pre-Pull and Cache QHub Docker Images
-      #   run: |
-      #     echo "${{ env.MINIKUBE_HOME }}"
-      #     docker pull quansight/qhub-jupyterhub:v0.3.13
-      #     docker pull quansight/qhub-jupyterlab:v0.3.13
-      #     docker pull quansight/qhub-dask-worker:v0.3.13
-      #     docker pull quansight/qhub-dask-gateway:v0.3.13
-      #     docker pull quansight/qhub-conda-store:v0.3.13
+          minikube cache add quansight/qhub-jupyterhub:v0.3.13
+          minikube cache add quansight/qhub-jupyterlab:v0.3.13
+          minikube cache add quansight/qhub-dask-worker:v0.3.13
+          minikube cache add quansight/qhub-dask-gateway:v0.3.13
+          minikube cache add quansight/qhub-conda-store:v0.3.13
 
-      #     minikube cache add quansight/qhub-jupyterhub:v0.3.13
-      #     minikube cache add quansight/qhub-jupyterlab:v0.3.13
-      #     minikube cache add quansight/qhub-dask-worker:v0.3.13
-      #     minikube cache add quansight/qhub-dask-gateway:v0.3.13
-      #     minikube cache add quansight/qhub-conda-store:v0.3.13
-      #   env:
-      #     MINIKUBE_HOME: ${{ env.MINIKUBE_HOME }}
+          ls -al
+          ls -al ~
+        env:
+          MINIKUBE_HOME: ${{ env.MINIKUBE_HOME }}
       # - name: Initialize QHub Cloud
       #   run: |
       #     minikube image list
