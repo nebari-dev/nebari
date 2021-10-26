@@ -340,7 +340,7 @@ and **Kubernetes versions** will be DIFFERENT. [duplicated info]
 
 To take advantage of the auto-scaling and dask-distributed computing capabilities,
 QHub can be deployed on a handful of the most commonly used cloud providers. QHub
-takes advantage of many of the resources these cloud providers have to offer, however,
+utilizes many of the resources these cloud providers have to offer, however,
 at it's core, is the Kubernetes engine (or service). Each cloud provider has slightly
 different ways Kubernetes is configured but fear not, all of this is handled by QHub.
 
