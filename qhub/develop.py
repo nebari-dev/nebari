@@ -42,18 +42,18 @@ def initialize_configuration(directory, image_tag, verbose=True, build_images=Tr
     if build_images:
         # replace the docker images used in deployment
         config["default_images"] = {
-            "jupyterhub": f"docker.io/library/jupyterhub:{image_tag}",
-            "jupyterlab": f"docker.io/library/jupyterlab:{image_tag}",
-            "dask_worker": f"docker.io/library/dask-worker:{image_tag}",
-            "dask_gateway": f"docker.io/library/dask-gateway:{image_tag}",
-            "conda_store": f"docker.io/library/conda-store:{image_tag}",
+            "jupyterhub": f"jupyterhub:{image_tag}",
+            "jupyterlab": f"jupyterlab:{image_tag}",
+            "dask_worker": f"dask-worker:{image_tag}",
+            "dask_gateway": f"dask-gateway:{image_tag}",
+            "conda_store": f"conda-store:{image_tag}",
         }
 
         for jupyterlab_profile in config["profiles"]["jupyterlab"]:
-            jupyterlab_profile["kubespawner_override"]["image"] = f"docker.io/library/jupyterlab:{image_tag}"
+            jupyterlab_profile["kubespawner_override"]["image"] = f"jupyterlab:{image_tag}"
 
         for name, dask_worker_profile in config["profiles"]["dask_worker"].items():
-            dask_worker_profile["image"] = f"docker.io/library/dask-worker:{image_tag}"
+            dask_worker_profile["image"] = f"dask-worker:{image_tag}"
 
     console.print(f"Generated QHub configuration at path={config_path}")
     if verbose:
