@@ -85,18 +85,17 @@ def version():
     return re.search(r"minikube version: v(\d+\.\d+.\d+)", version_output).group(1)
 
 
-def image_load(image, overwrite=True):
+def image_load(image, overwrite=True, profile="qhub"):
     minikube_path = download_minikube_binary()
 
     overwrite_command = '--overwrite=true' if overwrite else '--overwrite=false'
-    command = ['image', 'load', overwrite_command, image]
+    command = ['image', 'load', f"--profile={profile}", overwrite_command, image]
     run_minikube_subprocess(command, prefix="minikube")
 
 
-def image_build(dockerfile_path, build_directory, name, tag, verbose=False):
-    command = ['image', 'build', build_directory, f'--file="{os.path.basename(dockerfile_path)}"', f'--tag={name}:{tag}']
-    with change_directory(build_directory):
-        run_minikube_subprocess(command, prefix='minikube')
+def image_build(dockerfile_path, build_directory, name, tag, verbose=False, profile="qhub"):
+    command = ['image', 'build', build_directory, f"--profile={profile}", f'--file="{os.path.basename(dockerfile_path)}"', f'--tag={name}:{tag}']
+    run_minikube_subprocess(command, prefix='minikube')
 
 
 def start(driver='docker', memory='8g', cpu='2', profile="qhub", kubernetes_version=None):
