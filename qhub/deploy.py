@@ -5,7 +5,7 @@ from subprocess import CalledProcessError
 import socket
 
 from qhub.provider import terraform
-from qhub.utils import timer, check_cloud_credentials
+from qhub.utils import timer, check_cloud_credentials, QHubError
 from qhub.provider.dns.cloudflare import update_record
 from qhub.state import terraform_state_sync
 from qhub.console import console
