@@ -19,18 +19,18 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: 'QHUB_GH_BRANCH set for PR'
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          echo "QHUB_GH_BRANCH=${GITHUB_HEAD_REF}" >> "$GITHUB_ENV"
-          echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
-          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
-          echo "GITHUB_REF: ${GITHUB_REF}"
-      - name: 'QHUB_GH_BRANCH set for a branch (not a tag)'
-        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') }}
-        # e.g. QHUB_GH_BRANCH="main"
-        run: |
-          echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> "$GITHUB_ENV"
+      # - name: 'QHUB_GH_BRANCH set for PR'
+      #   if: ${{ github.event_name == 'pull_request' }}
+      #   run: |
+      #     echo "QHUB_GH_BRANCH=${GITHUB_HEAD_REF}" >> "$GITHUB_ENV"
+      #     echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
+      #     echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
+      #     echo "GITHUB_REF: ${GITHUB_REF}"
+      # - name: 'QHUB_GH_BRANCH set for a branch (not a tag)'
+      #   if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') }}
+      #   # e.g. QHUB_GH_BRANCH="main"
+      #   run: |
+      #     echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> "$GITHUB_ENV"
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
       - name: Set up Python
