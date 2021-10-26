@@ -56,8 +56,6 @@ def initialize_configuration(directory, image_tag, verbose=True, build_images=Tr
             dask_worker_profile["image"] = f"dask-worker:{image_tag}"
 
     console.print(f"Generated QHub configuration at path={config_path}")
-    if verbose:
-        pprint(config)
 
     os.makedirs(directory, exist_ok=True)
     with open(config_path, "w") as f:

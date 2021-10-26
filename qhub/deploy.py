@@ -68,8 +68,8 @@ def guided_install(
     # 3 kubernetes-alpha provider requires that kubernetes be
     # provisionioned before any "kubernetes_manifests" resources
     with timer(
-            'Creating QHub infrastructure',
-            'Created QHub infrastructure',
+            'Creating QHub infrastructure (cloud, managed kubernetes)',
+            'Created QHub infrastructure (cloud, managed kubernetes)',
             verbose=verbose):
         terraform.init(directory="infrastructure")
         terraform.apply(
@@ -82,8 +82,8 @@ def guided_install(
 
     # 04 Create qhub initial state (up to nginx-ingress)
     with timer(
-            'Deploying QHub kubernetes core components',
-            'Deployed QHub kubernetes core components',
+            'Deploying QHub core components (namespace, ingress, authentication, monitoring)',
+            'Deployed QHub core components (namespace, ingress, authentication, monitoring)',
             verbose=verbose):
         terraform.init(directory="infrastructure")
         terraform.apply(
@@ -135,8 +135,8 @@ def guided_install(
 
     # 06 Full deploy QHub
     with timer(
-            'Deploying QHub Components',
-            'Deployed QHub Components',
+            'Deploying QHub',
+            'Deployed QHub',
             verbose=verbose):
         terraform.apply(directory="infrastructure")
 
