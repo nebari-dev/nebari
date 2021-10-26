@@ -66,7 +66,7 @@ def initialize_configuration(directory, image_tag, verbose=True, build_images=Tr
     return config
 
 
-def develop(verbose=True, build_images=True):
+def develop(verbose=True, build_images=True, kubernetes_version="v1.20.2"):
     git_repo_root = git.is_git_repo()
     if git_repo_root is None:
         raise utils.QHubError('QHub develop required to run within QHub git repository')
@@ -81,7 +81,7 @@ def develop(verbose=True, build_images=True):
             'Creating Minikube cluster',
             'Created Minikube cluster',
             verbose=verbose):
-        minikube.start()
+        minikube.start(minikube_version=minikube_version)
         if not minikube.status():
             raise QHubError("Minikube cluster failed to start")
         minikube.configure_metallb()
