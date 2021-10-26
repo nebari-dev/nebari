@@ -7,6 +7,7 @@ from qhub.provider import terraform
 from qhub.utils import timer, check_cloud_credentials
 from qhub.provider.dns.cloudflare import update_record
 from qhub.state import terraform_state_sync
+from qhub.console import console
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +41,12 @@ def guided_install(
     dns_auto_provision,
     disable_prompt=False,
     skip_remote_state_provision=False,
+    verbose=True,
 ):
     # 01 Check Environment Variables
     check_cloud_credentials(config)
+    console.print('Validated QHub environment variables for provider')
+
     # Check that secrets required for terraform
     # variables are set as required
     check_secrets(config)
@@ -55,29 +59,41 @@ def guided_install(
         and (config.get("terraform_state", {}).get("type", "") == "remote")
         and (config.get("provider") != "local")
     ):
-        terraform_state_sync(config)
+        with timer(
+                'Creating terraform remote state',
+                'Created terraform remote state',
+                verbose=verbose):
+            terraform_state_sync(config)
 
     # 3 kubernetes-alpha provider requires that kubernetes be
     # provisionioned before any "kubernetes_manifests" resources
-    terraform.init(directory="infrastructure")
-    terraform.apply(
-        directory="infrastructure",
-        targets=[
-            "module.kubernetes",
-            "module.kubernetes-initialization",
-        ],
-    )
+    with timer(
+            'Creating QHub infrastructure',
+            'Created QHub infrastructure',
+            verbose=verbose):
+        terraform.init(directory="infrastructure")
+        terraform.apply(
+            directory="infrastructure",
+            targets=[
+                "module.kubernetes",
+                "module.kubernetes-initialization",
+            ],
+        )
 
     # 04 Create qhub initial state (up to nginx-ingress)
-    terraform.init(directory="infrastructure")
-    terraform.apply(
-        directory="infrastructure",
-        targets=[
-            "module.kubernetes",
-            "module.kubernetes-initialization",
-            "module.kubernetes-ingress",
-        ],
-    )
+    with timer(
+            'Deploying QHub kubernetes core components',
+            'Deployed QHub kubernetes core components',
+            verbose=verbose):
+        terraform.init(directory="infrastructure")
+        terraform.apply(
+            directory="infrastructure",
+            targets=[
+                "module.kubernetes",
+                "module.kubernetes-initialization",
+                "module.kubernetes-ingress",
+            ],
+        )
 
     cmd_output = terraform.output(directory="infrastructure")
     # This is a bit ugly, but the issue we have at the moment is being unable
@@ -118,7 +134,11 @@ def guided_install(
         )
 
     # 06 Full deploy QHub
-    terraform.apply(directory="infrastructure")
+    with timer(
+            'Deploying QHub Components',
+            'Deployed QHub Components',
+            verbose=verbose):
+        terraform.apply(directory="infrastructure")
 
 
 def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):

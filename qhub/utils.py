@@ -90,7 +90,7 @@ def check_cloud_credentials(config):
     if config["provider"] == "gcp":
         for variable in {"GOOGLE_CREDENTIALS"}:
             if variable not in os.environ:
-                raise ValueError(
+                raise QHubError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {GCP_ENV_DOCS}"""
                 )
@@ -102,7 +102,7 @@ def check_cloud_credentials(config):
             "ARM_TENANT_ID",
         }:
             if variable not in os.environ:
-                raise ValueError(
+                raise QHubError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {AZURE_ENV_DOCS}"""
                 )
@@ -112,7 +112,7 @@ def check_cloud_credentials(config):
             "AWS_SECRET_ACCESS_KEY",
         }:
             if variable not in os.environ:
-                raise ValueError(
+                raise QHubError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {AWS_ENV_DOCS}"""
                 )
@@ -125,7 +125,7 @@ def check_cloud_credentials(config):
             "DIGITALOCEAN_TOKEN",
         }:
             if variable not in os.environ:
-                raise ValueError(
+                raise QHubError(
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {DO_ENV_DOCS}"""
                 )
@@ -140,14 +140,14 @@ def check_cloud_credentials(config):
             os.environ["AWS_SECRET_ACCESS_KEY"]
             != os.environ["SPACES_SECRET_ACCESS_KEY"]
         ):
-            raise ValueError(
+            raise QHubError(
                 f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must be equal\n
                 See {DO_ENV_DOCS} for more information"""
             )
     elif config["provider"] == "local":
         pass
     else:
-        raise ValueError("Cloud Provider configuration not supported")
+        raise QHubError("Configured cloud provider={config['provider']} configuration not supported")
 
 
 def check_for_duplicates(users: Sequence[dict]) -> Set:
