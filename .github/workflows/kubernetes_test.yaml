@@ -44,13 +44,15 @@ jobs:
         run: |
           conda install -c anaconda pip
           pip install .[dev]
+      - name: Set MINIKUBE_HOME
+        run: |
+          echo "{MINIKUBE_HOME}={$HOME/.minikube}" >> "$GITHUB_ENV"
       - name: Download and Install Minikube and Kubectl
         run: |
           mkdir -p bin
           pushd bin
           curl -L https://github.com/kubernetes/minikube/releases/download/v1.22.0/minikube-linux-amd64 -o minikube
           chmod +x minikube
-          install minikube ~
 
           curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
           chmod +x kubectl
@@ -59,15 +61,15 @@ jobs:
           ls -al
           ls -al ~
           popd
-      # - name: Start Minikube
-      #   run: |
-      #     sudo docker ps
-      #     sudo usermod -aG docker $USER && newgrp docker
-      #     minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 4 --memory 12288 --wait=all
-      # - name: Versions
-      #   run: |
-      #     minikube version
-      #     kubectl version
+      - name: Start Minikube
+        run: |
+          sudo docker ps
+          sudo usermod -aG docker $USER && newgrp docker
+          minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 4 --memory 12288 --wait=all
+      - name: Versions
+        run: |
+          minikube version
+          kubectl version
       # - name: Add nfs client to kubernetes docker node
       #   run: |
       #     minikube ssh "sudo apt update; sudo apt install nfs-common -y"
@@ -83,9 +85,7 @@ jobs:
       # - name: Basic kubectl checks before deployment
       #   run: |
       #     kubectl get all,cm,secret,ing -A
-      # - name: Set MINIKUBE_HOME
-      #   run: |
-      #     echo "{MINIKUBE_HOME}={$HOME/.minikube}" >> $GITHUB_ENV
+
       # - name: Pre-Pull and Cache QHub Docker Images
       #   run: |
       #     echo "${{ env.MINIKUBE_HOME }}"
