@@ -85,7 +85,7 @@ jobs:
           echo "{MINIKUBE_HOME}={$HOME/.minikube}" >> $GITHUB_ENV
       - name: Pre-Pull and Cache QHub Docker Images
         run: |
-          echo $GITHUB_ENV
+          echo "${{ env.MINIKUBE_HOME }}"
           docker pull quansight/qhub-jupyterhub:v0.3.13
           docker pull quansight/qhub-jupyterlab:v0.3.13
           docker pull quansight/qhub-dask-worker:v0.3.13
@@ -97,8 +97,11 @@ jobs:
           minikube cache add quansight/qhub-dask-worker:v0.3.13
           minikube cache add quansight/qhub-dask-gateway:v0.3.13
           minikube cache add quansight/qhub-conda-store:v0.3.13
+        env:
+          MINIKUBE_HOME: ${{ env.MINIKUBE_HOME }}
       - name: Initialize QHub Cloud
         run: |
+          minikube image list
           mkdir -p local-deployment
           cd local-deployment
           qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password
