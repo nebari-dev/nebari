@@ -145,7 +145,7 @@ def guided_install(
 
     console.rule('Successful QHub Deployment')
     console.print(
-        f'Visit https://{config["domain"]} to access your QHub\n'
+        f'Visit https://{config["domain"]} to access your QHub Cluster\n'
         'Administrator documentation: https://docs.qhub.dev/en/stable/source/admin_guide/\n'
         'End user documentation: https://docs.qhub.dev/en/stable/source/user_guide/')
 
