@@ -8,7 +8,7 @@ import re
 import json
 import shutil
 
-from qhub.utils import run_subprocess_cmd, QHubError
+from qhub.utils import run_subprocess_cmd, QHubError, change_directory
 from qhub import constants
 from qhub.console import console
 
