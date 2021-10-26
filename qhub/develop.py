@@ -82,10 +82,8 @@ def develop(verbose=True, build_images=True, kubernetes_version="v1.20.2"):
         minikube.start(kubernetes_version=kubernetes_version)
         if not minikube.status():
             raise QHubError("Minikube cluster failed to start")
-        console.print('Started Minikube cluster')
         minikube.configure_metallb()
         minikube.addons_enable("metallb")
-        console.print('Configured Minikube MetalLB load balancer')
 
     if build_images:
         console.rule("Building Docker images")
@@ -115,6 +113,4 @@ def develop(verbose=True, build_images=True, kubernetes_version="v1.20.2"):
 
     console.print(
         f'Development documentation https://docs.qhub.dev/en/stable/source/dev_guide/\n'
-        f'Minikube cluster is deployed at ip={minikube.ip()}\n'
-        f'Load Balancer IP address\n'
     )
