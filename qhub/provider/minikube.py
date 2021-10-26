@@ -97,7 +97,7 @@ def start(driver='docker', memory='8g', cpu='2', profile="qhub", kubernetes_vers
     command = ["start", f"--driver={driver}", f"--memory={memory}", f"--cpus={cpu}", f"--profile={profile}"]
 
     if kubernetes_version:
-        command = command + ["--kubernetes-version={kubernetes_version}"]
+        command = command + [f"--kubernetes-version={kubernetes_version}"]
 
     run_minikube_subprocess(command, prefix="minikube")
 
