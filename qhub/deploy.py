@@ -2,6 +2,7 @@ import logging
 import os
 import re
 from subprocess import CalledProcessError
+import socket
 
 from qhub.provider import terraform
 from qhub.utils import timer, check_cloud_credentials
@@ -139,6 +140,32 @@ def guided_install(
             'Deployed QHub',
             verbose=verbose):
         terraform.apply(directory="infrastructure")
+
+    check_qhub_address(
+        ip_or_hostname,
+        config["domain"])
+
+
+def check_qhub_address(ip_or_hostname, domain):
+    try:
+        resolved_domain_ip = socket.gethostbyname(domain)
+    except socket.gaierror as e:
+        console.print(
+            f'Domain={domain} currently does not resolve\n'
+            f'Make sure to point DNS to {ip_or_hostname}\n'
+            'See https://docs.qhub.dev/en/stable/source/installation/setup.html#domain-registry\n',style='red')
+        return
+
+    resolved_load_balancer_ip = socket.gethostbyname(ip_or_hostname)
+    if resolved_load_balancer_ip != resolved_domain_ip:
+        console.print(
+            f'Domain={domain} is set but does not resolve to {ip_or_hostname}'
+            f'Currently resolving {domain} -> {resolved_domain_ip} and {ip_or_hostname} -> {resolved_load_balancer_ip}'
+            style='red')
+        return
+
+    console.print(f'Domain={domain} properly resolves to {ip_or_hostname}')
+    console.print(f'Visit https://{domain} to access QHub')
 
 
 def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):

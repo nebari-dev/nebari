@@ -38,6 +38,7 @@ setup(
         "cloudflare",
         "auth0-python",
         "pydantic",
+        "kubernetes",
         "pynacl",
         "bcrypt",
         "azure-identity==1.6.1",
