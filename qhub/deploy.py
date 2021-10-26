@@ -159,8 +159,8 @@ def check_qhub_address(ip_or_hostname, domain):
     resolved_load_balancer_ip = socket.gethostbyname(ip_or_hostname)
     if resolved_load_balancer_ip != resolved_domain_ip:
         console.print(
-            f'Domain={domain} is set but does not resolve to {ip_or_hostname}'
-            f'Currently resolving {domain} -> {resolved_domain_ip} and {ip_or_hostname} -> {resolved_load_balancer_ip}'
+            f'Domain={domain} is set but does not resolve to {ip_or_hostname}\n'
+            f'Currently resolving {domain} -> {resolved_domain_ip} and {ip_or_hostname} -> {resolved_load_balancer_ip}\n',
             style='red')
         return
 
