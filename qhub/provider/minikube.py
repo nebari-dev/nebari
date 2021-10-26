@@ -113,6 +113,12 @@ def status(profile="qhub"):
     return subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
 
 
+def ip(profile="qhub"):
+    minikube_path = download_minikube_binary()
+    command = [minikube_path, "ip", f"--profile={profile}"]
+    return subprocess.check_output(command, encoding='utf-8').strip()
+
+
 def delete(profile="qhub"):
     run_minikube_subprocess(["delete", "--profile", profile], prefix="minikube")
 

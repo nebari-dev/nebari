@@ -68,8 +68,8 @@ def guided_install(
     # 3 kubernetes-alpha provider requires that kubernetes be
     # provisionioned before any "kubernetes_manifests" resources
     with timer(
-            'Creating QHub infrastructure (cloud, managed kubernetes)',
-            'Created QHub infrastructure (cloud, managed kubernetes)',
+            'Deploying QHub infrastructure (cloud, managed kubernetes)',
+            'Deployed QHub infrastructure (cloud, managed kubernetes)',
             verbose=verbose):
         terraform.init(directory="infrastructure")
         terraform.apply(

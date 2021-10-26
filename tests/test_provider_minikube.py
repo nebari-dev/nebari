@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from qhub.provider import minikube
@@ -14,5 +16,6 @@ def test_minikube_start_status_delete():
     try:
         minikube.start(profile=profile)
         assert minikube.status(profile=profile)
+        assert re.fullmatch('\d+\.\d+\.\d+\.\d+', minikube.ip(profile=profile))
     finally:
         minikube.delete(profile=profile)
