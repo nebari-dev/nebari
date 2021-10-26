@@ -81,7 +81,7 @@ def develop(verbose=True, build_images=True, kubernetes_version="v1.20.2"):
             'Creating Minikube cluster',
             'Created Minikube cluster',
             verbose=verbose):
-        minikube.start(minikube_version=minikube_version)
+        minikube.start(kubernetes_version=kubernetes_version)
         if not minikube.status():
             raise QHubError("Minikube cluster failed to start")
         minikube.configure_metallb()
