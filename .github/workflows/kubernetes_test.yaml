@@ -44,6 +44,7 @@ jobs:
         run: |
           conda install -c anaconda pip
           pip install .[dev]
+          echo "QHUB_VERSION=$(qhub --version)" >> $GITHUB_ENV
       - name: Download and Install Minikube and Kubectl
         run: |
           mkdir -p bin
@@ -55,8 +56,6 @@ jobs:
           chmod +x kubectl
 
           echo "$PWD" >> "$GITHUB_PATH"
-          ls -al
-          ls -al ~
           popd
       - name: Start Minikube
         run: |
@@ -89,22 +88,20 @@ jobs:
       - name: Pre-Pull and Cache QHub Docker Images
         run: |
           echo "${{ env.MINIKUBE_HOME }}"
-          docker pull quansight/qhub-jupyterhub:v0.3.13
-          docker pull quansight/qhub-jupyterlab:v0.3.13
-          docker pull quansight/qhub-dask-worker:v0.3.13
-          docker pull quansight/qhub-dask-gateway:v0.3.13
-          docker pull quansight/qhub-conda-store:v0.3.13
+          echo "${{ env.QHUB_VERSION }}"
+          docker pull quansight/qhub-jupyterhub:v"${{ env.QHUB_VERSION }}"
+          docker pull quansight/qhub-jupyterlab:v"${{ env.QHUB_VERSION }}"
+          docker pull quansight/qhub-dask-worker:v"${{ env.QHUB_VERSION }}"
+          docker pull quansight/qhub-dask-gateway:v"${{ env.QHUB_VERSION }}"
+          docker pull quansight/qhub-conda-store:v"${{ env.QHUB_VERSION }}"
 
-          minikube cache add quansight/qhub-jupyterhub:v0.3.13
-          minikube cache add quansight/qhub-jupyterlab:v0.3.13
-          minikube cache add quansight/qhub-dask-worker:v0.3.13
-          minikube cache add quansight/qhub-dask-gateway:v0.3.13
-          minikube cache add quansight/qhub-conda-store:v0.3.13
-
-          ls -al
-          ls -al ~
+          minikube image load quansight/qhub-jupyterhub:v"${{ env.QHUB_VERSION }}"
+          minikube image load quansight/qhub-jupyterlab:v"${{ env.QHUB_VERSION }}"
+          minikube image load quansight/qhub-dask-worker:v"${{ env.QHUB_VERSION }}"
+          minikube image load quansight/qhub-dask-gateway:v"${{ env.QHUB_VERSION }}"
+          minikube image load quansight/qhub-conda-store:v"${{ env.QHUB_VERSION }}"
         env:
-          MINIKUBE_HOME: ${{ env.MINIKUBE_HOME }}
+          QHUB_VERSION: ${{ env.QHUB_VERSION }}
       - name: Initialize QHub Cloud
         run: |
           minikube image list
@@ -121,6 +118,13 @@ jobs:
         run: |
           cd local-deployment
           qhub deploy --config qhub-config.yaml --disable-prompt
+      - name: Remove Minikube Images
+        run: |
+          minikube image rm quansight/qhub-jupyterhub:v"${{ env.QHUB_VERSION }}"
+          minikube image rm quansight/qhub-jupyterlab:v"${{ env.QHUB_VERSION }}"
+          minikube image rm quansight/qhub-dask-worker:v"${{ env.QHUB_VERSION }}"
+          minikube image rm quansight/qhub-dask-gateway:v"${{ env.QHUB_VERSION }}"
+          minikube image rm quansight/qhub-conda-store:v"${{ env.QHUB_VERSION }}"
       - name: Basic kubectl checks after deployment
         run: |
           kubectl get all,cm,secret,ing -A
