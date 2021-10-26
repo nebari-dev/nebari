@@ -110,3 +110,9 @@ def develop(verbose=True, build_images=True, kubernetes_version="v1.20.2"):
 
     with utils.change_directory(develop_directory):
         deploy.guided_install(config, dns_provider=None, dns_auto_provision=False, disable_prompt=True, verbose=verbose)
+
+    console.print(
+        f'Development documentation https://docs.qhub.dev/en/stable/source/dev_guide/\n'
+        f'Minikube cluster is deployed at ip={minikube.ip()}\n'
+        f'Load Balancer IP address\n'
+    )
