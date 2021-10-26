@@ -19,8 +19,6 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: 'Checkout Infrastructure'
-        uses: actions/checkout@main
       - name: 'QHUB_GH_BRANCH set for PR'
         if: ${{ github.event_name == 'pull_request' }}
         run: |
@@ -33,6 +31,8 @@ jobs:
         # e.g. QHUB_GH_BRANCH="main"
         run: |
           echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> "$GITHUB_ENV"
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@main
       - name: Set up Python
         uses: conda-incubator/setup-miniconda@v2
         env:
@@ -47,7 +47,6 @@ jobs:
       - name: Download and Install Minikube and Kubectl
         run: |
           mkdir -p bin
-          echo "$PWD"
           pushd bin
           curl -L https://github.com/kubernetes/minikube/releases/download/v1.22.0/minikube-linux-amd64 -o minikube
           chmod +x minikube
@@ -55,8 +54,7 @@ jobs:
           curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
           chmod +x kubectl
 
-          echo "$PWD" >> "$GITHUB_ENV"
-          echo "$PWD"
+          echo "$PWD" >> "$GITHUB_PATH"
           popd
       - name: Start Minikube
         run: |
