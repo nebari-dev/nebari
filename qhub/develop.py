@@ -96,16 +96,7 @@ def develop(verbose=True, build_images=True, kubernetes_version="v1.20.2"):
                     f'Building {os.path.basename(dockerfile_path)} image "{image}"',
                     f'Built {os.path.basename(dockerfile_path)} image "{image}"',
                     verbose=verbose):
-                docker.build(dockerfile_path, QHUB_IMAGE_DIRECTORY, image_name, image_tag)
-
-        console.rule("Uploading Docker image to Minikube cache")
-        for image_name in image_names:
-            image = f"{image_name}:{image_tag}"
-            with utils.timer(
-                    f'Uploading "{image}" to local Minikube cache',
-                    f'Upload complete of "{image}" to local Minikube cache',
-                    verbose=verbose):
-                minikube.image_load(image, overwrite=False)
+                minikube.image_build(dockerfile_path, QHUB_IMAGE_DIRECTORY, image_name, image_tag)
 
     console.rule("Installing QHub")
     config = initialize_configuration(develop_directory, image_tag, build_images=build_images)
