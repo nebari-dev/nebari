@@ -27,7 +27,7 @@ def initialize_configuration(directory, image_tag, verbose=True, build_images=Tr
 
     config = initialize.render_config(
         f'qhubdevelop',
-        qhub_domain='github-actions.qhub.dev',
+        qhub_domain='localhost.qhub.dev',
         cloud_provider='local',
         ci_provider='none',
         repository=None,
