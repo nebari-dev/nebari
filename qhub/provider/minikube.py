@@ -94,7 +94,7 @@ def image_load(image, overwrite=True, profile="qhub"):
 
 
 def image_build(dockerfile_path, build_directory, name, tag, verbose=False, profile="qhub"):
-    command = ['image', 'build', build_directory, f"--profile={profile}", f'--file="{os.path.basename(dockerfile_path)}"', f'--tag={name}:{tag}']
+    command = ['image', 'build', f"--profile={profile}", f'--file="{os.path.basename(dockerfile_path)}"', f'--tag={name}:{tag}', f'"{build_directory}"']
     run_minikube_subprocess(command, prefix='minikube')
 
 
