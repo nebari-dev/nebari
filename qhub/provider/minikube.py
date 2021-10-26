@@ -94,7 +94,7 @@ def image_load(image, overwrite=True):
 
 
 def image_build(dockerfile_path, build_directory, name, tag, verbose=False):
-    command = ['image', 'build', f'--file={dockerfile_path}', f'--tag={name}:{tag}']
+    command = ['image', 'build', f'--file={dockerfile_path}', f'--tag={name}:{tag}', '.']
     with change_directory(build_directory):
         run_minikube_subprocess(command, prefix='minikube')
 
