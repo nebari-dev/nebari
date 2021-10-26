@@ -8,10 +8,10 @@ from qhub.initialize import render_config
 
 INIT_INPUTS = [
     # project, namespace, domain, cloud_provider, ci_provider, auth_provider
-    ("do-pytest", "dev", "do.qhub.dev", "do", "github-actions", "github"),
-    ("aws-pytest", "dev", "aws.qhub.dev", "aws", "github-actions", "github"),
-    ("gcp-pytest", "dev", "gcp.qhub.dev", "gcp", "github-actions", "github"),
-    ("azure-pytest", "dev", "azure.qhub.dev", "azure", "github-actions", "github"),
+    ("pytestdo", "dev", "do.qhub.dev", "do", "github-actions", "github"),
+    ("pytestaws", "dev", "aws.qhub.dev", "aws", "github-actions", "github"),
+    ("pytestgcp", "dev", "gcp.qhub.dev", "gcp", "github-actions", "github"),
+    ("pytestazure", "dev", "azure.qhub.dev", "azure", "github-actions", "github"),
 ]
 
 QHUB_CONFIG_FN = "qhub-config.yaml"
