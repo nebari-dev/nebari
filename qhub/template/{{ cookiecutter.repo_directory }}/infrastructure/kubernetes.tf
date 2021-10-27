@@ -224,13 +224,13 @@ module "qhub" {
 
 {% for helm_extension in cookiecutter.helm_extensions -%}
 module "{{helm_extension['name'] }}-extension" {
-  source       = "./modules/kubernetes/services/extensions"
+  source       = "./modules/kubernetes/services/helm-extensions"
   name       = "{{ helm_extension['name'] }}"
   namespace  = var.environment
   repository = "{{ helm_extension['repository'] }}"
   chart      = "{{ helm_extension['chart'] }}"
   chart_version    = "{{ helm_extension['version'] }}"
-  {% if 'overrides' in extension -%}
+  {% if 'overrides' in helm_extension -%}
   overrides = [<<EOT
 {{ helm_extension['overrides']|yamlify -}}
     EOT
