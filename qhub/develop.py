@@ -111,6 +111,8 @@ def develop(verbose=True, build_images=True, profile="qhub", kubernetes_version=
     with utils.change_directory(develop_directory):
         deploy.guided_install(config, dns_provider=None, dns_auto_provision=False, disable_prompt=True, verbose=verbose)
 
+    minikube_path = minikube.download_minikube_binary()
     console.print(
         f'Development documentation https://docs.qhub.dev/en/stable/source/dev_guide/\n'
+        f'When done with development delete the minikube cluster via "{minikube_path} delete --profile={profile}"\n'
     )
