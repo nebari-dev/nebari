@@ -1,7 +1,6 @@
 import subprocess
 import time
 import os
-import re
 import contextlib
 from typing import Sequence, Set, List
 
@@ -44,7 +43,7 @@ def timer(in_progress, completed, verbose=True):
         else:
             with console.capture():
                 yield
-    console.print(completed + f" in {time.time() - start_time:.3f} \[s]")
+    console.out(completed + f" in {time.time() - start_time:.3f} [s]")
 
 
 @contextlib.contextmanager
