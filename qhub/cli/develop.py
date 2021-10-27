@@ -21,7 +21,7 @@ def create_develop_subcommand(subparser):
     subparser.set_defaults(func=handle_develop)
 
 
-def handle_deploy(args):
+def handle_develop(args):
     develop(
         verbose=args.verbose,
         build_images=args.disable_build_images,
