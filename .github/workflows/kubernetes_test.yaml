@@ -118,7 +118,7 @@ jobs:
         run: |
           cd local-deployment
           qhub deploy --config qhub-config.yaml --disable-prompt
-      - name: Delete All Docker Images
+      - name: Remove Minikube Images and Docker System Prune
         run: |
           minikube image rm quansight/qhub-jupyterhub:v"${{ env.QHUB_VERSION }}"
           minikube image rm quansight/qhub-jupyterlab:v"${{ env.QHUB_VERSION }}"
@@ -126,7 +126,7 @@ jobs:
           minikube image rm quansight/qhub-dask-gateway:v"${{ env.QHUB_VERSION }}"
           minikube image rm quansight/qhub-conda-store:v"${{ env.QHUB_VERSION }}
           "
-          docker rmi $(docker images -a -q) -f
+          docker system prune -a -f
       - name: Basic kubectl checks after deployment
         run: |
           kubectl get all,cm,secret,ing -A
