@@ -57,6 +57,7 @@ class CICD(Base):
     before_script: typing.Optional[typing.List[str]]
     after_script: typing.Optional[typing.List[str]]
 
+
 # ======== Generic Helm Extensions ========
 class HelmExtension(Base):
     name: str
