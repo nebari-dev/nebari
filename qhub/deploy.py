@@ -159,6 +159,7 @@ def check_qhub_address(ip_or_hostname : str, domain : str):
         console.print(
             'Domain "{domain}" is designed for remote development testing via ssh\n'
             'Run "sudo ssh -L 80:{ip_or_hostname}:80 -L 443:{ip_or_hostname}:443 <remote-host>" to expose QHub locally\n')
+        return
 
     try:
         resolved_domain_ip = socket.gethostbyname(domain)
