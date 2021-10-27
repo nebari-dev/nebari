@@ -127,7 +127,7 @@ def develop(
         )
 
     with utils.change_directory(develop_directory):
-        deploy.guided_install(
+        deploy.deploy_configuration(
             config,
             dns_provider=None,
             dns_auto_provision=False,

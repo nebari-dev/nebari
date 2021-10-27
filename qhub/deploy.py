@@ -17,29 +17,6 @@ def deploy_configuration(
     config,
     dns_provider,
     dns_auto_provision,
-    disable_prompt,
-    skip_remote_state_provision,
-):
-    logger.info(f'All qhub endpoints will be under https://{config["domain"]}')
-
-    with timer(logger, "deploying QHub"):
-        try:
-            guided_install(
-                config,
-                dns_provider,
-                dns_auto_provision,
-                disable_prompt,
-                skip_remote_state_provision,
-            )
-        except CalledProcessError as e:
-            logger.error(e.output)
-            raise e
-
-
-def guided_install(
-    config,
-    dns_provider,
-    dns_auto_provision,
     disable_prompt=False,
     skip_remote_state_provision=False,
     verbose=True,
