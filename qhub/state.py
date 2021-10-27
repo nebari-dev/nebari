@@ -91,7 +91,7 @@ def terraform_state_sync(config, logger=None):
                 directory="terraform-state",
             )
 
-    except terraform.TerraformException:
+    except terraform.TerraformError:
         if logger:
             logger.info(
                 "Terraform error presumed to be due to importing a resource which does not exist yet"

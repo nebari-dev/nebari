@@ -1,7 +1,6 @@
 import argparse
 import logging
 import sys
-from pydantic.error_wrappers import ValidationError
 
 from qhub.cli.deploy import create_deploy_subcommand
 from qhub.cli.initialize import create_init_subcommand
@@ -9,7 +8,7 @@ from qhub.cli.render import create_render_subcommand
 from qhub.cli.validate import create_validate_subcommand
 from qhub.cli.destroy import create_destroy_subcommand
 from qhub.cli.upgrade import create_upgrade_subcommand
-from qhub.provider.terraform import TerraformException
+from qhub.utils import console, QHubError
 from qhub.version import __version__
 from qhub.utils import QHUB_GH_BRANCH
 
@@ -42,13 +41,15 @@ def cli(args):
 
     try:
         args.func(args)
-    except ValidationError as valerr:
-        sys.exit(
-            "Error: The schema validation of the qhub-config.yaml failed."
-            " The following error message may be helpful in determining what went wrong:\n\n"
-            + str(valerr)
-        )
-    except ValueError as ve:
-        sys.exit("\nProblem encountered: " + str(ve) + "\n")
-    except TerraformException:
-        sys.exit("\nProblem encountered: Terraform error\n")
+    except QHubError as qhub_error:
+        console.print(qhub_error.message, style="red")
+        sys.exit(1)
+    except BaseException as e:
+        # Any Exception that does not Derive from QHubError
+        # is an unhandled error within QHub and is an Error
+        console.print_exception(show_locals=True)
+        console.print(
+            'Uncaught QHub exception encountered\n'
+            'This is a bug please report with the stack trace to https://github.com/quansight/qhub/issues\n',
+            style="red")
+        sys.exit(1)
