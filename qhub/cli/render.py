@@ -23,7 +23,7 @@ def handle_render(args):
         )
 
     with config_filename.open() as f:
-        config = yaml.safe_load(f.read())
+        config = yaml.load(f.read())
 
     verify(config)
 

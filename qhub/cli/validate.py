@@ -40,7 +40,7 @@ def handle_validate(args):
         )
 
     with config_filename.open() as f:
-        config = yaml.safe_load(f.read())
+        config = yaml.load(f.read())
 
     if args.enable_commenting:
         # for PR's only

@@ -109,7 +109,7 @@ def test_render_template(init_render):
     qhub_config = output_directory / QHUB_CONFIG_FN
 
     yaml = YAML()
-    qhub_config_json = yaml.safe_load(qhub_config.read_text())
+    qhub_config_json = yaml.load(qhub_config.read_text())
 
     assert qhub_config_json["project_name"] == project
     assert qhub_config_json["namespace"] == namespace

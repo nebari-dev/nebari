@@ -115,7 +115,7 @@ def render_template(output_directory, config_filename, force=False):
         raise ValueError(f"cookiecutter configuration={filename} is not filename")
 
     with filename.open() as f:
-        config = yaml.safe_load(f)
+        config = yaml.load(f)
 
         # For any config values that start with
         # QHUB_SECRET_, set the values using the

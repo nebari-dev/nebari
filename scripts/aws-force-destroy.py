@@ -26,7 +26,7 @@ def handle_force_destroy(args):
         )
 
     with config_filename.open() as f:
-        config = yaml.safe_load(f.read())
+        config = yaml.load(f.read())
 
     # Don't verify(config) in case the schema has changed - just pick out the important bits and tear down
 
