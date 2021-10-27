@@ -46,7 +46,7 @@ def cli(args):
     except QHubError as qhub_error:
         console.print(qhub_error.message, style="red")
         sys.exit(1)
-    except BaseException as e:
+    except Exception as e:
         # Any Exception that does not Derive from QHubError
         # is an unhandled error within QHub and is an Error
         console.print_exception(show_locals=True)
