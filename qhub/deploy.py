@@ -1,7 +1,6 @@
 import logging
 import os
 import re
-from subprocess import CalledProcessError
 import socket
 
 from qhub.provider import terraform
