@@ -12,7 +12,7 @@ def test_minikube_start_status_delete():
     profile = "pytest-start-status-delete"
 
     try:
-        minikube.start(profile=profile, memory="1g", cpu="1")
+        minikube.start(profile=profile, memory="1g", cpu="2")
         assert minikube.status(profile=profile)
         assert re.fullmatch(r"\d+\.\d+\.\d+\.\d+", minikube.ip(profile=profile))
     finally:
