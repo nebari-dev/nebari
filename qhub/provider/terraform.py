@@ -71,7 +71,9 @@ def init(directory=None):
 
 def apply(directory=None, targets=None):
     targets = targets or []
-    command = ["apply", "-auto-approve", "-no-color"] + ["-target=" + _ for _ in targets]
+    command = ["apply", "-auto-approve", "-no-color"] + [
+        "-target=" + _ for _ in targets
+    ]
     run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
