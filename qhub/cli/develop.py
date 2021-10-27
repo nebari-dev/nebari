@@ -15,7 +15,7 @@ def create_develop_subcommand(subparser):
     subparser.add_argument(
         "--kubernetes-version", default="v1.20.2", help="kubernetes version to use for development",
     )
-    subparse.add_argument(
+    subparser.add_argument(
         "--remote", action="store_true", help=""
     )
     subparser.set_defaults(func=handle_develop)
