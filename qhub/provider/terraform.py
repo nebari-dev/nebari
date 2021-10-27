@@ -65,13 +65,13 @@ def version():
 
 
 def init(directory=None):
-    command = ["init", "--no-color"]
+    command = ["init", "-no-color"]
     run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
 def apply(directory=None, targets=None):
     targets = targets or []
-    command = ["apply", "-auto-approve", "--no-color"] + ["-target=" + _ for _ in targets]
+    command = ["apply", "-auto-approve", "-no-color"] + ["-target=" + _ for _ in targets]
     run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
@@ -94,7 +94,7 @@ def refresh(directory=None):
 
 
 def destroy(directory=None):
-    command = ["destroy", "-auto-approve"]
+    command = ["destroy", "-auto-approve", "-no-color"]
     run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
