@@ -22,12 +22,12 @@ def list_dockerfile_images(directory):
     return dockerfile_paths, image_names
 
 
-def initialize_configuration(directory, image_tag, verbose=True, build_images=True):
+def initialize_configuration(directory, image_tag, verbose=True, build_images=True, remote=True):
     config_path = os.path.join(directory, 'qhub-config.yaml')
 
     config = initialize.render_config(
         f'qhubdevelop',
-        qhub_domain='localhost.qhub.dev',
+        qhub_domain='localhost.qhub.dev' if remote else 'github-actions.qhub.dev',
         cloud_provider='local',
         ci_provider='none',
         repository=None,
@@ -64,7 +64,7 @@ def initialize_configuration(directory, image_tag, verbose=True, build_images=Tr
     return config
 
 
-def develop(verbose=True, build_images=True, kubernetes_version="v1.20.2"):
+def develop(verbose=True, build_images=True, profile="qhub", kubernetes_version="v1.20.2", remote=False):
     git_repo_root = git.is_git_repo()
     if git_repo_root is None:
         raise utils.QHubError('QHub develop required to run within QHub git repository')
@@ -79,11 +79,11 @@ def develop(verbose=True, build_images=True, kubernetes_version="v1.20.2"):
             'Creating Minikube cluster',
             'Created Minikube cluster',
             verbose=verbose):
-        minikube.start(kubernetes_version=kubernetes_version)
-        if not minikube.status():
+        minikube.start(kubernetes_version=kubernetes_version, profile=profile)
+        if not minikube.status(profile=profile):
             raise QHubError("Minikube cluster failed to start")
-        minikube.configure_metallb()
-        minikube.addons_enable("metallb")
+        minikube.configure_metallb(profile=profile)
+        minikube.addons_enable("metallb", profile=profile)
 
     if build_images:
         console.rule("Building Docker images")
@@ -94,10 +94,10 @@ def develop(verbose=True, build_images=True, kubernetes_version="v1.20.2"):
                     f'Building {os.path.basename(dockerfile_path)} image "{image}"',
                     f'Built {os.path.basename(dockerfile_path)} image "{image}"',
                     verbose=verbose):
-                minikube.image_build(dockerfile_path, QHUB_IMAGE_DIRECTORY, image_name, image_tag)
+                minikube.image_build(dockerfile_path, QHUB_IMAGE_DIRECTORY, image_name, image_tag, profile=profile)
 
     console.rule("Installing QHub")
-    config = initialize_configuration(develop_directory, image_tag, build_images=build_images)
+    config = initialize_configuration(develop_directory, image_tag, build_images=build_images, remote=remote)
 
     with utils.timer(
             f'Rendering qhub-config.yaml terraform files to directory={develop_directory}',

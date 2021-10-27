@@ -155,6 +155,11 @@ def check_qhub_address(ip_or_hostname : str, domain : str):
 
     This check can be flaky in the sense that DNS takes time to propagate.
     """
+    if domain == 'localhost.qhub.dev':
+        console.print(
+            'Domain "{domain}" is designed for remote development testing via ssh\n'
+            'Run "sudo ssh -L 80:{ip_or_hostname}:80 -L 443:{ip_or_hostname}:443 <remote-host>" to expose QHub locally\n')
+
     try:
         resolved_domain_ip = socket.gethostbyname(domain)
     except socket.gaierror as e:
