@@ -157,8 +157,8 @@ def check_qhub_address(ip_or_hostname : str, domain : str):
     """
     if domain == 'localhost.qhub.dev':
         console.print(
-            'Domain "{domain}" is designed for remote development testing via ssh\n'
-            'Run "sudo ssh -L 80:{ip_or_hostname}:80 -L 443:{ip_or_hostname}:443 <remote-host>" to expose QHub locally\n')
+            f'Domain "{domain}" is designed for remote development testing via ssh\n'
+            f'Run "sudo ssh -L 80:{ip_or_hostname}:80 -L 443:{ip_or_hostname}:443 <remote-host>" to expose QHub locally\n')
         return
 
     try:
