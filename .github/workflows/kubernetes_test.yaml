@@ -118,13 +118,15 @@ jobs:
         run: |
           cd local-deployment
           qhub deploy --config qhub-config.yaml --disable-prompt
-      - name: Remove Minikube Images
+      - name: Delete All Docker Images
         run: |
           minikube image rm quansight/qhub-jupyterhub:v"${{ env.QHUB_VERSION }}"
           minikube image rm quansight/qhub-jupyterlab:v"${{ env.QHUB_VERSION }}"
           minikube image rm quansight/qhub-dask-worker:v"${{ env.QHUB_VERSION }}"
           minikube image rm quansight/qhub-dask-gateway:v"${{ env.QHUB_VERSION }}"
-          minikube image rm quansight/qhub-conda-store:v"${{ env.QHUB_VERSION }}"
+          minikube image rm quansight/qhub-conda-store:v"${{ env.QHUB_VERSION }}
+          "
+          docker rmi $(docker images -a -q) -f
       - name: Basic kubectl checks after deployment
         run: |
           kubectl get all,cm,secret,ing -A
@@ -142,6 +144,7 @@ jobs:
           node-version: '14'
       - name: npm version
         run: |
+          df -h
           npm --version
       - name: Install Cypress dependencies
         run: |
