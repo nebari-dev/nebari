@@ -65,13 +65,13 @@ def version():
 
 
 def init(directory=None):
-    command = ["init"]
+    command = ["init", "--no-color"]
     run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
 def apply(directory=None, targets=None):
     targets = targets or []
-    command = ["apply", "-auto-approve"] + ["-target=" + _ for _ in targets]
+    command = ["apply", "-auto-approve", "--no-color"] + ["-target=" + _ for _ in targets]
     run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
@@ -83,9 +83,7 @@ def output(directory=None):
 
 def tfimport(addr, id, directory=None):
     command = ["import", addr, id]
-    run_terraform_subprocess(
-        command, cwd=directory, prefix="terraform"
-    )
+    run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
 def refresh(directory=None):

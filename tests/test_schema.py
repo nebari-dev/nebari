@@ -13,9 +13,7 @@ from qhub.initialize import render_config
         ("azure-pytest", "dev", "azure.qhub.dev", "azure", "github-actions", "github"),
     ],
 )
-def test_schema(
-    project, namespace, domain, cloud_provider, ci_provider, auth_provider
-):
+def test_schema(project, namespace, domain, cloud_provider, ci_provider, auth_provider):
     config = render_config(
         project_name=project,
         namespace=namespace,

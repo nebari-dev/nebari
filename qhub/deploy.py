@@ -46,7 +46,7 @@ def guided_install(
 ):
     # 01 Check Environment Variables
     check_cloud_credentials(config)
-    console.print('Validated QHub environment variables for provider')
+    console.print("Validated QHub environment variables for provider")
 
     # Check that secrets required for terraform
     # variables are set as required
@@ -61,17 +61,19 @@ def guided_install(
         and (config.get("provider") != "local")
     ):
         with timer(
-                'Creating terraform remote state',
-                'Created terraform remote state',
-                verbose=verbose):
+            "Creating terraform remote state",
+            "Created terraform remote state",
+            verbose=verbose,
+        ):
             terraform_state_sync(config)
 
     # 3 kubernetes-alpha provider requires that kubernetes be
     # provisionioned before any "kubernetes_manifests" resources
     with timer(
-            'Deploying QHub infrastructure (cloud, managed kubernetes)',
-            'Deployed QHub infrastructure (cloud, managed kubernetes)',
-            verbose=verbose):
+        "Deploying QHub infrastructure (cloud, managed kubernetes)",
+        "Deployed QHub infrastructure (cloud, managed kubernetes)",
+        verbose=verbose,
+    ):
         terraform.init(directory="infrastructure")
         terraform.apply(
             directory="infrastructure",
@@ -83,9 +85,10 @@ def guided_install(
 
     # 04 Create qhub initial state (up to nginx-ingress)
     with timer(
-            'Deploying QHub core components (namespace, ingress, authentication, monitoring)',
-            'Deployed QHub core components (namespace, ingress, authentication, monitoring)',
-            verbose=verbose):
+        "Deploying QHub core components (namespace, ingress, authentication, monitoring)",
+        "Deployed QHub core components (namespace, ingress, authentication, monitoring)",
+        verbose=verbose,
+    ):
         terraform.init(directory="infrastructure")
         terraform.apply(
             directory="infrastructure",
@@ -135,45 +138,46 @@ def guided_install(
         )
 
     # 06 Full deploy QHub
-    with timer(
-            'Deploying QHub',
-            'Deployed QHub',
-            verbose=verbose):
+    with timer("Deploying QHub", "Deployed QHub", verbose=verbose):
         terraform.apply(directory="infrastructure")
 
     check_qhub_address(ip_or_hostname, config["domain"])
 
-    console.rule('Successful QHub Deployment')
+    console.rule("Successful QHub Deployment")
     console.print(
         f'Visit https://{config["domain"]} to access your QHub Cluster\n'
-        'Administrator documentation: https://docs.qhub.dev/en/stable/source/admin_guide/\n'
-        'End user documentation: https://docs.qhub.dev/en/stable/source/user_guide/')
+        "Administrator documentation: https://docs.qhub.dev/en/stable/source/admin_guide/\n"
+        "End user documentation: https://docs.qhub.dev/en/stable/source/user_guide/"
+    )
 
 
-def check_qhub_address(ip_or_hostname : str, domain : str):
-    """Check that the QHub domain points to the load balancer ip address or cname
+def check_qhub_address(ip_or_hostname: str, domain: str):
+    """Check that the QHub domain points to the load balancer IP address or CNAME
 
     This check can be flaky in the sense that DNS takes time to propagate.
     """
-    if domain == 'localhost.qhub.dev':
+    if domain == "localhost.qhub.dev":
         console.print(
             f'Domain "{domain}" is designed for remote development testing via ssh\n'
-            f'Run "sudo ssh -L 80:{ip_or_hostname}:80 -L 443:{ip_or_hostname}:443 <remote-host>" to expose QHub locally\n')
+            f'Run "sudo ssh -L 80:{ip_or_hostname}:80 -L 443:{ip_or_hostname}:443 <remote-host>" to expose QHub locally\n'
+        )
         return
 
     try:
         resolved_domain_ip = socket.gethostbyname(domain)
-    except socket.gaierror as e:
+    except socket.gaierror:
         raise QHubError(
             f'Domain "{domain}" currently does not resolve\n'
-            f'Make sure to point DNS to {ip_or_hostname}\n'
-            'See https://docs.qhub.dev/en/stable/source/installation/setup.html#domain-registry\n')
+            f"Make sure to point DNS to {ip_or_hostname}\n"
+            "See https://docs.qhub.dev/en/stable/source/installation/setup.html#domain-registry\n"
+        )
 
     resolved_load_balancer_ip = socket.gethostbyname(ip_or_hostname)
     if resolved_load_balancer_ip != resolved_domain_ip:
         raise QHubError(
             f'Domain "{domain}" is set but does not resolve to "{ip_or_hostname}"\n'
-            f'Currently resolving "{domain}" -> "{resolved_domain_ip}" and "{ip_or_hostname}" -> "{resolved_load_balancer_ip}"\n')
+            f'Currently resolving "{domain}" -> "{resolved_domain_ip}" and "{ip_or_hostname}" -> "{resolved_load_balancer_ip}"\n'
+        )
 
     console.print(f'Domain "{domain}" properly resolves to "{ip_or_hostname}"')
 

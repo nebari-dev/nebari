@@ -1,10 +1,8 @@
 import os
-import datetime
 
 from ruamel import yaml
-from rich.pretty import pprint
 
-from qhub.provider import docker, git, minikube
+from qhub.provider import git, minikube
 from qhub import utils, initialize, deploy, render
 from qhub.console import console
 
@@ -16,27 +14,29 @@ def list_dockerfile_images(directory):
     dockerfile_paths = []
     image_names = []
     for path in os.listdir(directory):
-        if path.startswith('Dockerfile'):
+        if path.startswith("Dockerfile"):
             dockerfile_paths.append(os.path.join(directory, path))
             image_names.append(os.path.splitext(path)[1][1:])
     return dockerfile_paths, image_names
 
 
-def initialize_configuration(directory, image_tag, verbose=True, build_images=True, remote=True):
-    config_path = os.path.join(directory, 'qhub-config.yaml')
+def initialize_configuration(
+    directory, image_tag, verbose=True, build_images=True, remote=True
+):
+    config_path = os.path.join(directory, "qhub-config.yaml")
 
     config = initialize.render_config(
-        f'qhubdevelop',
-        qhub_domain='localhost.qhub.dev' if remote else 'github-actions.qhub.dev',
-        cloud_provider='local',
-        ci_provider='none',
+        "qhubdevelop",
+        qhub_domain="localhost.qhub.dev" if remote else "github-actions.qhub.dev",
+        cloud_provider="local",
+        ci_provider="none",
         repository=None,
-        auth_provider='password',
-        namespace='dev',
+        auth_provider="password",
+        namespace="dev",
         repository_auto_provision=False,
         auth_auto_provision=False,
         terraform_state=None,
-        disable_prompt=True
+        disable_prompt=True,
     )
 
     if build_images:
@@ -50,7 +50,9 @@ def initialize_configuration(directory, image_tag, verbose=True, build_images=Tr
         }
 
         for jupyterlab_profile in config["profiles"]["jupyterlab"]:
-            jupyterlab_profile["kubespawner_override"]["image"] = f"jupyterlab:{image_tag}"
+            jupyterlab_profile["kubespawner_override"][
+                "image"
+            ] = f"jupyterlab:{image_tag}"
 
         for name, dask_worker_profile in config["profiles"]["dask_worker"].items():
             dask_worker_profile["image"] = f"dask-worker:{image_tag}"
@@ -64,10 +66,16 @@ def initialize_configuration(directory, image_tag, verbose=True, build_images=Tr
     return config
 
 
-def develop(verbose=True, build_images=True, profile="qhub", kubernetes_version="v1.20.2", remote=False):
+def develop(
+    verbose=True,
+    build_images=True,
+    profile="qhub",
+    kubernetes_version="v1.20.2",
+    remote=False,
+):
     git_repo_root = git.is_git_repo()
     if git_repo_root is None:
-        raise utils.QHubError('QHub develop required to run within QHub git repository')
+        raise utils.QHubError("QHub develop required to run within QHub git repository")
 
     git_head_sha = git.current_sha()
     image_tag = git_head_sha
@@ -76,12 +84,11 @@ def develop(verbose=True, build_images=True, profile="qhub", kubernetes_version=
 
     console.rule("Starting Minikube cluster")
     with utils.timer(
-            'Creating Minikube cluster',
-            'Created Minikube cluster',
-            verbose=verbose):
+        "Creating Minikube cluster", "Created Minikube cluster", verbose=verbose
+    ):
         minikube.start(kubernetes_version=kubernetes_version, profile=profile)
         if not minikube.status(profile=profile):
-            raise QHubError("Minikube cluster failed to start")
+            raise utils.QHubError("Minikube cluster failed to start")
         minikube.configure_metallb(profile=profile)
         minikube.addons_enable("metallb", profile=profile)
 
@@ -91,28 +98,45 @@ def develop(verbose=True, build_images=True, profile="qhub", kubernetes_version=
         for dockerfile_path, image_name in zip(dockerfile_paths, image_names):
             image = f"{image_name}:{image_tag}"
             with utils.timer(
-                    f'Building {os.path.basename(dockerfile_path)} image "{image}"',
-                    f'Built {os.path.basename(dockerfile_path)} image "{image}"',
-                    verbose=verbose):
-                minikube.image_build(dockerfile_path, QHUB_IMAGE_DIRECTORY, image_name, image_tag, profile=profile)
+                f'Building {os.path.basename(dockerfile_path)} image "{image}"',
+                f'Built {os.path.basename(dockerfile_path)} image "{image}"',
+                verbose=verbose,
+            ):
+                minikube.image_build(
+                    dockerfile_path,
+                    QHUB_IMAGE_DIRECTORY,
+                    image_name,
+                    image_tag,
+                    profile=profile,
+                )
 
     console.rule("Installing QHub")
-    config = initialize_configuration(develop_directory, image_tag, build_images=build_images, remote=remote)
+    config = initialize_configuration(
+        develop_directory, image_tag, build_images=build_images, remote=remote
+    )
 
     with utils.timer(
-            f'Rendering qhub-config.yaml terraform files to directory={develop_directory}',
-            f'Rendered qhub-config.yaml terraform files to directory={develop_directory}',
-            verbose=verbose):
+        f"Rendering qhub-config.yaml terraform files to directory={develop_directory}",
+        f"Rendered qhub-config.yaml terraform files to directory={develop_directory}",
+        verbose=verbose,
+    ):
         render.render_template(
             develop_directory,
             os.path.join(develop_directory, "qhub-config.yaml"),
-            force=True)
+            force=True,
+        )
 
     with utils.change_directory(develop_directory):
-        deploy.guided_install(config, dns_provider=None, dns_auto_provision=False, disable_prompt=True, verbose=verbose)
+        deploy.guided_install(
+            config,
+            dns_provider=None,
+            dns_auto_provision=False,
+            disable_prompt=True,
+            verbose=verbose,
+        )
 
     minikube_path = minikube.download_minikube_binary()
     console.print(
-        f'Development documentation https://docs.qhub.dev/en/stable/source/dev_guide/\n'
+        f"Development documentation https://docs.qhub.dev/en/stable/source/dev_guide/\n"
         f'When done with development delete the minikube cluster via "{minikube_path} delete --profile={profile}"\n'
     )

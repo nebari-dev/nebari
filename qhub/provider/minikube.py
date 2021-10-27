@@ -8,7 +8,7 @@ import re
 import json
 import shutil
 
-from qhub.utils import run_subprocess_cmd, QHubError, change_directory
+from qhub.utils import run_subprocess_cmd, QHubError
 from qhub import constants
 from qhub.console import console
 
@@ -22,16 +22,16 @@ def _patch_nixos_minikube_binary(minikube_path):
 
     Use patchelf to change the ld interpreter to one that works for NixOS
     """
-    ls_command = shutil.which('ls')
-    patchelf_command = shutil.which('patchelf')
+    ls_command = shutil.which("ls")
+    patchelf_command = shutil.which("patchelf")
 
-    if sys.platform != 'linux' or 'NixOS' not in open('/etc/os-release').read():
+    if sys.platform != "linux" or "NixOS" not in open("/etc/os-release").read():
         return
 
-    command = [patchelf_command, '--print-interpreter', ls_command]
-    interpreter = subprocess.check_output(command, encoding='utf-8')[:-1]
+    command = [patchelf_command, "--print-interpreter", ls_command]
+    interpreter = subprocess.check_output(command, encoding="utf-8")[:-1]
 
-    command = [patchelf_command, '--set-interpreter', interpreter, minikube_path]
+    command = [patchelf_command, "--set-interpreter", interpreter, minikube_path]
     subprocess.check_output(command)
 
 
@@ -59,7 +59,9 @@ def download_minikube_binary(version=constants.MINIKUBE_VERSION):
     if not os.path.isfile(filename_path):
         os.makedirs(filename_directory, exist_ok=True)
 
-        console.print(f"downloading and extracting minikube binary from url={download_url} to path={filename_path}")
+        console.print(
+            f"downloading and extracting minikube binary from url={download_url} to path={filename_path}"
+        )
 
         with urllib.request.urlopen(download_url) as resp:
             with open(filename_path, "wb") as f:
@@ -73,33 +75,46 @@ def download_minikube_binary(version=constants.MINIKUBE_VERSION):
 def run_minikube_subprocess(process_args, **kwargs):
     minikube_path = download_minikube_binary()
     command = [minikube_path] + process_args
-    if run_subprocess_cmd([minikube_path] + process_args, **kwargs):
+    if run_subprocess_cmd(command, **kwargs):
         raise MinikubeError("Minikube returned an error")
 
 
 def version():
     minikube_path = download_minikube_binary()
-    version_output = subprocess.check_output([minikube_path, "version"]).decode(
-        "utf-8"
-    )
+    version_output = subprocess.check_output([minikube_path, "version"]).decode("utf-8")
     return re.search(r"minikube version: v(\d+\.\d+.\d+)", version_output).group(1)
 
 
 def image_load(image, overwrite=True, profile="qhub"):
-    minikube_path = download_minikube_binary()
-
-    overwrite_command = '--overwrite=true' if overwrite else '--overwrite=false'
-    command = ['image', 'load', f"--profile={profile}", overwrite_command, image]
+    overwrite_command = "--overwrite=true" if overwrite else "--overwrite=false"
+    command = ["image", "load", f"--profile={profile}", overwrite_command, image]
     run_minikube_subprocess(command, prefix="minikube")
 
 
-def image_build(dockerfile_path, build_directory, name, tag, verbose=False, profile="qhub"):
-    command = ['image', 'build', f"--profile={profile}", f'--file="{os.path.basename(dockerfile_path)}"', f'--tag={name}:{tag}', f'"{build_directory}"']
-    run_minikube_subprocess(command, prefix='minikube', shell=True)
+def image_build(
+    dockerfile_path, build_directory, name, tag, verbose=False, profile="qhub"
+):
+    command = [
+        "image",
+        "build",
+        f"--profile={profile}",
+        f'--file="{os.path.basename(dockerfile_path)}"',
+        f"--tag={name}:{tag}",
+        f'"{build_directory}"',
+    ]
+    run_minikube_subprocess(command, prefix="minikube", shell=True)
 
 
-def start(driver='docker', memory='8g', cpu='2', profile="qhub", kubernetes_version=None):
-    command = ["start", f"--driver={driver}", f"--memory={memory}", f"--cpus={cpu}", f"--profile={profile}"]
+def start(
+    driver="docker", memory="8g", cpu="2", profile="qhub", kubernetes_version=None
+):
+    command = [
+        "start",
+        f"--driver={driver}",
+        f"--memory={memory}",
+        f"--cpus={cpu}",
+        f"--profile={profile}",
+    ]
 
     if kubernetes_version:
         command = command + [f"--kubernetes-version={kubernetes_version}"]
@@ -110,13 +125,16 @@ def start(driver='docker', memory='8g', cpu='2', profile="qhub", kubernetes_vers
 def status(profile="qhub"):
     minikube_path = download_minikube_binary()
     command = [minikube_path, "status", f"--profile={profile}"]
-    return subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+    return (
+        subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        == 0
+    )
 
 
 def ip(profile="qhub"):
     minikube_path = download_minikube_binary()
     command = [minikube_path, "ip", f"--profile={profile}"]
-    return subprocess.check_output(command, encoding='utf-8').strip()
+    return subprocess.check_output(command, encoding="utf-8").strip()
 
 
 def delete(profile="qhub"):
@@ -124,7 +142,9 @@ def delete(profile="qhub"):
 
 
 def addons_enable(addon, profile="qhub"):
-    run_minikube_subprocess(["addons", "enable", addon, "--profile", profile], prefix="minikube")
+    run_minikube_subprocess(
+        ["addons", "enable", addon, "--profile", profile], prefix="minikube"
+    )
 
 
 def configure_metallb(profile="qhub", start_address=None, end_address=None):
@@ -132,24 +152,37 @@ def configure_metallb(profile="qhub", start_address=None, end_address=None):
 
     Assumes that minikube docker image is running
     """
-    docker_image_cmd = ['docker', 'ps', '--format', '{{.Names}} {{.ID}}']
-    docker_images_output = subprocess.check_output(docker_image_cmd, encoding='utf-8')[:-1]
-    docker_images = {line.split()[0]: line.split()[1] for line in docker_images_output.split('\n')}
+    docker_image_cmd = ["docker", "ps", "--format", "{{.Names}} {{.ID}}"]
+    docker_images_output = subprocess.check_output(docker_image_cmd, encoding="utf-8")[
+        :-1
+    ]
+    docker_images = {
+        line.split()[0]: line.split()[1] for line in docker_images_output.split("\n")
+    }
 
     if profile not in docker_images:
-        raise ValueError('minikube docker image not running')
+        raise ValueError("minikube docker image not running")
 
-    docker_inspect_cmd = ['docker', 'inspect', '--format={{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}', docker_images[profile]]
-    address = subprocess.check_output(docker_inspect_cmd, encoding='utf-8')[:-1].split('.')
+    docker_inspect_cmd = [
+        "docker",
+        "inspect",
+        "--format={{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}",
+        docker_images[profile],
+    ]
+    address = subprocess.check_output(docker_inspect_cmd, encoding="utf-8")[:-1].split(
+        "."
+    )
 
-    filename = os.path.expanduser(f'~/.minikube/profiles/{profile}/config.json')
+    filename = os.path.expanduser(f"~/.minikube/profiles/{profile}/config.json")
     with open(filename) as f:
         data = json.load(f)
 
-    start_address, end_address = '.'.join(address[0:3] + ['100']), '.'.join(address[0:3] + ['150'])
+    start_address, end_address = ".".join(address[0:3] + ["100"]), ".".join(
+        address[0:3] + ["150"]
+    )
     console.print(f"configuring MetalLB start={start_address} end={end_address}")
-    data['KubernetesConfig']['LoadBalancerStartIP'] = start_address
-    data['KubernetesConfig']['LoadBalancerEndIP'] = end_address
+    data["KubernetesConfig"]["LoadBalancerStartIP"] = start_address
+    data["KubernetesConfig"]["LoadBalancerEndIP"] = end_address
 
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         json.dump(data, f)

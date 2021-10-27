@@ -46,12 +46,13 @@ def cli(args):
     except QHubError as qhub_error:
         console.print(qhub_error.message, style="red")
         sys.exit(1)
-    except Exception as e:
+    except Exception:
         # Any Exception that does not Derive from QHubError
         # is an unhandled error within QHub and is an Error
         console.print_exception(show_locals=True)
         console.print(
-            'Uncaught QHub exception encountered\n'
-            'This is a bug please report with the stack trace to https://github.com/quansight/qhub/issues\n',
-            style="red")
+            "Uncaught QHub exception encountered\n"
+            "This is a bug please report with the stack trace to https://github.com/quansight/qhub/issues\n",
+            style="red",
+        )
         sys.exit(1)

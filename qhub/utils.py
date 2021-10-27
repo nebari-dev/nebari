@@ -1,5 +1,4 @@
 import subprocess
-import sys
 import time
 import os
 import re
@@ -34,7 +33,7 @@ namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
 
 # https://stackoverflow.com/a/14693789
 ANSI_ESCAPE_8BIT = re.compile(
-    r'(?:\x1B[@-Z\\-_]|[\x80-\x9A\x9C-\x9F]|(?:\x1B\[|\x9B)[0-?]*[ -/]*[@-~])'
+    r"(?:\x1B[@-Z\\-_]|[\x80-\x9A\x9C-\x9F]|(?:\x1B\[|\x9B)[0-?]*[ -/]*[@-~])"
 )
 
 
@@ -49,7 +48,7 @@ def timer(in_progress, completed, verbose=True):
         if verbose:
             yield
         else:
-            with console.capture() as capture:
+            with console.capture():
                 yield
     console.print(completed + f" in {time.time() - start_time:.3f} \[s]")
 
@@ -62,25 +61,27 @@ def change_directory(directory):
     os.chdir(current_directory)
 
 
-def run_subprocess_cmd(process_args : List[str], prefix : str = None, **kwargs):
-    """Runs subprocess command with realtime printing of stdout/stderr with optional line prefix
-    """
+def run_subprocess_cmd(process_args: List[str], prefix: str = None, **kwargs):
+    """Runs subprocess command with realtime printing of stdout/stderr with optional line prefix"""
     if prefix:
         line_prefix = f"[{prefix}]: "
     else:
         line_prefix
 
-    console.out(line_prefix + '$ ' + ' '.join(process_args))
+    console.out(line_prefix + "$ " + " ".join(process_args))
 
-    if 'shell' in kwargs:
-        process_args = ' '.join(process_args)
+    if "shell" in kwargs:
+        process_args = " ".join(process_args)
 
     process = subprocess.Popen(
-        process_args, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding="utf-8",
+        process_args,
+        **kwargs,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        encoding="utf-8",
     )
     for line in iter(lambda: process.stdout.readline(), ""):
-        full_line = ANSI_ESCAPE_8BIT.sub('', line_prefix + line)
-        console.out(full_line, end="")
+        console.out(line_prefix + line, end="")
     return process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout
@@ -147,7 +148,9 @@ def check_cloud_credentials(config):
     elif config["provider"] == "local":
         pass
     else:
-        raise QHubError("Configured cloud provider={config['provider']} configuration not supported")
+        raise QHubError(
+            "Configured cloud provider={config['provider']} configuration not supported"
+        )
 
 
 def check_for_duplicates(users: Sequence[dict]) -> Set:
