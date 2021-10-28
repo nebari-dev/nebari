@@ -62,6 +62,9 @@ def handle_develop(args):
             )
             console.rule(f"Local rev {args.rev}")
 
+        if os.path.isdir(worktree_directory):
+            git.worktree_remove(directory=worktree_directory, force=True)
+
         git.worktree_add(directory=worktree_directory, branch_name=branch_name)
         os.chdir(worktree_directory)
         console.print(f"Changing directory to {worktree_directory}")

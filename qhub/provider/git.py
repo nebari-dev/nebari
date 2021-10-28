@@ -46,6 +46,18 @@ def worktree_add(directory: str, path: str = None, branch_name: str = "main"):
         subprocess.check_output(["git", "worktree", "add", directory, branch_name])
 
 
+def worktree_remove(directory: str, path: str = None, force=False):
+    path = path or os.getcwd()
+    directory = os.path.abspath(directory)
+
+    command = ["git", "worktree", "remove", directory]
+    if force:
+        command = command = ['--force']
+
+    with change_directory(path):
+        subprocess.check_output(command)
+
+
 def initialize_git(path: str = None):
     path = path or os.getcwd()
     with change_directory(path):
