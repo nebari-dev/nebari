@@ -20,6 +20,7 @@ DELETABLE_PATHS = [
     ".gitlab-ci.yml",
 ]
 
+
 def patch_dask_gateway_extra_config(config):
     """Basically the current dask_gateway helm chart only allows one
     update to extraContainerConfig and extraPodConfig for the workers
@@ -140,7 +141,7 @@ def render_template(output_directory, config_filename, force=False):
 
     remove_existing_renders(
         dest_repo_dir=output_directory / repo_directory,
-        verbosity=2,
+        verbosity=0,
     )
 
     generate_files(
@@ -152,9 +153,7 @@ def render_template(output_directory, config_filename, force=False):
 
 
 def remove_existing_renders(
-    dest_repo_dir,
-    deletable_paths=DELETABLE_PATHS,
-    verbosity=0
+    dest_repo_dir, deletable_paths=DELETABLE_PATHS, verbosity=0
 ):
     """
     Remove all files and directories beneath each directory in `deletable_paths`. These files and directories will be regenerated in the next step (`generate_files`) based on the configurations set in `qhub-config.yml`.
@@ -165,7 +164,7 @@ def remove_existing_renders(
     if pathlib.Path.cwd() == home_dir:
         raise ValueError(
             f"Deploying QHub from the home directory, {home_dir}, is not permitted."
-        ) 
+        )
 
     for delete_me in deletable_paths:
         delete_me = dest_repo_dir / delete_me
