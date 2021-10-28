@@ -21,7 +21,7 @@ def list_dockerfile_images(directory):
 
 
 def initialize_configuration(
-        directory, image_tag, verbose=True, build_images=True, remote=True, config : str = None,
+        directory, image_tag, verbose=True, build_images=True, domain : str = "github-actions.qhub.dev", config : str = None,
 ):
     config_path = os.path.join(directory, "qhub-config.yaml")
 
@@ -34,7 +34,7 @@ def initialize_configuration(
         console.print('Generating default configuration')
         config = initialize.render_config(
              "qhubdevelop",
-            qhub_domain="localhost.qhub.dev" if remote else "github-actions.qhub.dev",
+            qhub_domain=domain,
             cloud_provider="local",
             ci_provider="none",
             repository=None,
@@ -45,6 +45,8 @@ def initialize_configuration(
             terraform_state=None,
             disable_prompt=True,
         )
+
+    config['domain'] = domain
 
     if build_images:
         # replace the docker images used in deployment
@@ -78,7 +80,7 @@ def develop(
     build_images=True,
     profile="qhub",
     kubernetes_version="v1.20.2",
-    remote=False,
+    domain: str = "github-actions.qhub.dev",
     config: str = None,
 ):
     git_repo_root = git.is_git_repo()
@@ -120,7 +122,7 @@ def develop(
 
     console.rule("Installing QHub")
     config = initialize_configuration(
-        develop_directory, image_tag, build_images=build_images, remote=remote, config=config,
+        develop_directory, image_tag, build_images=build_images, domain=domain, config=config,
     )
 
     with utils.timer(

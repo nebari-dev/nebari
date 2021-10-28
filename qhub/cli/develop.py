@@ -42,7 +42,11 @@ def create_develop_subcommand(subparser):
         "--config",
         help="path to a qhub-config.yaml to use instead of the default",
     )
-    subparser.add_argument("--remote", action="store_true", help="")
+    subparser.add_argument(
+        "--domain",
+        default="github-actions.qhub.dev",
+        help="domain that qhub cluster will be accessible at"
+    )
     subparser.set_defaults(func=handle_develop)
 
 
@@ -86,8 +90,8 @@ def handle_develop(args):
         if not args.disable_build_images:
             command_args.append("--disable-build-images")
 
-        if args.remote:
-            command_args.append("--remote")
+        if args.domain:
+            command_args.extend(["--domain", args.domain])
 
         if args.config:
             command_args.extend(["--config", args.config])
@@ -103,6 +107,6 @@ def handle_develop(args):
             build_images=args.disable_build_images,
             profile=args.profile,
             kubernetes_version=args.kubernetes_version,
-            remote=args.remote,
             config=args.config,
+            domain=args.domain,
         )
