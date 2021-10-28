@@ -29,7 +29,7 @@ def initialize_configuration(
         base_config_path = os.path.abspath(config)
         console.print(f'Using base configuration at {base_config_path}')
         with open(base_config_path) as f:
-            config = yaml.load(f)
+            config = yaml.safe_load(f)
     else:
         console.print('Generating default configuration')
         config = initialize.render_config(
