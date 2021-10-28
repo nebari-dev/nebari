@@ -33,6 +33,19 @@ def current_sha(path: str = None):
         ).strip()
 
 
+def fetch(path: str = None, remote : str = "origin", branch_name : str = "main"):
+    path = path or os.getcwd()
+    with change_directory(path):
+        subprocess.check_output(["git", "fetch", remote, branch_name])
+
+
+def worktree_add(directory: str, path: str = None, branch_name : str = "main"):
+    path = path or os.getcwd()
+    directory = os.path.abspath(directory)
+    with change_directory(path):
+        subprocess.check_output(["git", "worktree", "add", directory, branch_name])
+
+
 def initialize_git(path: str = None):
     path = path or os.getcwd()
     with change_directory(path):
