@@ -4,6 +4,7 @@ import tempfile
 
 from qhub.develop import develop
 from qhub.provider import git
+from qhub.console import console
 
 
 def create_develop_subcommand(subparser):
@@ -68,7 +69,8 @@ def handle_develop(args):
         if args.remote:
             command_args.append('--remote')
 
-        print('running in ', worktree_directory, sys.executable, command_args)
+        console.print(f"git worktree in {worktree_directory}")
+        console.print(f"$ {' '.join(command_args)}")
         os.execv(sys.executable, [sys.executable] + command_args)
     else: # default is to use current working tree
         develop(
