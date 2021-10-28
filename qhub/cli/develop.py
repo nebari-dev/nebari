@@ -50,14 +50,18 @@ def handle_develop(args):
                 tempfile.gettempdir(), "qhub", branch_name
             )
             git.fetch(remote="origin", branch_name=f"pull/{args.pr}/head:{branch_name}")
+            console.rule(f'GitHub PR {args.pr}')
         elif args.rev:
             branch_name = args.rev
             worktree_directory = os.path.join(
                 tempfile.gettempdir(), "qhub", branch_name
             )
+            console.rule(f'Local rev {args.rev}')
 
         git.worktree_add(directory=worktree_directory, branch_name=branch_name)
         os.chdir(worktree_directory)
+        console.print(f'Changing directory to {worktree_directory}')
+
         command_args = [
             sys.executable,
             "-m",
@@ -78,9 +82,8 @@ def handle_develop(args):
         if args.remote:
             command_args.append("--remote")
 
-        console.print(f"git worktree in {worktree_directory}")
         console.print(
-            f'when done run "git worktree remove {branch_name} --force" to delete worktree'
+            f'When done run "git worktree remove {branch_name} --force" to delete worktree'
         )
         console.print(f"$ {' '.join(command_args)}")
         os.execv(command_args[0], command_args)
