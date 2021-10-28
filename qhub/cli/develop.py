@@ -53,7 +53,7 @@ def handle_develop(args):
         git.worktree_add(directory=worktree_directory, branch_name=branch_name)
         os.chdir(worktree_directory)
         command_args = [
-            '-m', 'qhub',
+            '-m', 'qhub', 'develop',
             '--profile', args.profile,
             '--kubernetes-version', args.kubernetes_version,
         ]
