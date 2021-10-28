@@ -45,36 +45,46 @@ def create_develop_subcommand(subparser):
 def handle_develop(args):
     if args.pr or args.rev:
         if args.pr:
-            branch_name = f'qhub-develop-pr-{args.pr}'
-            worktree_directory = os.path.join(tempfile.gettempdir(), "qhub", branch_name)
-            git.fetch(remote='origin', branch_name=f'pull/{args.pr}/head:{branch_name}')
+            branch_name = f"qhub-develop-pr-{args.pr}"
+            worktree_directory = os.path.join(
+                tempfile.gettempdir(), "qhub", branch_name
+            )
+            git.fetch(remote="origin", branch_name=f"pull/{args.pr}/head:{branch_name}")
         elif args.rev:
             branch_name = args.rev
-            worktree_directory = os.path.join(tempfile.gettempdir(), "qhub", branch_name)
+            worktree_directory = os.path.join(
+                tempfile.gettempdir(), "qhub", branch_name
+            )
 
         git.worktree_add(directory=worktree_directory, branch_name=branch_name)
         os.chdir(worktree_directory)
         command_args = [
             sys.executable,
-            '-m', 'qhub', 'develop',
-            '--profile', args.profile,
-            '--kubernetes-version', args.kubernetes_version,
+            "-m",
+            "qhub",
+            "develop",
+            "--profile",
+            args.profile,
+            "--kubernetes-version",
+            args.kubernetes_version,
         ]
 
         if args.verbose:
-            command_args.append('--verbose')
+            command_args.append("--verbose")
 
         if not args.disable_build_images:
-            command_args.append('--disable-build-images')
+            command_args.append("--disable-build-images")
 
         if args.remote:
-            command_args.append('--remote')
+            command_args.append("--remote")
 
         console.print(f"git worktree in {worktree_directory}")
-        console.print(f'when done run "git worktree remove {branch_name}" to delete worktree')
+        console.print(
+            f'when done run "git worktree remove {branch_name} --force" to delete worktree'
+        )
         console.print(f"$ {' '.join(command_args)}")
         os.execv(command_args[0], command_args)
-    else: # default is to use current working tree
+    else:  # default is to use current working tree
         develop(
             verbose=args.verbose,
             build_images=args.disable_build_images,
