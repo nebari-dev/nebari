@@ -60,10 +60,10 @@ def handle_develop(args):
         ]
 
         if args.verbose:
-            command.append('--verbose')
+            command_args.append('--verbose')
 
         if args.disable_build_images:
-            command.append('--disable-build-images')
+            command_args.append('--disable-build-images')
 
         os.execv(sys.executable, command_args)
     else: # default is to use current working tree
