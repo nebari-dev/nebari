@@ -52,7 +52,7 @@ def worktree_remove(directory: str, path: str = None, force=False):
 
     command = ["git", "worktree", "remove", directory]
     if force:
-        command = command = ['--force']
+        command = command + ['--force']
 
     with change_directory(path):
         subprocess.check_output(command)
