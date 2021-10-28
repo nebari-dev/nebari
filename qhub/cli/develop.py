@@ -55,6 +55,7 @@ def handle_develop(args):
         git.worktree_add(directory=worktree_directory, branch_name=branch_name)
         os.chdir(worktree_directory)
         command_args = [
+            sys.executable,
             '-m', 'qhub', 'develop',
             '--profile', args.profile,
             '--kubernetes-version', args.kubernetes_version,
@@ -63,7 +64,7 @@ def handle_develop(args):
         if args.verbose:
             command_args.append('--verbose')
 
-        if args.disable_build_images:
+        if not args.disable_build_images:
             command_args.append('--disable-build-images')
 
         if args.remote:
@@ -72,7 +73,7 @@ def handle_develop(args):
         console.print(f"git worktree in {worktree_directory}")
         console.print(f'when done run "git worktree remove {branch_name}" to delete worktree')
         console.print(f"$ {' '.join(command_args)}")
-        os.execv(sys.executable, [sys.executable] + command_args)
+        os.execv(command_args[0], command_args)
     else: # default is to use current working tree
         develop(
             verbose=args.verbose,
