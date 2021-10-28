@@ -65,6 +65,7 @@ def handle_develop(args):
         if args.disable_build_images:
             command_args.append('--disable-build-images')
 
+        print('running in ', worktree_directory, sys.executable, command_args)
         os.execv(sys.executable, command_args)
     else: # default is to use current working tree
         develop(
