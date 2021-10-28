@@ -46,7 +46,7 @@ def handle_develop(args):
         if args.pr:
             branch_name = f'qhub-develop-pr-{args.pr}'
             worktree_directory = os.path.join(tempfile.gettempdir(), "qhub", branch_name)
-            git.fetch(remote='origin', branch=f'pull/{args.pr}/head:{branch_name}')
+            git.fetch(remote='origin', branch_name=f'pull/{args.pr}/head:{branch_name}')
         elif args.rev:
             branch_name = args.rev
             worktree_directory = os.path.join(tempfile.gettempdir(), "qhub", branch_name)
