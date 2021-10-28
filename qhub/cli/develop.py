@@ -70,6 +70,7 @@ def handle_develop(args):
             command_args.append('--remote')
 
         console.print(f"git worktree in {worktree_directory}")
+        console.print(f'when done run "git worktree remove {branch_name}" to delete worktree')
         console.print(f"$ {' '.join(command_args)}")
         os.execv(sys.executable, [sys.executable] + command_args)
     else: # default is to use current working tree
