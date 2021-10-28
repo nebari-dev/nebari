@@ -21,23 +21,30 @@ def list_dockerfile_images(directory):
 
 
 def initialize_configuration(
-    directory, image_tag, verbose=True, build_images=True, remote=True
+        directory, image_tag, verbose=True, build_images=True, remote=True, config : str = None,
 ):
     config_path = os.path.join(directory, "qhub-config.yaml")
 
-    config = initialize.render_config(
-        "qhubdevelop",
-        qhub_domain="localhost.qhub.dev" if remote else "github-actions.qhub.dev",
-        cloud_provider="local",
-        ci_provider="none",
-        repository=None,
-        auth_provider="password",
-        namespace="dev",
-        repository_auto_provision=False,
-        auth_auto_provision=False,
-        terraform_state=None,
-        disable_prompt=True,
-    )
+    if config:
+        base_config_path = os.path.abspath(config)
+        console.print(f'Using base configuration at {base_config_path}')
+        with open(base_config_path) as f:
+            config = yaml.load(f)
+    else:
+        console.print('Generating default configuration')
+        config = initialize.render_config(
+             "qhubdevelop",
+            qhub_domain="localhost.qhub.dev" if remote else "github-actions.qhub.dev",
+            cloud_provider="local",
+            ci_provider="none",
+            repository=None,
+            auth_provider="password",
+            namespace="dev",
+            repository_auto_provision=False,
+            auth_auto_provision=False,
+            terraform_state=None,
+            disable_prompt=True,
+        )
 
     if build_images:
         # replace the docker images used in deployment
@@ -72,6 +79,7 @@ def develop(
     profile="qhub",
     kubernetes_version="v1.20.2",
     remote=False,
+    config: str = None,
 ):
     git_repo_root = git.is_git_repo()
     if git_repo_root is None:
@@ -112,7 +120,7 @@ def develop(
 
     console.rule("Installing QHub")
     config = initialize_configuration(
-        develop_directory, image_tag, build_images=build_images, remote=remote
+        develop_directory, image_tag, build_images=build_images, remote=remote, config=config,
     )
 
     with utils.timer(

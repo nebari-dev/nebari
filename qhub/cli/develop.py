@@ -38,6 +38,10 @@ def create_develop_subcommand(subparser):
         "--rev",
         help="develop using a specific local git rev (commit or branch name)",
     )
+    subparser.add_argument(
+        "--config",
+        help="path to a qhub-config.yaml to use instead of the default",
+    )
     subparser.add_argument("--remote", action="store_true", help="")
     subparser.set_defaults(func=handle_develop)
 
@@ -82,6 +86,9 @@ def handle_develop(args):
         if args.remote:
             command_args.append("--remote")
 
+        if args.config:
+            command_args.extend(["--config", args.config])
+
         console.print(
             f'When done run "git worktree remove {branch_name} --force" to delete worktree'
         )
@@ -94,4 +101,5 @@ def handle_develop(args):
             profile=args.profile,
             kubernetes_version=args.kubernetes_version,
             remote=args.remote,
+            config=args.config,
         )
