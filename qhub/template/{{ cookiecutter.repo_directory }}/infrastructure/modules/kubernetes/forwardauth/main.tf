@@ -46,22 +46,31 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
       spec {
 
         container {
+          # image = "thomseddon/traefik-forward-auth:2.2.0"
+          # Use PR #159 https://github.com/thomseddon/traefik-forward-auth/pull/159
+          image = "maxisme/traefik-forward-auth:sha-a98e568"
           name  = "forwardauth-container"
-          image = "thomseddon/traefik-forward-auth:2.2.0"
+
+          env {
+            name  = "USER_ID_PATH"
+            value = "name"
+          }
 
           env {
             name  = "PROVIDERS_GENERIC_OAUTH_AUTH_URL"
-            value = "https://${var.external-url}/hub/api/oauth2/authorize"
+            value = "https://${var.external-url}/auth/realms/qhub/protocol/openid-connect/auth"
           }
 
           env {
-            name  = "PROVIDERS_GENERIC_OAUTH_TOKEN_URL"
-            value = "http://proxy-public.${var.namespace}/hub/api/oauth2/token"
+            name = "PROVIDERS_GENERIC_OAUTH_TOKEN_URL"
+            # http://keycloak-headless.${var.namespace}:8080 works fine here actually
+            value = "https://${var.external-url}/auth/realms/qhub/protocol/openid-connect/token"
           }
 
           env {
-            name  = "PROVIDERS_GENERIC_OAUTH_USER_URL"
-            value = "http://proxy-public.${var.namespace}/hub/api/user"
+            name = "PROVIDERS_GENERIC_OAUTH_USER_URL"
+            # But http://keycloak-headless.${var.namespace}:8080 does not work here - Token verification failed
+            value = "https://${var.external-url}/auth/realms/qhub/protocol/openid-connect/userinfo"
           }
 
           env {

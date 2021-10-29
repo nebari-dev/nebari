@@ -208,8 +208,6 @@ security:
     config:
       client_id: ...
       client_secret: ...
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
-      scope: ["openid", "email", "profile"]
       auth0_subdomain: ...
 ```
 
@@ -226,7 +224,6 @@ security:
     config:
       client_id: ...
       client_secret: ...
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
 ```
 
 #### Password Based Authentication

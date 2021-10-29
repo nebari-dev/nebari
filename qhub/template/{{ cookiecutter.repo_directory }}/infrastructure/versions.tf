@@ -30,6 +30,10 @@ terraform {
       source  = "hashicorp/kubernetes-alpha"
       version = "0.3.2"
     }
+    keycloak = {
+      source  = "mrparkers/keycloak"
+      version = "3.3.0"
+    }
   }
   required_version = ">= 0.13"
 }

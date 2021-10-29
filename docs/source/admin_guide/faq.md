@@ -7,3 +7,21 @@ AWS uses Amazon's Elastic Kubernetes Service for hosting the Kubernetes cluster.
 To stop this occuring, the autoscaler service "AZRebalance" needs to be manually suspended. Currently this autoscaler service isn't managed by terraform. Disabling it via the console is permanent for the life of the cluster. [There is an open issue to permanently fix this via Terraform](https://github.com/Quansight/qhub/issues/786)
 
 To turn off the AZRebalance service, follow the steps in this [AWS documentation](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-suspend-resume-processes.html) to suspend the AZRebalance service.
+
+To disable the AZRebalance service, follow the steps in this [AWS documentation](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-suspend-resume-processes.html) to suspend the AZRebalance service.
+
+## Can I deploy an arbitrary pod?
+
+Yes, add extensions as follows:
+
+```
+extensions:
+  - name: echo-test
+    image: inanimate/echo-server:latest
+    urlslug: echo
+    private: true
+```
+
+This will deploy a simple service based on the image provided. name must be a simple terraform-friendly string.
+
+It will be available on your QHub site at the /echo URL (or whatever urlslug you provide). Users will be required to be logged in if private is true.
