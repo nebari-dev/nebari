@@ -24,7 +24,6 @@ def initialize_configuration(
     directory,
     image_tag,
     verbose=True,
-    build_images=True,
     domain: str = "github-actions.qhub.dev",
     config: str = None,
 ):
@@ -53,23 +52,22 @@ def initialize_configuration(
 
     config["domain"] = domain
 
-    if build_images:
-        # replace the docker images used in deployment
-        config["default_images"] = {
-            "jupyterhub": f"jupyterhub:{image_tag}",
-            "jupyterlab": f"jupyterlab:{image_tag}",
-            "dask_worker": f"dask-worker:{image_tag}",
-            "dask_gateway": f"dask-gateway:{image_tag}",
-            "conda_store": f"conda-store:{image_tag}",
-        }
+    # replace the docker images used in deployment
+    config["default_images"] = {
+        "jupyterhub": f"jupyterhub:{image_tag}",
+        "jupyterlab": f"jupyterlab:{image_tag}",
+        "dask_worker": f"dask-worker:{image_tag}",
+        "dask_gateway": f"dask-gateway:{image_tag}",
+        "conda_store": f"conda-store:{image_tag}",
+    }
 
-        for jupyterlab_profile in config["profiles"]["jupyterlab"]:
-            jupyterlab_profile["kubespawner_override"][
-                "image"
-            ] = f"jupyterlab:{image_tag}"
+    for jupyterlab_profile in config["profiles"]["jupyterlab"]:
+        jupyterlab_profile["kubespawner_override"][
+            "image"
+        ] = f"jupyterlab:{image_tag}"
 
-        for name, dask_worker_profile in config["profiles"]["dask_worker"].items():
-            dask_worker_profile["image"] = f"dask-worker:{image_tag}"
+    for name, dask_worker_profile in config["profiles"]["dask_worker"].items():
+        dask_worker_profile["image"] = f"dask-worker:{image_tag}"
 
     console.print(f"Generated QHub configuration at path={config_path}")
 
@@ -82,7 +80,6 @@ def initialize_configuration(
 
 def develop(
     verbose=True,
-    build_images=True,
     profile="qhub",
     kubernetes_version="v1.20.2",
     domain: str = "github-actions.qhub.dev",
@@ -107,29 +104,27 @@ def develop(
         minikube.configure_metallb(profile=profile)
         minikube.addons_enable("metallb", profile=profile)
 
-    if build_images:
-        console.rule("Building Docker images")
-        dockerfile_paths, image_names = list_dockerfile_images(QHUB_IMAGE_DIRECTORY)
-        for dockerfile_path, image_name in zip(dockerfile_paths, image_names):
-            image = f"{image_name}:{image_tag}"
-            with utils.timer(
-                f'Building {os.path.basename(dockerfile_path)} image "{image}"',
-                f'Built {os.path.basename(dockerfile_path)} image "{image}"',
-                verbose=verbose,
-            ):
-                minikube.image_build(
-                    dockerfile_path,
-                    QHUB_IMAGE_DIRECTORY,
-                    image_name,
-                    image_tag,
-                    profile=profile,
-                )
+    console.rule("Building Docker images")
+    dockerfile_paths, image_names = list_dockerfile_images(QHUB_IMAGE_DIRECTORY)
+    for dockerfile_path, image_name in zip(dockerfile_paths, image_names):
+        image = f"{image_name}:{image_tag}"
+        with utils.timer(
+            f'Building {os.path.basename(dockerfile_path)} image "{image}"',
+            f'Built {os.path.basename(dockerfile_path)} image "{image}"',
+            verbose=verbose,
+        ):
+            minikube.image_build(
+                dockerfile_path,
+                QHUB_IMAGE_DIRECTORY,
+                image_name,
+                image_tag,
+                profile=profile,
+            )
 
     console.rule("Installing QHub")
     config = initialize_configuration(
         develop_directory,
         image_tag,
-        build_images=build_images,
         domain=domain,
         config=config,
     )

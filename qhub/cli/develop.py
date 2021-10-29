@@ -16,11 +16,6 @@ def create_develop_subcommand(subparser):
         help="verbose of logging",
     )
     subparser.add_argument(
-        "--disable-build-images",
-        action="store_false",
-        help="disable building Docker images",
-    )
-    subparser.add_argument(
         "--profile",
         default="qhub",
         help="minikube profile to use for development",
@@ -93,9 +88,6 @@ def handle_develop(args):
         if args.verbose:
             command_args.append("--verbose")
 
-        if not args.disable_build_images:
-            command_args.append("--disable-build-images")
-
         if args.domain:
             command_args.extend(["--domain", args.domain])
 
@@ -110,7 +102,6 @@ def handle_develop(args):
     else:  # default is to use current working tree
         develop(
             verbose=args.verbose,
-            build_images=args.disable_build_images,
             profile=args.profile,
             kubernetes_version=args.kubernetes_version,
             config=args.config,

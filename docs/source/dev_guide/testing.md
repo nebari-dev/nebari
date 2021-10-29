@@ -1,14 +1,141 @@
 # Testing and Development
 
 QHub is complex to test. In order to make testing easier a command
-`qhub develop` is available. This command should be the primary way
-that you develop and test QHub.
+`qhub develop` is available for developing locally. This command
+should be the primary way that you develop and test QHub. If your
+contribution requires the cloud to properly test this command will
+unfortunately not help you. With this command you can easily test PRs,
+specific commits, and the current state working state of the qhub
+repository.
 
 ```shell
+$ python -m qhub develop --help
+usage: __main__.py develop [-h] [-v] [--profile PROFILE] [--kubernetes-version KUBERNETES_VERSION]
+                           [--pr PR] [--rev REV] [--config CONFIG] [--domain DOMAIN]
 
-
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose         verbose of logging
+  --profile PROFILE     minikube profile to use for development
+  --kubernetes-version KUBERNETES_VERSION
+                        kubernetes version to use for development
+  --pr PR               develop using a specific QHub PR
+  --rev REV             develop using a specific local git rev (commit or branch name)
+  --config CONFIG       path to a qhub-config.yaml to use instead of the default
+  --domain DOMAIN       domain that qhub cluster will be accessible at
 ```
 
+This command does a lot of work for the user to ease testing:
+ - checks out the appropriate PR, commit, or working state
+ - runs QHub on the checked out version of the code
+ - starts up a Minikube cluster on docker
+ - configures a MetalLB load balancer
+ - builds all the Docker images and uploads to Minikube
+ - generated a default qhub configuration (can be overridden for testing)
+ - deploys QHub to the Minikube cluster
+
+This command is expected to work for Linux and OSX please report an
+issue if this does not work for you.
+
+## Dependencies
+
+This command does not require that you have QHub installed
+locally. Instead it requires an environment where you have all of the
+`install_requires` dependencies in the `setup.py` installed. However,
+it might just be easiest to install qhub locally.
+
+```shell
+pip install -e .[dev]
+```
+
+Alternatively if you are using conda you may
+
+```shell
+conda env create -f environment-dev.yaml
+conda activate qhub-dev
+```
+
+## Usage
+
+At a minimum 8 GB of RAM and 2 CPU should be available for the
+Minikube cluster. QHub has three primary runs:
+
+ - `qhub develop` deploys a local development QHub which matches the
+   current working state of the repository including non-committed
+   changes
+ - `qhub develop --pr <pr>` deploys a local development QHub of the
+   latest commit in PR `<pr>`
+ - `qhub develop --rev <rev>` deploys a local development QHub of the
+   commit or branch matching `<rev>`
+ 
+The `--pr` and `--rev` commands use `git worktree` allowing your
+current modifications and checked out branch to be untouched within
+the repository. Read up on [git
+worktree](https://git-scm.com/docs/git-worktree) to learn more about
+the command. Note that knowledge of this command is not needed for
+testing or development. If you are deploying locally on Linux this
+will likely be all the options that you need to supply.
+
+Initial deployment of the local test cluster will take awhile (10
+minutes to an hour) depending on local machine speed and Internet
+connection. However successive runs of this command will run much
+faster once the docker builds are cached after the first
+run. Therefore it is recommended to only delete your Minikube cluster
+after development and not in between changes. The `qhub develop`
+command is designed to be run many times as development is
+progressing.
+
+If your deployment was successful visit the domain mentioned at the
+end. This text will look like `Visit https://<domain> to access your
+QHub Cluster`. Attempt to visit the domain. If this does not work you
+will need to read the next section (OSX users and remote Linux
+deployments are in this category). The key issue after deployment via
+`qhub develop` for a local or remote Minikube cluster is accessing the
+load balancer that was created via
+[MetalLB](https://metallb.universe.tf/).
+
+### Setting the Domain
+
+One of the key problems encountered with local deployment is the
+`domain` name used for QHub. You must access your cluster's load
+balancer via a DNS name. By default on Linux locally the IP address
+assigned to the QHub load balancer is `192.168.49.100` which we have
+conveniently assigned to `github-actions.qhub.dev`. Here we will cover
+several cases to hopefully tell you how to set the proper `--domain`
+if the default does not work when performing `qhub develop`.
+
+After a deployment even if your domain is not accessible you will want
+to check the load balancer IP. This address will be written at the end
+of the deployment. The text will look like `DNS Domain "<domain>" is
+set but does not resolve to load balancer at "<load-balancer-ip>"`.
+
+For remote Linux development you will need to port forward the load
+balancer IP locally and set the domain to `--domain localhost`.
+
+```shell
+sudo ssh -L 80:<load-balancer-ip>:80 -L 443:<load-balancer-ip>:443 <remote-host-ip>
+```
+
+The QHub cluster will then be accessible via your web browser at
+`https://localhost`. This will require you to run `qhub develop` again
+with `qhub develop ... --domain localhost`.
+
+### Additional Options
+
+Effort was put into minimizing the number of options for `qhub
+develop`. Here we will outline convenient options for further testing.
+
+ - `--kubernetes-version` this option allows you to control the
+   version of Kubernetes that is spun up with Minikube and allows for
+   testing of QHub across Kubernetes versions.
+ - `--verbose` will show the detailed logs when running
+ - `--profile` behind the scenes Minikube is used to start
+   Kubernetes. Minikube has a profile option which allows it to run
+   multiple clusters. Use this if you want to test a cluster without
+   overwriting another deployment.
+ - `--config` allows you to provide a `qhub-config.yaml` to override
+   the default one generated by QHub. This is useful for testing
+   specific features of a development.
 
 # Tips for Testing
 
