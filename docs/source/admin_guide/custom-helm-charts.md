@@ -2,9 +2,6 @@
 
 Arbitrary helm charts can be deployed and managed with the qhub-config.yaml file.
 
-Prefect is a workflow automation system. QHub integrates Prefect with a
-feature flag as follows (in the top level):
-
 As an example, deploying the redis helm chart with qhub might look like the below:
 
 ```yaml
