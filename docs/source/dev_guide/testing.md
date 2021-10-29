@@ -87,11 +87,11 @@ progressing.
 
 If your deployment was successful visit the domain mentioned at the
 end. This text will look like `Visit https://<domain> to access your
-QHub Cluster`. Attempt to visit the domain. If this does not work you
-will need to read the next section (this is common). The key issue
-after deployment via `qhub develop` for a local or remote Minikube
-cluster is accessing the load balancer that was created via
-[MetalLB](https://metallb.universe.tf/).
+QHub Cluster`. Attempt to visit the domain in your web browser. If
+this does not work you will need to read the next section (this is
+common). The key issue after deployment via `qhub develop` for a local
+or remote Minikube cluster is accessing the load balancer that was
+created via [MetalLB](https://metallb.universe.tf/).
 
 ### Setting the Domain
 
@@ -99,18 +99,33 @@ One of the key problems encountered with local deployment is the
 `domain` name used for QHub. You must access your cluster's load
 balancer via a DNS name. By default on Linux locally the IP address
 assigned to the QHub load balancer is `192.168.49.100` which we have
-conveniently assigned to `github-actions.qhub.dev`. Here we will cover
-several cases to hopefully tell you how to set the proper `--domain`
-if the default does not work when performing `qhub develop`.
+conveniently assigned to `github-actions.qhub.dev` the default. Here
+we will cover several cases to hopefully tell you how to set the
+proper `--domain` if the default does not work when performing `qhub
+develop`.
 
 After a deployment even if your domain is not accessible you will want
 to check the load balancer IP. This address will be written at the end
 of the deployment. The text will look like `DNS Domain "<domain>" is
 set but does not resolve to load balancer at "<load-balancer-ip>"`.
 
-#### Local development (OSX and Linux)
+#### Local development (Windows, OSX, and Linux)
 
-For you can use `minikube` to port forward the
+`minikube` provides convenient access to ssh to the Kubernetes
+node. If you are developing locally with `qhub develop ...` then it
+should be relatively easy to port forward the http and https ports of
+the load balancer. The end of the `qhub develop ...` logs should give
+the full command with the proper load balancer address and Minikube
+path.
+
+```shell
+<minikube-path> ssh --profile=<profile> --native-ssh=false -- -L 10080:<load-balancer-ip>:80 -L 10443:<load-balancer-ip>:443
+```
+
+The QHub cluster will then be accessible via your web browser at
+`https://localhost:10443`. This will require you to run `qhub develop`
+again with `qhub develop ... --domain localhost` if your domain was
+not `localhost` before.
 
 #### Remote Linux Development
 
@@ -128,6 +143,8 @@ The QHub cluster will then be accessible via your web browser at
 again with `qhub develop ... --domain localhost` if your domain was
 not `localhost` before.
 
+#### Custom DNS Domain
+
 As a last resort if you know the IP of your load balancer and can
 access the IP address of the load balancer but don't have a dns entry
 for it use `nip.io` and `sslip.io`. You can easily test if you can
@@ -135,9 +152,10 @@ access QHub via the load balancer IP by visiting it and you should get
 `404 page not found`. You can trust these DNS services
 [Rancher](https://rancher.com/docs/rancher/v2.5/en/k8s-in-rancher/load-balancers-and-ingress/ingress/#automatically-generate-a-sslip-io-hostname)
 uses them as well. For example if the IP address of your load balancer
-is `X.Y.Z.W` set the domain to `--domain X.Y.Z.W.sslip.io`.
+is `X.Y.Z.W` set the domain to `--domain X.Y.Z.W.sslip.io`. This will
+require a redeployment of `qhub develop ...`.
 
-### Additional Options
+### Additional CLI Options
 
 Effort was put into minimizing the number of options for `qhub
 develop`. Here we will outline convenient options for further testing.
