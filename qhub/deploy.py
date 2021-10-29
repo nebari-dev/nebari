@@ -152,7 +152,7 @@ def check_qhub_address(ip_or_hostname: str, domain: str):
         console.print(
             f'DNS Domain "{domain}" is set but does not resolve to load balancer at "{ip_or_hostname}"\n'
             f'Currently resolving "{domain}" -> "{resolved_domain_ip}" and "{ip_or_hostname}" -> "{resolved_load_balancer_ip}"\n'
-            "If this is a production deployment this most likely an error",
+            "If this is a production deployment this is most likely an error",
             style="orange1",
         )
     else:
