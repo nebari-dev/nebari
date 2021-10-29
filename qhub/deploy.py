@@ -132,30 +132,27 @@ def check_qhub_address(ip_or_hostname: str, domain: str):
 
     This check can be flaky in the sense that DNS takes time to propagate.
     """
-    if domain == "localhost.qhub.dev":
-        console.print(
-            f'Domain "{domain}" is designed for remote development testing via ssh\n'
-            f'Run "sudo ssh -L 80:{ip_or_hostname}:80 -L 443:{ip_or_hostname}:443 <remote-host>" to expose QHub locally\n'
-        )
-        return
-
     try:
         resolved_domain_ip = socket.gethostbyname(domain)
     except socket.gaierror:
-        raise QHubError(
+        resolved_domain_ip = None
+
+    resolved_load_balancer_ip = socket.gethostbyname(ip_or_hostname)
+
+    if resolved_domain_ip is None:
+        console.print(
             f'Domain "{domain}" currently does not resolve\n'
             f"Make sure to point DNS to {ip_or_hostname}\n"
             "See https://docs.qhub.dev/en/stable/source/installation/setup.html#domain-registry\n"
-        )
-
-    resolved_load_balancer_ip = socket.gethostbyname(ip_or_hostname)
-    if resolved_load_balancer_ip != resolved_domain_ip:
-        raise QHubError(
+            , style="orange")
+    elif resolved_load_balancer_ip != resolved_domain_ip:
+        console.print(
             f'Domain "{domain}" is set but does not resolve to "{ip_or_hostname}"\n'
             f'Currently resolving "{domain}" -> "{resolved_domain_ip}" and "{ip_or_hostname}" -> "{resolved_load_balancer_ip}"\n'
-        )
-
-    console.print(f'Domain "{domain}" properly resolves to "{ip_or_hostname}"')
+            'If this is a production deployment this most likely an error\n'
+            , style="orange")
+    else:
+        console.print(f'Domain "{domain}" properly resolves to "{ip_or_hostname}"')
 
 
 def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):

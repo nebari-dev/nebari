@@ -1,3 +1,15 @@
+# Testing and Development
+
+QHub is complex to test. In order to make testing easier a command
+`qhub develop` is available. This command should be the primary way
+that you develop and test QHub.
+
+```shell
+
+
+```
+
+
 # Tips for Testing
 
 ## Using a development branch
