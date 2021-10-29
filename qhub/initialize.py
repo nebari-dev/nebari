@@ -229,7 +229,7 @@ DEFAULT_ENVIRONMENTS = {
             "voila==0.2.16",
             "streamlit==1.0.0",
             "dash==2.0.0",
-            "cdsdashboards-singleuser==0.5.7",
+            "cdsdashboards-singleuser==0.6.0",
         ],
     },
 }
@@ -325,8 +325,6 @@ def render_config(
 
     elif auth_provider == "password":
         config["security"]["authentication"] = AUTH_PASSWORD
-
-        config["security"]["users"]["example-user"]["password"] = default_password
 
     # Always use default password for keycloak root
     config["security"].setdefault("keycloak", {})[
