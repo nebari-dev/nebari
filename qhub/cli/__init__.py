@@ -17,7 +17,11 @@ from qhub.utils import QHUB_GH_BRANCH
 def cli(args):
     parser = argparse.ArgumentParser(description="QHub command line")
     parser.add_argument(
-        "-v", "--version", action="version", version=__version__, help="QHub version"
+        "-v",
+        "--version",
+        action="version",
+        version=__version__,
+        help="QHub version number",
     )
     parser.set_defaults(func=None)
 
