@@ -112,9 +112,8 @@ def develop(
 
     develop_directory = os.path.join(git_repo_root, ".qhub", "develop")
 
-    check_available_resources()
-
     console.rule("Starting Minikube cluster")
+    check_available_resources()
     with utils.timer(
         "Creating Minikube cluster", "Created Minikube cluster", verbose=verbose
     ):
