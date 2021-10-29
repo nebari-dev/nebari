@@ -62,9 +62,7 @@ def initialize_configuration(
     }
 
     for jupyterlab_profile in config["profiles"]["jupyterlab"]:
-        jupyterlab_profile["kubespawner_override"][
-            "image"
-        ] = f"jupyterlab:{image_tag}"
+        jupyterlab_profile["kubespawner_override"]["image"] = f"jupyterlab:{image_tag}"
 
     for name, dask_worker_profile in config["profiles"]["dask_worker"].items():
         dask_worker_profile["image"] = f"dask-worker:{image_tag}"
@@ -150,7 +148,8 @@ def develop(
         )
 
     minikube_path = minikube.download_minikube_binary()
-    console.print(f"""Development documentation https://docs.qhub.dev/en/stable/source/dev_guide/
+    console.print(
+        f"""Development documentation https://docs.qhub.dev/en/stable/source/dev_guide/
 
 For development if you cannot connect to "https://{config["domain"]}" in your browser the following will likely help:
  - local access on OSX/Windows/Linux "{minikube.download_minikube_binary()} ssh --profile=qhub --native-ssh=false -- -L 10080:{ip_or_hostname}:80 -L 10443:{ip_or_hostname}:443"
@@ -158,4 +157,5 @@ For development if you cannot connect to "https://{config["domain"]}" in your br
 Rerun "qhub develop ..." with domain set to "--domain localhost"
 Try to visit "https://localhost:10443". See development docs if this advice does not help.
 When done with development delete the minikube cluster via "{minikube_path} delete --profile={profile}"
-""")
+"""
+    )
