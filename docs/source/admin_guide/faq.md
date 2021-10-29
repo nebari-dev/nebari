@@ -8,13 +8,13 @@ To stop this occuring, the autoscaler service "AZRebalance" needs to be manually
 
 To turn off the AZRebalance service, follow the steps in this [AWS documentation](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-suspend-resume-processes.html) to suspend the AZRebalance service.
 
-To disable the AZRebalance service, follow the steps in this [AWS documentation](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-suspend-resume-processes.html) to suspend the AZRebalance service.
+To turn off the AZRebalance service, follow the steps in this [AWS documentation](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-suspend-resume-processes.html) to suspend the AZRebalance service.
 
-## Can I deploy an arbitrary pod?
+## Can a user deploy an arbitrary pod?
 
-Yes, add extensions as follows:
+As a user, add extensions as follows:
 
-```
+```sh
 extensions:
   - name: echo-test
     image: inanimate/echo-server:latest
@@ -22,6 +22,4 @@ extensions:
     private: true
 ```
 
-This will deploy a simple service based on the image provided. name must be a simple terraform-friendly string.
-
-It will be available on your QHub site at the /echo URL (or whatever urlslug you provide). Users will be required to be logged in if private is true.
+This deploys a simple service based on the image provided. name must be a simple terraform-friendly string. It's available on your QHub site at the `/echo` URL, or whatever URL slug you provide. Users need log-in credentials in if the private is true.
