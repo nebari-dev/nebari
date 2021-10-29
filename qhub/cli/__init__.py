@@ -44,7 +44,7 @@ def cli(args):
     try:
         args.func(args)
     except QHubError as qhub_error:
-        console.print(qhub_error.message, style="red")
+        console.print(qhub_error.args[0], style="red")
         sys.exit(1)
     except Exception:
         # Any Exception that does not Derive from QHubError
