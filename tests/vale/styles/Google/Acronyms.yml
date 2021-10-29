@@ -67,3 +67,7 @@ exceptions:
   - ZIP
   - DNS
   - CLI
+  - IOPS
+  - NFS
+  - AKS
+  - ARM
