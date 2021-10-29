@@ -46,7 +46,7 @@ def create_develop_subcommand(subparser):
     subparser.add_argument(
         "--domain",
         default="github-actions.qhub.dev",
-        help="domain that qhub cluster will be accessible at"
+        help="domain that qhub cluster will be accessible at",
     )
     subparser.set_defaults(func=handle_develop)
 
@@ -59,7 +59,9 @@ def handle_develop(args):
                 tempfile.gettempdir(), "qhub", branch_name
             )
             console.rule(f"GitHub PR {args.pr}")
-            console.print(f'Fetching latest commit of https://github.com/quansight/qhub/pull/{args.pr}')
+            console.print(
+                f"Fetching latest commit of https://github.com/quansight/qhub/pull/{args.pr}"
+            )
             git.fetch(remote="origin", branch_name=f"pull/{args.pr}/head:{branch_name}")
         elif args.rev:
             branch_name = args.rev
@@ -67,7 +69,7 @@ def handle_develop(args):
                 tempfile.gettempdir(), "qhub", branch_name
             )
             console.rule(f"Local rev {args.rev}")
-            console.print('Fetching latest commits from origin')
+            console.print("Fetching latest commits from origin")
             git.fetch(remote="origin")
 
         if os.path.isdir(worktree_directory):

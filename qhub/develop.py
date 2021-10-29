@@ -21,19 +21,24 @@ def list_dockerfile_images(directory):
 
 
 def initialize_configuration(
-        directory, image_tag, verbose=True, build_images=True, domain : str = "github-actions.qhub.dev", config : str = None,
+    directory,
+    image_tag,
+    verbose=True,
+    build_images=True,
+    domain: str = "github-actions.qhub.dev",
+    config: str = None,
 ):
     config_path = os.path.join(directory, "qhub-config.yaml")
 
     if config:
         base_config_path = os.path.abspath(config)
-        console.print(f'Using base configuration at {base_config_path}')
+        console.print(f"Using base configuration at {base_config_path}")
         with open(base_config_path) as f:
             config = yaml.safe_load(f)
     else:
-        console.print('Generating default configuration')
+        console.print("Generating default configuration")
         config = initialize.render_config(
-             "qhubdevelop",
+            "qhubdevelop",
             qhub_domain=domain,
             cloud_provider="local",
             ci_provider="none",
@@ -46,7 +51,7 @@ def initialize_configuration(
             disable_prompt=True,
         )
 
-    config['domain'] = domain
+    config["domain"] = domain
 
     if build_images:
         # replace the docker images used in deployment
@@ -122,7 +127,11 @@ def develop(
 
     console.rule("Installing QHub")
     config = initialize_configuration(
-        develop_directory, image_tag, build_images=build_images, domain=domain, config=config,
+        develop_directory,
+        image_tag,
+        build_images=build_images,
+        domain=domain,
+        config=config,
     )
 
     with utils.timer(
