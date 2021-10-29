@@ -42,6 +42,7 @@ setup(
         "azure-identity==1.6.1",
         "azure-mgmt-containerservice==16.2.0",
         "packaging",
+        "python-keycloak",
     ],
     extras_require={
         "dev": [

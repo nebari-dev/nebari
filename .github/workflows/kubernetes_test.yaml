@@ -122,8 +122,11 @@ jobs:
 
       - name: Get qhub-config.yaml full path
         run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`" >> "$GITHUB_ENV"
-      
-      - name: Sleep to see if it fixes flaky Kubernetes Tests 
+
+      - name: Create example-user
+        run: qhub keycloak --config qhub-config.yaml adduser example-user "${CYPRESS_EXAMPLE_USER_PASSWORD}"
+
+      - name: Sleep to see if it fixes flaky Kubernetes Tests
         run: sleep 60
 
       - name: Cypress run
