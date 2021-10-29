@@ -85,15 +85,15 @@ def check_available_resources(
         recommended_available_cpu=4):
     memory = psutil.virtual_memory()
     if memory.free < required_free_memory:
-        console.print('QHub deployment requires {required_free_memory / constants.GB:0.2f} GB free memory {memory.free / constants.GB}', style='red')
+        console.print(f'QHub deployment requires {required_free_memory / constants.GB:0.2f} GB free memory {memory.free / constants.GB}', style='red')
     elif memory.total < required_available_memory:
-        console.print('QHub deployment recommends {required_available_memory / constants.GB:0.2f} GB total memory only has {memory.total / constants.GB} GB', style='orange1')
+        console.print(f'QHub deployment recommends {required_available_memory / constants.GB:0.2f} GB total memory only has {memory.total / constants.GB} GB', style='orange1')
 
     available_cpu = multiprocessing.cpu_count()
     if available_cpu < required_available_cpu:
-        console.print('QHub deployment requires {required_available_cpu} CPU available {available_cpu} CPU', style='red')
+        console.print(f'QHub deployment requires {required_available_cpu} CPU available {available_cpu} CPU', style='red')
     elif available_cpu < required_available_cpu:
-        console.print('Minikube deployment recommends {required_available_cpu} CPU only has {available_cpu} CPU', style='red')
+        console.print(f'Minikube deployment recommends {required_available_cpu} CPU only has {available_cpu} CPU', style='red')
 
 
 def develop(
