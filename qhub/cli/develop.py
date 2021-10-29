@@ -32,6 +32,7 @@ def create_develop_subcommand(subparser):
     )
     subparser.add_argument(
         "--pr",
+        type=int,
         help="develop using a specific QHub PR",
     )
     subparser.add_argument(
@@ -57,14 +58,17 @@ def handle_develop(args):
             worktree_directory = os.path.join(
                 tempfile.gettempdir(), "qhub", branch_name
             )
-            git.fetch(remote="origin", branch_name=f"pull/{args.pr}/head:{branch_name}")
             console.rule(f"GitHub PR {args.pr}")
+            console.print(f'Fetching latest commit of https://github.com/quansight/qhub/pull/{args.pr}')
+            git.fetch(remote="origin", branch_name=f"pull/{args.pr}/head:{branch_name}")
         elif args.rev:
             branch_name = args.rev
             worktree_directory = os.path.join(
                 tempfile.gettempdir(), "qhub", branch_name
             )
             console.rule(f"Local rev {args.rev}")
+            console.print('Fetching latest commits from origin')
+            git.fetch(remote="origin")
 
         if os.path.isdir(worktree_directory):
             git.worktree_remove(directory=worktree_directory, force=True)
