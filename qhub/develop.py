@@ -141,7 +141,7 @@ def develop(
         )
 
     with utils.change_directory(develop_directory):
-        deploy.deploy_configuration(
+        ip_or_hostname = deploy.deploy_configuration(
             config,
             dns_provider=None,
             dns_auto_provision=False,
@@ -150,7 +150,9 @@ def develop(
         )
 
     minikube_path = minikube.download_minikube_binary()
-    console.print(
-        f"Development documentation https://docs.qhub.dev/en/stable/source/dev_guide/\n"
-        f'When done with development delete the minikube cluster via "{minikube_path} delete --profile={profile}"\n'
-    )
+    console.print(f"""Development documentation https://docs.qhub.dev/en/stable/source/dev_guide/
+When done with development delete the minikube cluster via "{minikube_path} delete --profile={profile}"
+For development deployment if you cannot connect to "https://{config["domain"]}" the following will likely help:
+ - local access on OSX/Windows/Linux "{minikube.download_minikube_binary()} ssh --profile=qhub --native-ssh=false -- -L 10080:{ip_or_hostname}:80 -L 10443:{ip_or_hostname}:443"
+ - remote access on Linux "ssh 10080:{ip_or_hostname}:80 10443:{ip_or_hostname}:10443 <remote-host-ip>"
+Ports 10080 and 10443 are arbitrary but lower ports often require root permissions""")

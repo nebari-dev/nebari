@@ -126,6 +126,8 @@ def deploy_configuration(
         "End user documentation: https://docs.qhub.dev/en/stable/source/user_guide/"
     )
 
+    return ip_or_hostname
+
 
 def check_qhub_address(ip_or_hostname: str, domain: str):
     """Check that the QHub domain points to the load balancer IP address or CNAME
