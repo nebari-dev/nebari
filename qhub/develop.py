@@ -1,9 +1,11 @@
 import os
+import multiprocessing
 
 from ruamel import yaml
+import psutil
 
 from qhub.provider import git, minikube
-from qhub import utils, initialize, deploy, render
+from qhub import utils, initialize, deploy, render, constants
 from qhub.console import console
 
 
@@ -76,6 +78,24 @@ def initialize_configuration(
     return config
 
 
+def check_available_resources(
+        required_free_memory=8*2**30,
+        recommended_available_memory=16*2**30,
+        required_available_cpu=2,
+        recommended_available_cpu=4):
+    memory = psutil.virtual_memory()
+    if memory.free < required_free_memory:
+        console.print('QHub deployment requires {required_free_memory / constants.GB:0.2f} GB free memory {memory.free / constants.GB}', style='red')
+    elif memory.total < required_available_memory:
+        console.print('QHub deployment recommends {required_available_memory / constants.GB:0.2f} GB total memory only has {memory.total / constants.GB} GB', style='orange1')
+
+    available_cpu = multiprocessing.cpu_count()
+    if available_cpu < required_available_cpu:
+        console.print('QHub deployment requires {required_available_cpu} CPU available {available_cpu} CPU', style='red')
+    elif available_cpu < required_available_cpu:
+        console.print('Minikube deployment recommends {required_available_cpu} CPU only has {available_cpu} CPU', style='red')
+
+
 def develop(
     verbose=True,
     profile="qhub",
@@ -91,6 +111,8 @@ def develop(
     image_tag = git_head_sha
 
     develop_directory = os.path.join(git_repo_root, ".qhub", "develop")
+
+    check_available_resources()
 
     console.rule("Starting Minikube cluster")
     with utils.timer(

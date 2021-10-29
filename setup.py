@@ -45,6 +45,7 @@ setup(
         "azure-identity==1.6.1",
         "azure-mgmt-containerservice==16.2.0",
         "packaging",
+        "psutil",
     ],
     extras_require={
         "dev": [
