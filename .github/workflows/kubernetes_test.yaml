@@ -30,6 +30,10 @@ jobs:
 
           echo "$PWD" >> $GITHUB_PATH
           popd
+      - name: Add user to docker group
+        run: |
+          sudo docker ps
+          sudo usermod -aG docker $USER && newgrp docker
       - name: Set up Python
         uses: conda-incubator/setup-miniconda@v2
         env:
