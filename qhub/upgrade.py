@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def do_upgrade(config_filename):
 
     with config_filename.open() as f:
-        config = yaml.load(f.read())
+        config = yaml.safe_load(f)
 
     try:
         verify(config)
