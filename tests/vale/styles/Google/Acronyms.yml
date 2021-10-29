@@ -66,3 +66,4 @@ exceptions:
   - YAML
   - ZIP
   - DNS
+  - CLI
