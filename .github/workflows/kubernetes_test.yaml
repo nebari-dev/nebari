@@ -43,7 +43,9 @@ jobs:
           pip install .[dev]
       - name: QHub Develop
         run: |
-          qhub develop
+          qhub develop --verbose
+      - name: Show qhub-config.yaml
+        run: cat .qhub/develop/qhub-config.yaml
       - name: Basic kubectl checks after deployment
         run: |
           kubectl get all,cm,secret,ing -A
