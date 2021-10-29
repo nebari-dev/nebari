@@ -37,6 +37,10 @@ def do_keycloak(config_filename, *args):
 
     should_verify_tls = config.get("certificate", {}).get("type", "") != "self-signed"
 
+    print(
+        f"Connection: {keycloak_server_url}, {keycloak_username}, {keycloak_password}"
+    )
+
     try:
         keycloak_admin = keycloak.KeycloakAdmin(
             server_url=keycloak_server_url,
