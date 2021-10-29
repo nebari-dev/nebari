@@ -30,3 +30,5 @@ exceptions:
   - QHub
   - Frequently asked questions
   - ClearML
+  - Grafana
+  - Cluster
