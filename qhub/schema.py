@@ -4,7 +4,7 @@ from abc import ABC
 
 import pydantic
 from pydantic import validator, root_validator
-from qhub.utils import namestr_regex, check_for_duplicates
+from qhub.utils import namestr_regex
 from .version import __version__
 
 
@@ -124,7 +124,6 @@ class DefaultImages(Base):
 
 
 class GitHubConfig(Base):
-    oauth_callback_url: str
     client_id: str
     client_secret: str
 
@@ -132,8 +131,6 @@ class GitHubConfig(Base):
 class Auth0Config(Base):
     client_id: str
     client_secret: str
-    oauth_callback_url: str
-    scope: typing.List[str]
     auth0_subdomain: str
 
 
@@ -185,24 +182,24 @@ class GitHubAuthentication(Authentication):
     config: GitHubConfig
 
 
-class CustomAuthentication(Authentication):
-    _typ = AuthenticationEnum.custom
-    authentication_class: str
-    config: typing.Dict[str, typing.Any]
-
-
 # =========== Users and Groups =============
 
 
 class User(Base):
-    uid: str
     password: typing.Optional[str]
-    primary_group: str
+    primary_group: typing.Optional[str]
     secondary_groups: typing.Optional[typing.List[str]]
 
 
 class Group(Base):
-    gid: int
+    gid: typing.Optional[int]
+
+
+# ================= Keycloak ==================
+
+
+class Keycloak(Base):
+    initial_root_password: typing.Optional[str]
 
 
 # ============== Security ================
@@ -210,13 +207,11 @@ class Group(Base):
 
 class Security(Base):
     authentication: Authentication
-    users: typing.Dict[str, User]
-    groups: typing.Dict[str, Group]
-
-    @validator("users", pre=True)
-    def validate_uderids(cls, v):
-        # raise TypeError if duplicated
-        return check_for_duplicates(v)
+    users: typing.Optional[typing.Dict[str, typing.Union[User, None]]]
+    groups: typing.Optional[
+        typing.Dict[str, typing.Union[Group, None]]
+    ]  # If gid is omitted, no attributes in Group means it appears as None
+    keycloak: typing.Optional[Keycloak]
 
 
 # ================ Providers ===============
@@ -282,7 +277,7 @@ class LocalProvider(Base):
 
 
 class Theme(Base):
-    jupyterhub: typing.Dict[str, str]
+    jupyterhub: typing.Dict[str, typing.Union[str, list]]
 
 
 # ================== Profiles ==================
@@ -350,6 +345,23 @@ class CDSDashboards(Base):
     enabled: bool
     cds_hide_user_named_servers: typing.Optional[bool]
     cds_hide_user_dashboard_servers: typing.Optional[bool]
+
+
+# =============== Extensions = = ==============
+
+
+class QHubExtensionEnv(Base):
+    code: str
+
+
+class QHubExtension(Base):
+    name: str
+    image: str
+    urlslug: str
+    private: bool = False
+    oauth2client: bool = False
+    envs: typing.Optional[typing.List[QHubExtensionEnv]]
+    logout: typing.Optional[str]
 
 
 # ======== External Container Registry ========
@@ -422,6 +434,7 @@ class Main(Base):
     environments: typing.Dict[str, CondaEnvironment]
     monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
+    extensions: typing.Optional[typing.List[QHubExtension]]
 
     @validator("qhub_version", pre=True, always=True)
     def check_default(cls, v):
