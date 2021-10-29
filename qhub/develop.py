@@ -84,10 +84,10 @@ def check_available_resources(
         required_available_cpu=2,
         recommended_available_cpu=4):
     memory = psutil.virtual_memory()
-    if memory.free < required_free_memory:
-        console.print(f'QHub deployment requires {required_free_memory / constants.GB:0.2f} GB free memory {memory.free / constants.GB}', style='red')
+    if memory.available < required_free_memory:
+        console.print(f'QHub deployment requires {required_free_memory / constants.GB:0.2f} GB free memory {memory.free / constants.GB:0.2f}', style='red')
     elif memory.total < required_available_memory:
-        console.print(f'QHub deployment recommends {required_available_memory / constants.GB:0.2f} GB total memory only has {memory.total / constants.GB} GB', style='orange1')
+        console.print(f'QHub deployment recommends {required_available_memory / constants.GB:0.2f} GB total memory only has {memory.total / constants.GB:0.2f} GB', style='orange1')
 
     available_cpu = multiprocessing.cpu_count()
     if available_cpu < required_available_cpu:
