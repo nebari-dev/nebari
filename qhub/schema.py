@@ -64,7 +64,7 @@ class HelmExtension(Base):
     repository: str
     chart: str
     version: str
-    overrides: typing.Optional[typing.Dict]
+    overrides: typing.Optional[typing.List[typing.Dict]]
 
 
 # ============== Monitoring =============
