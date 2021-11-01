@@ -11,11 +11,14 @@ ARG NB_USER=jovyan
 ARG NB_UID=1000
 ARG NB_GID=100
 
-ENV CONDA_VERSION py37_4.10.3
+ENV CONDA_VERSION=py37_4.10.3
 ENV CONDA_SHA256 a1a7285dea0edc430b2bc7951d89bb30a2a1b32026d2a7b02aacaaa95cf69c7c
 SHELL ["/bin/bash", "-c"]
 
-ENV PATH=/opt/conda/bin:${PATH}:/opt/scripts
+ENV CONDA_DIR=/opt/conda \
+    DEFAULT_ENV=default
+
+ENV PATH=/opt/conda/envs/${DEFAULT_ENV}/bin:/opt/conda/bin:${PATH}:/opt/scripts
 
 # ============== base install ===============
 COPY scripts/install-conda.sh /opt/scripts/install-conda.sh
@@ -34,4 +37,3 @@ ENV PATH="$NVIDIA_PATH:$PATH"
 
 COPY dask-worker /opt/dask-worker
 RUN /opt/dask-worker/postBuild
-
