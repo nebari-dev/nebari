@@ -1,0 +1,30 @@
+locales
+
+# assign uid/gid names
+libnss-wrapper
+
+# utilities
+wget
+curl
+
+# development utilities
+git
+openssh-client
+
+# editors
+nano
+vim
+emacs
+
+# conda prerequisites for GUI packages
+# See https://docs.anaconda.com/anaconda/install/linux/
+libXcomposite
+libXcursor
+libXi
+libXtst
+libXrandr
+alsa-lib
+mesa-libEGL
+libXdamage
+mesa-libGL
+libXScrnSaver

@@ -1,10 +1,10 @@
-FROM ubuntu:20.04
+FROM centos:centos8.4.2105
 LABEL MAINTAINER="Quansight"
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 RUN chmod -R a-w ~
-COPY scripts/install-apt-minimal.sh /opt/scripts/install-apt-minimal.sh
-RUN /opt/scripts/install-apt-minimal.sh
+COPY scripts/install-yum-minimal.sh /opt/scripts/install-yum-minimal.sh
+RUN /opt/scripts/install-yum-minimal.sh
 
 COPY scripts/fix-permissions /opt/scripts/fix-permissions
 # These can but should not be changed. ids will be arbitrary at run time.
@@ -12,7 +12,7 @@ ARG NB_USER=jovyan
 ARG NB_UID=1000
 ARG NB_GID=100
 
-ENV CONDA_VERSION py37_4.10.3
+ENV CONDA_VERSION=py37_4.10.3
 ENV CONDA_SHA256 a1a7285dea0edc430b2bc7951d89bb30a2a1b32026d2a7b02aacaaa95cf69c7c
 SHELL ["/bin/bash", "-c"]
 ENV CONDA_DIR=/opt/conda \
@@ -32,9 +32,9 @@ COPY scripts/install-conda.sh /opt/scripts/install-conda.sh
 RUN echo $SHELL; env; cat ~/.bashrc; cat ~/.profile ; /opt/scripts/install-conda.sh
 
 # ========== jupyterlab install ============
-COPY jupyterlab/apt.txt /opt/jupyterlab/apt.txt
-COPY scripts/install-apt.sh /opt/scripts/install-apt.sh
-RUN /opt/scripts/install-apt.sh /opt/jupyterlab/apt.txt
+COPY jupyterlab/yum-extras.txt /opt/jupyterlab/yum-extras.txt
+COPY scripts/install-yum.sh /opt/scripts/install-yum.sh
+RUN /opt/scripts/install-yum.sh /opt/jupyterlab/yum-extras.txt
 
 ARG SKIP_CONDA_SOLVE=no
 COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
@@ -81,7 +81,7 @@ RUN groupadd --gid ${NB_UID} ${NB_USER} && \
 
 # Have jovyan user own /home/jovyan/.local for local testing.
 RUN chown jovyan /home/jovyan
+RUN echo "--------------------HELLO WORLD--------------------"
 
 USER ${NB_UID}
 WORKDIR /home/${NB_USER}
-

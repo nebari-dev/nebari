@@ -11,10 +11,14 @@ if [ $(sha256sum -c miniconda.checksum | awk '{print $2}') != "OK" ]; then
 fi
 
 mv Miniconda3-$CONDA_VERSION-Linux-x86_64.sh miniconda.sh
-sh ./miniconda.sh -b -p /opt/conda
+sh ./miniconda.sh -b -p ${CONDA_DIR}
 rm miniconda.sh miniconda.checksum
 
-ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+ln -s ${CONDA_DIR}/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+conda install -y -c conda-forge mamba && \
+mamba clean -afy && \
+find ${CONDA_DIR} -follow -type f -name '*.a' -delete && \
+find ${CONDA_DIR} -follow -type f -name '*.pyc' -delete && \
 
 mkdir -p /etc/conda
 cat <<EOF > /etc/conda/condarc
@@ -31,4 +35,4 @@ EOF
 
 # Fix permissions in accordance with jupyter stack permissions
 # model
-fix-permissions /opt/conda /etc/conda /etc/profile.d
+fix-permissions ${CONDA_DIR} /etc/conda /etc/profile.d
