@@ -200,6 +200,7 @@ class Group(Base):
 
 class Keycloak(Base):
     initial_root_password: typing.Optional[str]
+    overrides: typing.Optional[typing.Dict]
 
 
 # ============== Security ================

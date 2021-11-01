@@ -193,6 +193,14 @@ module "kubernetes-keycloak-helm" {
 
   initial-root-password = {{ cookiecutter.security.get('keycloak',{}).initial_root_password | default("password",true) | jsonify }}
 
+  {% if cookiecutter.security.keycloak is defined and cookiecutter.security.keycloak.overrides is defined %}
+  overrides            = [<<EOT
+{{ cookiecutter.security.keycloak.overrides|yamlify -}}
+    EOT
+    ]
+  {% endif %}
+
+
   depends_on = [
     module.kubernetes-ingress
   ]

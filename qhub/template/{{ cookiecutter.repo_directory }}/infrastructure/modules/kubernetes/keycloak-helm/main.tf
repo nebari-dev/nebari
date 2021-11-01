@@ -4,7 +4,7 @@ resource "helm_release" "keycloak" {
 
   repository = "https://codecentric.github.io/helm-charts"
   chart      = "keycloak"
-  version    = "14.0.1"
+  version    = "15.0.2"
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -51,4 +51,3 @@ resource "kubernetes_manifest" "keycloak-http" {
     }
   }
 }
-
