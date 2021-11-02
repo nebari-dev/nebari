@@ -85,8 +85,6 @@ resource "keycloak_openid_client" "qhub_client" {
   valid_redirect_uris = [
     "https://${var.external-url}${var.forwardauth-callback-url-path}"
   ]
-
-  login_theme = "keycloak"
 }
 
 # Add a property 'name' to userinfo response (and others)
@@ -117,8 +115,6 @@ resource "keycloak_openid_client" "jupyterhub_client" {
     "https://${var.external-url}${var.jupyterhub-callback-url-path}",
     var.jupyterhub-logout-redirect-url
   ]
-
-  login_theme = "keycloak"
 }
 
 ### Login Flow for GitHub/Auth0 to map to existing users only

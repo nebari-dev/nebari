@@ -112,8 +112,8 @@ def patch_terraform_extensions(config):
             "name": ext["name"],
             "image": ext["image"],
             "urlslug": ext["urlslug"],
-            "private": ext["private"],
-            "oauth2client": ext["oauth2client"],
+            "private": ext.get("private", False),
+            "oauth2client": ext.get("oauth2client", False),
             "logout": ext.get("logout", ""),
             "jwt": False,
         }
