@@ -65,3 +65,9 @@ exceptions:
   - XSS
   - YAML
   - ZIP
+  - DNS
+  - CLI
+  - IOPS
+  - NFS
+  - AKS
+  - ARM

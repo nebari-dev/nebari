@@ -10,6 +10,7 @@ build/
 *.egg
 *.egg-info/
 dist/
+env/
 
 # IntelliJ
 .idea/
@@ -28,10 +29,13 @@ quansight-terraform-modules
 config.yaml
 data*
 
-# modules - removed this because .terraform folder is in .gitignore of deployments, 
+# modules - removed this because .terraform folder is in .gitignore of deployments,
 # this should cover imported modules while not gitignoring our new direct 'modules' folder.
 
 # ignore qhub files
 qhub-config.yaml
 
 .vscode/
+
+# Ignore Vale
+vale

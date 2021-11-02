@@ -2,7 +2,7 @@
 
 [Minikube](https://minikube.sigs.k8s.io/docs/) is a project allowing you to run a local Kubernetes node simulation for development and testing purposes.
 
-It is possible to run QHub on Minikube, and this can allow quicker feedback loops for development, as well as being less
+It's possible to run QHub on Minikube, and this can allow quicker feedback loops for development, as well as being less
 expensive than running cloud Kubernetes clusters.
 
 Local testing is a great way to test the components of QHub. It is
@@ -218,7 +218,7 @@ Then, initialize the configuration file `qhub-config.yaml` with:
 python -m qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
 ```
 ## Generate user password
-Each user on the `qhub-config.yaml` file will need a password.
+For each user on the `qhub-config.yaml` file needs a password.
 A random password is auto generated for the user `example-user` when
 the auth provider `password` is run, the value is then printed to the standard output (stdout).
 
