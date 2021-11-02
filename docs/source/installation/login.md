@@ -81,3 +81,13 @@ Under 'Account Security' click 'Signing In'.
 In the Password box, click the 'Update' button. This will guide you through entering your existing root password, and then entering a new password.
 
 From this point, the security.keycloak.initial_root_password field in `qhub-config.yaml` has no effect. If you redeploy QHub it will not reset the password back to the old one (or anything else that might be in the field in your YAML file). You can delete that line from your YAML file if you wish.
+
+# Groups
+
+Add Groups in the same Keycloak backend as you can add users - that is, login as `root` to https://myqhubsite.com/auth/admin/. Click Groups on the left-hand side.
+
+Groups named `users` and `admin` will have been created automatically by QHub. All users will be added to the `users` group automatically when you create them. You should never remove them from the `users` group as that group must contain all users.
+
+Members of `admin` group will have access to admin features within QHub.
+
+Neither `users` nor `admin` groups should ever be deleted.
