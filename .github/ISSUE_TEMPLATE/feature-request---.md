@@ -13,10 +13,6 @@ assignees: ''
 This section should contain "what" you are proposing. -->
 <!-- Are you having any problems? Briefly describe what your painpoints are. For example: "I'm always frustrated when ..." -->
 
-## Suggestion
-
-What are your suggestions on how to solve this problem? What solution(s) would make you happy?
-
 ## Value/benefit
 
 <!-- What is the value in adding this feature, and who will benefit from it? Include any information that could help us prioritize the issue.
