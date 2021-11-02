@@ -8,9 +8,11 @@ assignees: ''
 ---
 
 ## Describe the bug
-A clear and concise description of what the problem is.
+
+<!-- A clear and concise description of what the problem is. -->
 
 ## How can we help?
+
 Help us help you.
 * What are you trying to achieve?
 * How can we reproduce the problem?
