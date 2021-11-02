@@ -1,4 +1,4 @@
-# Configuration
+# Advanced Configuration
 
 The configuration file is split into several sections. In this page,
 we detail the requirements necessary for the YAML configuration

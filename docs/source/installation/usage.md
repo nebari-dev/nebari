@@ -56,6 +56,14 @@ There are several flags that allow you to configure the deployment:
 
 You will be prompted to enter values for some of the choices above if they are ommited as command line arguments (e.g. project name and domain).
 
+The `qhub init` command will also generate an initial password for your root Keycloak user:
+
+```
+Securely generated default random password=R1E8aWedaQVU6kKv for Keycloak root user stored at path=/tmp/QHUB_DEFAULT_PASSWORD
+```
+
+The password will also be available in the `qhub-config.yaml` file under the security.keycloak.initial_root_password field. It will be needed in the next page of these docs for logging in to your QHub.
+
 <a href="#" name="project-naming-convention"></a>
 > Note: **Project Naming Convention**
 >
@@ -75,7 +83,11 @@ This file is the configuration file that will determine how the cloud infrastruc
 
 But at this point it is just a text file! You could edit it manually if you are unhappy with the choices, or delete it and start over again.
 
-### Deploy QHub
+Or it would be possible to create from scratch or re-use a `qhub-config.yaml` file - it is not essential to use `qhub init` at all, but it is often the easiest way to get started.
+
+To understand some ways in which you could decide to edit the YAML file, see [Advanced Configuration](configuration.md).
+
+## Deploy QHub
 
 Finally, we can deploy QHub with:
 
@@ -160,3 +172,5 @@ Having issues? Head over to our
 [Troubleshooting](../admin_guide/troubleshooting.md) section for tips
 on how to debug your QHub. Or try our
 [FAQ](../admin_guide/faq.md).
+
+If your deployment seemed to be successful, next learn how to [login](login.md).
