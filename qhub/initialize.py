@@ -248,6 +248,7 @@ def render_config(
     terraform_state=None,
     kubernetes_version=None,
     disable_prompt=False,
+    ssl_cert_email=None,
 ):
     config = BASE_CONFIGURATION
     config["provider"] = cloud_provider
@@ -392,6 +393,15 @@ def render_config(
 
     config["profiles"] = DEFAULT_PROFILES
     config["environments"] = DEFAULT_ENVIRONMENTS
+
+    if ssl_cert_email is not None:
+        if not re.match("^[^ @]+@[^ @]+\\.[^ @]+$", ssl_cert_email):
+            raise ValueError("ssl-cert-email should be a valid email address")
+        config["certificate"] = {
+            "type": "lets-encrypt",
+            "acme_email": ssl_cert_email,
+            "acme_server": "https://acme-v02.api.letsencrypt.org/directory",
+        }
 
     if auth_auto_provision:
         if auth_provider == "auth0":

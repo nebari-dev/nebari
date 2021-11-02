@@ -1,49 +1,16 @@
 # Setup Initialization
 
 QHub handles the initial setup and management of configurable data
-science environments, allowing to users to attain seamless deployment
-with Github Actions.
+science environments, allowing users to attain seamless deployment
+with Github Actions or GitLab Workflows.
 
-QHub can be installed on a bare-metal server using HPC, on a CLoud
-provider or even locally for testing purposes.  Analyse the options
-below to discover what option suits best your specific use case.
+QHub will be deployed on a cloud of your choice (AWS, Google Cloud, Azure, or Digital Ocean), first preparing requisite cloud infrastructure including a Kubernetes cluster.
 
-## Local Deployment or Existing Kubernetes Cluster
+It is suitable for most use cases, especially when:
+- You require scalable infrastructure
+- You aim to have a production environment with administration managed via simple configuration stored in git
 
-The local version is recommended for testing QHub's components due to
-its simplicity. Choose the local mode if:
-
-- You already have Kubernetes clusters
-- You want to test these Kubernetes clusters
-- You have available local compute setup
-- You want to try out QHub with a quick-install to see how it works,
-  without setting up environment variables
-
-You should choose another installation option if you are starting from
-scratch (i.e., no clusters yet) and aiming to have a production
-environment.
-
-Found your match? Head over to the [tips for testing docs](https://docs.qhub.dev/en/stable/source/dev_guide/testing.html) for
-more details.
-
-## HPC Deployment
-
-The [QHub HPC](https://hpc.qhub.dev/en/latest/) should be your choice if:
-- You have highly optimized code that require highly performant infrastructure
-- You have existing infrastructure already available
-- You expect that your infrastructure will **not** exceed the existing resources capabilities
-> NOTE: Although it is possible to deploy QHub HPC on the Cloud, it is not generally recommended due to possible high
-> costs. For more information, check out the [base cost](../admin_guide/cost.md) section of the docs.
-
-## Kubernetes Deployment
-
-The Kubernetes version of QHub is considered to be the default
-option. If you are not sure which option to choose, try this one. It
-is suitable to most use cases, specially when:
-- You require a scalable infrastructure
-- You aim to have a production environment with GitOps enabled by default
-
-The QHub version requires a choice of [Cloud
+QHub requires a choice of [Cloud
 provider](#cloud-provider), [authentication (using Auth0, GitHub, or
 password based)](#authentication), [domain
 registration](#domain-registry), and CI provider (GitHub Actions).
@@ -54,12 +21,21 @@ that once set up will trigger QHub's automatic deploy using GitHub
 Actions.
 
 To find and set the environment variables, follow the steps described
-on the subsections below.
+in the subsections below.
 
-### Cloud Provider
+> NOTE: **Other QHub approaches**
+>
+> It is possible to deploy QHub into an existing Kubernetes cluster (on a cloud or otherwise), or into a local Kubernetes simulation on your personal computer (for testing). See [Testing](../dev_guide/testing.md).
+>
+> [QHub HPC](https://hpc.qhub.dev/) is a different codebase to regular QHub, aiming for a similar data science platform, and should be your choice if
+> - You have highly optimized code that requires highly performant infrastructure
+> - You have existing HPC infrastructure already available
+> - You expect that your infrastructure will **not** exceed the existing resources capabilities
+
+## Cloud Provider
 
 The first required step is to **choose a Cloud Provider to host the
-project deployment**. The cloud installation is based on Kubernetes,
+project deployment**. The cloud installation will be within a new Kubernetes cluster,
 but knowledge of Kubernetes is **NOT** required nor is in depth
 knowledge about the specific provider required either. QHub supports
 [Amazon AWS](#amazon-web-services-aws),
@@ -71,10 +47,9 @@ create all the resources. Hence, once the Cloud provider has been
 chosen, follow the steps below and set the environment variables as
 specified with **owner/admin** level permissions.
 
-For more details on configuration for each Cloud provider, check the
-How-To Guides section of the documentation.
+You will need to tell `qhub init` which cloud provider you have chosen, in the [Usage](usage.md) section, and this must correspond with the environment variables set for your chosen cloud as below:
 
-#### Amazon Web Services (AWS)
+### Amazon Web Services (AWS)
 <details><summary>Click for AWS configuration instructions </summary>
 
 Please see these instructions for [creating an IAM
@@ -97,7 +72,7 @@ Please see these instructions for [creating a Digital Ocean
 token](https://www.digitalocean.com/docs/apis-clis/api/create-personal-access-token/). In
 addition to a `token`, `spaces key` (similar to AWS S3) credentials are also required. Follow the instructions on the
 [official docs](https://www.digitalocean.com/community/tutorials/how-to-create-a-digitalocean-space-and-api-key) for more information.
-> Note: DigitalOcean's permissions model is not as fine-grained as other the other supported Cloud providers.
+> Note: DigitalOcean's permissions model is not as fine-grained as the other supported Cloud providers.
 
 Set the required environment variables as specified below:
 
@@ -110,7 +85,7 @@ export AWS_SECRET_ACCESS_KEY=""       # set this variable identical to `SPACES_S
 ```
 </details>
 
-#### Google Cloud Platform
+### Google Cloud Platform
 
 <details><summary>Click for CGP configuration specs </summary>
 
@@ -131,7 +106,7 @@ export PROJECT_ID="projectIDName"
 > found at the Google Console homepage, under `Project info`.
 </details>
 
-#### Microsoft Azure
+### Microsoft Azure
 
 <details><summary>Click for Azure configuration details </summary>
 
@@ -148,11 +123,21 @@ export ARM_TENANT_ID=""           # field available under `Azure Active Director
 
 > NOTE 2: [Tenant ID](https://docs.microsoft.com/en-us/azure/active-directory/fundamentals/active-directory-how-to-find-tenant)
 > values can be also found using PowerShell and CLI.
+</details>
 
-### Authentication
+## Authentication
 
-#### Auth0
+User identity in QHub is now managed within Keycloak which is a robust and highly flexible open source identity and access management solution. A Keycloak instance will be deployed inside your QHub.
 
+It can be configured to work with many OAuth2 identity providers, it can federate users from existing databases (such as LDAP), or it can be used as a simple database of username/passwords.
+
+The full extent of possible configuration can't be covered here, so we provide three simple options that can be configured automatically by QHub when it sets up your new platform. These options are basic passwords, GitHub single-sign on, or Auth0 single-sign on (which in turn can be configured to allow identity to be provided by social login etc).
+
+You will actually instruct `qhub init` which method you have chosen when you move on to the [Usage](usage.md) section, but at this stage you may need to set environment variables corresponding to your choice:
+
+### Auth0
+
+<details><summary>Click for Auth0 configuration details </summary>
 Auth0 is a great choice to enable flexible authentication via multiple
 providers. To create the necessary access tokens you will need to have
 an [Auth0](https://auth0.com/) account and be logged in. [Directions
@@ -174,9 +159,27 @@ The following environment variables must be set:
 ```bash
 export AUTH_DOMAIN="qhub-test.auth0.com" # in case the account was called 'qhub-test'
 ```
+</details>
 
-#### GitHub
+### GitHub Single-sign on
 
+<details><summary>Click for GitHub SSO configuration details </summary>
+To use GitHub as a single-sign on provider, you will need to provide env vars for a new OAuth2 app.
+
+TODO
+</details>
+
+## CI/CD Pipeline
+
+In the [Usage](usage.md) section, you will need to run `qhub init` (this only ever needs to be run once - it creates your configuration YAML file) and then `qhub deploy` to set up the cloud infrastructure and deploy QHub for the first time.
+
+For subsequent deployments, it is possible to run `qhub deploy` again in exactly the same way, providing the configuration YAML file as you would the first time. However, it is also possible to automate future deployments using 'DevOps' - the configuration YAML file stored in git will trigger automatic redeployment whenever it is edited.
+
+This DevOps approach can be provided by GitHub Actions or GitLab Workflows. As for the other choices, you will only need to specify the CI/CD provider when you come to run `qhub init`, but you may need to set relevant environment variables unless you choose 'none' because you plan to always redeploy manually.
+
+### GitHub
+
+<details><summary>Click for GitHub Actions configuration details </summary>
 QHub uses GitHub Actions to enable [Infrastructure as
 Code](https://en.wikipedia.org/wiki/Infrastructure_as_code) and
 trigger the CI/CD checks on the configuration file that automatically
@@ -191,8 +194,15 @@ to be on the safe side enable all permissions.
 
  - `GITHUB_USERNAME`: your GitHub username
  - `GITHUB_TOKEN`: token generated by GitHub
+</details>
 
-### Domain registry
+### GitLab
+
+<details><summary>Click for GitLab Workflow configuration details </summary>
+TODO
+</details>
+
+## Domain registry
 
 Finally, you will need to have a domain name for hosting QHub. This
 domain will be where your application will be exposed.
@@ -207,8 +217,9 @@ not possible to have detailed docs on how to create a record on your
 provider. Googling `setting <A/CNAME> record on <provider name>`
 should yield good results on doing it for your specific provider.
 
-#### Cloudflare
+### Cloudflare
 
+<details><summary>Click for Cloudflare configuration details </summary>
 QHub supports Cloudflare as a DNS provider. If you choose to use Cloudflare, first
 create an account, then there are two possible following options:
 1. You can either register your application domain name on it, using the [Cloudflare
@@ -236,8 +247,10 @@ Finally, set the environment variable such as:
  export CLOUDFLARE_TOKEN="cloudflaretokenvalue"
 ```
 
+</details>
+
+----
+
 You are now done with the hardest part of the deployment.
 
-On the next section, you will create the main file structure and
-render configuration modules to generate the deployment
-infrastructure.
+In the next section, you will create the main configuration YAML file and then deploy the QHub infrastructure.
