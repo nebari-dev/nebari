@@ -1,0 +1,45 @@
+FROM ubuntu:20.04
+LABEL org.opencontainers.image.authors="Quansight" \
+      org.opencontainers.image.source="https://github.com/Quansight/qhub"
+
+SHELL ["/bin/bash", "-c"]
+
+RUN echo "Install minimal apt packages" && \
+    apt-get update --fix-missing && \
+    apt-get install -y wget bzip2 ca-certificates curl git && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /var/tmp/* /tmp/*
+
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    CONDA_VERSION=py37_4.10.3 \
+    DEFAULT_ENV=default \
+    CONDA_DIR=/opt/conda \
+    CONDA_SHA256=a1a7285dea0edc430b2bc7951d89bb30a2a1b32026d2a7b02aacaaa95cf69c7c
+
+ENV PATH=${CONDA_DIR}/envs/${DEFAULT_ENV}/bin:${CONDA_DIR}/bin:/opt/scripts:${PATH}
+
+RUN echo "Install conda and mamba" && \
+    wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-$CONDA_VERSION-Linux-x86_64.sh -O miniconda.sh && \
+    echo "${CONDA_SHA256}  miniconda.sh" | sha256sum -c && \
+    sh miniconda.sh -b -p ${CONDA_DIR} && \
+    rm miniconda.sh && \
+    ln -s ${CONDA_DIR}/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    conda install -y -c conda-forge mamba && \
+    mamba clean -afy && \
+    find ${CONDA_DIR} -follow -type f -name '*.a' -delete && \
+    find ${CONDA_DIR} -follow -type f -name '*.pyc' -delete && \
+    mkdir -p /etc/conda && \
+    echo \
+$'always_yes: true\n\
+changeps1: false\n\
+auto_update_conda: false\n\
+aggressive_update_packages: []\n\
+envs_dirs:\n\
+ - /home/conda/environments\n\
+ - /home/jovyan/.conda/envs\n\
+pkgs_dirs:\n\
+ - /home/jovyan/.conda/pkgs' >> /etc/conda/condarc && \
+    chmod o+rX -R /etc/conda && \
+    chmod o+rX -R ${CONDA_DIR} && \
+    chmod o+rX -R /etc/profile.d
