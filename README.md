@@ -70,7 +70,7 @@ For more details, check out the release [blog post](https://www.quansight.com/po
 
 * QHub is supported by macOS and Linux operating systems (Windows is **NOT** currently supported).
 * Compatible with Python 3.6+. New to Python? We recommend using [Anaconda](https://www.anaconda.com/products/individual).
-* Adoption of virtual environments (`conda`, `pipenv` or `venv`) is also encouraged.
+* Adoption of virtual environments ([`conda`](https://docs.conda.io/en/latest/), [`pipenv`](https://github.com/pypa/pipenv) or [`venv`](https://docs.python.org/3/library/venv.html)) is also encouraged.
 
 ### Install QHub
 
@@ -118,6 +118,7 @@ variables, check the [Step-by-Step](https://docs.qhub.dev/en/latest/source/03_tu
 
 Once all the necessary credentials are gathered and set as [UNIX environment variables](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/),
 QHub can be deployed in under 20 minutes using:
+
 ```bash
 qhub init   ... # generates initial config file and optionally automates deployment steps
 qhub deploy ... # creates and configures the cloud infrastructure
@@ -128,6 +129,7 @@ qhub deploy ... # creates and configures the cloud infrastructure
 Have a look at our [FAQ](docs/source/02_get_started/07_support.md#faq) to see if your query has been answered.
 
 We separate the queries for QHub into:
+
 * [GitHub Discussions](https://github.com/Quansight/qhub/discussions) used to raise discussions about a subject, such as:
 "What is the recommended way to do X with QHub?"
 
