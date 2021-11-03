@@ -14,8 +14,6 @@ resource "keycloak_openid_client" "keycloak_ext_client" {
   valid_redirect_uris = [
     "https://${var.external-url}/${var.urlslug}/oauth_callback"
   ]
-
-  login_theme = "keycloak"
 }
 
 resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper" {
@@ -33,4 +31,3 @@ resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_ma
 
   full_path = false
 }
-

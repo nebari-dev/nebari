@@ -57,6 +57,10 @@ def create_init_subcommand(subparser):
         action="store_true",
         help="Never prompt user for input instead leave PLACEHOLDER",
     )
+    subparser.add_argument(
+        "--ssl-cert-email",
+        help="Allow generation of a LetsEncrypt SSL cert - requires an administrative email",
+    )
     subparser.set_defaults(func=handle_init)
 
 
@@ -75,6 +79,7 @@ def handle_init(args):
         terraform_state=args.terraform_state,
         kubernetes_version=args.kubernetes_version,
         disable_prompt=args.disable_prompt,
+        ssl_cert_email=args.ssl_cert_email,
     )
 
     try:
