@@ -1,7 +1,5 @@
-locales
-
 # assign uid/gid names
-libnss-wrapper
+nss_wrapper
 
 # utilities
 wget
@@ -9,7 +7,7 @@ curl
 
 # development utilities
 git
-openssh-client
+openssh-clients
 
 # editors
 nano

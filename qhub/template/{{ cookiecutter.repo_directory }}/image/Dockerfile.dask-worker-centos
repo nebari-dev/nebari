@@ -1,4 +1,4 @@
-FROM iameskild/ubuntu:base
+FROM iameskild/centos:base
 LABEL org.opencontainers.image.authors="Quansight" \
       org.opencontainers.image.source="https://github.com/Quansight/qhub"
 
@@ -7,12 +7,12 @@ ARG NB_USER=jovyan
 ARG NB_UID=1000
 ARG NB_GID=100
 
-# Install Dask-Worker
+# ========== Install Dask-Worker ==========
 COPY dask-worker/environment.yaml /opt/dask-worker/environment.yaml
 COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
 RUN /opt/scripts/install-conda-environment.sh /opt/dask-worker/environment.yaml 'false'
 
-# ========== Setup GPU Paths ============
+# ========== Setup GPU Paths ==========
 ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib64
 ENV NVIDIA_PATH=/usr/local/nvidia/bin
 ENV PATH="$NVIDIA_PATH:$PATH"

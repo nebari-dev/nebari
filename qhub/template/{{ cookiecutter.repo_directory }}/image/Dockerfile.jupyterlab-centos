@@ -1,4 +1,4 @@
-FROM iameskild/ubuntu:base
+FROM iameskild/centos:base
 LABEL org.opencontainers.image.authors="Quansight" \
       org.opencontainers.image.source="https://github.com/Quansight/qhub"
 
@@ -13,10 +13,10 @@ ARG NB_GID=100
 
 COPY jupyterlab /opt/jupyterlab
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends $(cat /opt/jupyterlab/apt.txt | grep -vE "^\s*#" $1  | tr "\n" " ") && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN yum update -y && \
+    yum install -y $(cat /opt/jupyterlab/yum.txt | grep -vE "^\s*#" $1  | tr "\n" " ") && \
+    yum clean all && \
+    rm -rf /tmp/* /var/tmp/* /var/cache/yum
 
 # ========== Install JupyterLab ==========
 ARG SKIP_CONDA_SOLVE=no

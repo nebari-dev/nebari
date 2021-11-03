@@ -1,4 +1,4 @@
-FROM iameskild/ubuntu:base
+FROM iameskild/centos:base
 LABEL org.opencontainers.image.authors="Quansight" \
       org.opencontainers.image.source="https://github.com/Quansight/qhub"
 
@@ -7,7 +7,7 @@ ARG NB_USER=jovyan
 ARG NB_UID=1000
 ARG NB_GID=100
 
-# Install JupyerHub
+# Install JupyterHub
 COPY jupyterhub /opt/jupyterhub
 COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
 RUN /opt/scripts/install-conda-environment.sh /opt/jupyterhub/environment.yaml 'false'

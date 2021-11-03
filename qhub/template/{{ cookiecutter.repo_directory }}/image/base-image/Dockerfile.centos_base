@@ -19,6 +19,8 @@ ENV LANG=C.UTF-8 \
 
 ENV PATH=${CONDA_DIR}/envs/${DEFAULT_ENV}/bin:${CONDA_DIR}/bin:/opt/scripts:${PATH}
 
+COPY fix-permissions /opt/scripts/fix-permissions
+
 RUN echo "Install conda and mamba" && \
     wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-$CONDA_VERSION-Linux-x86_64.sh -O miniconda.sh && \
     echo "${CONDA_SHA256}  miniconda.sh" | sha256sum -c && \
@@ -40,6 +42,4 @@ envs_dirs:\n\
  - /home/jovyan/.conda/envs\n\
 pkgs_dirs:\n\
  - /home/jovyan/.conda/pkgs' >> /etc/conda/condarc && \
-    chmod o+rX -R /etc/conda && \
-    chmod o+rX -R ${CONDA_DIR} && \
-    chmod o+rX -R /etc/profile.d
+    fix-permissions etc/conda ${CONDA_DIR} /etc/profile.d
