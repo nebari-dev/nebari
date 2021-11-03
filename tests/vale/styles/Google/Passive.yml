@@ -4,7 +4,7 @@ message: "In general, use active voice instead of passive voice ('%s')."
 ignorecase: true
 level: suggestion
 raw:
-  - \b(am|are|were|being|is|been|was|be)\b\s*
+  - \b(am|are|were|being|been|was|be)\b\s*
 tokens:
   - '[\w]+ed'
   - awoken

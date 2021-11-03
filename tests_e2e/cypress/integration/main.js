@@ -18,7 +18,10 @@ describe('First Test', () => {
       cy.visit('/hub/home');
 
       cy.get('#login-main > div.service-login > a')
-        .should('contain', 'Sign in with Auth0');
+        .should('contain', 'Sign in with Keycloak').click();
+
+      cy.get('a#social-auth0')
+        .should('contain', 'auth0');
 
     })
 
@@ -29,7 +32,11 @@ describe('First Test', () => {
       cy.visit('/hub/home');
 
       cy.get('#login-main > div.service-login > a')
-        .should('contain', 'Sign in with GitHub');
+        .should('contain', 'Sign in with Keycloak').click();
+
+      cy.get('a#social-github')
+        .should('contain', 'github');
+
 
     })
 
