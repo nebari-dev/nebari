@@ -11,6 +11,15 @@ from ..version import __version__
 from ..constants import TERRAFORM_VERSION
 from ..utils import pip_install_qhub, QHUB_GH_BRANCH, load_yaml
 
+# existing files and folders to delete when `render_template` is called
+DELETABLE_PATHS = [
+    "terraform-state",
+    ".github",
+    "infrastructure",
+    "image",
+    ".gitlab-ci.yml",
+]
+
 
 def patch_dask_gateway_extra_config(config):
     """Basically the current dask_gateway helm chart only allows one
@@ -294,7 +303,7 @@ def render_template(output_directory, config_filename, force=False):
 
     remove_existing_renders(
         dest_repo_dir=output_directory / repo_directory,
-        verbosity=2,
+        verbosity=0,
     )
 
     generate_files(
@@ -305,9 +314,11 @@ def render_template(output_directory, config_filename, force=False):
     )
 
 
-def remove_existing_renders(dest_repo_dir, verbosity=0):
+def remove_existing_renders(
+    dest_repo_dir, deletable_paths=DELETABLE_PATHS, verbosity=0
+):
     """
-    Remove all files and directories beneath each directory in `deletable_dirs`. These files and directories will be regenerated in the next step (`generate_files`) based on the configurations set in `qhub-config.yml`.
+    Remove all files and directories beneath each directory in `deletable_paths`. These files and directories will be regenerated in the next step (`generate_files`) based on the configurations set in `qhub-config.yml`.
 
     Inputs must be pathlib.Path
     """
@@ -317,23 +328,15 @@ def remove_existing_renders(dest_repo_dir, verbosity=0):
             f"Deploying QHub from the home directory, {home_dir}, is not permitted."
         )
 
-    deletable_dirs = [
-        "terraform-state",
-        ".github",
-        "infrastructure",
-        "image",
-        ".gitlab-ci.yml",
-    ]
-
-    for deletable_dir in deletable_dirs:
-        deletable_dir = dest_repo_dir / deletable_dir
-        if deletable_dir.exists():
+    for delete_me in deletable_paths:
+        delete_me = dest_repo_dir / delete_me
+        if delete_me.exists():
             if verbosity > 0:
-                print(f"Deleting all files and directories beneath {deletable_dir} ...")
-            if deletable_dir.is_dir():
-                rmtree(deletable_dir)
+                print(f"Deleting all files and directories beneath {delete_me} ...")
+            if delete_me.is_file():
+                delete_me.unlink()
             else:
-                deletable_dir.unlink()
+                rmtree(delete_me)
 
 
 def set_env_vars_in_config(config):
