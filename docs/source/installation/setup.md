@@ -65,12 +65,12 @@ export AWS_SECRET_ACCESS_KEY="iNtheJUng1etheMightyJUNgleTHEl10N51eEpsT0n1ghy;"
 ```
 </details>
 
-#### Digital Ocean
+### Digital Ocean
 <details><summary>Click to expand DigitalOcean configuration directions </summary>
 
 Please see these instructions for [creating a Digital Ocean
 token](https://www.digitalocean.com/docs/apis-clis/api/create-personal-access-token/). In
-addition to a `token`, `spaces key` (similar to AWS S3) credentials are also required. Follow the instructions on the
+addition to a `token`, a `spaces key` (similar to AWS S3) credentials are also required. Follow the instructions on the
 [official docs](https://www.digitalocean.com/community/tutorials/how-to-create-a-digitalocean-space-and-api-key) for more information.
 > Note: DigitalOcean's permissions model is not as fine-grained as the other supported Cloud providers.
 
@@ -138,6 +138,7 @@ You will actually instruct `qhub init` which method you have chosen when you mov
 ### Auth0
 
 <details><summary>Click for Auth0 configuration details </summary>
+
 Auth0 is a great choice to enable flexible authentication via multiple
 providers. To create the necessary access tokens you will need to have
 an [Auth0](https://auth0.com/) account and be logged in. [Directions
@@ -164,9 +165,10 @@ export AUTH_DOMAIN="qhub-test.auth0.com" # in case the account was called 'qhub-
 ### GitHub Single-sign on
 
 <details><summary>Click for GitHub SSO configuration details </summary>
-To use GitHub as a single-sign on provider, you will need to provide env vars for a new OAuth2 app.
 
-TODO
+To use GitHub as a single-sign on provider, you will need to create a new OAuth2 app.
+
+No environment variables are needed for this - you will be given the relevant information and prompted for various inputs during the next stage, when you run [`qhub init`](./usage.md) if you provide the flag `--auth-provider github`. This will be covered when you reach that point in this documentation.
 </details>
 
 ## CI/CD Pipeline
@@ -180,6 +182,7 @@ This DevOps approach can be provided by GitHub Actions or GitLab Workflows. As f
 ### GitHub
 
 <details><summary>Click for GitHub Actions configuration details </summary>
+
 QHub uses GitHub Actions to enable [Infrastructure as
 Code](https://en.wikipedia.org/wiki/Infrastructure_as_code) and
 trigger the CI/CD checks on the configuration file that automatically
@@ -199,7 +202,12 @@ to be on the safe side enable all permissions.
 ### GitLab
 
 <details><summary>Click for GitLab Workflow configuration details </summary>
-TODO
+
+If you want to use GitLab CI to automatically deploy changes to your configuration, then no extra environment variables are needed for this.
+
+All git repo and CI setup on GitLab will need to be done manually. At the next stage, when you run [`qhub init`](./usage.md) please provide the flag `--ci-provider gitlab-ci`.
+
+After initial deploy, the documentation should tell you when to commit your configuration files into your GitLab repo. There should be your `qhub-config.yaml` file as well as a generated file called `.gitlab-ci.yml`. You will need to manually set environment variables for your cloud provider as secrets in your GitLab CI for the repo.
 </details>
 
 ## Domain registry
@@ -220,10 +228,11 @@ should yield good results on doing it for your specific provider.
 ### Cloudflare
 
 <details><summary>Click for Cloudflare configuration details </summary>
+
 QHub supports Cloudflare as a DNS provider. If you choose to use Cloudflare, first
 create an account, then there are two possible following options:
-1. You can either register your application domain name on it, using the [Cloudflare
-nameserver](https://support.cloudflare.com/hc/en-us/articles/205195708-Changing-your-domain-nameservers-to-Cloudflare)
+1. You can either register your application domain name on it, using the
+[Cloudflare nameserver](https://support.cloudflare.com/hc/en-us/articles/205195708-Changing-your-domain-nameservers-to-Cloudflare)
 (recommended), or
 2. You can outright buy a new domain with Cloudflare (this action is not particularly recommended).
 
