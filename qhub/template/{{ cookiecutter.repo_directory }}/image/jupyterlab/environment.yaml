@@ -15,7 +15,8 @@ dependencies:
  - jupyterhub
  - nbconvert
  - nbval
-
+ - code-server >= 3.2
+ 
  # jupyterlab extensions
  - dask_labextension >=5.0.0
  - jupyterlab-git >=0.30.0
