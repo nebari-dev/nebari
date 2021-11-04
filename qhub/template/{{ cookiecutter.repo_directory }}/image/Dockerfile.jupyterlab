@@ -1,4 +1,11 @@
-FROM iameskild/ubuntu:base
+ARG DISTRO=ubuntu
+ARG IMAGE_TAG=v0.3.13
+FROM quansight/qhub-${DISTRO}-base:${IMAGE_TAG}
+
+# ARG required in RUN command below, needs to be added again
+# https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
+ARG DISTRO=ubuntu
+
 LABEL org.opencontainers.image.authors="Quansight" \
       org.opencontainers.image.source="https://github.com/Quansight/qhub"
 
@@ -13,10 +20,20 @@ ARG NB_GID=100
 
 COPY jupyterlab /opt/jupyterlab
 
-RUN apt-get update && \
+RUN if [[ "$DISTRO" == ubuntu ]] \
+    ; then \
+    echo "Install extra apt packages"  && \
+    apt-get update && \
     apt-get install -y --no-install-recommends $(cat /opt/jupyterlab/apt.txt | grep -vE "^\s*#" $1  | tr "\n" " ") && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    ; else \
+    echo "Install extra yum packages" && \
+    yum update -y && \
+    yum install -y $(cat /opt/jupyterlab/yum.txt | grep -vE "^\s*#" $1  | tr "\n" " ") && \
+    yum clean all && \
+    rm -rf /tmp/* /var/tmp/* /var/cache/yum \
+    ; fi
 
 # ========== Install JupyterLab ==========
 ARG SKIP_CONDA_SOLVE=no

@@ -1,4 +1,7 @@
-FROM iameskild/ubuntu:base
+ARG DISTRO=ubuntu
+ARG IMAGE_TAG=v0.3.13
+FROM quansight/qhub-${DISTRO}-base:${IMAGE_TAG}
+
 LABEL org.opencontainers.image.authors="Quansight" \
       org.opencontainers.image.source="https://github.com/Quansight/qhub"
 
