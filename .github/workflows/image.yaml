@@ -112,11 +112,13 @@ jobs:
 
       - name: Get Tag Name
         run: |
-          if ${{ matrix.DISTRO }} = centos
+          if [[ "$DISTRO" == "centos" ]]
           then
-            echo "BASE_IMAGE_DISTRO=${{ needs.base-image.outputs.centos-image-tag }}" >> $GITHUB_ENV
+            echo "BASE_IMAGE_DISTRO=${{ needs.base-image.outputs.centos-image-tag }}" >> "$GITHUB_ENV"
+            echo "DISTRO=centos" >> "$GITHUB_ENV"
           else
-            echo "BASE_IMAGE_DISTRO=${{ needs.base-image.outputs.ubuntu-image-tag }}" >> $GITHUB_ENV
+            echo "BASE_IMAGE_DISTRO=${{ needs.base-image.outputs.ubuntu-image-tag }}" >> "$GITHUB_ENV"
+            echo "DISTRO=ubuntu" >> "$GITHUB_ENV"
           fi
 
       - name: Build docker
@@ -128,7 +130,7 @@ jobs:
           context: "./qhub/template/{{ cookiecutter.repo_directory }}/image"
           file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.IMAGE }}"
           build-args: |
-            DISTRO=${{ matrix.DISTRO }}
+            DISTRO=${{ env.DISTRO }}
             BASE_IMAGE=${{ env.BASE_IMAGE_DISTRO }}
           tags: ${{ steps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
