@@ -1,6 +1,5 @@
-ARG DISTRO=ubuntu
-ARG IMAGE_TAG=v0.3.13
-FROM quansight/qhub-${DISTRO}-base:${IMAGE_TAG}
+ARG BASE_IMAGE=quansight/qhub-ubuntu-base:v0.3.13
+FROM ${BASE_IMAGE}
 
 LABEL org.opencontainers.image.authors="Quansight" \
       org.opencontainers.image.source="https://github.com/Quansight/qhub"

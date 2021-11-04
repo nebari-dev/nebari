@@ -18,17 +18,14 @@ on:
       - '*'
 
 jobs:
-  jupyterlab:
-    name: 'Build Docker Images'
+  base-image:
+    name: 'Build Base Docker Images'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dockerfile:
-          - jupyterlab
-          - jupyterhub
-          - dask-worker
-          - dask-gateway
-          - conda-store
+        BASE:
+          - centos-base
+          - ubuntu-base
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
@@ -48,7 +45,61 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            "quansight/qhub-${{ matrix.dockerfile }}"
+            "quansight/qhub-${{ matrix.BASE }}"
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
+
+      - name: Build docker
+        uses: docker/build-push-action@v2
+        with:
+          context: "./qhub/template/{{ cookiecutter.repo_directory }}/image/base"
+          file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/base/Dockerfile.${{ matrix.BASE }}"
+          tags: ${{ steps.meta.outputs.tags }}
+          push: ${{ github.event_name != 'pull_request' }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  matrix-build:
+    needs: base-image
+    strategy:
+      fail-fast: false
+      matrix:
+        IMAGE:
+          - jupyterlab
+          - jupyterhub
+          - dask-worker
+          - dask-gateway
+          - conda-store
+        include:
+          # build non-default, centos image
+          - IMAGE: jupyterlab
+            DISTRO: centos
+          - IMAGE: dask-worker
+            DISTRO: centos
+    name: ${{ matrix.IMAGE }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@main
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker meta
+        id: meta
+        uses: crazy-max/ghaction-docker-meta@v2
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            "quansight/qhub-${{ matrix.IMAGE }}"
           # generate Docker tags based on the following events/attributes
           tags: |
             type=ref,event=branch
@@ -59,7 +110,10 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: "./qhub/template/{{ cookiecutter.repo_directory }}/image"
-          file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.dockerfile }}"
+          file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.IMAGE }}"
+          build-args: |
+            DISTRO=${{ matrix.DISTRO }}
+            BASE_IMAGE=${{ needs.build-base.steps.meta.outputs.tags }}
           tags: ${{ steps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}

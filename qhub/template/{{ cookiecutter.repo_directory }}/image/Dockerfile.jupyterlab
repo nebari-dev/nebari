@@ -1,9 +1,6 @@
-ARG DISTRO=ubuntu
-ARG IMAGE_TAG=v0.3.13
-FROM quansight/qhub-${DISTRO}-base:${IMAGE_TAG}
+ARG BASE_IMAGE=quansight/qhub-ubuntu-base:v0.3.13
+FROM ${BASE_IMAGE}
 
-# ARG required in RUN command below, needs to be added again
-# https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
 ARG DISTRO=ubuntu
 
 LABEL org.opencontainers.image.authors="Quansight" \
