@@ -68,20 +68,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - IMAGE: dask-gateway
-          - IMAGE: conda-store
-          # build default, ubuntu image
+        IMAGE:
+          - jupyterlab
+          - jupyterhub
+          - dask-worker
+          - dask-gateway
+          - conda-store
+        DISTRO: [ubuntu, centos]
+        exclude:
           - IMAGE: jupyterhub
-          - DISTRO: ubuntu
-          - IMAGE: jupyterlab
-          - DISTRO: ubuntu
-          - IMAGE: dask-worker
-          - DISTRO: ubuntu
-          # build non-default, centos image
-          - IMAGE: jupyterlab
             DISTRO: centos
-          - IMAGE: dask-worker
+          - IMAGE: dask-gateway
+            DISTRO: centos
+          - IMAGE: conda-store
             DISTRO: centos
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
