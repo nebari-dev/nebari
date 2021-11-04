@@ -114,7 +114,7 @@ jobs:
           file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.IMAGE }}"
           build-args: |
             DISTRO=${{ matrix.DISTRO }}
-            BASE_IMAGE=${{ needs.base-image.outputs.base-image-tag }}
+            BASE_IMAGE=${{ needs.base-image.outputs.base-image-tag }}${{ matrix.DISTRO }}
           tags: ${{ steps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
