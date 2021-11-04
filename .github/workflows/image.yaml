@@ -25,7 +25,8 @@ jobs:
       matrix:
         BASE: [ubuntu, centos]
     outputs:
-      base-image-tag: ${{ steps.meta.outputs.tags }}
+      ubuntu-image-tag: ${{ steps.tag.outputs.ubuntu }}
+      centos-image-tag: ${{ steps.tag.outputs.centos }}
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
@@ -48,9 +49,13 @@ jobs:
             "quansight/qhub-${{ matrix.BASE }}-base"
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=ref,event=branch,suffix=${{ matrix.BASE }}
-            type=ref,event=tag,suffix=${{ matrix.BASE }}
-            type=sha,suffix=${{ matrix.BASE }}
+            type=ref,event=branch
+            type=ref,event=tag
+            type=sha
+
+      - name: Save Tag Names
+        id: tag
+        run: echo '::set-output name=${{ matrix.BASE }}::${{ steps.meta.outputs.tags }}'
 
       - name: Build docker
         uses: docker/build-push-action@v2
@@ -66,19 +71,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE:
-          - jupyterlab
-          - jupyterhub
-          - dask-worker
-          - dask-gateway
-          - conda-store
-        DISTRO: [ubuntu, centos]
-        exclude:
+        include:
+          - IMAGE: jupyterlab
           - IMAGE: jupyterhub
-            DISTRO: centos
+          - IMAGE: dask-worker
           - IMAGE: dask-gateway
-            DISTRO: centos
           - IMAGE: conda-store
+          # build non-default, centos image
+          - IMAGE: jupyterlab
+            DISTRO: centos
+          - IMAGE: dask-worker
             DISTRO: centos
     name: ${{ matrix.IMAGE }}
     runs-on: ubuntu-latest
@@ -115,7 +117,7 @@ jobs:
           file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.IMAGE }}"
           build-args: |
             DISTRO=${{ matrix.DISTRO }}
-            BASE_IMAGE=${{ needs.base-image.outputs.base-image-tag }}
+            BASE_IMAGE=${{ format('needs.base-image.outputs.{0}-image-tag', matrix.DISTRO) }}
           tags: ${{ steps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
