@@ -75,6 +75,10 @@ jobs:
         include:
           # build non-default, centos image
           - IMAGE: jupyterlab
+            DISTRO: ubuntu
+          - IMAGE: dask-worker
+            DISTRO: ubuntu
+          - IMAGE: jupyterlab
             DISTRO: centos
           - IMAGE: dask-worker
             DISTRO: centos
@@ -113,7 +117,7 @@ jobs:
           file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.IMAGE }}"
           build-args: |
             DISTRO=${{ matrix.DISTRO }}
-            BASE_IMAGE=${{ needs.build-base.steps.meta.outputs.tags }}
+            BASE_IMAGE=${{ needs.base-image.steps.meta.outputs.tags }}
           tags: ${{ steps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
