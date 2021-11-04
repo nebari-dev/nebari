@@ -75,6 +75,7 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
             content {
               name       = "qhubyamlconfigmap"
               mount_path = "/etc/qhubyamlconfigmap/"
+              read_only  = true
             }
           }
 
