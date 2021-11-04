@@ -53,7 +53,7 @@ jobs:
             type=ref,event=tag
             type=sha
 
-      - name: Save Tag Names
+      - name: Save Tag Name
         id: tag
         run: echo '::set-output name=${{ matrix.BASE }}::${{ steps.meta.outputs.tags }}'
 

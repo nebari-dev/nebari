@@ -17,7 +17,7 @@ ARG NB_GID=100
 
 COPY jupyterlab /opt/jupyterlab
 
-RUN if [[ "$DISTRO" == ubuntu ]] \
+RUN if [[ $DISTRO == ubuntu ]] \
     ; then \
     echo "Install extra apt packages"  && \
     apt-get update && \
