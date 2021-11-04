@@ -69,11 +69,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - IMAGE: jupyterlab
-          - IMAGE: jupyterhub
-          - IMAGE: dask-worker
           - IMAGE: dask-gateway
           - IMAGE: conda-store
+          # build default, ubuntu image
+          - IMAGE: jupyterhub
+          - DISTRO: ubuntu
+          - IMAGE: jupyterlab
+          - DISTRO: ubuntu
+          - IMAGE: dask-worker
+          - DISTRO: ubuntu
           # build non-default, centos image
           - IMAGE: jupyterlab
             DISTRO: centos
