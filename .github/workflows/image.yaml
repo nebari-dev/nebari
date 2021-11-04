@@ -26,6 +26,8 @@ jobs:
         BASE:
           - centos-base
           - ubuntu-base
+    outputs:
+      base-image-tag: ${{ steps.meta.outputs.tags }}
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
@@ -66,18 +68,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        IMAGE:
-          - jupyterlab
-          - jupyterhub
-          - dask-worker
-          - dask-gateway
-          - conda-store
         include:
-          # build non-default, centos image
           - IMAGE: jupyterlab
-            DISTRO: ubuntu
+          - IMAGE: jupyterhub
           - IMAGE: dask-worker
-            DISTRO: ubuntu
+          - IMAGE: dask-gateway
+          - IMAGE: conda-store
+          # build non-default, centos image
           - IMAGE: jupyterlab
             DISTRO: centos
           - IMAGE: dask-worker
@@ -117,7 +114,7 @@ jobs:
           file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.IMAGE }}"
           build-args: |
             DISTRO=${{ matrix.DISTRO }}
-            BASE_IMAGE=${{ needs.base-image.steps.meta.outputs.tags }}
+            BASE_IMAGE=${{ needs.base-image.output.base-image-tag }}
           tags: ${{ steps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
