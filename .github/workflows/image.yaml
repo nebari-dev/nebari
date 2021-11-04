@@ -103,9 +103,9 @@ jobs:
             "quansight/qhub-${{ matrix.IMAGE }}"
           # generate Docker tags based on the following events/attributes
           tags: |
-            ${{ format('{0}{1}', type=ref,event=branch, matrix.DISTRO) }}
-            ${{ format('{0}{1}', type=ref,event=tag, matrix.DISTRO) }}
-            ${{ format('{0}{1}', type=sha, matrix.DISTRO) }}
+            type=ref,event=branch,suffix=${{ matrix.DISTRO }}
+            type=ref,event=tag,suffix=${{ matrix.DISTRO }}
+            type=sha,suffix=${{ matrix.DISTRO }}
 
       - name: Build docker
         uses: docker/build-push-action@v2
