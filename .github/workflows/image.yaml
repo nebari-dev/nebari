@@ -115,6 +115,6 @@ jobs:
           build-args: |
             DISTRO=${{ matrix.DISTRO }}
             BASE_IMAGE=${{ needs.base-image.outputs.base-image-tag }}
-          tags: ${{ format('{0}{1}', steps.meta.outputs.tags, matrix.DISTRO }}
+          tags: ${{ format('{0}{1}', steps.meta.outputs.tags, matrix.DISTRO) }}
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
