@@ -70,6 +70,24 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
             container_port = 80
           }
 
+          dynamic "volume_mount" {
+            for_each = var.qhubconfigyaml ? [true] : []
+            content {
+              name       = "qhubyamlconfigmap"
+              mount_path = "/etc/qhubyamlconfigmap/"
+            }
+          }
+
+        }
+
+        dynamic "volume" {
+          for_each = var.qhubconfigyaml ? [true] : []
+          content {
+            name = "qhubyamlconfigmap"
+            config_map {
+              name = "qhub-config-yaml"
+            }
+          }
         }
 
       }

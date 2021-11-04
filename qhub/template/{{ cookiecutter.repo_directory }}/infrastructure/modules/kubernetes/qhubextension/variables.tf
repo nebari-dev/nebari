@@ -41,6 +41,12 @@ variable "oauth2client" {
   default     = false
 }
 
+variable "qhubconfigyaml" {
+  description = "Mount qhub-config.yaml from configmap"
+  type        = bool
+  default     = false
+}
+
 variable "envs" {
   description = "List of env var objects"
   type        = list(map(any))

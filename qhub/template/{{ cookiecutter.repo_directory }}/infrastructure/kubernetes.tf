@@ -408,3 +408,19 @@ module "forwardauth" {
     module.kubernetes-initialization
   ]
 }
+
+resource "kubernetes_manifest" "qhub_yaml_configmap" {
+  provider = kubernetes-alpha
+
+  manifest = {
+    apiVersion = "v1"
+    kind       = "ConfigMap"
+    metadata = {
+      name      = "qhub-config-yaml"
+      namespace = var.environment
+    }
+    data = {
+      "qhub-config.yaml" = file({{ cookiecutter.qhub_config_yaml_path | jsonify }})
+    }
+  }
+}
