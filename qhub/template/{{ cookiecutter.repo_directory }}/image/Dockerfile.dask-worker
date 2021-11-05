@@ -1,8 +1,7 @@
-ARG BASE_IMAGE=quansight/qhub-ubuntu-base:v0.3.13
+ARG BASE_IMAGE=quansight/qhub-ubuntu-base:centos
 FROM ${BASE_IMAGE}
 
-LABEL org.opencontainers.image.authors="Quansight" \
-      org.opencontainers.image.source="https://github.com/Quansight/qhub"
+LABEL org.opencontainers.image.source="https://github.com/Quansight/qhub"
 
 # These can but should not be changed. ids will be arbitrary at run time.
 ARG NB_USER=jovyan

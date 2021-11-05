@@ -25,6 +25,9 @@ jobs:
       matrix:
         BASE: [ubuntu, centos]
     outputs:
+      # used by `Save Tag Name` step in this job
+      # and by `Get Tag Name` step in the next job
+      # https://github.community/t/bug-jobs-output-should-return-a-list-for-a-matrix-job/128626/24
       ubuntu-image-tag: ${{ steps.tag.outputs.ubuntu }}
       centos-image-tag: ${{ steps.tag.outputs.centos }}
     steps:

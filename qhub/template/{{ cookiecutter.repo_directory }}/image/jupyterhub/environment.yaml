@@ -8,6 +8,7 @@ dependencies:
  - oauthenticator==14.1.0
  - escapism==1.0.1
  - cdsdashboards==0.6.0
+ - jupyterlab_code_formatter
  - pip:
    - qhub-jupyterhub-theme==0.3.2
    - python-keycloak==0.26.1

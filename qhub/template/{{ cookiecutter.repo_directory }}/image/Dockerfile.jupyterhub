@@ -1,15 +1,14 @@
-ARG BASE_IMAGE=quansight/qhub-ubuntu-base:v0.3.13
+ARG BASE_IMAGE=quansight/qhub-ubuntu-base:centos
 FROM ${BASE_IMAGE}
 
-LABEL org.opencontainers.image.authors="Quansight" \
-      org.opencontainers.image.source="https://github.com/Quansight/qhub"
+LABEL org.opencontainers.image.source="https://github.com/Quansight/qhub"
 
 # These can but should not be changed. ids will be arbitrary at run time.
 ARG NB_USER=jovyan
 ARG NB_UID=1000
 ARG NB_GID=100
 
-# Install JupyerHub
+# ========== Install JupyterLab ==========
 COPY jupyterhub /opt/jupyterhub
 COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
 RUN /opt/scripts/install-conda-environment.sh /opt/jupyterhub/environment.yaml 'false'

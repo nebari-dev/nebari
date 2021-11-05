@@ -1,6 +1,6 @@
 FROM centos:centos8.4.2105
-LABEL org.opencontainers.image.authors="Quansight" \
-      org.opencontainers.image.source="https://github.com/Quansight/qhub"
+
+LABEL org.opencontainers.image.source="https://github.com/Quansight/qhub"
 
 SHELL ["/bin/bash", "-c"]
 
