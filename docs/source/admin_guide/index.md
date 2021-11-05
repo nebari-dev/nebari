@@ -13,5 +13,6 @@ system_maintenance.md
 monitoring.md
 clearml.md
 prefect.md
+custom-helm-charts.md
 faq.md
 ```
