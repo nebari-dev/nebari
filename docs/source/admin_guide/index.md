@@ -1,4 +1,4 @@
-# Administration Guide
+# Administration guide
 
 ```{toctree}
 :maxdepth: 2

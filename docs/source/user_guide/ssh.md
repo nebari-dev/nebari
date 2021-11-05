@@ -2,9 +2,9 @@
 
 Using [jupyterhub-ssh](https://github.com/yuvipanda/jupyterhub-ssh)
 QHub has the ability for remotely accessing the cluster and a
-juypterlab environment via
+jupyterlab environment via
 [ssh](https://en.wikipedia.org/wiki/Secure_Shell). In addition user's
-can easily transfter files back and forth via
+can easily transfer files back and forth via
 [sftp](https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol). QHub
 provides a secure manner for users to login and provides additional
 ways to connect to the cluster. This enables using terminal based

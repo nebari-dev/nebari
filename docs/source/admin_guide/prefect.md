@@ -50,13 +50,13 @@ During operation the agent process queries the Prefect API for any scheduled flo
 runs, and allocates resources for them on their respective deployment platforms.
 
 When you enable prefect via `qhub-config.yml` prefect agent is deployed on the
-QHub's kubernetes cluster, which querys the Prefect Cloud for flow runs.
+QHub's kubernetes cluster, which queries the Prefect Cloud for flow runs.
 
 ## Agent configuration overrides
 You can override your agent configuration without having to modify the helm files directly.  The extra variable `overrides` makes this
 possible by changing the default values for the Agent chart according to the settings presented on your qhub-config.yaml file.
 
-The current variables, originaly available in the [Agent helm chart](https://github.com/PrefectHQ/server/blob/master/helm/prefect-server/templates/agent/deployment.yaml) that can be overridden include:
+The current variables, originally available in the [Agent helm chart](https://github.com/PrefectHQ/server/blob/master/helm/prefect-server/templates/agent/deployment.yaml) that can be overridden include:
 
 ```
 - IMAGE_PULL_SECRETS
@@ -81,7 +81,7 @@ prefect:
            limit:
              cpu: 4
 ```
-Also, if you would like to include an extra variable to the agent environment configuration, that was not previcosly in the helm chart, you can do it by including it under
+Also, if you would like to include an extra variable to the agent environment configuration, that was not previously in the helm chart, you can do it by including it under
 the `envVars` field in the overrides block. For example, if you would like to add `MY_VAR: "<value>"` to you agent environment, you can do so by adding the following to your qhub-config
 
 ```yaml

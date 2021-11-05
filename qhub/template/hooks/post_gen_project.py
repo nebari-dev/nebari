@@ -1,12 +1,18 @@
 import os
 import shutil
-
+import json
 from ruamel import yaml
 
 PROJECT_DIRECTORY = os.path.realpath(os.path.curdir)
 PROVIDER = "{{ cookiecutter.provider }}"
 CI_PROVIDER = "{{ cookiecutter.ci_cd.type | default('none') }}"
-ENVIRONMENTS = eval("{{ cookiecutter.environments }}")
+
+# This Python file will be processed by Jinja2 so the below would show an error in your IDE if env_str was defined without triple quotes.
+env_str = """
+{{ cookiecutter.environments | jsonify | replace('"', '\\"') }}
+"""
+ENVIRONMENTS = json.loads(env_str)
+
 TERRAFORM_STATE = "{{ cookiecutter.terraform_state.type }}"
 
 
@@ -23,7 +29,7 @@ if __name__ == "__main__":
         os.makedirs("environments", exist_ok=True)
         for name, spec in ENVIRONMENTS.items():
             with open(f"environments/{name}", "w") as f:
-                yaml.dump(spec, f)
+                yaml.dump(spec, f, default_flow_style=False)
 
     # Remove any unused cloud infrastructure
     if PROVIDER != "aws":

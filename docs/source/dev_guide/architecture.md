@@ -80,7 +80,7 @@ For JupyterHub and Dask, QHub uses the official Helm Charts and provide custom s
 
 ### SSL and Ingress (Common for all Clouds)
 
-To expose various services, such as the JupyterHub and Dask, present in the Kubernetes Cluster, QHub uses [Trafik Proxy](https://traefik.io/traefik/) which is a reverse proxy and load balancer.
+To expose various services, such as the JupyterHub and Dask, present in the Kubernetes Cluster, QHub uses [Traefik Proxy](https://traefik.io/traefik/) which is a reverse proxy and load balancer.
 
 [**SSL**](https://www.ssl.com/faqs/faq-what-is-ssl/) is a crucial part of any service exposed to the Internet. To handle this in Kubernetes, QHub utilizes [**cert manager**](https://github.com/jetstack/cert-manager), a popular Kubernetes add-on to automate the management and issuance of TLS certificates from various issuing sources.
 

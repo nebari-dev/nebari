@@ -2,7 +2,7 @@
 
 [Minikube](https://minikube.sigs.k8s.io/docs/) is a project allowing you to run a local Kubernetes node simulation for development and testing purposes.
 
-It is possible to run QHub on Minikube, and this can allow quicker feedback loops for development, as well as being less 
+It's possible to run QHub on Minikube, and this can allow quicker feedback loops for development, as well as being less
 expensive than running cloud Kubernetes clusters.
 
 Local testing is a great way to test the components of QHub. It is
@@ -28,7 +28,7 @@ This guide assumes that you have the QHub repository downloaded, and you are at 
 > NOTE: The following instructions apply **only to Linux OS**.
 
 To deploy QHub locally requires the installation of the following dependencies:
-+ [Minukube](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-minikube/) version 1.10.0-beta and up
++ [Minikube](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-minikube/) version 1.10.0-beta and up
 + [Docker Engine driver](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) install.
 
 The installation of a hypervisor is **not** necessary.
@@ -127,11 +127,11 @@ Replacing `v0.x.x` with the current version that is listed. Note this may take s
 After the images are pulled, they can be copied to the Minikube cache like so:
 
 ```bash
-minikube cache add quansight/qhub-jupyterhub:v0.x.x
-minikube cache add quansight/qhub-jupyterlab:v0.x.x
-minikube cache add quansight/qhub-dask-worker:v0.x.x
-minikube cache add quansight/qhub-dask-gateway:v0.x.x
-minikube cache add quansight/qhub-conda-store:v0.x.x
+minikube image load quansight/qhub-jupyterhub:v0.x.x
+minikube image load quansight/qhub-jupyterlab:v0.x.x
+minikube image load quansight/qhub-dask-worker:v0.x.x
+minikube image load quansight/qhub-dask-gateway:v0.x.x
+minikube image load quansight/qhub-conda-store:v0.x.x
 ```
 
 Again, adding the correct version. With this completed local Minikube deployment will no longer require pulling the above docker images.
@@ -161,7 +161,7 @@ python minikube-loadbalancer-ip.py
 ### Manually Configure MetalLB
 *Skip this section if above python script was used*
 
-First we need to obtain the the Docker image ID:
+First we need to obtain the Docker image ID:
 ```shell
 $ docker ps --format "{{.Names}} {{.ID}}"
 minikube <image-id>
@@ -176,7 +176,7 @@ $ docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}/{{.
 A example subnet range will look like `192.168.49.2/24`. This CIDR range will have a starting IP of `192.168.49.0` and ending address of `192.168.49.255`. The `metallb` load balancer needs to be given a range of IP addresses that are contained in the docker CIDR range. If your CIDR is different, you can determine your range IP addresses from a CIDR address at [this website](https://www.ipaddressguide.com/cidr).
 
 For this example case, we will assign `metallb` a start IP address of
-`192.168.49.100` and an end of `192.168.49.150`. 
+`192.168.49.100` and an end of `192.168.49.150`.
 
 We can the `metallb` below CLI interface which will prompt for the start and stop IP range:
 
@@ -201,7 +201,7 @@ The output should be `The 'metallb' addon is enabled`.
 ## Note for Development on Windows Subsystem for Linux 2 (WSL2)
 <details>
   <summary>Click to expand note</summary>
-  
+
 The browser can have trouble reaching the load balancer running on WSL2. A workaround is to port forward the proxy-... pod to the host (ip 0.0.0.0). Get the ip address of the WSL2 machine via ```ip a```, it should be a 127.x.x.x address. To change the port forwarding after opening k9s you can type ```:pods <enter>```, hover over the proxy-... pod and type ```<shift-s>```, and enter the ip addresses.
 </details>
 
@@ -218,7 +218,7 @@ Then, initialize the configuration file `qhub-config.yaml` with:
 python -m qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
 ```
 ## Generate user password
-Each user on the `qhub-config.yaml` file will need a password.
+For each user on the `qhub-config.yaml` file needs a password.
 A random password is auto generated for the user `example-user` when
 the auth provider `password` is run, the value is then printed to the standard output (stdout).
 
@@ -289,7 +289,7 @@ has not been added to your certificate registry.
 Each web browser handles this differently. A workaround for Firefox:
 
  - Visit `about:config` and change the `network.stricttransportsecurity.preloadlist` to `false`
-  
+
 And a workaround for Chrome:
 
  - Type `badidea` or `thisisunsafe` while viewing the rendered page (this has to do with [how Chrome preloads some domains for its HTTP Strict Transport Security](https://hstspreload.org/) list in a way that cannot be manually removed)
@@ -405,7 +405,7 @@ ssh -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute
 
 ## Install Minikube etc
 
-Install Minkube and Kubectl:
+Install Minikube and Kubectl:
 
 ```bash
 curl -LO https://github.com/kubernetes/minikube/releases/download/v1.22.0/minikube-linux-amd64
@@ -459,6 +459,7 @@ Create and modify qhub-config.yaml:
 mkdir data-test
 cd data-test
 
+export QHUB_GH_BRANCH=main
 qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password
 
 sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 1/g' "qhub-config.yaml"
@@ -524,7 +525,7 @@ EOF
 Now SSH into the AWS instance, enabling port forwarding so you can access the Minikube cluster as though it is running on your Mac:
 
 ```bash
-ssh -i ~/.ssh/aws-quansight-dsl.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443
+ssh -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443
 ```
 
 You should now find that `kubectl` and `k9s` work for the Minikube cluster if you run them on your Mac! This can include `kubectl port-forward` to access Kubernetes services individually.
@@ -542,7 +543,7 @@ We can trick it by setting up a hostname alias. Run `sudo vi /etc/hosts` on the 
 And then we add an extra port forward when we SSH into the AWS instance:
 
 ```bash
-sudo ssh -i ~/.ssh/aws-quansight-dsl.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:443 -L github-actions.qhub.dev:443:192.168.49.100:443
+sudo ssh -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443 -L github-actions.qhub.dev:443:192.168.49.100:443
 ```
 
 This has to be run with sudo because we want to forward a low-numbered port (443) and this is not allowed without sudo.

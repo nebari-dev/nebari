@@ -8,7 +8,7 @@ jupyter nbextension enable --py widgetsnbextension --sys-prefix
 mkdir -p /etc/ipython
 cp /opt/jupyterlab/ipython_config.py /etc/ipython/ipython_config.py
 
-# ====== setup juypterlab configuration overrides ======
+# ====== setup jupyterlab configuration overrides ======
 mkdir -p /opt/conda/share/jupyter/lab/settings
 cp /opt/jupyterlab/overrides.json /opt/conda/share/jupyter/lab/settings
 

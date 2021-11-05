@@ -29,7 +29,7 @@ dependencies:
  - nbgitpuller
 
  # cds dashboards
- - cdsdashboards-singleuser >=0.5.7
+ - cdsdashboards-singleuser >=0.6.0
  - jhsingle-native-proxy >=0.7.6
 
  # viz tools
@@ -49,5 +49,4 @@ dependencies:
 
  - pip:
    # See install-conda-environment.sh when editing this section.
-
     - git+https://github.com/betatim/vscode-binder
