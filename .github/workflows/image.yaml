@@ -80,3 +80,11 @@ jobs:
             quay.io/${{ steps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Lint Dockerfiles
+        uses: jbergstroem/hadolint-gh-action@v1
+        with:
+          dockerfile: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.dockerfile }}"
+          output_format: tty
+          error_level: 0
+          config_file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/hadolint.yml"
