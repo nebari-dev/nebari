@@ -73,8 +73,8 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
           dynamic "volume_mount" {
             for_each = var.qhubconfigyaml ? [true] : []
             content {
-              name       = "qhubyamlconfigmap"
-              mount_path = "/etc/qhubyamlconfigmap/"
+              name       = "qhubyamlsecret"
+              mount_path = "/etc/qhubyamlsecret/"
               read_only  = true
             }
           }
@@ -84,9 +84,9 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
         dynamic "volume" {
           for_each = var.qhubconfigyaml ? [true] : []
           content {
-            name = "qhubyamlconfigmap"
-            config_map {
-              name = "qhub-config-yaml"
+            name = "qhubyamlsecret"
+            secret {
+              secret_name = "qhub-config-yaml"
             }
           }
         }
