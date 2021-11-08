@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "test_project"
+name = "qhub"
 version = "0.3.14"
 description = "Management of QHub on Cloud Infrastructure"
 authors = ["Quansight"]
@@ -15,6 +15,7 @@ auth0-python = "^3"
 pydantic = "^1"
 kubernetes = "^19"
 pynacl = "^1"
+bcrypt = "^3"
 rich = "^10"
 azure-identity = "1.6.1"
 azure-mgmt-containerservice = "16.2.0"
