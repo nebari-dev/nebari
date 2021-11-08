@@ -12,12 +12,12 @@
         poetry2nix.overlay
         (final: prev: {
           # The application
-          myapp = prev.poetry2nix.mkPoetryApplication {
+          qhub = prev.poetry2nix.mkPoetryApplication {
             projectDir = ./.;
           };
 
           # The environment
-          myenv = prev.poetry2nix.mkPoetryEnv {
+          qhubEnv = prev.poetry2nix.mkPoetryEnv {
             projectDir = ./.;
           };
         })
@@ -32,13 +32,30 @@
       rec {
 
         apps = {
-          myapp = pkgs.myapp;
+          qhub = pkgs.qhub;
         };
 
-        defaultApp = apps.myapp;
+        defaultApp = apps.qhub;
 
         devShell = pkgs.mkShell {
-          buildInputs = [ pkgs.myenv ];
+          buildInputs = [ pkgs.qhubEnv ];
+        };
+
+        docs = pkgs.mkDerivation {
+          src = ./docs;
+
+          buildInputs = [
+            pkgs.qhubEnv
+          ];
+
+          buildPhase = ''
+            sphinx-build . build
+          '';
+
+          outputPhase = ''
+            mkdir -p $out
+            cp -r build/* $out
+          '';
         };
       }));
 }
