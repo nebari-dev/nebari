@@ -3,7 +3,7 @@
 
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
-  inputs.poetry2nix.url = "github:nlewo/poetry2nix/crypto-3.5";
+  inputs.poetry2nix.url = "github:costrouc/poetry2nix/fix-cloudflare";
 
   outputs = { self, nixpkgs, flake-utils, poetry2nix }:
     {
@@ -41,21 +41,26 @@
           buildInputs = [ pkgs.qhubEnv ];
         };
 
-        docs = pkgs.mkDerivation {
-          src = ./docs;
+        packages = {
+          docs = pkgs.stdenv.mkDerivation {
+            name = "qhub-docs";
 
-          buildInputs = [
-            pkgs.qhubEnv
-          ];
+            src = ./.;
 
-          buildPhase = ''
-            sphinx-build . build
-          '';
+            buildInputs = [
+              pkgs.qhubEnv
+            ];
 
-          outputPhase = ''
-            mkdir -p $out
-            cp -r build/* $out
-          '';
+            buildPhase = ''
+              cd docs
+              sphinx-build . build
+            '';
+
+            installPhase = ''
+              mkdir -p $out
+              cp -r build/* $out
+            '';
+          };
         };
       }));
 }

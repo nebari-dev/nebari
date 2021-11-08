@@ -32,7 +32,9 @@ jhub-client = "0.1.4"
 pre-commit = "^2"
 pydata-sphinx-theme = "0.7.1"
 sphinx-copybutton = "0.4.0"
-
+sphinx = "^4"
+myst_parser = "*"
+nbsphinx = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
