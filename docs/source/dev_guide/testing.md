@@ -300,3 +300,26 @@ QHub uses [Vale](https://github.com/errata-ai/vale), a syntax-aware linter to li
 - In case of false positives, make appropriate changes to the Vale configurations hosted in the `tests/vale/styles` directory.
 
 Vale runs on the GitHub Actions CI to automatically validate the documentation language. By default, Vale only checks the modified documentation to ensure that Vale doesn't generate a lot of noise over the Pull Requests.
+
+# Nix Development
+
+QHub additionally supports development via nix. The only requirement
+is an installation of [nix](https://nix.dev/tutorials/install-nix) of
+at least version `2.4`. We provide a flake which will allow you to run
+any commit or version of QHub. With no other installation
+requirements.
+
+ - `nix develop .` will create a development environment with all
+   dependencies
+ - `nix run . -- --help` will run `QHub`
+ - `nix build .#docs` will build the docs and will be available at
+   `./result/index.html`. Can easily view via `xdg-open result/index.html`
+
+A quick introduction to flakes. We reference a particular flake by
+`<location>#<attribute>`. Attribute is optional in `develop` and `run`
+seen above and will choose the default. If you are building the docs
+locally from the root of the QHub directory you can reference it via
+`.#docs`. However if you want to build a particular git repository you
+may `github:<owner>/<repository>/<branch>` or
+`github:<owner>/<repository>/<commit>`. This allows for easy testing
+of particular QHub version.
