@@ -5,10 +5,9 @@
 
 Information | Links |
 ------------|------------|
-Project | [![License](https://img.shields.io/badge/License-BSD%203--Clause-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://opensource.org/licenses/BSD-3-Clause) [![QHUb documentation](https://img.shields.io/badge/📖%20Read-the%20docs-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://docs.qhub.dev/en/stable/) [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
-|
+Project | [![License](https://img.shields.io/badge/License-BSD%203--Clause-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://opensource.org/licenses/BSD-3-Clause) [![QHUb documentation](https://img.shields.io/badge/📖%20Read-the%20docs-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://docs.qhub.dev/en/stable/) [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub) |
 Community | [![GH discussions](https://img.shields.io/badge/💬%20-Participate%20in%20discussions-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/Quansight/qhub/discussions) [![Open an issue](https://img.shields.io/badge/📝%20Open-an%20issue-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/Quansight/qhub/issues/new/choose) |
-CI | [![Build Docker Images](https://github.com/Quansight/qhub/actions/workflows/image.yaml/badge.svg)](https://github.com/Quansight/qhub/actions/workflows/image.yaml) [![Kubernetes Tests](https://github.com/Quansight/qhub/actions/workflows/kubernetes_test.yaml/badge.svg)](https://github.com/Quansight/qhub/actions/workflows/kubernetes_test.yaml) [![Tests](https://github.com/Quansight/qhub/actions/workflows/test.yaml/badge.svg)](https://github.com/Quansight/qhub/actions/workflows/test.yaml) [![Documentation linter](https://github.com/Quansight/qhub/actions/workflows/docs.yml/badge.svg)](https://github.com/Quansight/qhub/actions/workflows/docs.yml)|
+CI | [![Build Docker Images](https://github.com/Quansight/qhub/actions/workflows/image.yaml/badge.svg)](https://github.com/Quansight/qhub/actions/workflows/image.yaml) [![Kubernetes Tests](https://github.com/Quansight/qhub/actions/workflows/kubernetes_test.yaml/badge.svg)](https://github.com/Quansight/qhub/actions/workflows/kubernetes_test.yaml) [![Tests](https://github.com/Quansight/qhub/actions/workflows/test.yaml/badge.svg)](https://github.com/Quansight/qhub/actions/workflows/test.yaml) [![Documentation linter](https://github.com/Quansight/qhub/actions/workflows/docs.yml/badge.svg)](https://github.com/Quansight/qhub/actions/workflows/docs.yml) |
 
 ## Table of contents
 
@@ -71,7 +70,7 @@ For more details, check out the release [blog post](https://www.quansight.com/po
 
 * QHub is supported by macOS and Linux operating systems (Windows is **NOT** currently supported).
 * Compatible with Python 3.6+. New to Python? We recommend using [Anaconda](https://www.anaconda.com/products/individual).
-* Adoption of virtual environments (`conda`, `pipenv` or `venv`) is also encouraged.
+* Adoption of virtual environments ([`conda`](https://docs.conda.io/en/latest/), [`pipenv`](https://github.com/pypa/pipenv) or [`venv`](https://docs.python.org/3/library/venv.html)) is also encouraged.
 
 ### Install QHub
 
@@ -119,6 +118,7 @@ variables, check the [Step-by-Step](https://docs.qhub.dev/en/latest/source/03_tu
 
 Once all the necessary credentials are gathered and set as [UNIX environment variables](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/),
 QHub can be deployed in under 20 minutes using:
+
 ```bash
 qhub init   ... # generates initial config file and optionally automates deployment steps
 qhub deploy ... # creates and configures the cloud infrastructure
@@ -129,6 +129,7 @@ qhub deploy ... # creates and configures the cloud infrastructure
 Have a look at our [FAQ](docs/source/02_get_started/07_support.md#faq) to see if your query has been answered.
 
 We separate the queries for QHub into:
+
 * [GitHub Discussions](https://github.com/Quansight/qhub/discussions) used to raise discussions about a subject, such as:
 "What is the recommended way to do X with QHub?"
 
