@@ -310,6 +310,9 @@ module "qhub" {
   keycloak_password   = random_password.keycloak-qhub-bot-password.result
   keycloak_server_url = "http://keycloak-headless.${var.environment}:8080/auth/"
 
+  depends_on = [
+    module.kubernetes-initialization
+  ]
 }
 
 {% for helm_extension in cookiecutter.helm_extensions -%}
@@ -401,4 +404,7 @@ module "forwardauth" {
   jh-client-id      = local.forwardauth-keycloak-client-id
   jh-client-secret  = random_password.forwardauth-jhsecret.result
   callback-url-path = local.forwardauth-callback-url-path
+  depends_on = [
+    module.kubernetes-initialization
+  ]
 }
