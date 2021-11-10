@@ -12,6 +12,7 @@ terraform {
 {%- elif cookiecutter.provider == "gcp" %}
     google = {
       source = "hashicorp/google"
+      versions = "=3.89.0"
     }
 {%- elif cookiecutter.provider == "do" %}
     digitalocean = {
