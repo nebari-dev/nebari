@@ -1,9 +1,11 @@
 import enum
 import typing
+from abc import ABC
 
 import pydantic
 from pydantic import validator, root_validator
-from qhub.utils import namestr_regex, check_for_duplicates
+from qhub.utils import namestr_regex
+from .version import __version__
 
 
 class CertificateEnum(str, enum.Enum):
@@ -56,6 +58,15 @@ class CICD(Base):
     after_script: typing.Optional[typing.List[str]]
 
 
+# ======== Generic Helm Extensions ========
+class HelmExtension(Base):
+    name: str
+    repository: str
+    chart: str
+    version: str
+    overrides: typing.Optional[typing.Dict]
+
+
 # ============== Monitoring =============
 
 
@@ -68,6 +79,7 @@ class Monitoring(Base):
 
 class ClearML(Base):
     enabled: bool
+    enable_forward_auth: typing.Optional[bool]
 
 
 # ============== Prefect =============
@@ -76,6 +88,7 @@ class ClearML(Base):
 class Prefect(Base):
     enabled: bool
     image: typing.Optional[str]
+    overrides: typing.Optional[typing.Dict]
 
 
 # ============= Terraform ===============
@@ -120,7 +133,6 @@ class DefaultImages(Base):
 
 
 class GitHubConfig(Base):
-    oauth_callback_url: str
     client_id: str
     client_secret: str
 
@@ -128,31 +140,76 @@ class GitHubConfig(Base):
 class Auth0Config(Base):
     client_id: str
     client_secret: str
-    oauth_callback_url: str
-    scope: typing.List[str]
     auth0_subdomain: str
 
 
-class Authentication(Base):
+class Authentication(Base, ABC):
+    _types: typing.Dict[str, type] = {}
+
     type: AuthenticationEnum
-    authentication_class: typing.Optional[str]
-    config: typing.Optional[
-        typing.Union[Auth0Config, GitHubConfig, typing.Dict[str, typing.Any]]
-    ]
+
+    # Based on https://github.com/samuelcolvin/pydantic/issues/2177#issuecomment-739578307
+
+    # This allows type field to determine which subclass of Authentication should be used for validation.
+
+    # Used to register automatically all the submodels in `_types`.
+    def __init_subclass__(cls):
+        cls._types[cls._typ.value] = cls
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, value: typing.Dict[str, typing.Any]) -> "Authentication":
+        if "type" not in value:
+            raise ValueError("type field is missing from security.authentication")
+
+        specified_type = value.get("type")
+        sub_class = cls._types.get(specified_type, None)
+
+        if not sub_class:
+            raise ValueError(
+                f"No registered Authentication type called {specified_type}"
+            )
+
+        # init with right submodel
+        return sub_class(**value)
+
+
+class PasswordAuthentication(Authentication):
+    _typ = AuthenticationEnum.password
+
+
+class Auth0Authentication(Authentication):
+    _typ = AuthenticationEnum.auth0
+    config: Auth0Config
+
+
+class GitHubAuthentication(Authentication):
+    _typ = AuthenticationEnum.github
+    config: GitHubConfig
 
 
 # =========== Users and Groups =============
 
 
 class User(Base):
-    uid: str
     password: typing.Optional[str]
-    primary_group: str
+    primary_group: typing.Optional[str]
     secondary_groups: typing.Optional[typing.List[str]]
 
 
 class Group(Base):
-    gid: int
+    gid: typing.Optional[int]
+
+
+# ================= Keycloak ==================
+
+
+class Keycloak(Base):
+    initial_root_password: typing.Optional[str]
+    overrides: typing.Optional[typing.Dict]
 
 
 # ============== Security ================
@@ -160,13 +217,11 @@ class Group(Base):
 
 class Security(Base):
     authentication: Authentication
-    users: typing.Dict[str, User]
-    groups: typing.Dict[str, Group]
-
-    @validator("users", pre=True)
-    def validate_uderids(cls, v):
-        # raise TypeError if duplicated
-        return check_for_duplicates(v)
+    users: typing.Optional[typing.Dict[str, typing.Union[User, None]]]
+    groups: typing.Optional[
+        typing.Dict[str, typing.Union[Group, None]]
+    ]  # If gid is omitted, no attributes in Group means it appears as None
+    keycloak: typing.Optional[Keycloak]
 
 
 # ================ Providers ===============
@@ -232,7 +287,7 @@ class LocalProvider(Base):
 
 
 class Theme(Base):
-    jupyterhub: typing.Dict[str, str]
+    jupyterhub: typing.Dict[str, typing.Union[str, list]]
 
 
 # ================== Profiles ==================
@@ -302,6 +357,23 @@ class CDSDashboards(Base):
     cds_hide_user_dashboard_servers: typing.Optional[bool]
 
 
+# =============== Extensions = = ==============
+
+
+class QHubExtensionEnv(Base):
+    code: str
+
+
+class QHubExtension(Base):
+    name: str
+    image: str
+    urlslug: str
+    private: bool = False
+    oauth2client: bool = False
+    envs: typing.Optional[typing.List[QHubExtensionEnv]]
+    logout: typing.Optional[str]
+
+
 # ======== External Container Registry ========
 
 # This allows the user to set a private AWS ECR as a replacement for
@@ -348,6 +420,7 @@ class Main(Base):
     project_name: letter_dash_underscore_pydantic
     namespace: typing.Optional[letter_dash_underscore_pydantic]
     provider: ProviderEnum
+    qhub_version: str = ""
     ci_cd: typing.Optional[CICD]
     domain: str
     terraform_state: typing.Optional[TerraformState]
@@ -355,6 +428,7 @@ class Main(Base):
         TerraformModules
     ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
+    helm_extensions: typing.Optional[typing.List[HelmExtension]]
     prefect: typing.Optional[Prefect]
     cdsdashboards: CDSDashboards
     security: Security
@@ -371,6 +445,21 @@ class Main(Base):
     environments: typing.Dict[str, CondaEnvironment]
     monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
+    extensions: typing.Optional[typing.List[QHubExtension]]
+
+    @validator("qhub_version", pre=True, always=True)
+    def check_default(cls, v):
+        """
+        Always called even if qhub_version is not supplied at all (so defaults to ''). That way we can give a more helpful error message.
+        """
+        if v != __version__:
+            if v == "":
+                v = "not supplied"
+            raise ValueError(
+                f"qhub_version in the config file must equal {__version__} to be processed by this version of qhub (your value is {v})."
+                " Install a different version of qhub or run qhub upgrade to ensure your config file is compatible."
+            )
+        return v
 
 
 def verify(config):

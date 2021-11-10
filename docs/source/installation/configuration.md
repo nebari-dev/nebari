@@ -1,4 +1,4 @@
-# Configuration
+# Advanced Configuration
 
 The configuration file is split into several sections. In this page,
 we detail the requirements necessary for the YAML configuration
@@ -83,8 +83,8 @@ certificate:
   type: self-signed
 ```
 
-To use Let's Encrypt you must specify an email address that let's
-encrypt will associate the generated certificate with and whether to
+To use Let's Encrypt you must specify an email address that Let's
+Encrypt will associate the generated certificate with and whether to
 use the [staging
 server](https://acme-staging-v02.api.letsencrypt.org/directory) or
 [production
@@ -99,6 +99,8 @@ certificate:
   acme_email: <your-email-address>
   acme_server: https://acme-v02.api.letsencrypt.org/directory
 ```
+
+Note the above snippet will already be present if you provided an `--ssl-cert-email` when you ran `qhub init`.
 
 You may also supply a custom self-signed certificate and secret
 key. Note that the kubernetes default namespace that QHub uses is
@@ -120,6 +122,15 @@ kubectl create secret tls <secret-name> \
   --cert=path/to/cert/file --key=path/to/key/file
 ```
 
+### Wildcard certificates
+
+Some of QHub services might require special subdomains under your certificate, Wildcard certificates allow you to secure all subdomains of a domain with a single certificate. Defining a wildcard certificate decreases the amount of CN names you would need to define under the certificate configuration and reduces the chance of generating a wrong subdomain.
+
+**Note**
+It's not possible to request a double wildcard certificate for a domain (for example *.*.local.com). As a default behaviour of [Traefik](https://doc.traefik.io/traefik/https/tls/#default-certificate), if the Domain Name System (DNS) and Common Name (CN) name doesn't match, Traefik generates and uses a self-signed certificate. This may lead to some unexpected [TLS](https://www.internetsociety.org/deploy360/tls/basics) issues, so as an alternative of including each specific domain under the certificate CN list, you may also define a wildcard certificate.
+
+
+
 ## Security
 
 This section is for configuring security relating to the QHub
@@ -132,22 +143,6 @@ security:
       client_id: <CLIENT_ID>
       client_secret: <CLIENT_SECRET>
       oauth_callback_url: https://do.qhub.dev/hub/oauth_callback
-  users:
-    example-user:
-      uid: 1000
-      primary_group: users
-      secondary_groups:
-        - billing
-    dharhas:
-      uid: 1001
-      primary_group: admin
-  groups:
-    users:
-      gid: 100
-    admin:
-      gid: 101
-    billing:
-      gid: 102
 ```
 
 ### Omitting sensitive values
@@ -199,8 +194,6 @@ security:
     config:
       client_id: ...
       client_secret: ...
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
-      scope: ["openid", "email", "profile"]
       auth0_subdomain: ...
 ```
 
@@ -217,89 +210,74 @@ security:
     config:
       client_id: ...
       client_secret: ...
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
 ```
 
 #### Password Based Authentication
 
-For Password based authentication. Note that users will require a
-`password` field that can be generated via the following command:
-`python -c "import bcrypt; print(bcrypt.hashpw(b'<password>',
-bcrypt.gensalt()).decode('utf-8'))"`. Make sure to replace
-`<password>` with whatever password you are wanting.
+For Password based authentication. Ultimately, this just defers to however Keycloak is configured. That's also true for GitHub/Auth0 cases, except that for the single-sign on providers the deployment will also configure those providers in Keycloak to save manual configuration. But ultimately, it is also possible to add GitHub, or Google etc, as an Identity Provider in Keycloak even if you formally select 'password' authentication in the `qhub-config.yaml` file.
 
 ```yaml
 security:
   authentication:
     type: password
-  users:
-    ...
-    <username>:
-      ...
-      password: $2b$....
 ```
 
-#### Custom Authentication
+### Keycloak
 
-You can specify arbitrary authentication via the `custom` type. All
-`config` attributes will be set as traitlets to the configured
-authentication class. The attributes will obey the type set via yaml
-(e.g. True -> will be a boolean True for Traitets).
+The security.keycloak section allows you to specify an initial password for the `root` user (to login at https://myqhubsite.com/auth/admin/) to manage your Keycloak database, e.g. add users/groups.
 
-```yaml
+You should change this after deployment. Future deployments will not reset the password to any specified in the YAML file.
+
+It is also possible to provide overrides to the [Keycloak Helm deployment](https://github.com/codecentric/helm-charts/tree/master/charts/keycloak).
+
+```
 security:
-  authentication:
-    type: custom
-    authentication_class: "oauthenticator.google.GoogleOAuthenticator"
-    config:
-      login_service: "My Login Button"
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
-      client_id: 'your-client-id'
-      client_secret: 'your-client-secret'
+  keycloak:
+    initial_root_password: initpasswd
+    overrides:
+      image:
+        repository: quansight/qhub-keycloak
 ```
 
-### User Management
+### User and Group Management
 
-`users` and `groups` allows one to provision UNIX permissions to each
-user. Any user is assigned a `uid`, `primary_group`, and optionally
-any number of `secondary_groups`. Note that `uid` and `gid` fields
-must be unique and are required.
+It is still possible to specify `users` and `groups` in the YAML file - in older versions of QHub, all users had to be specified in this way.
+
+If specifying users/groups in this way, you can also manually add more users/groups in Keycloak. However, be aware that if users/groups were initially created based on entries in the YAML file, those users/groups will be destroyed if `qhub deploy` is ever run without those users/groups in the file. They may also be recreated after you delete them manually in Keycloak.
+
+Any user is assigned a `primary_group` and optionally
+any number of `secondary_groups`.
 
 ```yaml
 security:
   users:
     example-user:
-      uid: 1000
       primary_group: users
       secondary_groups:
         - billing
+      password: plaintextpasswd
     dharhas:
-      uid: 1001
       primary_group: admin
   groups:
     users:
-      gid: 100
     admin:
-      gid: 101
     billing:
-      gid: 102
 ```
 
 * The `primary_group` is the group name assigned to files that are
 written for the user.
-* `groups` are a mapping of group name to group IDs. It is
-  recommended to not change the IDs assigned to groups and users
-  after creation, since it may lead to login issues.
-  > NOTE: While the demo shows IDs between `100` and
-`1000`, it is recommended to start with high User ID numbers
-e.g. `10000000`. `ids` technically supports 2 billion `ids`.
+* `groups` are a mapping of group name to an empty map (no entries are required within that map any longer).
 
-### Admin Group
+#### Admin and Users Group
 
 The admin group has special significance. If a user's `primary_group`
 is admin they will be able to access the jupyterhub admin page. The
 admin page allows a user to stop user's servers and launch a given
 user's server and impersonate them.
+
+All users must be a member of the `users` group.
+
+Both `admin` and `users` groups will be created even if not specified in the YAML file.
 
 ## Provider Infrastructure
 
@@ -333,7 +311,7 @@ and **Kubernetes versions** will be DIFFERENT. [duplicated info]
 
 DigitalOcean has a restriction with autoscaling in that the minimum
 nodes allowed (`min_nodes` = 1) is one but is by far the cheapest
-provider even accounting for spot/premptible instances. In addition
+provider even accounting for spot/preemptible instances. In addition
 Digital Ocean does not have accelerator/gpu support. Digital Ocean is
 a great default choice for tying out QHub. Below is the recommended
 setup.
@@ -347,7 +325,7 @@ setup.
 
 To see available instance types refer to [Digital Ocean Instance
 Types](https://www.digitalocean.com/docs/droplets/). Additionally the
-digial ocean cli `doctl` has [support for listing
+Digital Ocean cli `doctl` has [support for listing
 droplets](https://www.digitalocean.com/docs/apis-clis/doctl/reference/compute/droplet/list/).
 
 ```yaml
@@ -430,7 +408,7 @@ amazon_web_services:
 
 #### Local (Existing) Kubernetes Cluster
 
-Deploying to a local existing kuberentes cluster has different options
+Deploying to a local existing kubernetes cluster has different options
 than the cloud providers. `kube_context` is an optional key that can
 be used to deploy to a non-default context. The default node selectors
 will allow pods to be scheduled anywhere. This can be adjusted to
@@ -509,6 +487,7 @@ default_images:
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
   dask_gateway: "quansight/qhub-dask-gateway:v||QHUB_VERSION||"
+  conda_store: "quansight/qhub-conda-store:v||QHUB_VERSION||"
 ```
 
 ## Storage
@@ -592,7 +571,7 @@ important considerations to make. Two important terms to understand are:
    than the node specification. See this [guide from digital
    ocean](https://docs.digitalocean.com/products/kubernetes/#allocatable-memory)
    which is generally applicable to other clouds.
-   
+
 For example if a node is 8 GB of ram and 2 cpu you should
 guarantee/schedule roughly 75% and follow the digital ocean guide
 linked above. E.g. 1.5 cpu guarantee and 5.5 GB guaranteed.
@@ -613,6 +592,12 @@ profiles:
       groups:
         - admin
         - users
+```
+
+Provided `groups:` is specified for a profile (even if no groups are listed), then that profile can also be made available to a group by adding the attribute `profiles` to the group in Keycloak. Add multiple profile (display) names to this attribute using ## as a delimiter:
+
+```
+"profiles": "Small Instance##Medium Instance"
 ```
 
 ### JupyterLab Profile Node Selectors
@@ -692,7 +677,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas
@@ -706,7 +691,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas
@@ -725,6 +710,14 @@ each environment include `ipykernel`, `ipywidgets`, `qhub-dask==0.2.3`. Upon cha
 environment definition expect 1-10 minutes upon deployment of the
 configuration for the environment to appear.
 
+## qhub_version
+
+All qhub-config.yaml files must now contain a `qhub_version` field displaying the version of QHub which it is intended to be deployed with.
+
+QHub will refuse to deploy if it does not contain the same version as that of the `qhub` command.
+
+Typically, you can upgrade the qhub-config.yaml file itself using the [`qhub upgrade` command](../admin_guide/upgrade.md). This will update image numbers, plus updating qhub_version to match the installed version of `qhub`, as well as any other bespoke changes required.
+
 # Full Configuration Example
 
 Everything in the configuration is set besides [???]
@@ -734,7 +727,7 @@ project_name: do-jupyterhub
 provider: do
 domain: "do.qhub.dev"
 
-ci_cd: 
+ci_cd:
   type: github-actions
   branch: main
 
@@ -742,39 +735,38 @@ certificate:
   type: self-signed
 
 security:
+  keycloak:
+    initial_root_password: initpasswd
+    overrides:
+      image:
+        repository: quansight/qhub-keycloak
+
   authentication:
     type: GitHub
     config:
       client_id: CLIENT_ID
       client_secret: CLIENT_SECRET
       oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
+
   users:
     example-user:
-      uid: 1000
       primary_group: users
       secondary_groups:
         - billing
     dharhas:
-      uid: 1001
       primary_group: admin
     tonyfast:
-      uid: 1002
       primary_group: admin
     prasunanand:
-      uid: 1003
       primary_group: admin
     aktech:
-      uid: 1004
       primary_group: users
       secondary_groups:
         - admin
   groups:
     users:
-      gid: 100
     admin:
-      gid: 101
     billing:
-      gid: 102
 
 digital_ocean:
   region: nyc3
@@ -797,6 +789,7 @@ default_images:
   jupyterhub: "quansight/qhub-jupyterhub:v||QHUB_VERSION||"
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
+  conda_store: "quansight/qhub-conda-store:v||QHUB_VERSION||"
 
 theme:
   jupyterhub:
@@ -862,7 +855,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas
@@ -876,7 +869,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas

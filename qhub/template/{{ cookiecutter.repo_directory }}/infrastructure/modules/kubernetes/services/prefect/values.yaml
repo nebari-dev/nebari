@@ -1,0 +1,17 @@
+
+envVars: {}
+
+secretEnvVars: {}
+
+prefect_agent:
+  job:
+    imagePullSecrets: ''
+    imagePullPolicy: ''
+    resources:
+      requests:
+        memory: ''
+        cpu: ''
+      limits:
+        memory: ''
+        cpu: ''
+  prefectLabels: '[]'

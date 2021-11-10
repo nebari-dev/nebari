@@ -3,7 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - cookiecutter ==1.7.2
-  - gitignore-parser==0.0.8
   - ruamel.yaml
   - cloudflare
   - auth0-python
@@ -11,7 +10,6 @@ dependencies:
   - pynacl
   - bcrypt
   - python-kubernetes
-
   # dev dependencies
   - flake8 ==3.8.4
   - black ==20.8b1

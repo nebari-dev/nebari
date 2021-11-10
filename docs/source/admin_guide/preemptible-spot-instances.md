@@ -1,20 +1,12 @@
-# Preemptible and Spot Instances on QHub
+# Preemptible and Spot instances on QHub
 
-A preemptible or spot VM is an instance that you can create and run at
-a much lower price than normal instances. Azure and GCP use the term
-preemptible, AWS uses the term spot, and Digital Ocean does not
-support these types of instances. However, the cloud provider might
-stop these instances if it requires access to those resources for
-other tasks. Preemptible instances are excess Cloud Provider's
-capacity, so their availability varies with usage. 
+A preemptible or spot VM is an instance that you can create and run at a much lower price than normal instances. Azure and Google Cloud platform use the term preemptible, while AWS uses the term spot, and Digital Ocean doesn't support these types of instances. However, the cloud provider might stop these instances if it requires access to those resources for other tasks. Preemptible instances are excess Cloud Provider's capacity, so their availability varies with usage.
 
 ## Usage
 
 ### Google Cloud Platform
 
-Preemptible instances can be defined via using the `preemptible` flag
-in the QHub config file as following.
-
+The `preemptible` flag in the QHub config file defines the preemptible instances.
 
 ```yaml
 google_cloud_platform:
@@ -35,12 +27,12 @@ google_cloud_platform:
 
 ### Amazon Web Services
 
-Spot instances are not supported at this moment.
+Spot instances aren't supported at this moment.
 
 ### Azure
 
-Preemptible instances are not supported at this moment.
+Preemptible instances aren't supported at this moment.
 
 ### Digital Ocean
 
-Digital Ocean does not support these type of instances.
+Digital Ocean doesn't support these type of instances.

@@ -1,100 +1,82 @@
-# Frequently Asked Questions
+# Frequently asked questions
 
-Additional FAQ questions can be found in the [GitHub
-discussions](https://github.com/Quansight/qhub/discussions/categories/q-a).
+Additional FAQ questions are available in the [GitHub discussions](https://github.com/Quansight/qhub/discussions/categories/q-a).
 
 ## Environments
 
 ### How are QHub conda user environments created? Who creates them?
 
-The environment specifications are located in `qhub_config.yml` in the
-deployment repo. These are served to the QHub deployment using
-[conda-store](https://conda-store.readthedocs.io/). When you manage
-your environments in this way you get all of the benefits of
-environment versioning that QHub does under the hood, including future
-features such as convenient environment rollback and environment
-encapsulation in containers.
+The environment specifications is available in `qhub_config.yml` in the deployment repo, which serves to the QHub deployment using [conda-store](https://conda-store.readthedocs.io/). When the user manages their environments in this way, they get all of the benefits of environment versioning that QHub does under the hood, including future features such as convenient environment rollback and environment encapsulation in containers.
 
-Anyone with access to the QHub deployment repo can add an environment, and there are no limits to the number of environments that can be included.
-  
-> Do be careful of the yaml indentation as it will differ from a conda `environment.yml`
+Anyone with access to the QHub deployment repo can add an environment, and there are no limits to the number of included environments.
 
-### I need X package and it's not in any available user environments - what do I do?
+> Be careful of the YAML indentation as it differs from the conda `environment.yml`
 
-The proper solution is to add the package to the `qhub_config.yml`
-(See #1). If you don't have access to the deployment repo, you will
-need to contact your QHub maintainer to get the required package. Just
-to note: you *can* do a user install for pip packages in a pinch (this
-is not recommended) but they will not be available to Dask workers.
+### What to do when the user requires `X` package and it's not available in the environment?
 
-### I want to use Dask. What needs to be included in my user environment?
+The proper solution is to add the package to the `qhub_config.yml` (See #1). If they don't have the access to the deployment repo, the user needs to contact their QHub maintainer to get the required package. They *can* do a user install for pip packages in a pinch (this isn't recommended) but they aren't be available to Dask workers.
 
-You will need to include the QHub Dask metapackage,
-e.g. `qhub-dask==0.3.12`. This will replace `distributed`, `dask`, ad
-`dask-gateway`.
+### What's included in the user environment if a user wants to use Dask?
 
-### Why can't I just create my own local conda environment or edit the existing conda environments?
+The user needs to include the QHub Dask metapackage. Example: `qhub-dask==||QHUB_VERSION||`. This replaces `distributed`, `dask`, and `dask-gateway`.
 
-The version of [conda-store](https://conda-store.readthedocs.io/) used
-in QHub versions 0.3.11 and earlier is an alpha version. This version
-doesn't support using local conda environments or editing pre-exising
-environments directly.
+### Why can't a user just create their own local conda environment or edit the existing conda environments?
 
-> See the answer to #2 for information on how to modify environments properly. In the near future the QHub team will be adding support for user-defined environments via conda-store.  
+The version of [conda-store](https://conda-store.readthedocs.io/) used in QHub versions 0.3.11 and earlier is an alpha version. This version doesn't support using local conda environments or editing pre-exising environments directly.
 
-### I have a local package - how can it be installed? Will it be available to my Dask workers?
+> See the answer to #2 for information on how to modify environments properly. In the near future, the support for user-defined environments via conda-store is going to be feature.
 
-If you're using a `setuptools` package, you can install it into your
-local user environment using
+### How can a user install a local package? Is it available to the user's Dask workers?
+
+If the user is using a `setuptools` package, they can install it into their local user environment using:
 
 ```shell
 pip install --no-build-isolation --user -e .
 ```
 
-If you're using a `flit` package, you can install with 
+If they're using a `flit` package, they can install with
 
 ```shell
 flit install -s
 ```
 
-These will not be available to the Dask workers.
+These aren't available to the Dask workers.
 
 ### How to use .bashrc on QHub?
 
-You can use `.bashrc` on QHub, but its important to note that only
-`.bash_profile` is sourced by default so you'll need to be sure to
-source the `.bashrc` inside of the `.bash_profile`. Its important to
-note that if you set environment variables in this way, they WILL NOT
-be available inside of notebooks.
+Users can use `.bashrc` on QHub, but its important to note that by default QHub sources `.bash_profile`. The users might need to be sure to source the `.bashrc` inside of the `.bash_profile`. Its important to note that if they set environment variables in this way, they aren't available inside the notebooks.
 
+### How to use environment variables on dask workers which isn't loaded via a package?
 
-7. How do I use environment variables on dask workers (not loaded via a package)?  
-This can be achieved through the UI:  
-    ```python
-    import dask_gateway
+It's achieved through the UI:
 
-    gateway = dask_gateway.Gateway()
-    options = gateway.cluster_options()
-    options
-    ```
-    Or programmatically:  
-    ```python
-    env_vars = {
-        "ENV_1": "VALUE_1",
-        "ENV_2": "VALUE_2"
-    }
-    options.environment_vars = env_vars
-    ```  
-    This functionality is available in release 0.3.12 or later.   
+```python
+import dask_gateway
+gateway = dask_gateway.Gateway()
+options = gateway.cluster_options()
+options
+```
 
-8. I can't see the active conda env in the terminal.   
-    Set the `changeps1` value in the conda config:  
-    ```shell  
-    conda config --set changeps1 true
-    ```  
+It's achieved in the same way programmatically:
 
-9. I want to use QHub server to compute a new pinned environment (which I'll the serve via the qhub_config.yml). I understand it's not recommended I use this environment for working.  
-If you need to solve a conda env on a QHub server (not recommended,
-but there are valid usecases for this), you'll need to specify the
-prefix. For example, `conda env create -f env_test.yml --prefix
-/tmp/test-env` where test-env will be the env name.
+```python
+env_vars = {
+"ENV_1": "VALUE_1",
+"ENV_2": "VALUE_2"
+}
+options.environment_vars = env_vars
+```
+
+This feature is available in release 0.3.12 or later.
+
+### What is a user can't see the active conda env in the terminal?
+
+Set the `changeps1` value in the conda config:
+
+```shell
+conda config --set changeps1 true
+```
+
+### What if a user wants to use the QHub server to compute a new pinned environment which the user serves via the `qhub_config.yml`?
+
+If the user needs to solve a conda env on a QHub server they need to specify the prefix. For example, `conda env create -f env_test.yml --prefix/tmp/test-env` where `test-env` is the env name. It's not recommended, but there are valid usecases of this operation.

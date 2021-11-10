@@ -21,7 +21,7 @@ jobs:
       - name: 'QHUB_GH_BRANCH set for PR'
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          echo "QHUB_GH_BRANCH=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
+          echo "QHUB_GH_BRANCH=${GITHUB_HEAD_REF}" >> "$GITHUB_ENV"
           echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           echo "GITHUB_REF: ${GITHUB_REF}"
@@ -29,8 +29,7 @@ jobs:
         if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') }}
         # e.g. QHUB_GH_BRANCH="main"
         run: |
-          echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> $GITHUB_ENV
-
+          echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> "$GITHUB_ENV"
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
       - name: Set up Python
@@ -44,7 +43,6 @@ jobs:
         run: |
           conda install -c anaconda pip
           pip install .[dev]
-
       - name: Download and Install Minikube and Kubectl
         run: |
           mkdir -p bin
@@ -59,6 +57,8 @@ jobs:
           popd
       - name: Start Minikube
         run: |
+          sudo docker ps
+          sudo usermod -aG docker $USER && newgrp docker
           minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 4 --memory 12288 --wait=all
       - name: Versions
         run: |
@@ -118,12 +118,15 @@ jobs:
           sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
       - name: Read example-user password
-        run: python -c "import tempfile, os; print('CYPRESS_EXAMPLE_USER_PASSWORD='+open(os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')).read())" >> $GITHUB_ENV
+        run: python -c "import tempfile, os; print('CYPRESS_EXAMPLE_USER_PASSWORD='+open(os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')).read())" >> "$GITHUB_ENV"
 
       - name: Get qhub-config.yaml full path
-        run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`" >> $GITHUB_ENV
-      
-      - name: Sleep to see if it fixes flaky Kubernetes Tests 
+        run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`" >> "$GITHUB_ENV"
+
+      - name: Create example-user
+        run: qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser example-user "${CYPRESS_EXAMPLE_USER_PASSWORD}"
+
+      - name: Sleep to see if it fixes flaky Kubernetes Tests
         run: sleep 60
 
       - name: Cypress run

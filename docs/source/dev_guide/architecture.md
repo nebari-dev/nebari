@@ -10,9 +10,14 @@ while providing the ability to scale with your organization and data.
 
 ## Installation
 
-You can install QHub through `pip`:
+After you have cloned the QHub repo locally, you can install QHub through `pip`:
 
-    pip install qhub-ops
+    python -m pip install -e .[dev]
+
+> NOTE: `zsh` users may need to escape the square brackets `\[dev\]`
+To install the pre-commit hooks, run:
+
+    pre-commit install
 
 After the installation, the next step is to configure QHub.
 
@@ -22,7 +27,8 @@ QHub is entirely controlled from a configuration file, which allows you to manag
 
 + **The Configuration File**
   + QHub comes with configuration file templates for each of the cloud providers it currently supports: **AWS**, **DO**, **GCP**, and **Azure**. The templates can be found [**here**](../installation/configuration.md).
-  
+  + You can create a simple qhub-config.yaml configuration panel as a starting point using the `qhub init` command as [described here](../installation/usage.md).
+
 ## Why QHub
 
 With QHub, managing configurable data science environments and attaining seamless deployment with [**Github Actions**](https://github.com/marketplace/actions/deployment-action) become remarkably easy. Let's look at how you can customize QHub for a data science architecture that meets  **your team's needs**.
@@ -74,33 +80,17 @@ For JupyterHub and Dask, QHub uses the official Helm Charts and provide custom s
 
 ### SSL and Ingress (Common for all Clouds)
 
-To expose various services, such as the JupyterHub and Dask, present in the Kubernetes Cluster, QHub uses the [**NGINX**](https://kubernetes.github.io/ingress-nginx/), which is a reverse proxy and load balancer. There is a standard component for using NGINX to expose services defined in Kubernetes Cluster, known as [**NGINX Ingress Controller**](https://github.com/kubernetes/ingress-nginx). QHub uses the official helm charts of the same to implement Ingress for its Kubernetes Cluster.
+To expose various services, such as the JupyterHub and Dask, present in the Kubernetes Cluster, QHub uses [Traefik Proxy](https://traefik.io/traefik/) which is a reverse proxy and load balancer.
 
 [**SSL**](https://www.ssl.com/faqs/faq-what-is-ssl/) is a crucial part of any service exposed to the Internet. To handle this in Kubernetes, QHub utilizes [**cert manager**](https://github.com/jetstack/cert-manager), a popular Kubernetes add-on to automate the management and issuance of TLS certificates from various issuing sources.
 
 
-
-### AWS Deployment
-
-The configuration file template for AWS can be found at the following path:
-
-    tests/assets/config_aws.yaml
+### AWS Cloud Architecture
 
 The architecture of AWS uses [**Virtual Private Cloud (VPC)**](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html), which enables you to launch resources into a virtual network. The VPC is the logically isolated section of AWS, which enables you to control how your network and AWS resources inside your network are exposed to the Internet. There are subnets inside the VPC in multiple availability zones. The Kubernetes Cluster is inside the VPC, which by default isolates it from the internet by the very nature of VPC.
 
 QHub uses AWS’s managed Kubernetes service: [**Elastic Kubernetes Service (EKS)**](https://aws.amazon.com/eks/) to create a Kubernetes Cluster. Since VPC is an isolated part of the AWS, you need a way to expose the services running inside the Kubernetes to the Internet, so that others can access it. This is achieved by an [**Internet Gateway**](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html). It’s a VPC component that allows communication between the VPC and the Internet.
 
-### DO Deployment
-
-The configuration file template for Digital Ocean can be found at the following path:
-
-    tests/assets/config_do.yaml
-
-### GCP Deployment
-
-The configuration file template for GCP can be found at the following path:
-
-    tests/assets/config_gcp.yaml
 
 ### Autoscaling
 
@@ -108,4 +98,4 @@ With QHub, system admins can customize and maintain their teams' compute needs a
 
 ### Authentication
 
-QHub uses Github for authentication.
+QHub uses Github, Auth0, or simple username/password for authentication.

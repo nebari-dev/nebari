@@ -1,4 +1,4 @@
-# qhub docs
+# QHub docs
 
 To build the docs:
 

@@ -30,11 +30,14 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 
 Cypress.Commands.add('loginWithPassword', (username, password) => {
     cy.visit('/hub/home');
+
+    cy.get('#login-main > div.service-login > a')
+        .should('contain', 'Sign in with Keycloak').click();
   
-    cy.get('#username_input')
+    cy.get('input#username')
       .type(username);
   
-    cy.get('#password_input')
+    cy.get('input#password')
       .type(password);
   
     cy.get('form').submit();

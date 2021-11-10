@@ -10,7 +10,7 @@ variable "labels" {
 }
 
 variable "secrets" {
-  description = "map of with map of key value secrets to store in kuberentes secrets"
+  description = "map of with map of key value secrets to store in kubernetes secrets"
   type = list(object({
     name = string
     data = map(string)
