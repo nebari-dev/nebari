@@ -11,6 +11,7 @@ exceptions:
   - CLI
   - Code
   - Cosmos
+  - AWS
   - Docker
   - Emmet
   - gRPC
@@ -20,6 +21,8 @@ exceptions:
   - macOS
   - Marketplace
   - MongoDB
+  - Minikube
+  - Mac
   - REPL
   - Studio
   - TypeScript
@@ -36,3 +39,9 @@ exceptions:
   - Digital Ocean
   - Spot
   - Amazon Web Services
+  - Key
+  - Pair
+  - Windows Subsystem for Linux 2
+  - MetalLB
+  - Python
+  - Docker

@@ -125,7 +125,7 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
 
 resource "kubernetes_manifest" "forwardauth-middleware" {
   # This version of the middleware is primarily for the forwardauth service
-  # itself, so the callback _oauth url can be centalised (not just under e.g. /someservice/_oauth).
+  # itself, so the callback _oauth url can be centalised (not just under for example /someservice/_oauth).
   # This middleware is in the root namespace, someservice may have its own.
 
   provider = kubernetes-alpha

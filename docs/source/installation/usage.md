@@ -54,7 +54,7 @@ There are several flags that allow you to configure the deployment:
 - `--repository-auto-provision`: Sets the secrets for the GitHub repository used for CI/CD actions.
 - `--ssl-cert-email`: Provide an admin's email address so that LetsEncrypt can generate a real SSL certificate for your site. If omitted, the site will use a self-signed cert that may cause problems for some browsers but may be sufficient for testing.
 
-You will be prompted to enter values for some of the choices above if they are ommited as command line arguments (e.g. project name and domain).
+You will be prompted to enter values for some of the choices above if they are ommited as command line arguments (for example project name and domain).
 
 The `qhub init` command will also generate an initial password for your root Keycloak user:
 

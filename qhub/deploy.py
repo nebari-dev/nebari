@@ -160,7 +160,7 @@ def check_secrets(config):
     """
     Checks that the appropriate variables are set based on the current config.
     These variables are prefixed with TF_VAR_ and are used to populate the
-    corresponding variables in the terraform deployment. e.g.
+    corresponding variables in the terraform deployment. for example
     TF_VAR_prefect_token sets the prefect_token variable in Terraform. These
     values are set in the terraform state but are not leaked when the
     terraform render occurs.

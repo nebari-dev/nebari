@@ -26,7 +26,7 @@ Please provide these details:
 Describe your environment:
     - Conda version (use `conda --version`);
     - Kubernetes version (use `0kubectl version`):
-    - Cloud provider (e.g. AWS, GCP, DigitalOcean, etc).
+    - Cloud provider (for example AWS, GCP, DigitalOcean, etc).
     - Operating system and version.
 
 > Feel free to add any **additional context** or screenshots about the feature request here.

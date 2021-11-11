@@ -104,7 +104,7 @@ Note that tests are heavily state dependent, so any changes or use of the deploy
 
 Cloud testing on aws, gcp, azure, and digital ocean can be significantly more complicated and time consuming. But it is the only way to truly test the cloud deployments, including infrastructure, of course. To test on cloud Kubernetes, just deploy qhub in the normal way on those clouds, but using the [linked pip install](./index.md) of the qhub package.
 
-Even with the dev install of the qhub package, you may find that the deployed cluster doesn't actually reflect any development changes, e.g. to the Docker images for JupyterHub or JupyterLab. That will be because your qhub-config.yaml references fully released versions. See [Using a development branch](#using-a-development-branch) above for how to encourage the Docker images to be specified based on the latest development code.
+Even with the dev install of the qhub package, you may find that the deployed cluster doesn't actually reflect any development changes, for example to the Docker images for JupyterHub or JupyterLab. That will be because your qhub-config.yaml references fully released versions. See [Using a development branch](#using-a-development-branch) above for how to encourage the Docker images to be specified based on the latest development code.
 
 You should always prefer the local testing when possible as it will be easier to debug, may be quicker to deploy, and is likely to be less expensive.
 

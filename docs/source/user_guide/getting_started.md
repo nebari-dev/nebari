@@ -22,7 +22,7 @@ login process.
 Once authenticated the user will be prompted with a set of profiles
 that are available for the authenticated user to use. Your given
 selections will likely differ from the image shown. The customized
-profiles will give you access to fixed resources e.g. 2 cpu, 8 GB ram,
+profiles will give you access to fixed resources for example 2 cpu, 8 GB ram,
 and 1 dedicated gpu. All of this is configured by the
 administrator. Click `start` once the appropriate profile has been
 chosen. The cluster may take several minutes to launch. This is due to
