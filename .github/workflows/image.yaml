@@ -87,4 +87,3 @@ jobs:
           dockerfile: ./qhub/template/\{\{\ cookiecutter.repo_directory\ \}\}/image/Dockerfile.${{ matrix.dockerfile }}
           output_format: tty
           error_level: 0
-          config_file: ./qhub/template/\{\{\ cookiecutter.repo_directory\ \}\}/image/hadolint.yml
