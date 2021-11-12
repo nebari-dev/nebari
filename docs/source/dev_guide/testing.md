@@ -64,9 +64,9 @@ Then open the localhost (127.0.0.1) link that is in the terminal
 
 ## Linting Dockerfiles
 
-To lint Dockerfiles, we use a tool called [Hadolint](https://github.com/hadolint/hadolint). Hadolint is a Dockerfile linter that allows to discover issues with the Dockerfiles and recommends [best practices to be followed](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/). QHub CI automates Hadolint code reviews on every commit and pull request, reporting code style and error prone issues.
+To lint Dockerfiles, developers use a tool called [Hadolint](https://github.com/hadolint/hadolint). Hadolint is a Dockerfile linter that allows to discover issues with the Dockerfiles and recommends [best practices to be followed](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/). QHub CI automates Hadolint code reviews on every commit and pull request, reporting code style and error prone issues.
 
-To run Hadolint locally you can either install it locally or use a container image. Instructions are available on the [install documentation for HadoLint](https://github.com/hadolint/hadolint#install). The `.hadolint.yml` on the root directory defines the ignored rules. To run Hadolint on Dockeriles run:
+To run Hadolint locally you can either install it locally or use a container image. Instructions are available on the [install documentation for HadoLint](https://github.com/hadolint/hadolint#install). The `.hadolint.yml` on the root directory defines the ignored rules. To run Hadolint on Dockerfiles run:
 
 ```shell
 hadolint ./qhub/template/\{\{\ cookiecutter.repo_directory\ \}\}/image/Dockerfile.conda-store
