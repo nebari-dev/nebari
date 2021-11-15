@@ -146,8 +146,12 @@ jobs:
             ./tests_e2e/cypress/screenshots/
             ./tests_e2e/cypress/videos/
 
-      ### CLEANUP AFTER CYPRESS
+      - name: Deployment Pytests
+        run: |
+          pip install dask-gateway kubernetes pytest dask-gateway
+          pytest tests_deployment/ -v
 
+      ### CLEANUP AFTER TESTS
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment
