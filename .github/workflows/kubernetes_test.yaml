@@ -148,7 +148,6 @@ jobs:
 
       - name: Deployment Pytests
         run: |
-          pip install dask-gateway kubernetes pytest dask-gateway
           pytest tests_deployment/ -v
 
       ### CLEANUP AFTER TESTS
