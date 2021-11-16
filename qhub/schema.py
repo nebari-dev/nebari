@@ -370,6 +370,7 @@ class QHubExtension(Base):
     urlslug: str
     private: bool = False
     oauth2client: bool = False
+    qhubconfigyaml: bool = False
     envs: typing.Optional[typing.List[QHubExtensionEnv]]
     logout: typing.Optional[str]
 

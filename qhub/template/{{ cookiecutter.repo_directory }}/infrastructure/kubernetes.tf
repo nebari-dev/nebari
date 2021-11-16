@@ -408,3 +408,14 @@ module "forwardauth" {
     module.kubernetes-initialization
   ]
 }
+
+resource "kubernetes_secret" "qhub_yaml_secret" {
+  metadata {
+    name      = "qhub-config-yaml"
+    namespace = var.environment
+  }
+
+  data = {
+    "qhub-config.yaml" = file({{ cookiecutter.qhub_config_yaml_path | jsonify }})
+  }
+}
