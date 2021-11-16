@@ -36,3 +36,4 @@ exceptions:
   - Digital Ocean
   - Spot
   - Amazon Web Services
+  - Dockerfiles
