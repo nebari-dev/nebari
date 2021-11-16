@@ -13,3 +13,9 @@ repos:
     rev: 3.8.4
     hooks:
     -   id: flake8
+-   repo: https://github.com/hadolint/hadolint.git
+    rev: v2.3.0
+    hooks:
+      - id: hadolint-docker
+        entry: hadolint/hadolint:v2.3.0 hadolint
+        args: ["--ignore", "DL3048"]
