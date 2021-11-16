@@ -16,3 +16,7 @@ dependencies:
   - pytest
   - diagrams
   - jhub-client
+
+  # deployment/integration tests dependencies
+  - dask-gateway
+  - python-kubernetes

@@ -100,6 +100,17 @@ The final command above should open the Cypress UI where you can run the tests m
 
 Note that tests are heavily state dependent, so any changes or use of the deployed QHub could affect the results.
 
+## Deployment/Integration Tests
+
+Deployment and Integration testing makes it easier to test various features of deployed QHub
+on minikube such as Dask Gateway, external integrations, state of the kubernetes cluster via
+simple Python code. You can run the integration and deployment tests via the following command:
+
+```
+pytest tests_deployment/ -v
+```
+
+
 # Cloud Testing
 
 Cloud testing on aws, gcp, azure, and digital ocean can be significantly more complicated and time consuming. But it is the only way to truly test the cloud deployments, including infrastructure, of course. To test on cloud Kubernetes, just deploy qhub in the normal way on those clouds, but using the [linked pip install](./index.md) of the qhub package.
