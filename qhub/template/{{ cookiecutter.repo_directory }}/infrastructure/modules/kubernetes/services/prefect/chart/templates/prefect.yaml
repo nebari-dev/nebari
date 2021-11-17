@@ -18,11 +18,22 @@ spec:
       serviceAccountName: {{ .Values.serviceAccount }}
       containers:
         - args:
-            - prefect agent start kubernetes -e JUPYTERHUB_API_TOKEN=$JUPYTERHUB_API_TOKEN
+            - prefect agent start kubernetes -e JUPYTERHUB_API_TOKEN=$JUPYTERHUB_API_TOKEN {{- range $k, $v := .Values.secretEnvVars }} {{ printf " -e %s=$%s" $k  $k -}} {{ end }}
           command:
             - /bin/bash
             - -c
           env:
+            {{- range $k, $v := .Values.envVars }}
+            - name: {{ $k }}
+              value: {{ squote $v -}}
+            {{ end }}
+            {{- range $i, $k := keys .Values.secretEnvVars }}
+            - name: {{ $k }}
+              valueFrom:
+                secretKeyRef:
+                  name: prefect-envsecret-{{ $i }}
+                  key: prefectEnvSecret{{ $i -}}
+            {{ end }}
             - name: PREFECT__CLOUD__AGENT__AUTH_TOKEN
               valueFrom:
                 secretKeyRef:
@@ -37,20 +48,6 @@ spec:
               value: {{ .Values.cloudApi }}
             - name: NAMESPACE
               value: {{ .Values.namespace }}
-            - name: IMAGE_PULL_SECRETS
-              value: ''
-            - name: PREFECT__CLOUD__AGENT__LABELS
-              value: '[]'
-            - name: JOB_MEM_REQUEST
-              value: ''
-            - name: JOB_MEM_LIMIT
-              value: ''
-            - name: JOB_CPU_REQUEST
-              value: ''
-            - name: JOB_CPU_LIMIT
-              value: ''
-            - name: IMAGE_PULL_POLICY
-              value: ''
             - name: SERVICE_ACCOUNT_NAME
               value: {{ .Values.serviceAccount }}
             - name: PREFECT__BACKEND

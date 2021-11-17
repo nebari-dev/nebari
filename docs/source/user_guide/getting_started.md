@@ -1,7 +1,7 @@
 # Log into QHub
 
 This guide aims to explain to newcomers how to log in to QHub.  Your
-own organization's QHub is likely to have a slighly different
+own organization's QHub is likely to have a slightly different
 procedure for the authentication due to the many authentication
 providers that QHub can integrate into.
 
@@ -42,10 +42,3 @@ environment will launch. Note that kernels can take several seconds to
 become responsive. The circle in the top right hand corner is a good
 indicator at the status of the kernel. A lightning bold means that the
 kernel has started but it not yet ready to run code.
-
-
-
-
-
-
-

@@ -13,18 +13,24 @@
     "certificate": {
       "type": "self-signed"
     },
-    "clearml": {
+    "helm_extensions": [],
+    "monitoring": {
         "enabled": null
+    },
+    "clearml": {
+        "enabled": null,
+        "enable_forward_auth": null
     },
     "prefect": {
         "enabled": null,
-        "image": null
+        "image": null,
+        "overrides": null
     },
     "security": null,
     "default_images": null,
     "profiles": null,
     "theme": {
-      "juypterhub": {
+      "jupyterhub": {
 
       }
     },
@@ -32,7 +38,6 @@
     "storage": null,
     "cdsdashboards": {},
     "external_container_reg": {},
-
     "local": {
         "node_selectors": {
             "general": {

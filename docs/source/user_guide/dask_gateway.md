@@ -26,7 +26,7 @@ gateway = Gateway()
 ```
 
 QHub has [a
-section](https://docs.qhub.dev/en/latest/source/02_get_started/04_configuration.html#profiles)
+section](https://docs.qhub.dev/en/stable/source/installation/configuration.html#profiles)
 for configuring the dask profiles that users have access to. These can
 be accessed via dask gateway options. Once the
 [ipywidget](https://ipywidgets.readthedocs.io/en/latest/) shows up the
@@ -121,7 +121,7 @@ Dask Gateway deployment.
 
 A long requested feature was the ability to access a dask cluster from
 outside of the cluster itself. In general this is possible but a the
-moment can break due to version missmatches between
+moment can break due to version mismatches between
 [dask](https://dask.org/),
 [distributed](https://distributed.dask.org/en/latest/), and
 [dask-gateway](https://gateway.dask.org/). Also we have had issues

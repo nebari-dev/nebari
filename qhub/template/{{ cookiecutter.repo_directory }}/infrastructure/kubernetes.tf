@@ -175,6 +175,88 @@ module "kubernetes-ingress" {
   ]
 }
 
+### Keycloak
+
+resource "random_password" "keycloak-qhub-bot-password" {
+  length  = 32
+  special = false
+}
+
+module "kubernetes-keycloak-helm" {
+  source = "./modules/kubernetes/keycloak-helm"
+
+  namespace = var.environment
+
+  external-url = var.endpoint
+
+  qhub-bot-password = random_password.keycloak-qhub-bot-password.result
+
+  initial-root-password = {{ cookiecutter.security.get('keycloak',{}).initial_root_password | default("password",true) | jsonify }}
+
+  # Be careful that overrides don't clobber anything important.
+  # For example, if extraEnv is present, it should repeat PROXY_ADDRESS_FORWARDING from values.yaml.
+  {% if cookiecutter.security.keycloak is defined and cookiecutter.security.keycloak.overrides is defined %}
+  overrides            = [<<EOT
+{{ cookiecutter.security.keycloak.overrides|yamlify -}}
+    EOT
+    ]
+  {% endif %}
+
+
+  depends_on = [
+    module.kubernetes-ingress
+  ]
+}
+
+provider "keycloak" {
+  client_id = "admin-cli"
+  username  = "qhub-bot"
+  password  = random_password.keycloak-qhub-bot-password.result
+  url       = "https://${var.endpoint}"
+
+  tls_insecure_skip_verify = local.tls-insecure-skip-verify
+}
+
+module "kubernetes-keycloak-config" {
+  source = "./modules/kubernetes/keycloak-config"
+
+  name = var.name
+
+  external-url = var.endpoint
+
+  forwardauth-callback-url-path      = local.forwardauth-callback-url-path
+  forwardauth-keycloak-client-id     = local.forwardauth-keycloak-client-id
+  forwardauth-keycloak-client-secret = random_password.forwardauth-jhsecret.result
+
+  jupyterhub-callback-url-path   = local.jupyterhub-callback-url-path
+  jupyterhub-logout-redirect-url = "{{ cookiecutter.final_logout_uri }}"
+
+  jupyterhub-keycloak-client-id     = local.jupyterhub-keycloak-client-id
+  jupyterhub-keycloak-client-secret = random_password.jupyterhub-jhsecret.result
+
+  users = jsondecode("{{ cookiecutter.tf_users | jsonify | replace('"', '\\"') }}")
+
+  groups = jsondecode("{{ cookiecutter.tf_groups | jsonify | replace('"', '\\"') }}")
+
+  user_groups = jsondecode("{{ cookiecutter.tf_user_groups | jsonify | replace('"', '\\"') }}")
+
+  {% if cookiecutter.security.authentication.type == "GitHub" -%}
+  github_client_id     = {{ cookiecutter.security.authentication.config.client_id | jsonify }}
+  github_client_secret = {{ cookiecutter.security.authentication.config.client_secret | jsonify }}
+  {%- endif %}
+
+  {% if cookiecutter.security.authentication.type == "Auth0" -%}
+  auth0_client_id     = {{ cookiecutter.security.authentication.config.client_id | jsonify }}
+  auth0_client_secret = {{ cookiecutter.security.authentication.config.client_secret | jsonify }}
+  # auth0_subdomain should be e.g. dev-5xltvsfy.eu or qhub-dev (i.e. without auth0.com at the end)
+  auth0_subdomain     = {{ cookiecutter.security.authentication.config.auth0_subdomain | jsonify }}
+  {%- endif %}
+
+  depends_on = [
+    module.kubernetes-keycloak-helm
+  ]
+}
+
 module "qhub" {
   source = "./modules/kubernetes/services/meta/qhub"
 
@@ -205,10 +287,6 @@ module "qhub" {
 
   dask_gateway_extra_config = file("dask_gateway_config.py.j2")
 
-  forwardauth-jh-client-id      = local.forwardauth-jh-client-id
-  forwardauth-jh-client-secret  = random_password.forwardauth-jhsecret.result
-  forwardauth-callback-url-path = local.forwardauth-callback-url-path
-
   extcr_config = {
     enabled : {{ cookiecutter.external_container_reg.enabled | default(false,true) | jsonify }}
     access_key_id : "{{ cookiecutter.external_container_reg.access_key_id | default("",true) }}"
@@ -217,10 +295,46 @@ module "qhub" {
     extcr_region : "{{ cookiecutter.external_container_reg.extcr_region | default("",true) }}"
   }
 
+  forwardauth-callback-url-path = local.forwardauth-callback-url-path
+
+  OAUTH_CLIENT_ID        = local.jupyterhub-keycloak-client-id
+  OAUTH_CLIENT_SECRET    = random_password.jupyterhub-jhsecret.result
+  OAUTH_CALLBACK_URL     = "https://${var.endpoint}${local.jupyterhub-callback-url-path}"
+  OAUTH2_TLS_VERIFY      = local.tls-insecure-skip-verify ? "false" : "true"
+  keycloak_authorize_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth"
+  keycloak_token_url     = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"
+  keycloak_userdata_url  = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"
+  keycloak_logout_url    = format("%s?redirect_uri=%s", "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/logout", urlencode("{{ cookiecutter.final_logout_uri }}"))
+
+  keycloak_username   = "qhub-bot"
+  keycloak_password   = random_password.keycloak-qhub-bot-password.result
+  keycloak_server_url = "http://keycloak-headless.${var.environment}:8080/auth/"
+
   depends_on = [
-    module.kubernetes-ingress
+    module.kubernetes-initialization
   ]
 }
+
+{% for helm_extension in cookiecutter.helm_extensions -%}
+module "{{helm_extension['name'] }}-extension" {
+  source       = "./modules/kubernetes/services/helm-extensions"
+  name       = "{{ helm_extension['name'] }}"
+  namespace  = var.environment
+  repository = "{{ helm_extension['repository'] }}"
+  chart      = "{{ helm_extension['chart'] }}"
+  chart_version    = "{{ helm_extension['version'] }}"
+  {% if 'overrides' in helm_extension -%}
+  overrides = [<<EOT
+{{ helm_extension['overrides']|yamlify -}}
+    EOT
+    ]
+  {% endif -%}
+  depends_on = [
+    module.qhub
+  ]
+}
+
+{% endfor -%}
 
 {% if cookiecutter.prefect.enabled -%}
 module "prefect" {
@@ -235,8 +349,27 @@ module "prefect" {
   {% if cookiecutter.prefect.image is defined -%}
   image                = "{{ cookiecutter.prefect.image }}"
   {% endif -%}
+  {% if cookiecutter.prefect.overrides is defined %}
+  overrides            = [<<EOT
+{{ cookiecutter.prefect.overrides|yamlify -}}
+    EOT
+    ]
+  {% endif %}
 }
 {% endif -%}
+
+{% if cookiecutter.monitoring.enabled -%}
+module "monitoring" {
+  source       = "./modules/kubernetes/services/monitoring"
+  namespace    = var.environment
+  external-url = var.endpoint
+  tls          = module.qhub.tls
+  depends_on = [
+    module.qhub
+  ]
+}
+{% endif -%}
+
 
 {% if cookiecutter.clearml.enabled -%}
 module "clearml" {
@@ -244,6 +377,9 @@ module "clearml" {
   namespace    = var.environment
   external-url = var.endpoint
   tls          = module.qhub.tls
+{% if cookiecutter.clearml.enable_forward_auth is defined -%}
+  enable-forward-auth = {{ cookiecutter.clearml.enable_forward_auth | default(false,true) | jsonify }}
+{% endif -%}
   depends_on = [
     module.qhub
   ]
@@ -255,12 +391,31 @@ resource "random_password" "forwardauth-jhsecret" {
   special = false
 }
 
+resource "random_password" "jupyterhub-jhsecret" {
+  length  = 32
+  special = false
+}
+
 module "forwardauth" {
   source       = "./modules/kubernetes/forwardauth"
   namespace    = var.environment
   external-url = var.endpoint
 
-  jh-client-id      = local.forwardauth-jh-client-id
+  jh-client-id      = local.forwardauth-keycloak-client-id
   jh-client-secret  = random_password.forwardauth-jhsecret.result
   callback-url-path = local.forwardauth-callback-url-path
+  depends_on = [
+    module.kubernetes-initialization
+  ]
+}
+
+resource "kubernetes_secret" "qhub_yaml_secret" {
+  metadata {
+    name      = "qhub-config-yaml"
+    namespace = var.environment
+  }
+
+  data = {
+    "qhub-config.yaml" = file({{ cookiecutter.qhub_config_yaml_path | jsonify }})
+  }
 }

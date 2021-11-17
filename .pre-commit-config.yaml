@@ -1,0 +1,26 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+    -   id: check-yaml
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+  - repo: https://github.com/psf/black
+    rev: 20.8b1
+    hooks:
+    -   id: black
+  - repo: https://github.com/pycqa/flake8
+    rev: 3.8.4
+    hooks:
+    -   id: flake8
+  - repo: https://github.com/hadolint/hadolint.git
+    rev: v2.3.0
+    hooks:
+      - id: hadolint-docker
+        entry: hadolint/hadolint:v2.3.0 hadolint
+        args: [
+            "--ignore", "DL3048",
+            "--ignore", "DL3008",
+            "--ignore", "DL3013",
+            "--ignore", "DL3003",
+        ]
