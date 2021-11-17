@@ -31,6 +31,14 @@ component which has not been released.  So you may need to manually
 modify the qhub-config.yaml to 'downgrade' the tags to a full release
 version.
 
+### Kubernetes Version Check for Cloud Providers
+
+When `qhub init <cloud provider>` is called, it checks that the `--kubernetes-version` provided is supported by the choosen cloud provider. This flag is optional and if not provided, the `kubernetes_version` is set to the most recent kubernetes version available. This is achieved by using the cloud provider's SDK which thus requires their approiate credentials to be set. To get around this, simply set the `QHUB_K8S_VERSION` environment variable like so:
+
+```
+export QHUB_K8S_VERSION=1.20
+```
+
 ## Modifying Docker Images
 
 All QHub docker images are located in [`qhub/templates/{{
@@ -76,7 +84,7 @@ check out the [Troubleshooting documentation](https://docs.qhub.dev/en/stable/so
 
 ## Cypress Tests
 
-Cypress automates testing within a web browser environment. It is integrated into the GitHub Actions tests.yaml workflows in this repo, and 
+Cypress automates testing within a web browser environment. It is integrated into the GitHub Actions tests.yaml workflows in this repo, and
 you can also run it locally. To do so:
 
 ```
@@ -91,9 +99,9 @@ npm run cypress:open
 ```
 
 The Base URL can point anywhere that should be accessible - it can be the URL of a QHub cloud deployment.
-The QHub Config Path should point to the associated yaml file for that site. Most importantly, the tests will inspect the yaml file to understand 
-what tests are relevant. To start with, it checks security.authentication.type to determine what should be available on the login page, and 
-how to test it. If the login type is 'password' then it uses the value in CYPRESS_EXAMPLE_USER_PASSWORD as the password (default username is 
+The QHub Config Path should point to the associated yaml file for that site. Most importantly, the tests will inspect the yaml file to understand
+what tests are relevant. To start with, it checks security.authentication.type to determine what should be available on the login page, and
+how to test it. If the login type is 'password' then it uses the value in CYPRESS_EXAMPLE_USER_PASSWORD as the password (default username is
 `example-user` but this can be changed by setting CYPRESS_EXAMPLE_USER_NAME).
 
 The final command above should open the Cypress UI where you can run the tests manually and see the actions in the browser.

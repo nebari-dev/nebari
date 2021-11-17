@@ -23,6 +23,8 @@ from .version import __version__
 
 logger = logging.getLogger(__name__)
 
+QHUB_K8S_VERSION = os.getenv("QHUB_K8S_VERSION", None)
+
 BASE_CONFIGURATION = {
     "project_name": None,
     "provider": None,
@@ -536,7 +538,13 @@ def _set_kubernetes_version(
         func=func,
     ):
         region = cloud_config["region"]
-        k8s_versions = func(region)
+
+        # to avoid using cloud provider SDK
+        # set QHUB_K8S_VERSION environment variable
+        if not QHUB_K8S_VERSION:
+            k8s_versions = func(region)
+        else:
+            k8s_versions = [QHUB_K8S_VERSION]
 
         if kubernetes_version:
             if kubernetes_version in k8s_versions:
