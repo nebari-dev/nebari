@@ -11,7 +11,7 @@ from your terminal.
 There are several ways to generate your configuration file, `qhub-config.yaml`. You can
 type the commands when prompted by terminal, or you can set
 it all automatically from the start. In any case, start by creating
-a new project folder.  Start by creating a directory `qhub-test`.
+a new project folder. Start by creating a directory `qhub-test`.
 
 On your terminal run:
 
@@ -47,27 +47,27 @@ allow to configure the deployment:
 - `--repository-auto-provision`: Sets the secrets for the GitHub repository used for CI/CD actions.
 - `--ssl-cert-email`: Provide an admin's email address so that LetsEncrypt can generate a real SSL certificate for your site. If omitted, the site will use a self-signed cert that may cause problems for some browsers but may be sufficient for testing.
 
-You will be prompted to enter values for some of the choices above if they are ommited as command line arguments (e.g. project name and domain).
+For configuration items not set as command line arguments, the script is going to prompt you to enter these values.
 
-The `qhub init` command will also generate an initial password for your root Keycloak user:
+The `qhub init` command also generates an initial password for your root Keycloak user:
 
 ```
 Securely generated default random password=R1E8aWedaQVU6kKv for Keycloak root user stored at path=/tmp/QHUB_DEFAULT_PASSWORD
 ```
 
-The password will also be available in the `qhub-config.yaml` file under the security.keycloak.initial_root_password field. It will be needed in the next page of these docs for logging in to your QHub.
+This password is also available in the `qhub-config.yaml` file under the security.keycloak.initial_root_password field. It is required in the next page of these docs for logging in to your QHub.
 
-The command above generates the `qhub-config.yaml` config file
+This `qhub init` command generates the `qhub-config.yaml` config file
 with an infrastructure to be deployed on `aws`, named `projectname`, with a
 domain name set to `qhub.dev`. The deployment uses `github-actions` as
-the continuous integration (CI) provider,
-automatically provisioned and authenticated by `auth0`. And initialized on
+the continuous integration provider,
+automatically provisioned and authenticated by `auth0`. And finally, initialized on
 GitHub under the URL `github.com/quansight/projectname`.
 
 If employing an infrastructure-as-code approach, this is where you would make the desired infrastructure changes
-including adding users, changing Dask worker instance type and much more. Once you're happy with your changes you would redeploy those changes using using GitHub Actions. For more details on on the `qhub-config.yaml` please see [Configuration](configuration.md)
+including adding users, changing Dask worker instance type and much more. Once you're happy with your changes you would redeploy those changes using GitHub Actions. For more details on the `qhub-config.yaml` please see [Configuration](configuration.md)
 
-##### Project Naming Convention
+##### Project naming convention
 In order to successfully deploy QHub, please follow some project naming conventions. For starters,
 make sure your project name is compatible with the specifics of your chosen cloud provider. In addition, QHub `projectname`
 should also obey to the following format requirements:
@@ -158,8 +158,8 @@ git push origin main
 Once pushed to GitHub, future commits to `main`  trigger CI/CD to redeploy
 changes the QHub cluster.  Since the infrastructure state is reflected in
 the repository, this workflow allows for team members to submit pull requests
-that can be reviewed before modifying the infrastructure, easing the
-maintenance process.
+and perform code reviews before modifying the infrastructure, easing the
+overall maintenance process.
 
 To automatically deploy (and to keep track of changes more effectively):
 - make changes to the `qhub-config.yaml` file on a new branch.
