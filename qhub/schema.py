@@ -4,7 +4,7 @@ from abc import ABC
 
 import pydantic
 from pydantic import validator, root_validator
-from qhub.utils import namestr_regex, check_for_duplicates
+from qhub.utils import namestr_regex
 from .version import __version__
 
 
@@ -56,6 +56,15 @@ class CICD(Base):
     branch: str
     before_script: typing.Optional[typing.List[str]]
     after_script: typing.Optional[typing.List[str]]
+
+
+# ======== Generic Helm Extensions ========
+class HelmExtension(Base):
+    name: str
+    repository: str
+    chart: str
+    version: str
+    overrides: typing.Optional[typing.Dict]
 
 
 # ============== Monitoring =============
@@ -124,7 +133,6 @@ class DefaultImages(Base):
 
 
 class GitHubConfig(Base):
-    oauth_callback_url: str
     client_id: str
     client_secret: str
 
@@ -132,8 +140,6 @@ class GitHubConfig(Base):
 class Auth0Config(Base):
     client_id: str
     client_secret: str
-    oauth_callback_url: str
-    scope: typing.List[str]
     auth0_subdomain: str
 
 
@@ -185,24 +191,25 @@ class GitHubAuthentication(Authentication):
     config: GitHubConfig
 
 
-class CustomAuthentication(Authentication):
-    _typ = AuthenticationEnum.custom
-    authentication_class: str
-    config: typing.Dict[str, typing.Any]
-
-
 # =========== Users and Groups =============
 
 
 class User(Base):
-    uid: str
     password: typing.Optional[str]
-    primary_group: str
+    primary_group: typing.Optional[str]
     secondary_groups: typing.Optional[typing.List[str]]
 
 
 class Group(Base):
-    gid: int
+    gid: typing.Optional[int]
+
+
+# ================= Keycloak ==================
+
+
+class Keycloak(Base):
+    initial_root_password: typing.Optional[str]
+    overrides: typing.Optional[typing.Dict]
 
 
 # ============== Security ================
@@ -210,13 +217,11 @@ class Group(Base):
 
 class Security(Base):
     authentication: Authentication
-    users: typing.Dict[str, User]
-    groups: typing.Dict[str, Group]
-
-    @validator("users", pre=True)
-    def validate_uderids(cls, v):
-        # raise TypeError if duplicated
-        return check_for_duplicates(v)
+    users: typing.Optional[typing.Dict[str, typing.Union[User, None]]]
+    groups: typing.Optional[
+        typing.Dict[str, typing.Union[Group, None]]
+    ]  # If gid is omitted, no attributes in Group means it appears as None
+    keycloak: typing.Optional[Keycloak]
 
 
 # ================ Providers ===============
@@ -282,7 +287,7 @@ class LocalProvider(Base):
 
 
 class Theme(Base):
-    jupyterhub: typing.Dict[str, str]
+    jupyterhub: typing.Dict[str, typing.Union[str, list]]
 
 
 # ================== Profiles ==================
@@ -352,6 +357,24 @@ class CDSDashboards(Base):
     cds_hide_user_dashboard_servers: typing.Optional[bool]
 
 
+# =============== Extensions = = ==============
+
+
+class QHubExtensionEnv(Base):
+    code: str
+
+
+class QHubExtension(Base):
+    name: str
+    image: str
+    urlslug: str
+    private: bool = False
+    oauth2client: bool = False
+    qhubconfigyaml: bool = False
+    envs: typing.Optional[typing.List[QHubExtensionEnv]]
+    logout: typing.Optional[str]
+
+
 # ======== External Container Registry ========
 
 # This allows the user to set a private AWS ECR as a replacement for
@@ -406,6 +429,7 @@ class Main(Base):
         TerraformModules
     ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
+    helm_extensions: typing.Optional[typing.List[HelmExtension]]
     prefect: typing.Optional[Prefect]
     cdsdashboards: CDSDashboards
     security: Security
@@ -422,6 +446,7 @@ class Main(Base):
     environments: typing.Dict[str, CondaEnvironment]
     monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
+    extensions: typing.Optional[typing.List[QHubExtension]]
 
     @validator("qhub_version", pre=True, always=True)
     def check_default(cls, v):

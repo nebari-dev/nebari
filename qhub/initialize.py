@@ -6,7 +6,6 @@ import secrets
 import tempfile
 import logging
 
-import bcrypt
 import requests
 
 from qhub.provider.oauth.auth0 import create_client
@@ -34,14 +33,6 @@ BASE_CONFIGURATION = {
     },
     "security": {
         "authentication": None,
-        "users": {
-            "example-user": {
-                "uid": 1000,
-                "primary_group": "admin",
-                "secondary_groups": ["users"],
-            }
-        },
-        "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
     },
     "default_images": {
         "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
@@ -65,6 +56,7 @@ BASE_CONFIGURATION = {
             "h2_color": "#652e8e",
         }
     },
+    "helm_extensions": [],
     "monitoring": {
         "enabled": True,
     },
@@ -86,7 +78,6 @@ AUTH_OAUTH_GITHUB = {
     "config": {
         "client_id": "PLACEHOLDER",
         "client_secret": "PLACEHOLDER",
-        "oauth_callback_url": "PLACEHOLDER",
     },
 }
 
@@ -95,8 +86,6 @@ AUTH_OAUTH_AUTH0 = {
     "config": {
         "client_id": "PLACEHOLDER",
         "client_secret": "PLACEHOLDER",
-        "oauth_callback_url": "PLACEHOLDER",
-        "scope": ["openid", "email", "profile"],
         "auth0_subdomain": "PLACEHOLDER",
     },
 }
@@ -248,7 +237,7 @@ DEFAULT_ENVIRONMENTS = {
             "voila==0.2.16",
             "streamlit==1.0.0",
             "dash==2.0.0",
-            "cdsdashboards-singleuser==0.5.7",
+            "cdsdashboards-singleuser==0.6.0",
         ],
     },
 }
@@ -267,6 +256,7 @@ def render_config(
     terraform_state=None,
     kubernetes_version=None,
     disable_prompt=False,
+    ssl_cert_email=None,
 ):
     config = BASE_CONFIGURATION.copy()
     config["provider"] = cloud_provider
@@ -305,7 +295,22 @@ def render_config(
 
     config["qhub_version"] = __version__
 
-    oauth_callback_url = f"https://{qhub_domain}/hub/oauth_callback"
+    # Generate default password for Keycloak root user and also example-user if using password auth
+    default_password = "".join(
+        secrets.choice(string.ascii_letters + string.digits) for i in range(16)
+    )
+
+    # Save default password to file
+    default_password_filename = os.path.join(
+        tempfile.gettempdir(), "QHUB_DEFAULT_PASSWORD"
+    )
+    with open(default_password_filename, "w") as f:
+        f.write(default_password)
+    os.chmod(default_password_filename, 0o700)
+
+    print(
+        f"Securely generated default random password={default_password} for Keycloak root user stored at path={default_password_filename}"
+    )
 
     if auth_provider == "github":
         config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()
@@ -313,7 +318,10 @@ def render_config(
             "Visit https://github.com/settings/developers and create oauth application"
         )
         print(f"  set the homepage to: https://{qhub_domain}/")
-        print(f"  set the callback_url to: {oauth_callback_url}")
+        print(
+            f"  set the callback_url to: https://{qhub_domain}/auth/realms/qhub/broker/github/endpoint"
+        )
+
         if not disable_prompt:
             config["security"]["authentication"]["config"]["client_id"] = input(
                 "Github client_id: "
@@ -321,35 +329,16 @@ def render_config(
             config["security"]["authentication"]["config"]["client_secret"] = input(
                 "Github client_secret: "
             )
-            config["security"]["authentication"]["config"][
-                "oauth_callback_url"
-            ] = oauth_callback_url
     elif auth_provider == "auth0":
         config["security"]["authentication"] = AUTH_OAUTH_AUTH0.copy()
-        config["security"]["authentication"]["config"][
-            "oauth_callback_url"
-        ] = oauth_callback_url
+
     elif auth_provider == "password":
         config["security"]["authentication"] = AUTH_PASSWORD.copy()
 
-        # Generate default password for qhub-init
-        default_password = "".join(
-            secrets.choice(string.ascii_letters + string.digits) for i in range(16)
-        )
-        config["security"]["users"]["example-user"]["password"] = bcrypt.hashpw(
-            default_password.encode("utf-8"), bcrypt.gensalt()
-        ).decode()
-
-        default_password_filename = os.path.join(
-            tempfile.gettempdir(), "QHUB_DEFAULT_PASSWORD"
-        )
-        with open(default_password_filename, "w") as f:
-            f.write(default_password)
-        os.chmod(default_password_filename, 0o700)
-
-        print(
-            f"Securely generated default random password={default_password} for example-user stored at path={default_password_filename}"
-        )
+    # Always use default password for keycloak root
+    config["security"].setdefault("keycloak", {})[
+        "initial_root_password"
+    ] = default_password
 
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
@@ -394,6 +383,15 @@ def render_config(
 
     config["profiles"] = DEFAULT_PROFILES.copy()
     config["environments"] = DEFAULT_ENVIRONMENTS.copy()
+
+    if ssl_cert_email is not None:
+        if not re.match("^[^ @]+@[^ @]+\\.[^ @]+$", ssl_cert_email):
+            raise ValueError("ssl-cert-email should be a valid email address")
+        config["certificate"] = {
+            "type": "lets-encrypt",
+            "acme_email": ssl_cert_email,
+            "acme_server": "https://acme-v02.api.letsencrypt.org/directory",
+        }
 
     if auth_auto_provision:
         if auth_provider == "auth0":

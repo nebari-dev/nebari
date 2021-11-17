@@ -1,8 +1,8 @@
 import pathlib
 
-from ruamel import yaml
 from qhub.schema import verify
 from qhub.provider.cicd.linter import comment_on_pr
+from qhub.utils import load_yaml
 
 
 def create_validate_subcommand(subparser):
@@ -39,8 +39,7 @@ def handle_validate(args):
             f"passed in configuration filename={config_filename} must exist"
         )
 
-    with config_filename.open() as f:
-        config = yaml.safe_load(f.read())
+    config = load_yaml(config_filename)
 
     if args.enable_commenting:
         # for PR's only

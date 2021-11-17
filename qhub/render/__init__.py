@@ -4,12 +4,22 @@ import functools
 import json
 import os
 from shutil import rmtree
+from urllib.parse import urlencode
 
 from ruamel.yaml import YAML
 from cookiecutter.generate import generate_files
 from ..version import __version__
 from ..constants import TERRAFORM_VERSION
 from ..utils import pip_install_qhub, QHUB_GH_BRANCH
+
+# existing files and folders to delete when `render_template` is called
+DELETABLE_PATHS = [
+    "terraform-state",
+    ".github",
+    "infrastructure",
+    "image",
+    ".gitlab-ci.yml",
+]
 
 
 def patch_dask_gateway_extra_config(config):
@@ -52,6 +62,166 @@ def patch_versioning_extra_config(config):
 
     if "terraform_version" not in config:
         config["terraform_version"] = TERRAFORM_VERSION
+
+
+def patch_terraform_users(config):
+    """
+    Add terraform-friendly user information
+    """
+    incoming_groups = config.get("security", {}).get("groups", {})
+    config["tf_groups"] = [
+        {
+            "name": k,
+            "gid": str((v or {}).get("gid", "")),
+        }
+        for (k, v) in {"users": {}, "admin": {}, **incoming_groups}.items()
+        # Above forces existence of users and admin groups if not already provided in config
+    ]
+
+    group_index_lookup = {
+        obj["name"]: index for (index, obj) in enumerate(config["tf_groups"])
+    }
+
+    incoming_users = config.get("security", {}).get("users", {})
+
+    config["tf_users"] = []
+    for (k, v) in incoming_users.items():
+        if v is None:
+            v = {}
+        config["tf_users"].append(
+            {
+                "name": k,
+                "uid": str(v.get("uid", "")),
+                "password": v.get("password", ""),
+                "email": "@" in k and k or None,
+                "primary_group": v.get("primary_group", "users"),
+            }
+        )
+
+    config["tf_user_groups"] = []
+    for (k, v) in incoming_users.items():
+        if v is None:
+            v = {}
+        # Every user should be in the 'users' group
+        users_group_names = set(
+            [v.get("primary_group", "")] + v.get("secondary_groups", []) + ["users"]
+        ) - set([""])
+        config["tf_user_groups"].append(
+            [group_index_lookup[gname] for gname in users_group_names]
+        )
+
+
+def patch_terraform_extensions(config):
+    """
+    Add terraform-friendly extension details
+    """
+    config["tf_extensions"] = []
+    logout_uris = []
+    for ext in config.get("extensions", []):
+        tf_ext = {
+            "name": ext["name"],
+            "image": ext["image"],
+            "urlslug": ext["urlslug"],
+            "private": ext.get("private", False),
+            "oauth2client": ext.get("oauth2client", False),
+            "logout": ext.get("logout", ""),
+            "jwt": False,
+            "qhubconfigyaml": ext.get("qhubconfigyaml", False),
+        }
+        tf_ext["envs"] = []
+        for env in ext.get("envs", []):
+            if env.get("code") == "KEYCLOAK":
+                tf_ext["envs"].append(
+                    {
+                        "name": "KEYCLOAK_SERVER_URL",
+                        "rawvalue": '"http://keycloak-headless.${var.environment}:8080/auth/"',
+                    }
+                )
+                tf_ext["envs"].append(
+                    {"name": "KEYCLOAK_ADMIN_USERNAME", "rawvalue": '"qhub-bot"'}
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "KEYCLOAK_ADMIN_PASSWORD",
+                        "rawvalue": "random_password.keycloak-qhub-bot-password.result",
+                    }
+                )
+            elif env.get("code") == "OAUTH2CLIENT":
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_AUTHORIZE_URL",
+                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth"',
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_ACCESS_TOKEN_URL",
+                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"',
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_USER_DATA_URL",
+                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"',
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_CLIENT_ID",
+                        "rawvalue": f"\"qhub-ext-{ext['name']}-client\"",
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_CLIENT_SECRET",
+                        "rawvalue": f"random_password.qhub-ext-{ext['name']}-keycloak-client-pw.result",
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "OAUTH2_REDIRECT_BASE",
+                        "rawvalue": f"\"https://${{var.endpoint}}/{ext['urlslug']}/\"",
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "COOKIE_OAUTH2STATE_NAME",
+                        "rawvalue": f"\"qhub-o2state-{ext['name']}\"",
+                    }
+                )
+            elif env.get("code") == "JWT":
+                tf_ext["envs"].append(
+                    {
+                        "name": "JWT_SECRET_KEY",
+                        "rawvalue": f"random_password.qhub-ext-{ext['name']}-jwt-secret.result",
+                    }
+                )
+                tf_ext["envs"].append(
+                    {
+                        "name": "COOKIE_AUTHORIZATION_NAME",
+                        "rawvalue": f"\"qhub-jwt-{ext['name']}\"",
+                    }
+                )
+                tf_ext["jwt"] = True
+            else:
+                raise ValueError("No such QHub extension code " + env.get("code"))
+
+        if ext.get("logout", "") != "":
+            logout_uris.append(
+                f"https://{config['domain']}/{ext['urlslug']}{ext['logout']}"
+            )
+
+        config["tf_extensions"].append(tf_ext)
+
+    final_logout_uri = f"https://{config['domain']}/hub/login"
+
+    for uri in logout_uris:
+        final_logout_uri = "{}?{}".format(
+            uri, urlencode({"redirect_uri": final_logout_uri})
+        )
+
+    config["final_logout_uri"] = final_logout_uri
+    config["logout_uris"] = logout_uris
 
 
 def deep_merge(d1, d2):
@@ -118,22 +288,28 @@ def render_template(output_directory, config_filename, force=False):
         yaml = YAML(typ="safe", pure=True)
         config = yaml.load(f)
 
-        # For any config values that start with
-        # QHUB_SECRET_, set the values using the
-        # corresponding env var.
-        set_env_vars_in_config(config)
+    # For any config values that start with
+    # QHUB_SECRET_, set the values using the
+    # corresponding env var.
+    set_env_vars_in_config(config)
 
-        config["repo_directory"] = repo_directory
-        patch_dask_gateway_extra_config(config)
+    config["repo_directory"] = repo_directory
+    patch_dask_gateway_extra_config(config)
 
     with (input_directory / "cookiecutter.json").open() as f:
         config = collections.ChainMap(config, json.load(f))
 
     patch_versioning_extra_config(config)
 
+    patch_terraform_users(config)
+
+    patch_terraform_extensions(config)
+
+    config["qhub_config_yaml_path"] = str(filename.absolute())
+
     remove_existing_renders(
         dest_repo_dir=output_directory / repo_directory,
-        verbosity=2,
+        verbosity=0,
     )
 
     generate_files(
@@ -144,9 +320,11 @@ def render_template(output_directory, config_filename, force=False):
     )
 
 
-def remove_existing_renders(dest_repo_dir, verbosity=0):
+def remove_existing_renders(
+    dest_repo_dir, deletable_paths=DELETABLE_PATHS, verbosity=0
+):
     """
-    Remove all files and directories beneath each directory in `deletable_dirs`. These files and directories will be regenerated in the next step (`generate_files`) based on the configurations set in `qhub-config.yml`.
+    Remove all files and directories beneath each directory in `deletable_paths`. These files and directories will be regenerated in the next step (`generate_files`) based on the configurations set in `qhub-config.yml`.
 
     Inputs must be pathlib.Path
     """
@@ -156,20 +334,15 @@ def remove_existing_renders(dest_repo_dir, verbosity=0):
             f"Deploying QHub from the home directory, {home_dir}, is not permitted."
         )
 
-    deletable_dirs = [
-        "terraform-state",
-        ".github",
-        "infrastructure",
-        "image",
-        ".gitlab-ci.yml",
-    ]
-
-    for deletable_dir in deletable_dirs:
-        deletable_dir = dest_repo_dir / deletable_dir
-        if deletable_dir.exists():
+    for delete_me in deletable_paths:
+        delete_me = dest_repo_dir / delete_me
+        if delete_me.exists():
             if verbosity > 0:
-                print(f"Deleting all files and directories beneath {deletable_dir} ...")
-            rmtree(deletable_dir)
+                print(f"Deleting all files and directories beneath {delete_me} ...")
+            if delete_me.is_file():
+                delete_me.unlink()
+            else:
+                rmtree(delete_me)
 
 
 def set_env_vars_in_config(config):

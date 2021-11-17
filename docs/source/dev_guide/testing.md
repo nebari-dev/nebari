@@ -70,6 +70,22 @@ Then open the localhost (127.0.0.1) link that is in the terminal
 [I 2021-04-05 17:37:17.346 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
 ```
 
+## Linting Dockerfiles
+
+To lint Dockerfiles, developers use a tool called [Hadolint](https://github.com/hadolint/hadolint). Hadolint is a Dockerfile linter that allows to discover issues with the Dockerfiles and recommends [best practices to be followed](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/). QHub CI automates Hadolint code reviews on every commit and pull request, reporting code style and error prone issues.
+
+To run Hadolint locally you can either install it locally or use a container image. Instructions are available on the [install documentation for HadoLint](https://github.com/hadolint/hadolint#install). The `.hadolint.yml` on the root directory defines the ignored rules. To run Hadolint on Dockerfiles run:
+
+```shell
+hadolint ./qhub/template/\{\{\ cookiecutter.repo_directory\ \}\}/image/Dockerfile.conda-store
+hadolint ./qhub/template/\{\{\ cookiecutter.repo_directory\ \}\}/image/Dockerfile.dask-gateway
+hadolint ./qhub/template/\{\{\ cookiecutter.repo_directory\ \}\}/image/Dockerfile.dask-worker
+hadolint ./qhub/template/\{\{\ cookiecutter.repo_directory\ \}\}/image/Dockerfile.jupyterhub
+hadolint ./qhub/template/\{\{\ cookiecutter.repo_directory\ \}\}/image/Dockerfile.jupyterlab
+```
+
+Hadolint will report `error`, `warning`, `info` and `style` while linting Dockerfiles. In case of an error, the CI fails.
+
 ## Debug Kubernetes clusters
 
  To debug Kubernetes clusters, we advise you to use [K9s](https://k9scli.io/), a terminal-based UI that aims to
@@ -107,6 +123,17 @@ how to test it. If the login type is 'password' then it uses the value in CYPRES
 The final command above should open the Cypress UI where you can run the tests manually and see the actions in the browser.
 
 Note that tests are heavily state dependent, so any changes or use of the deployed QHub could affect the results.
+
+## Deployment/Integration Tests
+
+Deployment and Integration testing makes it easier to test various features of deployed QHub
+on minikube such as Dask Gateway, external integrations, state of the kubernetes cluster via
+simple Python code. You can run the integration and deployment tests via the following command:
+
+```
+pytest tests_deployment/ -v
+```
+
 
 # Cloud Testing
 

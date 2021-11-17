@@ -2,7 +2,7 @@
 
 [Minikube](https://minikube.sigs.k8s.io/docs/) is a project allowing you to run a local Kubernetes node simulation for development and testing purposes.
 
-It is possible to run QHub on Minikube, and this can allow quicker feedback loops for development, as well as being less 
+It's possible to run QHub on Minikube, and this can allow quicker feedback loops for development, as well as being less
 expensive than running cloud Kubernetes clusters.
 
 Local testing is a great way to test the components of QHub. It is
@@ -19,7 +19,8 @@ MacOS relates to [Docker Desktop for
 Mac](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)
 being unable to route traffic to containers.  Theoretically, the
 installation of HyperKit Driver could solve the issue, although the
-proposed solution has not yet been tested. There some workarounds for running [Minikube on Mac below](#minikube-on-mac).
+proposed solution has not yet been tested. There are notes on our current attempts at workarounds for
+running [Minikube on Mac below](#minikube-on-mac).
 
 This guide assumes that you have the QHub repository downloaded, and you are at the root of the repository.
 
@@ -176,7 +177,7 @@ $ docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}/{{.
 A example subnet range will look like `192.168.49.2/24`. This CIDR range will have a starting IP of `192.168.49.0` and ending address of `192.168.49.255`. The `metallb` load balancer needs to be given a range of IP addresses that are contained in the docker CIDR range. If your CIDR is different, you can determine your range IP addresses from a CIDR address at [this website](https://www.ipaddressguide.com/cidr).
 
 For this example case, we will assign `metallb` a start IP address of
-`192.168.49.100` and an end of `192.168.49.150`. 
+`192.168.49.100` and an end of `192.168.49.150`.
 
 We can the `metallb` below CLI interface which will prompt for the start and stop IP range:
 
@@ -201,7 +202,7 @@ The output should be `The 'metallb' addon is enabled`.
 ## Note for Development on Windows Subsystem for Linux 2 (WSL2)
 <details>
   <summary>Click to expand note</summary>
-  
+
 The browser can have trouble reaching the load balancer running on WSL2. A workaround is to port forward the proxy-... pod to the host (ip 0.0.0.0). Get the ip address of the WSL2 machine via ```ip a```, it should be a 127.x.x.x address. To change the port forwarding after opening k9s you can type ```:pods <enter>```, hover over the proxy-... pod and type ```<shift-s>```, and enter the ip addresses.
 </details>
 
@@ -218,7 +219,7 @@ Then, initialize the configuration file `qhub-config.yaml` with:
 python -m qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
 ```
 ## Generate user password
-Each user on the `qhub-config.yaml` file will need a password.
+For each user on the `qhub-config.yaml` file needs a password.
 A random password is auto generated for the user `example-user` when
 the auth provider `password` is run, the value is then printed to the standard output (stdout).
 
@@ -289,7 +290,7 @@ has not been added to your certificate registry.
 Each web browser handles this differently. A workaround for Firefox:
 
  - Visit `about:config` and change the `network.stricttransportsecurity.preloadlist` to `false`
-  
+
 And a workaround for Chrome:
 
  - Type `badidea` or `thisisunsafe` while viewing the rendered page (this has to do with [how Chrome preloads some domains for its HTTP Strict Transport Security](https://hstspreload.org/) list in a way that cannot be manually removed)
@@ -315,7 +316,9 @@ The command will delete all instances of QHub, cleaning up the deployment enviro
 
 # Minikube on Mac
 
-The earlier instructions for minikube on Linux should work on Mac except:
+The earlier instructions for minikube on Linux will _nearly_ work on Mac except things will break without clever
+use of port forwarding at the right times... Here is an explanation of our attempts to get things to work, but
+it is not yet complete.
 
 1 - When working out the IP addresses to configure metallb try this:
 ```
@@ -329,7 +332,12 @@ This will display something like `192.168.49.2/24`, in which case a suitable IP 
 ```
 minikube kubectl -- --namespace=dev port-forward svc/proxy-public 8000:80
 ```
-Then you can access QHub on http://127.0.0.1:8000/
+Then you could access QHub on http://127.0.0.1:8000/
+
+3 - However, the `qhub deploy` step will need to communicate with the Keycloak server, but this is not possible
+without the correct hostname.
+
+It might be possible to set /etc/hosts to include github-actions.qhub.dev as we do for the AWS minikube, below. And meanwhile use kubectl port-forward to actually forward the traffic (from port 443 to something similar?). But you'd have to start that forwarding at the right point in the deployment. (When Kubernetes is ready, but before terraform runs the Keycloak operator...)
 
 ---
 
@@ -359,12 +367,14 @@ This assumes you have a 'quansight' profile in your ~/.aws/config and credential
 You can use a Key Pair that is already registered with AWS, or create one as follows:
 
 ```bash
-aws ec2 create-key-pair \
-    --key-name aws-quansight-mykey \
-    --query "KeyMaterial" \
-    --output text > ~/.ssh/aws-quansight-mykey.pem
+export MYKEYNAME=aws-quansight-<mykey>
 
-chmod 400 ~/.ssh/aws-quansight-mykey.pem
+aws ec2 create-key-pair \
+    --key-name ${MYKEYNAME} \
+    --query "KeyMaterial" \
+    --output text > ~/.ssh/${MYKEYNAME}.pem
+
+chmod 400 ~/.ssh/${MYKEYNAME}.pem
 ```
 
 ## Run the EC2 Instance
@@ -372,7 +382,7 @@ chmod 400 ~/.ssh/aws-quansight-mykey.pem
 The image we want is an Ubuntu 20.04 with Docker installed. We want to run it on a 16 GB/4 Core image, and also increase EBS disk space to 48 GB or so, up from the standard 8 GB.
 
 ```bash
-aws ec2 run-instances --image-id ami-0cd5fb602c264fbd6 --instance-type t3a.xlarge --count 1 --key-name aws-quansight-mykey --block-device-mappings 'DeviceName=/dev/sda1,Ebs={VolumeSize=48}'
+aws ec2 run-instances --image-id ami-0cd5fb602c264fbd6 --instance-type t3a.xlarge --count 1 --key-name ${MYKEYNAME} --block-device-mappings 'DeviceName=/dev/sda1,Ebs={VolumeSize=48}'
 ```
 
 Once running, get the instance ID and public DNS:
@@ -400,7 +410,7 @@ aws ec2 authorize-security-group-ingress --group-id sg-96f73feb --protocol tcp -
 Using the Public DNS obtained a couple of steps back, you can now SSH into the instance:
 
 ```bash
-ssh -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute.amazonaws.com
+ssh -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute.amazonaws.com
 ```
 
 ## Install Minikube etc
@@ -439,8 +449,9 @@ minikube addons enable metallb
 Install Virtualenv and Pip:
 
 ```bash
-sudo apt install python3-virtualenv
-sudo apt install python3-pip
+sudo apt update
+sudo apt install python3-virtualenv -y
+sudo apt install python3-pip -y
 ```
 
 Create and activate a virtualenv, install QHub dev:
@@ -459,6 +470,7 @@ Create and modify qhub-config.yaml:
 mkdir data-test
 cd data-test
 
+export QHUB_GH_BRANCH=main
 qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password
 
 sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 1/g' "qhub-config.yaml"
@@ -473,7 +485,10 @@ Then deploy:
 qhub deploy --config qhub-config.yaml --disable-prompt
 ```
 
-## Enable Minikube access from Mac
+## Enable Kubernetes access from Mac
+
+This step is optional, but will allow you to use kubectl and K9s directly from your Mac. It is not needed
+if you are happy to use kubectl within an SSH session on AWS instead.
 
 On your Mac laptop:
 
@@ -490,9 +505,9 @@ Copy these files from the remote instance (home folder):
 For example:
 ```bash
 cd .minikube_remote
-scp -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/ca.crt .
-scp -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/profiles/minikube/client.crt .
-scp -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/profiles/minikube/client.key .
+scp -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/ca.crt .
+scp -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/profiles/minikube/client.crt .
+scp -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/profiles/minikube/client.key .
 ```
 
 Merge the following into your ~/.kube/config file, or just run the command in full to overwrite it:
@@ -524,7 +539,7 @@ EOF
 Now SSH into the AWS instance, enabling port forwarding so you can access the Minikube cluster as though it is running on your Mac:
 
 ```bash
-ssh -i ~/.ssh/aws-quansight-dsl.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443
+ssh -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443
 ```
 
 You should now find that `kubectl` and `k9s` work for the Minikube cluster if you run them on your Mac! This can include `kubectl port-forward` to access Kubernetes services individually.
@@ -542,7 +557,7 @@ We can trick it by setting up a hostname alias. Run `sudo vi /etc/hosts` on the 
 And then we add an extra port forward when we SSH into the AWS instance:
 
 ```bash
-sudo ssh -i ~/.ssh/aws-quansight-dsl.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:443 -L github-actions.qhub.dev:443:192.168.49.100:443
+sudo ssh -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443 -L github-actions.qhub.dev:443:192.168.49.100:443
 ```
 
 This has to be run with sudo because we want to forward a low-numbered port (443) and this is not allowed without sudo.

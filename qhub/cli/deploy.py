@@ -1,11 +1,10 @@
 import pathlib
 import logging
 
-from ruamel import yaml
-
 from qhub.deploy import deploy_configuration
 from qhub.schema import verify
 from qhub.render import render_template
+from qhub.utils import load_yaml
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +40,11 @@ def create_deploy_subcommand(subparser):
         action="store_true",
         help="Disable auto-rendering in deploy stage",
     )
+    subparser.add_argument(
+        "--full-only",
+        action="store_true",
+        help="Only carry out one full pass instead of targeted sections (for development purposes)",
+    )
     subparser.set_defaults(func=handle_deploy)
 
 
@@ -51,8 +55,7 @@ def handle_deploy(args):
             f"passed in configuration filename={config_filename} must exist"
         )
 
-    with config_filename.open() as f:
-        config = yaml.safe_load(f.read())
+    config = load_yaml(config_filename)
 
     verify(config)
 
@@ -65,4 +68,5 @@ def handle_deploy(args):
         args.dns_auto_provision,
         args.disable_prompt,
         args.skip_remote_state_provision,
+        args.full_only,
     )

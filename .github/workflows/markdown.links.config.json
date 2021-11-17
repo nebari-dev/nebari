@@ -8,6 +8,12 @@
         },
         {
             "pattern": "linuxize.com"
+        },
+        {
+            "pattern": "github-actions.qhub.dev"
+        },
+        {
+            "pattern": "127.0.0.1:8000"
         }
 	]
 }

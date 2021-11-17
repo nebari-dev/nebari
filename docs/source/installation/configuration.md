@@ -1,4 +1,4 @@
-# Configuration
+# Advanced Configuration
 
 The configuration file is split into several sections. In this page,
 we detail the requirements necessary for the YAML configuration
@@ -83,8 +83,8 @@ certificate:
   type: self-signed
 ```
 
-To use Let's Encrypt you must specify an email address that let's
-encrypt will associate the generated certificate with and whether to
+To use Let's Encrypt you must specify an email address that Let's
+Encrypt will associate the generated certificate with and whether to
 use the [staging
 server](https://acme-staging-v02.api.letsencrypt.org/directory) or
 [production
@@ -99,6 +99,8 @@ certificate:
   acme_email: <your-email-address>
   acme_server: https://acme-v02.api.letsencrypt.org/directory
 ```
+
+Note the above snippet will already be present if you provided an `--ssl-cert-email` when you ran `qhub init`.
 
 You may also supply a custom self-signed certificate and secret
 key. Note that the kubernetes default namespace that QHub uses is
@@ -141,22 +143,6 @@ security:
       client_id: <CLIENT_ID>
       client_secret: <CLIENT_SECRET>
       oauth_callback_url: https://do.qhub.dev/hub/oauth_callback
-  users:
-    example-user:
-      uid: 1000
-      primary_group: users
-      secondary_groups:
-        - billing
-    dharhas:
-      uid: 1001
-      primary_group: admin
-  groups:
-    users:
-      gid: 100
-    admin:
-      gid: 101
-    billing:
-      gid: 102
 ```
 
 ### Omitting sensitive values
@@ -208,8 +194,6 @@ security:
     config:
       client_id: ...
       client_secret: ...
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
-      scope: ["openid", "email", "profile"]
       auth0_subdomain: ...
 ```
 
@@ -226,89 +210,74 @@ security:
     config:
       client_id: ...
       client_secret: ...
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
 ```
 
 #### Password Based Authentication
 
-For Password based authentication. Note that users will require a
-`password` field that can be generated via the following command:
-`python -c "import bcrypt; print(bcrypt.hashpw(b'<password>',
-bcrypt.gensalt()).decode('utf-8'))"`. Make sure to replace
-`<password>` with whatever password you are wanting.
+For Password based authentication. Ultimately, this just defers to however Keycloak is configured. That's also true for GitHub/Auth0 cases, except that for the single-sign on providers the deployment will also configure those providers in Keycloak to save manual configuration. But ultimately, it is also possible to add GitHub, or Google etc, as an Identity Provider in Keycloak even if you formally select 'password' authentication in the `qhub-config.yaml` file.
 
 ```yaml
 security:
   authentication:
     type: password
-  users:
-    ...
-    <username>:
-      ...
-      password: $2b$....
 ```
 
-#### Custom Authentication
+### Keycloak
 
-You can specify arbitrary authentication via the `custom` type. All
-`config` attributes will be set as traitlets to the configured
-authentication class. The attributes will obey the type set via yaml
-(e.g. True -> will be a boolean True for Traitlets).
+The security.keycloak section allows you to specify an initial password for the `root` user (to login at https://myqhubsite.com/auth/admin/) to manage your Keycloak database, e.g. add users/groups.
 
-```yaml
+You should change this after deployment. Future deployments will not reset the password to any specified in the YAML file.
+
+It is also possible to provide overrides to the [Keycloak Helm deployment](https://github.com/codecentric/helm-charts/tree/master/charts/keycloak).
+
+```
 security:
-  authentication:
-    type: custom
-    authentication_class: "oauthenticator.google.GoogleOAuthenticator"
-    config:
-      login_service: "My Login Button"
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
-      client_id: 'your-client-id'
-      client_secret: 'your-client-secret'
+  keycloak:
+    initial_root_password: initpasswd
+    overrides:
+      image:
+        repository: quansight/qhub-keycloak
 ```
 
-### User Management
+### User and Group Management
 
-`users` and `groups` allows one to provision UNIX permissions to each
-user. Any user is assigned a `uid`, `primary_group`, and optionally
-any number of `secondary_groups`. Note that `uid` and `gid` fields
-must be unique and are required.
+It is still possible to specify `users` and `groups` in the YAML file - in older versions of QHub, all users had to be specified in this way.
+
+If specifying users/groups in this way, you can also manually add more users/groups in Keycloak. However, be aware that if users/groups were initially created based on entries in the YAML file, those users/groups will be destroyed if `qhub deploy` is ever run without those users/groups in the file. They may also be recreated after you delete them manually in Keycloak.
+
+Any user is assigned a `primary_group` and optionally
+any number of `secondary_groups`.
 
 ```yaml
 security:
   users:
     example-user:
-      uid: 1000
       primary_group: users
       secondary_groups:
         - billing
+      password: plaintextpasswd
     dharhas:
-      uid: 1001
       primary_group: admin
   groups:
     users:
-      gid: 100
     admin:
-      gid: 101
     billing:
-      gid: 102
 ```
 
 * The `primary_group` is the group name assigned to files that are
 written for the user.
-* `groups` are a mapping of group name to group IDs. It is
-  recommended to not change the IDs assigned to groups and users
-  after creation, since it may lead to login issues.
-  > NOTE: While the demo shows IDs between `100` and
-`1000`, it is recommended to start with high User ID numbers
-e.g. `10000000`. `ids` technically supports 2 billion `ids`.
+* `groups` are a mapping of group name to an empty map (no entries are required within that map any longer).
 
-### Admin Group
+#### Admin and Users Group
 
 The admin group has special significance. If a user's `primary_group`
 is admin they will be able to access the jupyterhub admin page. The
 admin page allows a user to stop user's servers and launch a given
 user's server and impersonate them.
+
+All users must be a member of the `users` group.
+
+Both `admin` and `users` groups will be created even if not specified in the YAML file.
 
 ## Provider Infrastructure
 
@@ -635,6 +604,12 @@ profiles:
         - users
 ```
 
+Provided `groups:` is specified for a profile (even if no groups are listed), then that profile can also be made available to a group by adding the attribute `profiles` to the group in Keycloak. Add multiple profile (display) names to this attribute using ## as a delimiter:
+
+```
+"profiles": "Small Instance##Medium Instance"
+```
+
 ### JupyterLab Profile Node Selectors
 
 A common operation is to target jupyterlab profiles to specific node
@@ -745,6 +720,14 @@ each environment include `ipykernel`, `ipywidgets`, `qhub-dask==0.2.3`. Upon cha
 environment definition expect 1-10 minutes upon deployment of the
 configuration for the environment to appear.
 
+## qhub_version
+
+All qhub-config.yaml files must now contain a `qhub_version` field displaying the version of QHub which it is intended to be deployed with.
+
+QHub will refuse to deploy if it does not contain the same version as that of the `qhub` command.
+
+Typically, you can upgrade the qhub-config.yaml file itself using the [`qhub upgrade` command](../admin_guide/upgrade.md). This will update image numbers, plus updating qhub_version to match the installed version of `qhub`, as well as any other bespoke changes required.
+
 # Full Configuration Example
 
 Everything in the configuration is set besides [???]
@@ -762,39 +745,38 @@ certificate:
   type: self-signed
 
 security:
+  keycloak:
+    initial_root_password: initpasswd
+    overrides:
+      image:
+        repository: quansight/qhub-keycloak
+
   authentication:
     type: GitHub
     config:
       client_id: CLIENT_ID
       client_secret: CLIENT_SECRET
       oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
+
   users:
     example-user:
-      uid: 1000
       primary_group: users
       secondary_groups:
         - billing
     dharhas:
-      uid: 1001
       primary_group: admin
     tonyfast:
-      uid: 1002
       primary_group: admin
     prasunanand:
-      uid: 1003
       primary_group: admin
     aktech:
-      uid: 1004
       primary_group: users
       secondary_groups:
         - admin
   groups:
     users:
-      gid: 100
     admin:
-      gid: 101
     billing:
-      gid: 102
 
 digital_ocean:
   region: nyc3
