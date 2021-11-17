@@ -55,7 +55,7 @@ The `qhub init` command also generates an initial password for your root Keycloa
 Securely generated default random password=R1E8aWedaQVU6kKv for Keycloak root user stored at path=/tmp/QHUB_DEFAULT_PASSWORD
 ```
 
-This password is also available in the `qhub-config.yaml` file under the security.keycloak.initial_root_password field. It is required in the next page of these docs for logging in to your QHub.
+This password is also available in the `qhub-config.yaml` file under the security.keycloak.initial_root_password field. It's required in the next page of these docs for logging in to your QHub.
 
 This `qhub init` command generates the `qhub-config.yaml` config file
 with an infrastructure to be deployed on `aws`, named `projectname`, with a
@@ -82,9 +82,9 @@ The `qhub init` command may have some side-effects such automatically creating a
 
 This file is the configuration file that will determine how the cloud infrastructure and QHub is built and deployed in the next step.
 
-But at this point it is just a text file! You could edit it manually if you are unhappy with the choices, or delete it and start over again.
+But at this point it's just a text file! You could edit it manually if you are unhappy with the choices, or delete it and start over again.
 
-Or it would be possible to create from scratch or re-use a `qhub-config.yaml` file - it is not essential to use `qhub init` at all, but it is often the easiest way to get started.
+Or it would be possible to create from scratch or re-use a `qhub-config.yaml` file - it's not essential to use `qhub init` at all, but it's often the easiest way to get started.
 
 To understand some ways in which you could decide to edit the YAML file, see [Advanced Configuration](configuration.md).
 
@@ -156,7 +156,7 @@ git push origin main
 ```
 
 Once pushed to GitHub, future commits to `main`  trigger CI/CD to redeploy
-changes the QHub cluster.  Since the infrastructure state is reflected in
+changes the QHub cluster. Since the infrastructure state is reflected in
 the repository, this workflow allows for team members to submit pull requests
 and perform code reviews before modifying the infrastructure, easing the
 overall maintenance process.
