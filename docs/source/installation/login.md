@@ -28,7 +28,11 @@ This will create a user called bob with the initial password provided. Omit the 
 
 ### Add user using Keycloak console
 
-To add a QHub user from the web console for Keycloak, visit: https://<your_qhub_domain>/auth/admin/
+To add a QHub user from the web console for Keycloak, visit:
+
+https://myqhubsite.com/auth/admin/
+
+(Switch 'myqhubsite.com' for the domain you provided for your QHub deployment.)
 
 ![Root Login to Keycloak](/source/images/keycloak_master_login.png)
 
@@ -56,7 +60,7 @@ It is best to unset the 'Temporary' on/off button so the user won't be forced to
 
 Your new user can now log into QHub proper (not Keycloak's admin console).
 
-Visit https://<your_qhub_domain>/ (or whatever domain you have chosen for your QHub).
+Visit https://myqhubsite.com/ (or whatever domain you have chosen for your QHub).
 
 Click 'Sign in with Keycloak'.
 
@@ -70,7 +74,7 @@ If you chose GitHub or Auth0 login, click the 'GitHub' button to be taken to a G
 
 You should change your root password for Keycloak now that you've got things running.
 
-Back in https://<your_qhub_domain>/auth/admin/ you can click on the 'Root' dropdown in the top right of the screen, and select 'Manage account'.
+Back in https://myqhubsite.com/auth/admin/ you can click on the 'Root' dropdown in the top right of the screen, and select 'Manage account'.
 
 Under 'Account Security' click 'Signing In'.
 
@@ -80,7 +84,7 @@ From this point, the security.keycloak.initial_root_password field in `qhub-conf
 
 # Groups
 
-Add Groups in the same Keycloak backend as you can add users - that is, login as `root` to https://<your_qhub_domain>/auth/admin/. Click Groups on the left-hand side.
+Add Groups in the same Keycloak backend as you can add users - that is, login as `root` to https://myqhubsite.com/auth/admin/. Click Groups on the left-hand side.
 
 Groups named `users` and `admin` will have been created automatically by QHub. All users will be added to the `users` group automatically when you create them. You should never remove them from the `users` group as that group must contain all users.
 
