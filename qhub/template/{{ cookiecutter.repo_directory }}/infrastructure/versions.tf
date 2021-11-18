@@ -3,6 +3,7 @@ terraform {
 {%- if cookiecutter.provider == "aws" %}
     aws = {
       source = "hashicorp/aws"
+      version = "3.64.2"
     }
 {%- elif cookiecutter.provider == "azure" %}
     azurerm = {
@@ -12,10 +13,12 @@ terraform {
 {%- elif cookiecutter.provider == "gcp" %}
     google = {
       source = "hashicorp/google"
+      version = "=3.89.0"
     }
 {%- elif cookiecutter.provider == "do" %}
     digitalocean = {
       source = "digitalocean/digitalocean"
+      version = "=2.14.0"
     }
 {% endif %}
     helm = {
@@ -24,11 +27,15 @@ terraform {
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.0.2"
+      version = "2.3.2"
     }
     kubernetes-alpha = {
       source  = "hashicorp/kubernetes-alpha"
       version = "0.3.2"
+    }
+    keycloak = {
+      source  = "mrparkers/keycloak"
+      version = "3.3.0"
     }
   }
   required_version = ">= 0.13"

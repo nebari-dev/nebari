@@ -9,8 +9,7 @@ variable "namespace" {
 }
 
 variable "prefect_token" {
-  type    = string
-  default = ""
+  type = string
 }
 
 variable "image" {
@@ -21,4 +20,10 @@ variable "image" {
 variable "cloud_api" {
   type    = string
   default = "https://api.prefect.io"
+}
+
+variable "overrides" {
+  description = "Prefect helm chart list of overrides"
+  type        = list(string)
+  default     = []
 }

@@ -1,7 +1,8 @@
 import json
+import io
 
 from jinja2.ext import Extension
-from ruamel import yaml
+from qhub.utils import yaml
 
 
 class YamlifyExtension(Extension):
@@ -12,7 +13,9 @@ class YamlifyExtension(Extension):
         super().__init__(environment)
 
         def yamlify(obj):
-            return yaml.dump(obj)
+            s = io.StringIO()
+            yaml.dump(obj, s)
+            return s.getvalue()
 
         environment.filters["yamlify"] = yamlify
 

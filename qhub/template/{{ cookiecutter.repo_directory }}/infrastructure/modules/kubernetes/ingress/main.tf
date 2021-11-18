@@ -107,6 +107,38 @@ resource "kubernetes_service" "main" {
   }
 }
 
+resource "kubernetes_service" "traefik_internal" {
+  wait_for_load_balancer = true
+
+  metadata {
+    name      = "${var.name}-traefik-internal"
+    namespace = var.namespace
+    annotations = {
+      "prometheus.io/scrape" = "true"
+      "prometheus.io/path"   = "/metrics"
+      "prometheus.io/port"   = 9000
+    }
+    labels = {
+      "app.kubernetes.io/component" = "traefik-internal-service"
+      "app.kubernetes.io/part-of"   = "traefik-ingress"
+    }
+  }
+
+  spec {
+    selector = {
+      "app.kubernetes.io/component" = "traefik-ingress"
+    }
+
+    port {
+      name        = "http"
+      protocol    = "TCP"
+      port        = 9000
+      target_port = 9000
+    }
+
+    type = "ClusterIP"
+  }
+}
 
 resource "kubernetes_deployment" "main" {
   metadata {
@@ -172,7 +204,7 @@ resource "kubernetes_deployment" "main" {
             "--api.dashboard=true",
             "--ping=true",
             # Start the Traefik Kubernetes Ingress Controller
-            "--providers.kubernetesingress",
+            "--providers.kubernetesingress=true",
             "--providers.kubernetesingress.namespaces=${var.namespace}",
             "--providers.kubernetesingress.ingressclass=traefik",
             # Start the Traefik Kubernetes CRD Controller Provider
@@ -189,6 +221,8 @@ resource "kubernetes_deployment" "main" {
             "--entryPoints.traefik.address=:9000",
             "--entrypoints.web.http.redirections.entryPoint.to=websecure",
             "--entrypoints.web.http.redirections.entryPoint.scheme=https",
+            # Enable Prometheus Monitoring of Traefik
+            "--metrics.prometheus=true",
             # Enable debug logging. Useful to work out why something might not be
             # working. Fetch logs of the pod.
             "--log.level=${var.loglevel}",

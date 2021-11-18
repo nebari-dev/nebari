@@ -12,6 +12,52 @@ module "kubernetes-jupyterhub" {
   overrides = concat(var.jupyterhub-overrides, [
     jsonencode({
       hub = {
+        extraEnv = [
+          {
+            name = "OAUTH_CLIENT_ID",
+            value = var.OAUTH_CLIENT_ID
+          },
+          {
+            name = "OAUTH_CLIENT_SECRET",
+            value = var.OAUTH_CLIENT_SECRET
+          },
+          {
+            name = "OAUTH_CALLBACK_URL",
+            value = var.OAUTH_CALLBACK_URL
+          },
+          {
+            name = "OAUTH2_TLS_VERIFY",
+            value = var.OAUTH2_TLS_VERIFY
+          },
+          {
+            name = "KEYCLOAK_AUTHORIZE_URL",
+            value = var.keycloak_authorize_url
+          },
+          {
+            name = "KEYCLOAK_TOKEN_URL",
+            value = var.keycloak_token_url
+          },
+          {
+            name = "KEYCLOAK_USERDATA_URL",
+            value = var.keycloak_userdata_url
+          },
+          { 
+            name = "OAUTH_LOGOUT_REDIRECT_URL",
+            value = var.keycloak_logout_url
+          },
+          {
+            name  = "KEYCLOAK_SERVER_URL"
+            value = var.keycloak_server_url
+          },
+          {
+            name  = "KEYCLOAK_USERNAME"
+            value = var.keycloak_username
+          },
+          {
+            name  = "KEYCLOAK_PASSWORD"
+            value = var.keycloak_password
+          }
+        ]
         nodeSelector = {
           (var.general-node-group.key) = var.general-node-group.value
         }
@@ -22,10 +68,6 @@ module "kubernetes-jupyterhub" {
           "dask-gateway" = {
             apiToken = random_password.jupyterhub_api_token.result
           }
-        }
-
-        extraConfig = {
-          forwardauthservice = "c.JupyterHub.services += [{ 'name': 'forwardauth-jupyterhub-service', 'api_token': '${var.forwardauth-jh-client-secret}', 'oauth_client_id': '${var.forwardauth-jh-client-id}', 'oauth_redirect_uri': 'https://${var.external-url}${var.forwardauth-callback-url-path}', 'oauth_no_confirm': True, }]"
         }
       }
 
@@ -78,11 +120,6 @@ module "kubernetes-jupyterhub" {
             {
               name      = "etc-dask"
               mountPath = "/etc/dask"
-            },
-            {
-              name      = "home"
-              mountPath = "/home/shared"
-              subPath   = "home/shared"
             }
           ]
         }
@@ -91,12 +128,6 @@ module "kubernetes-jupyterhub" {
 
     })
   ])
-
-  # hub.services in z2jh does not currently support more than apiToken -> api_token, 
-  # but we need oauth_client_id and oauth_redirect_uri too for forwardauth,
-  # so that is in an extraConfig block above.
-  # Using += seems to work but ultimately relies on z2jh parsing services.dask-gateway 
-  # before forwardauthservice.extraConfig
 }
 
 
@@ -355,4 +386,16 @@ resource "kubernetes_manifest" "forwardauth" {
       tls = local.tls
     }
   }
+}
+
+module "external-container-reg" {
+  source = "../../extcr"
+
+  count = var.extcr_config.enabled ? 1 : 0
+
+  namespace         = var.namespace
+  access_key_id     = var.extcr_config.access_key_id
+  secret_access_key = var.extcr_config.secret_access_key
+  extcr_account     = var.extcr_config.extcr_account
+  extcr_region      = var.extcr_config.extcr_region
 }

@@ -3,6 +3,10 @@ render-qhub:
   variables:
     COMMIT_MSG: |
       qhub-config.yaml automated commit: {{ '$CI_COMMIT_SHA' }}
+{%- if cookiecutter.QHUB_GH_BRANCH != '' %}
+    # Preserve dev branch so pip_install_qhub doesn't get overridden on next render
+    QHUB_GH_BRANCH: {{ cookiecutter.QHUB_GH_BRANCH }}
+{% endif %}
 {%- if cookiecutter.ci_cd.before_script is defined %}
   before_script:
 {%- for command in cookiecutter.ci_cd.before_script %}

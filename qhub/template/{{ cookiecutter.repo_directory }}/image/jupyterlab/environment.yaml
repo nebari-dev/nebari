@@ -24,9 +24,11 @@ dependencies:
  - ipywidgets >=7.6
  - ipyleaflet >=0.13.5
  - pyviz_comms >=2.0.1
+ - jupyter-resource-usage >=0.6.0
+ - nbgitpuller
 
  # cds dashboards
- - cdsdashboards-singleuser >=0.5.7
+ - cdsdashboards-singleuser >=0.6.0
  - jhsingle-native-proxy >=0.7.6
 
  # viz tools

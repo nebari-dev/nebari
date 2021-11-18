@@ -1,3 +1,5 @@
+const path = require('path');
+
 const yaml_fields = [
     'security.authentication.type'
 ];
@@ -22,6 +24,8 @@ module.exports = (on, config) => {
                     field => ['qhub_'+field.replace(/\./g, '_') , _.get(data, field, '')]
                         )
         );
+
+        new_config['env']['full_path_of_cypress_folder'] = path.resolve(__dirname, "..");
 
     }
     catch (e) {

@@ -4,7 +4,7 @@ variable "namespace" {
 }
 
 variable "cluster-name" {
-  description = "Cluster name for kuberentes cluster"
+  description = "Cluster name for kubernetes cluster"
   type        = string
 }
 

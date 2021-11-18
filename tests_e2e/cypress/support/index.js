@@ -19,6 +19,8 @@
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
+const path = require('path');
+
 Cypress.on('uncaught:exception', (err, runnable) => {
     // returning false here prevents Cypress from
     // failing the test
@@ -28,14 +30,40 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 
 Cypress.Commands.add('loginWithPassword', (username, password) => {
     cy.visit('/hub/home');
+
+    cy.get('#login-main > div.service-login > a')
+        .should('contain', 'Sign in with Keycloak').click();
   
-    cy.get('#username_input')
+    cy.get('input#username')
       .type(username);
   
-    cy.get('#password_input')
+    cy.get('input#password')
       .type(password);
   
     cy.get('form').submit();
 });
 
+
+Cypress.Commands.add('runJHubClient', (JHUB_CLIENT_PYTHON_PATH, hub_url, username, password, notebook_filename, kernel="python3", timeout=20000) => {
+
+  Cypress.config('execTimeout', timeout);
+
+  let notebookpath = path.resolve(Cypress.env('full_path_of_cypress_folder'), "notebooks", notebook_filename);
+
+  return cy.exec(
+    [
+      JHUB_CLIENT_PYTHON_PATH, "-m", "jhub_client", "run",
+      "--hub", hub_url, "--notebook", "\"" + notebookpath + "\"",
+      "--auth-type", "basic",
+      "--kernel", kernel,
+      "--validate",
+      "--no-verify-ssl"
+    ].join(" "), 
+    {
+      env: { JUPYTERHUB_USERNAME: username, JUPYTERHUB_PASSWORD: password } ,
+      failOnNonZeroExit: false
+    }
+  )
+
+});
 
