@@ -281,9 +281,16 @@ module "qhub" {
   certificate-secret-name = "{{ cookiecutter.certificate.secret_name }}"
 {% endif %}
 
-  jupyterhub-overrides = [
+  jupyterhub-overrides = concat([
     file("jupyterhub.yaml")
-  ]
+    ]
+{%- if cookiecutter.jupyterhub is defined and cookiecutter.jupyterhub.overrides is defined %},
+[<<EOT
+{{ cookiecutter.jupyterhub.overrides | default({}) | yamlify -}}
+    EOT
+    ]
+{%- endif %}
+  )
 
   dask_gateway_extra_config = file("dask_gateway_config.py.j2")
 
