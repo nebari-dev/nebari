@@ -16,6 +16,20 @@
 
 ### Bug fixes
 
+## Release 0.3.14 - 11/19/2021
+
+### Breaking changes
+
+- No known breaking changes
+
+### Feature changes and enhancements
+
+- Fixed bug due to an unpinned GCP terraform dependency preventing deployment on GCP ([#914](https://github.com/Quansight/qhub/pull/914))
+- Deletes existing `.gitlb-ciy.yml` when rendering ([#887](https://github.com/Quansight/qhub/pull/887))
+- Update default CDS dashboards version to 0.6.0 ([this commit](https://github.com/Quansight/qhub/commit/188a5612d169bac0c43f640417031b257b71289b))
+- Update Azure env variable names in terraform ([#882](https://github.com/Quansight/qhub/pull/882))
+- change terraform command from import to refresh for GCP to prevent `qhub deploy` hanging when the state bucket is not currently created ([this commit](https://github.com/Quansight/qhub/commit/9ad65f640e2d18211140f2e59d1d9f70f194688e))
+
 ## Release 0.3.13 - 10/13/2021
 
 ### Breaking changes
