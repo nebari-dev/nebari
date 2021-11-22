@@ -44,7 +44,7 @@ allow to configure the deployment:
 - `--auth-provider`: Used to specified authentication provider, in this case Auth0
 - `--auth-auto-provision`: Whether or not to automatically create and configure the authentication provider.
 - `--repository`: Repository name used to store the Infrastructure-as-Code on GitHub.
-- `--repository-auto-provision`: Sets the secrets for the GitHub repository used for CI/CD actions.
+- `--repository-auto-provision`: Sets the secrets for the **GitHub** repository used for CI/CD actions.
 - `--ssl-cert-email`: Provide an admin's email address so that LetsEncrypt can generate a real SSL certificate for your site. If omitted, the site will use a self-signed cert that may cause problems for some browsers but may be sufficient for testing.
 
 For configuration items not set as command line arguments, the script is going to prompt you to enter these values.
@@ -55,7 +55,7 @@ The `qhub init` command also generates an initial password for your root Keycloa
 Securely generated default random password=R1E8aWedaQVU6kKv for Keycloak root user stored at path=/tmp/QHUB_DEFAULT_PASSWORD
 ```
 
-This password is also available in the `qhub-config.yaml` file under the security.keycloak.initial_root_password field. It's required in the next page of these docs for logging in to your QHub.
+This password is also available in the `qhub-config.yaml` file under the `security.keycloak.initial_root_password field`. It's required in the next page of these docs for logging in to your QHub.
 
 This `qhub init` command generates the `qhub-config.yaml` config file
 with an infrastructure to be deployed on `aws`, named `projectname`, with a
@@ -101,6 +101,7 @@ This creates the following folder structure:
 
 ```
 .
+├── .github             # if "--ci-provider github-actions" was passed in, then an action scripts folder is also generated
 ├── environments        # stores the conda environments
 ├── image               # docker images used on deployment: jupyterhub, jupyterlab, and dask-gateway
 │   ├── dask-worker
@@ -111,8 +112,8 @@ This creates the following folder structure:
 ```
 
 The terminal then prompts you to press `[enter]` to check auth credentials
-(which were added by the `qhub init` command).  This triggers the
-deployment, which takes around 10 minutes to complete.
+(which were added by the `qhub init` command); to disable the prompt, add `--disable-prompt` to the qhub deploy command.
+A first time deeployment can take around 10 minutes to complete.
 
 During the initial deployment, Digital Ocean, GCP and Azure are going to display an `"ip"` address
 whereas AWS is going to display a CNAME `"hostname"`.

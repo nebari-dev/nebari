@@ -60,22 +60,22 @@ def setup_fixture(request, monkeypatch, tmp_path):
 
     if cloud_provider == "aws":
         monkeypatch.setattr(
-            "qhub.initialize.amazon_web_services.kubernetes_versions",
+            "qhub.utils.amazon_web_services.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
     elif cloud_provider == "azure":
         monkeypatch.setattr(
-            "qhub.initialize.azure_cloud.kubernetes_versions",
+            "qhub.utils.azure_cloud.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
     elif cloud_provider == "do":
         monkeypatch.setattr(
-            "qhub.initialize.digital_ocean.kubernetes_versions",
+            "qhub.utils.digital_ocean.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
     elif cloud_provider == "gcp":
         monkeypatch.setattr(
-            "qhub.initialize.google_cloud.kubernetes_versions",
+            "qhub.utils.google_cloud.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
 
