@@ -5,23 +5,7 @@
 One of the first things you might want to do is to **add new users**
 to your QHub.
 
-Any type of supported authorization from auth0 can be used as a
-username. Below is an example configuration of 2 users:
-
-```yaml
-     joeuser@example:
-         uid: 1000000
-         primary_group: users
-         secondary_groups:
-             - billing
-             - admin
-     janeuser@example.com:
-         uid: 1000001
-         primary_group: users
-```
-
-As seen above, each username has a unique `uid` and a `primary_group`.
-Optional `secondary_groups` may also be set for each user.
+This can be done through the Keycloak web console. See [Adding a QHub user](file:///Users/dan/Dev/qhub/docs/build/source/installation/login.html#adding-a-qhub-user) for details.
 
 ## Upgrades and dependencies management
 
@@ -32,7 +16,7 @@ To update a current conda environment and redeploy you will need to:
 * Make changes to the `qhub-config.yaml` file under the `environments` key.
 > NOTE: in [YAML](https://yaml.org/spec/1.2/spec.html#mapping//),
   each level is a dictionary key, and every 2 white spaces represent values for those keys.
-  
+
 To add a new environment, add two spaces below the `environments` key such as the example below.
 ```yaml
 environments:
