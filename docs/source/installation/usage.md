@@ -44,7 +44,7 @@ allow to configure the deployment:
 - `--auth-provider`: Used to specified authentication provider, in this case Auth0
 - `--auth-auto-provision`: Whether or not to automatically create and configure the authentication provider.
 - `--repository`: Repository name used to store the Infrastructure-as-Code on GitHub.
-- `--repository-auto-provision`: Sets the secrets for the GitHub repository used for CI/CD actions.
+- `--repository-auto-provision`: Sets the secrets for the **GitHub** repository used for CI/CD actions.
 - `--ssl-cert-email`: Provide an admin's email address so that LetsEncrypt can generate a real SSL certificate for your site. If omitted, the site will use a self-signed cert that may cause problems for some browsers but may be sufficient for testing.
 
 For configuration items not set as command line arguments, the script is going to prompt you to enter these values.
