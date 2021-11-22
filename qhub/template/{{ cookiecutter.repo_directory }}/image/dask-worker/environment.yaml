@@ -3,4 +3,4 @@ channels:
   - conda-forge
 dependencies:
  # dask
- - qhub-dask==0.3.12
+ - qhub-dask==0.3.13

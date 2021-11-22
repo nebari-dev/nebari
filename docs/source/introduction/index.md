@@ -1,5 +1,6 @@
-# What is QHub?
-Open source tool for data science research, development, and deployment.
+# Introduction
+
+QHub is an open source tool for data science research, development, and deployment.
 
 QHub is [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code)
 that simplifies the deployment of data science projects using JupyterHub and Dask Gateway for you and your team.
@@ -22,10 +23,11 @@ The technology stack is an integration of the following existing open source lib
 + [**JupyterLab**](https://jupyterlab.readthedocs.io/en/stable/): a web-based interactive development environment for Jupyter Notebooks
 + [**Dask**](https://docs.dask.org/en/latest/): a scalable and flexible  library for parallel computing in Python
   + [**Dask-Gateway**](https://gateway.dask.org/): a secure, multi-tenant server for managing Dask clusters
-+ [**traefik**](https://traefik.io/) for routing web/tcp traffic inside cluster
-+ [**traefik-forward-auth**](https://github.com/thomseddon/traefik-forward-auth) single sign on and easy securing of web applications
++ [**Keycloak**](https://www.keycloak.org/) Open Source Identity and Access Management
 + [**GitHub Actions**](https://docs.github.com/en/actions): a tool to automate, customize, and execute software
   development workflows in a GitHub repository.
++ [**traefik**](https://traefik.io/) for routing web/tcp traffic inside cluster
+  + [**traefik-forward-auth**](https://github.com/thomseddon/traefik-forward-auth) single sign on and easy securing of web applications
 
 Amongst the newly created open source libraries on the tech stack are:
 + [**jupyterhub-ssh**](https://github.com/yuvipanda/jupyterhub-ssh) brings the SSH experience to a modern cluster manager.
@@ -46,7 +48,7 @@ with.
 + [**prometheus**](https://prometheus.io/) cluster monitoring
 + [**grafana**](https://grafana.com/) cluster monitoring visualizations
 
-# Why use QHub?
+## Why use QHub?
 
 QHub provides enables teams to build their own scalable compute infrastructure with:
 
@@ -55,6 +57,6 @@ QHub provides enables teams to build their own scalable compute infrastructure w
 + Option to choose from multiple compute instances, such as: **namely normal**, **high memory**, **GPU**, etc.
 + Autoscaling Dask compute clusters for big data using any instance type.
 + Shell access and remote editing access (i.e. VSCode remote) through KubeSSH.
-+ Full linux style permissions allowing for different shared folders for different groups of users.
++ Shared filesystem allowing users to work on projects privately, within groups, or across the organisation.
 + Robust compute environment handling allowing both prebuilt and ad-hoc environment creation.
 + Integrated video conferencing, using [Jitsi](https://meet.jit.si/).

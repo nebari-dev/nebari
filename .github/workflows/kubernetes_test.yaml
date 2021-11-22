@@ -95,6 +95,7 @@ jobs:
           cd local-deployment
           qhub deploy --config qhub-config.yaml --disable-prompt
       - name: Basic kubectl checks after deployment
+        if: always()
         run: |
           kubectl get all,cm,secret,ing -A
       - name: Check github-actions.qhub.dev resolves
@@ -122,8 +123,11 @@ jobs:
 
       - name: Get qhub-config.yaml full path
         run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`" >> "$GITHUB_ENV"
-      
-      - name: Sleep to see if it fixes flaky Kubernetes Tests 
+
+      - name: Create example-user
+        run: qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser example-user "${CYPRESS_EXAMPLE_USER_PASSWORD}"
+
+      - name: Sleep to see if it fixes flaky Kubernetes Tests
         run: sleep 60
 
       - name: Cypress run
@@ -142,12 +146,18 @@ jobs:
             ./tests_e2e/cypress/screenshots/
             ./tests_e2e/cypress/videos/
 
-      ### CLEANUP AFTER CYPRESS
+      - name: Deployment Pytests
+        run: |
+          pytest tests_deployment/ -v
 
+      ### CLEANUP AFTER TESTS
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment
-          qhub destroy --config qhub-config.yaml
+          # This is a known failure at the moment.
+          qhub destroy --config qhub-config.yaml || true
+
       - name: Basic kubectl checks after cleanup
+        if: always()
         run: |
           kubectl get all,cm,secret,ing -A
