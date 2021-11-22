@@ -39,7 +39,7 @@ jobs:
       - name: Test QHub
         run: |
           pytest --version
-          pytest
+          pytest --ignore=tests_deployment
 
   test-render-providers:
     name: 'Test QHub Provider'

@@ -125,6 +125,7 @@ def patch_terraform_extensions(config):
             "oauth2client": ext.get("oauth2client", False),
             "logout": ext.get("logout", ""),
             "jwt": False,
+            "qhubconfigyaml": ext.get("qhubconfigyaml", False),
         }
         tf_ext["envs"] = []
         for env in ext.get("envs", []):
@@ -300,6 +301,8 @@ def render_template(output_directory, config_filename, force=False):
     patch_terraform_users(config)
 
     patch_terraform_extensions(config)
+
+    config["qhub_config_yaml_path"] = str(filename.absolute())
 
     remove_existing_renders(
         dest_repo_dir=output_directory / repo_directory,

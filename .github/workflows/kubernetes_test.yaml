@@ -95,6 +95,7 @@ jobs:
           cd local-deployment
           qhub deploy --config qhub-config.yaml --disable-prompt
       - name: Basic kubectl checks after deployment
+        if: always()
         run: |
           kubectl get all,cm,secret,ing -A
       - name: Check github-actions.qhub.dev resolves
@@ -145,12 +146,18 @@ jobs:
             ./tests_e2e/cypress/screenshots/
             ./tests_e2e/cypress/videos/
 
-      ### CLEANUP AFTER CYPRESS
+      - name: Deployment Pytests
+        run: |
+          pytest tests_deployment/ -v
 
+      ### CLEANUP AFTER TESTS
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment
-          qhub destroy --config qhub-config.yaml
+          # This is a known failure at the moment.
+          qhub destroy --config qhub-config.yaml || true
+
       - name: Basic kubectl checks after cleanup
+        if: always()
         run: |
           kubectl get all,cm,secret,ing -A

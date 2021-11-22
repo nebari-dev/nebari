@@ -14,6 +14,12 @@ mv Miniconda3-$CONDA_VERSION-Linux-x86_64.sh miniconda.sh
 sh ./miniconda.sh -b -p /opt/conda
 rm miniconda.sh miniconda.checksum
 
+# install mamba and clean up
+conda install -y -c conda-forge mamba
+mamba clean -afy
+find /opt/conda/ -follow -type f -name '*.a' -delete
+find /opt/conda/ -follow -type f -name '*.js.map' -delete
+
 ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
 
 mkdir -p /etc/conda

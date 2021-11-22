@@ -310,7 +310,31 @@ module "qhub" {
   keycloak_password   = random_password.keycloak-qhub-bot-password.result
   keycloak_server_url = "http://keycloak-headless.${var.environment}:8080/auth/"
 
+  depends_on = [
+    module.kubernetes-initialization
+  ]
 }
+
+{% for helm_extension in cookiecutter.helm_extensions -%}
+module "{{helm_extension['name'] }}-extension" {
+  source       = "./modules/kubernetes/services/helm-extensions"
+  name       = "{{ helm_extension['name'] }}"
+  namespace  = var.environment
+  repository = "{{ helm_extension['repository'] }}"
+  chart      = "{{ helm_extension['chart'] }}"
+  chart_version    = "{{ helm_extension['version'] }}"
+  {% if 'overrides' in helm_extension -%}
+  overrides = [<<EOT
+{{ helm_extension['overrides']|yamlify -}}
+    EOT
+    ]
+  {% endif -%}
+  depends_on = [
+    module.qhub
+  ]
+}
+
+{% endfor -%}
 
 {% if cookiecutter.prefect.enabled -%}
 module "prefect" {
@@ -380,4 +404,18 @@ module "forwardauth" {
   jh-client-id      = local.forwardauth-keycloak-client-id
   jh-client-secret  = random_password.forwardauth-jhsecret.result
   callback-url-path = local.forwardauth-callback-url-path
+  depends_on = [
+    module.kubernetes-initialization
+  ]
+}
+
+resource "kubernetes_secret" "qhub_yaml_secret" {
+  metadata {
+    name      = "qhub-config-yaml"
+    namespace = var.environment
+  }
+
+  data = {
+    "qhub-config.yaml" = file({{ cookiecutter.qhub_config_yaml_path | jsonify }})
+  }
 }

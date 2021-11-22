@@ -7,7 +7,7 @@ runners:
     # Instance Type has 4 vcpu, 16 GiB memory, Up to 5 Gbps Network Performance
     instance_type: t3a.xlarge
     # Custom AMI with docker is pre-installed
-    machine_image: ami-08939857cf6893cde
+    machine_image: ami-0ff297f01f579288c
     # Region: Oregon
     region: us-west-2
     # Path of the relevant workflow file

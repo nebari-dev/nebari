@@ -49,6 +49,7 @@ BASE_CONFIGURATION = {
             "h2_color": "#652e8e",
         }
     },
+    "helm_extensions": [],
     "monitoring": {
         "enabled": True,
     },
@@ -116,8 +117,8 @@ GOOGLE_PLATFORM = {
     "kubernetes_version": "1.18.16-gke.502",
     "node_groups": {
         "general": {"instance": "n1-standard-4", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
-        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
+        "user": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
+        "worker": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
     },
 }
 
@@ -134,7 +135,7 @@ AZURE = {
         "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 5},
         "worker": {
             "instance": "Standard_D2_v2",
-            "min_nodes": 1,
+            "min_nodes": 0,
             "max_nodes": 5,
         },
     },
