@@ -224,7 +224,7 @@ security:
 
 ### Keycloak
 
-The `security.keycloak` section allows you to specify an initial password for the `root` user (to login at https://myqhubsite.com/auth/admin/) to manage your Keycloak database, e.g. add users/groups.
+The `security.keycloak` section allows you to specify an initial password for the `root` user (to login at `https://myqhubsite.com/auth/admin/`) to manage your Keycloak database, e.g. add users/groups.
 
 You should change this after deployment. Future deployments will not reset the password to any specified in the YAML file.
 

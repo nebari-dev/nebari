@@ -28,13 +28,11 @@ This will create a user called bob with the initial password provided. Omit the 
 
 ### Add user using Keycloak console
 
-To add a QHub user from the web console for Keycloak, visit:
-
-https://myqhubsite.com/auth/admin/
+To add a QHub user from the web console for Keycloak, visit `https://myqhubsite.com/auth/admin/`
 
 (Switch 'myqhubsite.com' for the domain you provided for your QHub deployment.)
 
-![Root Login to Keycloak](/source/images/keycloak_master_login.png)
+![Root Login to Keycloak](../images/keycloak_master_login.png)
 
 Login using the username `root` and the password provided for the initial Keycloak root password.
 
@@ -46,13 +44,13 @@ Click 'Users' along the left-hand side of the page.
 
 Click the 'Add user' button and you will see the new user form:
 
-![Add User to Keycloak](/source/images/keycloak_adduser.png)
+![Add User to Keycloak](../images/keycloak_adduser.png)
 
 Enter the name you would like for the user then click Save.
 
 Once the user has been created, you can set a password (not needed for GitHub/Auth0 login):
 
-![Set Password in Keycloak](/source/images/keycloak_user_password.png)
+![Set Password in Keycloak](../images/keycloak_user_password.png)
 
 It is best to unset the 'Temporary' on/off button so the user won't be forced to change the password on first login.
 
@@ -60,11 +58,11 @@ It is best to unset the 'Temporary' on/off button so the user won't be forced to
 
 Your new user can now log into QHub proper (not Keycloak's admin console).
 
-Visit https://myqhubsite.com/ (or whatever domain you have chosen for your QHub).
+Visit `https://myqhubsite.com/` (or whatever domain you have chosen for your QHub).
 
 Click 'Sign in with Keycloak'.
 
-![Login to Keycloak](/source/images/keycloak_qhub_login.png)
+![Login to Keycloak](../images/keycloak_qhub_login.png)
 
 Enter the username and password you chose when you added a user to QHub above.
 
@@ -74,7 +72,7 @@ If you chose GitHub or Auth0 login, click the 'GitHub' button to be taken to a G
 
 You should change your root password for Keycloak now that you've got things running.
 
-Back in https://myqhubsite.com/auth/admin/ you can click on the 'Root' dropdown in the top right of the screen, and select 'Manage account'.
+Back in `https://myqhubsite.com/auth/admin/` you can click on the 'Root' dropdown in the top right of the screen, and select 'Manage account'.
 
 Under 'Account Security' click 'Signing In'.
 
@@ -84,7 +82,7 @@ From this point, the `security.keycloak.initial_root_password` field in `qhub-co
 
 # Groups
 
-Add Groups in the same Keycloak backend as you can add users - that is, login as `root` to https://myqhubsite.com/auth/admin/. Click Groups on the left-hand side.
+Add Groups in the same Keycloak backend as you can add users - that is, login as `root` to `https://myqhubsite.com/auth/admin/`. Click Groups on the left-hand side.
 
 Groups named `users` and `admin` will have been created automatically by QHub. All users will be added to the `users` group automatically when you create them. You should never remove them from the `users` group as that group must contain all users.
 
