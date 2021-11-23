@@ -53,7 +53,7 @@ When you enable prefect via `qhub-config.yml` prefect agent is deployed on the
 QHub's kubernetes cluster, which queries the Prefect Cloud for flow runs.
 
 ## Agent configuration overrides
-You can override your agent configuration without having to modify the helm files directly.  The extra variable `overrides` makes this
+You can override your agent configuration without having to modify the helm files directly. The extra variable `overrides` makes this
 possible by changing the default values for the Agent chart according to the settings presented on your qhub-config.yaml file.
 
 The current variables, originally available in the [Agent helm chart](https://github.com/PrefectHQ/server/blob/master/helm/prefect-server/templates/agent/deployment.yaml) that can be overridden include:

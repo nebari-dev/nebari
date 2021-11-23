@@ -10,7 +10,7 @@ commands on your terminal to initialise the configuration for QHub, and then dep
 QHub can help you create your configuration YAML file, and you can further edit it as needed.
 
 We advise you to
-start by creating a new project folder.  Here, we will name the new
+start by creating a new project folder. Here, we will name the new
 folder `qhub-test`.
 
 On your terminal run:
@@ -54,7 +54,7 @@ There are several flags that allow you to configure the deployment:
 - `--repository-auto-provision`: Sets the secrets for the GitHub repository used for CI/CD actions.
 - `--ssl-cert-email`: Provide an admin's email address so that LetsEncrypt can generate a real SSL certificate for your site. If omitted, the site will use a self-signed cert that may cause problems for some browsers but may be sufficient for testing.
 
-You will be prompted to enter values for some of the choices above if they are ommited as command line arguments (e.g. project name and domain).
+You will be prompted to enter values for some of the choices above if they are omitted as command line arguments (e.g. project name and domain).
 
 The `qhub init` command will also generate an initial password for your root Keycloak user:
 
@@ -62,7 +62,7 @@ The `qhub init` command will also generate an initial password for your root Key
 Securely generated default random password=R1E8aWedaQVU6kKv for Keycloak root user stored at path=/tmp/QHUB_DEFAULT_PASSWORD
 ```
 
-The password will also be available in the `qhub-config.yaml` file under the security.keycloak.initial_root_password field. It will be needed in the next page of these docs for logging in to your QHub.
+The password will also be available in the `qhub-config.yaml` file under the `security.keycloak.initial_root_password` field. It will be needed in the next page of these docs for logging in to your QHub.
 
 <a href="#" name="project-naming-convention"></a>
 > Note: **Project Naming Convention**
@@ -136,7 +136,7 @@ If you specified `--dns-provider cloudflare --dns-auto-provision` on the command
 ### GitOps
 
 If you chose `--ci-provider github-actions` (or `gitlab-ci`) then QHub will use a GitHub Actions workflow (or GitLab equivalent) to automatically handle future deployment of
-the infrastructure. For that to work, your newly-generated project must be pushed to
+the infrastructure. For that to work, your newly generated project must be pushed to
 GitHub. Using the URL under the `--repository` flag on the `qhub init`
 command, you need to commit all files to the git repo.
 

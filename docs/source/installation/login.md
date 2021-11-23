@@ -5,7 +5,7 @@ Keycloak is the name of the open source user management software that is automat
 If you ran `qhub init` to create your `qhub-config.yaml` configuration file in the [Usage](usage.md) step, you will have been provided with a
 "random password for Keycloak root user".
 
-The password will also be visible in the `qhub-config.yaml` file under the security.keycloak.initial_root_password field.
+The password will also be visible in the `qhub-config.yaml` file under the `security.keycloak.initial_root_password` field.
 
 Note that when your QHub is first deployed, the password given at that location will be set for the root Keycloak user. If added or changed for subsequent deployments, that password value will have no effect.
 
@@ -80,7 +80,7 @@ Under 'Account Security' click 'Signing In'.
 
 In the Password box, click the 'Update' button. This will guide you through entering your existing root password, and then entering a new password.
 
-From this point, the security.keycloak.initial_root_password field in `qhub-config.yaml` has no effect. If you redeploy QHub it will not reset the password back to the old one (or anything else that might be in the field in your YAML file). You can delete that line from your YAML file if you wish.
+From this point, the `security.keycloak.initial_root_password` field in `qhub-config.yaml` has no effect. If you redeploy QHub it will not reset the password back to the old one (or anything else that might be in the field in your YAML file). You can delete that line from your YAML file if you wish.
 
 # Groups
 

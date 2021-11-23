@@ -224,7 +224,7 @@ security:
 
 ### Keycloak
 
-The security.keycloak section allows you to specify an initial password for the `root` user (to login at https://myqhubsite.com/auth/admin/) to manage your Keycloak database, e.g. add users/groups.
+The `security.keycloak` section allows you to specify an initial password for the `root` user (to login at https://myqhubsite.com/auth/admin/) to manage your Keycloak database, e.g. add users/groups.
 
 You should change this after deployment. Future deployments will not reset the password to any specified in the YAML file.
 
@@ -553,7 +553,7 @@ closely follows the
 [KubeSpawner](https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html)
 API. The only exception is that two keys are added `users` and
 `groups` which allow restriction of profiles to a given set of groups
-and users.  We recommend using groups to manage profile access.
+and users. We recommend using groups to manage profile access.
 
 Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the

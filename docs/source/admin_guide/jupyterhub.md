@@ -17,4 +17,4 @@ jupyterhub:
           enable_auth_state: true
 ```
 
-Where it is possible to inflence a value using 'native' QHub configuration, you should use that as a preference. For example, you would not set `jupyterhub.overrides.hub.image.name` to use a custom JupyterHub Docker image. Instead you would set `default_images.jupyterhub`.
+Where it is possible to influence a value using 'native' QHub configuration, you should use that as a preference. For example, you would not set `jupyterhub.overrides.hub.image.name` to use a custom JupyterHub Docker image. Instead you would set `default_images.jupyterhub`.
