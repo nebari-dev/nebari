@@ -39,7 +39,7 @@ def regions():
     return _kubernetes_options()["options"]["regions"]
 
 
-# keep `region` parameter - see `qhub.initialize._set_kubernetes_version`
+# keep `region` parameter
 def kubernetes_versions(region=None):
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
 
