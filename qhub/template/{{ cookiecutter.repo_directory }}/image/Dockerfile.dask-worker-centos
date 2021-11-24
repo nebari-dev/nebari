@@ -4,8 +4,6 @@ LABEL org.opencontainers.image.source="https://github.com/Quansight/qhub"
 COPY scripts/* /opt/scripts/
 RUN /opt/scripts/install-yum-minimal.sh
 
-# COPY scripts/fix-permissions /opt/scripts/fix-permissions
-
 # These can but should not be changed. ids will be arbitrary at run time.
 ARG NB_USER=jovyan
 ARG NB_UID=1000
@@ -18,13 +16,10 @@ SHELL ["/bin/bash", "-c"]
 ENV PATH=/opt/conda/bin:${PATH}:/opt/scripts
 
 # ============== base install ===============
-# COPY scripts/install-conda.sh /opt/scripts/install-conda.sh
-
 RUN /opt/scripts/install-conda.sh
 
 # ========== dask-worker install ===========
 COPY dask-worker/* /opt/dask-worker/
-# COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
 RUN /opt/scripts/install-conda-environment.sh /opt/dask-worker/environment.yaml 'false'
 
 # ========== Setup GPU Paths ============
@@ -32,5 +27,4 @@ ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib64
 ENV NVIDIA_PATH=/usr/local/nvidia/bin
 ENV PATH="$NVIDIA_PATH:$PATH"
 
-# COPY dask-worker /opt/dask-worker
 RUN /opt/dask-worker/postBuild
