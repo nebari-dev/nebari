@@ -290,6 +290,13 @@ class Theme(Base):
     jupyterhub: typing.Dict[str, typing.Union[str, list]]
 
 
+# ================= Theme ==================
+
+
+class JupyterHub(Base):
+    overrides: typing.Optional[typing.Dict]
+
+
 # ================== Profiles ==================
 
 
@@ -447,6 +454,7 @@ class Main(Base):
     monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
     extensions: typing.Optional[typing.List[QHubExtension]]
+    jupyterhub: typing.Optional[JupyterHub]
 
     @validator("qhub_version", pre=True, always=True)
     def check_default(cls, v):

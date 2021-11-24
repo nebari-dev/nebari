@@ -17,7 +17,7 @@ Currently, **QHub local deployment is primarily compatible with Linux-based
 Operating Systems**. The main limitation for the installation on
 MacOS relates to [Docker Desktop for
 Mac](https://docs.docker.com/docker-for-mac/networking/#known-limitations-use-cases-and-workarounds)
-being unable to route traffic to containers.  Theoretically, the
+being unable to route traffic to containers. Theoretically, the
 installation of HyperKit Driver could solve the issue, although the
 proposed solution has not yet been tested. There are notes on our current attempts at workarounds for
 running [Minikube on Mac below](#minikube-on-mac).
@@ -203,7 +203,7 @@ The output should be `The 'metallb' addon is enabled`.
 <details>
   <summary>Click to expand note</summary>
 
-The browser can have trouble reaching the load balancer running on WSL2. A workaround is to port forward the proxy-... pod to the host (ip 0.0.0.0). Get the ip address of the WSL2 machine via ```ip a```, it should be a 127.x.x.x address. To change the port forwarding after opening k9s you can type ```:pods <enter>```, hover over the proxy-... pod and type ```<shift-s>```, and enter the ip addresses.
+The browser can have trouble reaching the load balancer running on WSL2. A workaround is to port forward the proxy-... pod to the host (ip 0.0.0.0). Get the ip address of the WSL2 machine via ```ip a```, it should be a 127.x.x.x address. To change the port forwarding after opening `k9s` you can type ```:pods <enter>```, hover over the proxy-... pod and type ```<shift-s>```, and enter the ip addresses.
 </details>
 
 ## Deploy QHub
@@ -487,7 +487,7 @@ qhub deploy --config qhub-config.yaml --disable-prompt
 
 ## Enable Kubernetes access from Mac
 
-This step is optional, but will allow you to use kubectl and K9s directly from your Mac. It is not needed
+This step is optional, but will allow you to use kubectl and `k9s` directly from your Mac. It is not needed
 if you are happy to use kubectl within an SSH session on AWS instead.
 
 On your Mac laptop:

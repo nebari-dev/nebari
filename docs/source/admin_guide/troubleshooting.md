@@ -47,9 +47,9 @@ After completing these steps. `kubectl` should be able to access the cluster.
 
 #### Debug your Kubernetes cluster
 
- [K9s](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to
- simplify navigating, observing, and managing your applications in K8s.
- K9s continuously monitors Kubernetes clusters for changes and provides
+ [`k9s`](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to
+ simplify navigating, observing, and managing your applications in Kubernetes.
+ `k9s` continuously monitors Kubernetes clusters for changes and provides
  shortcut commands to interact with the observed resources becoming a
  fast way to review and resolve day-to-day issues in Kubernetes. It's
  definitely a huge improvement to the general workflow, and a best-to-have
@@ -59,17 +59,17 @@ Installation can be done on macOS, Windows, and Linux. Instructions
 for each operating system can be found [here](https://github.com/derailed/k9s).
 Complete the installation to follow along.
 
-By default, K9s starts with the standard directory that is set as the
+By default, `k9s` starts with the standard directory that is set as the
 context (in this case Minikube). To view all the current process press `0`:
 
-![Image of K9s termina UI](../images/k9s_UI.png)
+![Image of terminal UI](../images/k9s_UI.png)
 
 > **NOTE**: In some circumstances you will be confronted with the
   need to inspect any services launched by your cluster at your ‘localhost’. For instance, if your cluster has problem
 with the network traffic tunnel configuration, it may limit or block the user's
   access to destination resources over the connection.
 
-K9s port-forward option <kbd>shift</kbd> + <kbd>f</kbd> allows you to access and interact
+`k9s` port-forward option <kbd>shift</kbd> + <kbd>f</kbd> allows you to access and interact
 with internal Kubernetes cluster processes from your localhost you can
 then use this method to investigate issues and adjust your services
 locally without the need to expose them beforehand.

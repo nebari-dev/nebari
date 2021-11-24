@@ -53,7 +53,7 @@ When you enable prefect via `qhub-config.yml` prefect agent is deployed on the
 QHub's kubernetes cluster, which queries the Prefect Cloud for flow runs.
 
 ## Agent configuration overrides
-You can override your agent configuration without having to modify the helm files directly.  The extra variable `overrides` makes this
+You can override your agent configuration without having to modify the helm files directly. The extra variable `overrides` makes this
 possible by changing the default values for the Agent chart according to the settings presented on your qhub-config.yaml file.
 
 The current variables, originally available in the [Agent helm chart](https://github.com/PrefectHQ/server/blob/master/helm/prefect-server/templates/agent/deployment.yaml) that can be overridden include:
@@ -91,7 +91,7 @@ prefect:
      envVars:
        MY_VAR: "<value>"
 ```
-### Adding secrets to you Agent configuration
+### Adding secrets to your Agent configuration
 Overrides also allow you to define extra secrets to pass through your agent configuration, for example, when using [default secrets](https://docs.prefect.io/core/concepts/secrets.html#default-secrets) to automatically authenticate your flow with the listed service. In the Google cloud case, for `GCP_CREDENTIALS` context secret, you can do it by adding that specific key value pair into your configuration:
 
 ```yaml

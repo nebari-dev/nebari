@@ -56,7 +56,9 @@ jovyan
 jupyter
 jupyterhub
 jupyterlab
+K9s
 Kellndorfer
+Keycloak
 kube
 Kubectl
 kubectl
@@ -71,6 +73,7 @@ minikube
 Mongodb
 mongodb
 nameserver
+nameservers
 namespace
 namespaces
 nfs

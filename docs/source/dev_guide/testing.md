@@ -27,7 +27,7 @@ variable. In that case, Docker tags and workflow `pip install qhub`
 commands will be based on the qhub version specified in the
 qhub/version.py file, but these tags and releases may not yet exist,
 perhaps if the version has been updated to include a beta/dev
-component which has not been released.  So you may need to manually
+component which has not been released. So you may need to manually
 modify the qhub-config.yaml to 'downgrade' the tags to a full release
 version.
 
@@ -80,9 +80,9 @@ Hadolint will report `error`, `warning`, `info` and `style` while linting Docker
 
 ## Debug Kubernetes clusters
 
- To debug Kubernetes clusters, we advise you to use [K9s](https://k9scli.io/), a terminal-based UI that aims to
+ To debug Kubernetes clusters, we advise you to use [`k9s`](https://k9scli.io/), a terminal-based UI that aims to
  simplify navigation, observation, and management of applications in Kubernetes.
- K9s continuously monitors Kubernetes clusters for changes and provides
+ `k9s` continuously monitors Kubernetes clusters for changes and provides
  shortcut commands to interact with the observed resources becoming a
  fast way to review and resolve day-to-day issues in deployed clusters.
 
@@ -92,7 +92,7 @@ check out the [Troubleshooting documentation](https://docs.qhub.dev/en/stable/so
 
 ## Cypress Tests
 
-Cypress automates testing within a web browser environment. It is integrated into the GitHub Actions tests.yaml workflows in this repo, and 
+Cypress automates testing within a web browser environment. It is integrated into the GitHub Actions tests.yaml workflows in this repo, and
 you can also run it locally. To do so:
 
 ```
@@ -107,9 +107,9 @@ npm run cypress:open
 ```
 
 The Base URL can point anywhere that should be accessible - it can be the URL of a QHub cloud deployment.
-The QHub Config Path should point to the associated yaml file for that site. Most importantly, the tests will inspect the yaml file to understand 
-what tests are relevant. To start with, it checks security.authentication.type to determine what should be available on the login page, and 
-how to test it. If the login type is 'password' then it uses the value in CYPRESS_EXAMPLE_USER_PASSWORD as the password (default username is 
+The QHub Config Path should point to the associated yaml file for that site. Most importantly, the tests will inspect the yaml file to understand
+what tests are relevant. To start with, it checks security.authentication.type to determine what should be available on the login page, and
+how to test it. If the login type is 'password' then it uses the value in CYPRESS_EXAMPLE_USER_PASSWORD as the password (default username is
 `example-user` but this can be changed by setting CYPRESS_EXAMPLE_USER_NAME).
 
 The final command above should open the Cypress UI where you can run the tests manually and see the actions in the browser.

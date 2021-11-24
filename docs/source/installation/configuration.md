@@ -142,7 +142,6 @@ security:
     config:
       client_id: <CLIENT_ID>
       client_secret: <CLIENT_SECRET>
-      oauth_callback_url: https://do.qhub.dev/hub/oauth_callback
 ```
 
 ### Omitting sensitive values
@@ -161,7 +160,6 @@ security:
     config:
       client_id: QHUB_SECRET_github_client_id
       client_secret: QHUB_SECRET_github_client_key
-      oauth_callback_url: https://do.qhub.dev/hub/oauth_callback
 ```
 
 ### Authentication
@@ -224,7 +222,7 @@ security:
 
 ### Keycloak
 
-The security.keycloak section allows you to specify an initial password for the `root` user (to login at https://myqhubsite.com/auth/admin/) to manage your Keycloak database, e.g. add users/groups.
+The `security.keycloak` section allows you to specify an initial password for the `root` user (to login at `https://myqhubsite.com/auth/admin/`) to manage your Keycloak database, e.g. add users/groups.
 
 You should change this after deployment. Future deployments will not reset the password to any specified in the YAML file.
 
@@ -553,7 +551,7 @@ closely follows the
 [KubeSpawner](https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html)
 API. The only exception is that two keys are added `users` and
 `groups` which allow restriction of profiles to a given set of groups
-and users.  We recommend using groups to manage profile access.
+and users. We recommend using groups to manage profile access.
 
 Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the
@@ -746,7 +744,6 @@ security:
     config:
       client_id: CLIENT_ID
       client_secret: CLIENT_SECRET
-      oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
 
   users:
     example-user:

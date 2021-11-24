@@ -41,7 +41,7 @@ module "kubernetes-jupyterhub" {
             name = "KEYCLOAK_USERDATA_URL",
             value = var.keycloak_userdata_url
           },
-          { 
+          {
             name = "OAUTH_LOGOUT_REDIRECT_URL",
             value = var.keycloak_logout_url
           },
@@ -80,8 +80,15 @@ module "kubernetes-jupyterhub" {
       }
 
       proxy = {
-        nodeSelector = {
-          (var.general-node-group.key) = var.general-node-group.value
+        chp = {
+          nodeSelector = {
+            (var.general-node-group.key) = var.general-node-group.value
+          }
+        }
+        traefik = {
+          nodeSelector = {
+            (var.general-node-group.key) = var.general-node-group.value
+          }
         }
       }
 

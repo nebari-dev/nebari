@@ -41,7 +41,7 @@ You may have made special customizations to your qhub config, such as using your
 
 For CI/CD (GitHub/GitLab) workflows, then as well as generating the updated qhub-config.yaml files as above, you will also need to regenerate the workflow files based on the latest qhub version's templates.
 
-With the newly-upgraded qhub-config.yaml file, run:
+With the newly upgraded qhub-config.yaml file, run:
 
 ```shell
 qhub render -c qhub-config.yaml
@@ -49,7 +49,7 @@ qhub render -c qhub-config.yaml
 
 (Note that `qhub deploy` would perform this render step too, but will also immediately redeploy your qhub.)
 
-Commit all the files (qhub-config.yaml and GitHub/GitLab workflow files) back to the remote repo. All files need to be commited together in the same commit.
+Commit all the files (qhub-config.yaml and GitHub/GitLab workflow files) back to the remote repo. All files need to be committed together in the same commit.
 
 ## Known versions that require re-deployment
 

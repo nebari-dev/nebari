@@ -4,6 +4,8 @@ hub:
     pvc:
       storage: 1Gi
   baseUrl: "/"
+  networkPolicy:
+    enabled: false
 
 proxy:
   secretToken: "<placeholder>"
@@ -54,3 +56,5 @@ singleuser:
   memory:
     limit: "1G"
     guarantee: "1G"
+  networkPolicy:
+    enabled: false
