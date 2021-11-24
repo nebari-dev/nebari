@@ -142,7 +142,6 @@ security:
     config:
       client_id: <CLIENT_ID>
       client_secret: <CLIENT_SECRET>
-      oauth_callback_url: https://do.qhub.dev/hub/oauth_callback
 ```
 
 ### Omitting sensitive values
@@ -161,7 +160,6 @@ security:
     config:
       client_id: QHUB_SECRET_github_client_id
       client_secret: QHUB_SECRET_github_client_key
-      oauth_callback_url: https://do.qhub.dev/hub/oauth_callback
 ```
 
 ### Authentication
@@ -746,7 +744,6 @@ security:
     config:
       client_id: CLIENT_ID
       client_secret: CLIENT_SECRET
-      oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
 
   users:
     example-user:
