@@ -45,3 +45,4 @@ exceptions:
   - MetalLB
   - Python
   - Docker
+  - Dockerfiles

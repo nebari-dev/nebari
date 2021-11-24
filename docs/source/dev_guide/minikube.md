@@ -285,7 +285,9 @@ The command deletes all instances of QHub, cleaning up the deployment environmen
 
 # Minikube on Mac
 
-The earlier instructions for minikube on Linux should work on Mac except:
+The earlier instructions for minikube on Linux will _nearly_ work on Mac except things will break without clever
+use of port forwarding at the right times... Here is an explanation of our attempts to get things to work, but
+it is not yet complete.
 
 1 - When working out the IP addresses to configure metallb try this:
 ```
@@ -299,7 +301,12 @@ This displays something like `192.168.49.2/24`, in which case a suitable IP rang
 ```
 minikube kubectl -- --namespace=dev port-forward svc/proxy-public 8000:80
 ```
-Then you can access QHub on http://127.0.0.1:8000/
+Then you could access QHub on http://127.0.0.1:8000/
+
+3 - However, the `qhub deploy` step will need to communicate with the Keycloak server, but this is not possible
+without the correct hostname.
+
+It might be possible to set /etc/hosts to include github-actions.qhub.dev as we do for the AWS minikube, below. And meanwhile use kubectl port-forward to actually forward the traffic (from port 443 to something similar?). But you'd have to start that forwarding at the right point in the deployment. (When Kubernetes is ready, but before terraform runs the Keycloak operator...)
 
 ---
 
@@ -329,12 +336,14 @@ This assumes you have a 'quansight' profile in your ~/.aws/config and credential
 You can use a Key Pair that's already registered with AWS, or create one as follows:
 
 ```bash
-aws ec2 create-key-pair \
-    --key-name aws-quansight-mykey \
-    --query "KeyMaterial" \
-    --output text > ~/.ssh/aws-quansight-mykey.pem
+export MYKEYNAME=aws-quansight-<mykey>
 
-chmod 400 ~/.ssh/aws-quansight-mykey.pem
+aws ec2 create-key-pair \
+    --key-name ${MYKEYNAME} \
+    --query "KeyMaterial" \
+    --output text > ~/.ssh/${MYKEYNAME}.pem
+
+chmod 400 ~/.ssh/${MYKEYNAME}.pem
 ```
 
 ## Run the EC2 Instance
@@ -342,7 +351,7 @@ chmod 400 ~/.ssh/aws-quansight-mykey.pem
 The recommended image is an Ubuntu 20.04 with Docker installed. It's recommended to be to run on a 16 GB/4 Core image, and increase the EBS disk space to 48 GB or so, up from the standard 8 GB.
 
 ```bash
-aws ec2 run-instances --image-id ami-0cd5fb602c264fbd6 --instance-type t3a.xlarge --count 1 --key-name aws-quansight-mykey --block-device-mappings 'DeviceName=/dev/sda1,Ebs={VolumeSize=48}'
+aws ec2 run-instances --image-id ami-0cd5fb602c264fbd6 --instance-type t3a.xlarge --count 1 --key-name ${MYKEYNAME} --block-device-mappings 'DeviceName=/dev/sda1,Ebs={VolumeSize=48}'
 ```
 
 Once running, get the instance ID and public DNS:
@@ -370,7 +379,7 @@ aws ec2 authorize-security-group-ingress --group-id sg-96f73feb --protocol tcp -
 Using the Public DNS obtained a couple of steps back, you can now SSH into the instance:
 
 ```bash
-ssh -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute.amazonaws.com
+ssh -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute.amazonaws.com
 ```
 
 ## Install Minikube etc
@@ -409,8 +418,9 @@ minikube addons enable metallb
 Install Virtualenv and Pip:
 
 ```bash
-sudo apt install python3-virtualenv
-sudo apt install python3-pip
+sudo apt update
+sudo apt install python3-virtualenv -y
+sudo apt install python3-pip -y
 ```
 
 Create and activate a virtualenv, install QHub dev:
@@ -444,7 +454,10 @@ Then deploy:
 qhub deploy --config qhub-config.yaml --disable-prompt
 ```
 
-## Enable Minikube access from Mac
+## Enable Kubernetes access from Mac
+
+This step is optional, but will allow you to use kubectl and K9s directly from your Mac. It is not needed
+if you are happy to use kubectl within an SSH session on AWS instead.
 
 On your Mac laptop:
 
@@ -461,9 +474,9 @@ Copy these files from the remote instance (home folder):
 For example:
 ```bash
 cd .minikube_remote
-scp -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/ca.crt .
-scp -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/profiles/minikube/client.crt .
-scp -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/profiles/minikube/client.key .
+scp -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/ca.crt .
+scp -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/profiles/minikube/client.crt .
+scp -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com:~/.minikube/profiles/minikube/client.key .
 ```
 
 Merge the following into your ~/.kube/config file, or just run the command in full to overwrite it:
@@ -495,7 +508,7 @@ EOF
 Now SSH into the AWS instance, enabling port forwarding so you can access the Minikube cluster as though It's running on your Mac:
 
 ```bash
-ssh -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443
+ssh -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-18-130-21-222.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443
 ```
 
 You should now find that `kubectl` and `k9` work for the Minikube cluster if you run them on your Mac. This can include `kubectl port-forward` to access Kubernetes services individually.
@@ -513,7 +526,7 @@ The users can trick it by setting up a hostname alias. Run `sudo vi /etc/hosts` 
 And then the users can add an extra port forward when they SSH into their AWS instance.
 
 ```bash
-sudo ssh -i ~/.ssh/aws-quansight-mykey.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443 -L github-actions.qhub.dev:443:192.168.49.100:443
+sudo ssh -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443 -L github-actions.qhub.dev:443:192.168.49.100:443
 ```
 
 This is executed with the sudo access because it's desired to forward a low-numbered port, like 443, which is otherwise not allowed.

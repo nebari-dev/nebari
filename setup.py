@@ -53,6 +53,8 @@ setup(
             "diagrams",
             "jhub-client",
             "pre-commit",
+            "kubernetes",
+            "dask-gateway",
         ],
     },
     include_package_data=True,

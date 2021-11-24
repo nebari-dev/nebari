@@ -70,6 +70,25 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
             container_port = 80
           }
 
+          dynamic "volume_mount" {
+            for_each = var.qhubconfigyaml ? [true] : []
+            content {
+              name       = "qhubyamlsecret"
+              mount_path = "/etc/qhubyamlsecret/"
+              read_only  = true
+            }
+          }
+
+        }
+
+        dynamic "volume" {
+          for_each = var.qhubconfigyaml ? [true] : []
+          content {
+            name = "qhubyamlsecret"
+            secret {
+              secret_name = "qhub-config-yaml"
+            }
+          }
         }
 
       }
