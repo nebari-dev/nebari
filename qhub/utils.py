@@ -36,7 +36,7 @@ if QHUB_GH_BRANCH:
     pip_install_qhub = (
         f"pip install https://github.com/Quansight/qhub/archive/{QHUB_GH_BRANCH}.zip"
     )
-
+QHUB_PREVENT_COMMIT_RENDER = os.environ.get("QHUB_PREVENT_COMMIT_RENDER","no")
 
 # Regex for suitable project names
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"

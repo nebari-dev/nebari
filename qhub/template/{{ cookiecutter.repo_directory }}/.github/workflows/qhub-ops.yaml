@@ -68,6 +68,8 @@ jobs:
       - name: Deploy Changes made in qhub-config.yaml
         run: |
           qhub deploy -c qhub-config.yaml --disable-prompt {% if cookiecutter.QHUB_GH_BRANCH == '' %}--skip-remote-state-provision{% endif %}
+
+{% if cookiecutter.QHUB_PREVENT_COMMIT_RENDER != 'yes' -%}
       - name: Push Changes
         run: |
           git config user.email "qhub@quansight.com"
@@ -78,3 +80,4 @@ jobs:
         env:
           COMMIT_MSG: |
             qhub-config.yaml automated commit: {{ '${{ github.sha }}' }}
+{% endif %}

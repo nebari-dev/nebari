@@ -10,7 +10,7 @@ from ruamel.yaml import YAML
 from cookiecutter.generate import generate_files
 from ..version import __version__
 from ..constants import TERRAFORM_VERSION
-from ..utils import pip_install_qhub, QHUB_GH_BRANCH
+from ..utils import pip_install_qhub, QHUB_GH_BRANCH, QHUB_PREVENT_COMMIT_RENDER
 
 # existing files and folders to delete when `render_template` is called
 DELETABLE_PATHS = [
@@ -59,6 +59,8 @@ def patch_versioning_extra_config(config):
     config["pip_install_qhub"] = pip_install_qhub
 
     config["QHUB_GH_BRANCH"] = QHUB_GH_BRANCH
+
+    config["QHUB_PREVENT_COMMIT_RENDER"] = QHUB_PREVENT_COMMIT_RENDER
 
     if "terraform_version" not in config:
         config["terraform_version"] = TERRAFORM_VERSION
