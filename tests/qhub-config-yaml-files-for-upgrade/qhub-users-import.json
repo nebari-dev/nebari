@@ -6,8 +6,8 @@
       "username": "example-user",
       "enabled": true,
       "groups": [
-        "users",
-        "admin"
+        "admin",
+        "users"
       ]
     }
   ],

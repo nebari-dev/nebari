@@ -1,6 +1,5 @@
 import pytest
 from pathlib import Path
-from pydantic.error_wrappers import ValidationError
 
 from qhub.upgrade import do_upgrade, __version__, load_yaml, verify
 
@@ -18,17 +17,27 @@ def qhub_users_import_json():
 
 
 @pytest.mark.parametrize(
-    "old_qhub_config_path_str,expect_verify_error",
+    "old_qhub_config_path_str,attempt_fixes,expect_upgrade_error",
     [
-        ("./qhub-config-yaml-files-for-upgrade/qhub-config-do-310.yaml", False),
+        ("./qhub-config-yaml-files-for-upgrade/qhub-config-do-310.yaml", False, False),
+        (
+            "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310-customauth.yaml",
+            False,
+            True,
+        ),
         (
             "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310-customauth.yaml",
             True,
+            False,
         ),
     ],
 )
 def test_upgrade(
-    old_qhub_config_path_str, expect_verify_error, tmp_path, qhub_users_import_json
+    old_qhub_config_path_str,
+    attempt_fixes,
+    expect_upgrade_error,
+    tmp_path,
+    qhub_users_import_json,
 ):
     old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
 
@@ -40,18 +49,21 @@ def test_upgrade(
     assert not Path(tmp_path, "qhub-users-import.json").exists()
 
     # Do the updgrade
-    do_upgrade(tmp_qhub_config)
+    if not expect_upgrade_error:
+        do_upgrade(
+            tmp_qhub_config, attempt_fixes
+        )  # Would raise an error if invalid by current QHub version's standards
+    else:
+        with pytest.raises(ValueError):
+            do_upgrade(tmp_qhub_config, attempt_fixes)
+        return
 
     # Check the resulting YAML
     config = load_yaml(tmp_qhub_config)
 
-    if not expect_verify_error:
-        verify(
-            config
-        )  # Would raise an error if invalid by current QHub version's standards
-    else:
-        with pytest.raises(ValidationError):
-            verify(config)
+    verify(
+        config
+    )  # Would raise an error if invalid by current QHub version's standards
 
     assert len(config["security"]["keycloak"]["initial_root_password"]) == 16
 
@@ -66,6 +78,10 @@ def test_upgrade(
     assert (
         config["profiles"]["jupyterlab"][0]["kubespawner_override"]["image"]
         == f"quansight/qhub-jupyterlab:v{__version__}"
+    )
+
+    assert (
+        config.get("security", {}).get("authentication", {}).get("type", "") != "custom"
     )
 
     # Keycloak import users json
