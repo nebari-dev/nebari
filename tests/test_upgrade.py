@@ -1,5 +1,6 @@
 import pytest
 from pathlib import Path
+from pydantic.error_wrappers import ValidationError
 
 from qhub.upgrade import do_upgrade, __version__, load_yaml, verify
 
@@ -17,12 +18,18 @@ def qhub_users_import_json():
 
 
 @pytest.mark.parametrize(
-    "old_qhub_config_path_str",
+    "old_qhub_config_path_str,expect_verify_error",
     [
-        ("./qhub-config-yaml-files-for-upgrade/qhub-config-do-310.yaml"),
+        ("./qhub-config-yaml-files-for-upgrade/qhub-config-do-310.yaml", False),
+        (
+            "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310-customauth.yaml",
+            True,
+        ),
     ],
 )
-def test_upgrade(tmp_path, old_qhub_config_path_str, qhub_users_import_json):
+def test_upgrade(
+    old_qhub_config_path_str, expect_verify_error, tmp_path, qhub_users_import_json
+):
     old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
 
     tmp_qhub_config = Path(tmp_path, old_qhub_config_path.name)
@@ -30,15 +37,21 @@ def test_upgrade(tmp_path, old_qhub_config_path_str, qhub_users_import_json):
 
     orig_contents = tmp_qhub_config.read_text()  # Read in initial contents
 
+    assert not Path(tmp_path, "qhub-users-import.json").exists()
+
     # Do the updgrade
     do_upgrade(tmp_qhub_config)
 
     # Check the resulting YAML
     config = load_yaml(tmp_qhub_config)
 
-    verify(
-        config
-    )  # Would raise an error if invalid by current QHub version's standards
+    if not expect_verify_error:
+        verify(
+            config
+        )  # Would raise an error if invalid by current QHub version's standards
+    else:
+        with pytest.raises(ValidationError):
+            verify(config)
 
     assert len(config["security"]["keycloak"]["initial_root_password"]) == 16
 
@@ -57,7 +70,8 @@ def test_upgrade(tmp_path, old_qhub_config_path_str, qhub_users_import_json):
 
     # Keycloak import users json
     assert (
-        Path(tmp_path, "qhub-users-import.json").read_text() == qhub_users_import_json
+        Path(tmp_path, "qhub-users-import.json").read_text().rstrip()
+        == qhub_users_import_json
     )
 
     # Check backup
