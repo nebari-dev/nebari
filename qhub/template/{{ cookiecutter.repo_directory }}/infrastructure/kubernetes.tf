@@ -177,6 +177,20 @@ module "kubernetes-ingress" {
 
 ### Keycloak
 
+
+module "external-container-reg" {
+  source = "./modules/extcr"
+
+  count = {{ cookiecutter.external_container_reg.enabled | default(false,true) | jsonify }} ? 1 : 0
+
+  namespace         = var.environment
+  access_key_id     = "{{ cookiecutter.external_container_reg.access_key_id | default("",true) }}"
+  secret_access_key = "{{ cookiecutter.external_container_reg.secret_access_key | default("",true) }}"
+  extcr_account     = "{{ cookiecutter.external_container_reg.extcr_account | default("",true) }}"
+  extcr_region      = "{{ cookiecutter.external_container_reg.extcr_region | default("",true) }}"
+}
+
+
 resource "random_password" "keycloak-qhub-bot-password" {
   length  = 32
   special = false
@@ -204,7 +218,8 @@ module "kubernetes-keycloak-helm" {
 
 
   depends_on = [
-    module.kubernetes-ingress
+    module.kubernetes-ingress,
+    module.external-container-reg
   ]
 }
 
@@ -293,14 +308,6 @@ module "qhub" {
   )
 
   dask_gateway_extra_config = file("dask_gateway_config.py.j2")
-
-  extcr_config = {
-    enabled : {{ cookiecutter.external_container_reg.enabled | default(false,true) | jsonify }}
-    access_key_id : "{{ cookiecutter.external_container_reg.access_key_id | default("",true) }}"
-    secret_access_key : "{{ cookiecutter.external_container_reg.secret_access_key | default("",true) }}"
-    extcr_account : "{{ cookiecutter.external_container_reg.extcr_account | default("",true) }}"
-    extcr_region : "{{ cookiecutter.external_container_reg.extcr_region | default("",true) }}"
-  }
 
   forwardauth-callback-url-path = local.forwardauth-callback-url-path
 

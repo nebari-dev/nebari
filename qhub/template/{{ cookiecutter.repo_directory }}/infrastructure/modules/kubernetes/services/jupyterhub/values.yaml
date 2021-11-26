@@ -21,6 +21,8 @@ scheduling:
     enabled: false
     replicas: 1
 
+imagePullSecrets:
+  - extcrcreds
 
 singleuser:
   defaultUrl: "/lab"
