@@ -4,13 +4,25 @@ from pathlib import Path
 from qhub.upgrade import do_upgrade, __version__, load_yaml, verify
 
 
+@pytest.fixture
+def qhub_users_import_json():
+    return (
+        (
+            Path(__file__).parent
+            / "./qhub-config-yaml-files-for-upgrade/qhub-users-import.json"
+        )
+        .read_text()
+        .rstrip()
+    )
+
+
 @pytest.mark.parametrize(
     "old_qhub_config_path_str",
     [
         ("./qhub-config-yaml-files-for-upgrade/qhub-config-do-310.yaml"),
     ],
 )
-def test_upgrade(tmp_path, old_qhub_config_path_str):
+def test_upgrade(tmp_path, old_qhub_config_path_str, qhub_users_import_json):
     old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
 
     tmp_qhub_config = Path(tmp_path, old_qhub_config_path.name)
@@ -41,6 +53,11 @@ def test_upgrade(tmp_path, old_qhub_config_path_str):
     assert (
         config["profiles"]["jupyterlab"][0]["kubespawner_override"]["image"]
         == f"quansight/qhub-jupyterlab:v{__version__}"
+    )
+
+    # Keycloak import users json
+    assert (
+        Path(tmp_path, "qhub-users-import.json").read_text() == qhub_users_import_json
     )
 
     # Check backup
