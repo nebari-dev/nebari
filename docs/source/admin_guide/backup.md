@@ -170,7 +170,7 @@ If you have a heavily customized Keycloak configuration, some details may be omi
 
 ### Export Keycloak
 
-The export script is at [qhub/scripts/keycloak-export.py](https://github.com/Quansight/qhub/blob/main/scripts/keycloak-export.py).
+The export script is at [`qhub/scripts/keycloak-export.py`](https://github.com/Quansight/qhub/blob/main/scripts/keycloak-export.py).
 
 Locate your `qhub-config.yaml` file, for example by checking out of your Git repo for you QHub. Activate a virtual environment with the `qhub` Python package installed.
 
@@ -190,7 +190,7 @@ You may wish to upload the Keycloak export to the same S3 location where you upl
 
 To re-import your users and groups, [login to the /auth/ URL](../installation/login.md) using the root username and password.
 
-Under 'Manage' on the left-hand side, click 'Import'. Locate the exported-keycloak.json file and select it. Then click the 'Import' button.
+Under 'Manage' on the left-hand side, click 'Import'. Locate the `exported-keycloak.json` file and select it. Then click the 'Import' button.
 
 All users and groups should now be present in Keycloak. Note that password will not have been restored so may need to be reset.
 
