@@ -1,26 +1,27 @@
-# Deploy QHub to an Existing Kubernetes Cluster
+# Deploy QHub to an existing kubernetes cluster
 
 If you have an existing kubernetes cluster running in the cloud and
 would like to deploy QHub on the same cluster, this is the guide for you.
 
 To illustrate how this is done, the guide walks through a simple example.
-Given the variety of ways an existing kubernetes cluster can be configured,
-some of these steps may not be required.
+The guide below is meant to serve as a reference, the setup of your existing
+kubernetes might differ rending some of these additional setups steps
+unnecessary.
 
-## Deploy QHub to an Existing AWS EKS cluster
+## Deploy QHub to an existing AWS EKS cluster
 
-In this example, there already exists a basic web application running on an EKS
-cluster; [see this tutorial on how to setup this particular Guestbook web
-application](https://logz.io/blog/amazon-eks-cluster/).
+In this example, there already exists a basic web app running on an EKS
+cluster. [Here is the tutorial on how to setup this particular Guestbook web
+app](https://logz.io/blog/amazon-eks-cluster/).
 
 The existing EKS cluster has one VPC with three subnets (each in their own
 Availability Zone) and no node groups. There are three nodes each running on
 a `t3.medium` EC2 instance, unfortunately QHub's `general` node group requires
 a more powerful instance type.
 
-Now we will create three new node groups in preparation for the incoming QHub
+Now create three new node groups in preparation for the incoming QHub
 deployment. Before proceeding, ensure the following:
-- that the subnets are allowed to ["automatically
+- that the subnets can ["automatically
 assign public IP addresses to instances launched into it"](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-ip-addressing.html#subnet-public-ip)
 - there exists an IAM role with the following permissions:
   -  AmazonEKSWorkerNodePolicy
@@ -72,13 +73,15 @@ assign public IP addresses to instances launched into it"](https://docs.aws.amaz
         </details>
 
 
-### Create Node Groups (if they don't already exist)
+### Create node groups
+
+Skip this step if node groups already exist.
 
 For AWS, [follow this guide to create new node groups](https://docs.aws.amazon.com/eks/latest/userguide/create-managed-node-group.html). Be sure to fill in the following
 fields carefully:
 - "Node Group configuration"
   - `Name` must be either `general`, `user` or `worker`
-  - `Node IAM Role` must be the IAM role described above
+  - `Node IAM Role` must be the IAM role described proceeding
 - "Node Group compute configuration"
   - `Instance type`
     - The recommended minimum vCPU and memory for a `general` node is 4 vCPU / 16 GB RAM
@@ -88,7 +91,7 @@ fields carefully:
 - "Node Group scaling configuration"
   - `Minimum size` and `Maximum size` of 1 for the `general` node group
 - "Node Group subnet configuration"
-  - `subnet` ensure that all of the existing EKS subnets are included
+  - `subnet` include all existing EKS subnets
 
 
 ## Deploy QHub to Existing EKS Cluster
@@ -253,11 +256,11 @@ environments:
 
 
 Once updated, deploy QHub. When prompted be ready to manually update the DNS record.
-- `local` or "existing" deployments will not work if you pass `--dns-auto-provision` or `--disable-prompt`
+- `local` or "existing" deployments fail if you pass `--dns-auto-provision` or `--disable-prompt`
 
 ```
 python -m qhub deploy --config qhub-config.yaml
 ```
 
 The deployment completes successfully and all the pods appear to be running and so do the
-pre-existing Guestbook web application.
+pre-existing Guestbook web app.
