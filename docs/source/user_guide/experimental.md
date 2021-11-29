@@ -1,9 +1,9 @@
-# Experimental Features
+# Experimental features
 
-> NOTE: The features listed below are experimental and should be used with caution.
+> NOTE: The features listed below are experimental, proceed with caution.
 
 
-## CentOS `jupyterlab` and `dask-worker` Profiles
+## CentOS `jupyterlab` and `dask-worker` profiles
 
 The default images used during a typical QHub deployment are running on `ubuntu`. If you need your `jupyterlab` or `dask-worker` pods to run on `centOS` instead, simply update the appropriate images in your `qhub-config.yaml`.
 
