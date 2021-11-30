@@ -98,7 +98,7 @@ def output(directory=None):
 
 def tfimport(addr, id, directory=None):
     logger.info(f"terraform import directory={directory} addr={addr} id={id}")
-    command = ["import", addr, id]
+    command = ["timeout", "30s", "--signal=9", "import", addr, id]
     with timer(logger, "terraform import"):
         run_terraform_subprocess(
             command, cwd=directory, prefix="terraform", strip_errors=True

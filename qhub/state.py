@@ -40,8 +40,11 @@ def terraform_state_sync(config, logger=None):
             )
 
         elif provider == "gcp":
-            # terraform import fails here if the bucket doesn't already exist
-            terraform.refresh()
+            terraform.tfimport(
+                "module.terraform-state.module.gcs.google_storage_bucket.static-site",
+                f"{project_name}-{namespace}-terraform-state",
+                directory="terraform-state",
+            )
 
         elif provider == "do":
             do_region = config.get("digital_ocean", {}).get("region", "nyc3")
