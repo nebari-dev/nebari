@@ -23,6 +23,11 @@ def create_destroy_subcommand(subparser):
         action="store_true",
         help="Disable auto-rendering before destroy",
     )
+    subparser.add_argument(
+        "--full-only",
+        action="store_true",
+        help="Only carry out one full pass instead of targeted sections",
+    )
     subparser.set_defaults(func=handle_destroy)
 
 
@@ -43,4 +48,5 @@ def handle_destroy(args):
     destroy_configuration(
         config,
         args.skip_remote_state_provision,
+        args.full_only,
     )

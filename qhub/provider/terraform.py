@@ -115,12 +115,14 @@ def refresh(directory=None):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
-def destroy(directory=None):
-    logger.info(f"terraform destroy directory={directory}")
+def destroy(directory=None, targets=None):
+    targets = targets or []
+
+    logger.info(f"terraform destroy directory={directory} targets={targets}")
     command = [
         "destroy",
         "-auto-approve",
-    ]
+    ] + ["-target=" + _ for _ in targets]
 
     with timer(logger, "terraform destroy"):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
