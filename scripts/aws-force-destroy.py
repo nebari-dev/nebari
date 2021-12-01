@@ -258,9 +258,9 @@ def force_destroy_configuration(config):
                     for ni in subnet.network_interfaces.all():
                         ni.load()
                         # But can only detach if attached...
-                        ni.detach(DryRun=False, Force=True)
-
-                        ni.delete()
+                        if ni.attachment:
+                            ni.detach(DryRun=False, Force=True)
+                            ni.delete()
 
                     logging.info(f"Delete subnet {r['resource']}")
                     subnet.delete(DryRun=False)
