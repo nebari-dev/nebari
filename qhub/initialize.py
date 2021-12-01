@@ -386,6 +386,8 @@ def render_config(
         config["amazon_web_services"] = AMAZON_WEB_SERVICES
         if kubernetes_version:
             config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
+        if "AWS_DEFAULT_REGION" in os.environ:
+            config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
