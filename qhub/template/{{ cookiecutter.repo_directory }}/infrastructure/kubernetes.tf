@@ -51,6 +51,12 @@ module "kubernetes-initialization" {
 
   namespace = var.environment
   secrets   = []
+
+{% if cookiecutter.provider != "local" %}
+  depends_on = [
+    module.kubernetes
+  ]
+{% endif %}
 }
 
 
