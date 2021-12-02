@@ -1,7 +1,9 @@
 import pathlib
 import subprocess
+import signal
 import sys
 import time
+import threading
 import os
 import re
 import contextlib
@@ -59,11 +61,32 @@ def run_subprocess_cmd(processargs, **kwargs):
     else:
         line_prefix = b""
 
+    timeout = 0
+    if "timeout" in kwargs:
+        timeout = kwargs.pop("timeout")  # in seconds
+
     strip_errors = kwargs.pop("strip_errors", False)
 
     process = subprocess.Popen(
-        processargs, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        processargs,
+        **kwargs,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        preexec_fn=os.setsid,
     )
+    # Set timeout thread
+    timeout_timer = None
+    if timeout > 0:
+
+        def kill_process():
+            try:
+                os.killpg(process.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass  # Already finished
+
+        timeout_timer = threading.Timer(timeout, kill_process)
+        timeout_timer.start()
+
     for line in iter(lambda: process.stdout.readline(), b""):
         full_line = line_prefix + line
         if strip_errors:
@@ -75,6 +98,10 @@ def run_subprocess_cmd(processargs, **kwargs):
 
         sys.stdout.buffer.write(full_line)
         sys.stdout.flush()
+
+    if timeout_timer is not None:
+        timeout_timer.cancel()
+
     return process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout
