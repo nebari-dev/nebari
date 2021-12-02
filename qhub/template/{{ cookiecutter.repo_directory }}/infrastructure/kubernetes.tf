@@ -240,12 +240,6 @@ module "kubernetes-keycloak-config" {
   jupyterhub-keycloak-client-id     = local.jupyterhub-keycloak-client-id
   jupyterhub-keycloak-client-secret = random_password.jupyterhub-jhsecret.result
 
-  users = jsondecode("{{ cookiecutter.tf_users | jsonify | replace('"', '\\"') }}")
-
-  groups = jsondecode("{{ cookiecutter.tf_groups | jsonify | replace('"', '\\"') }}")
-
-  user_groups = jsondecode("{{ cookiecutter.tf_user_groups | jsonify | replace('"', '\\"') }}")
-
   {% if cookiecutter.security.authentication.type == "GitHub" -%}
   github_client_id     = {{ cookiecutter.security.authentication.config.client_id | jsonify }}
   github_client_secret = {{ cookiecutter.security.authentication.config.client_secret | jsonify }}

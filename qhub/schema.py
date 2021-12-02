@@ -191,19 +191,6 @@ class GitHubAuthentication(Authentication):
     config: GitHubConfig
 
 
-# =========== Users and Groups =============
-
-
-class User(Base):
-    password: typing.Optional[str]
-    primary_group: typing.Optional[str]
-    secondary_groups: typing.Optional[typing.List[str]]
-
-
-class Group(Base):
-    gid: typing.Optional[int]
-
-
 # ================= Keycloak ==================
 
 
@@ -217,10 +204,6 @@ class Keycloak(Base):
 
 class Security(Base):
     authentication: Authentication
-    users: typing.Optional[typing.Dict[str, typing.Union[User, None]]]
-    groups: typing.Optional[
-        typing.Dict[str, typing.Union[Group, None]]
-    ]  # If gid is omitted, no attributes in Group means it appears as None
     keycloak: typing.Optional[Keycloak]
 
 

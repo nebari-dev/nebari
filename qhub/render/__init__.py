@@ -63,53 +63,6 @@ def patch_versioning_extra_config(config):
         config["terraform_version"] = TERRAFORM_VERSION
 
 
-def patch_terraform_users(config):
-    """
-    Add terraform-friendly user information
-    """
-    incoming_groups = config.get("security", {}).get("groups", {})
-    config["tf_groups"] = [
-        {
-            "name": k,
-            "gid": str((v or {}).get("gid", "")),
-        }
-        for (k, v) in {"users": {}, "admin": {}, **incoming_groups}.items()
-        # Above forces existence of users and admin groups if not already provided in config
-    ]
-
-    group_index_lookup = {
-        obj["name"]: index for (index, obj) in enumerate(config["tf_groups"])
-    }
-
-    incoming_users = config.get("security", {}).get("users", {})
-
-    config["tf_users"] = []
-    for (k, v) in incoming_users.items():
-        if v is None:
-            v = {}
-        config["tf_users"].append(
-            {
-                "name": k,
-                "uid": str(v.get("uid", "")),
-                "password": v.get("password", ""),
-                "email": "@" in k and k or None,
-                "primary_group": v.get("primary_group", "users"),
-            }
-        )
-
-    config["tf_user_groups"] = []
-    for (k, v) in incoming_users.items():
-        if v is None:
-            v = {}
-        # Every user should be in the 'users' group
-        users_group_names = set(
-            [v.get("primary_group", "")] + v.get("secondary_groups", []) + ["users"]
-        ) - set([""])
-        config["tf_user_groups"].append(
-            [group_index_lookup[gname] for gname in users_group_names]
-        )
-
-
 def patch_terraform_extensions(config):
     """
     Add terraform-friendly extension details
@@ -297,8 +250,6 @@ def render_template(output_directory, config_filename, force=False):
         config = collections.ChainMap(config, json.load(f))
 
     patch_versioning_extra_config(config)
-
-    patch_terraform_users(config)
 
     patch_terraform_extensions(config)
 
