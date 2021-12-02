@@ -28,7 +28,7 @@
 - Deletes existing `.gitlb-ciy.yml` when rendering ([#887](https://github.com/Quansight/qhub/pull/887))
 - Update default CDS dashboards version to 0.6.0 ([this commit](https://github.com/Quansight/qhub/commit/188a5612d169bac0c43f640417031b257b71289b))
 - Update Azure env variable names in terraform ([#882](https://github.com/Quansight/qhub/pull/882))
-- change terraform command from import to refresh for GCP to prevent `qhub deploy` hanging when the state bucket is not currently created ([this commit](https://github.com/Quansight/qhub/commit/9ad65f640e2d18211140f2e59d1d9f70f194688e))
+- Add timeout to terraform import to prevent terminal hanging when resource doesn't exist ([this commit](https://github.com/Quansight/qhub/commit/941d694fd9afedebc6603d9a141cb17f27bcd0dc))
 
 ## Release 0.3.13 - 10/13/2021
 
