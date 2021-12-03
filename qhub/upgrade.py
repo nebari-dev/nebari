@@ -304,6 +304,12 @@ class Upgrade_0_3_14(UpgradeStep):
             f"Generated default random password={default_password} for Keycloak root user (Please change at /auth/ URL path).\n"
         )
 
+        if "terraform_modules" in config:
+            del config["terraform_modules"]
+            print(
+                "Removing terraform_modules field from config as it is no longer used.\n"
+            )
+
         return config
 
 
