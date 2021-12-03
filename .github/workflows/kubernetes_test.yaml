@@ -83,7 +83,7 @@ jobs:
         run: |
           mkdir -p local-deployment
           cd local-deployment
-          qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password
+          qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --disable-prompt
 
           # Need smaller profiles on Minikube
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "qhub-config.yaml"

@@ -25,6 +25,8 @@ resource "keycloak_group" "admingroup" {
 }
 
 resource "keycloak_group" "usersgroup" {
+  count = var.shared_users_group ? 1 : 0
+
   realm_id = keycloak_realm.realm-qhub.id
   name     = "users"
 
@@ -34,10 +36,12 @@ resource "keycloak_group" "usersgroup" {
 }
 
 resource "keycloak_default_groups" "default" {
+  count = var.shared_users_group ? 1 : 0
+
   realm_id = keycloak_realm.realm-qhub.id
 
   group_ids = [
-    keycloak_group.usersgroup.id
+    keycloak_group.usersgroup[0].id
   ]
 }
 

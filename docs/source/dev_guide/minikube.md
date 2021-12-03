@@ -216,7 +216,7 @@ cd data
 ## Initialize configuration
 Then, initialize the configuration file `qhub-config.yaml` with:
 ```shell
-python -m qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
+python -m qhub init local --project=thisisatest --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local --disable-prompt
 ```
 ## Generate user password
 For each user on the `qhub-config.yaml` file needs a password.
@@ -471,7 +471,7 @@ mkdir data-test
 cd data-test
 
 export QHUB_GH_BRANCH=main
-qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password
+qhub init local --project=thisisatest --domain github-actions.qhub.dev --auth-provider=password --disable-prompt
 
 sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 1/g' "qhub-config.yaml"
 sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 1G/g' "qhub-config.yaml"

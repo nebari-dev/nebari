@@ -117,15 +117,17 @@ def qhub_configure_profile(user_nss_json, safe_username, profile):
 
     profile.setdefault('kubespawner_override', {})['environment'] = preserve_envvars
 
-    profile['kubespawner_override']['lifecycle_hooks'] = {
-        "postStart": {
-            "exec": {
-                "command": ["/bin/sh", "-c", (
-                     "ln -sfn /home/shared /home/jovyan/shared"
-                )]
+    if len(groups) > 0:
+        # Only symlink shared if we have any mounts
+        profile['kubespawner_override']['lifecycle_hooks'] = {
+            "postStart": {
+                "exec": {
+                    "command": ["/bin/sh", "-c", (
+                        "ln -sfn /home/shared /home/jovyan/shared"
+                    )]
+                }
             }
         }
-    }
 
     # The recursive chown is important when migrating from an
     # older uid/gid-based NFS, but may be slow for a lot of files.

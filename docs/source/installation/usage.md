@@ -53,8 +53,10 @@ There are several flags that allow you to configure the deployment:
 - `--repository`: Repository name that will be used to store the Infrastructure-as-Code on GitHub.
 - `--repository-auto-provision`: Sets the secrets for the GitHub repository used for CI/CD actions.
 - `--ssl-cert-email`: Provide an admin's email address so that LetsEncrypt can generate a real SSL certificate for your site. If omitted, the site will use a self-signed cert that may cause problems for some browsers but may be sufficient for testing.
+- `--shared-users-group`: If provided, will ensure a `users` group is created and all users will become members. This means a shared folder called `users` will be available to share files with all other users.
+- `--disable-prompt`: Don't wait to ask for inputs for missing flags and values.
 
-You will be prompted to enter values for some of the choices above if they are omitted as command line arguments (e.g. project name and domain).
+You will be prompted to enter values for some of the choices above if they are omitted as command line arguments (e.g. project name and domain, and whether to create a shared users group or not). If you supply the `--disable-prompt` then you will not be asked for inputs - defaults will be used, or the text PLACEHOLDER used in the resulting `qhub-config.yaml` file so you supply necessary values before deploying.
 
 The `qhub init` command will also generate an initial password for your root Keycloak user:
 

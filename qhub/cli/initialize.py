@@ -61,6 +61,11 @@ def create_init_subcommand(subparser):
         "--ssl-cert-email",
         help="Allow generation of a LetsEncrypt SSL cert - requires an administrative email",
     )
+    subparser.add_argument(
+        "--shared-users-group",
+        action="store_true",
+        help="Create a group called `users` so there will be a shared folder for everyone",
+    )
     subparser.set_defaults(func=handle_init)
 
 
@@ -80,6 +85,7 @@ def handle_init(args):
         kubernetes_version=args.kubernetes_version,
         disable_prompt=args.disable_prompt,
         ssl_cert_email=args.ssl_cert_email,
+        shared_users_group=args.shared_users_group,
     )
 
     try:

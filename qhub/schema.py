@@ -199,6 +199,7 @@ class Keycloak(Base):
 class Security(Base):
     authentication: Authentication
     keycloak: typing.Optional[Keycloak]
+    shared_users_group: typing.Optional[bool] = False
 
 
 # ================ Providers ===============

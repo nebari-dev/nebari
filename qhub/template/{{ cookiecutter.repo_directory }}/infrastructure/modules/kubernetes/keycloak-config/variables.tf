@@ -72,3 +72,9 @@ variable "auth0_subdomain" {
   type        = string
   default     = ""
 }
+
+variable "shared_users_group" {
+  description = "Create a default group called users"
+  type        = bool
+  default     = false
+}

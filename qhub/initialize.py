@@ -250,6 +250,7 @@ def render_config(
     kubernetes_version=None,
     disable_prompt=False,
     ssl_cert_email=None,
+    shared_users_group=False,
 ):
     config = BASE_CONFIGURATION
     config["provider"] = cloud_provider
@@ -422,6 +423,18 @@ def render_config(
             raise ValueError(
                 f"Repository to be auto-provisioned is not the full URL of a GitHub repo: {repository}"
             )
+
+    # Create a default group called `users`?
+    if not shared_users_group and not disable_prompt:
+        want_shared_users_group_response = ""
+        while want_shared_users_group_response.upper() not in ("Y", "N"):
+            want_shared_users_group_response = input(
+                "Create a default group called `users` so there is a shared folder for everyone? [Y/N]"
+            )
+
+        shared_users_group = want_shared_users_group_response.upper() == "Y"
+
+    config["security"]["shared_users_group"] = shared_users_group
 
     return config
 

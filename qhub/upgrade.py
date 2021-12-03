@@ -292,6 +292,9 @@ class Upgrade_0_3_14(UpgradeStep):
         if "users" in security:
             del security["users"]
         if "groups" in security:
+            if "users" in security["groups"]:
+                # Ensure the users default group is added to Keycloak
+                security["shared_users_group"] = True
             del security["groups"]
 
         # Create root password

@@ -252,6 +252,8 @@ module "kubernetes-keycloak-config" {
   auth0_subdomain     = {{ cookiecutter.security.authentication.config.auth0_subdomain | jsonify }}
   {%- endif %}
 
+  shared_users_group = {{ cookiecutter.security.shared_users_group | default(false) | jsonify }}
+
   depends_on = [
     module.kubernetes-keycloak-helm
   ]
