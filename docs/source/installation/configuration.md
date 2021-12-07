@@ -406,6 +406,15 @@ amazon_web_services:
 
 #### Local (Existing) Kubernetes Cluster
 
+Originally designed for QHub deployments on a "local" minikube cluster,
+this feature has now expanded to allow users to deploy QHub to any
+existing kubernetes cluster. The default options for a `local` deployment
+are still set deploy QHub to a minikube cluster.
+
+If you wish to deploy QHub to an existing kubernetes cluster on one
+of the cloud providers, please refer to a more detailed walkthrough found
+in the [Deploy QHub to an Existing Kubernetes Cluster](./existing.md).
+
 Deploying to a local existing kubernetes cluster has different options
 than the cloud providers. `kube_context` is an optional key that can
 be used to deploy to a non-default context. The default node selectors
