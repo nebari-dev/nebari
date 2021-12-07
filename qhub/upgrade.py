@@ -304,6 +304,11 @@ class Upgrade_0_3_14(UpgradeStep):
             f"Generated default random password={default_password} for Keycloak root user (Please change at /auth/ URL path).\n"
         )
 
+        # project was never needed in Azure - it remained as PLACEHOLDER in earlier qhub inits!
+        if "azure" in config:
+            if "project" in config["azure"]:
+                del config["azure"]["project"]
+
         return config
 
 

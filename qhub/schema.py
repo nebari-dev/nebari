@@ -247,7 +247,6 @@ class GoogleCloudPlatformProvider(Base):
 
 
 class AzureProvider(Base):
-    project: str
     region: str
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
