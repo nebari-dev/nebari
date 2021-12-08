@@ -10,5 +10,5 @@ dependencies:
  - cdsdashboards==0.6.0
  - jupyterhub-idle-culler==1.0
  - pip:
-   - qhub-jupyterhub-theme==0.3.2
+   - qhub-jupyterhub-theme==0.3.3
    - python-keycloak==0.26.1
