@@ -19,4 +19,6 @@ resource "helm_release" "jupyterhub" {
     name  = "proxy.secretToken"
     value = random_password.proxy_secret_token.result
   }
+
+  wait = false
 }

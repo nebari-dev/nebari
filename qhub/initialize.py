@@ -123,7 +123,6 @@ GOOGLE_PLATFORM = {
 }
 
 AZURE = {
-    "project": "PLACEHOLDER",
     "region": "Central US",
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
