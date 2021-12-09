@@ -1,28 +1,12 @@
-resource "kubernetes_persistent_volume_claim" "main" {
+resource "kubernetes_service" "nfs" {
   metadata {
-    name      = "${var.name}-conda-store-storage"
-    namespace = var.namespace
-  }
-  wait_until_bound = true
-  spec {
-    access_modes = ["ReadWriteOnce"]
-    resources {
-      requests = {
-        storage = var.nfs_capacity
-      }
-    }
-  }
-}
-
-resource "kubernetes_service" "main" {
-  metadata {
-    name      = "${var.name}-conda-store"
+    name      = "${var.name}-conda-store-nfs"
     namespace = var.namespace
   }
 
   spec {
     selector = {
-      role = "${var.name}-conda-store"
+      role = "${var.name}-conda-store-worker"
     }
 
     port {
@@ -43,12 +27,39 @@ resource "kubernetes_service" "main" {
 }
 
 
+resource "kubernetes_persistent_volume_claim" "main" {
+  metadata {
+    name      = "${var.name}-conda-store-storage"
+    namespace = var.namespace
+  }
+  wait_until_bound = true
+  spec {
+    access_modes = ["ReadWriteOnce"]
+    resources {
+      requests = {
+        storage = var.nfs_capacity
+      }
+    }
+  }
+}
+
+
+resource "kubernetes_config_map" "conda-store-environments" {
+  metadata {
+    name      = "conda-environments"
+    namespace = var.namespace
+  }
+
+  data = var.environments
+}
+
+
 resource "kubernetes_deployment" "main" {
   metadata {
-    name      = "${var.name}-conda-store"
+    name      = "${var.name}-conda-store-worker"
     namespace = var.namespace
     labels = {
-      role = "${var.name}-conda-store"
+      role = "${var.name}-conda-store-worker"
     }
   }
 
@@ -57,14 +68,14 @@ resource "kubernetes_deployment" "main" {
 
     selector {
       match_labels = {
-        role = "${var.name}-conda-store"
+        role = "${var.name}-conda-store-worker"
       }
     }
 
     template {
       metadata {
         labels = {
-          role = "${var.name}-conda-store"
+          role = "${var.name}-conda-store-worker"
         }
       }
 
@@ -86,27 +97,28 @@ resource "kubernetes_deployment" "main" {
         }
 
         container {
-          name  = "conda-store"
+          name  = "conda-store-worker"
           image = "${var.conda-store-image.name}:${var.conda-store-image.tag}"
 
           command = [
-            "python", "/opt/conda-store/conda-store.py",
-            "-e", "/opt/environments",
-            "-o", "/home/conda/environments",
-            "-s", "/home/conda/store",
-            "--uid", "0",
-            "--gid", "0",
-            "--permissions", "775"
+            - "conda-store-worker"
+            - "--config"
+            - "/etc/conda-store/conda_store_config.py"
           ]
 
           volume_mount {
-            name       = "conda-environments"
-            mount_path = "/opt/environments"
+            name       = "config"
+            mount_path = "/etc/conda-store"
           }
 
           volume_mount {
-            mount_path = "/home/conda"
-            name       = "nfs-export-fast"
+            name       = "environments"
+            mount_path = "/opt/conda-store"
+          }
+
+          volume_mount {
+            name       = "storage"
+            mount_path = "/opt/conda-store"
           }
         }
 
@@ -135,33 +147,31 @@ resource "kubernetes_deployment" "main" {
 
           volume_mount {
             mount_path = "/exports"
-            name       = "nfs-export-fast"
+            name       = "storage"
           }
         }
 
         volume {
-          name = "nfs-export-fast"
-          persistent_volume_claim {
-            claim_name = "${var.name}-conda-store-storage"
-          }
-        }
-
-        volume {
-          name = "conda-environments"
+          name = "config"
           config_map {
-            name = kubernetes_config_map.conda-environments.metadata.0.name
+            name = kubernetes_config_map.conda-store-config.metadata.0.name
+          }
+        }
+
+        volume {
+          name = "environments"
+          config_map {
+            name = kubernetes_config_map.conda-store-environments.metadata.0.name
+          }
+        }
+
+        volume {
+          name = "storage"
+          persistent_volume_claim {
+            claim_name = persistent_volume_claim.main.metadata.0.name
           }
         }
       }
     }
   }
-}
-
-resource "kubernetes_config_map" "conda-environments" {
-  metadata {
-    name      = "conda-environments"
-    namespace = var.namespace
-  }
-
-  data = var.environments
 }
