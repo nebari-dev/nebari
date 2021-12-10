@@ -27,7 +27,7 @@ variable. In that case, Docker tags and workflow `pip install qhub`
 commands will be based on the qhub version specified in the
 qhub/version.py file, but these tags and releases may not yet exist,
 perhaps if the version has been updated to include a beta/dev
-component which has not been released.  So you may need to manually
+component which has not been released. So you may need to manually
 modify the qhub-config.yaml to 'downgrade' the tags to a full release
 version.
 
@@ -88,9 +88,9 @@ Hadolint will report `error`, `warning`, `info` and `style` while linting Docker
 
 ## Debug Kubernetes clusters
 
- To debug Kubernetes clusters, we advise you to use [K9s](https://k9scli.io/), a terminal-based UI that aims to
+ To debug Kubernetes clusters, we advise you to use [`k9s`](https://k9scli.io/), a terminal-based UI that aims to
  simplify navigation, observation, and management of applications in Kubernetes.
- K9s continuously monitors Kubernetes clusters for changes and provides
+ `k9s` continuously monitors Kubernetes clusters for changes and provides
  shortcut commands to interact with the observed resources becoming a
  fast way to review and resolve day-to-day issues in deployed clusters.
 

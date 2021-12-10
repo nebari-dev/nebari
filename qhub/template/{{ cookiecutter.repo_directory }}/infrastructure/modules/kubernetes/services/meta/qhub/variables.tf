@@ -100,11 +100,6 @@ variable "certificate-secret-name" {
   default     = ""
 }
 
-variable "extcr_config" {
-  description = "Customer's access details for external container reg"
-  type        = map(any)
-}
-
 variable "forwardauth-callback-url-path" {
   description = "Callback URL Path for ForwardAuth"
   type        = string

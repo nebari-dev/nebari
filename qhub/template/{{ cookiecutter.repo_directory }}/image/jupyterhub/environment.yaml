@@ -3,11 +3,12 @@ channels:
   - conda-forge
 dependencies:
  - pip==21.1.2
- - jupyterhub==1.4.1
- - jupyterhub-kubespawner==1.0.0
+ - jupyterhub==1.5.0
+ - jupyterhub-kubespawner==1.1.0
  - oauthenticator==14.1.0
  - escapism==1.0.1
  - cdsdashboards==0.6.0
+ - jupyterhub-idle-culler==1.0
  - pip:
-   - qhub-jupyterhub-theme==0.3.2
+   - qhub-jupyterhub-theme==0.3.3
    - python-keycloak==0.26.1

@@ -43,24 +43,6 @@ variable "name" {
   type        = string
 }
 
-variable "users" {
-  description = "list of users data"
-  type        = list(map(any))
-  default     = []
-}
-
-variable "groups" {
-  description = "list of groups data"
-  type        = list(map(any))
-  default     = []
-}
-
-variable "user_groups" {
-  description = "list of user_groups data"
-  type        = list(list(number))
-  default     = []
-}
-
 variable "github_client_id" {
   description = "GitHub OAuth2 Client ID"
   type        = string
@@ -90,4 +72,3 @@ variable "auth0_subdomain" {
   type        = string
   default     = ""
 }
-

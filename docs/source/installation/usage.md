@@ -138,7 +138,7 @@ If you specified `--dns-provider cloudflare --dns-auto-provision` on the command
 ### GitOps
 
 If you chose `--ci-provider github-actions` (or `gitlab-ci`) then QHub will use a GitHub Actions workflow (or GitLab equivalent) to automatically handle future deployment of
-the infrastructure. For that to work, your newly-generated project must be pushed to
+the infrastructure. For that to work, your newly generated project must be pushed to
 GitHub. Using the URL under the `--repository` flag on the `qhub init`
 command, you need to commit all files to the git repo.
 

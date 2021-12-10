@@ -123,13 +123,12 @@ GOOGLE_PLATFORM = {
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {"instance": "n1-standard-4", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
-        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
+        "user": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
+        "worker": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
     },
 }
 
 AZURE = {
-    "project": "PLACEHOLDER",
     "region": "Central US",
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
@@ -141,7 +140,7 @@ AZURE = {
         "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 5},
         "worker": {
             "instance": "Standard_D2_v2",
-            "min_nodes": 1,
+            "min_nodes": 0,
             "max_nodes": 5,
         },
     },
@@ -373,7 +372,8 @@ def render_config(
         ] = "Autoscaling Compute Environment on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
-
+        if "AWS_DEFAULT_REGION" in os.environ:
+            config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"

@@ -1,6 +1,6 @@
 # Log into QHub
 
-This guide aims to explain to newcomers how to log in to QHub.  Your
+This guide aims to explain to newcomers how to log in to QHub. Your
 own organization's QHub is likely to have a slightly different
 procedure for the authentication due to the many authentication
 providers that QHub can integrate into.
