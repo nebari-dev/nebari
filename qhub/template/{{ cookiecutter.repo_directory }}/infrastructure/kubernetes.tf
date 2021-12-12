@@ -307,6 +307,10 @@ module "qhub" {
 {%- endif %}
   )
 
+{%- if cookiecutter.jupyterhub.overrides.hub.extraEnv is defined %}
+  jupyterhub-hub-extraEnv = {{- cookiecutter.jupyterhub.overrides.hub.extraEnv | default({}) | jsonify -}}
+{%- endif %}
+
   dask_gateway_extra_config = file("dask_gateway_config.py.j2")
 
   forwardauth-callback-url-path = local.forwardauth-callback-url-path

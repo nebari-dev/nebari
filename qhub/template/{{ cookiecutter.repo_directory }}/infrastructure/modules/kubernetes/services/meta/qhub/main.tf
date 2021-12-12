@@ -12,7 +12,8 @@ module "kubernetes-jupyterhub" {
   overrides = concat(var.jupyterhub-overrides, [
     jsonencode({
       hub = {
-        extraEnv = [
+        extraEnv = concat( var.jupyterhub-hub-extraEnv,
+          [
           {
             name = "OAUTH_CLIENT_ID",
             value = var.OAUTH_CLIENT_ID
@@ -57,7 +58,7 @@ module "kubernetes-jupyterhub" {
             name  = "KEYCLOAK_PASSWORD"
             value = var.keycloak_password
           }
-        ]
+        ])
         nodeSelector = {
           (var.general-node-group.key) = var.general-node-group.value
         }
