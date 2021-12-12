@@ -307,7 +307,7 @@ module "qhub" {
 {%- endif %}
   )
 
-{%- if cookiecutter.jupyterhub.overrides.hub.extraEnv is defined %}
+{%- if cookiecutter.jupyterhub is defined and cookiecutter.jupyterhub.overrides is defined and cookiecutter.jupyterhub.overrides.hub is defined and cookiecutter.jupyterhub.overrides.hub.extraEnv is defined %}
   jupyterhub-hub-extraEnv = {{- cookiecutter.jupyterhub.overrides.hub.extraEnv | default({}) | jsonify -}}
 {%- endif %}
 
