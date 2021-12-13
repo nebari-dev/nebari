@@ -2,16 +2,11 @@
 
 ## Cloud Deployment
 
-Once all environment variables have been set (in [Configuration](configuration.md)), you will be able to run
-commands on your terminal to initialise the configuration for QHub, and then deploy it.
+Once all environment variables have been set (in [Configuration](configuration.md)), you will be able to run commands on your terminal to initialise the configuration for QHub, and then deploy it.
 
 ### Initialize configuration
 
-QHub can help you create your configuration YAML file, and you can further edit it as needed.
-
-We advise you to
-start by creating a new project folder.  Here, we will name the new
-folder `qhub-test`.
+QHub can help you create your configuration YAML file, and you can further edit it as needed. We advise you to start by creating a new project folder. Here, we will name the new folder `qhub-test`.
 
 On your terminal run:
 
@@ -30,31 +25,25 @@ qhub init aws \
   --ssl-cert-email admin@test.com
 ```
 
-The command above will generate the `qhub-config.yaml` config file
-with an infrastructure deployed on `aws`, named `projectname`, where
-the domain will be `qhub.dev`.
+The command above will generate the `qhub-config.yaml` config file with an infrastructure deployed on `aws`, named `projectname`, where the domain will be `qhub.dev`.
 
-The deployment
-will use `github-actions` as the continuous integration (CI) provider,
-automatically provisioning a repository on GitHub under the URL `github.com/quansight/projectname`
+The deployment will use `github-actions` as the continuous integration (CI) provider, automatically provisioning a repository on GitHub under the URL `github.com/quansight/projectname`
 
-User authentication will be by `auth0`, and an OAuth2 app will be created on Auth0 automatically.
-
-There are several flags that allow you to configure the deployment:
+User authentication will be by `auth0`, and an OAuth2 app will be created on Auth0 automatically. There are several flags that allow you to configure the deployment:
 
 - `aws` indicates that the project will be deployed on the Amazon AWS Cloud provider.
     + Other providers are: `gcp`, `do` and `azure`.
-- `--project`: the name of the project is required to be a string compliant with the Cloud provider recommendations. For
+- `--project`: The name of the project is required to be a string compliant with the Cloud provider recommendations. For
   more details see official Cloud provider docs on naming policies and check the [note below](#project-naming-convention).
-- `--domain`: domain for your cluster. This pattern is also required if you are setting your own DNS through a provider other than Cloudflare.
-- `--ci-provider`: specifies what provider to use for CI/CD. Currently, supports GitHub Actions, GitLab CI, or none ("github-actions", "gitlab-ci", or "none").
-- `--auth-provider`: This will set configuration file to use the specified provider for user authentication (value can be "auth0", "github", or "password").
-- `--auth-auto-provision`: This will automatically create and configure an application using OAuth (assuming `--auth-provider` is `auth0` or `github`).
+- `--domain`: Domain for your cluster. This pattern is also required if you are setting your own DNS through a provider other than Cloudflare.
+- `--ci-provider`: Specifies what provider to use for CI/CD. Currently, supports GitHub Actions, GitLab CI, or none.
+- `--auth-provider`: This will set configuration file to use the specified provider for user authentication. The values can be `auth0`, `github`, or `password`.
+- `--auth-auto-provision`: This will automatically create and configure an application using OAuth, assuming the `--auth-provider` is `auth0` or `github`.
 - `--repository`: Repository name that will be used to store the Infrastructure-as-Code on GitHub.
 - `--repository-auto-provision`: Sets the secrets for the GitHub repository used for CI/CD actions.
 - `--ssl-cert-email`: Provide an admin's email address so that LetsEncrypt can generate a real SSL certificate for your site. If omitted, the site will use a self-signed cert that may cause problems for some browsers but may be sufficient for testing.
 
-You will be prompted to enter values for some of the choices above if they are ommited as command line arguments (for example project name and domain).
+You will be prompted to enter values for some of the choices above if they are omitted as command line arguments (for example project name and domain).
 
 The `qhub init` command will also generate an initial password for your root Keycloak user:
 
@@ -79,11 +68,7 @@ should also obey to the following format requirements:
 
 The `qhub init` command may have some side-effects such automatically creating a GitHub repository and setting some repo secrets (if you used the `--repository-auto-provision` flag), and creating an Auth0 app, but the main output of the command is the `qhub-config.yaml` file.
 
-This file is the configuration file that will determine how the cloud infrastructure and QHub is built and deployed in the next step.
-
-But at this point it is just a text file! You could edit it manually if you are unhappy with the choices, or delete it and start over again.
-
-Or it would be possible to create from scratch or re-use a `qhub-config.yaml` file - it is not essential to use `qhub init` at all, but it is often the easiest way to get started.
+This file is the configuration file that will determine how the cloud infrastructure and QHub is built and deployed in the next step. But at this point it is just a text file. You could edit it manually if you are unhappy with the choices, or delete it and start over again. Or it would be possible to create from scratch or re-use a `qhub-config.yaml` file - it is not essential to use `qhub init` at all, but it is often the easiest way to get started.
 
 To understand some ways in which you could decide to edit the YAML file, see [Advanced Configuration](configuration.md).
 
@@ -136,9 +121,7 @@ If you specified `--dns-provider cloudflare --dns-auto-provision` on the command
 ### GitOps
 
 If you chose `--ci-provider github-actions` (or `gitlab-ci`) then QHub will use a GitHub Actions workflow (or GitLab equivalent) to automatically handle future deployment of
-the infrastructure. For that to work, your newly-generated project must be pushed to
-GitHub. Using the URL under the `--repository` flag on the `qhub init`
-command, you need to commit all files to the git repo.
+the infrastructure. For that to work, your newly generated project must be pushed to GitHub. Using the URL under the `--repository` flag on the `qhub init` command, you need to commit all files to the git repo.
 
 To add the project to the initialized remote git repository run:
 
@@ -147,30 +130,23 @@ git add .github/ .gitignore environments/ image/ infrastructure/ qhub-config.yam
 git commit -m "First commit"
 ```
 
-Push the changes to the repository (your primary branch may be called
-`master` instead of `main`):
+Push the changes to the repository (your primary branch may be called `master` instead of `main`):
 
 ```shell
 git push origin main
 ```
 
-Once the files are in GitHub/GitLab, all CI/CD changes will be triggered by commits to main, and deployed via GitHub Actions or GitLab CI.  Since the infrastructure state is reflected in the repository, this workflow
-allows for team members to submit pull requests that can be reviewed
-before modifying the infrastructure, easing the maintenance process.
+Once the files are in GitHub/GitLab, all CI/CD changes will be triggered by commits to main, and deployed via GitHub Actions or GitLab CI.  Since the infrastructure state is reflected in the repository, this workflow allows for team members to submit pull requests that can be reviewed before modifying the infrastructure, easing the maintenance process.
 
 To automatically deploy:
-- make changes to the `qhub-config.yaml` file on a new branch.
-- create a pull request (PR) to main.
-- Trigger the deployment by merging the PR. All changes will be
-  automatically applied to the new QHub instance.
+- Make changes to the `qhub-config.yaml` file on a new branch.
+- Create a pull request (PR) to main.
+- Trigger the deployment by merging the PR. All changes will be automatically applied to the new QHub instance.
 
 -----
 
-Congratulations, you have now completed your QHub cloud deployment!
+Congratulations, you have now completed your QHub cloud deployment.
 
-Having issues? Head over to our
-[Troubleshooting](../admin_guide/troubleshooting.md) section for tips
-on how to debug your QHub. Or try our
-[FAQ](../admin_guide/faq.md).
+Having issues? Head over to our [Troubleshooting](../admin_guide/troubleshooting.md) section for tips on how to debug your QHub. Or try our [FAQ](../admin_guide/faq.md).
 
 If your deployment seemed to be successful, next learn how to [login](login.md).

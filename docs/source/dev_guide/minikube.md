@@ -456,8 +456,7 @@ qhub deploy --config qhub-config.yaml --disable-prompt
 
 ## Enable Kubernetes access from Mac
 
-This step is optional, but will allow you to use kubectl and K9s directly from your Mac. It is not needed
-if you are happy to use kubectl within an SSH session on AWS instead.
+This step is optional, but will allow you to use kubectl and K9 directly from your Mac. It is not needed if you are satisfied to use kubectl within an SSH session on AWS instead.
 
 On your Mac laptop:
 
