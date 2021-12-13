@@ -25,8 +25,10 @@ jobs:
       matrix:
         dockerfile:
           - jupyterlab
+          - jupyterlab-centos
           - jupyterhub
           - dask-worker
+          - dask-worker-centos
           - dask-gateway
           - conda-store
     steps:

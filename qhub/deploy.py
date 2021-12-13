@@ -123,8 +123,8 @@ def guided_install(
                 f'"{config["domain"]}" [Press Enter when Complete]'
             )
 
-        # Now Keycloak Helm chart
-        targets = ["module.kubernetes-keycloak-helm"]
+        # Now Keycloak Helm chart (External Docker Registry before that if we need one)
+        targets = ["module.external-container-reg", "module.kubernetes-keycloak-helm"]
         logger.info(f"Running Terraform Stage: {targets}")
         terraform.apply(
             directory="infrastructure",

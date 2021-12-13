@@ -32,15 +32,11 @@ c.JupyterHub.extra_handlers = []
 
 # ==================== THEME =========================
 import tornado.web
-import qhub_jupyterhub_theme
+from qhub_jupyterhub_theme import theme_extra_handlers, theme_template_paths
 
-c.JupyterHub.extra_handlers += [
-    (r'/custom/(.*)', tornado.web.StaticFileHandler, {"path": qhub_jupyterhub_theme.STATIC_PATH}),
-]
+c.JupyterHub.extra_handlers += theme_extra_handlers
 
-c.JupyterHub.template_paths = [
-    qhub_jupyterhub_theme.TEMPLATE_PATH
-] + c.JupyterHub.template_paths
+c.JupyterHub.template_paths = theme_template_paths + c.JupyterHub.template_paths
 
 c.JupyterHub.template_vars = {
 {%- for key, value in cookiecutter.theme.jupyterhub.items() %}

@@ -77,7 +77,8 @@ prefect:
      envVars:
        MY_VAR: "<value>"
 ```
-### Adding secrets to you Agent configuration
+
+### Adding secrets to your Agent configuration
 
 Overrides also allow you to define extra secrets to pass through your agent configuration, for example, when using [default secrets](https://docs.prefect.io/core/concepts/secrets.html#default-secrets) to automatically authenticate your flow with the listed service. In the Google cloud case, for `GCP_CREDENTIALS` context secret, you can do it by adding that specific key value pair into your configuration:
 

@@ -2,9 +2,7 @@
 
 ## Add users to QHub
 
-One of the first things you might want to do is to **add new users** to your QHub.
-
-Any type of supported authorization from auth0 can be used as a username. Below is an example configuration of 2 users:
+One of the first things you might want to do is to **add new users** to your QHub. Any type of supported authorization from auth0 can be used as a username. Below is an example configuration of 2 users:
 
 ```yaml
      joeuser@example:
@@ -18,7 +16,7 @@ Any type of supported authorization from auth0 can be used as a username. Below 
          primary_group: users
 ```
 
-As seen above, each username has a unique `uid` and a `primary_group`. Optional `secondary_groups` may also be set for each user.
+As seen above, each username has a unique `uid` and a `primary_group`. Optional `secondary_groups` may also be set for each user. This can be done through the Keycloak web console. See [Adding a QHub user](./login.md#adding-a-qhub-user) for details.
 
 ## Upgrades and dependencies management
 
@@ -54,6 +52,4 @@ Within their own JupyterLab sessions, admins can add files to a folder called `s
 
 ## Monitor your QHub deployment
 
-<!---
-TODO: Add instruction on how to install and use K9 for monitoring the system deployment.
--->
+You can install `k9s` for debugging and deep monitoring of the system deployment - see [here](../admin_guide/troubleshooting.md).

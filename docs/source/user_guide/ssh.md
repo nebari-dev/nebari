@@ -34,14 +34,14 @@ with an `@` symbol weirdly thus you will need to provide the username
 explicitly in ssh. Notice the `8022` port used for ssh.
 
 ```
-$ ssh -o User=costrouchov@quansight.com training.qhub.dev -p 8022 
+$ ssh -o User=costrouchov@quansight.com training.qhub.dev -p 8022
 The authenticity of host '[training.qhub.dev]:8022 ([35.223.107.201]:8022)' can't be established.
 RSA key fingerprint is SHA256:mKy546LpI0cbqm/IY8dQR0B5QcbEziWLjLglern5G+U.
 This key is not known by any other names
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 Warning: Permanently added '[training.qhub.dev]:8022' (RSA) to the list of known hosts.
 (costrouchov@quansight.com@training.qhub.dev) Password:
-costrouchov@quansight.com@jupyter-costrouchov-40quansight-2ecom:~$ 
+costrouchov@quansight.com@jupyter-costrouchov-40quansight-2ecom:~$
 ```
 
 The `sftp` port is available on `8023`.

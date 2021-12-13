@@ -7,6 +7,17 @@ Once all environment variables have been set (in [Configuration](configuration.m
 ### Initialize configuration
 
 QHub can help you create your configuration YAML file, and you can further edit it as needed. We advise you to start by creating a new project folder. Here, we will name the new folder `qhub-test`.
+=======
+Great, you've gone through the `qhub` [Installation](installation.md) and [Setup Initialization](setup.md) steps,
+and have ensured that all the necessary environment variables have been properly set, it's time to deploy QHub
+from your terminal.
+
+### Initialize configuration
+
+There are several ways to generate your configuration file, `qhub-config.yaml`. You can
+type the commands when prompted by terminal, or you can set
+it all automatically from the start. In any case, start by creating
+a new project folder. Start by creating a directory `qhub-test`.
 
 On your terminal run:
 
@@ -14,7 +25,9 @@ On your terminal run:
 mkdir qhub-test && cd qhub-test
 ```
 
-To generate a configuration file, on your terminal run something like the following (vary for your own choices):
+#### Fully automated deployment
+
+To generate a fully automated configuration file, on your terminal run:
 
 ```shell
 qhub init aws \
@@ -24,6 +37,8 @@ qhub init aws \
   --auth-provider auth0 --auth-auto-provision \
   --ssl-cert-email admin@test.com
 ```
+There are several **optional** (yet highly recommended) flags that
+allow to configure the deployment:
 
 The command above will generate the `qhub-config.yaml` config file with an infrastructure deployed on `aws`, named `projectname`, where the domain will be `qhub.dev`.
 
@@ -45,19 +60,27 @@ User authentication will be by `auth0`, and an OAuth2 app will be created on Aut
 
 You will be prompted to enter values for some of the choices above if they are omitted as command line arguments (for example project name and domain).
 
-The `qhub init` command will also generate an initial password for your root Keycloak user:
+The `qhub init` command also generates an initial password for your root Keycloak user:
 
 ```
 Securely generated default random password=R1E8aWedaQVU6kKv for Keycloak root user stored at path=/tmp/QHUB_DEFAULT_PASSWORD
 ```
 
-The password will also be available in the `qhub-config.yaml` file under the security.keycloak.initial_root_password field. It will be needed in the next page of these docs for logging in to your QHub.
+This password is also available in the `qhub-config.yaml` file under the `security.keycloak.initial_root_password field`. It's required in the next page of these docs for logging in to your QHub.
 
-<a href="#" name="project-naming-convention"></a>
-> Note: **Project Naming Convention**
->
-> In order to successfully deploy QHub, there are some project naming conventions which need to be followed. For starters,
-make sure your name is compatible with the specific one for your chosen Cloud provider. In addition, QHub `projectname`
+This `qhub init` command generates the `qhub-config.yaml` config file
+with an infrastructure to be deployed on `aws`, named `projectname`, with a
+domain name set to `qhub.dev`. The deployment uses `github-actions` as
+the continuous integration provider,
+automatically provisioned and authenticated by `auth0`. And finally, initialized on
+GitHub under the URL `github.com/quansight/projectname`.
+
+If employing an infrastructure-as-code approach, this is where you would make the desired infrastructure changes
+including adding users, changing Dask worker instance type and much more. Once you're happy with your changes you would redeploy those changes using GitHub Actions. For more details on the `qhub-config.yaml` please see [Configuration](configuration.md)
+
+##### Project naming convention
+In order to successfully deploy QHub, please follow some project naming conventions. For starters,
+make sure your project name is compatible with the specifics of your chosen cloud provider. In addition, QHub `projectname`
 should also obey to the following format requirements:
 > + letters from A to Z (upper and lower case) and numbers;
 > + Special characters are **NOT** allowed;
@@ -74,18 +97,18 @@ To understand some ways in which you could decide to edit the YAML file, see [Ad
 
 ## Deploy QHub
 
-Finally, we can deploy QHub with:
+Finally, with the `qhub-config.yaml` created, QHub can be deployed for the first time:
 
 ```shell
 qhub deploy -c qhub-config.yaml --dns-provider cloudflare --dns-auto-provision
 ```
+> Omit `--dns-provider cloudflare --dns-auto-provision` if you are not using Cloudflare and will set up your DNS manually.
 
-Please omit `--dns-provider cloudflare --dns-auto-provision` if you are not using Cloudflare and will set up your DNS manually.
-
-The command will create the following folder structure, which is the Terraform definition language for the QHub platform that will be deployed:
+This creates the following folder structure:
 
 ```
 .
+├── .github             # if "--ci-provider github-actions" was passed in, then an action scripts folder is also generated
 ├── environments        # stores the conda environments
 ├── image               # docker images used on deployment: jupyterhub, jupyterlab, and dask-gateway
 │   ├── dask-worker
@@ -95,11 +118,12 @@ The command will create the following folder structure, which is the Terraform d
 └── terraform-state     # required by terraform to securely store the state of the deployment
 ```
 
-It will also start the deployment of your QHub, which will take around 10 minutes to complete.
+The terminal then prompts you to press `[enter]` to check auth credentials
+(which were added by the `qhub init` command); to disable the prompt, add `--disable-prompt` to the qhub deploy command.
+A first time deeployment can take around 10 minutes to complete.
 
-Part of the output will show an "ip" address (DigitalOcean or GCP), or
-a CNAME "hostname" (for AWS) according to the Cloud service
-provider. Such as:
+During the initial deployment, Digital Ocean, GCP and Azure are going to display an `"ip"` address
+whereas AWS is going to display a CNAME `"hostname"`.
 
 + Digital Ocean/Google Cloud Platform
 ```shell
