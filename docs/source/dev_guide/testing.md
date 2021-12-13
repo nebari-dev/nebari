@@ -17,7 +17,7 @@ perhaps if the version has been updated to include a beta/dev component which ha
 
 ### Kubernetes Version Check for Cloud Providers
 
-When `qhub init <cloud provider>` is called, it checks that the `--kubernetes-version` provided is supported by the choosen cloud provider. This flag is optional and if not provided, the `kubernetes_version` is set to the most recent kubernetes version available. This is achieved by using the cloud provider's SDK which thus requires their approiate credentials to be set. To get around this, simply set the `QHUB_K8S_VERSION` environment variable like so:
+When `qhub init <cloud provider>` is called, it checks that the `--kubernetes-version` provided is supported by the preferred cloud provider. This flag is optional and if not provided, the `kubernetes_version` is set to the most recent kubernetes version available. This is achieved by using the cloud provider's SDK which thus requires their appropriate credentials to be set. To get around this, simply set the `QHUB_K8S_VERSION` environment variable like so:
 
 ```
 export QHUB_K8S_VERSION=1.20

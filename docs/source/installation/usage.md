@@ -118,12 +118,9 @@ This creates the following folder structure:
 └── terraform-state     # required by terraform to securely store the state of the deployment
 ```
 
-The terminal then prompts you to press `[enter]` to check auth credentials
-(which were added by the `qhub init` command); to disable the prompt, add `--disable-prompt` to the qhub deploy command.
-A first time deeployment can take around 10 minutes to complete.
+The terminal then prompts you to press `[enter]` to check auth credentials (which were added by the `qhub init` command); to disable the prompt, add `--disable-prompt` to the qhub deploy command. A first time deployment can take around 10 minutes to complete.
 
-During the initial deployment, Digital Ocean, GCP and Azure are going to display an `"ip"` address
-whereas AWS is going to display a CNAME `"hostname"`.
+During the initial deployment, Digital Ocean, GCP and Azure are going to display an `"ip"` address whereas AWS is going to display a CNAME `"hostname"`.
 
 + Digital Ocean/Google Cloud Platform
 ```shell

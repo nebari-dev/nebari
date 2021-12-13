@@ -316,7 +316,7 @@ Listed below are the cloud providers QHub currently supports.
 > NOTE: Many of the cloud providers regularly update their internal Kubernetes
 > versions so if you wish to specify a particular version, please check the following
 > resources. This is *completely optional* as QHub will, by default, select the most
-> recent version available for your choosen cloud provider.
+> recent version available for your preferred cloud provider.
 > [Digital Ocean](https://docs.digitalocean.com/products/kubernetes/changelog/)
 > [Google Cloud Platform](https://cloud.google.com/kubernetes-engine/docs/release-notes-stable)
 > [Amazon Web Services](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)
