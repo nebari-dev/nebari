@@ -8,7 +8,7 @@ Designed to simplify the deployment and maintenance of scalable computational pl
 
 ## QHub Technology Stack
 
-![High-level illustration of QHub architecture](/source/images/qhub-cloud_architecture.png)
+![High-level illustration of QHub architecture](../images/qhub-cloud_architecture.png)
 
 ### Components
 
