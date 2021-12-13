@@ -12,7 +12,7 @@ Then `qhub init` will create a qhub-config.yaml containing, for example, `quansi
 
 In addition, `qhub deploy` can use QHUB_GH_BRANCH to create GitHub/GitLab workflows which install the development branch of QHub for their own deploy steps.
 
-If you want to use the development version of QHub for your init and deploy but want your resulting deployment to be based on a full release version, do not set the QHUB_GH_BRANCH environment variable. In that case, Docker tags and workflow `pip install qhub` commands will be based on the qhub version specified in the `qhub/version.py` file, but these tags and releases may not yet exist,
+If you want to use the development version of QHub for your init and deploy but want your resulting deployment to be based on a full release version, don't set the QHUB_GH_BRANCH environment variable. In that case, Docker tags and workflow `pip install qhub` commands will be based on the qhub version specified in the `qhub/version.py` file, but these tags and releases may not yet exist,
 perhaps if the version has been updated to include a beta/dev component which has not been released. So you may need to manually modify the qhub-config.yaml to 'downgrade' the tags to a full release version.
 
 ### Kubernetes Version Check for Cloud Providers
@@ -43,7 +43,7 @@ Often times you would like to modify the JupyterLab default docker image and run
 docker run -p 8888:8888 -it <image-sha> jupyter lab --ip=0.0.0.0
 ```
 
-Then open the localhost (127.0.0.1) link that is in the terminal
+Then open the localhost (127.0.0.1) link that's in the terminal
 
 ```shell
 [I 2021-04-05 17:37:17.345 ServerApp] Jupyter Server 1.5.1 is running at:
@@ -77,7 +77,7 @@ Installation can be done on a macOS, in Windows, and Linux and instructions can 
 
 ## Cypress Tests
 
-Cypress automates testing within a web browser environment. It is integrated into the GitHub Actions tests.yaml workflows in this repo, and  you can also run it locally. To do so:
+Cypress automates testing within a web browser environment. It's integrated into the GitHub Actions tests.yaml workflows in this repo, and  you can also run it locally. To do so:
 
 ```shell
 cd tests_e2e
@@ -108,7 +108,7 @@ pytest tests_deployment/ -v
 
 # Cloud Testing
 
-Cloud testing on aws, gcp, azure, and digital ocean can be significantly more complicated and time consuming. But it is the only way to truly test the cloud deployments, including infrastructure, of course. To test on cloud Kubernetes, just deploy qhub in the normal way on those clouds, but using the [linked pip install](./index.md) of the qhub package.
+Cloud testing on aws, gcp, azure, and digital ocean can be significantly more complicated and time consuming. But It's the only way to truly test the cloud deployments, including infrastructure, of course. To test on cloud Kubernetes, just deploy qhub in the normal way on those clouds, but using the [linked pip install](./index.md) of the qhub package.
 
 Even with the dev install of the qhub package, you may find that the deployed cluster doesn't actually reflect any development changes, for example to the Docker images for JupyterHub or JupyterLab. That will be because your qhub-config.yaml references fully released versions. See [Using a development branch](#using-a-development-branch) above for how to encourage the Docker images to be specified based on the latest development code.
 

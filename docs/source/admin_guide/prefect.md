@@ -27,7 +27,7 @@ There are a bunch of components in getting Prefect working for you, here is a br
 prefect create project 'your-prefect-project-name'
 ```
 
-The `TF_VAR_prefect_token` API key is set as `PREFECT__CLOUD__AGENT__AUTH_TOKEN` environment variable in the agent. It is used while deploying Prefect Agent so that it can connect to Prefect Cloud and query flows.
+The `TF_VAR_prefect_token` API key is set as `PREFECT__CLOUD__AGENT__AUTH_TOKEN` environment variable in the agent. It's used while deploying Prefect Agent so that it can connect to Prefect Cloud and query flows.
 
 ## Prefect Cloud
 
@@ -114,7 +114,7 @@ with Flow('My Functional Flow') as flow:
 
 ## Storage
 
-The Prefect Storage interface encapsulates logic for storing flows. Each storage unit is able to store multiple flows (with the constraint of name uniqueness within a given unit). The API documentation for the same can be found in the [prefect documentation](https://docs.prefect.io/api/latest/storage.html#docker)
+The Prefect Storage interface encapsulates logic for storing flows. Each storage unIt's able to store multiple flows (with the constraint of name uniqueness within a given unit). The API documentation for the same can be found in the [prefect documentation](https://docs.prefect.io/api/latest/storage.html#docker)
 
 ## Example: Creating, Building and Register Flow
 

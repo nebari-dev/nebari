@@ -20,7 +20,7 @@ gateway = Gateway()
 ```
 
 QHub has [a section](https://docs.qhub.dev/en/stable/source/installation/configuration.html#profiles) for configuring the dask profiles that users have access to. These can
-be accessed via Dask Gateway options. Once the [ipywidget](https://ipywidgets.readthedocs.io/en/latest/) shows up the user can select the options they care about. If you are interacting in a terminal there are also ways to configure the options. Please see the dask-gateway docs. It is important that the environment used for your notebook matches the dask worker environment.
+be accessed via Dask Gateway options. Once the [ipywidget](https://ipywidgets.readthedocs.io/en/latest/) shows up the user can select the options they care about. If you are interacting in a terminal there are also ways to configure the options. Please see the dask-gateway docs. It's important that the environment used for your notebook matches the dask worker environment.
 
 ![qhub dask options](../images/qhub_dask_cluster_options.png)
 
@@ -93,7 +93,7 @@ Note: The above configurations options are valid for QHub's Dask Gateway deploym
 
 ## Accessing Cluster Outside of QHub
 
-A long requested feature was the ability to access a dask cluster from outside of the cluster itself. In general this is possible but a the moment can break due to version mismatches between [dask](https://dask.org/), [distributed](https://distributed.dask.org/en/latest/), and [dask-gateway](https://gateway.dask.org/). Also we have had issues with other libraries not matching so do not consider this check exhaustive. At a minimum check that your local environment matches. It is possible that it will work if the versions don't match exactly but it is not recommended.
+A long requested feature was the ability to access a dask cluster from outside of the cluster itself. In general this is possible but a the moment can break due to version mismatches between [dask](https://dask.org/), [distributed](https://distributed.dask.org/en/latest/), and [dask-gateway](https://gateway.dask.org/). Also we have had issues with other libraries not matching so don't consider this check exhaustive. At a minimum check that your local environment matches. It's possible that it will work if the versions don't match exactly but It's not recommended.
 
 ```python
 import dask, distributed, dask_gateway
@@ -115,7 +115,7 @@ Finally you will need to manually configure the `Gateway` connection parameters.
 gateway = Gateway(address='https://<qhub-url>/gateway', auth='jupyterhub', proxy_address='tcp://<qhub-url>:8786')
 ```
 
-Now your gateway is properly configured. You can follow the usage tutorial above. If your dask, distributed, and dask-gateway versions do not match connecting to these APIs may (most likely) will break in unexpected ways.
+Now your gateway is properly configured. You can follow the usage tutorial above. If your dask, distributed, and dask-gateway versions don't match connecting to these APIs may (most likely) will break in unexpected ways.
 
 ## Common Errors
 

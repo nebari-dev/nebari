@@ -47,7 +47,7 @@ After completing these steps. `kubectl` should be able to access the cluster.
 
 Installation can be done on macOS, Windows, and Linux. Instructions for each operating system can be found [here](https://github.com/derailed/k9s). Complete the installation to follow along.
 
-By default, K9 starts with the standard directory that is set as the context (in this case Minikube). To view all the current process press `0`:
+By default, K9 starts with the standard directory that's set as the context (in this case Minikube). To view all the current process press `0`:
 
 ![Image of K9 terminal UI](../images/k9s_UI.png)
 

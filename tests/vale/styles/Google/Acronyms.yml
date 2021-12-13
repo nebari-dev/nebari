@@ -74,3 +74,6 @@ exceptions:
   - EKS
   - EBS
   - CIDR
+  - VPC
+  - GCP
+  - HTTP

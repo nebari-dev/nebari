@@ -46,3 +46,14 @@ exceptions:
   - Python
   - Docker
   - Dockerfiles
+  - Kubernetes
+  - EC2
+  - Configuration
+  - GPU
+  - Accelerator
+  - JuptyerLab
+  - Profile
+  - Node
+  - JuptyerHub
+  - SSL
+  - Ingress

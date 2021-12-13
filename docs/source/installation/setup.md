@@ -6,7 +6,7 @@ with Github Actions or GitLab Workflows.
 
 QHub will be deployed on a cloud of your choice (AWS, Google Cloud, Azure, or Digital Ocean), first preparing requisite cloud infrastructure including a Kubernetes cluster.
 
-It is suitable for most use cases, especially when:
+It's suitable for most use cases, especially when:
 - You require scalable infrastructure
 - You aim to have a production environment with administration managed via simple configuration stored in git
 
@@ -25,7 +25,7 @@ in the subsections below.
 
 > NOTE: **Other QHub approaches**
 >
-> It is possible to deploy QHub into an existing Kubernetes cluster (on a cloud or otherwise), or into a local Kubernetes simulation on your personal computer (for testing). See [Testing](../dev_guide/testing.md).
+> It's possible to deploy QHub into an existing Kubernetes cluster (on a cloud or otherwise), or into a local Kubernetes simulation on your personal computer (for testing). See [Testing](../dev_guide/testing.md).
 >
 > [QHub HPC](https://hpc.qhub.dev/) is a different codebase to regular QHub, aiming for a similar data science platform, and should be your choice if
 > - You have highly optimized code that requires highly performant infrastructure
@@ -72,7 +72,7 @@ Please see these instructions for [creating a Digital Ocean
 token](https://www.digitalocean.com/docs/apis-clis/api/create-personal-access-token/). In
 addition to a `token`, a `spaces key` (similar to AWS S3) credentials are also required. Follow the instructions on the
 [official docs](https://www.digitalocean.com/community/tutorials/how-to-create-a-digitalocean-space-and-api-key) for more information.
-> Note: DigitalOcean's permissions model is not as fine-grained as the other supported Cloud providers.
+> Note: DigitalOcean's permissions model isn't as fine-grained as the other supported Cloud providers.
 
 Set the required environment variables as specified below:
 
@@ -175,7 +175,7 @@ No environment variables are needed for this - you will be given the relevant in
 
 In the [Usage](usage.md) section, you will need to run `qhub init` (this only ever needs to be run once - it creates your configuration YAML file) and then `qhub deploy` to set up the cloud infrastructure and deploy QHub for the first time.
 
-For subsequent deployments, it is possible to run `qhub deploy` again in exactly the same way, providing the configuration YAML file as you would the first time. However, it is also possible to automate future deployments using 'DevOps' - the configuration YAML file stored in git will trigger automatic redeployment whenever it is edited.
+For subsequent deployments, It's possible to run `qhub deploy` again in exactly the same way, providing the configuration YAML file as you would the first time. However, it's also possible to automate future deployments using 'DevOps' - the configuration YAML file stored in git will trigger automatic redeployment whenever it's edited.
 
 This DevOps approach can be provided by GitHub Actions or GitLab Workflows. As for the other choices, you will only need to specify the CI/CD provider when you come to run `qhub init`, but you may need to set relevant environment variables unless you choose 'none' because you plan to always redeploy manually.
 
@@ -220,7 +220,7 @@ registration. If an alternate DNS provider is desired, change the
 `--dns-provider` flag from `cloudflare` to `none` on the `qhub deploy`
 command. The deployment then will be paused when it asks for an IP
 address (or CNAME, if using AWS) and prompt to register the desired
-URL. Setting a DNS record heavily depends on the provider thus it is
+URL. Setting a DNS record heavily depends on the provider thus It's
 not possible to have detailed docs on how to create a record on your
 provider. Googling `setting <A/CNAME> record on <provider name>`
 should yield good results on doing it for your specific provider.
@@ -234,7 +234,7 @@ create an account, then there are two possible following options:
 1. You can either register your application domain name on it, using the
 [Cloudflare nameserver](https://support.cloudflare.com/hc/en-us/articles/205195708-Changing-your-domain-nameservers-to-Cloudflare)
 (recommended), or
-2. You can outright buy a new domain with Cloudflare (this action is not particularly recommended).
+2. You can outright buy a new domain with Cloudflare (this action isn't particularly recommended).
 
 To generate a token [follow these steps](https://developers.cloudflare.com/api/tokens/create):
 

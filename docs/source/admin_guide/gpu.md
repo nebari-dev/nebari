@@ -141,7 +141,7 @@ used. This can easily be checked via the command `nvidia-smi`.
 
 ```shell
 $ nvidia-smi
-Thu May 20 18:05:14 2021       
+Thu May 20 18:05:14 2021
 +-----------------------------------------------------------------------------+
 | NVIDIA-SMI 450.51.06    Driver Version: 450.51.06    CUDA Version: 11.0     |
 |-------------------------------+----------------------+----------------------+
@@ -162,7 +162,7 @@ Thu May 20 18:05:14 2021
 ```
 
 The important section is `CUDA Version`. In general you should install
-a version of cudatoolkit that is less than or equal to the cuda
+a version of cudatoolkit that's less than or equal to the cuda
 version (but not too old).  If you install `cudatoolkit-dev` and
 `cudatoolkit` make sure that they are the same version exactly
 including minor version. Also in the near future cuda should have

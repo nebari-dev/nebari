@@ -91,7 +91,7 @@ should also obey to the following format requirements:
 
 The `qhub init` command may have some side-effects such automatically creating a GitHub repository and setting some repo secrets (if you used the `--repository-auto-provision` flag), and creating an Auth0 app, but the main output of the command is the `qhub-config.yaml` file.
 
-This file is the configuration file that will determine how the cloud infrastructure and QHub is built and deployed in the next step. But at this point it is just a text file. You could edit it manually if you are unhappy with the choices, or delete it and start over again. Or it would be possible to create from scratch or re-use a `qhub-config.yaml` file - it is not essential to use `qhub init` at all, but it is often the easiest way to get started.
+This file is the configuration file that will determine how the cloud infrastructure and QHub is built and deployed in the next step. But at this point It's just a text file. You could edit it manually if you are unhappy with the choices, or delete it and start over again. Or it would be possible to create from scratch or re-use a `qhub-config.yaml` file - It's not essential to use `qhub init` at all, but It's often the easiest way to get started.
 
 To understand some ways in which you could decide to edit the YAML file, see [Advanced Configuration](configuration.md).
 

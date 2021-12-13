@@ -213,9 +213,7 @@ In case you would like to change the generated password (optional), You can use 
 python -c "import bcrypt; print(bcrypt.hashpw(b'admin', bcrypt.gensalt()).decode('utf-8'))"
 ```
 
-`<password>` can be changed to any desired value.
-
-This requires the Python package `bcrypt` to be installed in your virtual environment. The password is added to the `qhub-config.yaml` in the users section.
+`<password>` can be changed to any desired value. This requires the Python package `bcrypt` to be installed in your virtual environment. The password is added to the `qhub-config.yaml` in the users section.
 
 ```yaml
   users:
@@ -255,7 +253,7 @@ curl -k https://github-actions.qhub.dev/hub/login
 
 It's also possible to visit `https://github-actions.qhub.dev` in your web browser to select the deployment.
 
-Since this is a local deployment, hence it's not visible to the internet; `https` certificates isn't signed by [Let's Encrypt](https://letsencrypt.org/). Thus, the certificates is [self-signed by Traefik](https://en.wikipedia.org/wiki/Self-signed_certificate).
+Since this is a local deployment, hence It's not visible to the internet; `https` certificates isn't signed by [Let's Encrypt](https://letsencrypt.org/). Thus, the certificates is [self-signed by Traefik](https://en.wikipedia.org/wiki/Self-signed_certificate).
 
 Several browsers makes it difficult to view a self-signed certificate that's not added to the certificate registry.
 
@@ -286,9 +284,7 @@ The command deletes all instances of QHub, cleaning up the deployment environmen
 
 # Minikube on Mac
 
-The earlier instructions for minikube on Linux will _nearly_ work on Mac except things will break without clever
-use of port forwarding at the right times... Here is an explanation of our attempts to get things to work, but
-it is not yet complete.
+The earlier instructions for minikube on Linux _nearly_ works on Mac except things that break without clever use of port forwarding at the right times.
 
 1 - When working out the IP addresses to configure metallb try this:
 ```
@@ -304,10 +300,10 @@ minikube kubectl -- --namespace=dev port-forward svc/proxy-public 8000:80
 ```
 Then you could access QHub on http://127.0.0.1:8000/
 
-3 - However, the `qhub deploy` step will need to communicate with the Keycloak server, but this is not possible
+3 - However, the `qhub deploy` step needs to communicate with the Keycloak server, but this isn't possible
 without the correct hostname.
 
-It might be possible to set /etc/hosts to include github-actions.qhub.dev as we do for the AWS minikube, below. And meanwhile use kubectl port-forward to actually forward the traffic (from port 443 to something similar?). But you'd have to start that forwarding at the right point in the deployment. (When Kubernetes is ready, but before terraform runs the Keycloak operator...)
+It might be possible to set `/etc/hosts` to include `github-actions.qhub.dev` as they are done for the AWS minikube, below. And meanwhile use kubectl port-forward to actually forward the traffic (from port 443 to something similar?). But you'd have to start that forwarding at the right point in the deployment. (When Kubernetes is ready, but before terraform runs the Keycloak operator...)
 
 ---
 
@@ -347,7 +343,7 @@ aws ec2 create-key-pair \
 chmod 400 ~/.ssh/${MYKEYNAME}.pem
 ```
 
-## Run the EC2 Instance
+## Run the EC2 instance
 
 The recommended image is an Ubuntu 20.04 with Docker installed. It's recommended to be to run on a 16 GB/4 Core image, and increase the EBS disk space to 48 GB or so, up from the standard 8 GB.
 
@@ -457,7 +453,7 @@ qhub deploy --config qhub-config.yaml --disable-prompt
 
 ## Enable Kubernetes access from Mac
 
-This step is optional, but will allow you to use kubectl and K9 directly from your Mac. It is not needed if you are satisfied to use kubectl within an SSH session on AWS instead.
+This step is optional, but allows you to use kubectl and K9 directly from your Mac. It's not needed if you are satisfied to use kubectl within an SSH session on AWS instead.
 
 On your Mac laptop:
 
@@ -529,6 +525,6 @@ And then the users can add an extra port forward when they SSH into their AWS in
 sudo ssh -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443 -L github-actions.qhub.dev:443:192.168.49.100:443
 ```
 
-This is executed with the sudo access because it's desired to forward a low-numbered port, like 443, which is otherwise not allowed.
+This is executed with the sudo access because It's desired to forward a low-numbered port, like 443, which is otherwise not allowed.
 
 Now you can access https://github-actions.qhub.dev/ in a browser and you should be able to use your QHub. You have to bypass the self-signed cert warnings though - see [verify the local deployment](#verify-the-local-deployment) for instructions.

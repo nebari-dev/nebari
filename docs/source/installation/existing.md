@@ -148,7 +148,7 @@ theme:
   jupyterhub:
     hub_title: QHub - eaeexisting
     hub_subtitle: Autoscaling Compute Environment on Amazon Web Services
-    welcome: Welcome to eaeexisting.qhub.dev. It is maintained by <a href="http://quansight.com">Quansight
+    welcome: Welcome to eaeexisting.qhub.dev. It's maintained by <a href="http://quansight.com">Quansight
       staff</a>. The hub's configuration is stored in a github repository based on
       <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>.
       To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github

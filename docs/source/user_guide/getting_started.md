@@ -6,7 +6,7 @@ Get the url of your QHub cluster. For this example we will use `https://training
 
 ![Qhub login screen](../images/qhub_login_screen.png)
 
-Upon visiting the website you will be prompted by a login page similar to the login page shown above. The login process will greatly differ between authentication providers. Qhub supports LDAP, OAuth2, Passwordless Auth, password based authentication and many others (any that JupyterHub supports) meaning that it is hard to detail the exact login process.
+Upon visiting the website you will be prompted by a login page similar to the login page shown above. The login process will greatly differ between authentication providers. Qhub supports LDAP, OAuth2, Passwordless Auth, password based authentication and many others (any that JupyterHub supports) meaning that it's hard to detail the exact login process.
 
 ![QHub select profile](../images/qhub_select_profile.png)
 
