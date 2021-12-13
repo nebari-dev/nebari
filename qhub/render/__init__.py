@@ -6,10 +6,11 @@ import os
 from shutil import rmtree
 from urllib.parse import urlencode
 
+from ruamel.yaml import YAML
 from cookiecutter.generate import generate_files
 from ..version import __version__
 from ..constants import TERRAFORM_VERSION
-from ..utils import pip_install_qhub, QHUB_GH_BRANCH, load_yaml
+from ..utils import pip_install_qhub, QHUB_GH_BRANCH
 
 # existing files and folders to delete when `render_template` is called
 DELETABLE_PATHS = [
@@ -236,7 +237,9 @@ def render_template(output_directory, config_filename, force=False):
     if not filename.is_file():
         raise ValueError(f"cookiecutter configuration={filename} is not filename")
 
-    config = load_yaml(filename)
+    with filename.open() as f:
+        yaml = YAML(typ="safe", pure=True)
+        config = yaml.load(f)
 
     # For any config values that start with
     # QHUB_SECRET_, set the values using the

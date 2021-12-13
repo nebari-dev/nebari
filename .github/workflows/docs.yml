@@ -20,7 +20,7 @@ jobs:
       - name: documentation quality check
         uses: errata-ai/vale-action@v1.4.0
         with:
-          files: '["docs", "CONTRIBUTING.md", "README.md", "RELEASE.md", "qhub"]'
+          files: __onlyModified
           onlyAnnotateModifiedLines: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

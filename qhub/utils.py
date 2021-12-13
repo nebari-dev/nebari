@@ -9,7 +9,16 @@ import re
 import contextlib
 from ruamel.yaml import YAML
 
+from qhub.provider.cloud import (
+    digital_ocean,
+    azure_cloud,
+    amazon_web_services,
+    google_cloud,
+)
+
 from .version import __version__
+
+QHUB_K8S_VERSION = os.getenv("QHUB_K8S_VERSION", None)
 
 DO_ENV_DOCS = (
     "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#digital-ocean"
@@ -199,3 +208,62 @@ def backup_config_file(filename: pathlib.Path, extrasuffix: str = ""):
 
     filename.rename(backup_filename)
     print(f"Backing up {filename} as {backup_filename}")
+
+
+def set_kubernetes_version(
+    config, kubernetes_version, cloud_provider, grab_latest_version=True
+):
+    cloud_provider_dict = {
+        "aws": {
+            "full_name": "amazon_web_services",
+            "k8s_version_checker_func": amazon_web_services.kubernetes_versions,
+        },
+        "azure": {
+            "full_name": "azure",
+            "k8s_version_checker_func": azure_cloud.kubernetes_versions,
+        },
+        "do": {
+            "full_name": "digital_ocean",
+            "k8s_version_checker_func": digital_ocean.kubernetes_versions,
+        },
+        "gcp": {
+            "full_name": "google_cloud_platform",
+            "k8s_version_checker_func": google_cloud.kubernetes_versions,
+        },
+    }
+    cloud_full_name = cloud_provider_dict[cloud_provider]["full_name"]
+    func = cloud_provider_dict[cloud_provider]["k8s_version_checker_func"]
+    cloud_config = config[cloud_full_name]
+
+    def _raise_value_error(cloud_provider, k8s_versions):
+        raise ValueError(
+            f"\nInvalid `kubernetes-version` provided: {kubernetes_version}.\nPlease select from one of the following {cloud_provider.upper()} supported Kubernetes versions: {k8s_versions} or omit flag to use latest Kubernetes version available."
+        )
+
+    def _check_and_set_kubernetes_version(
+        kubernetes_version=kubernetes_version,
+        cloud_provider=cloud_provider,
+        cloud_config=cloud_config,
+        func=func,
+    ):
+        region = cloud_config["region"]
+
+        # to avoid using cloud provider SDK
+        # set QHUB_K8S_VERSION environment variable
+        if not QHUB_K8S_VERSION:
+            k8s_versions = func(region)
+        else:
+            k8s_versions = [QHUB_K8S_VERSION]
+
+        if kubernetes_version:
+            if kubernetes_version in k8s_versions:
+                cloud_config["kubernetes_version"] = kubernetes_version
+            else:
+                _raise_value_error(cloud_provider, k8s_versions)
+        elif grab_latest_version:
+            cloud_config["kubernetes_version"] = k8s_versions[-1]
+        else:
+            # grab oldest version
+            cloud_config["kubernetes_version"] = k8s_versions[0]
+
+    return _check_and_set_kubernetes_version()

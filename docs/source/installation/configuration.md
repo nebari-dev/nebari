@@ -305,6 +305,23 @@ and **Kubernetes versions** will be DIFFERENT. [duplicated info]
 
 ### Providers
 
+To take advantage of the auto-scaling and dask-distributed computing capabilities,
+QHub can be deployed on a handful of the most commonly used cloud providers. QHub
+utilizes many of the resources these cloud providers have to offer, however,
+at it's core, is the Kubernetes engine (or service). Each cloud provider has slightly
+different ways Kubernetes is configured but fear not, all of this is handled by QHub.
+
+Listed below are the cloud providers QHub currently supports.
+
+> NOTE: Many of the cloud providers regularly update their internal Kubernetes
+> versions so if you wish to specify a particular version, please check the following
+> resources. This is *completely optional* as QHub will, by default, select the most
+> recent version available for your choosen cloud provider.
+> [Digital Ocean](https://docs.digitalocean.com/products/kubernetes/changelog/)
+> [Google Cloud Platform](https://cloud.google.com/kubernetes-engine/docs/release-notes-stable)
+> [Amazon Web Services](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)
+> [Microsoft Azure](https://docs.microsoft.com/en-us/azure/aks/supported-kubernetes-versions?tabs=azure-cli)
+
 #### DigitalOcean
 
 DigitalOcean has a restriction with autoscaling in that the minimum
@@ -313,13 +330,6 @@ provider even accounting for spot/preemptible instances. In addition
 Digital Ocean does not have accelerator/gpu support. Digital Ocean is
 a great default choice for tying out QHub. Below is the recommended
 setup.
-
-> Note: DigitalOcean regularly updates Kubernetes versions hence, the
-> field `kubernetes_version` will most likely have to be changed.
-> [See available instance types for
-> DigitalOcean](https://www.digitalocean.com/docs/droplets/).  If you
-> used `qhub init` this version will automatically be compute for you
-> Do not copy the version you see bellow
 
 To see available instance types refer to [Digital Ocean Instance
 Types](https://www.digitalocean.com/docs/droplets/). Additionally the
