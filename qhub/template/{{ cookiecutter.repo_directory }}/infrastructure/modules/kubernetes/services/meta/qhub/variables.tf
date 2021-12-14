@@ -88,6 +88,12 @@ variable "jupyterhub-overrides" {
   type        = list(string)
 }
 
+variable "jupyterhub-hub-extraEnv" {
+  description = "Extracted overrides to merge with jupyterhub.hub.extraEnv"
+  type        = list(map(any))
+  default     = []
+}
+
 variable "dask_gateway_extra_config" {
   description = "dask gateway extra configuration"
   type        = string
