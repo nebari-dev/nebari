@@ -17,6 +17,9 @@
         },
         {
             "pattern": "myqhubsite.com"
+        },
+        {
+            "pattern": "https://cloud.google.com"
         }
 	]
 }
