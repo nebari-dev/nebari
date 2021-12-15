@@ -26,7 +26,7 @@ To deploy QHub locally requires the installation of the following dependencies:
 The installation of a hypervisor isn't necessary.
 
 > NOTE: Minikube requires `kubectl` OR you can use the embedded kubectl appropriate for your Minikube cluster version using `minikube kubectl`.
-> To install `kubectl` [follow the instructions](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-kubectl/) according to your operating system.
+> To install `kubectl` [follow the instructions](https://kubernetes.io/docs/tasks/tools/) according to your operating system.
 
 
 ## Initialize Kubernetes cluster
