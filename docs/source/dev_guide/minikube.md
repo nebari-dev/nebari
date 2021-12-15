@@ -20,7 +20,7 @@ This guide assumes that you have the QHub repository downloaded, and you are at 
 
 To deploy QHub locally requires the installation of the following dependencies:
 
-- [Minikube](https://v1-18.docs.kubernetes.io/docs/tasks/tools/install-minikube/) version 1.10.0-beta and up
+- [Minikube](https://minikube.sigs.k8s.io/docs/start/) version 1.10.0-beta and up
 - [Docker Engine driver](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) install.
 
 The installation of a hypervisor isn't necessary.
