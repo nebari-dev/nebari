@@ -4,8 +4,7 @@
 
 It's possible to run QHub on Minikube, and this can allow quicker feedback loops for development, as well as being less expensive than running cloud Kubernetes clusters.
 
-Local testing is a great way to test the components of QHub. It's important to highlight that while It's possible to test most of QHub
-with this version, components that are Cloud provisioned such as VPCs, managed Kubernetes cluster and managed container registries can't be locally tested, due to their Cloud dependencies.
+Local testing is a great way to test the components of QHub. It's important to highlight that while it's possible to test most of QHub with this version, components that are Cloud provisioned such as VPCs, managed Kubernetes cluster and managed container registries can't be locally tested, due to their Cloud dependencies.
 
 ## Compatibility
 
@@ -161,7 +160,7 @@ A example subnet range looks like `192.168.49.2/24`. This CIDR range has a start
 
 For this example case, the user assigns `metallb` a start IP address of `192.168.49.100` and an end of `192.168.49.150`.
 
-The user can the `metallb` below command-line tool interface which prompts for the start and stop IP range:
+The user can enable `metallb` as shown below. The command-line tool interface prompts the user for the start and stop IP range:
 
 ```shell
 minikube addons configure metallb
@@ -186,7 +185,7 @@ The output should be `The 'metallb' addon is enabled`.
 <details>
   <summary>Click to expand note</summary>
 
-The browser can have trouble reaching the load balancer running on WSL2. A workaround is to port forward the proxy-pod to the host IP 0.0.0.0. Get the ip address of the WSL2 machine via ```ip a```, which should be a 127.x.x.x address. To change the port forwarding after opening k9 you can type ```:pods <enter>```, hover over the proxy-... pod and type ```<shift-s>```, and enter the ip addresses.
+The browser can have trouble reaching the load balancer running on WSL2. A workaround is to port forward the proxy-pod to the host IP 0.0.0.0. Get the ip address of the WSL2 machine via ```ip a```, which should be a 127.x.x.x address. To change the port forwarding after opening `k9s` you can type ```:pods <enter>```, hover over the proxy-... pod and type ```<shift-s>```, and enter the IP addresses.
 
 </details>
 
@@ -253,7 +252,7 @@ curl -k https://github-actions.qhub.dev/hub/login
 
 It's also possible to visit `https://github-actions.qhub.dev` in your web browser to select the deployment.
 
-Since this is a local deployment, hence It's not visible to the internet; `https` certificates isn't signed by [Let's Encrypt](https://letsencrypt.org/). Thus, the certificates is [self-signed by Traefik](https://en.wikipedia.org/wiki/Self-signed_certificate).
+Since this is a local deployment, hence it's not visible to the internet; `https` certificates isn't signed by [Let's Encrypt](https://letsencrypt.org/). Thus, the certificates is [self-signed by Traefik](https://en.wikipedia.org/wiki/Self-signed_certificate).
 
 Several browsers makes it difficult to view a self-signed certificate that's not added to the certificate registry.
 
@@ -284,7 +283,7 @@ The command deletes all instances of QHub, cleaning up the deployment environmen
 
 # Minikube on Mac
 
-The earlier instructions for minikube on Linux _nearly_ works on Mac except things that break without clever use of port forwarding at the right times.
+The earlier instructions for Minikube on Linux _nearly_ works on Mac except things that break without clever use of port forwarding at the right times.
 
 1 - When working out the IP addresses to configure metallb try this:
 ```
@@ -363,7 +362,7 @@ This should show all instances, so work out which one you need if there are mult
 
 Using the instance ID you obtained just preceding (for example `i-01bd8a4ee6016e1fe`), use that to first query for the 'security GroupSet ID' (for example `sg-96f73feb`).
 
-Then use that to open up port 22 for the security group (and hence for the instance). Multiple instances running in this security group, is exposed on Port 22.
+Then use that to open up port 22 for the security group (and hence for the instance). Multiple instances running in this security group, all of which are now exposed on Port 22.
 
 ```bash
 aws ec2 describe-instance-attribute --instance-id i-01bd8a4ee6016e1fe --attribute groupSet
@@ -443,7 +442,7 @@ sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 1/g' "qhub-config.yaml"
 sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 1G/g' "qhub-config.yaml"
 ```
 
-The last two commands preceding reduce slightly the memory and CPU requirements of JupyterLab sessions etc. Make any other changes needed to the qhub-config.yaml file.
+The preceding two commands reduce slightly the memory and CPU requirements of JupyterLab sessions etc. Make any other changes needed to the `qhub-config.yaml` file.
 
 Then deploy:
 
@@ -453,7 +452,7 @@ qhub deploy --config qhub-config.yaml --disable-prompt
 
 ## Enable Kubernetes access from Mac
 
-This step is optional, but allows you to use kubectl and K9 directly from your Mac. It's not needed if you are satisfied to use kubectl within an SSH session on AWS instead.
+This step is optional, but allows you to use `kubectl` and `k9s` directly from your Mac. It's not needed if you are satisfied to use kubectl within an SSH session on AWS instead.
 
 On your Mac laptop:
 
@@ -525,6 +524,6 @@ And then the users can add an extra port forward when they SSH into their AWS in
 sudo ssh -i ~/.ssh/${MYKEYNAME}.pem ubuntu@ec2-35-177-109-173.eu-west-2.compute.amazonaws.com -L 127.0.0.1:8443:192.168.49.2:8443 -L github-actions.qhub.dev:443:192.168.49.100:443
 ```
 
-This is executed with the sudo access because It's desired to forward a low-numbered port, like 443, which is otherwise not allowed.
+This is executed with the `sudo` privileges because forwarding a low-numbered port, like 443, is not allowed otherwise.
 
 Now you can access https://github-actions.qhub.dev/ in a browser and you should be able to use your QHub. You have to bypass the self-signed cert warnings though - see [verify the local deployment](#verify-the-local-deployment) for instructions.

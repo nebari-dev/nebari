@@ -1,6 +1,6 @@
 # Using Dask Gateway
 
-[Dask Gateway](https://gateway.dask.org/) provides a way for secure way to managing dask clusters. QHub uses dask-gateway to expose auto-scaling compute clusters automatically configured for the user. For a full guide on dask-gateway please [see the docs](https://gateway.dask.org/usage.html). However here we try and detail the important usage on qhub.
+[Dask Gateway](https://gateway.dask.org/) provides a secure way to managing dask clusters. QHub uses dask-gateway to expose auto-scaling compute clusters automatically configured for the user. For a full guide on dask-gateway please [see the docs](https://gateway.dask.org/usage.html). However here we try and detail the important usage on QHub.
 
 QHub already has the connection information pre-configured for the user. If you would like to see the pre-configured settings.
 
@@ -38,7 +38,7 @@ cluster = gateway.new_cluster(options)
 cluster
 ```
 
-The user is presented with a gui where you can select to scale up the workers. You originally start with `0` workers. In addition you can scale up via python functions. Additionally the gui has a `dashboard` link that you can click to view [cluster diagnostics](https://docs.dask.org/en/latest/diagnostics-distributed.html). This link is especially useful for debugging and benchmarking.
+The user is presented with a GUI where they can select to scale up the number of workers. At first users start with `0` workers. In addition you can scale up via python functions. Additionally the GUI has a `dashboard` link that you can click to view [cluster diagnostics](https://docs.dask.org/en/latest/diagnostics-distributed.html). This link is especially useful for debugging and benchmarking.
 
 ```python
 cluster.scale(1)

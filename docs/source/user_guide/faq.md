@@ -12,7 +12,7 @@ Anyone with access to the QHub deployment repo can add an environment, and there
 
 > Be careful of the YAML indentation as it differs from the conda `environment.yml`
 
-### What to do when the user requires `X` package and It's not available in the environment?
+### What to do when the user requires `X` package and it's not available in the environment?
 
 The proper solution is to add the package to the `qhub_config.yml` (See #1). If they don't have the access to the deployment repo, the user needs to contact their QHub maintainer to get the required package. They *can* do a user install for pip packages in a pinch (this isn't recommended) but they aren't be available to Dask workers.
 

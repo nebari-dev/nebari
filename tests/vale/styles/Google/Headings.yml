@@ -57,3 +57,4 @@ exceptions:
   - JuptyerHub
   - SSL
   - Ingress
+  - Keycloak

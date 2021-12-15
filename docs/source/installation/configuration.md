@@ -211,7 +211,7 @@ security:
 
 #### Password based authentication
 
-For Password based authentication. Ultimately, this just defers to however Keycloak is configured. That's also true for GitHub/Auth0 cases, except that for the single-sign on providers the deployment will also configure those providers in Keycloak to save manual configuration. But ultimately, It's also possible to add GitHub, or Google etc, as an Identity Provider in Keycloak even if you formally select 'password' authentication in the `qhub-config.yaml` file.
+For Password based authentication. Ultimately, this just defers to however Keycloak is configured. That's also true for GitHub/Auth0 cases, except that for the single-sign on providers the deployment will also configure those providers in Keycloak to save manual configuration. But ultimately, it's also possible to add GitHub, or Google etc, as an Identity Provider in Keycloak even if you formally select 'password' authentication in the `qhub-config.yaml` file.
 
 ```yaml
 security:
@@ -307,7 +307,7 @@ and **Kubernetes versions** will be DIFFERENT. [duplicated info]
 To take advantage of the auto-scaling and dask-distributed computing capabilities,
 QHub can be deployed on a handful of the most commonly used cloud providers. QHub
 utilizes many of the resources these cloud providers have to offer, however,
-at It's core, is the Kubernetes engine (or service). Each cloud provider has slightly
+at it's core, is the Kubernetes engine (or service). Each cloud provider has slightly
 different ways Kubernetes is configured but fear not, all of this is handled by QHub.
 
 Listed below are the cloud providers QHub currently supports.
@@ -602,7 +602,7 @@ When configuring the memory and cpus for profiles there are some
 important considerations to make. Two important terms to understand are:
  - `limit`: the absolute max memory that a given pod can consume. If a
    process within the pod consumes more than the `limit` memory the
-   linux OS will kill the process. LimIt's not used for scheduling
+   linux OS will kill the process. LimIt is not used for scheduling
    purposes with kubernetes.
  - `guarantee`: is the amount of memory the kubernetes scheduler uses
    to place a given pod. In general the `guarantee` will be less than
@@ -751,7 +751,7 @@ configuration for the environment to appear.
 
 ## qhub_version
 
-All qhub-config.yaml files must now contain a `qhub_version` field displaying the version of QHub which It's intended to be deployed with.
+All `qhub-config.yaml` files must now contain a `qhub_version` field displaying the version of QHub which it's intended to be deployed with.
 
 QHub will refuse to deploy if it doesn't contain the same version as that of the `qhub` command.
 

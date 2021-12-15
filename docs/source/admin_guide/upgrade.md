@@ -30,7 +30,7 @@ qhub upgrade -c qhub-config.yaml
 
 This will output a newer version of qhub-config.yaml that's compatible with the new version of qhub. The process will list any changes it has made. It will also tell you where it has stored a backup of the original file.
 
-If you are deploying QHub from your local machine (that'sn't using CI/CD) then you will now have a qhub-config.yaml file that you can use to `qhub deploy -c qhub-config.yaml` through the latest version of the QHub command package.
+If you are deploying QHub from your local machine (not using CI/CD) then you will now have a qhub-config.yaml file that you can use to `qhub deploy -c qhub-config.yaml` through the latest version of the QHub command package.
 
 ## Special customizations
 

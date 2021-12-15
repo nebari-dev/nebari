@@ -71,9 +71,9 @@ Hadolint will report `error`, `warning`, `info` and `style` while linting Docker
 
 ## Debug Kubernetes clusters
 
-To debug Kubernetes clusters, we advise you to use [K9](https://k9scli.io/), a terminal-based UI that aims to simplify navigation, observation, and management of applications in Kubernetes. K9 continuously monitors Kubernetes clusters for changes and provides shortcut commands to interact with the observed resources becoming a fast way to review and resolve day-to-day issues in deployed clusters.
+To debug Kubernetes clusters,  checkout [`k9s`](https://k9scli.io/), a terminal-based UI that aims to simplify navigation, observation, and management of applications in Kubernetes. `k9s` continuously monitors Kubernetes clusters for changes and provides shortcut commands to interact with the observed resources becoming a fast way to review and resolve day-to-day issues in deployed clusters.
 
-Installation can be done on a macOS, in Windows, and Linux and instructions can be found [here](https://github.com/derailed/k9s). For more details on usage, check out the [Troubleshooting documentation](https://docs.qhub.dev/en/stable/source/admin_guide/troubleshooting.html#debug-your-kubernetes-cluster).
+Installation can be done on a macOS, in Windows, and Linux and instructions are located [here](https://github.com/derailed/k9s). For more details on usage, review the [Troubleshooting documentation](https://docs.qhub.dev/en/stable/source/admin_guide/troubleshooting.html#debug-your-kubernetes-cluster).
 
 ## Cypress Tests
 
@@ -90,8 +90,7 @@ export CYPRESS_EXAMPLE_USER_PASSWORD=<password>
 npm run cypress:open
 ```
 
-The Base URL can point anywhere that should be accessible - it can be the URL of a QHub cloud deployment. The QHub Config Path should point to the associated yaml file for that site. Most importantly, the tests will inspect the yaml file to understand what tests are relevant. To start with, it checks security.authentication.type to determine what should be available on the login page, and  how to test it. If the login type is 'password' then it uses the value in CYPRESS_EXAMPLE_USER_PASSWORD as the password (default username is
-`example-user` but this can be changed by setting CYPRESS_EXAMPLE_USER_NAME).
+The Base URL can point anywhere that should be accessible - it can be the URL of a QHub cloud deployment. The QHub Config Path should point to the associated yaml file for that site. Most importantly, the tests will inspect the yaml file to understand what tests are relevant. To start with, it checks security.authentication.type to determine what should be available on the login page, and  how to test it. If the login type is 'password' then it uses the value in `CYPRESS_EXAMPLE_USER_PASSWORD` as the password (default username is `example-user` but this can be changed by setting `CYPRESS_EXAMPLE_USER_NAME`).
 
 The final command, in the preceding code-snippet, opens the Cypress UI where you can run the tests manually and see the actions in the browser.
 
@@ -108,7 +107,7 @@ pytest tests_deployment/ -v
 
 # Cloud Testing
 
-Cloud testing on aws, gcp, azure, and digital ocean can be significantly more complicated and time consuming. But It's the only way to truly test the cloud deployments, including infrastructure, of course. To test on cloud Kubernetes, just deploy qhub in the normal way on those clouds, but using the [linked pip install](./index.md) of the qhub package.
+Cloud testing on AWS, GCP, Azure, and Digital Ocean can be significantly more complicated and time consuming. But it's the only way to truly test the cloud deployments, including infrastructure, of course. To test on cloud Kubernetes, just deploy QHub in the normal way on those clouds, but using the [linked pip install](./index.md) of the QHub package.
 
 Even with the dev install of the qhub package, you may find that the deployed cluster doesn't actually reflect any development changes, for example to the Docker images for JupyterHub or JupyterLab. That will be because your qhub-config.yaml references fully released versions. See [Using a development branch](#using-a-development-branch) above for how to encourage the Docker images to be specified based on the latest development code.
 
