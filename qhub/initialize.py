@@ -11,11 +11,17 @@ import requests
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
-from qhub.provider.cloud import digital_ocean, azure_cloud
-from qhub.utils import namestr_regex, qhub_image_tag, check_cloud_credentials
+
+from qhub.utils import (
+    namestr_regex,
+    qhub_image_tag,
+    check_cloud_credentials,
+    set_kubernetes_version,
+)
 from .version import __version__
 
 logger = logging.getLogger(__name__)
+
 
 BASE_CONFIGURATION = {
     "project_name": None,
@@ -114,16 +120,15 @@ DIGITAL_OCEAN = {
 GOOGLE_PLATFORM = {
     "project": "PLACEHOLDER",
     "region": "us-central1",
-    "kubernetes_version": "1.18.16-gke.502",
+    "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {"instance": "n1-standard-4", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
-        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
+        "user": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
+        "worker": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
     },
 }
 
 AZURE = {
-    "project": "PLACEHOLDER",
     "region": "Central US",
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
@@ -135,7 +140,7 @@ AZURE = {
         "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 5},
         "worker": {
             "instance": "Standard_D2_v2",
-            "min_nodes": 1,
+            "min_nodes": 0,
             "max_nodes": 5,
         },
     },
@@ -146,7 +151,7 @@ AZURE = {
 
 AMAZON_WEB_SERVICES = {
     "region": "us-west-2",
-    "kubernetes_version": "1.18",
+    "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
@@ -251,7 +256,7 @@ def render_config(
     disable_prompt=False,
     ssl_cert_email=None,
 ):
-    config = BASE_CONFIGURATION
+    config = BASE_CONFIGURATION.copy()
     config["provider"] = cloud_provider
 
     if ci_provider is not None and ci_provider != "none":
@@ -306,7 +311,7 @@ def render_config(
     )
 
     if auth_provider == "github":
-        config["security"]["authentication"] = AUTH_OAUTH_GITHUB
+        config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()
         print(
             "Visit https://github.com/settings/developers and create oauth application"
         )
@@ -323,10 +328,10 @@ def render_config(
                 "Github client_secret: "
             )
     elif auth_provider == "auth0":
-        config["security"]["authentication"] = AUTH_OAUTH_AUTH0
+        config["security"]["authentication"] = AUTH_OAUTH_AUTH0.copy()
 
     elif auth_provider == "password":
-        config["security"]["authentication"] = AUTH_PASSWORD
+        config["security"]["authentication"] = AUTH_PASSWORD.copy()
 
     # Always use default password for keycloak root
     config["security"].setdefault("keycloak", {})[
@@ -337,24 +342,15 @@ def render_config(
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Digital Ocean"
-        config["digital_ocean"] = DIGITAL_OCEAN
-        if kubernetes_version:
-            config["digital_ocean"]["kubernetes_version"] = kubernetes_version
-        else:
-            # first kubernetes version returned by Digital Ocean api is
-            # the newest version of kubernetes supported this field needs
-            # to be dynamically filled since digital ocean updates the
-            # versions so frequently
-            config["digital_ocean"][
-                "kubernetes_version"
-            ] = digital_ocean.kubernetes_versions()[0]["slug"]
+        config["digital_ocean"] = DIGITAL_OCEAN.copy()
+        set_kubernetes_version(config, kubernetes_version, cloud_provider)
+
     elif cloud_provider == "gcp":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Google Cloud Platform"
-        config["google_cloud_platform"] = GOOGLE_PLATFORM
-        if kubernetes_version:
-            config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
+        config["google_cloud_platform"] = GOOGLE_PLATFORM.copy()
+        set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
         if "PROJECT_ID" in os.environ:
             config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
@@ -362,38 +358,30 @@ def render_config(
             config["google_cloud_platform"]["project"] = input(
                 "Enter Google Cloud Platform Project ID: "
             )
+
     elif cloud_provider == "azure":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Azure"
-        config["azure"] = AZURE
-
-        if kubernetes_version:
-            config["azure"]["kubernetes_version"] = kubernetes_version
-        else:
-            # first kubernetes version returned by azure sdk is
-            # the newest version of kubernetes supported this field needs
-            # to be dynamically filled since azure updates the
-            # versions so frequently
-            config["azure"]["kubernetes_version"] = azure_cloud.kubernetes_versions(
-                config["azure"]["region"]
-            )[0]
+        config["azure"] = AZURE.copy()
+        set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Amazon Web Services"
-        config["amazon_web_services"] = AMAZON_WEB_SERVICES
-        if kubernetes_version:
-            config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
+        config["amazon_web_services"] = AMAZON_WEB_SERVICES.copy()
+        set_kubernetes_version(config, kubernetes_version, cloud_provider)
+        if "AWS_DEFAULT_REGION" in os.environ:
+            config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment"
-        config["local"] = LOCAL
+        config["local"] = LOCAL.copy()
 
-    config["profiles"] = DEFAULT_PROFILES
-    config["environments"] = DEFAULT_ENVIRONMENTS
+    config["profiles"] = DEFAULT_PROFILES.copy()
+    config["environments"] = DEFAULT_ENVIRONMENTS.copy()
 
     if ssl_cert_email is not None:
         if not re.match("^[^ @]+@[^ @]+\\.[^ @]+$", ssl_cert_email):

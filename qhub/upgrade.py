@@ -17,7 +17,7 @@ from .version import __version__
 logger = logging.getLogger(__name__)
 
 
-def do_upgrade(config_filename):
+def do_upgrade(config_filename, attempt_fixes=False):
 
     config = load_yaml(config_filename)
 
@@ -37,7 +37,9 @@ def do_upgrade(config_filename):
 
     start_version = config.get("qhub_version", "")
 
-    UpgradeStep.upgrade(config, start_version, __version__, config_filename)
+    UpgradeStep.upgrade(
+        config, start_version, __version__, config_filename, attempt_fixes
+    )
 
     # Backup old file
     backup_config_file(config_filename, f".{start_version or 'old'}")
@@ -74,7 +76,9 @@ class UpgradeStep(ABC):
         return version in cls._steps
 
     @classmethod
-    def upgrade(cls, config, start_version, finish_version, config_filename):
+    def upgrade(
+        cls, config, start_version, finish_version, config_filename, attempt_fixes=False
+    ):
         """
         Runs through all required upgrade steps (i.e. relevant subclasses of UpgradeStep).
         Calls UpgradeStep.upgrade_step for each.
@@ -93,7 +97,12 @@ class UpgradeStep(ABC):
         current_start_version = start_version
         for stepcls in [cls._steps[str(v)] for v in step_versions]:
             step = stepcls()
-            config = step.upgrade_step(config, current_start_version, config_filename)
+            config = step.upgrade_step(
+                config,
+                current_start_version,
+                config_filename,
+                attempt_fixes=attempt_fixes,
+            )
             current_start_version = step.get_version()
             print("\n")
 
@@ -179,7 +188,9 @@ class UpgradeStep(ABC):
                 config["profiles"]["dask_worker"][k]["image"] = newimage
 
         # Run any version-specific tasks
-        return self._version_specific_upgrade(config, start_version, config_filename)
+        return self._version_specific_upgrade(
+            config, start_version, config_filename, *args, **kwargs
+        )
 
     def _version_specific_upgrade(
         self, config, start_version, config_filename, *args, **kwargs
@@ -215,10 +226,32 @@ class Upgrade_0_3_14(UpgradeStep):
         """
         Upgrade to Keycloak.
         """
-        # Create a group/user import file for Keycloak
         security = config.get("security", {})
         users = security.get("users", {})
         groups = security.get("groups", {})
+
+        # Custom Authenticators are no longer allowed
+        if (
+            config.get("security", {}).get("authentication", {}).get("type", "")
+            == "custom"
+        ):
+            customauth_warning = (
+                f"Custom Authenticators are no longer supported in {self.version} because Keycloak "
+                "manages all authentication.\nYou need to find a way to support your authentication "
+                "requirements within Keycloak."
+            )
+            if not kwargs.get("attempt_fixes", False):
+                raise ValueError(
+                    f"{customauth_warning}\n\nRun `qhub upgrade --attempt-fixes` to switch to basic Keycloak authentication instead."
+                )
+            else:
+                print(f"\nWARNING: {customauth_warning}")
+                print(
+                    "\nSwitching to basic Keycloak authentication instead since you specified --attempt-fixes."
+                )
+                config["security"]["authentication"] = {"type": "password"}
+
+        # Create a group/user import file for Keycloak
 
         realm_import_filename = config_filename.parent / "qhub-users-import.json"
 
@@ -227,9 +260,14 @@ class Upgrade_0_3_14(UpgradeStep):
             {
                 "username": k,
                 "enabled": True,
-                "groups": list(
-                    ({v.get("primary_group", "")} | set(v.get("secondary_groups", [])))
-                    - {""}
+                "groups": sorted(
+                    list(
+                        (
+                            {v.get("primary_group", "")}
+                            | set(v.get("secondary_groups", []))
+                        )
+                        - {""}
+                    )
                 ),
             }
             for k, v in users.items()
@@ -265,6 +303,11 @@ class Upgrade_0_3_14(UpgradeStep):
         print(
             f"Generated default random password={default_password} for Keycloak root user (Please change at /auth/ URL path).\n"
         )
+
+        # project was never needed in Azure - it remained as PLACEHOLDER in earlier qhub inits!
+        if "azure" in config:
+            if "project" in config["azure"]:
+                del config["azure"]["project"]
 
         return config
 

@@ -4,6 +4,8 @@ hub:
     pvc:
       storage: 1Gi
   baseUrl: "/"
+  networkPolicy:
+    enabled: false
 
 proxy:
   secretToken: "<placeholder>"
@@ -19,6 +21,8 @@ scheduling:
     enabled: false
     replicas: 1
 
+imagePullSecrets:
+  - extcrcreds
 
 singleuser:
   defaultUrl: "/lab"
@@ -54,3 +58,5 @@ singleuser:
   memory:
     limit: "1G"
     guarantee: "1G"
+  networkPolicy:
+    enabled: false
