@@ -143,5 +143,7 @@ yaml
 ClearML
 Hadolint
 Dockerfiles
+nameservers
+omitted
 keycloak
 Keycloak

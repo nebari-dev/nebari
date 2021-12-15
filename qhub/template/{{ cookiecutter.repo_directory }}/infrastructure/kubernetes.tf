@@ -263,7 +263,7 @@ module "kubernetes-keycloak-config" {
   {% if cookiecutter.security.authentication.type == "Auth0" -%}
   auth0_client_id     = {{ cookiecutter.security.authentication.config.client_id | jsonify }}
   auth0_client_secret = {{ cookiecutter.security.authentication.config.client_secret | jsonify }}
-  # auth0_subdomain should be e.g. dev-5xltvsfy.eu or qhub-dev (i.e. without auth0.com at the end)
+  # auth0_subdomain should be for example dev-5xltvsfy.eu or qhub-dev (i.e. without auth0.com at the end)
   auth0_subdomain     = {{ cookiecutter.security.authentication.config.auth0_subdomain | jsonify }}
   {%- endif %}
 

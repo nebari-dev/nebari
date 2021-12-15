@@ -1,4 +1,4 @@
-# Manual Backups
+# Manual backups
 
 Your cloud provider may have native ways to backup your Kubernetes cluster and volumes.
 
@@ -10,7 +10,7 @@ There are three main locations that you need to backup:
 2. The Keycloak user/group database
 3. The JupyterHub database (for Dashboard configuration)
 
-## Network File System
+## Network file system
 
 This amounts to:
 
@@ -162,7 +162,7 @@ gsutil cp gs://<your_bucket_name>/backups/2021-04-23.tar .
 Similar instructions, but use Digital Ocean spaces. This guide explains installation of the command-line tool:
 https://www.digitalocean.com/community/tutorials/how-to-migrate-from-amazon-s3-to-digitalocean-spaces-with-rclone
 
-## Keycloak User/Group Database
+## Keycloak user/group database
 
 QHub provides a simple script to export the important user/group database. Your new QHub cluster will recreate a lot of Keycloak config (including new Keycloak clients which will have new secrets), so only the high-level Group and User info is exported.
 

@@ -1,15 +1,14 @@
 # Login
 
-Keycloak is the name of the open source user management software that is automatically deployed within QHub. It is used to store the database of all users in your QHub site, and can provide connectivity to other services such GitHub/Auth0 single-sign on.
+Keycloak is the name of the open source user management software that's automatically deployed within QHub. It's used to store the database of all users in your QHub site, and can provide connectivity to other services such GitHub/Auth0 single-sign on.
 
-If you ran `qhub init` to create your `qhub-config.yaml` configuration file in the [Usage](usage.md) step, you will have been provided with a
-"random password for Keycloak root user".
+If you ran `qhub init` to create your `qhub-config.yaml` configuration file in the [Usage](usage.md) step, you will have been provided with a `random password for Keycloak root user`.
 
 The password will also be visible in the `qhub-config.yaml` file under the `security.keycloak.initial_root_password` field.
 
 Note that when your QHub is first deployed, the password given at that location will be set for the root Keycloak user. If added or changed for subsequent deployments, that password value will have no effect.
 
-Please note the root Keycloak user is only able to login and manage the Keycloak identity management section of QHub. It is not a user of the wider QHub data science platform.
+Please note the root Keycloak user is only able to login and manage the Keycloak identity management section of QHub. It's not a user of the wider QHub data science platform.
 
 ## Adding a QHub user
 
@@ -52,7 +51,7 @@ Once the user has been created, you can set a password (not needed for GitHub/Au
 
 ![Set Password in Keycloak](../images/keycloak_user_password.png)
 
-It is best to unset the 'Temporary' on/off button so the user won't be forced to change the password on first login.
+It's best to unset the 'Temporary' on/off button so the user won't be forced to change the password on first login.
 
 ## Login to QHub
 
@@ -82,7 +81,7 @@ From this point, the `security.keycloak.initial_root_password` field in `qhub-co
 
 # Groups
 
-Add Groups in the same Keycloak backend as you can add users - that is, login as `root` to `https://myqhubsite.com/auth/admin/`. Click Groups on the left-hand side.
+Add Groups in the same Keycloak backend as you can add users - that's, login as `root` to `https://myqhubsite.com/auth/admin/`. Click Groups on the left-hand side.
 
 Groups named `users` and `admin` will have been created automatically by QHub. All users will be added to the `users` group automatically when you create them. You should never remove them from the `users` group as that group must contain all users.
 
