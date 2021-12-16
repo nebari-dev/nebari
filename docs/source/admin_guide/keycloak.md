@@ -12,6 +12,7 @@ To set a Helm override, for example:
 security:
   keycloak:
     initial_root_password: password123
+    realm_display_name: "Our Company QHub"
     overrides:
       extraEnv: |
         - name: KEYCLOAK_DEFAULT_THEME
@@ -27,3 +28,5 @@ security:
 If you do set `overrides.extraEnv` as above, you must remember to include `PROXY_ADDRESS_FORWARDING=true`. Otherwise, the Keycloak deployment will not work as you will have overridden an important default Helm value that's required by QHub.
 
 To find out more about using Keycloak in QHub, see [Installation - Login](../installation/login.md)
+
+The `security.keycloak.realm_display_name` setting is the text to display on the Keycloak login page for your QHub (and in some other locations). This is optional, and if omitted will default to "QHub <project_name>" where `project_name` is a field in the `qhub-config.yaml` file.
