@@ -43,6 +43,11 @@ variable "name" {
   type        = string
 }
 
+variable "realm_display_name" {
+  description = "Display name for QHub realm"
+  type        = string
+}
+
 variable "github_client_id" {
   description = "GitHub OAuth2 Client ID"
   type        = string

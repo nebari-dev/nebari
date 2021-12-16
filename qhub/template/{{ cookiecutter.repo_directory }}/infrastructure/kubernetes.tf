@@ -243,6 +243,8 @@ module "kubernetes-keycloak-config" {
 
   name = var.name
 
+  realm_display_name = {{ cookiecutter.security.keycloak.realm_display_name | default("QHub ${var.name}", true) | jsonify }}
+
   external-url = var.endpoint
 
   forwardauth-callback-url-path      = local.forwardauth-callback-url-path
