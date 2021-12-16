@@ -40,3 +40,12 @@ jobs:
         run: |
           pytest --version
           pytest --ignore=tests_deployment
+      - name: YAML Lint
+        uses: karancode/yamllint-github-action@master
+        with:
+          yamllint_file_or_dir: '.'
+          yamllint_strict: false
+          yamllint_comment: true
+          yamllint_config_filepath: '.yamllint'
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
