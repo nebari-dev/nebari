@@ -124,7 +124,7 @@ for creating an Auth0 application](https://auth0.com/docs/applications/set-up-an
 - Select `Create Application` > `Machine to Machine Applications` > `Auth0 Management API` from the dropdown menu
 - Next, click `All` next to `Select all` and click `Authorize`
 
-With the application create the following environment variables can be set:
+With the application created set the following environment variables:
 
  - `AUTH0_CLIENT_ID`: client ID of Auth0 machine-to-machine application found at top of the newly created application page
  - `AUTH0_CLIENT_SECRET`: secret ID of Auth0 machine-to-machine application found in the `Settings` tab of the newly created application
