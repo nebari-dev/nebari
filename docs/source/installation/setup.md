@@ -123,17 +123,15 @@ for creating an Auth0 application](https://auth0.com/docs/applications/set-up-an
 - Click on the `Applications` button on the left
 - Select `Create Application` > `Machine to Machine Applications` > `Auth0 Management API` from the dropdown menu
 - Next, click `All` next to `Select all` and click `Authorize`
-- Set the variable `AUTH0_CLIENT_ID` equal to the `Cliend ID` string, and do the same for the `Client secret` by running the command below.
 
-The following environment variables must be set:
+With the application created set the following environment variables:
 
- - `AUTH0_CLIENT_ID`: client ID of Auth0 machine-to-machine application
- - `AUTH0_CLIENT_SECRET`: secret ID of Auth0 machine-to-machine application
- - `AUTH0_DOMAIN`: Finally, set the `AUTH0_DOMAIN` variable to your account name (indicated on the upper right-hand
-   corner) appended with `.auth0.com`, for example:
+ - `AUTH0_CLIENT_ID`: client ID of Auth0 machine-to-machine application found at top of the newly created application page
+ - `AUTH0_CLIENT_SECRET`: secret ID of Auth0 machine-to-machine application found in the `Settings` tab of the newly created application
+ - `AUTH0_DOMAIN`: The `Tenant Name` which can be found in the general account settings on the left hand side of the page appended with `.auth0.com`, for example:
 
 ```bash
-export AUTH_DOMAIN="qhub-test.auth0.com" # in case the account was called 'qhub-test'
+export AUTH_DOMAIN="qhub-test.auth0.com" # in case the Tenant Name was called 'qhub-test'
 ```
 </details>
 
