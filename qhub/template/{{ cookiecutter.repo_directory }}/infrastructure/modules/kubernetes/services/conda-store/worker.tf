@@ -54,7 +54,7 @@ resource "kubernetes_config_map" "conda-store-environments" {
 }
 
 
-resource "kubernetes_deployment" "main" {
+resource "kubernetes_deployment" "worker" {
   metadata {
     name      = "${var.name}-conda-store-worker"
     namespace = var.namespace
@@ -100,10 +100,10 @@ resource "kubernetes_deployment" "main" {
           name  = "conda-store-worker"
           image = "${var.conda-store-image.name}:${var.conda-store-image.tag}"
 
-          command = [
-            - "conda-store-worker"
-            - "--config"
-            - "/etc/conda-store/conda_store_config.py"
+          args = [
+            "conda-store-worker",
+            "--config",
+            "/etc/conda-store/conda_store_config.py"
           ]
 
           volume_mount {
@@ -113,7 +113,7 @@ resource "kubernetes_deployment" "main" {
 
           volume_mount {
             name       = "environments"
-            mount_path = "/opt/conda-store"
+            mount_path = "/opt/environments"
           }
 
           volume_mount {
@@ -168,7 +168,7 @@ resource "kubernetes_deployment" "main" {
         volume {
           name = "storage"
           persistent_volume_claim {
-            claim_name = persistent_volume_claim.main.metadata.0.name
+            claim_name = kubernetes_persistent_volume_claim.main.metadata.0.name
           }
         }
       }

@@ -4,7 +4,17 @@ resource "kubernetes_config_map" "conda-store-config" {
     namespace = var.namespace
   }
 
-  "conda-store-config.py" = file("${path.module}/config/conda-store-config.py")
+  data = {
+    "conda_store_config.py" = templatefile(
+      "${path.module}/config/conda_store_config.py", {
+        minio-username = module.minio.root_username
+        minio-password = module.minio.root_password
+        minio-service  = module.minio.service
+        postgres-username = module.postgresql.root_username
+        postgres-password = module.postgresql.root_password
+        postgres-service  = module.postgresql.service
+      })
+  }
 }
 
 
@@ -27,7 +37,7 @@ resource "kubernetes_service" "server" {
 }
 
 
-resource "kubernetes_deployment" "main" {
+resource "kubernetes_deployment" "server" {
   metadata {
     name      = "${var.name}-conda-store-server"
     namespace = var.namespace
@@ -73,10 +83,10 @@ resource "kubernetes_deployment" "main" {
           name  = "conda-store-server"
           image = "${var.conda-store-image.name}:${var.conda-store-image.tag}"
 
-          command = [
-            - "conda-store-server"
-            - "--config"
-            - "/etc/conda-store/conda_store_config.py"
+          args = [
+            "conda-store-server",
+            "--config",
+            "/etc/conda-store/conda_store_config.py"
           ]
 
           volume_mount {
