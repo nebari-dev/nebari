@@ -10,5 +10,5 @@ output "root_password" {
 
 output "service" {
   description = "Service name"
-  value       = "${var.name}-minio"
+  value       = helm_release.minio.name
 }

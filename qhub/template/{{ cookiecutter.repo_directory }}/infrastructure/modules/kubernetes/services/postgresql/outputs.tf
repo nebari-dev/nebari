@@ -15,5 +15,5 @@ output "database" {
 
 output "service" {
   description = "Service name"
-  value       = "${var.name}-postgresql"
+  value       = helm_release.postgresql.name
 }
