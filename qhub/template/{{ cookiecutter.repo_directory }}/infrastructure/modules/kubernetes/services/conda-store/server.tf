@@ -105,3 +105,33 @@ resource "kubernetes_deployment" "server" {
     }
   }
 }
+
+
+resource "kubernetes_manifest" "jupyterhub" {
+  provider = kubernetes-alpha
+
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "IngressRoute"
+    metadata = {
+      name      = "conda-store-server"
+      namespace = var.namespace
+    }
+    spec = {
+      entryPoints = ["websecure"]
+      routes = [
+        {
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`) && PathPrefix(`/conda-store`)"
+          services = [
+            {
+              name = kubernetes_service.server.metadata.0.name
+              port = 5000
+            }
+          ]
+        }
+      ]
+      tls = local.tls
+    }
+  }
+}

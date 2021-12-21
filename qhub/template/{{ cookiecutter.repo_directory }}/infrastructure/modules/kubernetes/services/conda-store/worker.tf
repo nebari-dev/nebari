@@ -118,7 +118,7 @@ resource "kubernetes_deployment" "worker" {
 
           volume_mount {
             name       = "storage"
-            mount_path = "/opt/conda-store"
+            mount_path = "/home/conda"
           }
         }
 

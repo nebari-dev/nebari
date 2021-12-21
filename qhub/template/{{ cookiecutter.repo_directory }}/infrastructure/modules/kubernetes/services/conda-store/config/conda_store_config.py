@@ -7,8 +7,8 @@ from conda_store_server.server.auth import DummyAuthentication
 #      conda-store settings
 # ==================================
 c.CondaStore.storage_class = S3Storage
-c.CondaStore.store_directory = "/opt/conda-store/"
-c.CondaStore.environment_directory = "/opt/conda-store/envs/"
+c.CondaStore.store_directory = "/home/conda/"
+c.CondaStore.environment_directory = "/home/conda/environments/"
 c.CondaStore.database_url = "postgresql+psycopg2://${postgres-username}:${postgres-password}@${postgres-service}/conda-store"
 c.CondaStore.default_uid = 1000
 c.CondaStore.default_gid = 100
@@ -33,7 +33,7 @@ c.CondaStoreServer.enable_metrics = True
 c.CondaStoreServer.address = "0.0.0.0"
 c.CondaStoreServer.port = 5000
 # This MUST start with `/`
-c.CondaStoreServer.url_prefix = "/"
+c.CondaStoreServer.url_prefix = "/conda-store"
 
 
 # ==================================
