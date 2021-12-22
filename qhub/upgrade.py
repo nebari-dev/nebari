@@ -211,7 +211,7 @@ class Upgrade_0_3_12(UpgradeStep):
         This verison of QHub requires a conda_store image for the first time.
         """
         if config.get("default_images", {}).get("conda_store", None) is None:
-            newimage = f"quansight/conda-store-server:v0.3.3"
+            newimage = "quansight/conda-store-server:v0.3.3"
             print(f"Adding default_images: conda_store image as {newimage}")
             config["default_images"]["conda_store"] = newimage
         return config
