@@ -226,6 +226,8 @@ redis: # configuration from https://github.com/bitnami/charts/blob/master/bitnam
   master:
     name: "{{ .Release.Name }}-redis-master"
     port: 6379
+    nodeSelector:
+      app: "clearml"
     persistence:
       enabled: true
       accessModes:
@@ -240,6 +242,8 @@ mongodb: # configuration from https://github.com/bitnami/charts/blob/master/bitn
     registry: docker.io
     repository: bitnami/mongodb
     tag: 3.6.21-debian-9-r71
+  nodeSelector:
+    app: "clearml"
   architecture: standalone
   auth:
     enabled: false
