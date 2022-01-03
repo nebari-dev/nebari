@@ -148,7 +148,7 @@ def guided_install(
     )
 
     logger.info(
-        f"Congratulations, QHub was deployed successfully! Please login and change the Keycloak `root` user password as soon as possible:\n\n\t{config['domain']}/auth/admin\n\nU]using the following credentials:\n\n\tusername: root\n\tpassword: {config['security']['keycloak']['initial_root_password']}\n\nThis will render the `initial_root_password` on the `qhub_config.yaml` useless. For more information Keycloak administration on QHub, please visit the docs:\n\n\t{keycloak_docs_link}\n\nTo access your QHub cluster as a regular user, please visit:\n\n\t{config['domain']}\n\nEnjoy!"
+        f"\nCongratulations, QHub was deployed successfully! Please login and change the Keycloak `root` user password as soon as possible:\n\n\t{config['domain']}/auth/admin\n\nusing the following credentials:\n\n\tusername: root\n\tpassword: {config['security']['keycloak']['initial_root_password']}\n\nThis will render the `initial_root_password` on the `qhub_config.yaml` useless. For more information Keycloak administration on QHub, please visit the docs:\n\n\t{keycloak_docs_link}\n\nTo access your QHub cluster as a regular user, please visit:\n\n\t{config['domain']}\n\nEnjoy!"
     )
 
 
