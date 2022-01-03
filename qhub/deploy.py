@@ -143,13 +143,18 @@ def guided_install(
     logger.info("Running Terraform Stage: FULL")
     terraform.apply(directory="infrastructure")
 
-    keycloak_docs_link = (
-        "https://docs.qhub.dev/en/stable/source/installation/login.html"
-    )
+    final_message = "\nCongratulations, QHub was successfully deployed!\n"
 
-    logger.info(
-        f"\nCongratulations, QHub was deployed successfully! Please login and change the Keycloak `root` user password as soon as possible:\n\n\t{config['domain']}/auth/admin\n\nusing the following credentials:\n\n\tusername: root\n\tpassword: {config['security']['keycloak']['initial_root_password']}\n\nThis will render the `initial_root_password` on the `qhub_config.yaml` useless. For more information Keycloak administration on QHub, please visit the docs:\n\n\t{keycloak_docs_link}\n\nTo access your QHub cluster as a regular user, please visit:\n\n\t{config['domain']}\n\nEnjoy!"
-    )
+    if config["security"]["keycloak"]:
+        keycloak_docs_link = (
+            "https://docs.qhub.dev/en/stable/source/installation/login.html"
+        )
+
+        final_message += f"Please login and change the Keycloak `root` user password as soon as possible:\n\n\t{config['domain']}/auth/admin\n\nusing the following credentials:\n\n\tusername: root\n\tpassword: {config['security']['keycloak']['initial_root_password']}\n\nThis will render the `initial_root_password` on the `qhub_config.yaml` useless. For more information Keycloak administration on QHub, please visit the docs:\n\n\t{keycloak_docs_link}\n\n"
+
+    final_message += f"To access your QHub cluster as a regular user, please visit:\n\n\t{config['domain']}\n\nEnjoy!"
+
+    logger.info(final_message)
 
 
 def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
