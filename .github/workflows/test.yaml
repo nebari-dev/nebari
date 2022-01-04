@@ -47,3 +47,7 @@ jobs:
           config_file: .yamllint.yml
           format: github
           no_warnings: true
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ failure() }}
+        timeout-minutes: 5
