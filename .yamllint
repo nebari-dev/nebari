@@ -9,6 +9,7 @@ ignore: |
   .github/**/**
   tests/vale/styles/Google/**.yml
   env/**/**
+  qhub/template/\{\{ cookiecutter\.repo_directory \}\}/
 
 rules:
   braces:
