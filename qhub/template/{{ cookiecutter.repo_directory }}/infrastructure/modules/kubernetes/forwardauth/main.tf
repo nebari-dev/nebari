@@ -44,7 +44,21 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
       }
 
       spec {
-
+        affinity {
+          node_affinity {
+            required_during_scheduling_ignored_during_execution {
+              node_selector_term {
+                match_expressions {
+                  key      = var.node-group.key
+                  operator = "In"
+                  values = [
+                    var.node-group.value
+                  ]
+                }
+              }
+            }
+          }
+        }
         container {
           # image = "thomseddon/traefik-forward-auth:2.2.0"
           # Use PR #159 https://github.com/thomseddon/traefik-forward-auth/pull/159
