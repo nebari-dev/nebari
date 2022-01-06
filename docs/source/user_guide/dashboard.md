@@ -3,7 +3,7 @@
 QHub supports user's creating dashboards that can be shared with other
 users and groups via [ContainDS
 Dashboards](https://cdsdashboards.readthedocs.io/en/stable/). Currently
-this dashboarding solution supports Panel, Bokeh, Voila, Streamlit,
+this solution supports Panel, Bokeh, Voila, Streamlit,
 and Plotly. The solution is general enough to support any webapp. For
 a more detailed guide on using CDSDashboards see the
 [documentation](https://cdsdashboards.readthedocs.io/en/stable/index.html).
@@ -33,8 +33,8 @@ dashboard.servable()
 
 Once you execute the notebook you should see the output shown
 above. We will now show how to create a dashboard from this
-notebook. Keep in mind that for other dashboarding solutions
-e.g. voila the instructions will be slightly different in which case
+notebook. Keep in mind that for other dashboard-based solutions
+for example voila the instructions will be slightly different in which case
 we recommend visiting the [cds
 docs](https://cdsdashboards.readthedocs.io/en/stable/index.html). Visit
 your hub homepage which is at `https://<qhub-url>/hub/dashboards` or

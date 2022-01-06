@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📖  QHub Documentation
+    url: https://docs.qhub.dev/en/stable/
+    about: Read QHub docs and development guide.
+  - name: 💬 GitHub discussions
+    url: https://github.com/Quansight/qhub/discussions
+

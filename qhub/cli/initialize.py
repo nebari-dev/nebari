@@ -1,7 +1,6 @@
-from ruamel import yaml
-
 from qhub.initialize import render_config
 from qhub.schema import ProviderEnum
+from qhub.utils import yaml
 
 
 def create_init_subcommand(subparser):
@@ -58,6 +57,10 @@ def create_init_subcommand(subparser):
         action="store_true",
         help="Never prompt user for input instead leave PLACEHOLDER",
     )
+    subparser.add_argument(
+        "--ssl-cert-email",
+        help="Allow generation of a LetsEncrypt SSL cert - requires an administrative email",
+    )
     subparser.set_defaults(func=handle_init)
 
 
@@ -76,13 +79,12 @@ def handle_init(args):
         terraform_state=args.terraform_state,
         kubernetes_version=args.kubernetes_version,
         disable_prompt=args.disable_prompt,
+        ssl_cert_email=args.ssl_cert_email,
     )
 
     try:
         with open("qhub-config.yaml", "x") as f:
-            yaml.dump(
-                config, f, default_flow_style=False, Dumper=yaml.RoundTripDumper
-            )  # RoundTripDumper avoids alphabetical sorting of yaml file
+            yaml.dump(config, f)
     except FileExistsError:
         raise ValueError(
             "A qhub-config.yaml file already exists. Please move or delete it and try again."

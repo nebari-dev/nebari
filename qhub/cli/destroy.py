@@ -1,11 +1,10 @@
 import pathlib
 import logging
 
-from ruamel import yaml
-
 from qhub.destroy import destroy_configuration
 from qhub.schema import verify
 from qhub.render import render_template
+from qhub.utils import load_yaml
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +23,11 @@ def create_destroy_subcommand(subparser):
         action="store_true",
         help="Disable auto-rendering before destroy",
     )
+    subparser.add_argument(
+        "--full-only",
+        action="store_true",
+        help="Only carry out one full pass instead of targeted sections",
+    )
     subparser.set_defaults(func=handle_destroy)
 
 
@@ -34,8 +38,7 @@ def handle_destroy(args):
             f"passed in configuration filename={config_filename} must exist"
         )
 
-    with config_filename.open() as f:
-        config = yaml.safe_load(f.read())
+    config = load_yaml(config_filename)
 
     verify(config)
 
@@ -45,4 +48,5 @@ def handle_destroy(args):
     destroy_configuration(
         config,
         args.skip_remote_state_provision,
+        args.full_only,
     )

@@ -8,6 +8,9 @@ from qhub.cli.initialize import create_init_subcommand
 from qhub.cli.render import create_render_subcommand
 from qhub.cli.validate import create_validate_subcommand
 from qhub.cli.destroy import create_destroy_subcommand
+from qhub.cli.support import create_support_subcommand
+from qhub.cli.upgrade import create_upgrade_subcommand
+from qhub.cli.keycloak import create_keycloak_subcommand
 from qhub.provider.terraform import TerraformException
 from qhub.version import __version__
 from qhub.utils import QHUB_GH_BRANCH
@@ -16,7 +19,11 @@ from qhub.utils import QHUB_GH_BRANCH
 def cli(args):
     parser = argparse.ArgumentParser(description="QHub command line")
     parser.add_argument(
-        "-v", "--version", action="version", version=__version__, help="QHub version"
+        "-v",
+        "--version",
+        action="version",
+        version=__version__,
+        help="QHub version number",
     )
     parser.set_defaults(func=None)
 
@@ -26,6 +33,9 @@ def cli(args):
     create_init_subcommand(subparser)
     create_validate_subcommand(subparser)
     create_destroy_subcommand(subparser)
+    create_support_subcommand(subparser)
+    create_upgrade_subcommand(subparser)
+    create_keycloak_subcommand(subparser)
 
     args = parser.parse_args(args)
 

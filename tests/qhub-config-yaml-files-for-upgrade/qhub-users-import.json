@@ -1,0 +1,15 @@
+{
+  "id": "qhub",
+  "realm": "qhub",
+  "users": [
+    {
+      "username": "example-user",
+      "enabled": true,
+      "groups": [
+        "admin",
+        "users"
+      ]
+    }
+  ],
+  "groups": []
+}

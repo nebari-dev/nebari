@@ -1,4 +1,4 @@
-# Administration Guide
+# Administration guide
 
 ```{toctree}
 :maxdepth: 2
@@ -11,7 +11,10 @@ gpu.md
 preemptible-spot-instances.md
 system_maintenance.md
 monitoring.md
+jupyterhub.md
+keycloak.md
 clearml.md
 prefect.md
+custom-helm-charts.md
 faq.md
 ```
