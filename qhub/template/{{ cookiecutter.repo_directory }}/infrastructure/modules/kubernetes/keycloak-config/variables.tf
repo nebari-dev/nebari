@@ -43,22 +43,9 @@ variable "name" {
   type        = string
 }
 
-variable "users" {
-  description = "list of users data"
-  type        = list(map(any))
-  default     = []
-}
-
-variable "groups" {
-  description = "list of groups data"
-  type        = list(map(any))
-  default     = []
-}
-
-variable "user_groups" {
-  description = "list of user_groups data"
-  type        = list(list(number))
-  default     = []
+variable "realm_display_name" {
+  description = "Display name for QHub realm"
+  type        = string
 }
 
 variable "github_client_id" {
@@ -90,4 +77,3 @@ variable "auth0_subdomain" {
   type        = string
   default     = ""
 }
-

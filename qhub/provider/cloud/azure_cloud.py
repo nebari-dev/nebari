@@ -24,9 +24,11 @@ def initiate_container_service_client():
 
 
 @functools.lru_cache()
-def kubernetes_versions(azure_location="Central US"):
+def kubernetes_versions(region="Central US"):
+    """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
 
     client = initiate_container_service_client()
+    azure_location = region.replace(" ", "").lower()
 
     k8s_versions_list = client.container_services.list_orchestrators(
         azure_location, resource_type="managedClusters"
@@ -36,5 +38,7 @@ def kubernetes_versions(azure_location="Central US"):
     for key in k8s_versions_list["orchestrators"]:
         if key["orchestrator_type"] == "Kubernetes":
             supported_kubernetes_versions.append(key["orchestrator_version"])
+
+    supported_kubernetes_versions = sorted(supported_kubernetes_versions)
 
     return supported_kubernetes_versions

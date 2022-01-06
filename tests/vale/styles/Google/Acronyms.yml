@@ -71,3 +71,9 @@ exceptions:
   - NFS
   - AKS
   - ARM
+  - EKS
+  - EBS
+  - CIDR
+  - VPC
+  - GCP
+  - HTTP

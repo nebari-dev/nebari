@@ -6,10 +6,11 @@ import os
 from shutil import rmtree
 from urllib.parse import urlencode
 
+from ruamel.yaml import YAML
 from cookiecutter.generate import generate_files
 from ..version import __version__
 from ..constants import TERRAFORM_VERSION
-from ..utils import pip_install_qhub, QHUB_GH_BRANCH, load_yaml
+from ..utils import pip_install_qhub, QHUB_GH_BRANCH
 
 # existing files and folders to delete when `render_template` is called
 DELETABLE_PATHS = [
@@ -63,53 +64,6 @@ def patch_versioning_extra_config(config):
         config["terraform_version"] = TERRAFORM_VERSION
 
 
-def patch_terraform_users(config):
-    """
-    Add terraform-friendly user information
-    """
-    incoming_groups = config.get("security", {}).get("groups", {})
-    config["tf_groups"] = [
-        {
-            "name": k,
-            "gid": str((v or {}).get("gid", "")),
-        }
-        for (k, v) in {"users": {}, "admin": {}, **incoming_groups}.items()
-        # Above forces existence of users and admin groups if not already provided in config
-    ]
-
-    group_index_lookup = {
-        obj["name"]: index for (index, obj) in enumerate(config["tf_groups"])
-    }
-
-    incoming_users = config.get("security", {}).get("users", {})
-
-    config["tf_users"] = []
-    for (k, v) in incoming_users.items():
-        if v is None:
-            v = {}
-        config["tf_users"].append(
-            {
-                "name": k,
-                "uid": str(v.get("uid", "")),
-                "password": v.get("password", ""),
-                "email": "@" in k and k or None,
-                "primary_group": v.get("primary_group", "users"),
-            }
-        )
-
-    config["tf_user_groups"] = []
-    for (k, v) in incoming_users.items():
-        if v is None:
-            v = {}
-        # Every user should be in the 'users' group
-        users_group_names = set(
-            [v.get("primary_group", "")] + v.get("secondary_groups", []) + ["users"]
-        ) - set([""])
-        config["tf_user_groups"].append(
-            [group_index_lookup[gname] for gname in users_group_names]
-        )
-
-
 def patch_terraform_extensions(config):
     """
     Add terraform-friendly extension details
@@ -125,6 +79,7 @@ def patch_terraform_extensions(config):
             "oauth2client": ext.get("oauth2client", False),
             "logout": ext.get("logout", ""),
             "jwt": False,
+            "qhubconfigyaml": ext.get("qhubconfigyaml", False),
         }
         tf_ext["envs"] = []
         for env in ext.get("envs", []):
@@ -282,7 +237,9 @@ def render_template(output_directory, config_filename, force=False):
     if not filename.is_file():
         raise ValueError(f"cookiecutter configuration={filename} is not filename")
 
-    config = load_yaml(filename)
+    with filename.open() as f:
+        yaml = YAML(typ="safe", pure=True)
+        config = yaml.load(f)
 
     # For any config values that start with
     # QHUB_SECRET_, set the values using the
@@ -297,9 +254,9 @@ def render_template(output_directory, config_filename, force=False):
 
     patch_versioning_extra_config(config)
 
-    patch_terraform_users(config)
-
     patch_terraform_extensions(config)
+
+    config["qhub_config_yaml_path"] = str(filename.absolute())
 
     remove_existing_renders(
         dest_repo_dir=output_directory / repo_directory,

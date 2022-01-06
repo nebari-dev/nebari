@@ -2,15 +2,13 @@
 
 QHub is an open source tool for data science research, development, and deployment.
 
-QHub is [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code)
-that simplifies the deployment of data science projects using JupyterHub and Dask Gateway for you and your team.
+QHub is [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) that simplifies the deployment of data science projects using JupyterHub and Dask Gateway for you and your team.
 
-Designed to simplify the deployment and maintenance of scalable computational platforms in the cloud, QHub is ideal for
-organizations that need a shared compute platform that is flexible, accessible, and scalable.
+Designed to simplify the deployment and maintenance of scalable computational platforms in the cloud, QHub is ideal for organizations that need a shared compute platform that's flexible, accessible, and scalable.
 
 ## QHub Technology Stack
 
-![High-level illustration of QHub architecture](/source/images/qhub-cloud_architecture.png)
+![High-level illustration of QHub architecture](../images/qhub-cloud_architecture.png)
 
 ### Components
 
@@ -40,8 +38,7 @@ Amongst the newly created open source libraries on the tech stack are:
 
 ### Integrations
 
-In an effort for QHub to serve as a core that services can integrate
-with.
+In an effort for QHub to serve as a core that services can integrate with.
 
 + [**prefect**](https://www.prefect.io/) workflow management
 + [**clearml**](https://clear.ml/) machine learning platform
@@ -56,7 +53,7 @@ QHub provides enables teams to build their own scalable compute infrastructure w
 + Autoscaling JupyterHub installation deployed on the Cloud provider of your choice.
 + Option to choose from multiple compute instances, such as: **namely normal**, **high memory**, **GPU**, etc.
 + Autoscaling Dask compute clusters for big data using any instance type.
-+ Shell access and remote editing access (i.e. VSCode remote) through KubeSSH.
++ Shell access and remote editing access (VSCode remote) through KubeSSH.
 + Shared filesystem allowing users to work on projects privately, within groups, or across the organisation.
 + Robust compute environment handling allowing both prebuilt and ad-hoc environment creation.
 + Integrated video conferencing, using [Jitsi](https://meet.jit.si/).

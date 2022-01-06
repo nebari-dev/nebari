@@ -27,7 +27,7 @@ jobs:
           echo "GITHUB_REF: ${GITHUB_REF}"
       - name: 'QHUB_GH_BRANCH set for a branch (not a tag)'
         if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') }}
-        # e.g. QHUB_GH_BRANCH="main"
+        # for example QHUB_GH_BRANCH="main"
         run: |
           echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> "$GITHUB_ENV"
       - name: 'Checkout Infrastructure'
@@ -146,8 +146,11 @@ jobs:
             ./tests_e2e/cypress/screenshots/
             ./tests_e2e/cypress/videos/
 
-      ### CLEANUP AFTER CYPRESS
+      - name: Deployment Pytests
+        run: |
+          pytest tests_deployment/ -v
 
+      ### CLEANUP AFTER TESTS
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment

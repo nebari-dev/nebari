@@ -186,8 +186,8 @@ agentGroups:
   - name: agent-group0
     replicaCount: 0
     nvidiaGpusPerAgent: 1
-    agentVersion: "" # if set, it *MUST* include comparison operator (e.g. ">=0.16.1")
-    queues: "default" # multiple queues can be specified separated by a space (e.g. "important_jobs default")
+    agentVersion: "" # if set, it *MUST* include comparison operator (for example ">=0.16.1")
+    queues: "default" # multiple queues can be specified separated by a space (for example "important_jobs default")
     clearmlGitUser: null
     clearmlGitPassword: null
     clearmlAccessKey: null

@@ -12,7 +12,8 @@ module "kubernetes-jupyterhub" {
   overrides = concat(var.jupyterhub-overrides, [
     jsonencode({
       hub = {
-        extraEnv = [
+        extraEnv = concat( var.jupyterhub-hub-extraEnv,
+          [
           {
             name = "OAUTH_CLIENT_ID",
             value = var.OAUTH_CLIENT_ID
@@ -41,7 +42,7 @@ module "kubernetes-jupyterhub" {
             name = "KEYCLOAK_USERDATA_URL",
             value = var.keycloak_userdata_url
           },
-          { 
+          {
             name = "OAUTH_LOGOUT_REDIRECT_URL",
             value = var.keycloak_logout_url
           },
@@ -57,7 +58,7 @@ module "kubernetes-jupyterhub" {
             name  = "KEYCLOAK_PASSWORD"
             value = var.keycloak_password
           }
-        ]
+        ])
         nodeSelector = {
           (var.general-node-group.key) = var.general-node-group.value
         }
@@ -80,8 +81,15 @@ module "kubernetes-jupyterhub" {
       }
 
       proxy = {
-        nodeSelector = {
-          (var.general-node-group.key) = var.general-node-group.value
+        chp = {
+          nodeSelector = {
+            (var.general-node-group.key) = var.general-node-group.value
+          }
+        }
+        traefik = {
+          nodeSelector = {
+            (var.general-node-group.key) = var.general-node-group.value
+          }
         }
       }
 
@@ -386,16 +394,4 @@ resource "kubernetes_manifest" "forwardauth" {
       tls = local.tls
     }
   }
-}
-
-module "external-container-reg" {
-  source = "../../extcr"
-
-  count = var.extcr_config.enabled ? 1 : 0
-
-  namespace         = var.namespace
-  access_key_id     = var.extcr_config.access_key_id
-  secret_access_key = var.extcr_config.secret_access_key
-  extcr_account     = var.extcr_config.extcr_account
-  extcr_region      = var.extcr_config.extcr_region
 }

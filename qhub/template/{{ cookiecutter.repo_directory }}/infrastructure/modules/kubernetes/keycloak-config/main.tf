@@ -12,63 +12,33 @@ resource "keycloak_realm" "realm-qhub" {
 
   realm = "qhub"
 
-  display_name = "QHub ${var.name}"
+  display_name = var.realm_display_name
 }
 
-resource "keycloak_user" "user" {
-  count = length(var.users)
-
+resource "keycloak_group" "admingroup" {
   realm_id = keycloak_realm.realm-qhub.id
-
-  username = var.users[count.index].name
-  enabled  = true
-  email    = var.users[count.index].email
+  name     = "admin"
 
   lifecycle {
     ignore_changes = all
   }
-
-  dynamic "initial_password" {
-    for_each = [for pwd in [var.users[count.index].password] : pwd if pwd != ""]
-    content {
-      value     = initial_password.value
-      temporary = false
-    }
-  }
 }
 
-resource "keycloak_group" "group" {
-  count = length(var.groups)
-
+resource "keycloak_group" "usersgroup" {
   realm_id = keycloak_realm.realm-qhub.id
-  name     = var.groups[count.index].name
+  name     = "users"
 
   lifecycle {
     ignore_changes = all
   }
-
 }
 
 resource "keycloak_default_groups" "default" {
   realm_id = keycloak_realm.realm-qhub.id
 
   group_ids = [
-    for g in keycloak_group.group : g.id if g.name == "users"
+    keycloak_group.usersgroup.id
   ]
-}
-
-resource "keycloak_user_groups" "user_groups" {
-  count = length(var.user_groups)
-
-  realm_id = keycloak_realm.realm-qhub.id
-
-  user_id = keycloak_user.user[count.index].id
-
-  group_ids = [
-    for i in var.user_groups[count.index] : keycloak_group.group[i].id
-  ]
-
-  exhaustive = false
 }
 
 resource "keycloak_openid_client" "qhub_client" {
