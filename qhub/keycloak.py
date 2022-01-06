@@ -19,6 +19,21 @@ def do_keycloak(config_filename, *args):
             "Only keycloak command is 'keycloak adduser username [password]'"
         )
 
+    keycloak_admin = get_keycloak_admin_from_config(config_filename)
+
+    new_user_dict = {"username": args[1], "enabled": True}
+    if len(args) >= 3:
+        new_user_dict["credentials"] = [
+            {"type": "password", "value": args[2], "temporary": False}
+        ]
+    else:
+        print("Not setting any password (none supplied)")
+
+    print(f"Adding user {args[1]}")
+    keycloak_admin.create_user(new_user_dict)
+
+
+def get_keycloak_admin_from_config(config_filename):
     config = load_yaml(config_filename)
 
     verify(config)
@@ -51,13 +66,4 @@ def do_keycloak(config_filename, *args):
     ) as e:
         raise ValueError(f"Failed to connect to Keycloak server: {e}")
 
-    new_user_dict = {"username": args[1], "enabled": True}
-    if len(args) >= 3:
-        new_user_dict["credentials"] = [
-            {"type": "password", "value": args[2], "temporary": False}
-        ]
-    else:
-        print("Not setting any password (none supplied)")
-
-    print(f"Adding user {args[1]}")
-    keycloak_admin.create_user(new_user_dict)
+    return keycloak_admin

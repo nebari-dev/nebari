@@ -8,6 +8,7 @@ from qhub.cli.initialize import create_init_subcommand
 from qhub.cli.render import create_render_subcommand
 from qhub.cli.validate import create_validate_subcommand
 from qhub.cli.destroy import create_destroy_subcommand
+from qhub.cli.support import create_support_subcommand
 from qhub.cli.upgrade import create_upgrade_subcommand
 from qhub.cli.keycloak import create_keycloak_subcommand
 from qhub.provider.terraform import TerraformException
@@ -32,6 +33,7 @@ def cli(args):
     create_init_subcommand(subparser)
     create_validate_subcommand(subparser)
     create_destroy_subcommand(subparser)
+    create_support_subcommand(subparser)
     create_upgrade_subcommand(subparser)
     create_keycloak_subcommand(subparser)
 

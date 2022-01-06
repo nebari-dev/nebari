@@ -3,8 +3,8 @@
 This guide aims to provide useful information to developers in the detection and correction of issues within QHub.
 
 ## General Troubleshooting
-To minimize the occurrence of errors on your QHub application, please follow the best practices described on the
-[Installation](../installation/installation.md), [Setup](../installation/setup.md) and [Usage](../installation/usage.md) sections.
+
+To minimize the occurrence of errors on your QHub application, please follow the best practices described on the [Installation](../installation/installation.md), [Setup](../installation/setup.md) and [Usage](../installation/usage.md) sections.
 
 ### Solutions for common problems
 
@@ -12,9 +12,7 @@ To minimize the occurrence of errors on your QHub application, please follow the
 
 ##### Digital Ocean
 
-To get the kubernetes context to interact with a Digital Ocean cluster
-use the [following
-instructions](https://www.digitalocean.com/docs/kubernetes/how-to/connect-to-cluster/).
+To get the kubernetes context to interact with a Digital Ocean cluster use the [following instructions](https://www.digitalocean.com/docs/kubernetes/how-to/connect-to-cluster/).
 
 1. [Download Digital Ocean command line utility](https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/)
 2. [Create Digital Ocean API Token](https://www.digitalocean.com/docs/apis-clis/doctl/how-to/install/) likely already done
@@ -25,8 +23,7 @@ After completing these steps. `kubectl` should be able to access the cluster.
 
 ##### Google Cloud Platform
 
-To get the kubernetes context to interact with a GCP use the [following
-instructions](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl).
+To get the kubernetes context to interact with a GCP use the [following instructions](https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl).
 
 1. [Download the GCP SDK](https://cloud.google.com/sdk/downloads)
 2. Login to GCP via `gcloud init`
@@ -36,8 +33,7 @@ After completing these steps. `kubectl` should be able to access the cluster.
 
 ##### Amazon Web Services
 
-To get the kubernetes context to interact with a AWS use the [following
-instructions](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html).
+To get the kubernetes context to interact with a AWS use the [following instructions](https://docs.aws.amazon.com/eks/latest/userguide/create-kubeconfig.html).
 
 1. Download the [aws command line](https://aws.amazon.com/cli/)
 2. [Create AWS Access Key and Secret Key](https://aws.amazon.com/premiumsupport/knowledge-center/create-access-key/) likely already done
@@ -47,32 +43,18 @@ After completing these steps. `kubectl` should be able to access the cluster.
 
 #### Debug your Kubernetes cluster
 
- [`k9s`](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to
- simplify navigating, observing, and managing your applications in Kubernetes.
- `k9s` continuously monitors Kubernetes clusters for changes and provides
- shortcut commands to interact with the observed resources becoming a
- fast way to review and resolve day-to-day issues in Kubernetes. It's
- definitely a huge improvement to the general workflow, and a best-to-have
- tool for debugging your Kubernetes cluster sessions.
+[`k9s`](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to simplify navigating, observing, and managing your applications in `k8s`. `k9s` continuously monitors Kubernetes clusters for changes and provides shortcut commands to interact with the observed resources becoming a fast way to review and resolve day-to-day issues in Kubernetes. It's definitely a huge improvement to the general workflow, and a best-to-have tool for debugging your Kubernetes cluster sessions.
 
-Installation can be done on macOS, Windows, and Linux. Instructions
-for each operating system can be found [here](https://github.com/derailed/k9s).
-Complete the installation to follow along.
+Installation can be done on macOS, Windows, and Linux. Instructions for each operating system can be found [here](https://github.com/derailed/k9s). Complete the installation to follow along.
 
-By default, `k9s` starts with the standard directory that is set as the
-context (in this case Minikube). To view all the current process press `0`:
+By default, `k9s` starts with the standard directory that's set as the context (in this case Minikube). To view all the current process press `0`:
 
-![Image of terminal UI](../images/k9s_UI.png)
+![Image of the `k9s` terminal UI](../images/k9s_UI.png)
 
-> **NOTE**: In some circumstances you will be confronted with the
-  need to inspect any services launched by your cluster at your ‘localhost’. For instance, if your cluster has problem
-with the network traffic tunnel configuration, it may limit or block the user's
-  access to destination resources over the connection.
+> **NOTE**: In some circumstances you will be confronted with the need to inspect any services launched by your cluster at your ‘localhost’. For instance, if your cluster has problem
+with the network traffic tunnel configuration, it may limit or block the user's access to destination resources over the connection.
 
-`k9s` port-forward option <kbd>shift</kbd> + <kbd>f</kbd> allows you to access and interact
-with internal Kubernetes cluster processes from your localhost you can
-then use this method to investigate issues and adjust your services
-locally without the need to expose them beforehand.
+`k9s` port-forward option <kbd>shift</kbd> + <kbd>f</kbd> allows you to access and interact with internal Kubernetes cluster processes from your localhost you can then use this method to investigate issues and adjust your services locally without the need to expose them beforehand.
 
 ---
 
@@ -82,14 +64,7 @@ locally without the need to expose them beforehand.
 
 #### JupyterHub Theme
 
-The QHub theme was originally based off the [work of the pangeo
-team](https://github.com/pangeo-data/pangeo-custom-jupyterhub-templates)
-and is now located in
-[github.com/Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme/). For
-simple modifications to the jupyterhub theme we suggest only editing
-`infrastructure/jupyterhub.yaml` and the value
-`c.JupyterHub.template_vars`. For most use cases this should provide
-enough flexibility.
+The QHub theme was originally based off the [work of the pangeo team](https://github.com/pangeo-data/pangeo-custom-jupyterhub-templates) and is now located in [github.com/Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme/). For simple modifications to the jupyterhub theme we suggest only editing `infrastructure/jupyterhub.yaml` and the value `c.JupyterHub.template_vars`. For most use cases this should provide enough flexibility.
 
 ```yaml
 hub:
@@ -103,29 +78,17 @@ hub:
       }
 ```
 
-For more serious modifications to the jupyterhub theme you will need
-to fork
-[Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme)
-and edit the jupyterhub Dockerfile located at
-`image/Dockerfile.jupyterhub`. Modify the `THEME_OWNER`, `THEME_REPO`,
-and `THEME_REV`. This should change the Dockerfile to use your new
-theme. The
-[Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme)
-has detailed documentation.
+For more serious modifications to the jupyterhub theme you will need to fork [Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme) and edit the jupyterhub Dockerfile located at `image/Dockerfile.jupyterhub`. Modify the `THEME_OWNER`, `THEME_REPO`, and `THEME_REV`. This should change the Dockerfile to use your new theme. The [Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme) has detailed documentation.
 
 #### JupyterLab Theme
 
-Setting the JupyterLab theme is done via extensions. Edit the
-`image/postBuild` script to include the jupyterlab extension in the
-build. Within the `image` directory run the following to build
-jupyterlab.
+Setting the JupyterLab theme is done via extensions. Edit the `image/postBuild` script to include the jupyterlab extension in the build. Within the `image` directory run the following to build JupyterLab.
 
 ```shell
 docker build -f Docker.jupyterlab -t Quansight/qhub-jupyterlab:latest .
 ```
 
-Finally, you can test the resulting image via the following docker
-command and open your web browser to `localhost:8000`.
+Finally, you can test the resulting image via the following docker command and open your web browser to `localhost:8000`.
 
 ```shell
 docker run -p 8000:8000 -it Quansight/qhub-jupyterlab:latest jupyter lab --port 8000 --ip 0.0.0.0

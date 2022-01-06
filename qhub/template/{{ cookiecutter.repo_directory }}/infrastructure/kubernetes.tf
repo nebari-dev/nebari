@@ -183,6 +183,20 @@ module "kubernetes-ingress" {
 
 ### Keycloak
 
+
+module "external-container-reg" {
+  source = "./modules/extcr"
+
+  count = {{ cookiecutter.external_container_reg.enabled | default(false,true) | jsonify }} ? 1 : 0
+
+  namespace         = var.environment
+  access_key_id     = "{{ cookiecutter.external_container_reg.access_key_id | default("",true) }}"
+  secret_access_key = "{{ cookiecutter.external_container_reg.secret_access_key | default("",true) }}"
+  extcr_account     = "{{ cookiecutter.external_container_reg.extcr_account | default("",true) }}"
+  extcr_region      = "{{ cookiecutter.external_container_reg.extcr_region | default("",true) }}"
+}
+
+
 resource "random_password" "keycloak-qhub-bot-password" {
   length  = 32
   special = false
@@ -210,7 +224,8 @@ module "kubernetes-keycloak-helm" {
 
 
   depends_on = [
-    module.kubernetes-ingress
+    module.kubernetes-ingress,
+    module.external-container-reg
   ]
 }
 
@@ -227,6 +242,8 @@ module "kubernetes-keycloak-config" {
   source = "./modules/kubernetes/keycloak-config"
 
   name = var.name
+
+  realm_display_name = {{ cookiecutter.security.keycloak.realm_display_name | default("QHub ${var.name}", true) | jsonify }}
 
   external-url = var.endpoint
 
@@ -248,7 +265,7 @@ module "kubernetes-keycloak-config" {
   {% if cookiecutter.security.authentication.type == "Auth0" -%}
   auth0_client_id     = {{ cookiecutter.security.authentication.config.client_id | jsonify }}
   auth0_client_secret = {{ cookiecutter.security.authentication.config.client_secret | jsonify }}
-  # auth0_subdomain should be e.g. dev-5xltvsfy.eu or qhub-dev (i.e. without auth0.com at the end)
+  # auth0_subdomain should be for example dev-5xltvsfy.eu or qhub-dev (i.e. without auth0.com at the end)
   auth0_subdomain     = {{ cookiecutter.security.authentication.config.auth0_subdomain | jsonify }}
   {%- endif %}
 
@@ -294,15 +311,11 @@ module "qhub" {
 {%- endif %}
   )
 
-  dask_gateway_extra_config = file("dask_gateway_config.py.j2")
+{%- if cookiecutter.jupyterhub is defined and cookiecutter.jupyterhub.overrides is defined and cookiecutter.jupyterhub.overrides.hub is defined and cookiecutter.jupyterhub.overrides.hub.extraEnv is defined %}
+  jupyterhub-hub-extraEnv = {{- cookiecutter.jupyterhub.overrides.hub.extraEnv | default({}) | jsonify -}}
+{%- endif %}
 
-  extcr_config = {
-    enabled : {{ cookiecutter.external_container_reg.enabled | default(false,true) | jsonify }}
-    access_key_id : "{{ cookiecutter.external_container_reg.access_key_id | default("",true) }}"
-    secret_access_key : "{{ cookiecutter.external_container_reg.secret_access_key | default("",true) }}"
-    extcr_account : "{{ cookiecutter.external_container_reg.extcr_account | default("",true) }}"
-    extcr_region : "{{ cookiecutter.external_container_reg.extcr_region | default("",true) }}"
-  }
+  dask_gateway_extra_config = file("dask_gateway_config.py.j2")
 
   forwardauth-callback-url-path = local.forwardauth-callback-url-path
 

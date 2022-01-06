@@ -312,6 +312,10 @@ class Upgrade_0_3_14(UpgradeStep):
             print(
                 "Removing terraform_modules field from config as it is no longer used.\n"
             )
+        # project was never needed in Azure - it remained as PLACEHOLDER in earlier qhub inits!
+        if "azure" in config:
+            if "project" in config["azure"]:
+                del config["azure"]["project"]
 
         return config
 

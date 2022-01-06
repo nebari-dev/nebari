@@ -12,7 +12,7 @@ resource "keycloak_realm" "realm-qhub" {
 
   realm = "qhub"
 
-  display_name = "QHub ${var.name}"
+  display_name = var.realm_display_name
 }
 
 resource "keycloak_group" "admingroup" {

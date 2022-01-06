@@ -2,7 +2,7 @@
 
 ## Pre-release Checklist
 
-Currently Qhub is not fully automated. This makes it especially
+Currently Qhub isn't fully automated. This makes it especially
 important to manually check the features. This is a minimal set of
 features that are guaranteed with each release.
 

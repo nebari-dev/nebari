@@ -191,6 +191,7 @@ class GitHubAuthentication(Authentication):
 class Keycloak(Base):
     initial_root_password: typing.Optional[str]
     overrides: typing.Optional[typing.Dict]
+    realm_display_name: typing.Optional[str]
 
 
 # ============== Security ================
@@ -242,7 +243,6 @@ class GoogleCloudPlatformProvider(Base):
 
 
 class AzureProvider(Base):
-    project: str
     region: str
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]

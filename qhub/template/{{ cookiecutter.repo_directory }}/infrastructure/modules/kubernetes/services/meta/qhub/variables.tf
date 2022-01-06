@@ -88,6 +88,12 @@ variable "jupyterhub-overrides" {
   type        = list(string)
 }
 
+variable "jupyterhub-hub-extraEnv" {
+  description = "Extracted overrides to merge with jupyterhub.hub.extraEnv"
+  type        = list(map(any))
+  default     = []
+}
+
 variable "dask_gateway_extra_config" {
   description = "dask gateway extra configuration"
   type        = string
@@ -98,11 +104,6 @@ variable "certificate-secret-name" {
   description = "tls certificate secret name to use"
   type        = string
   default     = ""
-}
-
-variable "extcr_config" {
-  description = "Customer's access details for external container reg"
-  type        = map(any)
 }
 
 variable "forwardauth-callback-url-path" {
