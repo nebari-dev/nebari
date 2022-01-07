@@ -36,6 +36,22 @@ google_cloud_platform:
         app: clearml
 ```
 
+## Clearml configuration overrides
+
+You can override your configuration without having to modify the helm files directly. The extra variable `overrides` makes this possible by changing the default values for the clearml helm chart according to the settings presented on your qhub-config.yaml file.
+
+For example, if you just want to override the node selector used for the agent you could use the following:
+
+```yaml
+prefect:
+ enabled: true
+ overrides:
+     agentServices:
+       NodeSelector:
+         app: "clearml_agent"
+```
+
+
 ## Accessing the server
 
 Users can access the ClearML server at: `app.clearml.your-qhub-domain.com`

@@ -19,6 +19,7 @@
     },
     "clearml": {
         "enabled": null,
+        "overrides": null,
         "enable_forward_auth": null
     },
     "prefect": {

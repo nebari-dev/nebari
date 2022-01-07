@@ -397,6 +397,13 @@ module "clearml" {
   namespace    = var.environment
   external-url = var.endpoint
   tls          = module.qhub.tls
+
+  {% if cookiecutter.clearml.overrides is defined %}
+  overrides            = [<<EOT
+{{ cookiecutter.clearml.overrides|yamlify -}}
+    EOT
+    ]
+  {% endif %}
 {% if cookiecutter.clearml.enable_forward_auth is defined -%}
   enable-forward-auth = {{ cookiecutter.clearml.enable_forward_auth | default(false,true) | jsonify }}
 {% endif -%}
