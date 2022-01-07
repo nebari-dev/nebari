@@ -53,4 +53,20 @@ resource "helm_release" "clearml" {
     }
   }
 
+  dynamic "set" {
+    for_each = var.node_selector
+    content {
+      name  = "mongodb.nodeSelector.${set.key}"
+      value = set.value
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.node_selector
+    content {
+      name  = "redis.master.nodeSelector.${set.key}"
+      value = set.value
+    }
+  }
+
 }
