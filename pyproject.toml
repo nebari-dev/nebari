@@ -1,4 +1,28 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
 [tool.black]
 line-length = 88
 target-version = ['py36', 'py37', 'py38']
 exclude = '/\{\{ cookiecutter.repo_directory \}\}/'
+
+[tool.setuptools_scm]
+write_to = "qhub/_version.py"
+version_scheme = "release-branch-semver"
+local_scheme = "node-and-timestamp"
+
+
+[tool.flake8] # double check this
+ignore = ["E203", "E266", "E501", "W503"]
+max-line-length = 89
+exclude = [
+  ".git",
+  "__pycache__",
+  "docs/source/conf.py",
+  "qhub/template",
+  "build",
+  "dist",
+  "docs",
+  "home"
+]

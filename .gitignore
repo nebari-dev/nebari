@@ -1,3 +1,6 @@
+# setuptools scm
+qhub/_version.py
+
 # ignore terraform state
 .terraform
 terraform.tfstate
