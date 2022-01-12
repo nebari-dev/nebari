@@ -23,3 +23,7 @@ variable "overrides" {
   type        = list(string)
   default     = []
 }
+
+variable "tls" {
+  description = "TLS configuration"
+}
