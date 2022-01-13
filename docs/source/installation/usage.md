@@ -2,12 +2,6 @@
 
 ## Cloud Deployment
 
-Once all environment variables have been set (in [Configuration](configuration.md)), you will be able to run commands on your terminal to initialise the configuration for QHub, and then deploy it.
-
-### Initialize configuration
-
-QHub can help you create your configuration YAML file, and you can further edit it as needed. We advise you to start by creating a new project folder. Here, we will name the new folder `qhub-test`.
-=======
 Great, you've gone through the `qhub` [Installation](installation.md) and [Setup Initialization](setup.md) steps,
 and have ensured that all the necessary environment variables have been properly set, it's time to deploy QHub
 from your terminal.
