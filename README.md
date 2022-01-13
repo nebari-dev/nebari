@@ -69,7 +69,7 @@ For more details, check out the release [blog post](https://www.quansight.com/po
 ### Pre-requisites
 
 * QHub is supported by macOS and Linux operating systems (Windows is **NOT** currently supported).
-* Compatible with Python 3.6+. New to Python? We recommend using [Anaconda](https://www.anaconda.com/products/individual).
+* Compatible with Python 3.7+. New to Python? We recommend using [Anaconda](https://www.anaconda.com/products/individual).
 * Adoption of virtual environments ([`conda`](https://docs.conda.io/en/latest/), [`pipenv`](https://github.com/pypa/pipenv) or [`venv`](https://docs.python.org/3/library/venv.html)) is also encouraged.
 
 ### Install QHub
