@@ -1,0 +1,25 @@
+{
+    "ignorePatterns": [
+		{
+			"pattern": "developers.cloudflare.com"
+		},
+        {
+            "pattern": "support.cloudflare.com"
+        },
+        {
+            "pattern": "linuxize.com"
+        },
+        {
+            "pattern": "github-actions.qhub.dev"
+        },
+        {
+            "pattern": "127.0.0.1:8000"
+        },
+        {
+            "pattern": "myqhubsite.com"
+        },
+        {
+            "pattern": "https://cloud.google.com"
+        }
+	]
+}

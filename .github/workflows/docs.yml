@@ -1,0 +1,35 @@
+name: Documentation linter
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**.md'
+
+  push:
+    branches: [ main ]
+    paths:
+      - '**.md'
+
+jobs:
+  check-all-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: documentation quality check
+        uses: errata-ai/vale-action@v1.4.0
+        with:
+          files: __onlyModified
+          onlyAnnotateModifiedLines: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Broken link checker
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          config-file: '.github/workflows/markdown.links.config.json'
+          folder-path: 'docs/'
+          check-modified-files-only: 'yes'
+          file-extension: '.md'
+          base-branch: 'main'

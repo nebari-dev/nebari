@@ -15,9 +15,10 @@ are three images that are currently built
 - jupyterlab :: modification of jupyterlab instances for each user
 - dask-worker :: modification of dask workers and dask scheduler
 - jupyterhub :: the jupyterhub server (allows for customization of hub UI)
+- conda-store :: Environment management tool for QHub
 
 Each docker image is customized with its respective directory
-(e.g. `image/Dockerfile.jupyterlab` -> `image/jupyterlab/*`. For
+(for example `image/Dockerfile.jupyterlab` -> `image/jupyterlab/*`. For
 jupyterlab the environment is located at
 `image/jupyterlab/environment.yaml`. Thus to add a package to the
 environment simply submit a pull request with the new package.

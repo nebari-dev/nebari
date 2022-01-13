@@ -1,0 +1,30 @@
+FROM centos:centos8.4.2105
+LABEL org.opencontainers.image.source="https://github.com/Quansight/qhub"
+
+COPY scripts/* /opt/scripts/
+RUN /opt/scripts/install-yum-minimal.sh
+
+# These can but should not be changed. ids will be arbitrary at run time.
+ARG NB_USER=jovyan
+ARG NB_UID=1000
+ARG NB_GID=100
+
+ENV CONDA_VERSION py37_4.10.3
+ENV CONDA_SHA256 a1a7285dea0edc430b2bc7951d89bb30a2a1b32026d2a7b02aacaaa95cf69c7c
+SHELL ["/bin/bash", "-c"]
+
+ENV PATH=/opt/conda/bin:${PATH}:/opt/scripts
+
+# ============== base install ===============
+RUN /opt/scripts/install-conda.sh
+
+# ========== dask-worker install ===========
+COPY dask-worker/* /opt/dask-worker/
+RUN /opt/scripts/install-conda-environment.sh /opt/dask-worker/environment.yaml 'false'
+
+# ========== Setup GPU Paths ============
+ENV LD_LIBRARY_PATH=/usr/local/nvidia/lib64
+ENV NVIDIA_PATH=/usr/local/nvidia/bin
+ENV PATH="$NVIDIA_PATH:$PATH"
+
+RUN /opt/dask-worker/postBuild

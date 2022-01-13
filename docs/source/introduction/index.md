@@ -1,15 +1,14 @@
-# What is QHub?
-Open source tool for data science research, development, and deployment.
+# Introduction
 
-QHub is [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code)
-that simplifies the deployment of data science projects using JupyterHub and Dask Gateway for you and your team.
+QHub is an open source tool for data science research, development, and deployment.
 
-Designed to simplify the deployment and maintenance of scalable computational platforms in the cloud, QHub is ideal for
-organizations that need a shared compute platform that is flexible, accessible, and scalable.
+QHub is [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) that simplifies the deployment of data science projects using JupyterHub and Dask Gateway for you and your team.
+
+Designed to simplify the deployment and maintenance of scalable computational platforms in the cloud, QHub is ideal for organizations that need a shared compute platform that's flexible, accessible, and scalable.
 
 ## QHub Technology Stack
 
-![High-level illustration of QHub architecture](/source/images/qhub-cloud_architecture.png)
+![High-level illustration of QHub architecture](../images/qhub-cloud_architecture.png)
 
 ### Components
 
@@ -22,10 +21,11 @@ The technology stack is an integration of the following existing open source lib
 + [**JupyterLab**](https://jupyterlab.readthedocs.io/en/stable/): a web-based interactive development environment for Jupyter Notebooks
 + [**Dask**](https://docs.dask.org/en/latest/): a scalable and flexible  library for parallel computing in Python
   + [**Dask-Gateway**](https://gateway.dask.org/): a secure, multi-tenant server for managing Dask clusters
-+ [**traefik**](https://traefik.io/) for routing web/tcp traffic inside cluster
-+ [**traefik-forward-auth**](https://github.com/thomseddon/traefik-forward-auth) single sign on and easy securing of web applications
++ [**Keycloak**](https://www.keycloak.org/) Open Source Identity and Access Management
 + [**GitHub Actions**](https://docs.github.com/en/actions): a tool to automate, customize, and execute software
   development workflows in a GitHub repository.
++ [**traefik**](https://traefik.io/) for routing web/tcp traffic inside cluster
+  + [**traefik-forward-auth**](https://github.com/thomseddon/traefik-forward-auth) single sign on and easy securing of web applications
 
 Amongst the newly created open source libraries on the tech stack are:
 + [**jupyterhub-ssh**](https://github.com/yuvipanda/jupyterhub-ssh) brings the SSH experience to a modern cluster manager.
@@ -38,15 +38,14 @@ Amongst the newly created open source libraries on the tech stack are:
 
 ### Integrations
 
-In an effort for QHub to serve as a core that services can integrate
-with.
+In an effort for QHub to serve as a core that services can integrate with.
 
 + [**prefect**](https://www.prefect.io/) workflow management
 + [**clearml**](https://clear.ml/) machine learning platform
 + [**prometheus**](https://prometheus.io/) cluster monitoring
 + [**grafana**](https://grafana.com/) cluster monitoring visualizations
 
-# Why use QHub?
+## Why use QHub?
 
 QHub provides enables teams to build their own scalable compute infrastructure with:
 
@@ -54,7 +53,7 @@ QHub provides enables teams to build their own scalable compute infrastructure w
 + Autoscaling JupyterHub installation deployed on the Cloud provider of your choice.
 + Option to choose from multiple compute instances, such as: **namely normal**, **high memory**, **GPU**, etc.
 + Autoscaling Dask compute clusters for big data using any instance type.
-+ Shell access and remote editing access (i.e. VSCode remote) through KubeSSH.
-+ Full linux style permissions allowing for different shared folders for different groups of users.
++ Shell access and remote editing access (VSCode remote) through KubeSSH.
++ Shared filesystem allowing users to work on projects privately, within groups, or across the organisation.
 + Robust compute environment handling allowing both prebuilt and ad-hoc environment creation.
 + Integrated video conferencing, using [Jitsi](https://meet.jit.si/).

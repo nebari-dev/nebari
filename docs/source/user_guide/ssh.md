@@ -2,7 +2,7 @@
 
 Using [`jupyterhub-ssh`](https://github.com/yuvipanda/jupyterhub-ssh),
 QHub has the ability for remotely accessing the cluster and a
-juypterlab environment via
+JuypterLab environment via
 [`ssh`](https://en.wikipedia.org/wiki/Secure_Shell). In addition, users
 can easily transfter files back and forth via
 [`sftp`](https://en.wikipedia.org/wiki/SSH_File_Transfer_Protocol). QHub
@@ -38,7 +38,7 @@ explicitly when trying to connect via `ssh`. See the example below for details.
 $ ssh -o User=costrouchov@quansight.com training.qhub.dev -p 8022
 The authenticity of host '[training.qhub.dev]:8022 ([35.223.107.201]:8022)' can't be established.
 RSA key fingerprint is SHA256:mKy546LpI0cbqm/IY8dQR0B5QcbEziWLjLglern5G+U.
-This key is not known by any other names
+This key isn't known by any other names
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 Warning: Permanently added '[training.qhub.dev]:8022' (RSA) to the list of known hosts.
 (costrouchov@quansight.com@training.qhub.dev) Password:

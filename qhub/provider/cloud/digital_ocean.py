@@ -39,5 +39,12 @@ def regions():
     return _kubernetes_options()["options"]["regions"]
 
 
-def kubernetes_versions():
-    return _kubernetes_options()["options"]["versions"]
+# keep `region` parameter
+def kubernetes_versions(region=None):
+    """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
+
+    supported_kubernetes_versions = sorted(
+        [_["slug"] for _ in _kubernetes_options()["options"]["versions"]]
+    )
+
+    return supported_kubernetes_versions

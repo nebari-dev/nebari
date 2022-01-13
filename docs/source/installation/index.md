@@ -6,6 +6,8 @@
 installation.md
 setup.md
 usage.md
+login.md
 configuration.md
 management.md
+existing.md
 ```

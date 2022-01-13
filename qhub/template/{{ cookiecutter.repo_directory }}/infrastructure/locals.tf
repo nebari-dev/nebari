@@ -66,6 +66,11 @@ locals {
     }
   }
 
-  forwardauth-jh-client-id      = "forwardauthjupyterhubserviceclient"
-  forwardauth-callback-url-path = "/forwardauth/_oauth"
+  forwardauth-keycloak-client-id = "forwardauthkeycloakclient"
+  forwardauth-callback-url-path  = "/forwardauth/_oauth"
+
+  jupyterhub-keycloak-client-id = "jupyterhubkeycloakclient"
+  jupyterhub-callback-url-path  = "/hub/oauth_callback"
+
+  tls-insecure-skip-verify = {% if cookiecutter.provider == "local" or cookiecutter.get('certificate', {}).get('type','') == "self-signed" %}true{% else %}false{% endif %}
 }

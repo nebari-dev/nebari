@@ -1,29 +1,42 @@
 import pytest
 
-from qhub.initialize import render_config
+from .conftest import render_config_partial
 
 
 @pytest.mark.parametrize(
-    "project, namespace, domain, cloud_provider, ci_provider, auth_provider",
-    [
-        ("do-pytest", "dev", "do.qhub.dev", "do", "github-actions", "github"),
-        ("aws-pytest", "dev", "aws.qhub.dev", "aws", "github-actions", "github"),
-        ("gcp-pytest", "dev", "gcp.qhub.dev", "gcp", "github-actions", "github"),
-        ("azure-pytest", "dev", "azure.qhub.dev", "azure", "github-actions", "github"),
-    ],
+    "k8s_version, expected", [(None, True), ("1.19", True), (1000, ValueError)]
 )
-def test_init(project, namespace, domain, cloud_provider, ci_provider, auth_provider):
-    render_config(
-        project_name=project,
-        namespace=namespace,
-        qhub_domain=domain,
-        cloud_provider=cloud_provider,
-        ci_provider=ci_provider,
-        repository="github.com/test/test",
-        auth_provider=auth_provider,
-        repository_auto_provision=False,
-        auth_auto_provision=False,
-        terraform_state="remote",
-        kubernetes_version="1.18.0",
-        disable_prompt=True,
-    )
+def test_init(setup_fixture, k8s_version, expected):
+    (qhub_config_loc, render_config_inputs) = setup_fixture
+    (
+        project,
+        namespace,
+        domain,
+        cloud_provider,
+        ci_provider,
+        auth_provider,
+    ) = render_config_inputs
+
+    # pass "unsupported" kubernetes version to `render_config`
+    # resulting in a `ValueError`
+    if type(expected) == type and issubclass(expected, Exception):
+        with pytest.raises(expected):
+            render_config_partial(
+                project_name=project,
+                namespace=namespace,
+                qhub_domain=domain,
+                cloud_provider=cloud_provider,
+                ci_provider=ci_provider,
+                auth_provider=auth_provider,
+                kubernetes_version=k8s_version,
+            )
+    else:
+        render_config_partial(
+            project_name=project,
+            namespace=namespace,
+            qhub_domain=domain,
+            cloud_provider=cloud_provider,
+            ci_provider=ci_provider,
+            auth_provider=auth_provider,
+            kubernetes_version=k8s_version,
+        )

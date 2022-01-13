@@ -6,16 +6,22 @@ import secrets
 import tempfile
 import logging
 
-import bcrypt
 import requests
 
 from qhub.provider.oauth.auth0 import create_client
 from qhub.provider.cicd import github
 from qhub.provider import git
-from qhub.provider.cloud import digital_ocean
-from qhub.utils import namestr_regex, qhub_image_tag, check_cloud_credentials
+
+from qhub.utils import (
+    namestr_regex,
+    qhub_image_tag,
+    check_cloud_credentials,
+    set_kubernetes_version,
+)
+from .version import __version__
 
 logger = logging.getLogger(__name__)
+
 
 BASE_CONFIGURATION = {
     "project_name": None,
@@ -26,14 +32,6 @@ BASE_CONFIGURATION = {
     },
     "security": {
         "authentication": None,
-        "users": {
-            "example-user": {
-                "uid": 1000,
-                "primary_group": "admin",
-                "secondary_groups": ["users"],
-            }
-        },
-        "groups": {"users": {"gid": 100}, "admin": {"gid": 101}},
     },
     "default_images": {
         "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
@@ -57,6 +55,7 @@ BASE_CONFIGURATION = {
             "h2_color": "#652e8e",
         }
     },
+    "helm_extensions": [],
     "monitoring": {
         "enabled": True,
     },
@@ -78,7 +77,6 @@ AUTH_OAUTH_GITHUB = {
     "config": {
         "client_id": "PLACEHOLDER",
         "client_secret": "PLACEHOLDER",
-        "oauth_callback_url": "PLACEHOLDER",
     },
 }
 
@@ -87,8 +85,6 @@ AUTH_OAUTH_AUTH0 = {
     "config": {
         "client_id": "PLACEHOLDER",
         "client_secret": "PLACEHOLDER",
-        "oauth_callback_url": "PLACEHOLDER",
-        "scope": ["openid", "email", "profile"],
         "auth0_subdomain": "PLACEHOLDER",
     },
 }
@@ -124,28 +120,27 @@ DIGITAL_OCEAN = {
 GOOGLE_PLATFORM = {
     "project": "PLACEHOLDER",
     "region": "us-central1",
-    "kubernetes_version": "1.18.16-gke.502",
+    "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
-        "general": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
-        "worker": {"instance": "n1-standard-2", "min_nodes": 1, "max_nodes": 5},
+        "general": {"instance": "n1-standard-4", "min_nodes": 1, "max_nodes": 1},
+        "user": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
+        "worker": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
     },
 }
 
 AZURE = {
-    "project": "PLACEHOLDER",
     "region": "Central US",
-    "kubernetes_version": "1.18.19",
+    "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {
-            "instance": "Standard_D2_v2",
+            "instance": "Standard_D4_v3",
             "min_nodes": 1,
             "max_nodes": 1,
         },
         "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 5},
         "worker": {
             "instance": "Standard_D2_v2",
-            "min_nodes": 1,
+            "min_nodes": 0,
             "max_nodes": 5,
         },
     },
@@ -156,9 +151,9 @@ AZURE = {
 
 AMAZON_WEB_SERVICES = {
     "region": "us-west-2",
-    "kubernetes_version": "1.18",
+    "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
-        "general": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 1},
+        "general": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 1},
         "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
         "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
     },
@@ -218,7 +213,7 @@ DEFAULT_ENVIRONMENTS = {
             "python",
             "ipykernel",
             "ipywidgets",
-            "qhub-dask ==0.3.12",
+            "qhub-dask ==0.3.13",
             "python-graphviz",
             "numpy",
             "numba",
@@ -229,18 +224,18 @@ DEFAULT_ENVIRONMENTS = {
         "name": "dashboard",
         "channels": ["conda-forge"],
         "dependencies": [
-            "python",
-            "ipykernel",
-            "ipywidgets >=7.6",
-            "qhub-dask ==0.3.12",
-            "param",
-            "python-graphviz",
-            "matplotlib >=3.3.4",
-            "panel >=0.10.3",
-            "voila >=0.2.7",
-            "streamlit >=0.76",
-            "dash >=1.19",
-            "cdsdashboards-singleuser >=0.5.7",
+            "python==3.9.7",
+            "ipykernel==6.4.1",
+            "ipywidgets==7.6.5",
+            "qhub-dask==0.3.13",
+            "param==1.11.1",
+            "python-graphviz==0.17",
+            "matplotlib==3.4.3",
+            "panel==0.12.4",
+            "voila==0.2.16",
+            "streamlit==1.0.0",
+            "dash==2.0.0",
+            "cdsdashboards-singleuser==0.6.0",
         ],
     },
 }
@@ -259,8 +254,9 @@ def render_config(
     terraform_state=None,
     kubernetes_version=None,
     disable_prompt=False,
+    ssl_cert_email=None,
 ):
-    config = BASE_CONFIGURATION
+    config = BASE_CONFIGURATION.copy()
     config["provider"] = cloud_provider
 
     if ci_provider is not None and ci_provider != "none":
@@ -294,15 +290,36 @@ def render_config(
     if qhub_domain is None and not disable_prompt:
         qhub_domain = input("Provide domain: ")
     config["domain"] = qhub_domain
-    oauth_callback_url = f"https://{qhub_domain}/hub/oauth_callback"
+
+    config["qhub_version"] = __version__
+
+    # Generate default password for Keycloak root user and also example-user if using password auth
+    default_password = "".join(
+        secrets.choice(string.ascii_letters + string.digits) for i in range(16)
+    )
+
+    # Save default password to file
+    default_password_filename = os.path.join(
+        tempfile.gettempdir(), "QHUB_DEFAULT_PASSWORD"
+    )
+    with open(default_password_filename, "w") as f:
+        f.write(default_password)
+    os.chmod(default_password_filename, 0o700)
+
+    print(
+        f"Securely generated default random password={default_password} for Keycloak root user stored at path={default_password_filename}"
+    )
 
     if auth_provider == "github":
-        config["security"]["authentication"] = AUTH_OAUTH_GITHUB
+        config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()
         print(
             "Visit https://github.com/settings/developers and create oauth application"
         )
         print(f"  set the homepage to: https://{qhub_domain}/")
-        print(f"  set the callback_url to: {oauth_callback_url}")
+        print(
+            f"  set the callback_url to: https://{qhub_domain}/auth/realms/qhub/broker/github/endpoint"
+        )
+
         if not disable_prompt:
             config["security"]["authentication"]["config"]["client_id"] = input(
                 "Github client_id: "
@@ -310,58 +327,30 @@ def render_config(
             config["security"]["authentication"]["config"]["client_secret"] = input(
                 "Github client_secret: "
             )
-            config["security"]["authentication"]["config"][
-                "oauth_callback_url"
-            ] = oauth_callback_url
     elif auth_provider == "auth0":
-        config["security"]["authentication"] = AUTH_OAUTH_AUTH0
-        config["security"]["authentication"]["config"][
-            "oauth_callback_url"
-        ] = oauth_callback_url
+        config["security"]["authentication"] = AUTH_OAUTH_AUTH0.copy()
+
     elif auth_provider == "password":
-        config["security"]["authentication"] = AUTH_PASSWORD
+        config["security"]["authentication"] = AUTH_PASSWORD.copy()
 
-        # Generate default password for qhub-init
-        default_password = "".join(
-            secrets.choice(string.ascii_letters + string.digits) for i in range(16)
-        )
-        config["security"]["users"]["example-user"]["password"] = bcrypt.hashpw(
-            default_password.encode("utf-8"), bcrypt.gensalt()
-        ).decode()
-
-        default_password_filename = os.path.join(
-            tempfile.gettempdir(), "QHUB_DEFAULT_PASSWORD"
-        )
-        with open(default_password_filename, "w") as f:
-            f.write(default_password)
-        os.chmod(default_password_filename, 0o700)
-
-        print(
-            f"Securely generated default random password={default_password} for example-user stored at path={default_password_filename}"
-        )
+    # Always use default password for keycloak root
+    config["security"].setdefault("keycloak", {})[
+        "initial_root_password"
+    ] = default_password
 
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Digital Ocean"
-        config["digital_ocean"] = DIGITAL_OCEAN
-        if kubernetes_version:
-            config["digital_ocean"]["kubernetes_version"] = kubernetes_version
-        else:
-            # first kubernetes version returned by Digital Ocean api is
-            # the newest version of kubernetes supported this field needs
-            # to be dynamically filled since digital ocean updates the
-            # versions so frequently
-            config["digital_ocean"][
-                "kubernetes_version"
-            ] = digital_ocean.kubernetes_versions()[0]["slug"]
+        config["digital_ocean"] = DIGITAL_OCEAN.copy()
+        set_kubernetes_version(config, kubernetes_version, cloud_provider)
+
     elif cloud_provider == "gcp":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Google Cloud Platform"
-        config["google_cloud_platform"] = GOOGLE_PLATFORM
-        if kubernetes_version:
-            config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
+        config["google_cloud_platform"] = GOOGLE_PLATFORM.copy()
+        set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
         if "PROJECT_ID" in os.environ:
             config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
@@ -369,29 +358,39 @@ def render_config(
             config["google_cloud_platform"]["project"] = input(
                 "Enter Google Cloud Platform Project ID: "
             )
+
     elif cloud_provider == "azure":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Azure"
-        config["azure"] = AZURE
-        if kubernetes_version:
-            config["azure"]["kubernetes_version"] = kubernetes_version
+        config["azure"] = AZURE.copy()
+        set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment on Amazon Web Services"
-        config["amazon_web_services"] = AMAZON_WEB_SERVICES
-        if kubernetes_version:
-            config["amazon_web_services"]["kubernetes_version"] = kubernetes_version
+        config["amazon_web_services"] = AMAZON_WEB_SERVICES.copy()
+        set_kubernetes_version(config, kubernetes_version, cloud_provider)
+        if "AWS_DEFAULT_REGION" in os.environ:
+            config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = "Autoscaling Compute Environment"
-        config["local"] = LOCAL
+        config["local"] = LOCAL.copy()
 
-    config["profiles"] = DEFAULT_PROFILES
-    config["environments"] = DEFAULT_ENVIRONMENTS
+    config["profiles"] = DEFAULT_PROFILES.copy()
+    config["environments"] = DEFAULT_ENVIRONMENTS.copy()
+
+    if ssl_cert_email is not None:
+        if not re.match("^[^ @]+@[^ @]+\\.[^ @]+$", ssl_cert_email):
+            raise ValueError("ssl-cert-email should be a valid email address")
+        config["certificate"] = {
+            "type": "lets-encrypt",
+            "acme_email": ssl_cert_email,
+            "acme_server": "https://acme-v02.api.letsencrypt.org/directory",
+        }
 
     if auth_auto_provision:
         if auth_provider == "auth0":

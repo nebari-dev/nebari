@@ -1,7 +1,7 @@
 from dask_gateway_server.options import Options, Select, Mapping
 
 # A mapping from profile name to configuration overrides
-profiles = {{ cookiecutter.profiles.dask_worker }}
+profiles = {{ cookiecutter.profiles.dask_worker | jsonify }}
 environments = [
 {% for filename, config in cookiecutter.environments.items() %}
     "{{config['name']}}",

@@ -4,7 +4,7 @@
 
 * QHub is supported on the macOS and Linux operating systems.
   > NOTE: **Currently, QHub cannot be installed on Windows**.
-* We recommend the adoption of virtual environments (`conda`, `pipenv` or `venv`) for successful usage. 
+* We recommend the adoption of virtual environments (`conda`, `pipenv` or `venv`) for successful usage.
 
 ## Install QHub CLI
 
@@ -15,12 +15,12 @@ QHub's installation can be performed by using:
 ```bash
 conda install -c conda-forge qhub
 ```
-  
+
  * or `pip` (instead):
 
 ```bash
 pip install qhub
-```  
+```
 
 Once finished, you can check QHub's version (and additional CLI args)
 by typing:
@@ -32,12 +32,12 @@ qhub --help
 If successful, the CLI output will be similar to the following:
 
 ```bash
-usage: qhub [-h] [-v] {deploy,destroy,render,init,validate,destroy} ...
+usage: qhub [-h] [-v] {deploy,render,init,validate,destroy,upgrade,keycloak} ...
 
 QHub command line
 
 positional arguments:
-  {deploy,destroy,render,init,validate,destroy}
+  {deploy,render,init,validate,destroy,upgrade,keycloak}
                         QHub - ||QHUB_VERSION||
 
 optional arguments:

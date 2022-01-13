@@ -2,7 +2,7 @@
 
 ## Pre-release Checklist
 
-Currently Qhub is not fully automated. This makes it especially
+Currently Qhub isn't fully automated. This makes it especially
 important to manually check the features. This is a minimal set of
 features that are guaranteed with each release.
 
@@ -39,3 +39,5 @@ In order to create a release:
 4. Finally [create a Release on QHub](https://github.com/Quansight/qhub/releases/new). The tag should be `v<version>` off of the branch `main`. Use the `RELEASE.md` to get the title `Release <version> - <month>/<day>/<year>` and set the text description to the `RELEASE.md` for the given version. Click `Publish Release`.
 
 If this worked a new version will be [uploaded to pypi for QHub](https://pypi.org/project/qhub/)
+
+This should also trigger the all appropriate Docker images to be built, tagged, and pushed up to DockerHub.

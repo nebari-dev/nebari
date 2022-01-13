@@ -88,6 +88,12 @@ variable "jupyterhub-overrides" {
   type        = list(string)
 }
 
+variable "jupyterhub-hub-extraEnv" {
+  description = "Extracted overrides to merge with jupyterhub.hub.extraEnv"
+  type        = list(map(any))
+  default     = []
+}
+
 variable "dask_gateway_extra_config" {
   description = "dask gateway extra configuration"
   type        = string
@@ -100,25 +106,63 @@ variable "certificate-secret-name" {
   default     = ""
 }
 
-variable "forwardauth-jh-client-id" {
-  description = "JupyterHub Client ID for use with ForwardAuth"
-  type        = string
-  default     = ""
-}
-
-variable "forwardauth-jh-client-secret" {
-  description = "JupyterHub Client Secret for use with ForwardAuth"
-  type        = string
-  default     = ""
-}
-
 variable "forwardauth-callback-url-path" {
   description = "Callback URL Path for ForwardAuth"
   type        = string
   default     = ""
 }
 
-variable "extcr_config" {
-  description = "Customer's access details for external container reg"
-  type        = map(any)
+variable "OAUTH_CLIENT_ID" {
+  description = "ID for JupyterHub client in Keycloak"
+  type        = string
+}
+
+variable "OAUTH_CLIENT_SECRET" {
+  description = "Secret for JupyterHub client in Keycloak"
+  type        = string
+}
+
+variable "OAUTH_CALLBACK_URL" {
+  description = "Callback URL for JupyterHub client in Keycloak"
+  type        = string
+}
+
+variable "OAUTH2_TLS_VERIFY" {
+  description = "Whether OAuthenticator should check HTTPS certs (true/false as string)"
+  type        = string
+}
+
+variable "keycloak_authorize_url" {
+  description = "Keycloak OAuth start URL"
+  type        = string
+}
+
+variable "keycloak_token_url" {
+  description = "Keycloak OAuth start URL"
+  type        = string
+}
+
+variable "keycloak_userdata_url" {
+  description = "Keycloak OAuth start URL"
+  type        = string
+}
+
+variable "keycloak_logout_url" {
+  description = "Keycloak logout URL"
+  type        = string
+}
+
+variable "keycloak_server_url" {
+  description = "URL of Keycloak service"
+  type        = string
+}
+
+variable "keycloak_username" {
+  description = "Keycloak username"
+  type        = string
+}
+
+variable "keycloak_password" {
+  description = "Keycloak password"
+  type        = string
 }

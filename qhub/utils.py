@@ -1,12 +1,24 @@
+import pathlib
 import subprocess
+import signal
 import sys
 import time
+import threading
 import os
 import re
 import contextlib
-from typing import Sequence, Set
+from ruamel.yaml import YAML
+
+from qhub.provider.cloud import (
+    digital_ocean,
+    azure_cloud,
+    amazon_web_services,
+    google_cloud,
+)
 
 from .version import __version__
+
+QHUB_K8S_VERSION = os.getenv("QHUB_K8S_VERSION", None)
 
 DO_ENV_DOCS = (
     "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#digital-ocean"
@@ -28,6 +40,11 @@ if QHUB_GH_BRANCH:
 
 # Regex for suitable project names
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
+
+# Create a ruamel object with our favored config, for universal use
+yaml = YAML()
+yaml.preserve_quotes = True
+yaml.default_flow_style = False
 
 
 @contextlib.contextmanager
@@ -53,11 +70,32 @@ def run_subprocess_cmd(processargs, **kwargs):
     else:
         line_prefix = b""
 
+    timeout = 0
+    if "timeout" in kwargs:
+        timeout = kwargs.pop("timeout")  # in seconds
+
     strip_errors = kwargs.pop("strip_errors", False)
 
     process = subprocess.Popen(
-        processargs, **kwargs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        processargs,
+        **kwargs,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        preexec_fn=os.setsid,
     )
+    # Set timeout thread
+    timeout_timer = None
+    if timeout > 0:
+
+        def kill_process():
+            try:
+                os.killpg(process.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass  # Already finished
+
+        timeout_timer = threading.Timer(timeout, kill_process)
+        timeout_timer.start()
+
     for line in iter(lambda: process.stdout.readline(), b""):
         full_line = line_prefix + line
         if strip_errors:
@@ -69,6 +107,10 @@ def run_subprocess_cmd(processargs, **kwargs):
 
         sys.stdout.buffer.write(full_line)
         sys.stdout.flush()
+
+    if timeout_timer is not None:
+        timeout_timer.cancel()
+
     return process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout
@@ -138,11 +180,90 @@ def check_cloud_credentials(config):
         raise ValueError("Cloud Provider configuration not supported")
 
 
-def check_for_duplicates(users: Sequence[dict]) -> Set:
-    uids = set([])
-    for user, attrs in users.items():
-        if attrs["uid"] in uids:
-            raise TypeError(f"Found duplicate uid ({attrs['uid']}) for {user}.")
+def load_yaml(config_filename: pathlib.Path):
+    """
+    Return yaml dict containing config loaded from config_filename.
+    """
+    with config_filename.open() as f:
+        config = yaml.load(f.read())
+
+    return config
+
+
+def backup_config_file(filename: pathlib.Path, extrasuffix: str = ""):
+    if not filename.exists():
+        return
+
+    # Backup old file
+    backup_filename = pathlib.Path(f"{filename}{extrasuffix}.backup")
+
+    if backup_filename.exists():
+        i = 1
+        while True:
+            next_backup_filename = pathlib.Path(f"{backup_filename}~{i}")
+            if not next_backup_filename.exists():
+                backup_filename = next_backup_filename
+                break
+            i = i + 1
+
+    filename.rename(backup_filename)
+    print(f"Backing up {filename} as {backup_filename}")
+
+
+def set_kubernetes_version(
+    config, kubernetes_version, cloud_provider, grab_latest_version=True
+):
+    cloud_provider_dict = {
+        "aws": {
+            "full_name": "amazon_web_services",
+            "k8s_version_checker_func": amazon_web_services.kubernetes_versions,
+        },
+        "azure": {
+            "full_name": "azure",
+            "k8s_version_checker_func": azure_cloud.kubernetes_versions,
+        },
+        "do": {
+            "full_name": "digital_ocean",
+            "k8s_version_checker_func": digital_ocean.kubernetes_versions,
+        },
+        "gcp": {
+            "full_name": "google_cloud_platform",
+            "k8s_version_checker_func": google_cloud.kubernetes_versions,
+        },
+    }
+    cloud_full_name = cloud_provider_dict[cloud_provider]["full_name"]
+    func = cloud_provider_dict[cloud_provider]["k8s_version_checker_func"]
+    cloud_config = config[cloud_full_name]
+
+    def _raise_value_error(cloud_provider, k8s_versions):
+        raise ValueError(
+            f"\nInvalid `kubernetes-version` provided: {kubernetes_version}.\nPlease select from one of the following {cloud_provider.upper()} supported Kubernetes versions: {k8s_versions} or omit flag to use latest Kubernetes version available."
+        )
+
+    def _check_and_set_kubernetes_version(
+        kubernetes_version=kubernetes_version,
+        cloud_provider=cloud_provider,
+        cloud_config=cloud_config,
+        func=func,
+    ):
+        region = cloud_config["region"]
+
+        # to avoid using cloud provider SDK
+        # set QHUB_K8S_VERSION environment variable
+        if not QHUB_K8S_VERSION:
+            k8s_versions = func(region)
         else:
-            uids.add(attrs["uid"])
-    return users
+            k8s_versions = [QHUB_K8S_VERSION]
+
+        if kubernetes_version:
+            if kubernetes_version in k8s_versions:
+                cloud_config["kubernetes_version"] = kubernetes_version
+            else:
+                _raise_value_error(cloud_provider, k8s_versions)
+        elif grab_latest_version:
+            cloud_config["kubernetes_version"] = k8s_versions[-1]
+        else:
+            # grab oldest version
+            cloud_config["kubernetes_version"] = k8s_versions[0]
+
+    return _check_and_set_kubernetes_version()

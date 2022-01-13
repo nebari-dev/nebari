@@ -1,4 +1,4 @@
-# Configuration
+# Advanced configuration
 
 This is a page dedicated to the `qhub-config.yaml` file, the file that `qhub` uses to deploy and redeploy changes to your infrastructure. The `qhub-config.yaml` configuration file is split into several sections and in this page, we detail the requirements necessary for this YAML-formatted configuration file. In the [Usage](usage.md) section we covered how you can auto-generate this file using `qhub init` (and properly set options/flags and environment variables).
 > NOTE: The configuration file is always validated by a [pydantic schema](https://pydantic-docs.helpmanual.io/) in [qhub/schema.py](https://github.com/Quansight/qhub/blob/main/qhub/schema.py)
@@ -32,7 +32,7 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
    services under (such a monitoring). For example `qhub.dev`
    would be the domain for JupyterHub to be exposed under.
 
-## Continuous Integration and Continuous Deployment
+## Continuous integration and continuous deployment
 
 `ci_cd`: is optional and specifies the continuous integration and
 continuous deployment framework to use. QHub uses infrastructure as
@@ -63,17 +63,17 @@ ci_cd:
    resources of successful QHub deployment. Only supported on
    `gitlab-ci` at the moment.
 
-If `ci_cd` is not supplied, no CI/CD will be auto-generated. However,
-we advise that employing an infrastructure-as-code approach allows teams
-to more quickly modify their QHub deployment, allowing developers and
-data sciencist to request the changes and approved by an
+If `ci_cd` is not supplied, no CI/CD will be auto-generated, however,
+we advise employing an infrastructure-as-code approach. This allows teams
+to more quickly modify their QHub deployment, empowering developers and
+data sciencists to request the changes and have them approved by an
 administrator.
 
 ## Certificate
 
 By default, to simplify initial deployment `qhub` uses traefik to
 create a self-signed certificate. In order to create a certificate
-that is signed so that web browsers do not throw errors we currently
+that's signed so that web browsers don't throw errors we currently
 support [Let's Encrypt](https://letsencrypt.org/).
 
 ```yaml
@@ -98,7 +98,12 @@ certificate:
   acme_server: https://acme-v02.api.letsencrypt.org/directory
 ```
 
-You may also supply a custom self-signed certificate and secret key.
+Note the above snippet will already be present if you provided an `--ssl-cert-email` when you ran `qhub init`.
+
+You may also supply a custom self-signed certificate and secret
+key. Note that the kubernetes default namespace that QHub uses is
+`dev`. Otherwise, it will be your `namespace` defined
+in the `qhub-config.yaml`.
 
 ```yaml
 certificate:
@@ -115,6 +120,14 @@ kubectl create secret tls <secret-name> \
   --cert=path/to/cert/file --key=path/to/key/file
 ```
 > NOTE: the default kubernetes namespace that QHub uses is `dev`, however you can change the `namespace` key in the `qhub-config.yaml`.
+
+### Wildcard certificates
+
+Some of QHub services might require special subdomains under your certificate, Wildcard certificates allow you to secure all subdomains of a domain with a single certificate. Defining a wildcard certificate decreases the amount of CN names you would need to define under the certificate configuration and reduces the chance of generating a wrong subdomain.
+
+**Note**
+
+It's not possible to request a double wildcard certificate for a domain (for example *.*.local.com). As a default behaviour of [Traefik](https://doc.traefik.io/traefik/https/tls/#default-certificate), if the Domain Name System (DNS) and Common Name (CN) name doesn't match, Traefik generates and uses a self-signed certificate. This may lead to some unexpected [TLS](https://www.internetsociety.org/deploy360/tls/basics) issues, so as an alternative of including each specific domain under the certificate CN list, you may also define a wildcard certificate.
 
 ## Security
 
@@ -133,23 +146,6 @@ security:
     config:
       client_id: <CLIENT_ID>
       client_secret: <CLIENT_SECRET>
-      oauth_callback_url: https://do.qhub.dev/hub/oauth_callback
-  users:
-    example-user:
-      uid: 1000
-      primary_group: users
-      secondary_groups:
-        - billing
-    dharhas:
-      uid: 1001
-      primary_group: admin
-  groups:
-    users:
-      gid: 100
-    admin:
-      gid: 101
-    billing:
-      gid: 102
 ```
 
 ### Omitting sensitive values
@@ -168,7 +164,6 @@ security:
     config:
       client_id: QHUB_SECRET_github_client_id
       client_secret: QHUB_SECRET_github_client_key
-      oauth_callback_url: https://do.qhub.dev/hub/oauth_callback
 ```
 
 ### Authentication
@@ -177,26 +172,19 @@ security:
 Provider, password based authentication, or custom
 authentication.
 
-#### Auth0 Based Authentication
+#### Auth0 based authentication
 
 [Auth0](https://auth0.com/#!) can be used for authentication. While it
 is not free, there is a reasonable free tier that allows deployment of
 QHub clusters using many different social providers, passwordless, and
 email based authentication methods.
 
-QHub has command line options with running `qhub init` which allow for
-automation of creation of the application via:
+QHub has command line options for `qhub init` which automates the creation
+Auth0 web app via:
 `--auth-provider=auth0 --auth-auto-provision`.
 
-However for most users this may not be the most convenient solution.
-Here are docs on
-[creating an Auth0
-Application](https://auth0.com/docs/applications). Make sure to select
-`Regular Web Application`. Important to note is the `auth0_subdomain`
-field which must be only the `<auth0_subdomain>.auth0.com`. So for the
-following `qhub-dev.auth0.com` the subdomain would be `qhub-dev`. Note
-that all the usernames will be the email addresses of users (not
-usernames).
+Otherwise here are docs on [creating an Auth0 Application](https://auth0.com/docs/applications).
+Make sure to select `Regular Web Application`. Important to note is the `auth0_subdomain` field which must be only the `<auth0_subdomain>.auth0.com`. So for the following `qhub-dev.auth0.com` the subdomain would be `qhub-dev`. Note that all the usernames will be the email addresses of users (not usernames).
 > NOTE: This is a different and distinct step from one outlined in the [Setup](setup.md#auth0)
 stage.
 
@@ -207,12 +195,10 @@ security:
     config:
       client_id: ...
       client_secret: ...
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
-      scope: ["openid", "email", "profile"]
       auth0_subdomain: ...
 ```
 
-#### GitHub Based Authentication
+#### GitHub based authentication
 
 GitHub has instructions for [creating OAuth
 applications](https://docs.github.com/en/developers/apps/creating-an-oauth-app). Note
@@ -225,89 +211,74 @@ security:
     config:
       client_id: ...
       client_secret: ...
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
 ```
 
-#### Password Based Authentication
+#### Password based authentication
 
-For Password based authentication. Note that users will require a
-`password` field that can be generated via the following command:
-`python -c "import bcrypt; print(bcrypt.hashpw(b'<password>',
-bcrypt.gensalt()).decode('utf-8'))"`. Make sure to replace
-`<password>` with whatever secure password you want.
+This is the simpliest authenication method. This just defers to however Keycloak is configured. That's also true for GitHub/Auth0 cases, except that for the single-sign on providers the deployment will also configure those providers in Keycloak to save manual configuration. But it's also possible to add GitHub, or Google etc, as an Identity Provider in Keycloak even if you formally select `password` authentication in the `qhub-config.yaml` file.
 
 ```yaml
 security:
   authentication:
     type: password
-  users:
-    ...
-    <username>:
-      ...
-      password: $2b$....
 ```
 
-#### Custom Authentication
+### Keycloak
 
-You can specify arbitrary authentication via the `custom` type. All
-`config` attributes will be set as traitlets to the configured
-authentication class. The attributes will obey the type set via yaml
-(e.g. True -> will be a boolean True for Traitets).
+The `security.keycloak` section allows you to specify an initial password for the `root` user (to login at `https://myqhubsite.com/auth/admin/`) to manage your Keycloak database, e.g. add users/groups.
 
-```yaml
+You should change this after deployment. Future deployments will not reset the password to any specified in the YAML file.
+
+It's also possible to provide overrides to the [Keycloak Helm deployment](https://github.com/codecentric/helm-charts/tree/master/charts/keycloak).
+
+```
 security:
-  authentication:
-    type: custom
-    authentication_class: "oauthenticator.google.GoogleOAuthenticator"
-    config:
-      login_service: "My Login Button"
-      oauth_callback_url: 'http[s]://[your-host]/hub/oauth_callback'
-      client_id: 'your-client-id'
-      client_secret: 'your-client-secret'
+  keycloak:
+    initial_root_password: initpasswd
+    overrides:
+      image:
+        repository: quansight/qhub-keycloak
 ```
 
-### User Management
+### User and group management
 
-`users` and `groups` allows one to provision UNIX permissions to each
-user. Any user is assigned a `uid`, `primary_group`, and optionally
+It's still possible to specify `users` and `groups` in the YAML file - in older versions of QHub, all users had to be specified in this way.
+
+If specifying users/groups in this way, you can also manually add more users/groups in Keycloak. However, be aware that if users/groups were initially created based on entries in the YAML file, those users/groups will be destroyed if `qhub deploy` is ever run without those users/groups in the file. They may also be recreated after you delete them manually in Keycloak.
+
+Any user is assigned a `primary_group` and optionally
 any number of `secondary_groups`.
-> NOTE: the `uid` and `gid` fields must be unique and are required.
 
 ```yaml
 security:
   users:
     example-user:
-      uid: 1000
       primary_group: users
       secondary_groups:
         - billing
+      password: plaintextpasswd
     dharhas:
-      uid: 1001
       primary_group: admin
   groups:
     users:
-      gid: 100
     admin:
-      gid: 101
     billing:
-      gid: 102
 ```
 
 * The `primary_group` is the group name assigned to files that are
 written for the user.
-* `groups` are a mapping of group name to group IDs. It is
-  recommended to not change the IDs assigned to groups and users
-  after creation, since it may lead to login issues.
-  > NOTE: While the demo shows IDs between `100` and
-`1000`, it is recommended to start with high User ID numbers
-e.g. `10000000`. `ids` technically supports 2 billion `ids`.
+* `groups` are a mapping of group name to an empty map (no entries are required within that map any longer).
 
-#### Admin Group
+#### Admin and Users Group
 
 The admin group has special significance. If a user's `primary_group`
 is admin they will be able to access the jupyterhub admin page. The
 admin page allows a user to stop user's servers and launch a given
 user's server and impersonate them.
+
+All users must be a member of the `users` group.
+
+Both `admin` and `users` groups will be created even if not specified in the YAML file.
 
 ## Provider Infrastructure
 
@@ -337,12 +308,29 @@ and **Kubernetes versions** will be DIFFERENT.
 
 ### Providers
 
+To take advantage of the auto-scaling and dask-distributed computing capabilities,
+QHub can be deployed on a handful of the most commonly used cloud providers. QHub
+utilizes many of the resources these cloud providers have to offer, however,
+at it's core, is the Kubernetes engine (or service). Each cloud provider has slightly
+different ways Kubernetes is configured but fear not, all of this is handled by QHub.
+
+Listed below are the cloud providers QHub currently supports.
+
+> NOTE: Many of the cloud providers regularly update their internal Kubernetes
+> versions so if you wish to specify a particular version, please check the following
+> resources. This is *completely optional* as QHub will, by default, select the most
+> recent version available for your preferred cloud provider.
+> [Digital Ocean](https://docs.digitalocean.com/products/kubernetes/changelog/)
+> [Google Cloud Platform](https://cloud.google.com/kubernetes-engine/docs/release-notes-stable)
+> [Amazon Web Services](https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html)
+> [Microsoft Azure](https://docs.microsoft.com/en-us/azure/aks/supported-kubernetes-versions?tabs=azure-cli)
+
 #### DigitalOcean
 
 DigitalOcean has a restriction with autoscaling in that the minimum
 nodes allowed (`min_nodes` = 1) is one but is by far the cheapest
-provider even accounting for spot/premptible instances. In addition
-Digital Ocean does not have accelerator/gpu support. Digital Ocean is
+provider even accounting for spot/preemptible instances. In addition
+Digital Ocean doesn't have accelerator/gpu support. Digital Ocean is
 a great default choice for tying out QHub. Below is the recommended
 setup.
 
@@ -352,7 +340,7 @@ setup.
 
 To see available instance types refer to [Digital Ocean Instance
 Types](https://www.digitalocean.com/docs/droplets/). Additionally the
-digial ocean cli `doctl` has [support for listing
+Digital Ocean cli `doctl` has [support for listing
 droplets](https://www.digitalocean.com/docs/apis-clis/doctl/reference/compute/droplet/list/).
 
 ```yaml
@@ -374,7 +362,7 @@ digital_ocean:
       max_nodes: 5
 ```
 
-#### Google Cloud Provider (GCP)
+#### Google cloud provider
 
 Google Cloud has the best support for QHub and is a great default
 choice for a production deployment. It allows auto-scaling to zero
@@ -387,7 +375,6 @@ To see available instance types refer to
 google_cloud_platform:
   project: test-test-test
   region: us-central1
-  availability_zones: ["us-central1-c"]
   kubernetes_version: "1.18.16-gke.502"
   node_groups:
     general:
@@ -406,9 +393,8 @@ google_cloud_platform:
 
 #### Amazon Web Services (AWS)
 
-Amazon Web Services has similar support to DigitalOcean and does not
-allow auto-scaling below 1 node. Additionally, AWS requires that a
-Kubernetes cluster run in two Availability Zones (AZs).
+Amazon Web Services has similar support to DigitalOcean and doesn't
+allow auto-scaling below 1 node.
 
 Consult [AWS instance types](https://aws.amazon.com/ec2/instance-types/)
 for possible options.
@@ -416,7 +402,6 @@ for possible options.
 ```yaml
 amazon_web_services:
   region: us-west-2
-  availability_zones: ["us-west-2a", "us-west-2b"]
   kubernetes_version: "1.18"
   node_groups:
     general:
@@ -433,9 +418,44 @@ amazon_web_services:
       max_nodes: 5
 ```
 
-#### Local (Existing) Kubernetes Cluster
+#### Azure
 
-Deploying to a local existing kuberentes cluster has different options
+Microsoft Azure has similar settings for Kubernetes version, region, and instance names - using Azure's available values of course.
+
+Azure also requires a field named `storage_account_postfix` which will have been generated by `qhub init`. This allows qhub to create a Storage Account bucket that should be globally unique.
+
+```
+azure:
+  region: Central US
+  kubernetes_version: 1.19.11
+  node_groups:
+    general:
+      instance: Standard_D4_v3
+      min_nodes: 1
+      max_nodes: 1
+    user:
+      instance: Standard_D2_v2
+      min_nodes: 0
+      max_nodes: 5
+    worker:
+      instance: Standard_D2_v2
+      min_nodes: 0
+      max_nodes: 5
+  storage_account_postfix: t65ft6q5
+```
+
+#### Local (existing) Kubernetes cluster
+
+Originally designed for QHub deployments on a "local" minikube cluster,
+this feature has now expanded to allow users to deploy QHub to any
+existing kubernetes cluster. The default options for a `local` deployment
+are still set deploy QHub to a minikube cluster.
+
+If you wish to deploy QHub to an existing kubernetes cluster on one
+of the cloud providers, please refer to a more detailed walkthrough found
+in the [Deploy QHub to an Existing Kubernetes Cluster](./existing.md).
+
+Deploying to a local existing kubernetes cluster has different options
 than the cloud providers. `kube_context` is an optional key that can
 be used to deploy to a non-default context. The default node selectors
 will allow pods to be scheduled anywhere. This can be adjusted to
@@ -457,13 +477,13 @@ local:
       value: linux
 ```
 
-## Terraform State
+## Terraform state
 
 Terraform manages the state of all the deployed resources via
 [backends](https://www.terraform.io/docs/language/settings/backends/index.html). Terraform
 requires storing the state in order to keep track of the names, ids,
 and states of deployed resources. The simplest approach is storing the
-state on the local filesystem but is not recommended and is not the
+state on the local filesystem but isn't recommended and isn't the
 default of QHub. `terraform_state` is either `remote`, `existing` or
 `local` with a default value of `remote`. This decides whether to
 control the state of the cluster `local` via tfstate file (not
@@ -514,6 +534,7 @@ default_images:
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
   dask_gateway: "quansight/qhub-dask-gateway:v||QHUB_VERSION||"
+  conda_store: "quansight/qhub-conda-store:v||QHUB_VERSION||"
 ```
 
 ## Storage
@@ -582,7 +603,7 @@ closely follows the
 [KubeSpawner](https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html)
 API. The only exception is that two keys are added `users` and
 `groups` which allow restriction of profiles to a given set of groups
-and users.  We recommend using groups to manage profile access.
+and users. We recommend using groups to manage profile access.
 
 Finally, we allow for configuration of the Dask workers. In general,
 similar to the JupyterLab instances you only need to configuration the
@@ -592,7 +613,7 @@ When configuring the memory and CPUs for profiles there are some
 important considerations to make. Two important terms to understand are:
  - `limit`: the absolute max memory that a given pod can consume. If a
    process within the pod consumes more than the `limit` memory the
-   linux OS will kill the process. Limit is not used for scheduling
+   linux OS will kill the process. LimIt is not used for scheduling
    purposes with kubernetes.
  - `guarantee`: is the amount of memory the kubernetes scheduler uses
    to place a given pod. In general the `guarantee` will be less than
@@ -600,7 +621,7 @@ important considerations to make. Two important terms to understand are:
    than the node specification. See this [guide from digital
    ocean](https://docs.digitalocean.com/products/kubernetes/#allocatable-memory)
    which is generally applicable to other clouds.
-   
+
 For example if a node has 8 GB of ram and 2 CPUs you should
 guarantee/schedule roughly 75% and follow the digital ocean guide
 linked above. E.g. 1.5 CPU guarantee and 5.5 GB guaranteed.
@@ -627,7 +648,7 @@ dask_worker:
 
 ### Limiting profiles to specific users and groups
 
-Sometimes on a select set of users should have access to specific
+Sometimes only a select set of users should have access to specific
 resources e.g. GPUs, high memory nodes etc. QHub has support for
 limiting resources.
 
@@ -641,6 +662,12 @@ profiles:
       groups:
         - admin
         - users
+```
+
+Provided `groups:` is specified for a profile (even if no groups are listed), then that profile can also be made available to a group by adding the attribute `profiles` to the group in Keycloak. Add multiple profile (display) names to this attribute using ## as a delimiter:
+
+```
+"profiles": "Small Instance##Medium Instance"
 ```
 
 ### JupyterLab Profile Node Selectors
@@ -693,7 +720,7 @@ theme:
     hub_title: QHub - thisisatest
     hub_subtitle: Autoscaling Compute Environment
     welcome: |
-      Welcome to jupyter.github-actions.qhub.dev. It is maintained by <a href="http://quansight.com">Quansight
+      Welcome to jupyter.github-actions.qhub.dev. It's maintained by <a href="http://quansight.com">Quansight
       staff</a>. The hub's configuration is stored in a github repository based on
       <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>.
       To provide feedback and report any technical problems, please use the
@@ -720,7 +747,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas
@@ -734,7 +761,7 @@ environments:
       - python=3.7
       - ipykernel
       - ipywidgets
-      - qhub-dask==0.3.12
+      - qhub-dask==||QHUB_VERSION||
       - numpy
       - numba
       - pandas
@@ -753,14 +780,22 @@ each environment include `ipykernel`, `ipywidgets`, `qhub-dask==0.2.3`. Upon cha
 environment definition expect 1-10 minutes upon deployment of the
 configuration for the environment to appear.
 
-# Full Configuration Example
+## qhub_version
+
+All `qhub-config.yaml` files must now contain a `qhub_version` field displaying the version of QHub which it's intended to be deployed with.
+
+QHub will refuse to deploy if it doesn't contain the same version as that of the `qhub` command.
+
+Typically, you can upgrade the qhub-config.yaml file itself using the [`qhub upgrade` command](../admin_guide/upgrade.md). This will update image numbers, plus updating qhub_version to match the installed version of `qhub`, as well as any other bespoke changes required.
+
+# Full configuration example
 
 ```yaml
 project_name: do-jupyterhub
 provider: do
 domain: "do.qhub.dev"
 
-ci_cd: 
+ci_cd:
   type: github-actions
   branch: main
 
@@ -768,39 +803,37 @@ certificate:
   type: self-signed
 
 security:
+  keycloak:
+    initial_root_password: initpasswd
+    overrides:
+      image:
+        repository: quansight/qhub-keycloak
+
   authentication:
     type: GitHub
     config:
       client_id: CLIENT_ID
       client_secret: CLIENT_SECRET
-      oauth_callback_url: https://jupyter.do.qhub.dev/hub/oauth_callback
+
   users:
     example-user:
-      uid: 1000
       primary_group: users
       secondary_groups:
         - billing
     dharhas:
-      uid: 1001
       primary_group: admin
     tonyfast:
-      uid: 1002
       primary_group: admin
     prasunanand:
-      uid: 1003
       primary_group: admin
     aktech:
-      uid: 1004
       primary_group: users
       secondary_groups:
         - admin
   groups:
     users:
-      gid: 100
     admin:
-      gid: 101
     billing:
-      gid: 102
 
 digital_ocean:
   region: nyc3
@@ -823,13 +856,14 @@ default_images:
   jupyterhub: "quansight/qhub-jupyterhub:v||QHUB_VERSION||"
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
+  conda_store: "quansight/qhub-conda-store:v||QHUB_VERSION||"
 
 theme:
   jupyterhub:
     hub_title: QHub - thisisatest
     hub_subtitle: Autoscaling Compute Environment
     welcome: |
-      Welcome to jupyter.github-actions.qhub.dev. It is maintained by <a href="http://quansight.com">Quansight
+      Welcome to jupyter.github-actions.qhub.dev. It's maintained by <a href="http://quansight.com">Quansight
       staff</a>. The hub's configuration is stored in a github repository based on
       <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>.
       To provide feedback and report any technical problems, please use the

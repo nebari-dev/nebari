@@ -1,0 +1,19 @@
+ingress:
+  # Helm chart (14.0 anyway) will only define Ingress records, not IngressRoute as required by Traefik, so
+  # we will need to define our own IngressRoute elsewhere.
+  enabled: false
+
+imagePullSecrets:
+  - name: "extcrcreds"
+
+extraEnv: |
+  - name: PROXY_ADDRESS_FORWARDING
+    value: "true"
+
+startupScripts:
+  keycloak.cli: |
+    {{- .Files.Get "scripts/keycloak.cli" | nindent 2 }}
+
+  qhubadminuser.sh: |
+    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u root -p "{{ .Values.initial_root_password }}"
+    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u qhub-bot -p "{{ .Values.qhub_bot_password }}"

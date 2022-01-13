@@ -33,13 +33,18 @@ setup(
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, <4",
     install_requires=[
         "cookiecutter==1.7.2",
-        "gitignore-parser==0.0.8",
         "ruamel.yaml",
         "cloudflare",
         "auth0-python",
         "pydantic",
         "pynacl",
         "bcrypt",
+        "kubernetes",
+        "azure-identity==1.6.1",
+        "azure-mgmt-containerservice==16.2.0",
+        "boto3",
+        "packaging",
+        "python-keycloak",
     ],
     extras_require={
         "dev": [
@@ -50,6 +55,8 @@ setup(
             "diagrams",
             "jhub-client",
             "pre-commit",
+            "kubernetes",
+            "dask-gateway",
         ],
     },
     include_package_data=True,

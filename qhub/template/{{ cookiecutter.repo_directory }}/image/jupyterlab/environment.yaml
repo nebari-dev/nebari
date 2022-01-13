@@ -12,7 +12,7 @@ dependencies:
  - jupyterlab >=3
  - jupyter_client
  - jupyter_console
- - jupyterhub
+ - jupyterhub==1.5.0
  - nbconvert
  - nbval
 
@@ -28,7 +28,7 @@ dependencies:
  - nbgitpuller
 
  # cds dashboards
- - cdsdashboards-singleuser >=0.5.7
+ - cdsdashboards-singleuser >=0.6.0
  - jhsingle-native-proxy >=0.7.6
 
  # viz tools
@@ -49,4 +49,3 @@ dependencies:
  - pip:
    # See install-conda-environment.sh when editing this section.
     - https://github.com/dirkcgrunwald/jupyter_codeserver_proxy-/archive/5596bc9c2fbd566180545fa242c659663755a427.tar.gz
-
