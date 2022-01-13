@@ -60,7 +60,7 @@ Commit all the files (`qhub-config.yaml` and GitHub/GitLab workflow files) back 
 
 If your QHub deployment relies on Auth0 for authentication, please update the OAuth callback URL.
 
-<details>
+<details><summary>Click for more detailed instructions </summary>
 
 1. Navigate to the your Auth0 tenacy homepage and from there select "Applications".
 
