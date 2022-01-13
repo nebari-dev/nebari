@@ -1,6 +1,6 @@
 ![quansight_logo](source/images/qhub_logo.png)
 
-[![Python version](https://img.shields.io/badge/python-3.7%20%7C%203.8-blue.svg)](https://pypi.org/project/qhub/)
+[![Python version](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-blue.svg)](https://pypi.org/project/qhub/)
 [![PyPI version](https://badge.fury.io/py/qhub.svg)](https://badge.fury.io/py/qhub)
 [![Conda version](https://img.shields.io/badge/conda--forge-v0.3.0-%234f28a8)](https://anaconda.org/conda-forge/qhub)
 [![GitHub issues](https://img.shields.io/github/issues/quansight/qhub?style=plastic)](https://github.com/Quansight/qhub/issues/new/choose)
