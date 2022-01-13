@@ -1,15 +1,14 @@
 # Log into QHub
 
 This guide aims to give a basic overview of the QHub login process. Your
-organization's QHub will likely have a slighly different authentication
+organization's QHub will likely have a slightly different authentication
 process due to the many authentication providers that QHub can integrate with.
 
-Get the URL of your QHub cluster. For this example we will use
-`https://training.qhub.dev`.
+Get the URL of your QHub cluster, for this `https://training.qhub.dev`.
 
 ![QHub login screen](../images/qhub_login_screen.png)
 
-Once on the site, you will be prompted by a login, similar to the login page shown above. The login process will differ greatly between authentication providers. QHub supports LDAP, OAuth2, passwordless authentication, password-based authentication and many others. Any authentication process
+Once on the site, you will be prompted by a login, similar to the login page shown in the proceeding image. The login process will differ greatly between authentication providers. QHub supports LDAP, OAuth 2.0, passwordless authentication, password-based authentication and many others. Any authentication process
 that JupyterHub supports, QHub also supports. This makes it a little challenging to detail the exact login process.
 
 ![QHub select profile](../images/qhub_select_profile.png)
@@ -17,7 +16,7 @@ that JupyterHub supports, QHub also supports. This makes it a little challenging
 Once authenticated, the user will be prompted with a set of profiles
 that are available for the authenticated user to use. Your given
 selections will likely differ from the image shown. The customized
-profiles will give you access to fixed cloud resources e.g. 2 CPU, 8 GB RAM,
+profiles will give you access to fixed cloud resources for example 2 CPU, 8 GB RAM,
 and 1 dedicated GPU, all of which is configured by your administrator.
 Once an appropriate profile has been select, click `start`. At this point, your JupyterHub will be launched, a step which may take up to several minutes due to QHub use of autoscaling under the hood. Ultimately this autoscaling feature helps reduce costs when the cluster is idle.
 

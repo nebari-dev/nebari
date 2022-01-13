@@ -151,7 +151,7 @@ export ARM_TENANT_ID=""           # field available under `Azure Active Director
 
 ## Authentication
 
-User identity in QHub is now managed within Keycloak which is a robust and highly flexible open source identity and access management solution. A Keycloak instance will be deployed inside your QHub. It can be configured to work with many OAuth2 identity providers, it can federate users from existing databases (such as LDAP), or it can be used as a simple database of username/passwords.
+User identity in QHub is now managed within Keycloak which is a robust and highly flexible open source identity and access management solution. A Keycloak instance will be deployed inside your QHub. It can be configured to work with many OAuth 2.0 identity providers, it can federate users from existing databases (such as LDAP), or it can be used as a simple database of username/passwords.
 
 The full extent of possible configuration can't be covered here, so we provide three simple options that can be configured automatically by QHub when it sets up your new platform. These options are basic passwords, GitHub single-sign on, or Auth0 single-sign on (which in turn can be configured to allow identity to be provided by social login etc).
 
@@ -184,7 +184,7 @@ export AUTH_DOMAIN="qhub-test.auth0.com" # in case the Tenant Name was called 'q
 
 <details><summary>Click for GitHub SSO configuration details </summary>
 
-To use GitHub as a single-sign on provider, you will need to create a new OAuth2 app.
+To use GitHub as a single-sign on provider, you will need to create a new OAuth 2.0 app.
 
 No environment variables are needed for this - you will be given the relevant information and prompted for various inputs during the next stage, when you run [`qhub init`](./usage.md) if you provide the flag `--auth-provider github`. This will be covered when you reach that point in this documentation.
 </details>

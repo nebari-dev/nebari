@@ -225,7 +225,7 @@ security:
 
 ### Keycloak
 
-The `security.keycloak` section allows you to specify an initial password for the `root` user (to login at `https://myqhubsite.com/auth/admin/`) to manage your Keycloak database, e.g. add users/groups.
+The `security.keycloak` section allows you to specify an initial password for the `root` user (to login at `https://myqhubsite.com/auth/admin/`) to manage your Keycloak database, for example add users/groups.
 
 You should change this after deployment. Future deployments will not reset the password to any specified in the YAML file.
 
@@ -624,7 +624,7 @@ important considerations to make. Two important terms to understand are:
 
 For example if a node has 8 GB of ram and 2 CPUs you should
 guarantee/schedule roughly 75% and follow the digital ocean guide
-linked above. E.g. 1.5 CPU guarantee and 5.5 GB guaranteed.
+linked above. For example 1.5 CPU guarantee and 5.5 GB guaranteed.
 
 #### Dask Scheduler
 
@@ -649,7 +649,7 @@ dask_worker:
 ### Limiting profiles to specific users and groups
 
 Sometimes only a select set of users should have access to specific
-resources e.g. GPUs, high memory nodes etc. QHub has support for
+resources for example GPUs, high memory nodes etc. QHub has support for
 limiting resources.
 
 ```yaml

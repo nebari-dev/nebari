@@ -39,7 +39,7 @@ The command above will generate the `qhub-config.yaml` config file with an infra
 
 The deployment will use `github-actions` as the continuous integration (CI) provider, automatically provisioning a repository on GitHub under the URL `github.com/quansight/projectname`
 
-User authentication will be by `auth0`, and an OAuth2 app will be created on Auth0 automatically. There are several flags that allow you to configure the deployment:
+User authentication will be by `auth0`, and an OAuth 2.0 app will be created on Auth0 automatically. There are several flags that allow you to configure the deployment:
 
 - `aws` indicates that the project will be deployed on the Amazon AWS Cloud provider.
     + Optional flags are: `gcp`, `do` and `azure`.
@@ -74,7 +74,7 @@ GitHub under the URL `github.com/quansight/projectname`.
 If employing an infrastructure-as-code approach, this is where you would make the desired infrastructure changes
 including adding users, changing Dask worker instance type and much more. Once you're happy with your changes you would redeploy those changes using GitHub Actions. For more details on the `qhub-config.yaml` please see [Configuration](configuration.md)
 
-The command above will generate the `qhub-config.yaml` config file
+The proceeding command will generate the `qhub-config.yaml` config file
 with an infrastructure deployed on `aws`, named `projectname`, where
 the domain will be `qhub.dev`. The deployment
 will use `github-actions` as the continuous integration (CI) provider,
@@ -82,7 +82,7 @@ automatically provisioned and authenticated by `auth0`, initialized on
 GitHub under the URL `github.com/quansight/projectname`.
 
 If employing an infrastructure-as-code approach, this is where you would make the desired infrastructure changes
-including adding environments, changing Dask worker instance type and much more. Once you're happy with your changes you would redeploy those changes using using GitHub Actions. For more details on on the `qhub-config.yaml` please see [Configuration](configuration.md)
+including adding environments, changing Dask worker instance type and much more. Once you're happy with your changes you would redeploy those changes using GitHub Actions. For more details on the `qhub-config.yaml` please see [Configuration](configuration.md)
 
 ##### Project Naming Convention
 In order to successfully deploy QHub, there are some project naming conventions which need to be followed. For starters,
