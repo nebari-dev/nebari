@@ -33,7 +33,7 @@ experience.
 
 **This repository details the [QHub](https://qhub.dev/ "Official QHub docs") (Kubernetes) version.**
 
-Not sure what to choose? Check out our [Setup Initialization](docs/source/02_get_started/02_setup.md) page.
+Not sure what to choose? Check out our [Setup Initialization](docs/source/installation/setup.md) page.
 
 ## QHub HPC
 
@@ -114,7 +114,7 @@ optional arguments:
 ## :label: Usage
 
 QHub requires the setting of environment variables to automate the deployments fully. For details on how to obtain those
-variables, check the [Step-by-Step](https://docs.qhub.dev/en/latest/source/03_tutorials_and_samples/1_project_setup_tutorial.html) guide in the docs.
+variables, check the [installation guide](docs/source/installation/installation.md) in the docs.
 
 Once all the necessary credentials are gathered and set as [UNIX environment variables](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/),
 QHub can be deployed in under 20 minutes using:
@@ -126,7 +126,7 @@ qhub deploy ... # creates and configures the cloud infrastructure
 
 ## :question: Questions?
 
-Have a look at our [FAQ](docs/source/02_get_started/07_support.md#faq) to see if your query has been answered.
+Have a look at our [FAQ](docs/source/user_guide/faq.md) to see if your query has been answered.
 
 We separate the queries for QHub into:
 
