@@ -10,6 +10,11 @@ on:
     paths-ignore:
       - "docs/**"
       - "*.md"
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-kubernetes:
     name: "Kubernetes Tests"
