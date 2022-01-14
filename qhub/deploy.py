@@ -68,6 +68,15 @@ def guided_install(
     if not full_only:
         targets = [
             "module.kubernetes",
+        ]
+
+        logger.info(f"Running Terraform Stage: {targets}")
+        terraform.apply(
+            directory="infrastructure",
+            targets=targets,
+        )
+
+        targets = [
             "module.kubernetes-initialization",
         ]
 

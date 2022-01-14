@@ -66,10 +66,15 @@ def destroy_configuration(config, skip_remote_state_provision=False, full_only=F
                     "targets": ["module.kubernetes-ingress"],
                 },
                 {
+                    "name": "Kubernetes Init",
+                    "targets": [
+                        "module.kubernetes-initialization",
+                    ],
+                },
+                {
                     "name": "Kubernetes Cluster",
                     "targets": [
                         "module.kubernetes",
-                        "module.kubernetes-initialization",
                     ],
                 },
                 {
