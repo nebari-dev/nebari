@@ -27,3 +27,8 @@ variable "overrides" {
 variable "tls" {
   description = "TLS configuration"
 }
+
+variable "external-url" {
+  description = "External url that jupyterhub cluster is accessible"
+  type        = string
+}

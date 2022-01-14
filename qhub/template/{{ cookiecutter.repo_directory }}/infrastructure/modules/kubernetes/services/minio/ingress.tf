@@ -34,10 +34,10 @@ resource "kubernetes_manifest" "minio-web" {
         {
           kind        = "Rule"
           match       = "Host(`${var.external-url}`) && PathPrefix(`/minio`)"
-          middlewares = local.minio_middleware
+          middlewares = kubernetes_manifest.minio-middleware
           services = [
             {
-              name      = module.minio.service
+              name      = helm_release.minio.name
               port      = 9000
               namespace = var.namespace
             }
