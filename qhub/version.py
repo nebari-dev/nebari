@@ -1,7 +1,4 @@
 """a backport for the qhub version references"""
-from ast import Mod
-
-
 try:
     from importlib.metadata import distribution
 except ModuleNotFoundError:
