@@ -217,8 +217,8 @@ class Upgrade_0_3_12(UpgradeStep):
         return config
 
 
-class Upgrade_0_3_14(UpgradeStep):
-    version = "0.3.14"
+class Upgrade_0_4_0(UpgradeStep):
+    version = "0.4.0"
 
     def _version_specific_upgrade(
         self, config, start_version, config_filename: pathlib.Path, *args, **kwargs
@@ -308,6 +308,15 @@ class Upgrade_0_3_14(UpgradeStep):
         if "azure" in config:
             if "project" in config["azure"]:
                 del config["azure"]["project"]
+
+        # "oauth_callback_url" and "scope" not required in qhub-config.yaml
+        # for Auth0 and Github authentication
+        auth_config = config["security"]["authentication"].get("config", None)
+        if auth_config:
+            if "oauth_callback_url" in auth_config:
+                del auth_config["oauth_callback_url"]
+            if "scope" in auth_config:
+                del auth_config["scope"]
 
         return config
 
