@@ -97,6 +97,13 @@ resource "kubernetes_service" "main" {
     }
 
     port {
+      name        = "minio"
+      protocol    = "TCP"
+      port        = 9080
+      target_port = 9080
+    }
+
+    port {
       name        = "tcp"
       protocol    = "TCP"
       port        = 8786

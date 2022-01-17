@@ -1,40 +1,19 @@
-resource "kubernetes_manifest" "minio-middleware" {
-  provider = kubernetes-alpha
-
-  manifest = {
-    apiVersion = "traefik.containo.us/v1alpha1"
-    kind       = "Middleware"
-    metadata = {
-      name      = "minio-middleware"
-      namespace = var.namespace
-    }
-    spec = {
-      stripPrefixRegex = {
-        regex = [
-          "/minio"
-        ]
-      }
-    }
-  }
-}
-
-resource "kubernetes_manifest" "minio-web" {
+resource "kubernetes_manifest" "minio-api" {
   provider = kubernetes-alpha
 
   manifest = {
     apiVersion = "traefik.containo.us/v1alpha1"
     kind       = "IngressRoute"
     metadata = {
-      name      = "minio-web"
+      name      = "minio-api"
       namespace = var.namespace
     }
     spec = {
       entryPoints = ["minio"]
       routes = [
         {
-          kind        = "Rule"
-          match       = "Host(`${var.external-url}`) && PathPrefix(`/minio`)"
-          middlewares = kubernetes_manifest.minio-middleware
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`)"
           services = [
             {
               name      = helm_release.minio.name
@@ -44,7 +23,7 @@ resource "kubernetes_manifest" "minio-web" {
           ]
         }
       ]
-      tls = var.tls
+      # tls = var.tls
     }
   }
 }
