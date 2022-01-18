@@ -3,7 +3,8 @@ module "minio" {
 
   name = "qhub-conda-store"
   namespace = var.namespace
-
+  tls =  local.tls
+  external-url = var.external-url
   buckets = [
     "conda-store"
   ]

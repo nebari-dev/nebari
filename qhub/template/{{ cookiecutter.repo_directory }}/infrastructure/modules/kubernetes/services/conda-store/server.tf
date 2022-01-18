@@ -7,6 +7,7 @@ resource "kubernetes_config_map" "conda-store-config" {
   data = {
     "conda_store_config.py" = templatefile(
       "${path.module}/config/conda_store_config.py", {
+        external-url   = var.external-url
         minio-username = module.minio.root_username
         minio-password = module.minio.root_password
         minio-service  = module.minio.service
