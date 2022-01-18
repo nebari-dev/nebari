@@ -15,7 +15,7 @@ c.CondaStore.default_gid = 100
 c.CondaStore.default_permissions = "775"
 
 c.S3Storage.internal_endpoint = "${minio-service}:9000"
-c.S3Storage.external_endpoint = "${minio-service}:30900"
+c.S3Storage.external_endpoint = "${external-url}:9080"
 c.S3Storage.access_key = "${minio-username}"
 c.S3Storage.secret_key = "${minio-password}"
 c.S3Storage.region = "us-east-1"  # minio region default
