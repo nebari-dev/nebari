@@ -35,3 +35,14 @@ variable "conda-store-image" {
     tag  = string
   })
 }
+
+variable "external-url" {
+  description = "External url that jupyterhub cluster is accessible"
+  type        = string
+}
+
+variable "certificate-secret-name" {
+  description = "tls certificate secret name to use"
+  type        = string
+  default     = ""
+}

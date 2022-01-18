@@ -102,6 +102,13 @@ module "kubernetes-conda-store-server" {
 
   name              = "qhub"
   namespace         = var.environment
+
+  external-url = var.endpoint
+
+{% if cookiecutter.certificate.type == "existing" %}
+  certificate-secret-name = "{{ cookiecutter.certificate.secret_name }}"
+{% endif %}
+
   nfs_capacity      = "{{ cookiecutter.storage.conda_store }}"
   node-group        = local.node_groups.general
   conda-store-image = var.conda-store-image

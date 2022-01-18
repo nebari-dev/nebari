@@ -97,6 +97,13 @@ resource "kubernetes_service" "main" {
     }
 
     port {
+      name        = "minio"
+      protocol    = "TCP"
+      port        = 9080
+      target_port = 9080
+    }
+
+    port {
       name        = "tcp"
       protocol    = "TCP"
       port        = 8786
@@ -219,6 +226,8 @@ resource "kubernetes_deployment" "main" {
             "--entrypoints.sftp.address=:8023",
             "--entryPoints.tcp.address=:8786",
             "--entryPoints.traefik.address=:9000",
+            # Define the entrypoint port for Minio
+            "--entryPoints.minio.address=:9080",
             "--entrypoints.web.http.redirections.entryPoint.to=websecure",
             "--entrypoints.web.http.redirections.entryPoint.scheme=https",
             # Enable Prometheus Monitoring of Traefik
@@ -261,6 +270,11 @@ resource "kubernetes_deployment" "main" {
           port {
             name           = "traefik"
             container_port = 9000
+          }
+
+          port {
+            name           = "minio"
+            container_port = 9080
           }
 
           liveness_probe {

@@ -14,6 +14,7 @@ repos:
     rev: 3.8.4
     hooks:
     -   id: flake8
+        exclude: 'qhub/template/\{\{ cookiecutter\.repo_directory \}\}/infrastructure/modules/kubernetes/services/conda-store/config/conda_store_config.py'
   - repo: https://github.com/hadolint/hadolint.git
     rev: v2.3.0
     hooks:

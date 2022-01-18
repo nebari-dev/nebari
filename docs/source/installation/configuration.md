@@ -534,7 +534,7 @@ default_images:
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
   dask_gateway: "quansight/qhub-dask-gateway:v||QHUB_VERSION||"
-  conda_store: "quansight/qhub-conda-store:v||QHUB_VERSION||"
+  conda_store: "quansight/conda-store-server:v0.3.3"
 ```
 
 ## Storage
@@ -856,7 +856,7 @@ default_images:
   jupyterhub: "quansight/qhub-jupyterhub:v||QHUB_VERSION||"
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
-  conda_store: "quansight/qhub-conda-store:v||QHUB_VERSION||"
+  conda_store: "quansight/conda-store-server:v0.3.3"
 
 theme:
   jupyterhub:

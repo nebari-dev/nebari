@@ -34,7 +34,6 @@ jobs:
           - dask-worker
           - dask-worker-centos
           - dask-gateway
-          - conda-store
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main

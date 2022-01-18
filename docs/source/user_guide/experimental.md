@@ -14,7 +14,7 @@ default_images:
   jupyterlab: quansight/qhub-jupyterlab-centos:main     <--- here
   dask_worker: quansight/qhub-dask-worker-centos:main   <--- here
   dask_gateway: quansight/qhub-dask-gateway:main
-  conda_store: quansight/qhub-conda-store:main
+  conda_store: quansight/conda-store-server:v0.3.3
 ...
 profiles:
   jupyterlab:
