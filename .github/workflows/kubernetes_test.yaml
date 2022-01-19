@@ -80,7 +80,7 @@ jobs:
           python tests/scripts/minikube-loadbalancer-ip.py
       - name: Add DNS entry to hosts
         run: |
-          sudo echo "192.168.49.100  github-actions.qhub.dev" | sudo tee -a /etc/hosts
+          echo "192.168.49.100  github-actions.qhub.dev" >> /etc/hosts
       - name: Enable Minikube metallb
         run: |
           minikube addons enable metallb
