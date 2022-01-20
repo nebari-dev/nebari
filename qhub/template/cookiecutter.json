@@ -4,6 +4,7 @@
     "namespace": "dev",
     "provider": null,
     "ci_cd": {
+      "type": "none",
       "branch": "main"
     },
     "endpoint": null,
@@ -158,7 +159,12 @@
     ],
 
     "_copy_without_render": [
-        "infrastructure/modules/*",
-        "terraform-state/modules/*"
+      "stages/01-terraform-state/modules/*",
+      "stages/02-infrastructure/modules/*",
+      "stages/03-kubernetes-initialize/modules/*",
+      "stages/04-kubernetes-ingress/modules/*",
+      "stages/05-kubernetes-keycloak/modules/*",
+      "stages/06-kubernetes-keycloak-configuration/modules/*",
+      "stages/07-kubernetes-services/modules/*"
     ]
 }

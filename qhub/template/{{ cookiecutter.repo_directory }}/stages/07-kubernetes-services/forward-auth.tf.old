@@ -1,0 +1,44 @@
+resource "random_password" "forwardauth_client_secret" {
+  length  = 32
+  special = false
+}
+
+# Add a property 'name' to userinfo response (and others)
+# because traefik forwardauth expects 'name' (rather than 'preferred_name')
+# and there does not seem to be a way to configure this in forwardauth.
+
+resource "keycloak_openid_user_property_protocol_mapper" "user_property_mapper" {
+  realm_id  = var.realm_id
+  client_id = keycloak_openid_client.forward_auth_client.id
+  name      = "user-property-mapper"
+
+  user_property = "username"
+  claim_name    = "name"
+}
+
+resource "keycloak_openid_client" "forward_auth_client" {
+  realm_id      = var.realm_id
+  client_id     = "forwardauth"
+  client_secret = var.jupyterhub-keycloak-client-secret
+
+  name    = "ForwardAuth Client"
+  enabled = true
+
+  access_type           = "CONFIDENTIAL"
+  standard_flow_enabled = true
+
+  valid_redirect_uris = [
+    "https://${var.endpoint}/_oauth",
+  ]
+}
+
+
+module "forwardauth" {
+  source       = "./modules/kubernetes/forwardauth"
+  namespace    = var.environment
+  external-url = var.endpoint
+
+  client_id      = local.forwardauth-keycloak-client-id
+  client_secret  = random_password.forwardauth-jhsecret.result
+  callback_url_path = local.forwardauth-callback-url-path
+}

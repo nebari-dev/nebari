@@ -1,10 +1,11 @@
 import logging
 import os
 import re
+import contextlib
 from subprocess import CalledProcessError
 
 from qhub.provider import terraform
-from qhub.utils import timer, check_cloud_credentials
+from qhub.utils import timer, check_cloud_credentials, modified_environ
 from qhub.provider.dns.cloudflare import update_record
 from qhub.state import terraform_state_sync
 
@@ -36,6 +37,41 @@ def deploy_configuration(
             raise e
 
 
+@contextlib.contextmanager
+def kubernetes_provider_context(kubernetes_credentials):
+    credential_mapping = {
+        'config_path': 'KUBE_CONFIG_PATH',
+        'config_context': 'KUBE_CTX',
+        'username': 'KUBE_USER',
+        'password': 'KUBE_PASSWORD',
+        'client_certificate': 'KUBE_CLIENT_CERT_DATA',
+        'client_key': 'KUBE_CLIENT_KEY_DATA',
+        'cluster_ca_certificate': 'KUBE_CLUSTER_CA_CERT_DATA',
+        'host': 'KUBE_HOST',
+        'token': 'KUBE_TOKEN',
+    }
+
+    credentials = {credential_mapping[k]: v for k,v in kubernetes_credentials.items()}
+    with modified_environ(**credentials):
+        yield
+
+
+@contextlib.contextmanager
+def keycloak_provider_context(keycloak_credentials):
+    credential_mapping = {
+        'client_id': 'KEYCLOAK_CLIENT_ID',
+        'url': 'KEYCLOAK_URL',
+        'username': 'KEYCLOAK_USER',
+        'password': 'KEYCLOAK_PASSWORD',
+        'realm': 'KEYCLOAK_REALM',
+    }
+
+    credentials = {credential_mapping[k]: v for k,v in keycloak_credentials.items()}
+    with modified_environ(**credentials):
+        yield
+
+
+
 def guided_install(
     config,
     dns_provider,
@@ -50,98 +86,100 @@ def guided_install(
     # variables are set as required
     check_secrets(config)
 
-    # 02 Create terraform backend remote state bucket
-    # backwards compatible with `qhub-config.yaml` which
-    # don't have `terraform_state` key
-    if (
-        (not skip_remote_state_provision)
-        and (config.get("terraform_state", {}).get("type", "") == "remote")
-        and (config.get("provider") != "local")
-    ):
-        terraform_state_sync(config)
+    stage_outputs = {}
 
-    # 3 kubernetes-alpha provider requires that kubernetes be
-    # provisionioned before any "kubernetes_manifests" resources
-    logger.info("Running terraform init")
-    terraform.init(directory="infrastructure")
+    for stage in [
+        "stages/01-terraform-state",
+        "stages/02-infrastructure",
+    ]:
+        logger.info(f"Running Terraform Stage={stage}")
+        stage_outputs[stage] = terraform.deploy(stage)
 
-    if not full_only:
-        targets = [
-            "module.kubernetes",
-            "module.kubernetes-initialization",
-        ]
+    with kubernetes_provider_context(
+            stage_outputs['stages/02-infrastructure']['kubernetes_credentials']['value']):
+        for stage in [
+                "stages/03-kubernetes-initialize",
+                "stages/04-kubernetes-ingress",
+                "stages/05-kubernetes-keycloak",
+        ]:
+            logger.info(f"Running Terraform Stage={stage}")
+            stage_outputs[stage] = terraform.deploy(directory=stage)
 
-        logger.info(f"Running Terraform Stage: {targets}")
-        terraform.apply(
-            directory="infrastructure",
-            targets=targets,
-        )
+        with keycloak_provider_context(
+                stage_outputs['stages/05-kubernetes-keycloak']['keycloak_credentials']['value']):
+            for stage in [
+                    "stages/06-kubernetes-keycloak-configuration",
+            ]:
+                logger.info(f"Running Terraform Stage={stage}")
+                stage_outputs[stage] = terraform.deploy(directory=stage)
 
-        # 04 Create qhub initial state (up to nginx-ingress)
-        targets = ["module.kubernetes-ingress"]
-        logger.info(f"Running Terraform Stage: {targets}")
-        terraform.apply(
-            directory="infrastructure",
-            targets=targets,
-        )
+            stage_outputs["stages/07-kubernetes-services"] = terraform.deploy(
+                directory="stages/07-kubernetes-services", input_vars={
+                    "realm_id": stage_outputs['stages/06-kubernetes-keycloak-configuration']['realm_id']['value'],
+                })
 
-        cmd_output = terraform.output(directory="infrastructure")
-        # This is a bit ugly, but the issue we have at the moment is being unable
-        # to parse cmd_output as json on Github Actions.
-        ip_matches = re.findall(r'"ip": "(?!string)(.+)"', cmd_output)
-        hostname_matches = re.findall(r'"hostname": "(?!string)(.+)"', cmd_output)
-        if ip_matches:
-            ip_or_hostname = ip_matches[0]
-        elif hostname_matches:
-            ip_or_hostname = hostname_matches[0]
-        else:
-            raise ValueError(f"IP Address not found in: {cmd_output}")
 
-        # 05 Update DNS to point to qhub deployment
-        if dns_auto_provision and dns_provider == "cloudflare":
-            record_name, zone_name = (
-                config["domain"].split(".")[:-2],
-                config["domain"].split(".")[-2:],
-            )
-            record_name = ".".join(record_name)
-            zone_name = ".".join(zone_name)
-            if config["provider"] in {"do", "gcp", "azure"}:
-                update_record(zone_name, record_name, "A", ip_or_hostname)
-                if config.get("clearml", {}).get("enabled"):
-                    add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
-            elif config["provider"] == "aws":
-                update_record(zone_name, record_name, "CNAME", ip_or_hostname)
-                if config.get("clearml", {}).get("enabled"):
-                    add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
-            else:
-                logger.info(
-                    f"Couldn't update the DNS record for cloud provider: {config['provider']}"
-                )
-        elif not disable_prompt:
-            input(
-                f"Take IP Address {ip_or_hostname} and update DNS to point to "
-                f'"{config["domain"]}" [Press Enter when Complete]'
-            )
+    import pprint
+    pprint.pprint(stage_outputs)
 
-        # Now Keycloak Helm chart (External Docker Registry before that if we need one)
-        targets = ["module.external-container-reg", "module.kubernetes-keycloak-helm"]
-        logger.info(f"Running Terraform Stage: {targets}")
-        terraform.apply(
-            directory="infrastructure",
-            targets=targets,
-        )
 
-        # Now Keycloak realm and config
-        targets = ["module.kubernetes-keycloak-config"]
-        logger.info(f"Running Terraform Stage: {targets}")
-        terraform.apply(
-            directory="infrastructure",
-            targets=targets,
-        )
+    #     cmd_output = terraform.output(directory="infrastructure")
+    #     # This is a bit ugly, but the issue we have at the moment is being unable
+    #     # to parse cmd_output as json on Github Actions.
+    #     ip_matches = re.findall(r'"ip": "(?!string)(.+)"', cmd_output)
+    #     hostname_matches = re.findall(r'"hostname": "(?!string)(.+)"', cmd_output)
+    #     if ip_matches:
+    #         ip_or_hostname = ip_matches[0]
+    #     elif hostname_matches:
+    #         ip_or_hostname = hostname_matches[0]
+    #     else:
+    #         raise ValueError(f"IP Address not found in: {cmd_output}")
 
-    # Full deploy QHub
-    logger.info("Running Terraform Stage: FULL")
-    terraform.apply(directory="infrastructure")
+    #     # 05 Update DNS to point to qhub deployment
+    #     if dns_auto_provision and dns_provider == "cloudflare":
+    #         record_name, zone_name = (
+    #             config["domain"].split(".")[:-2],
+    #             config["domain"].split(".")[-2:],
+    #         )
+    #         record_name = ".".join(record_name)
+    #         zone_name = ".".join(zone_name)
+    #         if config["provider"] in {"do", "gcp", "azure"}:
+    #             update_record(zone_name, record_name, "A", ip_or_hostname)
+    #             if config.get("clearml", {}).get("enabled"):
+    #                 add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
+    #         elif config["provider"] == "aws":
+    #             update_record(zone_name, record_name, "CNAME", ip_or_hostname)
+    #             if config.get("clearml", {}).get("enabled"):
+    #                 add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
+    #         else:
+    #             logger.info(
+    #                 f"Couldn't update the DNS record for cloud provider: {config['provider']}"
+    #             )
+    #     elif not disable_prompt:
+    #         input(
+    #             f"Take IP Address {ip_or_hostname} and update DNS to point to "
+    #             f'"{config["domain"]}" [Press Enter when Complete]'
+    #         )
+
+    #     # Now Keycloak Helm chart (External Docker Registry before that if we need one)
+    #     targets = ["module.external-container-reg", "module.kubernetes-keycloak-helm"]
+    #     logger.info(f"Running Terraform Stage: {targets}")
+    #     terraform.apply(
+    #         directory="infrastructure",
+    #         targets=targets,
+    #     )
+
+    #     # Now Keycloak realm and config
+    #     targets = ["module.kubernetes-keycloak-config"]
+    #     logger.info(f"Running Terraform Stage: {targets}")
+    #     terraform.apply(
+    #         directory="infrastructure",
+    #         targets=targets,
+    #     )
+
+    # # Full deploy QHub
+    # logger.info("Running Terraform Stage: FULL")
+    # terraform.apply(directory="infrastructure")
 
 
 def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):

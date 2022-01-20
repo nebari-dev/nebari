@@ -1,4 +1,5 @@
 import io
+import json
 import logging
 import os
 import platform
@@ -8,8 +9,9 @@ import sys
 import tempfile
 import urllib.request
 import zipfile
+from typing import Dict, Any
 
-from qhub.utils import timer, run_subprocess_cmd
+from qhub.utils import timer, run_subprocess_cmd, modified_environ
 from qhub import constants
 
 
@@ -18,6 +20,21 @@ logger = logging.getLogger(__name__)
 
 class TerraformException(Exception):
     pass
+
+
+def deploy(directory, input_vars: Dict[str, Any] = None):
+    """Execute a given terraform directory
+
+    """
+    input_vars = input_vars or {}
+
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix='.tfvars.json') as f:
+        json.dump(input_vars, f.file)
+        f.file.flush()
+
+        init(directory)
+        apply(directory, var_files=[f.name])
+        return output(directory)
 
 
 def download_terraform_binary(version=constants.TERRAFORM_VERSION):
@@ -77,11 +94,12 @@ def init(directory=None):
         run_terraform_subprocess(["init"], cwd=directory, prefix="terraform")
 
 
-def apply(directory=None, targets=None):
+def apply(directory=None, targets=None, var_files=None):
     targets = targets or []
+    var_files = var_files or []
 
     logger.info(f"terraform apply directory={directory} targets={targets}")
-    command = ["apply", "-auto-approve"] + ["-target=" + _ for _ in targets]
+    command = ["apply", "-auto-approve"] + ["-target=" + _ for _ in targets] + ["-var-file=" + _ for _ in var_files]
     with timer(logger, "terraform apply"):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
@@ -91,9 +109,9 @@ def output(directory=None):
 
     logger.info(f"terraform={terraform_path} output directory={directory}")
     with timer(logger, "terraform output"):
-        return subprocess.check_output(
+        return json.loads(subprocess.check_output(
             [terraform_path, "output", "-json"], cwd=directory
-        ).decode("utf8")[:-1]
+        ).decode("utf8")[:-1])
 
 
 def tfimport(addr, id, directory=None):

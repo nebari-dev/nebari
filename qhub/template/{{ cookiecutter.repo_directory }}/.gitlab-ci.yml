@@ -1,3 +1,5 @@
+{% if cookiecutter.ci_cd.type == 'gitlab-ci' %}
+
 render-qhub:
   image: "python:3.9"
   variables:
@@ -55,3 +57,5 @@ build-docker-images:
       - $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "{{ cookiecutter.ci_cd.branch }}"
     changes:
       - "image/**"
+
+{% endif %}
