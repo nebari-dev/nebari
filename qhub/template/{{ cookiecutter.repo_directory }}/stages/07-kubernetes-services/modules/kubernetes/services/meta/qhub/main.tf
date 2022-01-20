@@ -102,32 +102,27 @@ module "kubernetes-jupyterhub" {
 
         storage = {
           static = {
-            pvcName = var.home-pvc
+            pvcName = var.home-pvc.name
           }
 
           extraVolumes = [
-            {
-              name = "conda-store"
+            for k, v in var.extra-pvc: (v.kind == "persistentvolumeclaim" ? {
+              name = v.name
               persistentVolumeClaim = {
-                claimName = var.conda-store-pvc
+                claimName = v.name
               }
-            },
-            {
-              name = "etc-dask"
+            } : {
+              name = v.name
               configMap = {
-                name = kubernetes_config_map.dask-etc.metadata.0.name
+                name = v.name
               }
-            }
+            })
           ]
 
           extraVolumeMounts = [
-            {
-              name      = "conda-store"
-              mountPath = "/home/conda"
-            },
-            {
-              name      = "etc-dask"
-              mountPath = "/etc/dask"
+            for k, v in var.extra-pvc: {
+              name = v.name
+              mountPath = k
             }
           ]
         }
@@ -214,15 +209,6 @@ module "kubernetes-dask-gateway" {
 }
 
 
-module "kubernetes-jupyterhub-ssh" {
-  source = "../../jupyterhub-ssh"
-
-  namespace          = var.namespace
-  jupyterhub_api_url = "http://proxy-public.${var.namespace}"
-
-  node-group              = var.general-node-group
-  persistent_volume_claim = var.home-pvc
-}
 
 
 resource "kubernetes_config_map" "dask-etc" {

@@ -17,7 +17,7 @@ module "kubernetes-conda-store-server" {
   }
 }
 
-module "kubernetes-conda-store-mount" {
+module "conda-store-nfs-mount" {
   source = "./modules/kubernetes/nfs-mount"
 
   name         = "conda-store"

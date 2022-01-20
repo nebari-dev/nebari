@@ -1,8 +1,8 @@
 {% if cookiecutter.provider == "aws" -%}
-module "kubernetes-nfs-mount" {
+module "jupyterhub-nfs-mount" {
   source = "./modules/kubernetes/nfs-mount"
 
-  name         = "nfs-mount"
+  name         = "jupyterhub"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.efs.credentials.dns_name
@@ -17,10 +17,10 @@ module "kubernetes-nfs-server" {
   node-group   = local.node_groups.general
 }
 
-module "kubernetes-nfs-mount" {
+module "jupyterhub-nfs-mount" {
   source = "./modules/kubernetes/nfs-mount"
 
-  name         = "nfs-mount"
+  name         = "jupyterhub"
   namespace    = var.environment
   nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
   nfs_endpoint = module.kubernetes-nfs-server.endpoint_ip
@@ -39,6 +39,21 @@ module "jupyterhub" {
 
   external-url = var.endpoint
   realm_id = var.realm_id
+
+  home-pvc = module.jupyterhub-nfs-mount.persistent_volume_claim.name
+
+  extra-mounts = {
+    "/home/conda" = module.conda-store-nfs-mount.persistent_volume_claim
+    "etc/dask"    = {
+      name = "dask-etc"
+      namespace = var.environment
+      kind = "configmap"
+    }
+  }
+
+  services = [
+    "dask-gateway"
+  ]
 }
 
 
