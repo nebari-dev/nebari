@@ -74,10 +74,17 @@ jobs:
             type=ref,event=tag
             type=sha
 
+      - name: Check current dir tree
+        run: |
+          sudo apt-get install tree
+          tree ./qhub
+          ls -la ./qhub/template/*
+          echo "$GITHUB_REF"
+
       - name: Build docker
         uses: docker/build-push-action@v2
         with:
-          context: r"""./qhub/template/{{ cookiecutter.repo_directory }}/image"""
+          context: ./qhub/template/{{ cookiecutter.repo_directory }}/image
           file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.dockerfile }}"
           tags: |
             ${{ steps.meta.outputs.tags }}
