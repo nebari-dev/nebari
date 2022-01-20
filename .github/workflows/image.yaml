@@ -25,6 +25,8 @@ jobs:
   jupyterlab:
     name: 'Build Docker Images'
     runs-on: ubuntu-latest
+    env:
+      CONTEXT_PATH: "./qhub/template/{{ cookiecutter.repo_directory }}/image"
     strategy:
       matrix:
         dockerfile:
@@ -75,10 +77,10 @@ jobs:
             type=sha
 
       - name: Build docker
-        uses: docker/build-push-action@v2.7
+        uses: docker/build-push-action@v2
         with:
-          context: "./qhub/template/{{ cookiecutter.repo_directory }}/image"
-          file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.dockerfile }}"
+          context: "$CONTEXT_PATH"
+          file: "$CONTEXT_PATH/Dockerfile.${{ matrix.dockerfile }}"
           tags: |
             ${{ steps.meta.outputs.tags }}
             ghcr.io/${{ steps.meta.outputs.tags }}
