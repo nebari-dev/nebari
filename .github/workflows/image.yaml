@@ -78,13 +78,13 @@ jobs:
         run: |
           sudo apt-get install tree
           tree ./qhub
-          ls -la ./qhub/template/*
+          ls -la ./qhub/template/*/image
           echo "$GITHUB_REF"
 
       - name: Build docker
         uses: docker/build-push-action@v2
         with:
-          context: ./qhub/template/{{ cookiecutter.repo_directory }}/image
+          context: ./qhub/template/*/image
           file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.dockerfile }}"
           tags: |
             ${{ steps.meta.outputs.tags }}
