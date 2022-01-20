@@ -21,18 +21,6 @@ terraform {
       version = "=2.14.0"
     }
 {% endif %}
-    helm = {
-      source  = "hashicorp/helm"
-      version = "2.1.2"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "2.7.1"
-    }
-    keycloak = {
-      source  = "mrparkers/keycloak"
-      version = "3.3.0"
-    }
   }
-  required_version = ">= 0.13"
+  required_version = ">=1.0"
 }
