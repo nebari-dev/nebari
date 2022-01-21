@@ -25,14 +25,18 @@ resource "helm_release" "jupyterhub" {
       custom = {
         jupyterhub-theme = var.jupyterhub-theme
         cdsdashboards    = var.cdsdashboards
+        home-pvc         = var.home-pvc
+        shared-pvc       = var.shared-pvc
+        extra-mounts     = var.extra-mounts
       }
 
       hub = {
         image = var.jupyterhub-image
 
         extraConfig = {
-          "01-theme" = file("${path.module}/files/theme.py")
-          "02-spawner" = file("${path.module}/files/spawner.py")
+          "01-theme.py" = file("${path.module}/files/01-theme.py")
+          "02-spawner.py" = file("${path.module}/files/02-spawner.py")
+          "03-profiles.py" = file("${path.module}/files/03-profiles.py")
         }
 
         services = {
