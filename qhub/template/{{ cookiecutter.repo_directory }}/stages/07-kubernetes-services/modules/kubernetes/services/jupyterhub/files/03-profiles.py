@@ -5,6 +5,9 @@ from tornado import gen
 
 
 def base_profile_mounts(username, groups):
+    # kubernetes does not allow multiple volume sections
+    # for the same pvc thus there are multiple checks within
+    # (home_pvc_name != shared_pvc_name)
     home_pvc_name = z2jh.get_config('custom.home-pvc')
     shared_pvc_name = z2jh.get_config('custom.shared-pvc')
 
@@ -22,14 +25,15 @@ def base_profile_mounts(username, groups):
                     'claimName': home_pvc_name,
                 }
             },
-            {
-                'name': 'shared',
-                'persistentVolumeClaim': {
-                    'claimName': shared_pvc_name
-                }
-            }
-        ],
+        ]
     }
+    if home_pvc_name != shared_pvc_name:
+        extra_pod_config['volumes'].append({
+            'name': 'shared',
+            'persistentVolumeClaim': {
+                'claimName': shared_pvc_name
+            }
+        })
 
     extra_container_config = {
         'volumeMounts': [{
@@ -38,7 +42,7 @@ def base_profile_mounts(username, groups):
             'subPath': pvc_home_mount_path.format(username=username)
         }] + [{
             'mountPath': pod_shared_mount_path.format(group=group),
-            'name': 'shared',
+            'name': 'shared' if home_pvc_name != shared_pvc_name else 'home',
             'subPath': pvc_shared_mount_path.format(group=group),
         } for group in groups]
     }
@@ -50,7 +54,8 @@ def base_profile_mounts(username, groups):
             path=pvc_home_mount_path.format(username=username)
     )] + [
         MKDIR_OWN_DIRECTORY.format(
-            base_dir='/shared-mnt', path=pvc_shared_mount_path.format(group=group)) for group in groups])
+            base_dir='/shared-mnt' if home_pvc_name != shared_pvc_name else '/home-mnt',
+            path=pvc_shared_mount_path.format(group=group)) for group in groups])
 
     init_containers = [{
         'name': 'init-mounts',
@@ -62,11 +67,14 @@ def base_profile_mounts(username, groups):
         'volumeMounts': [{
             'mountPath': "/home-mnt",
             'name': 'home'
-        }, {
-            'mountPath': "/shared-mnt",
-            'name': 'shared'
         }]
     }]
+    if home_pvc_name != shared_pvc_name:
+        init_containers[0]['volumeMounts'].append({
+            'mountPath': "/shared-mnt",
+            'name': 'shared'
+        })
+
     return {
         'extra_pod_config': extra_pod_config,
         'extra_container_config': extra_container_config,
