@@ -76,6 +76,11 @@ variable "worker-node-group" {
   })
 }
 
+variable "dask-etc-configmap-name" {
+  description = "Name for dask-etc configuration resource"
+  type        = string
+}
+
 variable "gateway" {
   description = "gateway configuration"
   type = object({

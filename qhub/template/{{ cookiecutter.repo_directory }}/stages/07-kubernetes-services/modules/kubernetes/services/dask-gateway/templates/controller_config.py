@@ -47,9 +47,7 @@ def make_ingressroute(self, cluster_name, namespace):
                     "middlewares": self.proxy_web_middlewares,
                 }
             ],
-            "tls": {
-                "certResolver": "default"
-            }
+            "tls": {}
         },
     }
 

@@ -275,13 +275,13 @@ resource "kubernetes_manifest" "dask-gateway" {
 
           services = [
             {
-              name = "qhub-dask-gateway-gateway-api"
+              name = module."qhub-dask-gateway-gateway-api"
               port = 8000
             }
           ]
         }
       ]
-      tls = local.tls
+      tls = {}
     }
   }
 }

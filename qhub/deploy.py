@@ -115,12 +115,16 @@ def guided_install(
 
             stage_outputs["stages/07-kubernetes-services"] = terraform.deploy(
                 directory="stages/07-kubernetes-services", input_vars={
+                    "cdsdashboards": config['cdsdashboards'],
+                    "jupyterhub-theme": config['theme']['jupyterhub'],
                     "realm_id": stage_outputs['stages/06-kubernetes-keycloak-configuration']['realm_id']['value'],
                 })
 
 
     import pprint
     pprint.pprint(stage_outputs)
+
+    pprint.pprint(config)
 
 
     #     cmd_output = terraform.output(directory="infrastructure")

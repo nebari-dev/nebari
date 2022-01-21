@@ -35,6 +35,7 @@ module "jupyterhub-nfs-mount" {
 module "jupyterhub" {
   source = "./modules/kubernetes/services/jupyterhub"
 
+  name      = var.name
   namespace = var.environment
 
   external-url = var.endpoint
@@ -53,7 +54,14 @@ module "jupyterhub" {
 
   services = [
     "dask-gateway"
+    {% if cookiecutter.prefect.enabled -%}"prefect"{% endif %}
   ]
+
+  jupyterhub-image = var.jupyterhub-image
+  jupyterlab-image = var.jupyterlab-image
+
+  cdsdashboards    = var.cdsdashboards
+  jupyterhub-theme = var.jupyterhub-theme
 }
 
 

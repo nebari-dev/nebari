@@ -14,6 +14,9 @@ module "dask-gateway" {
   general-node-group = local.node_groups.general
   worker-node-group  = local.node_groups.worker
 
+  # needs to match name in module.jupyterhub.extra-mounts
+  dask-etc-configmap-name = "dask-etc"
+
   # # default cluster behavior
   # cluster = {
   #   # scheduler configuration
