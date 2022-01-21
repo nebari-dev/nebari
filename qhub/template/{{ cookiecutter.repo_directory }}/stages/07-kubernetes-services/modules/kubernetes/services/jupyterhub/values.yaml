@@ -35,15 +35,6 @@ singleuser:
       - mountPath: "/home/shared"
         name: home
         subPath: "home/shared"
-  initContainers:
-    - name: init-nfs
-      image: busybox:1.31
-      command: ['sh', '-c', 'mkdir -p /mnt/home/{username} && chmod 777 /mnt/home/{username} && mkdir -p /mnt/home/shared && chmod 777 /mnt/home/shared']
-      securityContext:
-        runAsUser: 0
-      volumeMounts:
-        - mountPath: "/mnt"
-          name: home
   cpu:
     limit: 1
     guarantee: 1

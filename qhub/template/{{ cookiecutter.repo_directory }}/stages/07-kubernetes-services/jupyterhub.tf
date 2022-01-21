@@ -43,6 +43,8 @@ module "jupyterhub" {
 
   home-pvc = module.jupyterhub-nfs-mount.persistent_volume_claim.name
 
+  shared-pvc = module.jupyterhub-nfs-mount.persistent_volume_claim.name
+
   extra-mounts = {
     "/home/conda" = module.conda-store-nfs-mount.persistent_volume_claim
     "etc/dask"    = {

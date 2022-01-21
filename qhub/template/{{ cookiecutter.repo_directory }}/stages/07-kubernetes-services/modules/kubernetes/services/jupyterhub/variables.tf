@@ -35,6 +35,11 @@ variable "home-pvc" {
   type        = string
 }
 
+variable "shared-pvc" {
+  description = "Name for persistent volume claim to use for shared directory uses /share/{group}"
+  type        = string
+}
+
 variable "extra-mounts" {
   description = "Name of additional configmaps and pvcs to be mounted within jupyterlab image"
   default     = {}
