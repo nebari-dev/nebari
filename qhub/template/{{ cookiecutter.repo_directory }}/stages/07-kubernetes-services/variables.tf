@@ -19,6 +19,26 @@ variable "realm_id" {
   type        = string
 }
 
+variable "cdsdashboards" {
+  description = "Enable CDS Dashboards"
+  type        = object({
+    enabled = bool
+    cds_hide_user_named_servers = bool
+    cds_hide_user_dashboard_servers = bool
+  })
+  default     = {
+    enabled = true
+    cds_hide_user_named_servers = true
+    cds_hide_user_dashboard_servers = false
+  }
+}
+
+variable "jupyterhub-theme" {
+  description = "JupyterHub theme"
+  type        = map
+  default     = {}
+}
+
 variable "jupyterhub-image" {
   description = "Jupyterhub user image"
   type = object({

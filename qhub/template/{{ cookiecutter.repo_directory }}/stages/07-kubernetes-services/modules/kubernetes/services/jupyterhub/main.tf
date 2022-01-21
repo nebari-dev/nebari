@@ -21,7 +21,20 @@ resource "helm_release" "jupyterhub" {
   values = concat([
     file("${path.module}/values.yaml"),
     jsonencode({
+      # custom values can be accessed via z2jh.get_config('custom.<path>')
+      custom = {
+        jupyterhub-theme = var.jupyterhub-theme
+        cdsdashboards    = var.cdsdashboards
+      }
+
       hub = {
+        image = var.jupyterhub-image
+
+        extraConfig = {
+          "01-theme" = file("${path.module}/files/theme.py")
+          "02-spawner" = file("${path.module}/files/spawner.py")
+        }
+
         services = {
           for service in var.services: service => {
             name = service
@@ -54,6 +67,8 @@ resource "helm_release" "jupyterhub" {
       }
 
       singleuser = {
+        image = var.jupyterlab-image
+
         storage = {
           static = {
             pvcName = var.home-pvc

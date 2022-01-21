@@ -20,27 +20,6 @@ module "{{helm_extension['name'] }}-extension" {
 
 {% endfor -%}
 
-{% if cookiecutter.prefect.enabled -%}
-module "prefect" {
-  source = "./modules/kubernetes/services/prefect"
-
-  depends_on = [
-    module.qhub
-  ]
-  namespace            = var.environment
-  jupyterhub_api_token = module.qhub.jupyterhub_api_token
-  prefect_token        = var.prefect_token
-  {% if cookiecutter.prefect.image is defined -%}
-  image                = "{{ cookiecutter.prefect.image }}"
-  {% endif -%}
-  {% if cookiecutter.prefect.overrides is defined %}
-  overrides            = [<<EOT
-{{ cookiecutter.prefect.overrides|yamlify -}}
-    EOT
-    ]
-  {% endif %}
-}
-{% endif -%}
 
 
 {% if cookiecutter.clearml.enabled -%}
