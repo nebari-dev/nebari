@@ -19,6 +19,23 @@ resource "keycloak_openid_client" "main" {
 }
 
 
+# Add a property 'name' to userinfo response (and others) because
+# traefik forwardauth expects 'name' (rather than 'preferred_name')
+# and there does not seem to be a way to configure this in
+# forwardauth. Remove if this changes.
+resource "keycloak_openid_user_property_protocol_mapper" "user_property_mapper" {
+  realm_id   = var.realm_id
+  client_id  = keycloak_openid_client.main.id
+  name       = "user-property-mapper"
+  claim_name = "name"
+
+  user_property       = "username"
+  add_to_id_token     = true
+  add_to_access_token = true
+  add_to_userinfo     = true
+}
+
+
 resource "keycloak_openid_user_client_role_protocol_mapper" "main" {
   realm_id        = var.realm_id
   client_id       = keycloak_openid_client.main.id
