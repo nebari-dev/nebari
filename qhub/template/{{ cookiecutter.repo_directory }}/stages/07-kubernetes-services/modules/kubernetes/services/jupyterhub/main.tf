@@ -37,6 +37,7 @@ resource "helm_release" "jupyterhub" {
           "01-theme.py" = file("${path.module}/files/01-theme.py")
           "02-spawner.py" = file("${path.module}/files/02-spawner.py")
           "03-profiles.py" = file("${path.module}/files/03-profiles.py")
+
         }
 
         services = {
@@ -46,6 +47,9 @@ resource "helm_release" "jupyterhub" {
             api_token = random_password.service_token[service].result
           }
         }
+
+        # for simple key value configuration with jupyterhub traitlets
+        # this hub.config property should be used
         config = {
           JupyterHub = {
             authenticator_class = "generic-oauth"
@@ -72,38 +76,6 @@ resource "helm_release" "jupyterhub" {
 
       singleuser = {
         image = var.jupyterlab-image
-
-        storage = {
-          static = {
-            pvcName = var.home-pvc
-            subPath = "home/{username}"
-          }
-
-          extraVolumes = concat(
-            [
-              for k, v in var.extra-mounts: {
-                name = v.name
-                persistentVolumeClaim = {
-                  claimName = v.name
-                }
-              } if v.kind == "persistentvolumeclaim"
-            ],
-            [
-              for k, v in var.extra-mounts: {
-                name = v.name
-                configMap = {
-                  name = v.name
-                }
-              } if v.kind == "configmap"
-            ])
-
-          extraVolumeMounts = [
-            for k, v in var.extra-mounts: {
-              name = v.name
-              mountPath = k
-            }
-          ]
-        }
       }
     })
   ], var.overrides)

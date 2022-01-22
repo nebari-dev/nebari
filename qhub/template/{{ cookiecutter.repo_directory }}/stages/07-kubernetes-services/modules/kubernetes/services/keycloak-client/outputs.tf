@@ -7,5 +7,6 @@ output "config" {
     authentication_url = "https://${var.external-url}/auth/realms/${var.realm_id}/protocol/openid-connect/auth"
     token_url          = "https://${var.external-url}/auth/realms/${var.realm_id}/protocol/openid-connect/token"
     userinfo_url       = "https://${var.external-url}/auth/realms/${var.realm_id}/protocol/openid-connect/userinfo"
+    callback_urls = var.callback-url-paths
   }
 }
