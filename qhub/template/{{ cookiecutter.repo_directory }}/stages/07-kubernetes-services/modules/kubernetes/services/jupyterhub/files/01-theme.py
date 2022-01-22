@@ -3,7 +3,7 @@ c.JupyterHub.extra_handlers.extend(theme_extra_handlers)
 c.JupyterHub.template_paths.extend(theme_template_paths)
 
 import z2jh
-jupyterhub_theme = z2jh.get_config('custom.jupyterhub-theme')
+jupyterhub_theme = z2jh.get_config('custom.theme')
 cdsdashboards = z2jh.get_config('custom.cdsdashboards')
 
 c.JupyterHub.template_vars = {

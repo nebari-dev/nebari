@@ -26,17 +26,16 @@ resource "keycloak_authentication_execution" "idp-auto-link" {
 }
 
 
-{% if cookiecutter.security.authentication.type == "GitHub" -%}
 resource "keycloak_oidc_identity_provider" "github_identity_provider" {
-  count = var.github_client_id == "" || var.github_client_secret == "" ? 0 : 1
+  count = var.authentication.type == "GitHub" ? 1 : 0
 
   realm             = keycloak_realm.main.id
   alias             = "github"
   provider_id       = "github"
-  authorization_url = ""
-  client_id         = var.github_client_id
-  client_secret     = var.github_client_secret
-  token_url         = ""
+  authorization_url = "https://github.com/login/oauth/authorize"
+  client_id         = var.authentication.config.client_id
+  client_secret     = var.authentication.config.client_secret
+  token_url         = "https://github.com/login/oauth/access_token"
   default_scopes    = "user:email"
   store_token       = false
   sync_mode         = "IMPORT"
@@ -48,16 +47,18 @@ resource "keycloak_oidc_identity_provider" "github_identity_provider" {
     "clientAuthMethod" = "client_secret_post"
   }
 }
-{% elif cookiecutter.security.authentication.type == "Auth0" -%}
+
 resource "keycloak_oidc_identity_provider" "auth0_identity_provider" {
+  count = var.authentication.type == "Auth0" ? 1 : 0
+
   realm             = keycloak_realm.main.id
   alias             = "auth0"
   provider_id       = "oidc"
-  authorization_url = "https://{{ cookiecutter.security.authentication.config.auth0_subdomain }}.auth0.com/authorize"
-  client_id         = "{{ cookiecutter.security.authentication.config.client_id }}"
-  client_secret     = "{{ cookiecutter.security.authentication.config.client_secret }}"
-  token_url         = "https://{{ cookiecutter.security.authentication.config.auth0_subdomain }}.auth0.com/oauth/token"
-  user_info_url     = "https://{{ cookiecutter.security.authentication.config.auth0_subdomain }}.auth0.com/userinfo"
+  authorization_url = "https://${var.authentication.config.auth0_subdomain}.auth0.com/authorize"
+  client_id         = var.authentication.config.client_id
+  client_secret     = var.authentication.config.client_secret
+  token_url         = "https://${var.authentication.config.auth0_subdomain}.auth0.com/oauth/token"
+  user_info_url     = "https://${var.authentication.config.auth0_subdomain}.auth0.com/userinfo"
   default_scopes    = "openid email profile"
   store_token       = false
   sync_mode         = "IMPORT"
@@ -69,4 +70,3 @@ resource "keycloak_oidc_identity_provider" "auth0_identity_provider" {
     "clientAuthMethod" = "client_secret_post"
   }
 }
-{% endif %}

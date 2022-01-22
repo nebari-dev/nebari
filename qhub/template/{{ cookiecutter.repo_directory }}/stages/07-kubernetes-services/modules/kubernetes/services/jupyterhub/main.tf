@@ -23,11 +23,12 @@ resource "helm_release" "jupyterhub" {
     jsonencode({
       # custom values can be accessed via z2jh.get_config('custom.<path>')
       custom = {
-        jupyterhub-theme = var.jupyterhub-theme
-        cdsdashboards    = var.cdsdashboards
-        home-pvc         = var.home-pvc
-        shared-pvc       = var.shared-pvc
-        extra-mounts     = var.extra-mounts
+        theme         = var.theme
+        profiles      = var.profiles
+        cdsdashboards = var.cdsdashboards
+        home-pvc      = var.home-pvc
+        shared-pvc    = var.shared-pvc
+        extra-mounts  = var.extra-mounts
       }
 
       hub = {
@@ -37,7 +38,6 @@ resource "helm_release" "jupyterhub" {
           "01-theme.py" = file("${path.module}/files/01-theme.py")
           "02-spawner.py" = file("${path.module}/files/02-spawner.py")
           "03-profiles.py" = file("${path.module}/files/03-profiles.py")
-
         }
 
         services = {

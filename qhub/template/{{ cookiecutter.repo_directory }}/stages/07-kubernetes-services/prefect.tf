@@ -1,3 +1,11 @@
+# ======================= VARIABLES ======================
+{% if cookiecutter.prefect.enabled -%}
+variable "prefect_token" {
+  type = string
+}
+{%- endif %}
+
+# ====================== RESOURCES =======================
 {% if cookiecutter.prefect.enabled -%}
 module "prefect" {
   source = "./modules/kubernetes/services/prefect"

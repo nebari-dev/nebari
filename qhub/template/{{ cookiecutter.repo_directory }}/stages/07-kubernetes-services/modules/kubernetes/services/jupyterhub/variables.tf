@@ -60,10 +60,15 @@ variable "services" {
   type        = set(string)
 }
 
-variable "jupyterhub-theme" {
+variable "theme" {
   description = "JupyterHub theme"
   type        = map
   default     = {}
+}
+
+variable "profiles" {
+  description = "JupyterHub profiles"
+  default     = []
 }
 
 variable "cdsdashboards" {

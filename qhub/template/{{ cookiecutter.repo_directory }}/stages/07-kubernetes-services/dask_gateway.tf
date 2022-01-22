@@ -1,3 +1,30 @@
+# ===================== VARIABLES ====================
+variable "dask-worker-image" {
+  description = "Dask worker image"
+  type = object({
+    name = string
+    tag  = string
+  })
+  default = {
+    name = "{{ cookiecutter.default_images.dask_worker.split(':')[0] }}"
+    tag  = "{{ cookiecutter.default_images.dask_worker.split(':')[1] }}"
+  }
+}
+
+variable "dask-gateway-image" {
+  description = "Dask worker image"
+  type = object({
+    name = string
+    tag  = string
+  })
+  default = {
+    name = "{{ cookiecutter.default_images.dask_gateway.split(':')[0] }}"
+    tag  = "{{ cookiecutter.default_images.dask_gateway.split(':')[1] }}"
+  }
+}
+
+
+# =================== RESOURCES =====================
 module "dask-gateway" {
   source = "./modules/kubernetes/services/dask-gateway"
 

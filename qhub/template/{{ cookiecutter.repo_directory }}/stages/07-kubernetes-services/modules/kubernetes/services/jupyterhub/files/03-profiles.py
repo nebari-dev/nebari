@@ -235,13 +235,8 @@ def render_profiles(spawner):
     groups = [os.path.basename(_) for _ in auth_state['oauth_user']['groups'] if os.path.dirname(_) == '/projects']
     spawner.log.error(f'user info: {username} {groups}')
 
-    # shared confituration for user
-    profile_list = [{
-        'display_name': 'Training Env - Python',
-        'slug': 'training-python',
-        'default': True,
-        'kubespawner_override': {}
-    }]
+    # fetch available profiles and render additional attributes
+    profile_list = z2jh.get_config('custom.profiles')
     return list(filter(None, [render_profile(p, username, groups) for p in profile_list]))
 
 
