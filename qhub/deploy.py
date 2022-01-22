@@ -97,29 +97,46 @@ def guided_install(
 
     with kubernetes_provider_context(
             stage_outputs['stages/02-infrastructure']['kubernetes_credentials']['value']):
-        for stage in [
-                "stages/03-kubernetes-initialize",
-                "stages/04-kubernetes-ingress",
-                "stages/05-kubernetes-keycloak",
-        ]:
-            logger.info(f"Running Terraform Stage={stage}")
-            stage_outputs[stage] = terraform.deploy(directory=stage)
+        stage_outputs["stages/03-kubernetes-initialize"] = terraform.deploy(
+            directory="stages/03-kubernetes-initialize",
+            input_vars={
+                'name': config['project_name'],
+                'environment': config['namespace'],
+            })
+
+        stage_outputs["stages/04-kubernetes-ingress"] = terraform.deploy(
+            directory="stages/04-kubernetes-ingress",
+            input_vars={
+                'name': config['project_name'],
+                'environment': config['namespace'],
+            })
+
+        stage_outputs["stages/05-kubernetes-keycloak"] = terraform.deploy(
+            directory="stages/05-kubernetes-keycloak",
+            input_vars={
+                'name': config['project_name'],
+                'environment': config['namespace'],
+                'endpoint': config['domain'],
+                'initial-root-password': config['security']['keycloak']['initial_root_password']
+            })
 
         with keycloak_provider_context(
                 stage_outputs['stages/05-kubernetes-keycloak']['keycloak_credentials']['value']):
-            for stage in [
-                    "stages/06-kubernetes-keycloak-configuration",
-            ]:
-                logger.info(f"Running Terraform Stage={stage}")
-                stage_outputs[stage] = terraform.deploy(directory=stage)
+            stage_outputs["stages/06-kubernetes-keycloak-configuration"] = terraform.deploy(
+                directory='stages/06-kubernetes-keycloak-configuration',
+                input_vars={
+                    'realm': f"qhub-{config['project_name']}",
+                    'authentication': config['security']['authentication']
+                })
 
             stage_outputs["stages/07-kubernetes-services"] = terraform.deploy(
                 directory="stages/07-kubernetes-services", input_vars={
+                    "jupyterlab-profiles": config['profiles']['jupyterlab'],
+                    "conda-store-environments": config['environments'],
                     "cdsdashboards": config['cdsdashboards'],
                     "jupyterhub-theme": config['theme']['jupyterhub'],
                     "realm_id": stage_outputs['stages/06-kubernetes-keycloak-configuration']['realm_id']['value'],
                 })
-
 
     import pprint
     pprint.pprint(stage_outputs)

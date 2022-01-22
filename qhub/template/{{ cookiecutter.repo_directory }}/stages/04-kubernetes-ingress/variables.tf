@@ -1,9 +1,9 @@
 variable "name" {
-  type    = string
-  default = "{{ cookiecutter.project_name }}"
+  description = "Prefix name to assign to ingress kubernetes resources"
+  type        = string
 }
 
 variable "environment" {
-  type    = string
-  default = "{{ cookiecutter.namespace }}"
+  description = "Kubernetes namespace to deploy ingress resources"
+  type        = string
 }

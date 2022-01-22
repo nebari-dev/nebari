@@ -1,3 +1,53 @@
+variable "cdsdashboards" {
+  description = "Enable CDS Dashboards"
+  type        = object({
+    enabled = bool
+    cds_hide_user_named_servers = bool
+    cds_hide_user_dashboard_servers = bool
+  })
+  default     = {
+    enabled = true
+    cds_hide_user_named_servers = true
+    cds_hide_user_dashboard_servers = false
+  }
+}
+
+variable "jupyterhub-theme" {
+  description = "JupyterHub theme"
+  type        = map
+  default     = {}
+}
+
+variable "jupyterhub-image" {
+  description = "Jupyterhub user image"
+  type = object({
+    name = string
+    tag  = string
+  })
+  default = {
+    name = "{{ cookiecutter.default_images.jupyterhub.split(':')[0] }}"
+    tag  = "{{ cookiecutter.default_images.jupyterhub.split(':')[1] }}"
+  }
+}
+
+variable "jupyterlab-image" {
+  description = "Jupyterlab user image"
+  type = object({
+    name = string
+    tag  = string
+  })
+  default = {
+    name = "{{ cookiecutter.default_images.jupyterlab.split(':')[0] }}"
+    tag  = "{{ cookiecutter.default_images.jupyterlab.split(':')[1] }}"
+  }
+}
+
+variable "jupyterlab-profiles" {
+  description = "JupyterHub profiles to expose to user"
+  default = []
+}
+
+
 {% if cookiecutter.provider == "aws" -%}
 module "jupyterhub-nfs-mount" {
   source = "./modules/kubernetes/nfs-mount"
@@ -63,67 +113,7 @@ module "jupyterhub" {
   jupyterlab-image = var.jupyterlab-image
 
   cdsdashboards    = var.cdsdashboards
-  jupyterhub-theme = var.jupyterhub-theme
+
+  theme = var.jupyterhub-theme
+  profiles = var.jupyterlab-profiles
 }
-
-
-# module "qhub" {
-#   source = "./modules/kubernetes/services/meta/qhub"
-
-#   name      = "qhub"
-#   namespace = var.environment
-
-#   home-pvc        = "nfs-mount-${var.environment}-share"
-#   conda-store-pvc = "conda-store-${var.environment}-share"
-
-#   external-url = var.endpoint
-
-#   jupyterhub-image   = var.jupyterhub-image
-#   jupyterlab-image   = var.jupyterlab-image
-#   dask-worker-image  = var.dask-worker-image
-#   dask-gateway-image = var.dask-gateway-image
-
-#   general-node-group = local.node_groups.general
-#   user-node-group    = local.node_groups.user
-#   worker-node-group  = local.node_groups.worker
-
-# {% if cookiecutter.certificate.type == "existing" %}
-#   certificate-secret-name = "{{ cookiecutter.certificate.secret_name }}"
-# {% endif %}
-
-#   jupyterhub-overrides = concat([
-#     file("jupyterhub.yaml")
-#     ]
-# {%- if cookiecutter.jupyterhub is defined and cookiecutter.jupyterhub.overrides is defined %},
-# [<<EOT
-# {{ cookiecutter.jupyterhub.overrides | default({}) | yamlify -}}
-#     EOT
-#     ]
-# {%- endif %}
-#   )
-
-# {%- if cookiecutter.jupyterhub is defined and cookiecutter.jupyterhub.overrides is defined and cookiecutter.jupyterhub.overrides.hub is defined and cookiecutter.jupyterhub.overrides.hub.extraEnv is defined %}
-#   jupyterhub-hub-extraEnv = {{- cookiecutter.jupyterhub.overrides.hub.extraEnv | default({}) | jsonify -}}
-# {%- endif %}
-
-#   dask_gateway_extra_config = file("dask_gateway_config.py.j2")
-
-#   forwardauth-callback-url-path = local.forwardauth-callback-url-path
-
-#   OAUTH_CLIENT_ID        = local.jupyterhub-keycloak-client-id
-#   OAUTH_CLIENT_SECRET    = random_password.jupyterhub-jhsecret.result
-#   OAUTH_CALLBACK_URL     = "https://${var.endpoint}${local.jupyterhub-callback-url-path}"
-#   OAUTH2_TLS_VERIFY      = local.tls-insecure-skip-verify ? "false" : "true"
-#   keycloak_authorize_url = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth"
-#   keycloak_token_url     = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"
-#   keycloak_userdata_url  = "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"
-#   keycloak_logout_url    = format("%s?redirect_uri=%s", "https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/logout", urlencode("{{ cookiecutter.final_logout_uri }}"))
-
-#   keycloak_username   = "qhub-bot"
-#   keycloak_password   = random_password.keycloak-qhub-bot-password.result
-#   keycloak_server_url = "http://keycloak-headless.${var.environment}:8080/auth/"
-
-#   depends_on = [
-#     module.kubernetes-initialization
-#   ]
-# }

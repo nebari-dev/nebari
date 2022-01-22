@@ -1,9 +1,9 @@
 variable "name" {
-  type    = string
-  default = "{{ cookiecutter.project_name }}"
+  description = "Prefix name to assign to QHub resources"
+  type        = string
 }
 
 variable "environment" {
-  type    = string
-  default = "{{ cookiecutter.namespace }}"
+  description = "Namespace to create Kubernetes resources"
+  type        = string
 }

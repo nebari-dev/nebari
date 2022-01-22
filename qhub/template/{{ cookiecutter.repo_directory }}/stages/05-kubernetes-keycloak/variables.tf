@@ -1,15 +1,26 @@
 variable "name" {
-  type    = string
-  default = "{{ cookiecutter.project_name }}"
+  description = "Prefix name to assign to keycloak kubernetes resources"
+  type        = string
 }
 
 variable "environment" {
-  type    = string
-  default = "{{ cookiecutter.namespace }}"
+  description = "Kubernetes namespace to deploy keycloak"
+  type        = string
 }
 
 variable "endpoint" {
   description = "QHub cluster endpoint"
   type        = string
-  default     = "{{ cookiecutter.domain }}"
+}
+
+variable "initial-root-password" {
+  description = "Keycloak root user password"
+  type        = string
+}
+
+variable "overrides" {
+  # https://github.com/codecentric/helm-charts/blob/master/charts/keycloak/values.yaml
+  description = "Keycloak helm chart overrides"
+  type        = list(string)
+  default     = []
 }

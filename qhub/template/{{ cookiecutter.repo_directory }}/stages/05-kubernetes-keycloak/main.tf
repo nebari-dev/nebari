@@ -12,14 +12,7 @@ module "kubernetes-keycloak-helm" {
 
   qhub-bot-password = random_password.keycloak-qhub-bot-password.result
 
-  initial-root-password = {{ cookiecutter.security.get('keycloak',{}).initial_root_password | default("password",true) | jsonify }}
+  initial-root-password = var.initial-root-password
 
-  # Be careful that overrides don't clobber anything important.
-  # For example, if extraEnv is present, it should repeat PROXY_ADDRESS_FORWARDING from values.yaml.
-  {% if cookiecutter.security.keycloak is defined and cookiecutter.security.keycloak.overrides is defined %}
-  overrides            = [<<EOT
-{{ cookiecutter.security.keycloak.overrides|yamlify -}}
-    EOT
-    ]
-  {% endif %}
+  overrides = var.overrides
 }
