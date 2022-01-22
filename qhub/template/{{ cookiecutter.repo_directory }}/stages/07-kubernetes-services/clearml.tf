@@ -1,14 +1,25 @@
-{% if cookiecutter.clearml.enabled -%}
+# ======================= VARIABLES ======================
+variable "clearml-enabled" {
+  description = "Clearml enabled or disabled"
+  type        = bool
+  default     = false
+}
+
+variable "clearml-enable-forwardauth" {
+  description = "Clearml enabled or disabled forward authentication"
+  type        = bool
+  default     = false
+}
+
+
+# ====================== RESOURCES =======================
 module "clearml" {
+  count = var.clearml-enabled ? 1 : 0
+
   source       = "./modules/kubernetes/services/clearml"
+
   namespace    = var.environment
   external-url = var.endpoint
-  tls          = module.qhub.tls
-{% if cookiecutter.clearml.enable_forward_auth is defined -%}
-  enable-forward-auth = {{ cookiecutter.clearml.enable_forward_auth | default(false,true) | jsonify }}
-{% endif -%}
-  depends_on = [
-    module.qhub
-  ]
+
+  enable-forward-auth = var.clearml-enable-forwardauth
 }
-{% endif -%}

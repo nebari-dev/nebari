@@ -40,7 +40,7 @@ resource "kubernetes_manifest" "clearml-app" {
           ]
         }
       ]
-      tls = var.tls
+      tls = {}
     }
   }
 }
@@ -69,7 +69,7 @@ resource "kubernetes_manifest" "clearml-files" {
           ]
         }
       ]
-      tls = var.tls
+      tls = {}
     }
   }
 }
@@ -98,7 +98,7 @@ resource "kubernetes_manifest" "clearml-api" {
           ]
         }
       ]
-      tls = var.tls
+      tls = {}
     }
   }
 }

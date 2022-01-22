@@ -5,10 +5,6 @@ variable "dask-worker-image" {
     name = string
     tag  = string
   })
-  default = {
-    name = "{{ cookiecutter.default_images.dask_worker.split(':')[0] }}"
-    tag  = "{{ cookiecutter.default_images.dask_worker.split(':')[1] }}"
-  }
 }
 
 variable "dask-gateway-image" {
@@ -17,10 +13,6 @@ variable "dask-gateway-image" {
     name = string
     tag  = string
   })
-  default = {
-    name = "{{ cookiecutter.default_images.dask_gateway.split(':')[0] }}"
-    tag  = "{{ cookiecutter.default_images.dask_gateway.split(':')[1] }}"
-  }
 }
 
 

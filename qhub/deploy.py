@@ -146,6 +146,19 @@ def guided_install(
                     "jupyterhub-shared-storage": config['storage']['shared_filesystem'],
                     "jupyterlab-profiles": config['profiles']['jupyterlab'],
                     "jupyterlab-image": split_docker_image_name(config['default_images']['jupyterlab']),
+                    # dask-gateway
+                    "dask-gateway-image": split_docker_image_name(config['default_images']['dask_gateway']),
+                    "dask-worker-image": split_docker_image_name(config['default_images']['dask_worker']),
+                    # monitoring
+                    "monitoring-enabled": config['monitoring']['enabled'],
+                    # prefect
+                    "prefect-enabled": config.get('prefect', {}).get('enabled', False),
+                    "prefect-token": config.get('prefect', {}).get('token', ''),
+                    "prefect-image": config.get('prefect', {}).get('image', ""),
+                    "prefect-overrides": config.get('prefect', {}).get('overrides', {}),
+                    # clearml
+                    "clearml-enabled": config.get('clearml', {}).get('enabled', False),
+                    "clearml-enable-forwardauth": config.get('clearml', {}).get('enable_forward_auth', False),
                 })
 
     import pprint

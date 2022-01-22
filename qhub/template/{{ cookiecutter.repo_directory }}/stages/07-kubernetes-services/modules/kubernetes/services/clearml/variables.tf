@@ -22,10 +22,6 @@ variable "external-url" {
   type        = string
 }
 
-variable "tls" {
-  description = "TLS configuration"
-}
-
 variable "enable-forward-auth" {
   type    = bool
   default = true
