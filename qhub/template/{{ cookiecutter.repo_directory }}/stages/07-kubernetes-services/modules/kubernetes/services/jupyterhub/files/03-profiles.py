@@ -169,6 +169,8 @@ def configure_user(username, uid=1000, gid=100):
         f"echo '{etc_group}' > /tmp/group",
         # mount the shared directories for user
         f"ln -sfn /shared /home/{username}/shared",
+        # conda-store
+        f"printf 'envs_dirs:\n - /home/conda/environments/' > /home/{username}/.condarc"
     ])
     lifecycle_hooks = {
         'postStart': {
