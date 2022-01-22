@@ -24,10 +24,11 @@ variable "jupyterhub-image" {
     name = string
     tag  = string
   })
-  default = {
-    name = "{{ cookiecutter.default_images.jupyterhub.split(':')[0] }}"
-    tag  = "{{ cookiecutter.default_images.jupyterhub.split(':')[1] }}"
-  }
+}
+
+variable "jupyterhub-shared-storage" {
+  description = "JupyterHub shared storage size [GB]"
+  type        = string
 }
 
 variable "jupyterlab-image" {
@@ -36,10 +37,6 @@ variable "jupyterlab-image" {
     name = string
     tag  = string
   })
-  default = {
-    name = "{{ cookiecutter.default_images.jupyterlab.split(':')[0] }}"
-    tag  = "{{ cookiecutter.default_images.jupyterlab.split(':')[1] }}"
-  }
 }
 
 variable "jupyterlab-profiles" {
@@ -54,7 +51,7 @@ module "jupyterhub-nfs-mount" {
 
   name         = "jupyterhub"
   namespace    = var.environment
-  nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
+  nfs_capacity = var.jupyterhub-shared-storage
   nfs_endpoint = module.efs.credentials.dns_name
 }
 {% else -%}
@@ -63,7 +60,7 @@ module "kubernetes-nfs-server" {
 
   name         = "nfs-server"
   namespace    = var.environment
-  nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
+  nfs_capacity = var.jupyterhub-shared-storage
   node-group   = local.node_groups.general
 }
 
@@ -72,7 +69,7 @@ module "jupyterhub-nfs-mount" {
 
   name         = "jupyterhub"
   namespace    = var.environment
-  nfs_capacity = "{{ cookiecutter.storage.shared_filesystem }}"
+  nfs_capacity = var.jupyterhub-shared-storage
   nfs_endpoint = module.kubernetes-nfs-server.endpoint_ip
 
   depends_on = [

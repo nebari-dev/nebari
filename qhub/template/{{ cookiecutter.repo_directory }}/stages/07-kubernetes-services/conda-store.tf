@@ -4,6 +4,10 @@ variable "conda-store-environments" {
   default = {}
 }
 
+variable "conda-store-storage" {
+  description = "Conda-Store storage in GB"
+  type        = string
+}
 
 variable "conda-store-image" {
   description = "Conda-store image"
@@ -11,10 +15,6 @@ variable "conda-store-image" {
     name = string
     tag  = string
   })
-  default = {
-    name = "{{ cookiecutter.default_images.conda_store.split(':')[0] }}"
-    tag  = "{{ cookiecutter.default_images.conda_store.split(':')[1] }}"
-  }
 }
 
 
@@ -28,7 +28,7 @@ module "kubernetes-conda-store-server" {
   external-url = var.endpoint
   realm_id     = var.realm_id
 
-  nfs_capacity      = "{{ cookiecutter.storage.conda_store }}"
+  nfs_capacity      = var.conda-store-storage
   node-group        = local.node_groups.general
   conda-store-image = var.conda-store-image
   environments      = {
@@ -42,7 +42,7 @@ module "conda-store-nfs-mount" {
 
   name         = "conda-store"
   namespace    = var.environment
-  nfs_capacity = "{{ cookiecutter.storage.conda_store }}"
+  nfs_capacity = var.conda-store-storage
   nfs_endpoint = module.kubernetes-conda-store-server.endpoint_ip
 
   depends_on = [
