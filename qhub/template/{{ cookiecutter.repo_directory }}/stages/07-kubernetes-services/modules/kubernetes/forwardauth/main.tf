@@ -1,3 +1,15 @@
+module "forwardauth-openid-client" {
+  source = "../services/keycloak-client"
+
+  realm_id     = var.realm_id
+  client_id  = "forwardauth"
+  external-url = var.external-url
+  callback-url-paths = [
+    "https://${var.external-url}/_oauth"
+  ]
+}
+
+
 resource "kubernetes_service" "forwardauth-service" {
   metadata {
     name      = "forwardauth-service"
@@ -53,34 +65,32 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
 
           env {
             name  = "USER_ID_PATH"
-            value = "name"
+            value = "preferred_username"
           }
 
           env {
             name  = "PROVIDERS_GENERIC_OAUTH_AUTH_URL"
-            value = "https://${var.external-url}/auth/realms/qhub/protocol/openid-connect/auth"
+            value = module.forwardauth-openid-client.config.authentication_url
           }
 
           env {
             name = "PROVIDERS_GENERIC_OAUTH_TOKEN_URL"
-            # http://keycloak-headless.${var.namespace}:8080 works fine here actually
-            value = "https://${var.external-url}/auth/realms/qhub/protocol/openid-connect/token"
+            value = module.forwardauth-openid-client.config.token_url
           }
 
           env {
             name = "PROVIDERS_GENERIC_OAUTH_USER_URL"
-            # But http://keycloak-headless.${var.namespace}:8080 does not work here - Token verification failed
-            value = "https://${var.external-url}/auth/realms/qhub/protocol/openid-connect/userinfo"
+            value = module.forwardauth-openid-client.config.userinfo_url
           }
 
           env {
             name  = "PROVIDERS_GENERIC_OAUTH_CLIENT_ID"
-            value = var.jh-client-id
+            value = module.forwardauth-openid-client.config.client_id
           }
 
           env {
             name  = "PROVIDERS_GENERIC_OAUTH_CLIENT_SECRET"
-            value = var.jh-client-secret
+            value = module.forwardauth-openid-client.config.client_secret
           }
 
           env {
@@ -95,7 +105,7 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
 
           env {
             name  = "URL_PATH"
-            value = var.callback-url-path
+            value = module.forwardauth-openid-client.config.callback_urls[0]
           }
 
           env {

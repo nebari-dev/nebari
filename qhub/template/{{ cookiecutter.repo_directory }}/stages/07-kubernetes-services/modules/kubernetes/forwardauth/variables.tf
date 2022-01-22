@@ -8,17 +8,7 @@ variable "external-url" {
   type        = string
 }
 
-variable "jh-client-id" {
-  description = "JupyterHub service client ID"
-  type        = string
-}
-
-variable "jh-client-secret" {
-  description = "JupyterHub service client secret"
-  type        = string
-}
-
-variable "callback-url-path" {
-  description = "Path of Callback URL"
+variable "realm_id" {
+  description = "Keycloak realm for forwardauth"
   type        = string
 }
