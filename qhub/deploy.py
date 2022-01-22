@@ -5,7 +5,7 @@ import contextlib
 from subprocess import CalledProcessError
 
 from qhub.provider import terraform
-from qhub.utils import timer, check_cloud_credentials, modified_environ
+from qhub.utils import timer, check_cloud_credentials, modified_environ, split_docker_image_name
 from qhub.provider.dns.cloudflare import update_record
 from qhub.state import terraform_state_sync
 
@@ -131,11 +131,21 @@ def guided_install(
 
             stage_outputs["stages/07-kubernetes-services"] = terraform.deploy(
                 directory="stages/07-kubernetes-services", input_vars={
-                    "jupyterlab-profiles": config['profiles']['jupyterlab'],
+                    "name": config['project_name'],
+                    "environment": config['namespace'],
+                    "endpoint": config['domain'],
+                    "realm_id": stage_outputs['stages/06-kubernetes-keycloak-configuration']['realm_id']['value'],
+                    # conda-store
                     "conda-store-environments": config['environments'],
+                    "conda-store-storage": config['storage']['conda_store'],
+                    "conda-store-image": split_docker_image_name(config['default_images']['conda_store']),
+                    # jupyterhub
                     "cdsdashboards": config['cdsdashboards'],
                     "jupyterhub-theme": config['theme']['jupyterhub'],
-                    "realm_id": stage_outputs['stages/06-kubernetes-keycloak-configuration']['realm_id']['value'],
+                    "jupyterhub-image": split_docker_image_name(config['default_images']['jupyterhub']),
+                    "jupyterhub-shared-storage": config['storage']['shared_filesystem'],
+                    "jupyterlab-profiles": config['profiles']['jupyterlab'],
+                    "jupyterlab-image": split_docker_image_name(config['default_images']['jupyterlab']),
                 })
 
     import pprint

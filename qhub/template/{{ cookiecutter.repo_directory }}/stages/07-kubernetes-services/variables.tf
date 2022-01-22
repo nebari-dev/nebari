@@ -1,17 +1,16 @@
 variable "name" {
-  type    = string
-  default = "{{ cookiecutter.project_name }}"
+  description = "Prefix name to assign to kubernetes resources"
+  type        = string
 }
 
 variable "environment" {
-  type    = string
-  default = "{{ cookiecutter.namespace }}"
+  description = "Kubernetes namespace to create resources within"
+  type        = string
 }
 
 variable "endpoint" {
-  description = "endpoint"
+  description = "Endpoint for services"
   type        = string
-  default     = "{{ cookiecutter.domain }}"
 }
 
 variable "realm_id" {
