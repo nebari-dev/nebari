@@ -12,3 +12,9 @@ variable "realm_id" {
   description = "Keycloak realm for forwardauth"
   type        = string
 }
+
+variable "callback-url-path" {
+  description = "Callback url for forewardauth"
+  type        = string
+  default     = "/_oauth"
+}

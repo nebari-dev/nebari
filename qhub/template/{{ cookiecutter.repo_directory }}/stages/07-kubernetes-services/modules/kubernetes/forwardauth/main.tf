@@ -5,7 +5,7 @@ module "forwardauth-openid-client" {
   client_id  = "forwardauth"
   external-url = var.external-url
   callback-url-paths = [
-    "https://${var.external-url}/_oauth"
+    "https://${var.external-url}${var.callback-url-path}"
   ]
 }
 
@@ -105,7 +105,7 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
 
           env {
             name  = "URL_PATH"
-            value = module.forwardauth-openid-client.config.callback_urls[0]
+            value = var.callback-url-path
           }
 
           env {
@@ -151,6 +151,41 @@ resource "kubernetes_manifest" "forwardauth-middleware" {
           "X-Forwarded-User"
         ]
       }
+    }
+  }
+}
+
+resource "kubernetes_manifest" "forwardauth-ingressroute" {
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "IngressRoute"
+    metadata = {
+      name      = "forwardauth"
+      namespace = var.namespace
+    }
+    spec = {
+      entryPoints = ["websecure"]
+      routes = [
+        {
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`) && PathPrefix(`${var.callback-url-path}`)"
+
+          middlewares = [
+            {
+              name      = "traefik-forward-auth"
+              namespace = var.namespace
+            }
+          ]
+
+          services = [
+            {
+              name = kubernetes_service.forwardauth-service.metadata.0.name
+              port = 4181
+            }
+          ]
+        }
+      ]
+      tls = {}
     }
   }
 }
