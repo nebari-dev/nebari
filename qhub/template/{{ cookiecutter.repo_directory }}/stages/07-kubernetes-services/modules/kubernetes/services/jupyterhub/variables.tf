@@ -40,6 +40,16 @@ variable "shared-pvc" {
   type        = string
 }
 
+variable "conda-store-pvc" {
+  description = "Name for persistent volume claim to use for conda-store directory"
+  type        = string
+}
+
+variable "conda-store-mount" {
+  description = "Mount directory for conda-store environments"
+  type        = string
+}
+
 variable "extra-mounts" {
   description = "Name of additional configmaps and pvcs to be mounted within jupyterlab image"
   default     = {}
