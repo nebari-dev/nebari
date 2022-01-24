@@ -215,6 +215,12 @@ def configure_user(username, groups, uid=1000, gid=100):
         }]
     )
 
+    jupyter_config = json.dumps({
+        # nb_conda_kernels configuration
+        # https://github.com/Anaconda-Platform/nb_conda_kernels
+        'CondaKernelSpecManager': {'name_format': '{environment}'}
+    })
+
     # condarc to add all the namespaces user has access to
     condarc = json.dumps({'envs_dirs': [f'/home/conda/{_}/envs' for _ in [
         username, 'filesystem', 'default',
@@ -228,7 +234,9 @@ def configure_user(username, groups, uid=1000, gid=100):
         # mount the shared directories for user
         f"ln -sfn /shared /home/{username}/shared",
         # conda-store environment configuration
-        f"printf '{condarc}' > /home/{username}/.condarc"
+        f"printf '{condarc}' > /home/{username}/.condarc",
+        # jupyter configuration
+        f"mkdir -p /home/{username}/.jupyter && printf '{jupyter_config}' > /home/{username}/.jupyter/jupyter_config.json",
     ])
     lifecycle_hooks = {
         'postStart': {
