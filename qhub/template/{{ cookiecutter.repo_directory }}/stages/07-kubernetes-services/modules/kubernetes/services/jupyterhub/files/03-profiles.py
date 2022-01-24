@@ -57,12 +57,12 @@ def base_profile_home_mounts(username):
 
 
 def base_profile_shared_mounts(groups):
-    """Configure the home directory mount for user
+    """Configure the group directory mounts for user
 
-    Ensure that user directory exists and user has permissions to
-    read/write/execute. Kubernetes does not allow the same pvc to be a
-    volume thus we must check that the home and share pvc are not the
-    same for some operation.
+    Ensure that {shared}/{group} directory exists and user has
+    permissions to read/write/execute. Kubernetes does not allow the
+    same pvc to be a volume thus we must check that the home and share
+    pvc are not the same for some operation.
 
     """
     home_pvc_name = z2jh.get_config('custom.home-pvc')
@@ -102,6 +102,57 @@ def base_profile_shared_mounts(groups):
         'volumeMounts': [{
             'mountPath': "/mnt",
             'name': 'shared' if home_pvc_name != shared_pvc_name else 'home'
+        }]
+    }]
+    return {
+        'extra_pod_config': extra_pod_config,
+        'extra_container_config': extra_container_config,
+        'init_containers': init_containers,
+    }
+
+
+def profile_conda_store_mounts(username, groups):
+    """Configure the conda_store environment directories mounts for
+    user
+
+    Ensure that {shared}/{group} directory exists and user has
+    permissions to read/write/execute.
+
+    """
+    conda_store_pvc_name = z2jh.get_config('custom.conda-store-pvc')
+    conda_store_mount = z2jh.get_config('custom.conda-store-mount')
+
+    extra_pod_config = {
+        'volumes': [{
+            'name': 'conda-store',
+            'persistentVolumeClaim': {
+                'claimName': conda_store_pvc_name,
+            }
+        }]
+    }
+
+    conda_store_namespaces = [username, 'filesystem', 'default'] + groups
+    extra_container_config = {
+        'volumeMounts': [{
+            'mountPath': os.path.join(conda_store_mount, namespace),
+            'name': 'conda-store',
+            'subPath': namespace,
+        } for namespace in conda_store_namespaces]
+    }
+
+    MKDIR_OWN_DIRECTORY = 'mkdir -p /mnt/{path} && chmod 755 /mnt/{path}'
+    command = ' && '.join([
+        MKDIR_OWN_DIRECTORY.format(path=namespace) for namespace in conda_store_namespaces])
+    init_containers = [{
+        'name': 'initialize-conda-store-mounts',
+        'image': 'busybox:1.31',
+        'command': ['sh', '-c', command],
+        'securityContext': {
+            'runAsUser': 0
+        },
+        'volumeMounts': [{
+            'mountPath': "/mnt",
+            'name': 'conda-store',
         }]
     }]
     return {
@@ -223,6 +274,7 @@ def render_profile(profile, username, groups):
     profile['kubespawner_override'] = functools.reduce(deep_merge, [
         base_profile_home_mounts(username),
         base_profile_shared_mounts(groups),
+        profile_conda_store_mounts(username, groups),
         base_profile_extra_mounts(),
         configure_user(username, groups),
         profile_kubespawner_override,
