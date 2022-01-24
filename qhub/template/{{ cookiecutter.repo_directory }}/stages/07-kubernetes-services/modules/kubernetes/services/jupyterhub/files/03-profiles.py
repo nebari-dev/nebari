@@ -1,6 +1,7 @@
 import copy
 import os
 import functools
+import json
 
 import z2jh
 from tornado import gen
@@ -139,7 +140,7 @@ def base_profile_extra_mounts():
     }
 
 
-def configure_user(username, uid=1000, gid=100):
+def configure_user(username, groups, uid=1000, gid=100):
     environment = {
         # nss_wrapper
         # https://cwrap.org/nss_wrapper.html
@@ -162,6 +163,12 @@ def configure_user(username, uid=1000, gid=100):
             'groupname': 'users', 'gid': gid
         }]
     )
+
+    # condarc to add all the namespaces user has access to
+    condarc = json.dumps({'envs_dirs': [f'/home/conda/{_}/envs' for _ in [
+        username, 'filesystem', 'default',
+    ] + groups]})
+
     command = ' && '.join([
         # nss_wrapper
         # https://cwrap.org/nss_wrapper.html
@@ -170,7 +177,7 @@ def configure_user(username, uid=1000, gid=100):
         # mount the shared directories for user
         f"ln -sfn /shared /home/{username}/shared",
         # conda-store environment configuration
-        f"printf 'envs_dirs:\n - /home/conda/environments/' > /home/{username}/.condarc"
+        f"printf '{condarc}' > /home/{username}/.condarc"
     ])
     lifecycle_hooks = {
         'postStart': {
@@ -217,7 +224,7 @@ def render_profile(profile, username, groups):
         base_profile_home_mounts(username),
         base_profile_shared_mounts(groups),
         base_profile_extra_mounts(),
-        configure_user(username),
+        configure_user(username, groups),
         profile_kubespawner_override,
     ], {})
     return profile
