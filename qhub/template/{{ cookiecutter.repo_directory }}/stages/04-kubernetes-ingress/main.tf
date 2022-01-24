@@ -3,7 +3,7 @@ module "kubernetes-ingress" {
 
   namespace = var.environment
 
-  node-group = local.node_groups.general
+  node-group = var.node_groups.general
 
 {% if cookiecutter.certificate.type == "lets-encrypt" %}
   enable-certificates = true

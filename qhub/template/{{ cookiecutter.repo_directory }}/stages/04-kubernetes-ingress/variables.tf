@@ -7,3 +7,11 @@ variable "environment" {
   description = "Kubernetes namespace to deploy ingress resources"
   type        = string
 }
+
+variable "node_groups" {
+  description = "Node group selectors for kubernetes resources"
+  type        = map(object({
+    key = string
+    value = string
+  }))
+}

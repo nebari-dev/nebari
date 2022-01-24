@@ -71,6 +71,18 @@ def keycloak_provider_context(keycloak_credentials):
         yield
 
 
+def calculate_note_groups(config):
+    if config['provider'] == 'aws':
+        return {group: {"key": "eks.amazonaws.com/nodegroup", "value": group} for group in ['general', 'user', 'worker']}
+    elif config['provider'] == 'gcp':
+        return {group: {"key": "cloud.google.com/gke-nodepool", "value": group} for group in ['general', 'user', 'worker']}
+    elif config['provider'] == 'azure':
+        return {group: {"key": "azure-node-pool", "value": group} for group in ['general', 'user', 'worker']}
+    elif config['provider'] == 'do':
+        return {group: {"key": "doks.digitalocean.com/node-pool", "value": group} for group in ['general', 'user', 'worker']}
+    else:
+        return config['local']['node_selectors']
+
 
 def guided_install(
     config,
@@ -109,6 +121,7 @@ def guided_install(
             input_vars={
                 'name': config['project_name'],
                 'environment': config['namespace'],
+                "node_groups": calculate_note_groups(config),
             })
 
         stage_outputs["stages/05-kubernetes-keycloak"] = terraform.deploy(
@@ -135,6 +148,7 @@ def guided_install(
                     "environment": config['namespace'],
                     "endpoint": config['domain'],
                     "realm_id": stage_outputs['stages/06-kubernetes-keycloak-configuration']['realm_id']['value'],
+                    "node_groups": calculate_note_groups(config),
                     # conda-store
                     "conda-store-environments": config['environments'],
                     "conda-store-storage": config['storage']['conda_store'],

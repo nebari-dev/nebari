@@ -30,8 +30,8 @@ module "dask-gateway" {
   gateway-image    = var.dask-gateway-image
   controller-image = var.dask-gateway-image
 
-  general-node-group = local.node_groups.general
-  worker-node-group  = local.node_groups.worker
+  general-node-group = var.node_groups.general
+  worker-node-group  = var.node_groups.worker
 
   # needs to match name in module.jupyterhub.extra-mounts
   dask-etc-configmap-name = "dask-etc"
