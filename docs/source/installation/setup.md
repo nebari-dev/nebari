@@ -24,7 +24,7 @@ scratch (i.e., no clusters yet) and aiming to have a production
 environment.
 
 Found your match? Head over to the [Local install
-docs](../development/testing.md#local-testing) for
+docs](../dev_guide/testing.md#local-testing) for
 more details.
 
 ## HPC Deployment
