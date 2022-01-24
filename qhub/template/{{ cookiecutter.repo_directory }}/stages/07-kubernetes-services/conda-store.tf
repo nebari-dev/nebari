@@ -29,7 +29,7 @@ module "kubernetes-conda-store-server" {
   realm_id     = var.realm_id
 
   nfs_capacity      = var.conda-store-storage
-  node-group        = local.node_groups.general
+  node-group        = var.node_groups.general
   conda-store-image = var.conda-store-image
   environments      = {
     for filename, environment in var.conda-store-environments:

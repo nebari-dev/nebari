@@ -61,7 +61,7 @@ module "kubernetes-nfs-server" {
   name         = "nfs-server"
   namespace    = var.environment
   nfs_capacity = var.jupyterhub-shared-storage
-  node-group   = local.node_groups.general
+  node-group   = var.node_groups.general
 }
 
 module "jupyterhub-nfs-mount" {
