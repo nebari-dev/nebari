@@ -30,6 +30,22 @@ variable "jupyterlab-image" {
   })
 }
 
+variable "general-node-group" {
+  description = "Node key value pair for bound general resources"
+  type = object({
+    key   = string
+    value = string
+  })
+}
+
+variable "user-node-group" {
+  description = "Node group key value pair for bound user resources"
+  type = object({
+    key   = string
+    value = string
+  })
+}
+
 variable "home-pvc" {
   description = "Name for persistent volume claim to use for home directory uses /home/{username}"
   type        = string
