@@ -168,7 +168,17 @@ variable "cluster" {
   }
 }
 
-variable "extra_config" {
-  description = "Additional dask-gateway configuration"
-  default     = ""
+variable "profiles" {
+  description = "Dask Gateway Profiles"
+  default     = []
+}
+
+variable "conda-store-pvc" {
+  description = "Name for persistent volume claim to use for conda-store directory"
+  type        = string
+}
+
+variable "conda-store-mount" {
+  description = "Mount directory for conda-store environments"
+  type        = string
 }

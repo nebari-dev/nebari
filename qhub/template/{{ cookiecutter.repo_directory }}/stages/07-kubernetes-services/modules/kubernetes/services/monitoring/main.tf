@@ -49,9 +49,10 @@ module "grafana-client-id" {
   client_id  = "grafana"
   external-url = var.external-url
   role_mapping = {
-    "grafana_admin" = "admin"
-    "grafana_developer" = "developer"
-    "grafana_viewer" = "viewer"
+    "admin" = ["grafana_admin"]
+    "developer" = ["grafana_developer"]
+    "practitioner" = ["grafana_viewer"]
+    "viewer" = ["grafana_viewer"]
   }
   callback-url-paths = [
     "https://${var.external-url}/monitoring/login/generic_oauth"

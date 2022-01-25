@@ -6,7 +6,7 @@ variable "realm" {
 variable "keycloak_groups" {
   description = "Permission groups in keycloak used for granting access to services"
   type = set(string)
-  default = ["admin", "developer", "viewer", "projects"]
+  default = ["admin", "developer", "practitioner", "viewer", "projects"]
 }
 
 variable "authentication" {
