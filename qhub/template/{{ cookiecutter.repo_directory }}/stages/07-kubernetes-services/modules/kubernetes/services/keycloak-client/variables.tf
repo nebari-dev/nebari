@@ -17,8 +17,9 @@ variable "external-url" {
 
 
 variable "role_mapping" {
-  description = "Role to Group mapping to establish for client"
-  default = { }
+  description = "Group to role mapping to establish for client"
+  type        = map(list(string))
+  default     = {}
 }
 
 

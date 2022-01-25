@@ -15,6 +15,11 @@ variable "dask-gateway-image" {
   })
 }
 
+variable "dask-gateway-profiles" {
+  description = "Dask Gateway profiles to expose to user"
+  default = []
+}
+
 
 # =================== RESOURCES =====================
 module "dask-gateway" {
@@ -35,6 +40,13 @@ module "dask-gateway" {
 
   # needs to match name in module.jupyterhub.extra-mounts
   dask-etc-configmap-name = "dask-etc"
+
+  # environments
+  conda-store-pvc = module.conda-store-nfs-mount.persistent_volume_claim.name
+  conda-store-mount = "/home/conda"
+
+  # profiles
+  profiles = var.dask-gateway-profiles
 
   # # default cluster behavior
   # cluster = {

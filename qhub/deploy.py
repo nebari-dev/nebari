@@ -163,6 +163,7 @@ def guided_install(
                     # dask-gateway
                     "dask-gateway-image": split_docker_image_name(config['default_images']['dask_gateway']),
                     "dask-worker-image": split_docker_image_name(config['default_images']['dask_worker']),
+                    "dask-gateway-profiles": config['profiles']['dask_worker'],
                     # monitoring
                     "monitoring-enabled": config['monitoring']['enabled'],
                     # prefect

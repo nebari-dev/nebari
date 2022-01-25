@@ -5,15 +5,7 @@ resource "kubernetes_config_map" "controller" {
   }
 
   data = {
-    "dask_gateway_config.py" = templatefile(
-      "${path.module}/templates/controller_config.py", {
-        gateway_service_name                 = kubernetes_service.gateway.metadata.0.name
-        gateway_service_namespace            = kubernetes_service.gateway.metadata.0.namespace
-        gateway_cluster_middleware_name      = kubernetes_manifest.chain-middleware.manifest.metadata.name
-        gateway_cluster_middleware_namespace = kubernetes_manifest.chain-middleware.manifest.metadata.namespace
-        gateway                              = var.gateway
-        controller                           = var.controller
-    })
+    "dask_gateway_config.py" = file("${path.module}/files/controller_config.py")
   }
 }
 
@@ -108,6 +100,7 @@ resource "kubernetes_deployment" "controller" {
         annotations = {
           # This lets us autorestart when the secret changes!
           "checksum/config-map" = sha256(jsonencode(kubernetes_config_map.controller.data))
+          "checksum/secret"     = sha256(jsonencode(kubernetes_secret.gateway.data))
         }
       }
 
@@ -136,6 +129,13 @@ resource "kubernetes_deployment" "controller" {
           }
         }
 
+        volume {
+          name = "secret"
+          secret {
+            secret_name = kubernetes_secret.gateway.metadata.0.name
+          }
+        }
+
         container {
           image = "${var.controller-image.name}:${var.controller-image.tag}"
           name  = "${var.name}-daskgateway-controller"
@@ -150,6 +150,11 @@ resource "kubernetes_deployment" "controller" {
           volume_mount {
             name       = "configmap"
             mount_path = "/etc/dask-gateway/"
+          }
+
+          volume_mount {
+            name       = "secret"
+            mount_path = "/var/lib/dask-gateway/"
           }
 
           port {

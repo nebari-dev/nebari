@@ -5,7 +5,21 @@ resource "kubernetes_secret" "gateway" {
   }
 
   data = {
-    "jupyterhub_api_token" = var.jupyterhub_api_token
+    "config.json" = jsonencode({
+      jupyterhub_api_token      = var.jupyterhub_api_token
+      jupyterhub_api_url        = var.jupyterhub_api_url
+      gateway_service_name      = kubernetes_service.gateway.metadata.0.name
+      gateway_service_namespace = kubernetes_service.gateway.metadata.0.namespace
+      gateway_cluster_middleware_name      = kubernetes_manifest.chain-middleware.manifest.metadata.name
+      gateway_cluster_middleware_namespace = kubernetes_manifest.chain-middleware.manifest.metadata.namespace
+      gateway                   = var.gateway
+      controller                = var.controller
+      cluster                   = var.cluster
+      cluster-image             = var.cluster-image
+      profiles                  = var.profiles
+      conda-store-pvc           = var.conda-store-pvc
+      conda-store-mount         = var.conda-store-mount
+    })
   }
 }
 
@@ -17,16 +31,7 @@ resource "kubernetes_config_map" "gateway" {
   }
 
   data = {
-    "dask_gateway_config.py" = templatefile(
-      "${path.module}/templates/gateway_config.py", {
-        gateway_service_name      = kubernetes_service.gateway.metadata.0.name
-        gateway_service_namespace = kubernetes_service.gateway.metadata.0.namespace
-        jupyterhub_api_url        = var.jupyterhub_api_url
-        gateway                   = var.gateway
-        cluster                   = var.cluster
-        cluster-image             = var.cluster-image
-        extra_config              = var.extra_config
-    })
+    "dask_gateway_config.py" = file("${path.module}/files/gateway_config.py")
   }
 }
 
@@ -149,6 +154,20 @@ resource "kubernetes_deployment" "gateway" {
           }
         }
 
+        volume {
+          name = "secret"
+          secret {
+            secret_name = kubernetes_secret.gateway.metadata.0.name
+          }
+        }
+
+        volume {
+          name = "conda-store"
+          persistent_volume_claim {
+            claim_name = var.conda-store-pvc
+          }
+        }
+
         service_account_name            = kubernetes_service_account.gateway.metadata.0.name
         automount_service_account_token = true
 
@@ -167,14 +186,14 @@ resource "kubernetes_deployment" "gateway" {
             mount_path = "/etc/dask-gateway/"
           }
 
-          env {
-            name = "JUPYTERHUB_API_TOKEN"
-            value_from {
-              secret_key_ref {
-                name = kubernetes_secret.gateway.metadata.0.name
-                key  = "jupyterhub_api_token"
-              }
-            }
+          volume_mount {
+            name       = "secret"
+            mount_path = "/var/lib/dask-gateway/"
+          }
+
+          volume_mount {
+            name       = "conda-store"
+            mount_path = var.conda-store-mount
           }
 
           port {

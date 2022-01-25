@@ -19,23 +19,6 @@ resource "keycloak_openid_client" "main" {
 }
 
 
-# Add a property 'name' to userinfo response (and others) because
-# traefik forwardauth expects 'name' (rather than 'preferred_name')
-# and there does not seem to be a way to configure this in
-# forwardauth. Remove if this changes.
-resource "keycloak_openid_user_property_protocol_mapper" "user_property_mapper" {
-  realm_id   = var.realm_id
-  client_id  = keycloak_openid_client.main.id
-  name       = "user-property-mapper"
-  claim_name = "name"
-
-  user_property       = "username"
-  add_to_id_token     = true
-  add_to_access_token = true
-  add_to_userinfo     = true
-}
-
-
 resource "keycloak_openid_user_client_role_protocol_mapper" "main" {
   realm_id        = var.realm_id
   client_id       = keycloak_openid_client.main.id
@@ -64,7 +47,7 @@ resource "keycloak_openid_group_membership_protocol_mapper" "main" {
 
 
 resource "keycloak_role" "main" {
-  for_each = var.role_mapping
+  for_each = toset(flatten(values(var.role_mapping)))
 
   realm_id    = var.realm_id
   client_id   = keycloak_openid_client.main.id
@@ -74,10 +57,10 @@ resource "keycloak_role" "main" {
 
 
 data "keycloak_group" "main" {
-  for_each = toset(values(var.role_mapping))
+  for_each = var.role_mapping
 
   realm_id = var.realm_id
-  name     = each.value
+  name     = each.key
 }
 
 
@@ -85,9 +68,8 @@ resource "keycloak_group_roles" "group_roles" {
   for_each = var.role_mapping
 
   realm_id = var.realm_id
-  group_id = data.keycloak_group.main[each.value].id
+  group_id = data.keycloak_group.main[each.key].id
+  role_ids = [for role in each.value: keycloak_role.main[role].id]
 
-  role_ids = [
-    keycloak_role.main[each.key].id,
-  ]
+  exhaustive = false
 }
