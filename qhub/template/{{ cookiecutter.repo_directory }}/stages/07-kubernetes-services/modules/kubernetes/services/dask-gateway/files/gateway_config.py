@@ -92,7 +92,7 @@ def list_dask_environments(conda_store_mount):
             yield namespace, name, conda_prefix
 
 
-def base_conda_store_mounts(username, namespace, name, uid=1000, gid=100):
+def base_conda_store_mounts(namespace, name):
     conda_store_pvc_name = config['conda-store-pvc']
     conda_store_mount = config['conda-store-mount']
 
@@ -106,12 +106,6 @@ def base_conda_store_mounts(username, namespace, name, uid=1000, gid=100):
             }]
         },
         "scheduler_extra_container_config": {
-            "securityContext": {
-                "runAsUser": uid,
-                "runAsGroup": gid,
-                "fsGroup": gid
-            },
-            'workingDir': f'/home/{username}',
             'volumeMounts': [{
                 'mountPath': os.path.join(conda_store_mount, namespace),
                 'name': 'conda-store',
@@ -127,12 +121,6 @@ def base_conda_store_mounts(username, namespace, name, uid=1000, gid=100):
             }]
         },
         "worker_extra_container_config": {
-            "securityContext": {
-                "runAsUser": uid,
-                "runAsGroup": gid,
-                "fsGroup": gid
-            },
-            'workingDir': f'/home/{username}',
             'volumeMounts': [{
                 'mountPath': os.path.join(conda_store_mount, namespace),
                 'name': 'conda-store',
@@ -142,18 +130,63 @@ def base_conda_store_mounts(username, namespace, name, uid=1000, gid=100):
         "worker_cmd": '/opt/conda-run-worker',
         "scheduler_cmd": '/opt/conda-run-scheduler',
         "environment": {
-            'HOME': f'/home/{username}',
             'CONDA_ENVIRONMENT': os.path.join(conda_store_mount, namespace, 'envs', name),
         }
     }
 
 
+def base_username_mount(username, uid=1000, gid=100):
+    return {
+        "scheduler_extra_pod_config": {
+            "volumes": [{
+                "name": "home",
+                "emptyDir": {}
+            }]
+        },
+        "scheduler_extra_container_config": {
+            "securityContext": {
+                "runAsUser": uid,
+                "runAsGroup": gid,
+                "fsGroup": gid
+            },
+            'workingDir': f'/home/{username}',
+            'volumeMounts': [{
+                'mountPath': f'/home/{username}',
+                'name': 'home',
+            }]
+        },
+        "worker_extra_pod_config": {
+            "volumes": [{
+                "name": "home",
+                "emptyDir": {}
+            }]
+        },
+        "worker_extra_container_config": {
+            "securityContext": {
+                "runAsUser": uid,
+                "runAsGroup": gid,
+                "fsGroup": gid
+            },
+            'workingDir': f'/home/{username}',
+            'volumeMounts': [{
+                'mountPath': f'/home/{username}',
+                'name': 'home',
+            }]
+        },
+        "environment": {
+            'HOME': f'/home/{username}',
+        }
+    }
+
+
+
 def worker_profile(options, user):
     namespace, name = options.conda_environment.split('/')
     return functools.reduce(deep_merge, [
+        base_conda_store_mounts(namespace, name),
+        base_username_mount(user.name),
         config['profiles'][options.profile],
         {"environment": {**options.environment_vars}},
-        base_conda_store_mounts(user.name, namespace, name),
     ], {})
 
 
