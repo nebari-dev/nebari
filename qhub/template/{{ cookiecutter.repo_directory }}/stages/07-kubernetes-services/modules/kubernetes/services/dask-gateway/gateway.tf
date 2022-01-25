@@ -19,6 +19,7 @@ resource "kubernetes_secret" "gateway" {
       profiles                  = var.profiles
       conda-store-pvc           = var.conda-store-pvc
       conda-store-mount         = var.conda-store-mount
+      worker-node-group         = var.worker-node-group
     })
   }
 }
