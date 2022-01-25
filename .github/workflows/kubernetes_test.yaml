@@ -78,9 +78,9 @@ jobs:
       - name: Configure LoadBalancer IPs
         run: |
           python tests/scripts/minikube-loadbalancer-ip.py
-      - name: Add DNS entry to hosts
-        run: |
-          sudo echo "192.168.49.100  github-actions.qhub.dev" | sudo tee -a /etc/hosts
+      # - name: Add DNS entry to hosts
+      #   run: |
+      #     sudo echo "192.168.49.100  github-actions.qhub.dev" | sudo tee -a /etc/hosts
       - name: Enable Minikube metallb
         run: |
           minikube addons enable metallb
