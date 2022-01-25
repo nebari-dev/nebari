@@ -92,6 +92,21 @@ def list_dask_environments(conda_store_mount):
             yield namespace, name, conda_prefix
 
 
+def base_node_group():
+    worker_node_group = {
+        config['worker-node-group']['key']: config['worker-node-group']['value']
+    }
+
+    return {
+        "scheduler_extra_pod_config": {
+            "nodeSelector": worker_node_group
+        },
+        "worker_extra_pod_config": {
+            "nodeSelector": worker_node_group
+        },
+    }
+
+
 def base_conda_store_mounts(namespace, name):
     conda_store_pvc_name = config['conda-store-pvc']
     conda_store_mount = config['conda-store-mount']
@@ -183,6 +198,7 @@ def base_username_mount(username, uid=1000, gid=100):
 def worker_profile(options, user):
     namespace, name = options.conda_environment.split('/')
     return functools.reduce(deep_merge, [
+        base_node_group(),
         base_conda_store_mounts(namespace, name),
         base_username_mount(user.name),
         config['profiles'][options.profile],
