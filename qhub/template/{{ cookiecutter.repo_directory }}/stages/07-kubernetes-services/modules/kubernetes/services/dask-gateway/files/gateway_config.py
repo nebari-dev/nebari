@@ -1,5 +1,6 @@
 import os
 import json
+import functools
 
 from aiohttp import web
 from dask_gateway_server.options import Options, Select, Mapping
@@ -41,7 +42,34 @@ c.KubeClusterConfig.worker_extra_container_config = config['cluster']['worker_ex
 c.KubeClusterConfig.worker_extra_pod_config = config['cluster']['worker_extra_pod_config']
 
 
+# ============ Authentication =================
+class QHubAuthentication(JupyterHubAuthenticator):
+    async def authenticate(self, request):
+        user = await super().authenticate(request)
+        url = f"{self.jupyterhub_api_url}/users/{user.name}"
+        kwargs = {
+            "headers": {"Authorization": "token %s" % self.jupyterhub_api_token},
+            "ssl": self.ssl_context,
+        }
+        resp = await self.session.get(url, **kwargs)
+        data = (await resp.json())['auth_state']['oauth_user']
 
+        if 'dask_gateway_developer' not in data['roles'] and 'dask_gateway_admin' not in data['roles']:
+            raise web.HTTPInternalServerError(
+                reason="Permission failure user does not have required dask_gateway roles"
+            )
+
+        user.admin = 'dask_gateway_admin' in data['roles']
+        user.groups = [os.path.basename(group) for group in data['groups'] if os.path.dirname(group) == '/projects']
+        return user
+
+
+c.DaskGateway.authenticator_class = QHubAuthentication
+c.JupyterHubAuthenticator.jupyterhub_api_url = config['jupyterhub_api_url']
+c.JupyterHubAuthenticator.jupyterhub_api_token = config['jupyterhub_api_token']
+
+
+# ==================== Profiles =======================
 def get_packages(conda_prefix):
     packages = set()
     for filename in os.listdir(os.path.join(conda_prefix, 'conda-meta')):
@@ -64,16 +92,69 @@ def list_dask_environments(conda_store_mount):
             yield namespace, name, conda_prefix
 
 
-def worker_profile(options):
-    print(options.profile)
-    _config = config['profiles'][options.profile]
-    _config['worker_cmd'] = '/opt/conda-run-worker'
-    _config['scheduler_cmd'] = '/opt/conda-run-scheduler'
-    _config['environment'] = {
-        **options.environment_vars,
-        'CONDA_ENVIRONMENT': options.conda_environment
+def base_conda_store_mounts(username, namespace, name, uid=1000, gid=100):
+    conda_store_pvc_name = config['conda-store-pvc']
+    conda_store_mount = config['conda-store-mount']
+
+    return {
+        "scheduler_extra_pod_config": {
+            "volumes": [{
+                'name': 'conda-store',
+                'persistentVolumeClaim': {
+                    'claimName': conda_store_pvc_name,
+                }
+            }]
+        },
+        "scheduler_extra_container_config": {
+            "securityContext": {
+                "runAsUser": uid,
+                "runAsGroup": gid,
+                "fsGroup": gid
+            },
+            'workingDir': f'/home/{username}',
+            'volumeMounts': [{
+                'mountPath': os.path.join(conda_store_mount, namespace),
+                'name': 'conda-store',
+                'subPath': namespace,
+            }]
+        },
+        "worker_extra_pod_config": {
+            "volumes": [{
+                'name': 'conda-store',
+                'persistentVolumeClaim': {
+                    'claimName': conda_store_pvc_name,
+                }
+            }]
+        },
+        "worker_extra_container_config": {
+            "securityContext": {
+                "runAsUser": uid,
+                "runAsGroup": gid,
+                "fsGroup": gid
+            },
+            'workingDir': f'/home/{username}',
+            'volumeMounts': [{
+                'mountPath': os.path.join(conda_store_mount, namespace),
+                'name': 'conda-store',
+                'subPath': namespace
+            }]
+        },
+        "worker_cmd": '/opt/conda-run-worker',
+        "scheduler_cmd": '/opt/conda-run-scheduler',
+        "environment": {
+            'HOME': f'/home/{username}',
+            'CONDA_ENVIRONMENT': os.path.join(conda_store_mount, namespace, 'envs', name),
+        }
     }
-    return _config
+
+
+def worker_profile(options, user):
+    namespace, name = options.conda_environment.split('/')
+    return functools.reduce(deep_merge, [
+        config['profiles'][options.profile],
+        {"environment": {**options.environment_vars}},
+        base_conda_store_mounts(user.name, namespace, name),
+    ], {})
 
 
 def user_options(user):
@@ -103,29 +184,37 @@ def user_options(user):
 c.Backend.cluster_options = user_options
 
 
-# ============ Authentication =================
-class QHubAuthentication(JupyterHubAuthenticator):
-    async def authenticate(self, request):
-        user = await super().authenticate(request)
-        url = f"{self.jupyterhub_api_url}/users/{user.name}"
-        kwargs = {
-            "headers": {"Authorization": "token %s" % self.jupyterhub_api_token},
-            "ssl": self.ssl_context,
-        }
-        resp = await self.session.get(url, **kwargs)
-        data = (await resp.json())['auth_state']['oauth_user']
+# ============== utils ============
+def deep_merge(d1, d2):
+    """Deep merge two dictionaries.
+    >>> value_1 = {
+    'a': [1, 2],
+    'b': {'c': 1, 'z': [5, 6]},
+    'e': {'f': {'g': {}}},
+    'm': 1,
+    }
 
-        if 'dask_gateway_developer' not in data['roles'] and 'dask_gateway_admin' not in data['roles']:
-            raise web.HTTPInternalServerError(
-                reason="Permission failure user does not have required dask_gateway roles"
-            )
+    >>> value_2 = {
+        'a': [3, 4],
+        'b': {'d': 2, 'z': [7]},
+        'e': {'f': {'h': 1}},
+        'm': [1],
+    }
 
-        user.admin = 'dask_gateway_admin' in data['roles']
-        user.groups = [os.path.basename(group) for group in data['groups'] if os.path.dirname(group) == '/projects']
-        return user
-
-
-# ========= Authentication ==========
-c.DaskGateway.authenticator_class = QHubAuthentication
-c.JupyterHubAuthenticator.jupyterhub_api_url = config['jupyterhub_api_url']
-c.JupyterHubAuthenticator.jupyterhub_api_token = config['jupyterhub_api_token']
+    >>> print(deep_merge(value_1, value_2))
+    {'m': 1, 'e': {'f': {'g': {}, 'h': 1}}, 'b': {'d': 2, 'c': 1, 'z': [5, 6, 7]}, 'a': [1, 2, 3,  4]}
+    """
+    if isinstance(d1, dict) and isinstance(d2, dict):
+        d3 = {}
+        for key in d1.keys() | d2.keys():
+            if key in d1 and key in d2:
+                d3[key] = deep_merge(d1[key], d2[key])
+            elif key in d1:
+                d3[key] = d1[key]
+            elif key in d2:
+                d3[key] = d2[key]
+        return d3
+    elif isinstance(d1, list) and isinstance(d2, list):
+        return [*d1, *d2]
+    else:  # if they don't match use left one
+        return d1
