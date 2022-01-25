@@ -35,6 +35,9 @@ resource "helm_release" "jupyterhub" {
 
       hub = {
         image = var.jupyterhub-image
+        nodeSelector = {
+          "${var.general-node-group.key}" = var.general-node-group.value
+        }
 
         extraConfig = {
           "01-theme.py" = file("${path.module}/files/01-theme.py")
@@ -78,6 +81,17 @@ resource "helm_release" "jupyterhub" {
 
       singleuser = {
         image = var.jupyterlab-image
+        nodeSelector = {
+          "${var.user-node-group.key}" = var.user-node-group.value
+        }
+      }
+
+      scheduling = {
+        userScheduler = {
+          nodeSelector = {
+            "${var.user-node-group.key}" = var.user-node-group.value
+          }
+        }
       }
     })
   ], var.overrides)

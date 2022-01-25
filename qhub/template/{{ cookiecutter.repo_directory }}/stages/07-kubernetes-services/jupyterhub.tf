@@ -108,6 +108,9 @@ module "jupyterhub" {
     {% if cookiecutter.prefect.enabled -%}"prefect"{% endif %}
   ]
 
+  general-node-group = var.node_groups.general
+  user-node-group  = var.node_groups.user
+
   jupyterhub-image = var.jupyterhub-image
   jupyterlab-image = var.jupyterlab-image
 

@@ -8,6 +8,34 @@ resource "helm_release" "prometheus-grafana" {
   values = concat([
     file("${path.module}/values.yaml"),
     jsonencode({
+      alertmanager = {
+        alertmanagerSpec = {
+          nodeSelector: {
+            "${var.node-group.key}" = var.node-group.value
+          }
+        }
+      }
+
+      prometheusOperator = {
+        admissionWebhooks = {
+          patch = {
+            nodeSelector = {
+              "${var.node-group.key}" = var.node-group.value
+            }
+          }
+        }
+
+        nodeSelector = {
+          "${var.node-group.key}" = var.node-group.value
+        }
+
+        prometheusSpec = {
+          nodeSelector = {
+            "${var.node-group.key}" = var.node-group.value
+          }
+        }
+      }
+
       grafana = {
         "grafana.ini": {
           server = {
