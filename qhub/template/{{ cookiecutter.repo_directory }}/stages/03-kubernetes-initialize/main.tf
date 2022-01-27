@@ -5,31 +5,27 @@ module "kubernetes-initialization" {
   secrets   = []
 }
 
-{% if cookiecutter.provider == "aws" -%}
 module "kubernetes-autoscaling" {
+  count = var.qhub_config.provider == "aws" ? 1 : 0
+
   source = "./modules/kubernetes/services/cluster-autoscaler"
 
   namespace = var.environment
 
-  aws-region   = var.region
+  aws-region   = var.qhub_config.amazon_web_services.region
   cluster-name = local.cluster_name
-
-  depends_on = [
-    module.kubernetes-initialization
-  ]
 }
-{% endif -%}
 
 module "external-container-reg" {
+  count = var.external_container_reg.enabled ? 1 : 0
+
   source = "./modules/extcr"
 
-  count = {{ cookiecutter.external_container_reg.enabled | default(false,true) | jsonify }} ? 1 : 0
-
   namespace         = var.environment
-  access_key_id     = "{{ cookiecutter.external_container_reg.access_key_id | default("",true) }}"
-  secret_access_key = "{{ cookiecutter.external_container_reg.secret_access_key | default("",true) }}"
-  extcr_account     = "{{ cookiecutter.external_container_reg.extcr_account | default("",true) }}"
-  extcr_region      = "{{ cookiecutter.external_container_reg.extcr_region | default("",true) }}"
+  access_key_id     = var.external_container_reg.access_key_id
+  secret_access_key = var.external_container_reg.secret_access_key
+  extcr_account     = var.external_container_reg.extcr_account
+  extcr_region      = var.external_container_reg.extcr_region
 }
 
 resource "kubernetes_secret" "qhub_yaml_secret" {
@@ -39,7 +35,7 @@ resource "kubernetes_secret" "qhub_yaml_secret" {
   }
 
   data = {
-    "qhub-config.yaml" = file({{ cookiecutter.qhub_config_yaml_path | jsonify }})
+    "qhub-config.yaml" = yamlencode(var.qhub_config)
   }
 }
 

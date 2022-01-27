@@ -3,10 +3,12 @@ import os
 import re
 import contextlib
 from subprocess import CalledProcessError
+from typing import List, Dict
 
 from qhub.provider import terraform
 from qhub.utils import timer, check_cloud_credentials, modified_environ, split_docker_image_name
 from qhub.provider.dns.cloudflare import update_record
+from qhub.render.terraform import QHubKubernetesProvider, QHubTerraformState
 from qhub.state import terraform_state_sync
 
 logger = logging.getLogger(__name__)
@@ -38,7 +40,7 @@ def deploy_configuration(
 
 
 @contextlib.contextmanager
-def kubernetes_provider_context(kubernetes_credentials):
+def kubernetes_provider_context(kubernetes_credentials : Dict[str, str]):
     credential_mapping = {
         'config_path': 'KUBE_CONFIG_PATH',
         'config_context': 'KUBE_CTX',
@@ -50,14 +52,15 @@ def kubernetes_provider_context(kubernetes_credentials):
         'host': 'KUBE_HOST',
         'token': 'KUBE_TOKEN',
     }
+    print(kubernetes_credentials)
 
-    credentials = {credential_mapping[k]: v for k,v in kubernetes_credentials.items()}
+    credentials = {credential_mapping[k]: v for k,v in kubernetes_credentials.items() if v is not None}
     with modified_environ(**credentials):
         yield
 
 
 @contextlib.contextmanager
-def keycloak_provider_context(keycloak_credentials):
+def keycloak_provider_context(keycloak_credentials : Dict[str, str]):
     credential_mapping = {
         'client_id': 'KEYCLOAK_CLIENT_ID',
         'url': 'KEYCLOAK_URL',
@@ -100,12 +103,19 @@ def guided_install(
 
     stage_outputs = {}
 
-    for stage in [
-        "stages/01-terraform-state",
-        "stages/02-infrastructure",
-    ]:
-        logger.info(f"Running Terraform Stage={stage}")
-        stage_outputs[stage] = terraform.deploy(stage)
+    if config['provider'] == "local":
+        stage_outputs['stages/02-infrastructure'] = terraform.deploy(
+            os.path.join("stages/02-infrastructure", config['provider']),
+            input_vars={
+                "kube_context": config['local'].get('kube_context')
+            })
+    else:
+        for stage in [
+                "stages/01-terraform-state",
+                "stages/02-infrastructure",
+        ]:
+            logger.info(f"Running Terraform Stage={stage}")
+            stage_outputs[stage] = terraform.deploy(stage)
 
     with kubernetes_provider_context(
             stage_outputs['stages/02-infrastructure']['kubernetes_credentials']['value']):
@@ -114,7 +124,13 @@ def guided_install(
             input_vars={
                 'name': config['project_name'],
                 'environment': config['namespace'],
-            })
+                'qhub_config': config,
+                'external_container_reg': config.get('external_container_reg', {'enabled': False})
+            },
+            terraform_objects=[
+                QHubTerraformState('03-kubernetes-initialize', config),
+                QHubKubernetesProvider(config),
+            ])
 
         stage_outputs["stages/04-kubernetes-ingress"] = terraform.deploy(
             directory="stages/04-kubernetes-ingress",
@@ -122,7 +138,15 @@ def guided_install(
                 'name': config['project_name'],
                 'environment': config['namespace'],
                 "node_groups": calculate_note_groups(config),
-            })
+                "enable-certificates": (config['certificate']['type'] == 'lets-encrypt'),
+                "acme-email": config['certificate'].get('acme_email'),
+                "acme-server": config['certificate'].get('acme_server'),
+                "certificate-secret-name": config['certificate']['secret_name'] if config['certificate']['type'] == 'lets-encrypt' else None,
+            },
+            terraform_objects=[
+                QHubTerraformState('04-kubernetes-ingress', config),
+                QHubKubernetesProvider(config),
+            ])
 
         stage_outputs["stages/05-kubernetes-keycloak"] = terraform.deploy(
             directory="stages/05-kubernetes-keycloak",
@@ -131,7 +155,11 @@ def guided_install(
                 'environment': config['namespace'],
                 'endpoint': config['domain'],
                 'initial-root-password': config['security']['keycloak']['initial_root_password']
-            })
+            },
+            terraform_objects=[
+                QHubTerraformState('05-kubernetes-keycloak', config),
+                QHubKubernetesProvider(config),
+            ])
 
         with keycloak_provider_context(
                 stage_outputs['stages/05-kubernetes-keycloak']['keycloak_credentials']['value']):
@@ -140,7 +168,11 @@ def guided_install(
                 input_vars={
                     'realm': f"qhub-{config['project_name']}",
                     'authentication': config['security']['authentication']
-                })
+                },
+                terraform_objects=[
+                    QHubTerraformState('06-kubernetes-keycloak-configuration', config),
+                ])
+
 
             stage_outputs["stages/07-kubernetes-services"] = terraform.deploy(
                 directory="stages/07-kubernetes-services", input_vars={
@@ -174,7 +206,12 @@ def guided_install(
                     # clearml
                     "clearml-enabled": config.get('clearml', {}).get('enabled', False),
                     "clearml-enable-forwardauth": config.get('clearml', {}).get('enable_forward_auth', False),
-                })
+                },
+                terraform_objects=[
+                    QHubTerraformState('07-kubernetes-services', config),
+                    QHubKubernetesProvider(config),
+                ])
+
 
     import pprint
     pprint.pprint(stage_outputs)

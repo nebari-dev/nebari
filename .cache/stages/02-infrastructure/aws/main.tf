@@ -1,8 +1,3 @@
-{%- if cookiecutter.provider == "aws" %}
-provider "aws" {
-  region = "{{ cookiecutter.amazon_web_services.region }}"
-}
-
 data "aws_availability_zones" "awszones" {
   filter {
     name   = "opt-in-status"
@@ -12,7 +7,7 @@ data "aws_availability_zones" "awszones" {
 
 # ==================== ACCOUNTING ======================
 module "accounting" {
-  source = "./modules/aws/accounting"
+  source = "../modules/aws/accounting"
 
   project     = var.name
   environment = var.environment
@@ -23,7 +18,7 @@ module "accounting" {
 
 # ======================= NETWORK ======================
 module "network" {
-  source = "./modules/aws/network"
+  source = "../modules/aws/network"
 
   name = local.cluster_name
 
@@ -48,7 +43,7 @@ module "network" {
 
 # ==================== REGISTRIES =====================
 module "registry-jupyterlab" {
-  source = "./modules/aws/registry"
+  source = "../modules/aws/registry"
 
   name = "${local.cluster_name}-jupyterlab"
   tags = local.additional_tags
@@ -57,7 +52,7 @@ module "registry-jupyterlab" {
 
 # ====================== EFS =========================
 module "efs" {
-  source = "./modules/aws/efs"
+  source = "../modules/aws/efs"
 
   name = "${local.cluster_name}-jupyterhub-shared"
   tags = local.additional_tags
@@ -69,7 +64,7 @@ module "efs" {
 
 # ==================== KUBERNETES =====================
 module "kubernetes" {
-  source = "./modules/aws/kubernetes"
+  source = "../modules/aws/kubernetes"
 
   name = local.cluster_name
   tags = local.additional_tags
@@ -82,20 +77,17 @@ module "kubernetes" {
   ]
 
   node_groups = [
-{% for nodegroup, nodegroup_config in cookiecutter.amazon_web_services.node_groups.items() %}
-    {
-      name          = "{{ nodegroup }}"
-      instance_type = "{{ nodegroup_config.instance }}"
-      min_size      = {{ nodegroup_config.min_nodes }}
-      desired_size  = {{ nodegroup_config.min_nodes }}
-      max_size      = {{ nodegroup_config.max_nodes }}
-      gpu           = {{ "true" if nodegroup_config.gpu is defined and nodegroup_config.gpu else "false"}}
-    },
-{% endfor %}
+    for name, config in node_groups: {
+      name          = name
+      instance_type = config.instance
+      min_size      = config.min_nodes
+      desired_size  = config.min_nodes
+      max_size      = config.max_nodes
+      gpu           = config.gpu
+    }
   ]
 
   depends_on = [
     module.network
   ]
 }
-{% endif %}
