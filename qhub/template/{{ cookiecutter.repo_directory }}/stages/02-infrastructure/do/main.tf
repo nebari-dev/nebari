@@ -7,7 +7,7 @@ module "kubernetes" {
   kubernetes_version = var.kubernetes_version
 
   node_groups = [
-    for name, config in node_groups: {
+    for name, config in var.node_groups: {
       name       = name
       auto_scale = true
       size      = config.instance

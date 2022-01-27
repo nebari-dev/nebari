@@ -26,7 +26,7 @@ module "terraform-state" {
 
 terraform {
   required_providers {
-    google = {
+    digitalocean = {
       source = "digitalocean/digitalocean"
       version = "2.17.0"
     }
