@@ -1,4 +1,4 @@
-locals {
+local {
   additional_tags = {
     Project     = var.name
     Owner       = "terraform"

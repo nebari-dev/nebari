@@ -9,9 +9,12 @@ import sys
 import tempfile
 import urllib.request
 import zipfile
-from typing import Dict, Any
+from typing import Dict, Any, List
+import functools
+import contextlib
 
-from qhub.utils import timer, run_subprocess_cmd, modified_environ
+
+from qhub.utils import timer, run_subprocess_cmd, deep_merge
 from qhub import constants
 
 
@@ -22,11 +25,23 @@ class TerraformException(Exception):
     pass
 
 
-def deploy(directory, input_vars: Dict[str, Any] = None):
+def deploy(directory, input_vars: Dict[str, Any] = None, terraform_objects: List[Dict] = None):
     """Execute a given terraform directory
+
+    Parameters:
+      input_vars: supply values for "variable" resources within
+        terraform module
+
+      terraform_objects: using resources Terraform, RequiredProvider,
+        Provider, TerraformBackend, Variable, Data, Resource, Output
+        construct additional resources to include in module
 
     """
     input_vars = input_vars or {}
+
+    if terraform_objects:
+        with open(os.path.join(directory, '_qhub.tf.json'), "w") as f:
+            json.dump(deep_merge(*terraform_objects), f, indent=4)
 
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix='.tfvars.json') as f:
         json.dump(input_vars, f.file)
@@ -154,3 +169,67 @@ def rm_local_state(directory=None):
 
     if os.path.isfile(tfstate_path):
         os.remove(tfstate_path)
+
+
+# ========== Terraform JSON ============
+@contextlib.contextmanager
+def tf_context(filename):
+    try:
+        tf_clear()
+        yield
+    finally:
+        with open(filename, "w") as f:
+            f.write(tf_render())
+        tf_clear()
+
+
+_TF_OBJECTS = {}
+
+def tf_clear():
+    global _TF_OBJECTS
+    _TF_OBJECTS = {}
+
+def tf_render():
+    global _TF_OBJECTS
+    return json.dumps(_TF_OBJECTS, indent=4)
+
+def register(f):
+    def wrapper(*args, **kwargs):
+        global _TF_OBJECTS
+        obj = f(*args, **kwargs)
+        _TF_OBJECTS = deep_merge(_TF_OBJECTS, obj)
+        return obj
+    return wrapper
+
+
+@register
+def Terraform(**kwargs):
+    return {'terraform': kwargs}
+
+@register
+def RequiredProvider(name, **kwargs):
+    return {'terraform': {'required_providers': {name: kwargs}}}
+
+@register
+def Provider(name, **kwargs):
+    return {'provider': {name: kwargs}}
+
+@register
+def TerraformBackend(name, **kwargs):
+    return {'terraform': {'backend': {name: kwargs}}}
+
+@register
+def Variable(name, **kwargs):
+    return {'variable': {name: kwargs}}
+
+@register
+def Data(resource_type, name, **kwargs):
+    return {'data': {resource_type: {name: kwargs}}}
+
+@register
+def Resource(resource_type, name, **kwargs):
+    return {'resource': {resource_type: {name: kwargs}}}
+
+@register
+def Output(name, **kwargs):
+    return {'output': {name: kwargs}}
