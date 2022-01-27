@@ -26,3 +26,9 @@ variable "node_groups" {
     max_nodes   = number
   }))
 }
+
+variable "kubeconfig_filename" {
+  description = "Kubernetes kubeconfig written to filesystem"
+  type        = string
+  default     = null
+}

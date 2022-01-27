@@ -4,6 +4,7 @@ import re
 import contextlib
 from subprocess import CalledProcessError
 from typing import List, Dict
+import tempfile
 
 from qhub.provider import terraform
 from qhub.utils import timer, check_cloud_credentials, modified_environ, split_docker_image_name
@@ -52,7 +53,6 @@ def kubernetes_provider_context(kubernetes_credentials : Dict[str, str]):
         'host': 'KUBE_HOST',
         'token': 'KUBE_TOKEN',
     }
-    print(kubernetes_credentials)
 
     credentials = {credential_mapping[k]: v for k,v in kubernetes_credentials.items() if v is not None}
     with modified_environ(**credentials):
@@ -109,6 +109,28 @@ def guided_install(
             input_vars={
                 "kube_context": config['local'].get('kube_context')
             })
+    elif config['provider'] == 'do':
+        stage_outputs['stages/01-terraform-state'] = terraform.deploy(
+            os.path.join("stages/01-terraform-state", config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'namespace': config['namespace'],
+                'region': config['digital_ocean']['region']
+            })
+
+        stage_outputs['stages/02-infrastructure'] = terraform.deploy(
+            os.path.join("stages/02-infrastructure", config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'environment': config['namespace'],
+                'region': config['digital_ocean']['region'],
+                'kubernetes_version': config['digital_ocean']['kubernetes_version'],
+                'node_groups': config['digital_ocean']['node_groups'],
+                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
+            },
+            terraform_objects=[
+                QHubTerraformState('02-infrastructure', config),
+            ])
     else:
         for stage in [
                 "stages/01-terraform-state",
