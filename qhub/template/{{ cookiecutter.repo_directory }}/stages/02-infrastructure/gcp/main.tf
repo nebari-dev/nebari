@@ -4,12 +4,12 @@ data "google_compute_zones" "gcpzones" {
 
 
 module "registry-jupyterhub" {
-  source = "../modules/gcp/registry"
+  source = "./modules/registry"
 }
 
 
 module "kubernetes" {
-  source = "../modules/gcp/kubernetes"
+  source = "./modules/kubernetes"
 
   name       = "${var.name}-${var.environment}"
   location   = var.region

@@ -14,7 +14,7 @@ variable "region" {
 }
 
 module "terraform-state" {
-  source = "../modules/gcp/terraform-state"
+  source = "./modules/terraform-state"
 
   name     = "${var.name }-${var.namespace}"
   location = var.region

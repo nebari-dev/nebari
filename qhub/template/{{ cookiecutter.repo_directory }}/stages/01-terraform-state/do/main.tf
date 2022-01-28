@@ -18,7 +18,7 @@ provider "digitalocean" {
 }
 
 module "terraform-state" {
-  source = "../modules/digitalocean/terraform-state"
+  source = "./modules/terraform-state"
 
   name   = "${var.name }-${var.namespace}"
   region = var.region

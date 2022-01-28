@@ -14,3 +14,8 @@ resource "local_file" "kubeconfig" {
   content = module.kubernetes.kubeconfig
   filename = var.kubeconfig_filename
 }
+
+output "kubeconfig_filename" {
+  description = "filename for qhub kubeconfig"
+  vale = var.kubeconfig_filename
+}

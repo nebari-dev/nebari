@@ -1,5 +1,5 @@
 module "registry" {
-  source              = "../modules/azure/registry"
+  source              = "./modules/registry"
 
   name                = "${var.name}${var.environment}"
   location            = var.region
@@ -8,7 +8,7 @@ module "registry" {
 
 
 module "kubernetes" {
-  source = "../modules/azure/kubernetes"
+  source = "./modules/kubernetes"
 
   name                     = "${var.name}-${var.environment}"
   environment              = var.environment

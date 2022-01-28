@@ -7,7 +7,7 @@ data "aws_availability_zones" "awszones" {
 
 # ==================== ACCOUNTING ======================
 module "accounting" {
-  source = "../modules/aws/accounting"
+  source = "./modules/accounting"
 
   project     = var.name
   environment = var.environment
@@ -18,7 +18,7 @@ module "accounting" {
 
 # ======================= NETWORK ======================
 module "network" {
-  source = "../modules/aws/network"
+  source = "./modules/network"
 
   name = local.cluster_name
 
@@ -43,7 +43,7 @@ module "network" {
 
 # ==================== REGISTRIES =====================
 module "registry-jupyterlab" {
-  source = "../modules/aws/registry"
+  source = "./modules/registry"
 
   name = "${local.cluster_name}-jupyterlab"
   tags = local.additional_tags
@@ -52,7 +52,7 @@ module "registry-jupyterlab" {
 
 # ====================== EFS =========================
 module "efs" {
-  source = "../modules/aws/efs"
+  source = "./modules/efs"
 
   name = "${local.cluster_name}-jupyterhub-shared"
   tags = local.additional_tags
@@ -64,7 +64,7 @@ module "efs" {
 
 # ==================== KUBERNETES =====================
 module "kubernetes" {
-  source = "../modules/aws/kubernetes"
+  source = "./modules/kubernetes"
 
   name = local.cluster_name
   tags = local.additional_tags
