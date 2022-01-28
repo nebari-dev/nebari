@@ -13,7 +13,7 @@ variable "region" {
   type        = string
 }
 
-variable "storage_account_prefix" {
+variable "storage_account_postfix" {
   description = "Prefix to assign to storage account to ensure it is unique"
   type        = string
 }

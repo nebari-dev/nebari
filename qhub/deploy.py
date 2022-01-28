@@ -157,6 +157,29 @@ def guided_install(
                 QHubGCPProvider(config),
                 QHubTerraformState('02-infrastructure', config),
             ])
+    elif config['provider'] == 'azure':
+        stage_outputs['stages/01-terraform-state'] = terraform.deploy(
+            os.path.join("stages/01-terraform-state", config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'namespace': config['namespace'],
+                'region': config['azure']['region'],
+                'storage_account_postfix': config['azure']['storage_account_postfix'],
+            })
+
+        stage_outputs['stages/02-infrastructure'] = terraform.deploy(
+            os.path.join("stages/02-infrastructure", config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'environment': config['namespace'],
+                'region': config['azure']['region'],
+                'kubernetes_version': config['azure']['kubernetes_version'],
+                'node_groups': config['azure']['node_groups'],
+                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
+            },
+            terraform_objects=[
+                QHubTerraformState('02-infrastructure', config),
+            ])
     else:
         for stage in [
                 "stages/01-terraform-state",
