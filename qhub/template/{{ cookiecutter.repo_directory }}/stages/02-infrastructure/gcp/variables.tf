@@ -13,17 +13,25 @@ variable "region" {
   type        = string
 }
 
+variable "project_id" {
+  description = "Google project_id"
+  type        = string
+}
+
+variable "availability_zones" {
+  description = "Avalability zones to use for QHub deployment"
+  type        = list(string)
+  default     = []
+}
+
 variable "node_groups" {
-  description = "AWS node groups"
-  type = map(object({
-    instance    = string
-    min_nodes   = number
-    max_nodes   = number
-    labels      = map(string)
-    preemptible = bool
-    guest_accelerators = object({
-      type  = string
-      count = number
-    })
-  }))
+  description = "GCP node groups"
+  type        = any
+  default     = null
+}
+
+variable "kubeconfig_filename" {
+  description = "Kubernetes kubeconfig written to filesystem"
+  type        = string
+  default     = null
 }
