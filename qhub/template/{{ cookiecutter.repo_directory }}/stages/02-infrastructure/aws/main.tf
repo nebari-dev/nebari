@@ -37,7 +37,7 @@ module "network" {
   }
 
   vpc_cidr_block         = var.vpc_cidr_block
-  aws_availability_zones = length(var.availability_zones) >= 2 ? var.availability_zones : [data.aws_availability_zones.awszones.names[0], data.aws_availability_zones.awszones.names[1]]
+  aws_availability_zones = length(var.availability_zones) >= 2 ? var.availability_zones : slice(sort(data.aws_availability_zones.awszones.names), 0, 2)
 }
 
 
@@ -76,16 +76,7 @@ module "kubernetes" {
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   ]
 
-  node_groups = [
-    for name, config in node_groups: {
-      name          = name
-      instance_type = config.instance
-      min_size      = config.min_nodes
-      desired_size  = config.min_nodes
-      max_size      = config.max_nodes
-      gpu           = config.gpu
-    }
-  ]
+  node_groups = var.node_groups
 
   depends_on = [
     module.network

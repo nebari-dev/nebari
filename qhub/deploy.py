@@ -9,7 +9,7 @@ import tempfile
 from qhub.provider import terraform
 from qhub.utils import timer, check_cloud_credentials, modified_environ, split_docker_image_name
 from qhub.provider.dns.cloudflare import update_record
-from qhub.render.terraform import QHubKubernetesProvider, QHubTerraformState, QHubGCPProvider
+from qhub.render.terraform import QHubKubernetesProvider, QHubTerraformState, QHubGCPProvider, QHubAWSProvider
 from qhub.state import terraform_state_sync
 
 logger = logging.getLogger(__name__)
@@ -180,13 +180,29 @@ def guided_install(
             terraform_objects=[
                 QHubTerraformState('02-infrastructure', config),
             ])
-    else:
-        for stage in [
-                "stages/01-terraform-state",
-                "stages/02-infrastructure",
-        ]:
-            logger.info(f"Running Terraform Stage={stage}")
-            stage_outputs[stage] = terraform.deploy(stage)
+    elif config['provider'] == 'aws':
+        stage_outputs['stages/01-terraform-state'] = terraform.deploy(
+            os.path.join("stages/01-terraform-state", config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'namespace': config['namespace'],
+            },
+            terraform_objects=[
+                QHubAWSProvider(config),
+            ])
+
+        stage_outputs['stages/02-infrastructure'] = terraform.deploy(
+            os.path.join("stages/02-infrastructure", config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'environment': config['namespace'],
+                'node_groups': [{'name': key, 'min_size': value['min_nodes'], 'desired_size': value['min_nodes'], 'max_size': value['max_nodes'], 'gpu': value.get('gpu', False), 'instance_type': value['instance']} for key, value in config['amazon_web_services']['node_groups'].items()],
+                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
+            },
+            terraform_objects=[
+                QHubAWSProvider(config),
+                QHubTerraformState('02-infrastructure', config),
+            ])
 
     with kubernetes_provider_context(
             stage_outputs['stages/02-infrastructure']['kubernetes_credentials']['value']):
