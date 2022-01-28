@@ -9,7 +9,7 @@ import tempfile
 from qhub.provider import terraform
 from qhub.utils import timer, check_cloud_credentials, modified_environ, split_docker_image_name
 from qhub.provider.dns.cloudflare import update_record
-from qhub.render.terraform import QHubKubernetesProvider, QHubTerraformState
+from qhub.render.terraform import QHubKubernetesProvider, QHubTerraformState, QHubGCPProvider
 from qhub.state import terraform_state_sync
 
 logger = logging.getLogger(__name__)
@@ -129,6 +129,32 @@ def guided_install(
                 'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
             },
             terraform_objects=[
+                QHubTerraformState('02-infrastructure', config),
+            ])
+    elif config['provider'] == 'gcp':
+        stage_outputs['stages/01-terraform-state'] = terraform.deploy(
+            os.path.join("stages/01-terraform-state", config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'namespace': config['namespace'],
+                'region': config['google_cloud_platform']['region']
+            },
+            terraform_objects=[
+                QHubGCPProvider(config),
+            ])
+
+        stage_outputs['stages/02-infrastructure'] = terraform.deploy(
+            os.path.join("stages/02-infrastructure", config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'environment': config['namespace'],
+                'region': config['google_cloud_platform']['region'],
+                'project_id': config['google_cloud_platform']['project'],
+                'node_groups': [{'name': key, 'min_size': value['min_nodes'], 'max_size': value['max_nodes'], **value} for key, value in config['google_cloud_platform']['node_groups'].items()],
+                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
+            },
+            terraform_objects=[
+                QHubGCPProvider(config),
                 QHubTerraformState('02-infrastructure', config),
             ])
     else:

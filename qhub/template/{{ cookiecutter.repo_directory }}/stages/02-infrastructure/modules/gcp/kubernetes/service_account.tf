@@ -8,4 +8,6 @@ resource "google_project_iam_member" "main" {
 
   role   = each.value
   member = "serviceAccount:${google_service_account.main.email}"
+
+  project = var.project_id
 }

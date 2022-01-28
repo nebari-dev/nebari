@@ -13,6 +13,11 @@ variable "location" {
   type        = string
 }
 
+variable "project_id" {
+  description = "GCP project_id"
+  type        = string
+}
+
 variable "additional_node_group_roles" {
   description = "Additional roles to apply to each node group"
   type        = list(string)

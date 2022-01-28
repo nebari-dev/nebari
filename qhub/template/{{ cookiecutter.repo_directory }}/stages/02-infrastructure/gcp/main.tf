@@ -4,15 +4,16 @@ data "google_compute_zones" "gcpzones" {
 
 
 module "registry-jupyterhub" {
-  source = "./modules/gcp/registry"
+  source = "../modules/gcp/registry"
 }
 
 
 module "kubernetes" {
-  source = "./modules/gcp/kubernetes"
+  source = "../modules/gcp/kubernetes"
 
-  name     = local.cluster_name
-  location = var.region
+  name       = "${var.name}-${var.environment}"
+  location   = var.region
+  project_id = var.project_id
 
   availability_zones = length(var.availability_zones) >= 1 ? var.availability_zones : [data.google_compute_zones.gcpzones.names[0]]
 
@@ -25,15 +26,5 @@ module "kubernetes" {
     "https://www.googleapis.com/auth/cloud-platform"
   ]
 
-  node_groups = [
-    for name, config in node_groups: {
-      name          = name
-      instance_type = config.instance
-      min_size      = config.min_nodes
-      max_size      = config.max_nodes
-      labels        = config.labels
-      preemptible   = config.preemptible
-      guest_accelerators = config.guest_accelerators
-    }
-  ]
+  node_groups = var.node_groups
 }
