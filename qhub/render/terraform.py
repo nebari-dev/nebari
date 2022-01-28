@@ -75,9 +75,9 @@ def QHubTerraformState(directory : str, qhub_config : Dict):
             "azurerm",
             resource_group_name=f"{qhub_config['project_name']}-{qhub_config['namespace']}",
             # storage account must be globally unique
-            storage_account_name=f"{qhub_config['project_name']}{qhub_config['namespace']}{qhub_config['azure']['storage_account_prefix']}",
+            storage_account_name=f"{qhub_config['project_name']}{qhub_config['namespace']}{qhub_config['azure']['storage_account_postfix']}",
             container_name=f"{qhub_config['project_name']}-{qhub_config['namespace']}state",
-            key="terraform/{qhub_config['project_name']}-{qhub_config['namespace']}/{directory}")
+            key=f"terraform/{qhub_config['project_name']}-{qhub_config['namespace']}/{directory}")
     elif qhub_config['provider'] == 'local':
         optional_kwargs = {}
         if 'kube_context' in qhub_config['local']:

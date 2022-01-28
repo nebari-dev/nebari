@@ -22,8 +22,8 @@ module "kubernetes" {
       name          = name
       auto_scale    = true
       instance_type = config.instance
-      min_size      = config.min_size
-      max_size      = config.max_size
+      min_size      = config.min_nodes
+      max_size      = config.max_nodes
     }
   ]
 }

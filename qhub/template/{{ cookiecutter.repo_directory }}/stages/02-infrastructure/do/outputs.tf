@@ -8,7 +8,6 @@ output "kubernetes_credentials" {
   }
 }
 
-
 resource "local_file" "kubeconfig" {
   count = var.kubeconfig_filename != null ? 1 : 0
 
