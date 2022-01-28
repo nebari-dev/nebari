@@ -23,7 +23,7 @@ provider "azurerm" {
 }
 
 module "terraform-state" {
-  source = "../modules/azure/terraform-state"
+  source = "./modules/terraform-state"
 
   resource_group_name     = "${var.name }-${var.namespace}"
   location                = var.region

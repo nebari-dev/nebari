@@ -1,5 +1,5 @@
 module "kubernetes" {
-  source = "../modules/digitalocean/kubernetes"
+  source = "./modules/kubernetes"
 
   name = "${var.name}-${var.environment}"
 

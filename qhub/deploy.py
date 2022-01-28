@@ -87,6 +87,122 @@ def calculate_note_groups(config):
         return config['local']['node_selectors']
 
 
+def provision_terraform_state(stage_outputs, config):
+    directory = 'stages/01-terraform-state'
+
+    if config['provider'] == "local":
+        stage_outputs[directory] = {}
+    elif config['provider'] == 'do':
+        stage_outputs[directory] = terraform.deploy(
+            os.path.join(directory, config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'namespace': config['namespace'],
+                'region': config['digital_ocean']['region']
+            })
+    elif config['provider'] == 'gcp':
+        stage_outputs[directory] = terraform.deploy(
+            os.path.join(directory, config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'namespace': config['namespace'],
+                'region': config['google_cloud_platform']['region']
+            },
+            terraform_objects=[
+                QHubGCPProvider(config),
+            ])
+    elif config['provider'] == 'azure':
+        stage_outputs[directory] = terraform.deploy(
+            os.path.join(directory, config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'namespace': config['namespace'],
+                'region': config['azure']['region'],
+                'storage_account_postfix': config['azure']['storage_account_postfix'],
+            })
+    elif config['provider'] == 'aws':
+        stage_outputs[directory] = terraform.deploy(
+            os.path.join(directory, config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'namespace': config['namespace'],
+            },
+            terraform_objects=[
+                QHubAWSProvider(config),
+            ])
+    else:
+        raise NotImplementedError(f'provider {config["provider"]} not implemented for directory={directory}')
+
+
+def provision_infrastructure(stage_outputs, config, check=True):
+    directory = 'stages/02-infrastructure'
+
+    if config['provider'] == "local":
+        stage_outputs[directory] = terraform.deploy(
+            os.path.join(directory, config['provider']),
+            input_vars={
+                "kube_context": config['local'].get('kube_context')
+            })
+    elif config['provider'] == 'do':
+        stage_outputs[directory] = terraform.deploy(
+            os.path.join(directory, config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'environment': config['namespace'],
+                'region': config['digital_ocean']['region'],
+                'kubernetes_version': config['digital_ocean']['kubernetes_version'],
+                'node_groups': config['digital_ocean']['node_groups'],
+                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
+            },
+            terraform_objects=[
+                QHubTerraformState('02-infrastructure', config),
+            ])
+    elif config['provider'] == 'gcp':
+        stage_outputs[directory] = terraform.deploy(
+            os.path.join(directory, config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'environment': config['namespace'],
+                'region': config['google_cloud_platform']['region'],
+                'project_id': config['google_cloud_platform']['project'],
+                'node_groups': [{'name': key, 'min_size': value['min_nodes'], 'max_size': value['max_nodes'], **value} for key, value in config['google_cloud_platform']['node_groups'].items()],
+                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
+            },
+            terraform_objects=[
+                QHubGCPProvider(config),
+                QHubTerraformState('02-infrastructure', config),
+            ])
+    elif config['provider'] == 'azure':
+        stage_outputs[directory] = terraform.deploy(
+            os.path.join(directory, config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'environment': config['namespace'],
+                'region': config['azure']['region'],
+                'kubernetes_version': config['azure']['kubernetes_version'],
+                'node_groups': config['azure']['node_groups'],
+                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
+            },
+            terraform_objects=[
+                QHubTerraformState('02-infrastructure', config),
+            ])
+    elif config['provider'] == 'aws':
+        stage_outputs[directory] = terraform.deploy(
+            os.path.join(directory, config['provider']),
+            input_vars={
+                'name': config['project_name'],
+                'environment': config['namespace'],
+                'node_groups': [{'name': key, 'min_size': value['min_nodes'], 'desired_size': value['min_nodes'], 'max_size': value['max_nodes'], 'gpu': value.get('gpu', False), 'instance_type': value['instance']} for key, value in config['amazon_web_services']['node_groups'].items()],
+                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
+            },
+            terraform_objects=[
+                QHubAWSProvider(config),
+                QHubTerraformState('02-infrastructure', config),
+            ])
+    else:
+        raise NotImplementedError(f'provider {config["provider"]} not implemented for directory={directory}')
+
+
 def guided_install(
     config,
     dns_provider,
@@ -102,107 +218,8 @@ def guided_install(
     check_secrets(config)
 
     stage_outputs = {}
-
-    if config['provider'] == "local":
-        stage_outputs['stages/02-infrastructure'] = terraform.deploy(
-            os.path.join("stages/02-infrastructure", config['provider']),
-            input_vars={
-                "kube_context": config['local'].get('kube_context')
-            })
-    elif config['provider'] == 'do':
-        stage_outputs['stages/01-terraform-state'] = terraform.deploy(
-            os.path.join("stages/01-terraform-state", config['provider']),
-            input_vars={
-                'name': config['project_name'],
-                'namespace': config['namespace'],
-                'region': config['digital_ocean']['region']
-            })
-
-        stage_outputs['stages/02-infrastructure'] = terraform.deploy(
-            os.path.join("stages/02-infrastructure", config['provider']),
-            input_vars={
-                'name': config['project_name'],
-                'environment': config['namespace'],
-                'region': config['digital_ocean']['region'],
-                'kubernetes_version': config['digital_ocean']['kubernetes_version'],
-                'node_groups': config['digital_ocean']['node_groups'],
-                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubTerraformState('02-infrastructure', config),
-            ])
-    elif config['provider'] == 'gcp':
-        stage_outputs['stages/01-terraform-state'] = terraform.deploy(
-            os.path.join("stages/01-terraform-state", config['provider']),
-            input_vars={
-                'name': config['project_name'],
-                'namespace': config['namespace'],
-                'region': config['google_cloud_platform']['region']
-            },
-            terraform_objects=[
-                QHubGCPProvider(config),
-            ])
-
-        stage_outputs['stages/02-infrastructure'] = terraform.deploy(
-            os.path.join("stages/02-infrastructure", config['provider']),
-            input_vars={
-                'name': config['project_name'],
-                'environment': config['namespace'],
-                'region': config['google_cloud_platform']['region'],
-                'project_id': config['google_cloud_platform']['project'],
-                'node_groups': [{'name': key, 'min_size': value['min_nodes'], 'max_size': value['max_nodes'], **value} for key, value in config['google_cloud_platform']['node_groups'].items()],
-                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubGCPProvider(config),
-                QHubTerraformState('02-infrastructure', config),
-            ])
-    elif config['provider'] == 'azure':
-        stage_outputs['stages/01-terraform-state'] = terraform.deploy(
-            os.path.join("stages/01-terraform-state", config['provider']),
-            input_vars={
-                'name': config['project_name'],
-                'namespace': config['namespace'],
-                'region': config['azure']['region'],
-                'storage_account_postfix': config['azure']['storage_account_postfix'],
-            })
-
-        stage_outputs['stages/02-infrastructure'] = terraform.deploy(
-            os.path.join("stages/02-infrastructure", config['provider']),
-            input_vars={
-                'name': config['project_name'],
-                'environment': config['namespace'],
-                'region': config['azure']['region'],
-                'kubernetes_version': config['azure']['kubernetes_version'],
-                'node_groups': config['azure']['node_groups'],
-                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubTerraformState('02-infrastructure', config),
-            ])
-    elif config['provider'] == 'aws':
-        stage_outputs['stages/01-terraform-state'] = terraform.deploy(
-            os.path.join("stages/01-terraform-state", config['provider']),
-            input_vars={
-                'name': config['project_name'],
-                'namespace': config['namespace'],
-            },
-            terraform_objects=[
-                QHubAWSProvider(config),
-            ])
-
-        stage_outputs['stages/02-infrastructure'] = terraform.deploy(
-            os.path.join("stages/02-infrastructure", config['provider']),
-            input_vars={
-                'name': config['project_name'],
-                'environment': config['namespace'],
-                'node_groups': [{'name': key, 'min_size': value['min_nodes'], 'desired_size': value['min_nodes'], 'max_size': value['max_nodes'], 'gpu': value.get('gpu', False), 'instance_type': value['instance']} for key, value in config['amazon_web_services']['node_groups'].items()],
-                'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubAWSProvider(config),
-                QHubTerraformState('02-infrastructure', config),
-            ])
+    provision_terraform_state(stage_outputs, config)
+    provision_infrastructure(stage_outputs, config)
 
     with kubernetes_provider_context(
             stage_outputs['stages/02-infrastructure']['kubernetes_credentials']['value']):

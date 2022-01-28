@@ -9,7 +9,7 @@ variable "namespace" {
 }
 
 module "terraform-state" {
-  source = "../modules/aws/terraform-state"
+  source = "./modules/terraform-state"
 
   name = "${var.name}-${var.namespace}"
 
