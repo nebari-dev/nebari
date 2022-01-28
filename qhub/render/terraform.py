@@ -27,7 +27,7 @@ def QHubKubernetesProvider(qhub_config: Dict):
     if qhub_config['provider'] == 'aws':
         optional_kwargs['exec'] = {
             "api_version": "client.authentication.k8s.io/v1alpha1",
-            "args": ["eks", "get-token", "--cluster-name", f"{qhub_config['projec_name']}-{qhub_config['namespace']}"],
+            "args": ["eks", "get-token", "--cluster-name", f"{qhub_config['project_name']}-{qhub_config['namespace']}"],
             "command": "aws",
         }
 

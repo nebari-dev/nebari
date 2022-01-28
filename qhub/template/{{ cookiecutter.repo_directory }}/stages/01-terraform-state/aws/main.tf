@@ -11,7 +11,7 @@ variable "namespace" {
 module "terraform-state" {
   source = "../modules/aws/terraform-state"
 
-  name = "${var.project_name }-${var.namespace}"
+  name = "${var.name}-${var.namespace}"
 
   tags = {
     Project     = var.name
