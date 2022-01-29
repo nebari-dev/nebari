@@ -13,6 +13,12 @@ variable "region" {
   type        = string
 }
 
+variable "tags" {
+  description = "DigitalOcean tags to assign to resources"
+  type        = list(string)
+  default     = []
+}
+
 variable "kubernetes_version" {
   description = "DigitalOcean kubernetes version"
   type        = string

@@ -25,7 +25,13 @@ class TerraformException(Exception):
     pass
 
 
-def deploy(directory, input_vars: Dict[str, Any] = None, terraform_objects: List[Dict] = None):
+def deploy(
+        directory,
+        terraform_init : bool = True,
+        terraform_apply : bool = True,
+        terraform_destroy : bool = False,
+        input_vars: Dict[str, Any] = None,
+        terraform_objects: List[Dict] = None):
     """Execute a given terraform directory
 
     Parameters:
@@ -47,8 +53,15 @@ def deploy(directory, input_vars: Dict[str, Any] = None, terraform_objects: List
         json.dump(input_vars, f.file)
         f.file.flush()
 
-        init(directory)
-        apply(directory, var_files=[f.name])
+        if terraform_init:
+            init(directory)
+
+        if terraform_apply:
+            apply(directory, var_files=[f.name])
+
+        if terraform_destroy:
+            destroy(directory, var_files=[f.name])
+
         return output(directory)
 
 
@@ -148,14 +161,15 @@ def refresh(directory=None):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
-def destroy(directory=None, targets=None):
+def destroy(directory=None, targets=None, var_files=None):
     targets = targets or []
+    var_files = var_files or []
 
     logger.info(f"terraform destroy directory={directory} targets={targets}")
     command = [
         "destroy",
         "-auto-approve",
-    ] + ["-target=" + _ for _ in targets]
+    ] + ["-target=" + _ for _ in targets] + ["-var-file=" + _ for _ in var_files]
 
     with timer(logger, "terraform destroy"):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")

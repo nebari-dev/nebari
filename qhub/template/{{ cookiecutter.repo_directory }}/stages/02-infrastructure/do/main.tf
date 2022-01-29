@@ -15,4 +15,11 @@ module "kubernetes" {
       max_nodes = config.max_nodes
     }
   ]
+
+  tags = concat([
+    "provision::terraform",
+    "project::${var.name}",
+    "namespace::${var.environment}",
+    "owner::qhub",
+  ], var.tags)
 }

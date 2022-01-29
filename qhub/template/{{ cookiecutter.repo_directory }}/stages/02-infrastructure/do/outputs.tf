@@ -17,5 +17,5 @@ resource "local_file" "kubeconfig" {
 
 output "kubeconfig_filename" {
   description = "filename for qhub kubeconfig"
-  vale = var.kubeconfig_filename
+  value = var.kubeconfig_filename
 }
