@@ -79,6 +79,14 @@ resource "helm_release" "jupyterhub" {
         }
       }
 
+      proxy = {
+        chp = {
+          nodeSelector = {
+            "${var.general-node-group.key}" = var.general-node-group.value
+          }
+        }
+      }
+
       singleuser = {
         image = var.jupyterlab-image
         nodeSelector = {

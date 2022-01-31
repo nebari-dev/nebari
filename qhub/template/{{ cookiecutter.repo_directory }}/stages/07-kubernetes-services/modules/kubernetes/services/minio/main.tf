@@ -29,5 +29,10 @@ resource "helm_release" "minio" {
 
   values = concat([
     file("${path.module}/values.yaml"),
+    jsonencode({
+      nodeSelector = {
+        "${var.node-group.key}" = var.node-group.value
+      }
+    })
   ], var.overrides)
 }

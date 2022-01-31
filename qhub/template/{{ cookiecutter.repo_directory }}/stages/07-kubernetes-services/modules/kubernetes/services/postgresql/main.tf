@@ -29,5 +29,12 @@ resource "helm_release" "postgresql" {
 
   values = concat([
     file("${path.module}/values.yaml"),
+    jsonencode({
+      primary = {
+        nodeSelector = {
+          "${var.node-group.key}" = var.node-group.value
+        }
+      }
+    })
   ], var.overrides)
 }

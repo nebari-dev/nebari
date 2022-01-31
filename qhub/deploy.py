@@ -298,7 +298,7 @@ def provision_04_kubernetes_ingress(stage_outputs, config, check=True):
             "enable-certificates": (config['certificate']['type'] == 'lets-encrypt'),
             "acme-email": config['certificate'].get('acme_email'),
             "acme-server": config['certificate'].get('acme_server'),
-            "certificate-secret-name": config['certificate']['secret_name'] if config['certificate']['type'] == 'lets-encrypt' else None,
+            "certificate-secret-name": config['certificate']['secret_name'] if config['certificate']['type'] == 'existing' else None,
         },
         terraform_objects=[
             QHubTerraformState('04-kubernetes-ingress', config),
