@@ -18,3 +18,11 @@ variable "callback-url-path" {
   type        = string
   default     = "/_oauth"
 }
+
+variable "node-group" {
+  description = "Node key value pair for bound general resources"
+  type = object({
+    key   = string
+    value = string
+  })
+}

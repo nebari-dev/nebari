@@ -56,6 +56,9 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
       }
 
       spec {
+        node_selector = {
+          "${var.node-group.key}" = var.node-group.value
+        }
 
         container {
           # image = "thomseddon/traefik-forward-auth:2.2.0"
