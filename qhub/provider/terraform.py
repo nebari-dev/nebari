@@ -61,7 +61,7 @@ def deploy(
 
         if terraform_import:
             for addr, id in state_imports:
-                tfimport(addr, id, directory=directory, var_files=[f.name])
+                tfimport(addr, id, directory=directory, var_files=[f.name], exist_ok=True)
 
         if terraform_apply:
             apply(directory, var_files=[f.name])
@@ -149,23 +149,27 @@ def output(directory=None):
         ).decode("utf8")[:-1])
 
 
-def tfimport(addr, id, directory=None, var_files=None):
+def tfimport(addr, id, directory=None, var_files=None, exist_ok=False):
     var_files = var_files or []
 
     logger.info(f"terraform import directory={directory} addr={addr} id={id}")
     command = ["import"] + ["-var-file=" + _ for _ in var_files] + [addr, id]
     logger.error(str(command))
     with timer(logger, "terraform import"):
-        run_terraform_subprocess(
-            command, cwd=directory, prefix="terraform", strip_errors=True, timeout=30
-        )
+        try:
+            run_terraform_subprocess(
+                command, cwd=directory, prefix="terraform", strip_errors=True, timeout=30
+            )
+        except TerraformException as e:
+            if not exist_ok:
+                raise e
 
 
-def refresh(directory=None):
+def refresh(directory=None, var_files=None):
+    var_files = var_files or []
+
     logger.info(f"terraform refresh directory={directory}")
-    command = [
-        "refresh",
-    ]
+    command = ["refresh"] + ["-var-file=" + _ for _ in var_files]
 
     with timer(logger, "terraform refresh"):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
@@ -177,7 +181,7 @@ def destroy(directory=None, targets=None, var_files=None):
 
     logger.info(f"terraform destroy directory={directory} targets={targets}")
     command = [
-        "destroy",
+        "apply", "-destroy",
         "-auto-approve",
     ] + ["-target=" + _ for _ in targets] + ["-var-file=" + _ for _ in var_files]
 
