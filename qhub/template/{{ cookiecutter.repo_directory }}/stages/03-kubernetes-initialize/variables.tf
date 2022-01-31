@@ -8,10 +8,12 @@ variable "environment" {
   type        = string
 }
 
-variable "qhub_config" {
-  description = "QHub Configuration"
+variable "cloud-provider" {
+  description = "Cloud provider being used in deployment"
+  type        = string
 }
 
-variable "external_container_reg" {
-  description = "External container registry"
+variable "aws-region" {
+  description = "AWS region is cloud provider is AWS"
+  type        = string
 }

@@ -251,8 +251,8 @@ def provision_03_kubernetes_initialize(stage_outputs, config, check=True):
         input_vars={
             'name': config['project_name'],
             'environment': config['namespace'],
-            'qhub_config': config,
-            'external_container_reg': config.get('external_container_reg', {'enabled': False})
+            'cloud-provider': config['provider'],
+            'aws-region': config.get('amazon_web_services', {}).get('region'),
         },
         terraform_objects=[
             QHubTerraformState('03-kubernetes-initialize', config),
@@ -503,6 +503,7 @@ def provision_07_kubernetes_services(stage_outputs, config, check=True):
             "jupyterhub-theme": config['theme']['jupyterhub'],
             "jupyterhub-image": split_docker_image_name(config['default_images']['jupyterhub']),
             "jupyterhub-shared-storage": config['storage']['shared_filesystem'],
+            "jupyterhub-shared-endpoint": stage_outputs['stages/02-infrastructure'].get('nfs_endpoint'),
             "jupyterlab-profiles": config['profiles']['jupyterlab'],
             "jupyterlab-image": split_docker_image_name(config['default_images']['jupyterlab']),
             # dask-gateway
@@ -548,6 +549,29 @@ def check_07_kubernetes_services(stage_outputs, config):
             sys.exit(1)
 
 
+def provision_08_enterprise_qhub(stage_outputs, config, check=True):
+    directory = "stages/08-enterprise-qhub"
+
+    stage_outputs[directory] = terraform.deploy(
+        directory=directory,
+        input_vars={
+            'environment': config['namespace'],
+            "endpoint": config['domain'],
+            "realm_id": stage_outputs['stages/06-kubernetes-keycloak-configuration']['realm_id']['value'],
+            'tf_extensions': config.get('tf_extensions', []),
+            'external_container_reg': config.get('external_container_reg', {'enabled': False}),
+            'qhub_config': config,
+            'helm_extensions': config.get('helm_extensions', []),
+        },
+        terraform_objects=[
+            QHubTerraformState('08-enterprise-qhub', config),
+            QHubKubernetesProvider(config),
+        ])
+
+    if check:
+        pass
+
+
 def guided_install(
     config,
     dns_provider,
@@ -574,6 +598,7 @@ def guided_install(
                 stage_outputs['stages/05-kubernetes-keycloak']['keycloak_credentials']['value']):
             provision_06_kubernetes_keycloak_configuration(stage_outputs, config)
             provision_07_kubernetes_services(stage_outputs, config)
+            provision_08_enterprise_qhub(stage_outputs, config)
 
             print('QHub deployed successfully')
 

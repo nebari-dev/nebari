@@ -159,8 +159,15 @@
     ],
 
     "_copy_without_render": [
-      "stages/01-terraform-state/modules/*",
-      "stages/02-infrastructure/modules/*",
+      "stages/01-terraform-state/aws/modules/*",
+      "stages/01-terraform-state/gcp/modules/*",
+      "stages/01-terraform-state/azure/modules/*",
+      "stages/01-terraform-state/do/modules/*",
+      "stages/02-infrastructure/aws/modules/*",
+      "stages/02-infrastructure/gcp/modules/*",
+      "stages/02-infrastructure/azure/modules/*",
+      "stages/02-infrastructure/do/modules/*",
+      "stages/02-infrastructure/local/modules/*",
       "stages/03-kubernetes-initialize/modules/*",
       "stages/04-kubernetes-ingress/modules/*",
       "stages/05-kubernetes-keycloak/modules/*",

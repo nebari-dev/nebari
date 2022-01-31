@@ -35,3 +35,9 @@ variable "kubeconfig_filename" {
   type        = string
   default     = null
 }
+
+variable "tags" {
+  description = "Google Cloud Platform tags to assign to resources"
+  type        = map(string)
+  default     = {}
+}
