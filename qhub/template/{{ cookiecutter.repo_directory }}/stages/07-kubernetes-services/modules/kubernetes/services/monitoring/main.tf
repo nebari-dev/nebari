@@ -7,6 +7,7 @@ resource "helm_release" "prometheus-grafana" {
 
   values = concat([
     file("${path.module}/values.yaml"),
+    # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
     jsonencode({
       alertmanager = {
         alertmanagerSpec = {
@@ -17,6 +18,10 @@ resource "helm_release" "prometheus-grafana" {
       }
 
       prometheusOperator = {
+        nodeSelector = {
+          "${var.node-group.key}" = var.node-group.value
+        }
+
         admissionWebhooks = {
           patch = {
             nodeSelector = {
@@ -24,11 +29,9 @@ resource "helm_release" "prometheus-grafana" {
             }
           }
         }
+      }
 
-        nodeSelector = {
-          "${var.node-group.key}" = var.node-group.value
-        }
-
+      prometheus = {
         prometheusSpec = {
           nodeSelector = {
             "${var.node-group.key}" = var.node-group.value
@@ -36,7 +39,12 @@ resource "helm_release" "prometheus-grafana" {
         }
       }
 
+      # https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
       grafana = {
+        nodeSelector = {
+          "${var.node-group.key}" = var.node-group.value
+        }
+
         "grafana.ini": {
           server = {
             protocol = "http"
