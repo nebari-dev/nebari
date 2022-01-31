@@ -28,10 +28,12 @@ class TerraformException(Exception):
 def deploy(
         directory,
         terraform_init : bool = True,
+        terraform_import : bool = False,
         terraform_apply : bool = True,
         terraform_destroy : bool = False,
         input_vars: Dict[str, Any] = None,
-        terraform_objects: List[Dict] = None):
+        terraform_objects: List[Dict] = None,
+        state_imports : List = None):
     """Execute a given terraform directory
 
     Parameters:
@@ -44,6 +46,7 @@ def deploy(
 
     """
     input_vars = input_vars or {}
+    state_imports = state_imports or []
 
     if terraform_objects:
         with open(os.path.join(directory, '_qhub.tf.json'), "w") as f:
@@ -55,6 +58,10 @@ def deploy(
 
         if terraform_init:
             init(directory)
+
+        if terraform_import:
+            for addr, id in state_imports:
+                tfimport(addr, id, directory=directory, var_files=[f.name])
 
         if terraform_apply:
             apply(directory, var_files=[f.name])
@@ -142,9 +149,12 @@ def output(directory=None):
         ).decode("utf8")[:-1])
 
 
-def tfimport(addr, id, directory=None):
+def tfimport(addr, id, directory=None, var_files=None):
+    var_files = var_files or []
+
     logger.info(f"terraform import directory={directory} addr={addr} id={id}")
-    command = ["import", addr, id]
+    command = ["import"] + ["-var-file=" + _ for _ in var_files] + [addr, id]
+    logger.error(str(command))
     with timer(logger, "terraform import"):
         run_terraform_subprocess(
             command, cwd=directory, prefix="terraform", strip_errors=True, timeout=30
