@@ -31,6 +31,12 @@ resource "helm_release" "prometheus-grafana" {
         }
       }
 
+      kube-state-metrics = {
+        nodeSelector = {
+          "${var.node-group.key}" = var.node-group.value
+        }
+      }
+
       prometheus = {
         prometheusSpec = {
           nodeSelector = {
