@@ -10,15 +10,16 @@ resource "helm_release" "minio" {
 
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "minio"
-  version    = "9.2.4"
+  # last release that was Apache-2.0
+  version    = "6.7.4"
 
   set {
-    name  = "auth.rootUser"
+    name  = "accessKey.password"
     value = "admin"
   }
 
   set {
-    name  = "auth.rootPassword"
+    name  = "secretKey.password"
     value = random_password.root_password.result
   }
 
