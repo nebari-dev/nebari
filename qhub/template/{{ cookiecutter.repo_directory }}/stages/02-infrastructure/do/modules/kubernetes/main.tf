@@ -27,5 +27,9 @@ resource "digitalocean_kubernetes_node_pool" "main" {
   min_nodes  = lookup(local.additional_node_groups[count.index], "min_nodes", 1)
   max_nodes  = lookup(local.additional_node_groups[count.index], "max_nodes", 1)
 
+  labels = {
+    "qhub.dev/node_group": local.additional_node_groups[count.index].name
+  }
+
   tags = var.tags
 }

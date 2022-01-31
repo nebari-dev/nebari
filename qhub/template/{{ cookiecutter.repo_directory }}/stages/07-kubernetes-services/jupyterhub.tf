@@ -31,6 +31,12 @@ variable "jupyterhub-shared-storage" {
   type        = string
 }
 
+variable "jupyterhub-shared-endpoint" {
+  description = "JupyterHub shared storage nfs endpoint"
+  type        = string
+  default     = null
+}
+
 variable "jupyterlab-image" {
   description = "Jupyterlab user image"
   type = object({
@@ -45,17 +51,9 @@ variable "jupyterlab-profiles" {
 }
 
 
-{% if cookiecutter.provider == "aws" -%}
-module "jupyterhub-nfs-mount" {
-  source = "./modules/kubernetes/nfs-mount"
-
-  name         = "jupyterhub"
-  namespace    = var.environment
-  nfs_capacity = var.jupyterhub-shared-storage
-  nfs_endpoint = module.efs.credentials.dns_name
-}
-{% else -%}
 module "kubernetes-nfs-server" {
+  count = var.jupyterhub-shared-endpoint == null ? 1 : 0
+
   source = "./modules/kubernetes/nfs-server"
 
   name         = "nfs-server"
@@ -64,19 +62,19 @@ module "kubernetes-nfs-server" {
   node-group   = var.node_groups.general
 }
 
+
 module "jupyterhub-nfs-mount" {
   source = "./modules/kubernetes/nfs-mount"
 
   name         = "jupyterhub"
   namespace    = var.environment
   nfs_capacity = var.jupyterhub-shared-storage
-  nfs_endpoint = module.kubernetes-nfs-server.endpoint_ip
+  nfs_endpoint = var.jupyterhub-shared-endpoint == null ? module.kubernetes-nfs-server.0.endpoint_ip : var.jupyterhub-shared-endpoint
 
   depends_on = [
     module.kubernetes-nfs-server
   ]
 }
-{% endif %}
 
 
 module "jupyterhub" {

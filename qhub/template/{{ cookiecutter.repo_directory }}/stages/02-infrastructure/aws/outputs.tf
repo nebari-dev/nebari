@@ -19,3 +19,8 @@ output "kubeconfig_filename" {
   description = "filename for qhub kubeconfig"
   value = var.kubeconfig_filename
 }
+
+output "nfs_endpoint" {
+  description = "Endpoint for nfs server"
+  value       = module.efs.credentials.dns_name
+}
