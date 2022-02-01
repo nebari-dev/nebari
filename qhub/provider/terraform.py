@@ -181,7 +181,7 @@ def destroy(directory=None, targets=None, var_files=None):
 
     logger.info(f"terraform destroy directory={directory} targets={targets}")
     command = [
-        "apply", "-destroy",
+        "destroy",
         "-auto-approve",
     ] + ["-target=" + _ for _ in targets] + ["-var-file=" + _ for _ in var_files]
 
