@@ -101,10 +101,9 @@ module "jupyterhub" {
     }
   }
 
-  services = [
+  services = concat([
     "dask-gateway"
-    {% if cookiecutter.prefect.enabled -%}"prefect"{% endif %}
-  ]
+  ], (var.prefect-enabled ? ["prefect"] : []))
 
   general-node-group = var.node_groups.general
   user-node-group  = var.node_groups.user
