@@ -1,0 +1,111 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prefect-agent
+  name: prefect-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prefect-agent
+  template:
+    metadata:
+      labels:
+        app: prefect-agent
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount }}
+      containers:
+        - args:
+            - prefect agent start kubernetes -e JUPYTERHUB_API_TOKEN=$JUPYTERHUB_API_TOKEN {{- range $k, $v := .Values.secretEnvVars }} {{ printf " -e %s=$%s" $k  $k -}} {{ end }}
+          command:
+            - /bin/bash
+            - -c
+          env:
+            {{- range $k, $v := .Values.envVars }}
+            - name: {{ $k }}
+              value: {{ squote $v -}}
+            {{ end }}
+            {{- range $i, $k := keys .Values.secretEnvVars }}
+            - name: {{ $k }}
+              valueFrom:
+                secretKeyRef:
+                  name: prefect-envsecret-{{ $i }}
+                  key: prefectEnvSecret{{ $i -}}
+            {{ end }}
+            - name: PREFECT__CLOUD__AGENT__AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: prefect-token
+                  key: prefectToken
+            - name: JUPYTERHUB_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: jupyterhub-token
+                  key: jupyterHubToken
+            - name: PREFECT__CLOUD__API
+              value: {{ .Values.cloudApi }}
+            - name: NAMESPACE
+              value: {{ .Values.namespace }}
+            - name: SERVICE_ACCOUNT_NAME
+              value: {{ .Values.serviceAccount }}
+            - name: PREFECT__BACKEND
+              value: cloud
+            - name: PREFECT__CLOUD__AGENT__AGENT_ADDRESS
+              value: http://:8080
+          image: {{ .Values.prefectImage }}
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 40
+          name: agent
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.serviceAccount }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prefect-agent-rbac
+  namespace: {{ .Values.namespace }}
+rules:
+  - apiGroups:
+      - batch
+      - extensions
+    resources:
+      - jobs
+    verbs:
+      - '*'
+  - apiGroups:
+      - '*'
+    resources:
+      - pods
+    verbs:
+      - '*'
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prefect-agent-rbac
+  namespace: {{ .Values.namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prefect-agent-rbac
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.serviceAccount }}

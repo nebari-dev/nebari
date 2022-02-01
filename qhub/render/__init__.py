@@ -1,13 +1,12 @@
 import pathlib
-import collections
 import functools
-import json
 import os
 from shutil import rmtree
+import shutil
+from turtle import up
 from urllib.parse import urlencode
 
 from ruamel.yaml import YAML
-from cookiecutter.generate import generate_files
 from ..version import __version__
 from ..constants import TERRAFORM_VERSION
 from ..utils import pip_install_qhub, QHUB_GH_BRANCH
@@ -224,13 +223,15 @@ def render_template(output_directory, config_filename, force=False):
         raise ValueError(f"input directory={input_directory} is not a directory")
 
     output_directory = pathlib.Path(output_directory).resolve()
-    # due to cookiecutter requiring a template directory folder
-    # we take the output directory and split into two components
-    repo_directory = output_directory.name
-    output_directory = output_directory.parent
+    #
+    from pathlib import Path
+
+    if output_directory == str(Path.home()):
+        print("Deploying on /home is not advised!")
+        return
 
     # mkdir all the way down to repo dir so we can copy .gitignore into it in remove_existing_renders
-    (output_directory / repo_directory).mkdir(exist_ok=True, parents=True)
+    output_directory.mkdir(exist_ok=True, parents=True)
 
     filename = pathlib.Path(config_filename)
 
@@ -246,11 +247,8 @@ def render_template(output_directory, config_filename, force=False):
     # corresponding env var.
     set_env_vars_in_config(config)
 
-    config["repo_directory"] = repo_directory
+    config["repo_directory"] = output_directory.name
     patch_dask_gateway_extra_config(config)
-
-    with (input_directory / "cookiecutter.json").open() as f:
-        config = collections.ChainMap(config, json.load(f))
 
     patch_versioning_extra_config(config)
 
@@ -258,21 +256,88 @@ def render_template(output_directory, config_filename, force=False):
 
     config["qhub_config_yaml_path"] = str(filename.absolute())
 
-    remove_existing_renders(
-        dest_repo_dir=output_directory / repo_directory,
-        verbosity=0,
-    )
+    directories = ["stages", "image"]
 
-    generate_files(
-        repo_dir=str(input_directory),
-        context={"cookiecutter": config},
-        output_dir=str(output_directory),
-        overwrite_if_exists=force,
+    source_dirs = [os.path.join(str(input_directory), _) for _ in directories]
+    output_dirs = [os.path.join(str(output_directory), _) for _ in directories]
+    new, untrack, updated = inspect_files(
+        source_dirs,
+        output_dirs,
+        source_base_dir=str(input_directory),
+        output_base_dir=str(output_directory),
     )
+    track_list = {"CREATED": new, "MODIFIED": untrack, "UNTRACKED": updated}
+    for mode in track_list.keys():
+        if mode != "UNTRACKED":
+            print(f"The following files will be {mode.lower()}...")
+        else:
+            print("The following files are untracked...")
+        for file in sorted(track_list[mode]):
+            print(f"   {mode} {file}")
+
+    for filename in new | updated:
+        output_filename = os.path.join(str(output_directory), filename)
+        input_filename = os.path.join(str(input_directory), filename)
+        os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+        shutil.copyfile(input_filename, output_filename)
+
+
+def inspect_files(
+    source_dirs: str, output_dirs: str, source_base_dir: str, output_base_dir: str
+):
+    """Return created, updated and untracked files by computing a checksum over the provided directory
+
+    Args:
+        source_dirs (str): The source dir used as base for comparssion
+        output_dirs (str): The destionation dir wich will be matched with
+        source_base_dir (str): Relative base path to source directory
+        output_base_dir (str): Relative base path to output directory
+    """
+
+    source_files = {}
+    output_files = {}
+
+    for source_dir, output_dir in zip(source_dirs, output_dirs):
+
+        for root, _, files in os.walk(source_dir):
+            for file_name in files:
+                file_path = os.path.join(root, file_name)
+                source_files[os.path.relpath(file_path, source_base_dir)] = hash_file(
+                    file_path
+                )
+
+        for root, _, files in os.walk(output_dir):
+            for file_name in files:
+                outfile_path = os.path.join(root, file_name)
+                output_files[
+                    os.path.relpath(outfile_path, output_base_dir)
+                ] = hash_file(outfile_path)
+
+    new_files = source_files.keys() - output_files.keys()
+    untracted_files = output_files.keys() - source_files.keys()
+    updated_files = set()
+
+    for prevalent_file in source_files.keys() & output_files.keys():
+        if source_files[prevalent_file] != output_files[prevalent_file]:
+            updated_files.add(prevalent_file)
+
+    return new_files, untracted_files, updated_files
+
+
+def hash_file(file_path: str):
+    """Get the hex digest of the given file
+
+    Args:
+        file_path (str): path to file
+    """
+    import hashlib
+
+    with open(file_path, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()
 
 
 def remove_existing_renders(
-    dest_repo_dir, deletable_paths=DELETABLE_PATHS, verbosity=0
+    output_directory, deletable_paths=DELETABLE_PATHS, verbosity=0
 ):
     """
     Remove all files and directories beneath each directory in `deletable_paths`. These files and directories will be regenerated in the next step (`generate_files`) based on the configurations set in `qhub-config.yml`.
