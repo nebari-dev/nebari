@@ -1,3 +1,5 @@
+import socket
+import time
 import logging
 import os
 import sys
@@ -410,22 +412,32 @@ def provision_04_kubernetes_ingress(stage_outputs, config, check=True):
 def check_04_kubernetes_ingress(stage_outputs, qhub_config):
     directory = "stages/04-kubernetes-ingress"
 
-    import socket
+    def _attempt_tcp_connect(host, port, num_attempts=3, timeout=5):
+        # normalize hostname to ip address
+        host = socket.gethostbyname(host)
+
+        for i in range(num_attempts):
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(5)
+            result = s.connect_ex((host, port))
+            if result == 0:
+                print(f'Attempt {i+1} succedded to connect to tcp://{host}:{port}')
+                return True
+            s.close()
+            print(f'Attempt {i+1} failed to connect to tcp tcp://{host}:{port}')
+            time.sleep(timeout)
+        return False
 
     tcp_ports = {80, 443}
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
-    host = socket.gethostbyname(ip_or_name["hostname"] or ip_or_name["ip"])
+    host = ip_or_name["hostname"] or ip_or_name["ip"]
 
     for port in tcp_ports:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(5)
-        result = s.connect_ex((host, port))
-        if result != 0:
+        if not _attempt_tcp_connect(host, port):
             print(
                 f"ERROR: After stage directory={directory} unable to connect to ingress host={host} port={port}"
             )
             sys.exit(1)
-        s.close()
 
     print(
         f"After stage directory={directory} kubernetes ingress available on tcp ports={tcp_ports}"
@@ -476,31 +488,29 @@ def provision_ingress_dns(
 
 
 def check_ingress_dns(stage_outputs, config):
-    import socket
-    import time
-
     directory = "stages/04-kubernetes-ingress"
-    domain_name = config["domain"]
+
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
     ip = socket.gethostbyname(ip_or_name["hostname"] or ip_or_name["ip"])
+    domain_name = config['domain']
 
-    lookup_count = 12
-    lookup_interval = 5
+    def _attempt_dns_lookup(domain_name, ip, num_attempts=12, timeout=5):
+        for i in range(num_attempts):
+            try:
+                resolved_ip = socket.gethostbyname(domain_name)
+                if resolved_ip == ip:
+                    print(f"DNS configured domain={domain_name} matches ingress ip={ip}")
+                    return True
+                else:
+                    print(
+                        f"Attempt {i+1} polling DNS domain={domain_name} does not match ip={ip} instead got {resolved_ip}"
+                    )
+            except socket.gaierror:
+                print(f"Attempt {i+1} polling DNS domain={domain_name} record does not exist")
+            time.sleep(timeout)
+        return False
 
-    for i in range(lookup_count):
-        try:
-            resolved_ip = socket.gethostbyname(domain_name)
-            if resolved_ip == ip:
-                print(f"DNS configured domain={domain_name} matches ingress ip={ip}")
-                break
-            else:
-                print(
-                    f"Polling DNS domain={domain_name} does not match ip={ip} instead got {resolved_ip}"
-                )
-        except socket.gaierror:
-            print(f"Polling DNS domain={domain_name} does not exist")
-        time.sleep(lookup_interval)
-    else:
+    if not _attempt_dns_lookup(domain_name, ip):
         print(
             f"ERROR: After stage directory={directory} DNS domain={domain_name} does not point to ip={ip}"
         )
@@ -537,30 +547,30 @@ def check_05_kubernetes_keycloak(stage_outputs, config):
         f"{stage_outputs[directory]['keycloak_credentials']['value']['url']}/auth/"
     )
 
-    try:
-        KeycloakAdmin(
+    def _attempt_keycloak_connection(keycloak_url, username, password, realm_name, client_id, verify=False, num_attempts=3, timeout=5):
+        for i in range(num_attempts):
+            try:
+                KeycloakAdmin(keycloak_url, username=username, password=password, realm_name=realm_name, client_id=client_id, verify=verify)
+                print(f'Attempt {i+1} succeded connecting to keycloak master realm')
+                return True
+            except KeycloakError:
+                print(f'Attempt {i+1} failed connecting to keycloak master realm')
+        return False
+
+    if not _attempt_keycloak_connection(
             keycloak_url,
-            username=stage_outputs[directory]["keycloak_credentials"]["value"][
-                "username"
-            ],
-            password=stage_outputs[directory]["keycloak_credentials"]["value"][
-                "password"
-            ],
-            realm_name=stage_outputs[directory]["keycloak_credentials"]["value"][
-                "realm"
-            ],
-            client_id=stage_outputs[directory]["keycloak_credentials"]["value"][
-                "client_id"
-            ],
+            stage_outputs[directory]["keycloak_credentials"]["value"]["username"],
+            stage_outputs[directory]["keycloak_credentials"]["value"]["password"],
+            stage_outputs[directory]["keycloak_credentials"]["value"]["realm"],
+            stage_outputs[directory]["keycloak_credentials"]["value"]["client_id"],
             verify=False,
-        )
-    except KeycloakError:
+        ):
         print(
-            f"ERROR: unable to connect to keycloak at url={keycloak_url} with root credentials"
+            f"ERROR: unable to connect to keycloak master realm at url={keycloak_url} with root credentials"
         )
         sys.exit(1)
 
-    print("Keycloak service within kubernetes started successfully")
+    print("Keycloak service successfully started")
 
 
 def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=True):
@@ -588,39 +598,36 @@ def check_06_kubernetes_keycloak_configuration(stage_outputs, config):
         f"{stage_outputs[directory]['keycloak_credentials']['value']['url']}/auth/"
     )
 
-    try:
-        realm_admin = KeycloakAdmin(
+    def _attempt_keycloak_connection(keycloak_url, username, password, realm_name, client_id, qhub_realm, verify=False, num_attempts=3, timeout=5):
+        for i in range(num_attempts):
+            try:
+                realm_admin = KeycloakAdmin(keycloak_url, username=username, password=password, realm_name=realm_name, client_id=client_id, verify=verify)
+                existing_realms = {_["id"] for _ in realm_admin.get_realms()}
+                if qhub_realm in existing_realms:
+                    print(f'Attempt {i+1} succeded connecting to keycloak and qhub realm={qhub_realm} exists')
+                    return True
+                else:
+                    print(f'Attempt {i+1} succeeded connecting to keycloak but qhub realm did not exist')
+            except KeycloakError:
+                print(f'Attempt {i+1} failed connecting to keycloak master realm')
+            time.sleep(timeout)
+        return False
+
+    if not _attempt_keycloak_connection(
             keycloak_url,
-            username=stage_outputs[directory]["keycloak_credentials"]["value"][
-                "username"
-            ],
-            password=stage_outputs[directory]["keycloak_credentials"]["value"][
-                "password"
-            ],
-            realm_name=stage_outputs[directory]["keycloak_credentials"]["value"][
-                "realm"
-            ],
-            client_id=stage_outputs[directory]["keycloak_credentials"]["value"][
-                "client_id"
-            ],
+            stage_outputs[directory]["keycloak_credentials"]["value"]["username"],
+            stage_outputs[directory]["keycloak_credentials"]["value"]["password"],
+            stage_outputs[directory]["keycloak_credentials"]["value"]["realm"],
+            stage_outputs[directory]["keycloak_credentials"]["value"]["client_id"],
+            qhub_realm=stage_outputs["stages/06-kubernetes-keycloak-configuration"]["realm_id"]["value"],
             verify=False,
-        )
-        existing_realms = {_["id"] for _ in realm_admin.get_realms()}
-        realm_id = stage_outputs["stages/06-kubernetes-keycloak-configuration"][
-            "realm_id"
-        ]["value"]
-        if realm_id in existing_realms:
-            print("Keycloak service within kubernetes configured successfully")
-        else:
-            print(
-                f"ERROR: realm_id={realm_id} not in existing_realms={existing_realms} keycloak configuration failed"
-            )
-            sys.exit(1)
-    except KeycloakError:
+        ):
         print(
-            f"ERROR: unable to connect to keycloak at url={keycloak_url} with root credentials"
+            f"ERROR: unable to connect to keycloak master realm and ensure that qhub realm exists"
         )
         sys.exit(1)
+
+    print("Keycloak service successfully started with qhub realm")
 
 
 def provision_07_kubernetes_services(stage_outputs, config, check=True):
@@ -689,16 +696,22 @@ def check_07_kubernetes_services(stage_outputs, config):
 
     # supress insecure warnings
     import urllib3
-
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    def _attempt_connect_url(url, verify=False, num_attempts=3, timeout=5):
+        for i in range(num_attempts):
+            response = requests.get(service_url, verify=verify)
+            if response.status_code < 400:
+                print(f'Attempt {i+1} health check succeded for url={url}')
+                return True
+            else:
+                print(f'Attempt {i+1} health check failed for url={url}')
+        return False
 
     services = stage_outputs[directory]["service_urls"]["value"]
     for service_name, service in services.items():
         service_url = service["health_url"]
-        response = requests.get(service_url, verify=False)
-        if response.status_code < 400:
-            print(f"Service {service_name} UP as url={service_url}")
-        else:
+        if not _attempt_connect_url(service_url):
             print(f"ERROR: Service {service_name} DOWN when checking url={service_url}")
             sys.exit(1)
 
