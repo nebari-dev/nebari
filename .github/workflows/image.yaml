@@ -8,7 +8,7 @@ on:
 
   push:
     paths:
-      - "qhub/template/{{ cookiecutter.repo_directory }}/image/**"
+      - "qhub/template/image/**"
       - ".github/workflows/image.yaml"
 
     branches: # Only on paths above
