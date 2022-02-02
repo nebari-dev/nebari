@@ -29,10 +29,8 @@ jobs:
       matrix:
         dockerfile:
           - jupyterlab
-          - jupyterlab-centos
           - jupyterhub
           - dask-worker
-          - dask-worker-centos
           - dask-gateway
     steps:
       - name: 'Checkout Infrastructure'
