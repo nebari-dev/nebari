@@ -69,7 +69,7 @@ resource "helm_release" "jupyterhub" {
             authorize_url = module.jupyterhub-openid-client.config.authentication_url
             token_url = module.jupyterhub-openid-client.config.token_url
             userdata_url = module.jupyterhub-openid-client.config.userinfo_url
-            login_service = "keycloak"
+            login_service = "Keycloak"
             username_key = "preferred_username"
             claim_groups_key = "roles"
             allowed_groups = ["jupyterhub_admin", "jupyterhub_developer"]
