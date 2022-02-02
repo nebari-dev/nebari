@@ -2,7 +2,7 @@ import pytest
 
 from ruamel.yaml import YAML
 
-from qhub.render import render_template, set_env_vars_in_config, remove_existing_renders
+from qhub.render import render_template, set_env_vars_in_config
 from .conftest import render_config_partial, PRESERVED_DIR
 
 
@@ -87,20 +87,3 @@ def test_render_template(write_qhub_config_to_file):
     assert qhub_config_json["namespace"] == namespace
     assert qhub_config_json["domain"] == domain
     assert qhub_config_json["provider"] == cloud_provider
-
-
-def test_remove_existing_renders(write_qhub_config_to_file):
-    qhub_config_loc, _ = write_qhub_config_to_file
-    output_directory = qhub_config_loc.parent
-    dirs = [_.name for _ in output_directory.iterdir()]
-    preserved_files = [_ for _ in (output_directory / PRESERVED_DIR).iterdir()]
-
-    # test `remove_existing_renders` implicitly
-    assert PRESERVED_DIR in dirs
-    assert len(preserved_files[0].read_text()) > 0
-
-    # test `remove_existing_renders` explicitly
-    remove_existing_renders(output_directory)
-
-    assert PRESERVED_DIR in dirs
-    assert len(preserved_files[0].read_text()) > 0
