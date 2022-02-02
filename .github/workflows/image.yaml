@@ -17,9 +17,9 @@ on:
     tags: # Always, regardless of paths above
       - '*'
 
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.ref }}
+#   cancel-in-progress: true
 
 jobs:
   jupyterlab:
