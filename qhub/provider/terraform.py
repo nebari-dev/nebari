@@ -32,7 +32,6 @@ def deploy(
         terraform_apply : bool = True,
         terraform_destroy : bool = False,
         input_vars: Dict[str, Any] = None,
-        terraform_objects: List[Dict] = None,
         state_imports : List = None):
     """Execute a given terraform directory
 
@@ -47,10 +46,6 @@ def deploy(
     """
     input_vars = input_vars or {}
     state_imports = state_imports or []
-
-    if terraform_objects:
-        with open(os.path.join(directory, '_qhub.tf.json'), "w") as f:
-            json.dump(deep_merge(*terraform_objects), f, indent=4)
 
     with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix='.tfvars.json') as f:
         json.dump(input_vars, f.file)
@@ -220,6 +215,9 @@ def tf_clear():
 def tf_render():
     global _TF_OBJECTS
     return json.dumps(_TF_OBJECTS, indent=4)
+
+def tf_render_objects(terraform_objects):
+    return json.dumps(deep_merge(*terraform_objects), indent=4)
 
 def register(f):
     def wrapper(*args, **kwargs):

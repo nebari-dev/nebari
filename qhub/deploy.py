@@ -10,7 +10,7 @@ import tempfile
 from qhub.provider import terraform
 from qhub.utils import timer, check_cloud_credentials, modified_environ, split_docker_image_name
 from qhub.provider.dns.cloudflare import update_record
-from qhub.render.terraform import QHubKubernetesProvider, QHubTerraformState, QHubGCPProvider, QHubAWSProvider
+
 
 logger = logging.getLogger(__name__)
 
@@ -114,9 +114,6 @@ def provision_01_terraform_state(stage_outputs, config):
                 'namespace': config['namespace'],
                 'region': config['google_cloud_platform']['region']
             },
-            terraform_objects=[
-                QHubGCPProvider(config),
-            ],
             state_imports=[(
                 "module.terraform-state.module.gcs.google_storage_bucket.static-site",
                 f"{config['project_name']}-{config['namespace']}-terraform-state",
@@ -154,9 +151,6 @@ def provision_01_terraform_state(stage_outputs, config):
                 'name': config['project_name'],
                 'namespace': config['namespace'],
             },
-            terraform_objects=[
-                QHubAWSProvider(config),
-            ],
             state_imports=[(
                 "module.terraform-state.aws_s3_bucket.terraform-state",
                 f"{config['project_name']}-{config['namespace']}-terraform-state",
@@ -201,10 +195,7 @@ def provision_02_infrastructure(stage_outputs, config, check=True):
                 'kubernetes_version': config['digital_ocean']['kubernetes_version'],
                 'node_groups': config['digital_ocean']['node_groups'],
                 'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubTerraformState('02-infrastructure', config),
-            ])
+            })
     elif config['provider'] == 'gcp':
         stage_outputs[directory] = terraform.deploy(
             os.path.join(directory, config['provider']),
@@ -213,13 +204,9 @@ def provision_02_infrastructure(stage_outputs, config, check=True):
                 'environment': config['namespace'],
                 'region': config['google_cloud_platform']['region'],
                 'project_id': config['google_cloud_platform']['project'],
-                'node_groups': [{'name': key, 'min_size': value['min_nodes'], 'max_size': value['max_nodes'], **value} for key, value in config['google_cloud_platform']['node_groups'].items()],
+                'node_groups': [{'name': key, 'min_size': value['min_nodes'], 'max_size': value['max_nodes'], 'instance_type': value['instance'], **value} for key, value in config['google_cloud_platform']['node_groups'].items()],
                 'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubGCPProvider(config),
-                QHubTerraformState('02-infrastructure', config),
-            ])
+            })
     elif config['provider'] == 'azure':
         stage_outputs[directory] = terraform.deploy(
             os.path.join(directory, config['provider']),
@@ -230,10 +217,7 @@ def provision_02_infrastructure(stage_outputs, config, check=True):
                 'kubernetes_version': config['azure']['kubernetes_version'],
                 'node_groups': config['azure']['node_groups'],
                 'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubTerraformState('02-infrastructure', config),
-            ])
+            })
     elif config['provider'] == 'aws':
         stage_outputs[directory] = terraform.deploy(
             os.path.join(directory, config['provider']),
@@ -242,11 +226,7 @@ def provision_02_infrastructure(stage_outputs, config, check=True):
                 'environment': config['namespace'],
                 'node_groups': [{'name': key, 'min_size': value['min_nodes'], 'desired_size': value['min_nodes'], 'max_size': value['max_nodes'], 'gpu': value.get('gpu', False), 'instance_type': value['instance']} for key, value in config['amazon_web_services']['node_groups'].items()],
                 'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubAWSProvider(config),
-                QHubTerraformState('02-infrastructure', config),
-            ])
+            })
     else:
         raise NotImplementedError(f'provider {config["provider"]} not implemented for directory={directory}')
 
@@ -286,11 +266,7 @@ def provision_03_kubernetes_initialize(stage_outputs, config, check=True):
             'environment': config['namespace'],
             'cloud-provider': config['provider'],
             'aws-region': config.get('amazon_web_services', {}).get('region'),
-        },
-        terraform_objects=[
-            QHubTerraformState('03-kubernetes-initialize', config),
-            QHubKubernetesProvider(config),
-        ])
+        })
 
     if check:
         check_03_kubernetes_initialize(stage_outputs, config)
@@ -332,11 +308,7 @@ def provision_04_kubernetes_ingress(stage_outputs, config, check=True):
             "acme-email": config['certificate'].get('acme_email'),
             "acme-server": config['certificate'].get('acme_server'),
             "certificate-secret-name": config['certificate']['secret_name'] if config['certificate']['type'] == 'existing' else None,
-        },
-        terraform_objects=[
-            QHubTerraformState('04-kubernetes-ingress', config),
-            QHubKubernetesProvider(config),
-        ])
+        })
 
     if check:
         check_04_kubernetes_ingress(stage_outputs, config)
@@ -436,12 +408,9 @@ def provision_05_kubernetes_keycloak(stage_outputs, config, check=True):
             'name': config['project_name'],
             'environment': config['namespace'],
             'endpoint': config['domain'],
-            'initial-root-password': config['security']['keycloak']['initial_root_password']
-        },
-        terraform_objects=[
-            QHubTerraformState('05-kubernetes-keycloak', config),
-            QHubKubernetesProvider(config),
-        ])
+            'initial-root-password': config['security']['keycloak']['initial_root_password'],
+            'node-group': calculate_note_groups(config)['general'],
+        })
 
     if check:
         check_05_kubernetes_keycloak(stage_outputs, config)
@@ -479,10 +448,7 @@ def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=
         input_vars={
             'realm': f"qhub-{config['project_name']}",
             'authentication': config['security']['authentication']
-        },
-        terraform_objects=[
-            QHubTerraformState('06-kubernetes-keycloak-configuration', config),
-        ])
+        })
 
     if check:
         check_06_kubernetes_keycloak_configuration(stage_outputs, config)
@@ -553,11 +519,7 @@ def provision_07_kubernetes_services(stage_outputs, config, check=True):
             # clearml
             "clearml-enabled": config.get('clearml', {}).get('enabled', False),
             "clearml-enable-forwardauth": config.get('clearml', {}).get('enable_forward_auth', False),
-        },
-        terraform_objects=[
-            QHubTerraformState('07-kubernetes-services', config),
-            QHubKubernetesProvider(config),
-        ])
+        })
 
     if check:
         check_07_kubernetes_services(stage_outputs, config)
@@ -595,11 +557,7 @@ def provision_08_enterprise_qhub(stage_outputs, config, check=True):
             'external_container_reg': config.get('external_container_reg', {'enabled': False}),
             'qhub_config': config,
             'helm_extensions': config.get('helm_extensions', []),
-        },
-        terraform_objects=[
-            QHubTerraformState('08-enterprise-qhub', config),
-            QHubKubernetesProvider(config),
-        ])
+        })
 
     if check:
         pass

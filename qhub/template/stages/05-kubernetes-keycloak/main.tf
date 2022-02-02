@@ -15,4 +15,6 @@ module "kubernetes-keycloak-helm" {
   initial-root-password = var.initial-root-password
 
   overrides = var.overrides
+
+  node-group = var.node-group
 }

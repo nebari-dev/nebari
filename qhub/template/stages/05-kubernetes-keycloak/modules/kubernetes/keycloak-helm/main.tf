@@ -8,6 +8,18 @@ resource "helm_release" "keycloak" {
 
   values = concat([
     file("${path.module}/values.yaml"),
+    jsonencode({
+      nodeSelector = {
+        "${var.node-group.key}" = var.node-group.value
+      }
+      postgresql = {
+        primary = {
+          nodeSelector = {
+            "${var.node-group.key}" = var.node-group.value
+          }
+        }
+      }
+    })
   ], var.overrides)
 
   set {

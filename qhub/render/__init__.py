@@ -1,244 +1,43 @@
+import sys
 import pathlib
 import functools
 import os
-from shutil import rmtree
 import shutil
-from turtle import up
-from urllib.parse import urlencode
+from typing import List, Dict
+import hashlib
 
 from ruamel.yaml import YAML
-from ..version import __version__
-from ..constants import TERRAFORM_VERSION
-from ..utils import pip_install_qhub, QHUB_GH_BRANCH
 
-# existing files and folders to delete when `render_template` is called
-DELETABLE_PATHS = [
-    "terraform-state",
-    ".github",
-    "infrastructure",
-    "image",
-    ".gitlab-ci.yml",
-]
+from qhub.provider.terraform import tf_render_objects
+from qhub.render.terraform import QHubKubernetesProvider, QHubTerraformState, QHubGCPProvider, QHubAWSProvider
 
 
-def patch_dask_gateway_extra_config(config):
-    """Basically the current dask_gateway helm chart only allows one
-    update to extraContainerConfig and extraPodConfig for the workers
-    and scheduler. Thus we need to copy the configuration done in
-    these settings. The only critical one is mounting the conda store
-    directory.
-
-    """
-    namespace = config["namespace"]
-    conda_store_volume = {
-        "name": "conda-store",
-        "persistentVolumeClaim": {"claimName": f"conda-store-{namespace}-share"},
-    }
-    extra_pod_config = {"volumes": [conda_store_volume]}
-
-    merge_config_for = ["worker_extra_pod_config", "scheduler_extra_pod_config"]
-
-    if "profiles" in config and "dask_worker" in config["profiles"]:
-        for worker_name, worker_config in config["profiles"]["dask_worker"].items():
-            for config_name in merge_config_for:
-                if config_name in worker_config:
-                    worker_config[config_name] = deep_merge(
-                        worker_config[config_name], extra_pod_config
-                    )
-
-
-def patch_versioning_extra_config(config):
-    """
-    Set defaults for qhub_version and pip install command
-    because they depend on __version__ so cannot be static in cookiecutter.json
-    """
-    if "qhub_version" not in config:
-        config["qhub_version"] = __version__
-
-    config["pip_install_qhub"] = pip_install_qhub
-
-    config["QHUB_GH_BRANCH"] = QHUB_GH_BRANCH
-
-    if "terraform_version" not in config:
-        config["terraform_version"] = TERRAFORM_VERSION
-
-
-def patch_terraform_extensions(config):
-    """
-    Add terraform-friendly extension details
-    """
-    config["tf_extensions"] = []
-    logout_uris = []
-    for ext in config.get("extensions", []):
-        tf_ext = {
-            "name": ext["name"],
-            "image": ext["image"],
-            "urlslug": ext["urlslug"],
-            "private": ext.get("private", False),
-            "oauth2client": ext.get("oauth2client", False),
-            "logout": ext.get("logout", ""),
-            "jwt": False,
-            "qhubconfigyaml": ext.get("qhubconfigyaml", False),
-        }
-        tf_ext["envs"] = []
-        for env in ext.get("envs", []):
-            if env.get("code") == "KEYCLOAK":
-                tf_ext["envs"].append(
-                    {
-                        "name": "KEYCLOAK_SERVER_URL",
-                        "rawvalue": '"http://keycloak-headless.${var.environment}:8080/auth/"',
-                    }
-                )
-                tf_ext["envs"].append(
-                    {"name": "KEYCLOAK_ADMIN_USERNAME", "rawvalue": '"qhub-bot"'}
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "KEYCLOAK_ADMIN_PASSWORD",
-                        "rawvalue": "random_password.keycloak-qhub-bot-password.result",
-                    }
-                )
-            elif env.get("code") == "OAUTH2CLIENT":
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_AUTHORIZE_URL",
-                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth"',
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_ACCESS_TOKEN_URL",
-                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"',
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_USER_DATA_URL",
-                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"',
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_CLIENT_ID",
-                        "rawvalue": f"\"qhub-ext-{ext['name']}-client\"",
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_CLIENT_SECRET",
-                        "rawvalue": f"random_password.qhub-ext-{ext['name']}-keycloak-client-pw.result",
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_REDIRECT_BASE",
-                        "rawvalue": f"\"https://${{var.endpoint}}/{ext['urlslug']}/\"",
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "COOKIE_OAUTH2STATE_NAME",
-                        "rawvalue": f"\"qhub-o2state-{ext['name']}\"",
-                    }
-                )
-            elif env.get("code") == "JWT":
-                tf_ext["envs"].append(
-                    {
-                        "name": "JWT_SECRET_KEY",
-                        "rawvalue": f"random_password.qhub-ext-{ext['name']}-jwt-secret.result",
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "COOKIE_AUTHORIZATION_NAME",
-                        "rawvalue": f"\"qhub-jwt-{ext['name']}\"",
-                    }
-                )
-                tf_ext["jwt"] = True
-            else:
-                raise ValueError("No such QHub extension code " + env.get("code"))
-
-        if ext.get("logout", "") != "":
-            logout_uris.append(
-                f"https://{config['domain']}/{ext['urlslug']}{ext['logout']}"
-            )
-
-        config["tf_extensions"].append(tf_ext)
-
-    final_logout_uri = f"https://{config['domain']}/hub/login"
-
-    for uri in logout_uris:
-        final_logout_uri = "{}?{}".format(
-            uri, urlencode({"redirect_uri": final_logout_uri})
-        )
-
-    config["final_logout_uri"] = final_logout_uri
-    config["logout_uris"] = logout_uris
-
-
-def deep_merge(d1, d2):
-    """Deep merge two dictionaries.
-    >>> value_1 = {
-    'a': [1, 2],
-    'b': {'c': 1, 'z': [5, 6]},
-    'e': {'f': {'g': {}}},
-    'm': 1,
-    }
-
-    >>> value_2 = {
-        'a': [3, 4],
-        'b': {'d': 2, 'z': [7]},
-        'e': {'f': {'h': 1}},
-        'm': [1],
-    }
-
-    >>> print(deep_merge(value_1, value_2))
-    {'m': 1, 'e': {'f': {'g': {}, 'h': 1}}, 'b': {'d': 2, 'c': 1, 'z': [5, 6, 7]}, 'a': [1, 2, 3,  4]}
-    """
-    if isinstance(d1, dict) and isinstance(d2, dict):
-        d3 = {}
-        for key in d1.keys() | d2.keys():
-            if key in d1 and key in d2:
-                d3[key] = deep_merge(d1[key], d2[key])
-            elif key in d1:
-                d3[key] = d1[key]
-            elif key in d2:
-                d3[key] = d2[key]
-        return d3
-    elif isinstance(d1, list) and isinstance(d2, list):
-        return [*d1, *d2]
-    else:  # if they don't match use left one
-        return d1
-
-
-def render_template(output_directory, config_filename, force=False):
+def render_template(output_directory, config_filename, force=False, dry_run=False):
+    # get directory for qhub templates
     import qhub
-
-    input_directory = pathlib.Path(qhub.__file__).parent / "template"
+    template_directory = pathlib.Path(qhub.__file__).parent / "template"
 
     # would be nice to remove assumption that input directory
-    # is in local filesystem
-    input_directory = pathlib.Path(input_directory)
-    if not input_directory.is_dir():
-        raise ValueError(f"input directory={input_directory} is not a directory")
+    # is in local filesystem and a directory
+    template_directory = pathlib.Path(template_directory)
+    if not template_directory.is_dir():
+        raise ValueError(f"template directory={template_directory} is not a directory")
 
     output_directory = pathlib.Path(output_directory).resolve()
-    #
-    from pathlib import Path
 
-    if output_directory == str(Path.home()):
-        print("Deploying on /home is not advised!")
-        return
+    if output_directory == str(pathlib.Path.home()):
+        print("ERROR: Deploying QHub in home directory is not advised!")
+        sys.exit(1)
 
-    # mkdir all the way down to repo dir so we can copy .gitignore into it in remove_existing_renders
+    # mkdir all the way down to repo dir so we can copy .gitignore
+    # into it in remove_existing_renders
     output_directory.mkdir(exist_ok=True, parents=True)
 
-    filename = pathlib.Path(config_filename)
+    config_filename = pathlib.Path(config_filename)
+    if not config_filename.is_file():
+        raise ValueError(f"cookiecutter configuration={config_filename} is not filename")
 
-    if not filename.is_file():
-        raise ValueError(f"cookiecutter configuration={filename} is not filename")
-
-    with filename.open() as f:
+    with config_filename.open() as f:
         yaml = YAML(typ="safe", pure=True)
         config = yaml.load(f)
 
@@ -248,42 +47,138 @@ def render_template(output_directory, config_filename, force=False):
     set_env_vars_in_config(config)
 
     config["repo_directory"] = output_directory.name
-    patch_dask_gateway_extra_config(config)
+    config["qhub_config_yaml_path"] = str(config_filename.absolute())
 
-    patch_versioning_extra_config(config)
+    contents = render_contents(config)
 
-    patch_terraform_extensions(config)
+    directories = [
+        "image",
+        f"stages/02-infrastructure/{config['provider']}",
+        "stages/03-kubernetes-initialize",
+        "stages/04-kubernetes-ingress",
+        "stages/05-kubernetes-keycloak",
+        "stages/06-kubernetes-keycloak-configuration",
+        "stages/07-kubernetes-services",
+        "stages/08-enterprise-qhub",
+    ]
+    if config['provider'] != 'local' and config['terraform_state']['type'] == 'remote':
+        directories.append(f"stages/01-terraform-state/{config['provider']}")
 
-    config["qhub_config_yaml_path"] = str(filename.absolute())
-
-    directories = ["stages", "image"]
-
-    source_dirs = [os.path.join(str(input_directory), _) for _ in directories]
+    source_dirs = [os.path.join(str(template_directory), _) for _ in directories]
     output_dirs = [os.path.join(str(output_directory), _) for _ in directories]
     new, untrack, updated = inspect_files(
         source_dirs,
         output_dirs,
-        source_base_dir=str(input_directory),
+        source_base_dir=str(template_directory),
         output_base_dir=str(output_directory),
+        ignore_filenames=[
+            'terraform.tfstate',
+            '.terraform.lock.hcl',
+            'terraform.tfstate.backup'
+        ],
+        ignore_directories=['.terraform'],
+        contents=contents,
     )
-    track_list = {"CREATED": new, "MODIFIED": untrack, "UNTRACKED": updated}
-    for mode in track_list.keys():
-        if mode != "UNTRACKED":
-            print(f"The following files will be {mode.lower()}...")
-        else:
-            print("The following files are untracked...")
-        for file in sorted(track_list[mode]):
-            print(f"   {mode} {file}")
 
-    for filename in new | updated:
-        output_filename = os.path.join(str(output_directory), filename)
-        input_filename = os.path.join(str(input_directory), filename)
-        os.makedirs(os.path.dirname(output_filename), exist_ok=True)
-        shutil.copyfile(input_filename, output_filename)
+    if new:
+        print(f"The following files will be created:")
+        for filename in sorted(new):
+            print(f'   CREATED   {filename}')
+    if updated:
+        print(f"The following files will be updated:")
+        for filename in sorted(updated):
+            print(f'   UPDATED   {filename}')
+    if untrack:
+        print(f"The following files are untracked (only exist in output directory):")
+        for filename in sorted(updated):
+            print(f'   UNTRACKED {filename}')
+
+    if dry_run:
+        print('dry-run enabled no files updated or created')
+    else:
+        for filename in new | updated:
+            input_filename = os.path.join(str(template_directory), filename)
+            output_filename = os.path.join(str(output_directory), filename)
+            os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+
+            if os.path.exists(input_filename):
+                shutil.copyfile(input_filename, output_filename)
+            else:
+                with open(output_filename, "w") as f:
+                    f.write(contents[filename])
+
+
+def render_contents(config: Dict):
+    """Dynamically generated contents from QHub configuration
+
+    """
+    contents = {}
+
+    if config['provider'] == 'gcp':
+        contents.update({
+            'stages/01-terraform-state/gcp/_qhub.tf.json': tf_render_objects([
+                QHubGCPProvider(config),
+            ]),
+            'stages/02-infrastructure/gcp/_qhub.tf.json': tf_render_objects([
+                QHubGCPProvider(config),
+                QHubTerraformState('02-infrastructure', config),
+            ])
+        })
+    elif config['provider'] == 'do':
+        contents.update({
+            'stages/02-infrastructure/do/_qhub.tf.json': tf_render_objects([
+                QHubTerraformState('02-infrastructure', config),
+            ])
+        })
+    elif config['azure'] == 'azure':
+        contents.update({
+            'stages/02-infrastructure/azure/_qhub.tf.json': tf_render_objects([
+                QHubTerraformState('02-infrastructure', config),
+            ])
+        })
+    elif config['provider'] == 'aws':
+        contents.update({
+            'stages/01-terraform-state/aws/_qhub.tf.json': tf_render_objects([
+                QHubAWSProvider(config),
+            ]),
+            'stages/02-infrastructure/aws/_qhub.tf.json': tf_render_objects([
+                QHubTerraformState('02-infrastructure', config),
+            ])
+        })
+
+    contents.update({
+        'stages/03-kubernetes-initialize/_qhub.tf.json': tf_render_objects([
+            QHubTerraformState('03-kubernetes-initialize', config),
+            QHubKubernetesProvider(config),
+        ]),
+        'stages/04-kubernetes-ingress/_qhub.tf.json': tf_render_objects([
+            QHubTerraformState('04-kubernetes-ingress', config),
+            QHubKubernetesProvider(config),
+        ]),
+        'stages/05-kubernetes-keycloak/_qhub.tf.json': tf_render_objects([
+            QHubTerraformState('05-kubernetes-keycloak', config),
+            QHubKubernetesProvider(config),
+        ]),
+        'stages/06-kubernetes-keycloak-configuration/_qhub.tf.json': tf_render_objects([
+            QHubTerraformState('06-kubernetes-keycloak-configuration', config),
+        ]),
+        'stages/07-kubernetes-services/_qhub.tf.json': tf_render_objects([
+            QHubTerraformState('07-kubernetes-services', config),
+            QHubKubernetesProvider(config),
+        ]),
+        'stages/08-enterprise-qhub/_qhub.tf.json': tf_render_objects([
+            QHubTerraformState('08-enterprise-qhub', config),
+            QHubKubernetesProvider(config),
+        ])
+    })
+
+    return contents
 
 
 def inspect_files(
-    source_dirs: str, output_dirs: str, source_base_dir: str, output_base_dir: str
+        source_dirs: str, output_dirs: str, source_base_dir: str, output_base_dir: str,
+        ignore_filenames : List[str] = None, ignore_directories : List[str] = None,
+        contents: Dict[str, str] = None,
 ):
     """Return created, updated and untracked files by computing a checksum over the provided directory
 
@@ -292,32 +187,44 @@ def inspect_files(
         output_dirs (str): The destionation dir wich will be matched with
         source_base_dir (str): Relative base path to source directory
         output_base_dir (str): Relative base path to output directory
+        ignore_filenames (list[str]): Filenames to ignore while comparing for changes
+        ignore_directories (list[str]): Directories to ignore while comparing for changes
+        contents (dict): filename to content mapping for dynmaically generated files
     """
+    ignore_filenames = ignore_filenames or []
+    ignore_directories = ignore_directories or []
+    contents = contents or {}
 
     source_files = {}
     output_files = {}
 
+    def list_files(directory: str, ignore_filenames : List[str], ignore_directories : List[str]):
+        for root, dirs, files in os.walk(directory):
+            dirs[:] = [d for d in dirs if d not in ignore_directories]
+            for file in files:
+                if file not in ignore_filenames:
+                    yield os.path.join(root, file)
+
+    for filename in contents:
+        source_files[filename] = hashlib.sha256(contents[filename].encode('utf8')).hexdigest()
+        output_filename = os.path.join(output_base_dir, filename)
+        if os.path.isfile(output_filename):
+            output_files[filename] = hash_file(filename)
+
     for source_dir, output_dir in zip(source_dirs, output_dirs):
+        for filename in list_files(source_dir, ignore_filenames, ignore_directories):
+            relative_path = os.path.relpath(filename, source_base_dir)
+            source_files[relative_path] = hash_file(filename)
 
-        for root, _, files in os.walk(source_dir):
-            for file_name in files:
-                file_path = os.path.join(root, file_name)
-                source_files[os.path.relpath(file_path, source_base_dir)] = hash_file(
-                    file_path
-                )
-
-        for root, _, files in os.walk(output_dir):
-            for file_name in files:
-                outfile_path = os.path.join(root, file_name)
-                output_files[
-                    os.path.relpath(outfile_path, output_base_dir)
-                ] = hash_file(outfile_path)
+        for filename in list_files(output_dir, ignore_filenames, ignore_directories):
+            relative_path = os.path.relpath(filename, output_base_dir)
+            output_files[relative_path] = hash_file(filename)
 
     new_files = source_files.keys() - output_files.keys()
     untracted_files = output_files.keys() - source_files.keys()
     updated_files = set()
 
-    for prevalent_file in source_files.keys() & output_files.keys():
+    for prevalent_file in (source_files.keys() & output_files.keys()):
         if source_files[prevalent_file] != output_files[prevalent_file]:
             updated_files.add(prevalent_file)
 
@@ -330,35 +237,8 @@ def hash_file(file_path: str):
     Args:
         file_path (str): path to file
     """
-    import hashlib
-
     with open(file_path, "rb") as f:
         return hashlib.sha256(f.read()).hexdigest()
-
-
-def remove_existing_renders(
-    output_directory, deletable_paths=DELETABLE_PATHS, verbosity=0
-):
-    """
-    Remove all files and directories beneath each directory in `deletable_paths`. These files and directories will be regenerated in the next step (`generate_files`) based on the configurations set in `qhub-config.yml`.
-
-    Inputs must be pathlib.Path
-    """
-    home_dir = pathlib.Path.home()
-    if pathlib.Path.cwd() == home_dir:
-        raise ValueError(
-            f"Deploying QHub from the home directory, {home_dir}, is not permitted."
-        )
-
-    for delete_me in deletable_paths:
-        delete_me = dest_repo_dir / delete_me
-        if delete_me.exists():
-            if verbosity > 0:
-                print(f"Deleting all files and directories beneath {delete_me} ...")
-            if delete_me.is_file():
-                delete_me.unlink()
-            else:
-                rmtree(delete_me)
 
 
 def set_env_vars_in_config(config):

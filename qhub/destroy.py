@@ -115,10 +115,7 @@ def destroy_02_infrastructure(config):
                 'kubernetes_version': config['digital_ocean']['kubernetes_version'],
                 'node_groups': config['digital_ocean']['node_groups'],
                 'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubTerraformState('02-infrastructure', config),
-            ])
+            })
     elif config['provider'] == 'gcp':
         terraform.deploy(
             terraform_apply=False,
@@ -131,11 +128,7 @@ def destroy_02_infrastructure(config):
                 'project_id': config['google_cloud_platform']['project'],
                 'node_groups': [{'name': key, 'min_size': value['min_nodes'], 'max_size': value['max_nodes'], **value} for key, value in config['google_cloud_platform']['node_groups'].items()],
                 'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubGCPProvider(config),
-                QHubTerraformState('02-infrastructure', config),
-            ])
+            })
     elif config['provider'] == 'azure':
         terraform.deploy(
             terraform_apply=False,
@@ -148,10 +141,7 @@ def destroy_02_infrastructure(config):
                 'kubernetes_version': config['azure']['kubernetes_version'],
                 'node_groups': config['azure']['node_groups'],
                 'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubTerraformState('02-infrastructure', config),
-            ])
+            })
     elif config['provider'] == 'aws':
         terraform.deploy(
             terraform_apply=False,
@@ -162,11 +152,7 @@ def destroy_02_infrastructure(config):
                 'environment': config['namespace'],
                 'node_groups': [{'name': key, 'min_size': value['min_nodes'], 'desired_size': value['min_nodes'], 'max_size': value['max_nodes'], 'gpu': value.get('gpu', False), 'instance_type': value['instance']} for key, value in config['amazon_web_services']['node_groups'].items()],
                 'kubeconfig_filename': os.path.join(tempfile.gettempdir(), 'QHUB_KUBECONFIG')
-            },
-            terraform_objects=[
-                QHubAWSProvider(config),
-                QHubTerraformState('02-infrastructure', config),
-            ])
+            })
     else:
         raise NotImplementedError(f'provider {config["provider"]} not implemented for directory={directory}')
 
