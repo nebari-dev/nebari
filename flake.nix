@@ -52,7 +52,6 @@
 
         patchPhase = ''
           substituteInPlace setup.py \
-            --replace "cookiecutter==1.7.2" "cookiecutter" \
             --replace "azure-identity==1.6.1" "azure-identity" \
             --replace "azure-mgmt-containerservice==16.2.0" "azure-mgmt-containerservice"
         '';

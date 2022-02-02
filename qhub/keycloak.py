@@ -55,7 +55,7 @@ def get_keycloak_admin_from_config(config_filename):
             server_url=keycloak_server_url,
             username=keycloak_username,
             password=keycloak_password,
-            realm_name=os.environ.get("KEYCLOAK_REALM", "qhub"),
+            realm_name=os.environ.get("KEYCLOAK_REALM", f"qhub-{config['project_name']}"),
             user_realm_name="master",
             auto_refresh_token=("get", "put", "post", "delete"),
             verify=should_verify_tls,
