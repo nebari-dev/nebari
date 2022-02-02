@@ -77,15 +77,14 @@ jobs:
       - name: Add symlink to cookiecutter dir and tree
         run: |
           cd ./qhub/template
-          ln -s ./\{\{\ cookiecutter.repo_directory\ \}\} cookiecutter
           sudo apt-get install tree
-          tree ./cookiecutter/image
+          tree ./image
 
       - name: Build docker
         uses: docker/build-push-action@v2
         with:
-          context: ./qhub/template/cookiecutter/image
-          file: "./qhub/template/cookiecutter/image/Dockerfile.${{ matrix.dockerfile }}"
+          context: "./qhub/template/image"
+          file: "./qhub/template/image/Dockerfile.${{ matrix.dockerfile }}"
           tags: |
             ${{ steps.meta.outputs.tags }}
             ghcr.io/${{ steps.meta.outputs.tags }}
@@ -96,6 +95,6 @@ jobs:
       - name: Lint Dockerfiles
         uses: jbergstroem/hadolint-gh-action@v1
         with:
-          dockerfile: ./qhub/template/cookiecutter/image/Dockerfile.${{ matrix.dockerfile }}
+          dockerfile: ./qhub/template/image/Dockerfile.${{ matrix.dockerfile }}
           output_format: tty
           error_level: 0
