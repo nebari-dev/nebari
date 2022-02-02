@@ -14,7 +14,6 @@
       keycloak = (import nixpkgs-keycloak { system = "x86_64-linux"; }).python3Packages.python-keycloak;
 
       propagatedDependencies = [
-        pythonPackages.cookiecutter
         pythonPackages.ruamel-yaml
         pythonPackages.cloudflare
         pythonPackages.auth0-python

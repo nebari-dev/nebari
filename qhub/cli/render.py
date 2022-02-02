@@ -14,7 +14,7 @@ def create_render_subcommand(subparser):
     subparser.add_argument(
         "--dry-run",
         action="store_true",
-        help="simulate rendering files without actually writing or updating any files"
+        help="simulate rendering files without actually writing or updating any files",
     )
     subparser.set_defaults(func=handle_render)
 

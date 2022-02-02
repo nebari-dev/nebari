@@ -304,7 +304,7 @@ def modified_environ(*remove: List[str], **update: Dict[str, str]):
 
 
 def split_docker_image_name(image_name):
-    name, tag = image_name.split(':')
+    name, tag = image_name.split(":")
     return {"name": name, "tag": tag}
 
 
@@ -332,7 +332,7 @@ def deep_merge(*args):
         return args[0]
     elif len(args) > 2:
         return functools.reduce(deep_merge, args, {})
-    else: # length 2
+    else:  # length 2
         d1, d2 = args
 
     if isinstance(d1, dict) and isinstance(d2, dict):

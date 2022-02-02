@@ -10,7 +10,6 @@ import tempfile
 import urllib.request
 import zipfile
 from typing import Dict, Any, List
-import functools
 import contextlib
 
 
@@ -26,13 +25,14 @@ class TerraformException(Exception):
 
 
 def deploy(
-        directory,
-        terraform_init : bool = True,
-        terraform_import : bool = False,
-        terraform_apply : bool = True,
-        terraform_destroy : bool = False,
-        input_vars: Dict[str, Any] = None,
-        state_imports : List = None):
+    directory,
+    terraform_init: bool = True,
+    terraform_import: bool = False,
+    terraform_apply: bool = True,
+    terraform_destroy: bool = False,
+    input_vars: Dict[str, Any] = None,
+    state_imports: List = None,
+):
     """Execute a given terraform directory
 
     Parameters:
@@ -47,7 +47,9 @@ def deploy(
     input_vars = input_vars or {}
     state_imports = state_imports or []
 
-    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix='.tfvars.json') as f:
+    with tempfile.NamedTemporaryFile(
+        mode="w", encoding="utf-8", suffix=".tfvars.json"
+    ) as f:
         json.dump(input_vars, f.file)
         f.file.flush()
 
@@ -56,7 +58,9 @@ def deploy(
 
         if terraform_import:
             for addr, id in state_imports:
-                tfimport(addr, id, directory=directory, var_files=[f.name], exist_ok=True)
+                tfimport(
+                    addr, id, directory=directory, var_files=[f.name], exist_ok=True
+                )
 
         if terraform_apply:
             apply(directory, var_files=[f.name])
@@ -129,7 +133,11 @@ def apply(directory=None, targets=None, var_files=None):
     var_files = var_files or []
 
     logger.info(f"terraform apply directory={directory} targets={targets}")
-    command = ["apply", "-auto-approve"] + ["-target=" + _ for _ in targets] + ["-var-file=" + _ for _ in var_files]
+    command = (
+        ["apply", "-auto-approve"]
+        + ["-target=" + _ for _ in targets]
+        + ["-var-file=" + _ for _ in var_files]
+    )
     with timer(logger, "terraform apply"):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
@@ -139,9 +147,11 @@ def output(directory=None):
 
     logger.info(f"terraform={terraform_path} output directory={directory}")
     with timer(logger, "terraform output"):
-        return json.loads(subprocess.check_output(
-            [terraform_path, "output", "-json"], cwd=directory
-        ).decode("utf8")[:-1])
+        return json.loads(
+            subprocess.check_output(
+                [terraform_path, "output", "-json"], cwd=directory
+            ).decode("utf8")[:-1]
+        )
 
 
 def tfimport(addr, id, directory=None, var_files=None, exist_ok=False):
@@ -153,7 +163,11 @@ def tfimport(addr, id, directory=None, var_files=None, exist_ok=False):
     with timer(logger, "terraform import"):
         try:
             run_terraform_subprocess(
-                command, cwd=directory, prefix="terraform", strip_errors=True, timeout=30
+                command,
+                cwd=directory,
+                prefix="terraform",
+                strip_errors=True,
+                timeout=30,
             )
         except TerraformException as e:
             if not exist_ok:
@@ -175,10 +189,14 @@ def destroy(directory=None, targets=None, var_files=None):
     var_files = var_files or []
 
     logger.info(f"terraform destroy directory={directory} targets={targets}")
-    command = [
-        "destroy",
-        "-auto-approve",
-    ] + ["-target=" + _ for _ in targets] + ["-var-file=" + _ for _ in var_files]
+    command = (
+        [
+            "destroy",
+            "-auto-approve",
+        ]
+        + ["-target=" + _ for _ in targets]
+        + ["-var-file=" + _ for _ in var_files]
+    )
 
     with timer(logger, "terraform destroy"):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
@@ -208,16 +226,20 @@ def tf_context(filename):
 
 _TF_OBJECTS = {}
 
+
 def tf_clear():
     global _TF_OBJECTS
     _TF_OBJECTS = {}
+
 
 def tf_render():
     global _TF_OBJECTS
     return json.dumps(_TF_OBJECTS, indent=4)
 
+
 def tf_render_objects(terraform_objects):
     return json.dumps(deep_merge(*terraform_objects), indent=4)
+
 
 def register(f):
     def wrapper(*args, **kwargs):
@@ -225,37 +247,45 @@ def register(f):
         obj = f(*args, **kwargs)
         _TF_OBJECTS = deep_merge(_TF_OBJECTS, obj)
         return obj
+
     return wrapper
 
 
 @register
 def Terraform(**kwargs):
-    return {'terraform': kwargs}
+    return {"terraform": kwargs}
+
 
 @register
 def RequiredProvider(name, **kwargs):
-    return {'terraform': {'required_providers': {name: kwargs}}}
+    return {"terraform": {"required_providers": {name: kwargs}}}
+
 
 @register
 def Provider(name, **kwargs):
-    return {'provider': {name: kwargs}}
+    return {"provider": {name: kwargs}}
+
 
 @register
 def TerraformBackend(name, **kwargs):
-    return {'terraform': {'backend': {name: kwargs}}}
+    return {"terraform": {"backend": {name: kwargs}}}
+
 
 @register
 def Variable(name, **kwargs):
-    return {'variable': {name: kwargs}}
+    return {"variable": {name: kwargs}}
+
 
 @register
 def Data(resource_type, name, **kwargs):
-    return {'data': {resource_type: {name: kwargs}}}
+    return {"data": {resource_type: {name: kwargs}}}
+
 
 @register
 def Resource(resource_type, name, **kwargs):
-    return {'resource': {resource_type: {name: kwargs}}}
+    return {"resource": {resource_type: {name: kwargs}}}
+
 
 @register
 def Output(name, **kwargs):
-    return {'output': {name: kwargs}}
+    return {"output": {name: kwargs}}

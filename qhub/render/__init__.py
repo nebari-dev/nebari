@@ -9,12 +9,18 @@ import hashlib
 from ruamel.yaml import YAML
 
 from qhub.provider.terraform import tf_render_objects
-from qhub.render.terraform import QHubKubernetesProvider, QHubTerraformState, QHubGCPProvider, QHubAWSProvider
+from qhub.render.terraform import (
+    QHubKubernetesProvider,
+    QHubTerraformState,
+    QHubGCPProvider,
+    QHubAWSProvider,
+)
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
     # get directory for qhub templates
     import qhub
+
     template_directory = pathlib.Path(qhub.__file__).parent / "template"
 
     # would be nice to remove assumption that input directory
@@ -35,7 +41,9 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
 
     config_filename = pathlib.Path(config_filename)
     if not config_filename.is_file():
-        raise ValueError(f"cookiecutter configuration={config_filename} is not filename")
+        raise ValueError(
+            f"cookiecutter configuration={config_filename} is not filename"
+        )
 
     with config_filename.open() as f:
         yaml = YAML(typ="safe", pure=True)
@@ -61,7 +69,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
         "stages/07-kubernetes-services",
         "stages/08-enterprise-qhub",
     ]
-    if config['provider'] != 'local' and config['terraform_state']['type'] == 'remote':
+    if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
         directories.append(f"stages/01-terraform-state/{config['provider']}")
 
     source_dirs = [os.path.join(str(template_directory), _) for _ in directories]
@@ -72,29 +80,29 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
         source_base_dir=str(template_directory),
         output_base_dir=str(output_directory),
         ignore_filenames=[
-            'terraform.tfstate',
-            '.terraform.lock.hcl',
-            'terraform.tfstate.backup'
+            "terraform.tfstate",
+            ".terraform.lock.hcl",
+            "terraform.tfstate.backup",
         ],
-        ignore_directories=['.terraform'],
+        ignore_directories=[".terraform"],
         contents=contents,
     )
 
     if new:
-        print(f"The following files will be created:")
+        print("The following files will be created:")
         for filename in sorted(new):
-            print(f'   CREATED   {filename}')
+            print(f"   CREATED   {filename}")
     if updated:
-        print(f"The following files will be updated:")
+        print("The following files will be updated:")
         for filename in sorted(updated):
-            print(f'   UPDATED   {filename}')
+            print(f"   UPDATED   {filename}")
     if untrack:
-        print(f"The following files are untracked (only exist in output directory):")
+        print("The following files are untracked (only exist in output directory):")
         for filename in sorted(updated):
-            print(f'   UNTRACKED {filename}')
+            print(f"   UNTRACKED {filename}")
 
     if dry_run:
-        print('dry-run enabled no files updated or created')
+        print("dry-run enabled no files updated or created")
     else:
         for filename in new | updated:
             input_filename = os.path.join(str(template_directory), filename)
@@ -109,77 +117,113 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
 
 
 def render_contents(config: Dict):
-    """Dynamically generated contents from QHub configuration
-
-    """
+    """Dynamically generated contents from QHub configuration"""
     contents = {}
 
-    if config['provider'] == 'gcp':
-        contents.update({
-            'stages/01-terraform-state/gcp/_qhub.tf.json': tf_render_objects([
-                QHubGCPProvider(config),
-            ]),
-            'stages/02-infrastructure/gcp/_qhub.tf.json': tf_render_objects([
-                QHubGCPProvider(config),
-                QHubTerraformState('02-infrastructure', config),
-            ])
-        })
-    elif config['provider'] == 'do':
-        contents.update({
-            'stages/02-infrastructure/do/_qhub.tf.json': tf_render_objects([
-                QHubTerraformState('02-infrastructure', config),
-            ])
-        })
-    elif config['provider'] == 'azure':
-        contents.update({
-            'stages/02-infrastructure/azure/_qhub.tf.json': tf_render_objects([
-                QHubTerraformState('02-infrastructure', config),
-            ])
-        })
-    elif config['provider'] == 'aws':
-        contents.update({
-            'stages/01-terraform-state/aws/_qhub.tf.json': tf_render_objects([
-                QHubAWSProvider(config),
-            ]),
-            'stages/02-infrastructure/aws/_qhub.tf.json': tf_render_objects([
-                QHubAWSProvider(config),
-                QHubTerraformState('02-infrastructure', config),
-            ])
-        })
+    if config["provider"] == "gcp":
+        contents.update(
+            {
+                "stages/01-terraform-state/gcp/_qhub.tf.json": tf_render_objects(
+                    [
+                        QHubGCPProvider(config),
+                    ]
+                ),
+                "stages/02-infrastructure/gcp/_qhub.tf.json": tf_render_objects(
+                    [
+                        QHubGCPProvider(config),
+                        QHubTerraformState("02-infrastructure", config),
+                    ]
+                ),
+            }
+        )
+    elif config["provider"] == "do":
+        contents.update(
+            {
+                "stages/02-infrastructure/do/_qhub.tf.json": tf_render_objects(
+                    [
+                        QHubTerraformState("02-infrastructure", config),
+                    ]
+                )
+            }
+        )
+    elif config["provider"] == "azure":
+        contents.update(
+            {
+                "stages/02-infrastructure/azure/_qhub.tf.json": tf_render_objects(
+                    [
+                        QHubTerraformState("02-infrastructure", config),
+                    ]
+                )
+            }
+        )
+    elif config["provider"] == "aws":
+        contents.update(
+            {
+                "stages/01-terraform-state/aws/_qhub.tf.json": tf_render_objects(
+                    [
+                        QHubAWSProvider(config),
+                    ]
+                ),
+                "stages/02-infrastructure/aws/_qhub.tf.json": tf_render_objects(
+                    [
+                        QHubAWSProvider(config),
+                        QHubTerraformState("02-infrastructure", config),
+                    ]
+                ),
+            }
+        )
 
-    contents.update({
-        'stages/03-kubernetes-initialize/_qhub.tf.json': tf_render_objects([
-            QHubTerraformState('03-kubernetes-initialize', config),
-            QHubKubernetesProvider(config),
-        ]),
-        'stages/04-kubernetes-ingress/_qhub.tf.json': tf_render_objects([
-            QHubTerraformState('04-kubernetes-ingress', config),
-            QHubKubernetesProvider(config),
-        ]),
-        'stages/05-kubernetes-keycloak/_qhub.tf.json': tf_render_objects([
-            QHubTerraformState('05-kubernetes-keycloak', config),
-            QHubKubernetesProvider(config),
-        ]),
-        'stages/06-kubernetes-keycloak-configuration/_qhub.tf.json': tf_render_objects([
-            QHubTerraformState('06-kubernetes-keycloak-configuration', config),
-        ]),
-        'stages/07-kubernetes-services/_qhub.tf.json': tf_render_objects([
-            QHubTerraformState('07-kubernetes-services', config),
-            QHubKubernetesProvider(config),
-        ]),
-        'stages/08-enterprise-qhub/_qhub.tf.json': tf_render_objects([
-            QHubTerraformState('08-enterprise-qhub', config),
-            QHubKubernetesProvider(config),
-        ])
-    })
+    contents.update(
+        {
+            "stages/03-kubernetes-initialize/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubTerraformState("03-kubernetes-initialize", config),
+                    QHubKubernetesProvider(config),
+                ]
+            ),
+            "stages/04-kubernetes-ingress/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubTerraformState("04-kubernetes-ingress", config),
+                    QHubKubernetesProvider(config),
+                ]
+            ),
+            "stages/05-kubernetes-keycloak/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubTerraformState("05-kubernetes-keycloak", config),
+                    QHubKubernetesProvider(config),
+                ]
+            ),
+            "stages/06-kubernetes-keycloak-configuration/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubTerraformState("06-kubernetes-keycloak-configuration", config),
+                ]
+            ),
+            "stages/07-kubernetes-services/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubTerraformState("07-kubernetes-services", config),
+                    QHubKubernetesProvider(config),
+                ]
+            ),
+            "stages/08-enterprise-qhub/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubTerraformState("08-enterprise-qhub", config),
+                    QHubKubernetesProvider(config),
+                ]
+            ),
+        }
+    )
 
     return contents
 
 
 def inspect_files(
-        source_dirs: str, output_dirs: str, source_base_dir: str, output_base_dir: str,
-        ignore_filenames : List[str] = None, ignore_directories : List[str] = None,
-        contents: Dict[str, str] = None,
+    source_dirs: str,
+    output_dirs: str,
+    source_base_dir: str,
+    output_base_dir: str,
+    ignore_filenames: List[str] = None,
+    ignore_directories: List[str] = None,
+    contents: Dict[str, str] = None,
 ):
     """Return created, updated and untracked files by computing a checksum over the provided directory
 
@@ -199,7 +243,9 @@ def inspect_files(
     source_files = {}
     output_files = {}
 
-    def list_files(directory: str, ignore_filenames : List[str], ignore_directories : List[str]):
+    def list_files(
+        directory: str, ignore_filenames: List[str], ignore_directories: List[str]
+    ):
         for root, dirs, files in os.walk(directory):
             dirs[:] = [d for d in dirs if d not in ignore_directories]
             for file in files:
@@ -207,7 +253,9 @@ def inspect_files(
                     yield os.path.join(root, file)
 
     for filename in contents:
-        source_files[filename] = hashlib.sha256(contents[filename].encode('utf8')).hexdigest()
+        source_files[filename] = hashlib.sha256(
+            contents[filename].encode("utf8")
+        ).hexdigest()
         output_filename = os.path.join(output_base_dir, filename)
         if os.path.isfile(output_filename):
             output_files[filename] = hash_file(filename)
@@ -225,7 +273,7 @@ def inspect_files(
     untracted_files = output_files.keys() - source_files.keys()
     updated_files = set()
 
-    for prevalent_file in (source_files.keys() & output_files.keys()):
+    for prevalent_file in source_files.keys() & output_files.keys():
         if source_files[prevalent_file] != output_files[prevalent_file]:
             updated_files.add(prevalent_file)
 
