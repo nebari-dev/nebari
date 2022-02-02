@@ -20,9 +20,9 @@ env:
   ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-# concurrency:
-#   group: ${{ github.ref }}
-#   cancel-in-progress: true
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-render-providers:
