@@ -1,5 +1,6 @@
 import base64
 import ssl
+import json
 
 from kubernetes import client, config
 
@@ -20,11 +21,11 @@ def get_jupyterhub_token():
     connect to dask gateway.
     """
     v1 = get_kubernetes_api_instance()
-    secret = str(v1.read_namespaced_secret(
+    secret = v1.read_namespaced_secret(
         constants.DASK_GATEWAY_JUPYTER_SECRET_NAME, constants.NAMESPACE
-    ).data)
-    base64_encoded_token = eval(secret)[constants.JUPYTERHUB_TOKEN_SECRET_KEY_NAME]
-    return base64.b64decode(base64_encoded_token).decode()
+    ).data
+    dask_config = json.loads(base64.b64decode(secret['config.json']))
+    return dask_config[constants.JUPYTERHUB_TOKEN_SECRET_KEY_NAME]
 
 
 def monkeypatch_ssl_context():
