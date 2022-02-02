@@ -575,6 +575,7 @@ def check_05_kubernetes_keycloak(stage_outputs, config):
                 return True
             except KeycloakError:
                 print(f"Attempt {i+1} failed connecting to keycloak master realm")
+            time.sleep(timeout)
         return False
 
     if not _attempt_keycloak_connection(
