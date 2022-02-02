@@ -130,7 +130,7 @@ def render_contents(config: Dict):
                 QHubTerraformState('02-infrastructure', config),
             ])
         })
-    elif config['azure'] == 'azure':
+    elif config['provider'] == 'azure':
         contents.update({
             'stages/02-infrastructure/azure/_qhub.tf.json': tf_render_objects([
                 QHubTerraformState('02-infrastructure', config),
@@ -142,6 +142,7 @@ def render_contents(config: Dict):
                 QHubAWSProvider(config),
             ]),
             'stages/02-infrastructure/aws/_qhub.tf.json': tf_render_objects([
+                QHubAWSProvider(config),
                 QHubTerraformState('02-infrastructure', config),
             ])
         })

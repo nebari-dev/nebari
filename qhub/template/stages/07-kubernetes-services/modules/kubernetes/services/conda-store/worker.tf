@@ -32,7 +32,7 @@ resource "kubernetes_persistent_volume_claim" "main" {
     name      = "${var.name}-conda-store-storage"
     namespace = var.namespace
   }
-  wait_until_bound = true
+
   spec {
     access_modes = ["ReadWriteOnce"]
     resources {
@@ -168,7 +168,11 @@ resource "kubernetes_deployment" "worker" {
         volume {
           name = "storage"
           persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.main.metadata.0.name
+            # on AWS the pvc gets stuck in a provisioning state if we
+            # directly reference the pvc may no longer be issue in
+            # future
+            # claim_name = kubernetes_persistent_volume_claim.main.metadata.0.name
+            claim_name = "${var.name}-conda-store-storage"
           }
         }
       }

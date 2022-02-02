@@ -17,7 +17,9 @@ def destroy_01_terraform_state(config):
     elif config['provider'] == 'do':
         terraform.deploy(
             terraform_import=True,
-            terraform_apply=False,
+            # acl and force_destroy do not import properly
+            # and only get refreshed properly with an apply
+            terraform_apply=True,
             terraform_destroy=True,
             directory=os.path.join(directory, config['provider']),
             input_vars={
@@ -32,7 +34,9 @@ def destroy_01_terraform_state(config):
     elif config['provider'] == 'gcp':
         terraform.deploy(
             terraform_import=True,
-            terraform_apply=False,
+            # acl and force_destroy do not import properly
+            # and only get refreshed properly with an apply
+            terraform_apply=True,
             terraform_destroy=True,
             directory=os.path.join(directory, config['provider']),
             input_vars={
@@ -74,7 +78,9 @@ def destroy_01_terraform_state(config):
     elif config['provider'] == 'aws':
         terraform.deploy(
             terraform_import=True,
-            terraform_apply=False,
+            # acl and force_destroy do not import properly
+            # and only get refreshed properly with an apply
+            terraform_apply=True,
             terraform_destroy=True,
             directory=os.path.join(directory, config['provider']),
             input_vars={

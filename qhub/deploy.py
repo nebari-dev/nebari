@@ -321,7 +321,7 @@ def check_04_kubernetes_ingress(stage_outputs, qhub_config):
 
     tcp_ports = {80, 443}
     ip_or_name = stage_outputs[directory]['load_balancer_address']['value']
-    host = ip_or_name['hostname'] or ip_or_name['ip']
+    host = socket.gethostbyname(ip_or_name['hostname'] or ip_or_name['ip'])
 
     for port in tcp_ports:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -353,14 +353,14 @@ def provision_ingress_dns(stage_outputs, config, dns_provider : str, dns_auto_pr
             if config.get("clearml", {}).get("enabled"):
                 add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
 
-            elif config["provider"] == "aws":
-                update_record(zone_name, record_name, "CNAME", ip_or_hostname)
-                if config.get("clearml", {}).get("enabled"):
-                    add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
-            else:
-                logger.info(
-                    f"Couldn't update the DNS record for cloud provider: {config['provider']}"
-                )
+        elif config["provider"] == "aws":
+            update_record(zone_name, record_name, "CNAME", ip_or_hostname)
+            if config.get("clearml", {}).get("enabled"):
+                add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
+        else:
+            logger.info(
+                f"Couldn't update the DNS record for cloud provider: {config['provider']}"
+            )
     elif not disable_prompt:
         input(
             f"Take IP Address {ip_or_hostname} and update DNS to point to "
@@ -502,7 +502,7 @@ def provision_07_kubernetes_services(stage_outputs, config, check=True):
             "jupyterhub-theme": config['theme']['jupyterhub'],
             "jupyterhub-image": split_docker_image_name(config['default_images']['jupyterhub']),
             "jupyterhub-shared-storage": config['storage']['shared_filesystem'],
-            "jupyterhub-shared-endpoint": stage_outputs['stages/02-infrastructure'].get('nfs_endpoint'),
+            "jupyterhub-shared-endpoint": stage_outputs['stages/02-infrastructure'].get('nfs_endpoint', {}).get('value'),
             "jupyterlab-profiles": config['profiles']['jupyterlab'],
             "jupyterlab-image": split_docker_image_name(config['default_images']['jupyterlab']),
             # dask-gateway
