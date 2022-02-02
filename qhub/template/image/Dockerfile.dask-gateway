@@ -21,7 +21,7 @@ RUN mkdir -p /tmp/workdir
 RUN mkdir -p /tmp/install-prefix
 
 RUN cd /tmp && \
-    wget -O -q dask-gateway.tar.gz "https://github.com/costrouc/dask-gateway/archive/refs/heads/kubernetes-controller-callables.tar.gz" && \
+    wget -O dask-gateway.tar.gz "https://github.com/costrouc/dask-gateway/archive/refs/heads/kubernetes-controller-callables.tar.gz" && \
     tar -xf dask-gateway.tar.gz && \
     ls -la && \
     cd dask-gateway-kubernetes-controller-callables/dask-gateway-server && \
