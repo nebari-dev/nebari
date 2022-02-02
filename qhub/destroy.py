@@ -70,10 +70,10 @@ def destroy_01_terraform_state(config):
                 resource_group_url,
             ), (
                 "module.terraform-state.azurerm_storage_account.terraform-storage-account",
-                f"{resource_group_url}/providers/Microsoft.Storage/storageAccounts/{resource_group_name_safe}{config['storage_account_postfix']}",
+                f"{resource_group_url}/providers/Microsoft.Storage/storageAccounts/{resource_group_name_safe}{config['azure']['storage_account_postfix']}",
             ), (
                 "module.terraform-state.azurerm_storage_container.storage_container",
-                f"https://{resource_group_name_safe}{config['storage_account_postfix']}.blob.core.windows.net/{resource_group_name}state",
+                f"https://{resource_group_name_safe}{config['azure']['storage_account_postfix']}.blob.core.windows.net/{resource_group_name}state",
             )])
     elif config['provider'] == 'aws':
         terraform.deploy(
