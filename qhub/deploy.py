@@ -634,8 +634,8 @@ def check_06_kubernetes_keycloak_configuration(stage_outputs, config):
         client_id,
         qhub_realm,
         verify=False,
-        num_attempts=3,
-        timeout=5,
+        num_attempts=5,
+        timeout=10,
     ):
         for i in range(num_attempts):
             try:
