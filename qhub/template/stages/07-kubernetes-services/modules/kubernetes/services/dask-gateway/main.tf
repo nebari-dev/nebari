@@ -50,7 +50,6 @@ resource "kubernetes_manifest" "dask-gateway" {
           ]
         }
       ]
-      tls = {}
     }
   }
 }

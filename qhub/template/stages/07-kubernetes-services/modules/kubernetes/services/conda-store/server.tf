@@ -149,7 +149,6 @@ resource "kubernetes_manifest" "jupyterhub" {
           ]
         }
       ]
-      tls = {}
     }
   }
 }

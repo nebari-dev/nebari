@@ -40,7 +40,6 @@ resource "kubernetes_manifest" "clearml-app" {
           ]
         }
       ]
-      tls = {}
     }
   }
 }
@@ -69,7 +68,6 @@ resource "kubernetes_manifest" "clearml-files" {
           ]
         }
       ]
-      tls = {}
     }
   }
 }
@@ -98,7 +96,6 @@ resource "kubernetes_manifest" "clearml-api" {
           ]
         }
       ]
-      tls = {}
     }
   }
 }
