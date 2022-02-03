@@ -15,6 +15,7 @@ jupyterhub.md
 keycloak.md
 clearml.md
 prefect.md
+traefik.md
 custom-helm-charts.md
 faq.md
 ```
