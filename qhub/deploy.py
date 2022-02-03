@@ -429,12 +429,12 @@ def check_04_kubernetes_ingress(stage_outputs, qhub_config):
         return False
 
     tcp_ports = {
-        80,   # http
+        80,  # http
         443,  # https
-        8022, # jupyterhub-ssh ssh
-        8023, # jupyterhub-ssh sftp
-        9080, # minio
-        8786, # dask-scheduler
+        8022,  # jupyterhub-ssh ssh
+        8023,  # jupyterhub-ssh sftp
+        9080,  # minio
+        8786,  # dask-scheduler
     }
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
     host = ip_or_name["hostname"] or ip_or_name["ip"]

@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 def do_keycloak(config_filename, *args):
     # supress insecure warnings
     import urllib3
+
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     keycloak_admin = get_keycloak_admin_from_config(config_filename)
