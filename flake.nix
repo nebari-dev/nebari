@@ -14,7 +14,6 @@
       keycloak = (import nixpkgs-keycloak { system = "x86_64-linux"; }).python3Packages.python-keycloak;
 
       propagatedDependencies = [
-        pythonPackages.cookiecutter
         pythonPackages.ruamel-yaml
         pythonPackages.cloudflare
         pythonPackages.auth0-python
@@ -53,7 +52,6 @@
 
         patchPhase = ''
           substituteInPlace setup.py \
-            --replace "cookiecutter==1.7.2" "cookiecutter" \
             --replace "azure-identity==1.6.1" "azure-identity" \
             --replace "azure-mgmt-containerservice==16.2.0" "azure-mgmt-containerservice"
         '';

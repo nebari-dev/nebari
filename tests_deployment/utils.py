@@ -1,30 +1,42 @@
-import base64
 import ssl
+import re
 
-from kubernetes import client, config
+import requests
 
 from tests_deployment import constants
 
 
-def get_kubernetes_api_instance():
-    """Returns the v1 core Kubernetes api instance for making
-    calls to the kubernetes cluster
-    """
-    config.load_kube_config()
-    return client.CoreV1Api()
+def get_jupyterhub_session():
+    session = requests.Session()
+    r = session.get(f"https://{constants.QHUB_HOSTNAME}/hub/oauth_login", verify=False)
+    auth_url = re.search('action="([^"]+)"', r.content.decode("utf8")).group(1)
+
+    r = session.post(
+        auth_url.replace("&amp;", "&"),
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        data={
+            "username": constants.KEYCLOAK_USERNAME,
+            "password": constants.KEYCLOAK_PASSWORD,
+            "credentialId": "",
+        },
+        verify=False,
+    )
+    return session
 
 
-def get_jupyterhub_token():
-    """
-    It fetches the secret that has the JupyterHub token to be able to
-    connect to dask gateway.
-    """
-    v1 = get_kubernetes_api_instance()
-    secret = str(v1.read_namespaced_secret(
-        constants.DASK_GATEWAY_JUPYTER_SECRET_NAME, constants.NAMESPACE
-    ).data)
-    base64_encoded_token = eval(secret)[constants.JUPYTERHUB_TOKEN_SECRET_KEY_NAME]
-    return base64.b64decode(base64_encoded_token).decode()
+def get_jupyterhub_token(note="jupyterhub-tests-deployment"):
+    session = get_jupyterhub_session()
+    r = session.post(
+        f"https://{constants.QHUB_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
+        headers={
+            "Referer": f"https://{constants.QHUB_HOSTNAME}/hub/token",
+        },
+        json={
+            "note": note,
+            "expires_in": None,
+        },
+    )
+    return r.json()["token"]
 
 
 def monkeypatch_ssl_context():
@@ -34,11 +46,13 @@ def monkeypatch_ssl_context():
     TODO: A better way to do this would be adding the Traefik's default certificate's
     CA public key to the trusted certificate authorities.
     """
+
     def create_default_context(context):
         def _inner(*args, **kwargs):
             context.check_hostname = False
             context.verify_mode = ssl.CERT_NONE
             return context
+
         return _inner
 
     sslcontext = ssl.create_default_context()

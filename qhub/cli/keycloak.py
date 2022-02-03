@@ -9,7 +9,9 @@ def create_keycloak_subcommand(subparser):
     subparser = subparser.add_parser("keycloak")
     subparser.add_argument("-c", "--config", help="qhub configuration", required=True)
     subparser.add_argument(
-        "keycloak_action", nargs="+", help="adduser <username> [password]"
+        "keycloak_action",
+        nargs="+",
+        help="`adduser <username> [password]` or `listusers`",
     )
     subparser.set_defaults(func=handle_keycloak)
 

@@ -133,7 +133,9 @@ jobs:
         run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`" >> "$GITHUB_ENV"
 
       - name: Create example-user
-        run: qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser example-user "${CYPRESS_EXAMPLE_USER_PASSWORD}"
+        run: |
+          qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser example-user "${CYPRESS_EXAMPLE_USER_PASSWORD}"
+          qhub keycloak --config "${QHUB_CONFIG_PATH}" listusers
 
       - name: Sleep to see if it fixes flaky Kubernetes Tests
         run: sleep 60
@@ -156,6 +158,9 @@ jobs:
 
       - name: Deployment Pytests
         run: |
+          export KEYCLOAK_USERNAME=qhub-user
+          export KEYCLOAK_PASSWORD=password
+          qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser $KEYCLOAK_USERNAME $KEYCLOAK_PASSWORD
           pytest tests_deployment/ -v
 
       ### CLEANUP AFTER TESTS

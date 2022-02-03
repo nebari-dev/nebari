@@ -31,7 +31,6 @@ setup(
     packages=find_packages(),
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, <4",
     install_requires=[
-        "cookiecutter==1.7.2",
         "ruamel.yaml",
         "cloudflare",
         "auth0-python",
