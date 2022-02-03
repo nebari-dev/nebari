@@ -1,4 +1,7 @@
-__version__ = "0.4.0"
+"""a backport for the qhub version references"""
+try:
+    from importlib.metadata import distribution
+except ModuleNotFoundError:
+    from importlib_metadata import distribution
 
-if __name__ == "__main__":
-    print(__version__, end="")
+__version__ = distribution("qhub").version

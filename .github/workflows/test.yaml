@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
