@@ -1,15 +1,15 @@
 # Traefik
 
-## Custom TLS Certificate
+## Custom TLS certificate
 
-### Creating the Certificate
+### Creating the certificate
 
-[lego](https://go-acme.github.io/lego/installation/) is a command line
+[Lego](https://go-acme.github.io/lego/installation/) is a command line
 tool for provisioning certificates for a domain. If you are trying to
 install QHub within an enterprise you may need to contact someone in
-IT to create the certificate and keypair for you. Ensure that this
+IT to create the certificate and key-pair for you. Ensure that this
 certificate has all of the domains that QHub is running on. Lego
-supports [multiple dns
+supports [multiple DNS
 providers](https://go-acme.github.io/lego/dns/). For this example we
 will assume Cloudflare as your DNS provider.
 
@@ -28,7 +28,7 @@ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3
   -nodes
 ```
 
-### Adding Certificate to kubernetes cluster as a secret
+### Adding certificate to kubernetes cluster as a secret
 
 You can name the certificate anything you would like
 `qhub-domain-certificate` is only an example.
@@ -39,7 +39,7 @@ kubectl create secret tls qhub-domain-certificate -n dev \
   --key=key.pem
 ```
 
-### Using Custom Certificate in qhub-config.yaml
+### Using custom certificate in qhub-config.yaml
 
 Once you have followed these steps make sure to modify the
 configuration to use the new certificate.
