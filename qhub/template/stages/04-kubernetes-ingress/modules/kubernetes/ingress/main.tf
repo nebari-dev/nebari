@@ -228,6 +228,7 @@ resource "kubernetes_deployment" "main" {
             "--entryPoints.traefik.address=:9000",
             # Define the entrypoint port for Minio
             "--entryPoints.minio.address=:9080",
+            # Redirect http -> https
             "--entrypoints.web.http.redirections.entryPoint.to=websecure",
             "--entrypoints.web.http.redirections.entryPoint.scheme=https",
             # Enable Prometheus Monitoring of Traefik
@@ -236,10 +237,11 @@ resource "kubernetes_deployment" "main" {
             # working. Fetch logs of the pod.
             "--log.level=${var.loglevel}",
             ], var.enable-certificates ? [
-            "--certificatesresolvers.default.acme.tlschallenge",
-            "--certificatesresolvers.default.acme.email=${var.acme-email}",
-            "--certificatesresolvers.default.acme.storage=acme.json",
-            "--certificatesresolvers.default.acme.caserver=${var.acme-server}",
+            "--entrypoints.websecure.http.tls.certResolver=letencrypt",
+            "--certificatesresolvers.letsencrypt.acme.tlschallenge",
+            "--certificatesresolvers.letsencrypt.acme.email=${var.acme-email}",
+            "--certificatesresolvers.letsencrypt.acme.storage=acme.json",
+            "--certificatesresolvers.letsencrypt.acme.caserver=${var.acme-server}",
           ] : [])
 
           port {
@@ -310,7 +312,7 @@ resource "kubernetes_deployment" "main" {
 
 
 resource "kubernetes_manifest" "tlsstore_default" {
-  count = var.certificate-secret-name == "" ? 0 : 1
+  count = var.certificate-secret-name != null ? 1 : 0
   manifest = {
     "apiVersion" = "traefik.containo.us/v1alpha1"
     "kind" = "TLSStore"

@@ -55,5 +55,6 @@ variable "acme-server" {
 
 variable "certificate-secret-name" {
   description = "Kubernetes secret used for certificate"
-  default     = ""
+  type        = string
+  default     = null
 }
