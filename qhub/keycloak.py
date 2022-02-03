@@ -10,6 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 def do_keycloak(config_filename, *args):
+    # supress insecure warnings
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
     keycloak_admin = get_keycloak_admin_from_config(config_filename)
 
     if args[0] == "adduser":
@@ -46,14 +50,10 @@ def create_user(
     else:
         print(f"Creating user={username} without password (none supplied)")
     keycloak_admin.create_user(payload)
+    print(f"Created user={username}")
 
 
 def list_users(keycloak_admin: keycloak.KeycloakAdmin):
-    # supress insecure warnings
-    import urllib3
-
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
     num_users = keycloak_admin.users_count()
     print(f"{num_users} Keycloak Users")
 

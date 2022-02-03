@@ -24,7 +24,7 @@ def get_jupyterhub_session():
     return session
 
 
-def get_jupyterhub_token():
+def get_jupyterhub_token(note="jupyterhub-tests-deployment"):
     session = get_jupyterhub_session()
     r = session.post(
         f"https://{constants.QHUB_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
@@ -32,7 +32,7 @@ def get_jupyterhub_token():
             "Referer": f"https://{constants.QHUB_HOSTNAME}/hub/token",
         },
         json={
-            "note": "qhub deployment test token",
+            "note": note,
             "expires_in": None,
         },
     )
