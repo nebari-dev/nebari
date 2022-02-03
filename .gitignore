@@ -23,6 +23,7 @@ result
 shell.nix
 .envrc
 build.nix
+.direnv
 
 # ignore deploments
 do-jupyterhub

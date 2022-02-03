@@ -2,7 +2,6 @@ name: qhub-dev
 channels:
   - conda-forge
 dependencies:
-  - cookiecutter ==1.7.2
   - ruamel.yaml
   - cloudflare
   - auth0-python

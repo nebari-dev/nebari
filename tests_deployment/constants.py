@@ -1,5 +1,7 @@
-DASK_GATEWAY_JUPYTER_SECRET_NAME = "qhub-daskgateway-gateway"
-JUPYTERHUB_TOKEN_SECRET_KEY_NAME = "jupyterhub_api_token"
-NAMESPACE = 'dev'
-QHUB_HOSTNAME = 'github-actions.qhub.dev'
-GATEWAY_ENDPOINT = 'gateway'
+import os
+
+QHUB_HOSTNAME = "github-actions.qhub.dev"
+GATEWAY_ENDPOINT = "gateway"
+
+KEYCLOAK_USERNAME = os.environ["KEYCLOAK_USERNAME"]
+KEYCLOAK_PASSWORD = os.environ["KEYCLOAK_PASSWORD"]
