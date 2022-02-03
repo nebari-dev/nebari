@@ -153,6 +153,9 @@ jobs:
 
       - name: Deployment Pytests
         run: |
+          export KEYCLOAK_USERNAME=costrouc
+          export KEYCLOAK_PASSWORD=password
+          qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser $KEYCLOAK_USERNAME $KEYCLOAK_PASSWORD
           pytest tests_deployment/ -v
 
       ### CLEANUP AFTER TESTS

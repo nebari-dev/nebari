@@ -232,20 +232,32 @@ def user_options(user):
         if namespace in allowed_namespaces
     }
 
-    return Options(
-        Select(
-            "conda_environment",
-            list(environments.keys()),
-            default=list(environments.keys())[0],
-            label="Environment",
-        ),
-        Select(
-            "profile",
-            list(config["profiles"].keys()),
-            default=list(config["profiles"].keys())[0],
-            label="Cluster Profile",
-        ),
+    args = []
+    if environments:
+        args += [
+            Select(
+                "conda_environment",
+                list(environments.keys()),
+                default=list(environments.keys())[0],
+                label="Environment",
+            )
+        ]
+    if config["profiles"]:
+        args += [
+            Select(
+                "profile",
+                list(config["profiles"].keys()),
+                default=list(config["profiles"].keys())[0],
+                label="Cluster Profile",
+            )
+        ]
+
+    args += [
         Mapping("environment_vars", {}, label="Environment Variables"),
+    ]
+
+    return Options(
+        *args,
         handler=worker_profile,
     )
 
