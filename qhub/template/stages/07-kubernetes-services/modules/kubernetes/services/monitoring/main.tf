@@ -142,7 +142,6 @@ resource "kubernetes_manifest" "grafana-ingress-route" {
           ]
         }
       ]
-      tls = {}
     }
   }
 }

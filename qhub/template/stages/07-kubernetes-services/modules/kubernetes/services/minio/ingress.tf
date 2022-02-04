@@ -21,7 +21,6 @@ resource "kubernetes_manifest" "minio-api" {
           ]
         }
       ]
-      tls = {}
     }
   }
 }

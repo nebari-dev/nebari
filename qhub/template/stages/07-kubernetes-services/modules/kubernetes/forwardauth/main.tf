@@ -188,7 +188,6 @@ resource "kubernetes_manifest" "forwardauth-ingressroute" {
           ]
         }
       ]
-      tls = {}
     }
   }
 }
