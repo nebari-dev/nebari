@@ -11,5 +11,5 @@ variable "keycloak_groups" {
 
 variable "authentication" {
   description = "Authentication configuration for keycloak"
-  type = map
+  type = any
 }
