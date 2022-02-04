@@ -11,5 +11,8 @@ variable "keycloak_groups" {
 
 variable "authentication" {
   description = "Authentication configuration for keycloak"
-  type = map
+  type = object({
+    type = string
+    config = map(string)
+  })
 }
