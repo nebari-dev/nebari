@@ -15,4 +15,8 @@ variable "authentication" {
     type = string
     config = map(string)
   })
+  default = {
+    config = {}
+    type = ""
+  }
 }
