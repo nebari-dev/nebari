@@ -8,6 +8,7 @@ from kubespawner import KubeSpawner
 import z2jh
 
 cdsdashboards = z2jh.get_config("custom.cdsdashboards")
+conda_store_environments = z2jh.get_config("custom.environments")
 
 if cdsdashboards["enabled"]:
     from cdsdashboards.hubextension.spawners.variablekube import VariableKubeSpawner
@@ -31,9 +32,7 @@ if cdsdashboards["enabled"]:
     c.CDSDashboardsConfig.spawn_default_options = False
 
     c.CDSDashboardsConfig.conda_envs = [
-        # {%- for key in cookiecutter.environments %}
-        #     "{{ cookiecutter.environments[key].name }}",
-        # {%- endfor %}
+        environment['name'] for _, environment in conda_store_environments.items()
     ]
 else:
     c.JupyterHub.allow_named_servers = False

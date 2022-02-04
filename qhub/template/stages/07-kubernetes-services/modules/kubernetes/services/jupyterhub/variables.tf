@@ -110,3 +110,9 @@ variable "cdsdashboards" {
     cds_hide_user_dashboard_servers = false
   }
 }
+
+variable "conda-store-environments" {
+  description = "conda environments from conda-store in filesystem namespace"
+  type        = map(any)
+  default     = {}
+}

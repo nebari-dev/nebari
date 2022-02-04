@@ -31,6 +31,7 @@ resource "helm_release" "jupyterhub" {
         conda-store-pvc   = var.conda-store-pvc
         conda-store-mount = var.conda-store-mount
         extra-mounts      = var.extra-mounts
+        environments      = var.conda-store-environments
       }
 
       hub = {
