@@ -213,6 +213,14 @@ def render_contents(config: Dict):
         }
     )
 
+    # if config["ci_cd"]:
+    #     qhub_ops_loc = "qhub_ops.yaml"
+    #     with qhub_ops_loc.open() as f:
+    #         yaml = YAML(typ="safe", pure=True)
+    #         qhub_ops = yaml.load(f)
+
+    #     qhub_ops["on"]["push"]["branches"] = config["ci_cd"]["branch"]
+
     return contents
 
 
