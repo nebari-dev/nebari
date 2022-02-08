@@ -406,26 +406,32 @@ def provision_04_kubernetes_ingress(stage_outputs, config, check=True):
     )
 
     if check:
+        time.sleep(60)
         check_04_kubernetes_ingress(stage_outputs, config)
 
 
 def check_04_kubernetes_ingress(stage_outputs, qhub_config):
     directory = "stages/04-kubernetes-ingress"
 
-    def _attempt_tcp_connect(host, port, num_attempts=3, timeout=5):
-        # normalize hostname to ip address
-        host = socket.gethostbyname(host)
-
+    def _attempt_tcp_connect(host, port, num_attempts=5, timeout=10):
         for i in range(num_attempts):
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(5)
-            result = s.connect_ex((host, port))
-            if result == 0:
-                print(f"Attempt {i+1} succedded to connect to tcp://{host}:{port}")
-                return True
-            s.close()
-            print(f"Attempt {i+1} failed to connect to tcp tcp://{host}:{port}")
-            time.sleep(timeout)
+            try:
+                # normalize hostname to ip address
+                host = socket.gethostbyname(host)
+
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.settimeout(5)
+                result = s.connect_ex((host, port))
+                if result == 0:
+                    print(f"Attempt {i+1} succedded to connect to tcp://{host}:{port}")
+                    return True
+                s.close()
+                print(f"Attempt {i+1} failed to connect to tcp tcp://{host}:{port}")
+                time.sleep(timeout)
+
+            except socket.gaierror:
+                print(f"Attempt {i+1} failed to get IP for {host}...")
+
         return False
 
     tcp_ports = {
@@ -438,6 +444,8 @@ def check_04_kubernetes_ingress(stage_outputs, qhub_config):
     }
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
     host = ip_or_name["hostname"] or ip_or_name["ip"]
+    print(stage_outputs)
+    print(ip_or_name)
 
     for port in tcp_ports:
         if not _attempt_tcp_connect(host, port):
