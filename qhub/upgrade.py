@@ -6,13 +6,11 @@ import json
 import string
 import secrets
 
-from packaging.version import parse as ver_parse
-
 from pydantic.error_wrappers import ValidationError
 
 from .schema import verify
 from .utils import backup_config_file, load_yaml, yaml
-from .version import __version__
+from .version import __rounded_version__, rounded_ver_parse
 
 logger = logging.getLogger(__name__)
 
@@ -24,21 +22,21 @@ def do_upgrade(config_filename, attempt_fixes=False):
     try:
         verify(config)
         print(
-            f"Your config file {config_filename} appears to be already up-to-date for qhub version {__version__}"
+            f"Your config file {config_filename} appears to be already up-to-date for qhub version {__rounded_version__}"
         )
         return
     except (ValidationError, ValueError) as e:
-        if config.get("qhub_version", "") == __version__:
+        if config.get("qhub_version", "") == __rounded_version__:
             # There is an unrelated validation problem
             print(
-                f"Your config file {config_filename} appears to be already up-to-date for qhub version {__version__} but there is another validation error.\n"
+                f"Your config file {config_filename} appears to be already up-to-date for qhub version {__rounded_version__} but there is another validation error.\n"
             )
             raise e
 
     start_version = config.get("qhub_version", "")
 
     UpgradeStep.upgrade(
-        config, start_version, __version__, config_filename, attempt_fixes
+        config, start_version, __rounded_version__, config_filename, attempt_fixes
     )
 
     # Backup old file
@@ -48,7 +46,7 @@ def do_upgrade(config_filename, attempt_fixes=False):
         yaml.dump(config, f)
 
     print(
-        f"Saving new config file {config_filename} ready for QHub version {__version__}"
+        f"Saving new config file {config_filename} ready for QHub version {__rounded_version__}"
     )
 
     ci_cd = config.get("ci_cd", {}).get("type", "")
@@ -83,15 +81,16 @@ class UpgradeStep(ABC):
         Runs through all required upgrade steps (i.e. relevant subclasses of UpgradeStep).
         Calls UpgradeStep.upgrade_step for each.
         """
-        starting_ver = ver_parse(start_version)
-        finish_ver = ver_parse(finish_version)
+        starting_ver = rounded_ver_parse(start_version or "0.0.0")
+        finish_ver = rounded_ver_parse(finish_version)
         step_versions = sorted(
             [
                 v
                 for v in cls._steps.keys()
-                if ver_parse(v) > starting_ver and ver_parse(v) <= finish_ver
+                if rounded_ver_parse(v) > starting_ver
+                and rounded_ver_parse(v) <= finish_ver
             ],
-            key=ver_parse,
+            key=rounded_ver_parse,
         )
 
         current_start_version = start_version
@@ -112,7 +111,7 @@ class UpgradeStep(ABC):
         return self.version
 
     def requires_qhub_version_field(self):
-        return ver_parse(self.version) > ver_parse("0.3.13")
+        return rounded_ver_parse(self.version) > rounded_ver_parse("0.3.13")
 
     def upgrade_step(self, config, start_version, config_filename, *args, **kwargs):
         """
@@ -322,7 +321,7 @@ class Upgrade_0_4_0(UpgradeStep):
 
 
 # Manually-added upgrade steps must go above this line
-if not UpgradeStep.has_step(__version__):
+if not UpgradeStep.has_step(__rounded_version__):
     # Always have a way to upgrade to the latest version number, even if no customizations
     class UpgradeLatest(UpgradeStep):
-        version = __version__
+        version = __rounded_version__

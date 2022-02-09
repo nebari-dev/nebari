@@ -18,7 +18,7 @@ from qhub.utils import (
     check_cloud_credentials,
     set_kubernetes_version,
 )
-from .version import __version__
+from .version import __rounded_version__
 
 logger = logging.getLogger(__name__)
 
@@ -291,7 +291,8 @@ def render_config(
         qhub_domain = input("Provide domain: ")
     config["domain"] = qhub_domain
 
-    config["qhub_version"] = __version__
+    # In qhub_version only use major.minor.patch version - drop any pre/post/dev suffixes
+    config["qhub_version"] = __rounded_version__
 
     # Generate default password for Keycloak root user and also example-user if using password auth
     default_password = "".join(

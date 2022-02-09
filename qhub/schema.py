@@ -5,7 +5,7 @@ from abc import ABC
 import pydantic
 from pydantic import validator, root_validator
 from qhub.utils import namestr_regex
-from .version import __version__
+from .version import __rounded_version__
 
 
 class CertificateEnum(str, enum.Enum):
@@ -444,11 +444,11 @@ class Main(Base):
         """
         Always called even if qhub_version is not supplied at all (so defaults to ''). That way we can give a more helpful error message.
         """
-        if v != __version__:
+        if v != __rounded_version__:
             if v == "":
                 v = "not supplied"
             raise ValueError(
-                f"qhub_version in the config file must equal {__version__} to be processed by this version of qhub (your value is {v})."
+                f"qhub_version in the config file must equal {__rounded_version__} to be processed by this version of qhub (your config file version is {v})."
                 " Install a different version of qhub or run qhub upgrade to ensure your config file is compatible."
             )
         return v
