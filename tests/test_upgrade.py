@@ -1,7 +1,8 @@
 import pytest
 from pathlib import Path
 
-from qhub.upgrade import do_upgrade, __version__, load_yaml, verify
+from qhub.upgrade import do_upgrade, load_yaml, verify
+from qhub.version import __rounded_version__
 
 
 @pytest.fixture
@@ -73,11 +74,11 @@ def test_upgrade(
     # Check image versions have been bumped up
     assert (
         config["default_images"]["jupyterhub"]
-        == f"quansight/qhub-jupyterhub:v{__version__}"
+        == f"quansight/qhub-jupyterhub:v{__rounded_version__}"
     )
     assert (
         config["profiles"]["jupyterlab"][0]["kubespawner_override"]["image"]
-        == f"quansight/qhub-jupyterlab:v{__version__}"
+        == f"quansight/qhub-jupyterlab:v{__rounded_version__}"
     )
 
     assert (
