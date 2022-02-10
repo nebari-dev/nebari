@@ -18,7 +18,7 @@ from qhub.provider.cloud import (
     google_cloud,
 )
 
-from .version import __version__, __rounded_version__
+from .version import __version__
 
 QHUB_K8S_VERSION = os.getenv("QHUB_K8S_VERSION", None)
 
@@ -29,7 +29,7 @@ AWS_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.h
 GCP_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#google-cloud-platform"
 AZURE_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#microsoft-azure"
 
-qhub_image_tag = f"v{__rounded_version__}"
+qhub_image_tag = f"v{__version__}"
 pip_install_qhub = f"pip install qhub=={__version__}"
 
 QHUB_GH_BRANCH = os.environ.get("QHUB_GH_BRANCH", "")

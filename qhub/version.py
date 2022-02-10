@@ -28,6 +28,3 @@ def rounded_ver_parse(versionstr):
     minor = int(m.group("minor") or 0)
     patch = int(m.group("patch") or 0)
     return (major, minor, patch)
-
-
-__rounded_version__ = ".".join([str(c) for c in rounded_ver_parse(__version__)])

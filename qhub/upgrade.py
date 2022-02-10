@@ -8,9 +8,9 @@ import secrets
 
 from pydantic.error_wrappers import ValidationError
 
-from .schema import verify
+from .schema import verify, is_version_accepted
 from .utils import backup_config_file, load_yaml, yaml
-from .version import __rounded_version__, rounded_ver_parse
+from .version import __version__, rounded_ver_parse
 
 logger = logging.getLogger(__name__)
 
@@ -22,21 +22,21 @@ def do_upgrade(config_filename, attempt_fixes=False):
     try:
         verify(config)
         print(
-            f"Your config file {config_filename} appears to be already up-to-date for qhub version {__rounded_version__}"
+            f"Your config file {config_filename} appears to be already up-to-date for qhub version {__version__}"
         )
         return
     except (ValidationError, ValueError) as e:
-        if config.get("qhub_version", "") == __rounded_version__:
+        if is_version_accepted(config.get("qhub_version", "")):
             # There is an unrelated validation problem
             print(
-                f"Your config file {config_filename} appears to be already up-to-date for qhub version {__rounded_version__} but there is another validation error.\n"
+                f"Your config file {config_filename} appears to be already up-to-date for qhub version {__version__} but there is another validation error.\n"
             )
             raise e
 
     start_version = config.get("qhub_version", "")
 
     UpgradeStep.upgrade(
-        config, start_version, __rounded_version__, config_filename, attempt_fixes
+        config, start_version, __version__, config_filename, attempt_fixes
     )
 
     # Backup old file
@@ -46,7 +46,7 @@ def do_upgrade(config_filename, attempt_fixes=False):
         yaml.dump(config, f)
 
     print(
-        f"Saving new config file {config_filename} ready for QHub version {__rounded_version__}"
+        f"Saving new config file {config_filename} ready for QHub version {__version__}"
     )
 
     ci_cd = config.get("ci_cd", {}).get("type", "")
@@ -60,7 +60,7 @@ def do_upgrade(config_filename, attempt_fixes=False):
 class UpgradeStep(ABC):
     _steps = {}
 
-    version = ""  # Each subclass must have a version
+    version = ""  # Each subclass must have a version - these should be full release versions (not dev/prerelease)
 
     def __init_subclass__(cls):
         assert cls.version != ""
@@ -83,6 +83,13 @@ class UpgradeStep(ABC):
         """
         starting_ver = rounded_ver_parse(start_version or "0.0.0")
         finish_ver = rounded_ver_parse(finish_version)
+
+        if finish_ver < starting_ver:
+            raise ValueError(
+                f"Your qhub-config.yaml already belongs to a later version ({start_version}) than the installed version of QHub ({finish_version}).\n"
+                "You should upgrade the installed qhub package (e.g. pip install --upgrade qhub) to work with your deployment."
+            )
+
         step_versions = sorted(
             [
                 v
@@ -129,6 +136,9 @@ class UpgradeStep(ABC):
         """
 
         finish_version = self.get_version()
+        __rounded_finish_version__ = ".".join(
+            [str(c) for c in rounded_ver_parse(finish_version)]
+        )
 
         print(
             f"\n---> Starting upgrade from {start_version or 'old version'} to {finish_version}\n"
@@ -157,7 +167,7 @@ class UpgradeStep(ABC):
         ):
             m = docker_image_regex.match(v)
             if m:
-                return ":".join([m.groups()[0], f"v{finish_version}"])
+                return ":".join([m.groups()[0], f"v{__rounded_finish_version__}"])
             return None
 
         for k, v in config.get("default_images", {}).items():
@@ -320,8 +330,11 @@ class Upgrade_0_4_0(UpgradeStep):
         return config
 
 
+__rounded_version__ = ".".join([str(c) for c in rounded_ver_parse(__version__)])
+
 # Manually-added upgrade steps must go above this line
 if not UpgradeStep.has_step(__rounded_version__):
-    # Always have a way to upgrade to the latest version number, even if no customizations
+    # Always have a way to upgrade to the latest full version number, even if no customizations
+    # Don't let dev/prerelease versions cloud things
     class UpgradeLatest(UpgradeStep):
         version = __rounded_version__
