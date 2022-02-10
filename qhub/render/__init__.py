@@ -153,7 +153,7 @@ def render_contents(config: Dict):
                     [
                         QHubTerraformState("02-infrastructure", config),
                     ]
-                )
+                ),
             }
         )
     elif config["provider"] == "aws":
