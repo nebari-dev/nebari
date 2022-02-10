@@ -14,7 +14,6 @@ from qhub.render.terraform import (
     QHubTerraformState,
     QHubGCPProvider,
     QHubAWSProvider,
-    QHubAzureProvider,
 )
 
 
@@ -150,11 +149,6 @@ def render_contents(config: Dict):
     elif config["provider"] == "azure":
         contents.update(
             {
-                "stages/01-terraform-state/azure/_qhub.tf.json": tf_render_objects(
-                    [
-                        QHubAzureProvider(config),
-                    ]
-                ),
                 "stages/02-infrastructure/azure/_qhub.tf.json": tf_render_objects(
                     [
                         QHubTerraformState("02-infrastructure", config),

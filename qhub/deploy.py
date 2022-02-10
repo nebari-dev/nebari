@@ -804,7 +804,8 @@ def guided_install(
     check_cloud_credentials(config)
 
     stage_outputs = {}
-    provision_01_terraform_state(stage_outputs, config)
+    if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
+        provision_01_terraform_state(stage_outputs, config)
     provision_02_infrastructure(stage_outputs, config)
 
     with kubernetes_provider_context(
