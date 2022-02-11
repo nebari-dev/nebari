@@ -327,6 +327,12 @@ class Upgrade_0_4_0(UpgradeStep):
             if "scope" in auth_config:
                 del auth_config["scope"]
 
+        # It is not safe to immediately redeploy without backing up data ready to restore data
+        # since a new cluster will be created for the new version.
+        # Setting the following flag will prevent deployment and display guidance to the user
+        # which they can override if they are happy they understand the situation.
+        config["prevent_deploy"] = True
+
         return config
 
 

@@ -438,6 +438,9 @@ class Main(Base):
     clearml: typing.Optional[ClearML]
     extensions: typing.Optional[typing.List[QHubExtension]]
     jupyterhub: typing.Optional[JupyterHub]
+    prevent_deploy: bool = (
+        False  # Optional, but will be given default value if not present
+    )
 
     # If the qhub_version in the schema is old
     # we must tell the user to first run qhub upgrade
@@ -461,7 +464,7 @@ class Main(Base):
 
 
 def verify(config):
-    Main(**config)
+    return Main(**config)
 
 
 def is_version_accepted(v):
