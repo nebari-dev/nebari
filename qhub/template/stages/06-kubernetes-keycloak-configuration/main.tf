@@ -1,7 +1,8 @@
 resource "keycloak_realm" "main" {
   provider = keycloak
 
-  realm = var.realm
+  realm        = var.realm
+  display_name = var.realm_display_name
 }
 
 
