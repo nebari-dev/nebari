@@ -12,21 +12,8 @@ cp /opt/jupyterlab/ipython_config.py /etc/ipython/ipython_config.py
 mkdir -p /opt/conda/share/jupyter/lab/settings
 cp /opt/jupyterlab/overrides.json /opt/conda/share/jupyter/lab/settings
 
-# ====== code-server install/config
-mkdir -p /opt/code_server
-cd /opt/code_server
-# Fetch the snapshot of https://code-server.dev/install.sh as of the time of writing
-curl -fsSL https://raw.githubusercontent.com/coder/code-server/ec3d9974b3494e6055c8e65e1fb0e4bc665429a7/install.sh > install.sh
-expected_sum=4e1199a09f0777580aa2d8651f620d984ab99a45121cbd154c300a0280de751d
-
-if [[ ! $(sha256sum install.sh) == "${expected_sum}  install.sh" ]];then
-    echo Unexpected hash from code-server install script
-    exit 1
-fi
-sh install.sh --prefix /opt/code_server
-
 # ====== fix perms ======
-fix-permissions /opt/jupyterlab /etc/ipython /opt/code_server
+fix-permissions /opt/jupyterlab /etc/ipython
 
 # if DEFAULT_ENV is unset ${DEFAULT_ENV+x} expands to nothing otherwise
 # it substitutes the string x. This allows us to check if the variable
