@@ -603,11 +603,13 @@ def check_05_kubernetes_keycloak(stage_outputs, config):
 
 def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=True):
     directory = "stages/06-kubernetes-keycloak-configuration"
+    realm_id = f"qhub-{config['project_name']}"
 
     stage_outputs[directory] = terraform.deploy(
         directory=directory,
         input_vars={
-            "realm": f"qhub-{config['project_name']}",
+            "realm": realm_id,
+            "realm_display_name": config['security']['keycloak'].get('realm_display_name', realm_id),
             "authentication": config["security"]["authentication"],
         },
     )
