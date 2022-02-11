@@ -7,6 +7,7 @@ import contextlib
 from subprocess import CalledProcessError
 from typing import Dict
 import tempfile
+import json
 
 from qhub.provider import terraform
 from qhub.utils import (
@@ -543,6 +544,9 @@ def provision_05_kubernetes_keycloak(stage_outputs, config, check=True):
             "initial-root-password": config["security"]["keycloak"][
                 "initial_root_password"
             ],
+            "overrides": [
+                json.dumps(config["security"]["keycloak"].get("overrides", {}))
+            ],
             "node-group": calculate_note_groups(config)["general"],
         },
     )
@@ -612,7 +616,9 @@ def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=
         directory=directory,
         input_vars={
             "realm": realm_id,
-            "realm_display_name": config['security']['keycloak'].get('realm_display_name', realm_id),
+            "realm_display_name": config["security"]["keycloak"].get(
+                "realm_display_name", realm_id
+            ),
             "authentication": config["security"]["authentication"],
         },
     )
