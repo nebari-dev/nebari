@@ -212,16 +212,47 @@ def render_contents(config: Dict):
             ),
         }
     )
-
-    if config.get("ci_cd", None):
-        qhub_ops_loc = pathlib.Path("qhub_ops.yaml")
-        with qhub_ops_loc.open() as f:
-            yaml = YAML(typ="safe", pure=True)
-            qhub_ops = yaml.load(f)
-
-        qhub_ops["on"]["push"]["branches"] = config["ci_cd"]["branch"]
+    if config["ci_cd"]:
+        for fn, data in gen_cicd(config).items():
+            contents.update({fn: data.json(indent=2)})
 
     return contents
+
+
+def gen_cicd(config):
+    from .cicd import QhubOps
+
+    cicd_files = {}
+
+    env_vars = {
+        "GITHUB_TOKEN": "${{ secrets.GITHUB_TOKEN }}",
+    }
+
+    if config["provider"] == "gcp":
+        env_vars["GOOGLE_CREDENTIALS"] = "${{ secrets.GOOGLE_CREDENTIALS }}"
+    # TODO: add envs for other cloud providers
+
+    if config["ci_cd"]["type"] == "github-actions":
+        # TODO: create similar schema/models for other GH action workflows
+        qhubops = QhubOps(
+            on=dict(
+                push=dict(
+                    branches=[config["ci_cd"]["branch"]], path=["qhub-config.yaml"]
+                ),
+            ),
+            env=env_vars,
+            jobs=dict(),
+        )
+        cicd_files["qhub_ops.yaml"] = qhubops
+
+    elif config["ci_cd"]["type"] == "gitlab-ci":
+        # TODO: create schema for GitLab-CI
+        pass
+    else:
+        # should never get to this point... something has gone wrong
+        pass
+
+    return cicd_files
 
 
 def inspect_files(
