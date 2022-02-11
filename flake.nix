@@ -41,17 +41,18 @@
         pkgs.minikube
         pkgs.k9s
       ];
-    in {
+    in rec {
       defaultApp.x86_64-linux = pythonPackages.buildPythonPackage {
         pname = "qhub";
         version = "latest";
+        format = "pyproject";
 
         src = ./.;
 
         propagatedBuildInputs = propagatedDependencies;
 
         patchPhase = ''
-          substituteInPlace setup.py \
+          substituteInPlace setup.cfg \
             --replace "azure-identity==1.6.1" "azure-identity" \
             --replace "azure-mgmt-containerservice==16.2.0" "azure-mgmt-containerservice"
         '';
@@ -61,7 +62,7 @@
 
       devShell.x86_64-linux =
         pkgs.mkShell {
-          buildInputs = propagatedDependencies ++ devDependencies;
+          buildInputs = propagatedDependencies ++ devDependencies ++ [ defaultApp.x86_64-linux ];
         };
     };
 }
