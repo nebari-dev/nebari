@@ -620,6 +620,9 @@ def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=
                 "realm_display_name", realm_id
             ),
             "authentication": config["security"]["authentication"],
+            "default_project_groups": ["users"]
+            if config["security"].get("shared_users_group")
+            else [],
         },
     )
 

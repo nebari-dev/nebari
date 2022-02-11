@@ -246,11 +246,12 @@ It's still possible to specify `users` and `groups` in the YAML file - in older 
 
 If specifying users/groups in this way, you can also manually add more users/groups in Keycloak. However, be aware that if users/groups were initially created based on entries in the YAML file, those users/groups will be destroyed if `qhub deploy` is ever run without those users/groups in the file. They may also be recreated after you delete them manually in Keycloak.
 
-Any user is assigned a `primary_group` and optionally
-any number of `secondary_groups`.
+Any user is assigned a `primary_group` and optionally any number of
+`secondary_groups`.
 
 ```yaml
 security:
+  shared_users_group: true
   users:
     example-user:
       primary_group: users
@@ -266,8 +267,14 @@ security:
 ```
 
 * The `primary_group` is the group name assigned to files that are
-written for the user.
-* `groups` are a mapping of group name to an empty map (no entries are required within that map any longer).
+  written for the user.
+* `groups` are a mapping of group name to an empty map (no entries are
+  required within that map any longer).
+* `shared_users_group` is an optional key (default False) which
+  optionally adds all users to a default group named `users`. Only new
+  users created after this option is enabled will be added to the
+  `users` group. You will have to manually add existing users to the
+  `users` group if you chose to enable this option later.
 
 #### Admin and Users Group
 
