@@ -350,6 +350,9 @@ def provision_03_kubernetes_initialize(stage_outputs, config, check=True):
             "environment": config["namespace"],
             "cloud-provider": config["provider"],
             "aws-region": config.get("amazon_web_services", {}).get("region"),
+            "external_container_reg": config.get(
+                "external_container_reg", {"enabled": False}
+            ),
         },
     )
 
@@ -782,9 +785,6 @@ def provision_08_enterprise_qhub(stage_outputs, config, check=True):
                 "realm_id"
             ]["value"],
             "tf_extensions": config.get("tf_extensions", []),
-            "external_container_reg": config.get(
-                "external_container_reg", {"enabled": False}
-            ),
             "qhub_config": config,
             "helm_extensions": config.get("helm_extensions", []),
         },
