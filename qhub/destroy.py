@@ -223,5 +223,8 @@ def destroy_configuration(config):
         check_cloud_credentials(config)
 
         destroy_02_infrastructure(config)
-        if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
+        if (
+            config["provider"] != "local"
+            and config["terraform_state"]["type"] == "remote"
+        ):
             destroy_01_terraform_state(config)
