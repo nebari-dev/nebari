@@ -26,6 +26,12 @@ variable "jupyterhub-image" {
   })
 }
 
+variable "jupyterhub-overrides" {
+  description = "Jupyterhub helm chart overrides"
+  type        = list(string)
+  default     = []
+}
+
 variable "jupyterhub-shared-storage" {
   description = "JupyterHub shared storage size [GB]"
   type        = string
@@ -85,6 +91,8 @@ module "jupyterhub" {
 
   external-url = var.endpoint
   realm_id = var.realm_id
+
+  overrides = var.jupyterhub-overrides
 
   home-pvc = module.jupyterhub-nfs-mount.persistent_volume_claim.name
 

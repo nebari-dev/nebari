@@ -765,6 +765,22 @@ QHub will refuse to deploy if it doesn't contain the same version as that of the
 
 Typically, you can upgrade the qhub-config.yaml file itself using the [`qhub upgrade` command](../admin_guide/upgrade.md). This will update image numbers, plus updating qhub_version to match the installed version of `qhub`, as well as any other bespoke changes required.
 
+## JupyterHub
+
+JupyterHub uses the [zero to jupyterhub helm
+chart](https://github.com/jupyterhub/zero-to-jupyterhub-k8s/). This
+chart has many options that are not configured in the QHub default
+installation. You can override specific values in the
+[values.yaml](https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/main/jupyterhub/values.yaml). `jupyterhub.overrides`
+is optional.
+
+```yaml
+jupyterhub:
+  overrides:
+    cull:
+      users: true
+```
+
 # Full configuration example
 
 ```yaml

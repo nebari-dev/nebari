@@ -728,6 +728,9 @@ def provision_07_kubernetes_services(stage_outputs, config, check=True):
             "jupyterlab-image": split_docker_image_name(
                 config["default_images"]["jupyterlab"]
             ),
+            "jupyterhub-overrides": [
+                json.dumps(config.get("jupyterhub", {}).get("overrides", {}))
+            ],
             # dask-gateway
             "dask-gateway-image": split_docker_image_name(
                 config["default_images"]["dask_gateway"]
