@@ -199,29 +199,6 @@ Then, initialize the configuration file `qhub-config.yaml` with:
 ```shell
 python -m qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
 ```
-## Generate user password
-For each user on the `qhub-config.yaml` file needs a password.
-A random password is auto generated for the user `example-user` when
-the auth provider `password` is run, the value is then printed to the standard output (stdout).
-
-In case you would like to change the generated password (optional), You can use [bcrypt](https://pypi.org/project/bcrypt/) to generate your own salted password by using the following _Python command_ script:
-
-```bash
-python -c "import bcrypt; print(bcrypt.hashpw(b'admin', bcrypt.gensalt()).decode('utf-8'))"
-```
-
-`<password>` can be changed to any desired value. This requires the Python package `bcrypt` to be installed in your virtual environment. The password is added to the `qhub-config.yaml` in the users section.
-
-```yaml
-  users:
-    example-user:
-      uid: 1000
-      ...
-      password: '$2b$12$lAk2Bhw8mu0QJkSecPiABOX2m87RF8N7vv7rBw9JksOgewI2thUuO'
-      ...
-      primary_group: users
-
-```
 
 ## Deploy and render the infrastructure
 

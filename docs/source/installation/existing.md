@@ -124,17 +124,6 @@ security:
       client_id:
       client_secret:
       oauth_callback_url: https://<domain_name>/hub/oauth_callback
-  users:
-    example_user:
-      uid: 1000
-      primary_group: admin
-      secondary_groups:
-      - users
-  groups:
-    users:
-      gid: 100
-    admin:
-      gid: 101
 default_images:
   jupyterhub: quansight/qhub-jupyterhub:v0.3.13
   jupyterlab: quansight/qhub-jupyterlab:v0.3.13
