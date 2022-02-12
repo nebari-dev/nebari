@@ -745,6 +745,9 @@ def provision_07_kubernetes_services(stage_outputs, config, check=True):
             "clearml-enable-forwardauth": config.get("clearml", {}).get(
                 "enable_forward_auth", False
             ),
+            "clearml-overrides": [
+                json.dumps(config.get("clearml", {}).get("overrides", {}))
+            ],
         },
     )
 
