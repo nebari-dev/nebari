@@ -100,12 +100,6 @@ class TerraformState(Base):
     config: typing.Optional[typing.Dict[str, str]]
 
 
-class TerraformModules(Base):
-    # No longer used, so ignored, but could still be in qhub-config.yaml
-    repository: str
-    rev: str
-
-
 # ============ Certificate =============
 
 
@@ -415,9 +409,6 @@ class Main(Base):
     ci_cd: typing.Optional[CICD]
     domain: str
     terraform_state: typing.Optional[TerraformState]
-    terraform_modules: typing.Optional[
-        TerraformModules
-    ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
     helm_extensions: typing.Optional[typing.List[HelmExtension]]
     prefect: typing.Optional[Prefect]
