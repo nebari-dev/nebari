@@ -8,6 +8,7 @@ from subprocess import CalledProcessError
 from typing import Dict
 import tempfile
 import json
+import textwrap
 
 from qhub.provider import terraform
 from qhub.utils import (
@@ -28,8 +29,25 @@ def deploy_configuration(
     dns_auto_provision,
     disable_prompt,
     skip_remote_state_provision,
-    full_only,
 ):
+    if config.get("prevent_deploy", False):
+        # Note if we used the Pydantic model properly, we might get that qhub_config.prevent_deploy always exists but defaults to False
+        raise ValueError(
+            textwrap.dedent(
+                """
+        Deployment prevented due to the prevent_deploy setting in your qhub-config.yaml file.
+        You could remove that field to deploy your QHub, but please do NOT do so without fully understanding why that value was set in the first place.
+
+        It may have been set during an upgrade of your qhub-config.yaml file because we do not believe it is safe to redeploy the new
+        version of QHub without having a full backup of your system ready to restore. It may be known that an in-situ upgrade is impossible
+        and that redeployment will tear down your existing infrastructure before creating an entirely new QHub without your old data.
+
+        PLEASE get in touch with Quansight at https://github.com/Quansight/qhub for assistance in proceeding.
+        Your data may be at risk without our guidance.
+        """
+            )
+        )
+
     logger.info(f'All qhub endpoints will be under https://{config["domain"]}')
 
     with timer(logger, "deploying QHub"):
@@ -40,7 +58,6 @@ def deploy_configuration(
                 dns_auto_provision,
                 disable_prompt,
                 skip_remote_state_provision,
-                full_only,
             )
         except CalledProcessError as e:
             logger.error(e.output)
@@ -812,14 +829,17 @@ def guided_install(
     dns_auto_provision,
     disable_prompt=False,
     skip_remote_state_provision=False,
-    full_only=False,
 ):
     # 01 Check Environment Variables
     check_cloud_credentials(config)
 
     stage_outputs = {}
     if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
-        provision_01_terraform_state(stage_outputs, config)
+        if skip_remote_state_provision:
+            print("Skipping remote state provision")
+        else:
+            provision_01_terraform_state(stage_outputs, config)
+
     provision_02_infrastructure(stage_outputs, config)
 
     with kubernetes_provider_context(
