@@ -303,6 +303,12 @@ class Upgrade_0_4_0(UpgradeStep):
         if "groups" in security:
             del security["groups"]
 
+        if "terraform_modules" in config:
+            del config["terraform_modules"]
+            print(
+                "Removing terraform_modules field from config as it is no longer used.\n"
+            )
+
         # Create root password
         default_password = "".join(
             secrets.choice(string.ascii_letters + string.digits) for i in range(16)
