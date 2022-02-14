@@ -434,7 +434,7 @@ def provision_04_kubernetes_ingress(stage_outputs, config, check=True):
 def check_04_kubernetes_ingress(stage_outputs, qhub_config):
     directory = "stages/04-kubernetes-ingress"
 
-    def _attempt_tcp_connect(host, port, num_attempts=5, timeout=10):
+    def _attempt_tcp_connect(host, port, num_attempts=10, timeout=60):
         for i in range(num_attempts):
             try:
                 # normalize hostname to ip address
@@ -465,8 +465,7 @@ def check_04_kubernetes_ingress(stage_outputs, qhub_config):
     }
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
     host = ip_or_name["hostname"] or ip_or_name["ip"]
-    print(stage_outputs)
-    print(ip_or_name)
+    print(host)
 
     for port in tcp_ports:
         if not _attempt_tcp_connect(host, port):
@@ -500,6 +499,9 @@ def provision_ingress_dns(
         )
         record_name = ".".join(record_name)
         zone_name = ".".join(zone_name)
+        print("DNS Auto Provision ...")
+        print(f"Record Name: {record_name}")
+        print(f"Zone Name: {zone_name}")
         if config["provider"] in {"do", "gcp", "azure"}:
             update_record(zone_name, record_name, "A", ip_or_hostname)
             if config.get("clearml", {}).get("enabled"):
