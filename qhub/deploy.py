@@ -465,7 +465,7 @@ def check_04_kubernetes_ingress(stage_outputs, qhub_config):
     }
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
     host = ip_or_name["hostname"] or ip_or_name["ip"]
-    print(host)
+    host = host.strip("\n")
 
     for port in tcp_ports:
         if not _attempt_tcp_connect(host, port):
