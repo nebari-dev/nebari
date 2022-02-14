@@ -18,10 +18,6 @@ variable "tf_extensions" {
   default     = []
 }
 
-variable "external_container_reg" {
-  description = "External container registry"
-}
-
 variable "qhub_config" {
   description = "QHub Configuration"
 }

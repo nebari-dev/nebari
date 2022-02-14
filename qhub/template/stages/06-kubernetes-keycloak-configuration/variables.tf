@@ -3,6 +3,11 @@ variable "realm" {
   type        = string
 }
 
+variable "realm_display_name" {
+  description = "Keycloak realm display name for QHub"
+  type        = string
+}
+
 variable "keycloak_groups" {
   description = "Permission groups in keycloak used for granting access to services"
   type = set(string)
@@ -12,4 +17,10 @@ variable "keycloak_groups" {
 variable "authentication" {
   description = "Authentication configuration for keycloak"
   type = any
+}
+
+variable "default_project_groups" {
+  description = "Set of groups that should exist by default"
+  type        = set(string)
+  default     = []
 }

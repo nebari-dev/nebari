@@ -11,9 +11,7 @@ logger = logging.getLogger(__name__)
 def destroy_01_terraform_state(config):
     directory = "stages/01-terraform-state"
 
-    if config["provider"] == "local":
-        pass
-    elif config["provider"] == "do":
+    if config["provider"] == "do":
         terraform.deploy(
             terraform_import=True,
             # acl and force_destroy do not import properly
@@ -225,4 +223,8 @@ def destroy_configuration(config):
         check_cloud_credentials(config)
 
         destroy_02_infrastructure(config)
-        destroy_01_terraform_state(config)
+        if (
+            config["provider"] != "local"
+            and config["terraform_state"]["type"] == "remote"
+        ):
+            destroy_01_terraform_state(config)

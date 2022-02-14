@@ -46,6 +46,9 @@ dependencies:
  - isort
  - importnb
 
+ # vscode
+ - code-server >= 3.2
+
  - pip:
-   # See install-conda-environment.sh when editing this section.
-    - https://github.com/dirkcgrunwald/jupyter_codeserver_proxy-/archive/5596bc9c2fbd566180545fa242c659663755a427.tar.gz
+     # vscode jupyterlab launcher
+     - git+https://github.com/betatim/vscode-binder

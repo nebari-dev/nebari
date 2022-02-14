@@ -7,6 +7,8 @@ import contextlib
 from subprocess import CalledProcessError
 from typing import Dict
 import tempfile
+import json
+import textwrap
 
 from qhub.provider import terraform
 from qhub.utils import (
@@ -27,8 +29,25 @@ def deploy_configuration(
     dns_auto_provision,
     disable_prompt,
     skip_remote_state_provision,
-    full_only,
 ):
+    if config.get("prevent_deploy", False):
+        # Note if we used the Pydantic model properly, we might get that qhub_config.prevent_deploy always exists but defaults to False
+        raise ValueError(
+            textwrap.dedent(
+                """
+        Deployment prevented due to the prevent_deploy setting in your qhub-config.yaml file.
+        You could remove that field to deploy your QHub, but please do NOT do so without fully understanding why that value was set in the first place.
+
+        It may have been set during an upgrade of your qhub-config.yaml file because we do not believe it is safe to redeploy the new
+        version of QHub without having a full backup of your system ready to restore. It may be known that an in-situ upgrade is impossible
+        and that redeployment will tear down your existing infrastructure before creating an entirely new QHub without your old data.
+
+        PLEASE get in touch with Quansight at https://github.com/Quansight/qhub for assistance in proceeding.
+        Your data may be at risk without our guidance.
+        """
+            )
+        )
+
     logger.info(f'All qhub endpoints will be under https://{config["domain"]}')
 
     with timer(logger, "deploying QHub"):
@@ -39,7 +58,6 @@ def deploy_configuration(
                 dns_auto_provision,
                 disable_prompt,
                 skip_remote_state_provision,
-                full_only,
             )
         except CalledProcessError as e:
             logger.error(e.output)
@@ -350,6 +368,9 @@ def provision_03_kubernetes_initialize(stage_outputs, config, check=True):
             "environment": config["namespace"],
             "cloud-provider": config["provider"],
             "aws-region": config.get("amazon_web_services", {}).get("region"),
+            "external_container_reg": config.get(
+                "external_container_reg", {"enabled": False}
+            ),
         },
     )
 
@@ -548,6 +569,9 @@ def provision_05_kubernetes_keycloak(stage_outputs, config, check=True):
             "initial-root-password": config["security"]["keycloak"][
                 "initial_root_password"
             ],
+            "overrides": [
+                json.dumps(config["security"]["keycloak"].get("overrides", {}))
+            ],
             "node-group": calculate_note_groups(config)["general"],
         },
     )
@@ -611,12 +635,19 @@ def check_05_kubernetes_keycloak(stage_outputs, config):
 
 def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=True):
     directory = "stages/06-kubernetes-keycloak-configuration"
+    realm_id = f"qhub-{config['project_name']}"
 
     stage_outputs[directory] = terraform.deploy(
         directory=directory,
         input_vars={
-            "realm": f"qhub-{config['project_name']}",
+            "realm": realm_id,
+            "realm_display_name": config["security"]["keycloak"].get(
+                "realm_display_name", realm_id
+            ),
             "authentication": config["security"]["authentication"],
+            "default_project_groups": ["users"]
+            if config["security"].get("shared_users_group")
+            else [],
         },
     )
 
@@ -722,6 +753,9 @@ def provision_07_kubernetes_services(stage_outputs, config, check=True):
             "jupyterlab-image": split_docker_image_name(
                 config["default_images"]["jupyterlab"]
             ),
+            "jupyterhub-overrides": [
+                json.dumps(config.get("jupyterhub", {}).get("overrides", {}))
+            ],
             # dask-gateway
             "dask-gateway-image": split_docker_image_name(
                 config["default_images"]["dask_gateway"]
@@ -788,9 +822,6 @@ def provision_08_enterprise_qhub(stage_outputs, config, check=True):
                 "realm_id"
             ]["value"],
             "tf_extensions": config.get("tf_extensions", []),
-            "external_container_reg": config.get(
-                "external_container_reg", {"enabled": False}
-            ),
             "qhub_config": config,
             "helm_extensions": config.get("helm_extensions", []),
         },
@@ -806,13 +837,17 @@ def guided_install(
     dns_auto_provision,
     disable_prompt=False,
     skip_remote_state_provision=False,
-    full_only=False,
 ):
     # 01 Check Environment Variables
     check_cloud_credentials(config)
 
     stage_outputs = {}
-    provision_01_terraform_state(stage_outputs, config)
+    if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
+        if skip_remote_state_provision:
+            print("Skipping remote state provision")
+        else:
+            provision_01_terraform_state(stage_outputs, config)
+
     provision_02_infrastructure(stage_outputs, config)
 
     with kubernetes_provider_context(
