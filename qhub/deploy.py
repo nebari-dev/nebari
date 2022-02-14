@@ -436,11 +436,10 @@ def check_04_kubernetes_ingress(stage_outputs, qhub_config):
 
     def _attempt_tcp_connect(host, port, num_attempts=20, timeout=60):
         for i in range(num_attempts):
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
                 # normalize hostname to ip address
                 ip = socket.gethostbyname(host)
-
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.settimeout(5)
                 result = s.connect_ex((ip, port))
                 if result == 0:
@@ -451,7 +450,8 @@ def check_04_kubernetes_ingress(stage_outputs, qhub_config):
                 time.sleep(timeout)
 
             except socket.gaierror:
-                print(f"Attempt {i+1} failed to get IP for {ip}...")
+                print(f"Attempt {i+1} failed to get IP for {host}...")
+                s.close()
 
         return False
 
