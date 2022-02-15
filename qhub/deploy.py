@@ -427,7 +427,6 @@ def provision_04_kubernetes_ingress(stage_outputs, config, check=True):
     )
 
     if check:
-        time.sleep(60)
         check_04_kubernetes_ingress(stage_outputs, config)
 
 
@@ -447,7 +446,6 @@ def check_04_kubernetes_ingress(stage_outputs, qhub_config):
                     return True
                 print(f"Attempt {i+1} failed to connect to tcp tcp://{ip}:{port}")
                 time.sleep(timeout)
-
             except socket.gaierror:
                 print(f"Attempt {i+1} failed to get IP for {host}...")
             finally:
@@ -499,9 +497,6 @@ def provision_ingress_dns(
         )
         record_name = ".".join(record_name)
         zone_name = ".".join(zone_name)
-        print("DNS Auto Provision ...")
-        print(f"Record Name: {record_name}")
-        print(f"Zone Name: {zone_name}")
         if config["provider"] in {"do", "gcp", "azure"}:
             update_record(zone_name, record_name, "A", ip_or_hostname)
             if config.get("clearml", {}).get("enabled"):
@@ -522,10 +517,10 @@ def provision_ingress_dns(
         )
 
     if check:
-        check_ingress_dns(stage_outputs, config)
+        check_ingress_dns(stage_outputs, config, disable_prompt)
 
 
-def check_ingress_dns(stage_outputs, config):
+def check_ingress_dns(stage_outputs, config, disable_prompt):
     directory = "stages/04-kubernetes-ingress"
 
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
@@ -552,11 +547,22 @@ def check_ingress_dns(stage_outputs, config):
             time.sleep(timeout)
         return False
 
-    if not _attempt_dns_lookup(domain_name, ip):
-        print(
-            f"ERROR: After stage directory={directory} DNS domain={domain_name} does not point to ip={ip}"
-        )
-        sys.exit(1)
+    attempt = 0
+    while not _attempt_dns_lookup(domain_name, ip):
+        sleeptime = 60 * (2 ** attempt)
+        if not disable_prompt:
+            input(
+                f"After attempting to poll the DNS, domain={domain_name} record appears not to exist or has yet to fully propogate. This non-deterministic behavior is likely due to DNS caching and will likely resolve itself in a few minutes.\nTo poll the DNS again in {sleeptime} seconds [Press Enter].\n\n(Otherwise kill the deployment and try again later...)"
+            )
+
+        print(f"Attempting to poll DNS again in {sleeptime} seconds...")
+        time.sleep(sleeptime)
+        attempt += 1
+        if attempt == 5:
+            print(
+                f"ERROR: After stage directory={directory} DNS domain={domain_name} does not point to ip={ip}"
+            )
+            sys.exit(1)
 
 
 def provision_05_kubernetes_keycloak(stage_outputs, config, check=True):
