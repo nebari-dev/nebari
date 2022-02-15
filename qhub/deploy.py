@@ -22,6 +22,10 @@ from qhub.provider.dns.cloudflare import update_record
 
 logger = logging.getLogger(__name__)
 
+# check and retry settings
+NUM_ATTEMPTS = 10
+TIMEOUT = 10  # seconds
+
 
 def deploy_configuration(
     config,
@@ -433,7 +437,7 @@ def provision_04_kubernetes_ingress(stage_outputs, config, check=True):
 def check_04_kubernetes_ingress(stage_outputs, qhub_config):
     directory = "stages/04-kubernetes-ingress"
 
-    def _attempt_tcp_connect(host, port, num_attempts=20, timeout=60):
+    def _attempt_tcp_connect(host, port, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT):
         for i in range(num_attempts):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             try:
@@ -449,7 +453,8 @@ def check_04_kubernetes_ingress(stage_outputs, qhub_config):
                 print(f"Attempt {i+1} failed to get IP for {host}...")
             finally:
                 s.close()
-                time.sleep(timeout)
+
+            time.sleep(timeout)
 
         return False
 
@@ -527,7 +532,9 @@ def check_ingress_dns(stage_outputs, config, disable_prompt):
     ip = socket.gethostbyname(ip_or_name["hostname"] or ip_or_name["ip"])
     domain_name = config["domain"]
 
-    def _attempt_dns_lookup(domain_name, ip, num_attempts=12, timeout=5):
+    def _attempt_dns_lookup(
+        domain_name, ip, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
+    ):
         for i in range(num_attempts):
             try:
                 resolved_ip = socket.gethostbyname(domain_name)
@@ -552,10 +559,10 @@ def check_ingress_dns(stage_outputs, config, disable_prompt):
         sleeptime = 60 * (2 ** attempt)
         if not disable_prompt:
             input(
-                f"After attempting to poll the DNS, domain={domain_name} record appears not to exist or has yet to fully propogate. This non-deterministic behavior is likely due to DNS caching and will likely resolve itself in a few minutes.\nTo poll the DNS again in {sleeptime} seconds [Press Enter].\n\n(Otherwise kill the deployment and try again later...)"
+                f"After attempting to poll the DNS, the record for domain={domain_name} appears not to exist, has recently been updaed, or has yet to fully propogate. This non-deterministic behavior is likely due to DNS caching and will likely resolve itself in a few minutes.\n\n\tTo poll the DNS again in {sleeptime} seconds [Press Enter].\n\n...otherwise kill the process and run the deployment again later..."
             )
 
-        print(f"Attempting to poll DNS again in {sleeptime} seconds...")
+        print(f"Will attempt to poll DNS again in {sleeptime} seconds...")
         time.sleep(sleeptime)
         attempt += 1
         if attempt == 5:
@@ -605,8 +612,8 @@ def check_05_kubernetes_keycloak(stage_outputs, config):
         realm_name,
         client_id,
         verify=False,
-        num_attempts=3,
-        timeout=5,
+        num_attempts=NUM_ATTEMPTS,
+        timeout=TIMEOUT,
     ):
         for i in range(num_attempts):
             try:
@@ -681,8 +688,8 @@ def check_06_kubernetes_keycloak_configuration(stage_outputs, config):
         client_id,
         qhub_realm,
         verify=False,
-        num_attempts=5,
-        timeout=10,
+        num_attempts=NUM_ATTEMPTS,
+        timeout=TIMEOUT,
     ):
         for i in range(num_attempts):
             try:
@@ -800,7 +807,9 @@ def check_07_kubernetes_services(stage_outputs, config):
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    def _attempt_connect_url(url, verify=False, num_attempts=3, timeout=5):
+    def _attempt_connect_url(
+        url, verify=False, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
+    ):
         for i in range(num_attempts):
             response = requests.get(service_url, verify=verify)
             if response.status_code < 400:
@@ -808,6 +817,7 @@ def check_07_kubernetes_services(stage_outputs, config):
                 return True
             else:
                 print(f"Attempt {i+1} health check failed for url={url}")
+            time.sleep(timeout)
         return False
 
     services = stage_outputs[directory]["service_urls"]["value"]
