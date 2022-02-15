@@ -8,6 +8,7 @@ from subprocess import CalledProcessError
 from typing import Dict
 import tempfile
 import json
+import textwrap
 
 from qhub.provider import terraform
 from qhub.utils import (
@@ -21,6 +22,10 @@ from qhub.provider.dns.cloudflare import update_record
 
 logger = logging.getLogger(__name__)
 
+# check and retry settings
+NUM_ATTEMPTS = 10
+TIMEOUT = 10  # seconds
+
 
 def deploy_configuration(
     config,
@@ -28,8 +33,25 @@ def deploy_configuration(
     dns_auto_provision,
     disable_prompt,
     skip_remote_state_provision,
-    full_only,
 ):
+    if config.get("prevent_deploy", False):
+        # Note if we used the Pydantic model properly, we might get that qhub_config.prevent_deploy always exists but defaults to False
+        raise ValueError(
+            textwrap.dedent(
+                """
+        Deployment prevented due to the prevent_deploy setting in your qhub-config.yaml file.
+        You could remove that field to deploy your QHub, but please do NOT do so without fully understanding why that value was set in the first place.
+
+        It may have been set during an upgrade of your qhub-config.yaml file because we do not believe it is safe to redeploy the new
+        version of QHub without having a full backup of your system ready to restore. It may be known that an in-situ upgrade is impossible
+        and that redeployment will tear down your existing infrastructure before creating an entirely new QHub without your old data.
+
+        PLEASE get in touch with Quansight at https://github.com/Quansight/qhub for assistance in proceeding.
+        Your data may be at risk without our guidance.
+        """
+            )
+        )
+
     logger.info(f'All qhub endpoints will be under https://{config["domain"]}')
 
     with timer(logger, "deploying QHub"):
@@ -40,7 +62,6 @@ def deploy_configuration(
                 dns_auto_provision,
                 disable_prompt,
                 skip_remote_state_provision,
-                full_only,
             )
         except CalledProcessError as e:
             logger.error(e.output)
@@ -416,20 +437,25 @@ def provision_04_kubernetes_ingress(stage_outputs, config, check=True):
 def check_04_kubernetes_ingress(stage_outputs, qhub_config):
     directory = "stages/04-kubernetes-ingress"
 
-    def _attempt_tcp_connect(host, port, num_attempts=3, timeout=5):
-        # normalize hostname to ip address
-        host = socket.gethostbyname(host)
-
+    def _attempt_tcp_connect(host, port, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT):
         for i in range(num_attempts):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(5)
-            result = s.connect_ex((host, port))
-            if result == 0:
-                print(f"Attempt {i+1} succedded to connect to tcp://{host}:{port}")
-                return True
-            s.close()
-            print(f"Attempt {i+1} failed to connect to tcp tcp://{host}:{port}")
+            try:
+                # normalize hostname to ip address
+                ip = socket.gethostbyname(host)
+                s.settimeout(5)
+                result = s.connect_ex((ip, port))
+                if result == 0:
+                    print(f"Attempt {i+1} succedded to connect to tcp://{ip}:{port}")
+                    return True
+                print(f"Attempt {i+1} failed to connect to tcp tcp://{ip}:{port}")
+            except socket.gaierror:
+                print(f"Attempt {i+1} failed to get IP for {host}...")
+            finally:
+                s.close()
+
             time.sleep(timeout)
+
         return False
 
     tcp_ports = {
@@ -442,6 +468,7 @@ def check_04_kubernetes_ingress(stage_outputs, qhub_config):
     }
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
     host = ip_or_name["hostname"] or ip_or_name["ip"]
+    host = host.strip("\n")
 
     for port in tcp_ports:
         if not _attempt_tcp_connect(host, port):
@@ -495,17 +522,19 @@ def provision_ingress_dns(
         )
 
     if check:
-        check_ingress_dns(stage_outputs, config)
+        check_ingress_dns(stage_outputs, config, disable_prompt)
 
 
-def check_ingress_dns(stage_outputs, config):
+def check_ingress_dns(stage_outputs, config, disable_prompt):
     directory = "stages/04-kubernetes-ingress"
 
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
     ip = socket.gethostbyname(ip_or_name["hostname"] or ip_or_name["ip"])
     domain_name = config["domain"]
 
-    def _attempt_dns_lookup(domain_name, ip, num_attempts=12, timeout=5):
+    def _attempt_dns_lookup(
+        domain_name, ip, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
+    ):
         for i in range(num_attempts):
             try:
                 resolved_ip = socket.gethostbyname(domain_name)
@@ -525,11 +554,25 @@ def check_ingress_dns(stage_outputs, config):
             time.sleep(timeout)
         return False
 
-    if not _attempt_dns_lookup(domain_name, ip):
-        print(
-            f"ERROR: After stage directory={directory} DNS domain={domain_name} does not point to ip={ip}"
-        )
-        sys.exit(1)
+    attempt = 0
+    while not _attempt_dns_lookup(domain_name, ip):
+        sleeptime = 60 * (2 ** attempt)
+        if not disable_prompt:
+            input(
+                f"After attempting to poll the DNS, the record for domain={domain_name} appears not to exist, "
+                f"has recently been updated, or has yet to fully propogate. This non-deterministic behavior is likely due to "
+                f"DNS caching and will likely resolve itself in a few minutes.\n\n\tTo poll the DNS again in {sleeptime} seconds "
+                f"[Press Enter].\n\n...otherwise kill the process and run the deployment again later..."
+            )
+
+        print(f"Will attempt to poll DNS again in {sleeptime} seconds...")
+        time.sleep(sleeptime)
+        attempt += 1
+        if attempt == 5:
+            print(
+                f"ERROR: After stage directory={directory} DNS domain={domain_name} does not point to ip={ip}"
+            )
+            sys.exit(1)
 
 
 def provision_05_kubernetes_keycloak(stage_outputs, config, check=True):
@@ -572,8 +615,8 @@ def check_05_kubernetes_keycloak(stage_outputs, config):
         realm_name,
         client_id,
         verify=False,
-        num_attempts=3,
-        timeout=5,
+        num_attempts=NUM_ATTEMPTS,
+        timeout=TIMEOUT,
     ):
         for i in range(num_attempts):
             try:
@@ -620,6 +663,9 @@ def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=
                 "realm_display_name", realm_id
             ),
             "authentication": config["security"]["authentication"],
+            "default_project_groups": ["users"]
+            if config["security"].get("shared_users_group")
+            else [],
         },
     )
 
@@ -645,8 +691,8 @@ def check_06_kubernetes_keycloak_configuration(stage_outputs, config):
         client_id,
         qhub_realm,
         verify=False,
-        num_attempts=5,
-        timeout=10,
+        num_attempts=NUM_ATTEMPTS,
+        timeout=TIMEOUT,
     ):
         for i in range(num_attempts):
             try:
@@ -725,6 +771,9 @@ def provision_07_kubernetes_services(stage_outputs, config, check=True):
             "jupyterlab-image": split_docker_image_name(
                 config["default_images"]["jupyterlab"]
             ),
+            "jupyterhub-overrides": [
+                json.dumps(config.get("jupyterhub", {}).get("overrides", {}))
+            ],
             # dask-gateway
             "dask-gateway-image": split_docker_image_name(
                 config["default_images"]["dask_gateway"]
@@ -764,7 +813,9 @@ def check_07_kubernetes_services(stage_outputs, config):
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    def _attempt_connect_url(url, verify=False, num_attempts=3, timeout=5):
+    def _attempt_connect_url(
+        url, verify=False, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
+    ):
         for i in range(num_attempts):
             response = requests.get(service_url, verify=verify)
             if response.status_code < 400:
@@ -772,6 +823,7 @@ def check_07_kubernetes_services(stage_outputs, config):
                 return True
             else:
                 print(f"Attempt {i+1} health check failed for url={url}")
+            time.sleep(timeout)
         return False
 
     services = stage_outputs[directory]["service_urls"]["value"]
@@ -809,14 +861,17 @@ def guided_install(
     dns_auto_provision,
     disable_prompt=False,
     skip_remote_state_provision=False,
-    full_only=False,
 ):
     # 01 Check Environment Variables
     check_cloud_credentials(config)
 
     stage_outputs = {}
     if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
-        provision_01_terraform_state(stage_outputs, config)
+        if skip_remote_state_provision:
+            print("Skipping remote state provision")
+        else:
+            provision_01_terraform_state(stage_outputs, config)
+
     provision_02_infrastructure(stage_outputs, config)
 
     with kubernetes_provider_context(

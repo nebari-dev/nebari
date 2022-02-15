@@ -18,3 +18,9 @@ variable "authentication" {
   description = "Authentication configuration for keycloak"
   type = any
 }
+
+variable "default_project_groups" {
+  description = "Set of groups that should exist by default"
+  type        = set(string)
+  default     = []
+}

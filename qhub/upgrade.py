@@ -301,7 +301,16 @@ class Upgrade_0_4_0(UpgradeStep):
         if "users" in security:
             del security["users"]
         if "groups" in security:
+            if "users" in security["groups"]:
+                # Ensure the users default group is added to Keycloak
+                security["shared_users_group"] = True
             del security["groups"]
+
+        if "terraform_modules" in config:
+            del config["terraform_modules"]
+            print(
+                "Removing terraform_modules field from config as it is no longer used.\n"
+            )
 
         # Create root password
         default_password = "".join(
@@ -326,6 +335,12 @@ class Upgrade_0_4_0(UpgradeStep):
                 del auth_config["oauth_callback_url"]
             if "scope" in auth_config:
                 del auth_config["scope"]
+
+        # It is not safe to immediately redeploy without backing up data ready to restore data
+        # since a new cluster will be created for the new version.
+        # Setting the following flag will prevent deployment and display guidance to the user
+        # which they can override if they are happy they understand the situation.
+        config["prevent_deploy"] = True
 
         return config
 

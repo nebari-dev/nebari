@@ -101,12 +101,6 @@ class TerraformState(Base):
     config: typing.Optional[typing.Dict[str, str]]
 
 
-class TerraformModules(Base):
-    # No longer used, so ignored, but could still be in qhub-config.yaml
-    repository: str
-    rev: str
-
-
 # ============ Certificate =============
 
 
@@ -206,6 +200,7 @@ class Keycloak(Base):
 
 class Security(Base):
     authentication: Authentication
+    shared_users_group: typing.Optional[bool]
     keycloak: typing.Optional[Keycloak]
 
 
@@ -416,9 +411,6 @@ class Main(Base):
     ci_cd: typing.Optional[CICD]
     domain: str
     terraform_state: typing.Optional[TerraformState]
-    terraform_modules: typing.Optional[
-        TerraformModules
-    ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
     helm_extensions: typing.Optional[typing.List[HelmExtension]]
     prefect: typing.Optional[Prefect]
@@ -439,6 +431,9 @@ class Main(Base):
     clearml: typing.Optional[ClearML]
     extensions: typing.Optional[typing.List[QHubExtension]]
     jupyterhub: typing.Optional[JupyterHub]
+    prevent_deploy: bool = (
+        False  # Optional, but will be given default value if not present
+    )
 
     # If the qhub_version in the schema is old
     # we must tell the user to first run qhub upgrade
@@ -462,7 +457,7 @@ class Main(Base):
 
 
 def verify(config):
-    Main(**config)
+    return Main(**config)
 
 
 def is_version_accepted(v):
