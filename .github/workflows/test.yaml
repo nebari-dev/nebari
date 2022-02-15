@@ -11,9 +11,9 @@ on:
       - "docs/**"
       - "*.md"
 
-# concurrency:
-#   group: ${{ github.ref }}
-#   cancel-in-progress: true
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-general:
