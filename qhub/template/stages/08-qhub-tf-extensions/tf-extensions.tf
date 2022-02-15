@@ -1,5 +1,5 @@
 module "extension" {
-  for_each = {for extension in var.tf_extensions: extension.name => extension}
+  for_each = {for extension in var.tf_extensions_processed: extension.name => extension}
 
   source = "./modules/qhubextension"
 
@@ -21,14 +21,14 @@ module "extension" {
 }
 
 resource "random_password" "qhub-ext-client" {
-  for_each = {for extension in var.tf_extensions: extension.name => extension}
+  for_each = {for extension in var.tf_extensions_processed: extension.name => extension}
 
   length  = 32
   special = false
 }
 
 resource "random_password" "qhub-ext-jwt" {
-  for_each = {for extension in var.tf_extensions: extension.name => extension}
+  for_each = {for extension in var.tf_extensions_processed: extension.name => extension}
 
   length  = 32
   special = false
