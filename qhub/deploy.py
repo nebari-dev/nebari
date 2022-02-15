@@ -445,11 +445,11 @@ def check_04_kubernetes_ingress(stage_outputs, qhub_config):
                     print(f"Attempt {i+1} succedded to connect to tcp://{ip}:{port}")
                     return True
                 print(f"Attempt {i+1} failed to connect to tcp tcp://{ip}:{port}")
-                time.sleep(timeout)
             except socket.gaierror:
                 print(f"Attempt {i+1} failed to get IP for {host}...")
             finally:
                 s.close()
+                time.sleep(timeout)
 
         return False
 
