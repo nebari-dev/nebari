@@ -1,8 +1,7 @@
 import os
 import base64
 
-
-import typing
+from typing import Optional, Dict, List, Union
 
 from pydantic import BaseModel, Field
 
@@ -93,8 +92,8 @@ def create_repository(owner, repo, description, homepage, private=True):
 
 
 class GHA_on_push(BaseModel):
-    branches: typing.List[str]
-    path: typing.List[str]
+    branches: List[str]
+    path: List[str]
 
 
 # TODO: make it dynamic
@@ -104,15 +103,15 @@ class GHA_on(BaseModel):
 
 class GHA_job_steps_extras(BaseModel):
     # to allow for dynamic key names
-    __root__: typing.Union[str, float, int]
+    __root__: Union[str, float, int]
 
 
 class GHA_job_step(BaseModel):
     name: str
-    uses: typing.Optional[str]
-    with_: typing.Optional[typing.Dict[str, GHA_job_steps_extras]] = Field(alias="with")
-    run: typing.Optional[str]
-    env: typing.Optional[typing.Dict[str, GHA_job_steps_extras]]
+    uses: Optional[str]
+    with_: Optional[Dict[str, GHA_job_steps_extras]] = Field(alias="with")
+    run: Optional[str]
+    env: Optional[Dict[str, GHA_job_steps_extras]]
 
     class Config:
         allow_population_by_field_name = True
@@ -121,7 +120,7 @@ class GHA_job_step(BaseModel):
 class GHA_job_id(BaseModel):
     name: str
     runs_on_: str = Field(alias="runs-on")
-    steps: typing.List[GHA_job_step]
+    steps: List[GHA_job_step]
 
     class Config:
         allow_population_by_field_name = True
@@ -129,13 +128,13 @@ class GHA_job_id(BaseModel):
 
 class GHA_jobs(BaseModel):
     # to allow for dynamic key names
-    __root__: typing.Dict[str, GHA_job_id]
+    __root__: Dict[str, GHA_job_id]
 
 
 class QhubOps(BaseModel):
     name: str = "qhub auto update"
     on: GHA_on
-    env: typing.Dict[str, str]
+    env: Optional[Dict[str, str]]
     jobs: GHA_jobs
 
 
