@@ -213,7 +213,7 @@ def render_contents(config: Dict):
             ),
         }
     )
-    if config["ci_cd"]:
+    if config.get("ci_cd"):
         for fn, workflow in gen_cicd(config).items():
             contents.update(
                 {
