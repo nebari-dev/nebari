@@ -638,7 +638,7 @@ def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=
             ),
             "authentication": config["security"]["authentication"],
             "default_project_groups": ["users"]
-            if config["security"].get("shared_users_group")
+            if config["security"].get("shared_users_group", False)
             else [],
         },
     )
@@ -815,89 +815,11 @@ def provision_08_qhub_tf_extensions(stage_outputs, config, check=True):
             "urlslug": ext["urlslug"],
             "private": ext.get("private", False),
             "oauth2client": ext.get("oauth2client", False),
+            "keycloakadmin": ext.get("keycloakadmin", False),
+            "jwt": ext.get("jwt", False),
             "logout": ext.get("logout", ""),
-            "jwt": False,
             "qhubconfigyaml": ext.get("qhubconfigyaml", False),
         }
-        tf_ext["envs"] = []
-        for env in ext.get("envs", []):
-            if env.get("code") == "KEYCLOAK":
-                tf_ext["envs"].append(
-                    {
-                        "name": "KEYCLOAK_SERVER_URL",
-                        "rawvalue": '"http://keycloak-headless.${var.environment}:8080/auth/"',
-                    }
-                )
-                tf_ext["envs"].append(
-                    {"name": "KEYCLOAK_ADMIN_USERNAME", "rawvalue": '"qhub-bot"'}
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "KEYCLOAK_ADMIN_PASSWORD",
-                        "rawvalue": "random_password.keycloak-qhub-bot-password.result",
-                    }
-                )
-            elif env.get("code") == "OAUTH2CLIENT":
-                # Need a dynamic env block for these pulling in admin password from child module (keycloak-config)
-                #
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_AUTHORIZE_URL",
-                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/auth"',
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_ACCESS_TOKEN_URL",
-                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/token"',
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_USER_DATA_URL",
-                        "rawvalue": '"https://${var.endpoint}/auth/realms/qhub/protocol/openid-connect/userinfo"',
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_CLIENT_ID",
-                        "rawvalue": f"\"qhub-ext-{ext['name']}-client\"",
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_CLIENT_SECRET",
-                        "rawvalue": f"random_password.qhub-ext-{ext['name']}-keycloak-client-pw.result",
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "OAUTH2_REDIRECT_BASE",
-                        "rawvalue": f"\"https://${{var.endpoint}}/{ext['urlslug']}/\"",
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "COOKIE_OAUTH2STATE_NAME",
-                        "rawvalue": f"\"qhub-o2state-{ext['name']}\"",
-                    }
-                )
-            elif env.get("code") == "JWT":
-                tf_ext["envs"].append(
-                    {
-                        "name": "JWT_SECRET_KEY",
-                        "rawvalue": f"random_password.qhub-ext-{ext['name']}-jwt-secret.result",
-                    }
-                )
-                tf_ext["envs"].append(
-                    {
-                        "name": "COOKIE_AUTHORIZATION_NAME",
-                        "rawvalue": f"\"qhub-jwt-{ext['name']}\"",
-                    }
-                )
-                tf_ext["jwt"] = True
-            else:
-                raise ValueError("No such QHub extension code " + env.get("code"))
 
         if ext.get("logout", "") != "":
             logout_uris.append(
@@ -928,7 +850,10 @@ def provision_08_qhub_tf_extensions(stage_outputs, config, check=True):
                 "realm_id"
             ]["value"],
             "tf_extensions_processed": tf_extensions_processed,
-            "qhub_config": config,
+            "qhub_config_yaml": config,
+            "keycloak_qhub_bot_password": stage_outputs[
+                "stages/05-kubernetes-keycloak"
+            ]["keycloak_qhub_bot_password"]["value"],
             "helm_extensions": config.get("helm_extensions", []),
         },
     )

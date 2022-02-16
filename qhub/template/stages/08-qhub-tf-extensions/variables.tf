@@ -18,11 +18,16 @@ variable "tf_extensions_processed" {
   default     = []
 }
 
-variable "qhub_config" {
+variable "qhub_config_yaml" {
   description = "QHub Configuration"
+  type = any
 }
 
 variable "helm_extensions" {
   description = "Helm Extensions"
   default     = []
+}
+
+variable "keycloak_qhub_bot_password" {
+  description = "Keycloak password for qhub-bot"
 }

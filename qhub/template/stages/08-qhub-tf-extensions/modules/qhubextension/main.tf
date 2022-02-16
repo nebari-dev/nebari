@@ -9,7 +9,7 @@ terraform {
 
 resource "kubernetes_service" "qhub-extension-service" {
   metadata {
-    name      = "${var.name}-qhubext-service"
+    name      = "${var.name}-service"
     namespace = var.namespace
   }
   spec {
@@ -59,7 +59,7 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
           }
 
           dynamic "env" {
-            for_each = var.envs
+            for_each = concat(local.oauth2client_envs, local.keycloakadmin_envs, local.jwt_envs)
             content {
               name  = env.value["name"]
               value = env.value["value"]
@@ -94,4 +94,10 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
       }
     }
   }
+}
+
+resource "random_password" "qhub-jwt-secret" {
+  count = var.jwt ? 1 : 0
+  length  = 32
+  special = false
 }

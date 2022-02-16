@@ -5,6 +5,6 @@ resource "kubernetes_secret" "qhub_yaml_secret" {
   }
 
   data = {
-    "qhub-config.yaml" = yamlencode(var.qhub_config)
+    "qhub-config.yaml" = yamlencode(var.qhub_config_yaml)
   }
 }
