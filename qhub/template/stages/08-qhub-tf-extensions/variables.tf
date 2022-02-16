@@ -13,7 +13,7 @@ variable "realm_id" {
   type        = string
 }
 
-variable "tf_extensions_processed" {
+variable "tf_extensions" {
   description = "QHub Terraform Extensions"
   default     = []
 }

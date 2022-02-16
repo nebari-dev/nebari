@@ -805,28 +805,13 @@ def check_07_kubernetes_services(stage_outputs, config):
 def provision_08_qhub_tf_extensions(stage_outputs, config, check=True):
     directory = "stages/08-qhub-tf-extensions"
 
-    tf_extensions_processed = []
-    logout_uris = []  # TODO Move earlier
+    # logout_uris = []  # TODO Move earlier
 
-    for ext in config.get("tf_extensions", []):
-        tf_ext = {
-            "name": ext["name"],
-            "image": ext["image"],
-            "urlslug": ext["urlslug"],
-            "private": ext.get("private", False),
-            "oauth2client": ext.get("oauth2client", False),
-            "keycloakadmin": ext.get("keycloakadmin", False),
-            "jwt": ext.get("jwt", False),
-            "logout": ext.get("logout", ""),
-            "qhubconfigyaml": ext.get("qhubconfigyaml", False),
-        }
-
-        if ext.get("logout", "") != "":
-            logout_uris.append(
-                f"https://{config['domain']}/{ext['urlslug']}{ext['logout']}"
-            )
-
-        tf_extensions_processed.append(tf_ext)
+    # for ext in config.get("tf_extensions", []):
+    #    if ext.get("logout", "") != "":
+    #        logout_uris.append(
+    #            f"https://{config['domain']}/{ext['urlslug']}{ext['logout']}"
+    #        )
 
     # TODO Move earlier
     # final_logout_uri = f"https://{config['domain']}/hub/login"
@@ -849,7 +834,7 @@ def provision_08_qhub_tf_extensions(stage_outputs, config, check=True):
             "realm_id": stage_outputs["stages/06-kubernetes-keycloak-configuration"][
                 "realm_id"
             ]["value"],
-            "tf_extensions_processed": tf_extensions_processed,
+            "tf_extensions": config.get("tf_extensions", []),
             "qhub_config_yaml": config,
             "keycloak_qhub_bot_password": stage_outputs[
                 "stages/05-kubernetes-keycloak"

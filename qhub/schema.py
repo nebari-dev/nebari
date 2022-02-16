@@ -345,6 +345,11 @@ class CDSDashboards(Base):
 # =============== Extensions = = ==============
 
 
+class QHubExtensionEnv(Base):
+    name: str
+    value: str
+
+
 class QHubExtension(Base):
     name: str
     image: str
@@ -355,6 +360,7 @@ class QHubExtension(Base):
     jwt: bool = False
     qhubconfigyaml: bool = False
     logout: typing.Optional[str]
+    envs: typing.Optional[typing.List[QHubExtensionEnv]]
 
 
 # ======== External Container Registry ========

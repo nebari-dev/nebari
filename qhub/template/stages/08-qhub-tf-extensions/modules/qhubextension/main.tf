@@ -59,7 +59,7 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
           }
 
           dynamic "env" {
-            for_each = concat(local.oauth2client_envs, local.keycloakadmin_envs, local.jwt_envs)
+            for_each = concat(local.oauth2client_envs, local.keycloakadmin_envs, local.jwt_envs, var.envs)
             content {
               name  = env.value["name"]
               value = env.value["value"]
