@@ -1,6 +1,11 @@
 import os
 import base64
 
+
+import typing
+
+from pydantic import BaseModel, Field
+
 import requests
 from nacl import encoding, public
 
@@ -82,3 +87,112 @@ def create_repository(owner, repo, description, homepage, private=True):
             },
         )
     return f"git@github.com:{owner}/{repo}.git"
+
+
+### GITHUB-ACTIONS SCHEMA ###
+
+
+class GHA_on_push(BaseModel):
+    branches: typing.List[str]
+    path: typing.List[str]
+
+
+# TODO: make it dynamic
+class GHA_on(BaseModel):
+    push: GHA_on_push
+
+
+class GHA_job_steps_extras(BaseModel):
+    # to allow for dynamic key names
+    __root__: typing.Union[str, float, int]
+
+
+class GHA_job_step(BaseModel):
+    name: str
+    uses: typing.Optional[str]
+    with_: typing.Optional[typing.Dict[str, GHA_job_steps_extras]] = Field(alias="with")
+    run: typing.Optional[str]
+    env: typing.Optional[typing.Dict[str, GHA_job_steps_extras]]
+
+    class Config:
+        allow_population_by_field_name = True
+
+
+class GHA_job_id(BaseModel):
+    name: str
+    runs_on_: str = Field(alias="runs-on")
+    steps: typing.List[GHA_job_step]
+
+    class Config:
+        allow_population_by_field_name = True
+
+
+class GHA_jobs(BaseModel):
+    # to allow for dynamic key names
+    __root__: typing.Dict[str, GHA_job_id]
+
+
+class QhubOps(BaseModel):
+    name: str = "qhub auto update"
+    on: GHA_on
+    env: typing.Dict[str, str]
+    jobs: GHA_jobs
+
+
+def gen_qhub_ops(config, env_vars):
+
+    branch = config["ci_cd"]["branch"]
+
+    on = GHA_on(push=GHA_on_push(branches=[branch], path=["qhub-config.yaml"]))
+
+    step1 = GHA_job_step(
+        name="Checkout Image",
+        uses="actions/checkout@master",
+        with_={
+            "token": GHA_job_steps_extras(
+                __root__="{{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}"
+            )
+        },
+    )
+
+    step2 = GHA_job_step(
+        name="Set up Python",
+        uses="actions/setup-python@v2",
+        with_={"python-version": GHA_job_steps_extras(__root__=3.8)},
+    )
+
+    step3 = GHA_job_step(
+        name="Install QHub", run=f"pip install qhub=={config['qhub_version']}"
+    )
+
+    step4 = GHA_job_step(
+        name="Deploy Changes made in qhub-config.yaml",
+        run=f"qhub deploy -c qhub-config.yaml --disable-prompt{' --skip-remote-state-provision' if os.environ.get('QHUB_GH_BRANCH') else ''}",
+    )
+
+    step5 = GHA_job_step(
+        name="Push Changes",
+        run=(
+            "git config user.email 'qhub@quansight.com' ; "
+            "git config user.name 'github action' ; "
+            "git add . ; "
+            "git diff --quiet && git diff --staged --quiet || (git commit -m '${COMMIT_MSG}') ; "
+            f"git push origin {branch}"
+        ),
+        env={
+            "COMMIT_MSG": GHA_job_steps_extras(
+                __root__="qhub-config.yaml automated commit: {{ '${{ github.sha }}' }}"
+            )
+        },
+    )
+
+    job1 = GHA_job_id(
+        name="qhub", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4, step5]
+    )
+    jobs = GHA_jobs(__root__={"build": job1})
+
+    return QhubOps(
+        on=on,
+        env=env_vars,
+        jobs=jobs,
+    )

@@ -15,6 +15,7 @@ from qhub.render.terraform import (
     QHubGCPProvider,
     QHubAWSProvider,
 )
+from qhub.provider.cicd.github import gen_qhub_ops
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
@@ -213,15 +214,22 @@ def render_contents(config: Dict):
         }
     )
     if config["ci_cd"]:
-        for fn, data in gen_cicd(config).items():
-            contents.update({fn: data.json(indent=2)})
+        for fn, workflow in gen_cicd(config).items():
+            contents.update(
+                {
+                    fn: workflow.json(
+                        indent=2,
+                        by_alias=True,
+                        exclude_unset=True,
+                        exclude_defaults=True,
+                    )
+                }
+            )
 
     return contents
 
 
 def gen_cicd(config):
-    from .cicd import QhubOps
-
     cicd_files = {}
 
     env_vars = {
@@ -234,16 +242,7 @@ def gen_cicd(config):
 
     if config["ci_cd"]["type"] == "github-actions":
         # TODO: create similar schema/models for other GH action workflows
-        qhubops = QhubOps(
-            on=dict(
-                push=dict(
-                    branches=[config["ci_cd"]["branch"]], path=["qhub-config.yaml"]
-                ),
-            ),
-            env=env_vars,
-            jobs=dict(),
-        )
-        cicd_files["qhub_ops.yaml"] = qhubops
+        cicd_files["qhub_ops.yaml"] = gen_qhub_ops(config, env_vars)
 
     elif config["ci_cd"]["type"] == "gitlab-ci":
         # TODO: create schema for GitLab-CI
