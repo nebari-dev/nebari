@@ -15,7 +15,7 @@ from qhub.render.terraform import (
     QHubGCPProvider,
     QHubAWSProvider,
 )
-from qhub.provider.cicd.github import gen_qhub_ops
+from qhub.provider.cicd.github import gen_qhub_ops, gen_qhub_linter
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
@@ -231,25 +231,21 @@ def render_contents(config: Dict):
 
 def gen_cicd(config):
     cicd_files = {}
+    cicd_provider = config["ci_cd"]["type"]
 
-    env_vars = {
-        "GITHUB_TOKEN": "${{ secrets.GITHUB_TOKEN }}",
-    }
-
-    if config["provider"] == "gcp":
-        env_vars["GOOGLE_CREDENTIALS"] = "${{ secrets.GOOGLE_CREDENTIALS }}"
-    # TODO: add envs for other cloud providers
-
-    if config["ci_cd"]["type"] == "github-actions":
+    if cicd_provider == "github-actions":
         # TODO: create similar schema/models for other GH action workflows
-        cicd_files["qhub_ops.yaml"] = gen_qhub_ops(config, env_vars)
+        gha_dir = ".github/workflows/"
+        cicd_files[gha_dir + "qhub-ops.yaml"] = gen_qhub_ops(config)
+        cicd_files[gha_dir + "qhub-linter.yaml"] = gen_qhub_linter(config)
 
-    elif config["ci_cd"]["type"] == "gitlab-ci":
+    elif cicd_provider == "gitlab-ci":
         # TODO: create schema for GitLab-CI
         pass
     else:
-        # should never get to this point... something has gone wrong
-        pass
+        raise ValueError(
+            f"The ci_cd provider, {cicd_provider}, is not supported. Supported providers include: `github-actions`, `gitlab-ci`."
+        )
 
     return cicd_files
 
