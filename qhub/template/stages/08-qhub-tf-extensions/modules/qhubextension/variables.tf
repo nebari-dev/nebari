@@ -8,12 +8,6 @@ variable "name" {
   type        = string
 }
 
-variable "certificate-secret-name" {
-  description = "tls certificate secret name to use"
-  type        = string
-  default     = ""
-}
-
 variable "external-url" {
   description = "URL of the QHub"
   type        = string
@@ -36,7 +30,19 @@ variable "private" {
 }
 
 variable "oauth2client" {
-  description = "Create a Keycloak client"
+  description = "Create a Keycloak client and include env vars"
+  type        = bool
+  default     = false
+}
+
+variable "keycloakadmin" {
+  description = "Include env vars for a keycloak admin user to make Keycloak Admin API calls"
+  type        = bool
+  default     = false
+}
+
+variable "jwt" {
+  description = "Create secret and cookie name for JWT, set as env vars"
   type        = bool
   default     = false
 }
@@ -59,7 +65,7 @@ variable "qhub-realm-id" {
   default     = ""
 }
 
-variable "keycloak-client-password" {
+variable "keycloak_qhub_bot_password" {
   description = "Keycloak client password"
   type        = string
   default     = ""

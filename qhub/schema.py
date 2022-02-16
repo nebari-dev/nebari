@@ -346,7 +346,8 @@ class CDSDashboards(Base):
 
 
 class QHubExtensionEnv(Base):
-    code: str
+    name: str
+    value: str
 
 
 class QHubExtension(Base):
@@ -355,9 +356,11 @@ class QHubExtension(Base):
     urlslug: str
     private: bool = False
     oauth2client: bool = False
+    keycloakadmin: bool = False
+    jwt: bool = False
     qhubconfigyaml: bool = False
-    envs: typing.Optional[typing.List[QHubExtensionEnv]]
     logout: typing.Optional[str]
+    envs: typing.Optional[typing.List[QHubExtensionEnv]]
 
 
 # ======== External Container Registry ========
@@ -428,7 +431,7 @@ class Main(Base):
     environments: typing.Dict[str, CondaEnvironment]
     monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
-    extensions: typing.Optional[typing.List[QHubExtension]]
+    tf_extensions: typing.Optional[typing.List[QHubExtension]]
     jupyterhub: typing.Optional[JupyterHub]
     prevent_deploy: bool = (
         False  # Optional, but will be given default value if not present

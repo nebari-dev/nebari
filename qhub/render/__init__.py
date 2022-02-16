@@ -67,7 +67,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
         "stages/05-kubernetes-keycloak",
         "stages/06-kubernetes-keycloak-configuration",
         "stages/07-kubernetes-services",
-        "stages/08-enterprise-qhub",
+        "stages/08-qhub-tf-extensions",
     ]
     if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
         directories.append(f"stages/01-terraform-state/{config['provider']}")
@@ -204,9 +204,9 @@ def render_contents(config: Dict):
                     QHubKubernetesProvider(config),
                 ]
             ),
-            "stages/08-enterprise-qhub/_qhub.tf.json": tf_render_objects(
+            "stages/08-qhub-tf-extensions/_qhub.tf.json": tf_render_objects(
                 [
-                    QHubTerraformState("08-enterprise-qhub", config),
+                    QHubTerraformState("08-qhub-tf-extensions", config),
                     QHubKubernetesProvider(config),
                 ]
             ),
