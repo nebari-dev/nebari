@@ -628,7 +628,7 @@ def check_05_kubernetes_keycloak(stage_outputs, config):
 
 def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=True):
     directory = "stages/06-kubernetes-keycloak-configuration"
-    realm_id = f"qhub-{config['project_name']}"
+    realm_id = "qhub"
 
     stage_outputs[directory] = terraform.deploy(
         directory=directory,
