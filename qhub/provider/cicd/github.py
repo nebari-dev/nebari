@@ -258,6 +258,7 @@ def gen_qhub_ops(config):
 
 def gen_qhub_linter(config):
 
+    env_vars = None
     if os.environ.get("QHUB_GH_BRANCH"):
         env_vars = {"QHUB_GH_BRANCH": os.environ.get("QHUB_GH_BRANCH")}
 
