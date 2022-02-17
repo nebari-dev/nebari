@@ -1,9 +1,19 @@
+resource "azurerm_resource_group" "resource_group" {
+  name     = var.resource_group_name
+  location = var.region
+}
+
+
 module "registry" {
   source              = "./modules/registry"
 
   name                = "${var.name}${var.environment}"
   location            = var.region
-  resource_group_name = "${var.name}-${var.environment}"
+  resource_group_name = azurerm_resource_group.resource_group.name
+
+  depends_on = [
+    azurerm_resource_group.resource_group
+  ]
 }
 
 
@@ -13,8 +23,10 @@ module "kubernetes" {
   name                     = "${var.name}-${var.environment}"
   environment              = var.environment
   location                 = var.region
-  resource_group_name      = "${var.name }-${var.environment}"
-  node_resource_group_name = "${var.name}-${var.environment}-node-resource-group"
+  resource_group_name      = azurerm_resource_group.resource_group.name
+  # Azure requires that a new, non-existent Resource Group is used, as otherwise
+  # the provisioning of the Kubernetes Service will fail.
+  node_resource_group_name = var.node_resource_group_name
   kubernetes_version       = var.kubernetes_version
 
   node_groups = [
@@ -25,5 +37,9 @@ module "kubernetes" {
       min_size      = config.min_nodes
       max_size      = config.max_nodes
     }
+  ]
+
+  depends_on = [
+    azurerm_resource_group.resource_group,
   ]
 }
