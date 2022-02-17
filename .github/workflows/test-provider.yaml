@@ -37,7 +37,7 @@ jobs:
           - gcp
           - local
         cicd:
-          - None
+          - none
           - github-actions
           - gitlab-ci
     steps:
