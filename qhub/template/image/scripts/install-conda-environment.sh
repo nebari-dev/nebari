@@ -50,6 +50,3 @@ fi
 # remove unnecissary files (statis, js.maps)
 find /opt/conda/ -follow -type f -name '*.a' -delete
 find /opt/conda/ -follow -type f -name '*.js.map' -delete
-
-# Fix permissions
-fix-permissions "/opt/conda/envs/${ENV_NAME}" || fix-permissions /opt/conda/bin
