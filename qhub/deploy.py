@@ -296,8 +296,8 @@ def provision_02_infrastructure(stage_outputs, config, check=True):
                 "kubeconfig_filename": os.path.join(
                     tempfile.gettempdir(), "QHUB_KUBECONFIG"
                 ),
-                "resource_group_name" : f'{config["project_name"]}-{config["namespace"]}',
-                "node_resource_group_name" : f'{config["project_name"]}-{config["namespace"]}-node-resource-group',
+                "resource_group_name": f'{config["project_name"]}-{config["namespace"]}',
+                "node_resource_group_name": f'{config["project_name"]}-{config["namespace"]}-node-resource-group',
             },
         )
     elif config["provider"] == "aws":
@@ -558,7 +558,7 @@ def check_ingress_dns(stage_outputs, config, disable_prompt):
 
     attempt = 0
     while not _attempt_dns_lookup(domain_name, ip):
-        sleeptime = 60 * (2 ** attempt)
+        sleeptime = 60 * (2**attempt)
         if not disable_prompt:
             input(
                 f"After attempting to poll the DNS, the record for domain={domain_name} appears not to exist, "

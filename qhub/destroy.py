@@ -178,8 +178,8 @@ def destroy_02_infrastructure(config):
                 "kubeconfig_filename": os.path.join(
                     tempfile.gettempdir(), "QHUB_KUBECONFIG"
                 ),
-                "resource_group_name" : f'{config["project_name"]}-{config["namespace"]}',
-                "node_resource_group_name" : f'{config["project_name"]}-{config["namespace"]}-node-resource-group',
+                "resource_group_name": f'{config["project_name"]}-{config["namespace"]}',
+                "node_resource_group_name": f'{config["project_name"]}-{config["namespace"]}-node-resource-group',
             },
         )
     elif config["provider"] == "aws":
