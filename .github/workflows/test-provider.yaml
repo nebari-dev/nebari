@@ -73,8 +73,8 @@ jobs:
           cat "qhub-config.yaml"
       - name: QHub Render
         run: |
-          qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
-          cp "qhub-config.yaml" "qhub-${{ matrix.provider }}-deployment/qhub-config.yaml"
+          qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
+          cp "qhub-config.yaml" "qhub-${{ matrix.provider }}-${{ matrix.cicd }}-deployment/qhub-config.yaml"
       - name: QHub Render Artifact
         uses: actions/upload-artifact@master
         with:
