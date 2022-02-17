@@ -297,6 +297,8 @@ def provision_02_infrastructure(stage_outputs, config, check=True):
                 "kubeconfig_filename": os.path.join(
                     tempfile.gettempdir(), "QHUB_KUBECONFIG"
                 ),
+                "resource_group_name": f'{config["project_name"]}-{config["namespace"]}',
+                "node_resource_group_name": f'{config["project_name"]}-{config["namespace"]}-node-resource-group',
             },
         )
     elif config["provider"] == "aws":
