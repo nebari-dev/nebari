@@ -22,4 +22,5 @@ def test_schema(setup_fixture):
         auth_provider=auth_provider,
         kubernetes_version=None,
     )
-    assert qhub.schema.verify(config) is None
+
+    qhub.schema.verify(config)

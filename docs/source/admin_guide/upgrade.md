@@ -42,6 +42,10 @@ If you are deploying QHub from your local machine (not using CI/CD) then you wil
 qhub deploy -m qhub-config.yaml
 ```
 
+At this point you may see an error message saying that deployment is prevented due to the `prevent_deploy` setting in your YAML file. This is a safeguard to ensure that you only proceed if you are aware of possible breaking changes in the current upgrade.
+
+For example, we may be aware that you will lose data due to this upgrade, so need to note a specific upgrade process to keep your data safe. Always check the release notes of the release in this case and get in touch with us if you need assistance. For example, you may find that your existing cluster is intentionally deleted so that a new replacement can be deployed instead, in which case your data must be backed up so it can be restored after the upgrade.
+
 ### CI/CD: render and commit to git
 
 For CI/CD (GitHub/GitLab) workflows, then as well as generating the updated `qhub-config.yaml` files as above, you will also need to regenerate the workflow files based on the latest `qhub` version's templates.
