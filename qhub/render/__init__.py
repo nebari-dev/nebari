@@ -16,6 +16,7 @@ from qhub.render.terraform import (
     QHubAWSProvider,
 )
 from qhub.provider.cicd.github import gen_qhub_ops, gen_qhub_linter
+from qhub.provider.cicd.gitlab import gen_gitlab_ci
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
@@ -234,14 +235,13 @@ def gen_cicd(config):
     cicd_provider = config["ci_cd"]["type"]
 
     if cicd_provider == "github-actions":
-        # TODO: create similar schema/models for other GH action workflows
         gha_dir = ".github/workflows/"
         cicd_files[gha_dir + "qhub-ops.yaml"] = gen_qhub_ops(config)
         cicd_files[gha_dir + "qhub-linter.yaml"] = gen_qhub_linter(config)
 
     elif cicd_provider == "gitlab-ci":
-        # TODO: create schema for GitLab-CI
-        pass
+        cicd_files[".gitlab-ci.yaml"] = gen_gitlab_ci(config)
+
     else:
         raise ValueError(
             f"The ci_cd provider, {cicd_provider}, is not supported. Supported providers include: `github-actions`, `gitlab-ci`."

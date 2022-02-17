@@ -169,7 +169,7 @@ class GHA(BaseModel):
     name: str
     on: GHA_on
     env: Optional[Dict[str, str]]
-    jobs: GHA_jobs
+    jobs: List[GHA_jobs]
 
 
 class QhubOps(GHA):
@@ -246,7 +246,7 @@ def gen_qhub_ops(config):
     job1 = GHA_job_id(
         name="qhub", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4, step5]
     )
-    jobs = GHA_jobs(__root__={"build": job1})
+    jobs = [GHA_jobs(__root__={"build": job1})]
 
     return QhubOps(
         name="qhub auto update",
@@ -258,9 +258,12 @@ def gen_qhub_ops(config):
 
 def gen_qhub_linter(config):
 
-    env_vars = None
-    if os.environ.get("QHUB_GH_BRANCH"):
-        env_vars = {"QHUB_GH_BRANCH": os.environ.get("QHUB_GH_BRANCH")}
+    env_vars = {}
+    qhub_gh_branch = os.environ.get("QHUB_GH_BRANCH")
+    if qhub_gh_branch:
+        env_vars["QHUB_GH_BRANCH"] = qhub_gh_branch
+    else:
+        env_vars = None
 
     branch = config["ci_cd"]["branch"]
     qhub_version = config["qhub_version"]
@@ -291,7 +294,7 @@ def gen_qhub_linter(config):
     job1 = GHA_job_id(
         name="qhub", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4]
     )
-    jobs = GHA_jobs(__root__={"qhub-validate": job1})
+    jobs = [GHA_jobs(__root__={"qhub-validate": job1})]
 
     return QhubLinter(
         name="qhub linter",
