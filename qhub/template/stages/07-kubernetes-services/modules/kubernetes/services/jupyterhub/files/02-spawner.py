@@ -32,8 +32,29 @@ if cdsdashboards["enabled"]:
     c.CDSDashboardsConfig.spawn_default_options = False
 
     c.CDSDashboardsConfig.conda_envs = [
-        environment['name'] for _, environment in conda_store_environments.items()
+        environment["name"] for _, environment in conda_store_environments.items()
     ]
+
+    # TODO: make timeouts configurable
+    c.VariableMixin.proxy_ready_timeout = 600
+    c.VariableMixin.proxy_request_timeout = 600
+
+    c.CDSDashboardsConfig.extra_presentation_types = ["panel-serve"]
+    c.VariableMixin.extra_presentation_launchers = {
+        "panel-serve": {
+            "args": [
+                "python3",
+                "{presentation_path}",
+                "{--}port",
+                "{port}",
+                "{--}address",
+                "{origin_host}",
+            ],
+            "debug_args": [],
+            "env": {"PYTHONPATH": "/home/jovyan/{presentation_dirname}"},
+        }
+    }
+
 else:
     c.JupyterHub.allow_named_servers = False
     c.JupyterHub.spawner_class = KubeSpawner
