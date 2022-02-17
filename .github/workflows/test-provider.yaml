@@ -21,7 +21,7 @@ env:
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
 concurrency:
-  group: ${{ github.ref }}
+  group: provider-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

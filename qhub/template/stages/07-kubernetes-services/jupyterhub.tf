@@ -26,6 +26,12 @@ variable "jupyterhub-image" {
   })
 }
 
+variable "jupyterhub-overrides" {
+  description = "Jupyterhub helm chart overrides"
+  type        = list(string)
+  default     = []
+}
+
 variable "jupyterhub-shared-storage" {
   description = "JupyterHub shared storage size [GB]"
   type        = string
@@ -86,6 +92,8 @@ module "jupyterhub" {
   external-url = var.endpoint
   realm_id = var.realm_id
 
+  overrides = var.jupyterhub-overrides
+
   home-pvc = module.jupyterhub-nfs-mount.persistent_volume_claim.name
 
   shared-pvc = module.jupyterhub-nfs-mount.persistent_volume_claim.name
@@ -116,4 +124,7 @@ module "jupyterhub" {
 
   theme = var.jupyterhub-theme
   profiles = var.jupyterlab-profiles
+
+  jupyterhub-logout-redirect-url = var.jupyterhub-logout-redirect-url
+  jupyterhub-hub-extraEnv        = var.jupyterhub-hub-extraEnv
 }

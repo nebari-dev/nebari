@@ -291,6 +291,7 @@ def render_config(
         qhub_domain = input("Provide domain: ")
     config["domain"] = qhub_domain
 
+    # In qhub_version only use major.minor.patch version - drop any pre/post/dev suffixes
     config["qhub_version"] = __version__
 
     # Generate default password for Keycloak root user and also example-user if using password auth

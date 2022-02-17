@@ -3,9 +3,9 @@ resource "keycloak_openid_client" "keycloak_ext_client" {
   count         = var.oauth2client ? 1 : 0
   realm_id      = var.qhub-realm-id
   client_id     = "${var.name}-client"
-  client_secret = var.keycloak-client-password
+  client_secret = random_password.qhub-ext-client[count.index].result
 
-  name    = "FastAPI Client"
+  name    = "${var.name} Client"
   enabled = true
 
   access_type           = "CONFIDENTIAL"
@@ -14,6 +14,12 @@ resource "keycloak_openid_client" "keycloak_ext_client" {
   valid_redirect_uris = [
     "https://${var.external-url}/${var.urlslug}/oauth_callback"
   ]
+}
+
+resource "random_password" "qhub-ext-client" {
+  count = var.oauth2client ? 1 : 0
+  length  = 32
+  special = false
 }
 
 resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper" {

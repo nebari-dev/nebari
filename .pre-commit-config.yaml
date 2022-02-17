@@ -10,11 +10,12 @@ repos:
     rev: 20.8b1
     hooks:
     -   id: black
+        exclude: '/qhub/template/'
   - repo: https://github.com/pycqa/flake8
     rev: 3.8.4
     hooks:
     -   id: flake8
-        exclude: 'qhub/template/stages/07-kubernetes-services/modules/kubernetes/services/conda-store/config/conda_store_config.py'
+        exclude: 'qhub/template'
         args: [
           "--builtins=c"
         ]

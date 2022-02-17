@@ -32,3 +32,13 @@ variable "kubeconfig_filename" {
   type        = string
   default     = null
 }
+
+variable "resource_group_name" {
+  description = "Specifies the Resource Group where the Managed Kubernetes Cluster should exist"
+  type        = string
+}
+
+variable "node_resource_group_name" {
+  description = "The name of the Resource Group where the Kubernetes Nodes should exist"
+  type        = string
+}

@@ -242,43 +242,20 @@ security:
 
 ### User and group management
 
-It's still possible to specify `users` and `groups` in the YAML file - in older versions of QHub, all users had to be specified in this way.
+Groups and users of QHub are all defined in Keycloak. As above, access Keycloak as the `root` user, noting that the `root` user is not actually a QHub user - you cannot access the main features of QHub such as JupyterLab with at user. It is only for Keycloak management.
 
-If specifying users/groups in this way, you can also manually add more users/groups in Keycloak. However, be aware that if users/groups were initially created based on entries in the YAML file, those users/groups will be destroyed if `qhub deploy` is ever run without those users/groups in the file. They may also be recreated after you delete them manually in Keycloak.
-
-Any user is assigned a `primary_group` and optionally
-any number of `secondary_groups`.
-
-```yaml
-security:
-  users:
-    example-user:
-      primary_group: users
-      secondary_groups:
-        - billing
-      password: plaintextpasswd
-    dharhas:
-      primary_group: admin
-  groups:
-    users:
-    admin:
-    billing:
-```
-
-* The `primary_group` is the group name assigned to files that are
-written for the user.
-* `groups` are a mapping of group name to an empty map (no entries are required within that map any longer).
+* `security.shared_users_group` is an optional key (default False) which
+  optionally adds all users to a default group named `users`. Only new
+  users created after this option is enabled will be added to the
+  `users` group. You will have to manually add existing users to the
+  `users` group if you chose to enable this option later.
 
 #### Admin and Users Group
 
-The admin group has special significance. If a user's `primary_group`
-is admin they will be able to access the jupyterhub admin page. The
-admin page allows a user to stop user's servers and launch a given
+The admin group has special significance in QHub, and will always be automatically created in Keycloak in every deployment. If a user is a member of the Keycloak `admin` group they will be able to access the jupyterhub admin page. The admin page allows a user to stop user's servers and launch a given
 user's server and impersonate them.
 
-All users must be a member of the `users` group.
-
-Both `admin` and `users` groups will be created even if not specified in the YAML file.
+If `security.shared_users_group` is `true` then all users will become members of the `users` group.
 
 ## Provider Infrastructure
 
@@ -788,6 +765,22 @@ QHub will refuse to deploy if it doesn't contain the same version as that of the
 
 Typically, you can upgrade the qhub-config.yaml file itself using the [`qhub upgrade` command](../admin_guide/upgrade.md). This will update image numbers, plus updating qhub_version to match the installed version of `qhub`, as well as any other bespoke changes required.
 
+## JupyterHub
+
+JupyterHub uses the [zero to jupyterhub helm
+chart](https://github.com/jupyterhub/zero-to-jupyterhub-k8s/). This
+chart has many options that are not configured in the QHub default
+installation. You can override specific values in the
+[values.yaml](https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/main/jupyterhub/values.yaml). `jupyterhub.overrides`
+is optional.
+
+```yaml
+jupyterhub:
+  overrides:
+    cull:
+      users: true
+```
+
 # Full configuration example
 
 ```yaml
@@ -815,25 +808,7 @@ security:
       client_id: CLIENT_ID
       client_secret: CLIENT_SECRET
 
-  users:
-    example-user:
-      primary_group: users
-      secondary_groups:
-        - billing
-    dharhas:
-      primary_group: admin
-    tonyfast:
-      primary_group: admin
-    prasunanand:
-      primary_group: admin
-    aktech:
-      primary_group: users
-      secondary_groups:
-        - admin
-  groups:
-    users:
-    admin:
-    billing:
+  shared_users_group: true
 
 digital_ocean:
   region: nyc3
