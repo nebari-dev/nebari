@@ -349,3 +349,15 @@ def deep_merge(*args):
         return [*d1, *d2]
     else:  # if they don't match use left one
         return d1
+
+
+def pip_install_qhub(qhub_version: str) -> str:
+    qhub_gh_branch = os.environ.get("QHUB_GH_BRANCH")
+    pip_install = f"pip install qhub=={qhub_version}"
+    # dev branches
+    if len(qhub_version.split(".")) > 3 and qhub_gh_branch:
+        pip_install = (
+            f"pip install https://github.com/Quansight/qhub.git@{qhub_gh_branch}"
+        )
+
+    return pip_install

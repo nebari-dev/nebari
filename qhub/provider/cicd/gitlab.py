@@ -1,7 +1,7 @@
-import os
 from typing import Optional, Dict, List, Union
 
 from pydantic import BaseModel, Field
+from qhub.utils import pip_install_qhub
 
 
 class GLCI_extras(BaseModel):
@@ -45,20 +45,19 @@ def gen_gitlab_ci(config):
     branch = config["ci_cd"]["branch"]
     before_script = config["ci_cd"].get("before_script")
     after_script = config["ci_cd"].get("after_script")
-    pip_install_qhub = f"pip install qhub=={config['qhub_version']}"
-    qhub_gh_branch = os.environ.get("QHUB_GH_BRANCH")
+    pip_install = pip_install_qhub(config["qhub_version"])
 
     render_vars = {
         "COMMIT_MSG": "qhub-config.yaml automated commit: {{ '$CI_COMMIT_SHA' }}",
     }
 
-    if qhub_gh_branch:
-        render_vars["QHUB_GH_BRANCH"] = qhub_gh_branch
-        pip_install_qhub = f"pip install https://github.com/Quansight/qhub/archive/{qhub_gh_branch}.zip"
+    # if qhub_gh_branch:
+    #     render_vars["QHUB_GH_BRANCH"] = qhub_gh_branch
+    #     pip_install_qhub = f"pip install https://github.com/Quansight/qhub/archive/{qhub_gh_branch}.zip"
 
     script = [
         f"git checkout {branch}",
-        f"{pip_install_qhub}",
+        f"{pip_install}",
         "qhub deploy --config qhub-config.yaml --disable-prompt --skip-remote-state-provision",
         "git config user.email 'qhub@quansight.com'",
         "git config user.name 'gitlab ci'",

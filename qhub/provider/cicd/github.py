@@ -8,6 +8,8 @@ from pydantic import BaseModel, Field
 import requests
 from nacl import encoding, public
 
+from qhub.utils import pip_install_qhub
+
 
 def github_request(url, method="GET", json=None):
     GITHUB_BASE_URL = "https://api.github.com/"
@@ -206,7 +208,7 @@ def setup_python_step():
 
 
 def install_qhub_step(qhub_version):
-    return GHA_job_step(name="Install QHub", run=f"pip install qhub=={qhub_version}")
+    return GHA_job_step(name="Install QHub", run=pip_install_qhub(qhub_version))
 
 
 def gen_qhub_ops(config):

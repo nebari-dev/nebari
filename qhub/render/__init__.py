@@ -231,6 +231,14 @@ def render_contents(config: Dict):
 
 
 def gen_cicd(config):
+    """
+    Use cicd schema to generate workflow files based on the
+    `ci_cd` key in the `config`.
+
+    For more detail on schema:
+    GiHub-Actions - qhub/providers/cicd/github.py
+    GitLab-CI - qhub/providers/cicd/gitlab.py
+    """
     cicd_files = {}
     cicd_provider = config["ci_cd"]["type"]
 
