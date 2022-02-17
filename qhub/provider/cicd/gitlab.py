@@ -40,7 +40,7 @@ class GLCI(BaseModel):
 PYTHON_VERSION = 3.9
 
 
-def gen_qhub_ops(config):
+def gen_gitlab_ci(config):
 
     branch = config["ci_cd"]["branch"]
     before_script = config["ci_cd"].get("before_script")
