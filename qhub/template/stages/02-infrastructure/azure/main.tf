@@ -10,10 +10,6 @@ module "registry" {
   name                = "${var.name}${var.environment}"
   location            = var.region
   resource_group_name = azurerm_resource_group.resource_group.name
-
-  depends_on = [
-    azurerm_resource_group.resource_group
-  ]
 }
 
 
@@ -37,9 +33,5 @@ module "kubernetes" {
       min_size      = config.min_nodes
       max_size      = config.max_nodes
     }
-  ]
-
-  depends_on = [
-    azurerm_resource_group.resource_group,
   ]
 }
