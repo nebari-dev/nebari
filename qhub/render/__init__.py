@@ -15,6 +15,8 @@ from qhub.render.terraform import (
     QHubGCPProvider,
     QHubAWSProvider,
 )
+from qhub.provider.cicd.github import gen_qhub_ops, gen_qhub_linter
+from qhub.provider.cicd.gitlab import gen_gitlab_ci
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
@@ -212,8 +214,48 @@ def render_contents(config: Dict):
             ),
         }
     )
+    if config.get("ci_cd"):
+        for fn, workflow in gen_cicd(config).items():
+            contents.update(
+                {
+                    fn: workflow.json(
+                        indent=2,
+                        by_alias=True,
+                        exclude_unset=True,
+                        exclude_defaults=True,
+                    )
+                }
+            )
 
     return contents
+
+
+def gen_cicd(config):
+    """
+    Use cicd schema to generate workflow files based on the
+    `ci_cd` key in the `config`.
+
+    For more detail on schema:
+    GiHub-Actions - qhub/providers/cicd/github.py
+    GitLab-CI - qhub/providers/cicd/gitlab.py
+    """
+    cicd_files = {}
+    cicd_provider = config["ci_cd"]["type"]
+
+    if cicd_provider == "github-actions":
+        gha_dir = ".github/workflows/"
+        cicd_files[gha_dir + "qhub-ops.yaml"] = gen_qhub_ops(config)
+        cicd_files[gha_dir + "qhub-linter.yaml"] = gen_qhub_linter(config)
+
+    elif cicd_provider == "gitlab-ci":
+        cicd_files[".gitlab-ci.yaml"] = gen_gitlab_ci(config)
+
+    else:
+        raise ValueError(
+            f"The ci_cd provider, {cicd_provider}, is not supported. Supported providers include: `github-actions`, `gitlab-ci`."
+        )
+
+    return cicd_files
 
 
 def inspect_files(
