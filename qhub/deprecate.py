@@ -1,4 +1,4 @@
-DEPRICATED_FILE_PATHS = [
+DEPRECATED_FILE_PATHS = [
     # v0.4 removed in PR #1003 move to stages
     "infrastructure",
     "terraform-state",
