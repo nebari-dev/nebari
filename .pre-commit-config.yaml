@@ -3,17 +3,22 @@ repos:
     rev: v2.3.0
     hooks:
     -   id: check-yaml
-        exclude: 'qhub/template/\{\{ cookiecutter\.repo_directory \}\}/(\.github/.*|infrastructure/jupyterhub.yaml)'
+        exclude: 'qhub/template/(\.github/.*|infrastructure/jupyterhub.yaml|stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*))'
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
   - repo: https://github.com/psf/black
     rev: 20.8b1
     hooks:
     -   id: black
+        exclude: '/qhub/template/'
   - repo: https://github.com/pycqa/flake8
     rev: 3.8.4
     hooks:
     -   id: flake8
+        exclude: 'qhub/template'
+        args: [
+          "--builtins=c"
+        ]
   - repo: https://github.com/hadolint/hadolint.git
     rev: v2.3.0
     hooks:

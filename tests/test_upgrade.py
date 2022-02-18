@@ -1,7 +1,9 @@
-import pytest
 from pathlib import Path
 
-from qhub.upgrade import do_upgrade, __version__, load_yaml, verify
+import pytest
+
+from qhub.upgrade import do_upgrade, load_yaml, verify
+from qhub.version import __version__, rounded_ver_parse
 
 
 @pytest.fixture
@@ -48,7 +50,7 @@ def test_upgrade(
 
     assert not Path(tmp_path, "qhub-users-import.json").exists()
 
-    # Do the updgrade
+    # Do the upgrade
     if not expect_upgrade_error:
         do_upgrade(
             tmp_qhub_config, attempt_fixes
@@ -70,14 +72,16 @@ def test_upgrade(
     assert "users" not in config["security"]
     assert "groups" not in config["security"]
 
+    __rounded_version__ = ".".join([str(c) for c in rounded_ver_parse(__version__)])
+
     # Check image versions have been bumped up
     assert (
         config["default_images"]["jupyterhub"]
-        == f"quansight/qhub-jupyterhub:v{__version__}"
+        == f"quansight/qhub-jupyterhub:v{__rounded_version__}"
     )
     assert (
         config["profiles"]["jupyterlab"][0]["kubespawner_override"]["image"]
-        == f"quansight/qhub-jupyterlab:v{__version__}"
+        == f"quansight/qhub-jupyterlab:v{__rounded_version__}"
     )
 
     assert (

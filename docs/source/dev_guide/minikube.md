@@ -102,7 +102,6 @@ docker pull quansight/qhub-jupyterhub:v0.x.x
 docker pull quansight/qhub-jupyterlab:v0.x.x
 docker pull quansight/qhub-dask-worker:v0.x.x
 docker pull quansight/qhub-dask-gateway:v0.x.x
-docker pull quansight/qhub-conda-store:v0.x.x
 ```
 
 Replacing `v0.x.x` with the current version that's listed. Note this may take several minutes. Once the process is complete, the user can copy them to the Minikube cache.
@@ -112,7 +111,6 @@ minikube image load quansight/qhub-jupyterhub:v0.x.x
 minikube image load quansight/qhub-jupyterlab:v0.x.x
 minikube image load quansight/qhub-dask-worker:v0.x.x
 minikube image load quansight/qhub-dask-gateway:v0.x.x
-minikube image load quansight/qhub-conda-store:v0.x.x
 ```
 
 Again, adding the correct version. With this completed local Minikube deployment no longer requires pulling the preceding docker images.
@@ -200,29 +198,6 @@ cd data
 Then, initialize the configuration file `qhub-config.yaml` with:
 ```shell
 python -m qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password --terraform-state=local
-```
-## Generate user password
-For each user on the `qhub-config.yaml` file needs a password.
-A random password is auto generated for the user `example-user` when
-the auth provider `password` is run, the value is then printed to the standard output (stdout).
-
-In case you would like to change the generated password (optional), You can use [bcrypt](https://pypi.org/project/bcrypt/) to generate your own salted password by using the following _Python command_ script:
-
-```bash
-python -c "import bcrypt; print(bcrypt.hashpw(b'admin', bcrypt.gensalt()).decode('utf-8'))"
-```
-
-`<password>` can be changed to any desired value. This requires the Python package `bcrypt` to be installed in your virtual environment. The password is added to the `qhub-config.yaml` in the users section.
-
-```yaml
-  users:
-    example-user:
-      uid: 1000
-      ...
-      password: '$2b$12$lAk2Bhw8mu0QJkSecPiABOX2m87RF8N7vv7rBw9JksOgewI2thUuO'
-      ...
-      primary_group: users
-
 ```
 
 ## Deploy and render the infrastructure

@@ -1,3 +1,4 @@
+from typing import Dict, List
 import pathlib
 import subprocess
 import signal
@@ -7,6 +8,7 @@ import threading
 import os
 import re
 import contextlib
+import functools
 from ruamel.yaml import YAML
 
 from qhub.provider.cloud import (
@@ -267,3 +269,95 @@ def set_kubernetes_version(
             cloud_config["kubernetes_version"] = k8s_versions[0]
 
     return _check_and_set_kubernetes_version()
+
+
+@contextlib.contextmanager
+def modified_environ(*remove: List[str], **update: Dict[str, str]):
+    """
+    https://stackoverflow.com/questions/2059482/python-temporarily-modify-the-current-processs-environment/51754362
+    Temporarily updates the ``os.environ`` dictionary in-place.
+
+    The ``os.environ`` dictionary is updated in-place so that the modification
+    is sure to work in all situations.
+
+    :param remove: Environment variables to remove.
+    :param update: Dictionary of environment variables and values to add/update.
+    """
+    env = os.environ
+    update = update or {}
+    remove = remove or []
+
+    # List of environment variables being updated or removed.
+    stomped = (set(update.keys()) | set(remove)) & set(env.keys())
+    # Environment variables and values to restore on exit.
+    update_after = {k: env[k] for k in stomped}
+    # Environment variables and values to remove on exit.
+    remove_after = frozenset(k for k in update if k not in env)
+
+    try:
+        env.update(update)
+        [env.pop(k, None) for k in remove]
+        yield
+    finally:
+        env.update(update_after)
+        [env.pop(k) for k in remove_after]
+
+
+def split_docker_image_name(image_name):
+    name, tag = image_name.split(":")
+    return {"name": name, "tag": tag}
+
+
+def deep_merge(*args):
+    """Deep merge multiple dictionaries.
+
+    >>> value_1 = {
+    'a': [1, 2],
+    'b': {'c': 1, 'z': [5, 6]},
+    'e': {'f': {'g': {}}},
+    'm': 1,
+    }
+
+    >>> value_2 = {
+        'a': [3, 4],
+        'b': {'d': 2, 'z': [7]},
+        'e': {'f': {'h': 1}},
+        'm': [1],
+    }
+
+    >>> print(deep_merge(value_1, value_2))
+    {'m': 1, 'e': {'f': {'g': {}, 'h': 1}}, 'b': {'d': 2, 'c': 1, 'z': [5, 6, 7]}, 'a': [1, 2, 3,  4]}
+    """
+    if len(args) == 1:
+        return args[0]
+    elif len(args) > 2:
+        return functools.reduce(deep_merge, args, {})
+    else:  # length 2
+        d1, d2 = args
+
+    if isinstance(d1, dict) and isinstance(d2, dict):
+        d3 = {}
+        for key in d1.keys() | d2.keys():
+            if key in d1 and key in d2:
+                d3[key] = deep_merge(d1[key], d2[key])
+            elif key in d1:
+                d3[key] = d1[key]
+            elif key in d2:
+                d3[key] = d2[key]
+        return d3
+    elif isinstance(d1, list) and isinstance(d2, list):
+        return [*d1, *d2]
+    else:  # if they don't match use left one
+        return d1
+
+
+def pip_install_qhub(qhub_version: str) -> str:
+    qhub_gh_branch = os.environ.get("QHUB_GH_BRANCH")
+    pip_install = f"pip install qhub=={qhub_version}"
+    # dev branches
+    if len(qhub_version.split(".")) > 3 and qhub_gh_branch:
+        pip_install = (
+            f"pip install https://github.com/Quansight/qhub.git@{qhub_gh_branch}"
+        )
+
+    return pip_install

@@ -1,11 +1,10 @@
 # Dashboards
 
-QHub supports user's creating dashboards that can be shared with other
+QHub encourages users to create dashboards that can be shared with other
 users and groups via [ContainDS
 Dashboards](https://cdsdashboards.readthedocs.io/en/stable/). Currently
-this solution supports Panel, Bokeh, Voila, Streamlit,
-and Plotly. The solution is general enough to support any webapp. For
-a more detailed guide on using CDSDashboards see the
+this dashboarding solution supports Panel, Bokeh, Voila, Streamlit,
+and Plotly. The solution is general purpose enough to support any web app. For a more detailed guide on using CDSDashboards, see the
 [documentation](https://cdsdashboards.readthedocs.io/en/stable/index.html).
 
 ![qhub dashboard notebook](../images/qhub_dashboard_notebook.png)

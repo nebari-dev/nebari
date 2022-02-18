@@ -11,6 +11,11 @@ def create_render_subcommand(subparser):
     subparser.add_argument(
         "-c", "--config", help="qhub configuration yaml file", required=True
     )
+    subparser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="simulate rendering files without actually writing or updating any files",
+    )
     subparser.set_defaults(func=handle_render)
 
 
@@ -25,4 +30,4 @@ def handle_render(args):
 
     verify(config)
 
-    render_template(args.output, args.config, force=True)
+    render_template(args.output, args.config, force=True, dry_run=args.dry_run)

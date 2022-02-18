@@ -10,16 +10,23 @@ on:
     paths-ignore:
       - "docs/**"
       - "*.md"
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-general:
     name: 'Test Package'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9]
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v2
         with:

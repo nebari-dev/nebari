@@ -38,7 +38,7 @@ BASE_CONFIGURATION = {
         "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
         "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         "dask_gateway": f"quansight/qhub-dask-gateway:{qhub_image_tag}",
-        "conda_store": f"quansight/qhub-conda-store:{qhub_image_tag}",
+        "conda_store": "quansight/conda-store-server:v0.3.9",
     },
     "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
     "theme": {
@@ -291,6 +291,7 @@ def render_config(
         qhub_domain = input("Provide domain: ")
     config["domain"] = qhub_domain
 
+    # In qhub_version only use major.minor.patch version - drop any pre/post/dev suffixes
     config["qhub_version"] = __version__
 
     # Generate default password for Keycloak root user and also example-user if using password auth

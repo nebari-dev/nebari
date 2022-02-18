@@ -2,21 +2,9 @@
 
 ## Add users to QHub
 
-One of the first things you might want to do is to **add new users** to your QHub. Any type of supported authorization from auth0 can be used as a username. Below is an example configuration of 2 users:
+One of the first things you might want to do is to **add new users** to your QHub.
 
-```yaml
-     joeuser@example:
-         uid: 1000000
-         primary_group: users
-         secondary_groups:
-             - billing
-             - admin
-     janeuser@example.com:
-         uid: 1000001
-         primary_group: users
-```
-
-As seen above, each username has a unique `uid` and a `primary_group`. Optional `secondary_groups` may also be set for each user. This can be done through the Keycloak web console. See [Adding a QHub user](./login.md#adding-a-qhub-user) for details.
+This can be done through the Keycloak web console. See [Adding a QHub user](./login.md#adding-a-qhub-user) for details.
 
 ## Upgrades and dependencies management
 
@@ -48,7 +36,7 @@ log files from the user instance in the `/home/conda/store/.logs` directory to t
 
 ## Copy Files into Users' Home Folders
 
-Within their own JupyterLab sessions, admins can add files to a folder called `shared/.userskel`. Any files in there will be copied to a user's own home folder whenever they start a new JupyterLab session. Existing files with the same name will not be overwritten. Admin users are defined as members of the admin group as specified in your qhub-config.yaml file.
+Within their own JupyterLab sessions, admins can add files to a folder called `shared/.userskel`. Any files in there will be copied to a user's own home folder whenever they start a new JupyterLab session. Existing files with the same name will not be overwritten. Admin users are defined as members of the admin group as specified in your `qhub-config.yaml` file.
 
 ## Monitor your QHub deployment
 
