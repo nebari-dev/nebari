@@ -1,9 +1,8 @@
 ---
 name: "Feature request \U0001F680"
 about: Have a suggestion on something we can to better? Tell us!
-title: "[enhancement]"
-labels: enhancement
-assignees: ''
+title: "[ENH] - <title>"
+labels: ["type: enhancement"]
 
 ---
 

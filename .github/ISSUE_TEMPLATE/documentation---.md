@@ -1,9 +1,8 @@
 ---
 name: "Documentation \U0001F516"
-about: Isses and feedback related to the docs.
-title: "[documentation]"
-labels: documentation
-assignees: ''
+about: Issues and feedback related to the docs.
+title: "[DOC] - <title>"
+labels: ["type: documentation"]
 
 ---
 

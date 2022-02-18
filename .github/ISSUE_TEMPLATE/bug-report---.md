@@ -1,9 +1,8 @@
 ---
 name: "Bug report \U0001F41B"
 about: "Found a bug? Help us make it into a \U0001F98B"
-title: "[bug]"
-labels: bug
-assignees: ''
+title: "[BUG] - <title>"
+labels: ["type: bug 🐛"]
 
 ---
 
