@@ -91,8 +91,8 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
             "__pycache__",
         ],
         deleted_paths=[
-            'infrastructure',
-            'terraform-state',
+            "infrastructure",
+            "terraform-state",
         ],
         contents=contents,
     )
@@ -133,7 +133,9 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
 
             # be extra cautious that deleted path is within output_directory
             if not abs_path.startswith(str(output_directory)):
-                raise Exception(f'[ERROR] SHOULD NOT HAPPEN filename was about to be deleted but path={abs_path} is outside of output_directory')
+                raise Exception(
+                    f"[ERROR] SHOULD NOT HAPPEN filename was about to be deleted but path={abs_path} is outside of output_directory"
+                )
 
             if os.path.isfile(abs_path):
                 os.remove(abs_path)
