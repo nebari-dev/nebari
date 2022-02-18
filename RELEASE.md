@@ -2,6 +2,7 @@
 
 > Contains description of QHub releases.
 ---
+
 ## To create a new release:
 
 1. Increment the version number in `qhub/VERSION`
@@ -15,6 +16,8 @@
 ### Feature changes and enhancements
 
 ### Bug fixes
+
+---
 
 ## Release 0.3.13 - 10/13/2021
 
@@ -42,6 +45,8 @@
 - Update `remove_existing_renders` to only delete QHub related files/directories ([#800](https://github.com/Quansight/qhub/pull/800))
 - Reduce number of AWS subnets down to 4 to increase the number of available nodes by a factor of 4 ([#839](https://github.com/Quansight/qhub/pull/839))
 
+---
+
 ## Release 0.3.11 - 05/07/2021
 
 ### Breaking changes
@@ -54,6 +59,8 @@
 
  - removing default values from pydantic schema which caused invalid yaml files to unexpectedly pass validation
  - make kubespawner_override.environment overridable (prior changes were overwritten)
+
+---
 
 ## Release 0.3.10 - 05/06/2021
 
@@ -75,6 +82,8 @@
 
  - terraform formatting in cookiecutter for enabling GPUs on GCP
 
+---
+
 ## Release 0.3.8 - 05/05/2021
 
 ### Breaking changes
@@ -89,6 +98,8 @@
  - dask-gateway exposed by default now properly
  - typo in cookiecutter for enabling GPUs on GCP
 
+---
+
 ## Release 0.3.7 - 04/30/2021
 
 ### Breaking changes
@@ -100,6 +111,8 @@
 ### Bug fixes
 
  - `jhsingle-native-proxy` added to the base jupyterlab image
+
+---
 
 ## Release 0.3.6 - 04/29/2021
 
@@ -122,6 +135,8 @@
  - fixed gitlab-ci before_script and after_script
  - fixed jovyan -> qhub_user home directory path issue with dashboards
 
+---
+
 ## Release 0.3.5 - 04/28/2021
 
 ### Breaking changes
@@ -136,6 +151,8 @@
 
 ### Bug fixes
 
+---
+
 ## Release 0.3.4 - 04/27/2021
 
 ### Breaking changes
@@ -145,6 +162,8 @@
 ### Bug fixes
 
  - remaining issues with ci_cd branch not being fully changed
+
+---
 
 ## Release 0.3.3 - 04/27/2021
 
@@ -162,12 +181,16 @@
 
 ### Breaking changes
 
+---
+
 ## Release 0.3.2 - 04/20/2021
 
 ### Bug fixes
 
  - prevent gitlab-ci from freezing on gitlab deployment
  - not all branches were configured via the `branch` option in `ci_cd`
+
+---
 
 ## Release 0.3.1 - 04/20/2021
 
@@ -181,6 +204,8 @@
 
 ### Bug fixes
  - typo in `authenticator_class` for custom authentication
+
+---
 
 ## Release 0.3.0 - 04/14/2021
 
@@ -256,4 +281,5 @@
 * Removed the registry for DigitalOcean.
 
 ## Thank you for your contributions!
+
 > [Brian Larsen](https://github.com/brl0), [Rajat Goyal](https://github.com/RajatGoyal), [Prasun Anand](https://github.com/prasunanand), and  [Rich Signell](https://github.com/rsignell-usgs) and [Josef Kellndorfer](https://github.com/jkellndorfer) for the insightful discussions.
