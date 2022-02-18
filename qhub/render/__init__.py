@@ -9,6 +9,7 @@ import hashlib
 from ruamel.yaml import YAML
 
 from qhub.provider.terraform import tf_render_objects
+from qhub.depricate import DEPRICATED_FILE_PATHS
 from qhub.render.terraform import (
     QHubKubernetesProvider,
     QHubTerraformState,
@@ -90,10 +91,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
             ".terraform",
             "__pycache__",
         ],
-        deleted_paths=[
-            "infrastructure",
-            "terraform-state",
-        ],
+        deleted_paths=DEPRICATED_FILE_PATHS,
         contents=contents,
     )
 
