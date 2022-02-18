@@ -5,7 +5,7 @@ from abc import ABC
 import pydantic
 from pydantic import validator, root_validator
 from qhub.utils import namestr_regex
-from .version import __version__
+from .version import rounded_ver_parse, __version__
 
 
 class CertificateEnum(str, enum.Enum):
@@ -100,12 +100,6 @@ class TerraformState(Base):
     config: typing.Optional[typing.Dict[str, str]]
 
 
-class TerraformModules(Base):
-    # No longer used, so ignored, but could still be in qhub-config.yaml
-    repository: str
-    rev: str
-
-
 # ============ Certificate =============
 
 
@@ -197,6 +191,7 @@ class GitHubAuthentication(Authentication):
 class Keycloak(Base):
     initial_root_password: typing.Optional[str]
     overrides: typing.Optional[typing.Dict]
+    realm_display_name: typing.Optional[str]
 
 
 # ============== Security ================
@@ -204,6 +199,7 @@ class Keycloak(Base):
 
 class Security(Base):
     authentication: Authentication
+    shared_users_group: typing.Optional[bool]
     keycloak: typing.Optional[Keycloak]
 
 
@@ -350,7 +346,8 @@ class CDSDashboards(Base):
 
 
 class QHubExtensionEnv(Base):
-    code: str
+    name: str
+    value: str
 
 
 class QHubExtension(Base):
@@ -359,9 +356,11 @@ class QHubExtension(Base):
     urlslug: str
     private: bool = False
     oauth2client: bool = False
+    keycloakadmin: bool = False
+    jwt: bool = False
     qhubconfigyaml: bool = False
-    envs: typing.Optional[typing.List[QHubExtensionEnv]]
     logout: typing.Optional[str]
+    envs: typing.Optional[typing.List[QHubExtensionEnv]]
 
 
 # ======== External Container Registry ========
@@ -414,9 +413,6 @@ class Main(Base):
     ci_cd: typing.Optional[CICD]
     domain: str
     terraform_state: typing.Optional[TerraformState]
-    terraform_modules: typing.Optional[
-        TerraformModules
-    ]  # No longer used, so ignored, but could still be in qhub-config.yaml
     certificate: Certificate
     helm_extensions: typing.Optional[typing.List[HelmExtension]]
     prefect: typing.Optional[Prefect]
@@ -435,23 +431,41 @@ class Main(Base):
     environments: typing.Dict[str, CondaEnvironment]
     monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
-    extensions: typing.Optional[typing.List[QHubExtension]]
+    tf_extensions: typing.Optional[typing.List[QHubExtension]]
     jupyterhub: typing.Optional[JupyterHub]
+    prevent_deploy: bool = (
+        False  # Optional, but will be given default value if not present
+    )
 
+    # If the qhub_version in the schema is old
+    # we must tell the user to first run qhub upgrade
     @validator("qhub_version", pre=True, always=True)
     def check_default(cls, v):
         """
         Always called even if qhub_version is not supplied at all (so defaults to ''). That way we can give a more helpful error message.
         """
-        if v != __version__:
+        if not cls.is_version_accepted(v):
             if v == "":
                 v = "not supplied"
             raise ValueError(
-                f"qhub_version in the config file must equal {__version__} to be processed by this version of qhub (your value is {v})."
+                f"qhub_version in the config file must be equivalent to {__version__} to be processed by this version of qhub (your config file version is {v})."
                 " Install a different version of qhub or run qhub upgrade to ensure your config file is compatible."
             )
         return v
 
+    @classmethod
+    def is_version_accepted(cls, v):
+        return v != "" and rounded_ver_parse(v) == rounded_ver_parse(__version__)
+
 
 def verify(config):
-    Main(**config)
+    return Main(**config)
+
+
+def is_version_accepted(v):
+    """
+    Given a version string, return boolean indicating whether
+    qhub_version in the qhub-config.yaml would be acceptable
+    for deployment with the current QHub package.
+    """
+    return Main.is_version_accepted(v)

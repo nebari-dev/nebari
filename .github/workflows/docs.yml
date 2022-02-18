@@ -11,6 +11,10 @@ on:
     paths:
       - '**.md'
 
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-all-files:
     runs-on: ubuntu-latest

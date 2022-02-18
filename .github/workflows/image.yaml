@@ -8,7 +8,7 @@ on:
 
   push:
     paths:
-      - "qhub/template/{{ cookiecutter.repo_directory }}/image/**"
+      - "qhub/template/image/**"
       - ".github/workflows/image.yaml"
 
     branches: # Only on paths above
@@ -16,6 +16,10 @@ on:
 
     tags: # Always, regardless of paths above
       - '*'
+
+concurrency:
+  group: image-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   jupyterlab:
@@ -25,12 +29,9 @@ jobs:
       matrix:
         dockerfile:
           - jupyterlab
-          - jupyterlab-centos
           - jupyterhub
           - dask-worker
-          - dask-worker-centos
           - dask-gateway
-          - conda-store
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
@@ -45,6 +46,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
@@ -52,6 +54,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Login to Quay Container Registry
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v1
         with:
           registry: quay.io
@@ -71,21 +74,29 @@ jobs:
             type=ref,event=tag
             type=sha
 
+      - name: Add symlink to cookiecutter dir and tree
+        run: |
+          cd ./qhub/template
+          sudo apt-get install tree
+          tree ./image
+
       - name: Build docker
         uses: docker/build-push-action@v2
         with:
-          context: "./qhub/template/{{ cookiecutter.repo_directory }}/image"
-          file: "./qhub/template/{{ cookiecutter.repo_directory }}/image/Dockerfile.${{ matrix.dockerfile }}"
+          context: "./qhub/template/image"
+          file: "./qhub/template/image/Dockerfile.${{ matrix.dockerfile }}"
           tags: |
             ${{ steps.meta.outputs.tags }}
             ghcr.io/${{ steps.meta.outputs.tags }}
             quay.io/${{ steps.meta.outputs.tags }}
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Lint Dockerfiles
         uses: jbergstroem/hadolint-gh-action@v1
         with:
-          dockerfile: ./qhub/template/\{\{\ cookiecutter.repo_directory\ \}\}/image/Dockerfile.${{ matrix.dockerfile }}
+          dockerfile: ./qhub/template/image/Dockerfile.${{ matrix.dockerfile }}
           output_format: tty
           error_level: 0

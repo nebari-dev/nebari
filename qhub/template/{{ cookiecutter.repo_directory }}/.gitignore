@@ -1,8 +1,0 @@
-# ignore terraform state
-.terraform
-terraform.tfstate
-terraform.tfstate.backup
-.terraform.tfstate.lock.info
-
-# python
-__pycache__
