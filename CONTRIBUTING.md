@@ -77,19 +77,19 @@ Never made an open-source contribution before? Wondering how contributions work 
 1. Go to the [QHub repository][QHub-repo] and click the `fork` button on the top-right corner to create your own copy of the project.
 2. Clone the project to your local computer:
 
-   "`bash
+   ```bash
    git clone https://github.com/your-username/QHub.git
    ```
 
 3. Change into the directory:
 
-   "`bash
+   ```bash
    cd Qhub
    ```
 
 4. Add the upstream repository:
 
-   "`bash
+   ```bash
    git remote add upstream https://github.com/Quansight/QHub.git
    ```
 
@@ -103,9 +103,9 @@ Now using the command `git remote -v` will show two remote repositories:
 1. Find an issue you are interested in addressing or a feature you would like to address.
 2. Pull the latest changes from upstream
 
-   "`bash
-   git checkout master
-   git pull upstream master
+   ```bash
+   git checkout main
+   git pull upstream main
    ```
 
 3. Create a branch for the feature you want to work on. Since the branch name will appear in the merge message, use a sensible, self-explanatory name:
@@ -123,7 +123,7 @@ Now using the command `git remote -v` will show two remote repositories:
 
 1. Push your changes back to your fork on GitHub:
 
-    "`bash
+    ```bash
     git push origin feature/<feature name>
     ```
 
@@ -170,4 +170,4 @@ In the source code, be sure to preface any issue or PR reference with gh-xxxx.
 [QHub-labels]: https://github.com/Quansight/QHub/labels
 [QHub-templates]: https://github.com/Quansight/QHub/issues/new/choose
 [QHub-qa]: https://github.com/Quansight/QHub/discussions/categories/q-a
-[issue-template]: https://github.com/Quansight/QHub/blob/master/ISSUE_TEMPLATE.md
+[issue-template]: https://github.com/Quansight/QHub/blob/main/ISSUE_TEMPLATE.md
