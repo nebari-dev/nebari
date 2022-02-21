@@ -2,7 +2,9 @@ name: "Kubernetes Tests"
 
 on:
   pull_request:
-    branches: [ $default-branch ]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
   push:
     branches: [ $default-branch ]
     paths-ignore:
