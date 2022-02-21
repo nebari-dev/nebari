@@ -58,6 +58,3 @@ ENV PATH="$NVIDIA_PATH:$PATH"
 COPY scripts/setup_shell_behavior.sh /opt/scripts/setup_shell_behavior.sh
 RUN setup_shell_behavior.sh ${DEFAULT_ENV} \
     && fix-permissions /etc
-
-# Have jovyan user own /home/jovyan/.local for local testing.
-RUN chown jovyan /home/jovyan
