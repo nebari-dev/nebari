@@ -126,7 +126,7 @@ def gha_env_vars(config):
 
 class GHA_on_extras(BaseModel):
     branches: List[str]
-    path: List[str]
+    paths: List[str]
 
 
 class GHA_on(BaseModel):
@@ -171,7 +171,7 @@ class GHA(BaseModel):
     name: str
     on: GHA_on
     env: Optional[Dict[str, str]]
-    jobs: List[GHA_jobs]
+    jobs: GHA_jobs
 
 
 class QhubOps(GHA):
@@ -248,7 +248,7 @@ def gen_qhub_ops(config):
     job1 = GHA_job_id(
         name="qhub", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4, step5]
     )
-    jobs = [GHA_jobs(__root__={"build": job1})]
+    jobs = GHA_jobs(__root__={"build": job1})
 
     return QhubOps(
         name="qhub auto update",
@@ -296,7 +296,11 @@ def gen_qhub_linter(config):
     job1 = GHA_job_id(
         name="qhub", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4]
     )
-    jobs = [GHA_jobs(__root__={"qhub-validate": job1})]
+    jobs = GHA_jobs(
+        __root__={
+            "qhub-validate": job1,
+        }
+    )
 
     return QhubLinter(
         name="qhub linter",
