@@ -41,7 +41,7 @@ aws eks update-kubeconfig  --region us-west-2 --name <relevant-name>
 
 ### Pod deployment
 
-With kubectl configured, the user now needs to deploy the pod that allows the user to access the cluster files. First save the follow pod specification to a file named `pod.yaml`
+With kubectl configured, the user now needs to deploy the pod that allows the user to access the cluster files. First save the following pod specification to a file named `pod.yaml`
 
 ```yaml
 kind: Pod
@@ -104,10 +104,10 @@ To backup the file system, run:
 
 ```shell
 cd /data
-tar -cvf <custom_name>.tar /home
+tar -cvf <custom_name>.tar home
 ```
 
-The preferred naming scheme includes a year-month-day, example `2021-04-23<sub>home</sub><sub>backup.tar</sub>`. The user can utilize multi-backups through this step. This step takes several minutes depending on the size of the home directories.
+The preferred naming scheme includes a year-month-day, example `2021-04-23_home_backup.tar`. The user can utilize multi-backups through this step. This step takes several minutes depending on the size of the home directories.
 
 ### Upload to block storage
 
@@ -144,6 +144,14 @@ tar -xvf 2021-04-23.tar
 ```
 
 The file permissions for the default tar is same as the original files.
+
+**Important: If upgrading from 0.3.14 or earlier to 0.4 or later**
+
+From QHub v0.4, all users have the same uid. If restoring your NFS as part of the upgrade you must also run, immediately after extracting from the tar file:
+
+```
+chown -R 1000:100 /data/home
+```
 
 ### Google cloud provider
 

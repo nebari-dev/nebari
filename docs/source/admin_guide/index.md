@@ -7,6 +7,7 @@ backup.md
 cost.md
 troubleshooting.md
 upgrade.md
+breaking-upgrade.md
 gpu.md
 preemptible-spot-instances.md
 system_maintenance.md
