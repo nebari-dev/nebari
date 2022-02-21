@@ -17,10 +17,6 @@ on:
     tags: # Always, regardless of paths above
       - '*'
 
-# concurrency:
-#   group: image-${{ github.ref }}
-#   cancel-in-progress: true
-
 jobs:
   jupyterlab:
     name: 'Build Docker Images'

@@ -9,10 +9,6 @@ on:
       - "docs/**"
       - "*.md"
 
-# concurrency:
-#   group: test-${{ github.ref }}
-#   cancel-in-progress: true
-
 jobs:
   test-general:
     name: 'Test Package'

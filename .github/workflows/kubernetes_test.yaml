@@ -9,10 +9,6 @@ on:
       - "docs/**"
       - "*.md"
 
-# concurrency:
-#   group: kubernetes-${{ github.ref }}
-#   cancel-in-progress: true
-
 jobs:
   test-kubernetes:
     name: "Kubernetes Tests"
