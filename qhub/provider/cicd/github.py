@@ -235,12 +235,12 @@ def gen_qhub_ops(config):
             "git config user.email 'qhub@quansight.com' ; "
             "git config user.name 'github action' ; "
             "git add . ; "
-            "git diff --quiet && git diff --staged --quiet || (git commit -m '${COMMIT_MSG}') ; "
+            "git diff --quiet && git diff --staged --quiet || (git commit -m ${{ env.COMMIT_MSG }}) ; "
             f"git push origin {branch}"
         ),
         env={
             "COMMIT_MSG": GHA_job_steps_extras(
-                __root__="qhub-config.yaml automated commit: {{ '${{ github.sha }}' }}"
+                __root__="qhub-config.yaml automated commit: ${{ github.sha }}"
             )
         },
     )
