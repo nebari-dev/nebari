@@ -59,13 +59,18 @@ jobs:
           sudo docker ps
           sudo usermod -aG docker $USER && newgrp docker
           minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 4 --memory 12288 --wait=all
+      - name: Use minikube docker daemon
+        run: |
+          eval $(minikube docker-env)
+          echo "DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY" >> $GITHUB_ENV
+          echo "DOCKER_HOST=$DOCKER_HOST" >> $GITHUB_ENV
+          echo "DOCKER_CERT_PATH=$DOCKER_CERT_PATH" >> $GITHUB_ENV
+          echo "MINIKUBE_ACTIVE_DOCKERD=$MINIKUBE_ACTIVE_DOCKERD" >> $GITHUB_ENV
       - name: Versions
         run: |
           minikube version
           kubectl version
-      - name: Add nfs client to kubernetes docker node
-        run: |
-          minikube ssh "sudo apt update; sudo apt install nfs-common -y"
+          docker ps
       - name: Get routing table for docker pods
         run: |
           ip route
