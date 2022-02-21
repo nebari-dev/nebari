@@ -1,10 +1,10 @@
 name: "Tests"
 
 on:
-  pull_request: # Workflow only runs for PR against main anyway
+  pull_request: [ main ]
   push:
     branches:
-      - '**'
+      - main
     tags:
       - 'v*'
     paths-ignore:

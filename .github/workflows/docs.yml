@@ -4,12 +4,14 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - '**.md'
+      - 'docs/**'
+      - '*.md'
 
   push:
     branches: [ main ]
     paths:
-      - '**.md'
+      - 'docs/**'
+      - '*.md'
 
 concurrency:
   group: docs-${{ github.ref }}
