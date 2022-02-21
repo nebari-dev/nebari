@@ -235,7 +235,7 @@ def gen_qhub_ops(config):
             "git config user.email 'qhub@quansight.com' ; "
             "git config user.name 'github action' ; "
             "git add . ; "
-            "git diff --quiet && git diff --staged --quiet || (git commit -m ${{ env.COMMIT_MSG }}) ; "
+            "git diff --quiet && git diff --staged --quiet || (git commit -m '${{ env.COMMIT_MSG }}') ; "
             f"git push origin {branch}"
         ),
         env={
