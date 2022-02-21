@@ -193,7 +193,7 @@ def checkout_image_step():
         uses="actions/checkout@master",
         with_={
             "token": GHA_job_steps_extras(
-                __root__="{{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}"
+                __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
             )
         },
     )
@@ -278,12 +278,10 @@ def gen_qhub_linter(config):
     step3 = install_qhub_step(qhub_version)
 
     step4_envs = {
-        "PR_NUMBER": GHA_job_steps_extras(
-            __root__="{{ '${{ github.event.number }}' }}"
-        ),
-        "REPO_NAME": GHA_job_steps_extras(__root__="{{ '${{ github.repository }}' }}"),
+        "PR_NUMBER": GHA_job_steps_extras(__root__="${{ github.event.number }}"),
+        "REPO_NAME": GHA_job_steps_extras(__root__="${{ github.repository }}"),
         "GITHUB_TOKEN": GHA_job_steps_extras(
-            __root__="{{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}"
+            __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
         ),
     }
 

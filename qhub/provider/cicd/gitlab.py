@@ -51,10 +51,6 @@ def gen_gitlab_ci(config):
         "COMMIT_MSG": "qhub-config.yaml automated commit: {{ '$CI_COMMIT_SHA' }}",
     }
 
-    # if qhub_gh_branch:
-    #     render_vars["QHUB_GH_BRANCH"] = qhub_gh_branch
-    #     pip_install_qhub = f"pip install https://github.com/Quansight/qhub/archive/{qhub_gh_branch}.zip"
-
     script = [
         f"git checkout {branch}",
         f"{pip_install}",
