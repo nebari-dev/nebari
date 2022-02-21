@@ -1,0 +1,30 @@
+{
+  "group": {
+    "default": {
+      "targets": [
+        "dask-gateway",
+        "dask-worker",
+        "jupyterhub",
+        "jupyterlab"
+      ]
+    }
+  },
+  "target": {
+    "dask-gateway": {
+      "context": "./",
+      "dockerfile": "Dockerfile.dask-gateway"
+    },
+    "dask-worker": {
+      "context": "./",
+      "dockerfile": "Dockerfile.dask-worker"
+    },
+    "jupyterhub": {
+      "context": "./",
+      "dockerfile": "Dockerfile.jupyterhub"
+    },
+    "jupyterlab": {
+      "context": "./",
+      "dockerfile": "Dockerfile.jupyterlab"
+    }
+  }
+}
