@@ -20,17 +20,11 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: 'QHUB_GH_BRANCH set for PR'
-        if: ${{ github.event_name == 'pull_request' }}
         run: |
-          echo "QHUB_GH_BRANCH=${GITHUB_HEAD_REF}" >> "$GITHUB_ENV"
+          echo "QHUB_GH_BRANCH=${GITHUB_SHA}" >> "$GITHUB_ENV"
           echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           echo "GITHUB_REF: ${GITHUB_REF}"
-      - name: 'QHUB_GH_BRANCH set for a branch (not a tag)'
-        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') }}
-        # for example QHUB_GH_BRANCH="main"
-        run: |
-          echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> "$GITHUB_ENV"
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
       - name: Set up Python
@@ -76,6 +70,7 @@ jobs:
       - name: Build docker images
         run: |
           cd qhub/template/image
+          docker build -f Dockerfile.jupyterlab -t quansight/qhub-jupyterlab:$GITHUB_SHA .
           docker build -f Dockerfile.jupyterhub -t quansight/qhub-jupyterhub:$GITHUB_SHA .
           docker build -f Dockerfile.dask-gateway -t quansight/qhub-dask-gateway:$GITHUB_SHA .
           docker build -f Dockerfile.dask-worker -t quansight/qhub-dask-worker:$GITHUB_SHA .
@@ -101,7 +96,7 @@ jobs:
         run: |
           mkdir -p local-deployment
           cd local-deployment
-          qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password
+          qhub init local --project=thisisatest --domain github-actions.qhub.dev --auth-provider=password
 
           # Need smaller profiles on Minikube
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "qhub-config.yaml"
