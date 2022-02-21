@@ -217,7 +217,7 @@ def gen_qhub_ops(config):
     branch = config["ci_cd"]["branch"]
     qhub_version = config["qhub_version"]
 
-    push = GHA_on_extras(branches=[branch], path=["qhub-config.yaml"])
+    push = GHA_on_extras(branches=[branch], paths=["qhub-config.yaml"])
     on = GHA_on(__root__={"push": push})
 
     step1 = checkout_image_step()
@@ -270,7 +270,7 @@ def gen_qhub_linter(config):
     branch = config["ci_cd"]["branch"]
     qhub_version = config["qhub_version"]
 
-    pull_request = GHA_on_extras(branches=[branch], path=["qhub-config.yaml"])
+    pull_request = GHA_on_extras(branches=[branch], paths=["qhub-config.yaml"])
     on = GHA_on(__root__={"pull_request": pull_request})
 
     step1 = checkout_image_step()
