@@ -34,3 +34,7 @@ envs_dirs:
 pkgs_dirs:
  - /home/jovyan/.conda/pkgs
 EOF
+
+# Fix permissions in accordance with jupyter stack permissions
+# model
+fix-permissions /opt/conda /etc/conda /etc/profile.d

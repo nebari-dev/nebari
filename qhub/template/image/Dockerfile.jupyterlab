@@ -58,4 +58,6 @@ ENV PATH="$NVIDIA_PATH:$PATH"
 # Establish some default shell behaviors for all users. This writes to /etc so
 # that the shell setup will always be used by users
 COPY scripts/setup_shell_behavior.sh /opt/scripts/setup_shell_behavior.sh
-RUN setup_shell_behavior.sh ${DEFAULT_ENV}
+RUN setup_shell_behavior.sh ${DEFAULT_ENV} \
+    && fix-permissions /etc
+
