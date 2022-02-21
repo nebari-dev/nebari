@@ -214,7 +214,7 @@ There is no need to TAR anything up since the only file required to be backed up
 
 So we just need to upload the file to S3. You might want to install the AWS CLI tool as we did before, but unfortunately the Hub container is quite locked down and it isn't straightforward to install that... You might need to upload to S3 using curl directly:
 
-As [explained in this article](https://www.gyanblog.com/aws/how-upload-aws-s3-curl/).
+As [explained here](./awss3curl.md).
 
 ### Restoring JupyterHub DB
 
@@ -224,6 +224,8 @@ You should restart the pod:
 ```
 kubectl delete -n dev pod hub-765c9488d6-8z4nj
 ```
+
+As for uploads, [you may need to download using curl](./awss3curl.md).
 
 ## Keycloak user/group database
 
