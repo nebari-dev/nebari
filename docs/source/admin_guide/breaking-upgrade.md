@@ -140,7 +140,7 @@ Updating the GitHub Application instead is very similar, but the OAuth callback 
 Next, return to the [Manual Backups documentation](./backup.md) to perform:
 
 1. Restore the NFS data from your S3 (or similar) backup
-2. Immediately after restoring NFS data, you must run the command `chown -R 1000:100 /data/home` as explained in the backup/restore docs for v0.4 upgrades.
+2. Immediately after restoring NFS data, you must run some extra commands as explained in the backup/restore docs for v0.4 upgrades specifically.
 3. Restore the JupyterHub sqlite database.
 
 ## 10. Import users into Keycloak
