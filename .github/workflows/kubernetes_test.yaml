@@ -73,6 +73,15 @@ jobs:
           minikube version
           kubectl version
           docker ps
+      - name: Build docker images
+        run: |
+          cd qhub/template/image
+          docker build -f Dockerfile.jupyterhub -t quansight/qhub-jupyterhub:$GITHUB_SHA .
+          docker build -f Dockerfile.dask-gateway -t quansight/qhub-dask-gateway:$GITHUB_SHA .
+          docker build -f Dockerfile.dask-worker -t quansight/qhub-dask-worker:$GITHUB_SHA .
+      - name: List docker images in minikube
+        run: |
+          docker images
       - name: Get routing table for docker pods
         run: |
           ip route
