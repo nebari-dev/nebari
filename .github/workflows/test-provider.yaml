@@ -1,12 +1,10 @@
 name: "Test QHub Provider"
 
 on:
-  pull_request: [ main ]
+  pull_request:
+    branches: [ $default-branch ]
   push:
-    branches: [ main ]
-      - '**'
-    tags:
-      - 'v*'
+    branches: [ $default-branch ]
     paths-ignore:
       - "docs/**"
       - "*.md"

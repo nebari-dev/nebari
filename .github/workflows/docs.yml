@@ -2,16 +2,18 @@ name: Documentation linter
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ $default-branch ]
     paths:
       - 'docs/**'
       - '*.md'
+      - '.github/workflows/docs.yml'
 
   push:
-    branches: [ main ]
+    branches: [ $default-branch ]
     paths:
       - 'docs/**'
       - '*.md'
+      - '.github/workflows/docs.yml'
 
 concurrency:
   group: docs-${{ github.ref }}
