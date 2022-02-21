@@ -15,9 +15,9 @@ on:
       - '*.md'
       - '.github/workflows/docs.yml'
 
-concurrency:
-  group: docs-${{ github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: docs-${{ github.ref }}
+#   cancel-in-progress: true
 
 jobs:
   check-all-files:
