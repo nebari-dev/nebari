@@ -17,8 +17,6 @@ class GLCI_image(BaseModel):
 class GLCI_rules(BaseModel):
     if_: Optional[str] = Field(alias="if")
     changes: Optional[List[str]]
-    # exists:
-    # variables:
 
     class Config:
         allow_population_by_field_name = True
@@ -30,7 +28,7 @@ class GLCI_job(BaseModel):
     before_script: Optional[List[str]]
     after_script: Optional[List[str]]
     script: List[str]
-    rules: GLCI_rules
+    rules: Optional[List[GLCI_rules]]
 
 
 class GLCI(BaseModel):
@@ -61,10 +59,12 @@ def gen_gitlab_ci(config):
         "git diff --quiet && git diff --staged --quiet || (git commit -m '${COMMIT_MSG}'; git push origin {branch})",
     ]
 
-    rules = GLCI_rules(
-        if_=f"$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == '{branch}'",
-        changes=["qhub-config.yaml"],
-    )
+    rules = [
+        GLCI_rules(
+            if_=f"$CI_COMMIT_BRANCH == '{branch}'",
+            changes=["qhub-config.yaml"],
+        )
+    ]
 
     render_qhub = GLCI_job(
         image=f"python:{PYTHON_VERSION}",
