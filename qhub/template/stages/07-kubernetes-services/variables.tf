@@ -25,3 +25,15 @@ variable "node_groups" {
     value = string
   }))
 }
+
+variable "jupyterhub-logout-redirect-url" {
+  description = "Next redirect destination following a Keycloak logout"
+  type = string
+  default = ""
+}
+
+variable "jupyterhub-hub-extraEnv" {
+  description = "Extracted overrides to merge with jupyterhub.hub.extraEnv"
+  type        = string
+  default     = "[]"
+}

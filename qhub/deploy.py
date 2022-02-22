@@ -9,6 +9,7 @@ from typing import Dict
 import tempfile
 import json
 import textwrap
+from urllib.parse import urlencode
 
 from qhub.provider import terraform
 from qhub.utils import (
@@ -296,6 +297,8 @@ def provision_02_infrastructure(stage_outputs, config, check=True):
                 "kubeconfig_filename": os.path.join(
                     tempfile.gettempdir(), "QHUB_KUBECONFIG"
                 ),
+                "resource_group_name": f'{config["project_name"]}-{config["namespace"]}',
+                "node_resource_group_name": f'{config["project_name"]}-{config["namespace"]}-node-resource-group',
             },
         )
     elif config["provider"] == "aws":
@@ -653,7 +656,7 @@ def check_05_kubernetes_keycloak(stage_outputs, config):
 
 def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=True):
     directory = "stages/06-kubernetes-keycloak-configuration"
-    realm_id = f"qhub-{config['project_name']}"
+    realm_id = "qhub"
 
     stage_outputs[directory] = terraform.deploy(
         directory=directory,
@@ -664,7 +667,7 @@ def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=
             ),
             "authentication": config["security"]["authentication"],
             "default_project_groups": ["users"]
-            if config["security"].get("shared_users_group")
+            if config["security"].get("shared_users_group", False)
             else [],
         },
     )
@@ -741,6 +744,17 @@ def check_06_kubernetes_keycloak_configuration(stage_outputs, config):
 def provision_07_kubernetes_services(stage_outputs, config, check=True):
     directory = "stages/07-kubernetes-services"
 
+    final_logout_uri = f"https://{config['domain']}/hub/login"
+
+    # Compound any logout URLs from extensions so they are are logged out in succession
+    # when Keycloak and JupyterHub are logged out
+    for ext in config.get("tf_extensions", []):
+        if ext.get("logout", "") != "":
+            final_logout_uri = "{}?{}".format(
+                f"https://{config['domain']}/{ext['urlslug']}{ext['logout']}",
+                urlencode({"redirect_uri": final_logout_uri}),
+            )
+
     stage_outputs[directory] = terraform.deploy(
         directory=directory,
         input_vars={
@@ -774,6 +788,12 @@ def provision_07_kubernetes_services(stage_outputs, config, check=True):
             "jupyterhub-overrides": [
                 json.dumps(config.get("jupyterhub", {}).get("overrides", {}))
             ],
+            "jupyterhub-hub-extraEnv": json.dumps(
+                config.get("jupyterhub", {})
+                .get("overrides", {})
+                .get("hub", {})
+                .get("extraEnv", [])
+            ),
             # dask-gateway
             "dask-gateway-image": split_docker_image_name(
                 config["default_images"]["dask_gateway"]
@@ -797,6 +817,7 @@ def provision_07_kubernetes_services(stage_outputs, config, check=True):
             "clearml-overrides": [
                 json.dumps(config.get("clearml", {}).get("overrides", {}))
             ],
+            "jupyterhub-logout-redirect-url": final_logout_uri,
         },
     )
 
@@ -834,8 +855,8 @@ def check_07_kubernetes_services(stage_outputs, config):
             sys.exit(1)
 
 
-def provision_08_enterprise_qhub(stage_outputs, config, check=True):
-    directory = "stages/08-enterprise-qhub"
+def provision_08_qhub_tf_extensions(stage_outputs, config, check=True):
+    directory = "stages/08-qhub-tf-extensions"
 
     stage_outputs[directory] = terraform.deploy(
         directory=directory,
@@ -846,7 +867,10 @@ def provision_08_enterprise_qhub(stage_outputs, config, check=True):
                 "realm_id"
             ]["value"],
             "tf_extensions": config.get("tf_extensions", []),
-            "qhub_config": config,
+            "qhub_config_yaml": config,
+            "keycloak_qhub_bot_password": stage_outputs[
+                "stages/05-kubernetes-keycloak"
+            ]["keycloak_qhub_bot_password"]["value"],
             "helm_extensions": config.get("helm_extensions", []),
         },
     )
@@ -895,7 +919,7 @@ def guided_install(
         ):
             provision_06_kubernetes_keycloak_configuration(stage_outputs, config)
             provision_07_kubernetes_services(stage_outputs, config)
-            provision_08_enterprise_qhub(stage_outputs, config)
+            provision_08_qhub_tf_extensions(stage_outputs, config)
 
             print("QHub deployed successfully")
 

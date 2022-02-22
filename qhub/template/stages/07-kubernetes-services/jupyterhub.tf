@@ -124,4 +124,7 @@ module "jupyterhub" {
 
   theme = var.jupyterhub-theme
   profiles = var.jupyterlab-profiles
+
+  jupyterhub-logout-redirect-url = var.jupyterhub-logout-redirect-url
+  jupyterhub-hub-extraEnv        = var.jupyterhub-hub-extraEnv
 }

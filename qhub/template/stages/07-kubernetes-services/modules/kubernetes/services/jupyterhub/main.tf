@@ -102,8 +102,19 @@ resource "helm_release" "jupyterhub" {
           }
         }
       }
-    })
-  ], var.overrides)
+    })],
+  var.overrides,
+  [jsonencode({
+    hub = {
+          extraEnv = concat([
+          {
+            name = "OAUTH_LOGOUT_REDIRECT_URL",
+            value = format("%s?redirect_uri=%s", "https://${var.external-url}/auth/realms/${var.realm_id}/protocol/openid-connect/logout", urlencode(var.jupyterhub-logout-redirect-url))
+          }],
+        jsondecode(var.jupyterhub-hub-extraEnv))
+    }
+   })]
+  )
 
   set {
     name  = "proxy.secretToken"
@@ -151,6 +162,7 @@ module "jupyterhub-openid-client" {
     "practitioner" = ["jupyterhub_developer"]
   }
   callback-url-paths = [
-    "https://${var.external-url}/hub/oauth_callback"
+    "https://${var.external-url}/hub/oauth_callback",
+    var.jupyterhub-logout-redirect-url
   ]
 }

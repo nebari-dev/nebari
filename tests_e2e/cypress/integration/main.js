@@ -47,7 +47,7 @@ describe('First Test', () => {
       cy.loginWithPassword(EXAMPLE_USER_NAME, EXAMPLE_USER_PASSWORD);
 
       // Start my Jupyter server
-      
+
       cy.get('#start')
         .should('contain', 'My Server').click();
 
@@ -59,13 +59,13 @@ describe('First Test', () => {
 
       // Minimal check that JupyterLab has opened
 
-      cy.get('div#jp-MainLogo', { timeout: 30000 }).should('exist').wait(500);
+      cy.get('div#jp-MainLogo', { timeout: 60000 }).should('exist').wait(500);
 
 
       if (JHUB_CLIENT_PYTHON_PATH) {
 
           cy.runJHubClient(
-                  JHUB_CLIENT_PYTHON_PATH, Cypress.config().baseUrl, EXAMPLE_USER_NAME, EXAMPLE_USER_PASSWORD, 
+                  JHUB_CLIENT_PYTHON_PATH, Cypress.config().baseUrl, EXAMPLE_USER_NAME, EXAMPLE_USER_PASSWORD,
                   "BasicTest.ipynb", "python3"
             ).then(result => {
               if (result.code) {
@@ -74,7 +74,7 @@ describe('First Test', () => {
                   Stdout:\n${result.stdout}
                   Stderr:\n${result.stderr}`);
               }
-              
+
               cy.log(result.stdout);
               cy.log(result.stderr);
             })
