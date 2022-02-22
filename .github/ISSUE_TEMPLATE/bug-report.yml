@@ -1,5 +1,5 @@
 name: "Bug report \U0001F41B"
-about: "Create a report to help us improve"
+description: "Create a report to help us improve"
 title: "[BUG] - <title>"
 labels: ["type: bug 🐛"]
 
@@ -85,7 +85,7 @@ body:
         - "minikube"
     validations:
       required: false
-  
+
   - type: dropdown
     attributes:
       label: Integrations
