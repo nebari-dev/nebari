@@ -28,7 +28,7 @@ def provision_01_terraform_state(stage_outputs, config):
             terraform_import=True,
             directory=os.path.join(directory, config["provider"]),
             input_vars=input_vars.stage_01_terraform_state(stage_outputs, config),
-            state_imports=state_imports.stage_01_terraform_state(config),
+            state_imports=state_imports.stage_01_terraform_state(stage_outputs, config),
         )
 
 
