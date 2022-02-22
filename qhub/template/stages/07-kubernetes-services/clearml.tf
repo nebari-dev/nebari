@@ -12,6 +12,13 @@ variable "clearml-enable-forwardauth" {
 }
 
 
+variable "clearml-overrides" {
+  description = "Clearml helm chart overrides"
+  type        = list(string)
+  default     = []
+}
+
+
 # ====================== RESOURCES =======================
 module "clearml" {
   count = var.clearml-enabled ? 1 : 0
@@ -20,6 +27,8 @@ module "clearml" {
 
   namespace    = var.environment
   external-url = var.endpoint
+
+  overrides = var.clearml-overrides
 
   enable-forward-auth = var.clearml-enable-forwardauth
 }
