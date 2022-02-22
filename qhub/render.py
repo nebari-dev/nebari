@@ -8,14 +8,9 @@ import hashlib
 
 from ruamel.yaml import YAML
 
-from qhub.provider.terraform import tf_render_objects
+from qhub.stages import tf_objects
 from qhub.deprecate import DEPRECATED_FILE_PATHS
-from qhub.render.terraform import (
-    QHubKubernetesProvider,
-    QHubTerraformState,
-    QHubGCPProvider,
-    QHubAWSProvider,
-)
+
 from qhub.provider.cicd.github import gen_qhub_ops, gen_qhub_linter
 from qhub.provider.cicd.gitlab import gen_gitlab_ci
 
@@ -143,100 +138,18 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
 
 def render_contents(config: Dict):
     """Dynamically generated contents from QHub configuration"""
-    contents = {}
 
-    if config["provider"] == "gcp":
-        contents.update(
-            {
-                "stages/01-terraform-state/gcp/_qhub.tf.json": tf_render_objects(
-                    [
-                        QHubGCPProvider(config),
-                    ]
-                ),
-                "stages/02-infrastructure/gcp/_qhub.tf.json": tf_render_objects(
-                    [
-                        QHubGCPProvider(config),
-                        QHubTerraformState("02-infrastructure", config),
-                    ]
-                ),
-            }
-        )
-    elif config["provider"] == "do":
-        contents.update(
-            {
-                "stages/02-infrastructure/do/_qhub.tf.json": tf_render_objects(
-                    [
-                        QHubTerraformState("02-infrastructure", config),
-                    ]
-                )
-            }
-        )
-    elif config["provider"] == "azure":
-        contents.update(
-            {
-                "stages/02-infrastructure/azure/_qhub.tf.json": tf_render_objects(
-                    [
-                        QHubTerraformState("02-infrastructure", config),
-                    ]
-                ),
-            }
-        )
-    elif config["provider"] == "aws":
-        contents.update(
-            {
-                "stages/01-terraform-state/aws/_qhub.tf.json": tf_render_objects(
-                    [
-                        QHubAWSProvider(config),
-                    ]
-                ),
-                "stages/02-infrastructure/aws/_qhub.tf.json": tf_render_objects(
-                    [
-                        QHubAWSProvider(config),
-                        QHubTerraformState("02-infrastructure", config),
-                    ]
-                ),
-            }
-        )
+    contents = {
+        **tf_objects.stage_01_terraform_state(config),
+        **tf_objects.stage_02_infrastructure(config),
+        **tf_objects.stage_03_kubernetes_initialize(config),
+        **tf_objects.stage_04_kubernetes_ingress(config),
+        **tf_objects.stage_05_kubernetes_keycloak(config),
+        **tf_objects.stage_06_kubernetes_keycloak_configuration(config),
+        **tf_objects.stage_07_kubernetes_services(config),
+        **tf_objects.stage_08_qhub_tf_extensions(config),
+    }
 
-    contents.update(
-        {
-            "stages/03-kubernetes-initialize/_qhub.tf.json": tf_render_objects(
-                [
-                    QHubTerraformState("03-kubernetes-initialize", config),
-                    QHubKubernetesProvider(config),
-                ]
-            ),
-            "stages/04-kubernetes-ingress/_qhub.tf.json": tf_render_objects(
-                [
-                    QHubTerraformState("04-kubernetes-ingress", config),
-                    QHubKubernetesProvider(config),
-                ]
-            ),
-            "stages/05-kubernetes-keycloak/_qhub.tf.json": tf_render_objects(
-                [
-                    QHubTerraformState("05-kubernetes-keycloak", config),
-                    QHubKubernetesProvider(config),
-                ]
-            ),
-            "stages/06-kubernetes-keycloak-configuration/_qhub.tf.json": tf_render_objects(
-                [
-                    QHubTerraformState("06-kubernetes-keycloak-configuration", config),
-                ]
-            ),
-            "stages/07-kubernetes-services/_qhub.tf.json": tf_render_objects(
-                [
-                    QHubTerraformState("07-kubernetes-services", config),
-                    QHubKubernetesProvider(config),
-                ]
-            ),
-            "stages/08-qhub-tf-extensions/_qhub.tf.json": tf_render_objects(
-                [
-                    QHubTerraformState("08-qhub-tf-extensions", config),
-                    QHubKubernetesProvider(config),
-                ]
-            ),
-        }
-    )
     if config.get("ci_cd"):
         for fn, workflow in gen_cicd(config).items():
             contents.update(
