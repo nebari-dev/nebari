@@ -25,11 +25,11 @@ def stage_01_terraform_state(stage_outputs, config):
 
         return [
             (
-                "module.terraform-state.azurerm_resource_group.terraform-resource-group",
+                "module.terraform-state.azurerm_resource_group.terraform-state-resource-group",
                 resource_group_url,
             ),
             (
-                "module.terraform-state.azurerm_storage_account.terraform-storage-account",
+                "module.terraform-state.azurerm_storage_account.terraform-state-storage-account",
                 f"{resource_group_url}/providers/Microsoft.Storage/storageAccounts/{state_resource_name_prefix_safe}{config['azure']['storage_account_postfix']}",
             ),
             (
