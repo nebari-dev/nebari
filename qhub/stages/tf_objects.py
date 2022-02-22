@@ -1,6 +1,6 @@
 from typing import Dict
 
-from qhub.provider.terraform import TerraformBackend, Provider
+from qhub.provider.terraform import tf_render_objects, TerraformBackend, Provider
 
 
 def QHubAWSProvider(qhub_config: Dict):
@@ -96,3 +96,128 @@ def QHubTerraformState(directory: str, qhub_config: Dict):
         )
     else:
         raise NotImplementedError("state not implemented")
+
+
+def stage_01_terraform_state(config):
+    if config["provider"] == "gcp":
+        return {
+            "stages/01-terraform-state/gcp/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubGCPProvider(config),
+                ]
+            )
+        }
+    elif config["provider"] == "aws":
+        return {
+            "stages/01-terraform-state/aws/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubAWSProvider(config),
+                ]
+            )
+        }
+    else:
+        return {}
+
+
+def stage_02_infrastructure(config):
+    if config["provider"] == "gcp":
+        return {
+            "stages/02-infrastructure/gcp/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubGCPProvider(config),
+                    QHubTerraformState("02-infrastructure", config),
+                ]
+            )
+        }
+    elif config["provider"] == "do":
+        return {
+            "stages/02-infrastructure/do/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubTerraformState("02-infrastructure", config),
+                ]
+            )
+        }
+    elif config["provider"] == "azure":
+        return {
+            "stages/02-infrastructure/azure/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubTerraformState("02-infrastructure", config),
+                ]
+            ),
+        }
+    elif config["provider"] == "aws":
+        return {
+            "stages/02-infrastructure/aws/_qhub.tf.json": tf_render_objects(
+                [
+                    QHubAWSProvider(config),
+                    QHubTerraformState("02-infrastructure", config),
+                ]
+            )
+        }
+    else:
+        return {}
+
+
+def stage_03_kubernetes_initialize(config):
+    return {
+        "stages/03-kubernetes-initialize/_qhub.tf.json": tf_render_objects(
+            [
+                QHubTerraformState("03-kubernetes-initialize", config),
+                QHubKubernetesProvider(config),
+            ]
+        ),
+    }
+
+
+def stage_04_kubernetes_ingress(config):
+    return {
+        "stages/04-kubernetes-ingress/_qhub.tf.json": tf_render_objects(
+            [
+                QHubTerraformState("04-kubernetes-ingress", config),
+                QHubKubernetesProvider(config),
+            ]
+        ),
+    }
+
+
+def stage_05_kubernetes_keycloak(config):
+    return {
+        "stages/05-kubernetes-keycloak/_qhub.tf.json": tf_render_objects(
+            [
+                QHubTerraformState("05-kubernetes-keycloak", config),
+                QHubKubernetesProvider(config),
+            ]
+        ),
+    }
+
+
+def stage_06_kubernetes_keycloak_configuration(config):
+    return {
+        "stages/06-kubernetes-keycloak-configuration/_qhub.tf.json": tf_render_objects(
+            [
+                QHubTerraformState("06-kubernetes-keycloak-configuration", config),
+            ]
+        ),
+    }
+
+
+def stage_07_kubernetes_services(config):
+    return {
+        "stages/07-kubernetes-services/_qhub.tf.json": tf_render_objects(
+            [
+                QHubTerraformState("07-kubernetes-services", config),
+                QHubKubernetesProvider(config),
+            ]
+        ),
+    }
+
+
+def stage_08_qhub_tf_extensions(config):
+    return {
+        "stages/08-qhub-tf-extensions/_qhub.tf.json": tf_render_objects(
+            [
+                QHubTerraformState("08-qhub-tf-extensions", config),
+                QHubKubernetesProvider(config),
+            ]
+        ),
+    }

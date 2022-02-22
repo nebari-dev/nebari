@@ -303,11 +303,6 @@ def modified_environ(*remove: List[str], **update: Dict[str, str]):
         [env.pop(k) for k in remove_after]
 
 
-def split_docker_image_name(image_name):
-    name, tag = image_name.split(":")
-    return {"name": name, "tag": tag}
-
-
 def deep_merge(*args):
     """Deep merge multiple dictionaries.
 
