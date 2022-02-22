@@ -1,3 +1,8 @@
+variable "resource_group_name" {
+  description = "Prefix of name to append resource"
+  type        = string
+}
+
 variable "name" {
   description = "Prefix of name to append resource"
   type        = string
