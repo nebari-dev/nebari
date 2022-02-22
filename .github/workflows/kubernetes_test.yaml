@@ -146,9 +146,6 @@ jobs:
           qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser example-user "${CYPRESS_EXAMPLE_USER_PASSWORD}"
           qhub keycloak --config "${QHUB_CONFIG_PATH}" listusers
 
-      - name: Sleep to see if it fixes flaky Kubernetes Tests
-        run: sleep 60
-
       - name: Cypress run
         uses: cypress-io/github-action@v2
         env:
