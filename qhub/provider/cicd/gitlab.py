@@ -56,7 +56,8 @@ def gen_gitlab_ci(config):
         "git config user.email 'qhub@quansight.com'",
         "git config user.name 'gitlab ci'",
         "git add .",
-        "git diff --quiet && git diff --staged --quiet || (git commit -m '${COMMIT_MSG}'; git push origin {branch})",
+        "git diff --quiet && git diff --staged --quiet || (git commit -m '${COMMIT_MSG}'",
+        f"git push origin {branch})",
     ]
 
     rules = [
