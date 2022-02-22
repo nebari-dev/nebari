@@ -2,16 +2,26 @@ name: "Test QHub Provider"
 
 on:
   pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-      - '.github/workflows/docs.yml'
+    paths:
+      - ".github/workflows/test-provider.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
   push:
     branches: [ $default-branch ]
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-      - '.github/workflows/docs.yml'
+    paths:
+      - ".github/workflows/test-provider.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
 
 env:
   DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
