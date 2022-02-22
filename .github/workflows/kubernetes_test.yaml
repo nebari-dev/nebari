@@ -5,11 +5,13 @@ on:
     paths-ignore:
       - "docs/**"
       - "*.md"
+      - '.github/workflows/docs.yml'
   push:
     branches: [ $default-branch ]
     paths-ignore:
       - "docs/**"
       - "*.md"
+      - '.github/workflows/docs.yml'
 
 jobs:
   test-kubernetes:
@@ -55,6 +57,10 @@ jobs:
           sudo docker ps
           sudo usermod -aG docker $USER && newgrp docker
           minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 4 --memory 12288 --wait=all
+      - name: Print minikube and kubectl versions
+        run: |
+          minikube version
+          kubectl version
       - name: Use minikube docker daemon
         run: |
           eval $(minikube docker-env)
@@ -62,10 +68,9 @@ jobs:
           echo "DOCKER_HOST=$DOCKER_HOST" >> $GITHUB_ENV
           echo "DOCKER_CERT_PATH=$DOCKER_CERT_PATH" >> $GITHUB_ENV
           echo "MINIKUBE_ACTIVE_DOCKERD=$MINIKUBE_ACTIVE_DOCKERD" >> $GITHUB_ENV
-      - name: Versions
+      - name: Print docker connection information
         run: |
-          minikube version
-          kubectl version
+          docker info
           docker ps
       - name: Build docker images
         run: |

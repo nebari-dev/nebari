@@ -2,12 +2,16 @@ name: "Test QHub Provider"
 
 on:
   pull_request:
-    branches: [ $default-branch ]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - '.github/workflows/docs.yml'
   push:
     branches: [ $default-branch ]
     paths-ignore:
       - "docs/**"
       - "*.md"
+      - '.github/workflows/docs.yml'
 
 env:
   DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}

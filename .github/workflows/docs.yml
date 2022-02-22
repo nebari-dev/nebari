@@ -2,7 +2,6 @@ name: Documentation linter
 
 on:
   pull_request:
-    branches: [ $default-branch ]
     paths:
       - 'docs/**'
       - '*.md'
