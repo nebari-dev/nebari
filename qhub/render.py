@@ -184,7 +184,7 @@ def gen_cicd(config):
         cicd_files[gha_dir + "qhub-linter.yaml"] = gen_qhub_linter(config)
 
     elif cicd_provider == "gitlab-ci":
-        cicd_files[".gitlab-ci.yaml"] = gen_gitlab_ci(config)
+        cicd_files[".gitlab-ci.yml"] = gen_gitlab_ci(config)
 
     else:
         raise ValueError(

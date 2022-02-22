@@ -352,7 +352,7 @@ def pip_install_qhub(qhub_version: str) -> str:
     # dev branches
     if len(qhub_version.split(".")) > 3 and qhub_gh_branch:
         pip_install = (
-            f"pip install https://github.com/Quansight/qhub.git@{qhub_gh_branch}"
+            f"pip install git+https://github.com/Quansight/qhub.git@{qhub_gh_branch}"
         )
 
     return pip_install
