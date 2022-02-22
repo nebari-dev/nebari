@@ -1,5 +1,5 @@
-variable "state_resource_group_name" {
-  description = "Prefix name for terraform state resource group"
+variable "name" {
+  description = "Prefix of name to append resource"
   type        = string
 }
 
