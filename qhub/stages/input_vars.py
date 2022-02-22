@@ -255,6 +255,9 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "clearml-enable-forwardauth": config.get("clearml", {}).get(
             "enable_forward_auth", False
         ),
+        "clearml-overrides": [
+            json.dumps(config.get("clearml", {}).get("overrides", {}))
+        ],
         "jupyterhub-logout-redirect-url": final_logout_uri,
     }
 
