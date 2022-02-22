@@ -75,11 +75,9 @@ jobs:
       - name: Build docker images
         run: |
           cd qhub/template/image
-          docker buildx bake \
-            --set dask-gateway.tags=quansight/qhub-dask-gateway:$GITHUB_SHA \
-            --set dask-worker.tags=quansight/qhub-dask-worker:$GITHUB_SHA \
-            --set jupyterhub.tags=quansight/qhub-jupyterhub:$GITHUB_SHA \
-            --set jupyterlab.tags=quansight/qhub-jupyterlab:$GITHUB_SHA
+          docker buildx bake
+        env:
+          TAG: ${{ github.sha }}
       - name: List docker images in minikube
         run: |
           docker images
