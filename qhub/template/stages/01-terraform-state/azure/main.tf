@@ -25,9 +25,9 @@ provider "azurerm" {
 module "terraform-state" {
   source = "./modules/terraform-state"
 
-  resource_group_name     = "${var.name }-${var.namespace}"
-  location                = var.region
-  storage_account_postfix = var.storage_account_postfix
+  state_resource_group_name     = "${var.name }-${var.namespace}-terraform-state"
+  location                      = var.region
+  storage_account_postfix       = var.storage_account_postfix
 }
 
 terraform {
