@@ -1,19 +1,17 @@
 name: "Kubernetes Tests"
 
 on:
-  pull_request: # Workflow only runs for PR against main anyway
-  push:
-    branches:
-      - '**'
-    tags:
-      - 'v*'
+  pull_request:
     paths-ignore:
       - "docs/**"
       - "*.md"
-
-concurrency:
-  group: kubernetes-${{ github.ref }}
-  cancel-in-progress: true
+      - '.github/workflows/docs.yml'
+  push:
+    branches: [ $default-branch ]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - '.github/workflows/docs.yml'
 
 jobs:
   test-kubernetes:
@@ -24,17 +22,11 @@ jobs:
         shell: bash -l {0}
     steps:
       - name: 'QHUB_GH_BRANCH set for PR'
-        if: ${{ github.event_name == 'pull_request' }}
         run: |
-          echo "QHUB_GH_BRANCH=${GITHUB_HEAD_REF}" >> "$GITHUB_ENV"
+          echo "QHUB_GH_BRANCH=${GITHUB_SHA}" >> "$GITHUB_ENV"
           echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           echo "GITHUB_REF: ${GITHUB_REF}"
-      - name: 'QHUB_GH_BRANCH set for a branch (not a tag)'
-        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') }}
-        # for example QHUB_GH_BRANCH="main"
-        run: |
-          echo "QHUB_GH_BRANCH=${GITHUB_REF:11}" >> "$GITHUB_ENV"
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
       - name: Set up Python
@@ -65,13 +57,30 @@ jobs:
           sudo docker ps
           sudo usermod -aG docker $USER && newgrp docker
           minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 4 --memory 12288 --wait=all
-      - name: Versions
+      - name: Print minikube and kubectl versions
         run: |
           minikube version
           kubectl version
-      - name: Add nfs client to kubernetes docker node
+      - name: Use minikube docker daemon
         run: |
-          minikube ssh "sudo apt update; sudo apt install nfs-common -y"
+          eval $(minikube docker-env)
+          echo "DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY" >> $GITHUB_ENV
+          echo "DOCKER_HOST=$DOCKER_HOST" >> $GITHUB_ENV
+          echo "DOCKER_CERT_PATH=$DOCKER_CERT_PATH" >> $GITHUB_ENV
+          echo "MINIKUBE_ACTIVE_DOCKERD=$MINIKUBE_ACTIVE_DOCKERD" >> $GITHUB_ENV
+      - name: Print docker connection information
+        run: |
+          docker info
+          docker ps
+      - name: Build docker images
+        run: |
+          cd qhub/template/image
+          docker buildx bake
+        env:
+          TAG: ${{ github.sha }}
+      - name: List docker images in minikube
+        run: |
+          docker images
       - name: Get routing table for docker pods
         run: |
           ip route
@@ -91,7 +100,7 @@ jobs:
         run: |
           mkdir -p local-deployment
           cd local-deployment
-          qhub init local --project=thisisatest  --domain github-actions.qhub.dev --auth-provider=password
+          qhub init local --project=thisisatest --domain github-actions.qhub.dev --auth-provider=password
 
           # Need smaller profiles on Minikube
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "qhub-config.yaml"
@@ -136,9 +145,6 @@ jobs:
         run: |
           qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser example-user "${CYPRESS_EXAMPLE_USER_PASSWORD}"
           qhub keycloak --config "${QHUB_CONFIG_PATH}" listusers
-
-      - name: Sleep to see if it fixes flaky Kubernetes Tests
-        run: sleep 60
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
