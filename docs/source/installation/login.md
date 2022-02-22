@@ -107,14 +107,19 @@ Groups represent a collection of users that perform similar actions and therefor
 
 To create new groups or modify (or delete) existing groups, login as `root` and click 'Groups' on the left-hand side.
 
+
+As an example, we create a new group named `conda-store-manager` and this group will have administrator access to Conda-Store service.
+
 ![Add Groups to Keycloak](../images/keycloak_groups.png)
 
-CONTINUE HERE
+To create a new group, click 'New' in the upper-right hand corner. First, give the new group an appropriate name.
 
-Add Groups in the same Keycloak backend as you can add users - that's, login as `root` to `https://myqhubsite.com/auth/admin/`. Click Groups on the left-hand side.
+![Give the new group a name](../images/keycloak_new_group1.png)
 
-Groups named `users` and `admin` will have been created automatically by QHub. All users will be added to the `users` group automatically when you create them. You should never remove them from the `users` group as that group must contain all users.
+Then under 'Role Mapping', add the appriopriate 'Client Roles' as needed; there should be no need to update the 'Realm Roles'. In this example, the new group only has one mapped role however it's possible to attached multiple 'Client Roles' to a single group.
 
-Members of `admin` group will have access to admin features within QHub.
+![Select from client roles](../images/keycloak_new_group2.png)
 
-Neither `users` nor `admin` groups should ever be deleted.
+![Assign permissions to the new group](../images/keycloak_new_group3.png)
+
+Once complete, return the 'Users' section and add the relevant users to this newly created group.
