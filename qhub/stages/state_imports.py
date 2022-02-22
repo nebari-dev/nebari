@@ -1,7 +1,7 @@
 import os
 
 
-def stage_01_terraform_state(config):
+def stage_01_terraform_state(stage_outputs, config):
     if config["provider"] == "do":
         return [
             (
