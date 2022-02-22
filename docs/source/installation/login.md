@@ -37,17 +37,32 @@ Login using the username `root` and the password provided for the initial Keyclo
 
 All QHub users will be part of the `qhub` realm (a realm is a distinct identity provider and set of users in Keycloak). Note that the root user alone is a member of the `master` realm.
 
-The qhub realm should be selected by default.
+The `qhub` realm should be selected by default.
 
 Click 'Users' along the left-hand side of the page.
 
 Click the 'Add user' button and you will see the new user form:
 
-![Add User to Keycloak](../images/keycloak_adduser.png)
+![Add User to Keycloak](../images/keycloak_add_users.png)
 
-Enter the name you would like for the user then click Save.
+There are three fields, outline above, which should be filled out.These are 'Username', 'Email', and 'Groups'.
 
-Once the user has been created, you can set a password (not needed for GitHub/Auth0 login):
+Depending on the authentication provider selected ('password', 'GitHub' or 'Auth0'), the values entered into the 'Username' field will differ slightly. The following table outlines those differences:
+
+|   | Password  | GitHub  | Auth0   |
+|---|---|---|---|
+| Username | *unique username*  | *GitHub username* | *Email to login with* |
+
+Once the 'Username' field has been updated, please add a valid email address in the 'Email' field.
+> NOTE: although not required, users may not be able to log into Graphana if this field is not properly set.
+
+Lastly, associate the user with one or more of the 'Groups'. By default, QHub is deployed with the following groups: 'admin', 'developer', 'practitioner' and 'viewer' (see below for more information about 'Groups').
+> NOTE: users will not be able to log into JupyterLab if the user is in the 'viewer' group or if this field is unset.
+
+Enter the name you would like for the user then click 'Save'.
+
+Once the user has been created, you can set a password
+> NOTE: not needed for GitHub/Auth0 based authentication.
 
 ![Set Password in Keycloak](../images/keycloak_user_password.png)
 
@@ -80,6 +95,21 @@ In the Password box, click the 'Update' button. This will guide you through ente
 From this point, the `security.keycloak.initial_root_password` field in `qhub-config.yaml` has no effect. If you redeploy QHub it will not reset the password back to the old one (or anything else that might be in the field in your YAML file). You can delete that line from your YAML file if you wish.
 
 # Groups
+
+Groups represent a collection of users that perform similar actions and therefore require the similar permissions. By default, QHub is deployed with the following groups: 'admin', 'developer', 'practitioner' and 'viewer'.
+
+| Group | Access to QHub Resources |
+|---|---|
+| 'admin' | all resources  |
+| 'developer' | JupyterLab, Dask, Graphana, Dashboards, Conda-Store  |
+| 'practioner' | JupyterLab, Dashboards  |
+| 'viewer'  | Dashboards  |
+
+To create new groups or modify (or delete) existing groups, login as `root` and click 'Groups' on the left-hand side.
+
+![Add Groups to Keycloak](../images/keycloak_groups.png)
+
+CONTINUE HERE
 
 Add Groups in the same Keycloak backend as you can add users - that's, login as `root` to `https://myqhubsite.com/auth/admin/`. Click Groups on the left-hand side.
 
