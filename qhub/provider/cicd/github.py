@@ -126,7 +126,7 @@ def gha_env_vars(config):
 
 class GHA_on_extras(BaseModel):
     branches: List[str]
-    path: List[str]
+    paths: List[str]
 
 
 class GHA_on(BaseModel):
@@ -171,7 +171,7 @@ class GHA(BaseModel):
     name: str
     on: GHA_on
     env: Optional[Dict[str, str]]
-    jobs: List[GHA_jobs]
+    jobs: GHA_jobs
 
 
 class QhubOps(GHA):
@@ -193,7 +193,7 @@ def checkout_image_step():
         uses="actions/checkout@master",
         with_={
             "token": GHA_job_steps_extras(
-                __root__="{{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}"
+                __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
             )
         },
     )
@@ -217,7 +217,7 @@ def gen_qhub_ops(config):
     branch = config["ci_cd"]["branch"]
     qhub_version = config["qhub_version"]
 
-    push = GHA_on_extras(branches=[branch], path=["qhub-config.yaml"])
+    push = GHA_on_extras(branches=[branch], paths=["qhub-config.yaml"])
     on = GHA_on(__root__={"push": push})
 
     step1 = checkout_image_step()
@@ -235,12 +235,12 @@ def gen_qhub_ops(config):
             "git config user.email 'qhub@quansight.com' ; "
             "git config user.name 'github action' ; "
             "git add . ; "
-            "git diff --quiet && git diff --staged --quiet || (git commit -m '${COMMIT_MSG}') ; "
+            "git diff --quiet && git diff --staged --quiet || (git commit -m '${{ env.COMMIT_MSG }}') ; "
             f"git push origin {branch}"
         ),
         env={
             "COMMIT_MSG": GHA_job_steps_extras(
-                __root__="qhub-config.yaml automated commit: {{ '${{ github.sha }}' }}"
+                __root__="qhub-config.yaml automated commit: ${{ github.sha }}"
             )
         },
     )
@@ -248,7 +248,7 @@ def gen_qhub_ops(config):
     job1 = GHA_job_id(
         name="qhub", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4, step5]
     )
-    jobs = [GHA_jobs(__root__={"build": job1})]
+    jobs = GHA_jobs(__root__={"build": job1})
 
     return QhubOps(
         name="qhub auto update",
@@ -270,7 +270,7 @@ def gen_qhub_linter(config):
     branch = config["ci_cd"]["branch"]
     qhub_version = config["qhub_version"]
 
-    pull_request = GHA_on_extras(branches=[branch], path=["qhub-config.yaml"])
+    pull_request = GHA_on_extras(branches=[branch], paths=["qhub-config.yaml"])
     on = GHA_on(__root__={"pull_request": pull_request})
 
     step1 = checkout_image_step()
@@ -278,12 +278,10 @@ def gen_qhub_linter(config):
     step3 = install_qhub_step(qhub_version)
 
     step4_envs = {
-        "PR_NUMBER": GHA_job_steps_extras(
-            __root__="{{ '${{ github.event.number }}' }}"
-        ),
-        "REPO_NAME": GHA_job_steps_extras(__root__="{{ '${{ github.repository }}' }}"),
+        "PR_NUMBER": GHA_job_steps_extras(__root__="${{ github.event.number }}"),
+        "REPO_NAME": GHA_job_steps_extras(__root__="${{ github.repository }}"),
         "GITHUB_TOKEN": GHA_job_steps_extras(
-            __root__="{{ '${{ secrets.REPOSITORY_ACCESS_TOKEN }}' }}"
+            __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
         ),
     }
 
@@ -296,7 +294,11 @@ def gen_qhub_linter(config):
     job1 = GHA_job_id(
         name="qhub", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4]
     )
-    jobs = [GHA_jobs(__root__={"qhub-validate": job1})]
+    jobs = GHA_jobs(
+        __root__={
+            "qhub-validate": job1,
+        }
+    )
 
     return QhubLinter(
         name="qhub linter",

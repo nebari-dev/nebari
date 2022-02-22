@@ -57,3 +57,8 @@ QHub provides enables teams to build their own scalable compute infrastructure w
 + Shared filesystem allowing users to work on projects privately, within groups, or across the organisation.
 + Robust compute environment handling allowing both prebuilt and ad-hoc environment creation.
 + Integrated video conferencing, using [Jitsi](https://meet.jit.si/).
+
+```{toctree}
+:maxdepth: 2
+qhub-101
+```

@@ -303,11 +303,6 @@ def modified_environ(*remove: List[str], **update: Dict[str, str]):
         [env.pop(k) for k in remove_after]
 
 
-def split_docker_image_name(image_name):
-    name, tag = image_name.split(":")
-    return {"name": name, "tag": tag}
-
-
 def deep_merge(*args):
     """Deep merge multiple dictionaries.
 
@@ -357,7 +352,7 @@ def pip_install_qhub(qhub_version: str) -> str:
     # dev branches
     if len(qhub_version.split(".")) > 3 and qhub_gh_branch:
         pip_install = (
-            f"pip install https://github.com/Quansight/qhub.git@{qhub_gh_branch}"
+            f"pip install git+https://github.com/Quansight/qhub.git@{qhub_gh_branch}"
         )
 
     return pip_install

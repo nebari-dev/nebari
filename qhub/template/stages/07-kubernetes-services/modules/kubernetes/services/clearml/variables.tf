@@ -26,3 +26,9 @@ variable "enable-forward-auth" {
   type    = bool
   default = true
 }
+
+variable "overrides" {
+  description = "Clearml helm chart overrides"
+  type        = list(string)
+  default     = []
+}

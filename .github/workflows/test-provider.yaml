@@ -1,15 +1,17 @@
 name: "Test QHub Provider"
 
 on:
-  pull_request: # Workflow only runs for PR against main anyway
-  push:
-    branches:
-      - '**'
-    tags:
-      - 'v*'
+  pull_request:
     paths-ignore:
       - "docs/**"
       - "*.md"
+      - '.github/workflows/docs.yml'
+  push:
+    branches: [ $default-branch ]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - '.github/workflows/docs.yml'
 
 env:
   DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
@@ -20,9 +22,6 @@ env:
   ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-concurrency:
-  group: provider-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   test-render-providers:

@@ -1,0 +1,55 @@
+{
+  "variable": {
+    "TAG": {
+      "default": "latest"
+    }
+  },
+  "group": {
+    "default": {
+      "targets": [
+        "dask-gateway",
+        "dask-worker",
+        "jupyterhub",
+        "jupyterlab"
+      ]
+    }
+  },
+  "target": {
+    "dask-gateway": {
+      "context": "./",
+      "dockerfile": "Dockerfile.dask-gateway",
+      "tags": [
+        "docker.io/quansight/qhub-dask-gateway:${TAG}",
+        "ghcr.io/quansight/qhub-dask-gateway:${TAG}",
+        "quay.io/quansight/qhub-dask-gateway:${TAG}"
+      ]
+    },
+    "dask-worker": {
+      "context": "./",
+      "dockerfile": "Dockerfile.dask-worker",
+      "tags": [
+        "docker.io/quansight/qhub-dask-worker:${TAG}",
+        "ghcr.io/quansight/qhub-dask-worker:${TAG}",
+        "quay.io/quansight/qhub-dask-worker:${TAG}"
+      ]
+    },
+    "jupyterhub": {
+      "context": "./",
+      "dockerfile": "Dockerfile.jupyterhub",
+      "tags": [
+        "docker.io/quansight/qhub-jupyterhub:${TAG}",
+        "ghcr.io/quansight/qhub-jupyterhub:${TAG}",
+        "quay.io/quansight/qhub-jupyterhub:${TAG}"
+      ]
+    },
+    "jupyterlab": {
+      "context": "./",
+      "dockerfile": "Dockerfile.jupyterlab",
+      "tags": [
+        "docker.io/quansight/qhub-jupyterlab:${TAG}",
+        "ghcr.io/quansight/qhub-jupyterlab:${TAG}",
+        "quay.io/quansight/qhub-jupyterlab:${TAG}"
+      ]
+    }
+  }
+}

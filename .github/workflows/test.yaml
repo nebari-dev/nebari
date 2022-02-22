@@ -1,19 +1,17 @@
 name: "Tests"
 
 on:
-  pull_request: # Workflow only runs for PR against main anyway
-  push:
-    branches:
-      - '**'
-    tags:
-      - 'v*'
+  pull_request:
     paths-ignore:
       - "docs/**"
       - "*.md"
-
-concurrency:
-  group: test-${{ github.ref }}
-  cancel-in-progress: true
+      - '.github/workflows/docs.yml'
+  push:
+    branches: [ $default-branch ]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - '.github/workflows/docs.yml'
 
 jobs:
   test-general:
