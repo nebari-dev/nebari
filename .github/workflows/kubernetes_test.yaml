@@ -2,16 +2,26 @@ name: "Kubernetes Tests"
 
 on:
   pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-      - '.github/workflows/docs.yml'
+    paths:
+      - ".github/workflows/kubernetes_test.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
   push:
     branches: [ $default-branch ]
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-      - '.github/workflows/docs.yml'
+    paths:
+      - ".github/workflows/kubernetes_test.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
 
 jobs:
   test-kubernetes:
