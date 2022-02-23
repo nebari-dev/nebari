@@ -36,12 +36,14 @@ def QHubKubernetesProvider(qhub_config: Dict):
                 experiments={"manifest_resource": True},
                 host="${data.aws_eks_cluster.default.endpoint}",
                 cluster_ca_certificate="${base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)}",
-                token="${data.aws_eks_cluster_auth.default.token}"
-            )
+                token="${data.aws_eks_cluster_auth.default.token}",
+            ),
         )
     return Provider(
-        "kubernetes", experiments={"manifest_resource": True},
+        "kubernetes",
+        experiments={"manifest_resource": True},
     )
+
 
 def QHubHelmProvider(qhub_config: Dict):
     if qhub_config["provider"] == "aws":
@@ -56,9 +58,9 @@ def QHubHelmProvider(qhub_config: Dict):
                     experiments={"manifest_resource": True},
                     host="${data.aws_eks_cluster.default.endpoint}",
                     cluster_ca_certificate="${base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)}",
-                    token="${data.aws_eks_cluster_auth.default.token}"
-                )
-            )
+                    token="${data.aws_eks_cluster_auth.default.token}",
+                ),
+            ),
         )
     return Provider("helm")
 
