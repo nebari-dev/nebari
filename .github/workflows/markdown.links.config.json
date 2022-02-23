@@ -20,12 +20,6 @@
     },
     {
         "pattern": "https://cloud.google.com"
-    },
-    {
-      "pattern": "sqlite"
-    },
-    {
-      "pattern": "URIs"
     }
 	]
 }
