@@ -155,7 +155,7 @@ Next, you will need to perform the following steps to restore from a previously 
 
 1. Restore the NFS data from your S3 (or similar) backup
 2. Immediately after restoring NFS data, you must run some extra commands as explained in the backup/restore docs for v0.4 upgrades specifically.
-3. Restore the JupyterHub sqlite database.
+3. Restore the JupyterHub SQLite database.
 
 ## 10. Import users into Keycloak
 
