@@ -82,7 +82,8 @@ def destroy_stages(stage_outputs, config):
                 terraform_import=True,
                 terraform_apply=terraform_apply,
                 terraform_destroy=True,
-                **kwargs)
+                **kwargs,
+            )
         except terraform.TerraformException as e:
             if not ignore_errors:
                 raise e
