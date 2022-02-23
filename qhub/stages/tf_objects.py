@@ -1,6 +1,7 @@
 from typing import Dict
 
-from qhub.provider.terraform import tf_render_objects, TerraformBackend, Provider
+from qhub.provider.terraform import tf_render_objects, TerraformBackend, Provider, Data
+from qhub.utils import deep_merge
 
 
 def QHubAWSProvider(qhub_config: Dict):
@@ -24,22 +25,44 @@ def QHubDigitalOceanProvider(qhub_config: Dict):
 
 
 def QHubKubernetesProvider(qhub_config: Dict):
-    optional_kwargs = {}
     if qhub_config["provider"] == "aws":
-        optional_kwargs["exec"] = {
-            "api_version": "client.authentication.k8s.io/v1alpha1",
-            "args": [
-                "eks",
-                "get-token",
-                "--cluster-name",
-                f"{qhub_config['project_name']}-{qhub_config['namespace']}",
-            ],
-            "command": "aws",
-        }
+        cluster_name = f"{qhub_config['project_name']}-{qhub_config['namespace']}"
 
+        return deep_merge(
+            Data("aws_eks_cluster", "default", name=cluster_name),
+            Data("aws_eks_cluster_auth", "default", name=cluster_name),
+            Provider(
+                "kubernetes",
+                experiments={"manifest_resource": True},
+                host="${data.aws_eks_cluster.default.endpoint}",
+                cluster_ca_certificate="${base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)}",
+                token="${data.aws_eks_cluster_auth.default.token}",
+            ),
+        )
     return Provider(
-        "kubernetes", experiments={"manifest_resource": True}, **optional_kwargs
+        "kubernetes",
+        experiments={"manifest_resource": True},
     )
+
+
+def QHubHelmProvider(qhub_config: Dict):
+    if qhub_config["provider"] == "aws":
+        cluster_name = f"{qhub_config['project_name']}-{qhub_config['namespace']}"
+
+        return deep_merge(
+            Data("aws_eks_cluster", "default", name=cluster_name),
+            Data("aws_eks_cluster_auth", "default", name=cluster_name),
+            Provider(
+                "helm",
+                kubernetes=dict(
+                    experiments={"manifest_resource": True},
+                    host="${data.aws_eks_cluster.default.endpoint}",
+                    cluster_ca_certificate="${base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)}",
+                    token="${data.aws_eks_cluster_auth.default.token}",
+                ),
+            ),
+        )
+    return Provider("helm")
 
 
 def QHubTerraformState(directory: str, qhub_config: Dict):
@@ -164,6 +187,7 @@ def stage_03_kubernetes_initialize(config):
             [
                 QHubTerraformState("03-kubernetes-initialize", config),
                 QHubKubernetesProvider(config),
+                QHubHelmProvider(config),
             ]
         ),
     }
@@ -175,6 +199,7 @@ def stage_04_kubernetes_ingress(config):
             [
                 QHubTerraformState("04-kubernetes-ingress", config),
                 QHubKubernetesProvider(config),
+                QHubHelmProvider(config),
             ]
         ),
     }
@@ -186,6 +211,7 @@ def stage_05_kubernetes_keycloak(config):
             [
                 QHubTerraformState("05-kubernetes-keycloak", config),
                 QHubKubernetesProvider(config),
+                QHubHelmProvider(config),
             ]
         ),
     }
@@ -207,6 +233,7 @@ def stage_07_kubernetes_services(config):
             [
                 QHubTerraformState("07-kubernetes-services", config),
                 QHubKubernetesProvider(config),
+                QHubHelmProvider(config),
             ]
         ),
     }
@@ -218,6 +245,7 @@ def stage_08_qhub_tf_extensions(config):
             [
                 QHubTerraformState("08-qhub-tf-extensions", config),
                 QHubKubernetesProvider(config),
+                QHubHelmProvider(config),
             ]
         ),
     }
