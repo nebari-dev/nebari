@@ -55,7 +55,6 @@ def QHubHelmProvider(qhub_config: Dict):
             Provider(
                 "helm",
                 kubernetes=dict(
-                    experiments={"manifest_resource": True},
                     host="${data.aws_eks_cluster.default.endpoint}",
                     cluster_ca_certificate="${base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)}",
                     token="${data.aws_eks_cluster_auth.default.token}",
