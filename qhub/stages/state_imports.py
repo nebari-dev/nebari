@@ -18,22 +18,23 @@ def stage_01_terraform_state(stage_outputs, config):
         ]
     elif config["provider"] == "azure":
         subscription_id = os.environ["ARM_SUBSCRIPTION_ID"]
-        resource_group_name = f"{config['project_name']}-{config['namespace']}"
-        resource_group_name_safe = resource_group_name.replace("-", "")
-        resource_group_url = f"/subscriptions/{subscription_id}/resourceGroups/{config['project_name']}-{config['namespace']}"
+        resource_name_prefix = f"{config['project_name']}-{config['namespace']}"
+        state_resource_group_name = f"{resource_name_prefix}-state"
+        state_resource_name_prefix_safe = resource_name_prefix.replace("-", "")
+        resource_group_url = f"/subscriptions/{subscription_id}/resourceGroups/{state_resource_group_name}"
 
         return [
             (
-                "module.terraform-state.azurerm_resource_group.terraform-resource-group",
+                "module.terraform-state.azurerm_resource_group.terraform-state-resource-group",
                 resource_group_url,
             ),
             (
-                "module.terraform-state.azurerm_storage_account.terraform-storage-account",
-                f"{resource_group_url}/providers/Microsoft.Storage/storageAccounts/{resource_group_name_safe}{config['azure']['storage_account_postfix']}",
+                "module.terraform-state.azurerm_storage_account.terraform-state-storage-account",
+                f"{resource_group_url}/providers/Microsoft.Storage/storageAccounts/{state_resource_name_prefix_safe}{config['azure']['storage_account_postfix']}",
             ),
             (
                 "module.terraform-state.azurerm_storage_container.storage_container",
-                f"https://{resource_group_name_safe}{config['azure']['storage_account_postfix']}.blob.core.windows.net/{resource_group_name}state",
+                f"https://{state_resource_name_prefix_safe}{config['azure']['storage_account_postfix']}.blob.core.windows.net/{resource_name_prefix}-state",
             ),
         ]
     elif config["provider"] == "aws":

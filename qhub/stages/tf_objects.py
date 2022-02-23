@@ -78,10 +78,10 @@ def QHubTerraformState(directory: str, qhub_config: Dict):
     elif qhub_config["provider"] == "azure":
         return TerraformBackend(
             "azurerm",
-            resource_group_name=f"{qhub_config['project_name']}-{qhub_config['namespace']}",
+            resource_group_name=f"{qhub_config['project_name']}-{qhub_config['namespace']}-state",
             # storage account must be globally unique
             storage_account_name=f"{qhub_config['project_name']}{qhub_config['namespace']}{qhub_config['azure']['storage_account_postfix']}",
-            container_name=f"{qhub_config['project_name']}-{qhub_config['namespace']}state",
+            container_name=f"{qhub_config['project_name']}-{qhub_config['namespace']}-state",
             key=f"terraform/{qhub_config['project_name']}-{qhub_config['namespace']}/{directory}",
         )
     elif qhub_config["provider"] == "local":
