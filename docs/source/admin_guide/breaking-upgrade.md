@@ -3,9 +3,9 @@
 For versions that are known to require redeployment when upgrading, this is an outline of the steps required to upgrade QHub:
 
 - Back up user data by following [this backup guide](./backup.md).
-- Change the existing cluster to a different URL (e.g. `qhub-old.mycompany.com`) so it is hidden.
+- Change the existing cluster to a different URL (for example `qhub-old.mycompany.com`) so it is hidden.
 - Run `qhub upgrade` to make recommended modifications to the `qhub-config.yaml` file.
-- Deploy a new QHub with the desired version (to your original preferred URL e.g. `qhub.mycompany.com` but a new project_name to avoid resource name clashes).
+- Deploy a new QHub with the desired version (to your original preferred URL for example `qhub.mycompany.com` but a new project_name to avoid resource name clashes).
 - Restore user data to the new cluster.
 - Once you have confirmed the backup and upgrade have been successfully completed, you can destroy the old cluster.
 
@@ -129,7 +129,7 @@ If your QHub deployment relies on Auth0 or GitHub for authentication, please upd
 
 <details><summary>Expand this section for Auth0 instructions </summary>
 
-1. Navigate to the your Auth0 tenacy homepage and from there select "Applications".
+1. Navigate to the your Auth0 tenancy homepage and from there select "Applications".
 
 2. Select the "Regular Web Application" with the name of your deployment.
 
