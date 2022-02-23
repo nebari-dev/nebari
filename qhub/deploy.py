@@ -3,54 +3,19 @@ import os
 import tempfile
 import textwrap
 import subprocess
-from typing import Dict
-import contextlib
 
-from qhub.utils import modified_environ, check_cloud_credentials, timer
+from qhub.utils import (
+    check_cloud_credentials,
+    timer,
+    kubernetes_provider_context,
+    keycloak_provider_context,
+)
 from qhub.stages import checks, state_imports, input_vars
 from qhub.provider import terraform
 from qhub.provider.dns.cloudflare import update_record
 
 
 logger = logging.getLogger(__name__)
-
-
-@contextlib.contextmanager
-def kubernetes_provider_context(kubernetes_credentials: Dict[str, str]):
-    credential_mapping = {
-        "config_path": "KUBE_CONFIG_PATH",
-        "config_context": "KUBE_CTX",
-        "username": "KUBE_USER",
-        "password": "KUBE_PASSWORD",
-        "client_certificate": "KUBE_CLIENT_CERT_DATA",
-        "client_key": "KUBE_CLIENT_KEY_DATA",
-        "cluster_ca_certificate": "KUBE_CLUSTER_CA_CERT_DATA",
-        "host": "KUBE_HOST",
-        "token": "KUBE_TOKEN",
-    }
-
-    credentials = {
-        credential_mapping[k]: v
-        for k, v in kubernetes_credentials.items()
-        if v is not None
-    }
-    with modified_environ(**credentials):
-        yield
-
-
-@contextlib.contextmanager
-def keycloak_provider_context(keycloak_credentials: Dict[str, str]):
-    credential_mapping = {
-        "client_id": "KEYCLOAK_CLIENT_ID",
-        "url": "KEYCLOAK_URL",
-        "username": "KEYCLOAK_USER",
-        "password": "KEYCLOAK_PASSWORD",
-        "realm": "KEYCLOAK_REALM",
-    }
-
-    credentials = {credential_mapping[k]: v for k, v in keycloak_credentials.items()}
-    with modified_environ(**credentials):
-        yield
 
 
 def provision_01_terraform_state(stage_outputs, config):

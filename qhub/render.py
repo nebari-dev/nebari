@@ -116,7 +116,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
             os.makedirs(os.path.dirname(output_filename), exist_ok=True)
 
             if os.path.exists(input_filename):
-                shutil.copyfile(input_filename, output_filename)
+                shutil.copy(input_filename, output_filename)
             else:
                 with open(output_filename, "w") as f:
                     f.write(contents[filename])
