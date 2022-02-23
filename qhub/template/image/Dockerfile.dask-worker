@@ -6,11 +6,6 @@ RUN /opt/scripts/install-apt-minimal.sh
 
 COPY scripts/fix-permissions /opt/scripts/fix-permissions
 
-# These can but should not be changed. ids will be arbitrary at run time.
-ARG NB_USER=jovyan
-ARG NB_UID=1000
-ARG NB_GID=100
-
 ENV CONDA_VERSION py37_4.10.3
 ENV CONDA_SHA256 a1a7285dea0edc430b2bc7951d89bb30a2a1b32026d2a7b02aacaaa95cf69c7c
 SHELL ["/bin/bash", "-c"]

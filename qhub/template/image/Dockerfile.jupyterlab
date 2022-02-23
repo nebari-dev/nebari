@@ -7,10 +7,6 @@ COPY scripts/install-apt-minimal.sh /opt/scripts/install-apt-minimal.sh
 RUN /opt/scripts/install-apt-minimal.sh
 
 COPY scripts/fix-permissions /opt/scripts/fix-permissions
-# These can but should not be changed. ids will be arbitrary at run time.
-ARG NB_USER=jovyan
-ARG NB_UID=1000
-ARG NB_GID=100
 
 ENV CONDA_VERSION py37_4.10.3
 ENV CONDA_SHA256 a1a7285dea0edc430b2bc7951d89bb30a2a1b32026d2a7b02aacaaa95cf69c7c
@@ -62,25 +58,3 @@ ENV PATH="$NVIDIA_PATH:$PATH"
 COPY scripts/setup_shell_behavior.sh /opt/scripts/setup_shell_behavior.sh
 RUN setup_shell_behavior.sh ${DEFAULT_ENV} \
     && fix-permissions /etc
-
-# ========== change user though this will change upon deployment...  ============
-# Create user & group jovyan, this is only relevant for
-# local testing where the user has not mounted their
-# own home directory to the container. During
-# deployment this is mounted over and so an equivalent
-# should be executed upon user initialization.
-RUN groupadd --gid ${NB_UID} ${NB_USER} && \
-    useradd \
-    --comment 'Jupyter container user' \
-    --create-home \
-    --no-log-init \
-    --shell /bin/bash \
-    --gid ${NB_UID} \
-    --uid ${NB_UID} \
-    ${NB_USER}
-
-# Have jovyan user own /home/jovyan/.local for local testing.
-RUN chown jovyan /home/jovyan
-
-USER ${NB_UID}
-WORKDIR /home/${NB_USER}
