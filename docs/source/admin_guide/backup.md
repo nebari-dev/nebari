@@ -152,26 +152,22 @@ The file permissions for the default tar is same as the original files.
 > QHub v0.4: If restoring your NFS as part of the upgrade you must also run some extra commands, immediately after extracting from the tar file.
 >
 > Because previous versions contained the `shared` folder within `home`, but they are now both at the same level, you must run:
-> ```
+> ```shell
 > cd /data
 > cp -r home/shared/* shared/
 > rm -rf home/shared/
 > ```
 > And then:
-> ```
+> ```shell
 > chown -R 1000:100 /data/home/*
 > chown -R 1000:100 /data/shared/*
 > ```
 > This is because all users have the same uid in QHub v0.4 onward.
 >
 
-
-
-
-
 ### Google cloud provider
 
-To use the Google Cloud provider, install [gsutil](https://cloud.google.com/storage/docs/gsutil_install). The instructions are same as the preceding steps. Additionally, use these commands for copy/download of the backup:
+To use the Google Cloud provider, install the [gsutil](https://cloud.google.com/storage/docs/gsutil_install) CLI. The instructions are the same as the preceding steps. Additionally, use these commands for copy/download of the backup:
 
 ```shell
 cd /data
@@ -184,19 +180,21 @@ gsutil cp gs://<your_bucket_name>/backups/2021-04-23.tar .
 ### Digital Ocean
 
 Similar instructions, but use Digital Ocean spaces. This guide explains installation of the command-line tool:
-https://www.digitalocean.com/community/tutorials/how-to-migrate-from-amazon-s3-to-digitalocean-spaces-with-rclone
+<https://www.digitalocean.com/community/tutorials/how-to-migrate-from-amazon-s3-to-digitalocean-spaces-with-rclone>
 
 
 ## JupyterHub Database
 
-The JupyterHub database will mostly be recreated when you start a new cluster anyway, but should be backed up to save Dashboard configurations.
+The JupyterHub database will mostly be recreated whenever you start a new cluster, but should be backed up to save Dashboard configurations.
 
-You can do something very similar to the NFS backup, above - this time you need to back up a file on the PersistentVolume `hub-db-dir`. First, you might think you can just make a new `pod.yaml` file, this time specifying `claimName: "hub-db-dir"` instead of `claimName: "nfs-mount-dev-share"`. However, `hub-db-dir` is 'Read Write Once' - the 'Once' meaning it can only be mounted to one pod at a time, but the JupyterHub pod will already have this mounted!
+You want to do something very similar to the NFS backup, above - this time you need to back up just one file, and it's on the PersistentVolume `hub-db-dir`.
+
+First, you might think you can just make a new `pod.yaml` file, this time specifying `claimName: "hub-db-dir"` instead of `claimName: "jupyterhub-dev-share"`. However, `hub-db-dir` is 'Read Write Once' - the 'Once' meaning it can only be mounted to one pod at a time, but the JupyterHub pod will already have this mounted! So the same approach will not work here.
 
 So instead of mounting to a new 'debugger pod' we have to access the JupyterHub pod directly and see what we can do from there.
 
 Look up the JupyterHub pod:
-```
+```bash
 kubectl get pods -n dev
 ```
 
@@ -204,7 +202,7 @@ It will be something like `hub-765c9488d6-8z4nj`.
 
 Get a shell into that pod:
 
-```
+```bash
 kubectl exec -n dev --stdin --tty hub-765c9488d6-8z4nj -- /bin/bash
 ```
 
@@ -212,20 +210,20 @@ There is no need to TAR anything up since the only file required to be backed up
 
 ### Backing up JupyterHub DB
 
-So we just need to upload the file to S3. You might want to install the AWS CLI tool as we did before, but unfortunately the Hub container is quite locked down and it isn't straightforward to install that... You might need to upload to S3 using curl directly:
+Now we just need to upload the file to S3. You might want to [install the AWS CLI tool](#installations) as we did before, but unfortunately the Hub container is quite locked down and it isn't straightforward to install that... So instead you need to upload to S3 using curl directly:
 
-As [explained here](./awss3curl.md).
+For more details please refer to the [using curl to access AWS S3 buckets](./awss3curl.md) documentation.
 
 ### Restoring JupyterHub DB
 
-Simply overwrite the same file `/srv/jupyterhub/jupyterhub.sqlite` based on the version backed up to S3.
+You will need to overwrite the file `/srv/jupyterhub/jupyterhub.sqlite` based on the version backed up to S3.
 
 You should restart the pod:
-```
+```bash
 kubectl delete -n dev pod hub-765c9488d6-8z4nj
 ```
 
-As for uploads, [you may need to download using curl](./awss3curl.md).
+As for uploads, [you may need to use curl to download items from an AWS S3 bucket](./awss3curl.md).
 
 ## Keycloak user/group database
 
@@ -245,7 +243,7 @@ If not, first set the `KEYCLOAK_ADMIN_PASSWORD` environment variable to the new 
 
 Run the following to create the export file:
 
-```
+```shell
 python qhub/scripts/keycloak-export.py -c qhub-config.yaml > exported-keycloak.json
 ```
 
@@ -257,4 +255,4 @@ To re-import your users and groups, [login to the /auth/ URL](../installation/lo
 
 Under 'Manage' on the left-hand side, click 'Import'. Locate the `exported-keycloak.json` file and select it. Then click the 'Import' button.
 
-All users and groups should now be present in Keycloak. Note that password will not have been restored so may need to be reset.
+All users and groups should now be present in Keycloak. Note that the passwords will not have been restored so you may need to be reset them after this step.

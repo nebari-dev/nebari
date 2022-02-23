@@ -2,12 +2,11 @@
 
 This is a guide to the general upgrade of QHub to a new version.
 
-You should always backup your data before upgrading.
+You should always [backup your data](./backup.md) before upgrading.
 
 > Note that for some releases (e.g. to v0.4), the cluster cannot be upgraded in-situ so you must perform a redeployment (backup the old cluster, redeploy a new upgraded cluster and then restore your data).
 >
-> To perform a redeployment upgrade see the [more detailed documentation here](./breaking-upgrade.md).
-
+> To perform a redeployment upgrade see the [breaking upgrade documentation](./breaking-upgrade.md).
 
 Here we suppose a user would like to upgrade to a version `<version>`, probably the latest full release of [QHub on PyPI](https://pypi.org/project/qhub/).
 
