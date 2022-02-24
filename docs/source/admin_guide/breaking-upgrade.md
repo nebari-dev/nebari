@@ -11,7 +11,7 @@ For versions that are known to require redeployment when upgrading, this is an o
 
 Full details of the steps appear below.
 
-Please always check [release notes](../dev_guide/changelog.md) for more details - and in all cases, backup your data before upgrading.
+Please always check the [release notes](../dev_guide/changelog.md) for more details - and in all cases, backup your data before upgrading.
 
 > The rest of this guide assumes you are upgrading from version v0.3.14 to v0.4.
 
