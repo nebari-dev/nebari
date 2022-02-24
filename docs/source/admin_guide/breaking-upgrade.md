@@ -29,7 +29,7 @@ For more details please refer to the [Manual Backup guide](./backup.md).
 
 This will allow the existing cluster to remain alive in case it is needed, but the idea would be not to have it in use from now on.
 
-In the qhub-config.yaml for example:
+In the `qhub-config.yaml` for example:
 
 ```yaml
 project_name: myqhub
