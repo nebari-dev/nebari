@@ -187,7 +187,7 @@ Similar instructions, but use Digital Ocean spaces. This guide explains installa
 
 The JupyterHub database will mostly be recreated whenever you start a new cluster, but should be backed up to save Dashboard configurations.
 
-You want to do something very similar to the NFS backup, above - this time you need to back up just one file, and it's on the PersistentVolume `hub-db-dir`.
+You want to do something very similar to the NFS backup, above - this time you need to back up just one file located in the  PersistentVolume `hub-db-dir`.
 
 First, you might think you can just make a new `pod.yaml` file, this time specifying `claimName: "hub-db-dir"` instead of `claimName: "jupyterhub-dev-share"`. However, `hub-db-dir` is 'Read Write Once' - the 'Once' meaning it can only be mounted to one pod at a time, but the JupyterHub pod will already have this mounted! So the same approach will not work here.
 
