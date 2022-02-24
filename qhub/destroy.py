@@ -177,9 +177,11 @@ def destroy_configuration(config):
 
     for stage_name, success in status.items():
         if not success:
-            logger.error(f'Stage={stage_name} failed to fully destroy')
+            logger.error(f"Stage={stage_name} failed to fully destroy")
 
     if not all(success.values()):
-        logger.error('ERROR: not all qhub stages were destroyed properly. For cloud deployments of QHub typically only stages 01 and 02 need to succeed to properly destroy everything')
+        logger.error(
+            "ERROR: not all qhub stages were destroyed properly. For cloud deployments of QHub typically only stages 01 and 02 need to succeed to properly destroy everything"
+        )
     else:
-        print('QHub properly destroyed all resources without error')
+        print("QHub properly destroyed all resources without error")
