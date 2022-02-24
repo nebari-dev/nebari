@@ -304,7 +304,7 @@ class DaskWorkerProfile(Base):
     worker_cores: int
     worker_memory_limit: str
     worker_memory: str
-    image: typing.Optional[bool]
+    image: typing.Optional[str]
 
     class Config:
         extra = "allow"
