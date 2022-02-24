@@ -191,7 +191,7 @@ You want to do something very similar to the NFS backup, above - this time you n
 
 First, you might think you can just make a new `pod.yaml` file, this time specifying `claimName: "hub-db-dir"` instead of `claimName: "jupyterhub-dev-share"`. However, `hub-db-dir` is 'Read Write Once' - the 'Once' meaning it can only be mounted to one pod at a time, but the JupyterHub pod will already have this mounted! So the same approach will not work here.
 
-So instead of mounting to a new 'debugger pod' we have to access the JupyterHub pod directly and see what we can do from there.
+Instead of mounting to a new 'debugger pod' you have to access the JupyterHub pod directly using the `kubectl` CLI.
 
 Look up the JupyterHub pod:
 ```bash
