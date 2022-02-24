@@ -13,7 +13,7 @@ Full details of the steps appear below.
 
 Please always check the [release notes](../dev_guide/changelog.md) for more details - and in all cases, backup your data before upgrading.
 
-> The rest of this guide assumes you are upgrading from version v0.3.14 to v0.4.
+> The rest of this guide assumes you are upgrading from version v0.3.14 (or earlier) to v0.4.
 
 You may be deploying QHub based on a local configuration file, or you may be using CI/CD workflows in GitHub or GitLab. Either way, you will need to locate a copy of your `qhub-config.yaml` configuration file to upgrade it (and commit back to your git repo in the CI/CD case).
 

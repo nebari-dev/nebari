@@ -27,7 +27,7 @@ This specific guide shows how to do this on an AWS cluster and upload to AWS S3.
 
 ### Kubectl configuration
 
-To setup kubectl, obtain the name of the cluster. If the user knows the deployment region of the current cluster, this is straightforward:
+To setup kubectl, obtain the name of the cluster. If you know the deployment region of the current cluster, this is straightforward:
 
 ```shell
 aws eks list-clusters --region=us-west-2
@@ -41,7 +41,7 @@ aws eks update-kubeconfig  --region us-west-2 --name <relevant-name>
 
 ### Pod deployment
 
-With `kubectl` configured,  the next step will be to deploy the pod that allows the user to access the cluster files. First, save the following pod specification to a file named `pod.yaml`:
+With `kubectl` configured, the next step will be to deploy the pod that allows you to access the cluster files. First, save the following pod specification to a file named `pod.yaml`:
 
 ```yaml
 kind: Pod
@@ -63,7 +63,7 @@ spec:
           name: volume-to-debug-ubuntu
 ```
 
-> Note in QHub versions before v0.4 replace `claimName: "jupyterhub-dev-share"` with `claimName: "nfs-mount-dev-share"`
+> Note in QHub versions before v0.4 replace `claimName: "jupyterhub-dev-share"` with `claimName: "nfs-mount-dev-share"` above.
 
 Once the file `pod.yml` has been created, run the following command:
 
@@ -71,7 +71,7 @@ Once the file `pod.yml` has been created, run the following command:
 kubectl apply -f pod.yaml -n dev
 ```
 
-If you have a namespace other than the default dev, replace `dev` with your namespace. To get a shell to this running pod, run:
+If you have a namespace other than the default dev, replace `dev` with your namespace when running `kubectl`. To get a shell to this running pod, run:
 
 ```shell
 kubectl exec -n dev --stdin --tty volume-debugger-ubuntu -- /bin/bash
@@ -81,7 +81,7 @@ Again replacing the `dev` namespace as needed.
 
 ### Installations
 
-The user must install several `apt` packages, as the pod spun up is a basic pod. The following commands installs them:
+You must install several `apt` packages, as the pod spun up is a basic pod. The following commands installs them:
 
 ```shell
 apt update
@@ -89,7 +89,7 @@ apt install curl -y
 apt install unzip -y
 ```
 
-Because the user is on AWS, the AWS command-line tool is also installed:
+Because you are on AWS, the AWS command-line tool is also installed:
 
 ```shell
 curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -109,11 +109,11 @@ cd /data
 tar -cvf <custom_name>.tar .
 ```
 
-The preferred naming scheme includes a year-month-day, example `2021-04-23_home_backup.tar`. The user can utilize multi-backups through this step. This step takes several minutes depending on the size of the home directories.
+The preferred naming scheme includes a year-month-day, example `2021-04-23_home_backup.tar`. You can utilize multi-backups through this step. This step takes several minutes depending on the size of the home directories.
 
 ### Upload to block storage
 
-Once this is complete, the user uploads the tar file to S3 using the AWS command-line tool:
+Once this is complete, upload the tar file to S3 using the AWS command-line tool:
 
 ```shell
 aws s3 cp 2021-04-23.tar s3://<your_bucket_name>/backups/2021-04-23.tar
@@ -131,7 +131,7 @@ Now that the data backed up, perform the same steps preceding for the new cluste
 - Installing the apt packages.
 - Configuring AWS.
 
-Once AWS gets configured on the new pod, the user can then download the backup with:
+Once AWS gets configured on the new pod, you can then download the backup with:
 
 ```shell
 cd /data
@@ -162,12 +162,12 @@ The file permissions for the default tar is same as the original files.
 > chown -R 1000:100 /data/home/*
 > chown -R 1000:100 /data/shared/*
 > ```
-> This is because all users have the same uid in QHub v0.4 onward.
+> From QHUb v0.4. all users will have the same `uid`.
 >
 
 ### Google cloud provider
 
-To use the Google Cloud provider, install the [gsutil](https://cloud.google.com/storage/docs/gsutil_install) CLI. The instructions are the same as the preceding steps. Additionally, use these commands for copy/download of the backup:
+To use the Google Cloud provider, install the [gsutil](https://cloud.google.com/storage/docs/gsutil_install) CLI instead of the AWS CLI. Otherwise, the instructions are the same as for AWS above, other than when working with S3. Here are the commands to access Google Spaces instead of S3 for copy/download of the backup:
 
 ```shell
 cd /data
@@ -179,7 +179,7 @@ gsutil cp gs://<your_bucket_name>/backups/2021-04-23.tar .
 
 ### Digital Ocean
 
-Similar instructions, but use Digital Ocean spaces. This guide explains installation of the command-line tool:
+Instructions will be similar to those for AWS above, but use Digital Ocean spaces instead of S3. This guide explains installation of the command-line tool:
 <https://www.digitalocean.com/community/tutorials/how-to-migrate-from-amazon-s3-to-digitalocean-spaces-with-rclone>
 
 
