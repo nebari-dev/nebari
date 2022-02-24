@@ -2,7 +2,7 @@
 
 In some situations, users may wish to upload content to S3 or download content from an S3 bucket. For example, when attempting [manual backups of QHub's data](./backup.md).
 
-Where possible, it is easiest to use AWS's command line tools to do so, but in some situations - for example, to backup the JupyterHub SQLite database - it may be difficult to install AWS' CLI tools due to being in a restricted container environment. In that situation, it is possible to fall back on AWS' basic REST API and use HTTPS requests directly instead. (Ultimately, the AWS CLI is simply a wrapper around those REST APIs.)
+In many cases, the most straightforward way to access AWS S3 buckets is by installing and using AWS's command-line tool. But in some situations - for example, to back up the JupyterHub SQLite database - it may be difficult to install AWS' CLI tools due to being in a restricted container environment. In that situation, it is possible to fall back on AWS' basic REST API and use HTTPS requests directly instead. (Ultimately, the AWS CLI is simply a wrapper around those REST APIs.)
 
 This document describes simple curl commands to interface with S3 directly, specifically in the case of uploading a [backup](./backup.md) of JupyterHub's SQLite database from a restricted pod to S3 (or restoring it from a backup from S3).
 
