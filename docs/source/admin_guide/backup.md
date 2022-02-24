@@ -65,7 +65,7 @@ spec:
 
 > Note in QHub versions before v0.4 replace `claimName: "jupyterhub-dev-share"` with `claimName: "nfs-mount-dev-share"`
 
-Run:
+Once the file `pod.yml` has been created, run the following command:
 
 ```shell
 kubectl apply -f pod.yaml -n dev
