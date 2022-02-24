@@ -36,13 +36,23 @@ def deploy(
     """Execute a given terraform directory
 
     Parameters:
+      directory: directory in which to run terraform operations on
+
+      terraform_init: whether to run `terraform init` default True
+
+      terraform_import: whether to run `terraform import` default
+        False for each `state_imports` supplied to function
+
+      terraform_apply: whether to run `terraform apply` default True
+
+      terraform_destroy: whether to run `terraform destroy` default
+        False
+
       input_vars: supply values for "variable" resources within
         terraform module
 
-      terraform_objects: using resources Terraform, RequiredProvider,
-        Provider, TerraformBackend, Variable, Data, Resource, Output
-        construct additional resources to include in module
-
+      state_imports: (addr, id) pairs for iterate through and attempt
+        to terraform import
     """
     input_vars = input_vars or {}
     state_imports = state_imports or []
