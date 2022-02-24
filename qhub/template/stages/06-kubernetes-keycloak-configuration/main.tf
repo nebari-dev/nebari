@@ -5,7 +5,6 @@ resource "keycloak_realm" "main" {
   display_name = var.realm_display_name
 }
 
-
 resource "keycloak_group" "groups" {
   for_each = var.keycloak_groups
   realm_id = keycloak_realm.main.id
@@ -15,16 +14,18 @@ resource "keycloak_group" "groups" {
 resource "keycloak_group" "project_groups" {
   for_each  = var.default_project_groups
   realm_id  = keycloak_realm.main.id
-
   name      = each.value
-  parent_id = keycloak_group.groups["projects"].id
 }
-
 
 resource "keycloak_default_groups" "default" {
   realm_id  = keycloak_realm.main.id
-  group_ids = [
-    for g in var.default_project_groups:
-    keycloak_group.project_groups[g].id
-  ]
+  group_ids = concat(
+    [
+      for g in var.default_project_groups:
+      keycloak_group.project_groups[g].id
+    ],
+    [
+      keycloak_group.groups["analyst"].id
+    ]
+  )
 }

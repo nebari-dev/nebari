@@ -263,7 +263,9 @@ def configure_user(username, groups, uid=1000, gid=100):
             # mount the shared directories for user only if there are
             # shared folders (groups) that the user is a member of
             # else ensure that the `shared` folder symlink does not exist
-            f"ln -sfn /shared /home/{username}/shared" if groups else f"rm -f /home/{username}/shared",
+            f"ln -sfn /shared /home/{username}/shared"
+            if groups
+            else f"rm -f /home/{username}/shared",
             # conda-store environment configuration
             f"printf '{condarc}' > /home/{username}/.condarc",
             # jupyter configuration
@@ -330,12 +332,10 @@ def render_profiles(spawner):
     spawner.log.error(str(auth_state))
 
     username = auth_state["oauth_user"]["preferred_username"]
-    # only return groups that match '/projects/[.^/]+'
-    groups = [
-        os.path.basename(_)
-        for _ in auth_state["oauth_user"]["groups"]
-        if os.path.dirname(_) == "/projects"
-    ]
+    # only return the lowest level group name
+    # e.g. /projects/myproj -> myproj
+    # and /developers -> developers
+    groups = [os.path.basename(_) for _ in auth_state["oauth_user"]["groups"]]
     spawner.log.error(f"user info: {username} {groups}")
 
     # fetch available profiles and render additional attributes
