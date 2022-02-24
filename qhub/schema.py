@@ -284,7 +284,7 @@ class KubeSpawner(Base):
     cpu_guarantee: int
     mem_limit: str
     mem_guarantee: str
-    image: str
+    image: typing.Optional[str]
 
     class Config:
         extra = "allow"
@@ -304,7 +304,7 @@ class DaskWorkerProfile(Base):
     worker_cores: int
     worker_memory_limit: str
     worker_memory: str
-    image: str
+    image: typing.Optional[bool]
 
     class Config:
         extra = "allow"

@@ -170,7 +170,6 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 0.75,
                 "mem_limit": "4G",
                 "mem_guarantee": "2.5G",
-                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
         {
@@ -181,7 +180,6 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1.5,
                 "mem_limit": "8G",
                 "mem_guarantee": "5G",
-                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
     ],
@@ -192,7 +190,6 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "4G",
             "worker_memory": "2.5G",
             "worker_threads": 1,
-            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
         "Medium Worker": {
             "worker_cores_limit": 2,
@@ -200,7 +197,6 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "8G",
             "worker_memory": "5G",
             "worker_threads": 2,
-            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
     },
 }
