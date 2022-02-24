@@ -170,15 +170,18 @@ def stage_05_kubernetes_keycloak(stage_outputs, config):
 def stage_06_kubernetes_keycloak_configuration(stage_outputs, config):
     realm_id = "qhub"
 
+    users_group = (
+        ["users"] if config["security"].get("shared_users_group", False) else []
+    )
+
     return {
         "realm": realm_id,
         "realm_display_name": config["security"]["keycloak"].get(
             "realm_display_name", realm_id
         ),
         "authentication": config["security"]["authentication"],
-        "default_project_groups": ["users"]
-        if config["security"].get("shared_users_group", False)
-        else [],
+        "keycloak_groups": ["admin", "developer", "analyst"] + users_group,
+        "default_groups": ["analyst"] + users_group,
     }
 
 
