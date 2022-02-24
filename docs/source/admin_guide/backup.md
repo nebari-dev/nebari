@@ -151,7 +151,7 @@ The file permissions for the default tar is same as the original files.
 >
 > QHub v0.4: If restoring your NFS as part of the upgrade you must also run some extra commands, immediately after extracting from the tar file.
 >
-> Because previous versions contained the `shared` folder within `home`, but they are now both at the same level, you must run:
+> Previous versions contained the `shared` folder within `home`. From `0.4.0` both `shared` and `home` directories are at the same level with respect to the QHub filesystem:
 > ```shell
 > cd /data
 > cp -r home/shared/* shared/
