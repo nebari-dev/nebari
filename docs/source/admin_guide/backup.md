@@ -179,7 +179,7 @@ gsutil cp gs://<your_bucket_name>/backups/2021-04-23.tar .
 
 ### Digital Ocean
 
-Similar instructions, but use Digital Ocean spaces. This guide explains installation of the command-line tool:
+We suggest you follow this Digital Ocean installation guide of the command-line tool:
 <https://www.digitalocean.com/community/tutorials/how-to-migrate-from-amazon-s3-to-digitalocean-spaces-with-rclone>
 
 
