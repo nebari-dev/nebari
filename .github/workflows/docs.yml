@@ -2,18 +2,17 @@ name: Documentation linter
 
 on:
   pull_request:
-    branches: [ main ]
     paths:
-      - '**.md'
+      - 'docs/**'
+      - '*.md'
+      - '.github/workflows/docs.yml'
 
   push:
-    branches: [ main ]
+    branches: [ $default-branch ]
     paths:
-      - '**.md'
-
-concurrency:
-  group: docs-${{ github.ref }}
-  cancel-in-progress: true
+      - 'docs/**'
+      - '*.md'
+      - '.github/workflows/docs.yml'
 
 jobs:
   check-all-files:

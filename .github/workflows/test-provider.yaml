@@ -1,15 +1,27 @@
 name: "Test QHub Provider"
 
 on:
-  pull_request: # Workflow only runs for PR against main anyway
+  pull_request:
+    paths:
+      - ".github/workflows/test-provider.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
   push:
-    branches:
-      - '**'
-    tags:
-      - 'v*'
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
+    branches: [ $default-branch ]
+    paths:
+      - ".github/workflows/test-provider.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
 
 env:
   DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
@@ -20,9 +32,6 @@ env:
   ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-concurrency:
-  group: provider-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   test-render-providers:

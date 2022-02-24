@@ -1,19 +1,27 @@
 name: "Tests"
 
 on:
-  pull_request: # Workflow only runs for PR against main anyway
+  pull_request:
+    paths:
+      - ".github/workflows/test.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
   push:
-    branches:
-      - '**'
-    tags:
-      - 'v*'
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-
-concurrency:
-  group: test-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [ $default-branch ]
+    paths:
+      - ".github/workflows/test.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
 
 jobs:
   test-general:
