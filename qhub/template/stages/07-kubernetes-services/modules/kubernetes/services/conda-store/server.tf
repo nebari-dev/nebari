@@ -29,8 +29,7 @@ module "conda-store-openid-client" {
   role_mapping = {
     "admin" = ["conda_store_admin"]
     "developer" = ["conda_store_developer"]
-    "practitioner" = ["conda_store_developer"]
-    "viewer" = ["conda_store_viewer"]
+    "analyst" = ["conda_store_developer"]
   }
   callback-url-paths = [
     "https://${var.external-url}/conda-store/oauth_callback"

@@ -159,7 +159,7 @@ module "jupyterhub-openid-client" {
   role_mapping = {
     "admin" = ["jupyterhub_admin", "dask_gateway_admin"]
     "developer" = ["jupyterhub_developer", "dask_gateway_developer"]
-    "practitioner" = ["jupyterhub_developer"]
+    "analyst" = ["jupyterhub_developer"]
   }
   callback-url-paths = [
     "https://${var.external-url}/hub/oauth_callback",
