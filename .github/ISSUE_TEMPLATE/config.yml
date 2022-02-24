@@ -1,8 +1,13 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 📖  QHub Documentation
+  - name: QHub Documentation 📖 
     url: https://docs.qhub.dev/en/stable/
     about: Read QHub docs and development guide.
-  - name: 💬 GitHub discussions
+  - name: GitHub discussions 💬
     url: https://github.com/Quansight/qhub/discussions
+    about: Keep up to date with the community discussions
+  - name: "(maintainers only) Blank issue"
+    url: https://github.com/Quansight/qhub/issues/new
+    about: For maintainers only - should be used sparingly
+
 

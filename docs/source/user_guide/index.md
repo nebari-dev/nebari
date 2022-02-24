@@ -4,6 +4,7 @@
 :maxdepth: 2
 
 getting_started.md
+environments.md
 code_server.md
 ssh.md
 dashboard.md

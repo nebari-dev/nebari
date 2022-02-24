@@ -1,25 +1,40 @@
 name: "Tests"
 
 on:
-  pull_request: # Workflow only runs for PR against main anyway
+  pull_request:
+    paths:
+      - ".github/workflows/test.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
   push:
-    branches:
-      - '**'
-    tags:
-      - 'v*'
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
+    branches: [ $default-branch ]
+    paths:
+      - ".github/workflows/test.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
+
 jobs:
   test-general:
     name: 'Test Package'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.7, 3.8, 3.9]
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
+        with:
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v2
         with:

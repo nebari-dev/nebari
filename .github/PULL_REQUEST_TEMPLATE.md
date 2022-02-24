@@ -1,14 +1,16 @@
 Fixes | Closes | Resolves #
 
-> Please remove anything marked as optional that you don't need to fill in. Choose one of the keywords preceding to refer to the issue this PR solves, followed by the issue number (e.g Fixes # 666). If there is no issue, remove the line. Remove this note after reading.
+> Please remove anything marked as optional that you don't need to fill in.
+> Choose one of the keywords preceding to refer to the issue this PR solves, followed by the issue number (e.g Fixes # 666).
+> If there is no issue, remove the line. Remove this note after reading.
 
-## Changes:
+## Changes introduced in this PR:
 
 -
 
 ## Types of changes
 
-What types of changes does your code introduce?
+What types of changes does your PR introduce?
 
 _Put an `x` in the boxes that apply_
 
@@ -32,6 +34,15 @@ _Put an `x` in the boxes that apply_
 
 - [ ] Yes
 - [ ] No
+
+## Documentation
+
+Does your contribution include breaking changes or deprecations?
+If so have you updated the documentation?
+
+- [ ] Yes, docstrings
+- [ ] Yes, main documentation
+- [ ] Yes, deprecation notices
 
 ## Further comments (optional)
 

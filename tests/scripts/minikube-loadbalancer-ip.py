@@ -4,23 +4,17 @@ import os
 import sys
 import subprocess
 
-docker_image_cmd = ["docker", "ps", "--format", "{{.Names}} {{.ID}}"]
-docker_images_output = subprocess.check_output(docker_image_cmd, encoding="utf-8")[:-1]
-docker_images = {
-    line.split()[0]: line.split()[1] for line in docker_images_output.split("\n")
-}
+minikube_cmd = ['minikube', 'ssh', '--', 'ip', '-j', 'a']
+minikube_output = subprocess.check_output(minikube_cmd, encoding="utf-8")[:-1]
 
-if "minikube" not in docker_images:
-    print("minikube docker image not running")
+address = None
+for interface in json.loads(minikube_output):
+    if interface['ifname'] == 'eth0':
+        address = interface['addr_info'][0]['local'].split('.')
+        break
+else:
+    print("minikube interface eth0 not found")
     sys.exit(1)
-
-docker_inspect_cmd = [
-    "docker",
-    "inspect",
-    "--format={{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}",
-    docker_images["minikube"],
-]
-address = subprocess.check_output(docker_inspect_cmd, encoding="utf-8")[:-1].split(".")
 
 filename = os.path.expanduser("~/.minikube/profiles/minikube/config.json")
 with open(filename) as f:

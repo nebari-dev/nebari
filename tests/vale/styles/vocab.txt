@@ -25,6 +25,8 @@ cpu
 cpus
 cuda
 cudatoolkit
+dns
+Lego
 dask
 Dask
 Daskgpus
