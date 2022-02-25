@@ -43,7 +43,7 @@ Click 'Users' along the left-hand side of the page.
 
 Click the 'Add user' button and you will see the new user form:
 
-![Add User to Keycloak](../images/keycloak_add_users.png)
+![Keycloak add user tab screenshot - new user form ](../images/keycloak_add_users.png)
 
 There are three fields, outline above, which should be filled out.These are 'Username', 'Email', and 'Groups'.
 
