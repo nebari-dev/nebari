@@ -122,4 +122,4 @@ Then under 'Role Mapping', add the appriopriate 'Client Roles' as needed; there 
 
 ![Keycloak group conda-store-manager form - role mappings tab focused ](../images/keycloak_new_group3.png)
 
-Once complete, return the 'Users' section and add the relevant users to this newly created group.
+Once complete, return to the 'Users' section in the dashboard and add the relevant users to this newly created group.
