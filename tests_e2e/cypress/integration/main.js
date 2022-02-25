@@ -90,7 +90,7 @@ describe('First Test', () => {
         // wait because otherwise event handler is not yet registered
         // 'Correct' solution is here: https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
       cy.get('#stop')
-        .should('contain', 'Stop My Server').wait(500).click();
+        .should('contain', 'Stop My Server').wait(1000).click();
 
       cy.get('#start', { timeout: 40000 })
         .should('contain', 'Start My Server');
