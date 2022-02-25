@@ -314,6 +314,10 @@ class Upgrade_0_4_0(UpgradeStep):
                 "Removing terraform_modules field from config as it is no longer used.\n"
             )
 
+        # Remove conda_store image from default_images
+        if "conda_store" in config["default_images"]:
+            del config["default_images"]["conda_store"]
+
         # Create root password
         default_password = "".join(
             secrets.choice(string.ascii_letters + string.digits) for i in range(16)
