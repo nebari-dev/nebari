@@ -15,6 +15,7 @@ def do_keycloak(config_filename, *args):
 
     # supress insecure warnings
     import urllib3
+
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     keycloak_admin = get_keycloak_admin_from_config(config)
@@ -27,7 +28,7 @@ def do_keycloak(config_filename, *args):
 
         username = args[1]
         password = args[2] if len(args) >= 3 else None
-        create_user(keycloak_admin, username, password, domain=config['domain'])
+        create_user(keycloak_admin, username, password, domain=config["domain"])
     elif args[0] == "listusers":
         list_users(keycloak_admin)
     else:
@@ -69,10 +70,11 @@ def list_users(keycloak_admin: keycloak.KeycloakAdmin):
 
     for user in keycloak_admin.get_users():
         user_groups = [_["name"] for _ in keycloak_admin.get_user_groups(user["id"])]
-        print(user_format.format(
-            username=user["username"],
-            email=user["email"],
-            groups=user_groups))
+        print(
+            user_format.format(
+                username=user["username"], email=user["email"], groups=user_groups
+            )
+        )
 
 
 def get_keycloak_admin_from_config(config):
