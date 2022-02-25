@@ -64,7 +64,7 @@ Enter the name you would like for the user then click 'Save'.
 Once the user has been created, you can set a password
 > NOTE: not needed for GitHub/Auth0 based authentication.
 
-![Set Password in Keycloak](../images/keycloak_user_password.png)
+![Keycloak add user > credentials tab screenshot - set password](../images/keycloak_user_password.png)
 
 It's best to unset the 'Temporary' on/off button so the user won't be forced to change the password on first login.
 
