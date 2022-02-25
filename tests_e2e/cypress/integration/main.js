@@ -97,15 +97,25 @@ describe('First Test', () => {
 
       // Visit Conda-Store
 
-      cy.visit('/conda-store/');
+      cy.visit('/conda-store/login/');
 
-      // Visit Grafana Monitoring
+      cy.get('#login a:first-of-type')
+        .should('contain', 'Sign in with OAuth').click();
+
+      cy.get('div.container:first-of-type > div.text-center:first-of-type > h1')
+        .should('contain', `Logged in as ${EXAMPLE_USER_NAME}`);
+
+      // Visit Grafana Monitoring - user must have an email address in Keycloak
 
       cy.visit('/monitoring/dashboards');
+
+      cy.get('div.page-header h1').should('contain', 'Dashboards');
 
       // Visit Keycloak User Profile
 
       cy.visit('/auth/realms/qhub/account/#/personal-info');
+
+      cy.get('input#user-name').should('have.value', EXAMPLE_USER_NAME);
     })
 
   } else {
