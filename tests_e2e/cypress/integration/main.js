@@ -106,13 +106,13 @@ describe('First Test', () => {
 
       cy.visit('/monitoring/dashboards');
 
-      cy.get('div.page-header h1').should('contain', 'Dashboards');
+      cy.get('div.page-header h1', { timeout: 20000 }).should('contain', 'Dashboards');
 
       // Visit Keycloak User Profile
 
       cy.visit('/auth/realms/qhub/account/#/personal-info');
 
-      cy.get('input#user-name').should('have.value', EXAMPLE_USER_NAME);
+      cy.get('input#user-name', { timeout: 20000 }).should('have.value', EXAMPLE_USER_NAME);
     })
 
   } else {
