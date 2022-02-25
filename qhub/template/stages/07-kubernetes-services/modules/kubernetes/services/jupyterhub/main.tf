@@ -41,9 +41,9 @@ resource "helm_release" "jupyterhub" {
         }
 
         extraConfig = {
-          "01-theme.py" = file("${path.module}/files/01-theme.py")
-          "02-spawner.py" = file("${path.module}/files/02-spawner.py")
-          "03-profiles.py" = file("${path.module}/files/03-profiles.py")
+          "01-theme.py"       = file("${path.module}/files/01-theme.py")
+          "02-spawner.py"     = file("${path.module}/files/02-spawner.py")
+          "03-profiles.py"    = file("${path.module}/files/03-profiles.py")
         }
 
         services = {
