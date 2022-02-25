@@ -108,7 +108,7 @@ Groups represent a collection of users that perform similar actions and therefor
 To create new groups or modify (or delete) existing groups, log in as `root` and click 'Groups' on the left-hand side.
 
 
-As an example, we create a new group named `conda-store-manager` and this group will have administrator access to Conda-Store service.
+As an example, we create a new group named `conda-store-manager` and this group will have administrator access to the Conda-Store service.
 
 ![Add Groups to Keycloak](../images/keycloak_groups.png)
 
