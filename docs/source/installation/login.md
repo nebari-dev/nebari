@@ -105,7 +105,7 @@ Groups represent a collection of users that perform similar actions and therefor
 | 'practioner' | JupyterLab, Dashboards  |
 | 'viewer'  | Dashboards  |
 
-To create new groups or modify (or delete) existing groups, login as `root` and click 'Groups' on the left-hand side.
+To create new groups or modify (or delete) existing groups, log in as `root` and click 'Groups' on the left-hand side.
 
 
 As an example, we create a new group named `conda-store-manager` and this group will have administrator access to Conda-Store service.
