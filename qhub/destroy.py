@@ -87,6 +87,10 @@ def destroy_stages(stage_outputs, config):
         except terraform.TerraformException as e:
             if not ignore_errors:
                 raise e
+            return False
+        return True
+
+    status = {}
 
     with kubernetes_provider_context(
         stage_outputs["stages/02-infrastructure"]["kubernetes_credentials"]["value"]
@@ -96,7 +100,7 @@ def destroy_stages(stage_outputs, config):
                 "value"
             ]
         ):
-            _terraform_destroy(
+            status["stages/08-qhub-tf-extensions"] = _terraform_destroy(
                 directory="stages/08-qhub-tf-extensions",
                 input_vars=input_vars.stage_08_qhub_tf_extensions(
                     stage_outputs, config
@@ -104,7 +108,7 @@ def destroy_stages(stage_outputs, config):
                 ignore_errors=True,
             )
 
-            _terraform_destroy(
+            status["stages/07-kubernetes-services"] = _terraform_destroy(
                 directory="stages/07-kubernetes-services",
                 input_vars=input_vars.stage_07_kubernetes_services(
                     stage_outputs, config
@@ -112,7 +116,7 @@ def destroy_stages(stage_outputs, config):
                 ignore_errors=True,
             )
 
-            _terraform_destroy(
+            status["stages/06-kubernetes-keycloak-configuration"] = _terraform_destroy(
                 directory="stages/06-kubernetes-keycloak-configuration",
                 input_vars=input_vars.stage_06_kubernetes_keycloak_configuration(
                     stage_outputs, config
@@ -120,32 +124,32 @@ def destroy_stages(stage_outputs, config):
                 ignore_errors=True,
             )
 
-        _terraform_destroy(
+        status["stages/05-kubernetes-keycloak"] = _terraform_destroy(
             directory="stages/05-kubernetes-keycloak",
             input_vars=input_vars.stage_05_kubernetes_keycloak(stage_outputs, config),
             ignore_errors=True,
         )
 
-        _terraform_destroy(
+        status["stages/04-kubernetes-ingress"] = _terraform_destroy(
             directory="stages/04-kubernetes-ingress",
             input_vars=input_vars.stage_04_kubernetes_ingress(stage_outputs, config),
             ignore_errors=True,
         )
 
-        _terraform_destroy(
+        status["stages/03-kubernetes-initialize"] = _terraform_destroy(
             directory="stages/03-kubernetes-initialize",
             input_vars=input_vars.stage_03_kubernetes_initialize(stage_outputs, config),
             ignore_errors=True,
         )
 
-    _terraform_destroy(
+    status["stages/02-infrastructure"] = _terraform_destroy(
         directory=os.path.join("stages/02-infrastructure", config["provider"]),
         input_vars=input_vars.stage_02_infrastructure(stage_outputs, config),
         ignore_errors=True,
     )
 
     if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
-        _terraform_destroy(
+        status["stages/01-terraform-state"] = _terraform_destroy(
             # acl and force_destroy do not import properly
             # and only get refreshed properly with an apply
             terraform_apply=True,
@@ -153,6 +157,8 @@ def destroy_stages(stage_outputs, config):
             input_vars=input_vars.stage_01_terraform_state(stage_outputs, config),
             ignore_errors=True,
         )
+
+    return status
 
 
 def destroy_configuration(config):
@@ -167,4 +173,15 @@ def destroy_configuration(config):
     stage_outputs = gather_stage_outputs(config)
 
     with timer(logger, "destroying QHub"):
-        destroy_stages(stage_outputs, config)
+        status = destroy_stages(stage_outputs, config)
+
+    for stage_name, success in status.items():
+        if not success:
+            logger.error(f"Stage={stage_name} failed to fully destroy")
+
+    if not all(status.values()):
+        logger.error(
+            "ERROR: not all qhub stages were destroyed properly. For cloud deployments of QHub typically only stages 01 and 02 need to succeed to properly destroy everything"
+        )
+    else:
+        print("QHub properly destroyed all resources without error")
