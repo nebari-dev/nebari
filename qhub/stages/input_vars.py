@@ -57,6 +57,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "node_groups": [
                 {
                     "name": key,
+                    "instance_type": value["instance"],
                     "min_size": value["min_nodes"],
                     "max_size": value["max_nodes"],
                     **value,
