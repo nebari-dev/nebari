@@ -95,6 +95,17 @@ describe('First Test', () => {
       cy.get('#start', { timeout: 40000 })
         .should('contain', 'Start My Server');
 
+      // Visit Conda-Store
+
+      cy.visit('/conda-store/');
+
+      // Visit Grafana Monitoring
+
+      cy.visit('/monitoring/dashboards');
+
+      // Visit Keycloak User Profile
+
+      cy.visit('/auth/realms/qhub/account/#/personal-info');
     })
 
   } else {
