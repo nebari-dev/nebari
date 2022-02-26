@@ -19,7 +19,9 @@ def paramiko_object():
             hostname=constants.QHUB_HOSTNAME,
             port=8022,
             username=constants.KEYCLOAK_USERNAME,
-            password=api_token
+            password=api_token,
+            # wait 5 minutes for jupyterlab server/terminal to spin up
+            auth_timeout=5 * 60,
         )
         yield client
     finally:
