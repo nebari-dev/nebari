@@ -34,7 +34,7 @@ You will need to add a QHub user in order to log in to your QHub platform. If yo
 
 ### Add user using Keycloak console
 
-To add a QHub user from the web console for Keycloak, visit `https://myqhubsite.com/auth/admin/`. Login using the username `root`, as shown above.
+To add a QHub user from the web console for Keycloak, visit <https://myqhubsite.com/auth/admin/>. Log in using the username `root`, as shown above.
 
 All QHub users will be part of the `qhub` realm (a realm is a distinct identity provider and set of users in Keycloak).
 > NOTE: The root user alone is a member of the `master` realm.
