@@ -30,7 +30,7 @@ In the Password box, click the 'Update' button. This will guide you through ente
 
 ## Adding a QHub user
 
-You will need to add a QHub user in order to login to your QHub platform. If you have chosen to use GitHub or Auth0 single-sign on, you must ensure the 'Username' you provide for new users in Keycloak match the usernames from GitHub or Auth0 respectively.
+You will need to add a QHub user in order to log in to your QHub platform. If you have chosen to use GitHub or Auth0 single-sign-on, you must ensure the 'Username' you provide for new users in Keycloak matches the usernames from GitHub or Auth0 respectively.
 
 ### Add user using Keycloak console
 
