@@ -75,7 +75,7 @@ To make adding users easier for new QHub deployments, there is a QHub command th
 
 Run:
 ```shell
-qhub keycloak -c qhub-config.yaml adduser bob pa55w0rd
+qhub keycloak -c qhub-config.yaml adduser <username> <password>
 ```
 
 This will create a user called bob with the initial password provided. Omit the password completely if you are using GitHub or Auth0.
