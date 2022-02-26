@@ -59,7 +59,7 @@ describe('First Test', () => {
       cy.get('div#jp-MainLogo', { timeout: 60000 }).should('exist').wait(500);
 
       // Click VS Code Launcher
-      cy.get('div[title="VS Code IDE [↗]"]').should('exist').click();
+      cy.get('div[title="VS Code [↗]"]').should('exist').click();
 
       cy.get('h2[title="Explorer (Ctrl+Shift+E)"]', { timeout: 30000 }).should('contain', 'Explorer');
 
