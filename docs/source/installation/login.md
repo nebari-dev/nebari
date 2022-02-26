@@ -78,7 +78,7 @@ Run:
 qhub keycloak -c qhub-config.yaml adduser <username> <password>
 ```
 
-This will create a user called bob with the initial password provided. Omit the password completely if you are using GitHub or Auth0.
+This will create a user  `<username>` with the initial password provided. Omit the password completely if you are using GitHub or Auth0.
 > NOTE: This will also add the user to 'analyst' group.
 
 ## Login to QHub
