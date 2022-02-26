@@ -58,13 +58,10 @@ describe('First Test', () => {
       // Minimal check that JupyterLab has opened
       cy.get('div#jp-MainLogo', { timeout: 60000 }).should('exist').wait(500);
 
-      // Click VS Code Launcher
-      cy.get('div.jp-LauncherCard[title="VS Code [↗]"]').should('exist').click();
-
-      cy.get('h2[title="Explorer (Ctrl+Shift+E)"]', { timeout: 30000 }).should('contain', 'Explorer');
+      // Click VS Code Launcher exists
+      cy.get('div.jp-LauncherCard[title="VS Code [↗]"]').should('exist');
 
       // Stop my Jupyter server - must do this so PVC can be destroyed on Minikube
-
       cy.visit('/hub/home');
 
       // wait because otherwise event handler is not yet registered

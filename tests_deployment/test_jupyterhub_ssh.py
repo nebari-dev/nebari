@@ -30,6 +30,4 @@ def paramiko_object():
 
 def test_simple_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command('ls -la', timeout=60, bufsize=1, get_pty=True)
-    for i in range(100):
-        line = stdout.readline()
-        print(line)
+    # eventually do something with the stdout
