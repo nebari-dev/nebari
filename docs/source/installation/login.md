@@ -91,7 +91,7 @@ Click 'Sign in with Keycloak'.
 
 ![QHub - Log in to Keycloak page](../images/keycloak_qhub_login.png)
 
-If you chose GitHub or Auth0 login, click the 'GitHub' button to be taken to a GitHub login page and single-sign on from there (as shown in the screenshot above). Otherwise, if you choose 'Password' based authentication, enter the username and password you chose when you added a user to QHub above.
+If you chose GitHub or Auth0 login, click the 'GitHub' button to be taken to a GitHub login page and single-sign-on from there (as shown in the screenshot above). Otherwise, if you choose 'Password` based authentication, enter the username and password you chose when you added a user to QHub above.
 
 ## Groups
 
