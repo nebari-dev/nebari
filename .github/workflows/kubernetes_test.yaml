@@ -173,6 +173,16 @@ jobs:
             ./tests_e2e/cypress/screenshots/
             ./tests_e2e/cypress/videos/
 
+      - name: JupyterHub Notebook Tests
+        run: |
+          export JUPYTERHUB_USERNAME=qhub-user
+          export JUPYTERHUB_PASSWORD=password
+          jhub-client --verbose run --hub=https://github-actions.qhub.dev \
+                                    --auth-type=keycloak \
+                                    --validate --no-verify-ssl \
+                                    --kernel python3 \
+                                    --notebook tests_deployment/assets/notebook/simple.ipynb
+
       - name: Deployment Pytests
         run: |
           export KEYCLOAK_USERNAME=qhub-user

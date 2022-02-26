@@ -2,8 +2,6 @@ const { divide } = require("lodash");
 
 const security_authentication_type = Cypress.env('qhub_security_authentication_type');
 
-const JHUB_CLIENT_PYTHON_PATH = Cypress.env('JHUB_CLIENT_PYTHON_PATH');
-
 const EXAMPLE_USER_NAME = Cypress.env('EXAMPLE_USER_NAME') || 'example-user';
 
 const EXAMPLE_USER_PASSWORD = Cypress.env('EXAMPLE_USER_PASSWORD');
@@ -58,37 +56,19 @@ describe('First Test', () => {
         .should('have.attr', 'value', 'Start').click();
 
       // Minimal check that JupyterLab has opened
-
       cy.get('div#jp-MainLogo', { timeout: 60000 }).should('exist').wait(500);
 
+      // Click VS Code Launcher
+      cy.get('div[title="VS Code IDE [↗]"]').should('exist').click();
 
-      if (JHUB_CLIENT_PYTHON_PATH) {
-
-          cy.runJHubClient(
-                  JHUB_CLIENT_PYTHON_PATH, Cypress.config().baseUrl, EXAMPLE_USER_NAME, EXAMPLE_USER_PASSWORD,
-                  "BasicTest.ipynb", "python3"
-            ).then(result => {
-              if (result.code) {
-                throw new Error(`Execution of exec failed
-                  Exit code: ${result.code}
-                  Stdout:\n${result.stdout}
-                  Stderr:\n${result.stderr}`);
-              }
-
-              cy.log(result.stdout);
-              cy.log(result.stderr);
-            })
-            .its('code').should('eq', 0);
-
-      }
-
+      cy.get('h2[title="Explorer (Ctrl+Shift+E)"]', { timeout: 30000 }).should('contain', 'Explorer');
 
       // Stop my Jupyter server - must do this so PVC can be destroyed on Minikube
 
       cy.visit('/hub/home');
 
-        // wait because otherwise event handler is not yet registered
-        // 'Correct' solution is here: https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
+      // wait because otherwise event handler is not yet registered
+      // 'Correct' solution is here: https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
       cy.get('#stop')
         .should('contain', 'Stop My Server').wait(1000).click();
 
