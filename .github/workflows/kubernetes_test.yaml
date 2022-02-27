@@ -181,7 +181,9 @@ jobs:
                                 --auth-type=keycloak \
                                 --validate --no-verify-ssl \
                                 --kernel python3 \
-                                --notebook tests_deployment/assets/notebook/simple.ipynb
+                                --stop-server \
+                                --notebook tests_deployment/assets/notebook/simple.ipynb \
+
 
       - name: Deployment Pytests
         run: |
