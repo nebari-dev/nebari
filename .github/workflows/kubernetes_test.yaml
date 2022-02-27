@@ -175,8 +175,8 @@ jobs:
 
       - name: JupyterHub Notebook Tests
         run: |
-          export JUPYTERHUB_USERNAME=qhub-user
-          export JUPYTERHUB_PASSWORD=password
+          export JUPYTERHUB_USERNAME=example-user
+          export JUPYTERHUB_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
           jhubctl --verbose run --hub=https://github-actions.qhub.dev \
                                 --auth-type=keycloak \
                                 --validate --no-verify-ssl \
