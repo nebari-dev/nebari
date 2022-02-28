@@ -2,7 +2,7 @@
 
 [Keycloak](https://www.keycloak.org/) is the name of the open source user management software that's automatically deployed within QHub. It's used to store the database of all users in your QHub site, and can provide connectivity to other services such GitHub/Auth0 single-sign on.
 
-If you ran `qhub init` to create your `qhub-config.yaml` configuration file in the [Usage](usage.md) step, you will have been provided with a `random password for Keycloak root user`. **The password will also be visible in the `qhub-config.yaml` file under the `security.keycloak.initial_root_password` field**.
+If you ran `qhub init` to create your `qhub-config.yaml` configuration file as detailed in the [Usage guide](usage.md), you will have been provided with a `random password for Keycloak root user`. **The password will also be visible in the `qhub-config.yaml` file under the `security.keycloak.initial_root_password` field**.
 
 The `root` Keycloak user is only able to login and manage the Keycloak identity management section of QHub. It's not a user of the wider QHub data science platform.
 
