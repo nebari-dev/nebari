@@ -10,6 +10,17 @@ resource "random_password" "proxy_secret_token" {
   special = false
 }
 
+resource "kubernetes_config_map" "server-idle-culling" {
+  metadata {
+    name      = "server-idle-culling"
+    namespace = var.namespace
+  }
+
+  data = {
+    "jupyter_notebook_config.py" = file("${path.module}/files/04-idle-culler.py")
+  }
+}
+
 resource "helm_release" "jupyterhub" {
   name      = "jupyterhub"
   namespace = var.namespace
