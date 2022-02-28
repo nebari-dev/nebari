@@ -173,7 +173,15 @@ jobs:
             ./tests_e2e/cypress/screenshots/
             ./tests_e2e/cypress/videos/
 
+      - name: Deployment Pytests
+        run: |
+          export KEYCLOAK_USERNAME=example-user
+          export KEYCLOAK_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
+          pytest tests_deployment/ -v
+
       - name: JupyterHub Notebook Tests
+        # run jhub-client after pytest since jhubctl can cleanup
+        # the running server
         run: |
           export JUPYTERHUB_USERNAME=example-user
           export JUPYTERHUB_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
@@ -183,14 +191,6 @@ jobs:
                                 --kernel python3 \
                                 --stop-server \
                                 --notebook tests_deployment/assets/notebook/simple.ipynb \
-
-
-      - name: Deployment Pytests
-        run: |
-          export KEYCLOAK_USERNAME=qhub-user
-          export KEYCLOAK_PASSWORD=password
-          qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser $KEYCLOAK_USERNAME $KEYCLOAK_PASSWORD
-          pytest tests_deployment/ -v
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup qhub deployment
