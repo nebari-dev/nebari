@@ -74,6 +74,7 @@ It's best to unset the 'Temporary' on/off button so the user won't be forced to 
 To make adding users easier for new QHub deployments, there is a QHub command that can help. It will only work if the initial_root_password for Keycloak has not yet been changed, so the value available in `qhub-config.yaml` is still correct.
 
 Run:
+
 ```shell
 qhub keycloak -c qhub-config.yaml adduser <username> <password>
 ```
