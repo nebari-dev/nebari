@@ -295,7 +295,9 @@ class Upgrade_0_4_0(UpgradeStep):
         print(
             f"\nSaving user/group import file {realm_import_filename}.\n\n"
             "ACTION REQUIRED: You must import this file into the Keycloak admin webpage after you redeploy QHub.\n"
-            "Visit the URL path /auth/ and login as 'root'. Under Manage, click Import and select this file.\n"
+            "Visit the URL path /auth/ and login as 'root'. Under Manage, click Import and select this file.\n\n"
+            "Non-admin users will default to analyst group membership after the upgrade (no dask access), "
+            "so you may wish to promote some users into the developer group.\n"
         )
 
         if "users" in security:
@@ -311,6 +313,10 @@ class Upgrade_0_4_0(UpgradeStep):
             print(
                 "Removing terraform_modules field from config as it is no longer used.\n"
             )
+
+        # Remove conda_store image from default_images
+        if "conda_store" in config["default_images"]:
+            del config["default_images"]["conda_store"]
 
         # Create root password
         default_password = "".join(

@@ -12,7 +12,8 @@ on:
       - "setup.cfg"
       - "pyproject.yoml"
   push:
-    branches: [ $default-branch ]
+    branches:
+      - main
     paths:
       - ".github/workflows/test.yaml"
       - "tests/**"

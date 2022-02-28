@@ -121,7 +121,6 @@ class DefaultImages(Base):
     jupyterlab: str
     dask_worker: str
     dask_gateway: str
-    conda_store: str
 
 
 # =========== Authentication ==============
@@ -284,7 +283,7 @@ class KubeSpawner(Base):
     cpu_guarantee: int
     mem_limit: str
     mem_guarantee: str
-    image: str
+    image: typing.Optional[str]
 
     class Config:
         extra = "allow"
@@ -304,7 +303,7 @@ class DaskWorkerProfile(Base):
     worker_cores: int
     worker_memory_limit: str
     worker_memory: str
-    image: str
+    image: typing.Optional[str]
 
     class Config:
         extra = "allow"

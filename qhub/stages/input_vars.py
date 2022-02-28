@@ -57,6 +57,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "node_groups": [
                 {
                     "name": key,
+                    "instance_type": value["instance"],
                     "min_size": value["min_nodes"],
                     "max_size": value["max_nodes"],
                     **value,
@@ -170,15 +171,18 @@ def stage_05_kubernetes_keycloak(stage_outputs, config):
 def stage_06_kubernetes_keycloak_configuration(stage_outputs, config):
     realm_id = "qhub"
 
+    users_group = (
+        ["users"] if config["security"].get("shared_users_group", False) else []
+    )
+
     return {
         "realm": realm_id,
         "realm_display_name": config["security"]["keycloak"].get(
             "realm_display_name", realm_id
         ),
         "authentication": config["security"]["authentication"],
-        "default_project_groups": ["users"]
-        if config["security"].get("shared_users_group", False)
-        else [],
+        "keycloak_groups": ["admin", "developer", "analyst"] + users_group,
+        "default_groups": ["analyst"] + users_group,
     }
 
 
@@ -211,7 +215,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "conda-store-environments": config["environments"],
         "conda-store-storage": config["storage"]["conda_store"],
         "conda-store-image": _split_docker_image_name(
-            config["default_images"]["conda_store"]
+            "quansight/conda-store-server:v0.3.9"
         ),
         # jupyterhub
         "cdsdashboards": config["cdsdashboards"],

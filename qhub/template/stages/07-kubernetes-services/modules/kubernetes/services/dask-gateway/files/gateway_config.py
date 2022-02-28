@@ -75,11 +75,7 @@ class QHubAuthentication(JupyterHubAuthenticator):
             )
 
         user.admin = "dask_gateway_admin" in data["roles"]
-        user.groups = [
-            os.path.basename(group)
-            for group in data["groups"]
-            if os.path.dirname(group) == "/projects"
-        ]
+        user.groups = [os.path.basename(group) for group in data["groups"]]
         return user
 
 

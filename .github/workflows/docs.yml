@@ -8,7 +8,8 @@ on:
       - '.github/workflows/docs.yml'
 
   push:
-    branches: [ $default-branch ]
+    branches:
+      - main
     paths:
       - 'docs/**'
       - '*.md'

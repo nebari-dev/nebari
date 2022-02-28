@@ -90,11 +90,29 @@ describe('First Test', () => {
         // wait because otherwise event handler is not yet registered
         // 'Correct' solution is here: https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
       cy.get('#stop')
-        .should('contain', 'Stop My Server').wait(500).click();
+        .should('contain', 'Stop My Server').wait(1000).click();
 
       cy.get('#start', { timeout: 40000 })
         .should('contain', 'Start My Server');
 
+      // Visit Conda-Store
+
+      cy.visit('/conda-store/login/');
+
+      cy.get('#login a:first-of-type')
+        .should('contain', 'Sign in with OAuth');
+
+      // Visit Grafana Monitoring - user must have an email address in Keycloak
+
+      cy.visit('/monitoring/dashboards');
+
+      cy.get('div.page-header h1', { timeout: 20000 }).should('contain', 'Dashboards');
+
+      // Visit Keycloak User Profile
+
+      cy.visit('/auth/realms/qhub/account/#/personal-info');
+
+      cy.get('input#user-name', { timeout: 20000 }).should('have.value', EXAMPLE_USER_NAME);
     })
 
   } else {

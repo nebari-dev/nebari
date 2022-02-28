@@ -93,11 +93,10 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         }
 
         for group in user_data.get("groups", []):
-            # only add groups that match the regex "/projects/[.^/]+"
-            if os.path.dirname(group) == "/projects":
-                group_name = os.path.basename(group)
-                namespaces.add(group_name)
-                role_bindings[f"{group_name}/*"] = roles
+            # Use only the base name of Keycloak groups
+            group_name = os.path.basename(group)
+            namespaces.add(group_name)
+            role_bindings[f"{group_name}/*"] = roles
 
         conda_store = get_conda_store()
         for namespace in namespaces:
