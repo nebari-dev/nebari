@@ -44,15 +44,15 @@ There are three issues templates to choose from:
 3. **Feature request**: Is there anything to make the community work better? Have you spotted something missing in QHub?
   Use this template to share your feature ideas with the QHub team.
 
-A few more tips:
+**A few more tips:**
 
 - **Describing your issue**: Try to provide as many details as possible. What exactly goes wrong? How is it failing? Is there an error?
   "XY doesn't work" usually isn't that helpful for tracking down problems. Always remember to include the code you ran, and if possible,
   extract only the relevant parts, and don't dump your entire script.
   This will make it easier for us to reproduce the error. Screenshots are also great ways to demonstrate errors or unexpected behaviours.
 
-- **Sharing long blocks of code or logs**: If you need to include extended code, logs or tracebacks, you can wrap them in `<details> and </details>`.
-  This collapses the content, so it only becomes visible on click, making it easier to read and follow.
+- **Sharing long blocks of code or logs**: We are using GitHub forms for our issues templates. If you need to share logs or blocks of code you can  copy-and-paste directly in the _Command output_ section of the form and the input will be automatically rendered as a _fenced codeblock_ when you submit your issue. If you want to present output from multiple commands, please present
+that as a shell session (commands you run get prefixed with `$`).
 
 - **Suggesting a new feature:** When suggesting a new feature, please also add details on how this new feature might impact the users' and developers' workflow.
 
