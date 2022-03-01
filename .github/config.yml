@@ -1,0 +1,22 @@
+# Configuration for welcome - https://github.com/behaviorbot/welcome
+
+# Configuration for new-issue-welcome - https://github.com/behaviorbot/new-issue-welcome
+
+# Comment to be posted to on first time issues
+newIssueWelcomeComment: >
+  ![QHub welcome banner](assets/welcome.svg)
+
+  :tada: Thanks for opening your first issue here! :tada:
+
+  <br>If you haven't done so already, please make sure you check out our [Contributing Guidelines](https://github.com/Quansight/qhub/blob/main/CONTRIBUTING.md).
+
+
+# Configuration for new-pr-welcome - https://github.com/behaviorbot/new-pr-welcome
+
+# Comment to be posted to on PRs from first time contributors in your repository
+newPRWelcomeComment: >
+  ![QHub welcome banner](assets/welcome.svg)
+
+  :tada: Thanks for opening this pull request! :tada:
+
+  <br>If you haven't done so already, please make sure you check out our [Contributing Guidelines](https://github.com/Quansight/qhub/blob/main/CONTRIBUTING.md).
