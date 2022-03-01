@@ -43,16 +43,6 @@ singleuser:
     guarantee: "1G"
   networkPolicy:
     enabled: false
-  # extraFiles:
-  #   server_idle_culling.py:
-  #     mountPath: "/usr/local/etc/jupyterhub/jupyterhub_config.d/server_idle_culling.py"
-  #     stringData: |
-  #       c.TerminalManager.cull_inactive_timeout = 100
-  #       c.TerminalManager.cull_interval = 60
-  #       c.MappingKernelManager.cull_idle_timeout = 120
-  #       c.MappingKernelManager.cull_interval = 60
-  #       c.MappingKernelManager.cull_connected = true
-  #       c.MappingKernelManager.cull_busy = false
 
 # cull relates to the jupyterhub-idle-culler service, responsible for evicting
 # inactive singleuser pods.
