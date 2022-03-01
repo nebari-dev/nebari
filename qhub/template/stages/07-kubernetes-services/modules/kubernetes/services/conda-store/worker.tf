@@ -98,7 +98,7 @@ resource "kubernetes_deployment" "worker" {
 
         container {
           name  = "conda-store-worker"
-          image = "${var.conda-store-image.name}:${var.conda-store-image.tag}"
+          image = "quansight/conda-store-server:v0.3.9"
 
           args = [
             "conda-store-worker",

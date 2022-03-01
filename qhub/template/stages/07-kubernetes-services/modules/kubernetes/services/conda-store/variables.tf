@@ -28,18 +28,6 @@ variable "node-group" {
   })
 }
 
-variable "conda-store-image" {
-  description = "Conda-store image"
-  type = object({
-    name = string
-    tag  = string
-  })
-  default = {
-    name = "quansight/conda-store-server"
-    tag  = "v0.3.10"
-  }
-}
-
 variable "external-url" {
   description = "External url that jupyterhub cluster is accessible"
   type        = string

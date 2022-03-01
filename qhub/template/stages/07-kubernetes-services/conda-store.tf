@@ -9,15 +9,6 @@ variable "conda-store-storage" {
   type        = string
 }
 
-variable "conda-store-image" {
-  description = "Conda-store image"
-  type = object({
-    name = string
-    tag  = string
-  })
-}
-
-
 # ====================== RESOURCES =======================
 module "kubernetes-conda-store-server" {
   source = "./modules/kubernetes/services/conda-store"
@@ -30,7 +21,6 @@ module "kubernetes-conda-store-server" {
 
   nfs_capacity      = var.conda-store-storage
   node-group        = var.node_groups.general
-  conda-store-image = var.conda-store-image
   environments      = {
     for filename, environment in var.conda-store-environments:
     filename => yamlencode(environment)

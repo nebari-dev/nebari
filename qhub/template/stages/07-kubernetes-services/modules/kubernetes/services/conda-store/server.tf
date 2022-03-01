@@ -100,7 +100,7 @@ resource "kubernetes_deployment" "server" {
 
         container {
           name  = "conda-store-server"
-          image = "${var.conda-store-image.name}:${var.conda-store-image.tag}"
+          image = "quansight/conda-store-server:v0.3.9"
 
           args = [
             "conda-store-server",
