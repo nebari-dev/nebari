@@ -28,7 +28,6 @@ variable "dashboards" {
   ]
 }
 
-
 variable "node-group" {
   description = "Node key value pair for bound resources"
   type = object({
