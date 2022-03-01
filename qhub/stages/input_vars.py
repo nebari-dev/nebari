@@ -214,9 +214,6 @@ def stage_07_kubernetes_services(stage_outputs, config):
         # conda-store
         "conda-store-environments": config["environments"],
         "conda-store-storage": config["storage"]["conda_store"],
-        "conda-store-image": _split_docker_image_name(
-            "quansight/conda-store-server:v0.3.9"
-        ),
         # jupyterhub
         "cdsdashboards": config["cdsdashboards"],
         "jupyterhub-theme": config["theme"]["jupyterhub"],
