@@ -52,7 +52,7 @@ jobs:
           - gitlab-ci
     steps:
       - name: 'Checkout Infrastructure'
-        uses: actions/checkout@main
+        uses: actions/checkout@v2.4.0
       - name: Set up Python
         uses: actions/setup-python@v1
         with:

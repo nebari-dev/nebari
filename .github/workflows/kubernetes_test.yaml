@@ -39,7 +39,7 @@ jobs:
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           echo "GITHUB_REF: ${GITHUB_REF}"
       - name: 'Checkout Infrastructure'
-        uses: actions/checkout@main
+        uses: actions/checkout@v2.4.0
       - name: Set up Python
         uses: conda-incubator/setup-miniconda@v2
         env:

@@ -30,7 +30,7 @@ jobs:
           - dask-gateway
     steps:
       - name: 'Checkout Infrastructure'
-        uses: actions/checkout@main
+        uses: actions/checkout@v2.4.0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1

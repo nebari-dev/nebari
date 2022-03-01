@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Set up python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v2.4.0
         with:
           python-version: 3.8
 
@@ -35,4 +35,3 @@ jobs:
 # and that the branch release-<version> also points to this tag
 # and that terraform-modules tag release-{version} exists.
 # See https://github.com/Quansight/qhub/issues/544
-
