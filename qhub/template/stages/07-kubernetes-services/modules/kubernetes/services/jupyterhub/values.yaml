@@ -65,7 +65,7 @@ cull:
   enabled: true
   users: false # --cull-users
   removeNamedServers: false # --remove-named-servers
-  timeout: 300 # --timeout 3600
-  every: 100 # --cull-every 600
+  timeout: 1800 # --timeout 3600
+  every: 600 # --cull-every 600
   concurrency: 10 # --concurrency
   maxAge: 0 # --max-age
