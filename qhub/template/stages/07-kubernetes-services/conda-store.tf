@@ -15,8 +15,11 @@ variable "conda-store-image" {
     name = string
     tag  = string
   })
+  default = {
+    name = "quansight/conda-store-server"
+    tag  = "v0.3.10"
+  }
 }
-
 
 # ====================== RESOURCES =======================
 module "kubernetes-conda-store-server" {

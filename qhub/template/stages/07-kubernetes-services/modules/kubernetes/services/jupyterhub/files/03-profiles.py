@@ -386,7 +386,7 @@ def deep_merge(d1, d2):
 
 def generate_nss_files(users, groups):
     etc_passwd = []
-    passwd_format = "{username}:x:{uid}:{gid}:{username}:/home/jovyan:/bin/bash"
+    passwd_format = "{username}:x:{uid}:{gid}:{username}:/home/{username}:/bin/bash"
     for user in users:
         etc_passwd.append(passwd_format.format(**user))
 
