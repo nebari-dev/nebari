@@ -51,7 +51,7 @@ There are three issues templates to choose from:
   extract only the relevant parts, and don't dump your entire script.
   This will make it easier for us to reproduce the error. Screenshots are also great ways to demonstrate errors or unexpected behaviours.
 
-- **Sharing long blocks of code or logs**: We are using GitHub forms for our issues templates. If you need to share logs or blocks of code you can  copy-and-paste directly in the _Command output_ section of the form and the input will be automatically rendered as a _fenced codeblock_ when you submit your issue. If you want to present output from multiple commands, please present
+- **Sharing long blocks of code or logs**: We are using GitHub forms for our issues templates. If you need to share logs or blocks of code you can  copy-and-paste directly in the _Command output_ section of the form and the input will be automatically rendered as a _fenced code block_ when you submit your issue. If you want to present output from multiple commands, please present
 that as a shell session (commands you run get prefixed with `$`).
 
 - **Suggesting a new feature:** When suggesting a new feature, please also add details on how this new feature might impact the users' and developers' workflow.

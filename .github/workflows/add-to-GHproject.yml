@@ -11,7 +11,7 @@ env:
   ORGANIZATION: "Quansight"
 
 jobs:
-  New-project-item:
+  new-project-item:
     runs-on: ubuntu-latest
     environment: maintenance
     steps:
