@@ -7,15 +7,17 @@ on:
     types: [opened, transferred, reopened]
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  ORGANIZATION: Quansight
-  PROJECT_NUMBER: 14
+  ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+  ORGANIZATION: "Quansight"
 
 jobs:
-  track-pr:
+  New-project-item:
     runs-on: ubuntu-latest
+    environment: maintenance
     steps:
       - name: Get project data 👓
+        env:
+          PROJECT_NUMBER: 14
         run: |
           gh api graphql -f query='
             query($org: String!, $number: Int!) {
