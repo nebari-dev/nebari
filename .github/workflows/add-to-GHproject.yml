@@ -11,13 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     environment: maintenance
     steps:
-    
+
       - name: Get project data 👓
         env:
           PROJECT_NUMBER: 14
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           ORGANIZATION: ${{ github.repository_owner }}
         run: |
+          gh auth login --with-token ${GITHUB_TOKEN}
           gh api graphql -f query='
             query($org: String!, $number: Int!) {
               organization(login: $org){
