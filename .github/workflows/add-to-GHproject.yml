@@ -12,13 +12,8 @@ jobs:
     environment: maintenance
     steps:
 
-      - name: Get project data 👓
-        env:
-          PROJECT_NUMBER: 14
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          ORGANIZATION: ${{ github.repository_owner }}
+      - name: Get project data 👓        
         run: |
-          gh auth login --with-token ${GITHUB_TOKEN}
           gh api graphql -f query='
             query($org: String!, $number: Int!) {
               organization(login: $org){
@@ -42,13 +37,14 @@ jobs:
           echo 'PROGRESS_OPTION_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") |.settings | fromjson.options[] | select(.name=="In Progress 🏃🏽‍♀️") |.id' project_data.json) >> $GITHUB_ENV
           
           echo 'BACKLOG_OPTION_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") |.settings | fromjson.options[] | select(.name=="Needs Triage 🔍") |.id' project_data.json) >> $GITHUB_ENV
+        env:
+          PROJECT_NUMBER: 14
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ORGANIZATION: ${{ github.repository_owner }}
 
       - name: Add PR to project 📥
         # only run on PR
         if: github.event_name == 'pull_request'
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          PR_ID: ${{ github.event.pull_request.node_id }}
         run: |
           item_id="$( gh api graphql -f query='
             mutation($project:ID!, $pr:ID!) {
@@ -60,13 +56,13 @@ jobs:
             }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectNextItem.projectNextItem.id')"
           
           echo 'ITEM_ID='$item_id >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          PR_ID: ${{ github.event.pull_request.node_id }}
       
       - name: Add issue to project 📥
         # only run on PR
         if: github.event_name == 'issue'
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          ISSUE_ID: ${{ github.event.issue.node_id }}
         run: |
           item_id="$( gh api graphql -f query='
             mutation($project:ID!, $issue:ID!) {
@@ -78,11 +74,12 @@ jobs:
             }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectNextItem.projectNextItem.id')"
             
             echo 'ITEM_ID='$item_id >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ISSUE_ID: ${{ github.event.issue.node_id }}
 
       - name: Set fields - PR 📝
         if: github.event_name == 'pull_request'
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           gh api graphql -f query='
             mutation (
@@ -102,11 +99,11 @@ jobs:
                   }
               }
             }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=$PROGRESS_OPTION_ID --silent
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Set fields - ISSUE 📝
         if: github.event_name == 'issue'
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           gh api graphql -f query='
             mutation (
@@ -126,3 +123,5 @@ jobs:
                   }
               }
             }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=$BACKLOG_OPTION_ID --silent
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
