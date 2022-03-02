@@ -107,11 +107,6 @@ module "jupyterhub" {
       name = "dask-etc"
       namespace = var.environment
       kind = "configmap"
-    },
-    "/etc/jupyter" = {
-      name = "server-idle-culling"
-      namespace = var.environment
-      kind = "configmap"
     }
   }
 
