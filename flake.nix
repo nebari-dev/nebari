@@ -36,6 +36,8 @@
         pythonPackages.black
         pythonPackages.flake8
         pythonPackages.sphinx
+        pythonPackages.dask-gateway
+        pythonPackages.paramiko
 
         # additional
         pkgs.minikube

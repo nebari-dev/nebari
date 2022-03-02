@@ -1,6 +1,6 @@
 import os
 
-QHUB_HOSTNAME = "github-actions.qhub.dev"
+QHUB_HOSTNAME = os.environ.get("QHUB_HOSTNAME", "github-actions.qhub.dev")
 GATEWAY_ENDPOINT = "gateway"
 
 KEYCLOAK_USERNAME = os.environ["KEYCLOAK_USERNAME"]
