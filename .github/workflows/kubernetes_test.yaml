@@ -199,6 +199,11 @@ jobs:
           # This is a known failure at the moment.
           qhub destroy --config qhub-config.yaml || true
 
+      - name: Stop and Delete Minikube
+        if: always()
+        run: |
+          minikube delete
+
       - name: Basic kubectl checks after cleanup
         if: always()
         run: |
