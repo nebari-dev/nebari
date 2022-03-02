@@ -6,20 +6,17 @@ on:
   issues:
     types: [opened, transferred, reopened]
 
-# https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows 
-# each step needs an individual GITHUB_TOKEN var
-env:
-  ORGANIZATION: "Quansight"
-
 jobs:
   new-project-item:
     runs-on: ubuntu-latest
     environment: maintenance
     steps:
+    
       - name: Get project data 👓
         env:
           PROJECT_NUMBER: 14
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ORGANIZATION: ${{ github.repository_owner }}
         run: |
           gh api graphql -f query='
             query($org: String!, $number: Int!) {
@@ -44,13 +41,13 @@ jobs:
           echo 'PROGRESS_OPTION_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") |.settings | fromjson.options[] | select(.name=="In Progress 🏃🏽‍♀️") |.id' project_data.json) >> $GITHUB_ENV
           
           echo 'BACKLOG_OPTION_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") |.settings | fromjson.options[] | select(.name=="Needs Triage 🔍") |.id' project_data.json) >> $GITHUB_ENV
-      
+
       - name: Add PR to project 📥
         # only run on PR
         if: github.event_name == 'pull_request'
         env:
-          PR_ID: ${{ github.event.pull_request.node_id }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          PR_ID: ${{ github.event.pull_request.node_id }}
         run: |
           item_id="$( gh api graphql -f query='
             mutation($project:ID!, $pr:ID!) {
@@ -67,8 +64,8 @@ jobs:
         # only run on PR
         if: github.event_name == 'issue'
         env:
-          ISSUE_ID: ${{ github.event.issue.node_id }}
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ISSUE_ID: ${{ github.event.issue.node_id }}
         run: |
           item_id="$( gh api graphql -f query='
             mutation($project:ID!, $issue:ID!) {
