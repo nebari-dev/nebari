@@ -41,14 +41,16 @@ resource "helm_release" "jupyterhub" {
         shared-pvc        = var.shared-pvc
         conda-store-pvc   = var.conda-store-pvc
         conda-store-mount = var.conda-store-mount
-        extra-mounts      = concat(
-          var.extra-mounts,{
+        extra-mounts      = merge(
+          var.extra-mounts,
+          {
             "/etc/jupyter" = {
               name = "server-idle-culling"
-              namespace = var.environment
+              namespace = var.namespace
               kind = "configmap"
             }
-          })
+          }
+        )
         environments      = var.conda-store-environments
       }
 
