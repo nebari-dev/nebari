@@ -11,21 +11,21 @@ The `root` Keycloak user is only able to login and manage the Keycloak identity 
 After the initial deployment, it is **highly** recommended that you change the Keycloak `root` user password as soon as you can.
 > NOTE: From this point on, the `security.keycloak.initial_root_password` field in `qhub-config.yaml` has no effect. If you redeploy QHub it will not reset the password back to the old one (or anything else that might be in the field in your YAML file). We strongly recommend you delete this field.
 
-To change the `root` user password, navigate to `https://myqhubsite.com/auth/admin/`, and login with the password provided.
+1. To change the `root` user password, navigate to `https://myqhubsite.com/auth/admin/`, and login with the password provided.
 
 ![Root Login to Keycloak](../images/keycloak_master_login.png)
 
-From there, click on the 'Root' dropdown in the top right of the screen, and select 'Manage account'.
+2. From there, click on the 'Root' dropdown in the top right of the screen, and select 'Manage account'.
 
-![Keycloak root user, manage account](../images/keycloak_root_user_manage_account.png)
+![Keycloak root user page - manage account tab selected](../images/keycloak_root_user_manage_account.png)
 
-Under 'Account Security' click 'Signing In'.
+3. Under 'Account Security' click 'Signing In'.
 
-![Keycloak root user, account security](../images/keycloak_root_user_account_security.png)
+![Keycloak root user page -  account security](../images/keycloak_root_user_account_security.png)
 
-In the Password box, click the 'Update' button. This will guide you through entering your existing root password, and then creating a new password.
+4. In the Password section, click the 'Update' button. This will guide you through entering your existing root password, and then creating a new password.
 
-![Keycloak root user, update password](../images/keycloak_root_user_update_password.png)
+![Keycloak root user page -  account security, update password](../images/keycloak_root_user_update_password.png)
 
 
 ## Adding a QHub user
@@ -37,6 +37,7 @@ You will need to add a QHub user in order to log in to your QHub platform. If yo
 To add a QHub user from the web console for Keycloak, visit <https://myqhubsite.com/auth/admin/>. Log in using the username `root`, as shown above.
 
 All QHub users will be part of the `qhub` realm (a realm is a distinct identity provider and set of users in Keycloak).
+
 > NOTE: The root user alone is a member of the `master` realm.
 
 The `qhub` realm is selected by default, we strongly recommend leaving it as is.
@@ -82,13 +83,14 @@ qhub keycloak -c qhub-config.yaml adduser <username> <password>
 ```
 
 This will create a user  `<username>` with the initial password provided. Omit the password completely if you are using GitHub or Auth0.
+
 > NOTE: This will also add the user to 'analyst' group.
 
 ## Login to QHub
 
-Your new user can now log into QHub proper (not Keycloak's admin console).
+Your new user can now log into the main QHub dashboard (not Keycloak's admin console).
 
-Visit `https://myqhubsite.com/` (or whatever domain you have chosen for your QHub).
+Visit <https://myqhubsite.com/> (or whatever domain you have chosen for your QHub).
 
 Click 'Sign in with Keycloak'.
 
