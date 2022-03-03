@@ -152,7 +152,7 @@ def check_ingress_dns(stage_outputs, config, disable_prompt):
         if not disable_prompt:
             input(
                 f"After attempting to poll the DNS, the record for domain={domain_name} appears not to exist, "
-                f"has recently been updated, or has yet to fully propogate. This non-deterministic behavior is likely due to "
+                f"has recently been updated, or has yet to fully propagate. This non-deterministic behavior is likely due to "
                 f"DNS caching and will likely resolve itself in a few minutes.\n\n\tTo poll the DNS again in {sleeptime} seconds "
                 f"[Press Enter].\n\n...otherwise kill the process and run the deployment again later..."
             )
