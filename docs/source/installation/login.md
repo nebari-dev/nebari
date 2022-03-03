@@ -48,7 +48,7 @@ Click the 'Add user' button and you will see the new user form:
 
 ![Keycloak add user tab screenshot - new user form ](../images/keycloak_add_users.png)
 
-Please fill out the three fields, outlined above. These are 'Username', 'Email', and 'Groups'.
+Fill out the three fields, outlined above. These are 'Username', 'Email', and 'Groups'.
 
 Depending on the authentication provider selected ('password', 'GitHub' or 'Auth0'), the values entered into the 'Username' field will differ slightly. The following table outlines those differences:
 
