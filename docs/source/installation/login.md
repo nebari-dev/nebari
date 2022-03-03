@@ -13,7 +13,7 @@ After the initial deployment, it is **highly** recommended that you change the K
 
 1. To change the `root` user password, navigate to `https://myqhubsite.com/auth/admin/`, and login with the password provided.
 
-![Root Login to Keycloak](../images/keycloak_master_login.png)
+![QhHub admin view - Root Login to Keycloak form](../images/keycloak_master_login.png)
 
 2. From there, click on the 'Root' dropdown in the top right of the screen, and select 'Manage account'.
 
