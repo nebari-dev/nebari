@@ -1,37 +1,36 @@
 #!/usr/bin/env bash
 set -xe
-# Requires environment CONDA_SHA256, CONDA_VERSION, and DEFAULT_ENV
-wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-$CONDA_VERSION-Linux-x86_64.sh
 
-echo "${CONDA_SHA256}  Miniconda3-$CONDA_VERSION-Linux-x86_64.sh" > miniconda.checksum
+CONDA_DIR=/opt/conda
+MINIFORGE_NAME=Miniforge3
+MINIFORGE_VERSION=4.11.0-4
+TINI_VERSION=v0.18.0
+TARGETPLATFORM=amd64
 
-if [ $(sha256sum -c miniconda.checksum | awk '{print $2}') != "OK" ]; then
-   echo Error when testing checksum
-   exit 1;
-fi
+# install essentials for conda and tini
+apt-get update > /dev/null
+apt-get install --no-install-recommends --yes wget bzip2 ca-certificates git > /dev/null
+apt-get clean
+rm -rf /var/lib/apt/lists/*
 
-mv Miniconda3-$CONDA_VERSION-Linux-x86_64.sh miniconda.sh
-sh ./miniconda.sh -b -p /opt/conda
-rm miniconda.sh miniconda.checksum
+# install tini
+wget --no-hsts --quiet https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${TARGETPLATFORM} -O /usr/local/bin/tini
+chmod +x /usr/local/bin/tini
 
-# install mamba and clean up
+# install conda
+wget --no-hsts --quiet https://github.com/conda-forge/miniforge/releases/download/${MINIFORGE_VERSION}/${MINIFORGE_NAME}-${MINIFORGE_VERSION}-Linux-$(uname -m).sh -O /tmp/miniforge.sh
+/bin/bash /tmp/miniforge.sh -b -p ${CONDA_DIR}
+
+# install mamba
 conda install -y -c conda-forge mamba
-mamba clean -afy
-find /opt/conda/ -follow -type f -name '*.a' -delete
-find /opt/conda/ -follow -type f -name '*.js.map' -delete
 
-ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+# cleanup
+rm /tmp/miniforge.sh
+conda clean -tipsy
+find ${CONDA_DIR} -follow -type f -name '*.a' -delete
+find ${CONDA_DIR} -follow -type f -name '*.pyc' -delete
+conda clean -afy
 
-mkdir -p /etc/conda
-cat <<EOF > /etc/conda/condarc
-always_yes: true
-changeps1: false
-auto_update_conda: false
-aggressive_update_packages: []
-envs_dirs:
- - /home/conda/environments
-EOF
-
-# Fix permissions in accordance with jupyter stack permissions
-# model
-fix-permissions /opt/conda /etc/conda /etc/profile.d
+# minimal steps to have conda available
+echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate base" >> /etc/skel/.bashrc
+echo ". ${CONDA_DIR}/etc/profile.d/conda.sh && conda activate base" >> ~/.bashrc
