@@ -1,4 +1,5 @@
 addons
+admin
 Anand
 api
 apis
@@ -34,6 +35,7 @@ dev
 digital
 Dockerfile
 Dockerfiles
+docstrings
 doctl
 ebs
 EBS
@@ -43,6 +45,7 @@ eks
 EKS
 elasticsearch
 emacs
+Email
 env
 gcp
 git
