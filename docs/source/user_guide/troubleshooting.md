@@ -21,7 +21,7 @@ At this point, feel free to cancel the deployment and rerun the same deployment 
 ## A Conda-Store environment fails to build
 
 ### Issue
-One of the two (`dashboard` or `dask`) Conda-Store environments created during the initial QHub deployment fails to appear as options when logged into JupyterHub.
+One of the two (`dashboard` or `dask`) [Conda-Store](https://github.com/Quansight/conda-store) environments created during the initial QHub deployment fails to appear as options when logged into JupyterHub.
 
 If your user has access to Conda-Store, you can verify this by visiting `<your_qhub_domain>.com/conda-store` and having a look at the build status of the missing environment.
 
