@@ -59,7 +59,7 @@ Depending on the authentication provider selected ('password', 'GitHub' or 'Auth
 Once the 'Username' field is updated, please add a valid email address in the 'Email' field.
 > NOTE: Although not required, users may not be able to log into Grafana if this field isn't properly set.
 
-Lastly, associate the user with one or more of the 'Groups'. Out of the box, QHub is deployed with the following groups: 'admin', 'analyst', and 'developer' (see below for more information about 'Groups').
+Lastly, associate the user with one or more of the 'Groups'. Out of the box, QHub is deployed with the following groups: 'admin', 'analyst', and 'developer' (see the sections [Groups](./login.md#groups) below).
 
 Enter the name you would like for the user then click 'Save'.
 
