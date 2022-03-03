@@ -73,6 +73,10 @@ It's best to unset the 'Temporary' on/off button so the user won't be forced to 
 ### Add user from the command line
 
 To make adding users easier for new QHub deployments, there is a QHub command that can help.
+
+> NOTE: If you changed the initial_root_password for Keycloak this method will not work.
+
+> NOTE: This method is primarily used by developers as a quick workaround.
 > NOTE: If you changed the initial_root_password for Keycloak this method will not work.
 > NOTE: This method is primarily used by developers as a quick workaround.
 
