@@ -10,6 +10,17 @@ resource "random_password" "proxy_secret_token" {
   special = false
 }
 
+resource "kubernetes_config_map" "server-idle-culling" {
+  metadata {
+    name      = "server-idle-culling"
+    namespace = var.namespace
+  }
+
+  data = {
+    "jupyter_notebook_config.py" = file("${path.module}/files/04-idle-culler.py")
+  }
+}
+
 resource "helm_release" "jupyterhub" {
   name      = "jupyterhub"
   namespace = var.namespace
@@ -30,7 +41,16 @@ resource "helm_release" "jupyterhub" {
         shared-pvc        = var.shared-pvc
         conda-store-pvc   = var.conda-store-pvc
         conda-store-mount = var.conda-store-mount
-        extra-mounts      = var.extra-mounts
+        extra-mounts      = merge(
+          var.extra-mounts,
+          {
+            "/etc/jupyter" = {
+              name = "server-idle-culling"
+              namespace = var.namespace
+              kind = "configmap"
+            }
+          }
+        )
         environments      = var.conda-store-environments
       }
 
@@ -41,9 +61,9 @@ resource "helm_release" "jupyterhub" {
         }
 
         extraConfig = {
-          "01-theme.py" = file("${path.module}/files/01-theme.py")
-          "02-spawner.py" = file("${path.module}/files/02-spawner.py")
-          "03-profiles.py" = file("${path.module}/files/03-profiles.py")
+          "01-theme.py"       = file("${path.module}/files/01-theme.py")
+          "02-spawner.py"     = file("${path.module}/files/02-spawner.py")
+          "03-profiles.py"    = file("${path.module}/files/03-profiles.py")
         }
 
         services = {
