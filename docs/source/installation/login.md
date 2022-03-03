@@ -77,8 +77,7 @@ To make adding users easier for new QHub deployments, there is a QHub command th
 > NOTE: If you changed the initial_root_password for Keycloak this method will not work.
 
 > NOTE: This method is primarily used by developers as a quick workaround.
-> NOTE: If you changed the initial_root_password for Keycloak this method will not work.
-> NOTE: This method is primarily used by developers as a quick workaround.
+
 
 Run:
 
