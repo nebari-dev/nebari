@@ -10,7 +10,7 @@ As the output message mentions, this is likely the result of the non-determinist
 
 Without going into a deep dive of what DNS is or how it works, the issue encountered here is that the when QHub tries to lookup the IP address associated with the DNS record, `your_qhub_domain`, nothing is returned. Unfortunately, this "lookup" is not as straight-forward as it sounds. To lookup the correct IP associated with this domain, many intermediate servers (root, top level domain, and authoritative nameservers) are checked, each with their own cache which was updated an unknown time ago (usually on the order of minutes but not always).
 
-For those interested to learn more about DNS, see [this CloudFlare article](https://www.cloudflare.com/learning/dns/what-is-dns)).
+For those interested to learn more about DNS, see [this CloudFlare article](https://howdns.works/)).
 
 ### *Troubleshooting*
 Again, as the output message mentions, it will ask if you want it to retry this DNS lookup again after another wait period; this wait period keeps increasing after each retry. However, it's still possible that after waiting 15 or more minutes that the DNS still won't resolve.
