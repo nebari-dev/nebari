@@ -196,10 +196,14 @@ jobs:
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment
-          # This is a known failure at the moment.
-          qhub destroy --config qhub-config.yaml || true
+          qhub destroy --config qhub-config.yaml
 
       - name: Basic kubectl checks after cleanup
         if: always()
         run: |
           kubectl get all,cm,secret,ing -A
+
+      - name: Delete minikube cluster
+        if: always()
+        run: |
+          minikube delete
