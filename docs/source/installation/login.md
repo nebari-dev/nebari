@@ -11,7 +11,7 @@ The `root` Keycloak user is only able to login and manage the Keycloak identity 
 After the initial deployment, it is **highly** recommended that you change the Keycloak `root` user password as soon as you can.
 > NOTE: From this point on, the `security.keycloak.initial_root_password` field in `qhub-config.yaml` has no effect. If you redeploy QHub it will not reset the password back to the old one (or anything else that might be in the field in your YAML file). We strongly recommend you delete this field.
 
-1. To change the `root` user password, navigate to `https://myqhubsite.com/auth/admin/`, and login with the password provided.
+1. To change the `root` user password, your QHub's instance admin dashboard i.e <https://myqhubsite.com/auth/admin/>, and log in with the password provided.
 
 ![QhHub admin view - Root Login to Keycloak form](../images/keycloak_master_login.png)
 
@@ -42,13 +42,13 @@ All QHub users will be part of the `qhub` realm (a realm is a distinct identity 
 
 The `qhub` realm is selected by default, we strongly recommend leaving it as is.
 
-Click 'Users' along the left-hand side of the page.
+1. Click 'Users' along the left-hand side of the page.
 
-Click the 'Add user' button and you will see the new user form:
+2. Click the 'Add user' button and you will see the new user form:
 
 ![Keycloak add user tab screenshot - new user form ](../images/keycloak_add_users.png)
 
-Fill out the three fields, outlined above. These are 'Username', 'Email', and 'Groups'.
+3. Fill out the three fields, outlined above. These are 'Username', 'Email', and 'Groups'.
 
 Depending on the authentication provider selected ('password', 'GitHub' or 'Auth0'), the values entered into the 'Username' field will differ slightly. The following table outlines those differences:
 
