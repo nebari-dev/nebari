@@ -3,7 +3,7 @@
 ## "DNS domain=`your_qhub_domain` record does not exist"
 
 ### *Issue*
-During your initial QHub deployment, at the end of "04-kubernetes-ingress" stage, you receive an output message stating that the DNS record for `your_qhub_domain` "appears not to exist, has recently been updated, or has yet to fully propagate."
+During your initial QHub deployment, at the end of the `04-kubernetes-ingress` stage, you receive an output message stating that the DNS record for `your_qhub_domain` "appears not to exist, has recently been updated, or has yet to fully propagate."
 
 ### *Reason for observed behavior*
 As the output message mentions, this is likely the result of the non-deterministic behavior of DNS.
