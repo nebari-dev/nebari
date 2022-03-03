@@ -1,4 +1,5 @@
 addons
+admin
 Anand
 api
 apis
@@ -43,6 +44,7 @@ eks
 EKS
 elasticsearch
 emacs
+Email
 env
 gcp
 git
