@@ -70,7 +70,7 @@ Once the user is created, you can set a password.
 
 It's best to unset the 'Temporary' on/off button so the user won't be forced to change the password on first login.
 
-### Add user from command line
+### Add user from the command line
 
 To make adding users easier for new QHub deployments, there is a QHub command that can help.
 > NOTE: If you changed the initial_root_password for Keycloak this method will not work.
