@@ -4,10 +4,6 @@ set -x
 # install classic notebook extensions
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
-# ====== setup ipython conifiguration ======
-mkdir -p /etc/ipython
-cp /opt/jupyterlab/ipython_config.py /etc/ipython/ipython_config.py
-
 # ====== setup jupyterlab configuration overrides ======
 mkdir -p /opt/conda/share/jupyter/lab/settings
 cp /opt/jupyterlab/overrides.json /opt/conda/share/jupyter/lab/settings

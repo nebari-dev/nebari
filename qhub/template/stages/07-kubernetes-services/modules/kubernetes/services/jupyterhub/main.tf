@@ -10,16 +10,6 @@ resource "random_password" "proxy_secret_token" {
   special = false
 }
 
-resource "kubernetes_config_map" "server-idle-culling" {
-  metadata {
-    name      = "server-idle-culling"
-    namespace = var.namespace
-  }
-
-  data = {
-    "jupyter_notebook_config.py" = file("${path.module}/files/04-idle-culler.py")
-  }
-}
 
 resource "helm_release" "jupyterhub" {
   name      = "jupyterhub"
@@ -44,9 +34,15 @@ resource "helm_release" "jupyterhub" {
         extra-mounts      = merge(
           var.extra-mounts,
           {
+            "/etc/ipython" = {
+              name = kubernetes_config_map.etc-ipython.metadata.0.name
+              namespace = kubernetes_config_map.etc-ipython.metadata.0.namespace
+              kind = "configmap"
+            }
+
             "/etc/jupyter" = {
-              name = "server-idle-culling"
-              namespace = var.namespace
+              name = kubernetes_config_map.etc-jupyter.metadata.0.name
+              namespace = kubernetes_config_map.etc-jupyter.metadata.0.namespace
               kind = "configmap"
             }
           }
@@ -61,9 +57,9 @@ resource "helm_release" "jupyterhub" {
         }
 
         extraConfig = {
-          "01-theme.py"       = file("${path.module}/files/01-theme.py")
-          "02-spawner.py"     = file("${path.module}/files/02-spawner.py")
-          "03-profiles.py"    = file("${path.module}/files/03-profiles.py")
+          "01-theme.py"       = file("${path.module}/files/jupyterhub/01-theme.py")
+          "02-spawner.py"     = file("${path.module}/files/jupyterhub/02-spawner.py")
+          "03-profiles.py"    = file("${path.module}/files/jupyterhub/03-profiles.py")
         }
 
         services = {
