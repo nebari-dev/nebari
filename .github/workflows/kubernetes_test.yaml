@@ -151,8 +151,11 @@ jobs:
 
       - name: Create example-user
         run: |
-          echo "CYPRESS_EXAMPLE_USER_NAME=example-user+new1@example.com" >> $GITHUB_ENV
-          echo "CYPRESS_EXAMPLE_USER_PASSWORD=P@sswo3d" >> $GITHUB_ENV
+          export CYPRESS_EXAMPLE_USER_NAME=example-user+new1@example.com
+          export CYPRESS_EXAMPLE_USER_PASSWORD=P@sswo3d
+
+          echo "CYPRESS_EXAMPLE_USER_NAME=${CYPRESS_EXAMPLE_USER_NAME}" >> $GITHUB_ENV
+          echo "CYPRESS_EXAMPLE_USER_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}" >> $GITHUB_ENV
 
           qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}"
           qhub keycloak --config "${QHUB_CONFIG_PATH}" listusers
