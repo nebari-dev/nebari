@@ -1,3 +1,6 @@
+import re
+import uuid
+
 import paramiko
 import pytest
 
@@ -28,21 +31,66 @@ def paramiko_object():
         client.close()
 
 
+def run_command(command, stdin, stdout, stderr):
+    delimiter = uuid.uuid4().hex
+    stdin.write(f"echo {delimiter}start; {command}; echo {delimiter}end\n")
+
+    output = []
+
+    line = stdout.readline()
+    while not re.match(f"^{delimiter}start$", line.strip()):
+        line = stdout.readline()
+
+    line = stdout.readline()
+    if delimiter not in line:
+        output.append(line)
+
+    while not re.match(f"^{delimiter}end$", line.strip()):
+        line = stdout.readline()
+        if delimiter not in line:
+            output.append(line)
+
+    return ''.join(output).strip()
+
+
 def test_simple_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command('')
 
-    stdin.write('''echo $CONDA_PREFIX
-conda activate default
-echo $SHELL
-echo $CONDA_PREFIX
-id
-whoami
-umask
-hostname
-df -h
-ls -la
-conda info
-env
-exit
-''')
-    print(stdout.read().decode('utf-8'))
+    # commands to run and just print the output
+    commands_print = [
+        'id',
+        'env',
+        'conda info',
+        'df -h',
+        'ls -la',
+        'umask',
+    ]
+
+    # commands to run and exactly match output
+    commands_exact = [
+        ('id -u', '1000'),
+        ('id -g', '100'),
+        ('whoami', constants.KEYCLOAK_USERNAME),
+        ('pwd', f'/home/{constants.KEYCLOAK_USERNAME}'),
+        ('echo $HOME', f'/home/{constants.KEYCLOAK_USERNAME}'),
+        ('conda activate default && echo $CONDA_PREFIX', '/opt/conda/envs/default'),
+        ('hostname', f'jupyter-{constants.KEYCLOAK_USERNAME}'),
+    ]
+
+    # commands to run and string need to be contained in output
+    commands_contain = [
+        ('ls -la', '.bashrc'),
+        ('cat ~/.bashrc', 'Managed by QHub'),
+        ('cat ~/.profile', 'Managed by QHub'),
+        ('cat ~/.bash_logout', 'Managed by QHub'),
+    ]
+
+    for command in commands_print:
+        print(f'COMMAND: "{command}"')
+        print(run_command(command, stdin, stdout, stderr))
+
+    for command, output in commands_exact:
+        assert output == run_command(command, stdin, stdout, stderr)
+
+    for command, output in commands_contain:
+        assert output in run_command(command, stdin, stdout, stderr)
