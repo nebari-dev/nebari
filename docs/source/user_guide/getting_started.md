@@ -15,7 +15,7 @@ makes it a little challenging to detail the exact process as it might differ
 greatly between authentication providers (LDAP, OAuth 2.0, passwordless
 authentication, password-based authentication and many others). A deeply
 overview of the QHub authentication process is described in the
-[Authentication Guide](../installation/login.mdl).
+[Authentication Guide](../installation/login.md).
 
 For this demonstration we will present the user with password-based or GitHub
 authentication.
