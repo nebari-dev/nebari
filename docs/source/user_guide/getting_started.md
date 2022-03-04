@@ -4,13 +4,13 @@ This guide aims to give a basic overview of the QHub login process. Your
 organization's QHub will likely have a slightly different authentication
 process due to the many authentication providers that QHub can integrate with.
 
-The fisrt step is to connect with your QHub cluster, for this example we will
+The first step is to connect with your QHub cluster, for this example we will
 be using `https://qhub-demo.qhub.dev`. Once on the site, you will be prompted
 by a login, similar to the login page shown in the image below.
 
 ![QHub login screen](../images/qhub_login_screen.png)
 
-Qhub now uses an open source tool called Keycloak for user managament. This
+Qhub now uses an open source tool called Keycloak for user management. This
 makes it a little challenging to detail the exact process as it might differ
 greatly between authentication providers (LDAP, OAuth 2.0, passwordless
 authentication, password-based authentication and many others). A deeply
