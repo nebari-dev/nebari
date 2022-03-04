@@ -31,7 +31,11 @@ def paramiko_object():
 def test_simple_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command('')
 
-    stdin.write('''id
+    stdin.write('''echo $CONDA_PREFIX
+conda activate default
+echo $SHELL
+echo $CONDA_PREFIX
+id
 whoami
 umask
 hostname
