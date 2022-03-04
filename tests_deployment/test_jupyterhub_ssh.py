@@ -5,7 +5,7 @@ import paramiko
 import pytest
 
 from tests_deployment import constants
-from tests_deployment.utils import get_jupyterhub_token, monkeypatch_ssl_context
+from tests_deployment.utils import get_jupyterhub_token, monkeypatch_ssl_context, escape_string
 
 monkeypatch_ssl_context()
 
@@ -74,7 +74,7 @@ def test_simple_jupyterhub_ssh(paramiko_object):
         ('pwd', f'/home/{constants.KEYCLOAK_USERNAME}'),
         ('echo $HOME', f'/home/{constants.KEYCLOAK_USERNAME}'),
         ('conda activate default && echo $CONDA_PREFIX', '/opt/conda/envs/default'),
-        ('hostname', f'jupyter-{constants.KEYCLOAK_USERNAME}'),
+        ('hostname', escape_string(f'jupyter-{constants.KEYCLOAK_USERNAME}')),
     ]
 
     # commands to run and string need to be contained in output

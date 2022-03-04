@@ -38,6 +38,7 @@
         pythonPackages.sphinx
         pythonPackages.dask-gateway
         pythonPackages.paramiko
+        pythonPackages.escapism
 
         # additional
         pkgs.minikube
