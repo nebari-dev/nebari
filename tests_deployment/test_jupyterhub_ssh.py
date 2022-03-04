@@ -5,7 +5,11 @@ import paramiko
 import pytest
 
 from tests_deployment import constants
-from tests_deployment.utils import get_jupyterhub_token, monkeypatch_ssl_context, escape_string
+from tests_deployment.utils import (
+    get_jupyterhub_token,
+    monkeypatch_ssl_context,
+    escape_string,
+)
 
 monkeypatch_ssl_context()
 
@@ -50,39 +54,39 @@ def run_command(command, stdin, stdout, stderr):
         if delimiter not in line:
             output.append(line)
 
-    return ''.join(output).strip()
+    return "".join(output).strip()
 
 
 def test_simple_jupyterhub_ssh(paramiko_object):
-    stdin, stdout, stderr = paramiko_object.exec_command('')
+    stdin, stdout, stderr = paramiko_object.exec_command("")
 
     # commands to run and just print the output
     commands_print = [
-        'id',
-        'env',
-        'conda info',
-        'df -h',
-        'ls -la',
-        'umask',
+        "id",
+        "env",
+        "conda info",
+        "df -h",
+        "ls -la",
+        "umask",
     ]
 
     # commands to run and exactly match output
     commands_exact = [
-        ('id -u', '1000'),
-        ('id -g', '100'),
-        ('whoami', constants.KEYCLOAK_USERNAME),
-        ('pwd', f'/home/{constants.KEYCLOAK_USERNAME}'),
-        ('echo $HOME', f'/home/{constants.KEYCLOAK_USERNAME}'),
-        ('conda activate default && echo $CONDA_PREFIX', '/opt/conda/envs/default'),
-        ('hostname', escape_string(f'jupyter-{constants.KEYCLOAK_USERNAME}')),
+        ("id -u", "1000"),
+        ("id -g", "100"),
+        ("whoami", constants.KEYCLOAK_USERNAME),
+        ("pwd", f"/home/{constants.KEYCLOAK_USERNAME}"),
+        ("echo $HOME", f"/home/{constants.KEYCLOAK_USERNAME}"),
+        ("conda activate default && echo $CONDA_PREFIX", "/opt/conda/envs/default"),
+        ("hostname", escape_string(f"jupyter-{constants.KEYCLOAK_USERNAME}")),
     ]
 
     # commands to run and string need to be contained in output
     commands_contain = [
-        ('ls -la', '.bashrc'),
-        ('cat ~/.bashrc', 'Managed by QHub'),
-        ('cat ~/.profile', 'Managed by QHub'),
-        ('cat ~/.bash_logout', 'Managed by QHub'),
+        ("ls -la", ".bashrc"),
+        ("cat ~/.bashrc", "Managed by QHub"),
+        ("cat ~/.profile", "Managed by QHub"),
+        ("cat ~/.bash_logout", "Managed by QHub"),
     ]
 
     for command in commands_print:

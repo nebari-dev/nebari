@@ -146,15 +146,15 @@ jobs:
           sudo apt-get -y update
           sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
-      - name: Read example-user password
-        run: python -c "import tempfile, os; print('CYPRESS_EXAMPLE_USER_PASSWORD='+open(os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')).read())" >> "$GITHUB_ENV"
-
       - name: Get qhub-config.yaml full path
         run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`" >> "$GITHUB_ENV"
 
       - name: Create example-user
         run: |
-          qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser example-user "${CYPRESS_EXAMPLE_USER_PASSWORD}"
+          echo "CYPRESS_EXAMPLE_USER_NAME=example-user+new1@example.com" >> $GITHUB_ENV
+          echo "CYPRESS_EXAMPLE_USER_PASSWORD=P@sswo3d" >> $GITHUB_ENV
+
+          qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}"
           qhub keycloak --config "${QHUB_CONFIG_PATH}" listusers
 
       - name: Cypress run
@@ -175,7 +175,7 @@ jobs:
 
       - name: Deployment Pytests
         run: |
-          export KEYCLOAK_USERNAME=example-user
+          export KEYCLOAK_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
           export KEYCLOAK_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
           pytest tests_deployment/ -v -s
 
@@ -183,7 +183,7 @@ jobs:
         # run jhub-client after pytest since jhubctl can cleanup
         # the running server
         run: |
-          export JUPYTERHUB_USERNAME=example-user
+          export JUPYTERHUB_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
           export JUPYTERHUB_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
           jhubctl --verbose run --hub=https://github-actions.qhub.dev \
                                 --auth-type=keycloak \
