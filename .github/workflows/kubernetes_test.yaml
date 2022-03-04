@@ -177,7 +177,7 @@ jobs:
         run: |
           export KEYCLOAK_USERNAME=example-user
           export KEYCLOAK_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
-          pytest tests_deployment/ -v
+          pytest tests_deployment/ -v -s
 
       - name: JupyterHub Notebook Tests
         # run jhub-client after pytest since jhubctl can cleanup

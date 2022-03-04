@@ -29,5 +29,16 @@ def paramiko_object():
 
 
 def test_simple_jupyterhub_ssh(paramiko_object):
-    stdin, stdout, stderr = paramiko_object.exec_command('ls -la', timeout=60, bufsize=1, get_pty=True)
-    # eventually do something with the stdout
+    stdin, stdout, stderr = paramiko_object.exec_command('')
+
+    stdin.write('''id
+whoami
+umask
+hostname
+df -h
+ls -la
+conda info
+env
+exit
+''')
+    print(stdout.read().decode('utf-8'))
