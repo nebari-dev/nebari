@@ -1,3 +1,4 @@
+
 import re
 import uuid
 
@@ -93,7 +94,7 @@ def test_exact_jupyterhub_ssh(paramiko_object):
         ("pwd", f"/home/{constants.KEYCLOAK_USERNAME}"),
         ("echo $HOME", f"/home/{constants.KEYCLOAK_USERNAME}"),
         ("conda activate default && echo $CONDA_PREFIX", "/opt/conda/envs/default"),
-        ("hostname", escape_string(f"jupyter-{constants.KEYCLOAK_USERNAME}")),
+        ("hostname", f"jupyter-{escape_string(constants.KEYCLOAK_USERNAME)}"),
     ]
 
     for command, output in commands_exact:
