@@ -18,7 +18,7 @@ The proper solution is to add the package to the `qhub_config.yml` (See #1). If 
 
 ### What's included in the user environment if a user wants to use Dask?
 
-The user needs to include the QHub Dask metapackage. Example: `qhub-dask==||QHUB_VERSION||`. This replaces `distributed`, `dask`, and `dask-gateway`.
+The user needs to include the [QHub Dask metapackage](https://github.com/conda-forge/qhub-dask-feedstock). Example: `qhub-dask==||QHUB_VERSION||`. This replaces `distributed`, `dask`, and `dask-gateway` with the correct pinned versions.
 
 ### Why can't a user just create their own local conda environment or edit the existing conda environments?
 
