@@ -33,6 +33,7 @@
       devDependencies = [
         # development
         pythonPackages.pytest
+        pythonPackages.pytest-timeout
         pythonPackages.black
         pythonPackages.flake8
         pythonPackages.sphinx

@@ -57,7 +57,13 @@ def run_command(command, stdin, stdout, stderr):
     return "".join(output).strip()
 
 
+@pytest.mark.timeout(120)
 def test_simple_jupyterhub_ssh(paramiko_object):
+    stdin, stdout, stderr = paramiko_object.exec_command("")
+
+
+@pytest.mark.timeout(120)
+def test_print_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
     # commands to run and just print the output
@@ -70,6 +76,15 @@ def test_simple_jupyterhub_ssh(paramiko_object):
         "umask",
     ]
 
+    for command in commands_print:
+        print(f'COMMAND: "{command}"')
+        print(run_command(command, stdin, stdout, stderr))
+
+
+@pytest.mark.timeout(120)
+def test_exact_jupyterhub_ssh(paramiko_object):
+    stdin, stdout, stderr = paramiko_object.exec_command("")
+
     # commands to run and exactly match output
     commands_exact = [
         ("id -u", "1000"),
@@ -81,6 +96,14 @@ def test_simple_jupyterhub_ssh(paramiko_object):
         ("hostname", escape_string(f"jupyter-{constants.KEYCLOAK_USERNAME}")),
     ]
 
+    for command, output in commands_exact:
+        assert output == run_command(command, stdin, stdout, stderr)
+
+
+@pytest.mark.timeout(120)
+def test_contains_jupyterhub_ssh(paramiko_object):
+    stdin, stdout, stderr = paramiko_object.exec_command("")
+
     # commands to run and string need to be contained in output
     commands_contain = [
         ("ls -la", ".bashrc"),
@@ -88,13 +111,6 @@ def test_simple_jupyterhub_ssh(paramiko_object):
         ("cat ~/.profile", "Managed by QHub"),
         ("cat ~/.bash_logout", "Managed by QHub"),
     ]
-
-    for command in commands_print:
-        print(f'COMMAND: "{command}"')
-        print(run_command(command, stdin, stdout, stderr))
-
-    for command, output in commands_exact:
-        assert output == run_command(command, stdin, stdout, stderr)
 
     for command, output in commands_contain:
         assert output in run_command(command, stdin, stdout, stderr)
