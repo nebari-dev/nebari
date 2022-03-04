@@ -31,6 +31,10 @@ resource "helm_release" "jupyterhub" {
         shared-pvc        = var.shared-pvc
         conda-store-pvc   = var.conda-store-pvc
         conda-store-mount = var.conda-store-mount
+        skel-mount        = {
+          name      = kubernetes_config_map.etc-skel.metadata.0.name
+          namespace = kubernetes_config_map.etc-skel.metadata.0.namespace
+        }
         extra-mounts      = merge(
           var.extra-mounts,
           {

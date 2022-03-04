@@ -22,7 +22,7 @@ resource "kubernetes_config_map" "etc-jupyter" {
 }
 
 
-resource "etc-skel" {
+resource "kubernetes_config_map" "etc-skel" {
   metadata {
     name      = "etc-skel"
     namespace = var.namespace
