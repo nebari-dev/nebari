@@ -3,7 +3,7 @@
 QHub has several ways to manage environments for users. The
 traditional approach available in older QHub deployments is still
 available by editing the `qhub-config.yaml` `environments:` key within
-the configuration file. An example would be 
+the configuration file. An example would be
 
 ```yaml
 environments:
@@ -36,7 +36,13 @@ endpoint](https://conda-store.readthedocs.io/en/latest/user_guide.html#create-cr
 will allow you to easily create a new environment. Additionally you
 can update existing environments via [visiting the
 environment](https://conda-store.readthedocs.io/en/latest/user_guide.html#environment-namespace-name-environments)
-and clicking edit. 
+and clicking edit.
+
+In order for your new environment to be properly visible in the list of
+available kernels, you will need to include  `ipykernel` and `ipywidgets`
+in your environment's dependency list. Also, if using Dask, you will need
+to include [extra dependencies](./faq.md/#whats-included-in-the-user-environment-if-a-user-wants-to-use-dask) to maintain version compatibility between
+the Dask client and server.
 
 We are working towards developing an extension within jupyterlab for
 editing these environments but it is not complete at the
