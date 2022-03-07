@@ -54,7 +54,7 @@ class Base(pydantic.BaseModel):
 class CICD(Base):
     type: CiEnum
     branch: str
-    commit_render: typing.Optional[bool] = Field(default=True)
+    commit_render: bool = Field(default=True)
     before_script: typing.Optional[typing.List[str]]
     after_script: typing.Optional[typing.List[str]]
 
