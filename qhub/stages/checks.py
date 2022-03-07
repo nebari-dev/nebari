@@ -21,7 +21,7 @@ def stage_02_infrastructure(stage_outputs, qhub_config):
 
     try:
         api_instance = client.CoreV1Api()
-        result = api_instance.list_node()
+        result = api_instance.list_namespace()
     except ApiException:
         print(
             f"ERROR: After stage directory={directory} unable to connect to kubernetes cluster"
