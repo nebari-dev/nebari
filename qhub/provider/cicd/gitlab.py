@@ -1,3 +1,4 @@
+import os
 from typing import Optional, Dict, List, Union
 
 from pydantic import BaseModel, Field
@@ -53,12 +54,18 @@ def gen_gitlab_ci(config):
         f"git checkout {branch}",
         f"{pip_install}",
         "qhub deploy --config qhub-config.yaml --disable-prompt --skip-remote-state-provision",
+    ]
+
+    commit_render_script = [
         "git config user.email 'qhub@quansight.com'",
         "git config user.name 'gitlab ci'",
         "git add .",
         "git diff --quiet && git diff --staged --quiet || (git commit -m '${COMMIT_MSG}'",
         f"git push origin {branch})",
     ]
+
+    if os.environ.get("QHUB_PREVENT_COMMIT_RENDER", "no") != "yes":
+        script += commit_render_script
 
     rules = [
         GLCI_rules(
