@@ -65,6 +65,12 @@ BASE_CONFIGURATION = {
     },
 }
 
+CICD_CONFIGURATION = {
+    "type": "PLACEHOLDER",
+    "branch": "main",
+    "commit_render": True,
+}
+
 AUTH_PASSWORD = {
     "type": "password",
 }
@@ -253,7 +259,10 @@ def render_config(
     config["provider"] = cloud_provider
 
     if ci_provider is not None and ci_provider != "none":
-        config["ci_cd"] = {"type": ci_provider, "branch": "main", "commit_render": True}
+        config["ci_cd"] = CICD_CONFIGURATION.copy()
+        config["ci_cd"]["type"] = ci_provider
+        if os.environ.get("QHUB__cicd__commit_render") == "False":
+            config["ci_cd"]["commit_render"] = False
 
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}
