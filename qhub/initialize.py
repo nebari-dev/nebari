@@ -259,7 +259,7 @@ def render_config(
     config["provider"] = cloud_provider
 
     if ci_provider is not None and ci_provider != "none":
-        config["ci_cd"] = {"type": ci_provider, "branch": "main"}
+        config["ci_cd"] = {"type": ci_provider, "branch": "main", "commit_render": True}
 
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}
