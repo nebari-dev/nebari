@@ -65,12 +65,6 @@ BASE_CONFIGURATION = {
     },
 }
 
-CICD_CONFIGURATION = {
-    "type": "PLACEHOLDER",
-    "branch": "main",
-    "commit_render": True,
-}
-
 AUTH_PASSWORD = {
     "type": "password",
 }
