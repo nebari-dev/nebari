@@ -215,6 +215,7 @@ def gen_qhub_ops(config):
 
     env_vars = gha_env_vars(config)
     branch = config["ci_cd"]["branch"]
+    commit_render = config["ci_cd"]["commit_render"]
     qhub_version = config["qhub_version"]
 
     push = GHA_on_extras(branches=[branch], paths=["qhub-config.yaml"])
@@ -246,7 +247,7 @@ def gen_qhub_ops(config):
     )
 
     gha_steps = [step1, step2, step3, step4]
-    if os.environ.get("QHUB_PREVENT_COMMIT_RENDER", "no") != "yes":
+    if commit_render:
         gha_steps.append(step5)
 
     job1 = GHA_job_id(name="qhub", runs_on_="ubuntu-latest", steps=gha_steps)

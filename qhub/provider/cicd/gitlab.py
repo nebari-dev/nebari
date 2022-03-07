@@ -1,4 +1,3 @@
-import os
 from typing import Optional, Dict, List, Union
 
 from pydantic import BaseModel, Field
@@ -42,6 +41,7 @@ PYTHON_VERSION = 3.9
 def gen_gitlab_ci(config):
 
     branch = config["ci_cd"]["branch"]
+    commit_render = config["ci_cd"]["commit_render"]
     before_script = config["ci_cd"].get("before_script")
     after_script = config["ci_cd"].get("after_script")
     pip_install = pip_install_qhub(config["qhub_version"])
@@ -64,7 +64,7 @@ def gen_gitlab_ci(config):
         f"git push origin {branch})",
     ]
 
-    if os.environ.get("QHUB_PREVENT_COMMIT_RENDER", "no") != "yes":
+    if commit_render:
         script += commit_render_script
 
     rules = [

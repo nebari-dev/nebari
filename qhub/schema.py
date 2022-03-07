@@ -3,7 +3,7 @@ import typing
 from abc import ABC
 
 import pydantic
-from pydantic import validator, root_validator
+from pydantic import validator, root_validator, Field
 from qhub.utils import namestr_regex
 from .version import rounded_ver_parse, __version__
 
@@ -54,6 +54,7 @@ class Base(pydantic.BaseModel):
 class CICD(Base):
     type: CiEnum
     branch: str
+    commit_render: typing.Optional[bool] = Field(default=True)
     before_script: typing.Optional[typing.List[str]]
     after_script: typing.Optional[typing.List[str]]
 
