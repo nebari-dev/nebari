@@ -245,9 +245,11 @@ def gen_qhub_ops(config):
         },
     )
 
-    job1 = GHA_job_id(
-        name="qhub", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4, step5]
-    )
+    gha_steps = [step1, step2, step3, step4]
+    if os.environ.get("QHUB_PREVENT_COMMIT_RENDER", "no") != "yes":
+        gha_steps.append(step5)
+
+    job1 = GHA_job_id(name="qhub", runs_on_="ubuntu-latest", steps=gha_steps)
     jobs = GHA_jobs(__root__={"build": job1})
 
     return QhubOps(
