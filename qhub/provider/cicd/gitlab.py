@@ -41,6 +41,7 @@ PYTHON_VERSION = 3.9
 def gen_gitlab_ci(config):
 
     branch = config["ci_cd"]["branch"]
+    commit_render = config["ci_cd"]["commit_render"]
     before_script = config["ci_cd"].get("before_script")
     after_script = config["ci_cd"].get("after_script")
     pip_install = pip_install_qhub(config["qhub_version"])
@@ -53,12 +54,18 @@ def gen_gitlab_ci(config):
         f"git checkout {branch}",
         f"{pip_install}",
         "qhub deploy --config qhub-config.yaml --disable-prompt --skip-remote-state-provision",
+    ]
+
+    commit_render_script = [
         "git config user.email 'qhub@quansight.com'",
         "git config user.name 'gitlab ci'",
         "git add .",
         "git diff --quiet && git diff --staged --quiet || (git commit -m '${COMMIT_MSG}'",
         f"git push origin {branch})",
     ]
+
+    if commit_render:
+        script += commit_render_script
 
     rules = [
         GLCI_rules(
