@@ -495,15 +495,14 @@ terraform_state:
 Default images are to the default image run if not specified in a
 profile (described in the next section). The `jupyterhub` key controls
 the jupyterhub image run. These control the docker image used to run
-JupyterHub, the default JupyterLab image, the default Dask worker
-image, and Dask Gateway docker image.
+JupyterHub, the default JupyterLab image, and the default Dask worker
+image.
 
 ```yaml
 default_images:
   jupyterhub: "quansight/qhub-jupyterhub:v||QHUB_VERSION||"
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
-  dask_gateway: "quansight/qhub-dask-gateway:v||QHUB_VERSION||"
 ```
 
 ## Storage

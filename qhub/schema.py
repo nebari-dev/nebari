@@ -121,7 +121,6 @@ class DefaultImages(Base):
     jupyterhub: str
     jupyterlab: str
     dask_worker: str
-    dask_gateway: str
 
 
 # =========== Authentication ==============

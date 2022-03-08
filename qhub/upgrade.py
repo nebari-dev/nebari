@@ -318,6 +318,10 @@ class Upgrade_0_4_0(UpgradeStep):
         if "conda_store" in config["default_images"]:
             del config["default_images"]["conda_store"]
 
+        # Remove dask_gateway image from default_images
+        if "dask_gateway" in config["default_images"]:
+            del config["default_images"]["dask_gateway"]
+
         # Create root password
         default_password = "".join(
             secrets.choice(string.ascii_letters + string.digits) for i in range(16)

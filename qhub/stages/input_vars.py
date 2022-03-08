@@ -244,9 +244,6 @@ def stage_07_kubernetes_services(stage_outputs, config):
             .get("extraEnv", [])
         ),
         # dask-gateway
-        "dask-gateway-image": _split_docker_image_name(
-            config["default_images"]["dask_gateway"]
-        ),
         "dask-worker-image": _split_docker_image_name(
             config["default_images"]["dask_worker"]
         ),
