@@ -4,4 +4,4 @@ from nox import session
 def docs(session):
     session.install("-e.")
     session.install("-rdocs/requirements.txt")
-    session.run("sphinx-build", "-c", "docs",".", "_build/html")
+    session.run("sphinx-build", "docs", "_build/html")

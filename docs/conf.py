@@ -19,7 +19,7 @@ BLOG_AUTHOR = author = "Quansight"
 html_theme = "pydata_sphinx_theme"
 
 # The master toctree document.
-master_doc = "docs/index"
+master_doc = "index"
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
