@@ -19,7 +19,7 @@ BLOG_AUTHOR = author = "Quansight"
 html_theme = "pydata_sphinx_theme"
 
 # The master toctree document.
-master_doc = "index"
+master_doc = "docs/index"
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -30,7 +30,6 @@ sys.path.append(os.path.abspath("./ext"))
 
 extensions = [
     "myst_parser",
-    "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx_copybutton",
@@ -65,7 +64,7 @@ templates_path = ["_templates"]
 html_logo = "source/images/qhub_logo.png"
 
 # exclude build directory and Jupyter backup files:
-exclude_patterns = ["_build", "*checkpoint*", "site", "jupyter_execute", "conf.py", "README.md", "ext"]
+exclude_patterns = [".nox", "_build", "*checkpoint*", "site", "jupyter_execute", "conf.py", "README.md", "ext"]
 
 latex_documents = [
     (master_doc, "qhub.tex", "Infrastructure as Code", "QHub", "manual",)
