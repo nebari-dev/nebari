@@ -1,5 +1,6 @@
 from nox import session
 
+
 @session(reuse_venv=True)
 def docs(session):
     session.install("-e.")

@@ -34,7 +34,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx_copybutton",
     "substitute",
-    ]
+]
 
 # autoapi.extension
 autoapi_type = "python"
@@ -45,7 +45,7 @@ DEFAULT_LANG = "en"
 
 NAVIGATION_LINKS = {
     DEFAULT_LANG: tuple(),
-    }
+}
 
 THEME_COLOR = "4f28a8"  # "#7B699F"
 
@@ -56,7 +56,7 @@ POSTS = (
     ("posts/*.html", "posts", "post.tmpl"),
     ("posts/*.ipynb", "posts", "post.tmpl"),
     ("posts/*.md.ipynb", "posts", "post.tmpl"),
-    )
+)
 
 templates_path = ["_templates"]
 
@@ -64,11 +64,26 @@ templates_path = ["_templates"]
 html_logo = "source/images/qhub_logo.png"
 
 # exclude build directory and Jupyter backup files:
-exclude_patterns = [".nox", "_build", "*checkpoint*", "site", "jupyter_execute", "conf.py", "README.md", "ext"]
+exclude_patterns = [
+    ".nox",
+    "_build",
+    "*checkpoint*",
+    "site",
+    "jupyter_execute",
+    "conf.py",
+    "README.md",
+    "ext",
+]
 
 latex_documents = [
-    (master_doc, "qhub.tex", "Infrastructure as Code", "QHub", "manual",)
-    ]
+    (
+        master_doc,
+        "qhub.tex",
+        "Infrastructure as Code",
+        "QHub",
+        "manual",
+    )
+]
 
 jupyter_execute_notebooks = "off"
 
@@ -77,7 +92,7 @@ myst_update_mathjax = False
 # Import qhub version number
 here = os.path.abspath(os.path.dirname(__file__))
 __version__ = None
-exec(open(os.path.join(here,'../qhub/version.py')).read())
+exec(open(os.path.join(here, "../qhub/version.py")).read())
 
 qhub_version_string = __version__
 
