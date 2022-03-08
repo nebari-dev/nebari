@@ -4,6 +4,6 @@
 # no configuration file at all. Change the values for non-default
 # behavior.
 #
-wrap = "keep"       # possible values: {"keep", "no", INTEGER}
-number = false      # possible values: {false, true}
+wrap = 180       # possible values: {"keep", "no", INTEGER}
+number = true      # possible values: {false, true}
 end_of_line = "lf"  # possible values: {"lf", "crlf"}
