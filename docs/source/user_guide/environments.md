@@ -1,9 +1,8 @@
 # Managing Conda Environments
 
 QHub has several ways to manage environments for users. The traditional
-approach available in older QHub deployments is still available by editing the
-`qhub-config.yaml` `environments:` key within the configuration file. An
-example would be
+approach, available in older QHub deployments, is still available by editing the
+`qhub-config.yaml` `environments:` key within the configuration file. Here's an example:
 
 ```yaml
 environments:
@@ -23,16 +22,16 @@ environments:
 ```
 
 When the environments are updated in this file and an automated `qhub deploy`
-is kicked off the environments are updated for all users. An additional method
-is allowed which enables users to easily create ad-hoc environments. Visiting
+is kicked off, the environments are updated for all users. There is also a way to
+easily create ad-hoc environments without modifying the file. Visiting
 `https://<qhub-domain>/conda-store/` will take you to
 [Conda-Store](https://conda-store.readthedocs.io/en/latest/) an open source
 tool for managing conda environments within enterprise environments. For now
-the username is anything with a password of `password`. Soon this will be
+the username is anything with a password of `password`, but soon this will be
 integrated with central authentication via keycloak. The [create environment
 endpoint](https://conda-store.readthedocs.io/en/latest/user_guide.html#create-create-environment)
-will allow you to easily create a new environment. Additionally you can update
-existing environments via [visiting the
+will allow you to easily create a new environment. Additionally, you can update
+existing environments by [visiting the
 environment](https://conda-store.readthedocs.io/en/latest/user_guide.html#environment-namespace-name-environments)
 and clicking edit.
 
@@ -43,6 +42,6 @@ include
 [extra dependencies](./faq.md/#whats-included-in-the-user-environment-if-a-user-wants-to-use-dask)
 to maintain version compatibility between the Dask client and server.
 
-We are working towards developing an extension within jupyterlab for editing
-these environments but it is not complete at the moment. Follow
+We are working towards developing an extension within JupyterLab for editing
+these environments, but it is not complete at the moment. Follow
 [gator](https://github.com/mamba-org/gator) for progress on this extension.
