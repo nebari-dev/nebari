@@ -2,42 +2,51 @@
 
 ## Pre-release Checklist
 
-Currently Qhub isn't fully automated. This makes it especially
-important to manually check the features. This is a minimal set of
-features that are guaranteed with each release.
+Although we do rely on end-to-end integration tests that run (in a private repo) on a weekly basis. This process is currently not fully integrated into the release process.
 
-Validate successful `qhub deploy` and `qhub destroy` of QHub on all
-providers.
+Cloud providers to validate:
+ - [ ] `azure` - Azure
+ - [ ] `aws` - Amazon Web Services
+ - [ ] `do` - Digital Ocean
+ - [ ] `gcp` - Google Cloud Platform
+ - [ ] `local` - Existing Kubernetes Cluster / Minikube
 
- - [ ] Azure
- - [ ] Amazon Web Services
- - [ ] Digital Ocean
- - [ ] Google Cloud Platform
- - [ ] Existing Kubernetes Cluster
+Authentication providers to validate:
+- [ ] password
+- [ ] GitHub
+- [ ] Auth0
 
-Check services of Qhub on each.
- - [ ] Login and launch jupyterlab notebook and able to run basic python calculations
- - [ ] Launch dask-gateway
-    - able to scale to 2 workers
-    - run basic dask calculation
-    - view dask gateway dashboard
- - [ ] Conda-store environments are created and available in jupyterlab notebook as kernels (dask, dashboard)
- - [ ] Create basic panel dashboard
+CI/CD providers to validate:
+- [ ] GitHub-Actions
+- [ ] GitLab-CI
+
+Although some of the tasks listed below are tested during the end-to-end integration tests, many others still need to be tested manually.
+
+Validate the following services:
+- [ ] Initialize `qhub-config.yaml`
+- [ ] QHub deploy
+- [ ] Commit to repo and use CI/CD to deploy
+- [ ] Log into Keycloak as root user and add user
+- [ ] Add user from command line, `qhub keycloak`
+- [ ] Launch JupyterLab session with new user
+- [ ] Launch dask-cluster and test auto-scaler
+- [ ] Launch dask-gateway dashboard
+- [ ] Launch conda-store and validate environments are available
+- [ ] Launch basic CDS Dashboard
+- [ ] Launch Grafana (validate SSO)
+- [ ] Qhub destroy
+- [ ] Test Qhub upgrade command to assert compatibility 
+
 
 ## Release
 
-In order to create a release:
+After testing any release-candidates, to create an official release:
 
-1. Make sure the `RELEASE.md` is up to date with change, bug fixes,
-   and breaking changes and move all the `Upcoming Release` into a new
-   section titled `Release <version> - <month>/<day>/<year>`
+1. On the Conda-Forge [`qhub-dask-feedstock`](https://github.com/conda-forge/qhub-dask-feedstock) repo, update the `qhub-dask` version to match the version to be released. Detailed documentation for updating conda-forge packages can be found [here](https://conda-forge.org/docs/maintainer/updating_pkgs.html#updating-recipes).
 
-2. Update file `qhub/version.py` to be `__version__ = "<version>"`
+2. On the GitHub repo homepage, select "Release" on the left-hand side and then click "Draft a new release". Add any breaking changes, features/improvements and bug fixes. Give it a title of `Release <version> - <month>/<day>/<year>`.
 
-3. Commit these changes to `main` branch
+3. When ready, create the new tag name and select branch from which the release will be created, then click "Publish release". This will automatically upload the new release to [PyPI](https://pypi.org/project/qhub/) and also automatically
+trigger the all appropriate Docker images to be built, tagged, and pushed up to DockerHub.
 
-4. Finally [create a Release on QHub](https://github.com/Quansight/qhub/releases/new). The tag should be `v<version>` off of the branch `main`. Use the `RELEASE.md` to get the title `Release <version> - <month>/<day>/<year>` and set the text description to the `RELEASE.md` for the given version. Click `Publish Release`.
-
-If this worked a new version will be [uploaded to pypi for QHub](https://pypi.org/project/qhub/)
-
-This should also trigger the all appropriate Docker images to be built, tagged, and pushed up to DockerHub.
+4. Finally, when the new release is published on PyPI, it's time to release the package on Conda-Forge. On the Conda-Forge [`qhub-feedstock`](https://github.com/conda-forge/qhub-feedstock) repo, update the `qhub` version to match the version to be released as well any other related package information that needs updating.

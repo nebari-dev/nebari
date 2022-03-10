@@ -35,8 +35,7 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 ## Continuous integration and continuous deployment
 
 `ci_cd`: is optional and specifies the continuous integration and
-continuous deployment framework to use. QHub uses infrastructure as
-code to allow developers and users of QHub to request change to the
+continuous deployment framework to use. QHub uses infrastructure-as-code to allow developers and users of QHub to request change to the
 environment via pull requests (PRs) which then get approved by administration.
 You may configure CI/CD process to watch for pull-requests or commits on
 specific branches. Currently CI/CD can be setup for either GitHub Actions or GitLab CI.
@@ -45,6 +44,7 @@ specific branches. Currently CI/CD can be setup for either GitHub Actions or Git
 ci_cd:
   type: gitlab-ci
   branch: main
+  commit_render: true
   before_script:
     - echo "running commands before ci completes"
   after_script:
@@ -54,6 +54,7 @@ ci_cd:
 
  - `type`: current supported CI providers are `github-actions` and `gitlab-ci`
  - `branch`: branch to use to commit `qhub render` changes to
+ - `commit_render`: whether to commit the rendered changes back into the repo. Optional, defaults to `true`.
  - `before_script`: optional script to run before CI starts QHub
    infrastructure deployment. This is useful in cases that additional
    setup is required for QHub to deploy the resources. Only supported
@@ -125,9 +126,7 @@ kubectl create secret tls <secret-name> \
 
 Some of QHub services might require special subdomains under your certificate, Wildcard certificates allow you to secure all subdomains of a domain with a single certificate. Defining a wildcard certificate decreases the amount of CN names you would need to define under the certificate configuration and reduces the chance of generating a wrong subdomain.
 
-**Note**
-
-It's not possible to request a double wildcard certificate for a domain (for example *.*.local.com). As a default behaviour of [Traefik](https://doc.traefik.io/traefik/https/tls/#default-certificate), if the Domain Name System (DNS) and Common Name (CN) name doesn't match, Traefik generates and uses a self-signed certificate. This may lead to some unexpected [TLS](https://www.internetsociety.org/deploy360/tls/basics) issues, so as an alternative of including each specific domain under the certificate CN list, you may also define a wildcard certificate.
+> NOTE: It's not possible to request a double wildcard certificate for a domain (for example *.*.local.com). As a default behaviour of [Traefik](https://doc.traefik.io/traefik/https/tls/#default-certificate), if the Domain Name System (DNS) and Common Name (CN) name doesn't match, Traefik generates and uses a self-signed certificate. This may lead to some unexpected [TLS](https://www.internetsociety.org/deploy360/tls/basics) issues, so as alternative to including each specific domain under the certificate CN list, you may also define a wildcard certificate.
 
 ## Security
 
@@ -147,6 +146,8 @@ security:
       client_id: <CLIENT_ID>
       client_secret: <CLIENT_SECRET>
 ```
+
+In previous QHub versions (prior to `v0.4.0`), users and groups were added directly into the `qhub-config.yaml`. Starting with `v0.4.0`, user and group management is handled by [Keycloak as described below](#keycloak).
 
 ### Omitting sensitive values
 
@@ -225,9 +226,11 @@ security:
 
 ### Keycloak
 
-The `security.keycloak` section allows you to specify an initial password for the `root` user (to login at `https://myqhubsite.com/auth/admin/`) to manage your Keycloak database, for example add users/groups.
+The `security.keycloak` section allows you to specify an initial password for the `root` user (to login at `https://myqhubsite.com/auth/admin/`) to manage your Keycloak database.
 
-You should change this after deployment. Future deployments will not reset the password to any specified in the YAML file.
+We strongly recommend changing this `initial_root_password` after your initial deployment and deleting this value from your `qhub-config.yaml`. Any changes to this value on the `qhub-config.yaml` after the initial deployment will have no affect.
+
+For more information on how to do this, see the ["Change Keycloak root password"](./login.md#change-keycloak-root-password) section.
 
 It's also possible to provide overrides to the [Keycloak Helm deployment](https://github.com/codecentric/helm-charts/tree/master/charts/keycloak).
 
@@ -240,22 +243,12 @@ security:
         repository: quansight/qhub-keycloak
 ```
 
-### User and group management
+#### User and group management
 
 Groups and users of QHub are all defined in Keycloak. As above, access Keycloak as the `root` user, noting that the `root` user is not actually a QHub user - you cannot access the main features of QHub such as JupyterLab with at user. It is only for Keycloak management.
 
-* `security.shared_users_group` is an optional key (default False) which
-  optionally adds all users to a default group named `users`. Only new
-  users created after this option is enabled will be added to the
-  `users` group. You will have to manually add existing users to the
-  `users` group if you chose to enable this option later.
+Follow this links for more detailed information on [Keycloak user management](./login.md#add-user-using-keycloak-console) and [Keycloak group management](./login.md#groups).
 
-#### Admin and Users Group
-
-The admin group has special significance in QHub, and will always be automatically created in Keycloak in every deployment. If a user is a member of the Keycloak `admin` group they will be able to access the jupyterhub admin page. The admin page allows a user to stop user's servers and launch a given
-user's server and impersonate them.
-
-If `security.shared_users_group` is `true` then all users will become members of the `users` group.
 
 ## Provider Infrastructure
 
@@ -323,10 +316,10 @@ droplets](https://www.digitalocean.com/docs/apis-clis/doctl/reference/compute/dr
 ```yaml
 digital_ocean:
   region: nyc3
-  kubernetes_version: "1.18.8-do.0"
+  kubernetes_version: "1.21.10-do.0"
   node_groups:
     general:
-      instance: "s-2vcpu-4gb"
+      instance: "g-4vcpu-16gb"
       min_nodes: 1
       max_nodes: 1
     user:
@@ -355,7 +348,7 @@ google_cloud_platform:
   kubernetes_version: "1.18.16-gke.502"
   node_groups:
     general:
-      instance: n1-standard-2
+      instance: n1-standard-4
       min_nodes: 1
       max_nodes: 1
     user:
@@ -382,7 +375,7 @@ amazon_web_services:
   kubernetes_version: "1.18"
   node_groups:
     general:
-      instance: "m5.large"
+      instance: "m5.xlarge"
       min_nodes: 1
       max_nodes: 1
     user:
@@ -511,7 +504,6 @@ default_images:
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
   dask_gateway: "quansight/qhub-dask-gateway:v||QHUB_VERSION||"
-  conda_store: "quansight/conda-store-server:v0.3.3"
 ```
 
 ## Storage
@@ -540,17 +532,12 @@ profiles:
   jupyterlab:
     - display_name: Small Instance
       description: Stable environment with 1 cpu / 1 GB ram
-      users:
-        - example-user
-      groups:
-        - admin
       default: true
       kubespawner_override:
         cpu_limit: 1
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       kubespawner_override:
@@ -558,21 +545,17 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
-
   dask_worker:
     "Small Worker":
       worker_cores_limit: 1
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
 ```
 
 For each `profiles.jupyterlab` is a named JupyterLab profile. It
@@ -603,7 +586,7 @@ For example if a node has 8 GB of ram and 2 CPUs you should
 guarantee/schedule roughly 75% and follow the digital ocean guide
 linked above. For example 1.5 CPU guarantee and 5.5 GB guaranteed.
 
-#### Dask Scheduler
+### Dask Scheduler
 
 In a few instances, the Dask worker node-group might be running on quite a large
 instance, perhaps with 8 CPUs and 32 GB of memory (or more). When this is the case, you
@@ -620,31 +603,6 @@ dask_worker:
       scheduler_cores: 6
       scheduler_memory_limit: 30G
       scheduler_memory: 28G
-      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
-```
-
-### Limiting profiles to specific users and groups
-
-Sometimes only a select set of users should have access to specific
-resources for example GPUs, high memory nodes etc. QHub has support for
-limiting resources.
-
-```yaml
-profiles:
-  jupyterlab:
-    - display_name: Small Instance
-      ...
-      users:
-        - example-user
-      groups:
-        - admin
-        - users
-```
-
-Provided `groups:` is specified for a profile (even if no groups are listed), then that profile can also be made available to a group by adding the attribute `profiles` to the group in Keycloak. Add multiple profile (display) names to this attribute using ## as a delimiter:
-
-```
-"profiles": "Small Instance##Medium Instance"
 ```
 
 ### JupyterLab Profile Node Selectors
@@ -791,6 +749,7 @@ domain: "do.qhub.dev"
 ci_cd:
   type: github-actions
   branch: main
+  commit_render: true
 
 certificate:
   type: self-signed
@@ -812,10 +771,10 @@ security:
 
 digital_ocean:
   region: nyc3
-  kubernetes_version: "1.18.8-do.0"
+  kubernetes_version: "1.21.10-do.0"
   node_groups:
     general:
-      instance: "s-2vcpu-4gb"
+      instance: "g-4vcpu-16gb"
       min_nodes: 1
       max_nodes: 1
     user:
@@ -831,7 +790,6 @@ default_images:
   jupyterhub: "quansight/qhub-jupyterhub:v||QHUB_VERSION||"
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
-  conda_store: "quansight/conda-store-server:v0.3.3"
 
 theme:
   jupyterhub:
@@ -862,7 +820,6 @@ profiles:
         cpu_guarantee: 1
         mem_limit: 1G
         mem_guarantee: 1G
-        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
       default: true
@@ -871,7 +828,6 @@ profiles:
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
-        image: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
 
   dask_worker:
     "Small Worker":
@@ -879,13 +835,11 @@ profiles:
       worker_cores: 1
       worker_memory_limit: 1G
       worker_memory: 1G
-      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
     "Medium Worker":
       worker_cores_limit: 1.5
       worker_cores: 1.25
       worker_memory_limit: 2G
       worker_memory: 2G
-      image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
 
 environments:
   "environment-default.yaml":
