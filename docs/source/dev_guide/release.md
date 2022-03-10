@@ -2,7 +2,7 @@
 
 ## Pre-release Checklist
 
-Although we do rely on end-to-end integration tests that run (in a private repo)on a weekly basis. This process is currently not fully integrated into the release process.
+Although we do rely on end-to-end integration tests that run (in a private repo) on a weekly basis. This process is currently not fully integrated into the release process.
 
 Cloud providers to validate:
  - [ ] `azure` - Azure
