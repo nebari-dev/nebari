@@ -35,6 +35,7 @@ Validate the following services:
 - [ ] Launch basic CDS Dashboard
 - [ ] Launch Grafana (validate SSO)
 - [ ] Qhub destroy
+- [ ] Test Qhub upgrade command to assert compatibility 
 
 
 ## Release
