@@ -43,9 +43,9 @@ After testing any release-candidates, to create an official release:
 
 1. On the Conda-Forge [`qhub-dask-feedstock`](https://github.com/conda-forge/qhub-dask-feedstock) repo, update the `qhub-dask` version to match the version to be released.
 
-2. On the GitHub repo homepage. select "Release" on the left-hand side and then click "Draft a new release". Add any breaking changes, features/improvments and bug fixes. Give it a title of `Release <version> - <month>/<day>/<year>`.
+2. On the GitHub repo homepage, select "Release" on the left-hand side and then click "Draft a new release". Add any breaking changes, features/improvments and bug fixes. Give it a title of `Release <version> - <month>/<day>/<year>`.
 
-3. When ready, create the new tag name and branch from which the release will be created, then click "Publish release". This will automatically upload the new release to [PyPI](https://pypi.org/project/qhub/) and also automatically
+3. When ready, create the new tag name and sekect branch from which the release will be created, then click "Publish release". This will automatically upload the new release to [PyPI](https://pypi.org/project/qhub/) and also automatically
 trigger the all appropriate Docker images to be built, tagged, and pushed up to DockerHub.
 
 4. Finally, when the new release is published on PyPI, it's time to release the package on Conda-Forage. On the Conda-Forge [`qhub-feedstock`](https://github.com/conda-forge/qhub-feedstock) repo, update the `qhub` version to match the version to be released as well any other related package information that needs updating.
