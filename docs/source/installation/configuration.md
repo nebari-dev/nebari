@@ -228,9 +228,7 @@ security:
 
 The `security.keycloak` section allows you to specify an initial password for the `root` user (to login at `https://myqhubsite.com/auth/admin/`) to manage your Keycloak database.
 
-> NOTE: After the initial deployment, changing this password will have no affect.
-
-We strongly recommend changing this `initial_root_password` after your initial deployment and deleting this value from your `qhub-config.yaml`.
+We strongly recommend changing this `initial_root_password` after your initial deployment and deleting this value from your `qhub-config.yaml`. Any changes to this value on the `qhub-config.yaml` after the initial deployment will have no affect.
 
 For more information on how to do this, see the ["Change Keycloak root password"](./login.md#change-keycloak-root-password) section.
 
