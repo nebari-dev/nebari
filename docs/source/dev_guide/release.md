@@ -42,7 +42,7 @@ Validate the following services:
 
 After testing any release-candidates, to create an official release:
 
-1. On the Conda-Forge [`qhub-dask-feedstock`](https://github.com/conda-forge/qhub-dask-feedstock) repo, update the `qhub-dask` version to match the version to be released.
+1. On the Conda-Forge [`qhub-dask-feedstock`](https://github.com/conda-forge/qhub-dask-feedstock) repo, update the `qhub-dask` version to match the version to be released. Detailed documentation for updating conda-forge packages can be found [here](https://conda-forge.org/docs/maintainer/updating_pkgs.html#updating-recipes).
 
 2. On the GitHub repo homepage, select "Release" on the left-hand side and then click "Draft a new release". Add any breaking changes, features/improvements and bug fixes. Give it a title of `Release <version> - <month>/<day>/<year>`.
 
