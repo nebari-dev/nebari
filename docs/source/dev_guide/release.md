@@ -27,7 +27,7 @@ Validate the following services:
 - [ ] QHub deploy
 - [ ] Commit to repo and use CI/CD to deploy
 - [ ] Log into Keycloak as root user and add user
-- [ ] Add user from command line
+- [ ] Add user from command line, `qhub keycloak`
 - [ ] Launch JupyterLab session with new user
 - [ ] Launch dask-cluster and test auto-scaler
 - [ ] Launch dask-gateway dashboard
