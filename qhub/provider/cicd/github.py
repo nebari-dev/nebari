@@ -215,7 +215,7 @@ def gen_qhub_ops(config):
 
     env_vars = gha_env_vars(config)
     branch = config["ci_cd"]["branch"]
-    commit_render = config["ci_cd"]["commit_render"]
+    commit_render = config["ci_cd"].get("commit_render", "")
     qhub_version = config["qhub_version"]
 
     push = GHA_on_extras(branches=[branch], paths=["qhub-config.yaml"])

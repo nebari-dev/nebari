@@ -41,7 +41,7 @@ PYTHON_VERSION = 3.9
 def gen_gitlab_ci(config):
 
     branch = config["ci_cd"]["branch"]
-    commit_render = config["ci_cd"]["commit_render"]
+    commit_render = config["ci_cd"].get("commit_render", "")
     before_script = config["ci_cd"].get("before_script")
     after_script = config["ci_cd"].get("after_script")
     pip_install = pip_install_qhub(config["qhub_version"])
