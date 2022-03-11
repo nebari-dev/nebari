@@ -23,3 +23,16 @@ if [[ -z "${DEFAULT_ENV+x}" ]]; then
 else
     fix-permissions "/opt/conda/envs/${DEFAULT_ENV}"
 fi
+
+
+# ====== Install Gator Jupyterlab extension ======
+
+GATOR_GIT_URL=https://github.com/Quansight/gator.git
+GATOR_GIT_BRANCH=change-default-view-for-env
+
+git clone ${GATOR_GIT_URL} && \
+cd gator && \
+git checkout origin/${GATOR_GIT_BRANCH} && \
+pip install -e . && \
+jupyter server extension enable mamba_gator --sys-prefix && \
+cd -
