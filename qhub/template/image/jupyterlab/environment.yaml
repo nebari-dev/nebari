@@ -9,7 +9,7 @@ dependencies:
  - nb_conda_kernels
  - ipython > 7
  - jupyter-server-proxy
- - jupyterlab >=3
+ - jupyterlab==3.3.1
  - jupyter_client
  - jupyter_console
  - jupyterhub==1.5.0
