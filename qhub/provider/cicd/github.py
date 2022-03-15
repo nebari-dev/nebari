@@ -269,7 +269,7 @@ def gen_qhub_linter(config):
     env_vars = {}
     qhub_gh_branch = os.environ.get("QHUB_GH_BRANCH")
     if qhub_gh_branch:
-        env_vars["QHUB_GH_BRANCH"] = qhub_gh_branch
+        env_vars["QHUB_GH_BRANCH"] = "${{ secrets.QHUB_GH_BRANCH }}"
     else:
         env_vars = None
 
