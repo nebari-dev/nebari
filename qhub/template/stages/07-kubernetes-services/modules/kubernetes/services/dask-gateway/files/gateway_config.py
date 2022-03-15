@@ -97,7 +97,7 @@ def get_packages(conda_prefix):
         import logging
 
         logger = logging.getLogger()
-        logger.warning(f"An issue with a conda environment was encountered.\n{e}")
+        logger.error(f"An issue with a conda environment was encountered.\n{e}")
 
 
 def get_conda_prefixes(conda_store_mount):
