@@ -1,6 +1,5 @@
 import logging
 import os
-import tempfile
 import textwrap
 import subprocess
 
@@ -239,9 +238,13 @@ def guided_install(
     print(
         f"Kubenetes kubeconfig located at file://{stage_outputs['stages/02-infrastructure']['kubeconfig_filename']['value']}"
     )
-    print(
-        f"Kubecloak master realm username={stage_outputs['stages/05-kubernetes-keycloak']['keycloak_credentials']['value']['username']} password=file://{os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')}"
+    username = "root"
+    password = (
+        config.get("security").get("keycloak").get("initial_root_password", False)
     )
+    if password:
+        print(f"Kubecloak master realm username={username} password={password}")
+
     print(
         "Additional administration docs can be found at https://docs.qhub.dev/en/stable/source/admin_guide/"
     )
