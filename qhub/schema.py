@@ -190,7 +190,7 @@ class GitHubAuthentication(Authentication):
 
 
 class Keycloak(Base):
-    initial_root_password: typing.Optional[str] = ""
+    initial_root_password: typing.Optional[str]
     overrides: typing.Optional[typing.Dict]
     realm_display_name: typing.Optional[str]
 
@@ -201,7 +201,7 @@ class Keycloak(Base):
 class Security(Base):
     authentication: Authentication
     shared_users_group: typing.Optional[bool]
-    keycloak: Keycloak
+    keycloak: typing.Optional[Keycloak]
 
 
 # ================ Providers ===============

@@ -156,14 +156,20 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
 
 
 def stage_05_kubernetes_keycloak(stage_outputs, config):
+    initial_root_password = (
+        config["security"].get("keycloak", {}).get("initial_root_password", "")
+    )
+    if initial_root_password is None:
+        initial_root_password = ""
+
     return {
         "name": config["project_name"],
         "environment": config["namespace"],
         "endpoint": config["domain"],
-        "initial-root-password": config["security"]["keycloak"].get(
-            "initial_root_password", ""
-        ),
-        "overrides": [json.dumps(config["security"]["keycloak"].get("overrides", {}))],
+        "initial-root-password": initial_root_password,
+        "overrides": [
+            json.dumps(config["security"].get("keycloak", {}).get("overrides", {}))
+        ],
         "node-group": _calculate_note_groups(config)["general"],
     }
 
