@@ -1,15 +1,19 @@
 # Login
 
-[Keycloak](https://www.keycloak.org/) is the name of the open-source user management software that's automatically deployed within QHub. It's used to store the database of all users in your QHub instance, and can provide connectivity to other services such as GitHub/Auth0 single-sign-on.
+[Keycloak](https://www.keycloak.org/) is the name of the open-source user management software that's automatically deployed within QHub. It's used to store the database of all
+users in your QHub instance, and can provide connectivity to other services such as GitHub/Auth0 single-sign-on.
 
-If you ran `qhub init` to create your `qhub-config.yaml` configuration file as detailed in the [Usage guide](usage.md), you will have been provided with a `random password for Keycloak root user`. **The password will also be visible in the `qhub-config.yaml` file under the `security.keycloak.initial_root_password` field**.
+If you ran `qhub init` to create your `qhub-config.yaml` configuration file as detailed in the [Usage guide](usage.md), you will have been provided with a
+`random password for Keycloak root user`. **The password will also be visible in the `qhub-config.yaml` file under the `security.keycloak.initial_root_password` field**.
 
 The `root` Keycloak user is only able to login and manage the Keycloak identity management section of QHub. It's not a user of the wider QHub data science platform.
 
 ## Change Keycloak root password
 
 After the initial deployment, it is **highly** recommended that you change the Keycloak `root` user password as soon as you can.
-> NOTE: From this point on, the `security.keycloak.initial_root_password` field in `qhub-config.yaml` has no effect. If you redeploy QHub it will not reset the password back to the old one (or anything else that might be in the field in your YAML file). We strongly recommend you delete this field.
+
+> NOTE: From this point on, the `security.keycloak.initial_root_password` field in `qhub-config.yaml` has no effect. If you redeploy QHub it will not reset the password back to the
+> old one (or anything else that might be in the field in your YAML file). We strongly recommend you delete this field.
 
 1. To change the `root` user password, your QHub's instance admin dashboard i.e <https://myqhubsite.com/auth/admin/>, and log in with the password provided.
 
@@ -27,10 +31,10 @@ After the initial deployment, it is **highly** recommended that you change the K
 
 ![Keycloak root user page -  account security, update password](../images/keycloak_root_user_update_password.png)
 
-
 ## Adding a QHub user
 
-You will need to add a QHub user in order to log in to your QHub platform. If you have chosen to use GitHub or Auth0 single-sign-on, you must ensure the 'Username' you provide for new users in Keycloak matches the usernames from GitHub or Auth0 respectively.
+You will need to add a QHub user in order to log in to your QHub platform. If you have chosen to use GitHub or Auth0 single-sign-on, you must ensure the 'Username' you provide for
+new users in Keycloak matches the usernames from GitHub or Auth0 respectively.
 
 ### Add user using Keycloak console
 
@@ -50,20 +54,22 @@ The `qhub` realm is selected by default, we strongly recommend leaving it as is.
 
 3. Fill out the three fields, outlined above. These are 'Username', 'Email', and 'Groups'.
 
-Depending on the authentication provider selected ('password', 'GitHub' or 'Auth0'), the values entered into the 'Username' field will differ slightly. The following table outlines those differences:
+Depending on the authentication provider selected ('password', 'GitHub' or 'Auth0'), the values entered into the 'Username' field will differ slightly. The following table outlines
+those differences:
 
-|   | Password  | GitHub  | Auth0   |
-|---|---|---|---|
-| Username | *unique username*  | *GitHub username* | *Email to login with* |
+| | Password | GitHub | Auth0 | |---|---|---|---| | Username | *unique username* | *GitHub username* | *Email to login with* |
 
 Once the 'Username' field is updated, please add a valid email address in the 'Email' field.
+
 > NOTE: Although not required, users may not be able to log into Grafana if this field isn't properly set.
 
-Lastly, associate the user with one or more of the 'Groups'. Out of the box, QHub is deployed with the following groups: 'admin', 'analyst', and 'developer' (see the [Groups](./login.md#groups) section below for more details).
+Lastly, associate the user with one or more of the 'Groups'. Out of the box, QHub is deployed with the following groups: 'admin', 'analyst', and 'developer' (see the
+[Groups](./login.md#groups) section below for more details).
 
 Enter the name you would like for the user then click 'Save'.
 
 Once the user is created, you can set a password.
+
 > NOTE: Not needed for GitHub/Auth0 based authentication.
 
 ![Keycloak add user > credentials tab screenshot - set password](../images/keycloak_user_password.png)
@@ -78,14 +84,13 @@ To make adding users easier for new QHub deployments, there is a QHub command th
 
 > NOTE: This method is primarily used by developers as a quick workaround.
 
-
 Run:
 
 ```shell
 qhub keycloak -c qhub-config.yaml adduser <username> <password>
 ```
 
-This will create a user  `<username>` with the initial password provided. Omit the password completely if you are using GitHub or Auth0.
+This will create a user `<username>` with the initial password provided. Omit the password completely if you are using GitHub or Auth0.
 
 > NOTE: This will also add the user to 'analyst' group.
 
@@ -99,17 +104,16 @@ Click 'Sign in with Keycloak'.
 
 ![QHub - Log in to Keycloak page](../images/keycloak_qhub_login.png)
 
-If you chose GitHub or Auth0 login, click the 'GitHub' button to be taken to a GitHub login page and single-sign-on from there (as shown in the screenshot above). Otherwise, if you choose 'Password` based authentication, enter the username and password you chose when you added a user to QHub above.
+If you chose GitHub or Auth0 login, click the 'GitHub' button to be taken to a GitHub login page and single-sign-on from there (as shown in the screenshot above). Otherwise, if you
+choose 'Password\` based authentication, enter the username and password you chose when you added a user to QHub above.
 
 ## Groups
 
-Groups represent a collection of users that perform similar actions and therefore require the similar permissions. By default, QHub is deployed with the following groups: 'admin', 'developer', 'analyst' and 'viewer'.
+Groups represent a collection of users that perform similar actions and therefore require the similar permissions. By default, QHub is deployed with the following groups: 'admin',
+'developer', 'analyst' and 'viewer'.
 
-| Group | Access to QHub Resources |
-|---|---|
-| 'admin' | Conda-Store Admin <br> Dask Admin <br> Jupyterhub Admin <br> Graphana Admin |
-| 'analyst' | Conda-Store Developer <br> Jupyterhub Developer <br> Graphana Viewer |
-| 'developer' | Conda-Store Developer <br> Dask Developer <br> Jupyterhub Developer <br> Graphana Developer |
+| Group | Access to QHub Resources | |---|---| | 'admin' | Conda-Store Admin <br> Dask Admin <br> Jupyterhub Admin <br> Graphana Admin | | 'analyst' | Conda-Store Developer <br>
+Jupyterhub Developer <br> Graphana Viewer | | 'developer' | Conda-Store Developer <br> Dask Developer <br> Jupyterhub Developer <br> Graphana Developer |
 
 To create new groups or modify (or delete) existing groups, log in as `root` and click 'Groups' on the left-hand side.
 
@@ -121,7 +125,8 @@ To create a new group, click 'New' in the upper-right hand corner. First, give t
 
 ![Keycloak add group form - name field set to conda-store-manager](../images/keycloak_new_group1.png)
 
-Then under 'Role Mapping', add the appriopriate 'Client Roles' as needed; there should be no need to update the 'Realm Roles'. In this example, the new group only has one mapped role however it's possible to attached multiple 'Client Roles' to a single group.
+Then under 'Role Mapping', add the appriopriate 'Client Roles' as needed; there should be no need to update the 'Realm Roles'. In this example, the new group only has one mapped
+role however it's possible to attached multiple 'Client Roles' to a single group.
 
 ![Keycloak group conda-store-manager form - role mappings tab focused with expanded client roles  dropdown](../images/keycloak_new_group2.png)
 

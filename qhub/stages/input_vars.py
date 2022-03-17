@@ -156,14 +156,20 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
 
 
 def stage_05_kubernetes_keycloak(stage_outputs, config):
+    initial_root_password = (
+        config["security"].get("keycloak", {}).get("initial_root_password", "")
+    )
+    if initial_root_password is None:
+        initial_root_password = ""
+
     return {
         "name": config["project_name"],
         "environment": config["namespace"],
         "endpoint": config["domain"],
-        "initial-root-password": config["security"]["keycloak"][
-            "initial_root_password"
+        "initial-root-password": initial_root_password,
+        "overrides": [
+            json.dumps(config["security"].get("keycloak", {}).get("overrides", {}))
         ],
-        "overrides": [json.dumps(config["security"]["keycloak"].get("overrides", {}))],
         "node-group": _calculate_note_groups(config)["general"],
     }
 
@@ -177,9 +183,9 @@ def stage_06_kubernetes_keycloak_configuration(stage_outputs, config):
 
     return {
         "realm": realm_id,
-        "realm_display_name": config["security"]["keycloak"].get(
-            "realm_display_name", realm_id
-        ),
+        "realm_display_name": config["security"]
+        .get("keycloak", {})
+        .get("realm_display_name", realm_id),
         "authentication": config["security"]["authentication"],
         "keycloak_groups": ["admin", "developer", "analyst"] + users_group,
         "default_groups": ["analyst"] + users_group,
