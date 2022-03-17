@@ -183,9 +183,9 @@ def stage_06_kubernetes_keycloak_configuration(stage_outputs, config):
 
     return {
         "realm": realm_id,
-        "realm_display_name": config["security"]["keycloak"].get(
-            "realm_display_name", realm_id
-        ),
+        "realm_display_name": config["security"]
+        .get("keycloak", {})
+        .get("realm_display_name", realm_id),
         "authentication": config["security"]["authentication"],
         "keycloak_groups": ["admin", "developer", "analyst"] + users_group,
         "default_groups": ["analyst"] + users_group,
