@@ -240,7 +240,7 @@ def guided_install(
     )
     username = "root"
     password = (
-        config.get("security").get("keycloak").get("initial_root_password", False)
+        config.get("security", {}).get("keycloak", {}).get("initial_root_password", "")
     )
     if password:
         print(f"Kubecloak master realm username={username} password={password}")
