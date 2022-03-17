@@ -201,7 +201,7 @@ class Keycloak(Base):
 class Security(Base):
     authentication: Authentication
     shared_users_group: typing.Optional[bool]
-    keycloak: typing.Optional[Keycloak]
+    keycloak: Keycloak
 
 
 # ================ Providers ===============
