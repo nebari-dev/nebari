@@ -160,9 +160,9 @@ def stage_05_kubernetes_keycloak(stage_outputs, config):
         "name": config["project_name"],
         "environment": config["namespace"],
         "endpoint": config["domain"],
-        "initial-root-password": config["security"]["keycloak"][
-            "initial_root_password"
-        ],
+        "initial-root-password": config["security"]["keycloak"].get(
+            "initial_root_password", ""
+        ),
         "overrides": [json.dumps(config["security"]["keycloak"].get("overrides", {}))],
         "node-group": _calculate_note_groups(config)["general"],
     }

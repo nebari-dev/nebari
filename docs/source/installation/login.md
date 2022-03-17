@@ -13,8 +13,7 @@ The `root` Keycloak user is only able to login and manage the Keycloak identity 
 After the initial deployment, it is **highly** recommended that you change the Keycloak `root` user password as soon as you can.
 
 > NOTE: From this point on, the `security.keycloak.initial_root_password` field in `qhub-config.yaml` has no effect. If you redeploy QHub it will not reset the password back to the
-> old one (or anything else that might be in the field in your YAML file). We strongly recommend you replace this value with a dummy value, something like
-> `initial_root_password: ---`.
+> old one (or anything else that might be in the field in your YAML file). We strongly recommend you delete this field.
 
 1. To change the `root` user password, your QHub's instance admin dashboard i.e <https://myqhubsite.com/auth/admin/>, and log in with the password provided.
 
