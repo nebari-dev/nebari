@@ -18,5 +18,6 @@ clearml.md
 prefect.md
 traefik.md
 custom-helm-charts.md
+awss3curl.md
 faq.md
 ```
