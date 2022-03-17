@@ -190,7 +190,7 @@ class GitHubAuthentication(Authentication):
 
 
 class Keycloak(Base):
-    initial_root_password: typing.Optional[str]
+    initial_root_password: typing.Optional[str] = ""
     overrides: typing.Optional[typing.Dict]
     realm_display_name: typing.Optional[str]
 
