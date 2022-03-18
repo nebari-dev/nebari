@@ -55,7 +55,7 @@ jobs:
         run: |
           mkdir -p bin
           pushd bin
-          curl -L https://github.com/kubernetes-sigs/kind/releases/download/v0.12.0/kind-linux-arm64 -o kind
+          curl -L https://github.com/kubernetes-sigs/kind/releases/download/v0.12.0/kind-linux-amd64 -o kind
           chmod +x kind
 
           curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
