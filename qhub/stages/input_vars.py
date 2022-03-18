@@ -40,7 +40,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "QHUB_KUBECONFIG"
             ),
-            "kube_context": config["local"].get("kube_context")
+            "kube_context": config["local"].get("kube_context"),
         }
     elif config["provider"] == "do":
         return {
