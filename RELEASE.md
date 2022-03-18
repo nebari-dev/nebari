@@ -2,7 +2,6 @@
 
 > Contains description of QHub releases.
 ---
-
 ## To create a new release:
 
 1. Increment the version number in `qhub/VERSION`
@@ -17,7 +16,153 @@
 
 ### Bug fixes
 
----
+## Release v0.4.0 - 03/17/2022
+
+## Breaking changes
+
+- Upgrading to `v0.4.0` will require a filesystem backup given the scope and size of the current change set.
+  - Running `qhub upgrade` will produce an updated `qhub-config.yaml` and a json file of users that can then be imported into Keycloak.
+- With the addition of Keycloak, QHub will no longer support `security.authentication.type = custom`.
+  - No more users and groups in the `qhub-config.yaml`.
+
+## Feature changes and enhancements
+
+- Authentication is now managed by Keycloak.
+- QHub Helm extension mechanism added.
+- Allow JupyterHub overrides in the `qhub-config.yaml`.
+- `qhub support` CLI option to save Kubernetes logs.
+- Updates `conda-store` UI.
+
+## What's Changed
+
+* Enabling Vale CI with GitHub Actions by @HarshCasper in https://github.com/Quansight/qhub/pull/871
+* Qhub upgrade by @danlester in https://github.com/Quansight/qhub/pull/870
+* Documentation cleanup by @HarshCasper in https://github.com/Quansight/qhub/pull/873
+* [Docs] Add Traefik wildcard docs by @viniciusdc in https://github.com/Quansight/qhub/pull/876
+* replace deprecated "minikube cache add" with "minikube image load" by @Adam-D-Lewis in https://github.com/Quansight/qhub/pull/880
+* Azure Python needs different env var names to Terraform by @danlester in https://github.com/Quansight/qhub/pull/882
+* Add notes about broken upgrades by @tylerpotts in https://github.com/Quansight/qhub/pull/877
+* Keycloak integration first pass by @danlester in https://github.com/Quansight/qhub/pull/848
+* K8s tests - keycloak adduser by @danlester in https://github.com/Quansight/qhub/pull/890
+* Documentation cleanup by @HarshCasper in https://github.com/Quansight/qhub/pull/889
+* Improvements to templates and readme by @trallard in https://github.com/Quansight/qhub/pull/893
+* Keycloak docs by @danlester in https://github.com/Quansight/qhub/pull/901
+* DOCS: Add a PR Template by @HarshCasper in https://github.com/Quansight/qhub/pull/900
+* Delete existing `.gitlab-ci.yml` when rendering  by @iameskild in https://github.com/Quansight/qhub/pull/887
+* Qhub Extension (Ready for Review) by @Adam-D-Lewis in https://github.com/Quansight/qhub/pull/886
+* Updates to Readme by @trallard in https://github.com/Quansight/qhub/pull/897
+* Mirror docker images to ghcr and quay container registry by @aktech in https://github.com/Quansight/qhub/pull/912
+* Fix CI: skip failure on cleanup by @aktech in https://github.com/Quansight/qhub/pull/910
+* Create and solve envs using mamba by @iameskild in https://github.com/Quansight/qhub/pull/915
+* Pin terraform providers by @Adam-D-Lewis in https://github.com/Quansight/qhub/pull/914
+* qhub-config.yaml as a secret by @danlester in https://github.com/Quansight/qhub/pull/905
+* Setup/Add integration/deployment tests via pytest by @aktech in https://github.com/Quansight/qhub/pull/922
+* Disabl/Remove the stale bot by @viniciusdc in https://github.com/Quansight/qhub/pull/923
+* Integrates Hadolint for Dockerfile linting by @HarshCasper in https://github.com/Quansight/qhub/pull/917
+* Reduce minimum nodes in user and dask node pools to 0 for Azure / GCP by @tarundmsharma in https://github.com/Quansight/qhub/pull/723
+* Allow jupyterhub.overrides in qhub-config.yaml by @danlester in https://github.com/Quansight/qhub/pull/930
+* qhub destroy using targets by @danlester in https://github.com/Quansight/qhub/pull/948
+* Take AWS region from AWS_DEFAULT_REGION into qhub-config.yaml on init… by @danlester in https://github.com/Quansight/qhub/pull/950
+* cookicutter template out of raw by @danlester in https://github.com/Quansight/qhub/pull/951
+* kubernetes-initialization depends_on kubernetes by @danlester in https://github.com/Quansight/qhub/pull/952
+* Add timeout to terraform import command by @tylerpotts in https://github.com/Quansight/qhub/pull/949
+* Timeout in process (for import) by @danlester in https://github.com/Quansight/qhub/pull/955
+* Remove user/groups from YAML by @danlester in https://github.com/Quansight/qhub/pull/956
+* qhub upgrade custom auth plus tests by @danlester in https://github.com/Quansight/qhub/pull/946
+* Add minimal support `centos` images by @iameskild in https://github.com/Quansight/qhub/pull/943
+* Keycloak Export by @danlester in https://github.com/Quansight/qhub/pull/947
+* qhub cli tool to save kubernetes logs - `qhub support` by @tarundmsharma in https://github.com/Quansight/qhub/pull/818
+* Add docs for deploying QHub to existing EKS cluster by @iameskild in https://github.com/Quansight/qhub/pull/944
+* Add  jupyterhub-idle-culler to jupyterhub image by @danlester in https://github.com/Quansight/qhub/pull/959
+* Robust external container registry by @danlester in https://github.com/Quansight/qhub/pull/945
+* use qhub-jupyterhub-theme 0.3.3 to simplify JupyterHub config by @danlester in https://github.com/Quansight/qhub/pull/966
+* Get kubernetes version for all cloud providers + pytest refactor by @iameskild in https://github.com/Quansight/qhub/pull/927
+* Merge hub.extraEnv env vars by @danlester in https://github.com/Quansight/qhub/pull/968
+* DOCS: Removing errors from documentation by @HarshCasper in https://github.com/Quansight/qhub/pull/941
+* keycloak.realm_display_name by @danlester in https://github.com/Quansight/qhub/pull/973
+* minor updates to keycloak docs by @tylerpotts in https://github.com/Quansight/qhub/pull/977
+* CI changes for QHub by @HarshCasper in https://github.com/Quansight/qhub/pull/989
+* Update `upgrade` docs and general doc improvements by @iameskild in https://github.com/Quansight/qhub/pull/990
+* Remove `scope`, `oauth_callback_url` during upgrade step by @iameskild in https://github.com/Quansight/qhub/pull/997
+* Adding Conda-Store to QHub by @costrouc in https://github.com/Quansight/qhub/pull/967
+* Fix Jupyterlab docker build by @viniciusdc in https://github.com/Quansight/qhub/pull/1001
+* DOCS: Fix broken link in setup doc by @HarshCasper in https://github.com/Quansight/qhub/pull/1006
+* Fix Kubernetes local test deployment by @viniciusdc in https://github.com/Quansight/qhub/pull/1002
+* Initial commit for auth and stages workflow by @costrouc in https://github.com/Quansight/qhub/pull/1003
+* Fix formatting issues with black #1003 by @viniciusdc in https://github.com/Quansight/qhub/pull/1020
+* use pyproject.toml and setup.cfg for packaging by @tonyfast in https://github.com/Quansight/qhub/pull/986
+* Increase timeout/attempts for keycloak check by @viniciusdc in https://github.com/Quansight/qhub/pull/1023
+* Fix issue with traefik issueing certificates with letsencrypt acme by @costrouc in https://github.com/Quansight/qhub/pull/1017
+* Fixing cdsdashboard conda environments being shown by @costrouc in https://github.com/Quansight/qhub/pull/1025
+* Fix input variable support for multiple types by @viniciusdc in https://github.com/Quansight/qhub/pull/1029
+* Fix Black/Flake8 problems by @danlester in https://github.com/Quansight/qhub/pull/1039
+* Add remote state condition for 01-terraform-state provisioning by @viniciusdc in https://github.com/Quansight/qhub/pull/1042
+* Round versions for upgrade and schema by @danlester in https://github.com/Quansight/qhub/pull/1038
+* Code Server is now installed via conda, and the Jupyterlab Extension is https://github.com/betatim/vscode-binder/ by @costrouc in https://github.com/Quansight/qhub/pull/1044
+* Removing cookiecutter from setup.cfg requirements by @costrouc in https://github.com/Quansight/qhub/pull/1026
+* Destroy terraform-state stage when condition match by @viniciusdc in https://github.com/Quansight/qhub/pull/1051
+* Fixup adding support for security.keycloak.realm_display_name key by @costrouc in https://github.com/Quansight/qhub/pull/1054
+* Move external_container_reg to earlier stage by @danlester in https://github.com/Quansight/qhub/pull/1053
+* Adding ability to specify overrides back into keycloak configuration by @costrouc in https://github.com/Quansight/qhub/pull/1055
+* Depricating terraform_modules option since no longer used by @costrouc in https://github.com/Quansight/qhub/pull/1057
+* Adding security.shared_users_group option for default users group by @costrouc in https://github.com/Quansight/qhub/pull/1056
+* Fixup adding back jupyterhub overrides option by @costrouc in https://github.com/Quansight/qhub/pull/1058
+* prevent_deploy flag for safeguarding upgrades by @danlester in https://github.com/Quansight/qhub/pull/1047
+* CI: Add layer caching for Docker images by @HarshCasper in https://github.com/Quansight/qhub/pull/1061
+* Additions to TCP/DNS stage check, fix 1027 by @iameskild in https://github.com/Quansight/qhub/pull/1063
+* FIX: Remove concurrency groups by @HarshCasper in https://github.com/Quansight/qhub/pull/1064
+* Stage 08 extensions and realms/logout by @danlester in https://github.com/Quansight/qhub/pull/1069
+* Auto create/destroy azure resource group by @viniciusdc in https://github.com/Quansight/qhub/pull/1071
+* Add CICD schema and render workflows by @iameskild in https://github.com/Quansight/qhub/pull/1068
+* Ensure that the shared folder symlink only exists if user has shared folders by @costrouc in https://github.com/Quansight/qhub/pull/1074
+* Adds the ability on render to deleted targeted files or directories by @costrouc in https://github.com/Quansight/qhub/pull/1073
+* DOCS: QHub 101 by @HarshCasper in https://github.com/Quansight/qhub/pull/1011
+* remove jovyan user by @tylerpotts in https://github.com/Quansight/qhub/pull/1089
+* More finely scoped github actions and kubernetes_test build docker images by @costrouc in https://github.com/Quansight/qhub/pull/1088
+* Adding clearml overrides by @costrouc in https://github.com/Quansight/qhub/pull/1059
+* Reorganizing render, deploy, destroy to unify stages input_vars, tf_objects, checks, and state_imports by @costrouc in https://github.com/Quansight/qhub/pull/1091
+* Updates/fixes for rendering CICD workflows by @iameskild in https://github.com/Quansight/qhub/pull/1086
+* fix bug in state_01_terraform_state function call by @tylerpotts in https://github.com/Quansight/qhub/pull/1094
+* Use paths instead of paths-ignore so that test only run on changes to given paths by @costrouc in https://github.com/Quansight/qhub/pull/1097
+* [ENH] - Update issue templates by @trallard in https://github.com/Quansight/qhub/pull/1083
+* Generate independet objects for terraform-state resources by @viniciusdc in https://github.com/Quansight/qhub/pull/1102
+* Complete implementation of destroy which goes through each stage by @costrouc in https://github.com/Quansight/qhub/pull/1103
+* Change AWS Kubenetes provider authentication to use data.eks_cluster instead of exec by @costrouc in https://github.com/Quansight/qhub/pull/1107
+* Relax qhub destroy to attempt to continue destroying resources by @costrouc in https://github.com/Quansight/qhub/pull/1109
+* Breaking upgrade docs (0.4) by @danlester in https://github.com/Quansight/qhub/pull/1087
+* Simplify default images by @tylerpotts in https://github.com/Quansight/qhub/pull/1114
+* Change group structure by @danlester in https://github.com/Quansight/qhub/pull/1112
+* Adding status field to each destroy stage to print status by @costrouc in https://github.com/Quansight/qhub/pull/1116
+* Incorrect mapping of values to gcp node group instance types by @costrouc in https://github.com/Quansight/qhub/pull/1117
+* FIX: Remove Conda Store from default images by @HarshCasper in https://github.com/Quansight/qhub/pull/1119
+* Minor fix to `setup.cfg` by @iameskild in https://github.com/Quansight/qhub/pull/1122
+* [DOC]- Update contribution guidelines by @trallard in https://github.com/Quansight/qhub/pull/1080
+* Adding tests to visit additional endpoints by @costrouc in https://github.com/Quansight/qhub/pull/1118
+* Adding tests for juypterhub-ssh, jhub-client, and vs code  by @costrouc in https://github.com/Quansight/qhub/pull/1123
+* Update Keycloak docs by @iameskild in https://github.com/Quansight/qhub/pull/1093
+* Upgrade conda-store v0.3.10 and simplify specification of image by @HarshCasper in https://github.com/Quansight/qhub/pull/1130
+* [ImgBot] Optimize images by @imgbot in https://github.com/Quansight/qhub/pull/1140
+* Adjust Idle culler settings and add internal culling by @viniciusdc in https://github.com/Quansight/qhub/pull/1133
+* [BUG] Removing jovyan home directory and issue with nss confiuration by @costrouc in https://github.com/Quansight/qhub/pull/1142
+* [DOC] Add `troubleshooting` docs by @iameskild in https://github.com/Quansight/qhub/pull/1139
+* Update user login guides by @viniciusdc in https://github.com/Quansight/qhub/pull/1144
+* [ImgBot] Optimize images by @imgbot in https://github.com/Quansight/qhub/pull/1146
+* Workaround for kubernetes-client version issue by @iameskild in https://github.com/Quansight/qhub/pull/1148
+* Make the commit of the terraform rendering optional (replaces PR 995) by @iameskild in https://github.com/Quansight/qhub/pull/1149
+* Fix typos in user guide docs by @ericdatakelly in https://github.com/Quansight/qhub/pull/1154
+* Minor docs clean up for v0.4.0 release by @iameskild in https://github.com/Quansight/qhub/pull/1155
+* Readthedocs and documentation updates by @tonyfast in https://github.com/Quansight/qhub/pull/1153
+* Add markdown formatter for doc wrapping by @viniciusdc in https://github.com/Quansight/qhub/pull/1152
+* remove deprecated param `count` from `.cirun.yml` by @aktech in https://github.com/Quansight/qhub/pull/1164
+* Use qhub-bot for keycloak deployment/check by @iameskild in https://github.com/Quansight/qhub/pull/1167
+* Only list active conda-envs for dask-gateway by @iameskild in https://github.com/Quansight/qhub/pull/1162
+
+## New Contributors
+
+* @imgbot made their first contribution in https://github.com/Quansight/qhub/pull/1140
+* @ericdatakelly made their first contribution in https://github.com/Quansight/qhub/pull/1154
+
+**Full Changelog**: https://github.com/Quansight/qhub/compare/v0.3.13...v0.4.0
 
 ## Release 0.3.13 - 10/13/2021
 
@@ -45,8 +190,6 @@
 - Update `remove_existing_renders` to only delete QHub related files/directories ([#800](https://github.com/Quansight/qhub/pull/800))
 - Reduce number of AWS subnets down to 4 to increase the number of available nodes by a factor of 4 ([#839](https://github.com/Quansight/qhub/pull/839))
 
----
-
 ## Release 0.3.11 - 05/07/2021
 
 ### Breaking changes
@@ -59,8 +202,6 @@
 
  - removing default values from pydantic schema which caused invalid yaml files to unexpectedly pass validation
  - make kubespawner_override.environment overridable (prior changes were overwritten)
-
----
 
 ## Release 0.3.10 - 05/06/2021
 
@@ -82,8 +223,6 @@
 
  - terraform formatting in cookiecutter for enabling GPUs on GCP
 
----
-
 ## Release 0.3.8 - 05/05/2021
 
 ### Breaking changes
@@ -98,8 +237,6 @@
  - dask-gateway exposed by default now properly
  - typo in cookiecutter for enabling GPUs on GCP
 
----
-
 ## Release 0.3.7 - 04/30/2021
 
 ### Breaking changes
@@ -111,8 +248,6 @@
 ### Bug fixes
 
  - `jhsingle-native-proxy` added to the base jupyterlab image
-
----
 
 ## Release 0.3.6 - 04/29/2021
 
@@ -135,8 +270,6 @@
  - fixed gitlab-ci before_script and after_script
  - fixed jovyan -> qhub_user home directory path issue with dashboards
 
----
-
 ## Release 0.3.5 - 04/28/2021
 
 ### Breaking changes
@@ -151,8 +284,6 @@
 
 ### Bug fixes
 
----
-
 ## Release 0.3.4 - 04/27/2021
 
 ### Breaking changes
@@ -162,8 +293,6 @@
 ### Bug fixes
 
  - remaining issues with ci_cd branch not being fully changed
-
----
 
 ## Release 0.3.3 - 04/27/2021
 
@@ -181,16 +310,12 @@
 
 ### Breaking changes
 
----
-
 ## Release 0.3.2 - 04/20/2021
 
 ### Bug fixes
 
  - prevent gitlab-ci from freezing on gitlab deployment
  - not all branches were configured via the `branch` option in `ci_cd`
-
----
 
 ## Release 0.3.1 - 04/20/2021
 
@@ -204,8 +329,6 @@
 
 ### Bug fixes
  - typo in `authenticator_class` for custom authentication
-
----
 
 ## Release 0.3.0 - 04/14/2021
 
@@ -281,5 +404,4 @@
 * Removed the registry for DigitalOcean.
 
 ## Thank you for your contributions!
-
 > [Brian Larsen](https://github.com/brl0), [Rajat Goyal](https://github.com/RajatGoyal), [Prasun Anand](https://github.com/prasunanand), and  [Rich Signell](https://github.com/rsignell-usgs) and [Josef Kellndorfer](https://github.com/jkellndorfer) for the insightful discussions.
