@@ -55,55 +55,34 @@ jobs:
         run: |
           mkdir -p bin
           pushd bin
-          curl -L https://github.com/kubernetes/minikube/releases/download/v1.22.0/minikube-linux-amd64 -o minikube
-          chmod +x minikube
+          curl -L https://github.com/kubernetes-sigs/kind/releases/download/v0.12.0/kind-linux-arm64 -o kind
+          chmod +x kind
 
           curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
           chmod +x kubectl
 
           echo "$PWD" >> $GITHUB_PATH
           popd
-      - name: Start Minikube
+      - name: Enable docker permissions for user
         run: |
           sudo docker ps
           sudo usermod -aG docker $USER && newgrp docker
-          minikube start --kubernetes-version=1.19.4 --driver=docker --cpus 4 --memory 12288 --wait=all
-      - name: Print minikube and kubectl versions
-        run: |
-          minikube version
-          kubectl version
-      - name: Use minikube docker daemon
-        run: |
-          eval $(minikube docker-env)
-          echo "DOCKER_TLS_VERIFY=$DOCKER_TLS_VERIFY" >> $GITHUB_ENV
-          echo "DOCKER_HOST=$DOCKER_HOST" >> $GITHUB_ENV
-          echo "DOCKER_CERT_PATH=$DOCKER_CERT_PATH" >> $GITHUB_ENV
-          echo "MINIKUBE_ACTIVE_DOCKERD=$MINIKUBE_ACTIVE_DOCKERD" >> $GITHUB_ENV
-      - name: Print docker connection information
-        run: |
+
           docker info
           docker ps
       - name: Build docker images
         run: |
           cd qhub/template/image
           docker buildx bake
+          kind load docker-image quansight/qhub-jupyterhub:${TAG} quansight/qhub-jupyterlab:${TAG} quansight/qhub-dask-worker:${TAG} quansight/qhub-dask-gateway:${TAG}
         env:
           TAG: ${{ github.sha }}
-      - name: List docker images in minikube
-        run: |
-          docker images
       - name: Get routing table for docker pods
         run: |
           ip route
-      - name: Configure LoadBalancer IPs
-        run: |
-          python tests/scripts/minikube-loadbalancer-ip.py
       - name: Add DNS entry to hosts
         run: |
-          sudo echo "192.168.49.100  github-actions.qhub.dev" | sudo tee -a /etc/hosts
-      - name: Enable Minikube metallb
-        run: |
-          minikube addons enable metallb
+          sudo echo "172.20.1.100  github-actions.qhub.dev" | sudo tee -a /etc/hosts
       - name: Basic kubectl checks before deployment
         run: |
           kubectl get all,cm,secret,ing -A
@@ -202,8 +181,3 @@ jobs:
         if: always()
         run: |
           kubectl get all,cm,secret,ing -A
-
-      - name: Delete minikube cluster
-        if: always()
-        run: |
-          minikube delete
