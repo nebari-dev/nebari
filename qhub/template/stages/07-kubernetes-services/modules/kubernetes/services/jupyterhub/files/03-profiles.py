@@ -305,6 +305,12 @@ def render_profile(profile, username, groups):
         }
     }
     """
+    # check that username or groups in allowed groups for profile
+    user_not_in_users = username not in set(profile.get('users', []))
+    user_not_in_groups = (set(groups) & set(profile.get('groups', []))) == set()
+    if ('users' in profile or 'groups' in profile) and user_not_in_users and user_not_in_groups:
+        return None
+
     profile = copy.copy(profile)
     profile_kubespawner_override = profile.get("kubespawner_override")
     profile["kubespawner_override"] = functools.reduce(
