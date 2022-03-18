@@ -36,7 +36,12 @@ def stage_01_terraform_state(stage_outputs, config):
 
 def stage_02_infrastructure(stage_outputs, config):
     if config["provider"] == "local":
-        return {"kube_context": config["local"].get("kube_context")}
+        return {
+            "kubeconfig_filename": os.path.join(
+                tempfile.gettempdir(), "QHUB_KUBECONFIG"
+            ),
+            "kube_context": config["local"].get("kube_context")
+        }
     elif config["provider"] == "do":
         return {
             "name": config["project_name"],
