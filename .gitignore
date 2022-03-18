@@ -1,3 +1,10 @@
+# docs
+.nox
+_build
+
+# setuptools scm
+qhub/_version.py
+
 # ignore terraform state
 .terraform
 terraform.tfstate
@@ -20,6 +27,7 @@ result
 shell.nix
 .envrc
 build.nix
+.direnv
 
 # ignore deploments
 do-jupyterhub

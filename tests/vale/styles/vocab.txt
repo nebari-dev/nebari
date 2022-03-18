@@ -1,4 +1,5 @@
 addons
+admin
 Anand
 api
 apis
@@ -25,6 +26,8 @@ cpu
 cpus
 cuda
 cudatoolkit
+dns
+Lego
 dask
 Dask
 Daskgpus
@@ -32,6 +35,7 @@ dev
 digital
 Dockerfile
 Dockerfiles
+docstrings
 doctl
 ebs
 EBS
@@ -41,6 +45,7 @@ eks
 EKS
 elasticsearch
 emacs
+Email
 env
 gcp
 git

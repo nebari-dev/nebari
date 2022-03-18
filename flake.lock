@@ -1,0 +1,44 @@
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1639029528,
+        "narHash": "sha256-6OxgTjoBBEuGZMct702B/fdqui8n7YgI2lTGjV93G1o=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "33582b3ee1d3edbe331b455ed423bc97e3fb7498",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-keycloak": {
+      "locked": {
+        "lastModified": 1640053849,
+        "narHash": "sha256-HBCcj8BJ+s17al53nhR77h2y+nMrKVwLc1DWi2V5aAo=",
+        "owner": "costrouc",
+        "repo": "nixpkgs",
+        "rev": "b5e918b5d2fe126836e665f03077e300ad42d1b0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "costrouc",
+        "ref": "python-keycloak",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "nixpkgs-keycloak": "nixpkgs-keycloak"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

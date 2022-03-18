@@ -10,34 +10,74 @@ logger = logging.getLogger(__name__)
 
 
 def do_keycloak(config_filename, *args):
-
-    if len(args) < 2:
-        raise ValueError("keycloak command requires extra inputs")
-
-    if args[0] != "adduser":
-        raise ValueError(
-            "Only keycloak command is 'keycloak adduser username [password]'"
-        )
-
-    keycloak_admin = get_keycloak_admin_from_config(config_filename)
-
-    new_user_dict = {"username": args[1], "enabled": True}
-    if len(args) >= 3:
-        new_user_dict["credentials"] = [
-            {"type": "password", "value": args[2], "temporary": False}
-        ]
-    else:
-        print("Not setting any password (none supplied)")
-
-    print(f"Adding user {args[1]}")
-    keycloak_admin.create_user(new_user_dict)
-
-
-def get_keycloak_admin_from_config(config_filename):
     config = load_yaml(config_filename)
-
     verify(config)
 
+    # supress insecure warnings
+    import urllib3
+
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    keycloak_admin = get_keycloak_admin_from_config(config)
+
+    if args[0] == "adduser":
+        if len(args) < 2:
+            raise ValueError(
+                "keycloak command 'adduser' requires `username [password]`"
+            )
+
+        username = args[1]
+        password = args[2] if len(args) >= 3 else None
+        create_user(keycloak_admin, username, password, domain=config["domain"])
+    elif args[0] == "listusers":
+        list_users(keycloak_admin)
+    else:
+        raise ValueError(f"unknown keycloak command {args[0]}")
+
+
+def create_user(
+    keycloak_admin: keycloak.KeycloakAdmin,
+    username: str,
+    password: str = None,
+    groups=None,
+    email=None,
+    domain=None,
+    enabled=True,
+):
+    payload = {
+        "username": username,
+        "groups": groups or ["/developer"],
+        "email": email or f"{username}@{domain or 'example.com'}",
+        "enabled": enabled,
+    }
+    if password:
+        payload["credentials"] = [
+            {"type": "password", "value": password, "temporary": False}
+        ]
+    else:
+        print(f"Creating user={username} without password (none supplied)")
+    keycloak_admin.create_user(payload)
+    print(f"Created user={username}")
+
+
+def list_users(keycloak_admin: keycloak.KeycloakAdmin):
+    num_users = keycloak_admin.users_count()
+    print(f"{num_users} Keycloak Users")
+
+    user_format = "{username:32} | {email:32} | {groups}"
+    print(user_format.format(username="username", email="email", groups="groups"))
+    print("-" * 120)
+
+    for user in keycloak_admin.get_users():
+        user_groups = [_["name"] for _ in keycloak_admin.get_user_groups(user["id"])]
+        print(
+            user_format.format(
+                username=user["username"], email=user["email"], groups=user_groups
+            )
+        )
+
+
+def get_keycloak_admin_from_config(config):
     keycloak_server_url = os.environ.get(
         "KEYCLOAK_SERVER_URL", f"https://{config['domain']}/auth/"
     )

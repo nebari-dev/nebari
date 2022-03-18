@@ -1,0 +1,110 @@
+name: "Bug report \U0001F41B"
+description: "Create a report to help us improve"
+title: "[BUG] - <title>"
+labels: ["type: bug 🐛"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hi! Thanks for using QHub and taking some time to contribute to this project.
+
+        Please answer the following sections to help us troubleshoot the problem.
+
+  - type: input
+    attributes:
+      label: OS system and architecture in which you are running QHub
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: |
+        A clear and concise description of what you expected to happen.
+        We suggest using bullets (indicated by * or -) here.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Actual behavior
+      description: |
+        A clear and concise description of what the bug is.
+        We suggest using bullets (indicated by * or -) here.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: How to Reproduce the problem?
+      description: |
+        Please provide steps to reproduce this bug.
+        Please use numbered list items.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Command output
+      render: bash session
+      description: |
+        Provide the output of the steps above, including the commands
+        themselves and any tracebacks/logs. If you're familiar with
+        Markdown, this block will have triple backticks added automatically
+        around it -- you don't have to add them.
+
+        If you want to present output from multiple commands, please present
+        that as a shell session (commands you run get prefixed with `$ `).
+        Please also ensure that the "How to reproduce" section contains matching
+        instructions for reproducing this.
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Versions and dependencies used.
+      description: |
+        Describe your environment:
+        - Conda version (use `conda --version`)
+        - Kubernetes version (use `kubectl version`)
+        - QHub version
+    validations:
+      required: false
+
+  - type: dropdown
+    attributes:
+      label: Compute environment
+      description: Are you using a public cloud provider or testing locally with minikube? Select the option that applies.
+      multiple: false
+      options:
+        - "Azure"
+        - "GCP"
+        - "AWS"
+        - "Digital Ocean"
+        - "minikube"
+    validations:
+      required: false
+
+  - type: dropdown
+    attributes:
+      label: Integrations
+      description: Is this issue related to onay of the QHub integrations?
+      multiple: true
+      options:
+        - "Prefect"
+        - "Keycloak"
+        - "conda-store"
+        - "Dask"
+        - "dashboards"
+        - "Grafana"
+
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: |
+        Links? References? Anything that will give us more context about the issue you are encountering!
+
+        Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
+    validations:
+      required: false

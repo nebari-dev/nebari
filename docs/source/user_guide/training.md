@@ -1,7 +1,6 @@
 # QHub training cluster
 
-Quansight provides training around the [PyData](https://pydata.org/) ecosystem. For this training material, a Qhub based training cluster is utilized. This guide aims to explain to newcomers how to log-in to Quansight's own QHub Training server. If you are looking at how to login to Your own organization's QHub see the user [getting started
-docs](getting_started.md).
+Quansight provides training around the [PyData](https://pydata.org/) ecosystem. For this training material, a Qhub based training cluster is utilized. This guide explains to newcomers how to log into Quansight's own QHub Training server. If you are looking for instructions on logging into your own organization's QHub see the user [getting started docs](getting_started.md).
 
 To access the training platform:
 
@@ -13,11 +12,11 @@ To access the training platform:
 
 ![Login screen using Auth0](../images/training_auth_screen_2.png)
 
-3. Next, you should then receive an email from **Quansight-training** with a 6-digit code. Remember to follow-up with your spam folder, just in case.
+3. You should then receive an email from **Quansight-training** with a 6-digit code. Remember to check your spam folder just in case.
 
 ![Screenshot of email with the login code](../images/training_email_screen_3.png)
 
-4. Copy the code, head back over to the [https://training.qhub.dev](https://training.qhub.dev) webpage and paste it when prompted.
+4. Copy the code, head back over to the [https://training.qhub.dev](https://training.qhub.dev) webpage, and paste it when prompted.
 
 ![Screenshot displaying the code to be pasted on QHub login webpage](../images/training_auth_screen_4.png)
 

@@ -1,8 +1,14 @@
 import os
 import base64
 
+from typing import Optional, Dict, List, Union
+
+from pydantic import BaseModel, Field
+
 import requests
 from nacl import encoding, public
+
+from qhub.utils import pip_install_qhub
 
 
 def github_request(url, method="GET", json=None):
@@ -82,3 +88,227 @@ def create_repository(owner, repo, description, homepage, private=True):
             },
         )
     return f"git@github.com:{owner}/{repo}.git"
+
+
+def gha_env_vars(config):
+    env_vars = {
+        "GITHUB_TOKEN": "${{ secrets.GITHUB_TOKEN }}",
+    }
+
+    if os.environ.get("QHUB_GH_BRANCH"):
+        env_vars["QHUB_GH_BRANCH"] = "${{ secrets.QHUB_GH_BRANCH }}"
+
+    if config["provider"] == "aws":
+        env_vars["AWS_ACCESS_KEY_ID"] = "${{ secrets.AWS_ACCESS_KEY_ID }}"
+        env_vars["AWS_SECRET_ACCESS_KEY"] = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        env_vars["AWS_DEFAULT_REGION"] = "${{ secrets.AWS_DEFAULT_REGION }}"
+    elif config["provider"] == "azure":
+        env_vars["ARM_CLIENT_ID"] = "${{ secrets.ARM_CLIENT_ID }}"
+        env_vars["ARM_CLIENT_SECRET"] = "${{ secrets.ARM_CLIENT_SECRET }}"
+        env_vars["ARM_SUBSCRIPTION_ID"] = "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+        env_vars["ARM_TENANT_ID"] = "${{ secrets.ARM_TENANT_ID }}"
+    elif config["provider"] == "do":
+        env_vars["AWS_ACCESS_KEY_ID"] = "${{ secrets.AWS_ACCESS_KEY_ID }}"
+        env_vars["AWS_SECRET_ACCESS_KEY"] = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+        env_vars["SPACES_ACCESS_KEY_ID"] = "${{ secrets.SPACES_ACCESS_KEY_ID }}"
+        env_vars["SPACES_SECRET_ACCESS_KEY"] = "${{ secrets.SPACES_SECRET_ACCESS_KEY }}"
+        env_vars["DIGITALOCEAN_TOKEN"] = "${{ secrets.DIGITALOCEAN_TOKEN }}"
+    elif config["provider"] == "gcp":
+        env_vars["GOOGLE_CREDENTIALS"] = "${{ secrets.GOOGLE_CREDENTIALS }}"
+    elif config["provider"] == "local":
+        # create mechanism to allow for extra env vars?
+        pass
+    else:
+        raise ValueError("Cloud Provider configuration not supported")
+
+    return env_vars
+
+
+### GITHUB-ACTIONS SCHEMA ###
+
+
+class GHA_on_extras(BaseModel):
+    branches: List[str]
+    paths: List[str]
+
+
+class GHA_on(BaseModel):
+    # to allow for dynamic key names
+    __root__: Dict[str, GHA_on_extras]
+
+    # TODO: validate __root__ values
+    # `push`, `pull_request`, etc.
+
+
+class GHA_job_steps_extras(BaseModel):
+    # to allow for dynamic key names
+    __root__: Union[str, float, int]
+
+
+class GHA_job_step(BaseModel):
+    name: str
+    uses: Optional[str]
+    with_: Optional[Dict[str, GHA_job_steps_extras]] = Field(alias="with")
+    run: Optional[str]
+    env: Optional[Dict[str, GHA_job_steps_extras]]
+
+    class Config:
+        allow_population_by_field_name = True
+
+
+class GHA_job_id(BaseModel):
+    name: str
+    runs_on_: str = Field(alias="runs-on")
+    steps: List[GHA_job_step]
+
+    class Config:
+        allow_population_by_field_name = True
+
+
+class GHA_jobs(BaseModel):
+    # to allow for dynamic key names
+    __root__: Dict[str, GHA_job_id]
+
+
+class GHA(BaseModel):
+    name: str
+    on: GHA_on
+    env: Optional[Dict[str, str]]
+    jobs: GHA_jobs
+
+
+class QhubOps(GHA):
+    pass
+
+
+class QhubLinter(GHA):
+    pass
+
+
+### GITHUB ACTION WORKFLOWS ###
+
+PYTHON_VERSION = 3.8
+
+
+def checkout_image_step():
+    return GHA_job_step(
+        name="Checkout Image",
+        uses="actions/checkout@master",
+        with_={
+            "token": GHA_job_steps_extras(
+                __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
+            )
+        },
+    )
+
+
+def setup_python_step():
+    return GHA_job_step(
+        name="Set up Python",
+        uses="actions/setup-python@v2",
+        with_={"python-version": GHA_job_steps_extras(__root__=PYTHON_VERSION)},
+    )
+
+
+def install_qhub_step(qhub_version):
+    return GHA_job_step(name="Install QHub", run=pip_install_qhub(qhub_version))
+
+
+def gen_qhub_ops(config):
+
+    env_vars = gha_env_vars(config)
+    branch = config["ci_cd"]["branch"]
+    commit_render = config["ci_cd"].get("commit_render", True)
+    qhub_version = config["qhub_version"]
+
+    push = GHA_on_extras(branches=[branch], paths=["qhub-config.yaml"])
+    on = GHA_on(__root__={"push": push})
+
+    step1 = checkout_image_step()
+    step2 = setup_python_step()
+    step3 = install_qhub_step(qhub_version)
+
+    step4 = GHA_job_step(
+        name="Deploy Changes made in qhub-config.yaml",
+        run=f"qhub deploy -c qhub-config.yaml --disable-prompt{' --skip-remote-state-provision' if os.environ.get('QHUB_GH_BRANCH') else ''}",
+    )
+
+    step5 = GHA_job_step(
+        name="Push Changes",
+        run=(
+            "git config user.email 'qhub@quansight.com' ; "
+            "git config user.name 'github action' ; "
+            "git add . ; "
+            "git diff --quiet && git diff --staged --quiet || (git commit -m '${{ env.COMMIT_MSG }}') ; "
+            f"git push origin {branch}"
+        ),
+        env={
+            "COMMIT_MSG": GHA_job_steps_extras(
+                __root__="qhub-config.yaml automated commit: ${{ github.sha }}"
+            )
+        },
+    )
+
+    gha_steps = [step1, step2, step3, step4]
+    if commit_render:
+        gha_steps.append(step5)
+
+    job1 = GHA_job_id(name="qhub", runs_on_="ubuntu-latest", steps=gha_steps)
+    jobs = GHA_jobs(__root__={"build": job1})
+
+    return QhubOps(
+        name="qhub auto update",
+        on=on,
+        env=env_vars,
+        jobs=jobs,
+    )
+
+
+def gen_qhub_linter(config):
+
+    env_vars = {}
+    qhub_gh_branch = os.environ.get("QHUB_GH_BRANCH")
+    if qhub_gh_branch:
+        env_vars["QHUB_GH_BRANCH"] = "${{ secrets.QHUB_GH_BRANCH }}"
+    else:
+        env_vars = None
+
+    branch = config["ci_cd"]["branch"]
+    qhub_version = config["qhub_version"]
+
+    pull_request = GHA_on_extras(branches=[branch], paths=["qhub-config.yaml"])
+    on = GHA_on(__root__={"pull_request": pull_request})
+
+    step1 = checkout_image_step()
+    step2 = setup_python_step()
+    step3 = install_qhub_step(qhub_version)
+
+    step4_envs = {
+        "PR_NUMBER": GHA_job_steps_extras(__root__="${{ github.event.number }}"),
+        "REPO_NAME": GHA_job_steps_extras(__root__="${{ github.repository }}"),
+        "GITHUB_TOKEN": GHA_job_steps_extras(
+            __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
+        ),
+    }
+
+    step4 = GHA_job_step(
+        name="QHub Lintify",
+        run="qhub validate --config qhub-config.yaml --enable-commenting",
+        env=step4_envs,
+    )
+
+    job1 = GHA_job_id(
+        name="qhub", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4]
+    )
+    jobs = GHA_jobs(
+        __root__={
+            "qhub-validate": job1,
+        }
+    )
+
+    return QhubLinter(
+        name="qhub linter",
+        on=on,
+        env=env_vars,
+        jobs=jobs,
+    )

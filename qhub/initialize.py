@@ -38,7 +38,6 @@ BASE_CONFIGURATION = {
         "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
         "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         "dask_gateway": f"quansight/qhub-dask-gateway:{qhub_image_tag}",
-        "conda_store": f"quansight/qhub-conda-store:{qhub_image_tag}",
     },
     "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
     "theme": {
@@ -66,7 +65,11 @@ BASE_CONFIGURATION = {
     },
 }
 
-CICD_CONFIGURATION = {"type": "PLACEHOLDER", "branch": "main"}
+CICD_CONFIGURATION = {
+    "type": "PLACEHOLDER",
+    "branch": "main",
+    "commit_render": True,
+}
 
 AUTH_PASSWORD = {
     "type": "password",
@@ -170,7 +173,6 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 0.75,
                 "mem_limit": "4G",
                 "mem_guarantee": "2.5G",
-                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
         {
@@ -181,7 +183,6 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1.5,
                 "mem_limit": "8G",
                 "mem_guarantee": "5G",
-                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
     ],
@@ -192,7 +193,6 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "4G",
             "worker_memory": "2.5G",
             "worker_threads": 1,
-            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
         "Medium Worker": {
             "worker_cores_limit": 2,
@@ -200,7 +200,6 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "8G",
             "worker_memory": "5G",
             "worker_threads": 2,
-            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
     },
 }
@@ -260,7 +259,8 @@ def render_config(
     config["provider"] = cloud_provider
 
     if ci_provider is not None and ci_provider != "none":
-        config["ci_cd"] = {"type": ci_provider, "branch": "main"}
+        config["ci_cd"] = CICD_CONFIGURATION.copy()
+        config["ci_cd"]["type"] = ci_provider
 
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}
@@ -291,6 +291,7 @@ def render_config(
         qhub_domain = input("Provide domain: ")
     config["domain"] = qhub_domain
 
+    # In qhub_version only use major.minor.patch version - drop any pre/post/dev suffixes
     config["qhub_version"] = __version__
 
     # Generate default password for Keycloak root user and also example-user if using password auth
