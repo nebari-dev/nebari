@@ -83,9 +83,6 @@ jobs:
       - name: Add DNS entry to hosts
         run: |
           sudo echo "172.20.1.100  github-actions.qhub.dev" | sudo tee -a /etc/hosts
-      - name: Basic kubectl checks before deployment
-        run: |
-          kubectl get all,cm,secret,ing -A
       - name: Initialize QHub Cloud
         run: |
           mkdir -p local-deployment
