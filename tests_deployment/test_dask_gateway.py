@@ -12,7 +12,9 @@ monkeypatch_ssl_context()
 @pytest.fixture
 def dask_gateway_object():
     """Connects to Dask Gateway cluster from outside the cluster."""
-    os.environ["JUPYTERHUB_API_TOKEN"] = get_jupyterhub_token("dask-gateway-pytest-token")
+    os.environ["JUPYTERHUB_API_TOKEN"] = get_jupyterhub_token(
+        "dask-gateway-pytest-token"
+    )
     return dask_gateway.Gateway(
         address=f"https://{constants.QHUB_HOSTNAME}/{constants.GATEWAY_ENDPOINT}",
         auth="jupyterhub",
