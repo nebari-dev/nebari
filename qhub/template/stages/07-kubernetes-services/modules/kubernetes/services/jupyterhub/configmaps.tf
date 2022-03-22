@@ -34,3 +34,15 @@ resource "kubernetes_config_map" "etc-skel" {
     ".bash_logout" = file("${path.module}/files/skel/.bash_logout")
   }
 }
+
+
+resource "kubernetes_config_map" "jupyterlab-settings" {
+  metadata {
+    name      = "jupyterlab-settings"
+    namespace = var.namespace
+  }
+
+  data = {
+    "overrides.json" = file("${path.module}/files/jupyterlab/overrides.json")
+  }
+}

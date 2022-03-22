@@ -49,6 +49,12 @@ resource "helm_release" "jupyterhub" {
               namespace = kubernetes_config_map.etc-jupyter.metadata.0.namespace
               kind = "configmap"
             }
+
+            "/opt/conda/envs/default/share/jupyter/lab/settings" = {
+              name = kubernetes_config_map.jupyterlab-settings.metadata.0.name
+              namespace = kubernetes_config_map.jupyterlab-settings.metadata.0.namespace
+              kind = "configmap"
+            }
           }
         )
         environments      = var.conda-store-environments

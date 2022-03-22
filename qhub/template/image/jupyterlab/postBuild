@@ -5,10 +5,6 @@ set -x
 # install classic notebook extensions
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
-# ====== setup jupyterlab configuration overrides ======
-mkdir -p /opt/conda/share/jupyter/lab/settings
-cp /opt/jupyterlab/overrides.json /opt/conda/share/jupyter/lab/settings
-
 # if DEFAULT_ENV is unset ${DEFAULT_ENV+x} expands to nothing otherwise
 # it substitutes the string x. This allows us to check if the variable
 # is set without triggering an unbound variable error
