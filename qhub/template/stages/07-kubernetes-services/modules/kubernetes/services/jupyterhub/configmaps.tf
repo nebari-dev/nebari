@@ -50,7 +50,7 @@ resource "kubernetes_config_map" "jupyterlab-settings" {
 }
 
 
-resource "kubernetes_config_map" "examples" {
+resource "kubernetes_config_map" "shared-examples" {
   metadata {
     name      = "shared-examples"
     namespace = var.namespace
