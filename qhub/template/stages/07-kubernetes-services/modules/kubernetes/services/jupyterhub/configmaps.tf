@@ -5,7 +5,7 @@ resource "kubernetes_config_map" "etc-ipython" {
   }
 
   data = {
-    for filename in fileset("${path.module}/files/ipython", "**"):
+    for filename in fileset("${path.module}/files/ipython", "*"):
     filename => file("${path.module}/files/ipython/${filename}")
   }
 }
@@ -18,7 +18,7 @@ resource "kubernetes_config_map" "etc-jupyter" {
   }
 
   data = {
-    for filename in fileset("${path.module}/files/jupyter", "**"):
+    for filename in fileset("${path.module}/files/jupyter", "*"):
     filename => file("${path.module}/files/jupyter/${filename}")
   }
 }
@@ -31,7 +31,7 @@ resource "kubernetes_config_map" "etc-skel" {
   }
 
   data = {
-    for filename in fileset("${path.module}/files/skel", "**"):
+    for filename in fileset("${path.module}/files/skel", "*"):
     filename => file("${path.module}/files/skel/${filename}")
   }
 }
@@ -44,7 +44,7 @@ resource "kubernetes_config_map" "jupyterlab-settings" {
   }
 
   data = {
-    for filename in fileset("${path.module}/files/jupyterlab", "**"):
+    for filename in fileset("${path.module}/files/jupyterlab", "*"):
     filename => file("${path.module}/files/jupyterlab/${filename}")
   }
 }
@@ -57,7 +57,7 @@ resource "kubernetes_config_map" "shared-examples" {
   }
 
   data = {
-    for filename in fileset("${path.module}/files/examples", "**"):
+    for filename in fileset("${path.module}/files/examples", "*"):
     filename => file("${path.module}/files/examples/${filename}")
   }
 }
