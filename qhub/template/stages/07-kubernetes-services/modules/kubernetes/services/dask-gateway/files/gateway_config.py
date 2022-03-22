@@ -30,6 +30,7 @@ c.KubeClusterConfig.image = (
 )
 c.KubeClusterConfig.image_pull_policy = config["cluster"]["image_pull_policy"]
 c.KubeClusterConfig.environment = config["cluster"]["environment"]
+c.KubeClusterConfig.idle_timeout = config["cluster"]["idle_timeout"]
 
 c.KubeClusterConfig.scheduler_cores = config["cluster"]["scheduler_cores"]
 c.KubeClusterConfig.scheduler_cores_limit = config["cluster"]["scheduler_cores_limit"]
