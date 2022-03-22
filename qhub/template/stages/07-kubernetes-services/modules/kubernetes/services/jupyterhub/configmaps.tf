@@ -5,7 +5,8 @@ resource "kubernetes_config_map" "etc-ipython" {
   }
 
   data = {
-    "ipython_config.py"          = file("${path.module}/files/ipython/ipython_config.py")
+    for filename in fileset("${path.module}/files/ipython", "**"):
+    filename => file("${path.module}/files/ipython/${filename}")
   }
 }
 
@@ -17,7 +18,8 @@ resource "kubernetes_config_map" "etc-jupyter" {
   }
 
   data = {
-    "jupyter_notebook_config.py" = file("${path.module}/files/jupyter/jupyter_notebook_config.py")
+    for filename in fileset("${path.module}/files/jupyter", "**"):
+    filename => file("${path.module}/files/jupyter/${filename}")
   }
 }
 
@@ -29,9 +31,8 @@ resource "kubernetes_config_map" "etc-skel" {
   }
 
   data = {
-    ".profile"     = file("${path.module}/files/skel/.profile")
-    ".bashrc"      = file("${path.module}/files/skel/.bashrc")
-    ".bash_logout" = file("${path.module}/files/skel/.bash_logout")
+    for filename in fileset("${path.module}/files/skel", "**"):
+    filename => file("${path.module}/files/skel/${filename}")
   }
 }
 
@@ -43,6 +44,20 @@ resource "kubernetes_config_map" "jupyterlab-settings" {
   }
 
   data = {
-    "overrides.json" = file("${path.module}/files/jupyterlab/overrides.json")
+    for filename in fileset("${path.module}/files/jupyterlab", "**"):
+    filename => file("${path.module}/files/jupyterlab/${filename}")
+  }
+}
+
+
+resource "kubernetes_config_map" "examples" {
+  metadata {
+    name      = "shared-examples"
+    namespace = var.namespace
+  }
+
+  data = {
+    for filename in fileset("${path.module}/files/examples", "**"):
+    filename => file("${path.module}/files/examples/${filename}")
   }
 }
