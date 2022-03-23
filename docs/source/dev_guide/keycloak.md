@@ -44,13 +44,19 @@ The `users` group also needs to be configured so that it is a default group assi
 Within the qhub realm, you will create a new client. Within QHub, a separate client exists for each of jupyterhub, conda-store, dask etc. In the side nav, click `Clients`, then
 click the `Create` button. Fill out the form as show below:
 
-| Form field | Value | | --------------- | -------------- | | Client ID | myclient | | Client Protocol | openid-connect |
+| Form field | Value |
+| --------------- | -------------- |
+| Client ID | myclient |
+| Client Protocol | openid-connect |
 
 After clicking `Save`, you will be taken to the client settings form. Make sure the form fields are filled in as follows:
 
 **Settings tab:**
 
-| Setting | Value | | ------------------- | ------------------------------------ | | Access Type | confidential | | Valid Redirect URIs | http://localhost:7010/oauth_callback |
+| Setting | Value |
+| ------------------- | ------------------------------------ |
+| Access Type | confidential |
+| Valid Redirect URIs | http://localhost:7010/oauth_callback |
 
 > The redirect URI you use here will depend on how you want to test OAuth2 login flows. The example above would make sense if you are running your OAuth2 client (e.g. JupyterHub or
 > Conda Store) at port 7010 locally, and it happens to have its callback URL at the path `/oauth_callback`.
@@ -62,8 +68,15 @@ You will next create a new mapper for the myclient client. Go to the `Mapper` ta
 
 **Mappers (create):**
 
-| Name | Value | | ------------------- | ---------------- | | Name | groups | | Mapper Type | Group Membership | | Token Claim Name | groups | | Full group path | OFF | | Add to ID
-token | OFF | | Add to access token | OFF | | Add to userinfo | ON |
+| Name | Value |
+| ------------------- | ---------------- |
+| Name | groups |
+| Mapper Type | Group Membership |
+| Token Claim Name | groups |
+| Full group path | OFF |
+| Add to ID token | OFF |
+| Add to access token | OFF |
+| Add to userinfo | ON |
 
 **Update: You may also want to set mappers for roles, which are now used for conda-store and dask.**
 
