@@ -52,7 +52,7 @@ module "conda-store-nfs-mount" {
 
   name         = "conda-store"
   namespace    = var.environment
-  nfs_capacity = var.conda-store-storage
+  nfs_capacity = var.conda-store-filesystem-storage
   nfs_endpoint = module.kubernetes-conda-store-server.endpoint_ip
 
   depends_on = [
