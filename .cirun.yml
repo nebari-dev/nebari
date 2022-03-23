@@ -14,5 +14,3 @@ runners:
     workflow: .github/workflows/kubernetes_test.yaml
     # Use Spot Instances for cost savings
     preemptible: false
-    # Number of runners to provision on every trigger on Actions job
-    count: 1

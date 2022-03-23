@@ -15,6 +15,7 @@ def base_profile_home_mounts(username):
 
     """
     home_pvc_name = z2jh.get_config("custom.home-pvc")
+    skel_mount = z2jh.get_config("custom.skel-mount")
     pvc_home_mount_path = "home/{username}"
     pod_home_mount_path = "/home/{username}"
 
@@ -25,6 +26,12 @@ def base_profile_home_mounts(username):
                 "persistentVolumeClaim": {
                     "claimName": home_pvc_name,
                 },
+            },
+            {
+                "name": "skel",
+                "configMap": {
+                    "name": skel_mount["name"],
+                }
             }
         ]
     }
@@ -35,11 +42,11 @@ def base_profile_home_mounts(username):
                 "mountPath": pod_home_mount_path.format(username=username),
                 "name": "home",
                 "subPath": pvc_home_mount_path.format(username=username),
-            }
+            },
         ]
     }
 
-    MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod 777 /mnt/{path}"
+    MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod 777 /mnt/{path} && cp -r /etc/skel/. /mnt/{path}"
     command = MKDIR_OWN_DIRECTORY.format(
         path=pvc_home_mount_path.format(username=username)
     )
@@ -49,7 +56,10 @@ def base_profile_home_mounts(username):
             "image": "busybox:1.31",
             "command": ["sh", "-c", command],
             "securityContext": {"runAsUser": 0},
-            "volumeMounts": [{"mountPath": "/mnt", "name": "home"}],
+            "volumeMounts": [
+                {"mountPath": "/mnt", "name": "home"},
+                {"mountPath": "/etc/skel", "name": "skel"},
+            ],
         }
     ]
     return {
@@ -305,6 +315,12 @@ def render_profile(profile, username, groups):
         }
     }
     """
+    # check that username or groups in allowed groups for profile
+    user_not_in_users = username not in set(profile.get('users', []))
+    user_not_in_groups = (set(groups) & set(profile.get('groups', []))) == set()
+    if ('users' in profile or 'groups' in profile) and user_not_in_users and user_not_in_groups:
+        return None
+
     profile = copy.copy(profile)
     profile_kubespawner_override = profile.get("kubespawner_override")
     profile["kubespawner_override"] = functools.reduce(

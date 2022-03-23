@@ -128,8 +128,6 @@ default_images:
   jupyterhub: quansight/qhub-jupyterhub:v0.3.13
   jupyterlab: quansight/qhub-jupyterlab:v0.3.13
   dask_worker: quansight/qhub-dask-worker:v0.3.13
-  dask_gateway: quansight/qhub-dask-gateway:v0.3.13
-  conda_store: quansight/conda-store-server:v0.3.3
 storage:
   conda_store: 60Gi
   shared_filesystem: 100Gi

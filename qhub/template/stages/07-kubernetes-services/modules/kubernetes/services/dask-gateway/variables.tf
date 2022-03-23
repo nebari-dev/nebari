@@ -144,6 +144,7 @@ variable "cluster" {
     worker_extra_container_config = any
     worker_extra_pod_config       = any
     # additional fields
+    idle_timeout      = number
     image_pull_policy = string
     environment       = map(string)
   })
@@ -163,6 +164,7 @@ variable "cluster" {
     worker_extra_container_config = {}
     worker_extra_pod_config       = {}
     # additional fields
+    idle_timeout      = 1800 # 30 minutes
     image_pull_policy = "IfNotPresent"
     environment       = {}
   }

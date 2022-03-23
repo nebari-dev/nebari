@@ -27,7 +27,6 @@ jobs:
           - jupyterlab
           - jupyterhub
           - dask-worker
-          - dask-gateway
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main

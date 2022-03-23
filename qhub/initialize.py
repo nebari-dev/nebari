@@ -37,7 +37,6 @@ BASE_CONFIGURATION = {
         "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
         "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
         "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
-        "dask_gateway": f"quansight/qhub-dask-gateway:{qhub_image_tag}",
     },
     "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
     "theme": {

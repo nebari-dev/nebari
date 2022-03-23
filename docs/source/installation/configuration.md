@@ -450,7 +450,7 @@ local:
 ## Terraform state
 
 Terraform manages the state of all the deployed resources via
-[backends](https://www.terraform.io/docs/language/settings/backends/index.html). Terraform
+[backends](https://www.terraform.io/language/settings/backends). Terraform
 requires storing the state in order to keep track of the names, ids,
 and states of deployed resources. The simplest approach is storing the
 state on the local filesystem but isn't recommended and isn't the
@@ -459,7 +459,7 @@ default of QHub. `terraform_state` is either `remote`, `existing` or
 control the state of the cluster `local` via tfstate file (not
 recommended), on an already `existing` terraform state store or
 remotely and auto creating the terraform state store. See [terraform
-remote state](https://www.terraform.io/docs/language/state/index.html)
+remote state](https://www.terraform.io/language/state/remote)
 docs. If you are doing anything other than testing we highly recommend
 `remote` unless you know what you are doing.
 
@@ -495,15 +495,14 @@ terraform_state:
 Default images are to the default image run if not specified in a
 profile (described in the next section). The `jupyterhub` key controls
 the jupyterhub image run. These control the docker image used to run
-JupyterHub, the default JupyterLab image, the default Dask worker
-image, and Dask Gateway docker image.
+JupyterHub, the default JupyterLab image, and the default Dask worker
+image.
 
 ```yaml
 default_images:
   jupyterhub: "quansight/qhub-jupyterhub:v||QHUB_VERSION||"
   jupyterlab: "quansight/qhub-jupyterlab:v||QHUB_VERSION||"
   dask_worker: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
-  dask_gateway: "quansight/qhub-dask-gateway:v||QHUB_VERSION||"
 ```
 
 ## Storage

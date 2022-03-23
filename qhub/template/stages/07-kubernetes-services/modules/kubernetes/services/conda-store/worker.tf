@@ -77,6 +77,11 @@ resource "kubernetes_deployment" "worker" {
         labels = {
           role = "${var.name}-conda-store-worker"
         }
+
+        annotations = {
+          # This lets us autorestart when the conifg changes!
+          "checksum/config-map" = sha256(jsonencode(kubernetes_config_map.conda-store-config.data))
+        }
       }
 
       spec {

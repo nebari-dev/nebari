@@ -7,7 +7,6 @@
   "group": {
     "default": {
       "targets": [
-        "dask-gateway",
         "dask-worker",
         "jupyterhub",
         "jupyterlab"
@@ -15,15 +14,6 @@
     }
   },
   "target": {
-    "dask-gateway": {
-      "context": "./",
-      "dockerfile": "Dockerfile.dask-gateway",
-      "tags": [
-        "docker.io/quansight/qhub-dask-gateway:${TAG}",
-        "ghcr.io/quansight/qhub-dask-gateway:${TAG}",
-        "quay.io/quansight/qhub-dask-gateway:${TAG}"
-      ]
-    },
     "dask-worker": {
       "context": "./",
       "dockerfile": "Dockerfile.dask-worker",
