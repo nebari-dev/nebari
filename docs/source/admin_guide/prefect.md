@@ -27,7 +27,8 @@ There are a bunch of components in getting Prefect working for you, here is a br
 prefect create project 'your-prefect-project-name'
 ```
 
-The `TF_VAR_prefect_token` API key is set as `PREFECT__CLOUD__AGENT__AUTH_TOKEN` environment variable in the agent. It's used while deploying Prefect Agent so that it can connect to Prefect Cloud and query flows.
+The `TF_VAR_prefect_token` API key is set as `PREFECT__CLOUD__AGENT__AUTH_TOKEN` environment variable in the agent. It's used while deploying Prefect Agent so that it can connect
+to Prefect Cloud and query flows.
 
 ## Prefect Cloud
 
@@ -35,15 +36,18 @@ Prefect Cloud is a fully hosted, production-ready backend for Prefect Core. Chec
 
 ## Prefect Agent
 
-Prefect Agents is a lightweight processes for orchestrating flow runs. Agents run inside a user's architecture, and are responsible for starting and monitoring flow runs. During operation the agent process queries the Prefect API for any scheduled flow runs, and allocates resources for them on their respective deployment platforms.
+Prefect Agents is a lightweight processes for orchestrating flow runs. Agents run inside a user's architecture, and are responsible for starting and monitoring flow runs. During
+operation the agent process queries the Prefect API for any scheduled flow runs, and allocates resources for them on their respective deployment platforms.
 
 When you enable prefect via `qhub-config.yml` prefect agent is deployed on the QHub's kubernetes cluster, which queries the Prefect Cloud for flow runs.
 
 ## Agent configuration overrides
 
-You can override your agent configuration without having to modify the helm files directly. The extra variable `overrides` makes this possible by changing the default values for the Agent chart according to the settings presented on your qhub-config.yaml file.
+You can override your agent configuration without having to modify the helm files directly. The extra variable `overrides` makes this possible by changing the default values for
+the Agent chart according to the settings presented on your qhub-config.yaml file.
 
-The current variables, originally available in the [Agent helm chart](https://github.com/PrefectHQ/server/blob/master/helm/prefect-server/templates/agent/deployment.yaml) that can be overridden include:
+The current variables, originally available in the [Agent helm chart](https://github.com/PrefectHQ/server/blob/master/helm/prefect-server/templates/agent/deployment.yaml) that can
+be overridden include:
 
 ```
 - IMAGE_PULL_SECRETS
@@ -67,8 +71,10 @@ prefect:
            limit:
              cpu: 4
 ```
-Also, if you would like to include an extra variable to the agent environment configuration, that was not previously in the helm chart, you can do it by including it under
-the `envVars` field in the overrides block. For example, if you would like to add `MY_VAR: "<value>"` to you agent environment, you can do so by adding the following to your qhub-config
+
+Also, if you would like to include an extra variable to the agent environment configuration, that was not previously in the helm chart, you can do it by including it under the
+`envVars` field in the overrides block. For example, if you would like to add `MY_VAR: "<value>"` to you agent environment, you can do so by adding the following to your
+qhub-config
 
 ```yaml
 prefect:
@@ -80,7 +86,9 @@ prefect:
 
 ### Adding secrets to your Agent configuration
 
-Overrides also allow you to define extra secrets to pass through your agent configuration, for example, when using [default secrets](https://docs.prefect.io/core/concepts/secrets.html#default-secrets) to automatically authenticate your flow with the listed service. In the Google cloud case, for `GCP_CREDENTIALS` context secret, you can do it by adding that specific key value pair into your configuration:
+Overrides also allow you to define extra secrets to pass through your agent configuration, for example, when using
+[default secrets](https://docs.prefect.io/core/concepts/secrets.html#default-secrets) to automatically authenticate your flow with the listed service. In the Google cloud case, for
+`GCP_CREDENTIALS` context secret, you can do it by adding that specific key value pair into your configuration:
 
 ```yaml
 prefect:
@@ -89,11 +97,13 @@ prefect:
    secretEnvVars:
        PREFECT__CONTEXT__SECRETS__GCP_CREDENTIALS: '<Your value>'
 ```
+
 This secret will then be stored as a [kubernetes secret](https://kubernetes.io/docs/concepts/configuration/secret/) variable into you QHub secrets volume.
 
 ## Flows
 
-Prefect agent can only orchestrate your flows, you need an actual flow to run via prefect agent. The API for the same can be found in the [prefect documentation](https://docs.prefect.io/core/concepts/flows.html) Here is a simple example from their official doc:
+Prefect agent can only orchestrate your flows, you need an actual flow to run via prefect agent. The API for the same can be found in the
+[prefect documentation](https://docs.prefect.io/core/concepts/flows.html) Here is a simple example from their official doc:
 
 ```python
 from prefect import task, Task, Flow
@@ -114,7 +124,8 @@ with Flow('My Functional Flow') as flow:
 
 ## Storage
 
-The Prefect Storage interface encapsulates logic for storing flows. Each storage unIt's able to store multiple flows (with the constraint of name uniqueness within a given unit). The API documentation for the same can be found in the [prefect documentation](https://docs.prefect.io/api/latest/storage.html#docker)
+The Prefect Storage interface encapsulates logic for storing flows. Each storage unIt's able to store multiple flows (with the constraint of name uniqueness within a given unit).
+The API documentation for the same can be found in the [prefect documentation](https://docs.prefect.io/api/latest/storage.html#docker)
 
 ## Example: Creating, Building and Register Flow
 
@@ -213,4 +224,5 @@ if __name__ == "__main__":
 Now that you have Prefect Agent running in QHub Kubernetes cluster, you can now run your flows from either of the two ways:
 
 - Triggering manually from the Prefect Cloud dashboard.
-- Running them on a schedule by adding a parameter to you flow. You can read more about it in the [prefect docs.](https://docs.prefect.io/core/tutorial/05-running-on-a-schedule.html#running-on-schedule)
+- Running them on a schedule by adding a parameter to you flow. You can read more about it in the
+  [prefect docs.](https://docs.prefect.io/core/tutorial/05-running-on-a-schedule.html#running-on-schedule)

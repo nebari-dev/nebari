@@ -1,8 +1,7 @@
 Fixes | Closes | Resolves #
 
-> Please remove anything marked as optional that you don't need to fill in.
-> Choose one of the keywords preceding to refer to the issue this PR solves, followed by the issue number (e.g Fixes # 666).
-> If there is no issue, remove the line. Remove this note after reading.
+> Please remove anything marked as optional that you don't need to fill in. Choose one of the keywords preceding to refer to the issue this PR solves, followed by the issue number
+> (e.g Fixes # 666). If there is no issue, remove the line. Remove this note after reading.
 
 ## Changes introduced in this PR:
 
@@ -14,35 +13,34 @@ What types of changes does your PR introduce?
 
 _Put an `x` in the boxes that apply_
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds a feature)
-- [ ] Breaking change (fix or feature that would cause existing features to not work as expected)
-- [ ] Documentation Update
-- [ ] Code style update (formatting, renaming)
-- [ ] Refactoring (no functional changes, no API changes)
-- [ ] Build related changes
-- [ ] Other (please describe):
+- \[ \] Bug fix (non-breaking change which fixes an issue)
+- \[ \] New feature (non-breaking change which adds a feature)
+- \[ \] Breaking change (fix or feature that would cause existing features to not work as expected)
+- \[ \] Documentation Update
+- \[ \] Code style update (formatting, renaming)
+- \[ \] Refactoring (no functional changes, no API changes)
+- \[ \] Build related changes
+- \[ \] Other (please describe):
 
 ## Testing
 
 ### Requires testing
 
-- [ ] Yes
-- [ ] No
+- \[ \] Yes
+- \[ \] No
 
 ### In case you checked yes, did you write tests?
 
-- [ ] Yes
-- [ ] No
+- \[ \] Yes
+- \[ \] No
 
 ## Documentation
 
-Does your contribution include breaking changes or deprecations?
-If so have you updated the documentation?
+Does your contribution include breaking changes or deprecations? If so have you updated the documentation?
 
-- [ ] Yes, docstrings
-- [ ] Yes, main documentation
-- [ ] Yes, deprecation notices
+- \[ \] Yes, docstrings
+- \[ \] Yes, main documentation
+- \[ \] Yes, deprecation notices
 
 ## Further comments (optional)
 

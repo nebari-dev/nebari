@@ -1,8 +1,9 @@
 # Pinning
 
 It is extremely important to pin specific packages:
- - dask
- - dask-gateway
+
+- dask
+- dask-gateway
 
 # Building Dockerfile
 

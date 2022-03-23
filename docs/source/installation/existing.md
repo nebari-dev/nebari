@@ -1,84 +1,82 @@
 # Deploy QHub to an existing kubernetes cluster
 
-If you have an existing kubernetes cluster running in the cloud and
-would like to deploy QHub on the same cluster, this is the guide for you.
+If you have an existing kubernetes cluster running in the cloud and would like to deploy QHub on the same cluster, this is the guide for you.
 
-To illustrate how this is done, the guide walks through a simple example.
-The guide below is meant to serve as a reference, the setup of your existing
-kubernetes might differ rending some of these additional setups steps
-unnecessary.
+To illustrate how this is done, the guide walks through a simple example. The guide below is meant to serve as a reference, the setup of your existing kubernetes might differ
+rending some of these additional setups steps unnecessary.
 
 ## Deploy QHub to an existing AWS EKS cluster
 
-In this example, there already exists a basic web app running on an EKS
-cluster. [Here is the tutorial on how to setup this particular Guestbook web
-app](https://logz.io/blog/amazon-eks-cluster/).
+In this example, there already exists a basic web app running on an EKS cluster.
+[Here is the tutorial on how to setup this particular Guestbook web app](https://logz.io/blog/amazon-eks-cluster/).
 
-The existing EKS cluster has one VPC with three subnets (each in their own
-Availability Zone) and no node groups. There are three nodes each running on
-a `t3.medium` EC2 instance, unfortunately QHub's `general` node group requires
-a more powerful instance type.
+The existing EKS cluster has one VPC with three subnets (each in their own Availability Zone) and no node groups. There are three nodes each running on a `t3.medium` EC2 instance,
+unfortunately QHub's `general` node group requires a more powerful instance type.
 
-Now create three new node groups in preparation for the incoming QHub
-deployment. Before proceeding, ensure the following:
-- that the subnets can ["automatically
-assign public IP addresses to instances launched into it"](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-ip-addressing.html#subnet-public-ip)
+Now create three new node groups in preparation for the incoming QHub deployment. Before proceeding, ensure the following:
+
+- that the subnets can
+  ["automatically assign public IP addresses to instances launched into it"](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-ip-addressing.html#subnet-public-ip)
 - there exists an IAM role with the following permissions:
-  -  AmazonEKSWorkerNodePolicy
-  -  AmazonEC2ContainerRegistryReadOnly
-  -  AmazonEKS_CNI_Policy
-  -  The following custom policy:
-        <details>
+  - AmazonEKSWorkerNodePolicy
 
-        ```json
-        {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Sid": "eksWorkerAutoscalingAll",
-                    "Effect": "Allow",
-                    "Action": [
-                        "ec2:DescribeLaunchTemplateVersions",
-                        "autoscaling:DescribeTags",
-                        "autoscaling:DescribeLaunchConfigurations",
-                        "autoscaling:DescribeAutoScalingInstances",
-                        "autoscaling:DescribeAutoScalingGroups"
-                    ],
-                    "Resource": "*"
-                },
-                {
-                    "Sid": "eksWorkerAutoscalingOwn",
-                    "Effect": "Allow",
-                    "Action": [
-                        "autoscaling:UpdateAutoScalingGroup",
-                        "autoscaling:TerminateInstanceInAutoScalingGroup",
-                        "autoscaling:SetDesiredCapacity"
-                    ],
-                    "Resource": "*",
-                    "Condition": {
-                        "StringEquals": {
-                            "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled": [
-                                "true"
-                            ],
-                            "autoscaling:ResourceTag/kubernetes.io/cluster/eaeeks": [
-                                "owned"
-                            ]
-                        }
+  - AmazonEC2ContainerRegistryReadOnly
+
+  - AmazonEKS_CNI_Policy
+
+  - The following custom policy:
+
+    <details>
+
+    ```json
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "eksWorkerAutoscalingAll",
+                "Effect": "Allow",
+                "Action": [
+                    "ec2:DescribeLaunchTemplateVersions",
+                    "autoscaling:DescribeTags",
+                    "autoscaling:DescribeLaunchConfigurations",
+                    "autoscaling:DescribeAutoScalingInstances",
+                    "autoscaling:DescribeAutoScalingGroups"
+                ],
+                "Resource": "*"
+            },
+            {
+                "Sid": "eksWorkerAutoscalingOwn",
+                "Effect": "Allow",
+                "Action": [
+                    "autoscaling:UpdateAutoScalingGroup",
+                    "autoscaling:TerminateInstanceInAutoScalingGroup",
+                    "autoscaling:SetDesiredCapacity"
+                ],
+                "Resource": "*",
+                "Condition": {
+                    "StringEquals": {
+                        "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled": [
+                            "true"
+                        ],
+                        "autoscaling:ResourceTag/kubernetes.io/cluster/eaeeks": [
+                            "owned"
+                        ]
                     }
                 }
-            ]
-        }
-        ```
+            }
+        ]
+    }
+    ```
 
-        </details>
-
+    </details>
 
 ### Create node groups
 
 Skip this step if node groups already exist.
 
-For AWS, [follow this guide to create new node groups](https://docs.aws.amazon.com/eks/latest/userguide/create-managed-node-group.html). Be sure to fill in the following
-fields carefully:
+For AWS, [follow this guide to create new node groups](https://docs.aws.amazon.com/eks/latest/userguide/create-managed-node-group.html). Be sure to fill in the following fields
+carefully:
+
 - "Node Group configuration"
   - `Name` must be either `general`, `user` or `worker`
   - `Node IAM Role` must be the IAM role described proceeding
@@ -93,21 +91,21 @@ fields carefully:
 - "Node Group subnet configuration"
   - `subnet` include all existing EKS subnets
 
-
 ## Deploy QHub to Existing EKS Cluster
 
 Ensure that you are using the existing cluster's `kubectl` context.
 
 Initialize in the usual manner:
+
 ```
 python -m qhub init aws --project <project_name> --domain <domain_name> --ci-provider github-actions --auth-provider github --auth-auto-provision
 ```
 
 Then update the `qhub-config.yaml` file. The important keys to update are:
+
 - Replace `provider: aws` with `provider: local`
 - Replace `amazon_web_services` with `local`
   - And update the `node_selector` and `kube_context` appropriately
-
 
 <details>
 
@@ -241,13 +239,12 @@ environments:
 
 </details>
 
-
 Once updated, deploy QHub. When prompted be ready to manually update the DNS record.
+
 - `local` or "existing" deployments fail if you pass `--dns-auto-provision` or `--disable-prompt`
 
 ```
 python -m qhub deploy --config qhub-config.yaml
 ```
 
-The deployment completes successfully and all the pods appear to be running and so do the
-pre-existing Guestbook web app.
+The deployment completes successfully and all the pods appear to be running and so do the pre-existing Guestbook web app.
