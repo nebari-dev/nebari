@@ -12,28 +12,30 @@ ______________________________________________________________________
 
 ## Release v0.4.0 - March 17, 2022
 
+We are happy to annouce the release of `v0.4.0`! This release lays the groundwork for many exciting new features and improvements in the future, stay tuned.
+
 Version `v0.4.0` introduced many design changes along with a handful of user-facing changes that require some justification. Unfortunately as a result of these changes, QHub
-instance that are upgraded from previous version to `v0.4.0` will irrevocably break.
+instances that are upgraded from previous version to `v0.4.0` will irrevocably break.
 
 Until we have a fully functioning backup mechanism, anyone looking to upgrade is highly encouraged to backup their data, see the
 [upgrade docs](https://docs.qhub.dev/en/latest/source/admin_guide/breaking-upgrade.html) and more specifically, the
 [backup docs](https://docs.qhub.dev/en/latest/source/admin_guide/backup.html).
 
-The design changes that we are referring to were considered important enough that the developers felt they were warranted. Below we try to highlight a few of the largest changes
+These design changes were considered important enough that the development team felt they were warranted. Below we try to highlight a few of the largest changes
 and provide justification for them.
 
 - Replace Terraforms resource targeting with staged Terraform deployments.
   - *Justification*: using Terraform resource targeting was never an ideal way of handing off outputs from stage to the next and Terraform explicitly warns its users that it's only
-    intended to be used "is provided only for exceptional situations such as recovering from errors or mistakes".
+    intended to be used "for exceptional situations such as recovering from errors or mistakes".
 - Fully remove `cookiecutter` as a templating mechanism.
-  - *Justification*: Although `cookiecutter` has its benefits, we were becoming overly reliant on it as a means to many various scripts needed for deployment. Reading through
+  - *Justification*: Although `cookiecutter` has its benefits, we were becoming overly reliant on it as a means of rendering various scripts needed for the deployment. Reading through
     Terraform scripts with scattered `cookiecutter` statements was increasing troublesome and a bit intimidating. Our IDEs are also much happier about this change.
 - Removing users and groups from the `qhub-config.yaml` and replacing user management with Keycloak.
   - *Justification*: Up until now, any change to QHub deployment needed to be made in the `qhub-config.yaml` which had the benefit of centralizing any configuration. However it
     also potentially limited the kinds of user management tasks while also causing the `qhub-config.yaml` to balloon in size. Another benefit of removing users and groups from the
-    `qhub-config.yaml` are that deserves highlighting is that user management no longer requires a full redeployment.
+    `qhub-config.yaml` that deserves highlighting is that user management no longer requires a full redeployment.
 
-Although breaking changes are never fun, we hope the reasons outlined above are encouraging signs that we are working on building a better, more stable yet flexible product. If you
+Although breaking changes are never fun, we hope the reasons outlined above are encouraging signs that we are working on building a better, more stable, more flexible product. If you
 experience any issues or have any questions about these changes, feel free to open an [issue on our Github repo](https://github.com/Quansight/qhub/issues).
 
 ## Breaking changes
