@@ -11,6 +11,12 @@ variable "namespace" {
 }
 
 
+variable "storage" {
+  description = "Storage size for minio objects"
+  type        = string
+  default     = "10Gi"
+}
+
 variable "buckets" {
   description = "Default available buckets"
   type        = list(string)

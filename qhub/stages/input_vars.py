@@ -219,7 +219,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "node_groups": _calculate_note_groups(config),
         # conda-store
         "conda-store-environments": config["environments"],
-        "conda-store-storage": config["storage"]["conda_store"],
+        "conda-store-filesystem-storage": config["storage"]["conda_store"],
         # jupyterhub
         "cdsdashboards": config["cdsdashboards"],
         "jupyterhub-theme": config["theme"]["jupyterhub"],
