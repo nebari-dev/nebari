@@ -23,7 +23,7 @@ variable "conda-store-image" {
   })
   default = {
     name = "quansight/conda-store-server"
-    tag  = "v0.3.13"
+    tag  = "v0.3.14"
   }
 }
 
