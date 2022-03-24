@@ -14,7 +14,6 @@ else
     fix-permissions "/opt/conda/envs/${DEFAULT_ENV}"
 fi
 
-
 # ====== Install Gator Jupyterlab extension ======
 
 GATOR_GIT_URL=https://github.com/Quansight/gator.git
