@@ -29,9 +29,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Link Checker
-        uses: lycheeverse/lychee-action@v1.4.1
+      - name: Broken link checker
+        uses: gaurav-nelson/github-action-markdown-link-check@1.0.14
         with:
-          fail: true
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          config-file: '.github/workflows/markdown.links.config.json'
+          folder-path: 'docs/'
+          check-modified-files-only: 'yes'
+          file-extension: '.md'
+          base-branch: 'main'
