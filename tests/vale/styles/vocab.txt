@@ -67,6 +67,7 @@ ip
 ipywidget
 Jitsi
 jovyan
+JSON
 jupyter
 jupyterhub
 jupyterlab
@@ -93,10 +94,13 @@ namespaces
 nfs
 nodegroup
 nodegroups
+nss
+NSS
 nvidia
 occuring
 overridable
 pangeo
+param
 passwordless
 performant
 Plotly
@@ -126,6 +130,7 @@ tarballed
 tarballing
 tcp
 termina
+tf
 tfstate
 tls
 tracebacks

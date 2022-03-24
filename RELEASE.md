@@ -10,7 +10,7 @@ ______________________________________________________________________
 
 ### Bug fixes
 
-## Release v0.4.0 - 03/17/2022
+## Release v0.4.0 - March 17, 2022
 
 Version `v0.4.0` introduced many design changes along with a handful of user-facing changes that require some justification. Unfortunately as a result of these changes, QHub
 instance that are upgraded from previous version to `v0.4.0` will irrevocably break.
@@ -41,7 +41,7 @@ experience any issues or have any questions about these changes, feel free to op
 Explicit user facing changes:
 
 - Upgrading to `v0.4.0` will require a filesystem backup given the scope and size of the current change set.
-  - Running `qhub upgrade` will produce an updated `qhub-config.yaml` and a json file of users that can then be imported into Keycloak.
+  - Running `qhub upgrade` will produce an updated `qhub-config.yaml` and a JSON file of users that can then be imported into Keycloak.
 - With the addition of Keycloak, QHub will no longer support `security.authentication.type = custom`.
   - No more users and groups in the `qhub-config.yaml`.
 
@@ -114,8 +114,8 @@ Explicit user facing changes:
 - Fix formatting issues with black #1003 by @viniciusdc in https://github.com/Quansight/qhub/pull/1020
 - use pyproject.toml and setup.cfg for packaging by @tonyfast in https://github.com/Quansight/qhub/pull/986
 - Increase timeout/attempts for keycloak check by @viniciusdc in https://github.com/Quansight/qhub/pull/1023
-- Fix issue with traefik issueing certificates with letsencrypt acme by @costrouc in https://github.com/Quansight/qhub/pull/1017
-- Fixing cdsdashboard conda environments being shown by @costrouc in https://github.com/Quansight/qhub/pull/1025
+- Fix issue with traefik issuing certificates with let's encrypt acme by @costrouc in https://github.com/Quansight/qhub/pull/1017
+- Fixing cds dashboard conda environments being shown by @costrouc in https://github.com/Quansight/qhub/pull/1025
 - Fix input variable support for multiple types by @viniciusdc in https://github.com/Quansight/qhub/pull/1029
 - Fix Black/Flake8 problems by @danlester in https://github.com/Quansight/qhub/pull/1039
 - Add remote state condition for 01-terraform-state provisioning by @viniciusdc in https://github.com/Quansight/qhub/pull/1042
@@ -123,12 +123,12 @@ Explicit user facing changes:
 - Code Server is now installed via conda, and the Jupyterlab Extension is https://github.com/betatim/vscode-binder/ by @costrouc in https://github.com/Quansight/qhub/pull/1044
 - Removing cookiecutter from setup.cfg requirements by @costrouc in https://github.com/Quansight/qhub/pull/1026
 - Destroy terraform-state stage when condition match by @viniciusdc in https://github.com/Quansight/qhub/pull/1051
-- Fixup adding support for security.keycloak.realm_display_name key by @costrouc in https://github.com/Quansight/qhub/pull/1054
+- Fix up adding support for security.keycloak.realm_display_name key by @costrouc in https://github.com/Quansight/qhub/pull/1054
 - Move external_container_reg to earlier stage by @danlester in https://github.com/Quansight/qhub/pull/1053
 - Adding ability to specify overrides back into keycloak configuration by @costrouc in https://github.com/Quansight/qhub/pull/1055
-- Depricating terraform_modules option since no longer used by @costrouc in https://github.com/Quansight/qhub/pull/1057
+- Deprecating terraform_modules option since no longer used by @costrouc in https://github.com/Quansight/qhub/pull/1057
 - Adding security.shared_users_group option for default users group by @costrouc in https://github.com/Quansight/qhub/pull/1056
-- Fixup adding back jupyterhub overrides option by @costrouc in https://github.com/Quansight/qhub/pull/1058
+- Fix up adding back jupyterhub overrides option by @costrouc in https://github.com/Quansight/qhub/pull/1058
 - prevent_deploy flag for safeguarding upgrades by @danlester in https://github.com/Quansight/qhub/pull/1047
 - CI: Add layer caching for Docker images by @HarshCasper in https://github.com/Quansight/qhub/pull/1061
 - Additions to TCP/DNS stage check, fix 1027 by @iameskild in https://github.com/Quansight/qhub/pull/1063
@@ -147,9 +147,9 @@ Explicit user facing changes:
 - fix bug in state_01_terraform_state function call by @tylerpotts in https://github.com/Quansight/qhub/pull/1094
 - Use paths instead of paths-ignore so that test only run on changes to given paths by @costrouc in https://github.com/Quansight/qhub/pull/1097
 - \[ENH\] - Update issue templates by @trallard in https://github.com/Quansight/qhub/pull/1083
-- Generate independet objects for terraform-state resources by @viniciusdc in https://github.com/Quansight/qhub/pull/1102
+- Generate independent objects for terraform-state resources by @viniciusdc in https://github.com/Quansight/qhub/pull/1102
 - Complete implementation of destroy which goes through each stage by @costrouc in https://github.com/Quansight/qhub/pull/1103
-- Change AWS Kubenetes provider authentication to use data.eks_cluster instead of exec by @costrouc in https://github.com/Quansight/qhub/pull/1107
+- Change AWS Kubernetes provider authentication to use data.eks_cluster instead of exec by @costrouc in https://github.com/Quansight/qhub/pull/1107
 - Relax qhub destroy to attempt to continue destroying resources by @costrouc in https://github.com/Quansight/qhub/pull/1109
 - Breaking upgrade docs (0.4) by @danlester in https://github.com/Quansight/qhub/pull/1087
 - Simplify default images by @tylerpotts in https://github.com/Quansight/qhub/pull/1114
@@ -165,7 +165,7 @@ Explicit user facing changes:
 - Upgrade conda-store v0.3.10 and simplify specification of image by @HarshCasper in https://github.com/Quansight/qhub/pull/1130
 - \[ImgBot\] Optimize images by @imgbot in https://github.com/Quansight/qhub/pull/1140
 - Adjust Idle culler settings and add internal culling by @viniciusdc in https://github.com/Quansight/qhub/pull/1133
-- \[BUG\] Removing jovyan home directory and issue with nss confiuration by @costrouc in https://github.com/Quansight/qhub/pull/1142
+- \[BUG\] Removing jovyan home directory and issue with nss configuration by @costrouc in https://github.com/Quansight/qhub/pull/1142
 - \[DOC\] Add `troubleshooting` docs by @iameskild in https://github.com/Quansight/qhub/pull/1139
 - Update user login guides by @viniciusdc in https://github.com/Quansight/qhub/pull/1144
 - \[ImgBot\] Optimize images by @imgbot in https://github.com/Quansight/qhub/pull/1146
@@ -173,7 +173,7 @@ Explicit user facing changes:
 - Make the commit of the terraform rendering optional (replaces PR 995) by @iameskild in https://github.com/Quansight/qhub/pull/1149
 - Fix typos in user guide docs by @ericdatakelly in https://github.com/Quansight/qhub/pull/1154
 - Minor docs clean up for v0.4.0 release by @iameskild in https://github.com/Quansight/qhub/pull/1155
-- Readthedocs and documentation updates by @tonyfast in https://github.com/Quansight/qhub/pull/1153
+- Read-the-docs and documentation updates by @tonyfast in https://github.com/Quansight/qhub/pull/1153
 - Add markdown formatter for doc wrapping by @viniciusdc in https://github.com/Quansight/qhub/pull/1152
 - remove deprecated param `count` from `.cirun.yml` by @aktech in https://github.com/Quansight/qhub/pull/1164
 - Use qhub-bot for keycloak deployment/check by @iameskild in https://github.com/Quansight/qhub/pull/1167
@@ -188,7 +188,7 @@ Explicit user facing changes:
 
 **Full Changelog**: https://github.com/Quansight/qhub/compare/v0.3.13...v0.4.0
 
-## Release 0.3.13 - 10/13/2021
+## Release 0.3.13 - October 13, 2021
 
 ### Breaking changes
 
@@ -214,7 +214,7 @@ Explicit user facing changes:
 - Update `remove_existing_renders` to only delete QHub related files/directories ([#800](https://github.com/Quansight/qhub/pull/800))
 - Reduce number of AWS subnets down to 4 to increase the number of available nodes by a factor of 4 ([#839](https://github.com/Quansight/qhub/pull/839))
 
-## Release 0.3.11 - 05/07/2021
+## Release 0.3.11 - May 7, 2021
 
 ### Breaking changes
 
@@ -227,7 +227,7 @@ Explicit user facing changes:
 - removing default values from pydantic schema which caused invalid yaml files to unexpectedly pass validation
 - make kubespawner_override.environment overridable (prior changes were overwritten)
 
-## Release 0.3.10 - 05/06/2021
+## Release 0.3.10 - May 6,2021
 
 ### Breaking changes
 
@@ -237,7 +237,7 @@ Explicit user facing changes:
 
 ### Bug fixes
 
-## Release 0.3.9 - 05/05/2021
+## Release 0.3.9 - May 5, 2021
 
 ### Breaking changes
 
@@ -247,7 +247,7 @@ Explicit user facing changes:
 
 - terraform formatting in cookiecutter for enabling GPUs on GCP
 
-## Release 0.3.8 - 05/05/2021
+## Release 0.3.8 - May 5, 2021
 
 ### Breaking changes
 
@@ -261,7 +261,7 @@ Explicit user facing changes:
 - dask-gateway exposed by default now properly
 - typo in cookiecutter for enabling GPUs on GCP
 
-## Release 0.3.7 - 04/30/2021
+## Release 0.3.7 - April 30, 2021
 
 ### Breaking changes
 
@@ -273,7 +273,7 @@ Explicit user facing changes:
 
 - `jhsingle-native-proxy` added to the base jupyterlab image
 
-## Release 0.3.6 - 04/29/2021
+## Release 0.3.6 - April 29, 2021
 
 ### Breaking changes
 
@@ -294,7 +294,7 @@ Explicit user facing changes:
 - fixed gitlab-ci before_script and after_script
 - fixed jovyan -> qhub_user home directory path issue with dashboards
 
-## Release 0.3.5 - 04/28/2021
+## Release 0.3.5 - April 28, 2021
 
 ### Breaking changes
 
@@ -308,7 +308,7 @@ Explicit user facing changes:
 
 ### Bug fixes
 
-## Release 0.3.4 - 04/27/2021
+## Release 0.3.4 - April 27, 2021
 
 ### Breaking changes
 
@@ -318,7 +318,7 @@ Explicit user facing changes:
 
 - remaining issues with ci_cd branch not being fully changed
 
-## Release 0.3.3 - 04/27/2021
+## Release 0.3.3 - April 27, 2021
 
 ### Breaking changes
 
@@ -334,14 +334,14 @@ Explicit user facing changes:
 
 ### Breaking changes
 
-## Release 0.3.2 - 04/20/2021
+## Release 0.3.2 - April 20, 2021
 
 ### Bug fixes
 
 - prevent gitlab-ci from freezing on gitlab deployment
 - not all branches were configured via the `branch` option in `ci_cd`
 
-## Release 0.3.1 - 04/20/2021
+## Release 0.3.1 - April 20, 2021
 
 ### Feature changes an enhancements
 
@@ -356,7 +356,7 @@ Explicit user facing changes:
 
 - typo in `authenticator_class` for custom authentication
 
-## Release 0.3.0 - 04/14/2021
+## Release 0.3.0 - April 14, 2021
 
 ### Feature changes and enhancements
 
@@ -406,7 +406,7 @@ Explicit user facing changes:
 
 ______________________________________________________________________
 
-## Release 0.2.3 - 02/05/2021
+## Release 0.2.3 - February 5, 2021
 
 ### Feature changes, and enhancements
 

@@ -49,7 +49,7 @@ After testing any release-candidates, to create an official release:
    documentation for updating conda-forge packages can be found [here](https://conda-forge.org/docs/maintainer/updating_pkgs.html#updating-recipes).
 
 2. On the GitHub repo homepage, select "Release" on the left-hand side and then click "Draft a new release". Add any breaking changes, features/improvements and bug fixes. Give it
-   a title of `Release <version> - <month>/<day>/<year>`. Make sure to copy these notes over `RELEASE.md` and commit them before releasing.
+   a title of `Release <version> - <month> <day>, <year>` (spelt out). Make sure to copy these notes over `RELEASE.md` and commit them before releasing.
 
 3. When ready, create the new tag name and select branch from which the release will be created, then click "Publish release". This will automatically upload the new release to
    [PyPI](https://pypi.org/project/qhub/) and also automatically trigger the all appropriate Docker images to be built, tagged, and pushed up to DockerHub.
