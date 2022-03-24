@@ -1,6 +1,6 @@
 # Culling idle notebook servers
 
-Qhub uses a mix of the `idle culler <https://github.com/jupyterhub/jupyterhub-idle-culler>`\_ extension and internal Jupyterlab server cofiguration to periodically check for idle
+Qhub uses a mix of the `idle culler <https://github.com/jupyterhub/jupyterhub-idle-culler>`\_ extension and internal Jupyterlab server configuration to periodically check for idle
 notebook servers and shut them down.
 
 JupyterHub pings the user's notebook server at certain time intervals. If no response is received from the server during this checks and the timeout expires, the server is
@@ -12,7 +12,7 @@ is part of what jupyterhub-idle-culler considers.
 ______________________________________________________________________
 
 The expected behavior is that the server will be shut down and removed from the Qhub namespace once all Terminals and Kernels are considered idle or terminated, as well as any
-remaning connection is closed.
+remaining connection is closed.
 
 ______________________________________________________________________
 

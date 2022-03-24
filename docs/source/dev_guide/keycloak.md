@@ -63,8 +63,8 @@ After clicking `Save`, you will be taken to the client settings form. Make sure 
 >
 > If you plan to test using Postman (see below) the callback will be `https://oauth.pstmn.io/v1/browser-callback`.
 
-You will next create a new mapper for the myclient client. Go to the `Mapper` tab and click the `Create` button. Make sure the form is filled out as shown below and then click the
-`Save` button.
+You will next create a new mapper for the `myclient` client. Go to the `Mapper` tab and click the `Create` button. Make sure the form is filled out as shown below and then click
+the `Save` button.
 
 **Mappers (create):**
 
@@ -88,7 +88,7 @@ In Keycloak, go to `Users` in the side nav and click `Add user`. Give the user a
 the `Credentials` tab, toggle off the `Temporary` field, and set a password for your user (we will assume `quser` for the password).
 
 In order for your new user to access the Qhub control panel, they must belong to the admin group. Go to `Users` in the side nav, click `View all users`, find your user, then click
-`Edit` under the `Actions` column. Go to the `Groups` tab for Quser. Under `Available Groups`, you should see `admin`. Click on `admin` then click `Join`. You should see the
+`Edit` under the `Actions` column. Go to the `Groups` tab for `quser`. Under `Available Groups`, you should see `admin`. Click on `admin` then click `Join`. You should see the
 `Group Membership` box update with `/admin`.
 
 ## Understanding JupyterHub OAuth2
