@@ -46,4 +46,4 @@ qhub-config.yaml
 .vscode/
 
 # Ignore Vale
-vale
+./vale

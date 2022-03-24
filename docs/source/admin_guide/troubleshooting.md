@@ -4,7 +4,8 @@ This guide aims to provide useful information to developers in the detection and
 
 ## General Troubleshooting
 
-To minimize the occurrence of errors on your QHub application, please follow the best practices described on the [Installation](../installation/installation.md), [Setup](../installation/setup.md) and [Usage](../installation/usage.md) sections.
+To minimize the occurrence of errors on your QHub application, please follow the best practices described on the [Installation](../installation/installation.md),
+[Setup](../installation/setup.md) and [Usage](../installation/usage.md) sections.
 
 ### Solutions for common problems
 
@@ -37,26 +38,30 @@ To get the kubernetes context to interact with a AWS use the [following instruct
 
 1. Download the [aws command line](https://aws.amazon.com/cli/)
 2. [Create AWS Access Key and Secret Key](https://aws.amazon.com/premiumsupport/knowledge-center/create-access-key/) likely already done
-2. `aws eks --region <region-code> update-kubeconfig --name <project-name>-<namespace>`
+3. `aws eks --region <region-code> update-kubeconfig --name <project-name>-<namespace>`
 
 After completing these steps. `kubectl` should be able to access the cluster.
 
 #### Debug your Kubernetes cluster
 
-[`k9s`](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to simplify navigating, observing, and managing your applications in `k8s`. `k9s` continuously monitors Kubernetes clusters for changes and provides shortcut commands to interact with the observed resources becoming a fast way to review and resolve day-to-day issues in Kubernetes. It's definitely a huge improvement to the general workflow, and a best-to-have tool for debugging your Kubernetes cluster sessions.
+[`k9s`](https://k9scli.io/) is a terminal-based UI to manage Kubernetes clusters that aims to simplify navigating, observing, and managing your applications in `k8s`. `k9s`
+continuously monitors Kubernetes clusters for changes and provides shortcut commands to interact with the observed resources becoming a fast way to review and resolve day-to-day
+issues in Kubernetes. It's definitely a huge improvement to the general workflow, and a best-to-have tool for debugging your Kubernetes cluster sessions.
 
-Installation can be done on macOS, Windows, and Linux. Instructions for each operating system can be found [here](https://github.com/derailed/k9s). Complete the installation to follow along.
+Installation can be done on macOS, Windows, and Linux. Instructions for each operating system can be found [here](https://github.com/derailed/k9s). Complete the installation to
+follow along.
 
 By default, `k9s` starts with the standard directory that's set as the context (in this case Minikube). To view all the current process press `0`:
 
-![Image of the `k9s` terminal UI](../images/k9s_UI.png)
+![Image of the  terminal UI](../images/k9s_UI.png)
 
-> **NOTE**: In some circumstances you will be confronted with the need to inspect any services launched by your cluster at your ‘localhost’. For instance, if your cluster has problem
-with the network traffic tunnel configuration, it may limit or block the user's access to destination resources over the connection.
+> **NOTE**: In some circumstances you will be confronted with the need to inspect any services launched by your cluster at your ‘localhost’. For instance, if your cluster has
+> problem with the network traffic tunnel configuration, it may limit or block the user's access to destination resources over the connection.
 
-`k9s` port-forward option <kbd>shift</kbd> + <kbd>f</kbd> allows you to access and interact with internal Kubernetes cluster processes from your localhost you can then use this method to investigate issues and adjust your services locally without the need to expose them beforehand.
+`k9s` port-forward option <kbd>shift</kbd> + <kbd>f</kbd> allows you to access and interact with internal Kubernetes cluster processes from your localhost you can then use this
+method to investigate issues and adjust your services locally without the need to expose them beforehand.
 
----
+______________________________________________________________________
 
 ## Further Setup
 
@@ -64,7 +69,9 @@ with the network traffic tunnel configuration, it may limit or block the user's 
 
 #### JupyterHub Theme
 
-The QHub theme was originally based off the [work of the pangeo team](https://github.com/pangeo-data/pangeo-custom-jupyterhub-templates) and is now located in [github.com/Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme/). For simple modifications to the jupyterhub theme we suggest only editing `infrastructure/jupyterhub.yaml` and the value `c.JupyterHub.template_vars`. For most use cases this should provide enough flexibility.
+The QHub theme was originally based off the [work of the pangeo team](https://github.com/pangeo-data/pangeo-custom-jupyterhub-templates) and is now located in
+[github.com/Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme/). For simple modifications to the jupyterhub theme we suggest only editing
+`infrastructure/jupyterhub.yaml` and the value `c.JupyterHub.template_vars`. For most use cases this should provide enough flexibility.
 
 ```yaml
 hub:
@@ -78,11 +85,14 @@ hub:
       }
 ```
 
-For more serious modifications to the jupyterhub theme you will need to fork [Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme) and edit the jupyterhub Dockerfile located at `image/Dockerfile.jupyterhub`. Modify the `THEME_OWNER`, `THEME_REPO`, and `THEME_REV`. This should change the Dockerfile to use your new theme. The [Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme) has detailed documentation.
+For more serious modifications to the jupyterhub theme you will need to fork [Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme) and edit the
+jupyterhub Dockerfile located at `image/Dockerfile.jupyterhub`. Modify the `THEME_OWNER`, `THEME_REPO`, and `THEME_REV`. This should change the Dockerfile to use your new theme.
+The [Quansight/qhub-jupyterhub-theme](https://github.com/Quansight/qhub-jupyterhub-theme) has detailed documentation.
 
 #### JupyterLab Theme
 
-Setting the JupyterLab theme is done via extensions. Edit the `image/postBuild` script to include the jupyterlab extension in the build. Within the `image` directory run the following to build JupyterLab.
+Setting the JupyterLab theme is done via extensions. Edit the `image/postBuild` script to include the jupyterlab extension in the build. Within the `image` directory run the
+following to build JupyterLab.
 
 ```shell
 docker build -f Docker.jupyterlab -t Quansight/qhub-jupyterlab:latest .
@@ -98,7 +108,8 @@ docker run -p 8000:8000 -it Quansight/qhub-jupyterlab:latest jupyter lab --port 
 
 By default, images such as the default JupyterLab image specified as `quansight/qhub-jupyterhub:v||QHUB_VERSION||` will be pulled from Docker Hub.
 
-To specify a private AWS ECR (and this technique should work regardless of which cloud your QHub is deployed to), first provide details of the ECR and AWS access keys in `qhub-config.yaml`:
+To specify a private AWS ECR (and this technique should work regardless of which cloud your QHub is deployed to), first provide details of the ECR and AWS access keys in
+`qhub-config.yaml`:
 
 ```yaml
 external_container_reg:
@@ -109,4 +120,5 @@ external_container_reg:
   extcr_region: us-west-1
 ```
 
-This will mean you can specify private Docker images such as `12345678.dkr.ecr.us-west-1.amazonaws.com/quansight/qhub-jupyterlab:mytag` in your `qhub-config.yaml` file. The AWS key and secret provided must have relevant ecr IAMS permissions to authenticate and read from the ECR container registry.
+This will mean you can specify private Docker images such as `12345678.dkr.ecr.us-west-1.amazonaws.com/quansight/qhub-jupyterlab:mytag` in your `qhub-config.yaml` file. The AWS key
+and secret provided must have relevant ecr IAMS permissions to authenticate and read from the ECR container registry.

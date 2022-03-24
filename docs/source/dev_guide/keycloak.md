@@ -44,18 +44,18 @@ The `users` group also needs to be configured so that it is a default group assi
 Within the qhub realm, you will create a new client. Within QHub, a separate client exists for each of jupyterhub, conda-store, dask etc. In the side nav, click `Clients`, then
 click the `Create` button. Fill out the form as show below:
 
-| Form field | Value |
+| Form field      | Value          |
 | --------------- | -------------- |
-| Client ID | myclient |
+| Client ID       | myclient       |
 | Client Protocol | openid-connect |
 
 After clicking `Save`, you will be taken to the client settings form. Make sure the form fields are filled in as follows:
 
 **Settings tab:**
 
-| Setting | Value |
+| Setting             | Value                                |
 | ------------------- | ------------------------------------ |
-| Access Type | confidential |
+| Access Type         | confidential                         |
 | Valid Redirect URIs | http://localhost:7010/oauth_callback |
 
 > The redirect URI you use here will depend on how you want to test OAuth2 login flows. The example above would make sense if you are running your OAuth2 client (e.g. JupyterHub or
@@ -63,20 +63,20 @@ After clicking `Save`, you will be taken to the client settings form. Make sure 
 >
 > If you plan to test using Postman (see below) the callback will be `https://oauth.pstmn.io/v1/browser-callback`.
 
-You will next create a new mapper for the myclient client. Go to the `Mapper` tab and click the `Create` button. Make sure the form is filled out as shown below and then click the
-`Save` button.
+You will next create a new mapper for the `myclient` client. Go to the `Mapper` tab and click the `Create` button. Make sure the form is filled out as shown below and then click
+the `Save` button.
 
 **Mappers (create):**
 
-| Name | Value |
+| Name                | Value            |
 | ------------------- | ---------------- |
-| Name | groups |
-| Mapper Type | Group Membership |
-| Token Claim Name | groups |
-| Full group path | OFF |
-| Add to ID token | OFF |
-| Add to access token | OFF |
-| Add to userinfo | ON |
+| Name                | groups           |
+| Mapper Type         | Group Membership |
+| Token Claim Name    | groups           |
+| Full group path     | OFF              |
+| Add to ID token     | OFF              |
+| Add to access token | OFF              |
+| Add to userinfo     | ON               |
 
 **Update: You may also want to set mappers for roles, which are now used for conda-store and dask.**
 
@@ -88,7 +88,7 @@ In Keycloak, go to `Users` in the side nav and click `Add user`. Give the user a
 the `Credentials` tab, toggle off the `Temporary` field, and set a password for your user (we will assume `quser` for the password).
 
 In order for your new user to access the Qhub control panel, they must belong to the admin group. Go to `Users` in the side nav, click `View all users`, find your user, then click
-`Edit` under the `Actions` column. Go to the `Groups` tab for Quser. Under `Available Groups`, you should see `admin`. Click on `admin` then click `Join`. You should see the
+`Edit` under the `Actions` column. Go to the `Groups` tab for `quser`. Under `Available Groups`, you should see `admin`. Click on `admin` then click `Join`. You should see the
 `Group Membership` box update with `/admin`.
 
 ## Understanding JupyterHub OAuth2

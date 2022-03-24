@@ -2,10 +2,12 @@
 
 In some situations, users may wish to upload content to S3 or download content from an S3 bucket. For example, when attempting [manual backups of QHub's data](./backup.md).
 
-In many cases, the most straightforward way to access AWS S3 buckets is by installing and using AWS's command-line tool. But in some situations - for example, to back up the JupyterHub SQLite database - it may be difficult to install AWS' CLI tools due to being in a restricted container environment. In that situation, it is possible to fall back on AWS' basic REST API and use HTTPS requests directly instead. (Ultimately, the AWS CLI is simply a wrapper around those REST APIs.)
+In many cases, the most straightforward way to access AWS S3 buckets is by installing and using AWS's command-line tool. But in some situations - for example, to back up the
+JupyterHub SQLite database - it may be difficult to install AWS' CLI tools due to being in a restricted container environment. In that situation, it is possible to fall back on
+AWS' basic REST API and use HTTPS requests directly instead. (Ultimately, the AWS CLI is simply a wrapper around those REST APIs.)
 
-This document describes how to use `curl` commands to interface with S3 directly, specifically in the case of [uploading a backup of JupyterHub's SQLite database](./backup.md) from a restricted pod to S3
-(or restoring it from a backup from S3).
+This document describes how to use `curl` commands to interface with S3 directly, specifically in the case of [uploading a backup of JupyterHub's SQLite database](./backup.md) from
+a restricted pod to S3 (or restoring it from a backup from S3).
 
 ## Common settings
 
@@ -67,6 +69,7 @@ curl -H "Host: s3-${region}.amazonaws.com" \
      https://s3-${region}.amazonaws.com/${bucket}/${s3_file} -o $output_file
 ```
 
+______________________________________________________________________
 
----
-Inspired by [this article on how to use curl to upload files to was s3](https://www.gyanblog.com/aws/how-upload-aws-s3-curl/) and [this StackOverflow answer on how to access was s3 buckets](https://stackoverflow.com/a/57516606/2792760).
+Inspired by [this article on how to use curl to upload files to was s3](https://www.gyanblog.com/aws/how-upload-aws-s3-curl/) and
+[this StackOverflow answer on how to access was s3 buckets](https://stackoverflow.com/a/57516606/2792760).
