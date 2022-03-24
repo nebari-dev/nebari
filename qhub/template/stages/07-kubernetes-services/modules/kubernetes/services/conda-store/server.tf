@@ -79,6 +79,11 @@ resource "kubernetes_deployment" "server" {
         labels = {
           role = "${var.name}-conda-store-server"
         }
+
+        annotations = {
+          # This lets us autorestart when the config changes!
+          "checksum/config-map" = sha256(jsonencode(kubernetes_config_map.conda-store-config.data))
+        }
       }
 
       spec {

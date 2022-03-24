@@ -28,6 +28,7 @@ cuda
 cudatoolkit
 dns
 Lego
+dashboarding
 dask
 Dask
 Daskgpus
