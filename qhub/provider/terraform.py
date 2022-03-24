@@ -137,7 +137,7 @@ def init(directory=None, upgrade=True):
     with timer(logger, "terraform init"):
         command = ["init"]
         if upgrade:
-            command.append('-upgrade')
+            command.append("-upgrade")
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
