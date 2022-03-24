@@ -34,6 +34,7 @@ repos:
     rev: 0.7.13
     hooks:
     - id: mdformat
+      files: ^docs/
       name: mdformat
       description: "CommonMark compliant Markdown formatter"
       entry: mdformat
