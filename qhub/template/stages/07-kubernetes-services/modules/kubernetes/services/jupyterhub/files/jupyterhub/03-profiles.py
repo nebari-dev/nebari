@@ -326,7 +326,7 @@ def render_profile(profile, username, groups, keycloak_profilenames):
             return None
     elif access == "keycloak":
         # Keycloak mapper should provide the 'jupyterlabprofiles' attribute from groups/user
-        if profile.display_name not in keycloak_profilenames:
+        if profile.get("display_name", None) not in keycloak_profilenames:
             return None
 
     profile = copy.copy(profile)

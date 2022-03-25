@@ -57,6 +57,7 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "jupyterlabprofiles" {
   add_to_access_token = true
   add_to_userinfo     = true
   
+  user_attribute       = "jupyterlabprofiles"
   multivalued          = true
   aggregate_attributes = true
 }
