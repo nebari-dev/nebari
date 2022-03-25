@@ -132,10 +132,13 @@ def version():
     return re.search(r"(\d+)\.(\d+).(\d+)", version_output).group(0)
 
 
-def init(directory=None):
+def init(directory=None, upgrade=True):
     logger.info(f"terraform init directory={directory}")
     with timer(logger, "terraform init"):
-        run_terraform_subprocess(["init"], cwd=directory, prefix="terraform")
+        command = ["init"]
+        if upgrade:
+            command.append("-upgrade")
+        run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
 def apply(directory=None, targets=None, var_files=None):
