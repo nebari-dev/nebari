@@ -45,7 +45,7 @@ class AccessEnum(str, enum.Enum):
     all = "all"
     yaml = "yaml"
     keycloak = "keycloak"
-    
+
 
 class Base(pydantic.BaseModel):
     ...
@@ -303,13 +303,16 @@ class JupyterLabProfile(Base):
     users: typing.Optional[typing.List[str]]
     groups: typing.Optional[typing.List[str]]
     kubespawner_override: typing.Optional[KubeSpawner]
-    
+
     @root_validator
     def only_yaml_can_have_groups_and_users(cls, values):
         if values["access"] != AccessEnum.yaml:
-            if values.get("users",None) is not None or values.get("groups",None) is not None:
+            if (
+                values.get("users", None) is not None
+                or values.get("groups", None) is not None
+            ):
                 raise ValueError(
-                    f"Profile must not contain groups or users fields unless access = yaml"
+                    "Profile must not contain groups or users fields unless access = yaml"
                 )
         return values
 
