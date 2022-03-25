@@ -88,7 +88,12 @@ resource "kubernetes_deployment" "main" {
 
         container {
           name  = "nfs-server"
-          image = "gcr.io/google_containers/volume-nfs:0.8"
+          image = "itsthenetwork/nfs-server-alpine:12"
+
+          env {
+            name = "SHARED_DIRECTORY"
+            value = "/exports"
+          }
 
           port {
             name           = "nfs"
