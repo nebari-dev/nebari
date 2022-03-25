@@ -316,8 +316,11 @@ def render_profile(profile, username, groups):
     }
     """
     # check that username or groups in allowed groups for profile
-    user_not_in_users = username not in set(profile.get('users', []))
-    user_not_in_groups = (set(groups) & set(profile.get('groups', []))) == set()
+    # profile.groups and profile.users can be None or empty lists, or may not be members of profile at all
+    # if e.g. profile.groups is not set at all, this means no group control is required - every group should be allowed
+    # if profile.groups is None this means to defer to Keycloak group attributes
+    user_not_in_users = username not in set(profile.get('users', []) or [])
+    user_not_in_groups = (set(groups) & set(profile.get('groups', []) or [])) == set()
     if ('users' in profile or 'groups' in profile) and user_not_in_users and user_not_in_groups:
         return None
 
