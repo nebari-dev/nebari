@@ -17,6 +17,7 @@ cds
 ci
 clearml
 ClearML
+ClearML
 cli
 conda
 config
@@ -26,15 +27,15 @@ cpu
 cpus
 cuda
 cudatoolkit
-dns
-Lego
 dashboarding
 dask
 Dask
 Daskgpus
 dev
 digital
+dns
 Dockerfile
+Dockerfiles
 Dockerfiles
 docstrings
 doctl
@@ -59,6 +60,7 @@ grafana
 gsutil
 gui
 Hadolint
+Hadolint
 hostname
 http
 https
@@ -74,6 +76,8 @@ jupyterhub
 jupyterlab
 K9s
 Kellndorfer
+keycloak
+Keycloak
 Keycloak
 kube
 kubectl
@@ -81,6 +85,7 @@ Kubectl
 kubelet
 kubernetes
 kubespawner
+Lego
 linux
 metallb
 metapackage
@@ -88,7 +93,9 @@ minikube
 Minikube
 mongodb
 Mongodb
+myclient
 nameserver
+nameservers
 nameservers
 namespace
 namespaces
@@ -99,6 +106,7 @@ nss
 NSS
 nvidia
 occuring
+omitted
 overridable
 pangeo
 param
@@ -139,8 +147,11 @@ traefik
 Traefik
 traitlets
 untaring
+URI
+URIs
 url
 usecases
+userinfo
 validator
 vcpu
 virtualenv
@@ -151,10 +162,3 @@ vscode
 walkthrough
 webapp
 yaml
-ClearML
-Hadolint
-Dockerfiles
-nameservers
-omitted
-keycloak
-Keycloak
