@@ -299,7 +299,7 @@ def configure_user(username, groups, uid=1000, gid=100):
     }
 
 
-def render_profile(profile, username, groups):
+def render_profile(profile, username, groups, keycloak_profilenames):
     """Render each profile for user
 
     If profile is not available for given username, groups returns
@@ -315,14 +315,19 @@ def render_profile(profile, username, groups):
         }
     }
     """
-    # check that username or groups in allowed groups for profile
-    # profile.groups and profile.users can be None or empty lists, or may not be members of profile at all
-    # if e.g. profile.groups is not set at all, this means no group control is required - every group should be allowed
-    # if profile.groups is None this means to defer to Keycloak group attributes
-    user_not_in_users = username not in set(profile.get('users', []) or [])
-    user_not_in_groups = (set(groups) & set(profile.get('groups', []) or [])) == set()
-    if ('users' in profile or 'groups' in profile) and user_not_in_users and user_not_in_groups:
-        return None
+    access = profile.get("access", "all")
+    
+    if access == "yaml":
+        # check that username or groups in allowed groups for profile
+        # profile.groups and profile.users can be None or empty lists, or may not be members of profile at all
+        user_not_in_users = username not in set(profile.get('users', []) or [])
+        user_not_in_groups = (set(groups) & set(profile.get('groups', []) or [])) == set()
+        if user_not_in_users and user_not_in_groups:
+            return None
+    elif access == "keycloak":
+        # Keycloak mapper should provide the 'jupyterlabprofiles' attribute from groups/user
+        if profile.display_name not in keycloak_profilenames:
+            return None
 
     profile = copy.copy(profile)
     profile_kubespawner_override = profile.get("kubespawner_override")
@@ -356,11 +361,13 @@ def render_profiles(spawner):
     # and /developers -> developers
     groups = [os.path.basename(_) for _ in auth_state["oauth_user"]["groups"]]
     spawner.log.error(f"user info: {username} {groups}")
+    
+    keycloak_profilenames = auth_state["oauth_user"].get("jupyterlabprofiles", [])
 
     # fetch available profiles and render additional attributes
     profile_list = z2jh.get_config("custom.profiles")
     return list(
-        filter(None, [render_profile(p, username, groups) for p in profile_list])
+        filter(None, [render_profile(p, username, groups, keycloak_profilenames) for p in profile_list])
     )
 
 
