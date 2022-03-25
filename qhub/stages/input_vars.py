@@ -60,10 +60,13 @@ def stage_02_infrastructure(stage_outputs, config):
                     "instance_type": value["instance"],
                     "min_size": value["min_nodes"],
                     "max_size": value["max_nodes"],
-                    "guest_accelerators": [{
-                        "type": _["name"],
-                        "count": _["count"],
-                    } for _ in value.get("guest_accelerators", [])],
+                    "guest_accelerators": [
+                        {
+                            "type": _["name"],
+                            "count": _["count"],
+                        }
+                        for _ in value.get("guest_accelerators", [])
+                    ],
                     **value,
                 }
                 for key, value in config["google_cloud_platform"]["node_groups"].items()
