@@ -474,6 +474,7 @@ profiles:
   jupyterlab:
     - display_name: Small Instance
       description: Stable environment with 1 cpu / 1 GB ram
+      access: all
       default: true
       kubespawner_override:
         cpu_limit: 1
@@ -482,11 +483,25 @@ profiles:
         mem_guarantee: 1G
     - display_name: Medium Instance
       description: Stable environment with 1.5 cpu / 2 GB ram
+      access: yaml
+      groups:
+        - admin
+        - developers
+      users:
+        - bob
       kubespawner_override:
         cpu_limit: 1.5
         cpu_guarantee: 1.25
         mem_limit: 2G
         mem_guarantee: 2G
+    - display_name: Large Instance
+      description: Stable environment with 2 cpu / 4 GB ram
+      access: keycloak
+      kubespawner_override:
+        cpu_limit: 2
+        cpu_guarantee: 2
+        mem_limit: 4G
+        mem_guarantee: 4G
   dask_worker:
     "Small Worker":
       worker_cores_limit: 1
@@ -500,9 +515,24 @@ profiles:
       worker_memory: 2G
 ```
 
-For each `profiles.jupyterlab` is a named JupyterLab profile. It closely follows the [KubeSpawner](https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html) API. The
-only exception is that two keys are added `users` and `groups` which allow restriction of profiles to a given set of groups and users. We recommend using groups to manage profile
-access.
+### JupyterLab Profiles
+
+For each `profiles.jupyterlab` is a named JupyterLab profile.
+
+Use the `kubespawner_override` field to define behavior as per the [KubeSpawner](https://jupyterhub-kubespawner.readthedocs.io/en/latest/spawner.html) API.
+
+It is possible to control which users have access to which JupyterLab profiles. Each profile has a field named `access` which can be set to `all` (default if omitted), `yaml`, or
+`keycloak`.
+
+`all` means every user will have access to the profile.
+
+`yaml` means that access is restricted to anyone with their username in the `users` field of the profile or who belongs to a group named in the `groups` field.
+
+`keycloak` means that access is restricted to any user who in Keycloak has either their group(s) or user with the attribute `jupyterlabprofiles` containing this profile name. For
+example, if the user is in a Keycloak group named `developers` which has an attribute `jupyterlabprofiles` set to `Large Instance`, they will have access to the Large Instance
+profile. To specify multiple profiles for one group (or user) delimit their names using `##` - for example, `Large Instance##Another Instance`.
+
+### Dask Profiles
 
 Finally, we allow for configuration of the Dask workers. In general, similar to the JupyterLab instances you only need to configuration the cores and memory.
 
@@ -734,6 +764,7 @@ profiles:
   jupyterlab:
     - display_name: Small Instance
       description: Stable environment with 1 cpu / 1 GB ram
+      access: yaml
       groups:
         - admin
       kubespawner_override:

@@ -79,6 +79,7 @@ profiles:
   jupyterlab:
     - display_name: Small Instance
       description: Stable environment with 1 cpu / 1 GB ram
+      access: yaml
       groups:
         - admin
       kubespawner_override:
@@ -102,6 +103,7 @@ profiles:
   jupyterlab:
     - display_name: Small Instance
       description: Stable environment with 1 cpu / 1 GB ram
+      access: yaml
       groups:
         - admin
       kubespawner_override:
