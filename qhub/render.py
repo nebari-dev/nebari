@@ -166,6 +166,21 @@ def render_contents(config: Dict):
     return contents
 
 
+def gen_gitignore(config):
+    toignore = """
+        # ignore terraform state
+        .terraform
+        terraform.tfstate
+        terraform.tfstate.backup
+        .terraform.tfstate.lock.info
+
+        # python
+        __pycache__
+    """
+
+    return {".gitignore": toignore}
+
+
 def gen_cicd(config):
     """
     Use cicd schema to generate workflow files based on the
