@@ -46,7 +46,7 @@ jobs:
       - name: Black Formatting
         run: |
           black --version
-          black qhub --diff --exclude qhub/_version.py
+          black qhub --diff --exclude "qhub/_version.py"
           black --check qhub
       - name: Flake8 Formatting
         run: |
