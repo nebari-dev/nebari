@@ -163,11 +163,20 @@ def render_contents(config: Dict):
                 }
             )
 
+    contents.update(gen_gitignore(config))
+
     return contents
 
 
 def gen_gitignore(config):
-    toignore = """
+    """
+    Generate `.gitignore` file.
+    Add files as needed.
+    """
+
+    from inspect import cleandoc
+
+    filestoignore = """
         # ignore terraform state
         .terraform
         terraform.tfstate
@@ -177,8 +186,7 @@ def gen_gitignore(config):
         # python
         __pycache__
     """
-
-    return {".gitignore": toignore}
+    return {".gitignore": cleandoc(filestoignore)}
 
 
 def gen_cicd(config):
