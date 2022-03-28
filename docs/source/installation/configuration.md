@@ -528,8 +528,8 @@ It is possible to control which users have access to which JupyterLab profiles. 
 
 `yaml` means that access is restricted to anyone with their username in the `users` field of the profile or who belongs to a group named in the `groups` field.
 
-`keycloak` means that access is restricted to any user who in Keycloak has either their group(s) or user with the attribute `jupyterlabprofiles` containing this profile name. For
-example, if the user is in a Keycloak group named `developers` which has an attribute `jupyterlabprofiles` set to `Large Instance`, they will have access to the Large Instance
+`keycloak` means that access is restricted to any user who in Keycloak has either their group(s) or user with the attribute `jupyterlab_profiles` containing this profile name. For
+example, if the user is in a Keycloak group named `developers` which has an attribute `jupyterlab_profiles` set to `Large Instance`, they will have access to the Large Instance
 profile. To specify multiple profiles for one group (or user) delimit their names using `##` - for example, `Large Instance##Another Instance`.
 
 ### Dask Profiles

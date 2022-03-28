@@ -197,5 +197,5 @@ module "jupyterhub-openid-client" {
     "https://${var.external-url}/hub/oauth_callback",
     var.jupyterhub-logout-redirect-url
   ]
-  jupyterlabprofiles_mapper = true
+  jupyterlab_profiles_mapper = true
 }

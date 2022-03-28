@@ -28,9 +28,8 @@ variable "callback-url-paths" {
   type        = list(string)
 }
 
-variable "jupyterlabprofiles_mapper" {
-  description = "Create a mapper for jupyterlabprofiles group/user attributes"
+variable "jupyterlab_profiles_mapper" {
+  description = "Create a mapper for jupyterlab_profiles group/user attributes"
   type        = bool
   default     = false
 }
-
