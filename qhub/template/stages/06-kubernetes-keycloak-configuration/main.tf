@@ -31,6 +31,12 @@ resource "keycloak_group" "groups" {
   realm_id = keycloak_realm.main.id
   name     = each.key
   attributes = {}
+  
+  lifecycle {
+    ignore_changes = [
+      attributes,
+    ]
+  }
 }
 
 resource "keycloak_default_groups" "default" {
