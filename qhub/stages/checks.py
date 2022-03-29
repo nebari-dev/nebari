@@ -148,7 +148,7 @@ def check_ingress_dns(stage_outputs, config, disable_prompt):
 
     attempt = 0
     while not _attempt_dns_lookup(domain_name, ip):
-        sleeptime = 60 * (2 ** attempt)
+        sleeptime = 60 * (2**attempt)
         if not disable_prompt:
             input(
                 f"After attempting to poll the DNS, the record for domain={domain_name} appears not to exist, "
