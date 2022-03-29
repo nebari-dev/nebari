@@ -228,9 +228,32 @@ class NodeGroup(Base):
     min_nodes: int
     max_nodes: int
     gpu: typing.Optional[bool] = False
+    guest_accelerators: typing.Optional[typing.List[typing.Dict]] = []
 
     class Config:
         extra = "allow"
+
+    @validator("guest_accelerators")
+    def validate_guest_accelerators(cls, v):
+        if not v:
+            return v
+        if not isinstance(v, list):
+            raise ValueError("guest_accelerators must be a list")
+        for i in v:
+            assertion_error_message = """
+                In order to successfully use guest accelerators, you must specify the following parameters:
+
+                name (str): Machine type name of the GPU, available at https://cloud.google.com/compute/docs/gpus
+                count (int): Number of GPUs to attach to the instance
+
+                See general information regarding GPU support at:
+                https://docs.qhub.dev/en/stable/source/admin_guide/gpu.html?#add-gpu-node-group
+            """
+            try:
+                assert "name" in i and "count" in i
+                assert isinstance(i["name"], str) and isinstance(i["count"], int)
+            except AssertionError:
+                raise ValueError(assertion_error_message)
 
 
 class DigitalOceanProvider(Base):
