@@ -12,4 +12,5 @@ locals {
   ])
 
   merged_node_groups = [for node_group in var.node_groups : merge(var.node_group_defaults, node_group)]
+  gpu_node_group_names = concat([for node_group in local.merged_node_groups : node_group.guest_accelerators])
 }
