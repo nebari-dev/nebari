@@ -12,6 +12,9 @@ ______________________________________________________________________
 
 ## Release v0.4.0 - March 17, 2022
 
+**WARNING**
+> If you're looking for a stable version of QHub, please consider `v0.3.14`. The `v0.4.0` has many breaking changes and has several bugs that we are working to resolve in the upcoming releases.
+
 We are happy to annouce the release of `v0.4.0`! This release lays the groundwork for many exciting new features and improvements in the future, stay tuned.
 
 Version `v0.4.0` introduced many design changes along with a handful of user-facing changes that require some justification. Unfortunately as a result of these changes, QHub
