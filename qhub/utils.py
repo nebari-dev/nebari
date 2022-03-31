@@ -27,7 +27,9 @@ DO_ENV_DOCS = (
 )
 AWS_ENV_DOCS = "https://docs.qhub.dev/en/stable/source/installation/setup.html#amazon-web-services-aws"
 GCP_ENV_DOCS = "https://docs.qhub.dev/en/stable/source/installation/setup.html#google-cloud-platform"
-AZURE_ENV_DOCS = "https://docs.qhub.dev/en/stable/source/installation/setup.html#microsoft-azure"
+AZURE_ENV_DOCS = (
+    "https://docs.qhub.dev/en/stable/source/installation/setup.html#microsoft-azure"
+)
 
 qhub_image_tag = f"v{__version__}"
 pip_install_qhub = f"pip install qhub=={__version__}"
