@@ -21,3 +21,8 @@ variable "aws-region" {
 variable "external_container_reg" {
   description = "External container registry"
 }
+
+variable "gpu_node_group_names" {
+  description = "Names of node groups with GPU"
+  default = []
+}

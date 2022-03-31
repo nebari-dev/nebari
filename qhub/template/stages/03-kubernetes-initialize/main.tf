@@ -19,3 +19,11 @@ module "kubernetes-autoscaling" {
 module "traefik-crds" {
   source = "./modules/traefik_crds"
 }
+
+module "nvidia-driver-installer" {
+  count = length(var.gpu_node_group_names) == 0 ? 0 : 1
+
+  source = "./modules/nvidia-installer"
+
+  gpu_node_group_names = var.gpu_node_group_names
+}

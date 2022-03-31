@@ -1,5 +1,5 @@
 resource "kubernetes_daemonset" "nvidia_installer" {
-  count = length(local.gpu_node_group_names) == 0 ? 0 : 1
+  count = length(var.gpu_node_group_names) == 0 ? 0 : 1
 
   metadata {
     name      = "nvidia-driver-installer"
@@ -14,10 +14,6 @@ resource "kubernetes_daemonset" "nvidia_installer" {
       match_labels = {
         "k8s-app" = "nvidia-driver-installer"
       }
-    }
-
-    strategy {
-      type = "RollingUpdate"
     }
 
     template {
@@ -141,6 +137,10 @@ resource "kubernetes_daemonset" "nvidia_installer" {
           name  = "pause"
         }
       }
+    }
+
+    strategy {
+      type = "RollingUpdate"
     }
   }
 }
