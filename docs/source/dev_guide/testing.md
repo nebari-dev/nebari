@@ -150,3 +150,8 @@ local machine, follow these steps:
 
 Vale runs on the GitHub Actions CI to automatically validate the documentation language. By default, Vale only checks the modified documentation to ensure that Vale doesn't
 generate a lot of noise over the Pull Requests.
+
+# Links Testing
+
+Make sure to add tests for any links present in error message displayed to the user. These tests
+can be added easily here: `tests/test_links.py`
