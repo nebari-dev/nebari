@@ -23,7 +23,7 @@
 - [:book: Code of Conduct](#book-code-of-conduct)
 - [:gear: Installing the Development version of QHub](#gear-installing-the-development-version-of-qhub)
 - [:raised_hands: Contributions](#raised_hands-contributions)
-- [On-Going Support](#on-going-support)
+- [Ongoing Support](#ongoing-support)
 - [License](#license)
 
 Automated data science platform. From [JupyterHub](https://jupyter.org/hub "Multi-user version of the Notebook") to Cloud environments with
@@ -154,7 +154,7 @@ Thinking about contributing? Check out our [Contribution Guidelines](https://git
 ## Ongoing Support
 
 The `v0.4.0` release introduced many changes that will irrevocably break your deployment if you attempt an inplace upgrade; for details see our
-[RELEASE](RELEASE.md#release-v040---03172022) notes. In order to focus on the future direction of the project, we have decided as a team that we will provide **limited** support for older versions. Any new user is encouraged to use `v0.4.0` or greater.
+[RELEASE](RELEASE.md#release-v040---march-17-2022) notes. In order to focus on the future direction of the project, we have decided as a team that we will provide **limited** support for older versions. Any new user is encouraged to use `v0.4.0` or greater.
 
 If you're using an older version of QHub and would like professional support, please reach out to Quansight.
 

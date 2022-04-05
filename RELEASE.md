@@ -13,7 +13,7 @@ ______________________________________________________________________
 ## Release v0.4.0 - March 17, 2022
 
 **WARNING**
-> If you're looking for a stable version of QHub, please consider `v0.3.14`. The `v0.4.0` has many breaking changes and has several bugs that we are working to resolve in the upcoming releases.
+> If you're looking for a stable version of QHub, please consider `v0.3.14`. The `v0.4.0` has many breaking changes and has rough edges that will be resolved in upcoming point releases.
 
 We are happy to annouce the release of `v0.4.0`! This release lays the groundwork for many exciting new features and improvements in the future, stay tuned.
 
@@ -232,7 +232,7 @@ Explicit user facing changes:
 - removing default values from pydantic schema which caused invalid yaml files to unexpectedly pass validation
 - make kubespawner_override.environment overridable (prior changes were overwritten)
 
-## Release 0.3.10 - May 6,2021
+## Release 0.3.10 - May 6, 2021
 
 ### Breaking changes
 
