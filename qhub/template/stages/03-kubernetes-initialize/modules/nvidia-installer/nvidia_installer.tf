@@ -1,3 +1,4 @@
+# source https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#installing_drivers
 resource "kubernetes_daemonset" "nvidia_installer" {
   count = length(var.gpu_node_group_names) == 0 ? 0 : 1
 
