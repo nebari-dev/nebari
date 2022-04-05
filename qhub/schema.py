@@ -68,6 +68,13 @@ class HelmExtension(Base):
     overrides: typing.Optional[typing.Dict]
 
 
+# ============== Argo-Workflows =========
+
+
+class ArgoWorkflows(Base):
+    enabled: bool
+
+
 # ============== Monitoring =============
 
 
@@ -429,6 +436,7 @@ class Main(Base):
     theme: Theme
     profiles: Profiles
     environments: typing.Dict[str, CondaEnvironment]
+    argo_workflows: typing.Optional[ArgoWorkflows]
     monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
     tf_extensions: typing.Optional[typing.List[QHubExtension]]
