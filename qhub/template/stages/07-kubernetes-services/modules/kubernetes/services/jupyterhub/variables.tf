@@ -113,7 +113,7 @@ variable "cdsdashboards" {
 
 variable "conda-store-environments" {
   description = "conda environments from conda-store in filesystem namespace"
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
