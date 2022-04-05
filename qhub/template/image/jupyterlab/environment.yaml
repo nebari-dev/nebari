@@ -13,7 +13,7 @@ dependencies:
  - jupyterlab >=3
  - jupyter_client
  - jupyter_console
- - jupyterhub==1.5.0
+ - jupyterhub==2.2.2
  - nbconvert
  - nbval
 
