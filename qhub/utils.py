@@ -145,6 +145,7 @@ def check_cloud_credentials(config):
         for variable in {
             "AWS_ACCESS_KEY_ID",
             "AWS_SECRET_ACCESS_KEY",
+            "AWS_DEFAULT_REGION",
         }:
             if variable not in os.environ:
                 raise ValueError(
