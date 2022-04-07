@@ -14,8 +14,12 @@ output "service_urls" {
       health_url = "https://${var.endpoint}/hub/api/"
     }
     monitoring   = {
-      url = "https://${var.endpoint}/monitoring/"
-      health_url = "https://${var.endpoint}/monitoring/api/health"
+      url = var.monitoring-enabled ? "https://${var.endpoint}/monitoring/" : null
+      health_url = var.monitoring-enabled ? "https://${var.endpoint}/monitoring/api/health" : null
+    }
+    argo-workflows = {
+      url = var.argo-workflows-enabled ? "https://${var.endpoint}/argo/" : null
+      health_url = var.argo-workflows-enabled ? "https://${var.endpoint}/argo/api/v1/info" : null
     }
     keycloak     = {
       url = "https://${var.endpoint}/auth/"
