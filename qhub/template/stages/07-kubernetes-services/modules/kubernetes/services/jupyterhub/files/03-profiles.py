@@ -319,6 +319,19 @@ def render_profile(profile, username, groups):
         ],
         {},
     )
+
+    # We need to merge any env vars from the spawner with any overrides from the profile
+    # This is mainly to ensure JUPYTERHUB_ANYONE/GROUP is passed through from the spawner
+    # to control dashboard access.
+    envvars_fixed = {**(profile["kubespawner_override"].get("environment", {}))}
+
+    def preserve_envvars(spawner):
+        # This adds in JUPYTERHUB_ANYONE/GROUP rather than overwrite all env vars,
+        # if set in the spawner for a dashboard to control access.
+        return {**envvars_fixed, **spawner.environment}
+
+    profile["kubespawner_override"]["environment"] = preserve_envvars
+
     return profile
 
 

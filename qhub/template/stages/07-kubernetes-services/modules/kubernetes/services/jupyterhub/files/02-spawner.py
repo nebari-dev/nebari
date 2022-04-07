@@ -32,7 +32,7 @@ if cdsdashboards["enabled"]:
     c.CDSDashboardsConfig.spawn_default_options = False
 
     c.CDSDashboardsConfig.conda_envs = [
-        environment['name'] for _, environment in conda_store_environments.items()
+        environment["name"] for _, environment in conda_store_environments.items()
     ]
 else:
     c.JupyterHub.allow_named_servers = False
