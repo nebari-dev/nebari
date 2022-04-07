@@ -53,9 +53,13 @@
 #   }
 # }
 
+locals {
+  name = "qhub-argo-workflows"  # qhub should probably not be hardcoded?
+  argo-workflows-prefix = "argo"
+}
 
 resource "helm_release" "argo-workflows" {
-  name       = "qhub-argo-workflows"
+  name       = local.name
   namespace  = var.namespace
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-workflows"
@@ -68,7 +72,14 @@ resource "helm_release" "argo-workflows" {
 
     jsonencode({
       # -- Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
-      # singleNamespace = true
+      singleNamespace = true
+      workflowNamespaces = "${var.namespace}-argo"  # doesn't seem to be observed yet
+      server = {
+        // this auth mode is for dev mode only
+        extraArgs = ["--auth-mode=server"]
+        baseHref = "/${local.argo-workflows-prefix}/"
+      }
+
 
       # -- Globally limits the rate at which pods are created.
       # controller = {
@@ -82,38 +93,62 @@ resource "helm_release" "argo-workflows" {
 
       # containerRuntimeExecutor = "emissary"
 
-      // this auth mode is for dev mode only
-      server = {
-        extraArgs = ["--auth-mode=server"]
-      }
-
     })
   ], var.overrides)
 }
 
-# resource "kubernetes_manifest" "grafana-ingress-route" {
-#   manifest = {
-#     apiVersion = "traefik.containo.us/v1alpha1"
-#     kind       = "IngressRoute"
-#     metadata = {
-#       name      = "grafana-ingress-route"
-#       namespace = var.namespace
-#     }
-#     spec = {
-#       entryPoints = ["websecure"]
-#       routes = [
-#         {
-#           kind  = "Rule"
-#           match = "Host(`${var.external-url}`) && PathPrefix(`/monitoring`)"
-#           services = [
-#             {
-#               name      = "qhub-grafana"
-#               port      = 80
-#               namespace = var.namespace
-#             }
-#           ]
-#         }
-#       ]
-#     }
-#   }
-# }
+
+resource "kubernetes_manifest" "argo-workflows-middleware-stripprefix" {
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "Middleware"
+    metadata = {
+      name      = "qhub-argo-workflows-stripprefix"
+      namespace = var.namespace
+    }
+    spec = {
+      stripPrefix = {
+        prefixes = [
+          "/${local.argo-workflows-prefix}/"
+        ]
+        forceSlash = false
+      }
+    }
+  }
+}
+
+
+resource "kubernetes_manifest" "argo-workflows-ingress-route" {
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "IngressRoute"
+    metadata = {
+      name      = "argo-workflows"
+      namespace = var.namespace
+    }
+    spec = {
+      entryPoints = ["websecure"]
+      routes = [
+        {
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`) && PathPrefix(`/${local.argo-workflows-prefix}`)"
+
+          middlewares = concat(
+            [{
+              name      = kubernetes_manifest.argo-workflows-middleware-stripprefix.manifest.metadata.name
+              namespace = var.namespace
+            }]
+          )
+
+          services = [
+            {
+              name      = "${local.name}-server"
+              port      = 2746
+              namespace = var.namespace
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

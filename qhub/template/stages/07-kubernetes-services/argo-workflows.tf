@@ -11,7 +11,7 @@ module "argo-workflows" {
 
   source       = "./modules/kubernetes/services/argo-workflows"
   namespace    = var.environment
-  # external-url = var.endpoint
+  external-url = var.endpoint
   # realm_id     = var.realm_id
 
   # node-group = var.node_groups.general

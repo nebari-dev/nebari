@@ -13,6 +13,11 @@ variable "namespace" {
 #   })
 # }
 
+variable "external-url" {
+  description = "External url that jupyterhub cluster is accessible"
+  type        = string
+}
+
 
 variable "overrides" {
   description = "Grafana helm chart overrides"
