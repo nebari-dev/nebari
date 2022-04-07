@@ -464,7 +464,7 @@ class Main(Base):
     prevent_deploy: bool = (
         False  # Optional, but will be given default value if not present
     )
-    ingress: Ingress
+    ingress: typing.Optional[Ingress]
 
     # If the qhub_version in the schema is old
     # we must tell the user to first run qhub upgrade

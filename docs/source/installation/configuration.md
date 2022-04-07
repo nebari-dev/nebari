@@ -690,6 +690,36 @@ jupyterhub:
       users: true
 ```
 
+## Terraform Overrides
+
+The QHub configuration file provides a huge number of configuration options for customizing your
+QHub Infrastructure, while these options are sufficient for an average user, but aren't
+exhaustive by any means. There are still a plenty of things you might want to achieve which
+cannot be configured directly by the above mentioned options, hence we've introduced a
+new option called terraform overrides (`terraform_overrides`), which lets you override
+the values of terraform variables in specific modules/resource. This is a relatively
+advance feature and must be used with utmost care and you should really know, what
+you're doing.
+
+Here we describe the overrides supported via QHub config file:
+
+### Ingress
+
+You can configure the IP of the load balancer and add annotations for the same via `ingress`'s
+terraform overrides, one such example for GCP is:
+
+
+```yaml
+ingress:
+  terraform_overrides:
+      load_balancer_annotations:
+          "networking.gke.io/load-balancer-type": "Internal"
+          "networking.gke.io/internal-load-balancer-subnet": "pre-existing-subnet"
+      load_balancer_ip: "1.2.3.4"
+```
+
+This is quite useful for pinning the IP Address of the load balancer.
+
 # Full configuration example
 
 ```yaml
