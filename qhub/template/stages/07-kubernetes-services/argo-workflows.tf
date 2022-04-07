@@ -7,7 +7,7 @@ variable "argo-workflows-enabled" {
 
 # ====================== RESOURCES =======================
 module "argo-workflows" {
-  # count = var.argo-workflows-enabled ? 1 : 0
+  count = var.argo-workflows-enabled ? 1 : 0
 
   source       = "./modules/kubernetes/services/argo-workflows"
   namespace    = var.environment
