@@ -1,6 +1,10 @@
 output "service_urls" {
   description = "service urls for configured services"
   value = {
+    argo-workflows = {
+      url = var.argo-workflows-enabled ? "https://${var.endpoint}/argo/" : null
+      health_url = var.argo-workflows-enabled ? "https://${var.endpoint}/argo/api/v1/info" : null
+    }
     conda_store  = {
       url = "https://${var.endpoint}/conda-store/"
       health_url ="https://${var.endpoint}/conda-store/api/v1/"
@@ -13,17 +17,13 @@ output "service_urls" {
       url = "https://${var.endpoint}/"
       health_url = "https://${var.endpoint}/hub/api/"
     }
-    monitoring   = {
-      url = var.monitoring-enabled ? "https://${var.endpoint}/monitoring/" : null
-      health_url = var.monitoring-enabled ? "https://${var.endpoint}/monitoring/api/health" : null
-    }
-    argo-workflows = {
-      url = var.argo-workflows-enabled ? "https://${var.endpoint}/argo/" : null
-      health_url = var.argo-workflows-enabled ? "https://${var.endpoint}/argo/api/v1/info" : null
-    }
     keycloak     = {
       url = "https://${var.endpoint}/auth/"
       health_url = "https://${var.endpoint}/auth/realms/master"
+    }
+    monitoring   = {
+      url = var.monitoring-enabled ? "https://${var.endpoint}/monitoring/" : null
+      health_url = var.monitoring-enabled ? "https://${var.endpoint}/monitoring/api/health" : null
     }
   }
 }
