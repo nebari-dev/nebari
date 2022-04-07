@@ -54,7 +54,7 @@
 # }
 
 locals {
-  name = "qhub-argo-workflows"  # qhub should probably not be hardcoded?
+  name = "argo-workflows"
   argo-workflows-prefix = "argo"
 }
 
