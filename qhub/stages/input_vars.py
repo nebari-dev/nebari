@@ -149,7 +149,9 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
         "enable-certificates": (config["certificate"]["type"] == "lets-encrypt"),
         "acme-email": config["certificate"].get("acme_email"),
         "acme-server": config["certificate"].get("acme_server"),
-        "certificate-secret-name": config["certificate"]["secret_name"]
+        "certificate-secret-name": config["certificate"]["secret_name"],
+        "load-balancer-annotations": config["ingress"]["terraform_overrides"]["load_balancer_annotations"],
+        "load-balancer-ip": config["ingress"]["terraform_overrides"]["load-balancer-ip"]
         if config["certificate"]["type"] == "existing"
         else None,
     }

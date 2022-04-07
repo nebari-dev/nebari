@@ -382,6 +382,15 @@ class QHubExtension(Base):
     envs: typing.Optional[typing.List[QHubExtensionEnv]]
 
 
+class IngressTerraformOverrides(Base):
+    load_balancer_annotations: typing.Optional[typing.Dict]
+    load_balancer_ip: str
+
+
+class Ingress(Base):
+    terraform_overrides: IngressTerraformOverrides
+
+
 # ======== External Container Registry ========
 
 # This allows the user to set a private AWS ECR as a replacement for
@@ -455,6 +464,7 @@ class Main(Base):
     prevent_deploy: bool = (
         False  # Optional, but will be given default value if not present
     )
+    ingress: Ingress
 
     # If the qhub_version in the schema is old
     # we must tell the user to first run qhub upgrade
