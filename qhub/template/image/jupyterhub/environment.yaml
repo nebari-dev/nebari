@@ -7,7 +7,7 @@ dependencies:
  - jupyterhub-kubespawner==1.1.0
  - oauthenticator==14.1.0
  - escapism==1.0.1
- - cdsdashboards==0.6.0
+ - cdsdashboards==0.6.1
  - jupyterhub-idle-culler==1.0
  - pip:
    - qhub-jupyterhub-theme==0.3.3
