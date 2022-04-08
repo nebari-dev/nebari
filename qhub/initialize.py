@@ -231,7 +231,7 @@ DEFAULT_ENVIRONMENTS = {
             "python-graphviz==0.17",
             "matplotlib==3.4.3",
             "panel==0.12.4",
-            "voila==0.2.16",
+            "voila==0.3.5",
             "streamlit==1.0.0",
             "dash==2.0.0",
             "cdsdashboards-singleuser==0.6.1",
