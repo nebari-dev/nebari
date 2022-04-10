@@ -77,6 +77,8 @@ resource "helm_release" "argo-workflows" {
       server = {
         # `sso` for OIDC/OAuth
         extraArgs = ["--auth-mode=sso"]
+        # to enable TLS
+        secure = true
         baseHref = "/${local.argo-workflows-prefix}/"
       }
       sso = {
