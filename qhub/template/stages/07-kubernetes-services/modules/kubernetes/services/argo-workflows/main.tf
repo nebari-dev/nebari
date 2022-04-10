@@ -75,9 +75,26 @@ resource "helm_release" "argo-workflows" {
       singleNamespace = true
       workflowNamespaces = "${var.namespace}-argo"  # doesn't seem to be observed yet
       server = {
-        // this auth mode is for dev mode only
-        extraArgs = ["--auth-mode=server"]
+        # `sso` for OIDC/OAuth
+        extraArgs = ["--auth-mode=sso"]
         baseHref = "/${local.argo-workflows-prefix}/"
+      }
+      sso = {
+        clientId = {
+          name = "argo-server-client-id"
+          key = module.argo-workflow-openid-client.config.client_id
+        }
+        clientSecret = {
+          name = "argo-server-client-secret"
+          key = module.argo-workflow-openid-client.config.client_secret
+        }
+        # The OIDC redirect URL. Should be in the form <argo-root-url>/oauth2/callback.
+        redirectUrl = "https://${var.external-url}/oauth2/callback"
+        rbac = {
+          enabled = true
+          secretWhitelist = []
+        }
+        scopes = ["groups"]
       }
 
 
@@ -151,4 +168,22 @@ resource "kubernetes_manifest" "argo-workflows-ingress-route" {
       ]
     }
   }
+}
+
+
+module "argo-workflow-openid-client" {
+  source = "../keycloak-client"
+
+  realm_id = var.realm_id
+  client_id = "argo-server-client-id"
+  external-url = var.external-url
+  role_mapping = {
+    "admin" = ["argo_admin"]
+    "developer" = ["argo_developer"]
+    "analyst" = ["argo_viewer"]
+  }
+
+  callback-url-paths = [
+    "https://${var.external-url}/oauth2/callback"
+  ]
 }
