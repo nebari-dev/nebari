@@ -18,6 +18,10 @@ variable "external-url" {
   type        = string
 }
 
+variable "realm_id" {
+  description = "Keycloak realm to use for deploying openid client"
+  type        = string
+}
 
 variable "overrides" {
   description = "Grafana helm chart overrides"
