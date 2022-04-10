@@ -82,6 +82,7 @@ resource "helm_release" "argo-workflows" {
         baseHref = "/${local.argo-workflows-prefix}/"
       }
       sso = {
+        issuer = "https://${var.external-url}/auth/realm/${var.realm-id}"
         clientId = {
           name = "argo-server-client-id"
           key = module.argo-workflow-openid-client.config.client_id
