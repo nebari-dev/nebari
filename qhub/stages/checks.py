@@ -310,6 +310,6 @@ def stage_07_kubernetes_services(stage_outputs, config):
     services = stage_outputs[directory]["service_urls"]["value"]
     for service_name, service in services.items():
         service_url = service["health_url"]
-        if not _attempt_connect_url(service_url):
+        if service_url and not _attempt_connect_url(service_url):
             print(f"ERROR: Service {service_name} DOWN when checking url={service_url}")
             sys.exit(1)
