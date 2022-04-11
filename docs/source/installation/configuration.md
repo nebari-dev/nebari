@@ -712,10 +712,10 @@ terraform overrides, one such example for GCP is:
 ```yaml
 ingress:
   terraform_overrides:
-      load_balancer_annotations:
+      load-balancer-annotations:
           "networking.gke.io/load-balancer-type": "Internal"
           "networking.gke.io/internal-load-balancer-subnet": "pre-existing-subnet"
-      load_balancer_ip: "1.2.3.4"
+      load-balancer-ip: "1.2.3.4"
 ```
 
 This is quite useful for pinning the IP Address of the load balancer.

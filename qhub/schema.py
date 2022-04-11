@@ -382,13 +382,8 @@ class QHubExtension(Base):
     envs: typing.Optional[typing.List[QHubExtensionEnv]]
 
 
-class IngressTerraformOverrides(Base):
-    load_balancer_annotations: typing.Optional[typing.Dict]
-    load_balancer_ip: str
-
-
 class Ingress(Base):
-    terraform_overrides: IngressTerraformOverrides
+    terraform_overrides: typing.Any
 
 
 # ======== External Container Registry ========

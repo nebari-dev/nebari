@@ -142,9 +142,6 @@ def _calculate_note_groups(config):
 
 
 def stage_04_kubernetes_ingress(stage_outputs, config):
-    ingress_terraform_overrides = config.get("ingress", {}).get(
-        "terraform_overrides", {}
-    )
     return {
         "name": config["project_name"],
         "environment": config["namespace"],
@@ -155,10 +152,7 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
         "certificate-secret-name": config["certificate"]["secret_name"]
         if config["certificate"]["type"] == "existing"
         else None,
-        "load-balancer-annotations": ingress_terraform_overrides.get(
-            "load_balancer_annotations", {}
-        ),
-        "load-balancer-ip": ingress_terraform_overrides.get("load-balancer-ip"),
+        **config.get("ingress", {}).get("terraform_overrides", {}),
     }
 
 
