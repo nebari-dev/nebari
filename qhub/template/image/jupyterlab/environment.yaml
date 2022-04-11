@@ -29,7 +29,7 @@ dependencies:
  - nbgitpuller
 
  # cds dashboards
- - cdsdashboards-singleuser >=0.6.0
+ - cdsdashboards-singleuser >=0.6.1
  - jhsingle-native-proxy >=0.7.6
 
  # viz tools
