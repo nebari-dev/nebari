@@ -80,68 +80,23 @@ resource "helm_release" "argo-workflows" {
     jsonencode({
       singleNamespace = true  # Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
 
-      # workflow = {
-      #   serviceAccount = {
-      #     create = true  # turning off permissions
-      #     name = "argo-workflow-service-account"  # default is "argo-workflow"
-      #   }
-      #   rbac = {
-      #     create = true  # turning off permissions
-      #   }
-      # }
       controller = {
-      #   serviceAccount = {
-      #     create = true  # turning off permissions
-      #     name = "argo-controller-service-account"
-      #   }
-      #   rbac = {
-      #     create = true  # turning off permissions
-      #   }
-        podAnnotations = {
-          "prometheus.io/scrape" = "true"
-          "prometheus.io/path"   = "/metrics"
-          "prometheus.io/port"   = "9090"
-        }
         metricsConfig = {
           enabled = true  # enable prometheus
         }
         workflowNamespaces = [
           "${var.namespace}"
           ]
-      #   # containerRuntimeExecutor = "emissary"
-      #   logging = {
-      #     level = "debug"
-      #   }
       }
 
       server = {
         enabled = true
 
-        # serviceAccount = {
-        #   create = false  # turning off permissions (argo server won't start without this)
-        #   name = "argo-workflows-server-service-account"
-        # }
-        # rbac = {
-        #   create = false # turning off permissions (argo server won't start without this)
-        # }
-      #   // this auth mode is for dev mode only
         extraArgs = ["--auth-mode=server"]
         baseHref = "/${local.argo-workflows-prefix}/"
       }
 
-
-
-      # -- Globally limits the rate at which pods are created.
-      # controller = {
-      #   parallelism = {
-      #     resourceRateLimit = {
-      #       limit = 10
-      #       burst = 1
-      #     }
-      #   }
-      # }
-
-      # containerRuntimeExecutor = "emissary"
+      containerRuntimeExecutor = "emissary"
 
     })
   ], var.overrides)
