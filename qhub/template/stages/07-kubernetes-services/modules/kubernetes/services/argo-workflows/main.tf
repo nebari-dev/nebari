@@ -52,6 +52,13 @@
 #     namespace = var.namespace
 #   }
 # }
+# resource "kubernetes_namespace" "main" {
+#   metadata {
+#     # labels = merge({}, var.labels)
+
+#     name = var.argo-workflows-namespace
+#   }
+# }
 
 locals {
   name = "argo-workflows"
@@ -71,14 +78,57 @@ resource "helm_release" "argo-workflows" {
 
 
     jsonencode({
-      # -- Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
-      singleNamespace = true
-      workflowNamespaces = "${var.namespace}-argo"  # doesn't seem to be observed yet
+      singleNamespace = true  # Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
+
+      # workflow = {
+      #   serviceAccount = {
+      #     create = true  # turning off permissions
+      #     name = "argo-workflow-service-account"  # default is "argo-workflow"
+      #   }
+      #   rbac = {
+      #     create = true  # turning off permissions
+      #   }
+      # }
+      controller = {
+      #   serviceAccount = {
+      #     create = true  # turning off permissions
+      #     name = "argo-controller-service-account"
+      #   }
+      #   rbac = {
+      #     create = true  # turning off permissions
+      #   }
+        podAnnotations = {
+          "prometheus.io/scrape" = "true"
+          "prometheus.io/path"   = "/metrics"
+          "prometheus.io/port"   = "9090"
+        }
+        metricsConfig = {
+          enabled = true  # enable prometheus
+        }
+        workflowNamespaces = [
+          "${var.namespace}"
+          ]
+      #   # containerRuntimeExecutor = "emissary"
+      #   logging = {
+      #     level = "debug"
+      #   }
+      }
+
       server = {
-        // this auth mode is for dev mode only
+        enabled = true
+
+        # serviceAccount = {
+        #   create = false  # turning off permissions (argo server won't start without this)
+        #   name = "argo-workflows-server-service-account"
+        # }
+        # rbac = {
+        #   create = false # turning off permissions (argo server won't start without this)
+        # }
+      #   // this auth mode is for dev mode only
         extraArgs = ["--auth-mode=server"]
         baseHref = "/${local.argo-workflows-prefix}/"
       }
+
 
 
       # -- Globally limits the rate at which pods are created.
