@@ -256,6 +256,9 @@ For any of the providers (besides local), adding a node group is as easy as the 
 
 > NOTE: For each provider, details such as **instance names**, **availability zones**, and **Kubernetes versions** will be DIFFERENT.
 
+> NOTE: upgrading the `general` node instance type may not be possible for your choosen provider.
+> [See FAQ.](../user_guide/faq.md#i-want-to-upgrade-the-instance-size-the-general-node-group-is-this-possible)
+
 ### Providers
 
 To take advantage of the auto-scaling and dask-distributed computing capabilities, QHub can be deployed on a handful of the most commonly used cloud providers. QHub utilizes many
@@ -692,22 +695,16 @@ jupyterhub:
 
 ## Terraform Overrides
 
-The QHub configuration file provides a huge number of configuration options for customizing your
-QHub Infrastructure, while these options are sufficient for an average user, but aren't
-exhaustive by any means. There are still a plenty of things you might want to achieve which
-cannot be configured directly by the above mentioned options, hence we've introduced a
-new option called terraform overrides (`terraform_overrides`), which lets you override
-the values of terraform variables in specific modules/resource. This is a relatively
-advance feature and must be used with utmost care and you should really know, what
-you're doing.
+The QHub configuration file provides a huge number of configuration options for customizing your QHub Infrastructure, while these options are sufficient for an average user, but
+aren't exhaustive by any means. There are still a plenty of things you might want to achieve which cannot be configured directly by the above mentioned options, hence we've
+introduced a new option called terraform overrides (`terraform_overrides`), which lets you override the values of terraform variables in specific modules/resource. This is a
+relatively advance feature and must be used with utmost care and you should really know, what you're doing.
 
 Here we describe the overrides supported via QHub config file:
 
 ### Ingress
 
-You can configure the IP of the load balancer and add annotations for the same via `ingress`'s
-terraform overrides, one such example for GCP is:
-
+You can configure the IP of the load balancer and add annotations for the same via `ingress`'s terraform overrides, one such example for GCP is:
 
 ```yaml
 ingress:

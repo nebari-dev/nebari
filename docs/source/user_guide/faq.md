@@ -88,3 +88,23 @@ conda config --set changeps1 true
 
 If the user needs to solve a conda env on a QHub server, they need to specify the prefix. For example, `conda env create -f env_test.yml --prefix/tmp/test-env` where `test-env` is
 the env name. It's not recommended, but there are valid use cases of this operation.
+
+## Compute
+
+### I want to upgrade the instance size the `general` node group, is this possible?
+
+Once initialized, the `qhub-config.yaml` has the `general` node groups
+
+The `general` node group is the node (usually only one) that hosts most of the pods that QHub relies on for its core services, `hub`, `conda-store`, `proxy` and so on. We have
+tried to size it so that the initial deployment will work out of the box but also not set it too large that it incurs unnecessary cloud compute costs.
+
+Although each cloud provider has different names and hourly prices for their compute nodes, the default `general` node group in `qhub-config.yaml` has 4 vCPU and 16 GB of memory.
+
+That said, upgrading may be desirable in some situations. Unfortunately whether this is feasible is also cloud provider dependent.
+
+| Cloud Provider | `general` node upgrade possible? |
+| :------------- | :------------------------------- |
+| AWS            | -                                |
+| Azure          | -                                |
+| Digital Ocean  | No                               |
+| GCP            | Yes                              |
