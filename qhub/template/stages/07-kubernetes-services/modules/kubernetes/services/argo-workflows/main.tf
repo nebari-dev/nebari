@@ -76,13 +76,13 @@ resource "helm_release" "argo-workflows" {
       workflowNamespaces = "${var.namespace}-argo"  # doesn't seem to be observed yet
       server = {
         # `sso` for OIDC/OAuth
-        extraArgs = ["--auth-mode=sso"]
+        extraArgs = ["--auth-mode=server"]
         # to enable TLS
-        secure = true
+        # secure = true
         baseHref = "/${local.argo-workflows-prefix}/"
       }
       sso = {
-        issuer = "https://${var.external-url}/auth/realm/${var.realm_id}"
+        issuer = "https://${var.external-url}/auth/realms/${var.realm_id}"
         clientId = {
           name = "argo-server-client-id"
           key = module.argo-workflow-openid-client.config.client_id
