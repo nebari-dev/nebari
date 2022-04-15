@@ -1,9 +1,14 @@
 variable "namespace" {
-  description = "deploy monitoring services on this namespace"
+  description = "deploy argo server on this namespace"
   type        = string
   default     = "dev"
 }
 
+variable "argo-workflows-namespace" {
+  description = "deploy argo workflows on this namespace"
+  type        = string
+  default     = "dev"
+}
 
 # variable "node-group" {
 #   description = "Node key value pair for bound resources"
