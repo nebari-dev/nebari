@@ -76,28 +76,29 @@ resource "helm_release" "argo-workflows" {
       workflowNamespaces = "${var.namespace}-argo"  # doesn't seem to be observed yet
       server = {
         # `sso` for OIDC/OAuth
-        extraArgs = ["--auth-mode=server"]
-        # to enable TLS
-        # secure = true
+        extraArgs = ["--auth-mode=sso", "--insecure-skip-verify"]
+        # to enable TLS, set `secure = true`
+        secure = false
         baseHref = "/${local.argo-workflows-prefix}/"
-      }
-      sso = {
-        issuer = "https://${var.external-url}/auth/realms/${var.realm_id}"
-        clientId = {
-          name = "argo-server-client-id"
-          key = module.argo-workflow-openid-client.config.client_id
+
+        sso = {
+          issuer = "https://${var.external-url}/auth/realms/${var.realm_id}"
+          clientId = {
+            name = "argo-server-sso"
+            key = "argo-oidc-client-id"
+          }
+          clientSecret = {
+            name = "argo-server-sso"
+            key = "argo-oidc-client-secret"
+          }
+          # The OIDC redirect URL. Should be in the form <argo-root-url>/oauth2/callback.
+          redirectUrl = "https://${var.external-url}/oauth2/callback"
+          rbac = {
+            enabled = false
+            # secretWhitelist = []
+          }
+          # scopes = ["groups"]
         }
-        clientSecret = {
-          name = "argo-server-client-secret"
-          key = module.argo-workflow-openid-client.config.client_secret
-        }
-        # The OIDC redirect URL. Should be in the form <argo-root-url>/oauth2/callback.
-        redirectUrl = "https://${var.external-url}/oauth2/callback"
-        rbac = {
-          enabled = true
-          secretWhitelist = []
-        }
-        scopes = ["groups"]
       }
 
 
@@ -117,6 +118,16 @@ resource "helm_release" "argo-workflows" {
   ], var.overrides)
 }
 
+resource "kubernetes_secret" "argo-oidc-secret" {
+  metadata {
+    name = "argo-server-sso"
+    namespace = var.namespace
+  }
+  data = {
+    "argo-oidc-client-id"     = module.argo-workflow-openid-client.config.client_id
+    "argo-oidc-client-secret" = module.argo-workflow-openid-client.config.client_secret
+  }
+}
 
 resource "kubernetes_manifest" "argo-workflows-middleware-stripprefix" {
   manifest = {
@@ -178,13 +189,13 @@ module "argo-workflow-openid-client" {
   source = "../keycloak-client"
 
   realm_id = var.realm_id
-  client_id = "argo-server-client-id"
+  client_id = "argo-server-sso"
   external-url = var.external-url
-  role_mapping = {
-    "admin" = ["argo_admin"]
-    "developer" = ["argo_developer"]
-    "analyst" = ["argo_viewer"]
-  }
+  # role_mapping = {
+  #   "admin" = ["argo_admin"]
+  #   "developer" = ["argo_developer"]
+  #   "analyst" = ["argo_viewer"]
+  # }
 
   callback-url-paths = [
     "https://${var.external-url}/oauth2/callback"
