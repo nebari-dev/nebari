@@ -1,6 +1,8 @@
 # QHub training cluster
 
-Quansight provides training around the [PyData](https://pydata.org/) ecosystem. For this training material, a Qhub based training cluster is utilized. This guide explains to newcomers how to log into Quansight's own QHub Training server. If you are looking for instructions on logging into your own organization's QHub see the user [getting started docs](getting_started.md).
+Quansight provides training around the [PyData](https://pydata.org/) ecosystem. For this training material, a Qhub based training cluster is utilized. This guide explains to
+newcomers how to log into Quansight's own QHub Training server. If you are looking for instructions on logging into your own organization's QHub see the user
+[getting started docs](getting_started.md).
 
 To access the training platform:
 

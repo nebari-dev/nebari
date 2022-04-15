@@ -355,6 +355,32 @@ class Upgrade_0_4_0(UpgradeStep):
         return config
 
 
+class Upgrade_0_4_1(UpgradeStep):
+    version = "0.4.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: pathlib.Path, *args, **kwargs
+    ):
+        """
+        Upgrade jupyterlab profiles.
+        """
+        print("\nUpgrading jupyterlab profiles in order to specify access type:\n")
+
+        profiles_jupyterlab = config.get("profiles", {}).get("jupyterlab", [])
+        for profile in profiles_jupyterlab:
+            name = profile.get("display_name", "")
+
+            if "groups" in profile or "users" in profile:
+                profile["access"] = "yaml"
+            else:
+                profile["access"] = "all"
+
+            print(
+                f"Setting access type of JupyterLab profile {name} to {profile['access']}"
+            )
+        return config
+
+
 __rounded_version__ = ".".join([str(c) for c in rounded_ver_parse(__version__)])
 
 # Manually-added upgrade steps must go above this line

@@ -34,7 +34,7 @@ def qhub_users_import_json():
         ),
     ],
 )
-def test_upgrade(
+def test_upgrade_4_0(
     old_qhub_config_path_str,
     attempt_fixes,
     expect_upgrade_error,
