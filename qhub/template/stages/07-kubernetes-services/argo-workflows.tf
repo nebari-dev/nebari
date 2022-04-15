@@ -14,5 +14,5 @@ module "argo-workflows" {
   external-url = var.endpoint
   realm_id     = var.realm_id
 
-  # node-group = var.node_groups.general
+  node-group = var.node_groups.general
 }
