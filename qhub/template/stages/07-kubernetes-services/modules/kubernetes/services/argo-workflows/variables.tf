@@ -10,13 +10,13 @@ variable "argo-workflows-namespace" {
   default     = "dev"
 }
 
-# variable "node-group" {
-#   description = "Node key value pair for bound resources"
-#   type = object({
-#     key   = string
-#     value = string
-#   })
-# }
+variable "node-group" {
+  description = "Node key value pair for bound resources"
+  type = object({
+    key   = string
+    value = string
+  })
+}
 
 variable "external-url" {
   description = "External url that jupyterhub cluster is accessible"

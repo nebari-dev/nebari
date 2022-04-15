@@ -25,6 +25,9 @@ resource "helm_release" "argo-workflows" {
         workflowNamespaces = [
           "${var.namespace}"
           ]
+        nodeSelector = {
+          "${var.node-group.key}" = var.node-group.value
+        }
       }
 
       server = {
@@ -53,12 +56,16 @@ resource "helm_release" "argo-workflows" {
           }
           scopes = ["profile"]
         }
+        nodeSelector = {
+          "${var.node-group.key}" = var.node-group.value
+        }
       }
 
       containerRuntimeExecutor = "emissary"
 
     })
   ], var.overrides)
+}
 
 resource "kubernetes_secret" "argo-oidc-secret" {
   metadata {
