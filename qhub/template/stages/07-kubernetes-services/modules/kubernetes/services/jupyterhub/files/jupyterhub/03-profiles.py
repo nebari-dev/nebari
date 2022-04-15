@@ -31,8 +31,8 @@ def base_profile_home_mounts(username):
                 "name": "skel",
                 "configMap": {
                     "name": skel_mount["name"],
-                }
-            }
+                },
+            },
         ]
     }
 
@@ -46,7 +46,9 @@ def base_profile_home_mounts(username):
         ]
     }
 
-    MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod 777 /mnt/{path} && cp -r /etc/skel/. /mnt/{path}"
+    MKDIR_OWN_DIRECTORY = (
+        "mkdir -p /mnt/{path} && chmod 777 /mnt/{path} && cp -r /etc/skel/. /mnt/{path}"
+    )
     command = MKDIR_OWN_DIRECTORY.format(
         path=pvc_home_mount_path.format(username=username)
     )
@@ -316,9 +318,13 @@ def render_profile(profile, username, groups):
     }
     """
     # check that username or groups in allowed groups for profile
-    user_not_in_users = username not in set(profile.get('users', []))
-    user_not_in_groups = (set(groups) & set(profile.get('groups', []))) == set()
-    if ('users' in profile or 'groups' in profile) and user_not_in_users and user_not_in_groups:
+    user_not_in_users = username not in set(profile.get("users", []))
+    user_not_in_groups = (set(groups) & set(profile.get("groups", []))) == set()
+    if (
+        ("users" in profile or "groups" in profile)
+        and user_not_in_users
+        and user_not_in_groups
+    ):
         return None
 
     profile = copy.copy(profile)
@@ -335,6 +341,19 @@ def render_profile(profile, username, groups):
         ],
         {},
     )
+
+    # We need to merge any env vars from the spawner with any overrides from the profile
+    # This is mainly to ensure JUPYTERHUB_ANYONE/GROUP is passed through from the spawner
+    # to control dashboard access.
+    envvars_fixed = {**(profile["kubespawner_override"].get("environment", {}))}
+
+    def preserve_envvars(spawner):
+        # This adds in JUPYTERHUB_ANYONE/GROUP rather than overwrite all env vars,
+        # if set in the spawner for a dashboard to control access.
+        return {**envvars_fixed, **spawner.environment}
+
+    profile["kubespawner_override"]["environment"] = preserve_envvars
+
     return profile
 
 

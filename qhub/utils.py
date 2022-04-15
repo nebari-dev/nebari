@@ -31,6 +31,7 @@ AZURE_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup
 
 qhub_image_tag = f"v{__version__}"
 pip_install_qhub = f"pip install qhub=={__version__}"
+qhub_dask_version = "0.4.0"
 
 QHUB_GH_BRANCH = os.environ.get("QHUB_GH_BRANCH", "")
 if QHUB_GH_BRANCH:
