@@ -35,6 +35,7 @@ resource "helm_release" "argo-workflows" {
         baseHref = "/${local.argo-workflows-prefix}/"
 
         sso = {
+          insecureSkipVerify = true
           issuer = "https://${var.external-url}/auth/realms/${var.realm_id}"
           clientId = {
             name = "argo-server-sso"
@@ -45,12 +46,12 @@ resource "helm_release" "argo-workflows" {
             key = "argo-oidc-client-secret"
           }
           # The OIDC redirect URL. Should be in the form <argo-root-url>/oauth2/callback.
-          redirectUrl = "https://${var.external-url}/oauth2/callback"
+          redirectUrl = "https://${var.external-url}/${local.argo-workflows-prefix}/oauth2/callback"
           rbac = {
             enabled = false
-            # secretWhitelist = []
+            secretWhitelist = []
           }
-          # scopes = ["groups"]
+          scopes = ["profile"]
         }
       }
 
@@ -58,7 +59,6 @@ resource "helm_release" "argo-workflows" {
 
     })
   ], var.overrides)
-}
 
 resource "kubernetes_secret" "argo-oidc-secret" {
   metadata {
@@ -84,7 +84,7 @@ module "argo-workflow-openid-client" {
   # }
 
   callback-url-paths = [
-    "https://${var.external-url}/oauth2/callback"
+    "https://${var.external-url}/${local.argo-workflows-prefix}/oauth2/callback"
   ]
 }
 
