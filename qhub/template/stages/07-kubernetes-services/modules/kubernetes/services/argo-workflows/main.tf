@@ -1,58 +1,3 @@
-# resource "kubernetes_service_account" "main" {
-#   metadata {
-#     name      = "jupyterflow-service-account"
-#     namespace = var.namespace
-#   }
-# }
-
-
-# resource "kubernetes_cluster_role" "main" {
-#   metadata {
-#     name = "argo-workflows-role"
-#   }
-
-#   rule {
-#     api_groups = [""]
-#     resources  = ["pods"]
-#     verbs      = ["get", "list", "watch", "patch"]
-#     # pod get/watch is used to identify the container IDs of the current pod
-#     # pod patch is used to annotate the step's outputs back to controller (e.g. artifact location)
-#   }
-
-#   rule {
-#     api_groups = [""]
-#     resources  = ["pods/log"]
-#     verbs      = ["get", "watch"]
-#     # logs get/watch are used to get the pods logs for script outputs, and for log archival
-#   }
-
-#   rule {
-#     api_groups = ["argoproj.io"]
-#     resources  = ["workflows"]
-#     verbs      = ["get", "list", "watch", "patch", "create"]
-#   }
-
-# }
-
-
-# resource "kubernetes_role_binding" "main" {
-#   metadata {
-#     name = "jupyterflow-role-binding"
-#     namespace = var.namespace
-#   }
-
-#   role_ref {
-#     api_group = "rbac.authorization.k8s.io"
-#     kind      = "Role"
-#     name      = kubernetes_cluster_role.main.metadata.0.name
-#   }
-#   subject {
-#     kind      = "ServiceAccount"
-#     name      = kubernetes_service_account.main.metadata.0.name
-#     namespace = var.namespace
-#   }
-# }
-
 locals {
   name = "argo-workflows"
   argo-workflows-prefix = "argo"
@@ -71,16 +16,26 @@ resource "helm_release" "argo-workflows" {
 
 
     jsonencode({
-      # -- Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
-      singleNamespace = true
-      workflowNamespaces = "${var.namespace}-argo"  # doesn't seem to be observed yet
+      singleNamespace = true  # Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
+
+      controller = {
+        metricsConfig = {
+          enabled = true  # enable prometheus
+        }
+        workflowNamespaces = [
+          "${var.namespace}"
+          ]
+      }
+
       server = {
+        enabled = true
         # `sso` for OIDC/OAuth
+        
         extraArgs = ["--auth-mode=sso", "--insecure-skip-verify"]
         # to enable TLS, set `secure = true`
         secure = false
         baseHref = "/${local.argo-workflows-prefix}/"
-
+        
         sso = {
           issuer = "https://${var.external-url}/auth/realms/${var.realm_id}"
           clientId = {
@@ -101,18 +56,7 @@ resource "helm_release" "argo-workflows" {
         }
       }
 
-
-      # -- Globally limits the rate at which pods are created.
-      # controller = {
-      #   parallelism = {
-      #     resourceRateLimit = {
-      #       limit = 10
-      #       burst = 1
-      #     }
-      #   }
-      # }
-
-      # containerRuntimeExecutor = "emissary"
+      containerRuntimeExecutor = "emissary"
 
     })
   ], var.overrides)
