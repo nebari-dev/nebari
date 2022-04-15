@@ -15,6 +15,7 @@ from qhub.provider import git
 from qhub.utils import (
     namestr_regex,
     qhub_image_tag,
+    qhub_dask_version,
     check_cloud_credentials,
     set_kubernetes_version,
 )
@@ -55,6 +56,9 @@ BASE_CONFIGURATION = {
     },
     "helm_extensions": [],
     "monitoring": {
+        "enabled": True,
+    },
+    "argo_workflows": {
         "enabled": True,
     },
     "cdsdashboards": {
@@ -211,7 +215,7 @@ DEFAULT_ENVIRONMENTS = {
             "python",
             "ipykernel",
             "ipywidgets",
-            "qhub-dask ==0.3.13",
+            f"qhub-dask =={qhub_dask_version}",
             "python-graphviz",
             "numpy",
             "numba",
@@ -225,15 +229,15 @@ DEFAULT_ENVIRONMENTS = {
             "python==3.9.7",
             "ipykernel==6.4.1",
             "ipywidgets==7.6.5",
-            "qhub-dask==0.3.13",
+            f"qhub-dask=={qhub_dask_version}",
             "param==1.11.1",
             "python-graphviz==0.17",
             "matplotlib==3.4.3",
             "panel==0.12.4",
-            "voila==0.2.16",
+            "voila==0.3.5",
             "streamlit==1.0.0",
             "dash==2.0.0",
-            "cdsdashboards-singleuser==0.6.0",
+            "cdsdashboards-singleuser==0.6.1",
         ],
     },
 }

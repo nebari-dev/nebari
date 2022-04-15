@@ -29,3 +29,8 @@ variable "overrides" {
   type        = list(string)
   default     = []
 }
+
+variable "realm_id" {
+  description = "Keycloak realm to use for deploying openid client"
+  type        = string
+}

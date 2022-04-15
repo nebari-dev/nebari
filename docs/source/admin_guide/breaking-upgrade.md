@@ -15,7 +15,8 @@ Please always check the [release notes](../dev_guide/changelog.md) for more deta
 
 > The rest of this guide assumes you are upgrading from version v0.3.14 (or earlier) to v0.4.
 
-You may be deploying QHub based on a local configuration file, or you may be using CI/CD workflows in GitHub or GitLab. Either way, you will need to locate a copy of your `qhub-config.yaml` configuration file to upgrade it (and commit back to your git repo in the CI/CD case).
+You may be deploying QHub based on a local configuration file, or you may be using CI/CD workflows in GitHub or GitLab. Either way, you will need to locate a copy of your
+`qhub-config.yaml` configuration file to upgrade it (and commit back to your git repo in the CI/CD case).
 
 For CI/CD deployments, you will need to `git clone <repo URL>` into a folder on your local machine if you haven't done so already.
 
@@ -65,11 +66,13 @@ qhub upgrade -c qhub-config.yaml
 
 This will output a newer version of `qhub-config.yaml` that's compatible with the new version of `qhub`. The process outputs a list of changes it has made.
 
-The `upgrade` command creates a copy of the original unmodified config file (`qhub-config.yaml.old.backup`) as well as a JSON file (`qhub-users-import.json`) used to import existing users into Keycloak.
+The `upgrade` command creates a copy of the original unmodified config file (`qhub-config.yaml.old.backup`) as well as a JSON file (`qhub-users-import.json`) used to import
+existing users into Keycloak.
 
 ## 5. Rename the Project and Increase Kubernetes version
 
-You need to rename the project to avoid clashes with the existing (old) cluster which would otherwise already own resources based on the names that the new cluster will attempt to use.
+You need to rename the project to avoid clashes with the existing (old) cluster which would otherwise already own resources based on the names that the new cluster will attempt to
+use.
 
 The domain should remain as the preferred main one that was always in use previously.
 
@@ -87,7 +90,8 @@ project_name: myqhubnew
 domain: qhub.myproj.com
 ```
 
-> It is also a good time to upgrade your version of Kubernetes. Look for the `kubernetes_version` field within the cloud provider section of the `qhub-config.yaml` file and increase it to the latest.
+> It is also a good time to upgrade your version of Kubernetes. Look for the `kubernetes_version` field within the cloud provider section of the `qhub-config.yaml` file and
+> increase it to the latest.
 
 ## 6. Redeploy QHub
 
@@ -97,17 +101,21 @@ You will now have a `qhub-config.yaml` file that you can deploy.
 qhub deploy -c qhub-config.yaml
 ```
 
-At this point you will see an error message saying that deployment is prevented due to the `prevent_deploy` setting in your YAML file. This is a safeguard to ensure that you only proceed if you are aware of possible breaking changes in the current upgrade.
+At this point you will see an error message saying that deployment is prevented due to the `prevent_deploy` setting in your YAML file. This is a safeguard to ensure that you only
+proceed if you are aware of possible breaking changes in the current upgrade.
 
 Make sure to **backup your data** as described in the [backup section of the documentation](./backup.md).
 
-Only after backing up your data proceed to remove the `prevent_deploy: true` line in the `qhub-config.yaml` file. This `prevent_deploy` functionality is there as a safeguard. Please only remove it if you understand why it was there in the first place - as a way to stop users blindly upgrading without realising they absolutely needed to backup their data first so that it can be restored into a completely new cluster.
+Only after backing up your data proceed to remove the `prevent_deploy: true` line in the `qhub-config.yaml` file. This `prevent_deploy` functionality is there as a safeguard.
+Please only remove it if you understand why it was there in the first place - as a way to stop users blindly upgrading without realising they absolutely needed to backup their data
+first so that it can be restored into a completely new cluster.
 
 Run the `qhub deploy -c qhub-config.yaml` command again and it should get further this time.
 
 ## 7. CI/CD: render and commit to git
 
-For CI/CD (GitHub/GitLab) workflows, as well as generating the updated `qhub-config.yaml` files as above, you will also need to regenerate the workflow files based on the latest `qhub` version's templates.
+For CI/CD (GitHub/GitLab) workflows, as well as generating the updated `qhub-config.yaml` files as above, you will also need to regenerate the workflow files based on the latest
+`qhub` version's templates.
 
 With the newly upgraded `qhub-config.yaml` file, run:
 
@@ -115,7 +123,8 @@ With the newly upgraded `qhub-config.yaml` file, run:
 qhub render -c qhub-config.yaml
 ```
 
-(Note that `qhub deploy` would have performed this render step too, but will also immediately redeploy your QHub instance. Run the render command alone if you are now working separately in your repo and don't want to redeploy.)
+(Note that `qhub deploy` would have performed this render step too, but will also immediately redeploy your QHub instance. Run the render command alone if you are now working
+separately in your repo and don't want to redeploy.)
 
 Commit all the files (`qhub-config.yaml` and GitHub/GitLab workflow files) back to the remote repo. All files need to be committed together in the same commit. For example:
 
@@ -133,8 +142,8 @@ If your QHub deployment relies on Auth0 or GitHub for authentication, please upd
 
 2. Select the "Regular Web Application" with the name of your deployment.
 
-3. Under the "Application URIs" section, paste the new OAuth callback URL in the "Allowed Callback URLs" text block.
-   The URL should be `https://{your-qhub-domain}/auth/realms/qhub/broker/auth0/endpoint`, replacing `{your-qhub-domain}` with your literal domain of course.
+3. Under the "Application URIs" section, paste the new OAuth callback URL in the "Allowed Callback URLs" text block. The URL should be
+   `https://{your-qhub-domain}/auth/realms/qhub/broker/auth0/endpoint`, replacing `{your-qhub-domain}` with your literal domain of course.
 
 </details>
 
@@ -144,8 +153,8 @@ If your QHub deployment relies on Auth0 or GitHub for authentication, please upd
 
 2. Click "OAuth Apps" and then click the app representing your QHub instance.
 
-3. Under "Authorization callback URL", paste the new GitHub callback URL.
-   The URL should be `https://{your-qhub-domain}/auth/realms/qhub/broker/github/endpoint`, replacing `{your-qhub-domain}` with your literal domain of course.
+3. Under "Authorization callback URL", paste the new GitHub callback URL. The URL should be `https://{your-qhub-domain}/auth/realms/qhub/broker/github/endpoint`, replacing
+   `{your-qhub-domain}` with your literal domain of course.
 
 </details>
 
@@ -166,9 +175,9 @@ The last two steps are to:
 
 For more details on this process, visit the [Keycloak docs section](../installation/login.md).
 
-
 ## Known versions that require re-deployment
 
-Version `v0.3.11` on AWS has an error with the Kubernetes config map. See [this GitHub discussion related to AWS K8s config maps](https://github.com/Quansight/qhub/discussions/841) for more details.
+Version `v0.3.11` on AWS has an error with the Kubernetes config map. See [this GitHub discussion related to AWS K8s config maps](https://github.com/Quansight/qhub/discussions/841)
+for more details.
 
 Version `v0.4`.

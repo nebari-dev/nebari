@@ -41,6 +41,12 @@ class AuthenticationEnum(str, enum.Enum):
     custom = "custom"
 
 
+class AccessEnum(str, enum.Enum):
+    all = "all"
+    yaml = "yaml"
+    keycloak = "keycloak"
+
+
 class Base(pydantic.BaseModel):
     ...
 
@@ -297,12 +303,25 @@ class KubeSpawner(Base):
 
 
 class JupyterLabProfile(Base):
+    access: AccessEnum = AccessEnum.all
     display_name: str
     description: str
     default: typing.Optional[bool]
     users: typing.Optional[typing.List[str]]
     groups: typing.Optional[typing.List[str]]
     kubespawner_override: typing.Optional[KubeSpawner]
+
+    @root_validator
+    def only_yaml_can_have_groups_and_users(cls, values):
+        if values["access"] != AccessEnum.yaml:
+            if (
+                values.get("users", None) is not None
+                or values.get("groups", None) is not None
+            ):
+                raise ValueError(
+                    "Profile must not contain groups or users fields unless access = yaml"
+                )
+        return values
 
 
 class DaskWorkerProfile(Base):
@@ -320,7 +339,7 @@ class Profiles(Base):
     jupyterlab: typing.List[JupyterLabProfile]
     dask_worker: typing.Dict[str, DaskWorkerProfile]
 
-    @validator("jupyterlab", pre=True)
+    @validator("jupyterlab")
     def check_default(cls, v, values):
         """Check if only one default value is present"""
         default = [attrs["default"] for attrs in v if "default" in attrs]
@@ -368,6 +387,10 @@ class QHubExtension(Base):
     qhubconfigyaml: bool = False
     logout: typing.Optional[str]
     envs: typing.Optional[typing.List[QHubExtensionEnv]]
+
+
+class Ingress(Base):
+    terraform_overrides: typing.Any
 
 
 # ======== External Container Registry ========
@@ -444,6 +467,7 @@ class Main(Base):
     prevent_deploy: bool = (
         False  # Optional, but will be given default value if not present
     )
+    ingress: typing.Optional[Ingress]
 
     # If the qhub_version in the schema is old
     # we must tell the user to first run qhub upgrade

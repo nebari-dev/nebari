@@ -28,10 +28,30 @@ resource "helm_release" "argo-workflows" {
       }
 
       server = {
-        enabled = true
-
-        extraArgs = ["--auth-mode=server"]
+        # `sso` for OIDC/OAuth
+        extraArgs = ["--auth-mode=sso", "--insecure-skip-verify"]
+        # to enable TLS, `secure = true`
+        secure = false
         baseHref = "/${local.argo-workflows-prefix}/"
+
+        sso = {
+          issuer = "https://${var.external-url}/auth/realms/${var.realm_id}"
+          clientId = {
+            name = "argo-server-sso"
+            key = "argo-oidc-client-id"
+          }
+          clientSecret = {
+            name = "argo-server-sso"
+            key = "argo-oidc-client-secret"
+          }
+          # The OIDC redirect URL. Should be in the form <argo-root-url>/oauth2/callback.
+          redirectUrl = "https://${var.external-url}/oauth2/callback"
+          rbac = {
+            enabled = false
+            # secretWhitelist = []
+          }
+          # scopes = ["groups"]
+        }
       }
 
       containerRuntimeExecutor = "emissary"
@@ -40,6 +60,33 @@ resource "helm_release" "argo-workflows" {
   ], var.overrides)
 }
 
+resource "kubernetes_secret" "argo-oidc-secret" {
+  metadata {
+    name = "argo-server-sso"
+    namespace = var.namespace
+  }
+  data = {
+    "argo-oidc-client-id"     = module.argo-workflow-openid-client.config.client_id
+    "argo-oidc-client-secret" = module.argo-workflow-openid-client.config.client_secret
+  }
+}
+
+module "argo-workflow-openid-client" {
+  source = "../keycloak-client"
+
+  realm_id = var.realm_id
+  client_id = "argo-server-sso"
+  external-url = var.external-url
+  # role_mapping = {
+  #   "admin" = ["argo_admin"]
+  #   "developer" = ["argo_developer"]
+  #   "analyst" = ["argo_viewer"]
+  # }
+
+  callback-url-paths = [
+    "https://${var.external-url}/oauth2/callback"
+  ]
+}
 
 resource "kubernetes_manifest" "argo-workflows-middleware-stripprefix" {
   manifest = {
@@ -59,7 +106,6 @@ resource "kubernetes_manifest" "argo-workflows-middleware-stripprefix" {
     }
   }
 }
-
 
 resource "kubernetes_manifest" "argo-workflows-ingress-route" {
   manifest = {

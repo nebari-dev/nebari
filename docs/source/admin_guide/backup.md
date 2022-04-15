@@ -2,7 +2,8 @@
 
 Your cloud provider may have native ways to backup your Kubernetes cluster and volumes.
 
-This guide describes how you would manually obtain the data you need to repopulate your QHub if your cluster is lost and you wish to start it up again from the `qhub-config.yaml` file.
+This guide describes how you would manually obtain the data you need to repopulate your QHub if your cluster is lost and you wish to start it up again from the `qhub-config.yaml`
+file.
 
 There are three main locations that you need to backup:
 
@@ -15,15 +16,15 @@ There are three main locations that you need to backup:
 This amounts to:
 
 - Tarballing the /home directory
-- Saving to block storage [s3, google cloud storage, etc]
+- Saving to block storage \[s3, google cloud storage, etc\]
 - Downloading and untaring to new cluster
 
 This specific guide shows how to do this on an AWS cluster and upload to AWS S3.
 
 ### Pre-requisites
 
-- [Install kubectl](<https://kubernetes.io/docs/tasks/tools/>)
-- [Install AWS command-line tool](<https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html>)
+- [Install kubectl](https://kubernetes.io/docs/tasks/tools/)
+- [Install AWS command-line tool](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
 
 ### Kubectl configuration
 
@@ -41,7 +42,8 @@ aws eks update-kubeconfig  --region us-west-2 --name <relevant-name>
 
 ### Pod deployment
 
-With `kubectl` configured, the next step will be to deploy the pod that allows you to access the cluster files. First, save the following pod specification to a file named `pod.yaml`:
+With `kubectl` configured, the next step will be to deploy the pod that allows you to access the cluster files. First, save the following pod specification to a file named
+`pod.yaml`:
 
 ```yaml
 kind: Pod
@@ -109,7 +111,8 @@ cd /data
 tar -cvf <custom_name>.tar .
 ```
 
-The preferred naming scheme includes a year-month-day, example `2021-04-23_home_backup.tar`. You can utilize multi-backups through this step. This step takes several minutes depending on the size of the home directories.
+The preferred naming scheme includes a year-month-day, example `2021-04-23_home_backup.tar`. You can utilize multi-backups through this step. This step takes several minutes
+depending on the size of the home directories.
 
 ### Upload to block storage
 
@@ -152,22 +155,26 @@ The file permissions for the default tar is same as the original files.
 > QHub v0.4: If restoring your NFS as part of the upgrade you must also run some extra commands, immediately after extracting from the tar file.
 >
 > Previous versions contained the `shared` folder within `home`. From `0.4.0` both `shared` and `home` directories are at the same level with respect to the QHub filesystem:
+>
 > ```shell
 > cd /data
 > cp -r home/shared/* shared/
 > rm -rf home/shared/
 > ```
+>
 > And then:
+>
 > ```shell
 > chown -R 1000:100 /data/home/*
 > chown -R 1000:100 /data/shared/*
 > ```
-> From QHUb v0.4. all users will have the same `uid`.
 >
+> From QHUb v0.4. all users will have the same `uid`.
 
 ### Google cloud provider
 
-To use the Google Cloud provider, install the [gsutil](https://cloud.google.com/storage/docs/gsutil_install) CLI instead of the AWS CLI. Otherwise, the instructions are the same as for AWS above, other than when working with S3. Here are the commands to access Google Spaces instead of S3 for copy/download of the backup:
+To use the Google Cloud provider, install the [gsutil](https://cloud.google.com/storage/docs/gsutil_install) CLI instead of the AWS CLI. Otherwise, the instructions are the same as
+for AWS above, other than when working with S3. Here are the commands to access Google Spaces instead of S3 for copy/download of the backup:
 
 ```shell
 cd /data
@@ -182,18 +189,20 @@ gsutil cp gs://<your_bucket_name>/backups/2021-04-23.tar .
 Instructions will be similar to those for AWS above, but use Digital Ocean spaces instead of S3. This guide explains installation of the command-line tool:
 <https://www.digitalocean.com/community/tutorials/how-to-migrate-from-amazon-s3-to-digitalocean-spaces-with-rclone>
 
-
 ## JupyterHub Database
 
 The JupyterHub database will mostly be recreated whenever you start a new cluster, but should be backed up to save Dashboard configurations.
 
-You want to do something very similar to the NFS backup, above - this time you need to back up just one file located in the  PersistentVolume `hub-db-dir`.
+You want to do something very similar to the NFS backup, above - this time you need to back up just one file located in the PersistentVolume `hub-db-dir`.
 
-First, you might think you can just make a new `pod.yaml` file, this time specifying `claimName: "hub-db-dir"` instead of `claimName: "jupyterhub-dev-share"`. However, `hub-db-dir` is 'Read Write Once' - the 'Once' meaning it can only be mounted to one pod at a time, but the JupyterHub pod will already have this mounted! So the same approach will not work here.
+First, you might think you can just make a new `pod.yaml` file, this time specifying `claimName: "hub-db-dir"` instead of `claimName: "jupyterhub-dev-share"`. However, `hub-db-dir`
+is 'Read Write Once' - the 'Once' meaning it can only be mounted to one pod at a time, but the JupyterHub pod will already have this mounted! So the same approach will not work
+here.
 
 Instead of mounting to a new 'debugger pod' you have to access the JupyterHub pod directly using the `kubectl` CLI.
 
 Look up the JupyterHub pod:
+
 ```bash
 kubectl get pods -n dev
 ```
@@ -210,7 +219,8 @@ There is no need to TAR anything up since the only file required to be backed up
 
 ### Backing up JupyterHub DB
 
-Now we just need to upload the file to S3. You might want to [install the AWS CLI tool](#installations) as we did before, however, as the Hub container is a rather restricted environment the recommended approach is to upload files to AWS S3 buckets using curl.
+Now we just need to upload the file to S3. You might want to [install the AWS CLI tool](#installations) as we did before, however, as the Hub container is a rather restricted
+environment the recommended approach is to upload files to AWS S3 buckets using curl.
 
 For more details please refer to the [using curl to access AWS S3 buckets](./awss3curl.md) documentation.
 
@@ -219,6 +229,7 @@ For more details please refer to the [using curl to access AWS S3 buckets](./aws
 You will need to overwrite the file `/srv/jupyterhub/jupyterhub.sqlite` based on the version backed up to S3.
 
 You should restart the pod:
+
 ```bash
 kubectl delete -n dev pod hub-765c9488d6-8z4nj
 ```
@@ -227,7 +238,8 @@ As for uploads, [you may need to use curl to download items from an AWS S3 bucke
 
 ## Keycloak user/group database
 
-QHub provides a simple script to export the important user/group database. Your new QHub cluster will recreate a lot of Keycloak config (including new Keycloak clients which will have new secrets), so only the high-level Group and User info is exported.
+QHub provides a simple script to export the important user/group database. Your new QHub cluster will recreate a lot of Keycloak config (including new Keycloak clients which will
+have new secrets), so only the high-level Group and User info is exported.
 
 If you have a heavily customized Keycloak configuration, some details may be omitted in this export.
 
