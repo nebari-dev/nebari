@@ -237,6 +237,7 @@ class DigitalOceanProvider(Base):
     region: str
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
+    terraform_overrides: typing.Any
 
 
 class GoogleCloudPlatformProvider(Base):
@@ -246,6 +247,7 @@ class GoogleCloudPlatformProvider(Base):
     availability_zones: typing.Optional[typing.List[str]]  # Genuinely optional
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
+    terraform_overrides: typing.Any
 
 
 class AzureProvider(Base):
@@ -253,6 +255,7 @@ class AzureProvider(Base):
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
     storage_account_postfix: str
+    terraform_overrides: typing.Any
 
 
 class AmazonWebServicesProvider(Base):
@@ -260,6 +263,7 @@ class AmazonWebServicesProvider(Base):
     availability_zones: typing.Optional[typing.List[str]]
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
+    terraform_overrides: typing.Any
 
 
 class LocalProvider(Base):
