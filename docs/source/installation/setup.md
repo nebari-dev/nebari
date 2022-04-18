@@ -68,7 +68,6 @@ To define the environment variables paste the commands below with your respectiv
 ```shell
 export AWS_ACCESS_KEY_ID="HAKUNAMATATA"
 export AWS_SECRET_ACCESS_KEY="iNtheJUng1etheMightyJUNgleTHEl10N51eEpsT0n1ghy;"
-export 
 export AWS_DEFAULT_REGION="us-west-2"
 ```
 
