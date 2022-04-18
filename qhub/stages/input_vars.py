@@ -251,6 +251,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "dask-gateway-profiles": config["profiles"]["dask_worker"],
         # monitoring
         "monitoring-enabled": config["monitoring"]["enabled"],
+        "kbatch-enabled": config["kbatch"]["enabled"],
         # prefect
         "prefect-enabled": config.get("prefect", {}).get("enabled", False),
         "prefect-token": config.get("prefect", {}).get("token", ""),

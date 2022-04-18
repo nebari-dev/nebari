@@ -74,6 +74,13 @@ class HelmExtension(Base):
     overrides: typing.Optional[typing.Dict]
 
 
+# ============== kbatch =============
+
+
+class KBatch(Base):
+    enabled: bool
+
+
 # ============== Monitoring =============
 
 
