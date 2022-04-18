@@ -25,7 +25,7 @@ module "kbatch" {
   external-url         = var.endpoint
   
   jupyterhub_api_token = module.jupyterhub.services.kbatch.api_token
-  image                = var.kbatch-image
+  # image                = var.kbatch-image
   # admin                = true
   # url                  = "http://kbatch-proxy.${var.environment}.svc.cluster.local"
   node-group   = var.node_groups.user
