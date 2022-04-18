@@ -459,6 +459,7 @@ class Main(Base):
     theme: Theme
     profiles: Profiles
     environments: typing.Dict[str, CondaEnvironment]
+    kbatch: typing.Optional[KBatch]
     monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
     tf_extensions: typing.Optional[typing.List[QHubExtension]]
