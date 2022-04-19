@@ -229,7 +229,7 @@ environments:
     - param==1.11.1
     - python-graphviz==0.17
     - matplotlib==3.4.3
-    - panel==0.12.4
+    - panel==0.12.7
     - voila==0.2.16
     - streamlit==1.0.0
     - dash==2.0.0
