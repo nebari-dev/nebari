@@ -83,6 +83,8 @@ resource "helm_release" "jupyterhub" {
             name = service
             admin = true
             api_token = random_password.service_token[service].result
+            # come back and clean up
+            url = "http://kbatch-kbatch-proxy.${var.external-url}.svc.cluster.local"
           }
         }
 
