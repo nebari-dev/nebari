@@ -1,8 +1,8 @@
 resource "helm_release" "kbatch" {
   name       = "kbatch"
   namespace  = var.namespace
-  repository = "https://kbatch-dev.github.io/helm-chart/"
-  chart      = "kbatch"
+  repository = "https://kbatch-dev.github.io/helm-chart"
+  chart      = "kbatch-proxy"
   version    = "0.3.1"
 
   values = concat([
