@@ -1,7 +1,9 @@
 resource "helm_release" "kbatch" {
   name       = "kbatch"
   namespace  = var.namespace
-  chart      = "${path.module}/chart"
+  repository = "https://kbatch-dev.github.io/helm-chart/"
+  chart      = "kbatch"
+  version    = "0.3.1"
 
   values = concat([
     file("${path.module}/values.yaml"),
