@@ -152,6 +152,7 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
         "certificate-secret-name": config["certificate"]["secret_name"]
         if config["certificate"]["type"] == "existing"
         else None,
+        **config.get("ingress", {}).get("terraform_overrides", {}),
     }
 
 
@@ -219,7 +220,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "node_groups": _calculate_note_groups(config),
         # conda-store
         "conda-store-environments": config["environments"],
-        "conda-store-storage": config["storage"]["conda_store"],
+        "conda-store-filesystem-storage": config["storage"]["conda_store"],
         # jupyterhub
         "cdsdashboards": config["cdsdashboards"],
         "jupyterhub-theme": config["theme"]["jupyterhub"],
@@ -244,9 +245,6 @@ def stage_07_kubernetes_services(stage_outputs, config):
             .get("extraEnv", [])
         ),
         # dask-gateway
-        "dask-gateway-image": _split_docker_image_name(
-            config["default_images"]["dask_gateway"]
-        ),
         "dask-worker-image": _split_docker_image_name(
             config["default_images"]["dask_worker"]
         ),

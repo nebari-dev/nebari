@@ -9,7 +9,13 @@ variable "namespace" {
 }
 
 variable "nfs_capacity" {
-  description = "Capacity of conda-store deployment"
+  description = "Capacity of conda-store filesystem"
+  type        = string
+  default     = "10Gi"
+}
+
+variable "minio_capacity" {
+  description = "Capacity of conda-store object storage"
   type        = string
   default     = "10Gi"
 }

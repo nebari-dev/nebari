@@ -7,7 +7,7 @@ repos:
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
   - repo: https://github.com/psf/black
-    rev: 20.8b1
+    rev: 22.3.0
     hooks:
     -   id: black
         exclude: '/qhub/template/'
@@ -34,6 +34,7 @@ repos:
     rev: 0.7.13
     hooks:
     - id: mdformat
+      files: ^docs/
       name: mdformat
       description: "CommonMark compliant Markdown formatter"
       entry: mdformat
@@ -44,3 +45,5 @@ repos:
       language_version: python3
       types: [markdown]
       minimum_pre_commit_version: '1.0.0'
+      additional_dependencies:
+      - mdformat-tables

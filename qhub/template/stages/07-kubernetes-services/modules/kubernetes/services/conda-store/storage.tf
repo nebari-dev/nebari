@@ -7,6 +7,8 @@ module "minio" {
 
   node-group = var.node-group
 
+  storage = var.minio_capacity
+
   buckets = [
     "conda-store"
   ]

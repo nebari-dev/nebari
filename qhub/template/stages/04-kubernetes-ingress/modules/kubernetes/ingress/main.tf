@@ -64,9 +64,9 @@ resource "kubernetes_service" "main" {
   }
 
   spec {
-    selector = {
+    selector = merge({
       "app.kubernetes.io/component" = "traefik-ingress"
-    }
+    }, var.load-balancer-annotations)
 
     port {
       name        = "http"
@@ -111,6 +111,7 @@ resource "kubernetes_service" "main" {
     }
 
     type = "LoadBalancer"
+    load_balancer_ip = var.load-balancer-ip
   }
 }
 

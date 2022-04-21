@@ -2,28 +2,27 @@
 
 ## Pre-requisites
 
-* QHub is supported on the macOS and Linux operating systems.
+- QHub is supported on the macOS and Linux operating systems.
   > NOTE: **Currently, QHub cannot be installed on Windows**.
-* We recommend the adoption of virtual environments (`conda`, `pipenv` or `venv`) for successful usage.
+- We recommend the adoption of virtual environments (`conda`, `pipenv` or `venv`) for successful usage.
 
 ## Install QHub CLI
 
 QHub's installation can be performed by using:
 
- * `conda`:
+- `conda`:
 
 ```bash
 conda install -c conda-forge qhub
 ```
 
- * or `pip` (instead):
+- or `pip` (instead):
 
 ```bash
 pip install qhub
 ```
 
-Once finished, you can check QHub's version (and additional CLI args)
-by typing:
+Once finished, you can check QHub's version (and additional CLI args) by typing:
 
 ```bash
 qhub --help

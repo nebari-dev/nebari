@@ -318,6 +318,10 @@ class Upgrade_0_4_0(UpgradeStep):
         if "conda_store" in config["default_images"]:
             del config["default_images"]["conda_store"]
 
+        # Remove dask_gateway image from default_images
+        if "dask_gateway" in config["default_images"]:
+            del config["default_images"]["dask_gateway"]
+
         # Create root password
         default_password = "".join(
             secrets.choice(string.ascii_letters + string.digits) for i in range(16)
@@ -348,6 +352,32 @@ class Upgrade_0_4_0(UpgradeStep):
         # which they can override if they are happy they understand the situation.
         config["prevent_deploy"] = True
 
+        return config
+
+
+class Upgrade_0_4_1(UpgradeStep):
+    version = "0.4.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: pathlib.Path, *args, **kwargs
+    ):
+        """
+        Upgrade jupyterlab profiles.
+        """
+        print("\nUpgrading jupyterlab profiles in order to specify access type:\n")
+
+        profiles_jupyterlab = config.get("profiles", {}).get("jupyterlab", [])
+        for profile in profiles_jupyterlab:
+            name = profile.get("display_name", "")
+
+            if "groups" in profile or "users" in profile:
+                profile["access"] = "yaml"
+            else:
+                profile["access"] = "all"
+
+            print(
+                f"Setting access type of JupyterLab profile {name} to {profile['access']}"
+            )
         return config
 
 

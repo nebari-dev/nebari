@@ -33,11 +33,13 @@
       devDependencies = [
         # development
         pythonPackages.pytest
+        pythonPackages.pytest-timeout
         pythonPackages.black
         pythonPackages.flake8
         pythonPackages.sphinx
         pythonPackages.dask-gateway
         pythonPackages.paramiko
+        pythonPackages.escapism
 
         # additional
         pkgs.minikube
