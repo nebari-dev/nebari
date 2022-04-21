@@ -720,6 +720,29 @@ ingress:
 
 This is quite useful for pinning the IP Address of the load balancer.
 
+### Deployment inside Virtual Private Network
+
+Using terraform overrides you can also deploy inside a virtual private network.
+
+An example configuration for Azure is given below:
+
+```yaml
+azure:
+  terraform_overrides:
+      private_cluster_enabled: true
+      vnet_subnet_id: '/subscriptions/<subscription_id>/resourceGroups/<resource_group>/providers/Microsoft.Network/virtualNetworks/<vnet-name>/subnets/<subnet-name>'
+  region: Central US
+```
+
+#### Deployment Notes
+
+Deployment inside a virtual network is slightly different from deploying inside a public network,
+as the name suggests, since its a virtual private network, you need to be inside the network to
+able to deploy and access QHub. One way to achieve this is by creating a Virtual Machine inside
+the virtual network, just select the virtual network and subnet name under the networking
+settings of your cloud provider while creating the VM and then follow the usual deployment
+instructions as you would deploy from your local machine.
+
 # Full configuration example
 
 ```yaml
