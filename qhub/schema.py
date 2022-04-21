@@ -476,12 +476,10 @@ class Main(Base):
             )
         return v
 
-    
     @classmethod
     def is_version_accepted(cls, v):
         return v != "" and rounded_ver_parse(v) == rounded_ver_parse(__version__)
-    
-    
+
     @validator("project_name")
     def project_name_convention(cls, value: typing.Any, values):
         convention = """
@@ -520,7 +518,6 @@ class Main(Base):
             )
         else:
             return letter_dash_underscore_pydantic
-
 
 
 def verify(config):
