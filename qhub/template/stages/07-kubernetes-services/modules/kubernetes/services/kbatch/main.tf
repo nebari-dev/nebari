@@ -71,7 +71,6 @@ resource "kubernetes_cluster_role" "kbatch" {
 resource "kubernetes_cluster_role_binding" "kbatch" {
   metadata {
     name = "${var.name}-kbatch"
-    namespace = var.namespace
   }
 
   role_ref {
