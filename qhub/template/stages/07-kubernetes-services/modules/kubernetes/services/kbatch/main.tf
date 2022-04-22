@@ -1,3 +1,8 @@
+# Get this name dynamtically
+locals {
+  kbatch_service_account_name = "kbatch-proxy-proxy"
+}
+
 resource "helm_release" "kbatch" {
   name       = "kbatch"
   namespace  = var.namespace
@@ -76,7 +81,7 @@ resource "kubernetes_cluster_role_binding" "kbatch" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.kbatch.metadata.0.name
+    name      = local.kbatch_service_account_name
     namespace = var.namespace
     api_group = ""
   }
