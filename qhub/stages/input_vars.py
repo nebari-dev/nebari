@@ -253,6 +253,9 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "monitoring-enabled": config["monitoring"]["enabled"],
         # argo-worfklows
         "argo-workflows-enabled": config["argo_workflows"]["enabled"],
+        "argo-workflows-overrides": [
+            json.dumps(config.get("argo_workflows", {}).get("overrides", {}))
+        ],
         # prefect
         "prefect-enabled": config.get("prefect", {}).get("enabled", False),
         "prefect-token": config.get("prefect", {}).get("token", ""),

@@ -79,6 +79,7 @@ class HelmExtension(Base):
 
 class ArgoWorkflows(Base):
     enabled: bool
+    overrides: typing.Optional[typing.Dict]
 
 
 # ============== Monitoring =============

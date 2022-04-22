@@ -14,9 +14,25 @@ You can submit a workflow by clicking "SUBMIT NEW WORKFLOW" on the landing page.
 
 ![See Argo Server Landing Page](../images/argo-server-landing-page.png)
 
+## Overrides of Argo Workflows Helm Chart values
+
+Argo Workflows is deployed using Argo Workflows Helm Chart version 0.13.1. The values.yaml for the helm chart can be overriden as needed via the overrides flag. The default values
+file can be found [here](https://github.com/argoproj/argo-helm/blob/argo-workflows-0.13.1/charts/argo-workflows/values.yaml). For example, the following could be done to add
+additional environment variables to the controller container.
+
+```yaml
+argo_workflows:
+  enabled: true
+  overrides:
+    controller:
+      extraEnv:
+        - name: foo
+          value: bar
+```
+
 ## Disabling Argo Workflows
 
-1. To turn off the cluster monitoring on QHub deployments, simply turn off the feature flag within your `qhub-config.yaml` file. For example:
+To turn off the cluster monitoring on QHub deployments, simply turn off the feature flag within your `qhub-config.yaml` file. For example:
 
 ```yaml
 argo_workflows:

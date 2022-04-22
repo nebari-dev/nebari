@@ -5,6 +5,13 @@ variable "argo-workflows-enabled" {
   default     = true
 }
 
+variable "argo-workflows-overrides" {
+  description = "Argo Workflows helm chart overrides"
+  type        = list(string)
+  default     = []
+}
+
+
 # ====================== RESOURCES =======================
 module "argo-workflows" {
   count = var.argo-workflows-enabled ? 1 : 0
@@ -15,4 +22,5 @@ module "argo-workflows" {
   realm_id     = var.realm_id
 
   node-group = var.node_groups.general
+  overrides  = var.argo-workflows-overrides
 }
