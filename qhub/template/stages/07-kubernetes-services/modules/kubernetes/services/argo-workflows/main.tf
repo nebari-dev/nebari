@@ -51,10 +51,12 @@ resource "helm_release" "argo-workflows" {
           # The OIDC redirect URL. Should be in the form <argo-root-url>/oauth2/callback.
           redirectUrl = "https://${var.external-url}/${local.argo-workflows-prefix}/oauth2/callback"
           rbac = {
-            enabled = false
+            # https://argoproj.github.io/argo-workflows/argo-server-sso/#sso-rbac
+            enabled = true
             secretWhitelist = []
           }
-          scopes = ["profile"]
+          customGroupClaimName = "roles"
+          scopes = ["roles"]
         }
         nodeSelector = {
           "${var.node-group.key}" = var.node-group.value
@@ -84,11 +86,11 @@ module "argo-workflow-openid-client" {
   realm_id = var.realm_id
   client_id = "argo-server-sso"
   external-url = var.external-url
-  # role_mapping = {
-  #   "admin" = ["argo_admin"]
-  #   "developer" = ["argo_developer"]
-  #   "analyst" = ["argo_viewer"]
-  # }
+  role_mapping = {
+    "admin" = ["argo_admin"]
+    "developer" = ["argo_developer"]
+    "analyst" = ["argo_viewer"]
+  }
 
   callback-url-paths = [
     "https://${var.external-url}/${local.argo-workflows-prefix}/oauth2/callback"
@@ -148,3 +150,116 @@ resource "kubernetes_manifest" "argo-workflows-ingress-route" {
     }
   }
 }
+
+resource "kubernetes_service_account" "argo-admin-sa" {
+  metadata {
+    name      = "argo-admin"
+    namespace = var.namespace
+    annotations = {
+      "workflows.argoproj.io/rbac-rule": "'argo_admin' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence": "11"
+    }
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "argo-admin-rb" {
+  metadata {
+    name = "argo-admin"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "argo-admin"  # role deployed as part of helm chart
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.argo-admin-sa.metadata.0.name
+    namespace = var.namespace
+  }
+}
+
+resource "kubernetes_service_account" "argo-edit-sa" {
+  metadata {
+    name      = "argo-edit"
+    namespace = var.namespace
+    annotations = {
+      "workflows.argoproj.io/rbac-rule": "'argo_developer' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence": "10"
+    }
+
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "argo-edit-rb" {
+  metadata {
+    name = "argo-edit"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "argo-edit"  # role deployed as part of helm chart
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.argo-edit-sa.metadata.0.name
+    namespace = var.namespace
+  }
+}
+resource "kubernetes_service_account" "argo-view-sa" {
+  metadata {
+    name      = "argo-view"
+    namespace = var.namespace
+    annotations = {
+      "workflows.argoproj.io/rbac-rule": "'argo_viewer' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence": "9"
+    }
+  }
+}
+
+resource "kubernetes_cluster_role_binding" "argo-view-rb" {
+  metadata {
+    name = "argo-view"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "argo-view"  # role deployed as part of helm chart
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.argo-view-sa.metadata.0.name
+    namespace = var.namespace
+  }
+}
+
+# The below would set a default service account to use for users authenticated through keycloak but without the proper role as I understand it
+# resource "kubernetes_service_account" "argo-default-sa" {
+#   metadata {
+#     name      = "argo-default"
+#     namespace = var.namespace
+#     annotations = {
+#       "workflows.argoproj.io/rbac-rule": "true"
+#       "workflows.argoproj.io/rbac-rule-precedence": "0"
+#     }
+#   }
+# }
+
+# resource "kubernetes_cluster_role_binding" "argo-default-rb" {
+#   metadata {
+#     name = "argo-default"
+#   }
+
+#   role_ref {
+#     api_group = "rbac.authorization.k8s.io"
+#     kind      = "ClusterRole"
+#     name      = "argo-admin"  # role deployed as part of helm chart
+#   }
+#   subject {
+#     kind      = "ServiceAccount"
+#     name      = kubernetes_service_account.argo-default-sa.metadata.0.name
+#     namespace = var.namespace
+#   }
+# }
