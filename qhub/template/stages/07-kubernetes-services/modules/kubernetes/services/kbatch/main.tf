@@ -1,6 +1,6 @@
 # Get this name dynamtically
 locals {
-  kbatch_service_account_name = "kbatch-proxy-proxy"
+  kbatch_service_account_name = "kbatch-kbatch-proxy"
 }
 
 resource "helm_release" "kbatch" {
@@ -18,12 +18,12 @@ resource "helm_release" "kbatch" {
         jupyterhub_api_url = "https://${var.external-url}/hub/api/"
         extra_env = {
           KBATCH_PREFIX = "/services/kbatch"
-          # KBATCH_JOB_EXTRA_ENV = {
-          #   "DASK_GATEWAY__AUTH__TYPE": "jupyterhub",
-          #   "DASK_GATEWAY__CLUSTER__OPTIONS__IMAGE": "{JUPYTER_IMAGE_SPEC}",
-          #   "DASK_GATEWAY__ADDRESS":  "https://<JUPYTERHUB_URL>/services/dask-gateway",
-          #   "DASK_GATEWAY__PROXY_ADDRESS": "gateway://<DASK_GATEWAY_ADDRESS>:80"
-          # }
+          KBATCH_JOB_EXTRA_ENV = jsonencode({
+            DASK_GATEWAY__AUTH__TYPE = "jupyterhub"
+            DASK_GATEWAY__CLUSTER__OPTIONS__IMAGE = "${var.dask-worker-image.name}:${var.dask-worker-image.tag}"
+            DASK_GATEWAY__ADDRESS = "${var.dask-gateway-address}"            
+            DASK_GATEWAY__PROXY_ADDRESS = "${var.dask-gateway-proxy-address}"
+          })
         }
       }
       image = {
@@ -58,12 +58,6 @@ resource "kubernetes_cluster_role" "kbatch" {
     api_groups = ["", "batch"]
     resources  = ["*"]
     verbs      = ["get", "watch", "list", "patch", "create"]
-  }
-
-  rule {
-    api_groups = ["gateway.dask.org"]
-    resources  = ["daskclusters"]
-    verbs      = ["*"]
   }
 }
 

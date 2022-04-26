@@ -4,16 +4,6 @@ variable "kbatch-enabled" {
   type = bool
 }
 
-# variable "kbatch-image" {
-#   description = "kbatch image"
-#   type = string
-# }
-
-# variable "kbatch-overrides" {
-#   description = ""
-#   type = map
-# }
-
 
 # ====================== RESOURCES =======================
 module "kbatch" {
@@ -25,9 +15,9 @@ module "kbatch" {
   external-url         = var.endpoint
   
   jupyterhub_api_token = module.jupyterhub.services.kbatch.api_token
-  # image                = var.kbatch-image
-  # admin                = true
-  # url                  = "http://kbatch-proxy.${var.environment}.svc.cluster.local"
   node-group   = var.node_groups.user
-#   overrides            = [yamlencode(var.kbatch-overrides)]
+
+  dask-gateway-address = module.dask-gateway.config.gateway.address
+  dask-gateway-proxy-address = module.dask-gateway.config.gateway.proxy_address
+  dask-worker-image = var.dask-worker-image
 }

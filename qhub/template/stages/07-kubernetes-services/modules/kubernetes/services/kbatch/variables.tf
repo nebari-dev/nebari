@@ -37,3 +37,7 @@ variable "overrides" {
   type        = list(string)
   default     = []
 }
+
+variable "dask-gateway-address" {}
+variable "dask-gateway-proxy-address" {}
+variable "dask-worker-image" {}
