@@ -47,6 +47,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "QHUB_KUBECONFIG"
             ),
+            **config.get("do", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "gcp":
         return {
@@ -67,6 +68,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "QHUB_KUBECONFIG"
             ),
+            **config.get("gcp", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "azure":
         return {
@@ -80,6 +82,7 @@ def stage_02_infrastructure(stage_outputs, config):
             ),
             "resource_group_name": f'{config["project_name"]}-{config["namespace"]}',
             "node_resource_group_name": f'{config["project_name"]}-{config["namespace"]}-node-resource-group',
+            **config.get("azure", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "aws":
         return {
@@ -99,6 +102,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "QHUB_KUBECONFIG"
             ),
+            **config.get("aws", {}).get("terraform_overrides", {}),
         }
     else:
         return {}
