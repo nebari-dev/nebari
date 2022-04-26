@@ -170,7 +170,7 @@ resource "kubernetes_cluster_role_binding" "argo-admin-rb" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = "argo-admin"  # role deployed as part of helm chart
+    name      = "argo-workflows-admin"  # role deployed as part of helm chart
   }
   subject {
     kind      = "ServiceAccount"
@@ -199,7 +199,7 @@ resource "kubernetes_cluster_role_binding" "argo-edit-rb" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = "argo-edit"  # role deployed as part of helm chart
+    name      = "argo-workflows-edit"  # role deployed as part of helm chart
   }
   subject {
     kind      = "ServiceAccount"
@@ -226,7 +226,7 @@ resource "kubernetes_cluster_role_binding" "argo-view-rb" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = "argo-view"  # role deployed as part of helm chart
+    name      = "argo-workflows-view"  # role deployed as part of helm chart
   }
   subject {
     kind      = "ServiceAccount"
@@ -234,32 +234,3 @@ resource "kubernetes_cluster_role_binding" "argo-view-rb" {
     namespace = var.namespace
   }
 }
-
-# The below would set a default service account to use for users authenticated through keycloak but without the proper role as I understand it
-# resource "kubernetes_service_account" "argo-default-sa" {
-#   metadata {
-#     name      = "argo-default"
-#     namespace = var.namespace
-#     annotations = {
-#       "workflows.argoproj.io/rbac-rule": "true"
-#       "workflows.argoproj.io/rbac-rule-precedence": "0"
-#     }
-#   }
-# }
-
-# resource "kubernetes_cluster_role_binding" "argo-default-rb" {
-#   metadata {
-#     name = "argo-default"
-#   }
-
-#   role_ref {
-#     api_group = "rbac.authorization.k8s.io"
-#     kind      = "ClusterRole"
-#     name      = "argo-admin"  # role deployed as part of helm chart
-#   }
-#   subject {
-#     kind      = "ServiceAccount"
-#     name      = kubernetes_service_account.argo-default-sa.metadata.0.name
-#     namespace = var.namespace
-#   }
-# }
