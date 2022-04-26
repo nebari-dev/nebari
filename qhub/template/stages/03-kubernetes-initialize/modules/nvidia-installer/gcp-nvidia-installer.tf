@@ -1,6 +1,6 @@
 # source https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#installing_drivers
-resource "kubernetes_daemonset" "nvidia_installer" {
-  count = length(var.gpu_node_group_names) == 0 ? 0 : 1
+resource "kubernetes_daemonset" "gcp_nvidia_installer" {
+  count = var.gpu_enabled && (var.cloud-provider == "gcp") ? 1 : 0
 
   metadata {
     name      = "nvidia-driver-installer"

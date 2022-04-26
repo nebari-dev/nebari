@@ -21,9 +21,11 @@ module "traefik-crds" {
 }
 
 module "nvidia-driver-installer" {
-  count = length(var.gpu_node_group_names) == 0 ? 0 : 1
+  count = var.gpu_enabled ? 1 : 0
 
   source = "./modules/nvidia-installer"
 
+  cloud-provider = var.cloud-provider
+  gpu_enabled = var.gpu_enabled
   gpu_node_group_names = var.gpu_node_group_names
 }

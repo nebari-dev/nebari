@@ -22,6 +22,12 @@ variable "external_container_reg" {
   description = "External container registry"
 }
 
+variable "gpu_enabled" {
+  description = "Enable GPU support"
+  type        = bool
+  default     = false
+}
+
 variable "gpu_node_group_names" {
   description = "Names of node groups with GPU"
   default = []
