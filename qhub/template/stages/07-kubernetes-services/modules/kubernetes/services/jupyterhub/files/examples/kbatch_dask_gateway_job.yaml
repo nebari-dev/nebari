@@ -1,0 +1,6 @@
+name: dask-gateway-job
+image: mcr.microsoft.com/planetary-computer/python:2021.08.02.0
+args:
+  - python
+  - kbatch_dask_gateway_test.py
+code: kbatch_dask_gateway_test.py
