@@ -107,7 +107,7 @@ module "jupyterhub" {
       name = "dask-etc"
       namespace = var.environment
       kind = "configmap"
-    }
+    },
   }
 
   services = concat([

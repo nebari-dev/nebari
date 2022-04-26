@@ -10,6 +10,7 @@ resource "random_password" "proxy_secret_token" {
   special = false
 }
 
+
 resource "helm_release" "jupyterhub" {
   name      = "jupyterhub"
   namespace = var.namespace
@@ -30,7 +31,38 @@ resource "helm_release" "jupyterhub" {
         shared-pvc        = var.shared-pvc
         conda-store-pvc   = var.conda-store-pvc
         conda-store-mount = var.conda-store-mount
-        extra-mounts      = var.extra-mounts
+        skel-mount        = {
+          name      = kubernetes_config_map.etc-skel.metadata.0.name
+          namespace = kubernetes_config_map.etc-skel.metadata.0.namespace
+        }
+        extra-mounts      = merge(
+          var.extra-mounts,
+          {
+            "/etc/ipython" = {
+              name = kubernetes_config_map.etc-ipython.metadata.0.name
+              namespace = kubernetes_config_map.etc-ipython.metadata.0.namespace
+              kind = "configmap"
+            }
+
+            "/etc/jupyter" = {
+              name = kubernetes_config_map.etc-jupyter.metadata.0.name
+              namespace = kubernetes_config_map.etc-jupyter.metadata.0.namespace
+              kind = "configmap"
+            }
+
+            "/opt/conda/envs/default/share/jupyter/lab/settings" = {
+              name = kubernetes_config_map.jupyterlab-settings.metadata.0.name
+              namespace = kubernetes_config_map.jupyterlab-settings.metadata.0.namespace
+              kind = "configmap"
+            }
+
+            "/shared/examples" = {
+              name = kubernetes_config_map.shared-examples.metadata.0.name
+              namespace = kubernetes_config_map.shared-examples.metadata.0.namespace
+              kind = "configmap"
+            }
+          }
+        )
         environments      = var.conda-store-environments
       }
 
@@ -41,9 +73,9 @@ resource "helm_release" "jupyterhub" {
         }
 
         extraConfig = {
-          "01-theme.py" = file("${path.module}/files/01-theme.py")
-          "02-spawner.py" = file("${path.module}/files/02-spawner.py")
-          "03-profiles.py" = file("${path.module}/files/03-profiles.py")
+          "01-theme.py"       = file("${path.module}/files/jupyterhub/01-theme.py")
+          "02-spawner.py"     = file("${path.module}/files/jupyterhub/02-spawner.py")
+          "03-profiles.py"    = file("${path.module}/files/jupyterhub/03-profiles.py")
         }
 
         services = {
@@ -159,10 +191,11 @@ module "jupyterhub-openid-client" {
   role_mapping = {
     "admin" = ["jupyterhub_admin", "dask_gateway_admin"]
     "developer" = ["jupyterhub_developer", "dask_gateway_developer"]
-    "practitioner" = ["jupyterhub_developer"]
+    "analyst" = ["jupyterhub_developer"]
   }
   callback-url-paths = [
     "https://${var.external-url}/hub/oauth_callback",
     var.jupyterhub-logout-redirect-url
   ]
+  jupyterlab_profiles_mapper = true
 }

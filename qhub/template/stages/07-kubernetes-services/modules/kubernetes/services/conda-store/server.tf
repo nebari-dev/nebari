@@ -29,8 +29,7 @@ module "conda-store-openid-client" {
   role_mapping = {
     "admin" = ["conda_store_admin"]
     "developer" = ["conda_store_developer"]
-    "practitioner" = ["conda_store_developer"]
-    "viewer" = ["conda_store_viewer"]
+    "analyst" = ["conda_store_developer"]
   }
   callback-url-paths = [
     "https://${var.external-url}/conda-store/oauth_callback"
@@ -79,6 +78,11 @@ resource "kubernetes_deployment" "server" {
       metadata {
         labels = {
           role = "${var.name}-conda-store-server"
+        }
+
+        annotations = {
+          # This lets us autorestart when the config changes!
+          "checksum/config-map" = sha256(jsonencode(kubernetes_config_map.conda-store-config.data))
         }
       }
 

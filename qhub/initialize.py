@@ -15,6 +15,7 @@ from qhub.provider import git
 from qhub.utils import (
     namestr_regex,
     qhub_image_tag,
+    qhub_dask_version,
     check_cloud_credentials,
     set_kubernetes_version,
 )
@@ -37,8 +38,6 @@ BASE_CONFIGURATION = {
         "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
         "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
         "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
-        "dask_gateway": f"quansight/qhub-dask-gateway:{qhub_image_tag}",
-        "conda_store": "quansight/conda-store-server:v0.3.9",
     },
     "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
     "theme": {
@@ -66,7 +65,11 @@ BASE_CONFIGURATION = {
     },
 }
 
-CICD_CONFIGURATION = {"type": "PLACEHOLDER", "branch": "main"}
+CICD_CONFIGURATION = {
+    "type": "PLACEHOLDER",
+    "branch": "main",
+    "commit_render": True,
+}
 
 AUTH_PASSWORD = {
     "type": "password",
@@ -170,7 +173,6 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 0.75,
                 "mem_limit": "4G",
                 "mem_guarantee": "2.5G",
-                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
         {
@@ -181,7 +183,6 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1.5,
                 "mem_limit": "8G",
                 "mem_guarantee": "5G",
-                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
     ],
@@ -192,7 +193,6 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "4G",
             "worker_memory": "2.5G",
             "worker_threads": 1,
-            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
         "Medium Worker": {
             "worker_cores_limit": 2,
@@ -200,7 +200,6 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "8G",
             "worker_memory": "5G",
             "worker_threads": 2,
-            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
     },
 }
@@ -213,7 +212,7 @@ DEFAULT_ENVIRONMENTS = {
             "python",
             "ipykernel",
             "ipywidgets",
-            "qhub-dask ==0.3.13",
+            f"qhub-dask =={qhub_dask_version}",
             "python-graphviz",
             "numpy",
             "numba",
@@ -227,15 +226,15 @@ DEFAULT_ENVIRONMENTS = {
             "python==3.9.7",
             "ipykernel==6.4.1",
             "ipywidgets==7.6.5",
-            "qhub-dask==0.3.13",
+            f"qhub-dask=={qhub_dask_version}",
             "param==1.11.1",
             "python-graphviz==0.17",
             "matplotlib==3.4.3",
-            "panel==0.12.4",
-            "voila==0.2.16",
+            "panel==0.12.7",
+            "voila==0.3.5",
             "streamlit==1.0.0",
             "dash==2.0.0",
-            "cdsdashboards-singleuser==0.6.0",
+            "cdsdashboards-singleuser==0.6.1",
         ],
     },
 }
@@ -260,7 +259,8 @@ def render_config(
     config["provider"] = cloud_provider
 
     if ci_provider is not None and ci_provider != "none":
-        config["ci_cd"] = {"type": ci_provider, "branch": "main"}
+        config["ci_cd"] = CICD_CONFIGURATION.copy()
+        config["ci_cd"]["type"] = ci_provider
 
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}

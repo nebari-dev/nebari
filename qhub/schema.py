@@ -41,6 +41,12 @@ class AuthenticationEnum(str, enum.Enum):
     custom = "custom"
 
 
+class AccessEnum(str, enum.Enum):
+    all = "all"
+    yaml = "yaml"
+    keycloak = "keycloak"
+
+
 class Base(pydantic.BaseModel):
     ...
 
@@ -54,6 +60,7 @@ class Base(pydantic.BaseModel):
 class CICD(Base):
     type: CiEnum
     branch: str
+    commit_render: typing.Optional[bool] = True
     before_script: typing.Optional[typing.List[str]]
     after_script: typing.Optional[typing.List[str]]
 
@@ -120,8 +127,6 @@ class DefaultImages(Base):
     jupyterhub: str
     jupyterlab: str
     dask_worker: str
-    dask_gateway: str
-    conda_store: str
 
 
 # =========== Authentication ==============
@@ -232,6 +237,7 @@ class DigitalOceanProvider(Base):
     region: str
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
+    terraform_overrides: typing.Any
 
 
 class GoogleCloudPlatformProvider(Base):
@@ -241,6 +247,7 @@ class GoogleCloudPlatformProvider(Base):
     availability_zones: typing.Optional[typing.List[str]]  # Genuinely optional
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
+    terraform_overrides: typing.Any
 
 
 class AzureProvider(Base):
@@ -248,6 +255,7 @@ class AzureProvider(Base):
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
     storage_account_postfix: str
+    terraform_overrides: typing.Any
 
 
 class AmazonWebServicesProvider(Base):
@@ -255,6 +263,7 @@ class AmazonWebServicesProvider(Base):
     availability_zones: typing.Optional[typing.List[str]]
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
+    terraform_overrides: typing.Any
 
 
 class LocalProvider(Base):
@@ -284,13 +293,14 @@ class KubeSpawner(Base):
     cpu_guarantee: int
     mem_limit: str
     mem_guarantee: str
-    image: str
+    image: typing.Optional[str]
 
     class Config:
         extra = "allow"
 
 
 class JupyterLabProfile(Base):
+    access: AccessEnum = AccessEnum.all
     display_name: str
     description: str
     default: typing.Optional[bool]
@@ -298,13 +308,25 @@ class JupyterLabProfile(Base):
     groups: typing.Optional[typing.List[str]]
     kubespawner_override: typing.Optional[KubeSpawner]
 
+    @root_validator
+    def only_yaml_can_have_groups_and_users(cls, values):
+        if values["access"] != AccessEnum.yaml:
+            if (
+                values.get("users", None) is not None
+                or values.get("groups", None) is not None
+            ):
+                raise ValueError(
+                    "Profile must not contain groups or users fields unless access = yaml"
+                )
+        return values
+
 
 class DaskWorkerProfile(Base):
     worker_cores_limit: int
     worker_cores: int
     worker_memory_limit: str
     worker_memory: str
-    image: str
+    image: typing.Optional[str]
 
     class Config:
         extra = "allow"
@@ -314,7 +336,7 @@ class Profiles(Base):
     jupyterlab: typing.List[JupyterLabProfile]
     dask_worker: typing.Dict[str, DaskWorkerProfile]
 
-    @validator("jupyterlab", pre=True)
+    @validator("jupyterlab")
     def check_default(cls, v, values):
         """Check if only one default value is present"""
         default = [attrs["default"] for attrs in v if "default" in attrs]
@@ -362,6 +384,10 @@ class QHubExtension(Base):
     qhubconfigyaml: bool = False
     logout: typing.Optional[str]
     envs: typing.Optional[typing.List[QHubExtensionEnv]]
+
+
+class Ingress(Base):
+    terraform_overrides: typing.Any
 
 
 # ======== External Container Registry ========
@@ -437,6 +463,7 @@ class Main(Base):
     prevent_deploy: bool = (
         False  # Optional, but will be given default value if not present
     )
+    ingress: typing.Optional[Ingress]
 
     # If the qhub_version in the schema is old
     # we must tell the user to first run qhub upgrade

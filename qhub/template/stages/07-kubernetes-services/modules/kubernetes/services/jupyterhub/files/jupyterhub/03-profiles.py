@@ -15,6 +15,7 @@ def base_profile_home_mounts(username):
 
     """
     home_pvc_name = z2jh.get_config("custom.home-pvc")
+    skel_mount = z2jh.get_config("custom.skel-mount")
     pvc_home_mount_path = "home/{username}"
     pod_home_mount_path = "/home/{username}"
 
@@ -25,7 +26,13 @@ def base_profile_home_mounts(username):
                 "persistentVolumeClaim": {
                     "claimName": home_pvc_name,
                 },
-            }
+            },
+            {
+                "name": "skel",
+                "configMap": {
+                    "name": skel_mount["name"],
+                },
+            },
         ]
     }
 
@@ -35,11 +42,13 @@ def base_profile_home_mounts(username):
                 "mountPath": pod_home_mount_path.format(username=username),
                 "name": "home",
                 "subPath": pvc_home_mount_path.format(username=username),
-            }
+            },
         ]
     }
 
-    MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod 777 /mnt/{path}"
+    MKDIR_OWN_DIRECTORY = (
+        "mkdir -p /mnt/{path} && chmod 777 /mnt/{path} && cp -r /etc/skel/. /mnt/{path}"
+    )
     command = MKDIR_OWN_DIRECTORY.format(
         path=pvc_home_mount_path.format(username=username)
     )
@@ -49,7 +58,10 @@ def base_profile_home_mounts(username):
             "image": "busybox:1.31",
             "command": ["sh", "-c", command],
             "securityContext": {"runAsUser": 0},
-            "volumeMounts": [{"mountPath": "/mnt", "name": "home"}],
+            "volumeMounts": [
+                {"mountPath": "/mnt", "name": "home"},
+                {"mountPath": "/etc/skel", "name": "skel"},
+            ],
         }
     ]
     return {
@@ -263,7 +275,9 @@ def configure_user(username, groups, uid=1000, gid=100):
             # mount the shared directories for user only if there are
             # shared folders (groups) that the user is a member of
             # else ensure that the `shared` folder symlink does not exist
-            f"ln -sfn /shared /home/{username}/shared" if groups else f"rm -f /home/{username}/shared",
+            f"ln -sfn /shared /home/{username}/shared"
+            if groups
+            else f"rm -f /home/{username}/shared",
             # conda-store environment configuration
             f"printf '{condarc}' > /home/{username}/.condarc",
             # jupyter configuration
@@ -287,7 +301,7 @@ def configure_user(username, groups, uid=1000, gid=100):
     }
 
 
-def render_profile(profile, username, groups):
+def render_profile(profile, username, groups, keycloak_profilenames):
     """Render each profile for user
 
     If profile is not available for given username, groups returns
@@ -303,6 +317,22 @@ def render_profile(profile, username, groups):
         }
     }
     """
+    access = profile.get("access", "all")
+
+    if access == "yaml":
+        # check that username or groups in allowed groups for profile
+        # profile.groups and profile.users can be None or empty lists, or may not be members of profile at all
+        user_not_in_users = username not in set(profile.get("users", []) or [])
+        user_not_in_groups = (
+            set(groups) & set(profile.get("groups", []) or [])
+        ) == set()
+        if user_not_in_users and user_not_in_groups:
+            return None
+    elif access == "keycloak":
+        # Keycloak mapper should provide the 'jupyterlab_profiles' attribute from groups/user
+        if profile.get("display_name", None) not in keycloak_profilenames:
+            return None
+
     profile = copy.copy(profile)
     profile_kubespawner_override = profile.get("kubespawner_override")
     profile["kubespawner_override"] = functools.reduce(
@@ -317,6 +347,19 @@ def render_profile(profile, username, groups):
         ],
         {},
     )
+
+    # We need to merge any env vars from the spawner with any overrides from the profile
+    # This is mainly to ensure JUPYTERHUB_ANYONE/GROUP is passed through from the spawner
+    # to control dashboard access.
+    envvars_fixed = {**(profile["kubespawner_override"].get("environment", {}))}
+
+    def preserve_envvars(spawner):
+        # This adds in JUPYTERHUB_ANYONE/GROUP rather than overwrite all env vars,
+        # if set in the spawner for a dashboard to control access.
+        return {**envvars_fixed, **spawner.environment}
+
+    profile["kubespawner_override"]["environment"] = preserve_envvars
+
     return profile
 
 
@@ -330,18 +373,24 @@ def render_profiles(spawner):
     spawner.log.error(str(auth_state))
 
     username = auth_state["oauth_user"]["preferred_username"]
-    # only return groups that match '/projects/[.^/]+'
-    groups = [
-        os.path.basename(_)
-        for _ in auth_state["oauth_user"]["groups"]
-        if os.path.dirname(_) == "/projects"
-    ]
+    # only return the lowest level group name
+    # e.g. /projects/myproj -> myproj
+    # and /developers -> developers
+    groups = [os.path.basename(_) for _ in auth_state["oauth_user"]["groups"]]
     spawner.log.error(f"user info: {username} {groups}")
+
+    keycloak_profilenames = auth_state["oauth_user"].get("jupyterlab_profiles", [])
 
     # fetch available profiles and render additional attributes
     profile_list = z2jh.get_config("custom.profiles")
     return list(
-        filter(None, [render_profile(p, username, groups) for p in profile_list])
+        filter(
+            None,
+            [
+                render_profile(p, username, groups, keycloak_profilenames)
+                for p in profile_list
+            ],
+        )
     )
 
 
@@ -386,7 +435,7 @@ def deep_merge(d1, d2):
 
 def generate_nss_files(users, groups):
     etc_passwd = []
-    passwd_format = "{username}:x:{uid}:{gid}:{username}:/home/jovyan:/bin/bash"
+    passwd_format = "{username}:x:{uid}:{gid}:{username}:/home/{username}:/bin/bash"
     for user in users:
         etc_passwd.append(passwd_format.format(**user))
 

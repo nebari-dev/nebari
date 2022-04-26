@@ -38,3 +38,20 @@ variable "certificate-secret-name" {
   description = "Kubernetes secret used for certificate"
   default     = ""
 }
+
+
+variable "load-balancer-ip" {
+  description = "IP Address of the load balancer"
+  type = string
+  default = null
+}
+
+
+variable "load-balancer-annotations" {
+  description = "Annotations for the load balancer"
+  type    = map(object({
+    key   = string
+    value = string
+  }))
+  default = null
+}

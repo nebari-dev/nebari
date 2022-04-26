@@ -7,7 +7,7 @@ repos:
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
   - repo: https://github.com/psf/black
-    rev: 20.8b1
+    rev: 22.3.0
     hooks:
     -   id: black
         exclude: '/qhub/template/'
@@ -30,3 +30,20 @@ repos:
             "--ignore", "DL3013",
             "--ignore", "DL3003",
         ]
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.13
+    hooks:
+    - id: mdformat
+      files: ^docs/
+      name: mdformat
+      description: "CommonMark compliant Markdown formatter"
+      entry: mdformat
+      language: python
+      # This is to support a use case where pre-commit runs in Python 2.
+      # Should eventually be removed, at latest when `minimum_pre_commit_version`
+      # is set to 2.0.0.
+      language_version: python3
+      types: [markdown]
+      minimum_pre_commit_version: '1.0.0'
+      additional_dependencies:
+      - mdformat-tables

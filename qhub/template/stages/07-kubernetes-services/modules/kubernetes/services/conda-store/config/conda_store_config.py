@@ -13,6 +13,7 @@ c.CondaStore.database_url = "postgresql+psycopg2://${postgres-username}:${postgr
 c.CondaStore.default_uid = 1000
 c.CondaStore.default_gid = 100
 c.CondaStore.default_permissions = "775"
+c.CondaStore.conda_included_packages = ["ipykernel"]
 
 c.S3Storage.internal_endpoint = "${minio-service}:9000"
 c.S3Storage.internal_secure = False
@@ -93,11 +94,10 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         }
 
         for group in user_data.get("groups", []):
-            # only add groups that match the regex "/projects/[.^/]+"
-            if os.path.dirname(group) == "/projects":
-                group_name = os.path.basename(group)
-                namespaces.add(group_name)
-                role_bindings[f"{group_name}/*"] = roles
+            # Use only the base name of Keycloak groups
+            group_name = os.path.basename(group)
+            namespaces.add(group_name)
+            role_bindings[f"{group_name}/*"] = roles
 
         conda_store = get_conda_store()
         for namespace in namespaces:
@@ -119,3 +119,4 @@ c.CondaStoreServer.authentication_class = KeyCloakAuthentication
 # ==================================
 c.CondaStoreWorker.log_level = logging.INFO
 c.CondaStoreWorker.watch_paths = ["/opt/environments"]
+c.CondaStoreWorker.concurrency = 4

@@ -28,6 +28,11 @@ resource "helm_release" "minio" {
     value = join(" ", var.buckets)
   }
 
+  set {
+    name ="persistence.size"
+    value = var.storage
+  }
+
   values = concat([
     file("${path.module}/values.yaml"),
     jsonencode({

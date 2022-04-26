@@ -43,3 +43,19 @@ singleuser:
     guarantee: "1G"
   networkPolicy:
     enabled: false
+
+# cull relates to the jupyterhub-idle-culler service, responsible for evicting
+# inactive singleuser pods.
+#
+# The configuration below, except for enabled, corresponds to command-line flags
+# for jupyterhub-idle-culler as documented here:
+# https://github.com/jupyterhub/jupyterhub-idle-culler#as-a-standalone-script
+#
+cull:
+  enabled: true
+  users: false
+  removeNamedServers: false
+  timeout: 1800
+  every: 600
+  concurrency: 10
+  maxAge: 0

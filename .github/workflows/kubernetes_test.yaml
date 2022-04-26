@@ -12,7 +12,8 @@ on:
       - "setup.cfg"
       - "pyproject.yoml"
   push:
-    branches: [ $default-branch ]
+    branches:
+      - main
     paths:
       - ".github/workflows/kubernetes_test.yaml"
       - "tests/**"
@@ -145,15 +146,18 @@ jobs:
           sudo apt-get -y update
           sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
-      - name: Read example-user password
-        run: python -c "import tempfile, os; print('CYPRESS_EXAMPLE_USER_PASSWORD='+open(os.path.join(tempfile.gettempdir(), 'QHUB_DEFAULT_PASSWORD')).read())" >> "$GITHUB_ENV"
-
       - name: Get qhub-config.yaml full path
         run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`" >> "$GITHUB_ENV"
 
       - name: Create example-user
         run: |
-          qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser example-user "${CYPRESS_EXAMPLE_USER_PASSWORD}"
+          export CYPRESS_EXAMPLE_USER_NAME=example-user
+          export CYPRESS_EXAMPLE_USER_PASSWORD=P@sswo3d
+
+          echo "CYPRESS_EXAMPLE_USER_NAME=${CYPRESS_EXAMPLE_USER_NAME}" >> $GITHUB_ENV
+          echo "CYPRESS_EXAMPLE_USER_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}" >> $GITHUB_ENV
+
+          qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}"
           qhub keycloak --config "${QHUB_CONFIG_PATH}" listusers
 
       - name: Cypress run
@@ -174,19 +178,35 @@ jobs:
 
       - name: Deployment Pytests
         run: |
-          export KEYCLOAK_USERNAME=qhub-user
-          export KEYCLOAK_PASSWORD=password
-          qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser $KEYCLOAK_USERNAME $KEYCLOAK_PASSWORD
-          pytest tests_deployment/ -v
+          export KEYCLOAK_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
+          export KEYCLOAK_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
+          pytest tests_deployment/ -v -s
+
+      - name: JupyterHub Notebook Tests
+        # run jhub-client after pytest since jhubctl can cleanup
+        # the running server
+        run: |
+          export JUPYTERHUB_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
+          export JUPYTERHUB_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
+          jhubctl --verbose run --hub=https://github-actions.qhub.dev \
+                                --auth-type=keycloak \
+                                --validate --no-verify-ssl \
+                                --kernel python3 \
+                                --stop-server \
+                                --notebook tests_deployment/assets/notebook/simple.ipynb \
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup qhub deployment
         run: |
           cd local-deployment
-          # This is a known failure at the moment.
-          qhub destroy --config qhub-config.yaml || true
+          qhub destroy --config qhub-config.yaml
 
       - name: Basic kubectl checks after cleanup
         if: always()
         run: |
           kubectl get all,cm,secret,ing -A
+
+      - name: Delete minikube cluster
+        if: always()
+        run: |
+          minikube delete

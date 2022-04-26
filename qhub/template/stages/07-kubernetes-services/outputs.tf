@@ -13,13 +13,13 @@ output "service_urls" {
       url = "https://${var.endpoint}/"
       health_url = "https://${var.endpoint}/hub/api/"
     }
-    monitoring   = {
-      url = "https://${var.endpoint}/monitoring/"
-      health_url = "https://${var.endpoint}/monitoring/api/health"
-    }
     keycloak     = {
       url = "https://${var.endpoint}/auth/"
       health_url = "https://${var.endpoint}/auth/realms/master"
+    }
+    monitoring   = {
+      url = var.monitoring-enabled ? "https://${var.endpoint}/monitoring/" : null
+      health_url = var.monitoring-enabled ? "https://${var.endpoint}/monitoring/api/health" : null
     }
   }
 }

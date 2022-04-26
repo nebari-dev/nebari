@@ -93,8 +93,7 @@ module "grafana-client-id" {
   role_mapping = {
     "admin" = ["grafana_admin"]
     "developer" = ["grafana_developer"]
-    "practitioner" = ["grafana_viewer"]
-    "viewer" = ["grafana_viewer"]
+    "analyst" = ["grafana_viewer"]
   }
   callback-url-paths = [
     "https://${var.external-url}/monitoring/login/generic_oauth"

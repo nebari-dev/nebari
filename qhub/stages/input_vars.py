@@ -47,6 +47,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "QHUB_KUBECONFIG"
             ),
+            **config.get("do", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "gcp":
         return {
@@ -57,6 +58,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "node_groups": [
                 {
                     "name": key,
+                    "instance_type": value["instance"],
                     "min_size": value["min_nodes"],
                     "max_size": value["max_nodes"],
                     **value,
@@ -66,6 +68,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "QHUB_KUBECONFIG"
             ),
+            **config.get("gcp", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "azure":
         return {
@@ -79,6 +82,7 @@ def stage_02_infrastructure(stage_outputs, config):
             ),
             "resource_group_name": f'{config["project_name"]}-{config["namespace"]}',
             "node_resource_group_name": f'{config["project_name"]}-{config["namespace"]}-node-resource-group',
+            **config.get("azure", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "aws":
         return {
@@ -98,6 +102,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "QHUB_KUBECONFIG"
             ),
+            **config.get("aws", {}).get("terraform_overrides", {}),
         }
     else:
         return {}
@@ -151,18 +156,25 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
         "certificate-secret-name": config["certificate"]["secret_name"]
         if config["certificate"]["type"] == "existing"
         else None,
+        **config.get("ingress", {}).get("terraform_overrides", {}),
     }
 
 
 def stage_05_kubernetes_keycloak(stage_outputs, config):
+    initial_root_password = (
+        config["security"].get("keycloak", {}).get("initial_root_password", "")
+    )
+    if initial_root_password is None:
+        initial_root_password = ""
+
     return {
         "name": config["project_name"],
         "environment": config["namespace"],
         "endpoint": config["domain"],
-        "initial-root-password": config["security"]["keycloak"][
-            "initial_root_password"
+        "initial-root-password": initial_root_password,
+        "overrides": [
+            json.dumps(config["security"].get("keycloak", {}).get("overrides", {}))
         ],
-        "overrides": [json.dumps(config["security"]["keycloak"].get("overrides", {}))],
         "node-group": _calculate_note_groups(config)["general"],
     }
 
@@ -170,15 +182,18 @@ def stage_05_kubernetes_keycloak(stage_outputs, config):
 def stage_06_kubernetes_keycloak_configuration(stage_outputs, config):
     realm_id = "qhub"
 
+    users_group = (
+        ["users"] if config["security"].get("shared_users_group", False) else []
+    )
+
     return {
         "realm": realm_id,
-        "realm_display_name": config["security"]["keycloak"].get(
-            "realm_display_name", realm_id
-        ),
+        "realm_display_name": config["security"]
+        .get("keycloak", {})
+        .get("realm_display_name", realm_id),
         "authentication": config["security"]["authentication"],
-        "default_project_groups": ["users"]
-        if config["security"].get("shared_users_group", False)
-        else [],
+        "keycloak_groups": ["admin", "developer", "analyst"] + users_group,
+        "default_groups": ["analyst"] + users_group,
     }
 
 
@@ -209,10 +224,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "node_groups": _calculate_note_groups(config),
         # conda-store
         "conda-store-environments": config["environments"],
-        "conda-store-storage": config["storage"]["conda_store"],
-        "conda-store-image": _split_docker_image_name(
-            config["default_images"]["conda_store"]
-        ),
+        "conda-store-filesystem-storage": config["storage"]["conda_store"],
         # jupyterhub
         "cdsdashboards": config["cdsdashboards"],
         "jupyterhub-theme": config["theme"]["jupyterhub"],
@@ -237,9 +249,6 @@ def stage_07_kubernetes_services(stage_outputs, config):
             .get("extraEnv", [])
         ),
         # dask-gateway
-        "dask-gateway-image": _split_docker_image_name(
-            config["default_images"]["dask_gateway"]
-        ),
         "dask-worker-image": _split_docker_image_name(
             config["default_images"]["dask_worker"]
         ),
