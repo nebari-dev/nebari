@@ -15,10 +15,10 @@ def main():
     print(f"dask version         = {dask.__version__}")
     print(f"dask_gateway version = {dask_gateway.__version__}")
     print(f"distributed version  = {distributed.__version__}")
-    
+
     gateway = dask_gateway.Gateway()
     options = gateway.cluster_options(use_local_defaults=False)
-    
+
     print("Starting cluster")
     cluster = gateway.new_cluster(options)
     client = cluster.get_client()
