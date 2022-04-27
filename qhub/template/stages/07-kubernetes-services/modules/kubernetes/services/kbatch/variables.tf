@@ -38,6 +38,17 @@ variable "overrides" {
   default     = []
 }
 
-variable "dask-gateway-address" {}
-variable "dask-gateway-proxy-address" {}
-variable "dask-worker-image" {}
+variable "dask-gateway-address" {
+  description = "Dask Gateway address"
+  type        = string
+}
+
+variable "dask-gateway-proxy-address" {
+  description = "Dask Gateway proxy-address"
+  type        = string
+}
+
+variable "dask-worker-image" {
+  description = "Dask worker image"
+  type        = string
+}

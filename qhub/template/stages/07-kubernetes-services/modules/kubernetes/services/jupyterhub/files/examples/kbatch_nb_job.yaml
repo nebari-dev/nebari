@@ -2,5 +2,5 @@ name: nb-job
 image: mcr.microsoft.com/planetary-computer/python:latest
 args:
   - papermill
-  - kbatch_nb_test.ipynb
-code: kbatch_nb_test.ipynb
+  - kbatch_nb.ipynb
+code: kbatch_nb.ipynb
