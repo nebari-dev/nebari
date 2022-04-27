@@ -50,5 +50,8 @@ variable "dask-gateway-proxy-address" {
 
 variable "dask-worker-image" {
   description = "Dask worker image"
-  type        = string
+  type = object({
+    name = string
+    tag  = string
+  })
 }
