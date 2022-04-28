@@ -722,6 +722,8 @@ This is quite useful for pinning the IP Address of the load balancer.
 
 ### Deployment inside Virtual Private Network
 
+#### Azure
+
 Using terraform overrides you can also deploy inside a virtual private network.
 
 An example configuration for Azure is given below:
@@ -733,6 +735,38 @@ azure:
       vnet_subnet_id: '/subscriptions/<subscription_id>/resourceGroups/<resource_group>/providers/Microsoft.Network/virtualNetworks/<vnet-name>/subnets/<subnet-name>'
   region: Central US
 ```
+
+#### Google Cloud
+
+Using terraform overrides you can also deploy inside a VPC in GCP, making the
+Kubernetes cluster private. Here is an example for configuring the same:
+
+```yaml
+google_cloud_platform:
+  terraform_overrides:
+    networking_mode: "VPC_NATIVE"
+    network: "your-vpc-name"
+    subnetwork: "your-vpc-subnet-name"
+    private_cluster_config:
+      enable_private_nodes: true
+      enable_private_endpoint: true
+      master_ipv4_cidr_block: "172.16.0.32/28"
+    master_authorized_networks_config:
+      cidr_block: null
+      display_name: null
+```
+
+As the name suggests the cluster will be private, which means it would not have
+access to the internet either, which is not ideal for deploying pods in the cluster,
+hence we need to allow internet access for the cluster, which can be achieved by creating
+a NAT router by running the following two commands for your vpc network.
+
+```
+gcloud compute routers create qhub-nat-router --network your-vpc-name --region your-region
+
+gcloud compute routers nats create nat-config --router qhub-nat-router  --nat-all-subnet-ip-ranges --auto-allocate-nat-external-ips --region your-region
+```
+
 
 #### Deployment Notes
 
