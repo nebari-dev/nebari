@@ -93,8 +93,6 @@ the env name. It's not recommended, but there are valid use cases of this operat
 
 ### I want to upgrade the instance size the `general` node group, is this possible?
 
-Once initialized, the `qhub-config.yaml` has the `general` node groups
-
 The `general` node group / node pool is the node (usually only one) that hosts most of the pods that QHub relies on for its core services, `hub`, `conda-store`, `proxy` and so on.
 We have tried to size it so that the initial deployment will work out of the box but also not set it too large that it incurs unnecessary cloud compute costs.
 
