@@ -9,9 +9,11 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   # Azure requires that a new, non-existent Resource Group is used, as otherwise the provisioning of the Kubernetes Service will fail.
   node_resource_group = var.node_resource_group_name
+  private_cluster_enabled = var.private_cluster_enabled
 
   kubernetes_version = var.kubernetes_version
   default_node_pool {
+    vnet_subnet_id = var.vnet_subnet_id
     name                = var.node_groups[0].name
     node_count          = 1
     vm_size             = var.node_groups[0].instance_type
