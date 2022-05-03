@@ -34,7 +34,7 @@ def create_init_subcommand(subparser):
     subparser.add_argument(
         "--repository-auto-provision",
         action="store_true",
-        help="Attempt to automatically provision repository. For github it requires environment variables GITHUB_USERNAME, GITHUB_TOKEN",
+        help="Attempt to automatically provision repository. For github it requires environment variables USERNAME_GITHUB, TOKEN_GITHUB",
     )
     subparser.add_argument(
         "--auth-auto-provision",

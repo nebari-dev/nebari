@@ -14,7 +14,7 @@ from qhub.utils import pip_install_qhub
 def github_request(url, method="GET", json=None):
     GITHUB_BASE_URL = "https://api.github.com/"
 
-    for name in ("GITHUB_USERNAME", "GITHUB_TOKEN"):
+    for name in ("USERNAME_GITHUB", "TOKEN_GITHUB"):
         if os.environ.get(name) is None:
             raise ValueError(
                 f"environment variable={name} is required for github automation"
@@ -30,7 +30,7 @@ def github_request(url, method="GET", json=None):
         f"{GITHUB_BASE_URL}{url}",
         json=json,
         auth=requests.auth.HTTPBasicAuth(
-            os.environ["GITHUB_USERNAME"], os.environ["GITHUB_TOKEN"]
+            os.environ["USERNAME_GITHUB"], os.environ["TOKEN_GITHUB"]
         ),
     )
     response.raise_for_status()
@@ -65,7 +65,7 @@ def get_repository(owner, repo):
 
 
 def create_repository(owner, repo, description, homepage, private=True):
-    if owner == os.environ.get("GITHUB_USERNAME"):
+    if owner == os.environ.get("USERNAME_GITHUB"):
         github_request(
             "user/repos",
             method="POST",
@@ -92,7 +92,7 @@ def create_repository(owner, repo, description, homepage, private=True):
 
 def gha_env_vars(config):
     env_vars = {
-        "GITHUB_TOKEN": "${{ secrets.GITHUB_TOKEN }}",
+        "TOKEN_GITHUB": "${{ secrets.TOKEN_GITHUB }}",
     }
 
     if os.environ.get("QHUB_GH_BRANCH"):
@@ -286,7 +286,7 @@ def gen_qhub_linter(config):
     step4_envs = {
         "PR_NUMBER": GHA_job_steps_extras(__root__="${{ github.event.number }}"),
         "REPO_NAME": GHA_job_steps_extras(__root__="${{ github.repository }}"),
-        "GITHUB_TOKEN": GHA_job_steps_extras(
+        "TOKEN_GITHUB": GHA_job_steps_extras(
             __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
         ),
     }

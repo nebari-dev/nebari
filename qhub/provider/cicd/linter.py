@@ -90,7 +90,7 @@ def comment_on_pr(config):
     owner, repo_name = os.environ["REPO_NAME"].split("/")
     pr_id = os.environ["PR_NUMBER"]
 
-    token = os.environ["GITHUB_TOKEN"]
+    token = os.environ["TOKEN_GITHUB"]
     url = f"https://api.github.com/repos/{owner}/{repo_name}/issues/{pr_id}/comments"
 
     payload = {"body": message}

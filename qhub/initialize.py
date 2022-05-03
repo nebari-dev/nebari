@@ -470,7 +470,7 @@ def github_auto_provision(config, owner, repo):
             }:
                 github.update_secret(owner, repo, name, os.environ[name])
         github.update_secret(
-            owner, repo, "REPOSITORY_ACCESS_TOKEN", os.environ["GITHUB_TOKEN"]
+            owner, repo, "REPOSITORY_ACCESS_TOKEN", os.environ["TOKEN_GITHUB"]
         )
     except requests.exceptions.HTTPError as he:
         raise ValueError(

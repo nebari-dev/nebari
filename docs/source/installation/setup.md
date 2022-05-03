@@ -204,8 +204,8 @@ automatically generates the deployment modules for the infrastructure. To do tha
 a github personal access token via [these instructions](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token). The token needs permissions to
 create a repo and create secrets on the repo. At the moment we don't have the permissions well scoped out so to be on the safe side enable all permissions.
 
-- `GITHUB_USERNAME`: GitHub username
-- `GITHUB_TOKEN`: GitHub-generated token
+- `USERNAME_GITHUB`: GitHub username
+- `TOKEN_GITHUB`: GitHub-generated token
 
 </details>
 
