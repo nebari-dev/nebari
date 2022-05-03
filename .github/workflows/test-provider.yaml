@@ -79,7 +79,7 @@ jobs:
           pip install .[dev]
       - name: QHub Initialize
         run: |
-          qhub init "${{ matrix.provider }}" --project "test--${{ matrix.provider }}-${{ matrix.cicd }}" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt --ci-provider ${{ matrix.cicd }}
+          qhub init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt --ci-provider ${{ matrix.cicd }}
           cat "qhub-config.yaml"
       - name: QHub Render
         run: |
