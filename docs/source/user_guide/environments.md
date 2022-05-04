@@ -27,6 +27,9 @@ authentication via keycloak. The [create environment endpoint](https://conda-sto
 create a new environment. Additionally, you can update existing environments by
 [visiting the environment](https://conda-store.readthedocs.io/en/latest/user_guide.html#environment-namespace-name-environments) and clicking edit.
 
+> NOTE: Environments, even global ones, created from the `/conda-store` user interface CANNOT be used when running dashboards via the CDSDashboard interface. Only those added via
+> the `qhub-config.yaml`.
+
 In order for your new environment to be properly visible in the list of available kernels, you will need to include `ipykernel` and `ipywidgets` in your environment's dependency
 list. Also, if using Dask, you will need to include [extra dependencies](./faq.md/#whats-included-in-the-user-environment-if-a-user-wants-to-use-dask) to maintain version
 compatibility between the Dask client and server.
