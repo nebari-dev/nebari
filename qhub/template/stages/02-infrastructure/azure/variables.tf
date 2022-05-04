@@ -42,3 +42,15 @@ variable "node_resource_group_name" {
   description = "The name of the Resource Group where the Kubernetes Nodes should exist"
   type        = string
 }
+
+variable "vnet_subnet_id" {
+  description = "The ID of a Subnet where the Kubernetes Node Pool should exist. Changing this forces a new resource to be created."
+  type        = string
+  default     = null
+}
+
+variable "private_cluster_enabled" {
+  description = "Should this Kubernetes Cluster have its API server only exposed on internal IP addresses? This provides a Private IP Address for the Kubernetes API on the Virtual Network where the Kubernetes Cluster is located. Defaults to false. Changing this forces a new resource to be created."
+  default     = false
+  type        = bool
+}

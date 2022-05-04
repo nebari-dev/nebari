@@ -57,7 +57,9 @@ The `qhub` realm is selected by default, we strongly recommend leaving it as is.
 Depending on the authentication provider selected ('password', 'GitHub' or 'Auth0'), the values entered into the 'Username' field will differ slightly. The following table outlines
 those differences:
 
-| | Password | GitHub | Auth0 | |---|---|---|---| | Username | *unique username* | *GitHub username* | *Email to login with* |
+|          | Password          | GitHub            | Auth0                 |
+| -------- | ----------------- | ----------------- | --------------------- |
+| Username | *unique username* | *GitHub username* | *Email to login with* |
 
 Once the 'Username' field is updated, please add a valid email address in the 'Email' field.
 
@@ -112,8 +114,11 @@ choose 'Password\` based authentication, enter the username and password you cho
 Groups represent a collection of users that perform similar actions and therefore require the similar permissions. By default, QHub is deployed with the following groups: 'admin',
 'developer', 'analyst' and 'viewer'.
 
-| Group | Access to QHub Resources | |---|---| | 'admin' | Conda-Store Admin <br> Dask Admin <br> Jupyterhub Admin <br> Graphana Admin | | 'analyst' | Conda-Store Developer <br>
-Jupyterhub Developer <br> Graphana Viewer | | 'developer' | Conda-Store Developer <br> Dask Developer <br> Jupyterhub Developer <br> Graphana Developer |
+| Group       | Access to QHub Resources                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| 'admin'     | Conda-Store Admin <br> Dask Admin <br> Jupyterhub Admin <br> Graphana Admin                 |
+| 'analyst'   | Conda-Store Developer <br> Jupyterhub Developer <br> Graphana Viewer                        |
+| 'developer' | Conda-Store Developer <br> Dask Developer <br> Jupyterhub Developer <br> Graphana Developer |
 
 To create new groups or modify (or delete) existing groups, log in as `root` and click 'Groups' on the left-hand side.
 
