@@ -275,6 +275,12 @@ ______________________________________________________________________
 
 # Minikube on Mac
 
+At one point developing with Minikube on a Mac worked, unfortunately this appears to no longer be the case. A few differences exists between how Minikube is deployed on Mac versus
+Linux and if you're interested to try the instructions as they appeared when this worked, open the collapsed tab below:
+
+<details>
+<summary>Previous instructions</summary>
+
 The earlier instructions for Minikube on Linux _nearly_ works on Mac except things that break without clever use of port forwarding at the right times.
 
 1 - When working out the IP addresses to configure metallb try this:
@@ -300,6 +306,7 @@ It might be possible to set `/etc/hosts` to include `github-actions.qhub.dev` as
 forward the traffic (from port 443 to something similar?). But you'd have to start that forwarding at the right point in the deployment. (When Kubernetes is ready, but before
 terraform runs the Keycloak operator...)
 
+</details>
 ______________________________________________________________________
 
 # Minikube on AWS
