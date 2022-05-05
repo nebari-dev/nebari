@@ -256,6 +256,9 @@ For any of the providers (besides local), adding a node group is as easy as the 
 
 > NOTE: For each provider, details such as **instance names**, **availability zones**, and **Kubernetes versions** will be DIFFERENT.
 
+> NOTE: upgrading the `general` node instance type may not be possible for your choosen provider.
+> [See FAQ.](../user_guide/faq.md#i-want-to-upgrade-the-instance-size-the-general-node-group-is-this-possible)
+
 ### Providers
 
 To take advantage of the auto-scaling and dask-distributed computing capabilities, QHub can be deployed on a handful of the most commonly used cloud providers. QHub utilizes many
@@ -715,6 +718,63 @@ ingress:
 ```
 
 This is quite useful for pinning the IP Address of the load balancer.
+
+### Deployment inside Virtual Private Network
+
+#### Azure
+
+Using terraform overrides you can also deploy inside a virtual private network.
+
+An example configuration for Azure is given below:
+
+```yaml
+azure:
+  terraform_overrides:
+      private_cluster_enabled: true
+      vnet_subnet_id: '/subscriptions/<subscription_id>/resourceGroups/<resource_group>/providers/Microsoft.Network/virtualNetworks/<vnet-name>/subnets/<subnet-name>'
+  region: Central US
+```
+
+#### Google Cloud
+
+Using terraform overrides you can also deploy inside a VPC in GCP, making the
+Kubernetes cluster private. Here is an example for configuring the same:
+
+```yaml
+google_cloud_platform:
+  terraform_overrides:
+    networking_mode: "VPC_NATIVE"
+    network: "your-vpc-name"
+    subnetwork: "your-vpc-subnet-name"
+    private_cluster_config:
+      enable_private_nodes: true
+      enable_private_endpoint: true
+      master_ipv4_cidr_block: "172.16.0.32/28"
+    master_authorized_networks_config:
+      cidr_block: null
+      display_name: null
+```
+
+As the name suggests the cluster will be private, which means it would not have
+access to the internet either, which is not ideal for deploying pods in the cluster,
+hence we need to allow internet access for the cluster, which can be achieved by creating
+a NAT router by running the following two commands for your vpc network.
+
+```
+gcloud compute routers create qhub-nat-router --network your-vpc-name --region your-region
+
+gcloud compute routers nats create nat-config --router qhub-nat-router  --nat-all-subnet-ip-ranges --auto-allocate-nat-external-ips --region your-region
+```
+
+
+#### Deployment Notes
+
+Deployment inside a virtual network is slightly different from deploying inside a public network,
+as the name suggests, since its a virtual private network, you need to be inside the network to
+able to deploy and access QHub. One way to achieve this is by creating a Virtual Machine inside
+the virtual network, just select the virtual network and subnet name under the networking
+settings of your cloud provider while creating the VM and then follow the usual deployment
+instructions as you would deploy from your local machine.
 
 # Full configuration example
 
