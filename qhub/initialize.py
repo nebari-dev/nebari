@@ -52,6 +52,7 @@ BASE_CONFIGURATION = {
             "text_color": "#111111",
             "h1_color": "#652e8e",
             "h2_color": "#652e8e",
+            "version": f"v{__version__}",
         }
     },
     "helm_extensions": [],

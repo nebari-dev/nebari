@@ -629,6 +629,8 @@ theme:
     h2_color: '#652e8e'
 ```
 
+Its also possible to display the current version of qhub by using the `display_version: 'True'` in the above `theme.jupyterhub` configuration.
+
 ## Environments
 
 ```yaml
