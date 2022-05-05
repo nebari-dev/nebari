@@ -428,14 +428,13 @@ class ExtContainerReg(Base):
 
 
 # ==================== Main ===================
-
 letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 
 
 class Main(Base):
-    project_name: letter_dash_underscore_pydantic
-    namespace: typing.Optional[letter_dash_underscore_pydantic]
     provider: ProviderEnum
+    project_name: str
+    namespace: typing.Optional[letter_dash_underscore_pydantic]
     qhub_version: str = ""
     ci_cd: typing.Optional[CICD]
     domain: str
@@ -484,6 +483,45 @@ class Main(Base):
     @classmethod
     def is_version_accepted(cls, v):
         return v != "" and rounded_ver_parse(v) == rounded_ver_parse(__version__)
+
+    @validator("project_name")
+    def project_name_convention(cls, value: typing.Any, values):
+        convention = """
+        In order to successfully deploy QHub, there are some project naming conventions which need
+        to be followed. First, ensure your name is compatible with the specific one for
+        your chosen Cloud provider. In addition, the QHub project name should also obey the following
+        format requirements:
+        - Letters from A to Z (upper and lower case) and numbers;
+        - Maximum accepted length of the name string is 16 characters.
+        - If using AWS: names should not start with the string "aws";
+        - If using Azure: names should not contain "-".
+        """
+        if len(value) > 16:
+            raise ValueError(
+                "\n".join(
+                    [
+                        convention,
+                        "Maximum accepted length of the project name string is 16 characters.",
+                    ]
+                )
+            )
+        elif values["provider"] == "azure" and ("-" in value):
+            raise ValueError(
+                "\n".join(
+                    [convention, "Provider [azure] does not allow '-' in project name."]
+                )
+            )
+        elif values["provider"] == "aws" and value.startswith("aws"):
+            raise ValueError(
+                "\n".join(
+                    [
+                        convention,
+                        "Provider [aws] does not allow 'aws' as starting sequence in project name.",
+                    ]
+                )
+            )
+        else:
+            return letter_dash_underscore_pydantic
 
 
 def verify(config):
