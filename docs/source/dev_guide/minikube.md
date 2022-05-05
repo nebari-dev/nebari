@@ -275,7 +275,7 @@ ______________________________________________________________________
 
 # Minikube on Mac
 
-At one point developing with Minikub on a Mac worked, unfortunately this appears to no longer be the case. A few differences exists between how Minikube is deployed on Mac versus
+At one point developing with Minikube on a Mac worked, unfortunately this appears to no longer be the case. A few differences exists between how Minikube is deployed on Mac versus
 Linux and if you're interested to try the instructions as they appeared when this worked, open the collapsed tab below:
 
 <details>
