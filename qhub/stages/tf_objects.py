@@ -181,27 +181,15 @@ def stage_02_infrastructure(config):
 
 
 def stage_03_kubernetes_initialize(config):
-    if config["provider"] == "aws":
-        return {
-            "stages/03-kubernetes-initialize/_qhub.tf.json": tf_render_objects(
-                [
-                    QHubAWSProvider(config),
-                    QHubTerraformState("03-kubernetes-initialize", config),
-                    QHubKubernetesProvider(config),
-                    QHubHelmProvider(config),
-                ]
-            ),
-        }
-    else:
-        return {
-            "stages/03-kubernetes-initialize/_qhub.tf.json": tf_render_objects(
-                [
-                    QHubTerraformState("03-kubernetes-initialize", config),
-                    QHubKubernetesProvider(config),
-                    QHubHelmProvider(config),
-                ]
-            ),
-        }
+    return {
+        "stages/03-kubernetes-initialize/_qhub.tf.json": tf_render_objects(
+            [
+                QHubTerraformState("03-kubernetes-initialize", config),
+                QHubKubernetesProvider(config),
+                QHubHelmProvider(config),
+            ]
+        ),
+    }
 
 
 def stage_04_kubernetes_ingress(config):
