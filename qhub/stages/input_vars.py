@@ -61,6 +61,9 @@ def stage_02_infrastructure(stage_outputs, config):
                     "instance_type": value["instance"],
                     "min_size": value["min_nodes"],
                     "max_size": value["max_nodes"],
+                    "guest_accelerators": value["guest_accelerators"]
+                    if "guest_accelerators" in value
+                    else [],
                     **value,
                 }
                 for key, value in config["google_cloud_platform"]["node_groups"].items()
@@ -109,6 +112,25 @@ def stage_02_infrastructure(stage_outputs, config):
 
 
 def stage_03_kubernetes_initialize(stage_outputs, config):
+    if config["provider"] == "gcp":
+        gpu_enabled = any(
+            node_group.get("guest_accelerators")
+            for node_group in config["google_cloud_platform"]["node_groups"].values()
+        )
+        gpu_node_group_names = []
+
+    elif config["provider"] == "aws":
+        gpu_enabled = any(
+            node_group.get("gpu")
+            for node_group in config["amazon_web_services"]["node_groups"].values()
+        )
+        gpu_node_group_names = [
+            group for group in config["amazon_web_services"]["node_groups"].keys()
+        ]
+    else:
+        gpu_enabled = False
+        gpu_node_group_names = []
+
     return {
         "name": config["project_name"],
         "environment": config["namespace"],
@@ -117,6 +139,8 @@ def stage_03_kubernetes_initialize(stage_outputs, config):
         "external_container_reg": config.get(
             "external_container_reg", {"enabled": False}
         ),
+        "gpu_enabled": gpu_enabled,
+        "gpu_node_group_names": gpu_node_group_names,
     }
 
 

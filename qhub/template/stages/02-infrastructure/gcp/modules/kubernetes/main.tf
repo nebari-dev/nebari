@@ -95,7 +95,7 @@ resource "google_container_node_pool" "main" {
       for_each = local.merged_node_groups[count.index].guest_accelerators
 
       content {
-        type  = guest_accelerator.value.type
+        type  = guest_accelerator.value.name
         count = guest_accelerator.value.count
       }
     }

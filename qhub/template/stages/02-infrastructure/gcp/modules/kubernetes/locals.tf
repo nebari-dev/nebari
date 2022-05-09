@@ -12,4 +12,5 @@ locals {
   ])
 
   merged_node_groups = [for node_group in var.node_groups : merge(var.node_group_defaults, node_group)]
+
 }
