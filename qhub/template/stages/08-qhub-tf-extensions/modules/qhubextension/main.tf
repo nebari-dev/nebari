@@ -97,7 +97,7 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
 }
 
 resource "random_password" "qhub-jwt-secret" {
-  count = var.jwt ? 1 : 0
+  count   = var.jwt ? 1 : 0
   length  = 32
   special = false
 }

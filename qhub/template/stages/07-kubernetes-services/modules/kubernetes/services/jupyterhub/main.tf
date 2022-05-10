@@ -31,39 +31,39 @@ resource "helm_release" "jupyterhub" {
         shared-pvc        = var.shared-pvc
         conda-store-pvc   = var.conda-store-pvc
         conda-store-mount = var.conda-store-mount
-        skel-mount        = {
+        skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace
         }
-        extra-mounts      = merge(
+        extra-mounts = merge(
           var.extra-mounts,
           {
             "/etc/ipython" = {
-              name = kubernetes_config_map.etc-ipython.metadata.0.name
+              name      = kubernetes_config_map.etc-ipython.metadata.0.name
               namespace = kubernetes_config_map.etc-ipython.metadata.0.namespace
-              kind = "configmap"
+              kind      = "configmap"
             }
 
             "/etc/jupyter" = {
-              name = kubernetes_config_map.etc-jupyter.metadata.0.name
+              name      = kubernetes_config_map.etc-jupyter.metadata.0.name
               namespace = kubernetes_config_map.etc-jupyter.metadata.0.namespace
-              kind = "configmap"
+              kind      = "configmap"
             }
 
             "/opt/conda/envs/default/share/jupyter/lab/settings" = {
-              name = kubernetes_config_map.jupyterlab-settings.metadata.0.name
+              name      = kubernetes_config_map.jupyterlab-settings.metadata.0.name
               namespace = kubernetes_config_map.jupyterlab-settings.metadata.0.namespace
-              kind = "configmap"
+              kind      = "configmap"
             }
 
             "/shared/examples" = {
-              name = kubernetes_config_map.shared-examples.metadata.0.name
+              name      = kubernetes_config_map.shared-examples.metadata.0.name
               namespace = kubernetes_config_map.shared-examples.metadata.0.namespace
-              kind = "configmap"
+              kind      = "configmap"
             }
           }
         )
-        environments      = var.conda-store-environments
+        environments = var.conda-store-environments
       }
 
       hub = {
@@ -73,15 +73,15 @@ resource "helm_release" "jupyterhub" {
         }
 
         extraConfig = {
-          "01-theme.py"       = file("${path.module}/files/jupyterhub/01-theme.py")
-          "02-spawner.py"     = file("${path.module}/files/jupyterhub/02-spawner.py")
-          "03-profiles.py"    = file("${path.module}/files/jupyterhub/03-profiles.py")
+          "01-theme.py"    = file("${path.module}/files/jupyterhub/01-theme.py")
+          "02-spawner.py"  = file("${path.module}/files/jupyterhub/02-spawner.py")
+          "03-profiles.py" = file("${path.module}/files/jupyterhub/03-profiles.py")
         }
 
         services = {
-          for service in var.services: service => {
-            name = service
-            admin = true
+          for service in var.services : service => {
+            name      = service
+            admin     = true
             api_token = random_password.service_token[service].result
           }
         }
@@ -96,18 +96,18 @@ resource "helm_release" "jupyterhub" {
             enable_auth_state = true
           }
           GenericOAuthenticator = {
-            client_id = module.jupyterhub-openid-client.config.client_id
-            client_secret = module.jupyterhub-openid-client.config.client_secret
+            client_id          = module.jupyterhub-openid-client.config.client_id
+            client_secret      = module.jupyterhub-openid-client.config.client_secret
             oauth_callback_url = "https://${var.external-url}/hub/oauth_callback"
-            authorize_url = module.jupyterhub-openid-client.config.authentication_url
-            token_url = module.jupyterhub-openid-client.config.token_url
-            userdata_url = module.jupyterhub-openid-client.config.userinfo_url
-            login_service = "Keycloak"
-            username_key = "preferred_username"
-            claim_groups_key = "roles"
-            allowed_groups = ["jupyterhub_admin", "jupyterhub_developer"]
-            admin_groups = ["jupyterhub_admin"]
-            tls_verify = false
+            authorize_url      = module.jupyterhub-openid-client.config.authentication_url
+            token_url          = module.jupyterhub-openid-client.config.token_url
+            userdata_url       = module.jupyterhub-openid-client.config.userinfo_url
+            login_service      = "Keycloak"
+            username_key       = "preferred_username"
+            claim_groups_key   = "roles"
+            allowed_groups     = ["jupyterhub_admin", "jupyterhub_developer"]
+            admin_groups       = ["jupyterhub_admin"]
+            tls_verify         = false
           }
         }
       }
@@ -135,17 +135,17 @@ resource "helm_release" "jupyterhub" {
         }
       }
     })],
-  var.overrides,
-  [jsonencode({
-    hub = {
-          extraEnv = concat([
+    var.overrides,
+    [jsonencode({
+      hub = {
+        extraEnv = concat([
           {
-            name = "OAUTH_LOGOUT_REDIRECT_URL",
+            name  = "OAUTH_LOGOUT_REDIRECT_URL",
             value = format("%s?redirect_uri=%s", "https://${var.external-url}/auth/realms/${var.realm_id}/protocol/openid-connect/logout", urlencode(var.jupyterhub-logout-redirect-url))
           }],
         jsondecode(var.jupyterhub-hub-extraEnv))
-    }
-   })]
+      }
+    })]
   )
 
   set {
@@ -186,12 +186,12 @@ module "jupyterhub-openid-client" {
   source = "../keycloak-client"
 
   realm_id     = var.realm_id
-  client_id  = "jupyterhub"
+  client_id    = "jupyterhub"
   external-url = var.external-url
   role_mapping = {
-    "admin" = ["jupyterhub_admin", "dask_gateway_admin"]
+    "admin"     = ["jupyterhub_admin", "dask_gateway_admin"]
     "developer" = ["jupyterhub_developer", "dask_gateway_developer"]
-    "analyst" = ["jupyterhub_developer"]
+    "analyst"   = ["jupyterhub_developer"]
   }
   callback-url-paths = [
     "https://${var.external-url}/hub/oauth_callback",

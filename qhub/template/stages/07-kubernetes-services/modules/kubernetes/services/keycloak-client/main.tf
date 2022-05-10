@@ -20,10 +20,10 @@ resource "keycloak_openid_client" "main" {
 
 
 resource "keycloak_openid_user_client_role_protocol_mapper" "main" {
-  realm_id        = var.realm_id
-  client_id       = keycloak_openid_client.main.id
-  name            = "user-client-role-mapper"
-  claim_name      = "roles"
+  realm_id   = var.realm_id
+  client_id  = keycloak_openid_client.main.id
+  name       = "user-client-role-mapper"
+  claim_name = "roles"
 
   claim_value_type    = "String"
   multivalued         = true
@@ -85,7 +85,7 @@ resource "keycloak_group_roles" "group_roles" {
 
   realm_id = var.realm_id
   group_id = data.keycloak_group.main[each.key].id
-  role_ids = [for role in each.value: keycloak_role.main[role].id]
+  role_ids = [for role in each.value : keycloak_role.main[role].id]
 
   exhaustive = false
 }

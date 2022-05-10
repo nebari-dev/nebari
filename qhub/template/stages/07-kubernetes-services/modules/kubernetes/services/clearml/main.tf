@@ -3,7 +3,7 @@ resource "helm_release" "clearml" {
   namespace         = var.namespace
   chart             = "${path.module}/chart"
   dependency_update = true
-  values            = concat([
+  values = concat([
     file("${path.module}/chart/values.yaml")
   ], var.overrides)
 

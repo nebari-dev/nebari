@@ -1,7 +1,7 @@
 # ======================= VARIABLES ======================
 variable "conda-store-environments" {
   description = "Conda-Store managed environments"
-  default = {}
+  default     = {}
 }
 
 variable "conda-store-filesystem-storage" {
@@ -31,8 +31,8 @@ variable "conda-store-image" {
 module "kubernetes-conda-store-server" {
   source = "./modules/kubernetes/services/conda-store"
 
-  name              = "qhub"
-  namespace         = var.environment
+  name      = "qhub"
+  namespace = var.environment
 
   external-url = var.endpoint
   realm_id     = var.realm_id
@@ -41,8 +41,8 @@ module "kubernetes-conda-store-server" {
   minio_capacity    = coalesce(var.conda-store-object-storage, var.conda-store-filesystem-storage)
   node-group        = var.node_groups.general
   conda-store-image = var.conda-store-image
-  environments      = {
-    for filename, environment in var.conda-store-environments:
+  environments = {
+    for filename, environment in var.conda-store-environments :
     filename => yamlencode(environment)
   }
 }
