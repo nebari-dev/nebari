@@ -4,7 +4,7 @@
 
 One of the first things you might want to do is to **add new users** to your QHub.
 
-This can be done through the Keycloak web console. See [Adding a QHub user](./login.md#adding-a-qhub-user) for details.
+This can be done through the Keycloak web console. See [Adding a QHub user](https://docs.qhub.dev/en/stable/source/installation/login.html#adding-a-qhub-user) for details.
 
 ## Upgrades and dependencies management
 
