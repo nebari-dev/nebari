@@ -37,6 +37,7 @@ env:
 jobs:
   test-render-providers:
     name: 'Test QHub Provider'
+    if: "github.repository == 'quansight/qhub'"
     runs-on: ubuntu-latest
     strategy:
       matrix:

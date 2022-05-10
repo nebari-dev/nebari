@@ -27,6 +27,7 @@ on:
 jobs:
   test-kubernetes:
     name: "Kubernetes Tests"
+    if: "github.repository == 'quansight/qhub'"
     runs-on: self-hosted
     defaults:
       run:
