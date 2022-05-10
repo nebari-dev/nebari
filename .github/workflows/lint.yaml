@@ -1,49 +1,36 @@
-name: Lint
+name: QHub Lint
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-    branches: [main]
+
 
 jobs:
-  Python-linter:
+  python-lint:
+    name: Lint Python code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
+      - name: Checks out the repository
+        uses: actions/checkout@v3
+
+      - name: Sets up Python
         uses: actions/setup-python@v2
-      - name: black Lint
+
+      - name: Checks Black formatting
         uses: psf/black@stable
-      - name: flake8 Lint
+
+      - name: Lints Python code
         uses: py-actions/flake8@v2
         with:
-          max-line-length: "100"
+          max-line-length: "89"
           path: "qhub"
 
-  Docker-linter:
+  terraform-lint:
+    name: Lint Terraform code
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dockerfile:
-          - jupyterlab
-          - jupyterlab-centos
-          - jupyterhub
-          - dask-worker
-          - dask-worker-centos
-          - dask-gateway
     steps:
-      - uses: actions/checkout@v2
-      - name: Dockerfile Lint
-        uses: jbergstroem/hadolint-gh-action@v1
-        with:
-          # TODO: update dockerfile location after PR 1003 is merged
-          dockerfile: ./qhub/template/\{\{\ cookiecutter.repo_directory\ \}\}/image/Dockerfile.${{ matrix.dockerfile }}
-          output_format: tty
-          error_level: 0
+      - name: Checks out the repository
+        uses: actions/checkout@v3
 
-  Terraform-linter:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Terraform Lint
+      - name: Lints Terraform code
         uses: actionshub/terraform-lint@main

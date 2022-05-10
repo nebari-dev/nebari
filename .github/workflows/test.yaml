@@ -43,15 +43,6 @@ jobs:
       - name: Install QHub
         run: |
           pip install .[dev]
-      - name: Black Formatting
-        run: |
-          black --version
-          black qhub --diff --exclude "qhub/_version.py"
-          black --check qhub --exclude "qhub/_version.py"
-      - name: Flake8 Formatting
-        run: |
-          flake8 --version
-          flake8
       - name: Test QHub
         run: |
           pytest --version

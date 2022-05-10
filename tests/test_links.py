@@ -10,12 +10,7 @@ LINKS_TO_TEST = [
 ]
 
 
-@pytest.mark.parametrize(
-    "url,status_code",
-    [
-        (url, 200) for url in LINKS_TO_TEST
-    ]
-)
+@pytest.mark.parametrize("url,status_code", [(url, 200) for url in LINKS_TO_TEST])
 def test_links(url, status_code):
     response = requests.get(url)
     assert response.status_code == status_code
