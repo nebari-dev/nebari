@@ -69,6 +69,7 @@ This release addresses several bugs with a slight emphasis on stablizing the cor
 * Enable display of Qhub version by @viniciusdc in [PR 1256](https://github.com/Quansight/qhub/pull/1256)
 * Fix missing region from AWS provider by @viniciusdc in [PR 1271](https://github.com/Quansight/qhub/pull/1271)
 * Re-enable GPU profiles for GCP/AWS by @viniciusdc in [PR 1219](https://github.com/Quansight/qhub/pull/1219)
+* Release notes for `v0.4.1` by @iameskild in [PR 1272](https://github.com/Quansight/qhub/pull/1272)
 
 ### New Contributors
 * @dependabot made their first contribution in [PR 1241](https://github.com/Quansight/qhub/pull/1241)
