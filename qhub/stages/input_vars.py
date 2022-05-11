@@ -241,9 +241,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
     if config["theme"]["jupyterhub"].get("display_version") and (
         not config["theme"]["jupyterhub"].get("version", False)
     ):
-        jupyterhub_theme = jupyterhub_theme.update(
-            {"version": f"v{config['qhub_version']}"}
-        )
+        jupyterhub_theme.update({"version": f"v{config['qhub_version']}"})
 
     return {
         "name": config["project_name"],
