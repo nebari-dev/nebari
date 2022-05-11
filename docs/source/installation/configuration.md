@@ -61,7 +61,7 @@ ci_cd:
   `gitlab-ci` at the moment.
 
 If `ci_cd` is not supplied, no CI/CD will be auto-generated, however, we advise employing an infrastructure-as-code approach. This allows teams to more quickly modify their QHub
-deployment, empowering developers and data sciencists to request the changes and have them approved by an administrator.
+deployment, empowering developers and data scientists to request the changes and have them approved by an administrator.
 
 ## Certificate
 
@@ -113,7 +113,7 @@ Some of QHub services might require special subdomains under your certificate, W
 Defining a wildcard certificate decreases the amount of CN names you would need to define under the certificate configuration and reduces the chance of generating a wrong
 subdomain.
 
-> NOTE: It's not possible to request a double wildcard certificate for a domain (for example *.*.local.com). As a default behaviour of
+> NOTE: It's not possible to request a double wildcard certificate for a domain (for example *.*.local.com). As a default behavior of
 > [Traefik](https://doc.traefik.io/traefik/https/tls/#default-certificate), if the Domain Name System (DNS) and Common Name (CN) name doesn't match, Traefik generates and uses a
 > self-signed certificate. This may lead to some unexpected [TLS](https://www.internetsociety.org/deploy360/tls/basics) issues, so as alternative to including each specific domain
 > under the certificate CN list, you may also define a wildcard certificate.
@@ -197,7 +197,7 @@ security:
 
 #### Password based authentication
 
-This is the simpliest authenication method. This just defers to however Keycloak is configured. That's also true for GitHub/Auth0 cases, except that for the single-sign on
+This is the simplest authentication method. This just defers to however Keycloak is configured. That's also true for GitHub/Auth0 cases, except that for the single-sign on
 providers the deployment will also configure those providers in Keycloak to save manual configuration. But it's also possible to add GitHub, or Google etc, as an Identity Provider
 in Keycloak even if you formally select `password` authentication in the `qhub-config.yaml` file.
 
@@ -256,7 +256,7 @@ For any of the providers (besides local), adding a node group is as easy as the 
 
 > NOTE: For each provider, details such as **instance names**, **availability zones**, and **Kubernetes versions** will be DIFFERENT.
 
-> NOTE: upgrading the `general` node instance type may not be possible for your choosen provider.
+> NOTE: upgrading the `general` node instance type may not be possible for your chosen provider.
 > [See FAQ.](../user_guide/faq.md#i-want-to-upgrade-the-instance-size-the-general-node-group-is-this-possible)
 
 ### Providers
@@ -457,7 +457,7 @@ default_images:
 
 ## Storage
 
-Control the amount of storage allocated to shared filesystems.
+Control the amount of storage allocated to shared filesystem.
 
 > NOTE 1: when the storage size is changed, for most providers it will automatically delete (!) the previous storage place. NOTE 2: changing the storage size on an AWS deployment
 > after the initial deployment can be especially tricky so it might be worthwhile padding these storage sizes.
