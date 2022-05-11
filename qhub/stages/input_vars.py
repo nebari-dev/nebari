@@ -237,6 +237,13 @@ def stage_07_kubernetes_services(stage_outputs, config):
                 f"https://{config['domain']}/{ext['urlslug']}{ext['logout']}",
                 urlencode({"redirect_uri": final_logout_uri}),
             )
+    jupyterhub_theme = config["theme"]["jupyterhub"]
+    if config["theme"]["jupyterhub"]["display_version"] and (
+        not config["theme"]["jupyterhub"].get("version", False)
+    ):
+        jupyterhub_theme = jupyterhub_theme.update(
+            {"version": f"v{config['qhub_version']}"}
+        )
 
     return {
         "name": config["project_name"],
@@ -251,7 +258,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "conda-store-filesystem-storage": config["storage"]["conda_store"],
         # jupyterhub
         "cdsdashboards": config["cdsdashboards"],
-        "jupyterhub-theme": config["theme"]["jupyterhub"],
+        "jupyterhub-theme": jupyterhub_theme,
         "jupyterhub-image": _split_docker_image_name(
             config["default_images"]["jupyterhub"]
         ),
