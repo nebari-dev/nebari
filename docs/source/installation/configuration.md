@@ -183,8 +183,8 @@ security:
 
 #### GitHub based authentication
 
-GitHub has instructions for [creating OAuth applications](https://docs.github.com/en/developers/apps/creating-an-oauth-app). Note that QHub usernames will be their GitHub
-usernames.
+GitHub has instructions for [creating OAuth applications](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app). Note that QHub usernames will be
+their GitHub usernames.
 
 ```yaml
 security:
