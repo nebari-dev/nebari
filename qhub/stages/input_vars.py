@@ -238,7 +238,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
                 urlencode({"redirect_uri": final_logout_uri}),
             )
     jupyterhub_theme = config["theme"]["jupyterhub"]
-    if config["theme"]["jupyterhub"]["display_version"] and (
+    if config["theme"]["jupyterhub"].get("display_version") and (
         not config["theme"]["jupyterhub"].get("version", False)
     ):
         jupyterhub_theme = jupyterhub_theme.update(
