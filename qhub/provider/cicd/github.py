@@ -99,7 +99,7 @@ def gha_env_vars(config):
         env_vars["QHUB_GH_BRANCH"] = "${{ secrets.QHUB_GH_BRANCH }}"
 
     # This assumes that the user is using the omitting sensitive values configuration for the token.
-    if config["prefect"].get("enabled", False):
+    if config.get("prefect", {}).get("enabled", False):
         env_vars[
             "QHUB_SECRET_prefect_token"
         ] = "${{ secrets.QHUB_SECRET_PREFECT_TOKEN }}"
