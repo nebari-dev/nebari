@@ -84,12 +84,12 @@ latex_documents = [
         "manual",
     )
 ]
-
+nitpicky = True
 jupyter_execute_notebooks = "off"
 
 myst_update_mathjax = False
 # Generate heading anchors for heading levels <h[1-3]>
-myst_heading_anchors = 3
+myst_heading_anchors = 5
 
 # Import qhub version number
 here = os.path.abspath(os.path.dirname(__file__))
