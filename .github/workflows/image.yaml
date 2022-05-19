@@ -82,11 +82,15 @@ jobs:
             type=ref,event=tag
             type=sha
 
-      - name: Add symlink to cookiecutter dir and tree
+      - name: Inspect image dir tree
         run: |
           cd ./qhub/template
           sudo apt-get install tree
           tree ./image
+
+      - name: Echo current tags
+        run: |
+          echo ${{ steps.meta.outputs.tags }}
 
       - name: Build docker
         uses: docker/build-push-action@v2
