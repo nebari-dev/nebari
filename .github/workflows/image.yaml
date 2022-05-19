@@ -111,7 +111,6 @@ jobs:
         with:
           image-ref: ${{ steps.var.outputs.docker_tag }}
           format: 'sarif'
-          exit-code: '1'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
