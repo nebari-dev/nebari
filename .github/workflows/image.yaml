@@ -88,9 +88,9 @@ jobs:
           sudo apt-get install tree
           tree ./image
 
-      - name: Echo current tags
-        run: |
-          echo "${{ steps.meta.outputs.tags }}" | sed -n 1p
+      - name: Set tag var
+        id: var
+        run: echo ::set-output name=docker_tag::$(echo "${{ steps.meta.outputs.tags }}" | sed -n 1p)
 
       - name: Build docker
         uses: docker/build-push-action@v2
@@ -109,7 +109,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: echo "${{ steps.meta.outputs.tags }}" | sed -n 1p
+          image-ref: ${{ steps.var.outputs.docker_tag }}
           format: 'sarif'
           exit-code: '1'
           output: 'trivy-results.sarif'
