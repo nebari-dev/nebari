@@ -90,7 +90,7 @@ jobs:
 
       - name: Echo current tags
         run: |
-          echo "${{ steps.meta.outputs.tags }}"
+          echo "${{ steps.meta.outputs.tags }}" | sed -n 1p
 
       - name: Build docker
         uses: docker/build-push-action@v2
