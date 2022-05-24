@@ -17,7 +17,7 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 ```
 
 - `project_name`: should be compatible with the Cloud provider naming convention. Generally only use `A-Z`, `a-z`, `-`, and `_` (see
-  [Project Naming Conventions](usage.md#project-naming-convention) for more details).
+  [Project Naming Conventions](./usage.md#project-naming-convention) for more details).
 
 - `namespace`: is used in combination with `project_name` to label resources. In addition `namespace` also determines the `namespace` that used when deploying kubernetes resources
   for qhub.
