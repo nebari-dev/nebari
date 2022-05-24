@@ -1,6 +1,6 @@
 # QHub 101
 
-QHub is an open source framework that allows data science team to initialize and maintain their data science stack on cloud. QHub makes use of Terraform to deploy JupyterHub,
+QHub is an open source framework that allows data science teams to initialize and maintain their data science stack on the cloud. QHub makes use of Terraform to deploy JupyterHub,
 JupyterLab, Dask, and Conda environments on Kubernetes clusters across all major cloud providers.
 
 Through QHub, the deployment is managed using a single configuration file and is powered by GitHub Actions. This allows teams to build and maintain cost-effective and scalable
@@ -39,8 +39,14 @@ To learn more about the nitty gritty of QHub's internal architecture, refer to t
 
 QHub can be easily installed using either `conda` or `pip`.
 
-- `conda`: `conda install -c conda-forge qhub`
-- `pip`: `pip install qhub`
+- conda:
+  ```sh
+  conda install -c conda-forge qhub
+  ```
+- pip:
+  ```sh
+  pip install qhub
+  ```
 
 QHub CLI will be installed automatically as part of the install process. After installation, QHub CLI can be used to deploy and manage your environment on HPC, cloud, on-premises
 or even locally. To install QHub locally, follow the [testing](../dev_guide/testing.md) section.

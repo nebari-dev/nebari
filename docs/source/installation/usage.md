@@ -2,8 +2,8 @@
 
 ## Cloud Deployment
 
-Great, you've gone through the `qhub` [Installation](installation.md) and [Setup Initialization](setup.md) steps, and have ensured that all the necessary environment variables have
-been properly set, it is time to deploy QHub from your terminal.
+Great, you've gone through the [Installation](installation.md) and [Setup Initialization](setup.md) steps, and have ensured that all the necessary environment variables have
+been properly set. Now it is time to deploy QHub from your terminal.
 
 ### Initialize configuration
 
