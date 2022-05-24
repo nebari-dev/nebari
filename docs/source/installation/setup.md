@@ -184,6 +184,29 @@ No environment variables are needed for this - you will be given the relevant in
 
 </details>
 
+### Identity Providers
+
+If you would like to use a different method for authentication that is not automatically covered in Qhub, such as Facebook, Microsoft AAD, or a custom provider. You can do so by
+defining the expected **identity provider** in the [Keyclok admin panel](https://docs.qhub.dev/en/latest/source/installation/login.html#login). An identity provider derives from a
+specific protocol used to authenticate and send authentication and authorization information to users. It can be:
+
+- A social provider such as Facebook, Google, or Twitter.
+
+- A business partner whose users need to access your services.
+
+- A cloud-based identity service you want to integrate.
+
+Typically, Keycloak bases identity providers on the following protocols:
+
+- `SAML v2.0`
+
+- `OpenID Connect v1.0`
+
+- `OAuth v2.0`
+
+If your authentication provider uses the above mentioned protocols you can follow [this steps](https://www.keycloak.org/docs/latest/server_admin/#default_identity_provider) to
+create a new identity provider or use an existing configuration for a [social identity provider](https://www.keycloak.org/docs/latest/server_admin/#social-identity-providers).
+
 ## CI/CD Pipeline
 
 In the [Usage](usage.md) section, you will need to run `qhub init` (this only ever needs to be run once - it creates your configuration YAML file) and then `qhub deploy` to set up
