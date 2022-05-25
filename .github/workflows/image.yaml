@@ -107,6 +107,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - uses: actions/cache@v2.1.4
+        if: ${{ github.event_name == 'pull_request' }}
         with:
           path: .trivy
           key: ${{ runner.os }}-trivy-${{ github.run_id }}
@@ -114,6 +115,7 @@ jobs:
             ${{ runner.os }}-trivy-
 
       - name: Run Trivy vulnerability scanner
+        if: ${{ github.event_name == 'pull_request' }}
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ steps.var.outputs.docker_tag }}
@@ -124,9 +126,11 @@ jobs:
           cache-dir: .trivy
 
       - name: Upload Trivy scan results to GitHub Security tab
+        if: ${{ github.event_name == 'pull_request' }}
         uses: github/codeql-action/upload-sarif@v1
         with:
           sarif_file: 'trivy-results.sarif'
 
       - name: Correct Trivy cache permissions
+        if: ${{ github.event_name == 'pull_request' }}
         run: sudo chown -R $USER:$GROUP .trivy
