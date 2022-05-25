@@ -17,7 +17,7 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 ```
 
 - `project_name`: should be compatible with the Cloud provider naming convention. Generally only use `A-Z`, `a-z`, `-`, and `_` (see
-  [Project Naming Conventions](usage.md#project-naming-convention) for more details).
+  [Project Naming Conventions](./usage.md#project-naming-convention) for more details).
 
 - `namespace`: is used in combination with `project_name` to label resources. In addition `namespace` also determines the `namespace` that used when deploying kubernetes resources
   for qhub.
@@ -61,7 +61,7 @@ ci_cd:
   `gitlab-ci` at the moment.
 
 If `ci_cd` is not supplied, no CI/CD will be auto-generated, however, we advise employing an infrastructure-as-code approach. This allows teams to more quickly modify their QHub
-deployment, empowering developers and data sciencists to request the changes and have them approved by an administrator.
+deployment, empowering developers and data scientists to request the changes and have them approved by an administrator.
 
 ## Certificate
 
@@ -113,7 +113,7 @@ Some of QHub services might require special subdomains under your certificate, W
 Defining a wildcard certificate decreases the amount of CN names you would need to define under the certificate configuration and reduces the chance of generating a wrong
 subdomain.
 
-> NOTE: It's not possible to request a double wildcard certificate for a domain (for example *.*.local.com). As a default behaviour of
+> NOTE: It's not possible to request a double wildcard certificate for a domain (for example *.*.local.com). As a default behavior of
 > [Traefik](https://doc.traefik.io/traefik/https/tls/#default-certificate), if the Domain Name System (DNS) and Common Name (CN) name doesn't match, Traefik generates and uses a
 > self-signed certificate. This may lead to some unexpected [TLS](https://www.internetsociety.org/deploy360/tls/basics) issues, so as alternative to including each specific domain
 > under the certificate CN list, you may also define a wildcard certificate.
@@ -183,8 +183,8 @@ security:
 
 #### GitHub based authentication
 
-GitHub has instructions for [creating OAuth applications](https://docs.github.com/en/developers/apps/creating-an-oauth-app). Note that QHub usernames will be their GitHub
-usernames.
+GitHub has instructions for [creating OAuth applications](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app). Note that QHub usernames will be
+their GitHub usernames.
 
 ```yaml
 security:
@@ -457,7 +457,7 @@ default_images:
 
 ## Storage
 
-Control the amount of storage allocated to shared filesystems.
+Control the amount of storage allocated to shared filesystem.
 
 > NOTE 1: when the storage size is changed, for most providers it will automatically delete (!) the previous storage place. NOTE 2: changing the storage size on an AWS deployment
 > after the initial deployment can be especially tricky so it might be worthwhile padding these storage sizes.
@@ -629,7 +629,8 @@ theme:
     h2_color: '#652e8e'
 ```
 
-Its also possible to display the current version of qhub by using the `display_version: 'True'` in the above `theme.jupyterhub` configuration.
+Its also possible to display the current version of qhub by using the `display_version: 'True'` in the above `theme.jupyterhub` configuration. If no extra information is passed,
+the displayed version will be the same as `qhub_version`, an overwrite can be done by passing the `version: v.a.b.c` key as well.
 
 ## Environments
 
