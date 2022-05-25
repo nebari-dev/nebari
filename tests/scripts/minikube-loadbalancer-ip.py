@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import json
 import os
-import sys
 import subprocess
+import sys
 
 minikube_cmd = ["minikube", "ssh", "--", "ip", "-j", "a"]
 minikube_output = subprocess.check_output(minikube_cmd, encoding="utf-8")[:-1]

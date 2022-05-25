@@ -130,7 +130,7 @@ To create a new group, click 'New' in the upper-right hand corner. First, give t
 
 ![Keycloak add group form - name field set to conda-store-manager](../images/keycloak_new_group1.png)
 
-Then under 'Role Mapping', add the appriopriate 'Client Roles' as needed; there should be no need to update the 'Realm Roles'. In this example, the new group only has one mapped
+Then under 'Role Mapping', add the appropriate 'Client Roles' as needed; there should be no need to update the 'Realm Roles'. In this example, the new group only has one mapped
 role however it's possible to attached multiple 'Client Roles' to a single group.
 
 ![Keycloak group conda-store-manager form - role mappings tab focused with expanded client roles  dropdown](../images/keycloak_new_group2.png)

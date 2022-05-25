@@ -1,10 +1,10 @@
-import os
-import json
 import functools
+import json
+import os
 
 from aiohttp import web
-from dask_gateway_server.options import Options, Select, Mapping
 from dask_gateway_server.auth import JupyterHubAuthenticator
+from dask_gateway_server.options import Mapping, Options, Select
 
 
 def dask_gateway_config(path="/var/lib/dask-gateway/config.json"):

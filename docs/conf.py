@@ -1,6 +1,7 @@
 # Configuration file for the Sphinx documentation builder.
 
-import os, sys
+import os
+import sys
 
 # -- Project information -----------------------------------------------------
 

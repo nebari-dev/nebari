@@ -3,9 +3,11 @@ import typing
 from abc import ABC
 
 import pydantic
-from pydantic import validator, root_validator
+from pydantic import root_validator, validator
+
 from qhub.utils import namestr_regex
-from .version import rounded_ver_parse, __version__
+
+from .version import __version__, rounded_ver_parse
 
 
 class CertificateEnum(str, enum.Enum):

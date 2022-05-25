@@ -1,4 +1,5 @@
 import qhub.schema
+
 from .conftest import render_config_partial
 
 

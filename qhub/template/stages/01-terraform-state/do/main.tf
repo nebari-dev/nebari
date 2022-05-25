@@ -20,14 +20,14 @@ provider "digitalocean" {
 module "terraform-state" {
   source = "./modules/terraform-state"
 
-  name   = "${var.name }-${var.namespace}"
+  name   = "${var.name}-${var.namespace}"
   region = var.region
 }
 
 terraform {
   required_providers {
     digitalocean = {
-      source = "digitalocean/digitalocean"
+      source  = "digitalocean/digitalocean"
       version = "2.17.0"
     }
   }

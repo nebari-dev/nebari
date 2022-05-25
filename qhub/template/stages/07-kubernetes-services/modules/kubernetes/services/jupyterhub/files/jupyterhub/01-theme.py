@@ -1,9 +1,8 @@
+import z2jh
 from qhub_jupyterhub_theme import theme_extra_handlers, theme_template_paths
 
 c.JupyterHub.extra_handlers.extend(theme_extra_handlers)
 c.JupyterHub.template_paths.extend(theme_template_paths)
-
-import z2jh
 
 jupyterhub_theme = z2jh.get_config("custom.theme")
 cdsdashboards = z2jh.get_config("custom.cdsdashboards")

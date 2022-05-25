@@ -26,10 +26,10 @@ module "kubernetes" {
     "https://www.googleapis.com/auth/cloud-platform"
   ]
 
-  node_groups = var.node_groups
-  network = var.network
-  subnetwork = var.subnetwork
-  ip_allocation_policy = var.ip_allocation_policy
+  node_groups                       = var.node_groups
+  network                           = var.network
+  subnetwork                        = var.subnetwork
+  ip_allocation_policy              = var.ip_allocation_policy
   master_authorized_networks_config = var.master_authorized_networks_config
-  private_cluster_config = var.private_cluster_config
+  private_cluster_config            = var.private_cluster_config
 }

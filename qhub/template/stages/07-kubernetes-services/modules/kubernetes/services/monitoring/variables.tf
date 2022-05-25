@@ -19,7 +19,7 @@ variable "realm_id" {
 
 variable "dashboards" {
   description = "Enabled grafana dashboards"
-  type = set(string)
+  type        = set(string)
   default = [
     "traefik.json",
     "keycloak.json",

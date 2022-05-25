@@ -6,7 +6,7 @@ resource "kubernetes_manifest" "main" {
       name = "daskclusters.gateway.dask.org"
     }
     spec = {
-      group   = "gateway.dask.org"
+      group = "gateway.dask.org"
       names = {
         kind     = "DaskCluster"
         listKind = "DaskClusterList"
@@ -15,8 +15,8 @@ resource "kubernetes_manifest" "main" {
       }
       scope = "Namespaced"
       versions = [{
-        name = "v1alpha1"
-        served = true
+        name    = "v1alpha1"
+        served  = true
         storage = true
         subresources = {
           status = {}

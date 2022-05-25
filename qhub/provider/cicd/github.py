@@ -1,12 +1,10 @@
-import os
 import base64
-
-from typing import Optional, Dict, List, Union
-
-from pydantic import BaseModel, Field
+import os
+from typing import Dict, List, Optional, Union
 
 import requests
 from nacl import encoding, public
+from pydantic import BaseModel, Field
 
 from qhub.utils import pip_install_qhub
 

@@ -31,9 +31,8 @@ export QHUB_K8S_VERSION=1.20
 
 ## Modifying Docker Images
 
-All QHub docker images are located in
-[`qhub/template/image`](https://github.com/Quansight/qhub/tree/main/qhub/template/image).
-You can build any image locally. Additionally, on Pull Requests each Docker-build will be tested.
+All QHub docker images are located in [`qhub/template/image`](https://github.com/Quansight/qhub/tree/main/qhub/template/image). You can build any image locally. Additionally, on
+Pull Requests each Docker-build will be tested.
 
 ```shell
 docker build -f Dockerfile.<filename> .

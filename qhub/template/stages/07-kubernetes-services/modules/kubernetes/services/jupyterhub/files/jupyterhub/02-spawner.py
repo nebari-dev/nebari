@@ -1,20 +1,19 @@
 # remove after next kubespawner release past 1/20/2022
 # https://github.com/jupyterhub/kubespawner/pull/558
 import kubernetes.client.models
-
-kubernetes.client.models.V1EndpointPort = kubernetes.client.models.CoreV1EndpointPort
+import z2jh
 from kubespawner import KubeSpawner
 
-import z2jh
+kubernetes.client.models.V1EndpointPort = kubernetes.client.models.CoreV1EndpointPort
 
 cdsdashboards = z2jh.get_config("custom.cdsdashboards")
 conda_store_environments = z2jh.get_config("custom.environments")
 
 if cdsdashboards["enabled"]:
-    from cdsdashboards.hubextension.spawners.variablekube import VariableKubeSpawner
+    from cdsdashboards.app import CDS_TEMPLATE_PATHS
     from cdsdashboards.builder.kubebuilder import KubeBuilder
     from cdsdashboards.hubextension import cds_extra_handlers
-    from cdsdashboards.app import CDS_TEMPLATE_PATHS
+    from cdsdashboards.hubextension.spawners.variablekube import VariableKubeSpawner
 
     c.JupyterHub.allow_named_servers = True
     c.JupyterHub.extra_handlers.extend(cds_extra_handlers)

@@ -25,7 +25,7 @@ module "nvidia-driver-installer" {
 
   source = "./modules/nvidia-installer"
 
-  cloud-provider = var.cloud-provider
-  gpu_enabled = var.gpu_enabled
+  cloud-provider       = var.cloud-provider
+  gpu_enabled          = var.gpu_enabled
   gpu_node_group_names = var.gpu_node_group_names
 }
