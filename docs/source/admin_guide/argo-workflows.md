@@ -16,7 +16,7 @@ You can submit a workflow by clicking "SUBMIT NEW WORKFLOW" on the landing page.
 
 ## Overrides of Argo Workflows Helm Chart values
 
-Argo Workflows is deployed using Argo Workflows Helm Chart version 0.13.1. The values.yaml for the helm chart can be overriden as needed via the overrides flag. The default values
+Argo Workflows is deployed using Argo Workflows Helm Chart version 0.13.1. The values.yaml for the helm chart can be overridden as needed via the overrides flag. The default values
 file can be found [here](https://github.com/argoproj/argo-helm/blob/argo-workflows-0.13.1/charts/argo-workflows/values.yaml). For example, the following could be done to add
 additional environment variables to the controller container.
 

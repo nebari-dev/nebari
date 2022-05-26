@@ -1,5 +1,5 @@
 locals {
-  name = "argo-workflows"
+  name                  = "argo-workflows"
   argo-workflows-prefix = "argo"
 }
 
@@ -16,15 +16,15 @@ resource "helm_release" "argo-workflows" {
 
 
     jsonencode({
-      singleNamespace = true  # Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
+      singleNamespace = true # Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
 
       controller = {
         metricsConfig = {
-          enabled = true  # enable prometheus
+          enabled = true # enable prometheus
         }
         workflowNamespaces = [
           "${var.namespace}"
-          ]
+        ]
         nodeSelector = {
           "${var.node-group.key}" = var.node-group.value
         }
@@ -34,29 +34,29 @@ resource "helm_release" "argo-workflows" {
         # `sso` for OIDC/OAuth
         extraArgs = ["--auth-mode=sso", "--insecure-skip-verify"]
         # to enable TLS, `secure = true`
-        secure = false
+        secure   = false
         baseHref = "/${local.argo-workflows-prefix}/"
 
         sso = {
           insecureSkipVerify = true
-          issuer = "https://${var.external-url}/auth/realms/${var.realm_id}"
+          issuer             = "https://${var.external-url}/auth/realms/${var.realm_id}"
           clientId = {
             name = "argo-server-sso"
-            key = "argo-oidc-client-id"
+            key  = "argo-oidc-client-id"
           }
           clientSecret = {
             name = "argo-server-sso"
-            key = "argo-oidc-client-secret"
+            key  = "argo-oidc-client-secret"
           }
           # The OIDC redirect URL. Should be in the form <argo-root-url>/oauth2/callback.
           redirectUrl = "https://${var.external-url}/${local.argo-workflows-prefix}/oauth2/callback"
           rbac = {
             # https://argoproj.github.io/argo-workflows/argo-server-sso/#sso-rbac
-            enabled = true
+            enabled         = true
             secretWhitelist = []
           }
           customGroupClaimName = "roles"
-          scopes = ["roles"]
+          scopes               = ["roles"]
         }
         nodeSelector = {
           "${var.node-group.key}" = var.node-group.value
@@ -71,7 +71,7 @@ resource "helm_release" "argo-workflows" {
 
 resource "kubernetes_secret" "argo-oidc-secret" {
   metadata {
-    name = "argo-server-sso"
+    name      = "argo-server-sso"
     namespace = var.namespace
   }
   data = {
@@ -83,13 +83,13 @@ resource "kubernetes_secret" "argo-oidc-secret" {
 module "argo-workflow-openid-client" {
   source = "../keycloak-client"
 
-  realm_id = var.realm_id
-  client_id = "argo-server-sso"
+  realm_id     = var.realm_id
+  client_id    = "argo-server-sso"
   external-url = var.external-url
   role_mapping = {
-    "admin" = ["argo_admin"]
+    "admin"     = ["argo_admin"]
     "developer" = ["argo_developer"]
-    "analyst" = ["argo_viewer"]
+    "analyst"   = ["argo_viewer"]
   }
 
   callback-url-paths = [
@@ -156,8 +156,8 @@ resource "kubernetes_service_account" "argo-admin-sa" {
     name      = "argo-admin"
     namespace = var.namespace
     annotations = {
-      "workflows.argoproj.io/rbac-rule": "'argo_admin' in groups"
-      "workflows.argoproj.io/rbac-rule-precedence": "11"
+      "workflows.argoproj.io/rbac-rule" : "'argo_admin' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence" : "11"
     }
   }
 }
@@ -170,7 +170,7 @@ resource "kubernetes_cluster_role_binding" "argo-admin-rb" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = "argo-workflows-admin"  # role deployed as part of helm chart
+    name      = "argo-workflows-admin" # role deployed as part of helm chart
   }
   subject {
     kind      = "ServiceAccount"
@@ -184,8 +184,8 @@ resource "kubernetes_service_account" "argo-edit-sa" {
     name      = "argo-edit"
     namespace = var.namespace
     annotations = {
-      "workflows.argoproj.io/rbac-rule": "'argo_developer' in groups"
-      "workflows.argoproj.io/rbac-rule-precedence": "10"
+      "workflows.argoproj.io/rbac-rule" : "'argo_developer' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence" : "10"
     }
 
   }
@@ -199,7 +199,7 @@ resource "kubernetes_cluster_role_binding" "argo-edit-rb" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = "argo-workflows-edit"  # role deployed as part of helm chart
+    name      = "argo-workflows-edit" # role deployed as part of helm chart
   }
   subject {
     kind      = "ServiceAccount"
@@ -212,8 +212,8 @@ resource "kubernetes_service_account" "argo-view-sa" {
     name      = "argo-view"
     namespace = var.namespace
     annotations = {
-      "workflows.argoproj.io/rbac-rule": "'argo_viewer' in groups"
-      "workflows.argoproj.io/rbac-rule-precedence": "9"
+      "workflows.argoproj.io/rbac-rule" : "'argo_viewer' in groups"
+      "workflows.argoproj.io/rbac-rule-precedence" : "9"
     }
   }
 }
@@ -226,7 +226,7 @@ resource "kubernetes_cluster_role_binding" "argo-view-rb" {
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = "argo-workflows-view"  # role deployed as part of helm chart
+    name      = "argo-workflows-view" # role deployed as part of helm chart
   }
   subject {
     kind      = "ServiceAccount"
