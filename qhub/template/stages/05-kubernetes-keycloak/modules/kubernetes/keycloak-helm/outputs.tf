@@ -1,7 +1,7 @@
 output "credentials" {
   description = "keycloak admin credentials"
   sensitive   = true
-  value       = {
+  value = {
     url       = "https://${var.external-url}"
     client_id = "admin-cli"
     realm     = "master"

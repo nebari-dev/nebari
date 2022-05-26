@@ -153,7 +153,7 @@ The important section is `CUDA Version`. In general you should install a version
 `cudatoolkit-dev` and `cudatoolkit` make sure that they are the same version exactly including minor version. Also in the near future cuda should have better
 [ABI compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/index.html).
 
-Bellow is an example gpu environment:
+Below is an example gpu environment:
 
 ```yaml
 name: gpu-environment

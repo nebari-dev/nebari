@@ -161,7 +161,7 @@ Explicit user facing changes:
 - Pin terraform providers by @Adam-D-Lewis in https://github.com/Quansight/qhub/pull/914
 - qhub-config.yaml as a secret by @danlester in https://github.com/Quansight/qhub/pull/905
 - Setup/Add integration/deployment tests via pytest by @aktech in https://github.com/Quansight/qhub/pull/922
-- Disabl/Remove the stale bot by @viniciusdc in https://github.com/Quansight/qhub/pull/923
+- Disable/Remove the stale bot by @viniciusdc in https://github.com/Quansight/qhub/pull/923
 - Integrates Hadolint for Dockerfile linting by @HarshCasper in https://github.com/Quansight/qhub/pull/917
 - Reduce minimum nodes in user and dask node pools to 0 for Azure / GCP by @tarundmsharma in https://github.com/Quansight/qhub/pull/723
 - Allow jupyterhub.overrides in qhub-config.yaml by @danlester in https://github.com/Quansight/qhub/pull/930

@@ -1,8 +1,8 @@
 module "minio" {
   source = "../minio"
 
-  name = "qhub-conda-store"
-  namespace = var.namespace
+  name         = "qhub-conda-store"
+  namespace    = var.namespace
   external-url = var.external-url
 
   node-group = var.node-group
@@ -18,7 +18,7 @@ module "minio" {
 module "postgresql" {
   source = "../postgresql"
 
-  name = "qhub-conda-store"
+  name      = "qhub-conda-store"
   namespace = var.namespace
 
   node-group = var.node-group

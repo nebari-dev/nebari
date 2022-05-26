@@ -20,7 +20,7 @@ variable "tf_extensions" {
 
 variable "qhub_config_yaml" {
   description = "QHub Configuration"
-  type = any
+  type        = any
 }
 
 variable "helm_extensions" {

@@ -1,14 +1,14 @@
+import json
 import logging
-from abc import ABC
 import pathlib
 import re
-import json
-import string
 import secrets
+import string
+from abc import ABC
 
 from pydantic.error_wrappers import ValidationError
 
-from .schema import verify, is_version_accepted
+from .schema import is_version_accepted, verify
 from .utils import backup_config_file, load_yaml, yaml
 from .version import __version__, rounded_ver_parse
 
@@ -217,7 +217,7 @@ class Upgrade_0_3_12(UpgradeStep):
         self, config, start_version, config_filename, *args, **kwargs
     ):
         """
-        This verison of QHub requires a conda_store image for the first time.
+        This version of QHub requires a conda_store image for the first time.
         """
         if config.get("default_images", {}).get("conda_store", None) is None:
             newimage = "quansight/conda-store-server:v0.3.3"

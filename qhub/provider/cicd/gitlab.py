@@ -1,6 +1,7 @@
-from typing import Optional, Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
+
 from qhub.utils import pip_install_qhub
 
 

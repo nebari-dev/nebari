@@ -1,8 +1,8 @@
-import os
 import logging
+import os
 
-from auth0.v3.management import Auth0
 from auth0.v3.authentication import GetToken
+from auth0.v3.management import Auth0
 
 logger = logging.getLogger(__name__)
 

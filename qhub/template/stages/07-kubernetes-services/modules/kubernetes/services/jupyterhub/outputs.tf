@@ -6,9 +6,9 @@ output "internal_jupyterhub_url" {
 
 output "services" {
   description = "Jupyterhub registered services"
-  value       = {
-    for service in var.services: service => {
-      name = service
+  value = {
+    for service in var.services : service => {
+      name      = service
       api_token = random_password.service_token[service].result
     }
   }

@@ -87,50 +87,50 @@ variable "node_group_defaults" {
 
 variable "networking_mode" {
   description = "Determines whether alias IPs or routes will be used for pod IPs in the cluster. Options are VPC_NATIVE or ROUTES."
-  type = string
-  default = "ROUTES"
+  type        = string
+  default     = "ROUTES"
 }
 
 variable "network" {
   description = "Name of the VPC network, where the cluster should be deployed"
-  type = string
-  default = "default"
+  type        = string
+  default     = "default"
 }
 
 variable "subnetwork" {
   description = "Name of the subnet for deploying cluster into"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "ip_allocation_policy" {
   description = "Configuration of cluster IP allocation for VPC-native clusters."
   type = map(object({
-    cluster_secondary_range_name    = string
-    services_secondary_range_name   = string
-    cluster_ipv4_cidr_block         = string
-    services_ipv4_cidr_block        = string
+    cluster_secondary_range_name  = string
+    services_secondary_range_name = string
+    cluster_ipv4_cidr_block       = string
+    services_ipv4_cidr_block      = string
   }))
   default = null
 }
 
 variable "master_authorized_networks_config" {
   description = "The desired configuration options for master authorized networks"
-  type           = map(object({
-    cidr_blocks   = map(object({
-      cidr_block = string
+  type = map(object({
+    cidr_blocks = map(object({
+      cidr_block   = string
       display_name = string
     }))
   }))
-  default     = null
+  default = null
 }
 
 variable "private_cluster_config" {
   description = "Configuration for private clusters, clusters with private nodes."
-  type                          = map(object({
-    enable_private_nodes        = bool
-    enable_private_endpoint     = bool
-    master_ipv4_cidr_block      = string
+  type = map(object({
+    enable_private_nodes    = bool
+    enable_private_endpoint = bool
+    master_ipv4_cidr_block  = string
   }))
-  default                       = null
+  default = null
 }

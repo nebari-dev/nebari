@@ -13,7 +13,7 @@ def do_keycloak(config_filename, *args):
     config = load_yaml(config_filename)
     verify(config)
 
-    # supress insecure warnings
+    # suppress insecure warnings
     import urllib3
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

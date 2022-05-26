@@ -1,9 +1,0 @@
-# .mdformat.toml
-#
-# This file shows the default values and is equivalent to having
-# no configuration file at all. Change the values for non-default
-# behavior.
-#
-wrap = 180       # possible values: {"keep", "no", INTEGER}
-number = true      # possible values: {false, true}
-end_of_line = "lf"  # possible values: {"lf", "crlf"}

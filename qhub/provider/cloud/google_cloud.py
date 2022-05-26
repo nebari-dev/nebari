@@ -1,6 +1,6 @@
-import subprocess
-import json
 import functools
+import json
+import subprocess
 
 
 @functools.lru_cache()

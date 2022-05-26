@@ -1,7 +1,7 @@
 import copy
-import os
 import functools
 import json
+import os
 
 import z2jh
 from tornado import gen

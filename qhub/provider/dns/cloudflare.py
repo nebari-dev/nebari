@@ -1,8 +1,7 @@
-import os
 import logging
+import os
 
 import CloudFlare
-
 
 logger = logging.getLogger(__name__)
 

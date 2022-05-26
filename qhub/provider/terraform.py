@@ -1,3 +1,4 @@
+import contextlib
 import io
 import json
 import logging
@@ -9,13 +10,10 @@ import sys
 import tempfile
 import urllib.request
 import zipfile
-from typing import Dict, Any, List
-import contextlib
+from typing import Any, Dict, List
 
-
-from qhub.utils import timer, run_subprocess_cmd, deep_merge
 from qhub import constants
-
+from qhub.utils import deep_merge, run_subprocess_cmd, timer
 
 logger = logging.getLogger(__name__)
 

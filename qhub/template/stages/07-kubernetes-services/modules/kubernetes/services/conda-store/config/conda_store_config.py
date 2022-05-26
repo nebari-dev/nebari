@@ -1,8 +1,11 @@
-import os
 import logging
+import os
 
-from conda_store_server.storage import S3Storage
+import requests
+from conda_store_server import api, orm, schema
 from conda_store_server.server.auth import GenericOAuthAuthentication
+from conda_store_server.server.utils import get_conda_store
+from conda_store_server.storage import S3Storage
 
 # ==================================
 #      conda-store settings
@@ -55,10 +58,6 @@ c.GenericOAuthAuthentication.access_scope = "profile"
 c.GenericOAuthAuthentication.user_data_key = "preferred_username"
 c.GenericOAuthAuthentication.tls_verify = False
 
-import requests
-from conda_store_server import schema, api, orm
-from conda_store_server.server.utils import get_conda_store
-
 
 class KeyCloakAuthentication(GenericOAuthAuthentication):
     def authenticate(self, request):
@@ -89,8 +88,8 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         namespaces = {username, "default", "filesystem"}
         role_bindings = {
             f"{username}/*": {"admin"},
-            f"filesystem/*": {"viewer"},
-            f"default/*": roles,
+            "filesystem/*": {"viewer"},
+            "default/*": roles,
         }
 
         for group in user_data.get("groups", []):

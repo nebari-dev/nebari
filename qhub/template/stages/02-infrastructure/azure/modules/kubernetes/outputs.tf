@@ -1,6 +1,6 @@
 output "credentials" {
   description = "Credentials required for connecting to kubernetes cluster"
-  sensitive = true
+  sensitive   = true
   value = {
     # see bottom of https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster
     endpoint               = azurerm_kubernetes_cluster.main.kube_config.0.host
@@ -14,6 +14,6 @@ output "credentials" {
 
 output "kubeconfig" {
   description = "Kubernetes connection kubeconfig"
-  sensitive = true
-  value = azurerm_kubernetes_cluster.main.kube_config_raw
+  sensitive   = true
+  value       = azurerm_kubernetes_cluster.main.kube_config_raw
 }
