@@ -297,7 +297,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
         url, verify=False, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
     ):
         for i in range(num_attempts):
-            response = requests.get(service_url, verify=verify, timeout=timeout)
+            response = requests.get(url, verify=verify, timeout=timeout)
             if response.status_code < 400:
                 print(f"Attempt {i+1} health check succeeded for url={url}")
                 return True

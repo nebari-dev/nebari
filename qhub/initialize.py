@@ -59,6 +59,9 @@ BASE_CONFIGURATION = {
     "monitoring": {
         "enabled": True,
     },
+    "argo_workflows": {
+        "enabled": True,
+    },
     "kbatch": {
         "enabled": True,
     },

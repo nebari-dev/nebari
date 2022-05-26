@@ -76,6 +76,14 @@ class HelmExtension(Base):
     overrides: typing.Optional[typing.Dict]
 
 
+# ============== Argo-Workflows =========
+
+
+class ArgoWorkflows(Base):
+    enabled: bool
+    overrides: typing.Optional[typing.Dict]
+
+
 # ============== kbatch =============
 
 
@@ -487,6 +495,7 @@ class Main(Base):
     theme: Theme
     profiles: Profiles
     environments: typing.Dict[str, CondaEnvironment]
+    argo_workflows: typing.Optional[ArgoWorkflows]
     kbatch: typing.Optional[KBatch]
     monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]

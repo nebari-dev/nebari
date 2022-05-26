@@ -1,6 +1,10 @@
 output "service_urls" {
   description = "service urls for configured services"
   value = {
+    argo-workflows = {
+      url        = var.argo-workflows-enabled ? "https://${var.endpoint}/argo/" : null
+      health_url = var.argo-workflows-enabled ? "https://${var.endpoint}/argo/" : null
+    }
     conda_store = {
       url        = "https://${var.endpoint}/conda-store/"
       health_url = "https://${var.endpoint}/conda-store/api/v1/"
