@@ -112,7 +112,10 @@ module "jupyterhub" {
 
   services = concat([
     "dask-gateway"
-  ], (var.prefect-enabled ? ["prefect"] : []))
+    ],
+    (var.prefect-enabled ? ["prefect"] : []),
+    (var.kbatch-enabled ? ["kbatch"] : [])
+  )
 
   general-node-group = var.node_groups.general
   user-node-group    = var.node_groups.user
