@@ -23,7 +23,7 @@ variable "clearml-overrides" {
 module "clearml" {
   count = var.clearml-enabled ? 1 : 0
 
-  source       = "./modules/kubernetes/services/clearml"
+  source = "./modules/kubernetes/services/clearml"
 
   namespace    = var.environment
   external-url = var.endpoint

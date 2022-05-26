@@ -1,7 +1,7 @@
-import json
-import subprocess
 import functools
+import json
 import os
+import subprocess
 
 import boto3
 

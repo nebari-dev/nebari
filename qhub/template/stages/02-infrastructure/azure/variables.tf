@@ -21,9 +21,9 @@ variable "kubernetes_version" {
 variable "node_groups" {
   description = "Azure node groups"
   type = map(object({
-    instance    = string
-    min_nodes   = number
-    max_nodes   = number
+    instance  = string
+    min_nodes = number
+    max_nodes = number
   }))
 }
 

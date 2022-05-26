@@ -5,7 +5,7 @@ const yaml_fields = [
 ];
 
 module.exports = (on, config) => {
-        
+
     const fs = require('fs');
     const _ = require('lodash');
     const yaml = require('js-yaml');
@@ -13,14 +13,14 @@ module.exports = (on, config) => {
     let new_config = {};
 
     try {
-  
+
         let fileContents = fs.readFileSync(process.env.QHUB_CONFIG_PATH, 'utf8');
         let data = yaml.load(fileContents);
 
         console.log(data);
 
         new_config['env'] = _.fromPairs(
-                _.map(yaml_fields, 
+                _.map(yaml_fields,
                     field => ['qhub_'+field.replace(/\./g, '_') , _.get(data, field, '')]
                         )
         );
@@ -34,5 +34,3 @@ module.exports = (on, config) => {
 
     return new_config;
   };
-
-  

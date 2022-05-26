@@ -100,8 +100,8 @@ Although each cloud provider has different names and hourly prices for their com
 
 > Given the possible destructive nature of resizing this node group, we **highly recommend** [backing up your cluster](../admin_guide/backup.md) before trying.
 
-Based on some testing, clusters running on Google Kubernetes Engine (GKE), may have some luck performing ths in place upgrade. However, this can't be said for the other cloud
-providers and attempting to do so for AWS and Azure will likely result in a catastrophic destruction of your cluster.
+Based on some testing, clusters running on Google Kubernetes Engine (GKE), may have some luck performing in place upgrade. However, this can't be said for the other cloud providers
+and attempting to do so for AWS and Azure will likely result in a catastrophic destruction of your cluster.
 
 | Cloud Provider | `general` node upgrade possible? |
 | :------------- | :------------------------------- |
@@ -110,7 +110,7 @@ providers and attempting to do so for AWS and Azure will likely result in a cata
 | Digital Ocean  | No                               |
 | GCP            | Yes                              |
 
-If modifying the resouce allocation for the `general` node is ultimately necessary, try increasing the max number of nodes for the `general` node group. This will mean two nodes -
+If modifying the resource allocation for the `general` node is ultimately necessary, try increasing the max number of nodes for the `general` node group. This will mean two nodes -
 reserved for the `general` node group - will likely always be running, increasing the operating cost of the cluster.
 
 Alternatively, you can backup your cluster, destroy it and redeploy using the same `qhub-config.yaml` but with an instance size of your liking.

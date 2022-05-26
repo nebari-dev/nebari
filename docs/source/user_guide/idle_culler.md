@@ -25,6 +25,6 @@ been up and running.
 
 The process for culling and terminating follows these steps:
 
-- Check if the Terminal and Notebooks kernels are idle for more than 15 minutes. With periodicaly culling checks of 5m.
+- Check if the Terminal and Notebooks kernels are idle for more than 15 minutes. With periodically culling checks of 5m.
 - If the kernel is idle for more than 15 minutes, terminate the kernel and the server.
 - Once no connections remains, after another 15m of no API calls from the user pod, the server is considered idle, and will be terminated.

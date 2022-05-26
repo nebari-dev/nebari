@@ -1,7 +1,7 @@
 output "kubernetes_credentials" {
   description = "Parameters needed to connect to kubernetes cluster"
   sensitive   = true
-  value       = {
+  value = {
     host                   = module.kubernetes.credentials.endpoint
     cluster_ca_certificate = module.kubernetes.credentials.cluster_ca_certificate
     token                  = module.kubernetes.credentials.token
@@ -11,11 +11,11 @@ output "kubernetes_credentials" {
 resource "local_file" "kubeconfig" {
   count = var.kubeconfig_filename != null ? 1 : 0
 
-  content = module.kubernetes.kubeconfig
+  content  = module.kubernetes.kubeconfig
   filename = var.kubeconfig_filename
 }
 
 output "kubeconfig_filename" {
   description = "filename for qhub kubeconfig"
-  value = var.kubeconfig_filename
+  value       = var.kubeconfig_filename
 }

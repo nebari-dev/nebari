@@ -8,7 +8,7 @@ has an [autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/cluster-aut
 between the two availability zones. When large Dask clusters get initialized and destroyed, the autoscaler attempts to reschedule a user pod. This reschedule operation occurs in
 the other availability zone. When this happens, Kubernetes doesn't successfully transfer the active pod to the other zone and the pod dies.
 
-To stop this occuring, the autoscaler service "AZRebalance" needs to be manually suspended. Currently this autoscaler service isn't managed by terraform. Disabling it via the
+To stop this occurring, the autoscaler service "AZRebalance" needs to be manually suspended. Currently this autoscaler service isn't managed by terraform. Disabling it via the
 console is permanent for the life of the cluster. [There is an open issue to permanently fix this via Terraform](https://github.com/Quansight/qhub/issues/786)
 
 To turn off the AZRebalance service, follow the steps in this [AWS documentation](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-suspend-resume-processes.html) to suspend

@@ -16,8 +16,6 @@ The local version is recommended for testing QHub's components due to its simpli
 
 You should choose another installation option if you are starting from scratch (i.e., no clusters yet) and aiming to have a production environment.
 
-Found your match? Head over to the [Local install docs](../dev_guide/testing.md#local-testing) for more details.
-
 ## HPC Deployment
 
 The [QHub HPC](https://hpc.qhub.dev/en/latest/) should be your choice if:

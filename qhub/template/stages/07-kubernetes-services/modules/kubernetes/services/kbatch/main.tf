@@ -15,19 +15,19 @@ resource "helm_release" "kbatch" {
     jsonencode({
       app = {
         jupyterhub_api_token = var.jupyterhub_api_token
-        jupyterhub_api_url = "https://${var.external-url}/hub/api/"
+        jupyterhub_api_url   = "https://${var.external-url}/hub/api/"
         extra_env = {
           KBATCH_PREFIX = ""
           KBATCH_JOB_EXTRA_ENV = jsonencode({
-            DASK_GATEWAY__AUTH__TYPE = "jupyterhub"
+            DASK_GATEWAY__AUTH__TYPE              = "jupyterhub"
             DASK_GATEWAY__CLUSTER__OPTIONS__IMAGE = "${var.dask-worker-image.name}:${var.dask-worker-image.tag}"
-            DASK_GATEWAY__ADDRESS = "${var.dask-gateway-address}"
-            DASK_GATEWAY__PROXY_ADDRESS = "${var.dask-gateway-proxy-address}"
+            DASK_GATEWAY__ADDRESS                 = "${var.dask-gateway-address}"
+            DASK_GATEWAY__PROXY_ADDRESS           = "${var.dask-gateway-proxy-address}"
           })
         }
       }
       image = {
-          tag = "0.3.1"
+        tag = "0.3.1"
       }
     })
   ])

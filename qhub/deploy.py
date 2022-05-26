@@ -1,18 +1,17 @@
 import logging
 import os
-import textwrap
 import subprocess
+import textwrap
 
-from qhub.utils import (
-    check_cloud_credentials,
-    timer,
-    kubernetes_provider_context,
-    keycloak_provider_context,
-)
-from qhub.stages import checks, state_imports, input_vars
 from qhub.provider import terraform
 from qhub.provider.dns.cloudflare import update_record
-
+from qhub.stages import checks, input_vars, state_imports
+from qhub.utils import (
+    check_cloud_credentials,
+    keycloak_provider_context,
+    kubernetes_provider_context,
+    timer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +33,7 @@ def provision_01_terraform_state(stage_outputs, config):
 def provision_02_infrastructure(stage_outputs, config, check=True):
     """Generalized method to provision infrastructure
 
-    After succesfull deployment the following properties are set on
+    After successful deployment the following properties are set on
     `stage_outputs[directory]`.
       - `kubernetes_credentials` which are sufficient credentials to
         connect with the kubernetes provider
@@ -236,7 +235,7 @@ def guided_install(
         print(f" - {service_name} -> {service['url']}")
 
     print(
-        f"Kubenetes kubeconfig located at file://{stage_outputs['stages/02-infrastructure']['kubeconfig_filename']['value']}"
+        f"Kubernetes kubeconfig located at file://{stage_outputs['stages/02-infrastructure']['kubeconfig_filename']['value']}"
     )
     username = "root"
     password = (

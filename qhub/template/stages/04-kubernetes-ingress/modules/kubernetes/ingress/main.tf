@@ -110,7 +110,7 @@ resource "kubernetes_service" "main" {
       target_port = 8786
     }
 
-    type = "LoadBalancer"
+    type             = "LoadBalancer"
     load_balancer_ip = var.load-balancer-ip
   }
 }
@@ -237,14 +237,14 @@ resource "kubernetes_deployment" "main" {
             # Enable debug logging. Useful to work out why something might not be
             # working. Fetch logs of the pod.
             "--log.level=${var.loglevel}",
-          ], var.enable-certificates ? [
+            ], var.enable-certificates ? [
             "--entrypoints.websecure.http.tls.certResolver=letsencrypt",
             "--entrypoints.minio.http.tls.certResolver=letsencrypt",
             "--certificatesresolvers.letsencrypt.acme.tlschallenge",
             "--certificatesresolvers.letsencrypt.acme.email=${var.acme-email}",
             "--certificatesresolvers.letsencrypt.acme.storage=acme.json",
             "--certificatesresolvers.letsencrypt.acme.caserver=${var.acme-server}",
-          ] : [
+            ] : [
             # ideally we could write "--entrypoints.websecure.http.tls={}"
             # but this doesn't seem to work?
             # since all we want to do is trigger traefik to generate a certificate
@@ -325,9 +325,9 @@ resource "kubernetes_manifest" "tlsstore_default" {
   count = var.certificate-secret-name != null ? 1 : 0
   manifest = {
     "apiVersion" = "traefik.containo.us/v1alpha1"
-    "kind" = "TLSStore"
+    "kind"       = "TLSStore"
     "metadata" = {
-      "name" = "default"
+      "name"      = "default"
       "namespace" = var.namespace
     }
     "spec" = {

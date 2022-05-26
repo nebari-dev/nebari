@@ -1,6 +1,6 @@
 from typing import Dict
 
-from qhub.provider.terraform import tf_render_objects, TerraformBackend, Provider, Data
+from qhub.provider.terraform import Data, Provider, TerraformBackend, tf_render_objects
 from qhub.utils import deep_merge
 
 
