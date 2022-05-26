@@ -59,6 +59,9 @@ BASE_CONFIGURATION = {
     "monitoring": {
         "enabled": True,
     },
+    "kbatch": {
+        "enabled": True,
+    },
     "cdsdashboards": {
         "enabled": True,
         "cds_hide_user_named_servers": True,
