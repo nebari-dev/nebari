@@ -52,6 +52,7 @@ BASE_CONFIGURATION = {
             "text_color": "#111111",
             "h1_color": "#652e8e",
             "h2_color": "#652e8e",
+            "version": f"v{__version__}",
         }
     },
     "helm_extensions": [],
@@ -59,6 +60,9 @@ BASE_CONFIGURATION = {
         "enabled": True,
     },
     "argo_workflows": {
+        "enabled": True,
+    },
+    "kbatch": {
         "enabled": True,
     },
     "cdsdashboards": {
@@ -233,7 +237,7 @@ DEFAULT_ENVIRONMENTS = {
             "param==1.11.1",
             "python-graphviz==0.17",
             "matplotlib==3.4.3",
-            "panel==0.12.4",
+            "panel==0.12.7",
             "voila==0.3.5",
             "streamlit==1.0.0",
             "dash==2.0.0",
@@ -267,11 +271,6 @@ def render_config(
 
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}
-
-    config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
-    config["theme"]["jupyterhub"][
-        "welcome"
-    ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
@@ -313,6 +312,11 @@ def render_config(
     print(
         f"Securely generated default random password={default_password} for Keycloak root user stored at path={default_password_filename}"
     )
+
+    config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
+    config["theme"]["jupyterhub"][
+        "welcome"
+    ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if auth_provider == "github":
         config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()

@@ -34,4 +34,6 @@ module "kubernetes" {
       max_size      = config.max_nodes
     }
   ]
+  vnet_subnet_id = var.vnet_subnet_id
+  private_cluster_enabled = var.private_cluster_enabled
 }

@@ -1,5 +1,5 @@
-resource "kubernetes_daemonset" "nvidia_installer" {
-  count = length(local.gpu_node_group_names) == 0 ? 0 : 1
+resource "kubernetes_daemonset" "aws_nvidia_installer" {
+  count = var.gpu_enabled && (var.cloud-provider == "aws") ? 1 : 0
   metadata {
     name      = "nvidia-device-plugin-daemonset-1.12"
     namespace = "kube-system"
@@ -27,7 +27,7 @@ resource "kubernetes_daemonset" "nvidia_installer" {
                 match_expressions {
                   key      = "eks.amazonaws.com/nodegroup"
                   operator = "In"
-                  values   = local.gpu_node_group_names
+                  values   = var.gpu_node_group_names
                 }
               }
             }

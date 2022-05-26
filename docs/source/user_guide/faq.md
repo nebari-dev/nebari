@@ -88,3 +88,29 @@ conda config --set changeps1 true
 
 If the user needs to solve a conda env on a QHub server, they need to specify the prefix. For example, `conda env create -f env_test.yml --prefix/tmp/test-env` where `test-env` is
 the env name. It's not recommended, but there are valid use cases of this operation.
+
+## Compute
+
+### I want to upgrade the instance size the `general` node group, is this possible?
+
+The `general` node group / node pool is the node (usually only one) that hosts most of the pods that QHub relies on for its core services, `hub`, `conda-store`, `proxy` and so on.
+We have tried to size it so that the initial deployment will work out of the box but also not set it too large that it incurs unnecessary cloud compute costs.
+
+Although each cloud provider has different names and hourly prices for their compute nodes, the default `general` node group in `qhub-config.yaml` has 2 vCPU and 8 GB of memory.
+
+> Given the possible destructive nature of resizing this node group, we **highly recommend** [backing up your cluster](../admin_guide/backup.md) before trying.
+
+Based on some testing, clusters running on Google Kubernetes Engine (GKE), may have some luck performing ths in place upgrade. However, this can't be said for the other cloud
+providers and attempting to do so for AWS and Azure will likely result in a catastrophic destruction of your cluster.
+
+| Cloud Provider | `general` node upgrade possible? |
+| :------------- | :------------------------------- |
+| AWS            | No (Danger!)                     |
+| Azure          | No (Danger!)                     |
+| Digital Ocean  | No                               |
+| GCP            | Yes                              |
+
+If modifying the resouce allocation for the `general` node is ultimately necessary, try increasing the max number of nodes for the `general` node group. This will mean two nodes -
+reserved for the `general` node group - will likely always be running, increasing the operating cost of the cluster.
+
+Alternatively, you can backup your cluster, destroy it and redeploy using the same `qhub-config.yaml` but with an instance size of your liking.

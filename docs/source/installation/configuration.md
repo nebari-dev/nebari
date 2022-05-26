@@ -17,7 +17,7 @@ domain: "do.qhub.dev" # top level URL exposure to monitor JupyterLab
 ```
 
 - `project_name`: should be compatible with the Cloud provider naming convention. Generally only use `A-Z`, `a-z`, `-`, and `_` (see
-  [Project Naming Conventions](usage.md#project-naming-convention) for more details).
+  [Project Naming Conventions](./usage.md#project-naming-convention) for more details).
 
 - `namespace`: is used in combination with `project_name` to label resources. In addition `namespace` also determines the `namespace` that used when deploying kubernetes resources
   for qhub.
@@ -61,7 +61,7 @@ ci_cd:
   `gitlab-ci` at the moment.
 
 If `ci_cd` is not supplied, no CI/CD will be auto-generated, however, we advise employing an infrastructure-as-code approach. This allows teams to more quickly modify their QHub
-deployment, empowering developers and data sciencists to request the changes and have them approved by an administrator.
+deployment, empowering developers and data scientists to request the changes and have them approved by an administrator.
 
 ## Certificate
 
@@ -113,7 +113,7 @@ Some of QHub services might require special subdomains under your certificate, W
 Defining a wildcard certificate decreases the amount of CN names you would need to define under the certificate configuration and reduces the chance of generating a wrong
 subdomain.
 
-> NOTE: It's not possible to request a double wildcard certificate for a domain (for example *.*.local.com). As a default behaviour of
+> NOTE: It's not possible to request a double wildcard certificate for a domain (for example *.*.local.com). As a default behavior of
 > [Traefik](https://doc.traefik.io/traefik/https/tls/#default-certificate), if the Domain Name System (DNS) and Common Name (CN) name doesn't match, Traefik generates and uses a
 > self-signed certificate. This may lead to some unexpected [TLS](https://www.internetsociety.org/deploy360/tls/basics) issues, so as alternative to including each specific domain
 > under the certificate CN list, you may also define a wildcard certificate.
@@ -183,8 +183,8 @@ security:
 
 #### GitHub based authentication
 
-GitHub has instructions for [creating OAuth applications](https://docs.github.com/en/developers/apps/creating-an-oauth-app). Note that QHub usernames will be their GitHub
-usernames.
+GitHub has instructions for [creating OAuth applications](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app). Note that QHub usernames will be
+their GitHub usernames.
 
 ```yaml
 security:
@@ -197,7 +197,7 @@ security:
 
 #### Password based authentication
 
-This is the simpliest authenication method. This just defers to however Keycloak is configured. That's also true for GitHub/Auth0 cases, except that for the single-sign on
+This is the simplest authentication method. This just defers to however Keycloak is configured. That's also true for GitHub/Auth0 cases, except that for the single-sign on
 providers the deployment will also configure those providers in Keycloak to save manual configuration. But it's also possible to add GitHub, or Google etc, as an Identity Provider
 in Keycloak even if you formally select `password` authentication in the `qhub-config.yaml` file.
 
@@ -255,6 +255,9 @@ For any of the providers (besides local), adding a node group is as easy as the 
 ```
 
 > NOTE: For each provider, details such as **instance names**, **availability zones**, and **Kubernetes versions** will be DIFFERENT.
+
+> NOTE: upgrading the `general` node instance type may not be possible for your chosen provider.
+> [See FAQ.](../user_guide/faq.md#i-want-to-upgrade-the-instance-size-the-general-node-group-is-this-possible)
 
 ### Providers
 
@@ -454,7 +457,7 @@ default_images:
 
 ## Storage
 
-Control the amount of storage allocated to shared filesystems.
+Control the amount of storage allocated to shared filesystem.
 
 > NOTE 1: when the storage size is changed, for most providers it will automatically delete (!) the previous storage place. NOTE 2: changing the storage size on an AWS deployment
 > after the initial deployment can be especially tricky so it might be worthwhile padding these storage sizes.
@@ -626,6 +629,9 @@ theme:
     h2_color: '#652e8e'
 ```
 
+Its also possible to display the current version of qhub by using the `display_version: 'True'` in the above `theme.jupyterhub` configuration. If no extra information is passed,
+the displayed version will be the same as `qhub_version`, an overwrite can be done by passing the `version: v.a.b.c` key as well.
+
 ## Environments
 
 ```yaml
@@ -692,22 +698,16 @@ jupyterhub:
 
 ## Terraform Overrides
 
-The QHub configuration file provides a huge number of configuration options for customizing your
-QHub Infrastructure, while these options are sufficient for an average user, but aren't
-exhaustive by any means. There are still a plenty of things you might want to achieve which
-cannot be configured directly by the above mentioned options, hence we've introduced a
-new option called terraform overrides (`terraform_overrides`), which lets you override
-the values of terraform variables in specific modules/resource. This is a relatively
-advance feature and must be used with utmost care and you should really know, what
-you're doing.
+The QHub configuration file provides a huge number of configuration options for customizing your QHub Infrastructure, while these options are sufficient for an average user, but
+aren't exhaustive by any means. There are still a plenty of things you might want to achieve which cannot be configured directly by the above mentioned options, hence we've
+introduced a new option called terraform overrides (`terraform_overrides`), which lets you override the values of terraform variables in specific modules/resource. This is a
+relatively advance feature and must be used with utmost care and you should really know, what you're doing.
 
 Here we describe the overrides supported via QHub config file:
 
 ### Ingress
 
-You can configure the IP of the load balancer and add annotations for the same via `ingress`'s
-terraform overrides, one such example for GCP is:
-
+You can configure the IP of the load balancer and add annotations for the same via `ingress`'s terraform overrides, one such example for GCP is:
 
 ```yaml
 ingress:
@@ -719,6 +719,56 @@ ingress:
 ```
 
 This is quite useful for pinning the IP Address of the load balancer.
+
+### Deployment inside Virtual Private Network
+
+#### Azure
+
+Using terraform overrides you can also deploy inside a virtual private network.
+
+An example configuration for Azure is given below:
+
+```yaml
+azure:
+  terraform_overrides:
+      private_cluster_enabled: true
+      vnet_subnet_id: '/subscriptions/<subscription_id>/resourceGroups/<resource_group>/providers/Microsoft.Network/virtualNetworks/<vnet-name>/subnets/<subnet-name>'
+  region: Central US
+```
+
+#### Google Cloud
+
+Using terraform overrides you can also deploy inside a VPC in GCP, making the Kubernetes cluster private. Here is an example for configuring the same:
+
+```yaml
+google_cloud_platform:
+  terraform_overrides:
+    networking_mode: "VPC_NATIVE"
+    network: "your-vpc-name"
+    subnetwork: "your-vpc-subnet-name"
+    private_cluster_config:
+      enable_private_nodes: true
+      enable_private_endpoint: true
+      master_ipv4_cidr_block: "172.16.0.32/28"
+    master_authorized_networks_config:
+      cidr_block: null
+      display_name: null
+```
+
+As the name suggests the cluster will be private, which means it would not have access to the internet either, which is not ideal for deploying pods in the cluster, hence we need
+to allow internet access for the cluster, which can be achieved by creating a NAT router by running the following two commands for your vpc network.
+
+```
+gcloud compute routers create qhub-nat-router --network your-vpc-name --region your-region
+
+gcloud compute routers nats create nat-config --router qhub-nat-router  --nat-all-subnet-ip-ranges --auto-allocate-nat-external-ips --region your-region
+```
+
+#### Deployment Notes
+
+Deployment inside a virtual network is slightly different from deploying inside a public network, as the name suggests, since its a virtual private network, you need to be inside
+the network to able to deploy and access QHub. One way to achieve this is by creating a Virtual Machine inside the virtual network, just select the virtual network and subnet name
+under the networking settings of your cloud provider while creating the VM and then follow the usual deployment instructions as you would deploy from your local machine.
 
 # Full configuration example
 

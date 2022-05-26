@@ -98,6 +98,12 @@ def gha_env_vars(config):
     if os.environ.get("QHUB_GH_BRANCH"):
         env_vars["QHUB_GH_BRANCH"] = "${{ secrets.QHUB_GH_BRANCH }}"
 
+    # This assumes that the user is using the omitting sensitive values configuration for the token.
+    if config.get("prefect", {}).get("enabled", False):
+        env_vars[
+            "QHUB_SECRET_prefect_token"
+        ] = "${{ secrets.QHUB_SECRET_PREFECT_TOKEN }}"
+
     if config["provider"] == "aws":
         env_vars["AWS_ACCESS_KEY_ID"] = "${{ secrets.AWS_ACCESS_KEY_ID }}"
         env_vars["AWS_SECRET_ACCESS_KEY"] = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"

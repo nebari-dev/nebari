@@ -27,10 +27,11 @@ def QHubDigitalOceanProvider(qhub_config: Dict):
 def QHubKubernetesProvider(qhub_config: Dict):
     if qhub_config["provider"] == "aws":
         cluster_name = f"{qhub_config['project_name']}-{qhub_config['namespace']}"
-
+        # The AWS provider needs to be added, as we are using aws related resources #1254
         return deep_merge(
             Data("aws_eks_cluster", "default", name=cluster_name),
             Data("aws_eks_cluster_auth", "default", name=cluster_name),
+            Provider("aws", region=qhub_config["amazon_web_services"]["region"]),
             Provider(
                 "kubernetes",
                 experiments={"manifest_resource": True},

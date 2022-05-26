@@ -18,9 +18,9 @@ prefect:
 There are a bunch of components in getting Prefect working for you, here is a brief description of them:
 
 1. Create a free Prefect cloud account here: https://cloud.prefect.io/
-2. Create a Service Account and an API key for the same and add this to the CI secrets as `TF_VAR_prefect_token`:
-   - In GitHub: Set it in Secrets (https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository)
-   - In GitLab: Set it as Variables (https://docs.gitlab.com/ee/ci/variables/#gitlab-cicd-variables)
+2. Create a Service Account and an API key for the same and add this to the CI secrets as `QHUB_SECRET_PREFECT_TOKEN`:
+   - In GitHub: Set it in [Secrets](https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository)
+   - In GitLab: Set it as [Variables](https://docs.gitlab.com/ee/ci/variables/#gitlab-cicd-variables)
 3. Create a project in the Prefect Cloud Dashboard. Alternatively from CLI:
 
 ```

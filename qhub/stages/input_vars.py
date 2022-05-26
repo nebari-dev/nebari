@@ -47,6 +47,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "QHUB_KUBECONFIG"
             ),
+            **config.get("do", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "gcp":
         return {
@@ -60,6 +61,9 @@ def stage_02_infrastructure(stage_outputs, config):
                     "instance_type": value["instance"],
                     "min_size": value["min_nodes"],
                     "max_size": value["max_nodes"],
+                    "guest_accelerators": value["guest_accelerators"]
+                    if "guest_accelerators" in value
+                    else [],
                     **value,
                 }
                 for key, value in config["google_cloud_platform"]["node_groups"].items()
@@ -67,6 +71,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "QHUB_KUBECONFIG"
             ),
+            **config.get("gcp", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "azure":
         return {
@@ -80,6 +85,7 @@ def stage_02_infrastructure(stage_outputs, config):
             ),
             "resource_group_name": f'{config["project_name"]}-{config["namespace"]}',
             "node_resource_group_name": f'{config["project_name"]}-{config["namespace"]}-node-resource-group',
+            **config.get("azure", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "aws":
         return {
@@ -99,12 +105,32 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "QHUB_KUBECONFIG"
             ),
+            **config.get("aws", {}).get("terraform_overrides", {}),
         }
     else:
         return {}
 
 
 def stage_03_kubernetes_initialize(stage_outputs, config):
+    if config["provider"] == "gcp":
+        gpu_enabled = any(
+            node_group.get("guest_accelerators")
+            for node_group in config["google_cloud_platform"]["node_groups"].values()
+        )
+        gpu_node_group_names = []
+
+    elif config["provider"] == "aws":
+        gpu_enabled = any(
+            node_group.get("gpu")
+            for node_group in config["amazon_web_services"]["node_groups"].values()
+        )
+        gpu_node_group_names = [
+            group for group in config["amazon_web_services"]["node_groups"].keys()
+        ]
+    else:
+        gpu_enabled = False
+        gpu_node_group_names = []
+
     return {
         "name": config["project_name"],
         "environment": config["namespace"],
@@ -113,6 +139,8 @@ def stage_03_kubernetes_initialize(stage_outputs, config):
         "external_container_reg": config.get(
             "external_container_reg", {"enabled": False}
         ),
+        "gpu_enabled": gpu_enabled,
+        "gpu_node_group_names": gpu_node_group_names,
     }
 
 
@@ -209,6 +237,11 @@ def stage_07_kubernetes_services(stage_outputs, config):
                 f"https://{config['domain']}/{ext['urlslug']}{ext['logout']}",
                 urlencode({"redirect_uri": final_logout_uri}),
             )
+    jupyterhub_theme = config["theme"]["jupyterhub"]
+    if config["theme"]["jupyterhub"].get("display_version") and (
+        not config["theme"]["jupyterhub"].get("version", False)
+    ):
+        jupyterhub_theme.update({"version": f"v{config['qhub_version']}"})
 
     return {
         "name": config["project_name"],
@@ -223,7 +256,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "conda-store-filesystem-storage": config["storage"]["conda_store"],
         # jupyterhub
         "cdsdashboards": config["cdsdashboards"],
-        "jupyterhub-theme": config["theme"]["jupyterhub"],
+        "jupyterhub-theme": jupyterhub_theme,
         "jupyterhub-image": _split_docker_image_name(
             config["default_images"]["jupyterhub"]
         ),
@@ -256,6 +289,8 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "argo-workflows-overrides": [
             json.dumps(config.get("argo_workflows", {}).get("overrides", {}))
         ],
+        # kbatch
+        "kbatch-enabled": config["kbatch"]["enabled"],
         # prefect
         "prefect-enabled": config.get("prefect", {}).get("enabled", False),
         "prefect-token": config.get("prefect", {}).get("token", ""),

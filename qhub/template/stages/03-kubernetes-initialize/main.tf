@@ -19,3 +19,13 @@ module "kubernetes-autoscaling" {
 module "traefik-crds" {
   source = "./modules/traefik_crds"
 }
+
+module "nvidia-driver-installer" {
+  count = var.gpu_enabled ? 1 : 0
+
+  source = "./modules/nvidia-installer"
+
+  cloud-provider = var.cloud-provider
+  gpu_enabled = var.gpu_enabled
+  gpu_node_group_names = var.gpu_node_group_names
+}
