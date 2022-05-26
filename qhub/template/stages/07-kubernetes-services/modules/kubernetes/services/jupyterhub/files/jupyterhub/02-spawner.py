@@ -1,10 +1,11 @@
 # remove after next kubespawner release past 1/20/2022
 # https://github.com/jupyterhub/kubespawner/pull/558
 import kubernetes.client.models
-import z2jh
-from kubespawner import KubeSpawner
 
 kubernetes.client.models.V1EndpointPort = kubernetes.client.models.CoreV1EndpointPort
+
+import z2jh  # noqa: E402
+from kubespawner import KubeSpawner  # noqa: E402
 
 cdsdashboards = z2jh.get_config("custom.cdsdashboards")
 conda_store_environments = z2jh.get_config("custom.environments")
