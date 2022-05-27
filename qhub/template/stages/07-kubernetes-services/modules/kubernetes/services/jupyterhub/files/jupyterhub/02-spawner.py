@@ -1,5 +1,7 @@
 # remove after next kubespawner release past 1/20/2022
 # https://github.com/jupyterhub/kubespawner/pull/558
+import os
+
 import kubernetes.client.models
 
 kubernetes.client.models.V1EndpointPort = kubernetes.client.models.CoreV1EndpointPort
@@ -39,6 +41,7 @@ if cdsdashboards["enabled"]:
     c.VariableMixin.proxy_ready_timeout = 600
     c.VariableMixin.proxy_request_timeout = 600
 
+    userhome = f"/home/{os.getenv('JUPYTERHUB_USER', 'jovyan')}"
     c.CDSDashboardsConfig.extra_presentation_types = ["panel-serve"]
     c.VariableMixin.extra_presentation_launchers = {
         "panel-serve": {
@@ -51,7 +54,7 @@ if cdsdashboards["enabled"]:
                 "{origin_host}",
             ],
             "debug_args": [],
-            "env": {"PYTHONPATH": "/home/jovyan/{presentation_dirname}"},
+            "env": {"PYTHONPATH": f"{userhome}/{{presentation_dirname}}"},
         }
     }
 
