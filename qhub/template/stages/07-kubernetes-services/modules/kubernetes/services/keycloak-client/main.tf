@@ -20,10 +20,10 @@ resource "keycloak_openid_client" "main" {
 
 
 resource "keycloak_openid_user_client_role_protocol_mapper" "main" {
-  realm_id        = var.realm_id
-  client_id       = keycloak_openid_client.main.id
-  name            = "user-client-role-mapper"
-  claim_name      = "roles"
+  realm_id   = var.realm_id
+  client_id  = keycloak_openid_client.main.id
+  name       = "user-client-role-mapper"
+  claim_name = "roles"
 
   claim_value_type    = "String"
   multivalued         = true
@@ -45,6 +45,22 @@ resource "keycloak_openid_group_membership_protocol_mapper" "main" {
   add_to_userinfo     = true
 }
 
+resource "keycloak_openid_user_attribute_protocol_mapper" "jupyterlab_profiles" {
+  count = var.jupyterlab_profiles_mapper ? 1 : 0
+
+  realm_id   = var.realm_id
+  client_id  = keycloak_openid_client.main.id
+  name       = "jupyterlab_profiles_mapper"
+  claim_name = "jupyterlab_profiles"
+
+  add_to_id_token     = true
+  add_to_access_token = true
+  add_to_userinfo     = true
+
+  user_attribute       = "jupyterlab_profiles"
+  multivalued          = true
+  aggregate_attributes = true
+}
 
 resource "keycloak_role" "main" {
   for_each = toset(flatten(values(var.role_mapping)))
@@ -69,7 +85,7 @@ resource "keycloak_group_roles" "group_roles" {
 
   realm_id = var.realm_id
   group_id = data.keycloak_group.main[each.key].id
-  role_ids = [for role in each.value: keycloak_role.main[role].id]
+  role_ids = [for role in each.value : keycloak_role.main[role].id]
 
   exhaustive = false
 }

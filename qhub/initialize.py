@@ -1,23 +1,24 @@
-import os
-import re
-import string
-import random
-import secrets
-import tempfile
 import logging
+import os
+import random
+import re
+import secrets
+import string
+import tempfile
 
 import requests
 
-from qhub.provider.oauth.auth0 import create_client
-from qhub.provider.cicd import github
 from qhub.provider import git
-
+from qhub.provider.cicd import github
+from qhub.provider.oauth.auth0 import create_client
 from qhub.utils import (
-    namestr_regex,
-    qhub_image_tag,
     check_cloud_credentials,
+    namestr_regex,
+    qhub_dask_version,
+    qhub_image_tag,
     set_kubernetes_version,
 )
+
 from .version import __version__
 
 logger = logging.getLogger(__name__)
@@ -37,8 +38,6 @@ BASE_CONFIGURATION = {
         "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
         "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
         "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
-        "dask_gateway": f"quansight/qhub-dask-gateway:{qhub_image_tag}",
-        "conda_store": "quansight/conda-store-server:v0.3.9",
     },
     "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
     "theme": {
@@ -53,10 +52,17 @@ BASE_CONFIGURATION = {
             "text_color": "#111111",
             "h1_color": "#652e8e",
             "h2_color": "#652e8e",
+            "version": f"v{__version__}",
         }
     },
     "helm_extensions": [],
     "monitoring": {
+        "enabled": True,
+    },
+    "argo_workflows": {
+        "enabled": True,
+    },
+    "kbatch": {
         "enabled": True,
     },
     "cdsdashboards": {
@@ -66,7 +72,11 @@ BASE_CONFIGURATION = {
     },
 }
 
-CICD_CONFIGURATION = {"type": "PLACEHOLDER", "branch": "main"}
+CICD_CONFIGURATION = {
+    "type": "PLACEHOLDER",
+    "branch": "main",
+    "commit_render": True,
+}
 
 AUTH_PASSWORD = {
     "type": "password",
@@ -170,7 +180,6 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 0.75,
                 "mem_limit": "4G",
                 "mem_guarantee": "2.5G",
-                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
         {
@@ -181,7 +190,6 @@ DEFAULT_PROFILES = {
                 "cpu_guarantee": 1.5,
                 "mem_limit": "8G",
                 "mem_guarantee": "5G",
-                "image": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
             },
         },
     ],
@@ -192,7 +200,6 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "4G",
             "worker_memory": "2.5G",
             "worker_threads": 1,
-            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
         "Medium Worker": {
             "worker_cores_limit": 2,
@@ -200,7 +207,6 @@ DEFAULT_PROFILES = {
             "worker_memory_limit": "8G",
             "worker_memory": "5G",
             "worker_threads": 2,
-            "image": f"quansight/qhub-dask-worker:{qhub_image_tag}",
         },
     },
 }
@@ -213,7 +219,7 @@ DEFAULT_ENVIRONMENTS = {
             "python",
             "ipykernel",
             "ipywidgets",
-            "qhub-dask ==0.3.13",
+            f"qhub-dask =={qhub_dask_version}",
             "python-graphviz",
             "numpy",
             "numba",
@@ -227,15 +233,15 @@ DEFAULT_ENVIRONMENTS = {
             "python==3.9.7",
             "ipykernel==6.4.1",
             "ipywidgets==7.6.5",
-            "qhub-dask==0.3.13",
+            f"qhub-dask=={qhub_dask_version}",
             "param==1.11.1",
             "python-graphviz==0.17",
             "matplotlib==3.4.3",
-            "panel==0.12.4",
-            "voila==0.2.16",
+            "panel==0.12.7",
+            "voila==0.3.5",
             "streamlit==1.0.0",
             "dash==2.0.0",
-            "cdsdashboards-singleuser==0.6.0",
+            "cdsdashboards-singleuser==0.6.1",
         ],
     },
 }
@@ -260,15 +266,11 @@ def render_config(
     config["provider"] = cloud_provider
 
     if ci_provider is not None and ci_provider != "none":
-        config["ci_cd"] = {"type": ci_provider, "branch": "main"}
+        config["ci_cd"] = CICD_CONFIGURATION.copy()
+        config["ci_cd"]["type"] = ci_provider
 
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}
-
-    config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
-    config["theme"]["jupyterhub"][
-        "welcome"
-    ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
@@ -310,6 +312,11 @@ def render_config(
     print(
         f"Securely generated default random password={default_password} for Keycloak root user stored at path={default_password_filename}"
     )
+
+    config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
+    config["theme"]["jupyterhub"][
+        "welcome"
+    ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if auth_provider == "github":
         config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()

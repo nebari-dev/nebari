@@ -1,19 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 set -x
+
 # install classic notebook extensions
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
-
-# ====== setup ipython conifiguration ======
-mkdir -p /etc/ipython
-cp /opt/jupyterlab/ipython_config.py /etc/ipython/ipython_config.py
-
-# ====== setup jupyterlab configuration overrides ======
-mkdir -p /opt/conda/share/jupyter/lab/settings
-cp /opt/jupyterlab/overrides.json /opt/conda/share/jupyter/lab/settings
-
-# ====== fix perms ======
-fix-permissions /opt/jupyterlab /etc/ipython
 
 # if DEFAULT_ENV is unset ${DEFAULT_ENV+x} expands to nothing otherwise
 # it substitutes the string x. This allows us to check if the variable

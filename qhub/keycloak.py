@@ -10,12 +10,15 @@ logger = logging.getLogger(__name__)
 
 
 def do_keycloak(config_filename, *args):
-    # supress insecure warnings
+    config = load_yaml(config_filename)
+    verify(config)
+
+    # suppress insecure warnings
     import urllib3
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    keycloak_admin = get_keycloak_admin_from_config(config_filename)
+    keycloak_admin = get_keycloak_admin_from_config(config)
 
     if args[0] == "adduser":
         if len(args) < 2:
@@ -25,7 +28,7 @@ def do_keycloak(config_filename, *args):
 
         username = args[1]
         password = args[2] if len(args) >= 3 else None
-        create_user(keycloak_admin, username, password)
+        create_user(keycloak_admin, username, password, domain=config["domain"])
     elif args[0] == "listusers":
         list_users(keycloak_admin)
     else:
@@ -37,11 +40,14 @@ def create_user(
     username: str,
     password: str = None,
     groups=None,
+    email=None,
+    domain=None,
     enabled=True,
 ):
     payload = {
         "username": username,
         "groups": groups or ["/developer"],
+        "email": email or f"{username}@{domain or 'example.com'}",
         "enabled": enabled,
     }
     if password:
@@ -58,20 +64,20 @@ def list_users(keycloak_admin: keycloak.KeycloakAdmin):
     num_users = keycloak_admin.users_count()
     print(f"{num_users} Keycloak Users")
 
-    user_format = "{username:32} | {groups}"
-    print(user_format.format(username="username", groups="groups"))
-    print("-" * 80)
+    user_format = "{username:32} | {email:32} | {groups}"
+    print(user_format.format(username="username", email="email", groups="groups"))
+    print("-" * 120)
 
     for user in keycloak_admin.get_users():
         user_groups = [_["name"] for _ in keycloak_admin.get_user_groups(user["id"])]
-        print(user_format.format(username=user["username"], groups=user_groups))
+        print(
+            user_format.format(
+                username=user["username"], email=user["email"], groups=user_groups
+            )
+        )
 
 
-def get_keycloak_admin_from_config(config_filename):
-    config = load_yaml(config_filename)
-
-    verify(config)
-
+def get_keycloak_admin_from_config(config):
     keycloak_server_url = os.environ.get(
         "KEYCLOAK_SERVER_URL", f"https://{config['domain']}/auth/"
     )

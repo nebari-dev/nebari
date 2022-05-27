@@ -18,6 +18,11 @@ variable "storage_account_postfix" {
   type        = string
 }
 
+variable "state_resource_group_name" {
+  description = "Name for terraform state resource group"
+  type        = string
+}
+
 provider "azurerm" {
   features {}
 }
@@ -25,7 +30,8 @@ provider "azurerm" {
 module "terraform-state" {
   source = "./modules/terraform-state"
 
-  resource_group_name     = "${var.name }-${var.namespace}"
+  name                    = "${var.name}-${var.namespace}"
+  resource_group_name     = var.state_resource_group_name
   location                = var.region
   storage_account_postfix = var.storage_account_postfix
 }

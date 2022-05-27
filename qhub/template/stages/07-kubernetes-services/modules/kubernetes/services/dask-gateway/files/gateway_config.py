@@ -1,10 +1,10 @@
-import os
-import json
 import functools
+import json
+import os
 
 from aiohttp import web
-from dask_gateway_server.options import Options, Select, Mapping
 from dask_gateway_server.auth import JupyterHubAuthenticator
+from dask_gateway_server.options import Mapping, Options, Select
 
 
 def dask_gateway_config(path="/var/lib/dask-gateway/config.json"):
@@ -30,6 +30,7 @@ c.KubeClusterConfig.image = (
 )
 c.KubeClusterConfig.image_pull_policy = config["cluster"]["image_pull_policy"]
 c.KubeClusterConfig.environment = config["cluster"]["environment"]
+c.KubeClusterConfig.idle_timeout = config["cluster"]["idle_timeout"]
 
 c.KubeClusterConfig.scheduler_cores = config["cluster"]["scheduler_cores"]
 c.KubeClusterConfig.scheduler_cores_limit = config["cluster"]["scheduler_cores_limit"]
@@ -75,11 +76,7 @@ class QHubAuthentication(JupyterHubAuthenticator):
             )
 
         user.admin = "dask_gateway_admin" in data["roles"]
-        user.groups = [
-            os.path.basename(group)
-            for group in data["groups"]
-            if os.path.dirname(group) == "/projects"
-        ]
+        user.groups = [os.path.basename(group) for group in data["groups"]]
         return user
 
 
@@ -90,12 +87,18 @@ c.JupyterHubAuthenticator.jupyterhub_api_token = config["jupyterhub_api_token"]
 
 # ==================== Profiles =======================
 def get_packages(conda_prefix):
-    packages = set()
-    for filename in os.listdir(os.path.join(conda_prefix, "conda-meta")):
-        if filename.endswith(".json"):
-            with open(os.path.join(conda_prefix, "conda-meta", filename)) as f:
-                packages.add(json.load(f).get("name"))
-    return packages
+    try:
+        packages = set()
+        for filename in os.listdir(os.path.join(conda_prefix, "conda-meta")):
+            if filename.endswith(".json"):
+                with open(os.path.join(conda_prefix, "conda-meta", filename)) as f:
+                    packages.add(json.load(f).get("name"))
+        return packages
+    except OSError as e:
+        import logging
+
+        logger = logging.getLogger()
+        logger.error(f"An issue with a conda environment was encountered.\n{e}")
 
 
 def get_conda_prefixes(conda_store_mount):
@@ -109,7 +112,8 @@ def get_conda_prefixes(conda_store_mount):
 
 def list_dask_environments(conda_store_mount):
     for namespace, name, conda_prefix in get_conda_prefixes(conda_store_mount):
-        if {"dask", "distributed"} <= get_packages(conda_prefix):
+        packages = get_packages(conda_prefix)
+        if packages and {"dask", "distributed"} <= packages:
             yield namespace, name, conda_prefix
 
 

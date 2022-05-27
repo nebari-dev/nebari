@@ -1,14 +1,14 @@
+import json
 import logging
-from abc import ABC
 import pathlib
 import re
-import json
-import string
 import secrets
+import string
+from abc import ABC
 
 from pydantic.error_wrappers import ValidationError
 
-from .schema import verify, is_version_accepted
+from .schema import is_version_accepted, verify
 from .utils import backup_config_file, load_yaml, yaml
 from .version import __version__, rounded_ver_parse
 
@@ -217,7 +217,7 @@ class Upgrade_0_3_12(UpgradeStep):
         self, config, start_version, config_filename, *args, **kwargs
     ):
         """
-        This verison of QHub requires a conda_store image for the first time.
+        This version of QHub requires a conda_store image for the first time.
         """
         if config.get("default_images", {}).get("conda_store", None) is None:
             newimage = "quansight/conda-store-server:v0.3.3"
@@ -295,7 +295,9 @@ class Upgrade_0_4_0(UpgradeStep):
         print(
             f"\nSaving user/group import file {realm_import_filename}.\n\n"
             "ACTION REQUIRED: You must import this file into the Keycloak admin webpage after you redeploy QHub.\n"
-            "Visit the URL path /auth/ and login as 'root'. Under Manage, click Import and select this file.\n"
+            "Visit the URL path /auth/ and login as 'root'. Under Manage, click Import and select this file.\n\n"
+            "Non-admin users will default to analyst group membership after the upgrade (no dask access), "
+            "so you may wish to promote some users into the developer group.\n"
         )
 
         if "users" in security:
@@ -311,6 +313,14 @@ class Upgrade_0_4_0(UpgradeStep):
             print(
                 "Removing terraform_modules field from config as it is no longer used.\n"
             )
+
+        # Remove conda_store image from default_images
+        if "conda_store" in config["default_images"]:
+            del config["default_images"]["conda_store"]
+
+        # Remove dask_gateway image from default_images
+        if "dask_gateway" in config["default_images"]:
+            del config["default_images"]["dask_gateway"]
 
         # Create root password
         default_password = "".join(
@@ -342,6 +352,32 @@ class Upgrade_0_4_0(UpgradeStep):
         # which they can override if they are happy they understand the situation.
         config["prevent_deploy"] = True
 
+        return config
+
+
+class Upgrade_0_4_1(UpgradeStep):
+    version = "0.4.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: pathlib.Path, *args, **kwargs
+    ):
+        """
+        Upgrade jupyterlab profiles.
+        """
+        print("\nUpgrading jupyterlab profiles in order to specify access type:\n")
+
+        profiles_jupyterlab = config.get("profiles", {}).get("jupyterlab", [])
+        for profile in profiles_jupyterlab:
+            name = profile.get("display_name", "")
+
+            if "groups" in profile or "users" in profile:
+                profile["access"] = "yaml"
+            else:
+                profile["access"] = "all"
+
+            print(
+                f"Setting access type of JupyterLab profile {name} to {profile['access']}"
+            )
         return config
 
 

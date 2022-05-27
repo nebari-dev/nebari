@@ -2,8 +2,6 @@ const { divide } = require("lodash");
 
 const security_authentication_type = Cypress.env('qhub_security_authentication_type');
 
-const JHUB_CLIENT_PYTHON_PATH = Cypress.env('JHUB_CLIENT_PYTHON_PATH');
-
 const EXAMPLE_USER_NAME = Cypress.env('EXAMPLE_USER_NAME') || 'example-user';
 
 const EXAMPLE_USER_PASSWORD = Cypress.env('EXAMPLE_USER_PASSWORD');
@@ -47,7 +45,7 @@ describe('First Test', () => {
       cy.loginWithPassword(EXAMPLE_USER_NAME, EXAMPLE_USER_PASSWORD);
 
       // Start my Jupyter server
-      
+
       cy.get('#start')
         .should('contain', 'My Server').click();
 
@@ -58,43 +56,40 @@ describe('First Test', () => {
         .should('have.attr', 'value', 'Start').click();
 
       // Minimal check that JupyterLab has opened
+      cy.get('div#jp-MainLogo', { timeout: 60000 }).should('exist').wait(500);
 
-      cy.get('div#jp-MainLogo', { timeout: 30000 }).should('exist').wait(500);
-
-
-      if (JHUB_CLIENT_PYTHON_PATH) {
-
-          cy.runJHubClient(
-                  JHUB_CLIENT_PYTHON_PATH, Cypress.config().baseUrl, EXAMPLE_USER_NAME, EXAMPLE_USER_PASSWORD, 
-                  "BasicTest.ipynb", "python3"
-            ).then(result => {
-              if (result.code) {
-                throw new Error(`Execution of exec failed
-                  Exit code: ${result.code}
-                  Stdout:\n${result.stdout}
-                  Stderr:\n${result.stderr}`);
-              }
-              
-              cy.log(result.stdout);
-              cy.log(result.stderr);
-            })
-            .its('code').should('eq', 0);
-
-      }
-
+      // Click VS Code Launcher exists
+      cy.get('div.jp-LauncherCard[title="VS Code [↗]"]').should('exist');
 
       // Stop my Jupyter server - must do this so PVC can be destroyed on Minikube
-
       cy.visit('/hub/home');
 
-        // wait because otherwise event handler is not yet registered
-        // 'Correct' solution is here: https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
+      // wait because otherwise event handler is not yet registered
+      // 'Correct' solution is here: https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
       cy.get('#stop')
-        .should('contain', 'Stop My Server').wait(500).click();
+        .should('contain', 'Stop My Server').wait(1000).click();
 
       cy.get('#start', { timeout: 40000 })
         .should('contain', 'Start My Server');
 
+      // Visit Conda-Store
+
+      cy.visit('/conda-store/login/');
+
+      cy.get('#login a:first-of-type')
+        .should('contain', 'Sign in with OAuth');
+
+      // Visit Grafana Monitoring - user must have an email address in Keycloak
+
+      cy.visit('/monitoring/dashboards');
+
+      cy.get('div.page-header h1', { timeout: 20000 }).should('contain', 'Dashboards');
+
+      // Visit Keycloak User Profile
+
+      cy.visit('/auth/realms/qhub/account/#/personal-info');
+
+      cy.get('input#user-name', { timeout: 20000 }).should('have.value', EXAMPLE_USER_NAME);
     })
 
   } else {

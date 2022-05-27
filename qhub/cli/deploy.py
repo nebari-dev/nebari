@@ -1,9 +1,9 @@
-import pathlib
 import logging
+import pathlib
 
 from qhub.deploy import deploy_configuration
-from qhub.schema import verify
 from qhub.render import render_template
+from qhub.schema import verify
 from qhub.utils import load_yaml
 
 logger = logging.getLogger(__name__)

@@ -4,6 +4,7 @@ output "keycloak_credentials" {
   value       = module.kubernetes-keycloak-helm.credentials
 }
 
+# At this point this might be redundant, see `qhub-bot-password` in ./modules/kubernetes/keycloak-helm/variables.tf
 output "keycloak_qhub_bot_password" {
   description = "keycloak qhub-bot credentials"
   sensitive   = true

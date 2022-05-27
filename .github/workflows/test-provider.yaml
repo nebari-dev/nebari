@@ -1,15 +1,28 @@
 name: "Test QHub Provider"
 
 on:
-  pull_request: # Workflow only runs for PR against main anyway
+  pull_request:
+    paths:
+      - ".github/workflows/test-provider.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
   push:
     branches:
-      - '**'
-    tags:
-      - 'v*'
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
+      - main
+    paths:
+      - ".github/workflows/test-provider.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
 
 env:
   DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
@@ -20,9 +33,6 @@ env:
   ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-concurrency:
-  group: provider-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   test-render-providers:
@@ -36,6 +46,10 @@ jobs:
           - do
           - gcp
           - local
+        cicd:
+          - none
+          - github-actions
+          - gitlab-ci
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
@@ -44,7 +58,7 @@ jobs:
         with:
           python-version: 3.8
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0
         if: ${{ matrix.provider == 'gcp' }}
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
@@ -65,13 +79,14 @@ jobs:
           pip install .[dev]
       - name: QHub Initialize
         run: |
-          qhub init "${{ matrix.provider }}" --project "test-${{ matrix.provider }}" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
+          qhub init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt --ci-provider ${{ matrix.cicd }}
+          cat "qhub-config.yaml"
       - name: QHub Render
         run: |
-          qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-deployment"
-          cp "qhub-config.yaml" "qhub-${{ matrix.provider }}-deployment/qhub-config.yaml"
+          qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
+          cp "qhub-config.yaml" "qhub-${{ matrix.provider }}-${{ matrix.cicd }}-deployment/qhub-config.yaml"
       - name: QHub Render Artifact
         uses: actions/upload-artifact@master
         with:
-          name: "qhub-${{ matrix.provider }}-artifact"
-          path: "qhub-${{ matrix.provider }}-deployment"
+          name: "qhub-${{ matrix.provider }}-${{ matrix.cicd }}-artifact"
+          path: "qhub-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"

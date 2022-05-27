@@ -1,11 +1,10 @@
 # QHub docs
 
-To build the docs:
+We use `nox` to build the docs.
 
 ```
-cd docs
-pip install -r requirements.txt
-sphinx-build . build
+pip install nox
+nox -s docs
 ```
 
-Then view `docs/build/index.html` in a web browser.
+Then view `_build/html/index.html` in a web browser.

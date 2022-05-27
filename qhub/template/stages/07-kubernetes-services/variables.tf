@@ -20,16 +20,16 @@ variable "realm_id" {
 
 variable "node_groups" {
   description = "Node group selectors for kubernetes resources"
-  type        = map(object({
-    key = string
+  type = map(object({
+    key   = string
     value = string
   }))
 }
 
 variable "jupyterhub-logout-redirect-url" {
   description = "Next redirect destination following a Keycloak logout"
-  type = string
-  default = ""
+  type        = string
+  default     = ""
 }
 
 variable "jupyterhub-hub-extraEnv" {

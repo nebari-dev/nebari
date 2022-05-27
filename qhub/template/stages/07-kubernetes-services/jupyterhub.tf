@@ -1,20 +1,20 @@
 variable "cdsdashboards" {
   description = "Enable CDS Dashboards"
-  type        = object({
-    enabled = bool
-    cds_hide_user_named_servers = bool
+  type = object({
+    enabled                         = bool
+    cds_hide_user_named_servers     = bool
     cds_hide_user_dashboard_servers = bool
   })
-  default     = {
-    enabled = true
-    cds_hide_user_named_servers = true
+  default = {
+    enabled                         = true
+    cds_hide_user_named_servers     = true
     cds_hide_user_dashboard_servers = false
   }
 }
 
 variable "jupyterhub-theme" {
   description = "JupyterHub theme"
-  type        = map
+  type        = map(any)
   default     = {}
 }
 
@@ -53,7 +53,7 @@ variable "jupyterlab-image" {
 
 variable "jupyterlab-profiles" {
   description = "JupyterHub profiles to expose to user"
-  default = []
+  default     = []
 }
 
 
@@ -90,7 +90,7 @@ module "jupyterhub" {
   namespace = var.environment
 
   external-url = var.endpoint
-  realm_id = var.realm_id
+  realm_id     = var.realm_id
 
   overrides = var.jupyterhub-overrides
 
@@ -98,31 +98,34 @@ module "jupyterhub" {
 
   shared-pvc = module.jupyterhub-nfs-mount.persistent_volume_claim.name
 
-  conda-store-pvc = module.conda-store-nfs-mount.persistent_volume_claim.name
-  conda-store-mount = "/home/conda"
+  conda-store-pvc          = module.conda-store-nfs-mount.persistent_volume_claim.name
+  conda-store-mount        = "/home/conda"
   conda-store-environments = var.conda-store-environments
 
   extra-mounts = {
-    "/etc/dask"    = {
-      name = "dask-etc"
+    "/etc/dask" = {
+      name      = "dask-etc"
       namespace = var.environment
-      kind = "configmap"
-    }
+      kind      = "configmap"
+    },
   }
 
   services = concat([
     "dask-gateway"
-  ], (var.prefect-enabled ? ["prefect"] : []))
+    ],
+    (var.prefect-enabled ? ["prefect"] : []),
+    (var.kbatch-enabled ? ["kbatch"] : [])
+  )
 
   general-node-group = var.node_groups.general
-  user-node-group  = var.node_groups.user
+  user-node-group    = var.node_groups.user
 
   jupyterhub-image = var.jupyterhub-image
   jupyterlab-image = var.jupyterlab-image
 
-  cdsdashboards    = var.cdsdashboards
+  cdsdashboards = var.cdsdashboards
 
-  theme = var.jupyterhub-theme
+  theme    = var.jupyterhub-theme
   profiles = var.jupyterlab-profiles
 
   jupyterhub-logout-redirect-url = var.jupyterhub-logout-redirect-url

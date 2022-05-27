@@ -19,7 +19,7 @@ variable "realm_id" {
 
 variable "dashboards" {
   description = "Enabled grafana dashboards"
-  type = set(string)
+  type        = set(string)
   default = [
     "traefik.json",
     "keycloak.json",
@@ -27,7 +27,6 @@ variable "dashboards" {
     "conda_store.json",
   ]
 }
-
 
 variable "node-group" {
   description = "Node key value pair for bound resources"

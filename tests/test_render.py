@@ -1,9 +1,12 @@
-import pytest
+import os
+from pathlib import Path
 
+import pytest
 from ruamel.yaml import YAML
 
 from qhub.render import render_template, set_env_vars_in_config
-from .conftest import render_config_partial
+
+from .conftest import PRESERVED_DIR, render_config_partial
 
 
 @pytest.fixture
@@ -87,3 +90,31 @@ def test_render_template(write_qhub_config_to_file):
     assert qhub_config_json["namespace"] == namespace
     assert qhub_config_json["domain"] == domain
     assert qhub_config_json["provider"] == cloud_provider
+
+
+def test_exists_after_render(write_qhub_config_to_file):
+    items_to_check = [
+        ".gitignore",
+        "image",
+        "stages",
+        "qhub-config.yaml",
+        PRESERVED_DIR,
+    ]
+
+    qhub_config_loc, _ = write_qhub_config_to_file
+
+    yaml = YAML()
+    qhub_config_json = yaml.load(qhub_config_loc.read_text())
+
+    # list of files/dirs available after `qhub render` command
+    ls = os.listdir(Path(qhub_config_loc).parent.resolve())
+
+    cicd = qhub_config_json.get("ci_cd", {}).get("type", None)
+
+    if cicd == "github-actions":
+        items_to_check.append(".github")
+    elif cicd == "gitlab-ci":
+        items_to_check.append(".gitlab-ci.yml")
+
+    for i in items_to_check:
+        assert i in ls

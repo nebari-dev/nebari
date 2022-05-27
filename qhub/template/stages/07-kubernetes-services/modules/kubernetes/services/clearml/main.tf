@@ -3,7 +3,9 @@ resource "helm_release" "clearml" {
   namespace         = var.namespace
   chart             = "${path.module}/chart"
   dependency_update = true
-  values            = [file("${path.module}/chart/values.yaml")]
+  values = concat([
+    file("${path.module}/chart/values.yaml")
+  ], var.overrides)
 
   dynamic "set" {
     for_each = var.node_selector

@@ -16,14 +16,14 @@ variable "region" {
 module "terraform-state" {
   source = "./modules/terraform-state"
 
-  name     = "${var.name }-${var.namespace}"
+  name     = "${var.name}-${var.namespace}"
   location = var.region
 }
 
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source  = "hashicorp/google"
       version = "4.8.0"
     }
   }

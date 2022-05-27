@@ -1,6 +1,7 @@
-import os
 import functools
 import logging
+import os
+
 from azure.identity import EnvironmentCredential
 from azure.mgmt.containerservice import ContainerServiceClient
 

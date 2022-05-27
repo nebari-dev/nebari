@@ -51,3 +51,16 @@ clearml:
 ```
 
 This is especially useful for accessing ClearML programmatically.
+
+## Overrides
+
+Addition helm chart variables may want to be overridden. For this an override hook is provided where you can specify anything with the
+[values.yaml](https://github.com/allegroai/clearml-helm-charts/tree/main/charts/clearml).
+
+```yaml
+clearml:
+  enabled: true
+  overrides:
+    clearml:
+      defaultCompany: "d1bd92a3b039400cbafc60a7a5b1e5ab"
+```

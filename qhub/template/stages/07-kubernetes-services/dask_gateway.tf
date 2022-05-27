@@ -7,17 +7,9 @@ variable "dask-worker-image" {
   })
 }
 
-variable "dask-gateway-image" {
-  description = "Dask worker image"
-  type = object({
-    name = string
-    tag  = string
-  })
-}
-
 variable "dask-gateway-profiles" {
   description = "Dask Gateway profiles to expose to user"
-  default = []
+  default     = []
 }
 
 
@@ -31,9 +23,7 @@ module "dask-gateway" {
 
   external-url = var.endpoint
 
-  cluster-image    = var.dask-worker-image
-  gateway-image    = var.dask-gateway-image
-  controller-image = var.dask-gateway-image
+  cluster-image = var.dask-worker-image
 
   general-node-group = var.node_groups.general
   worker-node-group  = var.node_groups.worker
@@ -42,7 +32,7 @@ module "dask-gateway" {
   dask-etc-configmap-name = "dask-etc"
 
   # environments
-  conda-store-pvc = module.conda-store-nfs-mount.persistent_volume_claim.name
+  conda-store-pvc   = module.conda-store-nfs-mount.persistent_volume_claim.name
   conda-store-mount = "/home/conda"
 
   # profiles

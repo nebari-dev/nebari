@@ -11,7 +11,7 @@ resource "helm_release" "prometheus-grafana" {
     jsonencode({
       alertmanager = {
         alertmanagerSpec = {
-          nodeSelector: {
+          nodeSelector : {
             "${var.node-group.key}" = var.node-group.value
           }
         }
@@ -51,11 +51,11 @@ resource "helm_release" "prometheus-grafana" {
           "${var.node-group.key}" = var.node-group.value
         }
 
-        "grafana.ini": {
+        "grafana.ini" : {
           server = {
-            protocol = "http"
-            domain = var.external-url
-            root_url = "https://%(domain)s/monitoring"
+            protocol            = "http"
+            domain              = var.external-url
+            root_url            = "https://%(domain)s/monitoring"
             serve_from_sub_path = "true"
           }
 
@@ -64,18 +64,18 @@ resource "helm_release" "prometheus-grafana" {
           }
 
           "auth.generic_oauth" = {
-            enabled = "true"
-            name = "Login Keycloak"
-            allow_sign_up = "true"
-            client_id = module.grafana-client-id.config.client_id
-            client_secret = module.grafana-client-id.config.client_secret
-            scopes = "profile"
-            auth_url = module.grafana-client-id.config.authentication_url
-            token_url = module.grafana-client-id.config.token_url
-            api_url = module.grafana-client-id.config.userinfo_url
+            enabled                  = "true"
+            name                     = "Login Keycloak"
+            allow_sign_up            = "true"
+            client_id                = module.grafana-client-id.config.client_id
+            client_secret            = module.grafana-client-id.config.client_secret
+            scopes                   = "profile"
+            auth_url                 = module.grafana-client-id.config.authentication_url
+            token_url                = module.grafana-client-id.config.token_url
+            api_url                  = module.grafana-client-id.config.userinfo_url
             tls_skip_verify_insecure = "true"
-            login_attribute_path = "preferred_username"
-            role_attribute_path = "contains(roles[*], 'grafana_admin') && 'Admin' || contains(roles[*], 'grafana_developer') && 'Editor' || contains(roles[*], 'grafana_viewer') || 'Viewer'"
+            login_attribute_path     = "preferred_username"
+            role_attribute_path      = "contains(roles[*], 'grafana_admin') && 'Admin' || contains(roles[*], 'grafana_developer') && 'Editor' || contains(roles[*], 'grafana_viewer') || 'Viewer'"
           }
         }
       }
@@ -88,13 +88,12 @@ module "grafana-client-id" {
   source = "../keycloak-client"
 
   realm_id     = var.realm_id
-  client_id  = "grafana"
+  client_id    = "grafana"
   external-url = var.external-url
   role_mapping = {
-    "admin" = ["grafana_admin"]
+    "admin"     = ["grafana_admin"]
     "developer" = ["grafana_developer"]
-    "practitioner" = ["grafana_viewer"]
-    "viewer" = ["grafana_viewer"]
+    "analyst"   = ["grafana_viewer"]
   }
   callback-url-paths = [
     "https://${var.external-url}/monitoring/login/generic_oauth"
@@ -114,7 +113,7 @@ resource "kubernetes_config_map" "dashboard" {
   }
 
   data = {
-    for dashboard in var.dashboards: dashboard => file("${path.module}/dashboards/${dashboard}")
+    for dashboard in var.dashboards : dashboard => file("${path.module}/dashboards/${dashboard}")
   }
 }
 

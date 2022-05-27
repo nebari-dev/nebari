@@ -5,13 +5,13 @@ variable "kube_context" {
 
 output "kubernetes_credentials" {
   description = "Parameters needed to connect to kubernetes cluster locally"
-  value       = {
-    config_path = pathexpand("~/.kube/config")
+  value = {
+    config_path    = pathexpand("~/.kube/config")
     config_context = var.kube_context
   }
 }
 
 output "kubeconfig_filename" {
   description = "filename for qhub kubeconfig"
-  value = pathexpand("~/.kube/config")
+  value       = pathexpand("~/.kube/config")
 }

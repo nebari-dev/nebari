@@ -1,3 +1,4 @@
+import contextlib
 import io
 import json
 import logging
@@ -9,13 +10,10 @@ import sys
 import tempfile
 import urllib.request
 import zipfile
-from typing import Dict, Any, List
-import contextlib
+from typing import Any, Dict, List
 
-
-from qhub.utils import timer, run_subprocess_cmd, deep_merge
 from qhub import constants
-
+from qhub.utils import deep_merge, run_subprocess_cmd, timer
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +34,23 @@ def deploy(
     """Execute a given terraform directory
 
     Parameters:
+      directory: directory in which to run terraform operations on
+
+      terraform_init: whether to run `terraform init` default True
+
+      terraform_import: whether to run `terraform import` default
+        False for each `state_imports` supplied to function
+
+      terraform_apply: whether to run `terraform apply` default True
+
+      terraform_destroy: whether to run `terraform destroy` default
+        False
+
       input_vars: supply values for "variable" resources within
         terraform module
 
-      terraform_objects: using resources Terraform, RequiredProvider,
-        Provider, TerraformBackend, Variable, Data, Resource, Output
-        construct additional resources to include in module
-
+      state_imports: (addr, id) pairs for iterate through and attempt
+        to terraform import
     """
     input_vars = input_vars or {}
     state_imports = state_imports or []
@@ -122,10 +130,13 @@ def version():
     return re.search(r"(\d+)\.(\d+).(\d+)", version_output).group(0)
 
 
-def init(directory=None):
+def init(directory=None, upgrade=True):
     logger.info(f"terraform init directory={directory}")
     with timer(logger, "terraform init"):
-        run_terraform_subprocess(["init"], cwd=directory, prefix="terraform")
+        command = ["init"]
+        if upgrade:
+            command.append("-upgrade")
+        run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
 def apply(directory=None, targets=None, var_files=None):
@@ -257,35 +268,35 @@ def Terraform(**kwargs):
 
 
 @register
-def RequiredProvider(name, **kwargs):
-    return {"terraform": {"required_providers": {name: kwargs}}}
+def RequiredProvider(_name, **kwargs):
+    return {"terraform": {"required_providers": {_name: kwargs}}}
 
 
 @register
-def Provider(name, **kwargs):
-    return {"provider": {name: kwargs}}
+def Provider(_name, **kwargs):
+    return {"provider": {_name: kwargs}}
 
 
 @register
-def TerraformBackend(name, **kwargs):
-    return {"terraform": {"backend": {name: kwargs}}}
+def TerraformBackend(_name, **kwargs):
+    return {"terraform": {"backend": {_name: kwargs}}}
 
 
 @register
-def Variable(name, **kwargs):
-    return {"variable": {name: kwargs}}
+def Variable(_name, **kwargs):
+    return {"variable": {_name: kwargs}}
 
 
 @register
-def Data(resource_type, name, **kwargs):
-    return {"data": {resource_type: {name: kwargs}}}
+def Data(_resource_type, _name, **kwargs):
+    return {"data": {_resource_type: {_name: kwargs}}}
 
 
 @register
-def Resource(resource_type, name, **kwargs):
-    return {"resource": {resource_type: {name: kwargs}}}
+def Resource(_resource_type, _name, **kwargs):
+    return {"resource": {_resource_type: {_name: kwargs}}}
 
 
 @register
-def Output(name, **kwargs):
-    return {"output": {name: kwargs}}
+def Output(_name, **kwargs):
+    return {"output": {_name: kwargs}}

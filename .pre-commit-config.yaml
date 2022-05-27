@@ -1,32 +1,79 @@
+# These pre-commit hooks are run as CI.
+
+# NOTE: if it can be avoided, add configs/args in pyproject.toml, setup.cfg or below instead of creating a new `.config.file`.
+
+
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
-    hooks:
-    -   id: check-yaml
-        exclude: 'qhub/template/(\.github/.*|infrastructure/jupyterhub.yaml|stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*))'
-    -   id: end-of-file-fixer
-    -   id: trailing-whitespace
-  - repo: https://github.com/psf/black
-    rev: 20.8b1
-    hooks:
-    -   id: black
-        exclude: '/qhub/template/'
-  - repo: https://github.com/pycqa/flake8
-    rev: 3.8.4
-    hooks:
-    -   id: flake8
-        exclude: 'qhub/template'
-        args: [
-          "--builtins=c"
-        ]
-  - repo: https://github.com/hadolint/hadolint.git
-    rev: v2.3.0
-    hooks:
-      - id: hadolint-docker
-        entry: hadolint/hadolint:v2.3.0 hadolint
-        args: [
-            "--ignore", "DL3048",
-            "--ignore", "DL3008",
-            "--ignore", "DL3013",
-            "--ignore", "DL3003",
-        ]
+# general
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.3.0
+  hooks:
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+  - id: check-json
+  - id: check-yaml
+    # jinja2 templates for helm charts
+    exclude: 'qhub/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)'
+
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.1.0
+  hooks:
+  - id: codespell
+    # --write (-w) enabled here
+    # see setup.cfg for more config options
+    entry: codespell -w
+    language: python
+
+# python
+- repo: https://github.com/psf/black
+  rev: 22.3.0
+  hooks:
+  - id: black
+
+- repo: https://github.com/pycqa/flake8
+  rev: 3.8.4
+  hooks:
+  - id: flake8
+    args: [
+      "--builtins=c"
+    ]
+
+- repo: https://github.com/pycqa/isort
+  rev: 5.10.1
+  hooks:
+  - id: isort
+    name: isort
+    args: ["--profile", "black"]
+
+# terraform
+- repo: https://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.71.0
+  hooks:
+  - id: terraform_fmt
+    args:
+      - --args=-write=true
+
+# docker
+- repo: https://github.com/hadolint/hadolint.git
+  rev: v2.10.0
+  hooks:
+  - id: hadolint-docker
+    entry: hadolint/hadolint:v2.10.0 hadolint
+    args: [
+      "--failure-threshold", "info",    # default: info
+      "--ignore", "DL3048",    # style complaint: Invalid Label Key
+    ]
+
+# markdown
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.14
+  hooks:
+  - id: mdformat
+    files: ^docs/
+    name: mdformat
+    entry: mdformat --wrap=180 --number --end-of-line=lf
+    language: python
+    types: [markdown]
+    minimum_pre_commit_version: '2.0.0'
+    additional_dependencies:
+    - mdformat-tables

@@ -8,6 +8,7 @@ contribution.md
 release.md
 testing.md
 minikube.md
+keycloak.md
 changelog.md
 logo.md
 ```

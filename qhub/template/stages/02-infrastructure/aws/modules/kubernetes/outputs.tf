@@ -1,6 +1,6 @@
 output "credentials" {
   description = "AWS eks credentials"
-  sensitive = true
+  sensitive   = true
   value = {
     endpoint = aws_eks_cluster.main.endpoint
     token    = data.aws_eks_cluster_auth.main.token

@@ -2,7 +2,7 @@ module "forwardauth-openid-client" {
   source = "../services/keycloak-client"
 
   realm_id     = var.realm_id
-  client_id  = "forwardauth"
+  client_id    = "forwardauth"
   external-url = var.external-url
   callback-url-paths = [
     "https://${var.external-url}${var.callback-url-path}"
@@ -77,12 +77,12 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
           }
 
           env {
-            name = "PROVIDERS_GENERIC_OAUTH_TOKEN_URL"
+            name  = "PROVIDERS_GENERIC_OAUTH_TOKEN_URL"
             value = module.forwardauth-openid-client.config.token_url
           }
 
           env {
-            name = "PROVIDERS_GENERIC_OAUTH_USER_URL"
+            name  = "PROVIDERS_GENERIC_OAUTH_USER_URL"
             value = module.forwardauth-openid-client.config.userinfo_url
           }
 

@@ -1,19 +1,28 @@
 name: "Tests"
 
 on:
-  pull_request: # Workflow only runs for PR against main anyway
+  pull_request:
+    paths:
+      - ".github/workflows/test.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
   push:
     branches:
-      - '**'
-    tags:
-      - 'v*'
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-
-concurrency:
-  group: test-${{ github.ref }}
-  cancel-in-progress: true
+      - main
+    paths:
+      - ".github/workflows/test.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "qhub/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
 
 jobs:
   test-general:
@@ -37,8 +46,8 @@ jobs:
       - name: Black Formatting
         run: |
           black --version
-          black qhub --diff
-          black --check qhub
+          black qhub --diff --exclude "qhub/_version.py"
+          black --check qhub --exclude "qhub/_version.py"
       - name: Flake8 Formatting
         run: |
           flake8 --version

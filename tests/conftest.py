@@ -5,7 +5,6 @@ import pytest
 
 from qhub.initialize import render_config
 
-
 INIT_INPUTS = [
     # project, namespace, domain, cloud_provider, ci_provider, auth_provider
     ("pytestdo", "dev", "do.qhub.dev", "do", "github-actions", "github"),

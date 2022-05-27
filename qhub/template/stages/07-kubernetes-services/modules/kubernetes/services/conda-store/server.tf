@@ -7,15 +7,15 @@ resource "kubernetes_config_map" "conda-store-config" {
   data = {
     "conda_store_config.py" = templatefile(
       "${path.module}/config/conda_store_config.py", {
-        external-url   = var.external-url
-        minio-username = module.minio.root_username
-        minio-password = module.minio.root_password
-        minio-service  = module.minio.service
+        external-url      = var.external-url
+        minio-username    = module.minio.root_username
+        minio-password    = module.minio.root_password
+        minio-service     = module.minio.service
         postgres-username = module.postgresql.root_username
         postgres-password = module.postgresql.root_password
         postgres-service  = module.postgresql.service
         openid-config     = module.conda-store-openid-client.config
-      })
+    })
   }
 }
 
@@ -24,13 +24,12 @@ module "conda-store-openid-client" {
   source = "../keycloak-client"
 
   realm_id     = var.realm_id
-  client_id  = "conda_store"
+  client_id    = "conda_store"
   external-url = var.external-url
   role_mapping = {
-    "admin" = ["conda_store_admin"]
+    "admin"     = ["conda_store_admin"]
     "developer" = ["conda_store_developer"]
-    "practitioner" = ["conda_store_developer"]
-    "viewer" = ["conda_store_viewer"]
+    "analyst"   = ["conda_store_developer"]
   }
   callback-url-paths = [
     "https://${var.external-url}/conda-store/oauth_callback"
@@ -79,6 +78,11 @@ resource "kubernetes_deployment" "server" {
       metadata {
         labels = {
           role = "${var.name}-conda-store-server"
+        }
+
+        annotations = {
+          # This lets us autorestart when the config changes!
+          "checksum/config-map" = sha256(jsonencode(kubernetes_config_map.conda-store-config.data))
         }
       }
 

@@ -1,20 +1,21 @@
-from typing import Dict, List
-import pathlib
-import subprocess
-import signal
-import sys
-import time
-import threading
-import os
-import re
 import contextlib
 import functools
+import os
+import pathlib
+import re
+import signal
+import subprocess
+import sys
+import threading
+import time
+from typing import Dict, List
+
 from ruamel.yaml import YAML
 
 from qhub.provider.cloud import (
-    digital_ocean,
-    azure_cloud,
     amazon_web_services,
+    azure_cloud,
+    digital_ocean,
     google_cloud,
 )
 
@@ -23,14 +24,17 @@ from .version import __version__
 QHUB_K8S_VERSION = os.getenv("QHUB_K8S_VERSION", None)
 
 DO_ENV_DOCS = (
-    "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#digital-ocean"
+    "https://docs.qhub.dev/en/stable/source/installation/setup.html#digital-ocean"
 )
-AWS_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#amazon-web-services-aws"
-GCP_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#google-cloud-platform"
-AZURE_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#microsoft-azure"
+AWS_ENV_DOCS = "https://docs.qhub.dev/en/stable/source/installation/setup.html#amazon-web-services-aws"
+GCP_ENV_DOCS = "https://docs.qhub.dev/en/stable/source/installation/setup.html#google-cloud-platform"
+AZURE_ENV_DOCS = (
+    "https://docs.qhub.dev/en/stable/source/installation/setup.html#microsoft-azure"
+)
 
 qhub_image_tag = f"v{__version__}"
 pip_install_qhub = f"pip install qhub=={__version__}"
+qhub_dask_version = "0.4.0"
 
 QHUB_GH_BRANCH = os.environ.get("QHUB_GH_BRANCH", "")
 if QHUB_GH_BRANCH:
@@ -303,9 +307,42 @@ def modified_environ(*remove: List[str], **update: Dict[str, str]):
         [env.pop(k) for k in remove_after]
 
 
-def split_docker_image_name(image_name):
-    name, tag = image_name.split(":")
-    return {"name": name, "tag": tag}
+@contextlib.contextmanager
+def kubernetes_provider_context(kubernetes_credentials: Dict[str, str]):
+    credential_mapping = {
+        "config_path": "KUBE_CONFIG_PATH",
+        "config_context": "KUBE_CTX",
+        "username": "KUBE_USER",
+        "password": "KUBE_PASSWORD",
+        "client_certificate": "KUBE_CLIENT_CERT_DATA",
+        "client_key": "KUBE_CLIENT_KEY_DATA",
+        "cluster_ca_certificate": "KUBE_CLUSTER_CA_CERT_DATA",
+        "host": "KUBE_HOST",
+        "token": "KUBE_TOKEN",
+    }
+
+    credentials = {
+        credential_mapping[k]: v
+        for k, v in kubernetes_credentials.items()
+        if v is not None
+    }
+    with modified_environ(**credentials):
+        yield
+
+
+@contextlib.contextmanager
+def keycloak_provider_context(keycloak_credentials: Dict[str, str]):
+    credential_mapping = {
+        "client_id": "KEYCLOAK_CLIENT_ID",
+        "url": "KEYCLOAK_URL",
+        "username": "KEYCLOAK_USER",
+        "password": "KEYCLOAK_PASSWORD",
+        "realm": "KEYCLOAK_REALM",
+    }
+
+    credentials = {credential_mapping[k]: v for k, v in keycloak_credentials.items()}
+    with modified_environ(**credentials):
+        yield
 
 
 def deep_merge(*args):
@@ -349,3 +386,15 @@ def deep_merge(*args):
         return [*d1, *d2]
     else:  # if they don't match use left one
         return d1
+
+
+def pip_install_qhub(qhub_version: str) -> str:
+    qhub_gh_branch = os.environ.get("QHUB_GH_BRANCH")
+    pip_install = f"pip install qhub=={qhub_version}"
+    # dev branches
+    if len(qhub_version.split(".")) > 3 and qhub_gh_branch:
+        pip_install = (
+            f"pip install git+https://github.com/Quansight/qhub.git@{qhub_gh_branch}"
+        )
+
+    return pip_install
