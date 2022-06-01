@@ -95,7 +95,7 @@ def stage_02_infrastructure(stage_outputs, config):
                 {
                     "name": key,
                     "min_size": value["min_nodes"],
-                    "desired_size": value["min_nodes"],
+                    "desired_size": max(value["min_nodes"], 1),
                     "max_size": value["max_nodes"],
                     "gpu": value.get("gpu", False),
                     "instance_type": value["instance"],
