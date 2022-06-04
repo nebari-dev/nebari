@@ -1,7 +1,5 @@
 # remove after next kubespawner release past 1/20/2022
 # https://github.com/jupyterhub/kubespawner/pull/558
-import os
-
 import kubernetes.client.models
 
 kubernetes.client.models.V1EndpointPort = kubernetes.client.models.CoreV1EndpointPort
@@ -11,6 +9,12 @@ from kubespawner import KubeSpawner  # noqa: E402
 
 cdsdashboards = z2jh.get_config("custom.cdsdashboards")
 conda_store_environments = z2jh.get_config("custom.environments")
+
+
+def get_username(spawner):
+    auth_state = yield spawner.user.get_auth_state()
+    return auth_state["oauth_user"]["preferred_username"]
+
 
 if cdsdashboards["enabled"]:
     from cdsdashboards.app import CDS_TEMPLATE_PATHS
@@ -41,7 +45,7 @@ if cdsdashboards["enabled"]:
     c.VariableMixin.proxy_ready_timeout = 600
     c.VariableMixin.proxy_request_timeout = 600
 
-    userhome = f"/home/{os.getenv('JUPYTERHUB_USER', 'jovyan')}"
+    home_username = f"/home/{get_username()}"
     c.CDSDashboardsConfig.extra_presentation_types = ["panel-serve"]
     c.VariableMixin.extra_presentation_launchers = {
         "panel-serve": {
@@ -54,7 +58,7 @@ if cdsdashboards["enabled"]:
                 "{origin_host}",
             ],
             "debug_args": [],
-            "env": {"PYTHONPATH": f"{userhome}/{{presentation_dirname}}"},
+            "env": {"PYTHONPATH": f"{home_username}/{{presentation_dirname}}"},
         }
     }
 
