@@ -10,7 +10,7 @@ resource "helm_release" "postgresql" {
 
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "postgresql"
-  version    = "10.13.12"
+  version    = "10.14.3"
 
   set {
     name  = "postgresqlUsername"
