@@ -1,6 +1,9 @@
 # remove after next kubespawner release past 1/20/2022
 # https://github.com/jupyterhub/kubespawner/pull/558
+import os
+
 import kubernetes.client.models
+from tornado import gen
 
 kubernetes.client.models.V1EndpointPort = kubernetes.client.models.CoreV1EndpointPort
 
@@ -11,10 +14,19 @@ cdsdashboards = z2jh.get_config("custom.cdsdashboards")
 conda_store_environments = z2jh.get_config("custom.environments")
 
 
-def get_username(spawner):
+@gen.coroutine
+def get_username_hook(spawner):
     auth_state = yield spawner.user.get_auth_state()
-    return auth_state["oauth_user"]["preferred_username"]
+    username = auth_state["oauth_user"]["preferred_username"]
 
+    spawner.environment.update(
+        {
+            "PREFERRED_USERNAME": username,
+        }
+    )
+
+
+c.Spawner.pre_spawn_hook = get_username_hook
 
 if cdsdashboards["enabled"]:
     from cdsdashboards.app import CDS_TEMPLATE_PATHS
@@ -45,7 +57,7 @@ if cdsdashboards["enabled"]:
     c.VariableMixin.proxy_ready_timeout = 600
     c.VariableMixin.proxy_request_timeout = 600
 
-    home_username = f"/home/{get_username()}"
+    home_username = f"/home/{os.getenv('PREFERRED_USERNAME')}"
     c.CDSDashboardsConfig.extra_presentation_types = ["panel-serve"]
     c.VariableMixin.extra_presentation_launchers = {
         "panel-serve": {
