@@ -51,6 +51,10 @@ dependencies:
  # vscode
  - code-server >= 3.2
 
+ # rstudio
+ - r-base
+ - r-tidyverse
+
  - pip:
      # vscode jupyterlab launcher
      - git+https://github.com/betatim/vscode-binder
