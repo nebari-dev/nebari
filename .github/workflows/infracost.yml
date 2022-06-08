@@ -1,0 +1,83 @@
+name: Infracost CI
+
+on:
+  pull_request:
+    paths:
+      - 'qhub/template/stages/02-infrastructure'
+      - '.github/workflows/infracost.yml'
+
+jobs:
+  infracost:
+    name: Run Infracost on QHub Infrastructure
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        provider:
+          - aws
+          - gcp
+          - azure
+
+    env:
+      TF_ROOT: qhub/template/stages/02-infrastructure/${{ matrix.provider }}
+
+    steps:
+      # Checkout the base branch of the pull request
+      - name: Checkout infrastructure
+        uses: actions/checkout@v3
+        with:
+          ref: '${{ github.event.pull_request.base.ref }}'
+
+      # Setup Infracost
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v2
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      # Run Infracost on the base branch to generate the baseline cost
+      - name: Generate Infracost cost estimate baseline
+        run: |
+          infracost breakdown --path=${TF_ROOT} \
+                              --format=json \
+                              --out-file=/tmp/infracost-base.json
+
+      # Checkout the PR branch
+      - name: Checkout PR branch
+        uses: actions/checkout@v3
+
+      # Compute if any specific file has been changed in the specific cloud-provider Terraform files
+      - name: Check modified files
+        id: check_files
+        run: |
+          git diff --name-only HEAD^ HEAD
+          git diff --name-only HEAD^ HEAD > files.txt
+          while IFS= read -r file
+          do
+            echo $file
+            if [[ $file != qhub/template/stages/02-infrastructure/${{ matrix.provider }}/* ]]; then
+              echo ::set-output name=run_job::false
+              break
+            else
+              echo ::set-output name=run_job::true
+            fi
+          done < files.txt
+
+      # Generate Infracost diff cost estimate only if the file has been changed
+      - name: Generate Infracost diff
+        if: steps.check_files.outputs.run_job == 'true'
+        run: |
+          infracost diff --path=${TF_ROOT} \
+                          --format=json \
+                          --compare-to=/tmp/infracost-base.json \
+                          --out-file=/tmp/infracost.json
+
+      # Generate the cost estimate report and submit it as a PR comment only if the file has been changed
+      - name: Post Infracost comment
+        if: steps.check_files.outputs.run_job == 'true'
+        run: |
+          infracost comment github --path=/tmp/infracost.json \
+                                    --repo=$GITHUB_REPOSITORY \
+                                    --github-token=${{github.token}} \
+                                    --pull-request=${{github.event.pull_request.number}} \
+                                    --behavior=update
