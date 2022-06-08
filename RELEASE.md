@@ -10,6 +10,28 @@ ______________________________________________________________________
 
 ### Bug fixes
 
+
+## Release v0.4.2 - June 8. 2022
+
+### Incident postmortem
+
+On June 2, 2022, GitHub user @peytondmurray reported [issue 1306](https://github.com/Quansight/qhub/issues/1306), stating that he was unable to deploy QHub using either the latest release `v0.4.1` or installing `qhub` from `main`. As verified by @peytondmurray and others, during you first `qhub deploy`, the deployment halts and complains about two invalid Helm charts missing from the bitnami `index.yaml`.
+
+[Bitnami's decision to update how long they keep old Helm charts in their index for](https://github.com/bitnami/charts/issues/10539) has essentially broken all post `v0.4.0` versions of QHub.
+
+This is a sever bug that will affect any new user who tries to install and deploy QHub with any version less then `v0.4.2` or greater than or equal to `v0.4.0`.
+
+Given the impact and severity of this bug, the team has decided to quickly cut a hotfix.
+
+
+### Bug fixes
+
+This release is a hotfix for the issue summarized in [issue 1319](https://github.com/Quansight/qhub/issues/1319) and [issue 1306](https://github.com/Quansight/qhub/issues/1306).
+
+### What's Changed
+* Update minio, postgresql chart repo location by @iameskild in [PR 1308](https://github.com/Quansight/qhub/pull/1308)
+
+
 ## Release v0.4.1 - May 10. 2022
 
 ### Feature changes and enhancements
