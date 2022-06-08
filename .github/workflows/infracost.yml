@@ -47,25 +47,16 @@ jobs:
         uses: actions/checkout@v3
 
       # Compute if any specific file has been changed in the specific cloud-provider Terraform files
-      - name: Check modified files
-        id: check_files
-        run: |
-          git diff --name-only HEAD^ HEAD
-          git diff --name-only HEAD^ HEAD > files.txt
-          while IFS= read -r file
-          do
-            echo $file
-            if [[ $file != qhub/template/stages/02-infrastructure/${{ matrix.provider }}/* ]]; then
-              echo ::set-output name=run_job::false
-              break
-            else
-              echo ::set-output name=run_job::true
-            fi
-          done < files.txt
+      - name: Verify Changed files
+        uses: tj-actions/verify-changed-files@v9.1
+        id: verify-changed-files
+        with:
+          files: |
+            qhub/template/stages/02-infrastructure/${{ matrix.provider }}
 
       # Generate Infracost diff cost estimate only if the file has been changed
       - name: Generate Infracost diff
-        if: steps.check_files.outputs.run_job == 'true'
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           infracost diff --path=${TF_ROOT} \
                           --format=json \
@@ -74,7 +65,7 @@ jobs:
 
       # Generate the cost estimate report and submit it as a PR comment only if the file has been changed
       - name: Post Infracost comment
-        if: steps.check_files.outputs.run_job == 'true'
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           infracost comment github --path=/tmp/infracost.json \
                                     --repo=$GITHUB_REPOSITORY \
