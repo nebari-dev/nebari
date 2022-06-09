@@ -29,16 +29,21 @@ Given the impact and severity of this bug, the team has decided to quickly cut a
 
 On May 27, 2022, GitHub user @tylerpotts reported [issue 1302](https://github.com/Quansight/qhub/issues/1302), stating that he was unable to deploy QHub using the latest release `v0.4.1` (or installing `qhub` from `main`). As described in the original issue, the deployment fails complaining about the deprecated `v1beta` Kubernetes API. This lead to the discovery that we were using an outdated `cluster_autoscaler` helm chart.
 
-The solution is update from `v1beta` to `v1` Kubernetes API for the appropriate resources and update the referece to the `cluster_autoscaler` helm chart.
+The solution is update from `v1beta` to `v1` Kubernetes API for the appropriate resources and update the reference to the `cluster_autoscaler` helm chart.
 
 Given the impact and severity of this bug, the team has decided to quickly cut a hotfix.
 
 ### Bug fixes
 
-This release is a hotfix for the issue summarized in [issue 1319](https://github.com/Quansight/qhub/issues/1319) and [issue 1306](https://github.com/Quansight/qhub/issues/1306).
+This release is a hotfix for the issue summarized in the following:
+* [issue 1319](https://github.com/Quansight/qhub/issues/1319)
+* [issue 1306](https://github.com/Quansight/qhub/issues/1306)
+* [issue 1302](https://github.com/Quansight/qhub/issues/1302)
+
 
 ### What's Changed
 * Update minio, postgresql chart repo location by @iameskild in [PR 1308](https://github.com/Quansight/qhub/pull/1308)
+* Fix broken AWS, set minimum desired size to 1, enable 0 scaling by @tylerpotts in [PR 1304](https://github.com/Quansight/qhub/issues/1304)
 
 
 ## Release v0.4.1 - May 10. 2022
@@ -192,7 +197,7 @@ Explicit user facing changes:
 - Pin terraform providers by @Adam-D-Lewis in https://github.com/Quansight/qhub/pull/914
 - qhub-config.yaml as a secret by @danlester in https://github.com/Quansight/qhub/pull/905
 - Setup/Add integration/deployment tests via pytest by @aktech in https://github.com/Quansight/qhub/pull/922
-- Disabl/Remove the stale bot by @viniciusdc in https://github.com/Quansight/qhub/pull/923
+- Disable/Remove the stale bot by @viniciusdc in https://github.com/Quansight/qhub/pull/923
 - Integrates Hadolint for Dockerfile linting by @HarshCasper in https://github.com/Quansight/qhub/pull/917
 - Reduce minimum nodes in user and dask node pools to 0 for Azure / GCP by @tarundmsharma in https://github.com/Quansight/qhub/pull/723
 - Allow jupyterhub.overrides in qhub-config.yaml by @danlester in https://github.com/Quansight/qhub/pull/930
