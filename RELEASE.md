@@ -29,7 +29,7 @@ Given the impact and severity of this bug, the team has decided to quickly cut a
 
 On May 27, 2022, GitHub user @tylerpotts reported [issue 1302](https://github.com/Quansight/qhub/issues/1302), stating that he was unable to deploy QHub using the latest release `v0.4.1` (or installing `qhub` from `main`). As described in the original issue, the deployment failed complaining about the deprecated `v1beta` Kubernetes API. This led to the discovery that we were using an outdated `cluster_autoscaler` helm chart.
 
-The solution is update from `v1beta` to `v1` Kubernetes API for the appropriate resources and update the reference to the `cluster_autoscaler` helm chart.
+The solution is to update from `v1beta` to `v1` Kubernetes API for the appropriate resources and update the reference to the `cluster_autoscaler` helm chart.
 
 Given the impact and severity of this bug, the team has decided to quickly cut a hotfix.
 
