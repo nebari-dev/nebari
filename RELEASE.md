@@ -21,7 +21,7 @@ On June 2, 2022, GitHub user @peytondmurray reported [issue 1306](https://github
 
 [Bitnami's decision to update how long they keep old Helm charts in their index for](https://github.com/bitnami/charts/issues/10539) has essentially broken all post `v0.4.0` versions of QHub.
 
-This is a sever bug that will affect any new user who tries to install and deploy QHub with any version less then `v0.4.2` or greater than or equal to `v0.4.0`.
+This is a severe bug that will affect any new user who tries to install and deploy QHub with any version less than `v0.4.2` and greater than or equal to `v0.4.0`.
 
 Given the impact and severity of this bug, the team has decided to quickly cut a hotfix.
 
