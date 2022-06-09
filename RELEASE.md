@@ -17,7 +17,7 @@ ______________________________________________________________________
 
 #### Bitnami update breaks post v0.4.0 releases
 
-On June 2, 2022, GitHub user @peytondmurray reported [issue 1306](https://github.com/Quansight/qhub/issues/1306), stating that he was unable to deploy QHub using either the latest release `v0.4.1` or installing `qhub` from `main`. As verified by @peytondmurray and others, during you first `qhub deploy`, the deployment halts and complains about two invalid Helm charts missing from the bitnami `index.yaml`.
+On June 2, 2022, GitHub user @peytondmurray reported [issue 1306](https://github.com/Quansight/qhub/issues/1306), stating that he was unable to deploy QHub using either the latest release `v0.4.1` or installing `qhub` from `main`. As verified by @peytondmurray and others, during your first `qhub deploy`, the deployment halts and complains about two invalid Helm charts missing from the bitnami `index.yaml`.
 
 [Bitnami's decision to update how long they keep old Helm charts in their index for](https://github.com/bitnami/charts/issues/10539) has essentially broken all post `v0.4.0` versions of QHub.
 
