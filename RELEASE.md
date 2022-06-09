@@ -10,6 +10,42 @@ ______________________________________________________________________
 
 ### Bug fixes
 
+
+## Release v0.4.2 - June 8. 2022
+
+### Incident postmortem
+
+#### Bitnami update breaks post v0.4.0 releases
+
+On June 2, 2022, GitHub user @peytondmurray reported [issue 1306](https://github.com/Quansight/qhub/issues/1306), stating that he was unable to deploy QHub using either the latest release `v0.4.1` or installing `qhub` from `main`. As verified by @peytondmurray and others, during your first `qhub deploy`, the deployment halts and complains about two invalid Helm charts missing from the bitnami `index.yaml`.
+
+[Bitnami's decision to update how long they keep old Helm charts in their index for](https://github.com/bitnami/charts/issues/10539) has essentially broken all post `v0.4.0` versions of QHub.
+
+This is a severe bug that will affect any new user who tries to install and deploy QHub with any version less than `v0.4.2` and greater than or equal to `v0.4.0`.
+
+Given the impact and severity of this bug, the team has decided to quickly cut a hotfix.
+
+#### AWS deployment failing due to old auto-scaler helm chart
+
+On May 27, 2022, GitHub user @tylerpotts reported [issue 1302](https://github.com/Quansight/qhub/issues/1302), stating that he was unable to deploy QHub using the latest release `v0.4.1` (or installing `qhub` from `main`). As described in the original issue, the deployment failed complaining about the deprecated `v1beta` Kubernetes API. This led to the discovery that we were using an outdated `cluster_autoscaler` helm chart.
+
+The solution is to update from `v1beta` to `v1` Kubernetes API for the appropriate resources and update the reference to the `cluster_autoscaler` helm chart.
+
+Given the impact and severity of this bug, the team has decided to quickly cut a hotfix.
+
+### Bug fixes
+
+This release is a hotfix for the issue summarized in the following:
+* [issue 1319](https://github.com/Quansight/qhub/issues/1319)
+* [issue 1306](https://github.com/Quansight/qhub/issues/1306)
+* [issue 1302](https://github.com/Quansight/qhub/issues/1302)
+
+
+### What's Changed
+* Update minio, postgresql chart repo location by @iameskild in [PR 1308](https://github.com/Quansight/qhub/pull/1308)
+* Fix broken AWS, set minimum desired size to 1, enable 0 scaling by @tylerpotts in [PR 1304](https://github.com/Quansight/qhub/issues/1304)
+
+
 ## Release v0.4.1 - May 10. 2022
 
 ### Feature changes and enhancements
