@@ -37,14 +37,17 @@ jobs:
         with:
           ref: '${{ github.event.pull_request.base.ref }}'
 
-      # Compute if any specific file has been changed in the specific cloud-provider Terraform files
-      # - name: Verify Changed files
-      #   uses: tj-actions/verify-changed-files@v9.2
-      #   id: verify-changed-files
-      #   with:
-      #     files: |
-      #       qhub/template/stages/01-terraform-state/${{ matrix.provider }}
-      #       qhub/template/stages/02-infrastructure/${{ matrix.provider }}
+      - name: Check changed infrastructure
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            aws:
+              - 'qhub/template/stages/02-infrastructure/aws/**'
+            gcp:
+              - 'qhub/template/stages/02-infrastructure/gcp/**'
+            azure:
+              - 'qhub/template/stages/02-infrastructure/azure/**'
 
       # Setup Google Cloud SDK
       - name: Set up Cloud SDK
@@ -73,27 +76,24 @@ jobs:
 
       # Setup Infracost
       - name: Setup Infracost
-        # if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: infracost/actions/setup@v2
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
       # Set up Python 3.8
       - name: Setup Python
-        # if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
       # Install QHub
       - name: Install QHub
-        # if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: steps.changes.outputs.${{ matrix.provider }} == 'true'
         run: |
           pip install .[dev]
 
       # Initialize QHub and render the infrastructure
       - name: QHub initialize and render
-        # if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           mkdir data && cd data
           qhub init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
@@ -102,7 +102,6 @@ jobs:
 
       # Run Infracost on the base branch to generate the baseline cost
       - name: Generate Infracost cost estimate baseline
-        # if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           infracost breakdown --path=${TF_ROOT} \
                               --format=json \
@@ -111,18 +110,16 @@ jobs:
 
       # Checkout the PR branch
       - name: Checkout PR branch
-        # if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: actions/checkout@v3
 
       # Install QHub
       - name: Install QHub
-        # if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: steps.changes.outputs.${{ matrix.provider }} == 'true'
         run: |
           pip install .[dev]
 
       # Initialize QHub and render the infrastructure
       - name: QHub initialize and render
-        # if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           mkdir data && cd data
           qhub init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
@@ -131,7 +128,6 @@ jobs:
 
       # Generate Infracost diff cost estimate only if the file has been changed
       - name: Generate Infracost diff
-        # if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           infracost diff --path=${TF_ROOT} \
                           --format=json \
@@ -140,7 +136,7 @@ jobs:
 
       # Generate the cost estimate report and submit it as a PR comment only if the file has been changed
       - name: Post Infracost comment
-        # if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: ${{ steps.changes.outputs.aws == 'true' }}
         run: |
           infracost comment github --path=/tmp/infracost.json \
                                     --repo=$GITHUB_REPOSITORY \
