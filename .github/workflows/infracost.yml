@@ -28,7 +28,7 @@ jobs:
           - azure
 
     env:
-      TF_ROOT: qhub/template/stages/02-infrastructure/${{ matrix.provider }}
+      TF_ROOT: data/stages/
 
     steps:
       # Checkout the base branch of the pull request
@@ -68,6 +68,25 @@ jobs:
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
+      # Set up Python 3.8
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      # Install QHub
+      - name: Install QHub
+        run: |
+          pip install .[dev]
+
+      # Initialize QHub and render the infrastructure
+      - name: QHub initialize and render
+        run: |
+          mkdir data && cd data
+          qhub init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
+          cat qhub-config.yaml
+          qhub render -c qhub-config.yaml
+
       # Run Infracost on the base branch to generate the baseline cost
       - name: Generate Infracost cost estimate baseline
         run: |
@@ -85,7 +104,23 @@ jobs:
         id: verify-changed-files
         with:
           files: |
+            qhub/template/stages/01-terraform-state
             qhub/template/stages/02-infrastructure/${{ matrix.provider }}
+
+      # Install QHub
+      - name: Install QHub
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: |
+          pip install .[dev]
+
+      # Initialize QHub and render the infrastructure
+      - name: QHub initialize and render
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: |
+          mkdir data && cd data
+          qhub init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
+          cat qhub-config.yaml
+          qhub render -c qhub-config.yaml
 
       # Generate Infracost diff cost estimate only if the file has been changed
       - name: Generate Infracost diff
@@ -105,3 +140,12 @@ jobs:
                                     --github-token=${{github.token}} \
                                     --pull-request=${{github.event.pull_request.number}} \
                                     --behavior=update
+
+      # Save artifacts to the PR
+      - name: Save artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: infracost-data-${{ matrix.provider }}-${{ github.event.pull_request.base.ref }}
+          path: |
+            /tmp/infracost.json
+            /tmp/infracost-base.json
