@@ -6,6 +6,14 @@ on:
       - 'qhub/template/stages/02-infrastructure'
       - '.github/workflows/infracost.yml'
 
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
 jobs:
   infracost:
     name: Run Infracost on QHub Infrastructure
@@ -28,6 +36,31 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: '${{ github.event.pull_request.base.ref }}'
+
+      # Setup Google Cloud SDK
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+        if: ${{ matrix.provider == 'gcp' }}
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      # Setup Google Cloud CLI
+      - name: Setup Google Cloud CLI
+        if: ${{ matrix.provider == 'gcp' }}
+        run: gcloud info
+
+      # Login into Azure
+      - name: Login to Azure
+        uses: azure/login@v1
+        if: ${{ matrix.provider == 'azure' }}
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Setup Azure CLI
+      - name: Setup Azure CLI
+        if: ${{ matrix.provider == 'azure' }}
+        run: az version
 
       # Setup Infracost
       - name: Setup Infracost
