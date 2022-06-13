@@ -37,6 +37,15 @@ jobs:
         with:
           ref: '${{ github.event.pull_request.base.ref }}'
 
+      # Compute if any specific file has been changed in the specific cloud-provider Terraform files
+      - name: Verify Changed files
+        uses: tj-actions/verify-changed-files@v23
+        id: verify-changed-files
+        with:
+          files: |
+            qhub/template/stages/01-terraform-state/${{ matrix.provider }}
+            qhub/template/stages/02-infrastructure/${{ matrix.provider }}
+
       # Setup Google Cloud SDK
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
@@ -64,23 +73,27 @@ jobs:
 
       # Setup Infracost
       - name: Setup Infracost
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: infracost/actions/setup@v2
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
       # Set up Python 3.8
       - name: Setup Python
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
 
       # Install QHub
       - name: Install QHub
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           pip install .[dev]
 
       # Initialize QHub and render the infrastructure
       - name: QHub initialize and render
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           mkdir data && cd data
           qhub init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
@@ -89,23 +102,17 @@ jobs:
 
       # Run Infracost on the base branch to generate the baseline cost
       - name: Generate Infracost cost estimate baseline
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           infracost breakdown --path=${TF_ROOT} \
                               --format=json \
                               --out-file=/tmp/infracost-base.json
+          rm -rf data/
 
       # Checkout the PR branch
       - name: Checkout PR branch
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: actions/checkout@v3
-
-      # Compute if any specific file has been changed in the specific cloud-provider Terraform files
-      - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v9.1
-        id: verify-changed-files
-        with:
-          files: |
-            qhub/template/stages/01-terraform-state
-            qhub/template/stages/02-infrastructure/${{ matrix.provider }}
 
       # Install QHub
       - name: Install QHub
