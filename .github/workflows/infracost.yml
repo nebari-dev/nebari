@@ -37,9 +37,13 @@ jobs:
         with:
           ref: '${{ github.event.pull_request.base.ref }}'
 
+      - uses: jitterbit/get-changed-files@v1
+        with:
+          format: ','
+
       # Compute if any specific file has been changed in the specific cloud-provider Terraform files
       - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v23
+        uses: tj-actions/verify-changed-files@v9.2
         id: verify-changed-files
         with:
           files: |
@@ -113,6 +117,10 @@ jobs:
       - name: Checkout PR branch
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: actions/checkout@v3
+
+      - uses: jitterbit/get-changed-files@v1
+        with:
+          format: ','
 
       # Install QHub
       - name: Install QHub
