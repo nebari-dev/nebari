@@ -14,7 +14,7 @@ assignees: ''
 
 Scheduled release date - <yyyy/mm/dd>
 
-Release captain responsible- <@gh_username>
+Release captain responsible - <@gh_username>
 
 
 ## Starting point - a new release is out
@@ -45,6 +45,10 @@ Release captain responsible- <@gh_username>
 - [ ] Prepare for the release.
   - [ ] Announce build freeze.
   - [ ] Release Candidate (RC) cycle.
+    - Is this a hotfix?
+      - [ ] Create a new branch off of the last version tag.
+        - Use this branch to cut the pre-release and the "official" release.
+      - [ ] `git cherry-pick` the commits that should be included.
     - [ ] [Perform end-to-end testing.](https://docs.qhub.dev/en/latest/source/dev_guide/release.html#pre-release-checklist)
       - For minor releases, relying on the end-to-end integration tests might suffice.
     - [ ] [Cut RC via GHA release workflow (w/ "This is a pre-release" checked).](https://github.com/Quansight/qhub/releases/new)
