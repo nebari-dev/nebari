@@ -37,13 +37,14 @@ jobs:
         with:
           ref: '${{ github.event.pull_request.base.ref }}'
 
-      - name: Check changed infrastructure
+      - name: Detect changed infrastructure
         uses: dorny/paths-filter@v2
         id: changes
         with:
           filters: |
             aws:
               - 'qhub/template/stages/02-infrastructure/aws/**'
+              - 'qhub/template/stages/01-terraform-state/aws/**'
             gcp:
               - 'qhub/template/stages/02-infrastructure/gcp/**'
             azure:
@@ -136,13 +137,23 @@ jobs:
 
       # Generate the cost estimate report and submit it as a PR comment only if the file has been changed
       - name: Post Infracost comment
-        if: ${{ steps.changes.outputs.aws == 'true' }}
         run: |
-          infracost comment github --path=/tmp/infracost.json \
-                                    --repo=$GITHUB_REPOSITORY \
-                                    --github-token=${{github.token}} \
-                                    --pull-request=${{github.event.pull_request.number}} \
-                                    --behavior=update
+          run_infracost() {
+            infracost comment github --path=/tmp/infracost.json \
+                                      --repo=$GITHUB_REPOSITORY \
+                                      --github-token=${{github.token}} \
+                                      --pull-request=${{github.event.pull_request.number}} \
+                                      --behavior=update
+          }
+          if [[ "${{steps.changes.outputs.aws}}" == "true" ]] && [[ "${{matrix.provider}}" == "aws" ]]; then
+            run_infracost
+          elif [[ "${{steps.changes.outputs.gcp}}" == "true" ]] && [[ "${{matrix.provider}}" == "gcp" ]]; then
+            run_infracost
+          elif [[ "${{steps.changes.outputs.azure}}" == "true" ]] && [[ "${{matrix.provider}}" == "azure" ]]; then
+            run_infracost
+          else
+            echo "No changes detected in infrastructure"
+          fi
 
       # Save artifacts to the PR
       - name: Save artifacts
