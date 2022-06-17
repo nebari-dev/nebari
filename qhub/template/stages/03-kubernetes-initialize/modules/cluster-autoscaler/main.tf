@@ -2,9 +2,9 @@ resource "helm_release" "autoscaler" {
   name      = "cluster-autoscaler"
   namespace = var.namespace
 
-  repository = "https://charts.helm.sh/stable"
+  repository = "https://kubernetes.github.io/autoscaler"
   chart      = "cluster-autoscaler"
-  version    = "7.1.0"
+  version    = "9.19.0"
 
   values = concat([
     jsonencode({
