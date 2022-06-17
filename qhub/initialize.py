@@ -39,7 +39,7 @@ BASE_CONFIGURATION = {
         "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
         "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
     },
-    "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
+    "storage": {"conda_store": "200Gi", "shared_filesystem": "200Gi"},
     "theme": {
         "jupyterhub": {
             "hub_title": None,
@@ -120,9 +120,9 @@ DIGITAL_OCEAN = {
     "region": "nyc3",
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
-        "general": {"instance": "g-4vcpu-16gb", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
-        "worker": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
+        "general": {"instance": "g-8vcpu-32gb", "min_nodes": 1, "max_nodes": 1},
+        "user": {"instance": "g-4vcpu-16gb", "min_nodes": 1, "max_nodes": 5},
+        "worker": {"instance": "g-4vcpu-16gb", "min_nodes": 1, "max_nodes": 5},
     },
 }
 # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
@@ -132,9 +132,9 @@ GOOGLE_PLATFORM = {
     "region": "us-central1",
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
-        "general": {"instance": "n1-standard-4", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
-        "worker": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
+        "general": {"instance": "n1-standard-8", "min_nodes": 1, "max_nodes": 1},
+        "user": {"instance": "n1-standard-4", "min_nodes": 0, "max_nodes": 5},
+        "worker": {"instance": "n1-standard-4", "min_nodes": 0, "max_nodes": 5},
     },
 }
 
@@ -143,13 +143,13 @@ AZURE = {
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {
-            "instance": "Standard_D4_v3",
+            "instance": "Standard_D8_v3",
             "min_nodes": 1,
             "max_nodes": 1,
         },
-        "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 5},
+        "user": {"instance": "Standard_D4_v3", "min_nodes": 0, "max_nodes": 5},
         "worker": {
-            "instance": "Standard_D2_v2",
+            "instance": "Standard_D4_v3",
             "min_nodes": 0,
             "max_nodes": 5,
         },
@@ -163,9 +163,9 @@ AMAZON_WEB_SERVICES = {
     "region": "us-west-2",
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
-        "general": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
-        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
+        "general": {"instance": "m5.2xlarge", "min_nodes": 1, "max_nodes": 1},
+        "user": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 5},
+        "worker": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 5},
     },
 }
 
@@ -173,18 +173,8 @@ DEFAULT_PROFILES = {
     "jupyterlab": [
         {
             "display_name": "Small Instance",
-            "description": "Stable environment with 1 cpu / 4 GB ram",
-            "default": True,
-            "kubespawner_override": {
-                "cpu_limit": 1,
-                "cpu_guarantee": 0.75,
-                "mem_limit": "4G",
-                "mem_guarantee": "2.5G",
-            },
-        },
-        {
-            "display_name": "Medium Instance",
             "description": "Stable environment with 2 cpu / 8 GB ram",
+            "default": True,
             "kubespawner_override": {
                 "cpu_limit": 2,
                 "cpu_guarantee": 1.5,
@@ -192,21 +182,31 @@ DEFAULT_PROFILES = {
                 "mem_guarantee": "5G",
             },
         },
+        {
+            "display_name": "Medium Instance",
+            "description": "Stable environment with 4 cpu / 15 GB ram",
+            "kubespawner_override": {
+                "cpu_limit": 4,
+                "cpu_guarantee": 3,
+                "mem_limit": "16G",
+                "mem_guarantee": "10G",
+            },
+        },
     ],
     "dask_worker": {
         "Small Worker": {
-            "worker_cores_limit": 1,
-            "worker_cores": 0.75,
-            "worker_memory_limit": "4G",
-            "worker_memory": "2.5G",
-            "worker_threads": 1,
-        },
-        "Medium Worker": {
             "worker_cores_limit": 2,
             "worker_cores": 1.5,
             "worker_memory_limit": "8G",
             "worker_memory": "5G",
             "worker_threads": 2,
+        },
+        "Medium Worker": {
+            "worker_cores_limit": 4,
+            "worker_cores": 3,
+            "worker_memory_limit": "16G",
+            "worker_memory": "10G",
+            "worker_threads": 4,
         },
     },
 }
