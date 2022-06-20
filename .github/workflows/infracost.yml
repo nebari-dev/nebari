@@ -82,7 +82,7 @@ jobs:
       - name: QHub initialize and render
         run: |
           mkdir data && cd data
-          qhub init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
+          qhub init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
           cat qhub-config.yaml
           qhub render -c qhub-config.yaml
 
@@ -108,7 +108,7 @@ jobs:
       - name: QHub initialize and render
         run: |
           mkdir data && cd data
-          qhub init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
+          qhub init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
           cat qhub-config.yaml
           qhub render -c qhub-config.yaml
 
