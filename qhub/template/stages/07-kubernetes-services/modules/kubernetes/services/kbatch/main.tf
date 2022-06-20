@@ -8,7 +8,7 @@ resource "helm_release" "kbatch" {
   namespace  = var.namespace
   repository = "https://kbatch-dev.github.io/helm-chart"
   chart      = "kbatch-proxy"
-  version    = "0.3.1"
+  version    = "0.4.0"
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -27,7 +27,7 @@ resource "helm_release" "kbatch" {
         }
       }
       image = {
-        tag = "0.3.1"
+        tag = "0.4.0"
       }
     })
   ])
