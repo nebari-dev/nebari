@@ -224,6 +224,9 @@ DEFAULT_ENVIRONMENTS = {
             "numpy",
             "numba",
             "pandas",
+            "pip:": [
+                "kbatch",
+            ],
         ],
     },
     "environment-dashboard.yaml": {
