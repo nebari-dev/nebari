@@ -28,6 +28,7 @@ jobs:
           - azure
 
     env:
+      # Specify the path where the Terraform state will be stored
       TF_ROOT: data/stages/
 
     steps:
@@ -37,6 +38,7 @@ jobs:
         with:
           ref: '${{ github.event.pull_request.base.ref }}'
 
+      # Detects changes in the infrastructure for each specific cloud service provider
       - name: Detect changed infrastructure
         uses: dorny/paths-filter@v2
         id: changes
