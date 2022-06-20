@@ -50,31 +50,6 @@ jobs:
             azure:
               - 'qhub/template/stages/02-infrastructure/azure/**'
 
-      # Setup Google Cloud SDK
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0
-        if: ${{ matrix.provider == 'gcp' }}
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GOOGLE_CREDENTIALS }}
-
-      # Setup Google Cloud CLI
-      - name: Setup Google Cloud CLI
-        if: ${{ matrix.provider == 'gcp' }}
-        run: gcloud info
-
-      # Login into Azure
-      - name: Login to Azure
-        uses: azure/login@v1
-        if: ${{ matrix.provider == 'azure' }}
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      # Setup Azure CLI
-      - name: Setup Azure CLI
-        if: ${{ matrix.provider == 'azure' }}
-        run: az version
-
       # Setup Infracost
       - name: Setup Infracost
         uses: infracost/actions/setup@v2
