@@ -11,3 +11,8 @@ terraform {
   }
   required_version = ">= 1.0"
 }
+
+locals {
+  kbatch_service_account_name = "kbatch-kbatch-proxy"
+  kbatch_version              = "0.4.0"
+}
