@@ -4,9 +4,9 @@ import sys
 
 from pydantic.error_wrappers import ValidationError
 
+from qhub.cli.cost import create_cost_subcommand
 from qhub.cli.deploy import create_deploy_subcommand
 from qhub.cli.destroy import create_destroy_subcommand
-from qhub.cli.infracost import create_infracost_report
 from qhub.cli.initialize import create_init_subcommand
 from qhub.cli.keycloak import create_keycloak_subcommand
 from qhub.cli.render import create_render_subcommand
@@ -38,7 +38,7 @@ def cli(args):
     create_support_subcommand(subparser)
     create_upgrade_subcommand(subparser)
     create_keycloak_subcommand(subparser)
-    create_infracost_report(subparser)
+    create_cost_subcommand(subparser)
 
     args = parser.parse_args(args)
 

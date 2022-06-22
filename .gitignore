@@ -1,3 +1,10 @@
+# docs
+.nox
+_build
+
+# setuptools scm
+qhub/_version.py
+
 # ignore terraform state
 .terraform
 terraform.tfstate
@@ -6,9 +13,34 @@ terraform.tfstate.backup
 
 # python
 __pycache__
+build/
+*.egg
+*.egg-info/
+dist/
+env/
 
-# Changes
-image/
-stages/
-qhub.egg-info
+# IntelliJ
+.idea/
+
+# nix
+result
+shell.nix
+.envrc
+build.nix
+.direnv
+
+# ignore deploments
+do-jupyterhub
+jupyterhub-aws
+gcp-jupyterhub
+quansight-terraform-modules
+config.yaml
+data*
+
+# modules - removed this because .terraform folder is in .gitignore of deployments,
+# this should cover imported modules while not gitignoring our new direct 'modules' folder.
+
+# ignore qhub files
 qhub-config.yaml
+
+.vscode/
