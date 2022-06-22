@@ -60,6 +60,9 @@ def infracost_report(path):
     args:
         path: path to the qhub stages directory
     """
+    if not path:
+        path = os.path.join(os.getcwd(), "stages")
+
     if _check_infracost() and _check_infracost_api_key():
         if not os.path.exists(path):
             print("Deployment is not available")
