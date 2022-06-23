@@ -345,6 +345,22 @@ def keycloak_provider_context(keycloak_credentials: Dict[str, str]):
         yield
 
 
+@contextlib.contextmanager
+def terraform_state_context(provider: str, terraform_state: str):
+    credentials = {}
+
+    if provider == "do" and terraform_state == "remote":
+        credentials.update(
+            {
+                "AWS_ACCESS_KEY_ID": os.eviron["SPACES_ACCESS_KEY_ID"],
+                "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
+            }
+        )
+
+    with modified_environ(**credentials):
+        yield
+
+
 def deep_merge(*args):
     """Deep merge multiple dictionaries.
 
