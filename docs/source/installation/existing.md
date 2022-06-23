@@ -82,10 +82,10 @@ carefully:
   - `Node IAM Role` must be the IAM role described proceeding
 - "Node Group compute configuration"
   - `Instance type`
-    - The recommended minimum vCPU and memory for a `general` node is 4 vCPU / 16 GB RAM
-    - The recommended minimum vCPU and memory for a `user` and `worker` node is 2 vCPU / 8 GB RAM
+    - The recommended minimum vCPU and memory for a `general` node is 8 vCPU / 32 GB RAM
+    - The recommended minimum vCPU and memory for a `user` and `worker` node is 4 vCPU / 16 GB RAM
   - `Disk size`
-    - The recommended minimum is 20 GB for the attached EBS (block-strage)
+    - The recommended minimum is 200 GB for the attached EBS (block-strage)
 - "Node Group scaling configuration"
   - `Minimum size` and `Maximum size` of 1 for the `general` node group
 - "Node Group subnet configuration"
@@ -172,36 +172,36 @@ local:
 profiles:
   jupyterlab:
   - display_name: Small Instance
-    description: Stable environment with 1 cpu / 4 GB ram
-    default: true
-    kubespawner_override:
-      cpu_limit: 1
-      cpu_guarantee: 0.75
-      mem_limit: 4G
-      mem_guarantee: 2.5G
-      image: quansight/qhub-jupyterlab:v0.3.13
-  - display_name: Medium Instance
     description: Stable environment with 2 cpu / 8 GB ram
+    default: true
     kubespawner_override:
       cpu_limit: 2
       cpu_guarantee: 1.5
       mem_limit: 8G
       mem_guarantee: 5G
       image: quansight/qhub-jupyterlab:v0.3.13
+  - display_name: Medium Instance
+    description: Stable environment with 4 cpu / 16 GB ram
+    kubespawner_override:
+      cpu_limit: 4
+      cpu_guarantee: 3
+      mem_limit: 16G
+      mem_guarantee: 10G
+      image: quansight/qhub-jupyterlab:v0.3.13
   dask_worker:
     Small Worker:
-      worker_cores_limit: 1
-      worker_cores: 0.75
-      worker_memory_limit: 4G
-      worker_memory: 2.5G
-      worker_threads: 1
-      image: quansight/qhub-dask-worker:v0.3.13
-    Medium Worker:
       worker_cores_limit: 2
       worker_cores: 1.5
       worker_memory_limit: 8G
       worker_memory: 5G
       worker_threads: 2
+      image: quansight/qhub-dask-worker:v0.3.13
+    Medium Worker:
+      worker_cores_limit: 4
+      worker_cores: 3
+      worker_memory_limit: 16G
+      worker_memory: 10G
+      worker_threads: 4
       image: quansight/qhub-dask-worker:v0.3.13
 environments:
   environment-dask.yaml:
