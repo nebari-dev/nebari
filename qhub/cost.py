@@ -52,6 +52,8 @@ def _run_infracost(path):
         return infracost_data
     except subprocess.CalledProcessError:
         return None
+    except AttributeError:
+        return None
 
 
 def infracost_report(path):
@@ -68,45 +70,59 @@ def infracost_report(path):
             print("Deployment is not available")
         else:
             data = _run_infracost(path)
+            if data:
+                cost_table = Table(title="Cost Breakdown")
+                cost_table.add_column(
+                    "Name", justify="right", style="cyan", no_wrap=True
+                )
+                cost_table.add_column(
+                    "Cost ($)", justify="right", style="cyan", no_wrap=True
+                )
 
-            cost_table = Table(title="Cost Breakdown")
-            cost_table.add_column("Name", justify="right", style="cyan", no_wrap=True)
-            cost_table.add_column("Cost", justify="right", style="cyan", no_wrap=True)
+                cost_table.add_row("Total Monthly Cost", data["totalMonthlyCost"])
+                cost_table.add_row("Total Hourly Cost", data["totalHourlyCost"])
 
-            cost_table.add_row("Total Monthly Cost", data["totalMonthlyCost"])
-            cost_table.add_row("Total Hourly Cost", data["totalHourlyCost"])
+                resource_table = Table(title="Resource Breakdown")
+                resource_table.add_column(
+                    "Name", justify="right", style="cyan", no_wrap=True
+                )
+                resource_table.add_column(
+                    "Number", justify="right", style="cyan", no_wrap=True
+                )
 
-            resource_table = Table(title="Resource Breakdown")
-            resource_table.add_column(
-                "Name", justify="right", style="cyan", no_wrap=True
-            )
-            resource_table.add_column(
-                "Number", justify="right", style="cyan", no_wrap=True
-            )
+                resource_table.add_row(
+                    "Total Detected Costs",
+                    str(data["summary"]["totalDetectedResources"]),
+                )
+                resource_table.add_row(
+                    "Total Supported Resources",
+                    str(data["summary"]["totalSupportedResources"]),
+                )
+                resource_table.add_row(
+                    "Total Un-Supported Resources",
+                    str(data["summary"]["totalUnsupportedResources"]),
+                )
+                resource_table.add_row(
+                    "Total Non-Priced Resources",
+                    str(data["summary"]["totalNoPriceResources"]),
+                )
+                resource_table.add_row(
+                    "Total Usage-Priced Resources",
+                    str(data["summary"]["totalUsageBasedResources"]),
+                )
 
-            resource_table.add_row(
-                "Total Detected Costs", str(data["summary"]["totalDetectedResources"])
-            )
-            resource_table.add_row(
-                "Total Supported Resources",
-                str(data["summary"]["totalSupportedResources"]),
-            )
-            resource_table.add_row(
-                "Total Un-Supported Resources",
-                str(data["summary"]["totalUnsupportedResources"]),
-            )
-            resource_table.add_row(
-                "Total Non-Priced Resources",
-                str(data["summary"]["totalNoPriceResources"]),
-            )
-            resource_table.add_row(
-                "Total Usage-Priced Resources",
-                str(data["summary"]["totalUsageBasedResources"]),
-            )
-
-            console = Console()
-            console.print(cost_table)
-            console.print(resource_table)
-            print(f"Access the dashboard here: {data['shareUrl']}")
+                console = Console()
+                console.print(cost_table)
+                console.print(resource_table)
+                try:
+                    print(f"Access the dashboard here: {data['shareUrl']}")
+                except KeyError:
+                    print(
+                        "Dashboard is not available. Enable it via: infracost configure set enable_dashboard true"
+                    )
+            else:
+                print(
+                    "No data was generated. Please check your QHub configuration and generated stages."
+                )
     else:
         print("Infracost is not installed or the API key is not configured")
