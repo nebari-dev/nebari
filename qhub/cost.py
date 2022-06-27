@@ -81,7 +81,7 @@ def infracost_report(path):
     if _check_infracost() and _check_infracost_api_key():
         _enable_infracost_dashboard()
         if not os.path.exists(path):
-            print("Deployment is not available")
+            logger.error("Deployment is not available")
         else:
             data = _run_infracost(path)
             if data:
@@ -128,15 +128,10 @@ def infracost_report(path):
                 console = Console()
                 console.print(cost_table)
                 console.print(resource_table)
-                try:
-                    print(f"Access the dashboard here: {data['shareUrl']}")
-                except KeyError:
-                    print(
-                        "Dashboard is not available. Enable it via: infracost configure set enable_dashboard true"
-                    )
+                print(f"Access the dashboard here: {data['shareUrl']}")
             else:
-                print(
+                logger.error(
                     "No data was generated. Please check your QHub configuration and generated stages."
                 )
     else:
-        print("Infracost is not installed or the API key is not configured")
+        logger.error("Infracost is not installed or the API key is not configured")
