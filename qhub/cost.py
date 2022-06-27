@@ -56,6 +56,19 @@ def _run_infracost(path):
         return None
 
 
+def _enable_infracost_dashboard():
+    """
+    Enable infracost dashboard
+    """
+    try:
+        subprocess.check_output(
+            ["infracost", "configure", "set", "enable_dashboard", "true"]
+        )
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
 def infracost_report(path):
     """
     Generate a report of the infracost cost of the given path
@@ -66,6 +79,7 @@ def infracost_report(path):
         path = os.path.join(os.getcwd(), "stages")
 
     if _check_infracost() and _check_infracost_api_key():
+        _enable_infracost_dashboard()
         if not os.path.exists(path):
             print("Deployment is not available")
         else:
