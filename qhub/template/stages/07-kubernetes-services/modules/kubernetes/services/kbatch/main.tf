@@ -52,7 +52,7 @@ resource "kubernetes_cluster_role" "kbatch" {
   rule {
     api_groups = ["", "batch"]
     resources  = ["*"]
-    verbs      = ["get", "watch", "list", "patch", "create"]
+    verbs      = ["get", "watch", "list", "patch", "create", "delete"]
   }
 }
 
