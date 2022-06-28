@@ -5,9 +5,24 @@ import re
 import subprocess
 
 from rich.console import Console
+from rich.markdown import Markdown
 from rich.table import Table
 
 logger = logging.getLogger(__name__)
+
+INFRACOST_NOTE = """
+QHub rely upon node-pools which is a usage resource but doesn't get captured in the above report. A general node-pool
+will always have one node running will add quite an additional charge. Please check in with your cloud provider to see
+the associated costs with node pools.
+
+- Total Monthly Cost: The total monthly cost of the deployment of supported resources.
+- Total Hourly Cost: The total hourly cost of the deployment of supported resources.
+- Total Detected Costs: The total number of resources detected by Infracost.
+- Total Supported Resources: The total number of resources supported by Infracost.
+- Total Un-Supported Resources: The total number of resources unsupported by Infracost.
+- Total Non-Priced Resources: The total number of resources that are not priced.
+- Total Usage-Priced Resources: The total number of resources that are priced based on usage.
+"""
 
 
 def _check_infracost():
@@ -128,12 +143,8 @@ def infracost_report(path):
                 console = Console()
                 console.print(cost_table)
                 console.print(resource_table)
-                console.print(f"Access the dashboard here: {data['shareUrl']}")
-                console.print(
-                    "Note: QHub rely upon node-pools which is a usage resource but doesn't get captured in the above report."
-                    " A general node-pool will always have one node running will add quite an additional charge."
-                    " Please check in with your cloud provider to see the associated costs with node pools."
-                )
+                console.print(f"Access the dashboard here: {data['shareUrl']}\n")
+                console.print(Markdown(INFRACOST_NOTE))
             else:
                 logger.error(
                     "No data was generated. Please check your QHub configuration and generated stages."
