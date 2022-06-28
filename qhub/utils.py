@@ -154,8 +154,6 @@ def check_cloud_credentials(config):
                 )
     elif config["provider"] == "do":
         for variable in {
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
             "SPACES_ACCESS_KEY_ID",
             "SPACES_SECRET_ACCESS_KEY",
             "DIGITALOCEAN_TOKEN",
@@ -165,21 +163,6 @@ def check_cloud_credentials(config):
                     f"""Missing the following required environment variable: {variable}\n
                     Please see the documentation for more information: {DO_ENV_DOCS}"""
                 )
-
-        if os.environ["AWS_ACCESS_KEY_ID"] != os.environ["SPACES_ACCESS_KEY_ID"]:
-            raise ValueError(
-                f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must be equal\n
-                See {DO_ENV_DOCS} for more information"""
-            )
-
-        if (
-            os.environ["AWS_SECRET_ACCESS_KEY"]
-            != os.environ["SPACES_SECRET_ACCESS_KEY"]
-        ):
-            raise ValueError(
-                f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must be equal\n
-                See {DO_ENV_DOCS} for more information"""
-            )
     elif config["provider"] == "local":
         pass
     else:
