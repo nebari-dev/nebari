@@ -36,7 +36,7 @@ module.exports = {
         slug: "category/tutorials",
         keywords: ["tutorials"],
       },
-      items: ["tutorials/overview", "tutorials/creating-cds-dashboard"],
+      items: ["tutorials/using_vscode", "tutorials/creating-cds-dashboard"],
     },
     {
       type: "category",
