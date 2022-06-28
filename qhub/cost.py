@@ -128,7 +128,12 @@ def infracost_report(path):
                 console = Console()
                 console.print(cost_table)
                 console.print(resource_table)
-                print(f"Access the dashboard here: {data['shareUrl']}")
+                console.print(f"Access the dashboard here: {data['shareUrl']}")
+                console.print(
+                    "Note: QHub rely upon node-pools which is a usage resource but doesn't get captured in the above report."
+                    " A general node-pool will always have one node running will add quite an additional charge."
+                    " Please check in with your cloud provider to see the associated costs with node pools."
+                )
             else:
                 logger.error(
                     "No data was generated. Please check your QHub configuration and generated stages."
