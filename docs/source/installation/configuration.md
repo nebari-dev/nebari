@@ -464,8 +464,8 @@ Control the amount of storage allocated to shared filesystem.
 
 ```yaml
 storage:
-  conda_store: 20Gi
-  shared_filesystem: 10Gi
+  conda_store: 200Gi
+  shared_filesystem: 200Gi
 ```
 
 ## Profiles
