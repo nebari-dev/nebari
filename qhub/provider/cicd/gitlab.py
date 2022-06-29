@@ -36,7 +36,7 @@ class GLCI(BaseModel):
     __root__: Dict[str, GLCI_job]
 
 
-PYTHON_VERSION = 3.9
+PYTHON_VERSION = 3.10
 
 
 def gen_gitlab_ci(config):
