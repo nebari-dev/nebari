@@ -31,8 +31,8 @@ variable "gateway-image" {
     tag  = string
   })
   default = {
-    name = "daskgateway/dask-gateway-server"
-    tag  = "0.9.0"
+    name = "ghcr.io/dask/dask-gateway-server"
+    tag  = "2022.4.0"
   }
 }
 
@@ -43,8 +43,8 @@ variable "controller-image" {
     tag  = string
   })
   default = {
-    name = "daskgateway/dask-gateway-server"
-    tag  = "0.9.0"
+    name = "ghcr.io/dask/dask-gateway-server"
+    tag  = "2022.4.0"
   }
 }
 
@@ -55,8 +55,8 @@ variable "cluster-image" {
     tag  = string
   })
   default = {
-    name = "daskgateway/dask-gateway"
-    tag  = "0.9.0"
+    name = "ghcr.io/dask/dask-gateway"
+    tag  = "2022.4.0"
   }
 }
 
