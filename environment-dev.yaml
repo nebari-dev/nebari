@@ -9,6 +9,7 @@ dependencies:
   - pynacl
   - bcrypt
   - python-kubernetes
+  - rich
   # dev dependencies
   - flake8 ==3.8.4
   - black ==22.3.0
