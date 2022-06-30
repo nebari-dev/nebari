@@ -14,5 +14,5 @@ terraform {
 
 locals {
   kbatch_service_account_name = "kbatch-kbatch-proxy"
-  kbatch_version              = "0.4.0"
+  kbatch_version              = "0.4.1"
 }
