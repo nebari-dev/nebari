@@ -335,7 +335,7 @@ def terraform_state_context(provider: str, terraform_state: str):
     if provider == "do" and terraform_state == "remote":
         credentials.update(
             {
-                "AWS_ACCESS_KEY_ID": os.eviron["SPACES_ACCESS_KEY_ID"],
+                "AWS_ACCESS_KEY_ID": os.environ["SPACES_ACCESS_KEY_ID"],
                 "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
             }
         )
