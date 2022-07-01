@@ -7,7 +7,7 @@ NEW_ENV="${1}"; shift # true or false indicating whether env update should occur
 # careful... setting the path for both the dockerfile and runtime container
 # can be tricky
 if [[ -z "${1+x}" ]] || [[ "${1}" == "" ]]; then
-    ENV_NAME=default
+    ENV_NAME=global
 else
     ENV_NAME="${1}"; shift
 fi

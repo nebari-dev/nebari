@@ -85,11 +85,11 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             if role in role_mappings
         }
         username = user_data["preferred_username"]
-        namespaces = {username, "default", "filesystem"}
+        namespaces = {username, "global", "nebari-git"}
         role_bindings = {
             f"{username}/*": {"admin"},
-            "filesystem/*": {"viewer"},
-            "default/*": roles,
+            "nebari-git/*": {"viewer"},
+            "global/*": roles,
         }
 
         for group in user_data.get("groups", []):
