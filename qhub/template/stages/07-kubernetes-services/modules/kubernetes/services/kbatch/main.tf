@@ -1,14 +1,9 @@
-# Get this name dynamtically
-locals {
-  kbatch_service_account_name = "kbatch-kbatch-proxy"
-}
-
 resource "helm_release" "kbatch" {
   name       = "kbatch"
   namespace  = var.namespace
   repository = "https://kbatch-dev.github.io/helm-chart"
   chart      = "kbatch-proxy"
-  version    = "0.3.1"
+  version    = local.kbatch_version
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -27,7 +22,7 @@ resource "helm_release" "kbatch" {
         }
       }
       image = {
-        tag = "0.3.1"
+        tag = local.kbatch_version
       }
     })
   ])
@@ -57,7 +52,7 @@ resource "kubernetes_cluster_role" "kbatch" {
   rule {
     api_groups = ["", "batch"]
     resources  = ["*"]
-    verbs      = ["get", "watch", "list", "patch", "create"]
+    verbs      = ["get", "watch", "list", "patch", "create", "delete"]
   }
 }
 
