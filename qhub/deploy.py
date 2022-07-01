@@ -10,7 +10,6 @@ from qhub.utils import (
     check_cloud_credentials,
     keycloak_provider_context,
     kubernetes_provider_context,
-    terraform_state_context,
     timer,
 )
 
@@ -202,33 +201,32 @@ def guided_install(
         else:
             provision_01_terraform_state(stage_outputs, config)
 
-    with terraform_state_context(config["provider"], config["terraform_state"]["type"]):
-        provision_02_infrastructure(stage_outputs, config)
+    provision_02_infrastructure(stage_outputs, config)
 
-        with kubernetes_provider_context(
-            stage_outputs["stages/02-infrastructure"]["kubernetes_credentials"]["value"]
+    with kubernetes_provider_context(
+        stage_outputs["stages/02-infrastructure"]["kubernetes_credentials"]["value"]
+    ):
+        provision_03_kubernetes_initialize(stage_outputs, config)
+        provision_04_kubernetes_ingress(stage_outputs, config)
+        provision_ingress_dns(
+            stage_outputs,
+            config,
+            dns_provider=dns_provider,
+            dns_auto_provision=dns_auto_provision,
+            disable_prompt=disable_prompt,
+        )
+        provision_05_kubernetes_keycloak(stage_outputs, config)
+
+        with keycloak_provider_context(
+            stage_outputs["stages/05-kubernetes-keycloak"]["keycloak_credentials"][
+                "value"
+            ]
         ):
-            provision_03_kubernetes_initialize(stage_outputs, config)
-            provision_04_kubernetes_ingress(stage_outputs, config)
-            provision_ingress_dns(
-                stage_outputs,
-                config,
-                dns_provider=dns_provider,
-                dns_auto_provision=dns_auto_provision,
-                disable_prompt=disable_prompt,
-            )
-            provision_05_kubernetes_keycloak(stage_outputs, config)
+            provision_06_kubernetes_keycloak_configuration(stage_outputs, config)
+            provision_07_kubernetes_services(stage_outputs, config)
+            provision_08_qhub_tf_extensions(stage_outputs, config)
 
-            with keycloak_provider_context(
-                stage_outputs["stages/05-kubernetes-keycloak"]["keycloak_credentials"][
-                    "value"
-                ]
-            ):
-                provision_06_kubernetes_keycloak_configuration(stage_outputs, config)
-                provision_07_kubernetes_services(stage_outputs, config)
-                provision_08_qhub_tf_extensions(stage_outputs, config)
-
-                print("QHub deployed successfully")
+            print("QHub deployed successfully")
 
     print("Services:")
     for service_name, service in stage_outputs["stages/07-kubernetes-services"][

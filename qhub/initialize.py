@@ -451,6 +451,8 @@ def github_auto_provision(config, owner, repo):
         # Secrets
         if config["provider"] == "do":
             for name in {
+                "AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY",
                 "SPACES_ACCESS_KEY_ID",
                 "SPACES_SECRET_ACCESS_KEY",
                 "DIGITALOCEAN_TOKEN",
