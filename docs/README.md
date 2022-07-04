@@ -43,9 +43,9 @@ $ yarn --version
 
 1. First make sure to be in the `/docs` directory:
 
-    ```bash
-    cd docs
-    ```
+   ```bash
+   cd docs
+   ```
 
 2. Install the necessary dependencies:
 
