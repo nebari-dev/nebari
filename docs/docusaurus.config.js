@@ -99,26 +99,27 @@ const config = {
             position: "right",
             to: "tutorials",
           },
-          {
-            label: "How-to Guides",
-            position: "right",
-            to: "how-tos/overview",
-          },
-          {
-            label: "Reference",
-            position: "right",
-            to: "references/overview",
-          },
-          {
-            label: "Conceptual Guides",
-            position: "right",
-            to: "explanations/overview",
-          },
-          {
-            label: "Community",
-            position: "right",
-            to: "governance/overview",
-          },
+        // TODO: uncomment section when at least one doc in the secton exists.
+        //   {
+        //     label: "How-to Guides",
+        //     position: "right",
+        //     to: "how-tos",
+        //   },
+        //   {
+        //     label: "Reference",
+        //     position: "right",
+        //     to: "references",
+        //   },
+        //   {
+        //     label: "Conceptual Guides",
+        //     position: "right",
+        //     to: "explanations",
+        //   },
+        //   {
+        //     label: "Community",
+        //     position: "right",
+        //     to: "governance",
+        //   },
           {
             href: customFields.githubUrl,
             position: "right",

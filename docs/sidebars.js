@@ -28,54 +28,48 @@ module.exports = {
     {
         type: 'category',
         label: 'Tutorials',
-        link: {type: 'doc', id: 'tutorials/index'},
+        link: {
+            type: 'doc', 
+            id: 'tutorials/index'
+        },
         items: [
           'tutorials/creating-cds-dashboard',
         ],
       },
-    {
-      type: "category",
-      label: "How-to Guides",
-      link: {
-        type: "generated-index",
-        title: "How-to Guides",
-        description:
-          "Practical step-by-step guides to help you achieve a specific goal. Most useful when you're trying to get something done.",
-        slug: "category/how-to",
-        keywords: ["how-to"],
-      },
-      items: ["how-tos/overview"],
-    },
-    {
-      type: "category",
-      label: "Conceptual Guides",
-      link: {
-        type: "generated-index",
-        title: "Conceptual Guides",
-        description:
-          "Big-picture explanations of higher-level Nebari concepts. Most useful for building understanding of a particular topic.",
-        slug: "category/conceptual-guides",
-        keywords: ["conceptual-guides"],
-      },
-      items: ["explanations/overview"],
-    },
-    {
-      type: "category",
-      label: "Reference",
-      link: {
-        type: "generated-index",
-        title: "Reference Guides",
-        description:
-          "Nitty-gritty technical descriptions of how Nebari works. ",
-        slug: "category/reference",
-        keywords: ["reference"],
-      },
-      items: ["references/overview"],
-    },
+    // {
+    //     type: 'category',
+    //     label: 'How-to Guides',
+    //     link: {
+    //         type: 'doc', 
+    //         id: 'how-to/index'
+    //     },
+    //     items: [
+    //     ],
+    //   },
+    // {
+    //     type: 'category',
+    //     label: 'Conceptual Guides',
+    //     link: {
+    //         type: 'doc', 
+    //         id: 'explanations/index'
+    //     },
+    //     items: [
+    //     ],
+    //   },
+    // {
+    //     type: 'category',
+    //     label: 'References',
+    //     link: {
+    //         type: 'doc', 
+    //         id: 'reference/index'
+    //     },
+    //     items: [
+    //     ],
+    //   },
     {
       type: "doc",
       label: "Community",
-      id: "governance/overview",
+      id: "governance/index",
     },
     {
       type: "doc",
