@@ -11,7 +11,7 @@ environments:
       - conda-forge
       - defaults
     dependencies:
-      - python=3.7
+      - python=3.8
       - ipykernel
       - ipywidgets
       - qhub-dask==||QHUB_VERSION||
