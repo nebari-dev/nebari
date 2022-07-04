@@ -31,8 +31,9 @@ module.exports = {
         link: {type: 'doc', id: 'tutorials/index'},
         items: [
           'tutorials/creating-cds-dashboard',
+          "tutorials/using_dask",
         ],
-      },
+    },
     {
       type: "category",
       label: "How-to Guides",
