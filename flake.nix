@@ -41,6 +41,7 @@
         pythonPackages.dask-gateway
         pythonPackages.paramiko
         pythonPackages.escapism
+        pythonPackages.isort
 
         # additional
         pkgs.minikube

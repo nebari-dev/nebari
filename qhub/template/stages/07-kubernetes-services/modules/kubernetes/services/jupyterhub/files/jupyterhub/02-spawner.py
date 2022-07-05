@@ -1,17 +1,11 @@
-# remove after next kubespawner release past 1/20/2022
-# https://github.com/jupyterhub/kubespawner/pull/558
+import json
 import os
-
-import kubernetes.client.models
-from tornado import gen
-
-kubernetes.client.models.V1EndpointPort = kubernetes.client.models.CoreV1EndpointPort
 
 import z2jh  # noqa: E402
 from kubespawner import KubeSpawner  # noqa: E402
+from tornado import gen
 
 cdsdashboards = z2jh.get_config("custom.cdsdashboards")
-conda_store_environments = z2jh.get_config("custom.environments")
 
 
 @gen.coroutine
@@ -49,9 +43,46 @@ if cdsdashboards["enabled"]:
     # Force dashboard creator to select an instance size
     c.CDSDashboardsConfig.spawn_default_options = False
 
-    c.CDSDashboardsConfig.conda_envs = [
-        environment["name"] for _, environment in conda_store_environments.items()
-    ]
+    def get_packages(conda_prefix):
+        try:
+            packages = set()
+            for filename in os.listdir(os.path.join(conda_prefix, "conda-meta")):
+                if filename.endswith(".json"):
+                    with open(os.path.join(conda_prefix, "conda-meta", filename)) as f:
+                        packages.add(json.load(f).get("name"))
+            return packages
+        except OSError as e:
+            import logging
+
+            logger = logging.getLogger()
+            logger.error(f"An issue with a conda environment was encountered.\n{e}")
+
+    def get_conda_prefixes(conda_store_mount):
+        for namespace in os.listdir(conda_store_mount):
+            if os.path.isdir(os.path.join(conda_store_mount, namespace, "envs")):
+                for name in os.listdir(
+                    os.path.join(conda_store_mount, namespace, "envs")
+                ):
+                    yield namespace, name, os.path.join(
+                        conda_store_mount, namespace, "envs", name
+                    )
+
+    def list_dashboard_environments(conda_store_mount):
+        for namespace, name, conda_prefix in get_conda_prefixes(conda_store_mount):
+            packages = get_packages(conda_prefix)
+            if packages and {"cdsdashboards-singleuser"} <= packages:
+                yield namespace, name, conda_prefix
+
+    def conda_environments():
+        conda_store_mount = z2jh.get_config("custom.conda-store-mount")
+        return [
+            name
+            for namespace, name, conda_prefix in list_dashboard_environments(
+                conda_store_mount
+            )
+        ]
+
+    c.CDSDashboardsConfig.conda_envs = conda_environments
 
     # TODO: make timeouts configurable
     c.VariableMixin.proxy_ready_timeout = 600

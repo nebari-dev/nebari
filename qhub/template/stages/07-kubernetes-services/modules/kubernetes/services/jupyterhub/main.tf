@@ -72,6 +72,18 @@ resource "helm_release" "jupyterhub" {
           "${var.general-node-group.key}" = var.general-node-group.value
         }
 
+        extraVolumes = [{
+          name = "conda-store-shared"
+          persistentVolumeClaim = {
+            claimName = var.conda-store-pvc
+          }
+        }]
+
+        extraVolumeMounts = [{
+          mountPath = var.conda-store-mount
+          name      = "conda-store-shared"
+        }]
+
         extraConfig = {
           "01-theme.py"    = file("${path.module}/files/jupyterhub/01-theme.py")
           "02-spawner.py"  = file("${path.module}/files/jupyterhub/02-spawner.py")
