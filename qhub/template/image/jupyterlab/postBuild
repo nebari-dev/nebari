@@ -5,6 +5,22 @@ set -x
 # install classic notebook extensions
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
+# ====== code-server install/config
+mkdir -p /opt/code_server
+cd /opt/code_server
+# Fetch the snapshot of https://code-server.dev/install.sh as of the time of writing
+curl -fsSL https://raw.githubusercontent.com/coder/code-server/326a1d1862872955cec062030df2bd103799a1eb/install.sh > install.sh
+expected_sum=ed18563871beb535130019b6c5b62206cc4a60c8bf4256aae96ce737951fc253
+
+if [[ ! $(sha256sum install.sh) == "${expected_sum}  install.sh" ]];then
+    echo Unexpected hash from code-server install script
+    exit 1
+fi
+sh install.sh --prefix /opt/code_server
+
+# === fix permissions ===
+fix-permissions /opt/code_server
+
 # if DEFAULT_ENV is unset ${DEFAULT_ENV+x} expands to nothing otherwise
 # it substitutes the string x. This allows us to check if the variable
 # is set without triggering an unbound variable error
