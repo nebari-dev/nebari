@@ -48,6 +48,10 @@ dependencies:
  - isort
  - importnb
 
+ # vscode
+#  - code-server >= 3.2
+
  - pip:
      # vscode jupyterlab launcher
-     - dask-labextension==5.3.0
+     #  - git+https://github.com/betatim/vscode-binder
+     - git+https://github.com/dask/dask-labextension.git@fc8de03447778e0605d0abafa3d3135f9e49e0d6
