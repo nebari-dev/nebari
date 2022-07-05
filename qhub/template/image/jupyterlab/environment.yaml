@@ -19,7 +19,7 @@ dependencies:
  - retrolab
 
  # jupyterlab extensions
-#  - dask_labextension >=5.0.0
+ - dask_labextension == 5.3.0
  - jupyterlab-git >=0.30.0
  - sidecar >=0.5.0
  - jupyter-videochat >=0.5.0
@@ -51,4 +51,3 @@ dependencies:
  - pip:
      # vscode jupyterlab launcher
      - git+https://github.com/betatim/vscode-binder
-     - git+https://github.com/dask/dask-labextension.git@01bf0418c20d1940160ba2fe459fb7444d48c195
