@@ -16,7 +16,7 @@ if [[ ! $(sha256sum install.sh) == "${expected_sum}  install.sh" ]];then
     echo Unexpected hash from code-server install script
     exit 1
 fi
-sh install.sh --prefix "/opt/conda/envs/${DEFAULT_ENV}/shared/code-server"
+sh install.sh --prefix "/opt/conda/envs/${DEFAULT_ENV}/share/code-server"
 
 # if DEFAULT_ENV is unset ${DEFAULT_ENV+x} expands to nothing otherwise
 # it substitutes the string x. This allows us to check if the variable
