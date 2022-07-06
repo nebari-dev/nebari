@@ -48,6 +48,7 @@ dependencies:
  - isort
  - importnb
 
+# vscode
  - code-server >= 3.2
 
  - pip:
