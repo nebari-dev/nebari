@@ -14,15 +14,13 @@ if [[ ! $(sha256sum install.sh) == "${expected_sum}  install.sh" ]];then
     exit 1
 fi
 
-sh ./install.sh --method standalone --prefix /opt/code-server
+mkdir /opt/tmpdir
+sh ./install.sh --method standalone --prefix /opt/tmpdir
 
-rm -rf /opt/code-server/bin
-mv /opt/code-server/lib/code-server-4.5.0/* /opt/code-server
+mv /opt/tmpdir/lib/code-server-4.5.0/* /opt/code-server/
+rm -rf /opt/tmpdir
 
 cat <<'EOF' >opt/code-server/bin/code-server
 #!/bin/bash
 node opt/code-server/out/node/entry.js $*
 EOF
-
-# Install the VS code proxy
-pip install git+https://github.com/betatim/vscode-binder
