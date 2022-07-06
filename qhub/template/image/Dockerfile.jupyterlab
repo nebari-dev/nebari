@@ -20,7 +20,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Set PATH for Dockerfile so that conda works and some useful scripts are
 # available. Any changes intended to propagate to runtime containers should be
 # set in /etc/profile.d (see setup_shell_behavior.sh)
-ENV PATH=/opt/conda/envs/${DEFAULT_ENV}/bin:/opt/conda/envs/${DEFAULT_ENV}/share/code-server/bin:$PATH:/opt/conda/bin:${PATH}:/opt/scripts
+ENV PATH=/opt/conda/envs/${DEFAULT_ENV}/bin:/opt/conda/bin:${PATH}:/opt/scripts
 
 # ============= base install ===============
 # install conda
@@ -45,6 +45,7 @@ RUN \
     /opt/scripts/install-conda-environment.sh "${ENV_FILE}" 'true'
 
 # ========== code-server install ============
+ENV PATH=/opt/conda/envs/${DEFAULT_ENV}/share/code-server/bin:${PATH}
 COPY scripts/install-code-server.sh /opt/scripts/install-code-server.sh
 
 COPY jupyterlab /opt/jupyterlab
