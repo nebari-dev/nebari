@@ -36,3 +36,13 @@ c.NotebookApp.shutdown_no_activity_timeout = 15 * 60
 ###############################################################################
 # JupyterHub idle culler total timeout corresponds (approximately) to:
 # max(cull_idle_timeout, cull_inactive_timeout) + shutdown_no_activity_timeout
+
+
+c.ServerProxy.servers = {
+    "code-server": {
+        "command": [
+            "--extensions-dir: ~/.local/share/code-server/extensions",
+        ],
+        "timeout": 20,
+    }
+}
