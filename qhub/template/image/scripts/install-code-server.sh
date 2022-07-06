@@ -16,9 +16,12 @@ fi
 
 sh ./install.sh --method standalone --prefix /opt/code-server
 
+rm -rf /opt/code-server/bin
+mv /opt/code-server/lib/code-server-4.5.0/* /opt/code-server
+
 cat <<'EOF' >opt/code-server/bin/code-server
 #!/bin/bash
-node opt/code-server/lib/code-server-4.5.0/out/node/entry.js $*
+node opt/code-server/out/node/entry.js $*
 EOF
 
 # Install the VS code proxy

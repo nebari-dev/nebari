@@ -45,7 +45,7 @@ RUN \
     /opt/scripts/install-conda-environment.sh "${ENV_FILE}" 'true'
 
 # ========== code-server install ============
-ENV PATH=/opt/code-server/bin:/opt/code-server/bin/code-server:${PATH}
+ENV PATH=/opt/code-server/bin:${PATH}
 COPY scripts/install-code-server.sh /opt/scripts/install-code-server.sh
 
 COPY jupyterlab /opt/jupyterlab
