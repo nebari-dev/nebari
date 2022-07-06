@@ -44,6 +44,9 @@ RUN \
     fi ; \
     /opt/scripts/install-conda-environment.sh "${ENV_FILE}" 'true'
 
+# ========== code-server install ============
+COPY scripts/install-code-server.sh /opt/scripts/install-code-server.sh
+
 COPY jupyterlab /opt/jupyterlab
 RUN /opt/jupyterlab/postBuild
 

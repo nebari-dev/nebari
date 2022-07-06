@@ -5,8 +5,8 @@ set -x
 # install classic notebook extensions
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
-# ====== code-server install/config
-../scripts/install-code-server.sh
+# install code-server extension
+sh /opt/scripts/install-code-server.sh "/opt/conda/envs/${DEFAULT_ENV}"
 
 # if DEFAULT_ENV is unset ${DEFAULT_ENV+x} expands to nothing otherwise
 # it substitutes the string x. This allows us to check if the variable
