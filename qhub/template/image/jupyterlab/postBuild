@@ -5,14 +5,7 @@ set -x
 # install classic notebook extensions
 jupyter nbextension enable --py widgetsnbextension --sys-prefix
 
-# install code-server extension
-sh /opt/scripts/install-code-server.sh
-
-# Enable the proxy extension in notebook and lab
-jupyter serverextension enable --py jupyter_server_proxy
-jupyter labextension install @jupyterlab/server-proxy
-jupyter lab build
-
+# install code-server basic extensions
 code-server --install-extension ms-python.python
 
 # if DEFAULT_ENV is unset ${DEFAULT_ENV+x} expands to nothing otherwise
