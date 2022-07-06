@@ -8,6 +8,15 @@ jupyter nbextension enable --py widgetsnbextension --sys-prefix
 # install code-server extension
 sh /opt/scripts/install-code-server.sh
 
+# Enable the proxy extension in notebook and lab
+jupyter serverextension enable --py jupyter_server_proxy
+jupyter labextension install @jupyterlab/server-proxy
+jupyter lab build
+
+code-server --install-extension ms-python.python
+
+conda pip install git+https://github.com/betatim/vscode-binder.git
+
 # if DEFAULT_ENV is unset ${DEFAULT_ENV+x} expands to nothing otherwise
 # it substitutes the string x. This allows us to check if the variable
 # is set without triggering an unbound variable error

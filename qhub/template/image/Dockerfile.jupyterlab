@@ -32,10 +32,6 @@ COPY jupyterlab/apt.txt /opt/jupyterlab/apt.txt
 COPY scripts/install-apt.sh /opt/scripts/install-apt.sh
 RUN /opt/scripts/install-apt.sh /opt/jupyterlab/apt.txt
 
-# ========== code-server install ============
-ENV PATH=/opt/code-server/bin:${PATH}
-COPY scripts/install-code-server.sh /opt/scripts/install-code-server.sh
-
 ARG SKIP_CONDA_SOLVE=no
 COPY scripts/install-conda-environment.sh /opt/scripts/install-conda-environment.sh
 COPY jupyterlab/environment.yaml /opt/jupyterlab/environment.yaml
@@ -47,6 +43,10 @@ RUN \
         ENV_FILE=/opt/jupyterlab/environment.yaml ; \
     fi ; \
     /opt/scripts/install-conda-environment.sh "${ENV_FILE}" 'true'
+
+# ========== code-server install ============
+ENV PATH=/opt/code-server/bin:${PATH}
+COPY scripts/install-code-server.sh /opt/scripts/install-code-server.sh
 
 COPY jupyterlab /opt/jupyterlab
 RUN /opt/jupyterlab/postBuild

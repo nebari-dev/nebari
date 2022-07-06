@@ -19,8 +19,3 @@ sh ./install.sh --method standalone --prefix /opt/tmpdir
 
 mv /opt/tmpdir/lib/code-server-4.5.0/* /opt/code-server
 rm -rf /opt/tmpdir
-
-cat <<'EOF' > /opt/code-server/bin/code-server
-#!/bin/bash
-node /opt/code-server/out/node/entry.js $*
-EOF
