@@ -47,3 +47,7 @@ dependencies:
  - black
  - isort
  - importnb
+
+ - pip:
+     # vscode jupyterlab launcher
+     - git+https://github.com/betatim/vscode-binder
