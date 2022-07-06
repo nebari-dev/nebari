@@ -16,6 +16,10 @@ fi
 
 sh ./install.sh --method standalone --prefix /opt/code-server
 
+cat <<'EOF' >opt/code-server/bin/code-server
+#!/bin/bash
+node opt/code-server/lib/code-server-4.5.0/out/node/entry.js $*
+EOF
 
 # Install the VS code proxy
 pip install git+https://github.com/betatim/vscode-binder
