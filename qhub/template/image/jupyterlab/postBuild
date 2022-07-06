@@ -15,7 +15,8 @@ jupyter lab build
 
 code-server --install-extension ms-python.python
 
-conda pip install git+https://github.com/betatim/vscode-binder.git
+conda activate ${DEFAULT_ENV}
+pip install git+https://github.com/betatim/vscode-binder.git
 
 # if DEFAULT_ENV is unset ${DEFAULT_ENV+x} expands to nothing otherwise
 # it substitutes the string x. This allows us to check if the variable
