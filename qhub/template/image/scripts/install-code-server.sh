@@ -22,5 +22,5 @@ rm -rf /opt/tmpdir
 
 cat <<'EOF' > /opt/code-server/bin/code-server
 #!/bin/bash
-node opt/code-server/out/node/entry.js $*
+node /opt/code-server/out/node/entry.js $*
 EOF
