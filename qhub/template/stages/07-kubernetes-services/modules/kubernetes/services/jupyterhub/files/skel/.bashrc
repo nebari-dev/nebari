@@ -46,7 +46,7 @@ esac
 # uncomment for a colored prompt, if the terminal has the capability; turned
 # off by default to not distract the user: the focus in a terminal window
 # should be on the output of commands, not on the prompt
-#force_color_prompt=yes
+force_color_prompt=yes
 
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
@@ -120,3 +120,33 @@ if ! shopt -oq posix; then
 fi
 
 . /opt/conda/etc/profile.d/conda.sh && conda activate base
+
+# add nicer bash prompt
+conda config --set changeps1 True
+
+parse_git_branch() {
+  git branch --color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/[\1]/'
+}
+
+BASE03=$(tput setaf 234)
+BASE02=$(tput setaf 235)
+BASE01=$(tput setaf 240)
+BASE00=$(tput setaf 241)
+BASE0=$(tput setaf 244)
+BASE1=$(tput setaf 245)
+BASE2=$(tput setaf 254)
+BASE3=$(tput setaf 230)
+YELLOW=$(tput setaf 136)
+ORANGE=$(tput setaf 166)
+RED=$(tput setaf 160)
+MAGENTA=$(tput setaf 125)
+VIOLET=$(tput setaf 61)
+BLUE=$(tput setaf 33)
+CYAN=$(tput setaf 37)
+GREEN=$(tput setaf 64)
+BOLD=$(tput bold)
+RESET=$(tput sgr0)
+
+NAME=`whoami | cut -d'@' -f1`
+
+PS1="\[$CYAN\]$NAME:\w\[$RESET\]\$(parse_git_branch) \n\[$GREEN\]\A \$ \[$RESET\]"
