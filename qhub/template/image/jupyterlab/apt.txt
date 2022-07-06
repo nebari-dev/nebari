@@ -6,10 +6,15 @@ libnss-wrapper
 # utilities
 wget
 curl
+htop
+tree
+zip
+unzip
 
 # development utilities
 git
 openssh-client
+tmux
 
 # editors
 nano
