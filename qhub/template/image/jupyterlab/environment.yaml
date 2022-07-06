@@ -48,3 +48,11 @@ dependencies:
  - isort
  - importnb
 
+ - code-server >= 3.2
+
+ - pip:
+     # vscode jupyterlab launcher
+     - git+https://github.com/betatim/vscode-binder
+
+variables:
+  CODE_EXTENSIONSDIR: '~/.local/share/code-server/extensions'
