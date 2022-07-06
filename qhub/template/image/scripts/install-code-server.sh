@@ -14,7 +14,28 @@ if [[ ! $(sha256sum install.sh) == "${expected_sum}  install.sh" ]];then
     exit 1
 fi
 
-sh ./install.sh --prefix ${DEFAULT_PREFIX}/share/code-server
+export VSCODE_EXTENSIONS="~/.local/share/code-server/extensions"
+
+sh ./install.sh --method standalone --prefix ${DEFAULT_PREFIX}/share/code-server
+
+export PATH="${DEFAULT_PREFIX}/share/code-server/bin:$PATH"
+
+# Directly check whether the code-server call also works inside of conda-build
+code-server --help
+
+# Remove unnecessary resources
+find ${DEFAULT_PREFIX}/share/code-server -name '*.map' -delete
+rm -rf \
+  ${DEFAULT_PREFIX}/share/code-server/node \
+  ${DEFAULT_PREFIX}/share/code-server/lib/node \
+  ${DEFAULT_PREFIX}/share/code-server/lib/lib* \
+  ${DEFAULT_PREFIX}/share/code-server/lib/vscode/node_modules/vscode-sqlite3/build/Release/obj* \
+  ${DEFAULT_PREFIX}/share/code-server/lib/vscode/node_modules/vscode-sqlite3/build/Release/sqlite3.a \
+  ${DEFAULT_PREFIX}/share/code-server/lib/vscode/node_modules/vscode-sqlite3/deps \
+  ${DEFAULT_PREFIX}/share/code-server/lib/vscode/node_modules/.cache \
+  ${DEFAULT_PREFIX}/share/code-server/lib/vscode/out/vs/workbench/*.map \
+  ${DEFAULT_PREFIX}/share/code-server/lib/vscode/node_modules/@coder/requirefs/coverage
+find ${DEFAULT_PREFIX}/share/code-server/ -name obj.target | xargs rm -r
 
 # Install the VS code proxy
 pip install git+https://github.com/betatim/vscode-binder
