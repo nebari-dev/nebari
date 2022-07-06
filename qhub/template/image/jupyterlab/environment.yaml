@@ -19,7 +19,7 @@ dependencies:
  - retrolab
 
  # jupyterlab extensions
- - dask_labextension == 5.3.0
+ - dask_labextension >= 5.3.0
  - jupyterlab-git >=0.30.0
  - sidecar >=0.5.0
  - jupyter-videochat >=0.5.0
