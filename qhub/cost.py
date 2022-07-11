@@ -47,6 +47,19 @@ def _check_infracost_api_key():
         return False
 
 
+def _set_currency_code(currency_code):
+    """
+    Specify the currency code for infracost
+    """
+    try:
+        subprocess.check_output(
+            ["infracost", "configure", "set", "currency", currency_code]
+        )
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
 def _run_infracost(path):
     """
     Run infracost on the given path and return the JSON output
@@ -97,7 +110,7 @@ def _disable_infracost_dashboard():
         return False
 
 
-def infracost_report(path, dashboard, file):
+def infracost_report(path, dashboard, file, currency_code):
     """
     Generate a report of the infracost cost of the given path
     args:
@@ -109,6 +122,7 @@ def infracost_report(path, dashboard, file):
 
     # Checks if infracost is installed and an API key is configured
     if _check_infracost() and _check_infracost_api_key():
+        _set_currency_code(currency_code)
         if not dashboard:
             _disable_infracost_dashboard()
         else:
@@ -131,7 +145,7 @@ def infracost_report(path, dashboard, file):
                     "Name", justify="right", style="cyan", no_wrap=True
                 )
                 cost_table.add_column(
-                    "Cost ($)", justify="right", style="cyan", no_wrap=True
+                    "Cost", justify="right", style="cyan", no_wrap=True
                 )
 
                 cost_table.add_row("Total Monthly Cost", data["totalMonthlyCost"])
