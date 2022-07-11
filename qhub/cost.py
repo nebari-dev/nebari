@@ -97,25 +97,34 @@ def _disable_infracost_dashboard():
         return False
 
 
-def infracost_report(path, dashboard):
+def infracost_report(path, dashboard, file):
     """
     Generate a report of the infracost cost of the given path
     args:
         path: path to the qhub stages directory
     """
+    # If path is not provided, use the current directory with `stages` subdirectory
     if not path:
         path = os.path.join(os.getcwd(), "stages")
 
+    # Checks if infracost is installed and an API key is configured
     if _check_infracost() and _check_infracost_api_key():
         if not dashboard:
             _disable_infracost_dashboard()
         else:
             _enable_infracost_dashboard()
 
+        # Check if the deployment is available on the given path
         if not os.path.exists(path):
             logger.error("Deployment is not available")
         else:
             data = _run_infracost(path)
+
+            # If a user has asked for a JSON file, download it
+            if file:
+                # Convert data to JSON and save it to the given file
+                with open(file, "w") as f:
+                    json.dump(data, f)
             if data:
                 cost_table = Table(title="Cost Breakdown")
                 cost_table.add_column(

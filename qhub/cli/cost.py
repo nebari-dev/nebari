@@ -21,8 +21,14 @@ def create_cost_subcommand(subparser):
         help="Enable the cost dashboard",
         required=False,
     )
+    subparser.add_argument(
+        "-f",
+        "--file",
+        help="Specify the path of the file to store the cost report",
+        required=False,
+    )
     subparser.set_defaults(func=handle_cost_report)
 
 
 def handle_cost_report(args):
-    infracost_report(args.path, ast.literal_eval(args.dashboard))
+    infracost_report(args.path, ast.literal_eval(args.dashboard), args.file)
