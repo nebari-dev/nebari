@@ -35,7 +35,7 @@ def create_cost_subcommand(subparser):
         default="USD",
     )
     subparser.add_argument(
-        "-ct",
+        "-cc",
         "--compare",
         help="Compare the cost report to a previously generated report",
         required=False,
