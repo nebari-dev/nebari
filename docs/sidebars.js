@@ -71,7 +71,10 @@ module.exports = {
         slug: "category/conceptual-guides",
         keywords: ["conceptual-guides"],
       },
-      items: ["explanations/overview"],
+      items: [
+        "explanations/overview",
+        "explanations/infrastructure-architecture"
+      ],
     },
     {
       type: "category",
@@ -84,7 +87,10 @@ module.exports = {
         slug: "category/reference",
         keywords: ["reference"],
       },
-      items: ["references/overview"],
+      items: [
+        "references/overview",
+        "references/source-code-architecture"
+      ],
     },
     {
       type: "doc",
