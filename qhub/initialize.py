@@ -35,9 +35,9 @@ BASE_CONFIGURATION = {
         "authentication": None,
     },
     "default_images": {
-        "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
-        "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
-        "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
+        "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{qhub_image_tag}",
+        "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{qhub_image_tag}",
+        "dask_worker": f"quay.io/nebari/nebari-dask-worker:{qhub_image_tag}",
     },
     "storage": {"conda_store": "200Gi", "shared_filesystem": "200Gi"},
     "theme": {

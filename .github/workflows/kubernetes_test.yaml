@@ -83,10 +83,11 @@ jobs:
         run: |
           docker info
           docker ps
-      - name: Build docker images
+      - name: Pull docker images
         run: |
-          cd qhub/template/image
-          docker buildx bake
+          docker pull quay.io/nebari/nebari-jupyterhub:main
+          docker pull quay.io/nebari/nebari-jupyterlab:main
+          docker pull quay.io/nebari/nebari-dask-gateway:main
         env:
           TAG: ${{ github.sha }}
       - name: List docker images in minikube
