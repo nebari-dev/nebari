@@ -87,7 +87,7 @@ jobs:
         run: |
           docker pull quay.io/nebari/nebari-jupyterhub:main
           docker pull quay.io/nebari/nebari-jupyterlab:main
-          docker pull quay.io/nebari/nebari-dask-gateway:main
+          docker pull quay.io/nebari/nebari-dask-worker:main
         env:
           TAG: ${{ github.sha }}
       - name: List docker images in minikube
