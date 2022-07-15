@@ -38,7 +38,6 @@ qhub_dask_version = "0.4.3"
 
 QHUB_GH_BRANCH = os.environ.get("QHUB_GH_BRANCH", "")
 if QHUB_GH_BRANCH:
-    qhub_image_tag = QHUB_GH_BRANCH
     pip_install_qhub = (
         f"pip install https://github.com/Quansight/qhub/archive/{QHUB_GH_BRANCH}.zip"
     )
