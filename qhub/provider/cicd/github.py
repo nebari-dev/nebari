@@ -1,22 +1,28 @@
 import base64
 import os
+import re
 from typing import Dict, List, Optional, Union
 
 import requests
 from nacl import encoding, public
 from pydantic import BaseModel, Field
 
-from qhub.utils import pip_install_qhub
+from qhub.provider.cicd.common import pip_install_qhub
+
+GITHUB_BASE_URL = "https://api.github.com/"
 
 
-def github_request(url, method="GET", json=None):
-    GITHUB_BASE_URL = "https://api.github.com/"
-
-    for name in ("GITHUB_USERNAME", "GITHUB_TOKEN"):
-        if os.environ.get(name) is None:
-            raise ValueError(
-                f"environment variable={name} is required for github automation"
-            )
+def github_request(url, method="GET", json=None, authenticate=True):
+    auth = None
+    if authenticate:
+        for name in ("GITHUB_USERNAME", "GITHUB_TOKEN"):
+            if os.environ.get(name) is None:
+                raise ValueError(
+                    f"environment variable={name} is required for github automation"
+                )
+        auth = requests.auth.HTTPBasicAuth(
+            os.environ["GITHUB_USERNAME"], os.environ["GITHUB_TOKEN"]
+        )
 
     method_map = {
         "GET": requests.get,
@@ -27,9 +33,7 @@ def github_request(url, method="GET", json=None):
     response = method_map[method](
         f"{GITHUB_BASE_URL}{url}",
         json=json,
-        auth=requests.auth.HTTPBasicAuth(
-            os.environ["GITHUB_USERNAME"], os.environ["GITHUB_TOKEN"]
-        ),
+        auth=auth,
     )
     response.raise_for_status()
     return response
@@ -60,6 +64,21 @@ def update_secret(owner, repo, secret_name, secret_value):
 
 def get_repository(owner, repo):
     return github_request(f"repos/{owner}/{repo}").json()
+
+
+def get_repo_tags(owner, repo):
+    return github_request(f"repos/{owner}/{repo}/tags", authenticate=False).json()
+
+
+def get_latest_repo_tag(owner, repo, clean_tag=False):
+    tags = get_repo_tags(owner, repo)
+    if not clean_tag:
+        return tags[0].get("name")
+    else:
+        for t in tags:
+            rel = list(filter(None, re.sub(r"[A-Za-z]", " ", t["name"]).split(" ")))
+            if len(rel) == 1:
+                return t
 
 
 def create_repository(owner, repo, description, homepage, private=True):

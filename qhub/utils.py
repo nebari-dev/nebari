@@ -12,14 +12,13 @@ from typing import Dict, List
 
 from ruamel.yaml import YAML
 
+from qhub.provider.cicd.github import get_latest_repo_tag
 from qhub.provider.cloud import (
     amazon_web_services,
     azure_cloud,
     digital_ocean,
     google_cloud,
 )
-
-from .version import __version__
 
 QHUB_K8S_VERSION = os.getenv("QHUB_K8S_VERSION", None)
 
@@ -32,15 +31,17 @@ AZURE_ENV_DOCS = (
     "https://docs.qhub.dev/en/stable/source/installation/setup.html#microsoft-azure"
 )
 
-qhub_image_tag = f"v{__version__}"
-pip_install_qhub = f"pip install qhub=={__version__}"
 qhub_dask_version = "0.4.3"
 
 QHUB_GH_BRANCH = os.environ.get("QHUB_GH_BRANCH", "")
-if QHUB_GH_BRANCH:
-    pip_install_qhub = (
-        f"pip install https://github.com/Quansight/qhub/archive/{QHUB_GH_BRANCH}.zip"
-    )
+QHUB_IMAGE_TAG = os.environ.get("QHUB_IMAGE_TAG", "")
+
+DOCKER_IMAGE_OWNER = "nebari-dev"
+DOCKER_IMAGE_REPO = "nebari-docker-images"
+
+qhub_image_tag = get_latest_repo_tag(DOCKER_IMAGE_OWNER, DOCKER_IMAGE_REPO)
+if QHUB_IMAGE_TAG:
+    qhub_image_tag = QHUB_IMAGE_TAG
 
 
 # Regex for suitable project names
@@ -385,15 +386,3 @@ def deep_merge(*args):
         return [*d1, *d2]
     else:  # if they don't match use left one
         return d1
-
-
-def pip_install_qhub(qhub_version: str) -> str:
-    qhub_gh_branch = os.environ.get("QHUB_GH_BRANCH")
-    pip_install = f"pip install qhub=={qhub_version}"
-    # dev branches
-    if len(qhub_version.split(".")) > 3 and qhub_gh_branch:
-        pip_install = (
-            f"pip install git+https://github.com/Quansight/qhub.git@{qhub_gh_branch}"
-        )
-
-    return pip_install

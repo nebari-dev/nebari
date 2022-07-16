@@ -14,7 +14,7 @@ from qhub.cli.support import create_support_subcommand
 from qhub.cli.upgrade import create_upgrade_subcommand
 from qhub.cli.validate import create_validate_subcommand
 from qhub.provider.terraform import TerraformException
-from qhub.utils import QHUB_GH_BRANCH
+from qhub.utils import QHUB_GH_BRANCH, QHUB_IMAGE_TAG
 from qhub.version import __version__
 
 
@@ -50,6 +50,9 @@ def cli(args):
 
     if QHUB_GH_BRANCH:
         logging.info(f"Modifying for development branch {QHUB_GH_BRANCH}")
+
+    if QHUB_IMAGE_TAG:
+        logging.info(f"Modifying image tag, using `{QHUB_IMAGE_TAG}` instead.")
 
     try:
         args.func(args)

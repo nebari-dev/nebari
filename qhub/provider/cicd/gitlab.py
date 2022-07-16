@@ -2,7 +2,7 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from qhub.utils import pip_install_qhub
+from qhub.provider.cicd.common import pip_install_qhub
 
 
 class GLCI_extras(BaseModel):
