@@ -10,8 +10,11 @@ import threading
 import time
 from typing import Dict, List
 
+import requests
+from requests.exceptions import ConnectionError
 from ruamel.yaml import YAML
 
+from qhub.constants import DEFAULT_QHUB_DASK_VERSION, DEFAULT_QHUB_IMAGE_TAG
 from qhub.provider.cicd.github import get_latest_repo_tag
 from qhub.provider.cloud import (
     amazon_web_services,
@@ -20,7 +23,11 @@ from qhub.provider.cloud import (
     google_cloud,
 )
 
+# environment variable overrides
 QHUB_K8S_VERSION = os.getenv("QHUB_K8S_VERSION", None)
+QHUB_GH_BRANCH = os.getenv("QHUB_GH_BRANCH", None)
+QHUB_IMAGE_TAG = os.getenv("QHUB_IMAGE_TAG", None)
+QHUB_DASK_VERSION = os.getenv("QHUB_DASK_VERSION", None)
 
 DO_ENV_DOCS = (
     "https://docs.qhub.dev/en/stable/source/installation/setup.html#digital-ocean"
@@ -31,18 +38,10 @@ AZURE_ENV_DOCS = (
     "https://docs.qhub.dev/en/stable/source/installation/setup.html#microsoft-azure"
 )
 
-qhub_dask_version = "0.4.3"
-
-QHUB_GH_BRANCH = os.environ.get("QHUB_GH_BRANCH", "")
-QHUB_IMAGE_TAG = os.environ.get("QHUB_IMAGE_TAG", "")
+CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
 
 DOCKER_IMAGE_OWNER = "nebari-dev"
 DOCKER_IMAGE_REPO = "nebari-docker-images"
-
-qhub_image_tag = get_latest_repo_tag(DOCKER_IMAGE_OWNER, DOCKER_IMAGE_REPO)
-if QHUB_IMAGE_TAG:
-    qhub_image_tag = QHUB_IMAGE_TAG
-
 
 # Regex for suitable project names
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
@@ -386,3 +385,35 @@ def deep_merge(*args):
         return [*d1, *d2]
     else:  # if they don't match use left one
         return d1
+
+
+def set_docker_image_tag() -> str:
+    """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
+    try:
+        qhub_image_tag = get_latest_repo_tag(DOCKER_IMAGE_OWNER, DOCKER_IMAGE_REPO)
+    except ConnectionError:
+        print("Unable to connect to the GitHub API, falling back to the default value.")
+        qhub_image_tag = DEFAULT_QHUB_IMAGE_TAG
+
+    if QHUB_IMAGE_TAG:
+        qhub_image_tag = QHUB_IMAGE_TAG
+
+    return qhub_image_tag
+
+
+def set_qhub_dask_version() -> str:
+    """Set version of `qhub-dask` meta package."""
+    try:
+        resp = requests.get(CONDA_FORGE_CHANNEL_DATA_URL)
+        qhub_dask_version = resp.json()["packages"]["qhub-dask"]["version"]
+        resp.raise_for_status()
+    except ConnectionError:
+        print(
+            "Unable to connect to the Conda-Forge channel data, falling back to the default value."
+        )
+        qhub_dask_version = DEFAULT_QHUB_DASK_VERSION
+
+    if QHUB_DASK_VERSION:
+        qhub_dask_version = QHUB_DASK_VERSION
+
+    return qhub_dask_version

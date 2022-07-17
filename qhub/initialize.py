@@ -14,14 +14,17 @@ from qhub.provider.oauth.auth0 import create_client
 from qhub.utils import (
     check_cloud_credentials,
     namestr_regex,
-    qhub_dask_version,
-    qhub_image_tag,
+    set_docker_image_tag,
     set_kubernetes_version,
+    set_qhub_dask_version,
 )
 
 from .version import __version__
 
 logger = logging.getLogger(__name__)
+
+qhub_image_tag = set_docker_image_tag()
+qhub_dask_version = set_qhub_dask_version()
 
 
 BASE_CONFIGURATION = {
