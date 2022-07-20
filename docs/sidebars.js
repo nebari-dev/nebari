@@ -58,6 +58,8 @@ module.exports = {
         "how-tos/nebari-azure",
         "how-tos/nebari-hpc",
         "how-tos/domain-registry",
+        "how-tos/login-keycloak",
+        "how-tos/configuring-keycloak",
       ],
     },
     {
