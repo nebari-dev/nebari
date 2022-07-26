@@ -42,7 +42,10 @@ const config = {
   },
 
   // Plugings need installing first then add here
-  plugins: ["docusaurus-plugin-sass"],
+  plugins: [
+    "docusaurus-plugin-sass",
+    require.resolve('docusaurus-lunr-search'),
+  ],
   customFields: { ...customFields },
 
   // ---------------------------------------------------------------------------
