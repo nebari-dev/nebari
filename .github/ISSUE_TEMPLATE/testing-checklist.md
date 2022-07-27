@@ -25,6 +25,7 @@ assignees: ''
 
 ### Validate the following services:
 - [ ] QHub init
+- [ ] Validate Backward compatibility with previous version
 - [ ] QHub deploy
 - [ ] Log into keycloak as root user and add user
 - [ ] Add user from command line
@@ -50,6 +51,7 @@ assignees: ''
 
 ### Validate the following services:
 - [ ] QHub init
+- [ ] Validate Backward compatibility with previous version
 - [ ] QHub deploy
 - [ ] Log into keycloak as root user and add user
 - [ ] Add user from command line
@@ -75,6 +77,7 @@ assignees: ''
 
 ### Validate the following services:
 - [ ] QHub init
+- [ ] Validate Backward compatibility with previous version
 - [ ] QHub deploy
 - [ ] Log into keycloak as root user and add user
 - [ ] Add user from command line
@@ -100,6 +103,7 @@ assignees: ''
 
 ### Validate the following services:
 - [ ] QHub init
+- [ ] Validate Backward compatibility with previous version
 - [ ] QHub deploy
 - [ ] Log into keycloak as root user and add user
 - [ ] Add user from command line
@@ -125,6 +129,7 @@ assignees: ''
 
 ### Validate the following services:
 - [ ] QHub init
+- [ ] Validate Backward compatibility with previous version
 - [ ] QHub deploy
 - [ ] Log into keycloak as root user and add user
 - [ ] Add user from command line
