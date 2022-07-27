@@ -392,7 +392,9 @@ def set_docker_image_tag() -> str:
     try:
         qhub_image_tag = get_latest_repo_tag(DOCKER_IMAGE_OWNER, DOCKER_IMAGE_REPO)
     except ConnectionError:
-        print(f"Unable to connect to the GitHub API, falling back to the default value: {DEFAULT_QHUB_IMAGE_TAG}.")
+        print(
+            f"Unable to connect to the GitHub API, falling back to the default value: {DEFAULT_QHUB_IMAGE_TAG}."
+        )
         qhub_image_tag = DEFAULT_QHUB_IMAGE_TAG
 
     if QHUB_IMAGE_TAG:
@@ -409,7 +411,7 @@ def set_qhub_dask_version() -> str:
         resp.raise_for_status()
     except ConnectionError:
         print(
-            "Unable to connect to the Conda-Forge channel data, falling back to the default value."
+            f"Unable to connect to the Conda-Forge channel data, falling back to the default value: {DEFAULT_QHUB_DASK_VERSION}"
         )
         qhub_dask_version = DEFAULT_QHUB_DASK_VERSION
 
