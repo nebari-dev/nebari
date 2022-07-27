@@ -392,7 +392,7 @@ def set_docker_image_tag() -> str:
     try:
         qhub_image_tag = get_latest_repo_tag(DOCKER_IMAGE_OWNER, DOCKER_IMAGE_REPO)
     except ConnectionError:
-        print("Unable to connect to the GitHub API, falling back to the default value.")
+        print(f"Unable to connect to the GitHub API, falling back to the default value: {DEFAULT_QHUB_IMAGE_TAG}.")
         qhub_image_tag = DEFAULT_QHUB_IMAGE_TAG
 
     if QHUB_IMAGE_TAG:
