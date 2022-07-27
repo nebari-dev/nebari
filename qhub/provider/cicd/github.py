@@ -18,7 +18,7 @@ def github_request(url, method="GET", json=None, authenticate=True):
         for name in ("GITHUB_USERNAME", "GITHUB_TOKEN"):
             if os.environ.get(name) is None:
                 raise ValueError(
-                    f"environment variable={name} is required for github automation"
+                    f"Environment variable={name} is required for GitHub automation"
                 )
         auth = requests.auth.HTTPBasicAuth(
             os.environ["GITHUB_USERNAME"], os.environ["GITHUB_TOKEN"]
