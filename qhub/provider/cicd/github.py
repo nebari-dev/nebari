@@ -7,6 +7,7 @@ import requests
 from nacl import encoding, public
 from pydantic import BaseModel, Field
 
+from qhub.constants import LATEST_SUPPORTED_PYTHON_VERSION
 from qhub.provider.cicd.common import pip_install_qhub
 
 GITHUB_BASE_URL = "https://api.github.com/"
@@ -219,8 +220,6 @@ class QhubLinter(GHA):
 
 ### GITHUB ACTION WORKFLOWS ###
 
-PYTHON_VERSION = 3.8
-
 
 def checkout_image_step():
     return GHA_job_step(
@@ -238,7 +237,11 @@ def setup_python_step():
     return GHA_job_step(
         name="Set up Python",
         uses="actions/setup-python@v2",
-        with_={"python-version": GHA_job_steps_extras(__root__=PYTHON_VERSION)},
+        with_={
+            "python-version": GHA_job_steps_extras(
+                __root__=LATEST_SUPPORTED_PYTHON_VERSION
+            )
+        },
     )
 
 

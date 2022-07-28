@@ -27,7 +27,7 @@ on:
 jobs:
   test-kubernetes:
     name: "Kubernetes Tests"
-    runs-on: self-hosted
+    runs-on: [self-hosted, cirun-runner]
     defaults:
       run:
         shell: bash -l {0}
