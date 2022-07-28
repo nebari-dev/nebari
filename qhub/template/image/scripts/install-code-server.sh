@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -xe
 DEFAULT_PREFIX="${1}"; shift # path to environment yaml or lock file
+CODE_SERVER_VERSION=4.5.0
 
 mkdir -p ${DEFAULT_PREFIX}/code-server
 cd ${DEFAULT_PREFIX}/code-server
@@ -15,7 +16,7 @@ if [[ ! $(sha256sum install.sh) == "${expected_sum}  install.sh" ]];then
 fi
 
 mkdir /opt/tmpdir
-sh ./install.sh --method standalone --prefix /opt/tmpdir
+sh ./install.sh --method standalone --prefix /opt/tmpdir --version ${CODE_SERVER_VERSION}
 
-mv /opt/tmpdir/lib/code-server-4.5.0/* ${DEFAULT_PREFIX}/code-server
+mv /opt/tmpdir/lib/code-server-${CODE_SERVER_VERSION}/* ${DEFAULT_PREFIX}/code-server
 rm -rf /opt/tmpdir
