@@ -70,21 +70,24 @@ def get_repo_tags(owner, repo):
     return github_request(f"repos/{owner}/{repo}/tags", authenticate=False).json()
 
 
-def get_latest_repo_tag(owner: str, repo: str, clean_tag: bool = True) -> str:
+def get_latest_repo_tag(owner: str, repo: str, only_clean_tags: bool = True) -> str:
     """
     Get the latest available tag on GitHub for owner/repo.
 
-    NOTE: Set `clean_tag=False` to include dev and pre-releases.
+    NOTE: Set `only_clean_tags=False` to include dev / pre-release (if latest).
     """
     tags = get_repo_tags(owner, repo)
-    if clean_tag:
+    tag_info = None
+    if only_clean_tags:
         for t in tags:
             # ignore dev releases
             rel = list(filter(None, re.sub(r"[A-Za-z]", " ", t["name"]).split(" ")))
             if len(rel) == 1:
-                return t
+                tag_info = t
     else:
-        return tags[0].get("name")
+        tag_info = tags[0]
+
+    return tag_info.get("name")
 
 
 def create_repository(owner, repo, description, homepage, private=True):
