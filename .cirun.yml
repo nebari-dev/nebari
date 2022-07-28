@@ -10,7 +10,7 @@ runners:
     machine_image: ami-0ff297f01f579288c
     # Region: Oregon
     region: us-west-2
-    # Path of the relevant workflow file
-    workflow: .github/workflows/kubernetes_test.yaml
     # Use Spot Instances for cost savings
     preemptible: false
+    labels:
+      - cirun-runner
