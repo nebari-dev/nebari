@@ -117,6 +117,14 @@ class Prefect(Base):
     overrides: typing.Optional[typing.Dict]
 
 
+# =========== Conda-Store ==============
+
+
+class CondaStore(Base):
+    extra_settings: typing.Optional[typing.Dict[str, typing.Any]] = {}
+    extra_config: typing.Optional[str] = ""
+
+
 # ============= Terraform ===============
 
 
@@ -502,6 +510,7 @@ class Main(Base):
     theme: Theme
     profiles: Profiles
     environments: typing.Dict[str, CondaEnvironment]
+    conda_store: typing.Optional[CondaStore]
     argo_workflows: typing.Optional[ArgoWorkflows]
     kbatch: typing.Optional[KBatch]
     monitoring: typing.Optional[Monitoring]

@@ -25,3 +25,13 @@ module "postgresql" {
 
   database = "conda-store"
 }
+
+
+module "redis" {
+  source = "../redis"
+
+  name      = "qhub-conda-store"
+  namespace = var.namespace
+
+  node-group = var.node-group
+}

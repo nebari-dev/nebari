@@ -1,3 +1,28 @@
+resource "kubernetes_secret" "conda-store-secret" {
+  metadata {
+    name      = "conda-store-secret"
+    namespace = var.namespace
+  }
+
+  data = {
+    "config.json" = jsonencode({
+      external-url      = var.external-url
+      minio-username    = module.minio.root_username
+      minio-password    = module.minio.root_password
+      minio-service     = module.minio.service
+      redis-password    = module.redis.root_password
+      redis-service     = module.redis.service
+      postgres-username = module.postgresql.root_username
+      postgres-password = module.postgresql.root_password
+      postgres-service  = module.postgresql.service
+      openid-config     = module.conda-store-openid-client.config
+      extra-settings    = var.extra-settings
+      extra-config      = var.extra-config
+    })
+  }
+}
+
+
 resource "kubernetes_config_map" "conda-store-config" {
   metadata {
     name      = "conda-store-config"
@@ -5,17 +30,7 @@ resource "kubernetes_config_map" "conda-store-config" {
   }
 
   data = {
-    "conda_store_config.py" = templatefile(
-      "${path.module}/config/conda_store_config.py", {
-        external-url      = var.external-url
-        minio-username    = module.minio.root_username
-        minio-password    = module.minio.root_password
-        minio-service     = module.minio.service
-        postgres-username = module.postgresql.root_username
-        postgres-password = module.postgresql.root_password
-        postgres-service  = module.postgresql.service
-        openid-config     = module.conda-store-openid-client.config
-    })
+    "conda_store_config.py" = file("${path.module}/config/conda_store_config.py")
   }
 }
 
@@ -83,6 +98,7 @@ resource "kubernetes_deployment" "server" {
         annotations = {
           # This lets us autorestart when the config changes!
           "checksum/config-map" = sha256(jsonencode(kubernetes_config_map.conda-store-config.data))
+          "checksum/secret"     = sha256(jsonencode(kubernetes_secret.conda-store-secret.data))
         }
       }
 
@@ -117,12 +133,24 @@ resource "kubernetes_deployment" "server" {
             name       = "config"
             mount_path = "/etc/conda-store"
           }
+
+          volume_mount {
+            name       = "secret"
+            mount_path = "/var/lib/conda-store/"
+          }
         }
 
         volume {
           name = "config"
           config_map {
             name = kubernetes_config_map.conda-store-config.metadata.0.name
+          }
+        }
+
+        volume {
+          name = "secret"
+          secret {
+            secret_name = kubernetes_secret.conda-store-secret.metadata.0.name
           }
         }
       }

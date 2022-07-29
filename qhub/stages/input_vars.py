@@ -263,6 +263,12 @@ def stage_07_kubernetes_services(stage_outputs, config):
         # conda-store
         "conda-store-environments": config["environments"],
         "conda-store-filesystem-storage": config["storage"]["conda_store"],
+        "conda-store-extra-settings": config.get("conda_store", {}).get(
+            "extra_settings", {}
+        ),
+        "conda-store-extra-config": config.get("conda_store", {}).get(
+            "extra_config", ""
+        ),
         # jupyterhub
         "cdsdashboards": config["cdsdashboards"],
         "jupyterhub-theme": jupyterhub_theme,

@@ -51,3 +51,15 @@ variable "realm_id" {
   description = "Keycloak realm to use for deploying openid client"
   type        = string
 }
+
+variable "extra-settings" {
+  description = "Additional traitlets settings to apply before extra-config traitlets code is run"
+  type        = map(any)
+  default     = {}
+}
+
+variable "extra-config" {
+  description = "Additional traitlets configuration code to be ran"
+  type        = string
+  default     = ""
+}

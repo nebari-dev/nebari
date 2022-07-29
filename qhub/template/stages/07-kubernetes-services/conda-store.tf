@@ -15,6 +15,18 @@ variable "conda-store-object-storage" {
   default     = null
 }
 
+variable "conda-store-extra-settings" {
+  description = "Conda-Store extra traitlet settings to apply in `c.Class.key = value` form"
+  type        = map(any)
+  default     = {}
+}
+
+variable "conda-store-extra-config" {
+  description = "Additional traitlets configuration code to be ran"
+  type        = string
+  default     = ""
+}
+
 variable "conda-store-image" {
   description = "Conda-store image"
   type = object({
@@ -23,7 +35,7 @@ variable "conda-store-image" {
   })
   default = {
     name = "quansight/conda-store-server"
-    tag  = "v0.3.15"
+    tag  = "v0.4.7"
   }
 }
 
@@ -45,6 +57,8 @@ module "kubernetes-conda-store-server" {
     for filename, environment in var.conda-store-environments :
     filename => yamlencode(environment)
   }
+  extra-settings = var.conda-store-extra-settings
+  extra-config   = var.conda-store-extra-config
 }
 
 module "conda-store-nfs-mount" {

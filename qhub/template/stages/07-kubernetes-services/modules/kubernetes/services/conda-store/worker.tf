@@ -81,6 +81,7 @@ resource "kubernetes_deployment" "worker" {
         annotations = {
           # This lets us autorestart when the conifg changes!
           "checksum/config-map" = sha256(jsonencode(kubernetes_config_map.conda-store-config.data))
+          "checksum/secret"     = sha256(jsonencode(kubernetes_secret.conda-store-secret.data))
         }
       }
 
@@ -154,12 +155,24 @@ resource "kubernetes_deployment" "worker" {
             mount_path = "/exports"
             name       = "storage"
           }
+
+          volume_mount {
+            name       = "secret"
+            mount_path = "/var/lib/conda-store/"
+          }
         }
 
         volume {
           name = "config"
           config_map {
             name = kubernetes_config_map.conda-store-config.metadata.0.name
+          }
+        }
+
+        volume {
+          name = "secret"
+          secret {
+            secret_name = kubernetes_secret.conda-store-secret.metadata.0.name
           }
         }
 
