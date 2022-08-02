@@ -32,9 +32,9 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: 'QHUB_GH_BRANCH set for PR'
+      - name: "Set QHUB_IMAGE_TAG=main"
         run: |
-          echo "QHUB_GH_BRANCH=${GITHUB_SHA}" >> "$GITHUB_ENV"
+          echo "QHUB_IMAGE_TAG=main" >> "$GITHUB_ENV"
           echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           echo "GITHUB_REF: ${GITHUB_REF}"
@@ -83,12 +83,6 @@ jobs:
         run: |
           docker info
           docker ps
-      - name: Build docker images
-        run: |
-          cd qhub/template/image
-          docker buildx bake
-        env:
-          TAG: ${{ github.sha }}
       - name: List docker images in minikube
         run: |
           docker images

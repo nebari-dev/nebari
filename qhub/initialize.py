@@ -14,14 +14,17 @@ from qhub.provider.oauth.auth0 import create_client
 from qhub.utils import (
     check_cloud_credentials,
     namestr_regex,
-    qhub_dask_version,
-    qhub_image_tag,
+    set_docker_image_tag,
     set_kubernetes_version,
+    set_qhub_dask_version,
 )
 
 from .version import __version__
 
 logger = logging.getLogger(__name__)
+
+qhub_image_tag = set_docker_image_tag()
+qhub_dask_version = set_qhub_dask_version()
 
 
 BASE_CONFIGURATION = {
@@ -35,9 +38,9 @@ BASE_CONFIGURATION = {
         "authentication": None,
     },
     "default_images": {
-        "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
-        "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
-        "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
+        "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{qhub_image_tag}",
+        "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{qhub_image_tag}",
+        "dask_worker": f"quay.io/nebari/nebari-dask-worker:{qhub_image_tag}",
     },
     "storage": {"conda_store": "200Gi", "shared_filesystem": "200Gi"},
     "theme": {
