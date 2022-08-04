@@ -8,10 +8,10 @@ resource "helm_release" "minio" {
   name      = "${var.name}-minio"
   namespace = var.namespace
 
-  repository = "https://charts.bitnami.com/bitnami"
+  repository = "https://raw.githubusercontent.com/bitnami/charts/defb094c658024e4aa8245622dab202874880cbc/bitnami"
   chart      = "minio"
   # last release that was Apache-2.0
-  version    = "6.7.4"
+  version = "6.7.4"
 
   set {
     name  = "accessKey.password"
@@ -26,6 +26,11 @@ resource "helm_release" "minio" {
   set {
     name  = "defaultBuckets"
     value = join(" ", var.buckets)
+  }
+
+  set {
+    name  = "persistence.size"
+    value = var.storage
   }
 
   values = concat([

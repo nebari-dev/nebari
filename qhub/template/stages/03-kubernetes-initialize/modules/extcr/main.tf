@@ -168,7 +168,7 @@ resource "kubernetes_manifest" "job_extcr_cred_updater" {
 
 resource "kubernetes_manifest" "cronjob_extcr_cred_updater" {
   manifest = {
-    "apiVersion" = "batch/v1beta1"
+    "apiVersion" = "batch/v1"
     "kind"       = "CronJob"
     "metadata" = {
       "name"      = "extcr-cred-updater"

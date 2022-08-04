@@ -1,5 +1,6 @@
-import pathlib
 import logging
+import pathlib
+
 from qhub.keycloak import do_keycloak
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,7 @@
 import pathlib
 
-from qhub.schema import verify
 from qhub.provider.cicd.linter import comment_on_pr
+from qhub.schema import verify
 from qhub.utils import load_yaml
 
 

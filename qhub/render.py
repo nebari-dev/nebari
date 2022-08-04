@@ -1,18 +1,17 @@
-import sys
-import pathlib
 import functools
-import os
-import shutil
-from typing import List, Dict
 import hashlib
+import os
+import pathlib
+import shutil
+import sys
+from typing import Dict, List
 
 from ruamel.yaml import YAML
 
-from qhub.stages import tf_objects
 from qhub.deprecate import DEPRECATED_FILE_PATHS
-
-from qhub.provider.cicd.github import gen_qhub_ops, gen_qhub_linter
+from qhub.provider.cicd.github import gen_qhub_linter, gen_qhub_ops
 from qhub.provider.cicd.gitlab import gen_gitlab_ci
+from qhub.stages import tf_objects
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
@@ -58,7 +57,6 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
     contents = render_contents(config)
 
     directories = [
-        "image",
         f"stages/02-infrastructure/{config['provider']}",
         "stages/03-kubernetes-initialize",
         "stages/04-kubernetes-ingress",
@@ -163,7 +161,30 @@ def render_contents(config: Dict):
                 }
             )
 
+    contents.update(gen_gitignore(config))
+
     return contents
+
+
+def gen_gitignore(config):
+    """
+    Generate `.gitignore` file.
+    Add files as needed.
+    """
+
+    from inspect import cleandoc
+
+    filestoignore = """
+        # ignore terraform state
+        .terraform
+        terraform.tfstate
+        terraform.tfstate.backup
+        .terraform.tfstate.lock.info
+
+        # python
+        __pycache__
+    """
+    return {".gitignore": cleandoc(filestoignore)}
 
 
 def gen_cicd(config):
@@ -208,13 +229,13 @@ def inspect_files(
 
     Args:
         source_dirs (str): The source dir used as base for comparssion
-        output_dirs (str): The destionation dir wich will be matched with
+        output_dirs (str): The destination dir which will be matched with
         source_base_dir (str): Relative base path to source directory
         output_base_dir (str): Relative base path to output directory
         ignore_filenames (list[str]): Filenames to ignore while comparing for changes
         ignore_directories (list[str]): Directories to ignore while comparing for changes
         deleted_paths (list[str]): Paths that if exist in output directory should be deleted
-        contents (dict): filename to content mapping for dynmaically generated files
+        contents (dict): filename to content mapping for dynamically generated files
     """
     ignore_filenames = ignore_filenames or []
     ignore_directories = ignore_directories or []

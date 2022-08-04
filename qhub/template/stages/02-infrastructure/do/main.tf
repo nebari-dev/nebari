@@ -7,12 +7,12 @@ module "kubernetes" {
   kubernetes_version = var.kubernetes_version
 
   node_groups = [
-    for name, config in var.node_groups: {
+    for name, config in var.node_groups : {
       name       = name
       auto_scale = true
-      size      = config.instance
-      min_nodes = config.min_nodes
-      max_nodes = config.max_nodes
+      size       = config.instance
+      min_nodes  = config.min_nodes
+      max_nodes  = config.max_nodes
     }
   ]
 

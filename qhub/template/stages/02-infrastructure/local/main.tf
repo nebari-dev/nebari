@@ -108,4 +108,16 @@ locals {
   metallb_ip_max = cidrhost([
     for network in data.docker_network.kind.ipam_config : network if network.gateway != ""
   ][0].subnet, 406)
+
+output "kubernetes_credentials" {
+  description = "Parameters needed to connect to kubernetes cluster locally"
+  value = {
+    config_path    = pathexpand("~/.kube/config")
+    config_context = var.kube_context
+  }
+}
+
+output "kubeconfig_filename" {
+  description = "filename for qhub kubeconfig"
+  value       = pathexpand("~/.kube/config")
 }

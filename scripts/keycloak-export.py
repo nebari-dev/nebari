@@ -1,8 +1,8 @@
-import logging
-import sys
-import pathlib
 import argparse
 import json
+import logging
+import pathlib
+import sys
 
 from qhub.keycloak import get_keycloak_admin_from_config
 

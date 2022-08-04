@@ -1,8 +1,11 @@
-import os
 import functools
 import logging
+import os
+
 from azure.identity import EnvironmentCredential
 from azure.mgmt.containerservice import ContainerServiceClient
+
+from qhub.provider.cloud.commons import filter_by_highest_supported_k8s_version
 
 logger = logging.getLogger("azure")
 logger.setLevel(logging.ERROR)
@@ -40,5 +43,4 @@ def kubernetes_versions(region="Central US"):
             supported_kubernetes_versions.append(key["orchestrator_version"])
 
     supported_kubernetes_versions = sorted(supported_kubernetes_versions)
-
-    return supported_kubernetes_versions
+    return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)

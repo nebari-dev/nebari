@@ -1,6 +1,6 @@
 from qhub.initialize import render_config
 from qhub.schema import ProviderEnum
-from qhub.utils import yaml
+from qhub.utils import QHUB_DASK_VERSION, QHUB_IMAGE_TAG, yaml
 
 
 def create_init_subcommand(subparser):
@@ -65,6 +65,16 @@ def create_init_subcommand(subparser):
 
 
 def handle_init(args):
+
+    if QHUB_IMAGE_TAG:
+        print(
+            f"Modifying the image tags for the `default_images`, setting tags equal to: {QHUB_IMAGE_TAG}"
+        )
+
+    if QHUB_DASK_VERSION:
+        print(
+            f"Modifying the version of the `qhub_dask` package, setting version equal to: {QHUB_DASK_VERSION}"
+        )
 
     config = render_config(
         project_name=args.project,

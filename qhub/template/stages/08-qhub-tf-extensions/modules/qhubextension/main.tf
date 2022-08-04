@@ -2,7 +2,7 @@ terraform {
   required_providers {
     keycloak = {
       source  = "mrparkers/keycloak"
-      version = "3.3.0"
+      version = "3.7.0"
     }
   }
 }
@@ -97,7 +97,7 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
 }
 
 resource "random_password" "qhub-jwt-secret" {
-  count = var.jwt ? 1 : 0
+  count   = var.jwt ? 1 : 0
   length  = 32
   special = false
 }

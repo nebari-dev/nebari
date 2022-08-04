@@ -1,9 +1,9 @@
-import logging
-import time
-import pathlib
 import argparse
+import logging
+import pathlib
+import time
 
-from qhub.utils import timer, check_cloud_credentials, load_yaml
+from qhub.utils import check_cloud_credentials, load_yaml, timer
 
 logging.basicConfig(level=logging.INFO)
 

@@ -1,17 +1,14 @@
 # GPUs on QHub
 
-Having access to GPUs is of prime importance for speeding up many
-computations by several orders of magnitude. QHub provides a way to
-achieve that, we will go through achieving that for each Cloud
-provider.
+Having access to GPUs is of prime importance for speeding up many computations by several orders of magnitude. QHub provides a way to achieve that, we will go through achieving
+that for each Cloud provider.
 
 ## Clouds
 
 ### Google Cloud Platform
 
-By default the quota to spin up GPUs on GCP is 0. Make sure you have
-requested GCP Support to increase quota of allowed GPUs for your
-billing account to be the number of GPUs you need access to.
+By default the quota to spin up GPUs on GCP is 0. Make sure you have requested GCP Support to increase quota of allowed GPUs for your billing account to be the number of GPUs you
+need access to.
 
 See [GCP Pre-requisites here](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#requirements)
 
@@ -19,11 +16,8 @@ Here are the changes needed in your `qhub-config.yml` file to get GPUs working w
 
 #### 1. Add GPU node group
 
-Add a node group for GPU instance in the `node_groups` section of
-`google_cloud_platform` section, and under the `guest_accelerators`
-section add the name of the GPU. A comprehensive list of GPU types can
-be found in at the Official GCP docs here:
-https://cloud.google.com/compute/docs/gpus
+Add a node group for GPU instance in the `node_groups` section of `google_cloud_platform` section, and under the `guest_accelerators` section add the name of the GPU. A
+comprehensive list of GPU types can be found in at the Official GCP docs here: https://cloud.google.com/compute/docs/gpus
 
 An example of getting GPUs on GCP:
 
@@ -49,16 +43,14 @@ google_cloud_platform:
 
 Notes:
 
-- One of the restrictions regarding GPUs on GCP is they can only be used
-with general-purpose *[N1 machine types](https://cloud.google.com/compute/docs/machine-types#n1_machine_types)*,
-except A100 GPUs, which are only supported on *[a2 machine types](https://cloud.google.com/blog/products/compute/announcing-google-cloud-a2-vm-family-based-on-nvidia-a100-gpu)*
+- One of the restrictions regarding GPUs on GCP is they can only be used with general-purpose
+  *[N1 machine types](https://cloud.google.com/compute/docs/machine-types#n1_machine_types)*, except A100 GPUs, which are only supported on
+  *[a2 machine types](https://cloud.google.com/blog/products/compute/announcing-google-cloud-a2-vm-family-based-on-nvidia-a100-gpu)*
 
-- If you are not using the gcp provider in QHub but are using gcp (let's say deploying
-  on an existing gcp cluster). You will need to manually install NVIDIA drivers to the
-  cluster - see [documentation here](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#installing_drivers).
+- If you are not using the gcp provider in QHub but are using gcp (let's say deploying on an existing gcp cluster). You will need to manually install NVIDIA drivers to the cluster
+  \- see [documentation here](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#installing_drivers).
 
 - See [general limitations of GPUs on Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus#limitations).
-
 
 #### 2. Add GPU instance in the JupyterLab profiles
 
@@ -82,9 +74,8 @@ profiles:
 
 ### Amazon Web Services
 
-Here are the changes needed in your `qhub-config.yml` file to get GPUs
-working with AWS. Unlike GCP gpus are specified in the instance type
-this is due to how AWS exposes gpus to the user.
+Here are the changes needed in your `qhub-config.yml` file to get GPUs working with AWS. Unlike GCP gpus are specified in the instance type this is due to how AWS exposes gpus to
+the user.
 
 #### 1. Add GPU node group
 
@@ -121,9 +112,8 @@ profiles:
 
 Notes:
 
-- If you are not using the AWS provider in QHub but are using the AWS cloud (let's say deploying
-  on an existing AWS cluster), you will need to manually install NVIDIA drivers to the
-  cluster. See [documentation here](https://github.com/NVIDIA/k8s-device-plugin).
+- If you are not using the AWS provider in QHub but are using the AWS cloud (let's say deploying on an existing AWS cluster), you will need to manually install NVIDIA drivers to
+  the cluster. See [documentation here](https://github.com/NVIDIA/k8s-device-plugin).
 
 ### DigitalOcean
 
@@ -131,13 +121,11 @@ DigitalOcean does not support GPUs at the time of writing this.
 
 ### Azure
 
-Azure does support GPUs in Kubernetes, but QHub doesn't currently have
-official support for this.
+Azure does support GPUs in Kubernetes, but QHub doesn't currently have official support for this.
 
 ## Create conda environment to take advantage of GPUs
 
-First you need to consult the driver version of nvidia being
-used. This can easily be checked via the command `nvidia-smi`.
+First you need to consult the driver version of nvidia being used. This can easily be checked via the command `nvidia-smi`.
 
 ```shell
 $ nvidia-smi
@@ -161,15 +149,11 @@ Thu May 20 18:05:14 2021
 +-----------------------------------------------------------------------------+
 ```
 
-The important section is `CUDA Version`. In general you should install
-a version of cudatoolkit that's less than or equal to the cuda
-version (but not too old).  If you install `cudatoolkit-dev` and
-`cudatoolkit` make sure that they are the same version exactly
-including minor version. Also in the near future cuda should have
-better [ABI
-compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/index.html).
+The important section is `CUDA Version`. In general you should install a version of cudatoolkit that's less than or equal to the cuda version (but not too old). If you install
+`cudatoolkit-dev` and `cudatoolkit` make sure that they are the same version exactly including minor version. Also in the near future cuda should have better
+[ABI compatibility](https://docs.nvidia.com/deploy/cuda-compatibility/index.html).
 
-Bellow is an example gpu environment:
+Below is an example gpu environment:
 
 ```yaml
 name: gpu-environment
@@ -183,6 +167,5 @@ dependencies:
  - numba
 ```
 
-We are working hard to make the GPU experience on Qhub as streamlined
-as possible. There are many small gotchas when working with GPUs and
-getting all the drivers installed properly.
+We are working hard to make the GPU experience on Qhub as streamlined as possible. There are many small gotchas when working with GPUs and getting all the drivers installed
+properly.

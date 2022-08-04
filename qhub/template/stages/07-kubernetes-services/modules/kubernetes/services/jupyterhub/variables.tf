@@ -88,7 +88,7 @@ variable "services" {
 
 variable "theme" {
   description = "JupyterHub theme"
-  type        = map
+  type        = map(any)
   default     = {}
 }
 
@@ -99,28 +99,28 @@ variable "profiles" {
 
 variable "cdsdashboards" {
   description = "Enable CDS Dashboards"
-  type        = object({
-    enabled = bool
-    cds_hide_user_named_servers = bool
+  type = object({
+    enabled                         = bool
+    cds_hide_user_named_servers     = bool
     cds_hide_user_dashboard_servers = bool
   })
-  default     = {
-    enabled = true
-    cds_hide_user_named_servers = true
+  default = {
+    enabled                         = true
+    cds_hide_user_named_servers     = true
     cds_hide_user_dashboard_servers = false
   }
 }
 
 variable "conda-store-environments" {
   description = "conda environments from conda-store in filesystem namespace"
-  type        = map(any)
+  type        = any
   default     = {}
 }
 
 variable "jupyterhub-logout-redirect-url" {
   description = "Next redirect destination following a Keycloak logout"
-  type = string
-  default = ""
+  type        = string
+  default     = ""
 }
 
 variable "jupyterhub-hub-extraEnv" {

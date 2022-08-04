@@ -2,6 +2,7 @@ resource "keycloak_authentication_flow" "flow" {
   realm_id    = keycloak_realm.main.id
   alias       = "detect-existing"
   provider_id = "basic-flow"
+  description = ""
 }
 
 resource "keycloak_authentication_execution" "idp-detect-existing-broker-user" {

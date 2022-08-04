@@ -1,44 +1,47 @@
-from typing import Dict, List
-import pathlib
-import subprocess
-import signal
-import sys
-import time
-import threading
-import os
-import re
 import contextlib
 import functools
+import os
+import pathlib
+import re
+import signal
+import subprocess
+import sys
+import threading
+import time
+from typing import Dict, List
+
+import requests
+from requests.exceptions import ConnectionError
 from ruamel.yaml import YAML
 
+from qhub.constants import DEFAULT_QHUB_DASK_VERSION, DEFAULT_QHUB_IMAGE_TAG
+from qhub.provider.cicd.github import get_latest_repo_tag
 from qhub.provider.cloud import (
-    digital_ocean,
-    azure_cloud,
     amazon_web_services,
+    azure_cloud,
+    digital_ocean,
     google_cloud,
 )
 
-from .version import __version__
-
+# environment variable overrides
 QHUB_K8S_VERSION = os.getenv("QHUB_K8S_VERSION", None)
+QHUB_GH_BRANCH = os.getenv("QHUB_GH_BRANCH", None)
+QHUB_IMAGE_TAG = os.getenv("QHUB_IMAGE_TAG", None)
+QHUB_DASK_VERSION = os.getenv("QHUB_DASK_VERSION", None)
 
 DO_ENV_DOCS = (
-    "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#digital-ocean"
+    "https://docs.qhub.dev/en/stable/source/installation/setup.html#digital-ocean"
 )
-AWS_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#amazon-web-services-aws"
-GCP_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#google-cloud-platform"
-AZURE_ENV_DOCS = "https://docs.qhub.dev/en/latest/source/02_get_started/02_setup.html#microsoft-azure"
+AWS_ENV_DOCS = "https://docs.qhub.dev/en/stable/source/installation/setup.html#amazon-web-services-aws"
+GCP_ENV_DOCS = "https://docs.qhub.dev/en/stable/source/installation/setup.html#google-cloud-platform"
+AZURE_ENV_DOCS = (
+    "https://docs.qhub.dev/en/stable/source/installation/setup.html#microsoft-azure"
+)
 
-qhub_image_tag = f"v{__version__}"
-pip_install_qhub = f"pip install qhub=={__version__}"
+CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
 
-QHUB_GH_BRANCH = os.environ.get("QHUB_GH_BRANCH", "")
-if QHUB_GH_BRANCH:
-    qhub_image_tag = QHUB_GH_BRANCH
-    pip_install_qhub = (
-        f"pip install https://github.com/Quansight/qhub/archive/{QHUB_GH_BRANCH}.zip"
-    )
-
+DOCKER_IMAGE_OWNER = "nebari-dev"
+DOCKER_IMAGE_REPO = "nebari-docker-images"
 
 # Regex for suitable project names
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
@@ -384,13 +387,35 @@ def deep_merge(*args):
         return d1
 
 
-def pip_install_qhub(qhub_version: str) -> str:
-    qhub_gh_branch = os.environ.get("QHUB_GH_BRANCH")
-    pip_install = f"pip install qhub=={qhub_version}"
-    # dev branches
-    if len(qhub_version.split(".")) > 3 and qhub_gh_branch:
-        pip_install = (
-            f"pip install git+https://github.com/Quansight/qhub.git@{qhub_gh_branch}"
+def set_docker_image_tag() -> str:
+    """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
+    try:
+        qhub_image_tag = get_latest_repo_tag(DOCKER_IMAGE_OWNER, DOCKER_IMAGE_REPO)
+    except ConnectionError:
+        print(
+            f"Unable to connect to the GitHub API, falling back to the default value: {DEFAULT_QHUB_IMAGE_TAG}."
         )
+        qhub_image_tag = DEFAULT_QHUB_IMAGE_TAG
 
-    return pip_install
+    if QHUB_IMAGE_TAG:
+        qhub_image_tag = QHUB_IMAGE_TAG
+
+    return qhub_image_tag
+
+
+def set_qhub_dask_version() -> str:
+    """Set version of `qhub-dask` meta package."""
+    try:
+        resp = requests.get(CONDA_FORGE_CHANNEL_DATA_URL)
+        qhub_dask_version = resp.json()["packages"]["qhub-dask"]["version"]
+        resp.raise_for_status()
+    except ConnectionError:
+        print(
+            f"Unable to connect to the Conda-Forge channel data, falling back to the default value: {DEFAULT_QHUB_DASK_VERSION}"
+        )
+        qhub_dask_version = DEFAULT_QHUB_DASK_VERSION
+
+    if QHUB_DASK_VERSION:
+        qhub_dask_version = QHUB_DASK_VERSION
+
+    return qhub_dask_version

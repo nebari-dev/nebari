@@ -1,6 +1,6 @@
 # QHub docs
 
-We use `nox` to build the to docs.
+We use `nox` to build the docs.
 
 ```
 pip install nox

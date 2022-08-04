@@ -17,7 +17,7 @@ resource "keycloak_openid_client" "keycloak_ext_client" {
 }
 
 resource "random_password" "qhub-ext-client" {
-  count = var.oauth2client ? 1 : 0
+  count   = var.oauth2client ? 1 : 0
   length  = 32
   special = false
 }

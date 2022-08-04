@@ -1,26 +1,30 @@
-import os
-import re
-import string
-import random
-import secrets
-import tempfile
 import logging
+import os
+import random
+import re
+import secrets
+import string
+import tempfile
 
 import requests
 
-from qhub.provider.oauth.auth0 import create_client
-from qhub.provider.cicd import github
 from qhub.provider import git
-
+from qhub.provider.cicd import github
+from qhub.provider.oauth.auth0 import create_client
 from qhub.utils import (
-    namestr_regex,
-    qhub_image_tag,
     check_cloud_credentials,
+    namestr_regex,
+    set_docker_image_tag,
     set_kubernetes_version,
+    set_qhub_dask_version,
 )
+
 from .version import __version__
 
 logger = logging.getLogger(__name__)
+
+qhub_image_tag = set_docker_image_tag()
+qhub_dask_version = set_qhub_dask_version()
 
 
 BASE_CONFIGURATION = {
@@ -34,12 +38,11 @@ BASE_CONFIGURATION = {
         "authentication": None,
     },
     "default_images": {
-        "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
-        "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
-        "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
-        "dask_gateway": f"quansight/qhub-dask-gateway:{qhub_image_tag}",
+        "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{qhub_image_tag}",
+        "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{qhub_image_tag}",
+        "dask_worker": f"quay.io/nebari/nebari-dask-worker:{qhub_image_tag}",
     },
-    "storage": {"conda_store": "60Gi", "shared_filesystem": "100Gi"},
+    "storage": {"conda_store": "200Gi", "shared_filesystem": "200Gi"},
     "theme": {
         "jupyterhub": {
             "hub_title": None,
@@ -52,10 +55,17 @@ BASE_CONFIGURATION = {
             "text_color": "#111111",
             "h1_color": "#652e8e",
             "h2_color": "#652e8e",
+            "version": f"v{__version__}",
         }
     },
     "helm_extensions": [],
     "monitoring": {
+        "enabled": True,
+    },
+    "argo_workflows": {
+        "enabled": True,
+    },
+    "kbatch": {
         "enabled": True,
     },
     "cdsdashboards": {
@@ -113,9 +123,9 @@ DIGITAL_OCEAN = {
     "region": "nyc3",
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
-        "general": {"instance": "g-4vcpu-16gb", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
-        "worker": {"instance": "g-2vcpu-8gb", "min_nodes": 1, "max_nodes": 5},
+        "general": {"instance": "g-8vcpu-32gb", "min_nodes": 1, "max_nodes": 1},
+        "user": {"instance": "g-4vcpu-16gb", "min_nodes": 1, "max_nodes": 5},
+        "worker": {"instance": "g-4vcpu-16gb", "min_nodes": 1, "max_nodes": 5},
     },
 }
 # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
@@ -125,9 +135,9 @@ GOOGLE_PLATFORM = {
     "region": "us-central1",
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
-        "general": {"instance": "n1-standard-4", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
-        "worker": {"instance": "n1-standard-2", "min_nodes": 0, "max_nodes": 5},
+        "general": {"instance": "n1-standard-8", "min_nodes": 1, "max_nodes": 1},
+        "user": {"instance": "n1-standard-4", "min_nodes": 0, "max_nodes": 5},
+        "worker": {"instance": "n1-standard-4", "min_nodes": 0, "max_nodes": 5},
     },
 }
 
@@ -136,13 +146,13 @@ AZURE = {
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {
-            "instance": "Standard_D4_v3",
+            "instance": "Standard_D8_v3",
             "min_nodes": 1,
             "max_nodes": 1,
         },
-        "user": {"instance": "Standard_D2_v2", "min_nodes": 0, "max_nodes": 5},
+        "user": {"instance": "Standard_D4_v3", "min_nodes": 0, "max_nodes": 5},
         "worker": {
-            "instance": "Standard_D2_v2",
+            "instance": "Standard_D4_v3",
             "min_nodes": 0,
             "max_nodes": 5,
         },
@@ -156,9 +166,9 @@ AMAZON_WEB_SERVICES = {
     "region": "us-west-2",
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
-        "general": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
-        "worker": {"instance": "m5.large", "min_nodes": 1, "max_nodes": 5},
+        "general": {"instance": "m5.2xlarge", "min_nodes": 1, "max_nodes": 1},
+        "user": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 5},
+        "worker": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 5},
     },
 }
 
@@ -166,18 +176,8 @@ DEFAULT_PROFILES = {
     "jupyterlab": [
         {
             "display_name": "Small Instance",
-            "description": "Stable environment with 1 cpu / 4 GB ram",
-            "default": True,
-            "kubespawner_override": {
-                "cpu_limit": 1,
-                "cpu_guarantee": 0.75,
-                "mem_limit": "4G",
-                "mem_guarantee": "2.5G",
-            },
-        },
-        {
-            "display_name": "Medium Instance",
             "description": "Stable environment with 2 cpu / 8 GB ram",
+            "default": True,
             "kubespawner_override": {
                 "cpu_limit": 2,
                 "cpu_guarantee": 1.5,
@@ -185,21 +185,31 @@ DEFAULT_PROFILES = {
                 "mem_guarantee": "5G",
             },
         },
+        {
+            "display_name": "Medium Instance",
+            "description": "Stable environment with 4 cpu / 16 GB ram",
+            "kubespawner_override": {
+                "cpu_limit": 4,
+                "cpu_guarantee": 3,
+                "mem_limit": "16G",
+                "mem_guarantee": "10G",
+            },
+        },
     ],
     "dask_worker": {
         "Small Worker": {
-            "worker_cores_limit": 1,
-            "worker_cores": 0.75,
-            "worker_memory_limit": "4G",
-            "worker_memory": "2.5G",
-            "worker_threads": 1,
-        },
-        "Medium Worker": {
             "worker_cores_limit": 2,
             "worker_cores": 1.5,
             "worker_memory_limit": "8G",
             "worker_memory": "5G",
             "worker_threads": 2,
+        },
+        "Medium Worker": {
+            "worker_cores_limit": 4,
+            "worker_cores": 3,
+            "worker_memory_limit": "16G",
+            "worker_memory": "10G",
+            "worker_threads": 4,
         },
     },
 }
@@ -212,11 +222,16 @@ DEFAULT_ENVIRONMENTS = {
             "python",
             "ipykernel",
             "ipywidgets",
-            "qhub-dask ==0.3.13",
+            f"qhub-dask =={qhub_dask_version}",
             "python-graphviz",
             "numpy",
             "numba",
             "pandas",
+            {
+                "pip": [
+                    "kbatch",
+                ],
+            },
         ],
     },
     "environment-dashboard.yaml": {
@@ -226,15 +241,15 @@ DEFAULT_ENVIRONMENTS = {
             "python==3.9.7",
             "ipykernel==6.4.1",
             "ipywidgets==7.6.5",
-            "qhub-dask==0.3.13",
+            f"qhub-dask=={qhub_dask_version}",
             "param==1.11.1",
             "python-graphviz==0.17",
             "matplotlib==3.4.3",
-            "panel==0.12.4",
-            "voila==0.2.16",
+            "panel==0.12.7",
+            "voila==0.3.5",
             "streamlit==1.0.0",
             "dash==2.0.0",
-            "cdsdashboards-singleuser==0.6.0",
+            "cdsdashboards-singleuser==0.6.1",
         ],
     },
 }
@@ -264,11 +279,6 @@ def render_config(
 
     if terraform_state is not None:
         config["terraform_state"] = {"type": terraform_state}
-
-    config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
-    config["theme"]["jupyterhub"][
-        "welcome"
-    ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
@@ -310,6 +320,11 @@ def render_config(
     print(
         f"Securely generated default random password={default_password} for Keycloak root user stored at path={default_password_filename}"
     )
+
+    config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
+    config["theme"]["jupyterhub"][
+        "welcome"
+    ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if auth_provider == "github":
         config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()

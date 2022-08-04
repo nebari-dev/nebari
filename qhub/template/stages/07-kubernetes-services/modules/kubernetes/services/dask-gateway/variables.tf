@@ -31,8 +31,8 @@ variable "gateway-image" {
     tag  = string
   })
   default = {
-    name = "daskgateway/dask-gateway-server"
-    tag  = "0.9.0"
+    name = "ghcr.io/dask/dask-gateway-server"
+    tag  = "2022.4.0"
   }
 }
 
@@ -43,8 +43,8 @@ variable "controller-image" {
     tag  = string
   })
   default = {
-    name = "daskgateway/dask-gateway-server"
-    tag  = "0.9.0"
+    name = "ghcr.io/dask/dask-gateway-server"
+    tag  = "2022.4.0"
   }
 }
 
@@ -55,8 +55,8 @@ variable "cluster-image" {
     tag  = string
   })
   default = {
-    name = "daskgateway/dask-gateway"
-    tag  = "0.9.0"
+    name = "ghcr.io/dask/dask-gateway"
+    tag  = "2022.4.0"
   }
 }
 
@@ -144,6 +144,7 @@ variable "cluster" {
     worker_extra_container_config = any
     worker_extra_pod_config       = any
     # additional fields
+    idle_timeout      = number
     image_pull_policy = string
     environment       = map(string)
   })
@@ -163,6 +164,7 @@ variable "cluster" {
     worker_extra_container_config = {}
     worker_extra_pod_config       = {}
     # additional fields
+    idle_timeout      = 1800 # 30 minutes
     image_pull_policy = "IfNotPresent"
     environment       = {}
   }

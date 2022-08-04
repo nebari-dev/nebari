@@ -27,3 +27,9 @@ variable "callback-url-paths" {
   description = "URLs to use for openid callback"
   type        = list(string)
 }
+
+variable "jupyterlab_profiles_mapper" {
+  description = "Create a mapper for jupyterlab_profiles group/user attributes"
+  type        = bool
+  default     = false
+}

@@ -1,10 +1,10 @@
-import os
-import json
 import functools
+import json
+import os
 
 from aiohttp import web
-from dask_gateway_server.options import Options, Select, Mapping
 from dask_gateway_server.auth import JupyterHubAuthenticator
+from dask_gateway_server.options import Mapping, Options, Select
 
 
 def dask_gateway_config(path="/var/lib/dask-gateway/config.json"):
@@ -30,6 +30,7 @@ c.KubeClusterConfig.image = (
 )
 c.KubeClusterConfig.image_pull_policy = config["cluster"]["image_pull_policy"]
 c.KubeClusterConfig.environment = config["cluster"]["environment"]
+c.KubeClusterConfig.idle_timeout = config["cluster"]["idle_timeout"]
 
 c.KubeClusterConfig.scheduler_cores = config["cluster"]["scheduler_cores"]
 c.KubeClusterConfig.scheduler_cores_limit = config["cluster"]["scheduler_cores_limit"]

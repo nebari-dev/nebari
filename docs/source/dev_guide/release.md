@@ -1,52 +1,18 @@
 # Release Process for QHub
 
-## Pre-release Checklist
+## Release Checklist
 
-Although we do rely on end-to-end integration tests that run (in a private repo) on a weekly basis. This process is currently not fully integrated into the release process.
+To generate a checklist that will guide you through the release process, create an issue from the `Release Checklist` issue template on GitHub. This issue is also used as a
+centralized place to discuss any release items as a team.
 
-Cloud providers to validate:
- - [ ] `azure` - Azure
- - [ ] `aws` - Amazon Web Services
- - [ ] `do` - Digital Ocean
- - [ ] `gcp` - Google Cloud Platform
- - [ ] `local` - Existing Kubernetes Cluster / Minikube
+> NOTE: [Click here](https://github.com/Quansight/qhub/issues/new?assignees=&labels=type%3A+release+%F0%9F%8F%B7&template=release-checklist.md&title=%5BRELEASE%5D+-+%3Cversion%3E)
+> to create a new release checklist issue.
 
-Authentication providers to validate:
-- [ ] password
-- [ ] GitHub
-- [ ] Auth0
+### Testing Checklist
 
-CI/CD providers to validate:
-- [ ] GitHub-Actions
-- [ ] GitLab-CI
+As part of major releases, more hands-on, in-depth testing is required to validate that the core features and services are working as expected. To generate a checklist that will
+guide you through the testing process, create an issue from the `Testing Checklist` issue template on GitHub.
 
-Although some of the tasks listed below are tested during the end-to-end integration tests, many others still need to be tested manually.
-
-Validate the following services:
-- [ ] Initialize `qhub-config.yaml`
-- [ ] QHub deploy
-- [ ] Commit to repo and use CI/CD to deploy
-- [ ] Log into Keycloak as root user and add user
-- [ ] Add user from command line, `qhub keycloak`
-- [ ] Launch JupyterLab session with new user
-- [ ] Launch dask-cluster and test auto-scaler
-- [ ] Launch dask-gateway dashboard
-- [ ] Launch conda-store and validate environments are available
-- [ ] Launch basic CDS Dashboard
-- [ ] Launch Grafana (validate SSO)
-- [ ] Qhub destroy
-- [ ] Test Qhub upgrade command to assert compatibility 
-
-
-## Release
-
-After testing any release-candidates, to create an official release:
-
-1. On the Conda-Forge [`qhub-dask-feedstock`](https://github.com/conda-forge/qhub-dask-feedstock) repo, update the `qhub-dask` version to match the version to be released. Detailed documentation for updating conda-forge packages can be found [here](https://conda-forge.org/docs/maintainer/updating_pkgs.html#updating-recipes).
-
-2. On the GitHub repo homepage, select "Release" on the left-hand side and then click "Draft a new release". Add any breaking changes, features/improvements and bug fixes. Give it a title of `Release <version> - <month>/<day>/<year>`.
-
-3. When ready, create the new tag name and select branch from which the release will be created, then click "Publish release". This will automatically upload the new release to [PyPI](https://pypi.org/project/qhub/) and also automatically
-trigger the all appropriate Docker images to be built, tagged, and pushed up to DockerHub.
-
-4. Finally, when the new release is published on PyPI, it's time to release the package on Conda-Forge. On the Conda-Forge [`qhub-feedstock`](https://github.com/conda-forge/qhub-feedstock) repo, update the `qhub` version to match the version to be released as well any other related package information that needs updating.
+> NOTE:
+> [Click here](https://github.com/Quansight/qhub/issues/new?assignees=&labels=type%3A+release+%F0%9F%8F%B7&template=testing-checklist.md&title=Testing+checklist+for+%3Cversion%3E)
+> to create a new testing checklist issue.

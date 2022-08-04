@@ -1,3 +1,4 @@
+import contextlib
 import io
 import json
 import logging
@@ -9,13 +10,10 @@ import sys
 import tempfile
 import urllib.request
 import zipfile
-from typing import Dict, Any, List
-import contextlib
+from typing import Any, Dict, List
 
-
-from qhub.utils import timer, run_subprocess_cmd, deep_merge
 from qhub import constants
-
+from qhub.utils import deep_merge, run_subprocess_cmd, timer
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +94,7 @@ def download_terraform_binary(version=constants.TERRAFORM_VERSION):
         "i386": "386",
         "armv7l": "arm",
         "aarch64": "arm64",
+        "arm64": "arm64",
     }
 
     download_url = f"https://releases.hashicorp.com/terraform/{version}/terraform_{version}_{os_mapping[sys.platform]}_{architecture_mapping[platform.machine()]}.zip"
@@ -132,10 +131,13 @@ def version():
     return re.search(r"(\d+)\.(\d+).(\d+)", version_output).group(0)
 
 
-def init(directory=None):
+def init(directory=None, upgrade=True):
     logger.info(f"terraform init directory={directory}")
     with timer(logger, "terraform init"):
-        run_terraform_subprocess(["init"], cwd=directory, prefix="terraform")
+        command = ["init"]
+        if upgrade:
+            command.append("-upgrade")
+        run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
 def apply(directory=None, targets=None, var_files=None):

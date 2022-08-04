@@ -1,7 +1,9 @@
-from typing import Optional, Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
-from qhub.utils import pip_install_qhub
+
+from qhub.constants import LATEST_SUPPORTED_PYTHON_VERSION
+from qhub.provider.cicd.common import pip_install_qhub
 
 
 class GLCI_extras(BaseModel):
@@ -33,9 +35,6 @@ class GLCI_job(BaseModel):
 
 class GLCI(BaseModel):
     __root__: Dict[str, GLCI_job]
-
-
-PYTHON_VERSION = 3.9
 
 
 def gen_gitlab_ci(config):
@@ -75,7 +74,7 @@ def gen_gitlab_ci(config):
     ]
 
     render_qhub = GLCI_job(
-        image=f"python:{PYTHON_VERSION}",
+        image=f"python:{LATEST_SUPPORTED_PYTHON_VERSION}",
         variables=render_vars,
         before_script=before_script,
         after_script=after_script,

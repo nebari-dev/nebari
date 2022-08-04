@@ -1,5 +1,6 @@
-import pathlib
 import logging
+import pathlib
+
 from qhub.upgrade import do_upgrade
 
 logger = logging.getLogger(__name__)

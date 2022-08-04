@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 import json
 import os
-import sys
 import subprocess
+import sys
 
-minikube_cmd = ['minikube', 'ssh', '--', 'ip', '-j', 'a']
+minikube_cmd = ["minikube", "ssh", "--", "ip", "-j", "a"]
 minikube_output = subprocess.check_output(minikube_cmd, encoding="utf-8")[:-1]
 
 address = None
 for interface in json.loads(minikube_output):
-    if interface['ifname'] == 'eth0':
-        address = interface['addr_info'][0]['local'].split('.')
+    if interface["ifname"] == "eth0":
+        address = interface["addr_info"][0]["local"].split(".")
         break
 else:
     print("minikube interface eth0 not found")

@@ -10,13 +10,13 @@ variable "realm_display_name" {
 
 variable "keycloak_groups" {
   description = "Permission groups in keycloak used for granting access to services"
-  type = set(string)
-  default = []
+  type        = set(string)
+  default     = []
 }
 
 variable "authentication" {
   description = "Authentication configuration for keycloak"
-  type = any
+  type        = any
 }
 
 variable "default_groups" {

@@ -1,25 +1,29 @@
 output "service_urls" {
   description = "service urls for configured services"
   value = {
-    conda_store  = {
-      url = "https://${var.endpoint}/conda-store/"
-      health_url ="https://${var.endpoint}/conda-store/api/v1/"
+    argo-workflows = {
+      url        = var.argo-workflows-enabled ? "https://${var.endpoint}/argo/" : null
+      health_url = var.argo-workflows-enabled ? "https://${var.endpoint}/argo/" : null
+    }
+    conda_store = {
+      url        = "https://${var.endpoint}/conda-store/"
+      health_url = "https://${var.endpoint}/conda-store/api/v1/"
     }
     dask_gateway = {
-      url = "https://${var.endpoint}/gateway/"
+      url        = "https://${var.endpoint}/gateway/"
       health_url = "https://${var.endpoint}/gateway/api/version"
     }
-    jupyterhub   = {
-      url = "https://${var.endpoint}/"
+    jupyterhub = {
+      url        = "https://${var.endpoint}/"
       health_url = "https://${var.endpoint}/hub/api/"
     }
-    monitoring   = {
-      url = "https://${var.endpoint}/monitoring/"
-      health_url = "https://${var.endpoint}/monitoring/api/health"
-    }
-    keycloak     = {
-      url = "https://${var.endpoint}/auth/"
+    keycloak = {
+      url        = "https://${var.endpoint}/auth/"
       health_url = "https://${var.endpoint}/auth/realms/master"
+    }
+    monitoring = {
+      url        = var.monitoring-enabled ? "https://${var.endpoint}/monitoring/" : null
+      health_url = var.monitoring-enabled ? "https://${var.endpoint}/monitoring/api/health" : null
     }
   }
 }

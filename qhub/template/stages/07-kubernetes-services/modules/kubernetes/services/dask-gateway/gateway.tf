@@ -6,20 +6,20 @@ resource "kubernetes_secret" "gateway" {
 
   data = {
     "config.json" = jsonencode({
-      jupyterhub_api_token      = var.jupyterhub_api_token
-      jupyterhub_api_url        = var.jupyterhub_api_url
-      gateway_service_name      = kubernetes_service.gateway.metadata.0.name
-      gateway_service_namespace = kubernetes_service.gateway.metadata.0.namespace
+      jupyterhub_api_token                 = var.jupyterhub_api_token
+      jupyterhub_api_url                   = var.jupyterhub_api_url
+      gateway_service_name                 = kubernetes_service.gateway.metadata.0.name
+      gateway_service_namespace            = kubernetes_service.gateway.metadata.0.namespace
       gateway_cluster_middleware_name      = kubernetes_manifest.chain-middleware.manifest.metadata.name
       gateway_cluster_middleware_namespace = kubernetes_manifest.chain-middleware.manifest.metadata.namespace
-      gateway                   = var.gateway
-      controller                = var.controller
-      cluster                   = var.cluster
-      cluster-image             = var.cluster-image
-      profiles                  = var.profiles
-      conda-store-pvc           = var.conda-store-pvc
-      conda-store-mount         = var.conda-store-mount
-      worker-node-group         = var.worker-node-group
+      gateway                              = var.gateway
+      controller                           = var.controller
+      cluster                              = var.cluster
+      cluster-image                        = var.cluster-image
+      profiles                             = var.profiles
+      conda-store-pvc                      = var.conda-store-pvc
+      conda-store-mount                    = var.conda-store-mount
+      worker-node-group                    = var.worker-node-group
     })
   }
 }

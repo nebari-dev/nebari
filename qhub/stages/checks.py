@@ -1,7 +1,6 @@
+import socket
 import sys
 import time
-import socket
-
 
 # check and retry settings
 NUM_ATTEMPTS = 10
@@ -81,7 +80,7 @@ def stage_04_kubernetes_ingress(stage_outputs, qhub_config):
                 s.settimeout(5)
                 result = s.connect_ex((ip, port))
                 if result == 0:
-                    print(f"Attempt {i+1} succeded to connect to tcp://{ip}:{port}")
+                    print(f"Attempt {i+1} succeeded to connect to tcp://{ip}:{port}")
                     return True
                 print(f"Attempt {i+1} failed to connect to tcp tcp://{ip}:{port}")
             except socket.gaierror:
@@ -148,7 +147,7 @@ def check_ingress_dns(stage_outputs, config, disable_prompt):
 
     attempt = 0
     while not _attempt_dns_lookup(domain_name, ip):
-        sleeptime = 60 * (2 ** attempt)
+        sleeptime = 60 * (2**attempt)
         if not disable_prompt:
             input(
                 f"After attempting to poll the DNS, the record for domain={domain_name} appears not to exist, "
@@ -197,7 +196,7 @@ def stage_05_kubernetes_keycloak(stage_outputs, config):
                     client_id=client_id,
                     verify=verify,
                 )
-                print(f"Attempt {i+1} succeded connecting to keycloak master realm")
+                print(f"Attempt {i+1} succeeded connecting to keycloak master realm")
                 return True
             except KeycloakError:
                 print(f"Attempt {i+1} failed connecting to keycloak master realm")
@@ -254,7 +253,7 @@ def stage_06_kubernetes_keycloak_configuration(stage_outputs, config):
                 existing_realms = {_["id"] for _ in realm_admin.get_realms()}
                 if qhub_realm in existing_realms:
                     print(
-                        f"Attempt {i+1} succeded connecting to keycloak and qhub realm={qhub_realm} exists"
+                        f"Attempt {i+1} succeeded connecting to keycloak and qhub realm={qhub_realm} exists"
                     )
                     return True
                 else:
@@ -289,7 +288,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
     directory = "stages/07-kubernetes-services"
     import requests
 
-    # supress insecure warnings
+    # suppress insecure warnings
     import urllib3
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -298,9 +297,9 @@ def stage_07_kubernetes_services(stage_outputs, config):
         url, verify=False, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
     ):
         for i in range(num_attempts):
-            response = requests.get(service_url, verify=verify, timeout=timeout)
+            response = requests.get(url, verify=verify, timeout=timeout)
             if response.status_code < 400:
-                print(f"Attempt {i+1} health check succeded for url={url}")
+                print(f"Attempt {i+1} health check succeeded for url={url}")
                 return True
             else:
                 print(f"Attempt {i+1} health check failed for url={url}")
@@ -310,6 +309,6 @@ def stage_07_kubernetes_services(stage_outputs, config):
     services = stage_outputs[directory]["service_urls"]["value"]
     for service_name, service in services.items():
         service_url = service["health_url"]
-        if not _attempt_connect_url(service_url):
+        if service_url and not _attempt_connect_url(service_url):
             print(f"ERROR: Service {service_name} DOWN when checking url={service_url}")
             sys.exit(1)

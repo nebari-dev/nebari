@@ -19,6 +19,40 @@ resource "google_container_cluster" "main" {
     }
   }
 
+  networking_mode = var.networking_mode
+  network         = var.network
+  subnetwork      = var.subnetwork
+
+  dynamic "ip_allocation_policy" {
+    for_each = var.ip_allocation_policy == null ? [] : [1]
+    content {
+      cluster_secondary_range_name  = var.ip_allocation_policy.cluster_secondary_range_name
+      services_secondary_range_name = var.ip_allocation_policy.services_secondary_range_name
+      cluster_ipv4_cidr_block       = var.ip_allocation_policy.cluster_ipv4_cidr_block
+      services_ipv4_cidr_block      = var.ip_allocation_policy.services_ipv4_cidr_block
+    }
+  }
+
+  dynamic "master_authorized_networks_config" {
+    for_each = var.master_authorized_networks_config == null ? [] : [1]
+    content {
+      cidr_blocks {
+        cidr_block   = var.master_authorized_networks_config.cidr_blocks.cidr_block
+        display_name = var.master_authorized_networks_config.cidr_blocks.display_name
+      }
+    }
+  }
+
+  dynamic "private_cluster_config" {
+    for_each = var.private_cluster_config == null ? [] : [1]
+    content {
+      enable_private_nodes    = var.private_cluster_config.enable_private_nodes
+      enable_private_endpoint = var.private_cluster_config.enable_private_endpoint
+      master_ipv4_cidr_block  = var.private_cluster_config.master_ipv4_cidr_block
+    }
+  }
+
+
   lifecycle {
     ignore_changes = [
       node_locations
@@ -61,7 +95,7 @@ resource "google_container_node_pool" "main" {
       for_each = local.merged_node_groups[count.index].guest_accelerators
 
       content {
-        type  = guest_accelerator.value.type
+        type  = guest_accelerator.value.name
         count = guest_accelerator.value.count
       }
     }

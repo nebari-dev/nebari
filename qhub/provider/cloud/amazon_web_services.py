@@ -1,9 +1,11 @@
-import json
-import subprocess
 import functools
+import json
 import os
+import subprocess
 
 import boto3
+
+from qhub.provider.cloud.commons import filter_by_highest_supported_k8s_version
 
 
 @functools.lru_cache()
@@ -40,8 +42,7 @@ def kubernetes_versions(region="us-west-2"):
                 )
 
     supported_kubernetes_versions = sorted(list(set(supported_kubernetes_versions)))
-
-    return supported_kubernetes_versions
+    return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
 
 
 @functools.lru_cache()

@@ -1,5 +1,5 @@
 module "extension" {
-  for_each = {for extension in var.tf_extensions: extension.name => extension}
+  for_each = { for extension in var.tf_extensions : extension.name => extension }
 
   source = "./modules/qhubextension"
 

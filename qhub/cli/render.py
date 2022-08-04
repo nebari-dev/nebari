@@ -2,7 +2,7 @@ import pathlib
 
 from qhub.render import render_template
 from qhub.schema import verify
-from qhub.utils import load_yaml
+from qhub.utils import QHUB_GH_BRANCH, load_yaml
 
 
 def create_render_subcommand(subparser):
@@ -20,6 +20,12 @@ def create_render_subcommand(subparser):
 
 
 def handle_render(args):
+
+    if QHUB_GH_BRANCH:
+        print(
+            f"Modifying the version of `qhub` used by git-ops workflows, installing `qhub` from branch: {QHUB_GH_BRANCH}"
+        )
+
     config_filename = pathlib.Path(args.config)
     if not config_filename.is_file():
         raise ValueError(
