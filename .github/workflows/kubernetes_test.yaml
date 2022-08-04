@@ -51,7 +51,7 @@ jobs:
         run: |
           conda install -c anaconda pip
           pip install .[dev]
-      - name: Download and Install Minikube and Kubectl
+      - name: Download and Install Kind and Kubectl
         run: |
           mkdir -p bin
           pushd bin
@@ -70,13 +70,19 @@ jobs:
 
           docker info
           docker ps
-      - name: Build docker images
+      - name: Pull docker images
         run: |
-          cd qhub/template/image
-          docker buildx bake
-          kind load docker-image quansight/qhub-jupyterhub:${TAG} quansight/qhub-jupyterlab:${TAG} quansight/qhub-dask-worker:${TAG} quansight/qhub-dask-gateway:${TAG}
+          images=( ${REGISTRY}/nebari-jupyterhub:${TAG} ${REGISTRY}/nebari-jupyterlab:${TAG} ${REGISTRY}/nebari-dask-worker:${TAG} )
+          for img in "${images[@]}"; do docker pull $img; done
         env:
-          TAG: ${{ github.sha }}
+          TAG: sha-43788cc
+          REGISTRY: quay.io/nebari
+      - name: Load Kind
+        run: |
+          kind load docker-image ${REGISTRY}/nebari-jupyterhub:${TAG} ${REGISTRY}/nebari-jupyterlab:${TAG} ${REGISTRY}/nebari-dask-worker:${TAG}
+        env:
+          TAG: sha-43788cc
+          REGISTRY: quay.io/nebari
       - name: List docker images in minikube
         run: |
           docker images
@@ -92,9 +98,9 @@ jobs:
           cd local-deployment
           qhub init local --project=thisisatest --domain github-actions.qhub.dev --auth-provider=password
 
-          # Need smaller profiles on Minikube
-          sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "qhub-config.yaml"
-          sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "qhub-config.yaml"
+          # # Need smaller profiles on Minikube
+          # sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "qhub-config.yaml"
+          # sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "qhub-config.yaml"
 
           cat qhub-config.yaml
       - name: Deploy QHub Cloud
