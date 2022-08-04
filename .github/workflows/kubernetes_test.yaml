@@ -24,6 +24,9 @@ on:
       - "setup.cfg"
       - "pyproject.yoml"
 
+env:
+  image_names: ( quay.io/nebari/nebari-jupyterhub:main quay.io/nebari/nebari-jupyterlab:main quay.io/nebari/nebari-dask-worker:main )
+
 jobs:
   test-kubernetes:
     name: "Kubernetes Tests"
@@ -72,17 +75,15 @@ jobs:
           docker ps
       - name: Pull docker images
         run: |
-          images=( ${REGISTRY}/nebari-jupyterhub:${TAG} ${REGISTRY}/nebari-jupyterlab:${TAG} ${REGISTRY}/nebari-dask-worker:${TAG} )
-          for img in "${images[@]}"; do docker pull $img; done
-        env:
-          TAG: sha-43788cc
-          REGISTRY: quay.io/nebari
+          images=${{ env.image_names }}
+          for img in "${images[@]}"; do docker pull $img; echo "--------------------------"; done
+      - name: Start Kind cluster
+        run: |
+          kind create cluster
       - name: Load Kind
         run: |
-          kind load docker-image ${REGISTRY}/nebari-jupyterhub:${TAG} ${REGISTRY}/nebari-jupyterlab:${TAG} ${REGISTRY}/nebari-dask-worker:${TAG}
-        env:
-          TAG: sha-43788cc
-          REGISTRY: quay.io/nebari
+          images=${{ env.image_names }}
+          for img in "${images[@]}"; do kind load docker-image $img; echo "--------------------------"; done
       - name: List docker images in minikube
         run: |
           docker images
