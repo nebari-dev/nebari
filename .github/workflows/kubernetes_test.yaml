@@ -186,8 +186,3 @@ jobs:
         run: |
           cd local-deployment
           qhub destroy --config qhub-config.yaml
-
-      - name: Basic kubectl checks after cleanup
-        if: always()
-        run: |
-          kubectl get all,cm,secret,ing -A
