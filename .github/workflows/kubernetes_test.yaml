@@ -24,9 +24,6 @@ on:
       - "setup.cfg"
       - "pyproject.yoml"
 
-env:
-  image_names: ( quay.io/nebari/nebari-jupyterhub:main quay.io/nebari/nebari-jupyterlab:main quay.io/nebari/nebari-dask-worker:main )
-
 jobs:
   test-kubernetes:
     name: "Kubernetes Tests"

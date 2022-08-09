@@ -119,6 +119,23 @@ LOCAL = {
     }
 }
 
+EXISTING = {
+    "node_selectors": {
+        "general": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "user": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "worker": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+    }
+}
+
 DIGITAL_OCEAN = {
     "region": "nyc3",
     "kubernetes_version": "PLACEHOLDER",
@@ -390,6 +407,13 @@ def render_config(
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
         if "AWS_DEFAULT_REGION" in os.environ:
             config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
+
+    elif cloud_provider == "existing":
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = "Autoscaling Compute Environment"
+        config["existing"] = EXISTING.copy()
+
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"

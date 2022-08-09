@@ -148,7 +148,7 @@ def gha_env_vars(config):
         env_vars["DIGITALOCEAN_TOKEN"] = "${{ secrets.DIGITALOCEAN_TOKEN }}"
     elif config["provider"] == "gcp":
         env_vars["GOOGLE_CREDENTIALS"] = "${{ secrets.GOOGLE_CREDENTIALS }}"
-    elif config["provider"] == "local":
+    elif config["provider"] in ["local", "existing"]:
         # create mechanism to allow for extra env vars?
         pass
     else:
