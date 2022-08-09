@@ -76,7 +76,7 @@ jobs:
           ip route
       - name: Add DNS entry to hosts
         run: |
-          sudo echo "172.20.1.100  github-actions.qhub.dev" | sudo tee -a /etc/hosts
+          sudo echo "172.18.1.100  github-actions.qhub.dev" | sudo tee -a /etc/hosts
       - name: Initialize QHub Cloud
         run: |
           mkdir -p local-deployment
@@ -170,8 +170,3 @@ jobs:
         run: |
           cd local-deployment
           qhub destroy --config qhub-config.yaml
-
-      - name: Basic kubectl checks after cleanup
-        if: always()
-        run: |
-          kubectl get all,cm,secret,ing -A
