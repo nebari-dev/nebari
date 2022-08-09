@@ -36,7 +36,14 @@ def stage_01_terraform_state(stage_outputs, config):
 
 def stage_02_infrastructure(stage_outputs, config):
     if config["provider"] == "local":
-        return {"kube_context": config["local"].get("kube_context")}
+        return {
+            "kubeconfig_filename": os.path.join(
+                tempfile.gettempdir(), "QHUB_KUBECONFIG"
+            ),
+            "kube_context": config["local"].get("kube_context"),
+        }
+    elif config["provider"] == "existing":
+        return {"kube_context": config["existing"].get("kube_context")}
     elif config["provider"] == "do":
         return {
             "name": config["project_name"],
@@ -165,6 +172,8 @@ def _calculate_note_groups(config):
             group: {"key": "doks.digitalocean.com/node-pool", "value": group}
             for group in ["general", "user", "worker"]
         }
+    elif config["provider"] == "existing":
+        return config["existing"].get("node_selectors")
     else:
         return config["local"]["node_selectors"]
 

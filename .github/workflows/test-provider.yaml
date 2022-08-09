@@ -46,6 +46,7 @@ jobs:
           - do
           - gcp
           - local
+          - existing
         cicd:
           - none
           - github-actions

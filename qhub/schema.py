@@ -24,6 +24,7 @@ class TerraformStateEnum(str, enum.Enum):
 
 class ProviderEnum(str, enum.Enum):
     local = "local"
+    existing = "existing"
     do = "do"
     aws = "aws"
     gcp = "gcp"
@@ -311,6 +312,11 @@ class LocalProvider(Base):
     node_selectors: typing.Dict[str, KeyValueDict]
 
 
+class ExistingProvider(Base):
+    kube_context: typing.Optional[str]
+    node_selectors: typing.Dict[str, KeyValueDict]
+
+
 # ================= Theme ==================
 
 
@@ -488,6 +494,7 @@ class Main(Base):
     default_images: DefaultImages
     storage: typing.Dict[str, str]
     local: typing.Optional[LocalProvider]
+    existing: typing.Optional[ExistingProvider]
     google_cloud_platform: typing.Optional[GoogleCloudPlatformProvider]
     amazon_web_services: typing.Optional[AmazonWebServicesProvider]
     azure: typing.Optional[AzureProvider]
