@@ -58,8 +58,6 @@ jobs:
         run: |
           mkdir -p bin
           pushd bin
-          curl -L https://github.com/kubernetes-sigs/kind/releases/download/v0.12.0/kind-linux-amd64 -o kind
-          chmod +x kind
 
           curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
           chmod +x kubectl
@@ -73,20 +71,6 @@ jobs:
 
           docker info
           docker ps
-      - name: Pull docker images
-        run: |
-          images=${{ env.image_names }}
-          for img in "${images[@]}"; do docker pull $img; echo "--------------------------"; done
-      - name: Start Kind cluster
-        run: |
-          kind create cluster
-      - name: Load Kind
-        run: |
-          images=${{ env.image_names }}
-          for img in "${images[@]}"; do kind load docker-image $img; echo "--------------------------"; done
-      - name: List docker images in minikube
-        run: |
-          docker images
       - name: Get routing table for docker pods
         run: |
           ip route
@@ -99,9 +83,9 @@ jobs:
           cd local-deployment
           qhub init local --project=thisisatest --domain github-actions.qhub.dev --auth-provider=password
 
-          # # Need smaller profiles on Minikube
-          # sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "qhub-config.yaml"
-          # sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "qhub-config.yaml"
+          # Need smaller profiles on Local Kind
+          sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "qhub-config.yaml"
+          sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "qhub-config.yaml"
 
           cat qhub-config.yaml
       - name: Deploy QHub Cloud
