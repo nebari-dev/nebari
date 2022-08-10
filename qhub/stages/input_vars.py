@@ -3,6 +3,8 @@ import os
 import tempfile
 from urllib.parse import urlencode
 
+from qhub.constants import DEFAULT_CONDA_STORE_IMAGE_TAG
+
 
 def stage_01_terraform_state(stage_outputs, config):
     if config["provider"] == "do":
@@ -269,7 +271,9 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "conda-store-extra-config": config.get("conda_store", {}).get(
             "extra_config", ""
         ),
-        "conda-store-image-tag": config.get("conda-store", {}).get("image_tag", None),
+        "conda-store-image-tag": config.get("conda-store", {}).get(
+            "image_tag", DEFAULT_CONDA_STORE_IMAGE_TAG
+        ),
         # jupyterhub
         "cdsdashboards": config["cdsdashboards"],
         "jupyterhub-theme": jupyterhub_theme,
