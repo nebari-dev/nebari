@@ -126,6 +126,11 @@ resource "kubernetes_deployment" "worker" {
             name       = "storage"
             mount_path = "/home/conda"
           }
+
+          volume_mount {
+            name       = "secret"
+            mount_path = "/var/lib/conda-store/"
+          }
         }
 
         container {
@@ -154,11 +159,6 @@ resource "kubernetes_deployment" "worker" {
           volume_mount {
             mount_path = "/exports"
             name       = "storage"
-          }
-
-          volume_mount {
-            name       = "secret"
-            mount_path = "/var/lib/conda-store/"
           }
         }
 

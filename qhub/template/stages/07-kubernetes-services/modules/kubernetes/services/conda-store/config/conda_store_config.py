@@ -6,7 +6,7 @@ import tempfile
 import requests
 from conda_store_server import api, orm, schema
 from conda_store_server.server.auth import GenericOAuthAuthentication
-from conda_store_server.server.utils import get_conda_store
+from conda_store_server.server.dependencies import get_conda_store
 from conda_store_server.storage import S3Storage
 
 
@@ -144,7 +144,7 @@ for classname, attributes in conda_store_settings.items():
 
 # run arbitrary python code
 # compiling makes debugging easier: https://stackoverflow.com/a/437857
-extra_config_filename = os.path.join(tempfile.gettmpdir(), "extra-config.py")
+extra_config_filename = os.path.join(tempfile.gettempdir(), "extra-config.py")
 extra_config = config.get("extra-config", "")
 with open(extra_config_filename, "w") as f:
     f.write(extra_config)

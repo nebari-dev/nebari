@@ -5,5 +5,5 @@ output "root_password" {
 
 output "service" {
   description = "Service name"
-  value       = helm_release.redis.name
+  value       = "${helm_release.redis.name}-master"
 }
