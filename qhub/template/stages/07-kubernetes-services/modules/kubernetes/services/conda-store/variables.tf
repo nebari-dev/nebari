@@ -35,11 +35,15 @@ variable "node-group" {
 }
 
 variable "conda-store-image" {
-  description = "Conda-store image"
-  type = object({
-    name = string
-    tag  = string
-  })
+  description = "Conda-Store image"
+  type        = string
+  default     = "quansight/conda-store-server"
+}
+
+variable "conda-store-image-tag" {
+  description = "Version of conda-store to use"
+  type        = string
+  default     = "v0.4.7"
 }
 
 variable "external-url" {

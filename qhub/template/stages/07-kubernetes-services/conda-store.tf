@@ -28,15 +28,15 @@ variable "conda-store-extra-config" {
 }
 
 variable "conda-store-image" {
-  description = "Conda-store image"
-  type = object({
-    name = string
-    tag  = string
-  })
-  default = {
-    name = "quansight/conda-store-server"
-    tag  = "v0.4.7"
-  }
+  description = "Conda-Store image"
+  type        = string
+  default     = "quansight/conda-store-server"
+}
+
+variable "conda-store-image-tag" {
+  description = "Version of conda-store to use"
+  type        = string
+  default     = "v0.4.7"
 }
 
 # ====================== RESOURCES =======================
@@ -49,10 +49,11 @@ module "kubernetes-conda-store-server" {
   external-url = var.endpoint
   realm_id     = var.realm_id
 
-  nfs_capacity      = var.conda-store-filesystem-storage
-  minio_capacity    = coalesce(var.conda-store-object-storage, var.conda-store-filesystem-storage)
-  node-group        = var.node_groups.general
-  conda-store-image = var.conda-store-image
+  nfs_capacity          = var.conda-store-filesystem-storage
+  minio_capacity        = coalesce(var.conda-store-object-storage, var.conda-store-filesystem-storage)
+  node-group            = var.node_groups.general
+  conda-store-image     = var.conda-store-image
+  conda-store-image-tag = var.conda-store-image-tag
   environments = {
     for filename, environment in var.conda-store-environments :
     filename => yamlencode(environment)
