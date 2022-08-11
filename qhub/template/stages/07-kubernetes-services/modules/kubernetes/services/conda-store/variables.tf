@@ -35,11 +35,15 @@ variable "node-group" {
 }
 
 variable "conda-store-image" {
-  description = "Conda-store image"
-  type = object({
-    name = string
-    tag  = string
-  })
+  description = "Conda-Store image"
+  type        = string
+  default     = "quansight/conda-store-server"
+}
+
+variable "conda-store-image-tag" {
+  description = "Version of conda-store to use"
+  type        = string
+  default     = "v0.4.7"
 }
 
 variable "external-url" {
@@ -50,4 +54,16 @@ variable "external-url" {
 variable "realm_id" {
   description = "Keycloak realm to use for deploying openid client"
   type        = string
+}
+
+variable "extra-settings" {
+  description = "Additional traitlets settings to apply before extra-config traitlets code is run"
+  type        = map(any)
+  default     = {}
+}
+
+variable "extra-config" {
+  description = "Additional traitlets configuration code to be ran"
+  type        = string
+  default     = ""
 }
