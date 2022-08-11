@@ -121,7 +121,7 @@ resource "kubernetes_deployment" "server" {
 
         container {
           name  = "conda-store-server"
-          image = "${var.conda-store-image.name}:${var.conda-store-image.tag}"
+          image = "${var.conda-store-image}:${var.conda-store-image-tag}"
 
           args = [
             "conda-store-server",
