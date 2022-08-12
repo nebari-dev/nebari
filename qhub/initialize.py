@@ -243,7 +243,7 @@ DEFAULT_ENVIRONMENTS = {
             "python-graphviz",
             "pyarrow",
             "s3fs",
-            "gcsf",
+            "gcsfs",
             "numpy",
             "numba",
             "pandas",
