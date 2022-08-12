@@ -241,6 +241,8 @@ DEFAULT_ENVIRONMENTS = {
             "ipywidgets",
             f"qhub-dask =={qhub_dask_version}",
             "python-graphviz",
+            "pyarrow",
+            "s3fs",
             "numpy",
             "numba",
             "pandas",
