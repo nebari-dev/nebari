@@ -19,21 +19,6 @@ Lastly, as a stretch goal, it would be wonderful if we could help ourselves as d
 Function calls:
 1. `qhub/cli/__init__.py:cli`
 
-Output:
-```bash
-usage: qhub [-h] [-v] {deploy,render,init,validate,destroy,support,upgrade,keycloak,cost-estimate} ...
-
-QHub command line
-
-positional arguments:
-  {deploy,render,init,validate,destroy,support,upgrade,keycloak,cost-estimate}
-                        QHub - <version>
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -v, --version         QHub version number
-```
-
 
 ### `qhub initialize`
 
@@ -59,9 +44,27 @@ Function calls:
      - `QHUB_IMAGE_TAG`
      - `QHUB_DASK_TAG`
 4. `qhub/initialize.py:render_config`
-   - user `input` required here
-     - project
-     - domain
+   - user `input` required here:
+     - project_name
+     - qhub_domain
      - auth provider - github client id
      - auth provider - github client secret
      - cloud provider - gcp PROJECT_ID
+   - imported modules/functions from `qhub/provider`
+     - `git`
+       - `is_git_repo`
+       - `initialize_git`
+       - `add_git_remote`
+     - `github`
+       - `get_repository`
+       - `create_repository`
+       - `update_secret`
+     - `oauth.auth0.create_client`
+   - imported functions from `qhub/utils`
+     - `set_docker_image_tag`
+     - `set_qhub_dask_version`
+     - `set_kubernetes_version`
+   - other used functions
+     - `github_auto_provision`
+     - `github_repository_initialize`
+     - `auth0_auto_provision`
