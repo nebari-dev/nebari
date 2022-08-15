@@ -20,7 +20,7 @@ Function calls:
 1. `qhub/cli/__init__.py:cli`
 
 
-### `qhub initialize`
+### `qhub init`
 
 Function calls:
 1. `qhub/cli/__init__.py:cli`
@@ -68,3 +68,25 @@ Function calls:
      - `github_auto_provision`
      - `github_repository_initialize`
      - `auth0_auto_provision`
+
+
+### `qhub render`
+
+Function calls:
+1. `qhub/cli/__init__.py:cli`
+2. `qhub/cli/render.py:create_render_subcommand`
+3. `qhub/cli/render.py:handle_render`
+   - args
+     - config
+     - dry-run
+   - dev mode
+     - QHUB_GH_BRANCH
+4. `qhub/schema.py:verify`
+   - relies on `Main` validator to verify config file is in the proper format
+5. `qhub/render.py:render_template`
+6. `qhub/render.py:render_contents`
+7. `qhub/stages/tf_objects.py:stage_XX_...`
+
+...
+
+### `qhub validate`
