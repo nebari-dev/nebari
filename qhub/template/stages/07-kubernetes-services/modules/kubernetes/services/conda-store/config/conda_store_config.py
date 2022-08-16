@@ -76,7 +76,7 @@ c.GenericOAuthAuthentication.tls_verify = False
 
 
 class KeyCloakAuthentication(GenericOAuthAuthentication):
-    def authenticate(self, request):
+    async def authenticate(self, request):
         # 1. using the callback_url code and state in request
         oauth_access_token = self._get_oauth_token(request)
         if oauth_access_token is None:
@@ -114,7 +114,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             namespaces.add(group_name)
             role_bindings[f"{group_name}/*"] = roles
 
-        conda_store = get_conda_store()
+        conda_store = get_conda_store(request)
         for namespace in namespaces:
             _namespace = api.get_namespace(conda_store.db, name=namespace)
             if _namespace is None:
