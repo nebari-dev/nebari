@@ -94,7 +94,10 @@ def test_exact_jupyterhub_ssh(paramiko_object):
         ("whoami", constants.KEYCLOAK_USERNAME),
         ("pwd", f"/home/{constants.KEYCLOAK_USERNAME}"),
         ("echo $HOME", f"/home/{constants.KEYCLOAK_USERNAME}"),
-        ("conda activate global && echo $CONDA_PREFIX", "/opt/conda/envs/global"),
+        (
+            "conda activate nebari-system && echo $CONDA_PREFIX",
+            "/opt/conda/envs/nebari-system",
+        ),
         ("hostname", f"jupyter-{escape_string(constants.KEYCLOAK_USERNAME)}"),
     ]
 

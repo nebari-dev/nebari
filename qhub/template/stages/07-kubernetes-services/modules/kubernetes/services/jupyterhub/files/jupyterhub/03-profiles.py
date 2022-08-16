@@ -153,7 +153,7 @@ def profile_conda_store_mounts(username, groups):
         ]
     }
 
-    conda_store_namespaces = [username, "nebari-git", "global"] + groups
+    conda_store_namespaces = [username, "nebari-git", "nebari-system"] + groups
     extra_container_config = {
         "volumeMounts": [
             {
@@ -259,7 +259,7 @@ def configure_user(username, groups, uid=1000, gid=100):
                 for _ in [
                     username,
                     "nebari-git",
-                    "global",
+                    "nebari-system",
                 ]
                 + groups
             ]
