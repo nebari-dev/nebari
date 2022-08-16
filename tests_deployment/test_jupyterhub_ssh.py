@@ -13,6 +13,8 @@ from tests_deployment.utils import (
 
 monkeypatch_ssl_context()
 
+TIMEOUT_SECS = 300
+
 
 @pytest.fixture
 def paramiko_object():
@@ -57,12 +59,12 @@ def run_command(command, stdin, stdout, stderr):
     return "".join(output).strip()
 
 
-@pytest.mark.timeout(120)
+@pytest.mark.timeout(TIMEOUT_SECS)
 def test_simple_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
 
-@pytest.mark.timeout(120)
+@pytest.mark.timeout(TIMEOUT_SECS)
 def test_print_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
@@ -81,7 +83,7 @@ def test_print_jupyterhub_ssh(paramiko_object):
         print(run_command(command, stdin, stdout, stderr))
 
 
-@pytest.mark.timeout(120)
+@pytest.mark.timeout(TIMEOUT_SECS)
 def test_exact_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
@@ -100,7 +102,7 @@ def test_exact_jupyterhub_ssh(paramiko_object):
         assert output == run_command(command, stdin, stdout, stderr)
 
 
-@pytest.mark.timeout(120)
+@pytest.mark.timeout(TIMEOUT_SECS)
 def test_contains_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 

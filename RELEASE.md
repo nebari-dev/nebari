@@ -11,7 +11,60 @@ ______________________________________________________________________
 ### Bug fixes
 
 
-## Release v0.4.2 - June 8. 2022
+## Release v0.4.3 - July 7, 2022
+
+### Feature changes and enhancements
+
+Enhancements for this release include:
+- Integrating Argo Workflow
+- Integrating kbatch
+- Adding `cost-estimate` CLI subcommand (Infracost)
+- Add `panel-serve` as a CDS dashboard option
+- Add option to use RetroLab instead of default JupyterLab
+
+
+### What's Changed
+* Update the login/Keycloak docs page by @gabalafou in https://github.com/Quansight/qhub/pull/1289
+* Add configuration option so myst parser generates anchors for heading… by @costrouc in https://github.com/Quansight/qhub/pull/1299
+* Image scanning by @HarshCasper in https://github.com/Quansight/qhub/pull/1291
+* Fix display version behavior by @viniciusdc in https://github.com/Quansight/qhub/pull/1275
+* [Docs] Add docs about custom Identity providers for Authentication by @viniciusdc in https://github.com/Quansight/qhub/pull/1273
+* Add prefect token var to CI when needed by @viniciusdc in https://github.com/Quansight/qhub/pull/1279
+* ci: prevent image scans on main image builds by @HarshCasper in https://github.com/Quansight/qhub/pull/1300
+* Integrate `kbatch` by @iameskild in https://github.com/Quansight/qhub/pull/1258
+* add `retrolab` to the base jupyter image by @tonyfast in https://github.com/Quansight/qhub/pull/1222
+* Update pre-commit, remove vale by @iameskild in https://github.com/Quansight/qhub/pull/1282
+* Argo Workflows by @Adam-D-Lewis in https://github.com/Quansight/qhub/pull/1252
+* Update minio, postgresql chart repo location by @iameskild in https://github.com/Quansight/qhub/pull/1308
+* Fix broken AWS, set minimum desired size to 1, enable 0 scaling by @tylerpotts in https://github.com/Quansight/qhub/pull/1304
+* v0.4.2 release notes by @iameskild in https://github.com/Quansight/qhub/pull/1323
+* install dask lab ext from main by @iameskild in https://github.com/Quansight/qhub/pull/1321
+* Overrides default value for dask-labextension by @viniciusdc in https://github.com/Quansight/qhub/pull/1327
+* CI: Add Infracost to GHA CI for infra cost tracking by @HarshCasper in https://github.com/Quansight/qhub/pull/1316
+* Add check for highest supported k8s version by @aktech in https://github.com/Quansight/qhub/pull/1336
+* Increase the default instance sizes by @peytondmurray in https://github.com/Quansight/qhub/pull/1338
+* Add panel-serve as a CDS dashboard option by @iameskild in https://github.com/Quansight/qhub/pull/1070
+* Generate QHub Costs via `infracost` by @HarshCasper in https://github.com/Quansight/qhub/pull/1340
+* Add release-checklist issue template by @iameskild in https://github.com/Quansight/qhub/pull/1314
+* Fix missing import: `rich` : broken qhub init with cloud by @aktech in https://github.com/Quansight/qhub/pull/1353
+* Bump qhub-dask version to 0.4.3 by @peytondmurray in https://github.com/Quansight/qhub/pull/1341
+* Remove the need for AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to be set with Digital Ocean deployment by @costrouc in https://github.com/Quansight/qhub/pull/1344
+* Revert "Remove the need for AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to be set with Digital Ocean deployment" by @viniciusdc in https://github.com/Quansight/qhub/pull/1355
+* Upgrade kbatch version by @iameskild in https://github.com/Quansight/qhub/pull/1335
+* Drop support for python 3.7 in dask environment by @peytondmurray in https://github.com/Quansight/qhub/pull/1354
+* Add useful terminal utils to jlab image by @dharhas in https://github.com/Quansight/qhub/pull/1361
+* Tweak bashrc by @dharhas in https://github.com/Quansight/qhub/pull/1363
+* Fix bug where vscode extensions are not installing by @viniciusdc in https://github.com/Quansight/qhub/pull/1360
+
+### New Contributors
+* @gabalafou made their first contribution in https://github.com/Quansight/qhub/pull/1289
+* @peytondmurray made their first contribution in https://github.com/Quansight/qhub/pull/1338
+* @dharhas made their first contribution in https://github.com/Quansight/qhub/pull/1361
+
+**Full Changelog**: https://github.com/Quansight/qhub/compare/v0.4.1...v0.4.3
+
+
+## Release v0.4.2 - June 8, 2022
 
 ### Incident postmortem
 
@@ -46,7 +99,7 @@ This release is a hotfix for the issue summarized in the following:
 * Fix broken AWS, set minimum desired size to 1, enable 0 scaling by @tylerpotts in [PR 1304](https://github.com/Quansight/qhub/issues/1304)
 
 
-## Release v0.4.1 - May 10. 2022
+## Release v0.4.1 - May 10, 2022
 
 ### Feature changes and enhancements
 

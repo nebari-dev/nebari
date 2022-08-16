@@ -95,7 +95,6 @@ def test_render_template(write_qhub_config_to_file):
 def test_exists_after_render(write_qhub_config_to_file):
     items_to_check = [
         ".gitignore",
-        "image",
         "stages",
         "qhub-config.yaml",
         PRESERVED_DIR,

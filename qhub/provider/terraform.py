@@ -94,6 +94,7 @@ def download_terraform_binary(version=constants.TERRAFORM_VERSION):
         "i386": "386",
         "armv7l": "arm",
         "aarch64": "arm64",
+        "arm64": "arm64",
     }
 
     download_url = f"https://releases.hashicorp.com/terraform/{version}/terraform_{version}_{os_mapping[sys.platform]}_{architecture_mapping[platform.machine()]}.zip"

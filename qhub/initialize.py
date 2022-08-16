@@ -14,14 +14,17 @@ from qhub.provider.oauth.auth0 import create_client
 from qhub.utils import (
     check_cloud_credentials,
     namestr_regex,
-    qhub_dask_version,
-    qhub_image_tag,
+    set_docker_image_tag,
     set_kubernetes_version,
+    set_qhub_dask_version,
 )
 
 from .version import __version__
 
 logger = logging.getLogger(__name__)
+
+qhub_image_tag = set_docker_image_tag()
+qhub_dask_version = set_qhub_dask_version()
 
 
 BASE_CONFIGURATION = {
@@ -35,9 +38,9 @@ BASE_CONFIGURATION = {
         "authentication": None,
     },
     "default_images": {
-        "jupyterhub": f"quansight/qhub-jupyterhub:{qhub_image_tag}",
-        "jupyterlab": f"quansight/qhub-jupyterlab:{qhub_image_tag}",
-        "dask_worker": f"quansight/qhub-dask-worker:{qhub_image_tag}",
+        "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{qhub_image_tag}",
+        "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{qhub_image_tag}",
+        "dask_worker": f"quay.io/nebari/nebari-dask-worker:{qhub_image_tag}",
     },
     "storage": {"conda_store": "200Gi", "shared_filesystem": "200Gi"},
     "theme": {
@@ -100,6 +103,23 @@ AUTH_OAUTH_AUTH0 = {
 }
 
 LOCAL = {
+    "node_selectors": {
+        "general": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "user": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+        "worker": {
+            "key": "kubernetes.io/os",
+            "value": "linux",
+        },
+    }
+}
+
+EXISTING = {
     "node_selectors": {
         "general": {
             "key": "kubernetes.io/os",
@@ -221,9 +241,17 @@ DEFAULT_ENVIRONMENTS = {
             "ipywidgets",
             f"qhub-dask =={qhub_dask_version}",
             "python-graphviz",
+            "pyarrow",
+            "s3fs",
+            "gcsfs",
             "numpy",
             "numba",
             "pandas",
+            {
+                "pip": [
+                    "kbatch",
+                ],
+            },
         ],
     },
     "environment-dashboard.yaml": {
@@ -382,6 +410,13 @@ def render_config(
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
         if "AWS_DEFAULT_REGION" in os.environ:
             config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
+
+    elif cloud_provider == "existing":
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = "Autoscaling Compute Environment"
+        config["existing"] = EXISTING.copy()
+
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"

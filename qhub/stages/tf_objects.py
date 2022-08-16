@@ -107,6 +107,16 @@ def QHubTerraformState(directory: str, qhub_config: Dict):
             container_name=f"{qhub_config['project_name']}-{qhub_config['namespace']}-state",
             key=f"terraform/{qhub_config['project_name']}-{qhub_config['namespace']}/{directory}",
         )
+    elif qhub_config["provider"] == "existing":
+        optional_kwargs = {}
+        if "kube_context" in qhub_config["existing"]:
+            optional_kwargs["confix_context"] = qhub_config["existing"]["kube_context"]
+        return TerraformBackend(
+            "kubernetes",
+            secret_suffix=f"{qhub_config['project_name']}-{qhub_config['namespace']}-{directory}",
+            load_config_file=True,
+            **optional_kwargs,
+        )
     elif qhub_config["provider"] == "local":
         optional_kwargs = {}
         if "kube_context" in qhub_config["local"]:
