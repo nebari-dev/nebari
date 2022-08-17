@@ -87,6 +87,124 @@ Function calls:
 6. `qhub/render.py:render_contents`
 7. `qhub/stages/tf_objects.py:stage_XX_...`
 
-...
-
 ### `qhub validate`
+
+Function calls:
+1. `qhub/cli/__init__.py:cli`
+2. `qhub/cli/render.py:create_validate_subcommand`
+3. `qhub/cli/validate.py:handle_validate`
+  - args
+      - config
+4. `qhub/utils.py:load_yaml`
+  - Return yaml dict containing config loaded from config_filename.
+5. `qhub/provider/cicd/linter.py:comment_on_pr`
+6. `qhub/schema.py:verify`
+
+### `qhub deploy`
+
+Function calls:
+1. `qhub/cli/__init__.py:cli`
+2. `qhub/cli/deploy.py:create_deploy_subcommand`
+  - flags:
+      - --dns-provider
+      - --skip-remote-state-provision
+      - --dns-auto-provision
+      - --disable-prompt
+      - --diable-render
+3. `qhub/cli/deploy.py:handle_deploy`
+  - args
+    - config
+4. `qhub/schema.py:verify`
+5. `qhub/utils.py:load_yaml`
+  - Return yaml dict containing config loaded from config_filename.
+6. `qhub/render.py:render_template`
+7. `qhub/deploy.py:deploy_configuration`
+
+### `qhub-destroy`
+
+Function calls:
+1. `qhub/cli/__init__.py:cli`
+2. `qhub/cli/destroy.py:create_destroy_subcommand`
+  - args
+    - --disable-render
+3. `qhub/cli/destroy.py:handle_destroy`
+4. `qhub/schema.py:verify`
+5. `qhub/utils.py:load_yaml`
+6. `qhub/render.py:render_template`
+7. `qhub/destroy.py:destroy_configuration`
+
+
+### `qhub-keycloak`
+
+Function calls:
+1. `qhub/cli/__init__.py:cli`
+2. `qhub/cli/keycloak.py:create_keycloak_subcommand`
+  - argument:
+    - keycloak_action
+3. `qhub/cli/keycloak.py:handle_keycloak`
+  - args:
+    - config
+4. `qhub/keycloak.py:do_keycloak`
+5. `qhub/schema.py:verify`
+6. `qhub/utils.py:load_yaml`
+
+
+### `qhub-support`
+
+Function calls:
+1. `qhub/cli/__init__.py:cli`
+2. `qhub/cli/support.py:create_support_subcommand`
+  - args
+    - QHUB_SUPPORT_LOG_FILE
+3. `qhub/cli/support.py:handle_support`
+  - args
+    - config
+    - v1
+    - namespace
+    - pods
+4. `qhub/cli/support.py:get_config_namespace`
+  - args:
+    - path
+    - zipfile
+    - yaml
+    - client
+    - config
+
+### `qhub-upgrade`
+
+Function calls:
+1. `qhub/cli/__init__.py:cli`
+2. `qhub/cli/upgrade.py:create_upgrade_subcommand`
+  - arguments:
+    - --attempt-fixes
+3. `qhub/cli/upgrade.py:handle_upgrade`
+  - args
+    - config_filename
+    - pathlib
+4. `qhub/upgrade.py:do_upgrade`
+5. `qhub/schema.py:verify`
+6. `qhub/utils.py:load_yaml`
+7. `qhub/version.py:start_version`
+
+### `qhub-cost`
+
+Function calls:
+1. `qhub/cli/__init__.py:cli`
+2. `qhub/cli/cost.py:create_cost_subcommand`
+  - arguments
+    - -p
+    - -d
+    - -f
+    - -c
+    - -cc
+3. `qhub/cli/cost.py:handle_cost_report`
+  - args
+    - path
+    - dashboard
+    - file
+    - currency
+    - compare
+4. `qhub/cost.py:infracost_report`
+  -  Generate a report of the infracost cost of the given path
+    - args:
+        - path: path to the qhub stages directory.
