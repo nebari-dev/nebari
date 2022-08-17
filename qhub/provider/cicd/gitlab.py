@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Union
 from pydantic import BaseModel, Field
 
 from qhub.constants import LATEST_SUPPORTED_PYTHON_VERSION
-from qhub.utils import pip_install_qhub
+from qhub.provider.cicd.common import pip_install_qhub
 
 
 class GLCI_extras(BaseModel):

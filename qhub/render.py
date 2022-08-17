@@ -57,7 +57,6 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
     contents = render_contents(config)
 
     directories = [
-        "image",
         f"stages/02-infrastructure/{config['provider']}",
         "stages/03-kubernetes-initialize",
         "stages/04-kubernetes-ingress",

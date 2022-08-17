@@ -22,6 +22,7 @@
         pythonPackages.bcrypt
         pythonPackages.kubernetes
         pythonPackages.packaging
+        pythonPackages.rich
         keycloak
 
         # cloud packages
