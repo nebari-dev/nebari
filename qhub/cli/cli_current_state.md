@@ -208,3 +208,4 @@ Function calls:
   -  Generate a report of the infracost cost of the given path
     - args:
         - path: path to the qhub stages directory.
+
