@@ -62,7 +62,6 @@ Release captain responsible - <@gh_username>
 
 - [ ] [Tag, build and push docker images](https://github.com/nebari-dev/nebari-docker-images/releases/new)
 - [ ] [Update and cut release for `qhub-dask` meta package on Conda-Forge.](https://github.com/conda-forge/qhub-dask-feedstock)
-- [ ] [Cut Test PyPI release via manual `workflow_dispatch`.](https://github.com/Quansight/qhub/actions/workflows/test-release.yaml)
 - [ ] [Cut PyPI release via GHA release workflow.](https://github.com/Quansight/qhub/releases/new)
     - Copy release notes from `RELEASE.md`.
 - [ ] [Merge automated release PR for `qhub` on Conda-Forge.](https://github.com/conda-forge/qhub-feedstock)
