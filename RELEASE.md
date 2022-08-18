@@ -8,7 +8,7 @@ ______________________________________________________________________
 
 ### Feature changes and enhancements
 
-### Bug fixes
+
 
 ## Release v0.4.4 - August 18, 2022
 
