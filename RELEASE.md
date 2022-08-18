@@ -8,7 +8,39 @@ ______________________________________________________________________
 
 ### Feature changes and enhancements
 
-### Bug fixes
+
+
+## Release v0.4.4 - August 18, 2022
+
+### Feature changes and enhancements
+
+Enhancements for this release include:
+- Bump `conda-store` version to `v0.4.9` and enable overrides
+- Fully decouple the JupyterLab, JupyterHub and Dask-Worker images from the main codebase
+  - See https://github.com/nebari-dev/nebari-docker-images for images
+- Add support for Python 3.10
+- Add support for Terraform binary download for M1 Mac
+
+
+## What's Changed
+* Add support for terraform binary download for M1 by @aktech in https://github.com/Quansight/qhub/pull/1370
+* Improvements in the QHub Cost estimate tool by @HarshCasper in https://github.com/Quansight/qhub/pull/1365
+* Add Python-3.10 by @HarshCasper in https://github.com/Quansight/qhub/pull/1352
+* Add backwards compatibility item to test checklist by @viniciusdc in https://github.com/Quansight/qhub/pull/1381
+* add code server version to fix build by @HarshCasper in https://github.com/Quansight/qhub/pull/1383
+* Update Cirun.io config to use labels by @aktech in https://github.com/Quansight/qhub/pull/1379
+* Decouple docker images by @iameskild in https://github.com/Quansight/qhub/pull/1371
+* Set LATEST_SUPPORTED_PYTHON_VERSION as str by @iameskild in https://github.com/Quansight/qhub/pull/1387
+* Integrate kind into local deployment to no longer require minikube for development by @costrouc in https://github.com/Quansight/qhub/pull/1171
+* Upgrade conda-store to 0.4.7 allow for customization by @costrouc in https://github.com/Quansight/qhub/pull/1385
+* [ENH] Bump conda-store to v0.4.9 by @viniciusdc in https://github.com/Quansight/qhub/pull/1392
+* [ENH] Add `pyarrow` and `s3fs` by @viniciusdc in https://github.com/Quansight/qhub/pull/1393
+* Fixing bug in authentication method in Conda-Store authentication by @costrouc in https://github.com/Quansight/qhub/pull/1396
+* CI: Merge test and release to PyPi workflows into one by @HarshCasper in https://github.com/Quansight/qhub/pull/1386
+* Update packages in the dashboard env by @iameskild in https://github.com/Quansight/qhub/pull/1402
+* BUG: Setting behind proxy setting in conda-store to be aware of http vs. https by @costrouc in https://github.com/Quansight/qhub/pull/1404
+* Minor update to release workflow by @iameskild in https://github.com/Quansight/qhub/pull/1406
+* Clean up release workflow by @iameskild in https://github.com/Quansight/qhub/pull/1407
 
 
 ## Release v0.4.3 - July 7, 2022
