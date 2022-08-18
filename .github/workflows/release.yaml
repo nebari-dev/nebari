@@ -24,7 +24,9 @@ jobs:
           fetch-depth: 0
 
       - name: Create tag
-        run: git tag ${{ github.event.inputs.qhub_tag }}
+        run: |
+          echo "QHUB_TAG=$(git describe --tags)" >> $GITHUB_ENV
+          echo ${{ env.QHUB_TAG }}
 
       - name: Build source and binary
         run: python -m build --sdist --wheel .
@@ -41,7 +43,7 @@ jobs:
             pip install \
             --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple \
-            qhub==${{ github.event.inputs.qhub_tag }}
+            qhub==${{ env.QHUB_TAG }}
 
   release-pypi:
     name: Publish QHub on PyPi
@@ -66,12 +68,7 @@ jobs:
         run: python -m build --sdist --wheel .
 
       - name: Publish package
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: ${{ secrets.PYPI_USERNAME }}
           password: ${{ secrets.pypi_password }}
-
-# Could check that the version.py version number matches the tag
-# and that the branch release-<version> also points to this tag
-# and that terraform-modules tag release-{version} exists.
-# See https://github.com/Quansight/qhub/issues/544
