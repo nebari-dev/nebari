@@ -24,6 +24,7 @@ class TerraformStateEnum(str, enum.Enum):
 
 class ProviderEnum(str, enum.Enum):
     local = "local"
+    existing = "existing"
     do = "do"
     aws = "aws"
     gcp = "gcp"
@@ -114,6 +115,15 @@ class Prefect(Base):
     enabled: bool
     image: typing.Optional[str]
     overrides: typing.Optional[typing.Dict]
+
+
+# =========== Conda-Store ==============
+
+
+class CondaStore(Base):
+    extra_settings: typing.Optional[typing.Dict[str, typing.Any]] = {}
+    extra_config: typing.Optional[str] = ""
+    image_tag: typing.Optional[str] = ""
 
 
 # ============= Terraform ===============
@@ -311,6 +321,11 @@ class LocalProvider(Base):
     node_selectors: typing.Dict[str, KeyValueDict]
 
 
+class ExistingProvider(Base):
+    kube_context: typing.Optional[str]
+    node_selectors: typing.Dict[str, KeyValueDict]
+
+
 # ================= Theme ==================
 
 
@@ -488,6 +503,7 @@ class Main(Base):
     default_images: DefaultImages
     storage: typing.Dict[str, str]
     local: typing.Optional[LocalProvider]
+    existing: typing.Optional[ExistingProvider]
     google_cloud_platform: typing.Optional[GoogleCloudPlatformProvider]
     amazon_web_services: typing.Optional[AmazonWebServicesProvider]
     azure: typing.Optional[AzureProvider]
@@ -495,6 +511,7 @@ class Main(Base):
     theme: Theme
     profiles: Profiles
     environments: typing.Dict[str, CondaEnvironment]
+    conda_store: typing.Optional[CondaStore]
     argo_workflows: typing.Optional[ArgoWorkflows]
     kbatch: typing.Optional[KBatch]
     monitoring: typing.Optional[Monitoring]

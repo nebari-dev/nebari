@@ -14,6 +14,7 @@ repos:
   - id: check-yaml
     # jinja2 templates for helm charts
     exclude: 'qhub/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)'
+    args: [--allow-multiple-documents]
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.1.0
@@ -52,17 +53,6 @@ repos:
   - id: terraform_fmt
     args:
       - --args=-write=true
-
-# docker
-- repo: https://github.com/hadolint/hadolint.git
-  rev: v2.10.0
-  hooks:
-  - id: hadolint-docker
-    entry: hadolint/hadolint:v2.10.0 hadolint
-    args: [
-      "--failure-threshold", "info",    # default: info
-      "--ignore", "DL3048",    # style complaint: Invalid Label Key
-    ]
 
 # markdown
 - repo: https://github.com/executablebooks/mdformat

@@ -3,6 +3,8 @@ import os
 import tempfile
 from urllib.parse import urlencode
 
+from qhub.constants import DEFAULT_CONDA_STORE_IMAGE_TAG
+
 
 def stage_01_terraform_state(stage_outputs, config):
     if config["provider"] == "do":
@@ -36,7 +38,14 @@ def stage_01_terraform_state(stage_outputs, config):
 
 def stage_02_infrastructure(stage_outputs, config):
     if config["provider"] == "local":
-        return {"kube_context": config["local"].get("kube_context")}
+        return {
+            "kubeconfig_filename": os.path.join(
+                tempfile.gettempdir(), "QHUB_KUBECONFIG"
+            ),
+            "kube_context": config["local"].get("kube_context"),
+        }
+    elif config["provider"] == "existing":
+        return {"kube_context": config["existing"].get("kube_context")}
     elif config["provider"] == "do":
         return {
             "name": config["project_name"],
@@ -165,6 +174,8 @@ def _calculate_note_groups(config):
             group: {"key": "doks.digitalocean.com/node-pool", "value": group}
             for group in ["general", "user", "worker"]
         }
+    elif config["provider"] == "existing":
+        return config["existing"].get("node_selectors")
     else:
         return config["local"]["node_selectors"]
 
@@ -254,6 +265,15 @@ def stage_07_kubernetes_services(stage_outputs, config):
         # conda-store
         "conda-store-environments": config["environments"],
         "conda-store-filesystem-storage": config["storage"]["conda_store"],
+        "conda-store-extra-settings": config.get("conda_store", {}).get(
+            "extra_settings", {}
+        ),
+        "conda-store-extra-config": config.get("conda_store", {}).get(
+            "extra_config", ""
+        ),
+        "conda-store-image-tag": config.get("conda-store", {}).get(
+            "image_tag", DEFAULT_CONDA_STORE_IMAGE_TAG
+        ),
         # jupyterhub
         "cdsdashboards": config["cdsdashboards"],
         "jupyterhub-theme": jupyterhub_theme,
