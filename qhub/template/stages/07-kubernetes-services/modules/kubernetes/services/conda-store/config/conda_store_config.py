@@ -52,6 +52,7 @@ c.CondaStoreServer.enable_registry = True
 c.CondaStoreServer.enable_metrics = True
 c.CondaStoreServer.address = "0.0.0.0"
 c.CondaStoreServer.port = 5000
+c.CondaStoreServer.behind_proxy = True
 # This MUST start with `/`
 c.CondaStoreServer.url_prefix = "/conda-store"
 
