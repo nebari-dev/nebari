@@ -14,6 +14,7 @@ on:
   push:
     branches:
       - main
+      - develop
     paths:
       - ".github/workflows/test-provider.yaml"
       - "tests/**"
