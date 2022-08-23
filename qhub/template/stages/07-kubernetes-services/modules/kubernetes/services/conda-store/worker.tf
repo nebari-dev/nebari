@@ -1,3 +1,7 @@
+locals {
+  home_conda = "/home/conda"
+}
+
 resource "kubernetes_service" "nfs" {
   metadata {
     name      = "${var.name}-conda-store-nfs"
@@ -102,6 +106,25 @@ resource "kubernetes_deployment" "worker" {
           }
         }
 
+        init_container {
+          command = [
+            "/bin/chown",
+            "-R",
+            "1000:1000",
+            locals.home_conda
+          ]
+          image = "busybox:latest"
+          name  = "chown-conda-store-home"
+          security_context {
+            privileged = true
+          }
+          volume_mount {
+            mount_path        = [locals.home_conda]
+            mount_propagation = null
+            name              = storage
+          }
+        }
+
         container {
           name  = "conda-store-worker"
           image = "${var.conda-store-image}:${var.conda-store-image-tag}"
@@ -124,7 +147,7 @@ resource "kubernetes_deployment" "worker" {
 
           volume_mount {
             name       = "storage"
-            mount_path = "/home/conda"
+            mount_path = locals.home_conda
           }
 
           volume_mount {
@@ -192,6 +215,10 @@ resource "kubernetes_deployment" "worker" {
             # claim_name = kubernetes_persistent_volume_claim.main.metadata.0.name
             claim_name = "${var.name}-conda-store-storage"
           }
+        }
+
+        security_context {
+          fs_group = 1000
         }
       }
     }
