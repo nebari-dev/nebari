@@ -111,7 +111,7 @@ resource "kubernetes_deployment" "worker" {
             "/bin/chown",
             "-R",
             "1000:1000",
-            locals.home_conda
+            local.home_conda
           ]
           image = "busybox:latest"
           name  = "chown-conda-store-home"
@@ -119,7 +119,7 @@ resource "kubernetes_deployment" "worker" {
             privileged = true
           }
           volume_mount {
-            mount_path = [locals.home_conda]
+            mount_path = [local.home_conda]
             name       = "storage"
           }
         }
@@ -146,7 +146,7 @@ resource "kubernetes_deployment" "worker" {
 
           volume_mount {
             name       = "storage"
-            mount_path = locals.home_conda
+            mount_path = local.home_conda
           }
 
           volume_mount {
