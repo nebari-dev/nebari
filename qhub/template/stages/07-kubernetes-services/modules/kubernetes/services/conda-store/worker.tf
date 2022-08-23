@@ -120,7 +120,7 @@ resource "kubernetes_deployment" "worker" {
           }
           volume_mount {
             mount_path = [locals.home_conda]
-            name       = storage
+            name       = "storage"
           }
         }
 
