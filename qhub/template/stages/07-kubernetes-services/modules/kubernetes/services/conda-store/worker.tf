@@ -119,9 +119,8 @@ resource "kubernetes_deployment" "worker" {
             privileged = true
           }
           volume_mount {
-            mount_path        = [locals.home_conda]
-            mount_propagation = null
-            name              = storage
+            mount_path = [locals.home_conda]
+            name       = storage
           }
         }
 
