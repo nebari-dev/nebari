@@ -35,11 +35,6 @@ variable "loglevel" {
   default     = "WARN"
 }
 
-variable "enable-certificates" {
-  description = "Enable certificates"
-  default     = false
-}
-
 variable "acme-email" {
   description = "ACME server email"
   default     = "costrouchov@quansight.com"
@@ -69,4 +64,11 @@ variable "load-balancer-annotations" {
   description = "Annotations for the load balancer"
   type        = map(string)
   default     = null
+}
+
+# current options: "default", "letsencrypt", "" (i.e. disabled)
+variable "certificate-service" {
+  description = "The certificate service to use"
+  type        = string
+  default     = "default"
 }

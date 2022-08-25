@@ -5,7 +5,7 @@ module "kubernetes-ingress" {
 
   node-group = var.node_groups.general
 
-  enable-certificates       = var.enable-certificates
+  certificate-service       = var.certificate-service
   acme-email                = var.acme-email
   acme-server               = var.acme-server
   certificate-secret-name   = var.certificate-secret-name
