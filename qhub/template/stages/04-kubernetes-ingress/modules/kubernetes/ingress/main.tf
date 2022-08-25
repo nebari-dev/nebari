@@ -255,7 +255,7 @@ resource "kubernetes_deployment" "main" {
             # Enable debug logging. Useful to work out why something might not be
             # working. Fetch logs of the pod.
             "--log.level=${var.loglevel}",
-            ], var.add-certificate
+            ], local.add-certificate
           )
 
           port {
