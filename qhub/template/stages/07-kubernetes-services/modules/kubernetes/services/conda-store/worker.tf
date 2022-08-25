@@ -194,8 +194,8 @@ resource "kubernetes_deployment" "worker" {
           }
         }
         security_context {
-          run_run_as_group = 0
-          run_as_user      = 0
+          run_as_group = 0
+          run_as_user  = 0
         }
       }
     }
