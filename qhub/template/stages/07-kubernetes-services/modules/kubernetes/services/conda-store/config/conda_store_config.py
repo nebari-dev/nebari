@@ -27,8 +27,8 @@ c.CondaStore.database_url = f"postgresql+psycopg2://{config['postgres-username']
 c.CondaStore.redis_url = (
     f"redis://:{config['redis-password']}@{config['redis-service']}:6379/0"
 )
-c.CondaStore.default_uid = 0
-c.CondaStore.default_gid = 0
+c.CondaStore.default_uid = 1000
+c.CondaStore.default_gid = 100
 c.CondaStore.default_permissions = "775"
 c.CondaStore.conda_included_packages = ["ipykernel"]
 
