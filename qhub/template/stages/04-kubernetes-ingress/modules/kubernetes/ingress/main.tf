@@ -1,8 +1,10 @@
 locals {
-  default = "${var.certificate-service}" == "default" ? [
+  default_cert = [
     "--entrypoints.websecure.http.tls.certResolver=default",
     "--entrypoints.minio.http.tls.certResolver=default",
-  ] : ""
+  ]
+  default = "${var.certificate-service}" == "default" ? local.default_cert : []
+  existing = "${var.certificate-service}" == "existing" ? local.default_cert : []
   letsencrypt = "${var.certificate-service}" == "letsencrypt" ? [
     "--entrypoints.websecure.http.tls.certResolver=letsencrypt",
     "--entrypoints.minio.http.tls.certResolver=letsencrypt",
@@ -10,8 +12,8 @@ locals {
     "--certificatesresolvers.letsencrypt.acme.email=${var.acme-email}",
     "--certificatesresolvers.letsencrypt.acme.storage=acme.json",
     "--certificatesresolvers.letsencrypt.acme.caserver=${var.acme-server}",
-  ] : ""
-  add-certificate = coalesce(local.default, local.letsencrypt, [""])
+  ] : []
+  add-certificate = coalesce(local.default, local.letsencrypt, [])
 }
 
 
