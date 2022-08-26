@@ -59,14 +59,15 @@ resource "kubernetes_service" "main" {
   wait_for_load_balancer = true
 
   metadata {
-    name      = "${var.name}-traefik-ingress"
-    namespace = var.namespace
+    name        = "${var.name}-traefik-ingress"
+    namespace   = var.namespace
+    annotations = var.load-balancer-annotations
   }
 
   spec {
-    selector = merge({
+    selector = {
       "app.kubernetes.io/component" = "traefik-ingress"
-    }, var.load-balancer-annotations)
+    }
 
     port {
       name        = "http"
