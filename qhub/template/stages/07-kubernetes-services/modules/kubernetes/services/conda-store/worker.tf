@@ -193,6 +193,10 @@ resource "kubernetes_deployment" "worker" {
             claim_name = "${var.name}-conda-store-storage"
           }
         }
+        security_context {
+          run_as_group = 0
+          run_as_user  = 0
+        }
       }
     }
   }
