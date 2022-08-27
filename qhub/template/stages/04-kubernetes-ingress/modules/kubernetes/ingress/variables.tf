@@ -69,5 +69,5 @@ variable "load-balancer-annotations" {
 variable "certificate-service" {
   description = "The certificate service to use"
   type        = string
-  default     = "default"
+  default     = "self-signed"
 }
