@@ -66,7 +66,6 @@ variable "load-balancer-annotations" {
   default     = null
 }
 
-# current options: "default", "letsencrypt", "" (i.e. disabled)
 variable "certificate-service" {
   description = "The certificate service to use"
   type        = string
