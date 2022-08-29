@@ -70,15 +70,14 @@ def check_cloud_provider_creds(cloud_provider: str):
             hide_input=True,
         )
 
-    elif (
-        cloud_provider == "AZURE"
-        and not os.environ.get("ARM_CLIENT_ID")
-        and not os.environ.get("ARM_CLIENT_SECRET")
-        and not os.environ.get("ARM_SUBSCRIPTION_ID")
-        and not os.environ.get("ARM_TENANT_ID")
+    elif cloud_provider == "AZURE" and (
+        not os.environ.get("ARM_CLIENT_ID")
+        or not os.environ.get("ARM_CLIENT_SECRET")
+        or not os.environ.get("ARM_SUBSCRIPTION_ID")
+        or not os.environ.get("ARM_TENANT_ID")
     ):
         print(
-            "Please generate your AWS keys at this link: [link=https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret#creating-a-service-principal-in-the-azure-portal][/link]"
+            "\nUnable to location AWS credentials, please generate your AWS keys at this link: [link=https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret#creating-a-service-principal-in-the-azure-portal][/link]"
         )
         os.environ["ARM_CLIENT_ID"] = typer.prompt(
             "Please enter your ARM_CLIENT_ID",
