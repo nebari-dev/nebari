@@ -28,5 +28,5 @@ variable "chart_version" {
 variable "overrides" {
   description = "Overrides for the helm chart values"
   type        = any
-  default     = []
+  default     = {}
 }
