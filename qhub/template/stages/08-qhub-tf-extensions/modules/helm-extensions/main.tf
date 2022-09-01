@@ -5,5 +5,5 @@ resource "helm_release" "custom-helm-deployment" {
   chart      = var.chart
   version    = var.chart_version
 
-  values = var.overrides
+  values = [jsonencode(var.overrides)]
 }
