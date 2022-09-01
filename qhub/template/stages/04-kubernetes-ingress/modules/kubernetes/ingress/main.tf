@@ -3,18 +3,20 @@ locals {
     "--entrypoints.websecure.http.tls.certResolver=default",
     "--entrypoints.minio.http.tls.certResolver=default",
   ]
-  self_signed = "${var.certificate-service}" == "self-signed" ? local.default_cert : []
-  existing    = "${var.certificate-service}" == "existing" ? local.default_cert : []
-  letsencrypt = "${var.certificate-service}" == "lets-encrypt" ? [
-    "--entrypoints.websecure.http.tls.certResolver=letsencrypt",
-    "--entrypoints.minio.http.tls.certResolver=letsencrypt",
-    "--certificatesresolvers.letsencrypt.acme.tlschallenge",
-    "--certificatesresolvers.letsencrypt.acme.email=${var.acme-email}",
-    "--certificatesresolvers.letsencrypt.acme.storage=acme.json",
-    "--certificatesresolvers.letsencrypt.acme.caserver=${var.acme-server}",
-  ] : []
-  disabled        = "${var.certificate-service}" == "disabled" ? [] : []
-  add-certificate = coalesce(local.self_signed, local.existing, local.letsencrypt, local.disabled)
+  certificate-settings = {
+    lets-encrypt = [
+      "--entrypoints.websecure.http.tls.certResolver=letsencrypt",
+      "--entrypoints.minio.http.tls.certResolver=letsencrypt",
+      "--certificatesresolvers.letsencrypt.acme.tlschallenge",
+      "--certificatesresolvers.letsencrypt.acme.email=${var.acme-email}",
+      "--certificatesresolvers.letsencrypt.acme.storage=acme.json",
+      "--certificatesresolvers.letsencrypt.acme.caserver=${var.acme-server}",
+    ]
+    self-signed = local.default_cert
+    existing    = local.default_cert
+    disabled    = []
+  }
+  add-certificate = local.certificate-settings[var.certificate-service]
 }
 
 
