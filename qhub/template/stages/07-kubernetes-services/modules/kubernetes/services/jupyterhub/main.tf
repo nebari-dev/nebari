@@ -12,7 +12,7 @@ resource "random_password" "proxy_secret_token" {
 
 
 resource "helm_release" "jupyterhub" {
-  name      = "jupyterhub-${var.name}"
+  name      = "jupyterhub-${var.namespace}"
   namespace = var.namespace
 
   repository = "https://jupyterhub.github.io/helm-chart/"
