@@ -26,18 +26,46 @@ def init(
         None,
         "--project-name",
         "--project",
-        "-p",
         prompt=True,
     ),
     domain_name: str = typer.Option(
         None,
         "--domain-name",
         "--domain",
-        "-d",
         prompt=True,
     ),
     auth_provider: str = typer.Option(
         "password",
+        prompt=True,
+        # callback=auth_provider_options
+    ),
+    namespace: str = typer.Option(
+        "dev",
+        prompt=True,
+        # callback=auth_provider_options
+    ),
+    repository: str = typer.Option(
+        None,
+        prompt=True,
+        # callback=auth_provider_options
+    ),
+    ci_provider: str = typer.Option(
+        "github-actions",
+        prompt=True,
+        # callback=auth_provider_options
+    ),
+    terraform_state: str = typer.Option(
+        "remote",
+        prompt=True,
+        # callback=auth_provider_options
+    ),
+    kubernetes_version: str = typer.Option(
+        "latest",
+        prompt=True,
+        # callback=auth_provider_options
+    ),
+    ssl_cert: str = typer.Option(
+        "email",
         prompt=True,
         # callback=auth_provider_options
     ),
@@ -46,10 +74,6 @@ def init(
     Initialize the nebari-config.yaml file.
 
     """
-    print(f"Cloud provider: {cloud_provider}")
-    print(f"Project name: {project_name}")
-    print(f"Domain name: {domain_name}")
-    print(f"Auth provider: {auth_provider}")
 
 
 @app.command()

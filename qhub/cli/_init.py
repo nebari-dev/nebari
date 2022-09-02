@@ -1,11 +1,17 @@
 import os
 
 import typer
+from rich import print
 
 from qhub.schema import ProviderEnum
 
 
 def check_cloud_provider_creds(cloud_provider: str):
+
+    print("[green]Initializing the Nebari 🚀 [/green]")
+    print(
+        "\n[green]Note: Values that the user assign for each arguments will be reflected in the [red]config.yaml[/red] file. Later you can update by using[blue] nebari update[/blue] command [/green]"
+    )
 
     cloud_provider = cloud_provider.lower()
 
@@ -14,7 +20,7 @@ def check_cloud_provider_creds(cloud_provider: str):
         or not os.environ.get("AWS_SECRET_ACCESS_KEY")
     ):
         print(
-            "\nUnable to location AWS credentials, please generate your AWS keys at this link: aws.com/..."
+            "Unable to location AWS credentials, please generate your AWS keys at this link:[blue] https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create.html[/blue]"
         )
         os.environ["AWS_ACCESS_KEY_ID"] = typer.prompt(
             "Please enter your AWS_ACCESS_KEY_ID",
