@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def provision_01_terraform_state(stage_outputs, config):
     directory = "stages/01-terraform-state"
 
-    if config["provider"] == "local":
+    if config["provider"] in {"existing", "local"}:
         stage_outputs[directory] = {}
     else:
         stage_outputs[directory] = terraform.deploy(
