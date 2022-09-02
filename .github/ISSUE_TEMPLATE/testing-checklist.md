@@ -12,7 +12,7 @@ assignees: ''
 
 *Use/modify this checklist as a more comprehensive list of core services to validate before cutting a major release.*
 
-## Test core services
+## Manual testing: core services
 
 If the integration tests for all of the cloud providers are successful, that is a good sign!
 However, the following core services still need to be manually validated (until we can automate them).
