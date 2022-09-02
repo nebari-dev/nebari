@@ -74,7 +74,6 @@ def init(
     Initialize the nebari-config.yaml file.
 
     """
-    
 
 
 @app.command()

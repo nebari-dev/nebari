@@ -7,10 +7,11 @@ from qhub.schema import ProviderEnum
 
 
 def check_cloud_provider_creds(cloud_provider: str):
-    
+
     print("[green]Initializing the Nebari 🚀 [/green]")
-    print("\n[green]Note: Values that the user assign for each arguments will be reflected in the [red]config.yaml[/red] file. Later you can update by using[blue] nebari update[/blue] command [/green]")
-    
+    print(
+        "\n[green]Note: Values that the user assign for each arguments will be reflected in the [red]config.yaml[/red] file. Later you can update by using[blue] nebari update[/blue] command [/green]"
+    )
 
     cloud_provider = cloud_provider.lower()
 
