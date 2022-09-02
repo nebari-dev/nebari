@@ -195,7 +195,10 @@ def guided_install(
     check_cloud_credentials(config)
 
     stage_outputs = {}
-    if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
+    if (
+        config["provider"] not in {"existing", "local"}
+        and config["terraform_state"]["type"] == "remote"
+    ):
         if skip_remote_state_provision:
             print("Skipping remote state provision")
         else:
