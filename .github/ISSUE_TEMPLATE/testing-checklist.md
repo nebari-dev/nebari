@@ -26,4 +26,6 @@ At minimum, the following services will need to be tested:
 - [ ] [Launch dask-gateway cluster, test auto-scaler and](https://nebari-docs.netlify.app/tutorials/using_dask)
   - [ ] [validate that the dask-labextention is working](https://nebari-docs.netlify.app/tutorials/using_dask#step-5---viewing-the-dashboard-inside-of-jupyterlab)
 - [ ] [Create a basic CDS Dashboard](https://nebari-docs.netlify.app/tutorials/creating-cds-dashboard)
-- [ ] [Open VS-Code extension and create a python file](https://nebari-docs.netlify.app/tutorials/using-vscode)
+- [ ] [Open VS-Code extension](https://nebari-docs.netlify.app/tutorials/using-vscode)
+  - [ ] [Add the Python extension](https://nebari-docs.netlify.app/tutorials/using-vscode#adding-extensions)
+  - [ ] [Create a `.py` file and run it](https://nebari-docs.netlify.app/tutorials/using-vscode#running-python-code)
