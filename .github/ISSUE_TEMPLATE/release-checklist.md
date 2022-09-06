@@ -60,6 +60,7 @@ Release captain responsible - <@gh_username>
 
 ## Cut the official release
 
+*These steps must be actioned in the order they appear in this checklist.*
 - [ ] [Tag, build and push docker images](https://github.com/nebari-dev/nebari-docker-images/releases/new)
 - [ ] [Update and cut release for `qhub-dask` meta package on Conda-Forge.](https://github.com/conda-forge/qhub-dask-feedstock)
 - [ ] [Cut PyPI release via GHA release workflow.](https://github.com/Quansight/qhub/releases/new)
