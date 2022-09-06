@@ -24,7 +24,7 @@ At minimum, the following services will need to be tested:
   - [ ] a conda environment in a shared namespace and,
   - [ ] a conda environment in your personal namespace
 - [ ] [Launch dask-gateway cluster, test auto-scaler and](https://nebari-docs.netlify.app/tutorials/using_dask)
-  - [ ] [validate that the dask-labextention is working](https://nebari-docs.netlify.app/tutorials/using_dask#step-5---viewing-the-dashboard-inside-of-jupyterlab)
+  - [ ] [Validate that the dask-labextention is working](https://nebari-docs.netlify.app/tutorials/using_dask#step-5---viewing-the-dashboard-inside-of-jupyterlab)
 - [ ] [Create a basic CDS Dashboard](https://nebari-docs.netlify.app/tutorials/creating-cds-dashboard)
 - [ ] [Open VS-Code extension](https://nebari-docs.netlify.app/tutorials/using-vscode)
   - [ ] [Add the Python extension](https://nebari-docs.netlify.app/tutorials/using-vscode#adding-extensions)
