@@ -130,7 +130,8 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
 c.CondaStoreServer.authentication_class = KeyCloakAuthentication
 c.AuthenticationBackend.predefined_tokens = {
-    service_token : service_permissions for service_token, service_permissions in config["service-tokens"].items()
+    service_token: service_permissions
+    for service_token, service_permissions in config["service-tokens"].items()
 }
 
 # ==================================

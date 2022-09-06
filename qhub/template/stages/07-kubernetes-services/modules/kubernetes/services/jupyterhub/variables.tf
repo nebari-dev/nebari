@@ -111,6 +111,11 @@ variable "cdsdashboards" {
   }
 }
 
+variable "conda-store-service-name" {
+  description = "Name of conda-store service"
+  type        = string
+}
+
 variable "conda-store-environments" {
   description = "conda environments from conda-store in filesystem namespace"
   type        = any

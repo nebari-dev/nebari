@@ -72,10 +72,10 @@ variable "services" {
   type        = map(any)
   default = {
     "cdsdashboards" = {
-           "primary_namespace": "cdsdashboards",
-           "role_bindings": {
-                "*/*": ["viewer"],
-           }
-     }
+      "primary_namespace" : "cdsdashboards",
+      "role_bindings" : {
+        "*/*" : ["viewer"],
+      }
+    }
   }
 }
