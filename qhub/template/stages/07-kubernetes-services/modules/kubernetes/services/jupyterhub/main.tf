@@ -24,6 +24,7 @@ resource "helm_release" "jupyterhub" {
     jsonencode({
       # custom values can be accessed via z2jh.get_config('custom.<path>')
       custom = {
+        external-url      = var.external-url
         theme             = var.theme
         profiles          = var.profiles
         cdsdashboards     = var.cdsdashboards
@@ -31,6 +32,7 @@ resource "helm_release" "jupyterhub" {
         shared-pvc        = var.shared-pvc
         conda-store-pvc   = var.conda-store-pvc
         conda-store-mount = var.conda-store-mount
+        conda-store-cdsdashboards = var.conda-store-cdsdashboard-token
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace

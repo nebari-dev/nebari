@@ -117,6 +117,12 @@ variable "conda-store-environments" {
   default     = {}
 }
 
+variable "conda-store-cdsdashboard-token" {
+  description = "Token for cdsdashboards to use conda-store"
+  type        = string
+  default     = ""
+}
+
 variable "jupyterhub-logout-redirect-url" {
   description = "Next redirect destination following a Keycloak logout"
   type        = string
