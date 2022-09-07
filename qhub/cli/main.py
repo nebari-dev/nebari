@@ -1,4 +1,6 @@
 import typer
+from click import Context
+from typer.core import TyperGroup
 
 from qhub.cli._init import check_cloud_provider_creds
 from qhub.schema import ProviderEnum
@@ -8,9 +10,17 @@ def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
 
 
+class OrderCommands(TyperGroup):
+    def list_commands(self, ctx: Context):
+        """Return list of commands in the order appear."""
+        return list(self.commands)
+
+
 app = typer.Typer(
+    cls=OrderCommands,
     help="Nebari CLI 🪴",
     add_completion=False,
+    no_args_is_help=True,
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 
@@ -27,6 +37,7 @@ def init(
         "--project-name",
         "--project",
         prompt=True,
+        # callback=project_name_convention
     ),
     domain_name: str = typer.Option(
         None,
@@ -107,10 +118,6 @@ def destroy():
     Destroy the nebari
     """
     print("Destroy the Nebari")
-
-
-def main():
-    app()
 
 
 if __name__ == "__main__":
