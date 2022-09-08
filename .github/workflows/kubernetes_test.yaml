@@ -33,9 +33,13 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: "Set QHUB_IMAGE_TAG=develop"
+      - name: Extract branch name
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+      - name: Set QHUB_IMAGE_TAG=${{ steps.extract_branch.outputs.branch }}
         run: |
-          echo "QHUB_IMAGE_TAG=develop" >> "$GITHUB_ENV"
+          echo "QHUB_IMAGE_TAG=${{ steps.extract_branch.outputs.branch }}" >> "$GITHUB_ENV"
           echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           echo "GITHUB_REF: ${GITHUB_REF}"
