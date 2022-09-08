@@ -97,7 +97,7 @@ def provision_ingress_dns(
     dns_provider: str,
     dns_auto_provision: bool,
     disable_prompt: bool = True,
-    check: bool = True,
+    check: bool = False,
 ):
     directory = "stages/04-kubernetes-ingress"
 
@@ -189,6 +189,7 @@ def guided_install(
     dns_provider,
     dns_auto_provision,
     disable_prompt=False,
+    disable_checks=False,
     skip_remote_state_provision=False,
 ):
     # 01 Check Environment Variables
@@ -204,30 +205,33 @@ def guided_install(
         else:
             provision_01_terraform_state(stage_outputs, config)
 
-    provision_02_infrastructure(stage_outputs, config)
+    provision_02_infrastructure(stage_outputs, config, disable_checks)
 
     with kubernetes_provider_context(
         stage_outputs["stages/02-infrastructure"]["kubernetes_credentials"]["value"]
     ):
-        provision_03_kubernetes_initialize(stage_outputs, config)
-        provision_04_kubernetes_ingress(stage_outputs, config)
+        provision_03_kubernetes_initialize(stage_outputs, config, disable_checks)
+        provision_04_kubernetes_ingress(stage_outputs, config, disable_checks)
         provision_ingress_dns(
             stage_outputs,
             config,
             dns_provider=dns_provider,
             dns_auto_provision=dns_auto_provision,
             disable_prompt=disable_prompt,
+            check=disable_checks,
         )
-        provision_05_kubernetes_keycloak(stage_outputs, config)
+        provision_05_kubernetes_keycloak(stage_outputs, config, disable_checks)
 
         with keycloak_provider_context(
             stage_outputs["stages/05-kubernetes-keycloak"]["keycloak_credentials"][
                 "value"
             ]
         ):
-            provision_06_kubernetes_keycloak_configuration(stage_outputs, config)
-            provision_07_kubernetes_services(stage_outputs, config)
-            provision_08_qhub_tf_extensions(stage_outputs, config)
+            provision_06_kubernetes_keycloak_configuration(
+                stage_outputs, config, disable_checks
+            )
+            provision_07_kubernetes_services(stage_outputs, config, disable_checks)
+            provision_08_qhub_tf_extensions(stage_outputs, config, disable_checks)
 
             print("QHub deployed successfully")
 
@@ -257,6 +261,7 @@ def deploy_configuration(
     dns_provider,
     dns_auto_provision,
     disable_prompt,
+    disable_checks,
     skip_remote_state_provision,
 ):
     if config.get("prevent_deploy", False):
@@ -279,6 +284,11 @@ def deploy_configuration(
 
     logger.info(f'All qhub endpoints will be under https://{config["domain"]}')
 
+    if disable_checks:
+        logger.warning(
+            "The validation checks at the end of each stage have been disabled"
+        )
+
     with timer(logger, "deploying QHub"):
         try:
             guided_install(
@@ -286,6 +296,7 @@ def deploy_configuration(
                 dns_provider,
                 dns_auto_provision,
                 disable_prompt,
+                disable_checks,
                 skip_remote_state_provision,
             )
         except subprocess.CalledProcessError as e:
