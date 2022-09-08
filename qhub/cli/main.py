@@ -1,7 +1,7 @@
 import typer
 
 from qhub.cli._init import check_cloud_provider_creds
-from qhub.schema import ProviderEnum
+from qhub.schema import ProviderEnum, verify
 
 
 def enum_to_list(enum_cls):
@@ -74,16 +74,20 @@ def init(
     Initialize the nebari-config.yaml file.
 
     """
-    
 
 
 @app.command()
-def validate():
+def validate(
+    config: str = typer.Argument(
+        ...,
+        help="qhub configuration yaml file (deprecated - please pass in as -c/--config flag)",
+        callback=verify,
+    ),
+):
     """
     Validate the config.yaml file.
 
     """
-    print("Validate the config.yaml file")
 
 
 @app.command()
