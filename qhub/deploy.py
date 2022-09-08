@@ -30,7 +30,7 @@ def provision_01_terraform_state(stage_outputs, config):
         )
 
 
-def provision_02_infrastructure(stage_outputs, config, check=True):
+def provision_02_infrastructure(stage_outputs, config, disable_checks=False):
     """Generalized method to provision infrastructure
 
     After successful deployment the following properties are set on
@@ -52,11 +52,11 @@ def provision_02_infrastructure(stage_outputs, config, check=True):
         input_vars=input_vars.stage_02_infrastructure(stage_outputs, config),
     )
 
-    if check:
+    if not disable_checks:
         checks.stage_02_infrastructure(stage_outputs, config)
 
 
-def provision_03_kubernetes_initialize(stage_outputs, config, check=True):
+def provision_03_kubernetes_initialize(stage_outputs, config, disable_checks=False):
     directory = "stages/03-kubernetes-initialize"
 
     stage_outputs[directory] = terraform.deploy(
@@ -64,11 +64,11 @@ def provision_03_kubernetes_initialize(stage_outputs, config, check=True):
         input_vars=input_vars.stage_03_kubernetes_initialize(stage_outputs, config),
     )
 
-    if check:
+    if not disable_checks:
         checks.stage_03_kubernetes_initialize(stage_outputs, config)
 
 
-def provision_04_kubernetes_ingress(stage_outputs, config, check=True):
+def provision_04_kubernetes_ingress(stage_outputs, config, disable_checks=False):
     directory = "stages/04-kubernetes-ingress"
 
     stage_outputs[directory] = terraform.deploy(
@@ -76,7 +76,7 @@ def provision_04_kubernetes_ingress(stage_outputs, config, check=True):
         input_vars=input_vars.stage_04_kubernetes_ingress(stage_outputs, config),
     )
 
-    if check:
+    if not disable_checks:
         checks.stage_04_kubernetes_ingress(stage_outputs, config)
 
 
@@ -97,7 +97,7 @@ def provision_ingress_dns(
     dns_provider: str,
     dns_auto_provision: bool,
     disable_prompt: bool = True,
-    check: bool = False,
+    disable_checks: bool = False,
 ):
     directory = "stages/04-kubernetes-ingress"
 
@@ -130,11 +130,11 @@ def provision_ingress_dns(
             f'"{config["domain"]}" [Press Enter when Complete]'
         )
 
-    if check:
+    if not disable_checks:
         checks.check_ingress_dns(stage_outputs, config, disable_prompt)
 
 
-def provision_05_kubernetes_keycloak(stage_outputs, config, check=True):
+def provision_05_kubernetes_keycloak(stage_outputs, config, disable_checks=False):
     directory = "stages/05-kubernetes-keycloak"
 
     stage_outputs[directory] = terraform.deploy(
@@ -142,11 +142,13 @@ def provision_05_kubernetes_keycloak(stage_outputs, config, check=True):
         input_vars=input_vars.stage_05_kubernetes_keycloak(stage_outputs, config),
     )
 
-    if check:
+    if not disable_checks:
         checks.stage_05_kubernetes_keycloak(stage_outputs, config)
 
 
-def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=True):
+def provision_06_kubernetes_keycloak_configuration(
+    stage_outputs, config, disable_checks=False
+):
     directory = "stages/06-kubernetes-keycloak-configuration"
 
     stage_outputs[directory] = terraform.deploy(
@@ -156,11 +158,11 @@ def provision_06_kubernetes_keycloak_configuration(stage_outputs, config, check=
         ),
     )
 
-    if check:
+    if not disable_checks:
         checks.stage_06_kubernetes_keycloak_configuration(stage_outputs, config)
 
 
-def provision_07_kubernetes_services(stage_outputs, config, check=True):
+def provision_07_kubernetes_services(stage_outputs, config, disable_checks=False):
     directory = "stages/07-kubernetes-services"
 
     stage_outputs[directory] = terraform.deploy(
@@ -168,11 +170,11 @@ def provision_07_kubernetes_services(stage_outputs, config, check=True):
         input_vars=input_vars.stage_07_kubernetes_services(stage_outputs, config),
     )
 
-    if check:
+    if not disable_checks:
         checks.stage_07_kubernetes_services(stage_outputs, config)
 
 
-def provision_08_qhub_tf_extensions(stage_outputs, config, check=True):
+def provision_08_qhub_tf_extensions(stage_outputs, config, disable_checks=False):
     directory = "stages/08-qhub-tf-extensions"
 
     stage_outputs[directory] = terraform.deploy(
@@ -180,7 +182,7 @@ def provision_08_qhub_tf_extensions(stage_outputs, config, check=True):
         input_vars=input_vars.stage_08_qhub_tf_extensions(stage_outputs, config),
     )
 
-    if check:
+    if not disable_checks:
         pass
 
 
