@@ -108,6 +108,7 @@ def stage_02_infrastructure(stage_outputs, config):
                     "max_size": value["max_nodes"],
                     "gpu": value.get("gpu", False),
                     "instance_type": value["instance"],
+                    "single_subnet": value.get("single_subnet", False),
                 }
                 for key, value in config["amazon_web_services"]["node_groups"].items()
             ],
