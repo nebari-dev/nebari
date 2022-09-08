@@ -220,7 +220,7 @@ def guided_install(
             dns_provider=dns_provider,
             dns_auto_provision=dns_auto_provision,
             disable_prompt=disable_prompt,
-            check=disable_checks,
+            disable_checks=disable_checks,
         )
         provision_05_kubernetes_keycloak(stage_outputs, config, disable_checks)
 
