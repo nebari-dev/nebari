@@ -48,8 +48,16 @@ variable "load-balancer-annotations" {
   default     = null
 }
 
+
 variable "certificate-service" {
   description = "The certificate service to use"
   type        = string
   default     = "self-signed"
+}
+
+
+variable "additional-arguments" {
+  description = "Additional command line arguments to supply to traefik ingress"
+  type        = list(string)
+  default     = []
 }
