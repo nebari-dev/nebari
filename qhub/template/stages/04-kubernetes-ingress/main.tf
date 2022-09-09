@@ -11,4 +11,5 @@ module "kubernetes-ingress" {
   certificate-secret-name   = var.certificate-secret-name
   load-balancer-annotations = var.load-balancer-annotations
   load-balancer-ip          = var.load-balancer-ip
+  additional-arguments      = var.additional-arguments
 }

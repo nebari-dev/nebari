@@ -71,3 +71,9 @@ variable "certificate-service" {
   type        = string
   default     = "self-signed"
 }
+
+variable "additional-arguments" {
+  description = "Additional command line arguments to supply to traefik ingress"
+  type        = list(string)
+  default     = []
+}
