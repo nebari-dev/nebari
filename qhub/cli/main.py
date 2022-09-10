@@ -88,12 +88,19 @@ def init(
 
 
 @app.command()
-def validate():
+def validate(
+    config: str = typer.Option(
+        "--config",
+        help="qhub configuration yaml file (deprecated - please pass in as -c/--config flag)",
+        ##required=true,
+        callback=verify,
+    ),
+):
     """
     Validate the config.yaml file.
 
     """
-    print("Validate the config.yaml file")
+    ##print("Validate the config.yaml file")
 
 
 @app.command()
