@@ -3,8 +3,9 @@ from click import Context
 from typer.core import TyperGroup
 
 from qhub.cli._init import check_cloud_provider_creds
-from qhub.schema import ProviderEnum
-
+from qhub.schema import ProviderEnum, verify
+from qhub.utils import load_yaml
+import pathlib
 
 def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
@@ -34,7 +35,7 @@ def init(
     ),
     project_name: str = typer.Option(
         None,
-        "--project-name",
+       "--project-name",
         "--project",
         prompt=True,
         # callback=project_name_convention
@@ -82,17 +83,23 @@ def init(
     ),
 ):
     """
-    Initialize the nebari-config.yaml file.
+    Initialize nebari-config.yaml file.
 
     """
 
-
 @app.command()
 def validate(
-    config: str = typer.Option(
-        "--config",
-        help="qhub configuration yaml file (deprecated - please pass in as -c/--config flag)",
+    config_filename: str = typer.Argument(
+        ...,
+        help="qhub configuration yaml file",
         ##required=true,
+        callback=load_yaml,
+    ),
+    config: str = typer.Option(
+        None,
+        "--config", 
+        "-c",
+        help="qhub configuration yaml file, please pass in as -c/--config flag",
         callback=verify,
     ),
 ):
@@ -103,12 +110,12 @@ def validate(
     ##print("Validate the config.yaml file")
 
 
+
 @app.command()
 def render():
     """
     Render the config.yaml file.
     """
-    print("Render the congig.yaml file")
 
 
 @app.command()
