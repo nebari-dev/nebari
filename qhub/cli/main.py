@@ -1,3 +1,5 @@
+import pathlib
+
 import typer
 from click import Context
 from typer.core import TyperGroup
@@ -5,7 +7,7 @@ from typer.core import TyperGroup
 from qhub.cli._init import check_cloud_provider_creds
 from qhub.schema import ProviderEnum, verify
 from qhub.utils import load_yaml
-import pathlib 
+
 
 def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
@@ -35,7 +37,7 @@ def init(
     ),
     project_name: str = typer.Option(
         None,
-       "--project-name",
+        "--project-name",
         "--project",
         prompt=True,
         # callback=project_name_convention
@@ -87,26 +89,24 @@ def init(
 
     """
 
+
 @app.command()
 def validate(
-
     config: str = typer.Option(
         None,
-        "--config", 
+        "--config",
         "-c",
         help="qhub configuration yaml file path, please pass in as -c/--config flag",
     ),
     enable_commenting: bool = typer.Option(
-       False,
-       "--enable_commenting",
-       help="Toggle PR commenting on GitHub Actions"
-    )
+        False, "--enable_commenting", help="Toggle PR commenting on GitHub Actions"
+    ),
 ):
     """
     Validate the config.yaml file.
 
     """
-    #print(f"Validate the {config}")
+    # print(f"Validate the {config}")
 
     config_filename = pathlib.Path(config)
     if not config_filename.is_file():
@@ -123,7 +123,6 @@ def validate(
     else:
         verify(config)
         print("Successfully validated configuration")
-
 
 
 @app.command()
