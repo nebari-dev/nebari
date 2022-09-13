@@ -548,14 +548,15 @@ resource "kubernetes_manifest" "middleware" {
                       type = "object"
                       properties = {
                         customRequestHeaders = {
-                          properties = {
-                            testHeader = {
-                              type = "string"
-                            }
+                          additionalProperties = {
+                            type = "string"
                           }
                           type = "object"
                         }
                         customResponseHeaders = {
+                          additionalProperties = {
+                            type = "string"
+                          }
                           type = "object"
                         }
                         accessControlAllowCredentials = {
@@ -616,10 +617,8 @@ resource "kubernetes_manifest" "middleware" {
                           type = "string"
                         }
                         sslProxyHeaders = {
-                          properties = {
-                            X-Forwarded-Proto = {
-                              type = "string"
-                            }
+                          additionalProperties = {
+                            type = "string"
                           }
                           type = "object"
                         }
