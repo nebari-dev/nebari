@@ -140,15 +140,15 @@ def render(
         "--config",
         help="qhub configuration yaml file",
     ),
-    # dry_run: bool = typer.Option(
-    #     False,
-    #     "--dry-run",
-    #     help="simulate rendering files without actually writing or updating any files",
-    # )
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="simulate rendering files without actually writing or updating any files",
+    )
     # TODO: debug why dry-run is not working?
 ):
     """
-    Render the config.yaml file.
+    Dynamically render terraform scripts and other files from the nebari-config.yaml
     """
     config_filename = pathlib.Path(config)
 
@@ -161,7 +161,7 @@ def render(
 
     verify(config_yaml)
 
-    render_template(output, config, force=True, dry_run=False)
+    render_template(output, config, force=True, dry_run=dry_run)
 
 
 @app.command()
