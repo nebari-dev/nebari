@@ -548,6 +548,11 @@ resource "kubernetes_manifest" "middleware" {
                       type = "object"
                       properties = {
                         customRequestHeaders = {
+                          properties = {
+                            testHeader = {
+                              type = "string"
+                            }
+                          }
                           type = "object"
                         }
                         customResponseHeaders = {
@@ -611,6 +616,11 @@ resource "kubernetes_manifest" "middleware" {
                           type = "string"
                         }
                         sslProxyHeaders = {
+                          properties = {
+                            X-Forwarded-Proto = {
+                              type = "string"
+                            }
+                          }
                           type = "object"
                         }
                         sslForceHost = {
