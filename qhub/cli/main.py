@@ -126,10 +126,41 @@ def validate(
 
 
 @app.command()
-def render():
+def render(
+    output: str = typer.Option(
+        "./",
+        "-o",
+        "--output",
+        help="output directory",
+    ),
+    config: str = typer.Option(
+        None,
+        "-c",
+        "--config",
+        help="qhub configuration yaml file",
+    ),
+    # dry_run: bool = typer.Option(
+    #     False,
+    #     "--dry-run",
+    #     help="simulate rendering files without actually writing or updating any files",
+    # )
+    # TODO: debug why dry-run is not working?
+):
     """
     Render the config.yaml file.
     """
+    config_filename = pathlib.Path(config)
+
+    if not config_filename.is_file():
+        raise ValueError(
+            f"passed in configuration filename={config_filename} must exist"
+        )
+
+    config_yaml = load_yaml(config_filename)
+
+    verify(config_yaml)
+
+    render_template(output, config, force=True, dry_run=False)
 
 
 @app.command()
