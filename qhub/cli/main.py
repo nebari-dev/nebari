@@ -5,6 +5,7 @@ from click import Context
 from typer.core import TyperGroup
 
 from qhub.cli._init import check_cloud_provider_creds
+from qhub.render import render_template
 from qhub.schema import ProviderEnum, verify
 from qhub.utils import load_yaml
 
