@@ -5,6 +5,8 @@ from click import Context
 from typer.core import TyperGroup
 
 from qhub.cli._init import check_cloud_provider_creds
+from qhub.deploy import deploy_configuration
+from qhub.destroy import destroy_configuration
 from qhub.render import render_template
 from qhub.schema import ProviderEnum, verify
 from qhub.utils import load_yaml
@@ -138,14 +140,13 @@ def render(
         None,
         "-c",
         "--config",
-        help="qhub configuration yaml file",
+        help="nebari configuration yaml file path",
     ),
     dry_run: bool = typer.Option(
         False,
         "--dry-run",
         help="simulate rendering files without actually writing or updating any files",
-    )
-    # TODO: debug why dry-run is not working?
+    ),
 ):
     """
     Dynamically render terraform scripts and other files from the nebari-config.yaml
@@ -165,19 +166,86 @@ def render(
 
 
 @app.command()
-def deploy():
+def deploy(
+    config: str = typer.Option(
+        ...,
+        "--config",
+        "-c",
+        help="nebari configuration yaml file path",
+    ),
+    output: str = typer.Option(
+        "./",
+        "-o",
+        "--output",
+        help="output directory",
+    ),
+    disable_prompt: bool = typer.Option(
+        False,
+        "--disable-prompt",
+        help="Disable human intervention",
+    ),
+    disable_render: bool = typer.Option(
+        False,
+        "--disable-render",
+        help="Disable auto-rendering in deploy stage",
+    ),
+):
     """
     Deploy the nebari
     """
-    print("Deploy the Nebari")
+    config_filename = pathlib.Path(config)
+    if not config_filename.is_file():
+        raise ValueError(
+            f"passed in configuration filename={config_filename} must exist"
+        )
+
+    config_yaml = load_yaml(config_filename)
+
+    verify(config_yaml)
+
+    if not disable_render:
+        render_template(output, config, force=True)
+
+    deploy_configuration(
+        config_yaml,
+        dns_provider=False,
+        dns_auto_provision=False,
+        disable_prompt=disable_prompt,
+        skip_remote_state_provision=False,
+    )
 
 
 @app.command()
-def destroy():
+def destroy(
+    config: str = typer.Option(..., "-c", "--config", help="qhub configuration"),
+    output: str = typer.Option(
+        "./" "-o",
+        "--output",
+        help="output directory",
+    ),
+    disable_render: bool = typer.Option(
+        False,
+        "--disable-render",
+        help="Disable auto-rendering before destroy",
+    ),
+):
     """
     Destroy the nebari
     """
-    print("Destroy the Nebari")
+    config_filename = pathlib.Path(config)
+    if not config_filename.is_file():
+        raise ValueError(
+            f"passed in configuration filename={config_filename} must exist"
+        )
+
+    config_yaml = load_yaml(config_filename)
+
+    verify(config_yaml)
+
+    if not disable_render:
+        render_template(output, config, force=True)
+
+    destroy_configuration(config_yaml)
 
 
 if __name__ == "__main__":
