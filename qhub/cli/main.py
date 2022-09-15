@@ -232,20 +232,26 @@ def destroy(
     """
     Destroy the nebari
     """
-    config_filename = pathlib.Path(config)
-    if not config_filename.is_file():
-        raise ValueError(
-            f"passed in configuration filename={config_filename} must exist"
-        )
+    delete = typer.confirm("Are you sure you want to destroy it?")
 
-    config_yaml = load_yaml(config_filename)
+    if not delete:
+        print("not destroying!")
+        raise typer.Abort()
+    else:
+        config_filename = pathlib.Path(config)
+        if not config_filename.is_file():
+            raise ValueError(
+                f"passed in configuration filename={config_filename} must exist"
+            )
 
-    verify(config_yaml)
+        config_yaml = load_yaml(config_filename)
 
-    if not disable_render:
-        render_template(output, config, force=True)
+        verify(config_yaml)
 
-    destroy_configuration(config_yaml)
+        if not disable_render:
+            render_template(output, config, force=True)
+
+        destroy_configuration(config_yaml)
 
 
 if __name__ == "__main__":
