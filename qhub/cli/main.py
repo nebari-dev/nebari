@@ -4,9 +4,9 @@ import typer
 from click import Context
 from typer.core import TyperGroup
 
-from qhub.cli._init import check_cloud_provider_creds
+from qhub.cli._init import check_auth_provider_creds, check_cloud_provider_creds
 from qhub.render import render_template
-from qhub.schema import ProviderEnum, verify
+from qhub.schema import AuthenticationEnum, ProviderEnum, verify
 from qhub.utils import load_yaml
 
 
@@ -37,27 +37,28 @@ def init(
         callback=check_cloud_provider_creds,
     ),
     project_name: str = typer.Option(
-        None,
+        ...,
         "--project-name",
         "--project",
-        prompt=True,
-        # callback=project_name_convention
+        "-p",
+        prompt="Please enter your desired project name",
     ),
     domain_name: str = typer.Option(
-        None,
+        ...,
         "--domain-name",
         "--domain",
-        prompt=True,
+        "-d",
+        prompt="Please enter your desired domain name",
     ),
     auth_provider: str = typer.Option(
         "password",
-        prompt=True,
-        # callback=auth_provider_options
+        prompt="Please enter your desired authentication provider",
+        help=f"options: {enum_to_list(AuthenticationEnum)}",
+        callback=check_auth_provider_creds,
     ),
     namespace: str = typer.Option(
         "dev",
         prompt=True,
-        # callback=auth_provider_options
     ),
     repository: str = typer.Option(
         None,
@@ -86,9 +87,9 @@ def init(
     ),
 ):
     """
-    Initialize nebari-config.yaml file.
-
+    Create and initialize your nebari-config.yaml file.
     """
+    pass
 
 
 @app.command()
