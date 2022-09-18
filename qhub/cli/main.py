@@ -4,10 +4,21 @@ import typer
 from click import Context
 from typer.core import TyperGroup
 
-from qhub.cli._init import check_auth_provider_creds, check_cloud_provider_creds
+from qhub.cli._init import (
+    check_auth_provider_creds,
+    check_cloud_provider_creds,
+    check_project_name,
+)
+from qhub.initialize import render_config
 from qhub.render import render_template
-from qhub.schema import AuthenticationEnum, ProviderEnum, verify
-from qhub.utils import load_yaml
+from qhub.schema import (
+    AuthenticationEnum,
+    CiEnum,
+    ProviderEnum,
+    TerraformStateEnum,
+    verify,
+)
+from qhub.utils import QHUB_DASK_VERSION, QHUB_IMAGE_TAG, load_yaml, yaml
 
 
 def enum_to_list(enum_cls):
@@ -41,20 +52,24 @@ def init(
         "--project-name",
         "--project",
         "-p",
-        prompt="Please enter your desired project name",
+        prompt=True,
+        callback=check_project_name,
     ),
     domain_name: str = typer.Option(
         ...,
         "--domain-name",
         "--domain",
         "-d",
-        prompt="Please enter your desired domain name",
+        prompt=True,
     ),
     auth_provider: str = typer.Option(
         "password",
-        prompt="Please enter your desired authentication provider",
+        prompt=True,
         help=f"options: {enum_to_list(AuthenticationEnum)}",
         callback=check_auth_provider_creds,
+    ),
+    auth_auto_provision: bool = typer.Option(
+        False,
     ),
     namespace: str = typer.Option(
         "dev",
@@ -63,33 +78,65 @@ def init(
     repository: str = typer.Option(
         None,
         prompt=True,
-        # callback=auth_provider_options
+    ),
+    repository_auto_provision: bool = typer.Option(
+        False,
     ),
     ci_provider: str = typer.Option(
-        "github-actions",
+        None,
         prompt=True,
+        help=f"options: {enum_to_list(CiEnum)}",
         # callback=auth_provider_options
     ),
     terraform_state: str = typer.Option(
-        "remote",
-        prompt=True,
-        # callback=auth_provider_options
+        "remote", prompt=True, help=f"options {enum_to_list(TerraformStateEnum)}"
     ),
     kubernetes_version: str = typer.Option(
         "latest",
         prompt=True,
         # callback=auth_provider_options
     ),
-    ssl_cert: str = typer.Option(
-        "email",
+    ssl_cert_email: str = typer.Option(
+        None,
         prompt=True,
-        # callback=auth_provider_options
     ),
 ):
     """
     Create and initialize your nebari-config.yaml file.
     """
-    pass
+    if QHUB_IMAGE_TAG:
+        print(
+            f"Modifying the image tags for the `default_images`, setting tags equal to: {QHUB_IMAGE_TAG}"
+        )
+
+    if QHUB_DASK_VERSION:
+        print(
+            f"Modifying the version of the `qhub_dask` package, setting version equal to: {QHUB_DASK_VERSION}"
+        )
+
+    config = render_config(
+        cloud_provider=cloud_provider,
+        project_name=project_name,
+        qhub_domain=domain_name,
+        auth_provider=auth_provider,
+        auth_auto_provision=auth_auto_provision,
+        ci_provider=ci_provider,
+        namespace=namespace,
+        repository=repository,
+        repository_auto_provision=repository_auto_provision,
+        kubernetes_version=kubernetes_version,
+        terraform_state=terraform_state,
+        ssl_cert_email=ssl_cert_email,
+        disable_prompt=False,  # keep?
+    )
+
+    try:
+        with open("qhub-config.yaml", "x") as f:
+            yaml.dump(config, f)
+    except FileExistsError:
+        raise ValueError(
+            "A qhub-config.yaml file already exists. Please move or delete it and try again."
+        )
 
 
 @app.command()

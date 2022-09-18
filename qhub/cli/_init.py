@@ -1,9 +1,11 @@
 import os
+from pathlib import Path
 
 import rich
 import typer
+from dotenv import load_dotenv
 
-from qhub.schema import AuthenticationEnum, ProviderEnum
+from qhub.schema import AuthenticationEnum, ProviderEnum, project_name_convention
 
 MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, please refer to this guide on how to generate them:\n[light_green]{link_to_docs}[/light_green]\n"
 
@@ -22,12 +24,39 @@ CREATE_AUTH0_CREDS = "https://auth0.com/docs/get-started/auth0-overview/create-a
 CREATE_GITHUB_OAUTH_CREDS = "https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app"
 
 
+DOTENV_FILE = Path.cwd() / ".env"
+
+
+def _load_dotenv(dotenv_file=DOTENV_FILE):
+    load_dotenv(dotenv_file)
+
+
+def add_env_var(env_vars: dict):
+
+    new_line = "{key}={value}\n"
+
+    if not DOTENV_FILE.exists():
+        rich.print(
+            (
+                "Creating a `.env` file used to manage your cloud credentials"
+                f"and other important tokens.\nYou can view them here: {DOTENV_FILE.resolve()}"
+            )
+        )
+
+    with open(DOTENV_FILE, "a+") as f:
+        for key, value in env_vars.items():
+            rich.print(f"Writing {key} to `.env` file...")
+            f.writelines(new_line.format(key=key, value=value))
+
+
 def check_cloud_provider_creds(cloud_provider: str):
     """Validate that the necessary cloud credentials have been set as environment variables."""
 
-    cloud_provider = cloud_provider.lower()
-
     rich.print("Creating and initializing your nebari-config.yaml :rocket:\n")
+
+    _load_dotenv()
+    cloud_provider = cloud_provider.lower()
+    env_vars = {}
 
     # AWS
     if cloud_provider == ProviderEnum.aws.value.lower() and (
@@ -40,11 +69,11 @@ def check_cloud_provider_creds(cloud_provider: str):
             )
         )
 
-        os.environ["AWS_ACCESS_KEY_ID"] = typer.prompt(
+        env_vars["AWS_ACCESS_KEY_ID"] = typer.prompt(
             "Please enter your AWS_ACCESS_KEY_ID",
             hide_input=True,
         )
-        os.environ["AWS_SECRET_ACCESS_KEY"] = typer.prompt(
+        env_vars["AWS_SECRET_ACCESS_KEY"] = typer.prompt(
             "Please enter your AWS_SECRET_ACCESS_KEY",
             hide_input=True,
         )
@@ -59,11 +88,11 @@ def check_cloud_provider_creds(cloud_provider: str):
             )
         )
 
-        os.environ["GOOGLE_CREDENTIALS"] = typer.prompt(
+        env_vars["GOOGLE_CREDENTIALS"] = typer.prompt(
             "Please enter your GOOGLE_CREDENTIALS",
             hide_input=True,
         )
-        os.environ["PROJECT_ID"] = typer.prompt(
+        env_vars["PROJECT_ID"] = typer.prompt(
             "Please enter your PROJECT_ID",
             hide_input=True,
         )
@@ -80,14 +109,14 @@ def check_cloud_provider_creds(cloud_provider: str):
             )
         )
 
-        os.environ["DIGITALOCEAN_TOKEN"] = typer.prompt(
+        env_vars["DIGITALOCEAN_TOKEN"] = typer.prompt(
             "Please enter your DIGITALOCEAN_TOKEN",
             hide_input=True,
         )
-        os.environ["SPACES_ACCESS_KEY_ID"] = typer.prompt(
+        env_vars["SPACES_ACCESS_KEY_ID"] = typer.prompt(
             "Please enter your SPACES_ACCESS_KEY_ID",
         )
-        os.environ["SPACES_SECRET_ACCESS_KEY"] = typer.prompt(
+        env_vars["SPACES_SECRET_ACCESS_KEY"] = typer.prompt(
             "Please enter your SPACES_SECRET_ACCESS_KEY",
             hide_input=True,
         )
@@ -105,84 +134,110 @@ def check_cloud_provider_creds(cloud_provider: str):
             )
         )
 
-        os.environ["ARM_CLIENT_ID"] = typer.prompt(
+        env_vars["ARM_CLIENT_ID"] = typer.prompt(
             "Please enter your ARM_CLIENT_ID",
             hide_input=True,
         )
-        os.environ["ARM_CLIENT_SECRET"] = typer.prompt(
+        env_vars["ARM_CLIENT_SECRET"] = typer.prompt(
             "Please enter your ARM_CLIENT_SECRET",
             hide_input=True,
         )
-        os.environ["ARM_SUBSCRIPTION_ID"] = typer.prompt(
+        env_vars["ARM_SUBSCRIPTION_ID"] = typer.prompt(
             "Please enter your ARM_SUBSCRIPTION_ID",
             hide_input=True,
         )
-        os.environ["ARM_TENANT_ID"] = typer.prompt(
+        env_vars["ARM_TENANT_ID"] = typer.prompt(
             "Please enter your ARM_TENANT_ID",
             hide_input=True,
         )
 
+    add_env_var(env_vars)
+    _load_dotenv()
+
     return cloud_provider
 
 
-def check_auth_provider_creds(auth_provider: str):
+def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     """Validating the the necessary auth provider credentials have been set as environment variables."""
 
+    _load_dotenv()
+    env_vars = {}
     auth_provider = auth_provider.lower()
 
     # Auth0
-    if auth_provider == AuthenticationEnum.auth0.value.lower() and (
-        not os.environ.get("AUTH0_CLIENT_ID")
-        or not os.environ.get("AUTH0_CLIENT_SECRET")
-        or not os.environ.get("AUTH0_DOMAIN")
-    ):
-        rich.print(
-            MISSING_CREDS_TEMPLATE.format(
-                provider="Auth0", link_to_docs=CREATE_AUTH0_CREDS
-            )
-        )
+    if auth_provider == AuthenticationEnum.auth0.value.lower():
 
-        os.environ["AUTH0_CLIENT_ID"] = typer.prompt(
-            "Please enter your AUTH0_CLIENT_ID",
-            hide_input=True,
-        )
-        os.environ["AUTH0_CLIENT_SECRET"] = typer.prompt(
-            "Please enter your AUTH0_CLIENT_SECRET",
-            hide_input=True,
-        )
-        os.environ["AUTH0_DOMAIN"] = typer.prompt(
-            "Please enter your AUTH0_DOMAIN",
-            hide_input=True,
-        )
+        if (
+            not os.environ.get("AUTH0_CLIENT_ID")
+            or not os.environ.get("AUTH0_CLIENT_SECRET")
+            or not os.environ.get("AUTH0_DOMAIN")
+        ):
+            rich.print(
+                MISSING_CREDS_TEMPLATE.format(
+                    provider="Auth0", link_to_docs=CREATE_AUTH0_CREDS
+                )
+            )
+
+            env_vars["AUTH0_CLIENT_ID"] = typer.prompt(
+                "Please enter your AUTH0_CLIENT_ID",
+                hide_input=True,
+            )
+            env_vars["AUTH0_CLIENT_SECRET"] = typer.prompt(
+                "Please enter your AUTH0_CLIENT_SECRET",
+                hide_input=True,
+            )
+            env_vars["AUTH0_DOMAIN"] = typer.prompt(
+                "Please enter your AUTH0_DOMAIN",
+                hide_input=True,
+            )
+
+        if not ctx.params.get("auth_auto_provision", False):
+            ctx.params["auth_auto_provision"] = typer.prompt(
+                "Do you wish for Nebari to automatically provision the Auth0 `Regular Web Application`?",
+                type=bool,
+                default=True,
+            )
 
     # GitHub
-    elif auth_provider == AuthenticationEnum.github.value.lower() and (
-        not os.environ.get("GITHUB_CLIENT_ID")
-        or not os.environ.get("GITHUB_CLIENT_SECRET")
-    ):
-        rich.print(
-            MISSING_CREDS_TEMPLATE.format(
-                provider="GitHub OAuth App", link_to_docs=CREATE_GITHUB_OAUTH_CREDS
+    elif auth_provider == AuthenticationEnum.github.value.lower():
+
+        if not os.environ.get("GITHUB_CLIENT_ID") or not os.environ.get(
+            "GITHUB_CLIENT_SECRET"
+        ):
+
+            rich.print(
+                MISSING_CREDS_TEMPLATE.format(
+                    provider="GitHub OAuth App", link_to_docs=CREATE_GITHUB_OAUTH_CREDS
+                )
             )
-        )
+
+            env_vars["GITHUB_CLIENT_ID"] = typer.prompt(
+                "Please enter your GITHUB_CLIENT_ID",
+                hide_input=True,
+            )
+            env_vars["GITHUB_CLIENT_SECRET"] = typer.prompt(
+                "Please enter your GITHUB_CLIENT_SECRET",
+                hide_input=True,
+            )
+
+        domain_name = ctx.params.get("domain_name", "<your-domain-name>")
         rich.print(
             (
                 ":warning: If you haven't done so already, please ensure the following:\n"
-                "The `Homepage URL` is set to: [light_green]https://<your-domain-name>[/light_green]\n"
-                "The `Authorization callback URL` is set to: [light_green]https://<your-domain-name>/auth/realms/qhub/broker/github/endpoint[/light_green]\n\n"
-                "* `[light_green]<your-domain-name>[/light_green]` should be the same one you provided above"
+                f"The `Homepage URL` is set to: [light_green]https://{domain_name}[/light_green]\n"
+                f"The `Authorization callback URL` is set to: [light_green]https://{domain_name}/auth/realms/qhub/broker/github/endpoint[/light_green]\n\n"
             )
         )
 
-        os.environ["GITHUB_CLIENT_ID"] = typer.prompt(
-            "Please enter your GITHUB_CLIENT_ID",
-            hide_input=True,
-        )
-        os.environ["GITHUB_CLIENT_SECRET"] = typer.prompt(
-            "Please enter your GITHUB_CLIENT_SECRET",
-            hide_input=True,
-        )
-
-    print(os.environ["GITHUB_CLIENT_ID"])
+    add_env_var(env_vars)
+    _load_dotenv()
 
     return auth_provider
+
+
+def check_project_name(ctx: typer.Context, project_name: str):
+    project_name_convention(
+        project_name.lower(), {"provider": ctx.params["cloud_provider"]}
+    )
+
+    return project_name
