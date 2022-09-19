@@ -5,13 +5,13 @@ import pathlib
 import shutil
 import sys
 from typing import Dict, List
-
 from ruamel.yaml import YAML
-
 from qhub.deprecate import DEPRECATED_FILE_PATHS
 from qhub.provider.cicd.github import gen_qhub_linter, gen_qhub_ops
 from qhub.provider.cicd.gitlab import gen_gitlab_ci
 from qhub.stages import tf_objects
+from rich import print
+from rich.table import Table
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
@@ -89,21 +89,25 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
     )
 
     if new:
-        print("The following files will be created:")
+        table = Table("The following files will be created:",style="deep_sky_blue1")
         for filename in sorted(new):
-            print(f"   CREATED   {filename}")
+            table.add_row(filename,style="spring_green1")
+        print(table)
     if updated:
-        print("The following files will be updated:")
+        table = Table("The following files will be updated:",style="deep_sky_blue1")
         for filename in sorted(updated):
-            print(f"   UPDATED   {filename}")
+            table.add_row(filename,style="spring_green1")
+        print(table)
     if deleted:
-        print("The following files will be deleted:")
+        table = Table("The following files will be deleted:",style="deep_sky_blue1")
         for filename in sorted(deleted):
-            print(f"   DELETED   {filename}")
+            table.add_row(filename,style="spring_green1")
+        print(table)
     if untracked:
-        print("The following files are untracked (only exist in output directory):")
+        table = Table("The following files are untracked (only exist in output directory):",style="deep_sky_blue1")
         for filename in sorted(updated):
-            print(f"   UNTRACKED {filename}")
+            table.add_row(filename,style="spring_green1")
+        print(table)
 
     if dry_run:
         print("dry-run enabled no files will be created, updated, or deleted")
