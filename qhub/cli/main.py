@@ -4,13 +4,13 @@ import typer
 from click import Context
 from typer.core import TyperGroup
 
-from qhub.deploy import deploy_configuration
-from qhub.destroy import destroy_configuration
 from qhub.cli._init import (
     check_auth_provider_creds,
     check_cloud_provider_creds,
     check_project_name,
 )
+from qhub.deploy import deploy_configuration
+from qhub.destroy import destroy_configuration
 from qhub.initialize import render_config
 from qhub.render import render_template
 from qhub.schema import (
