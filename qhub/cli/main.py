@@ -62,7 +62,7 @@ def init(
         # callback=auth_provider_options
     ),
     repository: str = typer.Option(
-        None,
+        "",
         prompt=True,
         # callback=auth_provider_options
     ),
@@ -179,6 +179,16 @@ def deploy(
         "--output",
         help="output directory",
     ),
+    dns_provider: str = typer.Option(
+        False,
+        "--dns-provider",
+        help="dns provider to use for registering domain name mapping",
+    ),
+    dns_auto_provision: bool = typer.Option(
+        False,
+        "--dns-auto-provision",
+        help="Attempt to automatically provision DNS. For Auth0 is requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
+    ),
     disable_prompt: bool = typer.Option(
         False,
         "--disable-prompt",
@@ -208,8 +218,8 @@ def deploy(
 
     deploy_configuration(
         config_yaml,
-        dns_provider=False,
-        dns_auto_provision=False,
+        dns_provider=dns_provider,
+        dns_auto_provision=dns_auto_provision,
         disable_prompt=disable_prompt,
         skip_remote_state_provision=False,
     )
