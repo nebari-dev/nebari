@@ -40,6 +40,11 @@ def create_deploy_subcommand(subparser):
         action="store_true",
         help="Disable auto-rendering in deploy stage",
     )
+    subparser.add_argument(
+        "--disable-checks",
+        action="store_true",
+        help="Disable the checks performed after each stage",
+    )
     subparser.set_defaults(func=handle_deploy)
 
 
@@ -62,5 +67,6 @@ def handle_deploy(args):
         args.dns_provider,
         args.dns_auto_provision,
         args.disable_prompt,
+        args.disable_checks,
         args.skip_remote_state_provision,
     )
