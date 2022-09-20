@@ -423,6 +423,16 @@ def deploy(
         "--output",
         help="output directory",
     ),
+    dns_provider: str = typer.Option(
+        False,
+        "--dns-provider",
+        help="dns provider to use for registering domain name mapping",
+    ),
+    dns_auto_provision: bool = typer.Option(
+        False,
+        "--dns-auto-provision",
+        help="Attempt to automatically provision DNS. For Auth0 is requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
+    ),
     disable_prompt: bool = typer.Option(
         False,
         "--disable-prompt",
@@ -438,6 +448,7 @@ def deploy(
     Deploy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
     """
     config_filename = Path(config)
+
     if not config_filename.is_file():
         raise ValueError(
             f"passed in configuration filename={config_filename} must exist"
@@ -452,8 +463,8 @@ def deploy(
 
     deploy_configuration(
         config_yaml,
-        dns_provider=False,
-        dns_auto_provision=False,
+        dns_provider=dns_provider,
+        dns_auto_provision=dns_auto_provision,
         disable_prompt=disable_prompt,
         skip_remote_state_provision=False,
     )
