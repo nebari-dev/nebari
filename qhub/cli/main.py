@@ -3,6 +3,7 @@ from pathlib import Path
 import rich
 import typer
 from click import Context
+from rich import print
 from typer.core import TyperGroup
 
 from qhub.cli._init import (
@@ -23,7 +24,7 @@ from qhub.schema import (
     verify,
 )
 from qhub.utils import load_yaml
-from rich import print
+
 
 def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
