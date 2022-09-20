@@ -23,7 +23,7 @@ from qhub.schema import (
     verify,
 )
 from qhub.utils import load_yaml
-
+from rich import print
 
 def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
@@ -369,7 +369,7 @@ def validate(
         pass
     else:
         verify(config)
-        print("Successfully validated configuration")
+        print("[bold purple]Successfully validated configuration.[/bold purple]")
 
 
 @app.command()
@@ -488,9 +488,7 @@ def destroy(
     Destroy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
     """
     delete = typer.confirm("Are you sure you want to destroy it?")
-
     if not delete:
-        print("not destroying!")
         raise typer.Abort()
     else:
         config_filename = Path(config)
