@@ -5,13 +5,15 @@ import pathlib
 import shutil
 import sys
 from typing import Dict, List
+
+from rich import print
+from rich.table import Table
 from ruamel.yaml import YAML
+
 from qhub.deprecate import DEPRECATED_FILE_PATHS
 from qhub.provider.cicd.github import gen_qhub_linter, gen_qhub_ops
 from qhub.provider.cicd.gitlab import gen_gitlab_ci
 from qhub.stages import tf_objects
-from rich import print
-from rich.table import Table
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
@@ -89,24 +91,27 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
     )
 
     if new:
-        table = Table("The following files will be created:",style="deep_sky_blue1")
+        table = Table("The following files will be created:", style="deep_sky_blue1")
         for filename in sorted(new):
-            table.add_row(filename,style="spring_green1")
+            table.add_row(filename, style="spring_green1")
         print(table)
     if updated:
-        table = Table("The following files will be updated:",style="deep_sky_blue1")
+        table = Table("The following files will be updated:", style="deep_sky_blue1")
         for filename in sorted(updated):
-            table.add_row(filename,style="spring_green1")
+            table.add_row(filename, style="spring_green1")
         print(table)
     if deleted:
-        table = Table("The following files will be deleted:",style="deep_sky_blue1")
+        table = Table("The following files will be deleted:", style="deep_sky_blue1")
         for filename in sorted(deleted):
-            table.add_row(filename,style="spring_green1")
+            table.add_row(filename, style="spring_green1")
         print(table)
     if untracked:
-        table = Table("The following files are untracked (only exist in output directory):",style="deep_sky_blue1")
+        table = Table(
+            "The following files are untracked (only exist in output directory):",
+            style="deep_sky_blue1",
+        )
         for filename in sorted(updated):
-            table.add_row(filename,style="spring_green1")
+            table.add_row(filename, style="spring_green1")
         print(table)
 
     if dry_run:
