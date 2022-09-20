@@ -5,9 +5,16 @@ import rich
 import typer
 from dotenv import load_dotenv
 
-from qhub.schema import AuthenticationEnum, ProviderEnum, project_name_convention
+from qhub.initialize import render_config
+from qhub.schema import (
+    AuthenticationEnum,
+    InitInputs,
+    ProviderEnum,
+    project_name_convention,
+)
+from qhub.utils import QHUB_DASK_VERSION, QHUB_IMAGE_TAG, yaml
 
-MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, please refer to this guide on how to generate them:\n[light_green]{link_to_docs}[/light_green]\n"
+MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, please refer to this guide on how to generate them:\n\n[light_green]\t\t{link_to_docs}[/light_green]\n\n"
 
 # links to external docs
 CREATE_AWS_CREDS = (
@@ -24,6 +31,9 @@ CREATE_AUTH0_CREDS = "https://auth0.com/docs/get-started/auth0-overview/create-a
 CREATE_GITHUB_OAUTH_CREDS = "https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app"
 
 
+############################
+### MOVE TO UTILS FOLDER ###
+############################
 DOTENV_FILE = Path.cwd() / ".env"
 
 
@@ -38,21 +48,61 @@ def add_env_var(env_vars: dict):
     if not DOTENV_FILE.exists():
         rich.print(
             (
-                "Creating a `.env` file used to manage your cloud credentials"
-                f"and other important tokens.\nYou can view them here: {DOTENV_FILE.resolve()}"
+                "Creating a [purple].env[/purple] file used to manage secret credentials and other important environment variables.\n"
+                "You can view or modify these environment variables here:\n\n"
+                f"\t\t[purple]{DOTENV_FILE.resolve()}[/purple]\n\n"
             )
         )
 
     with open(DOTENV_FILE, "a+") as f:
         for key, value in env_vars.items():
-            rich.print(f"Writing {key} to `.env` file...")
+            rich.print(f"Writing {key} to [purple].env[/purple] file...")
             f.writelines(new_line.format(key=key, value=value))
 
 
-def check_cloud_provider_creds(cloud_provider: str):
-    """Validate that the necessary cloud credentials have been set as environment variables."""
+############################
 
-    rich.print("Creating and initializing your nebari-config.yaml :rocket:\n")
+
+def handle_init(inputs: InitInputs):
+    if QHUB_IMAGE_TAG:
+        print(
+            f"Modifying the image tags for the `default_images`, setting tags equal to: {QHUB_IMAGE_TAG}"
+        )
+
+    if QHUB_DASK_VERSION:
+        print(
+            f"Modifying the version of the `qhub_dask` package, setting version equal to: {QHUB_DASK_VERSION}"
+        )
+
+    print(inputs)
+
+    config = render_config(
+        cloud_provider=inputs.cloud_provider,
+        project_name=inputs.project_name,
+        qhub_domain=inputs.domain_name,
+        namespace=inputs.namespace,
+        auth_provider=inputs.auth_provider,
+        auth_auto_provision=inputs.auth_auto_provision,
+        ci_provider=inputs.ci_provider,
+        repository=inputs.repository,
+        repository_auto_provision=inputs.repository_auto_provision,
+        kubernetes_version=inputs.kubernetes_version,
+        terraform_state=inputs.terraform_state,
+        ssl_cert_email=inputs.ssl_cert_email,
+        disable_prompt=False,  # keep?
+    )
+
+    try:
+        with open("qhub-config.yaml", "x") as f:
+            yaml.dump(config, f)
+    except FileExistsError:
+        raise ValueError(
+            "A qhub-config.yaml file already exists. Please move or delete it and try again."
+        )
+
+
+def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
+    """Validate that the necessary cloud credentials have been set as environment variables."""
 
     _load_dotenv()
     cloud_provider = cloud_provider.lower()
@@ -115,6 +165,7 @@ def check_cloud_provider_creds(cloud_provider: str):
         )
         env_vars["SPACES_ACCESS_KEY_ID"] = typer.prompt(
             "Please enter your SPACES_ACCESS_KEY_ID",
+            hide_input=True,
         )
         env_vars["SPACES_SECRET_ACCESS_KEY"] = typer.prompt(
             "Please enter your SPACES_SECRET_ACCESS_KEY",
@@ -165,68 +216,49 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     auth_provider = auth_provider.lower()
 
     # Auth0
-    if auth_provider == AuthenticationEnum.auth0.value.lower():
+    if auth_provider == AuthenticationEnum.auth0.value.lower() and (
+        not os.environ.get("AUTH0_CLIENT_ID")
+        or not os.environ.get("AUTH0_CLIENT_SECRET")
+        or not os.environ.get("AUTH0_DOMAIN")
+    ):
+        rich.print(
+            MISSING_CREDS_TEMPLATE.format(
+                provider="Auth0", link_to_docs=CREATE_AUTH0_CREDS
+            )
+        )
 
-        if (
-            not os.environ.get("AUTH0_CLIENT_ID")
-            or not os.environ.get("AUTH0_CLIENT_SECRET")
-            or not os.environ.get("AUTH0_DOMAIN")
-        ):
-            rich.print(
-                MISSING_CREDS_TEMPLATE.format(
-                    provider="Auth0", link_to_docs=CREATE_AUTH0_CREDS
-                )
-            )
-
-            env_vars["AUTH0_CLIENT_ID"] = typer.prompt(
-                "Please enter your AUTH0_CLIENT_ID",
-                hide_input=True,
-            )
-            env_vars["AUTH0_CLIENT_SECRET"] = typer.prompt(
-                "Please enter your AUTH0_CLIENT_SECRET",
-                hide_input=True,
-            )
-            env_vars["AUTH0_DOMAIN"] = typer.prompt(
-                "Please enter your AUTH0_DOMAIN",
-                hide_input=True,
-            )
-
-        if not ctx.params.get("auth_auto_provision", False):
-            ctx.params["auth_auto_provision"] = typer.prompt(
-                "Do you wish for Nebari to automatically provision the Auth0 `Regular Web Application`?",
-                type=bool,
-                default=True,
-            )
+        env_vars["AUTH0_CLIENT_ID"] = typer.prompt(
+            "Please enter your AUTH0_CLIENT_ID",
+            hide_input=True,
+        )
+        env_vars["AUTH0_CLIENT_SECRET"] = typer.prompt(
+            "Please enter your AUTH0_CLIENT_SECRET",
+            hide_input=True,
+        )
+        env_vars["AUTH0_DOMAIN"] = typer.prompt(
+            "Please enter your AUTH0_DOMAIN",
+            hide_input=True,
+        )
 
     # GitHub
-    elif auth_provider == AuthenticationEnum.github.value.lower():
+    elif auth_provider == AuthenticationEnum.github.value.lower() and (
+        not os.environ.get("GITHUB_CLIENT_ID")
+        or not os.environ.get("GITHUB_CLIENT_SECRET")
+    ):
 
-        if not os.environ.get("GITHUB_CLIENT_ID") or not os.environ.get(
-            "GITHUB_CLIENT_SECRET"
-        ):
-
-            rich.print(
-                MISSING_CREDS_TEMPLATE.format(
-                    provider="GitHub OAuth App", link_to_docs=CREATE_GITHUB_OAUTH_CREDS
-                )
-            )
-
-            env_vars["GITHUB_CLIENT_ID"] = typer.prompt(
-                "Please enter your GITHUB_CLIENT_ID",
-                hide_input=True,
-            )
-            env_vars["GITHUB_CLIENT_SECRET"] = typer.prompt(
-                "Please enter your GITHUB_CLIENT_SECRET",
-                hide_input=True,
-            )
-
-        domain_name = ctx.params.get("domain_name", "<your-domain-name>")
         rich.print(
-            (
-                ":warning: If you haven't done so already, please ensure the following:\n"
-                f"The `Homepage URL` is set to: [light_green]https://{domain_name}[/light_green]\n"
-                f"The `Authorization callback URL` is set to: [light_green]https://{domain_name}/auth/realms/qhub/broker/github/endpoint[/light_green]\n\n"
+            MISSING_CREDS_TEMPLATE.format(
+                provider="GitHub OAuth App", link_to_docs=CREATE_GITHUB_OAUTH_CREDS
             )
+        )
+
+        env_vars["GITHUB_CLIENT_ID"] = typer.prompt(
+            "Please enter your GITHUB_CLIENT_ID",
+            hide_input=True,
+        )
+        env_vars["GITHUB_CLIENT_SECRET"] = typer.prompt(
+            "Please enter your GITHUB_CLIENT_SECRET",
+            hide_input=True,
         )
 
     add_env_var(env_vars)
@@ -236,6 +268,8 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
 
 
 def check_project_name(ctx: typer.Context, project_name: str):
+    """Validate the project_name is acceptable. Depends on `cloud_provider`."""
+
     project_name_convention(
         project_name.lower(), {"provider": ctx.params["cloud_provider"]}
     )

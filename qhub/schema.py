@@ -525,6 +525,22 @@ def project_name_convention(value: typing.Any, values):
         return letter_dash_underscore_pydantic
 
 
+# CLEAN UP
+class InitInputs(Base):
+    cloud_provider: typing.Type[ProviderEnum] = "local"
+    project_name: str = ""
+    domain_name: str = ""
+    namespace: typing.Optional[letter_dash_underscore_pydantic] = "dev"
+    auth_provider: typing.Type[AuthenticationEnum] = "password"
+    auth_auto_provision: bool = False
+    repository: typing.Union[str, None] = None
+    repository_auto_provision: bool = False
+    ci_provider: typing.Optional[CiEnum] = None
+    terraform_state: typing.Optional[TerraformStateEnum] = None
+    kubernetes_version: typing.Union[str, None] = None
+    ssl_cert_email: typing.Union[str, None] = None
+
+
 class Main(Base):
     provider: ProviderEnum
     project_name: str
