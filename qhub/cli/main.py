@@ -691,6 +691,8 @@ def support(
             print(file)
             zip.write(file)
 
+
+def get_config_namespace(config):
     config_filename = Path(config_filename)
     if not config_filename.is_file():
         raise ValueError(
