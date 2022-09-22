@@ -55,6 +55,7 @@ Enhancements for this release include:
 * Add properties to middleware crd headers by @iameskild in https://github.com/Quansight/qhub/pull/1434
 * Restart conda-store worker when new conda env is added to config.yaml by @iameskild in https://github.com/Quansight/qhub/pull/1437
 * Pin dask ipywidgets version to `7.7.1` by @viniciusdc in https://github.com/Quansight/qhub/pull/1442
+* Set qhub-dask version to 0.4.4 by @iameskild in https://github.com/Quansight/qhub/pull/1470
 
 ## New Contributors
 * @konkapv made their first contribution in https://github.com/Quansight/qhub/pull/1424
