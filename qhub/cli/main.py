@@ -693,7 +693,7 @@ def support(
 
 
 def get_config_namespace(config):
-    config_filename = Path(config_filename)
+    config_filename = Path(config)
     if not config_filename.is_file():
         raise ValueError(
             f"passed in configuration filename={config_filename} must exist"
