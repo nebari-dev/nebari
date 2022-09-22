@@ -467,6 +467,7 @@ def deploy(
         dns_provider=dns_provider,
         dns_auto_provision=dns_auto_provision,
         disable_prompt=disable_prompt,
+        disable_checks=False,
         skip_remote_state_provision=False,
     )
 
