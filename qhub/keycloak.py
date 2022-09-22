@@ -20,7 +20,7 @@ def do_keycloak(config_filename, add_user, listusers):
 
     keycloak_admin = get_keycloak_admin_from_config(config)
 
-    if add_user is not None: 
+    if add_user is not None:
         if len(add_user) < 2:
             raise ValueError(
                 "keycloak command 'adduser' requires `username [password]`"
@@ -29,7 +29,7 @@ def do_keycloak(config_filename, add_user, listusers):
         username, password = add_user
 
         if len(password) < 3:
-            password=None 
+            password = None
         create_user(keycloak_admin, username, password, domain=config["domain"])
     elif listusers:
         listusers(keycloak_admin)

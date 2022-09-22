@@ -1,11 +1,14 @@
 from pathlib import Path
-
-from typing import Tuple 
+from typing import Tuple
+from zipfile import ZipFile
 
 import rich
 import typer
 from click import Context
+from kubernetes import client
+from kubernetes import config as kube_config
 from rich import print
+from ruamel import yaml
 from typer.core import TyperGroup
 
 from qhub.cli._init import (
@@ -14,8 +17,10 @@ from qhub.cli._init import (
     check_project_name,
     handle_init,
 )
+from qhub.cost import infracost_report
 from qhub.deploy import deploy_configuration
 from qhub.destroy import destroy_configuration
+from qhub.keycloak import do_keycloak
 from qhub.render import render_template
 from qhub.schema import (
     AuthenticationEnum,
@@ -25,15 +30,9 @@ from qhub.schema import (
     TerraformStateEnum,
     verify,
 )
-from qhub.utils import load_yaml
-from qhub.cost import infracost_report
 from qhub.upgrade import do_upgrade
-from qhub.keycloak import do_keycloak
-from zipfile import ZipFile
+from qhub.utils import load_yaml
 
-from kubernetes import client
-from kubernetes import config as kube_config
-from ruamel import yaml
 
 def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
@@ -482,7 +481,9 @@ def deploy(
 
 @app.command()
 def destroy(
-    config: str = typer.Option(..., "-c", "--config", help="qhub configuration file path"),
+    config: str = typer.Option(
+        ..., "-c", "--config", help="qhub configuration file path"
+    ),
     output: str = typer.Option(
         "./" "-o",
         "--output",
@@ -516,6 +517,7 @@ def destroy(
 
         destroy_configuration(config_yaml)
 
+
 @app.command()
 def cost(
     path: str = typer.Option(
@@ -547,7 +549,7 @@ def cost(
         "-cc",
         "--compare",
         help="Compare the cost report to a previously generated report",
-    )
+    ),
 ):
     """
     Cost-Estimate
@@ -560,19 +562,20 @@ def cost(
         compare=False,
     )
 
+
 @app.command()
 def upgrade(
     config: str = typer.Option(
         ...,
-        "-c", 
-        "--config", 
+        "-c",
+        "--config",
         help="qhub configuration file path",
     ),
     attempt_fixes: bool = typer.Option(
         False,
         "--attempt-fixes",
         help="Attempt to fix the config for any incompatibilities between your old and new QHub versions.",
-    )
+    ),
 ):
     """
     Upgrade
@@ -583,20 +586,18 @@ def upgrade(
             f"passed in configuration filename={config_filename} must exist"
         )
 
-    do_upgrade(
-        config_filename, 
-        attempt_fixes=attempt_fixes
-    )
+    do_upgrade(config_filename, attempt_fixes=attempt_fixes)
+
 
 @app.command()
 def keycloak(
     config: str = typer.Option(
         ...,
-        "-c", 
-        "--config", 
+        "-c",
+        "--config",
         help="qhub configuration file path",
     ),
-    add_user: Tuple[str,str] = typer.Option(
+    add_user: Tuple[str, str] = typer.Option(
         None,
         "--add-user",
         help="`--add-user <username> [password]` or `listusers`",
@@ -605,7 +606,7 @@ def keycloak(
         False,
         "--listusers",
         help="list current keycloak users",
-    )
+    ),
 ):
     """
     Keycloak
@@ -617,30 +618,31 @@ def keycloak(
         )
 
     do_keycloak(
-        config_filename, 
+        config_filename,
         add_user=add_user,
         listusers=list_users,
-        )
+    )
+
 
 @app.command()
 def support(
     config_filename: str = typer.Option(
         ...,
-        "-c", 
-        "--config", 
+        "-c",
+        "--config",
         help="qhub configuration file path",
     ),
     output: str = typer.Option(
         "./qhub-support-logs.zip",
-        "-o", 
-        "--output", 
+        "-o",
+        "--output",
         help="output filename",
-    )
+    ),
 ):
     """
     Support
     """
-    
+
     kube_config.load_kube_config()
 
     v1 = client.CoreV1Api()
@@ -689,7 +691,6 @@ def support(
             print(file)
             zip.write(file)
 
-
     config_filename = Path(config_filename)
     if not config_filename.is_file():
         raise ValueError(
@@ -700,7 +701,6 @@ def support(
         config = yaml.safe_load(f.read())
 
     return config["namespace"]
-
 
 
 if __name__ == "__main__":
