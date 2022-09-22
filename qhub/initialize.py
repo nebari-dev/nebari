@@ -238,7 +238,7 @@ DEFAULT_ENVIRONMENTS = {
         "dependencies": [
             "python",
             "ipykernel",
-            "ipywidgets",
+            "ipywidgets==7.7.1",
             f"qhub-dask =={qhub_dask_version}",
             "python-graphviz",
             "pyarrow",
