@@ -1,5 +1,7 @@
+import os
 from pathlib import Path
 
+import questionary
 import rich
 import typer
 from click import Context
@@ -45,32 +47,12 @@ app = typer.Typer(
 )
 
 
-@app.command()
-def guided_init(
-    ctx: typer.Context,
-    disable_checks: bool = typer.Option(
-        default=False,
-    ),
-):
-    """
-    [bold green]START HERE[/bold green] if you're new to Nebari. This is the Guided Init wizard used to create and initialize your [purple]nebari-config.yaml[/purple] file.
+def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
-    To get started simply run:
+    disable_checks = os.environ.get("QHUB_DISABLE_INIT_CHECKS", False)
 
-            [green]nebari guided-init[/green]
-
-    This command asks a few important questions and when complete, will generate:
-    :sparkles: [purple]nebari-config.yaml[/purple], which:
-        contains all your Nebari cluster configuration details and,
-        is used as input to later commands such as [green]nebari render[/green], [green]nebari deploy[/green], etc.
-    :sparkles: [purple].env[/purple], which:
-        contains all your important environment variables (i.e. cloud credentials, tokens, etc.) and,
-        is only stored on your local machine and used as a convenience.
-
-    [yellow]NOTE[/yellow]
-    This CLI command completes the same task, generating the [purple]nebari-config.yaml[/purple], as the generic
-    [green]nebari init[/green] command but does so without the need to enter all the flags required to get started.
-    """
+    if not guided_init:
+        return guided_init
 
     rich.print(
         (
@@ -85,8 +67,6 @@ def guided_init(
         rich.print(
             "⚠️  Attempting to use the Guided Init wizard without any validation checks. There is no guarantee values provided will work!  ⚠️\n\n"
         )
-
-    import questionary
 
     qmark = " 🪴 "
 
@@ -266,6 +246,15 @@ def guided_init(
         )
     )
 
+    raise typer.Exit()
+
+
+guided_init_help_msg = (
+    "[bold green]START HERE[/bold green] - this will gently guide you through a list of questions "
+    "to generate your [purple]nebari-config.yaml[/purple]. "
+    "It is an [i]alternative[/i] to passing the options listed below."
+)
+
 
 @app.command()
 def init(
@@ -273,6 +262,12 @@ def init(
         "local",
         help=f"options: {enum_to_list(ProviderEnum)}",
         callback=check_cloud_provider_creds,
+        is_eager=True,
+    ),
+    guided_init: bool = typer.Option(
+        False,
+        help=guided_init_help_msg,
+        callback=guided_init_wizard,
         is_eager=True,
     ),
     project_name: str = typer.Option(
@@ -321,23 +316,36 @@ def init(
 ):
     """
     Create and initialize your [purple]nebari-config.yaml[/purple] file.
+
+    If you're new to Nebari, we recommend you use the Guided Init wizard.
+    To get started simply run:
+
+            [green]nebari init --guided-init[/green]
+
+    This command will generate: [purple]nebari-config.yaml[/purple] :sparkles:
+
+    This file contains all your Nebari cluster configuration details and,
+    is used as input to later commands such as [green]nebari render[/green], [green]nebari deploy[/green], etc.
     """
-    inputs = InitInputs()
+    # """
+    # Create and initialize your [purple]nebari-config.yaml[/purple] file.
+    # """
+    # inputs = InitInputs()
 
-    inputs.cloud_provider = cloud_provider
-    inputs.project_name = project_name
-    inputs.domain_name = domain_name
-    inputs.namespace = namespace
-    inputs.auth_provider = auth_provider
-    inputs.auth_auto_provision = auth_auto_provision
-    inputs.repository = repository
-    inputs.repository_auto_provision = repository_auto_provision
-    inputs.ci_provider = ci_provider
-    inputs.terraform_state = terraform_state
-    inputs.kubernetes_version = kubernetes_version
-    inputs.ssl_cert_email = ssl_cert_email
+    # inputs.cloud_provider = cloud_provider
+    # inputs.project_name = project_name
+    # inputs.domain_name = domain_name
+    # inputs.namespace = namespace
+    # inputs.auth_provider = auth_provider
+    # inputs.auth_auto_provision = auth_auto_provision
+    # inputs.repository = repository
+    # inputs.repository_auto_provision = repository_auto_provision
+    # inputs.ci_provider = ci_provider
+    # inputs.terraform_state = terraform_state
+    # inputs.kubernetes_version = kubernetes_version
+    # inputs.ssl_cert_email = ssl_cert_email
 
-    handle_init(inputs)
+    # handle_init(inputs)
 
 
 @app.command()
