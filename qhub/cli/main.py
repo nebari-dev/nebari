@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from typing import Tuple 
+
 import rich
 import typer
 from click import Context
@@ -24,7 +26,14 @@ from qhub.schema import (
     verify,
 )
 from qhub.utils import load_yaml
+from qhub.cost import infracost_report
+from qhub.upgrade import do_upgrade
+from qhub.keycloak import do_keycloak
+from zipfile import ZipFile
 
+from kubernetes import client
+from kubernetes import config as kube_config
+from ruamel import yaml
 
 def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
@@ -344,7 +353,7 @@ def init(
 @app.command()
 def validate(
     config: str = typer.Option(
-        None,
+        ...,
         "--config",
         "-c",
         help="qhub configuration yaml file path, please pass in as -c/--config flag",
@@ -382,7 +391,7 @@ def render(
         help="output directory",
     ),
     config: str = typer.Option(
-        None,
+        ...,
         "-c",
         "--config",
         help="nebari configuration yaml file path",
@@ -473,7 +482,7 @@ def deploy(
 
 @app.command()
 def destroy(
-    config: str = typer.Option(..., "-c", "--config", help="qhub configuration"),
+    config: str = typer.Option(..., "-c", "--config", help="qhub configuration file path"),
     output: str = typer.Option(
         "./" "-o",
         "--output",
@@ -506,6 +515,192 @@ def destroy(
             render_template(output, config, force=True)
 
         destroy_configuration(config_yaml)
+
+@app.command()
+def cost(
+    path: str = typer.Option(
+        None,
+        "-p",
+        "--path",
+        help="Pass the path of your stages directory generated after rendering QHub configurations before deployment",
+    ),
+    dashboard: bool = typer.Option(
+        True,
+        "-d",
+        "--dashboard",
+        help="Enable the cost dashboard",
+    ),
+    file: str = typer.Option(
+        None,
+        "-f",
+        "--file",
+        help="Specify the path of the file to store the cost report",
+    ),
+    currency: str = typer.Option(
+        "USD",
+        "-c",
+        "--currency",
+        help="Specify the currency code to use in the cost report",
+    ),
+    compare: bool = typer.Option(
+        False,
+        "-cc",
+        "--compare",
+        help="Compare the cost report to a previously generated report",
+    )
+):
+    """
+    Cost-Estimate
+    """
+    infracost_report(
+        path=path,
+        dashboard=True,
+        file=file,
+        currency_code=currency,
+        compare=False,
+    )
+
+@app.command()
+def upgrade(
+    config: str = typer.Option(
+        ...,
+        "-c", 
+        "--config", 
+        help="qhub configuration file path",
+    ),
+    attempt_fixes: bool = typer.Option(
+        False,
+        "--attempt-fixes",
+        help="Attempt to fix the config for any incompatibilities between your old and new QHub versions.",
+    )
+):
+    """
+    Upgrade
+    """
+    config_filename = Path(config)
+    if not config_filename.is_file():
+        raise ValueError(
+            f"passed in configuration filename={config_filename} must exist"
+        )
+
+    do_upgrade(
+        config_filename, 
+        attempt_fixes=attempt_fixes
+    )
+
+@app.command()
+def keycloak(
+    config: str = typer.Option(
+        ...,
+        "-c", 
+        "--config", 
+        help="qhub configuration file path",
+    ),
+    add_user: Tuple[str,str] = typer.Option(
+        None,
+        "--add-user",
+        help="`--add-user <username> [password]` or `listusers`",
+    ),
+    list_users: bool = typer.Option(
+        False,
+        "--listusers",
+        help="list current keycloak users",
+    )
+):
+    """
+    Keycloak
+    """
+    config_filename = Path(config)
+    if not config_filename.is_file():
+        raise ValueError(
+            f"passed in configuration filename={config_filename} must exist"
+        )
+
+    do_keycloak(
+        config_filename, 
+        add_user=add_user,
+        listusers=list_users,
+        )
+
+@app.command()
+def support(
+    config_filename: str = typer.Option(
+        ...,
+        "-c", 
+        "--config", 
+        help="qhub configuration file path",
+    ),
+    output: str = typer.Option(
+        "./qhub-support-logs.zip",
+        "-o", 
+        "--output", 
+        help="output filename",
+    )
+):
+    """
+    Support
+    """
+    
+    kube_config.load_kube_config()
+
+    v1 = client.CoreV1Api()
+
+    namespace = get_config_namespace(config=config_filename)
+
+    pods = v1.list_namespaced_pod(namespace=namespace)
+
+    for pod in pods.items:
+        Path(f"./log/{namespace}").mkdir(parents=True, exist_ok=True)
+        path = Path(f"./log/{namespace}/{pod.metadata.name}.txt")
+        with path.open(mode="wt") as file:
+            try:
+                file.write(
+                    "%s\t%s\t%s\n"
+                    % (
+                        pod.status.pod_ip,
+                        namespace,
+                        pod.metadata.name,
+                    )
+                )
+
+                # some pods are running multiple containers
+                containers = [
+                    _.name if len(pod.spec.containers) > 1 else None
+                    for _ in pod.spec.containers
+                ]
+
+                for container in containers:
+                    if container is not None:
+                        file.write(f"Container: {container}\n")
+                    file.write(
+                        v1.read_namespaced_pod_log(
+                            name=pod.metadata.name,
+                            namespace=namespace,
+                            container=container,
+                        )
+                    )
+
+            except client.exceptions.ApiException as e:
+                file.write("%s not available" % pod.metadata.name)
+                raise e
+
+    with ZipFile(output, "w") as zip:
+        for file in list(Path(f"./log/{namespace}").glob("*.txt")):
+            print(file)
+            zip.write(file)
+
+
+    config_filename = Path(config_filename)
+    if not config_filename.is_file():
+        raise ValueError(
+            f"passed in configuration filename={config_filename} must exist"
+        )
+
+    with config_filename.open() as f:
+        config = yaml.safe_load(f.read())
+
+    return config["namespace"]
+
 
 
 if __name__ == "__main__":
