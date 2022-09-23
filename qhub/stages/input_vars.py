@@ -305,6 +305,9 @@ def stage_07_kubernetes_services(stage_outputs, config):
             config["default_images"]["dask_worker"]
         ),
         "dask-gateway-profiles": config["profiles"]["dask_worker"],
+        "dask-extra-images": config.get("dask_gateway", {}).get(
+            "worker_extra_images", {}
+        ),
         # monitoring
         "monitoring-enabled": config["monitoring"]["enabled"],
         # argo-worfklows

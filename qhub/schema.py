@@ -377,6 +377,12 @@ class JupyterLabProfile(Base):
         return values
 
 
+class DaskGateway(Base):
+    overrides: typing.Optional[typing.Dict]
+    worker_extra_images: typing.Optional[typing.Dict[str, str]]
+    volume_mounts: typing.Optional[typing.List[typing.Dict]]
+
+
 class DaskWorkerProfile(Base):
     worker_cores_limit: int
     worker_cores: int
@@ -502,6 +508,7 @@ class Main(Base):
     security: Security
     external_container_reg: typing.Optional[ExtContainerReg]
     default_images: DefaultImages
+    dask_gateway: typing.Optional[DaskGateway]
     storage: typing.Dict[str, str]
     local: typing.Optional[LocalProvider]
     existing: typing.Optional[ExistingProvider]
