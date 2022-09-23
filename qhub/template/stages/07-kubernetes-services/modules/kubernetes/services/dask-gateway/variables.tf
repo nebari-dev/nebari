@@ -96,6 +96,11 @@ variable "gateway" {
   }
 }
 
+variable "extra-worker-images" {
+  description = "Extra images to pull for Dask Gateway cluster handler"
+  type        = map(any)
+}
+
 variable "controller" {
   description = "controller configuration"
   type = object({

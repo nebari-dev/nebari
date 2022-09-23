@@ -17,6 +17,7 @@ resource "kubernetes_secret" "gateway" {
       cluster                              = var.cluster
       cluster-image                        = var.cluster-image
       profiles                             = var.profiles
+      worker-images                        = var.extra-worker-images
       conda-store-pvc                      = var.conda-store-pvc
       conda-store-mount                    = var.conda-store-mount
       worker-node-group                    = var.worker-node-group

@@ -12,6 +12,10 @@ variable "dask-gateway-profiles" {
   default     = []
 }
 
+variable "dask-extra-images" {
+  description = "Extra images to pull for Dask Gateway cluster handler"
+  default     = {}
+}
 
 # =================== RESOURCES =====================
 module "dask-gateway" {
@@ -36,5 +40,7 @@ module "dask-gateway" {
   conda-store-mount = "/home/conda"
 
   # profiles
-  profiles = var.dask-gateway-profiles
+  profiles            = var.dask-gateway-profiles
+  extra-worker-images = var.dask-extra-images
+
 }
