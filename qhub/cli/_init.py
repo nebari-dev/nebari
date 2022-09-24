@@ -1,9 +1,7 @@
 import os
-from pathlib import Path
 
 import rich
 import typer
-from dotenv import load_dotenv
 
 from qhub.initialize import render_config
 from qhub.schema import (
@@ -29,38 +27,6 @@ CREATE_DO_CREDS = (
 CREATE_AZURE_CREDS = "https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret#creating-a-service-principal-in-the-azure-portal"
 CREATE_AUTH0_CREDS = "https://auth0.com/docs/get-started/auth0-overview/create-applications/machine-to-machine-apps"
 CREATE_GITHUB_OAUTH_CREDS = "https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app"
-
-
-############################
-### MOVE TO UTILS FOLDER ###
-############################
-DOTENV_FILE = Path.cwd() / ".env"
-
-
-def _load_dotenv(dotenv_file=DOTENV_FILE):
-    load_dotenv(dotenv_file)
-
-
-def add_env_var(env_vars: dict):
-
-    new_line = "{key}={value}\n"
-
-    if not DOTENV_FILE.exists():
-        rich.print(
-            (
-                "Creating a [purple].env[/purple] file used to manage secret credentials and other important environment variables.\n"
-                "You can view or modify these environment variables here:\n\n"
-                f"\t\t[purple]{DOTENV_FILE.resolve()}[/purple]\n\n"
-            )
-        )
-
-    with open(DOTENV_FILE, "a+") as f:
-        for key, value in env_vars.items():
-            rich.print(f"Writing {key} to [purple].env[/purple] file...")
-            f.writelines(new_line.format(key=key, value=value))
-
-
-############################
 
 
 def handle_init(inputs: InitInputs):
@@ -104,9 +70,7 @@ def handle_init(inputs: InitInputs):
 def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
     """Validate that the necessary cloud credentials have been set as environment variables."""
 
-    _load_dotenv()
     cloud_provider = cloud_provider.lower()
-    env_vars = {}
 
     # AWS
     if cloud_provider == ProviderEnum.aws.value.lower() and (
@@ -119,11 +83,11 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
             )
         )
 
-        env_vars["AWS_ACCESS_KEY_ID"] = typer.prompt(
+        os.environ["AWS_ACCESS_KEY_ID"] = typer.prompt(
             "Please enter your AWS_ACCESS_KEY_ID",
             hide_input=True,
         )
-        env_vars["AWS_SECRET_ACCESS_KEY"] = typer.prompt(
+        os.environ["AWS_SECRET_ACCESS_KEY"] = typer.prompt(
             "Please enter your AWS_SECRET_ACCESS_KEY",
             hide_input=True,
         )
@@ -138,11 +102,11 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
             )
         )
 
-        env_vars["GOOGLE_CREDENTIALS"] = typer.prompt(
+        os.environ["GOOGLE_CREDENTIALS"] = typer.prompt(
             "Please enter your GOOGLE_CREDENTIALS",
             hide_input=True,
         )
-        env_vars["PROJECT_ID"] = typer.prompt(
+        os.environ["PROJECT_ID"] = typer.prompt(
             "Please enter your PROJECT_ID",
             hide_input=True,
         )
@@ -159,15 +123,15 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
             )
         )
 
-        env_vars["DIGITALOCEAN_TOKEN"] = typer.prompt(
+        os.environ["DIGITALOCEAN_TOKEN"] = typer.prompt(
             "Please enter your DIGITALOCEAN_TOKEN",
             hide_input=True,
         )
-        env_vars["SPACES_ACCESS_KEY_ID"] = typer.prompt(
+        os.environ["SPACES_ACCESS_KEY_ID"] = typer.prompt(
             "Please enter your SPACES_ACCESS_KEY_ID",
             hide_input=True,
         )
-        env_vars["SPACES_SECRET_ACCESS_KEY"] = typer.prompt(
+        os.environ["SPACES_SECRET_ACCESS_KEY"] = typer.prompt(
             "Please enter your SPACES_SECRET_ACCESS_KEY",
             hide_input=True,
         )
@@ -185,25 +149,22 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
             )
         )
 
-        env_vars["ARM_CLIENT_ID"] = typer.prompt(
+        os.environ["ARM_CLIENT_ID"] = typer.prompt(
             "Please enter your ARM_CLIENT_ID",
             hide_input=True,
         )
-        env_vars["ARM_CLIENT_SECRET"] = typer.prompt(
+        os.environ["ARM_CLIENT_SECRET"] = typer.prompt(
             "Please enter your ARM_CLIENT_SECRET",
             hide_input=True,
         )
-        env_vars["ARM_SUBSCRIPTION_ID"] = typer.prompt(
+        os.environ["ARM_SUBSCRIPTION_ID"] = typer.prompt(
             "Please enter your ARM_SUBSCRIPTION_ID",
             hide_input=True,
         )
-        env_vars["ARM_TENANT_ID"] = typer.prompt(
+        os.environ["ARM_TENANT_ID"] = typer.prompt(
             "Please enter your ARM_TENANT_ID",
             hide_input=True,
         )
-
-    add_env_var(env_vars)
-    _load_dotenv()
 
     return cloud_provider
 
@@ -211,8 +172,6 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
 def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     """Validating the the necessary auth provider credentials have been set as environment variables."""
 
-    _load_dotenv()
-    env_vars = {}
     auth_provider = auth_provider.lower()
 
     # Auth0
@@ -227,15 +186,15 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
             )
         )
 
-        env_vars["AUTH0_CLIENT_ID"] = typer.prompt(
+        os.environ["AUTH0_CLIENT_ID"] = typer.prompt(
             "Please enter your AUTH0_CLIENT_ID",
             hide_input=True,
         )
-        env_vars["AUTH0_CLIENT_SECRET"] = typer.prompt(
+        os.environ["AUTH0_CLIENT_SECRET"] = typer.prompt(
             "Please enter your AUTH0_CLIENT_SECRET",
             hide_input=True,
         )
-        env_vars["AUTH0_DOMAIN"] = typer.prompt(
+        os.environ["AUTH0_DOMAIN"] = typer.prompt(
             "Please enter your AUTH0_DOMAIN",
             hide_input=True,
         )
@@ -252,17 +211,14 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
             )
         )
 
-        env_vars["GITHUB_CLIENT_ID"] = typer.prompt(
+        os.environ["GITHUB_CLIENT_ID"] = typer.prompt(
             "Please enter your GITHUB_CLIENT_ID",
             hide_input=True,
         )
-        env_vars["GITHUB_CLIENT_SECRET"] = typer.prompt(
+        os.environ["GITHUB_CLIENT_SECRET"] = typer.prompt(
             "Please enter your GITHUB_CLIENT_SECRET",
             hide_input=True,
         )
-
-    add_env_var(env_vars)
-    _load_dotenv()
 
     return auth_provider
 

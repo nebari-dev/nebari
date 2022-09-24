@@ -239,8 +239,8 @@ def guided_init(
     rich.print(
         (
             "Congratulations, you have generated the all important [purple]nebari-config.yaml[/purple] file 🎉\n\n"
-            "You can always edit your [purple]nebari-config.yaml[/purple] file by editing the file directly."
-            "If you do make changes to you can ensure its still a valid configuration by running:\n\n"
+            "You can always edit your [purple]nebari-config.yaml[/purple] file by editing the file directly.\n"
+            "If you do make changes to it you can ensure its still a valid configuration by running:\n\n"
             "\t\t[green]nebari validate --config path/to/nebari-config.yaml[/green]\n\n"
         )
     )
