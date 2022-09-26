@@ -227,9 +227,7 @@ def worker_profile(options, user):
 
 
 def user_options(user):
-    allowed_namespaces = set(
-        ["nebari-git", "nebari-system", user.name] + list(user.groups)
-    )
+    allowed_namespaces = set(["nebari-git", "global", user.name] + list(user.groups))
     environments = {
         f"{namespace}/{name}": conda_prefix
         for namespace, name, conda_prefix in list_dask_environments(

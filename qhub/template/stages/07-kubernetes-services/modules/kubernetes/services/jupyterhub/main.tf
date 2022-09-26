@@ -50,7 +50,7 @@ resource "helm_release" "jupyterhub" {
               kind      = "configmap"
             }
 
-            "/opt/conda/envs/nebari-system/share/jupyter/lab/settings" = {
+            "/opt/conda/envs/global/share/jupyter/lab/settings" = {
               name      = kubernetes_config_map.jupyterlab-settings.metadata.0.name
               namespace = kubernetes_config_map.jupyterlab-settings.metadata.0.namespace
               kind      = "configmap"
