@@ -53,6 +53,8 @@ app = typer.Typer(
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 
+# app.add_typer(keycloak.app,name="keycloak",help="keycloak")
+
 
 @app.command()
 def guided_init(
@@ -619,7 +621,8 @@ def keycloak(
 
     do_keycloak(
         config_filename,
-        add_user=add_user,
+        username=add_user[0],
+        password=add_user[1],
         listusers=list_users,
     )
 
