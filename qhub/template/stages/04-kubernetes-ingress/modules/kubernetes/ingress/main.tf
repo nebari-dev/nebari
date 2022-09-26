@@ -1,3 +1,25 @@
+locals {
+  default_cert = [
+    "--entrypoints.websecure.http.tls.certResolver=default",
+    "--entrypoints.minio.http.tls.certResolver=default",
+  ]
+  certificate-settings = {
+    lets-encrypt = [
+      "--entrypoints.websecure.http.tls.certResolver=letsencrypt",
+      "--entrypoints.minio.http.tls.certResolver=letsencrypt",
+      "--certificatesresolvers.letsencrypt.acme.tlschallenge",
+      "--certificatesresolvers.letsencrypt.acme.email=${var.acme-email}",
+      "--certificatesresolvers.letsencrypt.acme.storage=acme.json",
+      "--certificatesresolvers.letsencrypt.acme.caserver=${var.acme-server}",
+    ]
+    self-signed = local.default_cert
+    existing    = local.default_cert
+    disabled    = []
+  }
+  add-certificate = local.certificate-settings[var.certificate-service]
+}
+
+
 resource "kubernetes_service_account" "main" {
   metadata {
     name      = "${var.name}-traefik-ingress"
@@ -238,22 +260,10 @@ resource "kubernetes_deployment" "main" {
             # Enable debug logging. Useful to work out why something might not be
             # working. Fetch logs of the pod.
             "--log.level=${var.loglevel}",
-            ], var.enable-certificates ? [
-            "--entrypoints.websecure.http.tls.certResolver=letsencrypt",
-            "--entrypoints.minio.http.tls.certResolver=letsencrypt",
-            "--certificatesresolvers.letsencrypt.acme.tlschallenge",
-            "--certificatesresolvers.letsencrypt.acme.email=${var.acme-email}",
-            "--certificatesresolvers.letsencrypt.acme.storage=acme.json",
-            "--certificatesresolvers.letsencrypt.acme.caserver=${var.acme-server}",
-            ] : [
-            # ideally we could write "--entrypoints.websecure.http.tls={}"
-            # but this doesn't seem to work?
-            # since all we want to do is trigger traefik to generate a certificate
-            # the downside of specifying this is you will see error messages
-            # in the traefik logs like "... uses a non-existent resolver: default"
-            "--entrypoints.websecure.http.tls.certResolver=default",
-            "--entrypoints.minio.http.tls.certResolver=default",
-          ])
+            ],
+            local.add-certificate,
+            var.additional-arguments,
+          )
 
           port {
             name           = "http"

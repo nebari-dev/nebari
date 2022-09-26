@@ -14,6 +14,7 @@ class CertificateEnum(str, enum.Enum):
     letsencrypt = "lets-encrypt"
     selfsigned = "self-signed"
     existing = "existing"
+    disabled = "disabled"
 
 
 class TerraformStateEnum(str, enum.Enum):

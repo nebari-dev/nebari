@@ -5,6 +5,7 @@ import questionary
 import rich
 import typer
 from click import Context
+from rich import print
 from typer.core import TyperGroup
 
 from qhub.cli._init import (
@@ -218,8 +219,8 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
     rich.print(
         (
             "Congratulations, you have generated the all important [purple]nebari-config.yaml[/purple] file 🎉\n\n"
-            "You can always edit your [purple]nebari-config.yaml[/purple] file by editing the file directly."
-            "If you do make changes to you can ensure its still a valid configuration by running:\n\n"
+            "You can always edit your [purple]nebari-config.yaml[/purple] file by editing the file directly.\n"
+            "If you do make changes to it you can ensure its still a valid configuration by running:\n\n"
             "\t\t[green]nebari validate --config path/to/nebari-config.yaml[/green]\n\n"
         )
     )
@@ -377,7 +378,7 @@ def validate(
         pass
     else:
         verify(config)
-        print("Successfully validated configuration")
+        print("[bold purple]Successfully validated configuration.[/bold purple]")
 
 
 @app.command()
@@ -431,6 +432,16 @@ def deploy(
         "--output",
         help="output directory",
     ),
+    dns_provider: str = typer.Option(
+        False,
+        "--dns-provider",
+        help="dns provider to use for registering domain name mapping",
+    ),
+    dns_auto_provision: bool = typer.Option(
+        False,
+        "--dns-auto-provision",
+        help="Attempt to automatically provision DNS. For Auth0 is requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
+    ),
     disable_prompt: bool = typer.Option(
         False,
         "--disable-prompt",
@@ -446,6 +457,7 @@ def deploy(
     Deploy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
     """
     config_filename = Path(config)
+
     if not config_filename.is_file():
         raise ValueError(
             f"passed in configuration filename={config_filename} must exist"
@@ -460,9 +472,10 @@ def deploy(
 
     deploy_configuration(
         config_yaml,
-        dns_provider=False,
-        dns_auto_provision=False,
+        dns_provider=dns_provider,
+        dns_auto_provision=dns_auto_provision,
         disable_prompt=disable_prompt,
+        disable_checks=False,
         skip_remote_state_provision=False,
     )
 
@@ -485,9 +498,7 @@ def destroy(
     Destroy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
     """
     delete = typer.confirm("Are you sure you want to destroy it?")
-
     if not delete:
-        print("not destroying!")
         raise typer.Abort()
     else:
         config_filename = Path(config)
