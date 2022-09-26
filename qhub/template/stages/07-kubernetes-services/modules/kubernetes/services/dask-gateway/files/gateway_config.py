@@ -213,7 +213,7 @@ def base_username_mount(username, uid=1000, gid=100):
 
 def worker_profile(options, user):
     namespace, name = options.conda_environment.split("/")
-    return_dict = functools.reduce(
+    return functools.reduce(
         deep_merge,
         [
             base_node_group(),
@@ -221,12 +221,14 @@ def worker_profile(options, user):
             base_username_mount(user.name),
             config["profiles"][options.profile],
             {"environment": {**options.environment_vars}},
+            {
+                "image": config["worker-images"][options.profile]
+                if config["worker-images"]
+                else f"{config['cluster-image']['name']}:{config['cluster-image']['tag']}"
+            },
         ],
         {},
     )
-    if config["worker-images"]:
-        return_dict.update({"image": config["worker-images"][options.profile]})
-    return return_dict
 
 
 def user_options(user):
@@ -264,7 +266,7 @@ def user_options(user):
             Select(
                 "image",
                 list(config["worker-images"].keys()),
-                default=config["worker-images"].keys()[0],
+                default=list(config["worker-images"].keys())[0],
                 label="Cluster Docker Image",
             )
         ]
