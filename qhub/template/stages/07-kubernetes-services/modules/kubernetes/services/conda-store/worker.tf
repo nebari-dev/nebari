@@ -80,8 +80,9 @@ resource "kubernetes_deployment" "worker" {
 
         annotations = {
           # This lets us autorestart when the conifg changes!
-          "checksum/config-map" = sha256(jsonencode(kubernetes_config_map.conda-store-config.data))
-          "checksum/secret"     = sha256(jsonencode(kubernetes_secret.conda-store-secret.data))
+          "checksum/config-map"         = sha256(jsonencode(kubernetes_config_map.conda-store-config.data))
+          "checksum/secret"             = sha256(jsonencode(kubernetes_secret.conda-store-secret.data))
+          "checksum/conda-environments" = sha256(jsonencode(kubernetes_config_map.conda-store-environments.data))
         }
       }
 
@@ -192,6 +193,10 @@ resource "kubernetes_deployment" "worker" {
             # claim_name = kubernetes_persistent_volume_claim.main.metadata.0.name
             claim_name = "${var.name}-conda-store-storage"
           }
+        }
+        security_context {
+          run_as_group = 0
+          run_as_user  = 0
         }
       }
     }

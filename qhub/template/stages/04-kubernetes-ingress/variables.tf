@@ -16,11 +16,6 @@ variable "node_groups" {
   }))
 }
 
-variable "enable-certificates" {
-  description = "Enable certificates"
-  default     = false
-}
-
 variable "acme-email" {
   description = "ACME server email"
   default     = "qhub@example.com"
@@ -49,9 +44,20 @@ variable "load-balancer-ip" {
 
 variable "load-balancer-annotations" {
   description = "Annotations for the load balancer"
-  type = map(object({
-    key   = string
-    value = string
-  }))
-  default = null
+  type        = map(string)
+  default     = null
+}
+
+
+variable "certificate-service" {
+  description = "The certificate service to use"
+  type        = string
+  default     = "self-signed"
+}
+
+
+variable "additional-arguments" {
+  description = "Additional command line arguments to supply to traefik ingress"
+  type        = list(string)
+  default     = []
 }
