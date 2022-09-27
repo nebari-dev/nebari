@@ -70,8 +70,7 @@ if cdsdashboards["enabled"]:
         # parse response
         j = json.loads(response.data.decode("UTF-8"))
         return [
-            f"/home/conda/{env['namespace']['name']}/envs/{env['name']}"
-            for env in j.get("data", [])
+            f"{env['namespace']['name']}-{env['name']}" for env in j.get("data", [])
         ]
 
     c.CDSDashboardsConfig.conda_envs = partial(
