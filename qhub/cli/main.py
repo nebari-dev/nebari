@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Tuple
 from zipfile import ZipFile
 
 import rich
@@ -17,10 +16,10 @@ from qhub.cli._init import (
     check_project_name,
     handle_init,
 )
+from qhub.cli._keycloak import app_keycloak
 from qhub.cost import infracost_report
 from qhub.deploy import deploy_configuration
 from qhub.destroy import destroy_configuration
-from qhub.keycloak import do_keycloak
 from qhub.render import render_template
 from qhub.schema import (
     AuthenticationEnum,
@@ -52,8 +51,7 @@ app = typer.Typer(
     rich_markup_mode="rich",
     context_settings={"help_option_names": ["-h", "--help"]},
 )
-
-# app.add_typer(keycloak.app,name="keycloak",help="keycloak")
+app.add_typer(app_keycloak, name="keycloak", help="keycloak")
 
 
 @app.command()
@@ -589,42 +587,6 @@ def upgrade(
         )
 
     do_upgrade(config_filename, attempt_fixes=attempt_fixes)
-
-
-@app.command()
-def keycloak(
-    config: str = typer.Option(
-        ...,
-        "-c",
-        "--config",
-        help="qhub configuration file path",
-    ),
-    add_user: Tuple[str, str] = typer.Option(
-        None,
-        "--add-user",
-        help="`--add-user <username> [password]` or `listusers`",
-    ),
-    list_users: bool = typer.Option(
-        False,
-        "--listusers",
-        help="list current keycloak users",
-    ),
-):
-    """
-    Keycloak
-    """
-    config_filename = Path(config)
-    if not config_filename.is_file():
-        raise ValueError(
-            f"passed in configuration filename={config_filename} must exist"
-        )
-
-    do_keycloak(
-        config_filename,
-        username=add_user[0],
-        password=add_user[1],
-        listusers=list_users,
-    )
 
 
 @app.command()

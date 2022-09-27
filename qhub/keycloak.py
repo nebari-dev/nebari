@@ -10,7 +10,7 @@ from .utils import load_yaml
 logger = logging.getLogger(__name__)
 
 
-def do_keycloak(config_filename, username, password, listusers):
+def do_keycloak(config_filename, *args):
     config = load_yaml(config_filename)
     verify(config)
 
@@ -21,19 +21,19 @@ def do_keycloak(config_filename, username, password, listusers):
 
     keycloak_admin = get_keycloak_admin_from_config(config)
 
-    if username:
-        if len(username) < 2:
+    if args[0] == "adduser":
+        if len(args) < 2:
             raise ValueError(
                 "keycloak command 'adduser' requires `username [password]`"
             )
 
-        if len(password) < 3:
-            password = None
+        username = args[1]
+        password = args[2] if len(args) >= 3 else None
         create_user(keycloak_admin, username, password, domain=config["domain"])
-    elif listusers:
+    elif args[0] == "listusers":
         list_users(keycloak_admin)
     else:
-        raise ValueError("unsupported keycloak argument, please use --help")
+        raise ValueError(f"unknown keycloak command {args[0]}")
 
 
 def create_user(
