@@ -5,7 +5,12 @@ import typer
 
 from qhub.keycloak import do_keycloak
 
-app_keycloak = typer.Typer()
+app_keycloak = typer.Typer(
+    add_completion=False,
+    no_args_is_help=True,
+    rich_markup_mode="rich",
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 
 
 @app_keycloak.command()

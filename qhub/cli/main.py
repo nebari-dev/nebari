@@ -34,6 +34,14 @@ from qhub.upgrade import do_upgrade
 from qhub.utils import load_yaml
 
 SECOND_COMMAND_GROUP_NAME = "Additional Commands"
+GUIDED_INIT_MSG = (
+    "[bold green]START HERE[/bold green] - this will gently guide you through a list of questions "
+    "to generate your [purple]nebari-config.yaml[/purple]. "
+    "It is an [i]alternative[/i] to passing the options listed below."
+)
+KEYCLOAK_COMMAND_MSG = (
+    "Interact with the Nebari Keycloak identity and access management tool."
+)
 
 
 class OrderCommands(TyperGroup):
@@ -50,13 +58,11 @@ app = typer.Typer(
     rich_markup_mode="rich",
     context_settings={"help_option_names": ["-h", "--help"]},
 )
-app.add_typer(app_keycloak, name="keycloak", help="keycloak")
-
-
-guided_init_help_msg = (
-    "[bold green]START HERE[/bold green] - this will gently guide you through a list of questions "
-    "to generate your [purple]nebari-config.yaml[/purple]. "
-    "It is an [i]alternative[/i] to passing the options listed below."
+app.add_typer(
+    app_keycloak,
+    name="keycloak",
+    help=KEYCLOAK_COMMAND_MSG,
+    rich_help_panel=SECOND_COMMAND_GROUP_NAME,
 )
 
 
@@ -70,7 +76,7 @@ def init(
     ),
     guided_init: bool = typer.Option(
         False,
-        help=guided_init_help_msg,
+        help=GUIDED_INIT_MSG,
         callback=guided_init_wizard,
         is_eager=True,
     ),
@@ -163,7 +169,7 @@ def validate(
     ),
 ):
     """
-    Validate the [purple]nebari-config.yaml[/purple] file.
+    Validate the values in the [purple]nebari-config.yaml[/purple] file are acceptable.
     """
     config_filename = Path(config)
     if not config_filename.is_file():
@@ -320,7 +326,7 @@ def destroy(
         destroy_configuration(config_yaml)
 
 
-@app.command()
+@app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def cost(
     path: str = typer.Option(
         None,
@@ -354,7 +360,10 @@ def cost(
     ),
 ):
     """
-    Cost-Estimate
+    Estimate the cost of deploying Nebari based on your [purple]nebari-config.yaml[/purple]. [italic]Experimental.[/italic]
+
+    [italic]This is still only experimental using Infracost under the hood.
+    The estimated value is a base cost and does not include usage costs.[/italic]
     """
     infracost_report(
         path=path,
@@ -365,7 +374,7 @@ def cost(
     )
 
 
-@app.command()
+@app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def upgrade(
     config: str = typer.Option(
         ...,
@@ -380,7 +389,11 @@ def upgrade(
     ),
 ):
     """
-    Upgrade
+    Upgrade your [purple]nebari-config.yaml[/purple] from pre-0.4.0 to 0.4.0.
+
+    Due to several breaking changes that came with the 0.4.0 release, this utility is available to help
+    update your [purple]nebari-config.yaml[/purple] to comply with the introduced changes.
+    See the project [green]RELEASE.md[/green] for details.
     """
     config_filename = Path(config)
     if not config_filename.is_file():
@@ -391,7 +404,7 @@ def upgrade(
     do_upgrade(config_filename, attempt_fixes=attempt_fixes)
 
 
-@app.command()
+@app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def support(
     config_filename: str = typer.Option(
         ...,
@@ -407,7 +420,10 @@ def support(
     ),
 ):
     """
-    Support
+    Support tool to write all Kubernetes logs locally and compress them into a zip file.
+
+    The Nebari team recommends k9s to manage and inspect the state of the cluster.
+    However, this command occasionally helpful for debugging purposes should the logs need to be shared.
     """
 
     kube_config.load_kube_config()
