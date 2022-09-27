@@ -10,17 +10,18 @@ ______________________________________________________________________
 
 
 
-## Release v0.4.4 - August 18, 2022
+## Release v0.4.4 - September 22, 2022
 
 ### Feature changes and enhancements
 
 Enhancements for this release include:
-- Bump `conda-store` version to `v0.4.9` and enable overrides
+- Bump `conda-store` version to `v0.4.11` and enable overrides
 - Fully decouple the JupyterLab, JupyterHub and Dask-Worker images from the main codebase
   - See https://github.com/nebari-dev/nebari-docker-images for images
 - Add support for Python 3.10
 - Add support for Terraform binary download for M1 Mac
-
+- Add option to supply additional arguments to ingress from qhub-config.yaml
+- Add support for Kubernetes Kind (local)
 
 ## What's Changed
 * Add support for terraform binary download for M1 by @aktech in https://github.com/Quansight/qhub/pull/1370
@@ -41,7 +42,23 @@ Enhancements for this release include:
 * BUG: Setting behind proxy setting in conda-store to be aware of http vs. https by @costrouc in https://github.com/Quansight/qhub/pull/1404
 * Minor update to release workflow by @iameskild in https://github.com/Quansight/qhub/pull/1406
 * Clean up release workflow by @iameskild in https://github.com/Quansight/qhub/pull/1407
+* Add release notes for v0.4.4 by @iameskild in https://github.com/Quansight/qhub/pull/1408
+* Update Ingress overrides behaviour by @viniciusdc in https://github.com/Quansight/qhub/pull/1420
+* Preserve conda-store image permissions by @iameskild in https://github.com/Quansight/qhub/pull/1419
+* Add project name to jhub helm chart release name by @iameskild in https://github.com/Quansight/qhub/pull/1422
+* Fix for helm extension overrides data type issue by @konkapv in https://github.com/Quansight/qhub/pull/1424
+* Add option to disable tls certificate by @iameskild in https://github.com/Quansight/qhub/pull/1421
+* Fixing provider=existing for local/existing by @costrouc in https://github.com/Quansight/qhub/pull/1425
+* Update release, testing checklist by @iameskild in https://github.com/Quansight/qhub/pull/1397
+* Add `--disable-checks` flag to deploy by @iameskild in https://github.com/Quansight/qhub/pull/1429
+* Adding option to supply additional arguments to ingress via `ingress.terraform_overrides.additional-arguments` by @costrouc in https://github.com/Quansight/qhub/pull/1431
+* Add properties to middleware crd headers by @iameskild in https://github.com/Quansight/qhub/pull/1434
+* Restart conda-store worker when new conda env is added to config.yaml by @iameskild in https://github.com/Quansight/qhub/pull/1437
+* Pin dask ipywidgets version to `7.7.1` by @viniciusdc in https://github.com/Quansight/qhub/pull/1442
+* Set qhub-dask version to 0.4.4 by @iameskild in https://github.com/Quansight/qhub/pull/1470
 
+## New Contributors
+* @konkapv made their first contribution in https://github.com/Quansight/qhub/pull/1424
 
 ## Release v0.4.3 - July 7, 2022
 
