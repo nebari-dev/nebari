@@ -1,7 +1,6 @@
 from pathlib import Path
 from zipfile import ZipFile
 
-import rich
 import typer
 from click import Context
 from kubernetes import client
@@ -14,6 +13,8 @@ from qhub.cli._init import (
     check_auth_provider_creds,
     check_cloud_provider_creds,
     check_project_name,
+    enum_to_list,
+    guided_init_wizard,
     handle_init,
 )
 from qhub.cli._keycloak import app_keycloak
@@ -32,9 +33,7 @@ from qhub.schema import (
 from qhub.upgrade import do_upgrade
 from qhub.utils import load_yaml
 
-
-def enum_to_list(enum_cls):
-    return [e.value for e in enum_cls]
+SECOND_COMMAND_GROUP_NAME = "Additional Commands"
 
 
 class OrderCommands(TyperGroup):
@@ -54,226 +53,11 @@ app = typer.Typer(
 app.add_typer(app_keycloak, name="keycloak", help="keycloak")
 
 
-@app.command()
-def guided_init(
-    ctx: typer.Context,
-    disable_checks: bool = typer.Option(
-        default=False,
-    ),
-):
-    """
-    [bold green]START HERE[/bold green] if you're new to Nebari. This is the Guided Init wizard used to create and initialize your [purple]nebari-config.yaml[/purple] file.
-
-    To get started simply run:
-
-            [green]nebari guided-init[/green]
-
-    This command asks a few important questions and when complete, will generate:
-    :sparkles: [purple]nebari-config.yaml[/purple], which:
-        contains all your Nebari cluster configuration details and,
-        is used as input to later commands such as [green]nebari render[/green], [green]nebari deploy[/green], etc.
-    :sparkles: [purple].env[/purple], which:
-        contains all your important environment variables (i.e. cloud credentials, tokens, etc.) and,
-        is only stored on your local machine and used as a convenience.
-
-    [yellow]NOTE[/yellow]
-    This CLI command completes the same task, generating the [purple]nebari-config.yaml[/purple], as the generic
-    [green]nebari init[/green] command but does so without the need to enter all the flags required to get started.
-    """
-
-    rich.print(
-        (
-            "Welcome to the Guided Init wizard!\n"
-            "You will be asked a few questions that are used to generate your [purple]nebari-config.yaml[/purple] and [purple].env[/purple] files.\n\n"
-            "For more detail about the [green]nebari init[/green] command, please refer to our docs:\n\n"
-            "\t\t[light_green]https://nebari-docs.netlify.app[/light_green]\n\n"
-        )
-    )
-
-    if disable_checks:
-        rich.print(
-            "⚠️  Attempting to use the Guided Init wizard without any validation checks. There is no guarantee values provided will work!  ⚠️\n\n"
-        )
-
-    import questionary
-
-    qmark = " 🪴 "
-
-    # pull in default values for each of the below
-    inputs = InitInputs()
-
-    # CLOUD PROVIDER
-    inputs.cloud_provider = questionary.select(
-        "Where would you like to deploy your Nebari cluster?",
-        choices=enum_to_list(ProviderEnum),
-        qmark=qmark,
-    ).ask()
-
-    if not disable_checks:
-        check_cloud_provider_creds(ctx, cloud_provider=inputs.cloud_provider)
-
-    # specific context needed when `check_project_name` is called
-    ctx.params["cloud_provider"] = inputs.cloud_provider
-
-    # PROJECT NAME
-    inputs.project_name = questionary.text(
-        "What project name would you like to use?",
-        qmark=qmark,
-        validate=lambda text: True if len(text) > 0 else "Please enter a value",
-    ).ask()
-
-    if not disable_checks:
-        check_project_name(ctx, inputs.project_name)
-
-    # DOMAIN NAME
-    inputs.domain_name = questionary.text(
-        "What domain name would you like to use?",
-        qmark=qmark,
-        validate=lambda text: True if len(text) > 0 else "Please enter a value",
-    ).ask()
-
-    # NAMESPACE
-    inputs.namespace = questionary.text(
-        "What namespace would like to use?",
-        default=inputs.namespace,
-        qmark=qmark,
-    ).ask()
-
-    # AUTH PROVIDER
-    inputs.auth_provider = questionary.select(
-        "What authentication provider would you like?",
-        choices=enum_to_list(AuthenticationEnum),
-        qmark=qmark,
-    ).ask()
-
-    if not disable_checks:
-        check_auth_provider_creds(ctx, auth_provider=inputs.auth_provider)
-
-    if inputs.auth_provider.lower() == AuthenticationEnum.auth0.value.lower():
-        inputs.auth_auto_provision = questionary.confirm(
-            "Would you like us to auto provision the Auth0 Machine-to-Machine app?",
-            default=False,
-            qmark=qmark,
-        ).ask()
-
-    elif inputs.auth_provider.lower() == AuthenticationEnum.github.value.lower():
-        rich.print(
-            (
-                ":warning: If you haven't done so already, please ensure the following:\n"
-                f"The `Homepage URL` is set to: [light_green]https://{inputs.domain_name}[/light_green]\n"
-                f"The `Authorization callback URL` is set to: [light_green]https://{inputs.domain_name}/auth/realms/qhub/broker/github/endpoint[/light_green]\n\n"
-            )
-        )
-
-    # REPOSITORY
-    if questionary.confirm(
-        "Would you like to store this project in a git repo?",
-        default=False,
-        qmark=qmark,
-    ).ask():
-
-        repo_url = "http://{git_provider}/{org_name}/{repo_name}"
-
-        git_provider = questionary.select(
-            "Which git provider would you like to use?",
-            choices=["github.com", "gitlab.com"],
-            qmark=qmark,
-        ).ask()
-
-        org_name = questionary.text(
-            f"Which user or organization will this repo live under? ({repo_url.format(git_provider=git_provider, org_name='<org-name>', repo_name='<repo-name>')})",
-            qmark=qmark,
-        ).ask()
-
-        repo_name = questionary.text(
-            f"And what is the name of this repo? ({repo_url.format(git_provider=git_provider, org_name=org_name, repo_name='<repo-name>')})",
-            qmark=qmark,
-        ).ask()
-
-        inputs.repository = repo_url.format(
-            git_provider=git_provider, org_name=org_name, repo_name=repo_name
-        )
-
-        inputs.repository_auto_provision = questionary.confirm(
-            f"Would you like us to auto create the following git repo: {inputs.repository}?",
-            default=False,
-            qmark=qmark,
-        ).ask()
-
-        # create `check_repository_creds` function
-        if not disable_checks:
-            pass
-
-    # CICD
-    inputs.ci_provider = questionary.select(
-        "Would you like to adopt a GitOps workflow for this repository?",
-        choices=enum_to_list(CiEnum),
-        qmark=qmark,
-    ).ask()
-
-    # SSL CERTIFICATE
-    ssl_cert = questionary.confirm(
-        "Would you like to add a Let's Encrypt SSL certificate to your cluster?",
-        default=False,
-        qmark=qmark,
-    ).ask()
-
-    if ssl_cert:
-        inputs.ssl_cert_email = questionary.text(
-            "Which email address should Let's Encrypt associate the certificate with?",
-            qmark=qmark,
-        ).ask()
-
-    # ADVANCED FEATURES
-    if questionary.confirm(
-        "Would you like to make advanced configuration changes (⚠️ caution is advised)?",
-        default=False,
-        qmark=qmark,
-    ).ask():
-
-        inputs.terraform_state = questionary.select(
-            "Where should the Terraform State be provisioned?",
-            choices=enum_to_list(TerraformStateEnum),
-            qmark=qmark,
-        ).ask()
-
-        inputs.kubernetes_version = questionary.text(
-            "Which Kubernetes version would you like to use?",
-            qmark=qmark,
-        ).ask()
-
-    handle_init(inputs)
-
-    rich.print(
-        (
-            "Congratulations, you have generated the all important [purple]nebari-config.yaml[/purple] file 🎉\n\n"
-            "You can always edit your [purple]nebari-config.yaml[/purple] file by editing the file directly."
-            "If you do make changes to you can ensure its still a valid configuration by running:\n\n"
-            "\t\t[green]nebari validate --config path/to/nebari-config.yaml[/green]\n\n"
-        )
-    )
-
-    base_cmd = f"nebari init {inputs.cloud_provider}"
-
-    def if_used(key, model=inputs, ignore_list=["cloud_provider"]):
-        if key not in ignore_list:
-            b = "--{key} {value}"
-            value = getattr(model, key)
-            if isinstance(value, str) and value != "":
-                return b.format(key=key, value=value).replace("_", "-")
-            if isinstance(value, bool) and value:
-                return b.format(key=key, value=value).replace("_", "-")
-
-    cmds = " ".join(
-        [_ for _ in [if_used(_) for _ in inputs.dict().keys()] if _ is not None]
-    )
-
-    rich.print(
-        (
-            "Here is the previous Guided Init if it was converted into a [green]nebari init[/green] command:\n\n"
-            f"\t\t[green]{base_cmd} {cmds}[/green]\n\n"
-        )
-    )
+guided_init_help_msg = (
+    "[bold green]START HERE[/bold green] - this will gently guide you through a list of questions "
+    "to generate your [purple]nebari-config.yaml[/purple]. "
+    "It is an [i]alternative[/i] to passing the options listed below."
+)
 
 
 @app.command()
@@ -282,6 +66,12 @@ def init(
         "local",
         help=f"options: {enum_to_list(ProviderEnum)}",
         callback=check_cloud_provider_creds,
+        is_eager=True,
+    ),
+    guided_init: bool = typer.Option(
+        False,
+        help=guided_init_help_msg,
+        callback=guided_init_wizard,
         is_eager=True,
     ),
     project_name: str = typer.Option(
@@ -330,6 +120,17 @@ def init(
 ):
     """
     Create and initialize your [purple]nebari-config.yaml[/purple] file.
+
+    This command will create and initialize your [purple]nebari-config.yaml[/purple] :sparkles:
+
+    This file contains all your Nebari cluster configuration details and,
+    is used as input to later commands such as [green]nebari render[/green], [green]nebari deploy[/green], etc.
+
+    If you're new to Nebari, we recommend you use the Guided Init wizard.
+    To get started simply run:
+
+            [green]nebari init --guided-init[/green]
+
     """
     inputs = InitInputs()
 
@@ -349,7 +150,7 @@ def init(
     handle_init(inputs)
 
 
-@app.command()
+@app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def validate(
     config: str = typer.Option(
         ...,
@@ -381,7 +182,7 @@ def validate(
         print("[bold purple]Successfully validated configuration.[/bold purple]")
 
 
-@app.command()
+@app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def render(
     output: str = typer.Option(
         "./",
@@ -475,6 +276,7 @@ def deploy(
         dns_provider=dns_provider,
         dns_auto_provision=dns_auto_provision,
         disable_prompt=disable_prompt,
+        disable_checks=False,
         skip_remote_state_provision=False,
     )
 
