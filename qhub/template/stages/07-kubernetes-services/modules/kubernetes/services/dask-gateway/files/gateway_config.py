@@ -222,7 +222,7 @@ def worker_profile(options, user):
             config["profiles"][options.profile],
             {"environment": {**options.environment_vars}},
             {
-                "image": config["worker-images"][options.profile]
+                "image": config["worker-images"][options.image]
                 if config["worker-images"]
                 else f"{config['cluster-image']['name']}:{config['cluster-image']['tag']}"
             },
