@@ -315,7 +315,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
     rich.print(
         (
             "\n 🪴  Great! Now it's time to decide on the domain name (i.e the URL) that Nebari will be accessible from. "
-            "This should be domain that you own.\n\n"
+            "This should be a domain that you own.\n\n"
         )
     )
     inputs.domain_name = questionary.text(
