@@ -380,7 +380,8 @@ class JupyterLabProfile(Base):
 class DaskGateway(Base):
     overrides: typing.Optional[typing.Dict]
     worker_extra_images: typing.Optional[typing.Dict[str, str]]
-    volume_mounts: typing.Optional[typing.List[typing.Dict]]
+    init_container_cmd: typing.Optional[bool]
+    extra_worker_mounts: typing.Optional[typing.Dict[str, typing.List]]
 
 
 class DaskWorkerProfile(Base):

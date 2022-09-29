@@ -101,6 +101,11 @@ variable "extra-worker-images" {
   type        = map(any)
 }
 
+variable "init-container-cmd" {
+  description = "Enable init container cmd execution for conda environment"
+  type        = bool
+}
+
 variable "controller" {
   description = "controller configuration"
   type = object({
@@ -188,4 +193,21 @@ variable "conda-store-pvc" {
 variable "conda-store-mount" {
   description = "Mount directory for conda-store environments"
   type        = string
+}
+
+variable "extra-worker-mounts" {
+  description = "Extra volumes mounts for Dask Gateway cluster"
+  type = object({
+    volumes = list(object({
+      name = string
+      persistentVolumeClaim = object({
+        claimName = string
+      })
+    }))
+    volume_mounts = list(object({
+      mountPath = string
+      name      = string
+      subPath   = string
+    }))
+  })
 }

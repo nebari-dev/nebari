@@ -132,7 +132,7 @@ def base_conda_store_mounts(namespace, name):
     conda_store_pvc_name = config["conda-store-pvc"]
     conda_store_mount = config["conda-store-mount"]
 
-    return {
+    base_config = {
         "scheduler_extra_pod_config": {
             "volumes": [
                 {
@@ -180,6 +180,13 @@ def base_conda_store_mounts(namespace, name):
         },
     }
 
+    if not config["init-container-cmd"]:
+        # disable init container cmd
+        del base_config["worker_cmd"]
+        del base_config["scheduler_cmd"]
+
+    return base_config
+
 
 def base_username_mount(username, uid=1000, gid=100):
     return {
@@ -211,6 +218,30 @@ def base_username_mount(username, uid=1000, gid=100):
     }
 
 
+def extra_worker_mounts():
+    extra_mounts = {}
+    if config["extra-worker-mounts"]:
+        volumes = config["extra-worker-mounts"]["volumes"]
+        volume_mounts = config["extra-worker-mounts"]["volume_mounts"]
+        if volumes:
+            extra_mounts.update(
+                {
+                    "scheduler_extra_pod_config": {
+                        "volumes": volumes,
+                    },
+                    "worker_extra_pod_config": {"volumes": volumes},
+                }
+            )
+        if volume_mounts:
+            extra_mounts.update(
+                {
+                    "scheduler_extra_container_config": {"volumeMounts": volume_mounts},
+                    "worker_extra_container_config": {"volumeMounts": volume_mounts},
+                }
+            )
+    return extra_mounts
+
+
 def worker_profile(options, user):
     namespace, name = options.conda_environment.split("/")
     return functools.reduce(
@@ -226,6 +257,7 @@ def worker_profile(options, user):
                 if config["worker-images"]
                 else f"{config['cluster-image']['name']}:{config['cluster-image']['tag']}"
             },
+            extra_worker_mounts(),
         ],
         {},
     )

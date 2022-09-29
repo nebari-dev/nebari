@@ -17,6 +17,16 @@ variable "dask-extra-images" {
   default     = {}
 }
 
+variable "dask-extra-worker-mounts" {
+  description = "Extra mounts to add to Dask Gateway worker pods"
+  type        = any
+}
+
+variable "dask-init-container-cmd" {
+  description = "Command to run in init container"
+  type        = bool
+}
+
 # =================== RESOURCES =====================
 module "dask-gateway" {
   source = "./modules/kubernetes/services/dask-gateway"
@@ -42,5 +52,7 @@ module "dask-gateway" {
   # profiles
   profiles            = var.dask-gateway-profiles
   extra-worker-images = var.dask-extra-images
+  init-container-cmd  = var.dask-init-container-cmd
+  extra-worker-mounts = var.dask-extra-worker-mounts
 
 }
