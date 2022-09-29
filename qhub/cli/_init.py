@@ -435,7 +435,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         )
     )
     if questionary.confirm(
-        "Would you like to make advanced configuration changes ?",
+        "Would you like to make advanced configuration changes?",
         default=False,
         qmark=qmark,
     ).ask():
