@@ -1,5 +1,6 @@
 from pathlib import Path
 from zipfile import ZipFile
+from typing import Optional
 
 import typer
 from click import Context
@@ -8,6 +9,7 @@ from kubernetes import config as kube_config
 from rich import print
 from ruamel import yaml
 from typer.core import TyperGroup
+from qhub.version import __version__
 
 from qhub.cli._init import (
     check_auth_provider_creds,
@@ -50,6 +52,7 @@ class OrderCommands(TyperGroup):
         return list(self.commands)
 
 
+
 app = typer.Typer(
     cls=OrderCommands,
     help="Nebari CLI 🪴",
@@ -64,6 +67,20 @@ app.add_typer(
     help=KEYCLOAK_COMMAND_MSG,
     rich_help_panel=SECOND_COMMAND_GROUP_NAME,
 )
+
+@app.callback(invoke_without_command=True)
+def version(
+    version: Optional[bool] = typer.Option(
+        None, 
+        "-v", 
+        "--version", 
+        help="Nebari version number",
+        is_eager=True, 
+    ),
+):
+    if version:
+        print(__version__)
+        raise typer.Exit()
 
 
 @app.command()
