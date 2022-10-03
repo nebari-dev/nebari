@@ -296,10 +296,20 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
     # specific context needed when `check_project_name` is called
     ctx.params["cloud_provider"] = inputs.cloud_provider
 
+    name_guidelines = """
+    The project name must adhere to the following requirements:
+    - Letters from A to Z (upper and lower case) and numbers
+    - Maximum accepted length of the name string is 16 characters
+    """
+    if inputs.cloud_provider == ProviderEnum.aws.value.lower():
+        name_guidelines += "- Should NOT start with the string `aws`\n"
+    elif inputs.cloud_provider == ProviderEnum.azure.value.lower():
+        name_guidelines += "- Should NOT contain `-`\n"
+
     # PROJECT NAME
     rich.print(
         (
-            "\n 🪴  Next, give your Nebari instance a project name. This name is what your Kubernetes cluster will be referred to as.\n\n"
+            f"\n 🪴  Next, give your Nebari instance a project name. This name is what your Kubernetes cluster will be referred to as.\n{name_guidelines}\n\n"
         )
     )
     inputs.project_name = questionary.text(
@@ -361,7 +371,8 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
     rich.print(
         (
             "\n 🪴  This next section is [italic]optional[/italic] but recommended. If you wish to adopt a GitOps approach to managing this platform, "
-            "we will walk you through a set of questions to get that setup.\n\n"
+            "we will walk you through a set of questions to get that setup. With this setup, Nebari will use GitHub Actions workflows (or GitLab equivalent) "
+            "to automatically handle the future deployments of your infrastructure.\n\n"
         )
     )
     if questionary.confirm(
@@ -430,7 +441,9 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
     # ADVANCED FEATURES
     rich.print(
         (
-            "\n 🪴  This next section is [italic]optional[/italic] and includes advanced configuration changes. "
+            # TODO once docs are updated, add links for more info on these changes
+            "\n 🪴  This next section is [italic]optional[/italic] and includes advanced configuration changes to the "
+            "Terraform state, Kubernetes Namespace and Kubernetes version.\n"
             "⚠️ caution is advised!\n\n"
         )
     )
@@ -440,17 +453,17 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         qmark=qmark,
     ).ask():
 
-        # NAMESPACE
-        inputs.namespace = questionary.text(
-            "What namespace would like to use?",
-            default=inputs.namespace,
-            qmark=qmark,
-        ).ask()
-
         # TERRAFORM STATE
         inputs.terraform_state = questionary.select(
             "Where should the Terraform State be provisioned?",
             choices=enum_to_list(TerraformStateEnum),
+            qmark=qmark,
+        ).ask()
+
+        # NAMESPACE
+        inputs.namespace = questionary.text(
+            "What namespace would like to use?",
+            default=inputs.namespace,
             qmark=qmark,
         ).ask()
 
