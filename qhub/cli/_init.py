@@ -277,12 +277,12 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # CLOUD PROVIDER
         rich.print(
             (
-                "\n 🪴  Nebari runs on a Kubernetes cluster so one of the first choices that needs to be made "
+                "\n\n\n\n 🪴  Nebari runs on a Kubernetes cluster so one of the first choices that needs to be made "
                 "is where you want this Kubernetes cluster deployed. "
                 f"{LINKS_TO_DOCS_TEMPLATE.format(link_to_docs=CHOOSE_CLOUD_PROVIDER)}"
-                "\n\t❕ [purple]local[/purple] requires Docker and Kubernetes running on your local machine. "
+                "\n\t❗️ [purple]local[/purple] requires Docker and Kubernetes running on your local machine. "
                 "[italic]Currently only available on Linux OS.[/italic]"
-                "\n\t❕ [purple]existing[/purple] refers to an existing Kubernetes cluster that Nebari can be deployed on.\n"
+                "\n\t❗️ [purple]existing[/purple] refers to an existing Kubernetes cluster that Nebari can be deployed on.\n"
             )
         )
         # try:
@@ -315,7 +315,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # PROJECT NAME
         rich.print(
             (
-                f"\n 🪴  Next, give your Nebari instance a project name. This name is what your Kubernetes cluster will be referred to as.\n{name_guidelines}\n\n"
+                f"\n\n 🪴  Next, give your Nebari instance a project name. This name is what your Kubernetes cluster will be referred to as.\n{name_guidelines}\n\n"
             )
         )
         inputs.project_name = questionary.text(
@@ -330,7 +330,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # DOMAIN NAME
         rich.print(
             (
-                "\n 🪴  Great! Now it's time to decide on the domain name (i.e the URL) that Nebari will be accessible from. "
+                "\n\n 🪴  Great! Now it's time to decide on the domain name (i.e the URL) that Nebari will be accessible from. "
                 "This should be a domain that you own.\n\n"
             )
         )
@@ -343,9 +343,9 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # AUTH PROVIDER
         rich.print(
             (
-                "\n 🪴  Nebari comes with [green]Keycloak[/green], an open-source identity and access management tool. This is how users, groups and roles "
+                "\n\n 🪴  Nebari comes with [green]Keycloak[/green], an open-source identity and access management tool. This is how users, groups and roles "
                 "are managed on the platform. To connect Keycloak with an identity provider, you can select one now.\n\n"
-                "\n\t❕ [purple]password[/purple] is the default option and is not connected to any external identity provider.\n"
+                "\n\t❗️ [purple]password[/purple] is the default option and is not connected to any external identity provider.\n"
             )
         )
         inputs.auth_provider = questionary.select(
@@ -376,7 +376,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # GITOPS - REPOSITORY, CICD
         rich.print(
             (
-                "\n 🪴  This next section is [italic]optional[/italic] but recommended. If you wish to adopt a GitOps approach to managing this platform, "
+                "\n\n 🪴  This next section is [italic]optional[/italic] but recommended. If you wish to adopt a GitOps approach to managing this platform, "
                 "we will walk you through a set of questions to get that setup. With this setup, Nebari will use GitHub Actions workflows (or GitLab equivalent) "
                 "to automatically handle the future deployments of your infrastructure.\n\n"
             )
@@ -428,7 +428,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # SSL CERTIFICATE
         rich.print(
             (
-                "\n 🪴  This next section is [italic]optional[/italic] but recommended. If you want your Nebari domain to use a Let's Encrypt SSL certificate, "
+                "\n\n 🪴  This next section is [italic]optional[/italic] but recommended. If you want your Nebari domain to use a Let's Encrypt SSL certificate, "
                 "all we need is an email address from you.\n\n"
             )
         )
@@ -448,7 +448,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         rich.print(
             (
                 # TODO once docs are updated, add links for more info on these changes
-                "\n 🪴  This next section is [italic]optional[/italic] and includes advanced configuration changes to the "
+                "\n\n 🪴  This next section is [italic]optional[/italic] and includes advanced configuration changes to the "
                 "Terraform state, Kubernetes Namespace and Kubernetes version."
                 "\n ⚠️  caution is advised!\n\n"
             )
