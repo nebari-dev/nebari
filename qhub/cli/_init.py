@@ -260,7 +260,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
     rich.print(
         (
             "\n\t\t[bold]Welcome to the Guided Init wizard![/bold]\n\n"
-            "You will be asked a few questions that are used to generate your [purple]nebari-config.yaml[/purple]. "
+            "You will be asked a few questions to generate your [purple]nebari-config.yaml[/purple]. "
             f"{LINKS_TO_DOCS_TEMPLATE.format(link_to_docs=DOCS_HOME)}"
         )
     )
