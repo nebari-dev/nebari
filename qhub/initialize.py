@@ -343,6 +343,7 @@ def render_config(
     ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if auth_provider == "github":
+        config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()
         if not disable_prompt:
             config["security"]["authentication"]["config"]["client_id"] = input(
                 "Github client_id: "

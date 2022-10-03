@@ -10,9 +10,14 @@ dependencies:
   - bcrypt
   - python-kubernetes
   - rich
+  - typer
+  - pip
+  - pip:
+    - questionary
   # dev dependencies
   - flake8 ==3.8.4
   - black ==22.3.0
+  - importlib-metadata<5.0
   - twine
   - pytest
   - diagrams
