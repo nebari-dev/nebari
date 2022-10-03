@@ -277,7 +277,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # CLOUD PROVIDER
         rich.print(
             (
-                "\n\n\n\n 🪴  Nebari runs on a Kubernetes cluster so one of the first choices that needs to be made "
+                "\n\n 🪴  Nebari runs on a Kubernetes cluster so one of the first choices that needs to be made "
                 "is where you want this Kubernetes cluster deployed. "
                 f"{LINKS_TO_DOCS_TEMPLATE.format(link_to_docs=CHOOSE_CLOUD_PROVIDER)}"
                 "\n\t❗️ [purple]local[/purple] requires Docker and Kubernetes running on your local machine. "
