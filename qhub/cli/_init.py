@@ -501,7 +501,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
     rich.print(
         (
-            "Here is the previous Guided Init if it was converted into a [green]nebari init[/green] command:\n\n"
+            "For reference, if the previous Guided Init answers were converted into a direct [green]nebari init[/green] command, it would be:\n\n"
             f"\t\t[green]{base_cmd} {cmds}[/green]\n\n"
         )
     )
