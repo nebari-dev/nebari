@@ -44,7 +44,7 @@ def enum_to_list(enum_cls):
 def handle_init(inputs: InitInputs):
     if QHUB_IMAGE_TAG:
         print(
-            f"Modifying the image tags for the `default_images`, setting tags equal to: {QHUB_IMAGE_TAG}"
+            f"Modifying the image tags for the `default_images`, setting tags to: {QHUB_IMAGE_TAG}"
         )
 
     if QHUB_DASK_VERSION:
