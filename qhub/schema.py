@@ -489,9 +489,9 @@ letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 
 def project_name_convention(value: typing.Any, values):
     convention = """
-    In order to successfully deploy QHub, there are some project naming conventions which need
-    to be followed. First, ensure your name is compatible with the specific one for
-    your chosen Cloud provider. In addition, the QHub project name should also obey the following
+    There are some project naming conventions which need to be followed.
+    First, ensure your name is compatible with the specific one for
+    your chosen Cloud provider. In addition, the project name should also obey the following
     format requirements:
     - Letters from A to Z (upper and lower case) and numbers;
     - Maximum accepted length of the name string is 16 characters.

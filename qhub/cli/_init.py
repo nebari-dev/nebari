@@ -15,8 +15,10 @@ from qhub.schema import (
 )
 from qhub.utils import QHUB_DASK_VERSION, QHUB_IMAGE_TAG, yaml
 
-MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[light_green]\t{link_to_docs}[/light_green]\n\n"
-LINKS_TO_DOCS_TEMPLATE = "For more details, refer to the Nebari docs:\n\n\t[light_green]{link_to_docs}[/light_green]\n\n"
+MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[blue1]\t{link_to_docs}[/blue1]\n\n"
+LINKS_TO_DOCS_TEMPLATE = (
+    "For more details, refer to the Nebari docs:\n\n\t[blue1]{link_to_docs}[/blue1]\n\n"
+)
 
 # links to external docs
 CREATE_AWS_CREDS = (
@@ -33,8 +35,8 @@ CREATE_AUTH0_CREDS = "https://auth0.com/docs/get-started/auth0-overview/create-a
 CREATE_GITHUB_OAUTH_CREDS = "https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app"
 
 # links to Nebari docs
-DOCS_HOME = "https://nebari-docs.netlify.app"
-CHOOSE_CLOUD_PROVIDER = "https://nebari-docs.netlify.app/getting-started/deploy"
+DOCS_HOME = "https://nebari.dev"
+CHOOSE_CLOUD_PROVIDER = "https://nebari.dev/getting-started/deploy"
 
 
 def enum_to_list(enum_cls):
@@ -42,6 +44,9 @@ def enum_to_list(enum_cls):
 
 
 def handle_init(inputs: InitInputs):
+    """
+    Take the inputs from the `nebari init` command, render the config and write it to a local yaml file.
+    """
     if QHUB_IMAGE_TAG:
         print(
             f"Modifying the image tags for the `default_images`, setting tags to: {QHUB_IMAGE_TAG}"
@@ -277,7 +282,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # CLOUD PROVIDER
         rich.print(
             (
-                "\n\n 🪴  Nebari runs on a Kubernetes cluster so one of the first choices that needs to be made "
+                "\n\n 🪴  Nebari runs on a Kubernetes cluster: where do you want this Kubernetes cluster deployed? "
                 "is where you want this Kubernetes cluster deployed. "
                 f"{LINKS_TO_DOCS_TEMPLATE.format(link_to_docs=CHOOSE_CLOUD_PROVIDER)}"
                 "\n\t❗️ [purple]local[/purple] requires Docker and Kubernetes running on your local machine. "
@@ -330,7 +335,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # DOMAIN NAME
         rich.print(
             (
-                "\n\n 🪴  Great! Now it's time to decide on the domain name (i.e the URL) that Nebari will be accessible from. "
+                "\n\n 🪴  Great! Now you need to provide a valid domain name (i.e. the URL) to access your Nebri instance. "
                 "This should be a domain that you own.\n\n"
             )
         )
@@ -343,7 +348,8 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # AUTH PROVIDER
         rich.print(
             (
-                "\n\n 🪴  Nebari comes with [green]Keycloak[/green], an open-source identity and access management tool. This is how users, groups and roles "
+                # TODO once docs are updated, add links for more details
+                "\n\n 🪴  Nebari comes with [green]Keycloak[/green], an open-source identity and access management tool. This is how users and permissions "
                 "are managed on the platform. To connect Keycloak with an identity provider, you can select one now.\n\n"
                 "\n\t❗️ [purple]password[/purple] is the default option and is not connected to any external identity provider.\n"
             )
@@ -368,8 +374,8 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             rich.print(
                 (
                     ":warning: If you haven't done so already, please ensure the following:\n"
-                    f"The `Homepage URL` is set to: [light_green]https://{inputs.domain_name}[/light_green]\n"
-                    f"The `Authorization callback URL` is set to: [light_green]https://{inputs.domain_name}/auth/realms/qhub/broker/github/endpoint[/light_green]\n\n"
+                    f"The `Homepage URL` is set to: [blue1]https://{inputs.domain_name}[/blue1]\n"
+                    f"The `Authorization callback URL` is set to: [blue1]https://{inputs.domain_name}/auth/realms/qhub/broker/github/endpoint[/blue1]\n\n"
                 )
             )
 
@@ -468,7 +474,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
             # NAMESPACE
             inputs.namespace = questionary.text(
-                "What namespace would like to use?",
+                "What would you like the main Kubernetes namespace to be called?",
                 default=inputs.namespace,
                 qmark=qmark,
             ).unsafe_ask()
@@ -517,7 +523,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 "You can now deploy your Nebari instance with:\n\n"
                 "\t[green]nebari deploy -c nebari-config.yaml[/green]\n\n"
                 "For more information, run [green]nebari deploy --help[/green] or check out the documentation: "
-                "[light_green]https://www.nebari.dev/how-tos/[/light_green]"
+                "[blue1]https://www.nebari.dev/how-tos/[/blue1]"
             )
         )
 
