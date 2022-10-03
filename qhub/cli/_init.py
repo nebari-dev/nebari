@@ -15,7 +15,7 @@ from qhub.schema import (
 )
 from qhub.utils import QHUB_DASK_VERSION, QHUB_IMAGE_TAG, yaml
 
-MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, please refer to this guide on how to generate them:\n\n[light_green]\t\t{link_to_docs}[/light_green]\n\n"
+MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[light_green]\t\t{link_to_docs}[/light_green]\n\n"
 LINKS_TO_DOCS_TEMPLATE = "For more details, refer to the Nebari docs:\n\n\t[light_green]{link_to_docs}[/light_green]\n\n"
 
 # links to external docs
