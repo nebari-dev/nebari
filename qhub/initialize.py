@@ -337,25 +337,12 @@ def render_config(
         f.write(default_password)
     os.chmod(default_password_filename, 0o700)
 
-    print(
-        f"Securely generated default random password={default_password} for Keycloak root user stored at path={default_password_filename}"
-    )
-
     config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
     config["theme"]["jupyterhub"][
         "welcome"
     ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
 
     if auth_provider == "github":
-        config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()
-        print(
-            "Visit https://github.com/settings/developers and create oauth application"
-        )
-        print(f"  set the homepage to: https://{qhub_domain}/")
-        print(
-            f"  set the callback_url to: https://{qhub_domain}/auth/realms/qhub/broker/github/endpoint"
-        )
-
         if not disable_prompt:
             config["security"]["authentication"]["config"]["client_id"] = input(
                 "Github client_id: "
