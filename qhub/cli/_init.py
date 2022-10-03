@@ -49,7 +49,7 @@ def handle_init(inputs: InitInputs):
 
     if QHUB_DASK_VERSION:
         print(
-            f"Modifying the version of the `qhub_dask` package, setting version equal to: {QHUB_DASK_VERSION}"
+            f"Modifying the version of the `qhub_dask` package, setting version to: {QHUB_DASK_VERSION}"
         )
 
     # this will force the `set_kubernetes_version` to grab the latest version
