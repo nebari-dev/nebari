@@ -296,11 +296,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             choices=enum_to_list(ProviderEnum),
             qmark=qmark,
         ).unsafe_ask()
-        # except KeyboardInterrupt:
-        #     print("I'm HERE")
-        #     raise typer.Exit()
 
-        # print("WHY AM I HERE?")
         if not disable_checks:
             check_cloud_provider_creds(ctx, cloud_provider=inputs.cloud_provider)
 
