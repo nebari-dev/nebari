@@ -169,6 +169,8 @@ def init(
     inputs.terraform_state = terraform_state
     inputs.kubernetes_version = kubernetes_version
     inputs.ssl_cert_email = ssl_cert_email
+    # TODO remove when Typer CLI is out of BETA
+    inputs.nebari = True
 
     handle_init(inputs)
 

@@ -540,6 +540,8 @@ class InitInputs(Base):
     terraform_state: typing.Optional[TerraformStateEnum] = None
     kubernetes_version: typing.Union[str, None] = None
     ssl_cert_email: typing.Union[str, None] = None
+    # TODO remove when Typer CLI is out of BETA
+    nebari: bool = False
 
 
 class Main(Base):
