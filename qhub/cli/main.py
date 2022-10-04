@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 from zipfile import ZipFile
 
 import typer
@@ -32,6 +33,7 @@ from qhub.schema import (
 )
 from qhub.upgrade import do_upgrade
 from qhub.utils import load_yaml
+from qhub.version import __version__
 
 SECOND_COMMAND_GROUP_NAME = "Additional Commands"
 GUIDED_INIT_MSG = (
@@ -64,6 +66,21 @@ app.add_typer(
     help=KEYCLOAK_COMMAND_MSG,
     rich_help_panel=SECOND_COMMAND_GROUP_NAME,
 )
+
+
+@app.callback(invoke_without_command=True)
+def version(
+    version: Optional[bool] = typer.Option(
+        None,
+        "-v",
+        "--version",
+        help="Nebari version number",
+        is_eager=True,
+    ),
+):
+    if version:
+        print(__version__)
+        raise typer.Exit()
 
 
 @app.command()
