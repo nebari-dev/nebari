@@ -77,7 +77,7 @@ def handle_init(inputs: InitInputs):
         kubernetes_version=inputs.kubernetes_version,
         terraform_state=inputs.terraform_state,
         ssl_cert_email=inputs.ssl_cert_email,
-        disable_prompt=False,  # keep?
+        disable_prompt=inputs.disable_prompt,
     )
 
     # TODO remove when Typer CLI is out of BETA
@@ -96,6 +96,9 @@ def handle_init(inputs: InitInputs):
 
 def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
     """Validate that the necessary cloud credentials have been set as environment variables."""
+
+    if ctx.params.get("disable_prompt"):
+        return cloud_provider
 
     cloud_provider = cloud_provider.lower()
 
@@ -198,6 +201,9 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
 
 def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     """Validating the the necessary auth provider credentials have been set as environment variables."""
+
+    if ctx.params.get("disable_prompt"):
+        return auth_provider
 
     auth_provider = auth_provider.lower()
 
