@@ -60,6 +60,10 @@ def handle_init(inputs: InitInputs):
     # this will force the `set_kubernetes_version` to grab the latest version
     if inputs.kubernetes_version == "latest":
         inputs.kubernetes_version = None
+    print(
+        "The latest available Kubernetes version will be installed if none was provided"
+    )
+        
 
     config = render_config(
         cloud_provider=inputs.cloud_provider,
@@ -282,7 +286,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # CLOUD PROVIDER
         rich.print(
             (
-                "\n\n 🪴  Nebari runs on a Kubernetes cluster: where do you want this Kubernetes cluster deployed? "
+                "\n 🪴  Nebari runs on a Kubernetes cluster: Where do you want this Kubernetes cluster deployed? "
                 "is where you want this Kubernetes cluster deployed. "
                 f"{LINKS_TO_DOCS_TEMPLATE.format(link_to_docs=CHOOSE_CLOUD_PROVIDER)}"
                 "\n\t❗️ [purple]local[/purple] requires Docker and Kubernetes running on your local machine. "
@@ -316,7 +320,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # PROJECT NAME
         rich.print(
             (
-                f"\n\n 🪴  Next, give your Nebari instance a project name. This name is what your Kubernetes cluster will be referred to as.\n{name_guidelines}\n\n"
+                f"\n 🪴  Next, give your Nebari instance a project name. This name is what your Kubernetes cluster will be referred to as.\n{name_guidelines}\n"
             )
         )
         inputs.project_name = questionary.text(
@@ -413,7 +417,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
             if git_provider == "github.com":
                 inputs.repository_auto_provision = questionary.confirm(
-                    f"Would you like the following git repository to be automatically created: {inputs.repository}?",
+                    f"Would you like nebari to create a remote repository on {git_provider}?",
                     default=False,
                     qmark=qmark,
                 ).unsafe_ask()
@@ -480,6 +484,8 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 "Which Kubernetes version would you like to use?",
                 qmark=qmark,
             ).unsafe_ask()
+
+            
 
         handle_init(inputs)
 
