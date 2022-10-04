@@ -124,8 +124,8 @@ jobs:
           echo "CYPRESS_EXAMPLE_USER_NAME=${CYPRESS_EXAMPLE_USER_NAME}" >> $GITHUB_ENV
           echo "CYPRESS_EXAMPLE_USER_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}" >> $GITHUB_ENV
 
-          nebari keycloak --config "${NEBARI_CONFIG_PATH}" adduser "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}"
-          nebari keycloak --config "${NEBARI_CONFIG_PATH}" listusers
+          nebari keycloak adduser "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}" --config "${NEBARI_CONFIG_PATH}"
+          nebari keycloak listusers --config "${NEBARI_CONFIG_PATH}"
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
