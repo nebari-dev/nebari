@@ -63,7 +63,6 @@ def handle_init(inputs: InitInputs):
     print(
         "The latest available Kubernetes version will be installed if none was provided"
     )
-        
 
     config = render_config(
         cloud_provider=inputs.cloud_provider,
@@ -484,8 +483,6 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 "Which Kubernetes version would you like to use?",
                 qmark=qmark,
             ).unsafe_ask()
-
-            
 
         handle_init(inputs)
 
