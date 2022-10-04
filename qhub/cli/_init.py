@@ -15,9 +15,9 @@ from qhub.schema import (
 )
 from qhub.utils import QHUB_DASK_VERSION, QHUB_IMAGE_TAG, yaml
 
-MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[blue1]\t{link_to_docs}[/blue1]\n\n"
+MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[green]\t{link_to_docs}[/green]\n\n"
 LINKS_TO_DOCS_TEMPLATE = (
-    "For more details, refer to the Nebari docs:\n\n\t[blue1]{link_to_docs}[/blue1]\n\n"
+    "For more details, refer to the Nebari docs:\n\n\t[green]{link_to_docs}[/green]\n\n"
 )
 
 # links to external docs
@@ -370,8 +370,8 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             rich.print(
                 (
                     ":warning: If you haven't done so already, please ensure the following:\n"
-                    f"The `Homepage URL` is set to: [blue1]https://{inputs.domain_name}[/blue1]\n"
-                    f"The `Authorization callback URL` is set to: [blue1]https://{inputs.domain_name}/auth/realms/qhub/broker/github/endpoint[/blue1]\n\n"
+                    f"The `Homepage URL` is set to: [green]https://{inputs.domain_name}[/green]\n"
+                    f"The `Authorization callback URL` is set to: [green]https://{inputs.domain_name}/auth/realms/qhub/broker/github/endpoint[/green]\n\n"
                 )
             )
 
@@ -519,7 +519,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 "You can now deploy your Nebari instance with:\n\n"
                 "\t[green]nebari deploy -c nebari-config.yaml[/green]\n\n"
                 "For more information, run [green]nebari deploy --help[/green] or check out the documentation: "
-                "[blue1]https://www.nebari.dev/how-tos/[/blue1]"
+                "[green]https://www.nebari.dev/how-tos/[/green]"
             )
         )
 
