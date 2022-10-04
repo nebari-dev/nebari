@@ -37,7 +37,7 @@ from qhub.version import __version__
 
 SECOND_COMMAND_GROUP_NAME = "Additional Commands"
 GUIDED_INIT_MSG = (
-    "[bold green]START HERE[/bold green] - this will gently guide you through a list of questions "
+    "[bold green]START HERE[/bold green] - this will guide you step-by-step "
     "to generate your [purple]nebari-config.yaml[/purple]. "
     "It is an [i]alternative[/i] to passing the options listed below."
 )
