@@ -166,4 +166,4 @@ jobs:
       - name: Cleanup nebari deployment
         run: |
           cd local-deployment
-          nebari destroy --config nebari-config.yaml
+          nebari destroy --config nebari-config.yaml --disable-prompt
