@@ -16,9 +16,9 @@ def dask_gateway_object():
         "dask-gateway-pytest-token"
     )
     return dask_gateway.Gateway(
-        address=f"https://{constants.QHUB_HOSTNAME}/{constants.GATEWAY_ENDPOINT}",
+        address=f"https://{constants.NEBARI_HOSTNAME}/{constants.GATEWAY_ENDPOINT}",
         auth="jupyterhub",
-        proxy_address=f"tcp://{constants.QHUB_HOSTNAME}:8786",
+        proxy_address=f"tcp://{constants.NEBARI_HOSTNAME}:8786",
     )
 
 

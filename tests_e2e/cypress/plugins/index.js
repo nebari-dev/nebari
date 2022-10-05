@@ -21,7 +21,7 @@ module.exports = (on, config) => {
 
         new_config['env'] = _.fromPairs(
                 _.map(yaml_fields,
-                    field => ['qhub_'+field.replace(/\./g, '_') , _.get(data, field, '')]
+                    field => ['nebari_'+field.replace(/\./g, '_') , _.get(data, field, '')]
                         )
         );
 
