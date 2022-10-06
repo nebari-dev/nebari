@@ -60,9 +60,6 @@ def handle_init(inputs: InitInputs):
     # this will force the `set_kubernetes_version` to grab the latest version
     if inputs.kubernetes_version == "latest":
         inputs.kubernetes_version = None
-    print(
-        "The latest available Kubernetes version will be installed if none was provided"
-    )
 
     config = render_config(
         cloud_provider=inputs.cloud_provider,
@@ -480,7 +477,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
             # KUBERNETES VERSION
             inputs.kubernetes_version = questionary.text(
-                "Which Kubernetes version would you like to use?",
+                "Which Kubernetes version would you like to use (if none provided; latest version will be installed)?",
                 qmark=qmark,
             ).unsafe_ask()
 
