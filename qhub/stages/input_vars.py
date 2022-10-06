@@ -181,17 +181,20 @@ def _calculate_note_groups(config):
 
 
 def stage_04_kubernetes_ingress(stage_outputs, config):
+    cert_type = config["certificate"]["type"]
+    cert_details = {"certificate-service": cert_type}
+    if cert_type == "lets-encrypt":
+        cert_details["acme-email"] = config["certificate"]["acme_email"]
+        cert_details["acme-server"] = config["certificate"]["acme_server"]
+
     return {
-        "name": config["project_name"],
-        "environment": config["namespace"],
-        "node_groups": _calculate_note_groups(config),
-        "enable-certificates": (config["certificate"]["type"] == "lets-encrypt"),
-        "acme-email": config["certificate"].get("acme_email"),
-        "acme-server": config["certificate"].get("acme_server"),
-        "certificate-secret-name": config["certificate"]["secret_name"]
-        if config["certificate"]["type"] == "existing"
-        else None,
-        **config.get("ingress", {}).get("terraform_overrides", {}),
+        **{
+            "name": config["project_name"],
+            "environment": config["namespace"],
+            "node_groups": _calculate_note_groups(config),
+            **config.get("ingress", {}).get("terraform_overrides", {}),
+        },
+        **cert_details,
     }
 
 

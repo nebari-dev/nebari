@@ -25,7 +25,10 @@ def gather_stage_outputs(config):
         terraform_destroy=False,
     )
 
-    if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
+    if (
+        config["provider"] not in {"existing", "local"}
+        and config["terraform_state"]["type"] == "remote"
+    ):
         stage_outputs["stages/01-terraform-state"] = _terraform_init_output(
             directory=os.path.join("stages/01-terraform-state", config["provider"]),
             input_vars=input_vars.stage_01_terraform_state(stage_outputs, config),
@@ -148,7 +151,10 @@ def destroy_stages(stage_outputs, config):
         ignore_errors=True,
     )
 
-    if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
+    if (
+        config["provider"] not in {"existing", "local"}
+        and config["terraform_state"]["type"] == "remote"
+    ):
         status["stages/01-terraform-state"] = _terraform_destroy(
             # acl and force_destroy do not import properly
             # and only get refreshed properly with an apply

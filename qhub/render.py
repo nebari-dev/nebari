@@ -65,7 +65,10 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
         "stages/07-kubernetes-services",
         "stages/08-qhub-tf-extensions",
     ]
-    if config["provider"] != "local" and config["terraform_state"]["type"] == "remote":
+    if (
+        config["provider"] not in {"existing", "local"}
+        and config["terraform_state"]["type"] == "remote"
+    ):
         directories.append(f"stages/01-terraform-state/{config['provider']}")
 
     source_dirs = [os.path.join(str(template_directory), _) for _ in directories]

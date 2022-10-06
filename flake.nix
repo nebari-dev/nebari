@@ -46,6 +46,7 @@
         # additional
         pkgs.minikube
         pkgs.k9s
+        pkgs.expect
       ];
     in rec {
       defaultApp.x86_64-linux = pythonPackages.buildPythonPackage {
