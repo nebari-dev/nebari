@@ -1,3 +1,10 @@
+resource "random_password" "conda_store_service_token" {
+  for_each = var.services
+
+  length  = 32
+  special = false
+}
+
 resource "kubernetes_secret" "conda-store-secret" {
   metadata {
     name      = "conda-store-secret"
@@ -16,8 +23,11 @@ resource "kubernetes_secret" "conda-store-secret" {
       postgres-password = module.postgresql.root_password
       postgres-service  = module.postgresql.service
       openid-config     = module.conda-store-openid-client.config
-      extra-settings    = var.extra-settings
-      extra-config      = var.extra-config
+      service-tokens = {
+        for service, value in var.services : base64encode(random_password.conda_store_service_token[service].result) => value
+      }
+      extra-settings = var.extra-settings
+      extra-config   = var.extra-config
     })
   }
 }

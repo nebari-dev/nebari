@@ -76,8 +76,9 @@ describe('First Test', () => {
 
       cy.visit('/conda-store/login/');
 
-      cy.get('#login a:first-of-type')
-        .should('contain', 'Sign in with OAuth');
+      cy.get('body > nav > a')
+        .contains('conda-store')
+        .should('have.attr', 'href');
 
       // Visit Grafana Monitoring - user must have an email address in Keycloak
 
