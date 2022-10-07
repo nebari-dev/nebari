@@ -6,6 +6,7 @@ import secrets
 import string
 from abc import ABC
 
+import rich
 from pydantic.error_wrappers import ValidationError
 
 from .schema import is_version_accepted, verify
@@ -21,8 +22,8 @@ def do_upgrade(config_filename, attempt_fixes=False):
 
     try:
         verify(config)
-        print(
-            f"Your config file {config_filename} appears to be already up-to-date for qhub version {__version__}"
+        rich.print(
+            f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for qhub version [green]{__version__}[/green]"
         )
         return
     except (ValidationError, ValueError) as e:

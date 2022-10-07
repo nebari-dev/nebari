@@ -14,14 +14,14 @@ module.exports = (on, config) => {
 
     try {
 
-        let fileContents = fs.readFileSync(process.env.QHUB_CONFIG_PATH, 'utf8');
+        let fileContents = fs.readFileSync(process.env.NEBARI_CONFIG_PATH, 'utf8');
         let data = yaml.load(fileContents);
 
         console.log(data);
 
         new_config['env'] = _.fromPairs(
                 _.map(yaml_fields,
-                    field => ['qhub_'+field.replace(/\./g, '_') , _.get(data, field, '')]
+                    field => ['nebari_'+field.replace(/\./g, '_') , _.get(data, field, '')]
                         )
         );
 

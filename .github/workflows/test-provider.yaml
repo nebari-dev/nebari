@@ -1,4 +1,4 @@
-name: "Test QHub Provider"
+name: "Test Nebari Provider"
 
 on:
   pull_request:
@@ -36,7 +36,7 @@ env:
 
 jobs:
   test-render-providers:
-    name: 'Test QHub Provider'
+    name: 'Test Nebari Provider'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -75,19 +75,19 @@ jobs:
       - name: Use az CLI
         if: ${{ matrix.provider == 'azure' }}
         run: az version
-      - name: Install QHub
+      - name: Install Nebari
         run: |
           pip install .[dev]
-      - name: QHub Initialize
+      - name: Nebari Initialize
         run: |
-          qhub init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt --ci-provider ${{ matrix.cicd }}
-          cat "qhub-config.yaml"
-      - name: QHub Render
+          nebari init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.nebari.dev" --auth-provider github --disable-prompt --ci-provider ${{ matrix.cicd }}
+          cat "nebari-config.yaml"
+      - name: Nebari Render
         run: |
-          qhub render -c "qhub-config.yaml" -o "qhub-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
-          cp "qhub-config.yaml" "qhub-${{ matrix.provider }}-${{ matrix.cicd }}-deployment/qhub-config.yaml"
-      - name: QHub Render Artifact
+          nebari render -c "nebari-config.yaml" -o "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
+          cp "nebari-config.yaml" "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment/nebari-config.yaml"
+      - name: Nebari Render Artifact
         uses: actions/upload-artifact@master
         with:
-          name: "qhub-${{ matrix.provider }}-${{ matrix.cicd }}-artifact"
-          path: "qhub-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
+          name: "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-artifact"
+          path: "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"

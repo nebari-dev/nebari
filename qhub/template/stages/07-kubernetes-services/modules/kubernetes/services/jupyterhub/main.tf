@@ -24,13 +24,15 @@ resource "helm_release" "jupyterhub" {
     jsonencode({
       # custom values can be accessed via z2jh.get_config('custom.<path>')
       custom = {
-        theme             = var.theme
-        profiles          = var.profiles
-        cdsdashboards     = var.cdsdashboards
-        home-pvc          = var.home-pvc
-        shared-pvc        = var.shared-pvc
-        conda-store-pvc   = var.conda-store-pvc
-        conda-store-mount = var.conda-store-mount
+        conda-store-service-name  = var.conda-store-service-name
+        theme                     = var.theme
+        profiles                  = var.profiles
+        cdsdashboards             = var.cdsdashboards
+        home-pvc                  = var.home-pvc
+        shared-pvc                = var.shared-pvc
+        conda-store-pvc           = var.conda-store-pvc
+        conda-store-mount         = var.conda-store-mount
+        conda-store-cdsdashboards = var.conda-store-cdsdashboard-token
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace
@@ -71,6 +73,18 @@ resource "helm_release" "jupyterhub" {
         nodeSelector = {
           "${var.general-node-group.key}" = var.general-node-group.value
         }
+
+        extraVolumes = [{
+          name = "conda-store-shared"
+          persistentVolumeClaim = {
+            claimName = var.conda-store-pvc
+          }
+        }]
+
+        extraVolumeMounts = [{
+          mountPath = var.conda-store-mount
+          name      = "conda-store-shared"
+        }]
 
         extraConfig = {
           "01-theme.py"    = file("${path.module}/files/jupyterhub/01-theme.py")

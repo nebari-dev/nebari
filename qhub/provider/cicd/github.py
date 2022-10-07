@@ -78,17 +78,12 @@ def get_latest_repo_tag(owner: str, repo: str, only_clean_tags: bool = True) -> 
     NOTE: Set `only_clean_tags=False` to include dev / pre-release (if latest).
     """
     tags = get_repo_tags(owner, repo)
-    tag_info = None
-    if only_clean_tags:
-        for t in tags:
-            # ignore dev releases
-            rel = list(filter(None, re.sub(r"[A-Za-z]", " ", t["name"]).split(" ")))
-            if len(rel) == 1:
-                tag_info = t
-    else:
-        tag_info = tags[0]
-
-    return tag_info.get("name")
+    if not only_clean_tags and len(tags) >= 1:
+        return tags[0].get("name")
+    for t in tags:
+        rel = list(filter(None, re.sub(r"[A-Za-z]", " ", t["name"]).split(" ")))
+        if len(rel) == 1:
+            return t.get("name")
 
 
 def create_repository(owner, repo, description, homepage, private=True):

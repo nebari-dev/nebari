@@ -1,6 +1,6 @@
 const { divide } = require("lodash");
 
-const security_authentication_type = Cypress.env('qhub_security_authentication_type');
+const security_authentication_type = Cypress.env('nebari_security_authentication_type');
 
 const EXAMPLE_USER_NAME = Cypress.env('EXAMPLE_USER_NAME') || 'example-user';
 
@@ -76,8 +76,9 @@ describe('First Test', () => {
 
       cy.visit('/conda-store/login/');
 
-      cy.get('#login a:first-of-type')
-        .should('contain', 'Sign in with OAuth');
+      cy.get('body > nav > a')
+        .contains('conda-store')
+        .should('have.attr', 'href');
 
       // Visit Grafana Monitoring - user must have an email address in Keycloak
 

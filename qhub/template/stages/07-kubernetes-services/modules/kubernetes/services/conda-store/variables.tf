@@ -66,3 +66,8 @@ variable "extra-config" {
   type        = string
   default     = ""
 }
+
+variable "services" {
+  description = "Map of services tokens and scopes for conda-store"
+  type        = map(any)
+}
