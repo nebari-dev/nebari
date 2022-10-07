@@ -85,7 +85,7 @@ jobs:
           sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
 
           cat nebari-config.yaml
-      - name: Deploy Nebari Cloud
+      - name: Deploy Nebari
         run: |
           cd local-deployment
           nebari deploy --config nebari-config.yaml --disable-prompt
