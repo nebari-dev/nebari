@@ -41,6 +41,8 @@ c.S3Storage.secret_key = config["minio-password"]
 c.S3Storage.region = "us-east-1"  # minio region default
 c.S3Storage.bucket_name = "conda-store"
 
+c.CondaStore.default_namespace = "global"
+c.CondaStore.filesystem_namespace = config["default-namespace"]
 
 # ==================================
 #        server settings

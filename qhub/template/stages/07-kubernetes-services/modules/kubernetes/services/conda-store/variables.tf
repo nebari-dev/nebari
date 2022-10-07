@@ -67,7 +67,7 @@ variable "extra-config" {
   default     = ""
 }
 
-variable "conda-store-namespace-name" {
+variable "default-namespace-name" {
   description = "Name of the default conda-store namespace"
   type        = string
 }
