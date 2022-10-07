@@ -13,7 +13,7 @@ app_keycloak = typer.Typer(
 )
 
 
-@app_keycloak.command()
+@app_keycloak.command(name="adduser")
 def add_user(
     add_users: Tuple[str, str] = typer.Option(
         ..., "--user", help="Provide both: <username> <password>"
@@ -34,7 +34,7 @@ def add_user(
     do_keycloak(config_filename, *args)
 
 
-@app_keycloak.command()
+@app_keycloak.command(name="listusers")
 def list_users(
     config_filename: str = typer.Option(
         ...,

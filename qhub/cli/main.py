@@ -140,6 +140,10 @@ def init(
     ssl_cert_email: str = typer.Option(
         None,
     ),
+    disable_prompt: bool = typer.Option(
+        False,
+        is_eager=True,
+    ),
 ):
     """
     Create and initialize your [purple]nebari-config.yaml[/purple] file.
@@ -169,6 +173,9 @@ def init(
     inputs.terraform_state = terraform_state
     inputs.kubernetes_version = kubernetes_version
     inputs.ssl_cert_email = ssl_cert_email
+    inputs.disable_prompt = disable_prompt
+    # TODO remove when Typer CLI is out of BETA
+    inputs.nebari = True
 
     handle_init(inputs)
 
@@ -319,13 +326,18 @@ def destroy(
         "--disable-render",
         help="Disable auto-rendering before destroy",
     ),
+    disable_prompt: bool = typer.Option(
+        False,
+        "--disable-prompt",
+        help="Destroy entire Nebari cluster without confirmation request. Suggested for CI use.",
+    ),
 ):
     """
     Destroy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
     """
-    delete = typer.confirm("Are you sure you want to destroy it?")
-    if not delete:
-        raise typer.Abort()
+    if not disable_prompt:
+        if typer.confirm("Are you sure you want to destroy your Nebari cluster?"):
+            raise typer.Abort()
     else:
         config_filename = Path(config)
         if not config_filename.is_file():
