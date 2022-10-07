@@ -164,7 +164,6 @@ jobs:
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
-        # `--disable-prompt` needed to bypass user confirmation
-        run:
+        run: |
           cd local-deployment
           nebari destroy --config nebari-config.yaml --disable-prompt
