@@ -25,7 +25,7 @@ def paramiko_object():
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
         client.connect(
-            hostname=constants.QHUB_HOSTNAME,
+            hostname=constants.NEBARI_HOSTNAME,
             port=8022,
             username=constants.KEYCLOAK_USERNAME,
             password=api_token,

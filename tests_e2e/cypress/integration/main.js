@@ -1,6 +1,6 @@
 const { divide } = require("lodash");
 
-const security_authentication_type = Cypress.env('qhub_security_authentication_type');
+const security_authentication_type = Cypress.env('nebari_security_authentication_type');
 
 const EXAMPLE_USER_NAME = Cypress.env('EXAMPLE_USER_NAME') || 'example-user';
 
