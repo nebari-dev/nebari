@@ -491,6 +491,7 @@ class Main(Base):
     provider: ProviderEnum
     project_name: str
     namespace: typing.Optional[letter_dash_underscore_pydantic]
+    default_conda_namespace_name: typing.Optional[str]
     qhub_version: str = ""
     ci_cd: typing.Optional[CICD]
     domain: str

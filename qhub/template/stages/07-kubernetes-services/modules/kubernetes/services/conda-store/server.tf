@@ -18,6 +18,7 @@ resource "kubernetes_secret" "conda-store-secret" {
       openid-config     = module.conda-store-openid-client.config
       extra-settings    = var.extra-settings
       extra-config      = var.extra-config
+      default-namespace = var.default-conda-store-namespace
     })
   }
 }

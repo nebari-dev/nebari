@@ -37,3 +37,9 @@ variable "jupyterhub-hub-extraEnv" {
   type        = string
   default     = "[]"
 }
+
+variable "conda-store-default-namespace" {
+  description = "Default conda-store namespace name"
+  type        = string
+  default     = "nebari-git"
+}

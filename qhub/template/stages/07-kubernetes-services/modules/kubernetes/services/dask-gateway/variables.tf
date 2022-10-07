@@ -184,3 +184,8 @@ variable "conda-store-mount" {
   description = "Mount directory for conda-store environments"
   type        = string
 }
+
+variable "default-conda-store-namespace" {
+  description = "Default conda-store namespace"
+  type        = string
+}

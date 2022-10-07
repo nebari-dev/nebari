@@ -128,3 +128,8 @@ variable "jupyterhub-hub-extraEnv" {
   type        = string
   default     = "[]"
 }
+
+variable "default-conda-store-namespace" {
+  description = "Default conda-store namespace"
+  type        = string
+}

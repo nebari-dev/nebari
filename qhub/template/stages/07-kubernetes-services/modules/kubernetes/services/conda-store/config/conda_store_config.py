@@ -102,10 +102,11 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             if role in role_mappings
         }
         username = user_data["preferred_username"]
-        namespaces = {username, "global", "nebari-git"}
+        default_namespace = config["default-namespace"]
+        namespaces = {username, "global", default_namespace}
         role_bindings = {
             f"{username}/*": {"admin"},
-            "nebari-git/*": {"viewer"},
+            f"{default_namespace}/*": {"viewer"},
             "global/*": roles,
         }
 
