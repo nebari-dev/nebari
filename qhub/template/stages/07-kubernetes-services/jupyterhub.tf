@@ -98,9 +98,11 @@ module "jupyterhub" {
 
   shared-pvc = module.jupyterhub-nfs-mount.persistent_volume_claim.name
 
-  conda-store-pvc          = module.conda-store-nfs-mount.persistent_volume_claim.name
-  conda-store-mount        = "/home/conda"
-  conda-store-environments = var.conda-store-environments
+  conda-store-pvc                = module.conda-store-nfs-mount.persistent_volume_claim.name
+  conda-store-mount              = "/home/conda"
+  conda-store-environments       = var.conda-store-environments
+  conda-store-cdsdashboard-token = module.kubernetes-conda-store-server.service-tokens.cdsdashboards
+  conda-store-service-name       = module.kubernetes-conda-store-server.service_name
 
   extra-mounts = {
     "/etc/dask" = {
