@@ -329,7 +329,7 @@ def destroy(
     disable_prompt: bool = typer.Option(
         False,
         "--disable-prompt",
-        help="Destroy entire Nebari cluster without confirmation request",
+        help="Destroy entire Nebari cluster without confirmation request. Suggested for CI use.",
     ),
 ):
     """
