@@ -271,6 +271,14 @@ def stage_07_kubernetes_services(stage_outputs, config):
             "default_conda_namespace_name", "nebari-git"
         ),
         "conda-store-filesystem-storage": config["storage"]["conda_store"],
+        "conda-store-service-token-scopes": {
+            "cdsdashboards": {
+                "primary_namespace": "cdsdashboards",
+                "role_bindings": {
+                    "*/*": ["viewer"],
+                },
+            }
+        },
         "conda-store-extra-settings": config.get("conda_store", {}).get(
             "extra_settings", {}
         ),

@@ -10,7 +10,9 @@ from tests_deployment import constants
 
 def get_jupyterhub_session():
     session = requests.Session()
-    r = session.get(f"https://{constants.QHUB_HOSTNAME}/hub/oauth_login", verify=False)
+    r = session.get(
+        f"https://{constants.NEBARI_HOSTNAME}/hub/oauth_login", verify=False
+    )
     auth_url = re.search('action="([^"]+)"', r.content.decode("utf8")).group(1)
 
     r = session.post(
@@ -29,9 +31,9 @@ def get_jupyterhub_session():
 def get_jupyterhub_token(note="jupyterhub-tests-deployment"):
     session = get_jupyterhub_session()
     r = session.post(
-        f"https://{constants.QHUB_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
+        f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
         headers={
-            "Referer": f"https://{constants.QHUB_HOSTNAME}/hub/token",
+            "Referer": f"https://{constants.NEBARI_HOSTNAME}/hub/token",
         },
         json={
             "note": note,

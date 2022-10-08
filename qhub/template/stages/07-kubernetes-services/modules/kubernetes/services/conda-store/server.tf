@@ -1,3 +1,10 @@
+resource "random_password" "conda_store_service_token" {
+  for_each = var.services
+
+  length  = 32
+  special = false
+}
+
 resource "kubernetes_secret" "conda-store-secret" {
   metadata {
     name      = "conda-store-secret"
@@ -19,6 +26,11 @@ resource "kubernetes_secret" "conda-store-secret" {
       extra-settings    = var.extra-settings
       extra-config      = var.extra-config
       default-namespace = var.default-namespace-name
+      service-tokens = {
+        for service, value in var.services : base64encode(random_password.conda_store_service_token[service].result) => value
+      }
+      extra-settings = var.extra-settings
+      extra-config   = var.extra-config
     })
   }
 }

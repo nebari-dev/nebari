@@ -132,6 +132,10 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
 
 c.CondaStoreServer.authentication_class = KeyCloakAuthentication
+c.AuthenticationBackend.predefined_tokens = {
+    service_token: service_permissions
+    for service_token, service_permissions in config["service-tokens"].items()
+}
 
 # ==================================
 #         worker settings
@@ -139,6 +143,9 @@ c.CondaStoreServer.authentication_class = KeyCloakAuthentication
 c.CondaStoreWorker.log_level = logging.INFO
 c.CondaStoreWorker.watch_paths = ["/opt/environments"]
 c.CondaStoreWorker.concurrency = 4
+
+# Template used to form the directory for symlinking conda environment builds.
+c.CondaStore.environment_directory = "/home/conda/{namespace}/envs/{namespace}-{name}"
 
 # extra-settings to apply simply as `c.Class.key = value`
 conda_store_settings = config["extra-settings"]

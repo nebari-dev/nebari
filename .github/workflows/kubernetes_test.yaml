@@ -47,11 +47,11 @@ jobs:
         with:
           python-version: 3.8
           miniconda-version: "latest"
-      - name: Install QHub
+      - name: Install Nebari
         run: |
           conda install -c anaconda pip
           pip install .[dev]
-      - name: Download and Install Kind and Kubectl
+      - name: Download and Install Kubectl
         run: |
           mkdir -p bin
           pushd bin
@@ -73,32 +73,32 @@ jobs:
           ip route
       - name: Add DNS entry to hosts
         run: |
-          sudo echo "172.18.1.100  github-actions.qhub.dev" | sudo tee -a /etc/hosts
-      - name: Initialize QHub Cloud
+          sudo echo "172.18.1.100  github-actions.nebari.dev" | sudo tee -a /etc/hosts
+      - name: Initialize Nebari Cloud
         run: |
           mkdir -p local-deployment
           cd local-deployment
-          qhub init local --project=thisisatest --domain github-actions.qhub.dev --auth-provider=password
+          nebari init local --project=thisisatest --domain github-actions.nebari.dev --auth-provider=password
 
           # Need smaller profiles on Local Kind
-          sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "qhub-config.yaml"
-          sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "qhub-config.yaml"
+          sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
+          sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
 
-          cat qhub-config.yaml
-      - name: Deploy QHub Cloud
+          cat nebari-config.yaml
+      - name: Deploy Nebari
         run: |
           cd local-deployment
-          qhub deploy --config qhub-config.yaml --disable-prompt
+          nebari deploy --config nebari-config.yaml --disable-prompt
       - name: Basic kubectl checks after deployment
         if: always()
         run: |
           kubectl get all,cm,secret,ing -A
-      - name: Check github-actions.qhub.dev resolves
+      - name: Check github-actions.nebari.dev resolves
         run: |
-          nslookup github-actions.qhub.dev
+          nslookup github-actions.nebari.dev
       - name: Curl jupyterhub login page
         run: |
-          curl -k https://github-actions.qhub.dev/hub/home -i
+          curl -k https://github-actions.nebari.dev/hub/home -i
 
       ### CYPRESS TESTS
       - name: Setup Node
@@ -113,8 +113,8 @@ jobs:
           sudo apt-get -y update
           sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
-      - name: Get qhub-config.yaml full path
-        run: echo "QHUB_CONFIG_PATH=`realpath ./local-deployment/qhub-config.yaml`" >> "$GITHUB_ENV"
+      - name: Get nebari-config.yaml full path
+        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
 
       - name: Create example-user
         run: |
@@ -124,13 +124,13 @@ jobs:
           echo "CYPRESS_EXAMPLE_USER_NAME=${CYPRESS_EXAMPLE_USER_NAME}" >> $GITHUB_ENV
           echo "CYPRESS_EXAMPLE_USER_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}" >> $GITHUB_ENV
 
-          qhub keycloak --config "${QHUB_CONFIG_PATH}" adduser "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}"
-          qhub keycloak --config "${QHUB_CONFIG_PATH}" listusers
+          nebari keycloak adduser --user "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}" --config "${NEBARI_CONFIG_PATH}"
+          nebari keycloak listusers --config "${NEBARI_CONFIG_PATH}"
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
         env:
-          CYPRESS_BASE_URL: https://github-actions.qhub.dev/
+          CYPRESS_BASE_URL: https://github-actions.nebari.dev/
         with:
           working-directory: tests_e2e
 
@@ -155,7 +155,7 @@ jobs:
         run: |
           export JUPYTERHUB_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
           export JUPYTERHUB_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
-          jhubctl --verbose run --hub=https://github-actions.qhub.dev \
+          jhubctl --verbose run --hub=https://github-actions.nebari.dev \
                                 --auth-type=keycloak \
                                 --validate --no-verify-ssl \
                                 --kernel python3 \
@@ -163,7 +163,7 @@ jobs:
                                 --notebook tests_deployment/assets/notebook/simple.ipynb \
 
       ### CLEANUP AFTER TESTS
-      - name: Cleanup qhub deployment
+      - name: Cleanup nebari deployment
         run: |
           cd local-deployment
-          qhub destroy --config qhub-config.yaml
+          nebari destroy --config nebari-config.yaml --disable-prompt

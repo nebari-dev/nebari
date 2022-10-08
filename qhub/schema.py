@@ -487,6 +487,64 @@ class ExtContainerReg(Base):
 letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 
 
+def project_name_convention(value: typing.Any, values):
+    convention = """
+    There are some project naming conventions which need to be followed.
+    First, ensure your name is compatible with the specific one for
+    your chosen Cloud provider. In addition, the project name should also obey the following
+    format requirements:
+    - Letters from A to Z (upper and lower case) and numbers;
+    - Maximum accepted length of the name string is 16 characters.
+    - If using AWS: names should not start with the string "aws";
+    - If using Azure: names should not contain "-".
+    """
+    if len(value) > 16:
+        raise ValueError(
+            "\n".join(
+                [
+                    convention,
+                    "Maximum accepted length of the project name string is 16 characters.",
+                ]
+            )
+        )
+    elif values["provider"] == "azure" and ("-" in value):
+        raise ValueError(
+            "\n".join(
+                [convention, "Provider [azure] does not allow '-' in project name."]
+            )
+        )
+    elif values["provider"] == "aws" and value.startswith("aws"):
+        raise ValueError(
+            "\n".join(
+                [
+                    convention,
+                    "Provider [aws] does not allow 'aws' as starting sequence in project name.",
+                ]
+            )
+        )
+    else:
+        return letter_dash_underscore_pydantic
+
+
+# CLEAN UP
+class InitInputs(Base):
+    cloud_provider: typing.Type[ProviderEnum] = "local"
+    project_name: str = ""
+    domain_name: str = ""
+    namespace: typing.Optional[letter_dash_underscore_pydantic] = "dev"
+    auth_provider: typing.Type[AuthenticationEnum] = "password"
+    auth_auto_provision: bool = False
+    repository: typing.Union[str, None] = None
+    repository_auto_provision: bool = False
+    ci_provider: typing.Optional[CiEnum] = None
+    terraform_state: typing.Optional[TerraformStateEnum] = None
+    kubernetes_version: typing.Union[str, None] = None
+    ssl_cert_email: typing.Union[str, None] = None
+    disable_prompt: bool = False
+    # TODO remove when Typer CLI is out of BETA
+    nebari: bool = False
+
+
 class Main(Base):
     provider: ProviderEnum
     project_name: str
@@ -546,43 +604,8 @@ class Main(Base):
         return v != "" and rounded_ver_parse(v) == rounded_ver_parse(__version__)
 
     @validator("project_name")
-    def project_name_convention(cls, value: typing.Any, values):
-        convention = """
-        In order to successfully deploy QHub, there are some project naming conventions which need
-        to be followed. First, ensure your name is compatible with the specific one for
-        your chosen Cloud provider. In addition, the QHub project name should also obey the following
-        format requirements:
-        - Letters from A to Z (upper and lower case) and numbers;
-        - Maximum accepted length of the name string is 16 characters.
-        - If using AWS: names should not start with the string "aws";
-        - If using Azure: names should not contain "-".
-        """
-        if len(value) > 16:
-            raise ValueError(
-                "\n".join(
-                    [
-                        convention,
-                        "Maximum accepted length of the project name string is 16 characters.",
-                    ]
-                )
-            )
-        elif values["provider"] == "azure" and ("-" in value):
-            raise ValueError(
-                "\n".join(
-                    [convention, "Provider [azure] does not allow '-' in project name."]
-                )
-            )
-        elif values["provider"] == "aws" and value.startswith("aws"):
-            raise ValueError(
-                "\n".join(
-                    [
-                        convention,
-                        "Provider [aws] does not allow 'aws' as starting sequence in project name.",
-                    ]
-                )
-            )
-        else:
-            return letter_dash_underscore_pydantic
+    def _project_name_convention(cls, value: typing.Any, values):
+        project_name_convention(value=value, values=values)
 
 
 def verify(config):
