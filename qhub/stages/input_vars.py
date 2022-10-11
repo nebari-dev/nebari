@@ -267,9 +267,6 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "node_groups": _calculate_note_groups(config),
         # conda-store
         "conda-store-environments": config["environments"],
-        "conda-store-default-namespace": config.get(
-            "default_conda_namespace_name", "nebari-git"
-        ),
         "conda-store-filesystem-storage": config["storage"]["conda_store"],
         "conda-store-service-token-scopes": {
             "cdsdashboards": {
@@ -279,6 +276,9 @@ def stage_07_kubernetes_services(stage_outputs, config):
                 },
             }
         },
+        "conda-store-default-namespace": config.get("conda_store", {}).get(
+            "default_namespace", "nebari-git"
+        ),
         "conda-store-extra-settings": config.get("conda_store", {}).get(
             "extra_settings", {}
         ),

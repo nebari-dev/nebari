@@ -125,6 +125,7 @@ class CondaStore(Base):
     extra_settings: typing.Optional[typing.Dict[str, typing.Any]] = {}
     extra_config: typing.Optional[str] = ""
     image_tag: typing.Optional[str] = ""
+    default_namespace: typing.Optional[str] = ""
 
 
 # ============= Terraform ===============
@@ -549,7 +550,6 @@ class Main(Base):
     provider: ProviderEnum
     project_name: str
     namespace: typing.Optional[letter_dash_underscore_pydantic]
-    default_conda_namespace_name: typing.Optional[str]
     qhub_version: str = ""
     ci_cd: typing.Optional[CICD]
     domain: str
