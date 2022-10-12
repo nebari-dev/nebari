@@ -1070,6 +1070,64 @@ resource "kubernetes_manifest" "middleware" {
   }
 }
 
+resource "kubernetes_manifest" "middlewaretcp" {
+  manifest = {
+    apiVersion = "apiextensions.k8s.io/v1"
+    kind       = "CustomResourceDefinition"
+    metadata = {
+      name = "middlewaretcps.traefik.containo.us"
+    }
+    spec = {
+      group = "traefik.containo.us"
+      names = {
+        kind     = "MiddlewareTCP"
+        listKind = "MiddlewareTCPList"
+        plural   = "middlewaretcps"
+        singular = "middlewaretcp"
+      }
+      scope = "Namespaced"
+      versions = [
+        {
+          name    = "v1alpha1"
+          served  = true
+          storage = true
+          schema = {
+            openAPIV3Schema = {
+              type = "object"
+              properties = {
+                spec = {
+                  type = "object"
+                  properties = {
+                    inFlightConn = {
+                      type = "object"
+                      properties = {
+                        amount = {
+                          type = "integer"
+                        }
+                      }
+                    }
+                    ipWhiteList = {
+                      type = "object"
+                      properties = {
+                        sourceRange = {
+                          type = "array"
+                          items = {
+                            type = "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
 
 resource "kubernetes_manifest" "serverstransports" {
   manifest = {

@@ -53,7 +53,7 @@ resource "kubernetes_cluster_role" "main" {
 
   rule {
     api_groups = ["traefik.containo.us"]
-    resources  = ["ingressroutes", "ingressroutetcps", "ingressrouteudps", "middlewares", "tlsoptions", "tlsstores", "traefikservices", "serverstransports"]
+    resources  = ["ingressroutes", "ingressroutetcps", "ingressrouteudps", "middlewares", "middlewaretcps", "tlsoptions", "tlsstores", "traefikservices", "serverstransports"]
     verbs      = ["get", "list", "watch"]
   }
 }
