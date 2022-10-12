@@ -189,7 +189,10 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
 
     return {
         **{
-            "traefik-image": {"traefik": DEFAULT_TRAEFIK_IMAGE_TAG},
+            "traefik-image": {
+                "image": "traefik",
+                "tag": DEFAULT_TRAEFIK_IMAGE_TAG,
+            },
             "name": config["project_name"],
             "environment": config["namespace"],
             "node_groups": _calculate_note_groups(config),
