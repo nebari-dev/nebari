@@ -48,3 +48,11 @@ resource "aws_eks_node_group" "main" {
 data "aws_eks_cluster_auth" "main" {
   name = aws_eks_cluster.main.name
 }
+
+resource "aws_eks_addon" "addons" {
+  for_each          = { for addon in var.addons : addon.name => addon }
+  cluster_name      = aws_eks_cluster.main.name
+  addon_name        = each.value.name
+  addon_version     = each.value.version
+  resolve_conflicts = "OVERWRITE"
+}

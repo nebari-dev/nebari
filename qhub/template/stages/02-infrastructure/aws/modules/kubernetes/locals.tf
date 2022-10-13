@@ -7,6 +7,7 @@ locals {
   node_group_policies = concat([
     "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
     "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+    "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
     aws_iam_policy.worker_autoscaling.arn
   ], var.node_group_additional_policies)
 

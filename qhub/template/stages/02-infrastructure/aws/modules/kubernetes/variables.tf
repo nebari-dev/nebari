@@ -14,6 +14,16 @@ variable "cluster_subnets" {
   type        = list(string)
 }
 
+variable "region" {
+  description = "AWS region for EKS cluster"
+  type        = string
+}
+
+variable "kubernetes_version" {
+  description = "AWS kubernetes version for EKS cluster"
+  type        = string
+}
+
 variable "cluster_security_groups" {
   description = "AWS security groups to use for EKS cluster"
   type        = list(string)
@@ -47,4 +57,18 @@ variable "node_group_instance_type" {
   description = "AWS instance types to use for kubernetes nodes"
   type        = string
   default     = "m5.large"
+}
+
+variable "addons" {
+  type = list(object({
+    name    = string
+    version = string
+  }))
+
+  default = [
+    {
+      name    = "aws-ebs-csi-driver"
+      version = "v1.11.4-eksbuild.1"
+    }
+  ]
 }
