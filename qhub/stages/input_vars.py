@@ -100,6 +100,8 @@ def stage_02_infrastructure(stage_outputs, config):
         return {
             "name": config["project_name"],
             "environment": config["namespace"],
+            "region": config["amazon_web_services"]["region"],
+            "kubernetes_version": config["amazon_web_services"]["kubernetes_version"],
             "node_groups": [
                 {
                     "name": key,
