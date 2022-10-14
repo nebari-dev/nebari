@@ -3,7 +3,7 @@ import os
 import tempfile
 from urllib.parse import urlencode
 
-from qhub.constants import DEFAULT_CONDA_STORE_IMAGE_TAG
+from qhub.constants import DEFAULT_CONDA_STORE_IMAGE_TAG, DEFAULT_TRAEFIK_IMAGE_TAG
 
 
 def stage_01_terraform_state(stage_outputs, config):
@@ -191,6 +191,10 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
 
     return {
         **{
+            "traefik-image": {
+                "image": "traefik",
+                "tag": DEFAULT_TRAEFIK_IMAGE_TAG,
+            },
             "name": config["project_name"],
             "environment": config["namespace"],
             "node_groups": _calculate_note_groups(config),
