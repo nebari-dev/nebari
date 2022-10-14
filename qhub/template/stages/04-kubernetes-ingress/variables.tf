@@ -16,6 +16,14 @@ variable "node_groups" {
   }))
 }
 
+variable "traefik-image" {
+  description = "traefik image to use"
+  type = object({
+    image = string
+    tag   = string
+  })
+}
+
 variable "acme-email" {
   description = "ACME server email"
   default     = "qhub@example.com"

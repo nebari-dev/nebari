@@ -5,6 +5,8 @@ module "kubernetes-ingress" {
 
   node-group = var.node_groups.general
 
+  traefik-image = var.traefik-image
+
   certificate-service       = var.certificate-service
   acme-email                = var.acme-email
   acme-server               = var.acme-server
