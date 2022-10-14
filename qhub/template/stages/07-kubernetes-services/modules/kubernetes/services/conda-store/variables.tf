@@ -67,6 +67,11 @@ variable "extra-config" {
   default     = ""
 }
 
+variable "default-namespace-name" {
+  description = "Name of the default conda-store namespace"
+  type        = string
+}
+
 variable "services" {
   description = "Map of services tokens and scopes for conda-store"
   type        = map(any)

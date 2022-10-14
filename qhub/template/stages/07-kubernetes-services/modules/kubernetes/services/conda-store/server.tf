@@ -23,6 +23,9 @@ resource "kubernetes_secret" "conda-store-secret" {
       postgres-password = module.postgresql.root_password
       postgres-service  = module.postgresql.service
       openid-config     = module.conda-store-openid-client.config
+      extra-settings    = var.extra-settings
+      extra-config      = var.extra-config
+      default-namespace = var.default-namespace-name
       service-tokens = {
         for service, value in var.services : base64encode(random_password.conda_store_service_token[service].result) => value
       }

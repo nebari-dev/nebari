@@ -282,6 +282,9 @@ def stage_07_kubernetes_services(stage_outputs, config):
                 },
             }
         },
+        "conda-store-default-namespace": config.get("conda_store", {}).get(
+            "default_namespace", "nebari-git"
+        ),
         "conda-store-extra-settings": config.get("conda_store", {}).get(
             "extra_settings", {}
         ),

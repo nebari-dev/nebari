@@ -141,6 +141,7 @@ def profile_conda_store_mounts(username, groups):
     """
     conda_store_pvc_name = z2jh.get_config("custom.conda-store-pvc")
     conda_store_mount = z2jh.get_config("custom.conda-store-mount")
+    default_namespace = z2jh.get_config("custom.default-conda-store-namespace")
 
     extra_pod_config = {
         "volumes": [
@@ -153,7 +154,7 @@ def profile_conda_store_mounts(username, groups):
         ]
     }
 
-    conda_store_namespaces = [username, "filesystem", "default"] + groups
+    conda_store_namespaces = [username, default_namespace, "global"] + groups
     extra_container_config = {
         "volumeMounts": [
             {
@@ -252,14 +253,15 @@ def configure_user(username, groups, uid=1000, gid=100):
     )
 
     # condarc to add all the namespaces user has access to
+    default_namespace = z2jh.get_config("custom.default-conda-store-namespace")
     condarc = json.dumps(
         {
             "envs_dirs": [
                 f"/home/conda/{_}/envs"
                 for _ in [
                     username,
-                    "filesystem",
-                    "default",
+                    default_namespace,
+                    "global",
                 ]
                 + groups
             ]

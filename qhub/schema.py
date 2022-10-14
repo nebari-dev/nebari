@@ -125,6 +125,7 @@ class CondaStore(Base):
     extra_settings: typing.Optional[typing.Dict[str, typing.Any]] = {}
     extra_config: typing.Optional[str] = ""
     image_tag: typing.Optional[str] = ""
+    default_namespace: typing.Optional[str] = ""
 
 
 # ============= Terraform ===============
