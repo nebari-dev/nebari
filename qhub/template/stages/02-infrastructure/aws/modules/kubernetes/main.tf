@@ -1,6 +1,7 @@
 resource "aws_eks_cluster" "main" {
   name     = var.name
   role_arn = aws_iam_role.cluster.arn
+  version  = var.kubernetes_version
 
   vpc_config {
     security_group_ids = var.cluster_security_groups
@@ -49,10 +50,14 @@ data "aws_eks_cluster_auth" "main" {
   name = aws_eks_cluster.main.name
 }
 
-resource "aws_eks_addon" "addons" {
-  for_each          = { for addon in var.addons : addon.name => addon }
+resource "aws_eks_addon" "aws-ebs-csi-driver" {
+  # required for Kubernetes v1.23+ on AWS
+  addon_name        = "aws-ebs-csi-driver"
   cluster_name      = aws_eks_cluster.main.name
-  addon_name        = each.value.name
-  addon_version     = each.value.version
   resolve_conflicts = "OVERWRITE"
+  # Ensure cluster and node groups are created
+  depends_on = [
+    aws_eks_cluster.main,
+    aws_eks_node_group.main,
+  ]
 }

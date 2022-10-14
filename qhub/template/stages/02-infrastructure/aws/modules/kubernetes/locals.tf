@@ -1,7 +1,8 @@
 locals {
   cluster_policies = concat([
     "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
+    "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
   ], var.cluster_additional_policies)
 
   node_group_policies = concat([
