@@ -32,6 +32,11 @@ Enhancements for this release include:
 ## New Contributors
 * @tjcrone made their first contribution in https://github.com/Quansight/qhub/pull/1471
 
+## Migration note
+
+If you are upgrading from a version of Nebari prior to `0.4.5`, you will need to manually update your conda-store namespaces
+to be compatible with the new Nebari version. This is a one-time migration step that will need to be performed after upgrading to continue using the service. Refer to [How to migrate base conda-store namespaces](https://deploy-preview-178--nebari-docs.netlify.app/troubleshooting#conda-store-compatibility-migration-steps-when-upgrading-to-045) for further instructions.
+
 ## Release v0.4.4 - September 22, 2022
 
 ### Feature changes and enhancements
