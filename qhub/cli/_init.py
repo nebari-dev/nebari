@@ -1,4 +1,6 @@
 import os
+import re
+from pathlib import Path
 
 import questionary
 import rich
@@ -87,7 +89,7 @@ def handle_init(inputs: InitInputs):
             yaml.dump(config, f)
     except FileExistsError:
         raise ValueError(
-            "A qhub-config.yaml file already exists. Please move or delete it and try again."
+            f"A {whoami}-config.yaml file already exists. Please move or delete it and try again."
         )
 
 
@@ -263,12 +265,24 @@ def check_project_name(ctx: typer.Context, project_name: str):
     return project_name
 
 
+def check_ssl_cert_email(ctx: typer.Context, ssl_cert_email: str):
+    if ssl_cert_email and not re.match("^[^ @]+@[^ @]+\\.[^ @]+$", ssl_cert_email):
+        raise ValueError("ssl-cert-email should be a valid email address")
+
+    return ssl_cert_email
+
+
 def guided_init_wizard(ctx: typer.Context, guided_init: str):
     """
     Guided Init Wizard is a user-friendly questionnaire used to help generate the `nebari-config.yaml`.
     """
     qmark = "  "
     disable_checks = os.environ.get("QHUB_DISABLE_INIT_CHECKS", False)
+
+    if Path("nebari-config.yaml").exists():
+        raise ValueError(
+            "A nebari-config.yaml file already exists. Please move or delete it and try again."
+        )
 
     if not guided_init:
         return guided_init
@@ -458,6 +472,9 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 "Which email address should Let's Encrypt associate the certificate with?",
                 qmark=qmark,
             ).unsafe_ask()
+
+            if not disable_checks:
+                check_ssl_cert_email(ctx, ssl_cert_email=inputs.ssl_cert_email)
 
         # ADVANCED FEATURES
         rich.print(

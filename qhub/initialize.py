@@ -415,8 +415,6 @@ def render_config(
     config["environments"] = DEFAULT_ENVIRONMENTS.copy()
 
     if ssl_cert_email is not None:
-        if not re.match("^[^ @]+@[^ @]+\\.[^ @]+$", ssl_cert_email):
-            raise ValueError("ssl-cert-email should be a valid email address")
         config["certificate"] = {
             "type": "lets-encrypt",
             "acme_email": ssl_cert_email,
