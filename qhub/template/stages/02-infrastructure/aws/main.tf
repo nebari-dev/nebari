@@ -66,8 +66,10 @@ module "efs" {
 module "kubernetes" {
   source = "./modules/kubernetes"
 
-  name = local.cluster_name
-  tags = local.additional_tags
+  name               = local.cluster_name
+  tags               = local.additional_tags
+  region             = var.region
+  kubernetes_version = var.kubernetes_version
 
   cluster_subnets         = module.network.subnet_ids
   cluster_security_groups = [module.network.security_group_id]

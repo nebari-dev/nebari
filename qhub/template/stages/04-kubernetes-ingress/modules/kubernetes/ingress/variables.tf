@@ -24,10 +24,6 @@ variable "traefik-image" {
     image = string
     tag   = string
   })
-  default = {
-    image = "traefik"
-    tag   = "2.4.8"
-  }
 }
 
 variable "loglevel" {

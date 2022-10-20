@@ -8,6 +8,16 @@ variable "environment" {
   type        = string
 }
 
+variable "region" {
+  description = "AWS region for EKS cluster"
+  type        = string
+}
+
+variable "kubernetes_version" {
+  description = "AWS kubernetes version for EKS cluster"
+  type        = string
+}
+
 variable "node_groups" {
   description = "AWS node groups"
   type = list(object({
