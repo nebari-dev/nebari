@@ -14,7 +14,7 @@ on:
   push:
     branches:
       - main
-      - release/**
+      - release/\d{4}.\d{2}.\d{1,2}
     paths:
       - ".github/workflows/kubernetes_test.yaml"
       - "tests/**"
