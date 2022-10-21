@@ -9,5 +9,7 @@ exclude = '/qhub/template/'
 
 [tool.setuptools_scm]
 write_to = "qhub/_version.py"
-version_scheme = "release-branch-semver"
 local_scheme = "node-and-timestamp"
+
+[tools.setuptools_scm.version_scheme]
+calver_by_date = "calver-by-date"
