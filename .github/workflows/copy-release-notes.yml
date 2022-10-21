@@ -1,0 +1,27 @@
+name: Copy release notes to nebari.dev
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'RELEASE.md'
+  workflow_dispatch:
+    inputs:
+      repo_name: nebari-docs
+
+jobs:
+  replicate_release_notes:
+      name: Replicate release notes
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Replicating file
+        uses: derberg/copy-files-to-other-repositories@v1.0.0
+        with:
+          github_token: ${{ secrets.GH_TOKEN }}
+          patterns_to_include: 'RELEASE.md'
+          destination: docs/references
+          committer_username: pavithraes
+          committer_email: pavithraes@outlook.com
+          commit_message: "gh action: update release notes"
