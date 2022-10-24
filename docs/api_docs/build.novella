@@ -1,0 +1,7 @@
+template "docusaurus" {
+  content_directory = "../../qhub"
+}
+
+action "preprocess-markdown" {
+  use "pydoc"
+}
