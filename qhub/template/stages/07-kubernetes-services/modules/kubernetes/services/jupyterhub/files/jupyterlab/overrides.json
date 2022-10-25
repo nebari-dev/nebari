@@ -1,5 +1,0 @@
-{
-    "dask-labextension:plugin": {
-        "browserDashboardCheck": true
-    }
-}
