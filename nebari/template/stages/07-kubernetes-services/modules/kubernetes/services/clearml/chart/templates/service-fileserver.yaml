@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "clearml.fullname" . }}-fileserver
+  labels:
+    {{- include "clearml.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.fileserver.service.type }}
+  ports:
+    - port: {{ .Values.fileserver.service.port }}
+      targetPort: {{ .Values.fileserver.service.port }}
+      nodePort: 30081
+      protocol: TCP
+  selector:
+    {{- include "clearml.selectorLabelsFileServer" . | nindent 4 }}

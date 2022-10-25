@@ -1,0 +1,14 @@
+apiVersion: v2
+appVersion: "1.0.2"
+description: Clearml server Helm chart for Kubernetes
+name: clearml-server-cloud-ready
+version: "2.0.2+1"
+dependencies:
+  - name: redis
+    version: "~10.9.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled
+  - name: mongodb
+    version: "~10.3.2"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: mongodb.enabled

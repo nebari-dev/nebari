@@ -1,0 +1,5 @@
+prefectImage: <placeholder>
+namespace: <placeholder>
+serviceAccount: prefect
+prefectToken: "<placeholder>"
+cloudApi: "<placeholder>"

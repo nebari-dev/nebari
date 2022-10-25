@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "clearml.fullname" . }}-apiserver
+  labels:
+    {{- include "clearml.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.apiserver.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "clearml.selectorLabelsApiServer" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.apiserver.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "clearml.selectorLabelsApiServer" . | nindent 8 }}
+    spec:
+      {{- if .Values.apiserver.storage.enableConfigVolume }}
+      volumes:
+        - name: apiserver-config
+          persistentVolumeClaim:
+            claimName: {{ include "clearml.fullname" . }}-apiserver-config
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.apiserver.image.repository }}:{{ .Values.apiserver.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.apiserver.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8008
+              protocol: TCP
+          env:
+          - name: CLEARML_ELASTIC_SERVICE_HOST
+            value: "{{ tpl .Values.elasticsearch.name . }}"
+          - name: CLEARML_ELASTIC_SERVICE_PORT
+            value: "{{ .Values.elasticsearch.httpPort }}"
+          - name: CLEARML_MONGODB_SERVICE_HOST
+            value: "{{ tpl .Values.mongodb.service.name . }}"
+          - name: CLEARML_MONGODB_SERVICE_PORT
+            value: "{{ .Values.mongodb.service.port }}"
+          - name: CLEARML_REDIS_SERVICE_HOST
+            value: "{{ tpl .Values.redis.master.name . }}"
+          - name: CLEARML_REDIS_SERVICE_PORT
+            value: "{{ .Values.redis.master.port }}"
+          - name: CLEARML__APISERVER__PRE_POPULATE__ENABLED
+            value: "{{ .Values.apiserver.prepopulateEnabled }}"
+          - name: CLEARML__APISERVER__PRE_POPULATE__ZIP_FILES
+            value: "{{ .Values.apiserver.prepopulateZipFiles }}"
+          - name: CLEARML_SERVER_DEPLOYMENT_TYPE
+            value: "helm-cloud"
+          - name: CLEARML_CONFIG_DIR
+            value: /opt/clearml/config
+          - name: CLEARML__APISERVER__DEFAULT_COMPANY
+            value: {{ .Values.clearml.defaultCompany }}
+          - name: CLEARML__SECURE__HTTP__SESSION_SECRET__APISERVER
+            valueFrom:
+              secretKeyRef:
+                name: clearml-conf
+                key: http_session
+          - name: CLEARML__SECURE__AUTH__TOKEN_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: clearml-conf
+                key: auth_token
+          - name: CLEARML__SECURE__CREDENTIALS__APISERVER__USER_KEY
+            valueFrom:
+              secretKeyRef:
+                name: clearml-conf
+                key: apiserver_key
+          - name: CLEARML__SECURE__CREDENTIALS__APISERVER__USER_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: clearml-conf
+                key: apiserver_secret
+          - name: CLEARML__SECURE__CREDENTIALS__TESTS__USER_KEY
+            valueFrom:
+              secretKeyRef:
+                name: clearml-conf
+                key: tests_user_key
+          - name: CLEARML__SECURE__CREDENTIALS__TESTS__USER_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: clearml-conf
+                key: tests_user_secret
+         {{- if .Values.apiserver.extraEnvs }}
+         {{ toYaml .Values.apiserver.extraEnvs | nindent 10 }}
+         {{- end }}
+          args:
+            - apiserver
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.apiserver.livenessDelay }}
+            httpGet:
+              path: /debug.ping
+              port: 8008
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.apiserver.readinessDelay }}
+            failureThreshold: 8
+            httpGet:
+              path: /debug.ping
+              port: 8008
+          {{- if .Values.apiserver.storage.enableConfigVolume }}
+          volumeMounts:
+           - name: apiserver-config
+             mountPath: /opt/clearml/config
+          {{- end }}
+          resources:
+            {{- toYaml .Values.apiserver.resources | nindent 12 }}
+      {{- with .Values.apiserver.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apiserver.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.apiserver.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

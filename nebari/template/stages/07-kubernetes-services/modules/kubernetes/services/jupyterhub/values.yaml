@@ -1,0 +1,61 @@
+# https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/main/jupyterhub/values.yaml
+hub:
+  db:
+    type: sqlite-pvc
+    pvc:
+      storage: 1Gi
+  baseUrl: "/"
+  networkPolicy:
+    enabled: false
+
+proxy:
+  secretToken: "<placeholder>"
+  service:
+    type: ClusterIP
+
+scheduling:
+  userScheduler:
+    enabled: true
+  podPriority:
+    enabled: true
+  userPlaceholder:
+    enabled: false
+    replicas: 1
+
+imagePullSecrets:
+  - extcrcreds
+
+singleuser:
+  defaultUrl: "/lab"
+  startTimeout: 600  # 10 minutes
+  profileList: []
+  storage:
+    type: static
+    extraVolumeMounts:
+      - mountPath: "/home/shared"
+        name: home
+        subPath: "home/shared"
+  cpu:
+    limit: 1
+    guarantee: 1
+  memory:
+    limit: "1G"
+    guarantee: "1G"
+  networkPolicy:
+    enabled: false
+
+# cull relates to the jupyterhub-idle-culler service, responsible for evicting
+# inactive singleuser pods.
+#
+# The configuration below, except for enabled, corresponds to command-line flags
+# for jupyterhub-idle-culler as documented here:
+# https://github.com/jupyterhub/jupyterhub-idle-culler#as-a-standalone-script
+#
+cull:
+  enabled: true
+  users: false
+  removeNamedServers: false
+  timeout: 1800
+  every: 600
+  concurrency: 10
+  maxAge: 0
