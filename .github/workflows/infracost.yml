@@ -3,7 +3,7 @@ name: Infracost CI
 on:
   pull_request:
     paths:
-      - 'qhub/template/stages/02-infrastructure'
+      - 'nebari/template/stages/02-infrastructure'
       - '.github/workflows/infracost.yml'
 
 env:
@@ -16,7 +16,7 @@ env:
 
 jobs:
   infracost:
-    name: Run Infracost on QHub Infrastructure
+    name: Run Infracost on Nebari Infrastructure
     runs-on: ubuntu-latest
 
     strategy:
@@ -45,12 +45,12 @@ jobs:
         with:
           filters: |
             aws:
-              - 'qhub/template/stages/02-infrastructure/aws/**'
-              - 'qhub/template/stages/01-terraform-state/aws/**'
+              - 'nebari/template/stages/02-infrastructure/aws/**'
+              - 'nebari/template/stages/01-terraform-state/aws/**'
             gcp:
-              - 'qhub/template/stages/02-infrastructure/gcp/**'
+              - 'nebari/template/stages/02-infrastructure/gcp/**'
             azure:
-              - 'qhub/template/stages/02-infrastructure/azure/**'
+              - 'nebari/template/stages/02-infrastructure/azure/**'
 
       # Setup Google Cloud SDK
       - name: Set up Cloud SDK
@@ -72,19 +72,19 @@ jobs:
         with:
           python-version: 3.8
 
-      # Install QHub
-      - name: Install QHub
+      # Install Nebari
+      - name: Install Nebari
         if: steps.changes.outputs.${{ matrix.provider }} == 'true'
         run: |
           pip install .[dev]
 
-      # Initialize QHub and render the infrastructure
-      - name: QHub initialize and render
+      # Initialize Nebari and render the infrastructure
+      - name: Nebari initialize and render
         run: |
           mkdir data && cd data
-          qhub init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
-          cat qhub-config.yaml
-          qhub render -c qhub-config.yaml
+          nebari init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.nebari.dev" --auth-provider github --disable-prompt
+          cat nebari-config.yaml
+          nebari render -c nebari-config.yaml
 
       # Run Infracost on the base branch to generate the baseline cost
       - name: Generate Infracost cost estimate baseline
@@ -98,19 +98,19 @@ jobs:
       - name: Checkout PR branch
         uses: actions/checkout@v3
 
-      # Install QHub
-      - name: Install QHub
+      # Install Nebari
+      - name: Install Nebari
         if: steps.changes.outputs.${{ matrix.provider }} == 'true'
         run: |
           pip install .[dev]
 
-      # Initialize QHub and render the infrastructure
-      - name: QHub initialize and render
+      # Initialize Nebari and render the infrastructure
+      - name: Nebari initialize and render
         run: |
           mkdir data && cd data
-          qhub init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
-          cat qhub-config.yaml
-          qhub render -c qhub-config.yaml
+          nebari init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.nebari.dev" --auth-provider github --disable-prompt
+          cat nebari-config.yaml
+          nebari render -c nebari-config.yaml
 
       # Generate Infracost diff cost estimate only if the file has been changed
       - name: Generate Infracost diff
