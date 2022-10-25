@@ -2,6 +2,7 @@ from functools import partial
 from unittest.mock import Mock
 
 import pytest
+
 from nebari.initialize import render_config
 
 INIT_INPUTS = [
