@@ -407,7 +407,10 @@ def set_nebari_dask_version() -> str:
     """Set version of `nebari-dask` meta package."""
     try:
         resp = requests.get(CONDA_FORGE_CHANNEL_DATA_URL)
-        nebari_dask_version = resp.json()["packages"]["nebari-dask"]["version"]
+        # Disable check for `nebari-dask` package in `conda-forge` channel.
+        # set version to `2022.10.1` as `nebari-dask` is not available in `conda-forge` channel.
+        # nebari_dask_version = resp.json()["packages"]["nebari-dask"]["version"]
+        nebari_dask_version = "2022.10.1"
         resp.raise_for_status()
     except ConnectionError:
         print(
