@@ -23,18 +23,18 @@ def do_upgrade(config_filename, attempt_fixes=False):
     try:
         verify(config)
         rich.print(
-            f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for nebari version [green]{__version__}[/green]"
+            f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for Nebari version [green]{__version__}[/green]"
         )
         return
     except (ValidationError, ValueError) as e:
-        if is_version_accepted(config.get("nebari_version", "")):
+        if is_version_accepted(config.get("qhub_version", "")):
             # There is an unrelated validation problem
             print(
-                f"Your config file {config_filename} appears to be already up-to-date for nebari version {__version__} but there is another validation error.\n"
+                f"Your config file {config_filename} appears to be already up-to-date for Nebari version {__version__} but there is another validation error.\n"
             )
             raise e
 
-    start_version = config.get("nebari_version", "")
+    start_version = config.get("qhub_version", "")
 
     UpgradeStep.upgrade(
         config, start_version, __version__, config_filename, attempt_fixes
@@ -147,7 +147,7 @@ class UpgradeStep(ABC):
 
         # Set the new version
         if start_version == "":
-            assert "nebari_version" not in config
+            assert "qhub_version" not in config
         assert self.version != start_version
 
         if self.requires_nebari_version_field():

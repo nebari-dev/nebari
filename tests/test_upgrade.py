@@ -7,11 +7,11 @@ from nebari.version import __version__, rounded_ver_parse
 
 
 @pytest.fixture
-def nebari_users_import_json():
+def qhub_users_import_json():
     return (
         (
             Path(__file__).parent
-            / "./nebari-config-yaml-files-for-upgrade/nebari-users-import.json"
+            / "./qhub-config-yaml-files-for-upgrade/qhub-users-import.json"
         )
         .read_text()
         .rstrip()
@@ -19,55 +19,53 @@ def nebari_users_import_json():
 
 
 @pytest.mark.parametrize(
-    "old_nebari_config_path_str,attempt_fixes,expect_upgrade_error",
+    "old_qhub_config_path_str,attempt_fixes,expect_upgrade_error",
     [
         (
-            "./nebari-config-yaml-files-for-upgrade/nebari-config-do-310.yaml",
+            "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310.yaml",
             False,
             False,
         ),
         (
-            "./nebari-config-yaml-files-for-upgrade/nebari-config-do-310-customauth.yaml",
+            "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310-customauth.yaml",
             False,
             True,
         ),
         (
-            "./nebari-config-yaml-files-for-upgrade/nebari-config-do-310-customauth.yaml",
+            "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310-customauth.yaml",
             True,
             False,
         ),
     ],
 )
 def test_upgrade_4_0(
-    old_nebari_config_path_str,
+    old_qhub_config_path_str,
     attempt_fixes,
     expect_upgrade_error,
     tmp_path,
-    nebari_users_import_json,
+    qhub_users_import_json,
 ):
-    old_nebari_config_path = Path(__file__).parent / old_nebari_config_path_str
+    old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
 
-    tmp_nebari_config = Path(tmp_path, old_nebari_config_path.name)
-    tmp_nebari_config.write_text(
-        old_nebari_config_path.read_text()
-    )  # Copy contents to tmp
+    tmp_qhub_config = Path(tmp_path, old_qhub_config_path.name)
+    tmp_qhub_config.write_text(old_qhub_config_path.read_text())  # Copy contents to tmp
 
-    orig_contents = tmp_nebari_config.read_text()  # Read in initial contents
+    orig_contents = tmp_qhub_config.read_text()  # Read in initial contents
 
-    assert not Path(tmp_path, "nebari-users-import.json").exists()
+    assert not Path(tmp_path, "qhub-users-import.json").exists()
 
     # Do the upgrade
     if not expect_upgrade_error:
         do_upgrade(
-            tmp_nebari_config, attempt_fixes
+            tmp_qhub_config, attempt_fixes
         )  # Would raise an error if invalid by current Nebari version's standards
     else:
         with pytest.raises(ValueError):
-            do_upgrade(tmp_nebari_config, attempt_fixes)
+            do_upgrade(tmp_qhub_config, attempt_fixes)
         return
 
     # Check the resulting YAML
-    config = load_yaml(tmp_nebari_config)
+    config = load_yaml(tmp_qhub_config)
 
     verify(
         config
@@ -97,12 +95,10 @@ def test_upgrade_4_0(
     # Keycloak import users json
     assert (
         Path(tmp_path, "nebari-users-import.json").read_text().rstrip()
-        == nebari_users_import_json
+        == qhub_users_import_json
     )
 
     # Check backup
-    tmp_nebari_config_backup = Path(
-        tmp_path, f"{old_nebari_config_path.name}.old.backup"
-    )
+    tmp_qhub_config_backup = Path(tmp_path, f"{old_qhub_config_path.name}.old.backup")
 
-    assert orig_contents == tmp_nebari_config_backup.read_text()
+    assert orig_contents == tmp_qhub_config_backup.read_text()
