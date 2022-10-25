@@ -51,7 +51,7 @@ jobs:
           # generate the new docs
           pydoc-markdown -I "../../" -p qhub --render-toc > api_temp.md
           # make modifications to clean up
-          python api_doc_mods.py --autogen_path api_temp.md --outpath api_doc.md         
+          python api_doc_mods.py --autogen_path api_temp.md --outpath api_doc.md
 
       - name: Check for changes
         run: |
