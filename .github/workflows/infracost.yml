@@ -140,11 +140,19 @@ jobs:
             echo "No changes detected in infrastructure"
           fi
 
+      # parse pull_request.base.ref before generating artifacts
+      - name: Parse artifact name
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        id: parse
+        run: |
+          echo "::set-output name=artifact_name_base::$(echo $BASE_REF | sed 's/\//-/g')"
+
       # Save artifacts to the PR
       - name: Save artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: infracost-data-${{ matrix.provider }}-${{ github.event.pull_request.base.ref }}
+          name: infracost-data-${{ matrix.provider }}-${{ steps.parse.outputs.artifact_name_base }}
           path: |
             /tmp/infracost.json
             /tmp/infracost-base.json
