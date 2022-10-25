@@ -23,57 +23,104 @@ from .version import __version__
 
 logger = logging.getLogger(__name__)
 
-qhub_image_tag = set_docker_image_tag()
-qhub_dask_version = set_qhub_dask_version()
 
-
-BASE_CONFIGURATION = {
-    "project_name": None,
-    "provider": None,
-    "domain": None,
-    "certificate": {
-        "type": "self-signed",
-    },
-    "security": {
-        "authentication": None,
-    },
-    "default_images": {
-        "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{qhub_image_tag}",
-        "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{qhub_image_tag}",
-        "dask_worker": f"quay.io/nebari/nebari-dask-worker:{qhub_image_tag}",
-    },
-    "storage": {"conda_store": "200Gi", "shared_filesystem": "200Gi"},
-    "theme": {
-        "jupyterhub": {
-            "hub_title": None,
-            "hub_subtitle": None,
-            "welcome": None,
-            "logo": "/hub/custom/images/jupyter_qhub_logo.svg",
-            "primary_color": "#4f4173",
-            "secondary_color": "#957da6",
-            "accent_color": "#32C574",
-            "text_color": "#111111",
-            "h1_color": "#652e8e",
-            "h2_color": "#652e8e",
-            "version": f"v{__version__}",
+def __getattr__(name):
+    if name == 'qhub_image_tag':
+        return set_docker_image_tag()
+    elif name == 'qhub_dask_version':
+        return set_qhub_dask_version()
+    elif name == 'BASE_CONFIGURATION':
+        return {
+            "project_name": None,
+            "provider": None,
+            "domain": None,
+            "certificate": {
+                "type": "self-signed",
+            },
+            "security": {
+                "authentication": None,
+            },
+            "default_images": {
+                "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{qhub_image_tag}",
+                "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{qhub_image_tag}",
+                "dask_worker": f"quay.io/nebari/nebari-dask-worker:{qhub_image_tag}",
+            },
+            "storage": {"conda_store": "200Gi", "shared_filesystem": "200Gi"},
+            "theme": {
+                "jupyterhub": {
+                    "hub_title": None,
+                    "hub_subtitle": None,
+                    "welcome": None,
+                    "logo": "/hub/custom/images/jupyter_qhub_logo.svg",
+                    "primary_color": "#4f4173",
+                    "secondary_color": "#957da6",
+                    "accent_color": "#32C574",
+                    "text_color": "#111111",
+                    "h1_color": "#652e8e",
+                    "h2_color": "#652e8e",
+                    "version": f"v{__version__}",
+                }
+            },
+            "helm_extensions": [],
+            "monitoring": {
+                "enabled": True,
+            },
+            "argo_workflows": {
+                "enabled": True,
+            },
+            "kbatch": {
+                "enabled": True,
+            },
+            "cdsdashboards": {
+                "enabled": True,
+                "cds_hide_user_named_servers": True,
+                "cds_hide_user_dashboard_servers": False,
+            },
         }
-    },
-    "helm_extensions": [],
-    "monitoring": {
-        "enabled": True,
-    },
-    "argo_workflows": {
-        "enabled": True,
-    },
-    "kbatch": {
-        "enabled": True,
-    },
-    "cdsdashboards": {
-        "enabled": True,
-        "cds_hide_user_named_servers": True,
-        "cds_hide_user_dashboard_servers": False,
-    },
-}
+    elif name == 'DEFAULT_ENVIRONMENTS':
+        return {
+            "environment-dask.yaml": {
+                "name": "dask",
+                "channels": ["conda-forge"],
+                "dependencies": [
+                    "python",
+                    "ipykernel",
+                    "ipywidgets==7.7.1",
+                    f"qhub-dask =={qhub_dask_version}",
+                    "python-graphviz",
+                    "pyarrow",
+                    "s3fs",
+                    "gcsfs",
+                    "numpy",
+                    "numba",
+                    "pandas",
+                    {
+                        "pip": [
+                            "kbatch",
+                        ],
+                    },
+                ],
+            },
+            "environment-dashboard.yaml": {
+                "name": "dashboard",
+                "channels": ["conda-forge"],
+                "dependencies": [
+                    "python==3.9.13",
+                    "ipykernel==6.15.1",
+                    "ipywidgets==7.7.1",
+                    f"qhub-dask=={qhub_dask_version}",
+                    "param==1.12.2",
+                    "python-graphviz==0.20.1",
+                    "matplotlib==3.3.2",
+                    "panel==0.13.1",
+                    "voila==0.3.6",
+                    "streamlit==1.10.0",
+                    "dash==2.6.1",
+                    "cdsdashboards-singleuser==0.6.2",
+                ],
+            },
+        }
+
 
 CICD_CONFIGURATION = {
     "type": "PLACEHOLDER",
@@ -228,49 +275,6 @@ DEFAULT_PROFILES = {
             "worker_memory": "10G",
             "worker_threads": 4,
         },
-    },
-}
-
-DEFAULT_ENVIRONMENTS = {
-    "environment-dask.yaml": {
-        "name": "dask",
-        "channels": ["conda-forge"],
-        "dependencies": [
-            "python",
-            "ipykernel",
-            "ipywidgets==7.7.1",
-            f"qhub-dask =={qhub_dask_version}",
-            "python-graphviz",
-            "pyarrow",
-            "s3fs",
-            "gcsfs",
-            "numpy",
-            "numba",
-            "pandas",
-            {
-                "pip": [
-                    "kbatch",
-                ],
-            },
-        ],
-    },
-    "environment-dashboard.yaml": {
-        "name": "dashboard",
-        "channels": ["conda-forge"],
-        "dependencies": [
-            "python==3.9.13",
-            "ipykernel==6.15.1",
-            "ipywidgets==7.7.1",
-            f"qhub-dask=={qhub_dask_version}",
-            "param==1.12.2",
-            "python-graphviz==0.20.1",
-            "matplotlib==3.3.2",
-            "panel==0.13.1",
-            "voila==0.3.6",
-            "streamlit==1.10.0",
-            "dash==2.6.1",
-            "cdsdashboards-singleuser==0.6.2",
-        ],
     },
 }
 
