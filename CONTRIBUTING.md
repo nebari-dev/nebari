@@ -1,6 +1,6 @@
-# Contributing to QHub
+# Contributing to Nebari
 
-:sparkles: :raised_hands: Welcome to the QHub repository! :sparkles: :raised_hands:
+:sparkles: :raised_hands: Welcome to the Nebari repository! :sparkles: :raised_hands:
 
 Everyone is welcome to contribute, and we value everybody's contribution. Code is not the only way to help the community. Your choices aren't limited to programming; as you can see
 below, there are many areas where we need **your** help. Answering questions, helping others, reaching out and improving the documentation is immensely valuable to the community.
@@ -11,7 +11,7 @@ This document will help you through your journey of open source. Here, you'll ge
 
 ## Table of contents
 
-- [Contributing to QHub](#contributing-to-qhub)
+- [Contributing to Nebari](#contributing-to-nebari)
   - [Table of contents](#table-of-contents)
   - [🏷 Where to start: issues](#-where-to-start-issues)
     - [Submitting issues](#submitting-issues)
@@ -26,21 +26,21 @@ This document will help you through your journey of open source. Here, you'll ge
 
 ## 🏷 Where to start: issues
 
-Before you open a new issue, please check the [open issues][qhub-issues]. See if the issue has already been reported or if your idea has already been discussed. If so, it's often
+Before you open a new issue, please check the [open issues][nebari-issues]. See if the issue has already been reported or if your idea has already been discussed. If so, it's often
 better to leave a comment on a current issue rather than opening a new one. Old issues also often include helpful tips and solutions to common problems.
 
-If you are looking for specific help with QHub or its configuration, check our [Github discussions][qhub-qa].
+If you are looking for specific help with Nebari or its configuration, check our [Github discussions][nebari-qa].
 
 ### Submitting issues
 
-When opening an issue, give it a **descriptive title** and provide as much information as possible. Our [issue templates][qhub-templates] help you remember the most important
+When opening an issue, give it a **descriptive title** and provide as much information as possible. Our [issue templates][nebari-templates] help you remember the most important
 details to include.
 
 There are three issues templates to choose from:
 
 1. **Bug Report**: With this template, create an issue report that can help others fix something currently broken.
 2. **Documentation**: Use this template to provide feedback on our documentation or suggest additions and improvements.
-3. **Feature request**: Is there anything to make the community work better? Have you spotted something missing in QHub? Use this template to share your feature ideas with the QHub
+3. **Feature request**: Is there anything to make the community work better? Have you spotted something missing in Nebari? Use this template to share your feature ideas with the Nebari
    team.
 
 A few more tips:
@@ -56,44 +56,44 @@ A few more tips:
 
 ### Issue labels
 
-Check our [labels page][qhub-labels] for an overview of the system we use to tag our issues and pull requests.
+Check our [labels page][nebari-labels] for an overview of the system we use to tag our issues and pull requests.
 
 ## :computer: Contributing to the codebase
 
-You don't have to be a Python or Kubernetes pro to contribute, and we're happy to help you get started. If you're new to QHub, an excellent place to start are the issues marked
-with the [type: good first issue](https://github.com/Quansight/QHub/labels/type%3A%20good%20first%20issue) label, which we use to tag bugs and feature requests that require
+You don't have to be a Python or Kubernetes pro to contribute, and we're happy to help you get started. If you're new to Nebari, an excellent place to start are the issues marked
+with the [type: good first issue](https://github.com/Quansight/Nebari/labels/type%3A%20good%20first%20issue) label, which we use to tag bugs and feature requests that require
 low-effort (i.e. low entry-barrier or little in-depth knowledge needed) and self-contained. If you've decided to take on one of these problems and you're making good progress,
 don't forget to add a quick comment to the issue to assign this to yourself. You can also use the issue to ask questions or share your work in progress.
 
 ### Development process - short summary
 
-Never made an open-source contribution before? Wondering how contributions work in the QHub world? Here's a quick rundown!
+Never made an open-source contribution before? Wondering how contributions work in the Nebari world? Here's a quick rundown!
 
 #### If you are a first-time contributor
 
-1. Go to the [QHub repository][qhub-repo] and click the `fork` button on the top-right corner to create your own copy of the project.
+1. Go to the [Nebari repository][nebari-repo] and click the `fork` button on the top-right corner to create your own copy of the project.
 
 2. Clone the project to your local computer:
 
    ```bash
-   git clone https://github.com/your-username/QHub.git
+   git clone https://github.com/your-username/Nebari.git
    ```
 
 3. Change into the directory:
 
    ```bash
-   cd Qhub
+   cd Nebari
    ```
 
 4. Add the upstream repository:
 
    ```bash
-   git remote add upstream https://github.com/Quansight/QHub.git
+   git remote add upstream https://github.com/Quansight/Nebari.git
    ```
 
 Now using the command `git remote -v` will show two remote repositories:
 
-- `upstream`: which refers to the `QHub` repository on Github.
+- `upstream`: which refers to the `Nebari` repository on Github.
 - `origin`: which refers to your personal fork
 
 #### Develop your contribution
@@ -132,7 +132,7 @@ Now using the command `git remote -v` will show two remote repositories:
    it.
 
 :warning: - If your commit introduces a new feature or changes functionality, please ensure you first create an open Pull Request on our repo with `WIP` (work in progress) in the
-title and marked as draft, explaining what you want to do. That way we can discuss it to be sure it makes sense for QHub. Or start by creating an issue and indicate that you would
+title and marked as draft, explaining what you want to do. That way we can discuss it to be sure it makes sense for Nebari. Or start by creating an issue and indicate that you would
 be interested in solving the problem yourself. This is generally not necessary for bug fixes, documentation updates, etc. However, if you do not get any reaction, do feel free to
 ask for a review.
 
@@ -166,8 +166,8 @@ In the source code, be sure to preface any issue or PR reference with gh-xxxx.
 
 <!-- Links -->
 
-[qhub-issues]: https://github.com/Quansight/QHub/issues
-[qhub-labels]: https://github.com/Quansight/QHub/labels
-[qhub-qa]: https://github.com/Quansight/QHub/discussions/categories/q-a
-[qhub-repo]: https://github.com/Quansight/QHub/
-[qhub-templates]: https://github.com/Quansight/QHub/issues/new/choose
+[nebari-issues]: https://github.com/Quansight/Nebari/issues
+[nebari-labels]: https://github.com/Quansight/Nebari/labels
+[nebari-qa]: https://github.com/Quansight/Nebari/discussions/categories/q-a
+[nebari-repo]: https://github.com/Quansight/Nebari/
+[nebari-templates]: https://github.com/Quansight/Nebari/issues/new/choose
