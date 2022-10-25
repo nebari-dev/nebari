@@ -1,6 +1,7 @@
 # docs
 .nox
 _build
+docs/api_docs/api_temp.md
 
 # setuptools scm
 qhub/_version.py
