@@ -14,8 +14,8 @@ variable "overrides" {
   default     = []
 }
 
-variable "qhub-bot-password" {
-  description = "qhub-bot password for keycloak"
+variable "nebari-bot-password" {
+  description = "nebari-bot password for keycloak"
   type        = string
 }
 

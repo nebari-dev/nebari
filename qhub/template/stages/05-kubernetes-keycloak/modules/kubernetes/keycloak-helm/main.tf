@@ -23,8 +23,8 @@ resource "helm_release" "keycloak" {
   ], var.overrides)
 
   set {
-    name  = "qhub_bot_password"
-    value = var.qhub-bot-password
+    name  = "nebari_bot_password"
+    value = var.nebari-bot-password
   }
 
   set {

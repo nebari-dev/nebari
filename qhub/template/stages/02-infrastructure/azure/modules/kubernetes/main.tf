@@ -5,7 +5,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   resource_group_name = var.resource_group_name
 
   # DNS prefix specified when creating the managed cluster. Changing this forces a new resource to be created.
-  dns_prefix = "Qhub" # required
+  dns_prefix = "Nebari" # required
 
   # Azure requires that a new, non-existent Resource Group is used, as otherwise the provisioning of the Kubernetes Service will fail.
   node_resource_group     = var.node_resource_group_name

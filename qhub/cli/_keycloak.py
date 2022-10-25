@@ -2,8 +2,7 @@ from pathlib import Path
 from typing import Tuple
 
 import typer
-
-from qhub.keycloak import do_keycloak
+from nebari.keycloak import do_keycloak
 
 app_keycloak = typer.Typer(
     add_completion=False,
@@ -22,7 +21,7 @@ def add_user(
         ...,
         "-c",
         "--config",
-        help="qhub configuration file path",
+        help="nebari configuration file path",
     ),
 ):
     """Add a user to Keycloak. User will be automatically added to the [italic]analyst[/italic] group."""
@@ -40,7 +39,7 @@ def list_users(
         ...,
         "-c",
         "--config",
-        help="qhub configuration file path",
+        help="nebari configuration file path",
     )
 ):
     """List the users in Keycloak."""

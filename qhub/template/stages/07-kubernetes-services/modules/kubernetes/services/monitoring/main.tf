@@ -1,5 +1,5 @@
 resource "helm_release" "prometheus-grafana" {
-  name       = "qhub"
+  name       = "nebari"
   namespace  = var.namespace
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
@@ -103,7 +103,7 @@ module "grafana-client-id" {
 
 resource "kubernetes_config_map" "dashboard" {
   metadata {
-    name      = "qhub-grafana-dashboards"
+    name      = "nebari-grafana-dashboards"
     namespace = var.namespace
     labels = {
       # grafana_dashboard label needed for grafana to pick it up
@@ -134,7 +134,7 @@ resource "kubernetes_manifest" "grafana-ingress-route" {
           match = "Host(`${var.external-url}`) && PathPrefix(`/monitoring`)"
           services = [
             {
-              name      = "qhub-grafana"
+              name      = "nebari-grafana"
               port      = 80
               namespace = var.namespace
             }

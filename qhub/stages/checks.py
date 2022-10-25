@@ -7,7 +7,7 @@ NUM_ATTEMPTS = 10
 TIMEOUT = 10  # seconds
 
 
-def stage_02_infrastructure(stage_outputs, qhub_config):
+def stage_02_infrastructure(stage_outputs, nebari_config):
     from kubernetes import client, config
     from kubernetes.client.rest import ApiException
 
@@ -38,7 +38,7 @@ def stage_02_infrastructure(stage_outputs, qhub_config):
     )
 
 
-def stage_03_kubernetes_initialize(stage_outputs, qhub_config):
+def stage_03_kubernetes_initialize(stage_outputs, nebari_config):
     from kubernetes import client, config
     from kubernetes.client.rest import ApiException
 
@@ -59,7 +59,7 @@ def stage_03_kubernetes_initialize(stage_outputs, qhub_config):
         sys.exit(1)
 
     namespaces = {_.metadata.name for _ in result.items}
-    if qhub_config["namespace"] not in namespaces:
+    if nebari_config["namespace"] not in namespaces:
         print(
             f"ERROR: After stage directory={directory} namespace={config['namespace']} not provisioned within kubernetes cluster"
         )
@@ -68,7 +68,7 @@ def stage_03_kubernetes_initialize(stage_outputs, qhub_config):
     print(f"After stage directory={directory} kubernetes initialized successfully")
 
 
-def stage_04_kubernetes_ingress(stage_outputs, qhub_config):
+def stage_04_kubernetes_ingress(stage_outputs, nebari_config):
     directory = "stages/04-kubernetes-ingress"
 
     def _attempt_tcp_connect(host, port, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT):
@@ -235,7 +235,7 @@ def stage_06_kubernetes_keycloak_configuration(stage_outputs, config):
         password,
         realm_name,
         client_id,
-        qhub_realm,
+        nebari_realm,
         verify=False,
         num_attempts=NUM_ATTEMPTS,
         timeout=TIMEOUT,
@@ -251,14 +251,14 @@ def stage_06_kubernetes_keycloak_configuration(stage_outputs, config):
                     verify=verify,
                 )
                 existing_realms = {_["id"] for _ in realm_admin.get_realms()}
-                if qhub_realm in existing_realms:
+                if nebari_realm in existing_realms:
                     print(
-                        f"Attempt {i+1} succeeded connecting to keycloak and qhub realm={qhub_realm} exists"
+                        f"Attempt {i+1} succeeded connecting to keycloak and nebari realm={nebari_realm} exists"
                     )
                     return True
                 else:
                     print(
-                        f"Attempt {i+1} succeeded connecting to keycloak but qhub realm did not exist"
+                        f"Attempt {i+1} succeeded connecting to keycloak but nebari realm did not exist"
                     )
             except KeycloakError:
                 print(f"Attempt {i+1} failed connecting to keycloak master realm")
@@ -271,17 +271,17 @@ def stage_06_kubernetes_keycloak_configuration(stage_outputs, config):
         stage_outputs[directory]["keycloak_credentials"]["value"]["password"],
         stage_outputs[directory]["keycloak_credentials"]["value"]["realm"],
         stage_outputs[directory]["keycloak_credentials"]["value"]["client_id"],
-        qhub_realm=stage_outputs["stages/06-kubernetes-keycloak-configuration"][
+        nebari_realm=stage_outputs["stages/06-kubernetes-keycloak-configuration"][
             "realm_id"
         ]["value"],
         verify=False,
     ):
         print(
-            "ERROR: unable to connect to keycloak master realm and ensure that qhub realm exists"
+            "ERROR: unable to connect to keycloak master realm and ensure that nebari realm exists"
         )
         sys.exit(1)
 
-    print("Keycloak service successfully started with qhub realm")
+    print("Keycloak service successfully started with nebari realm")
 
 
 def stage_07_kubernetes_services(stage_outputs, config):

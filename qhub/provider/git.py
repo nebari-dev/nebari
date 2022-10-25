@@ -2,7 +2,7 @@ import configparser
 import os
 import subprocess
 
-from qhub.utils import change_directory
+from nebari.utils import change_directory
 
 
 def is_git_repo(path=None):

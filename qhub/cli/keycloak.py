@@ -1,14 +1,14 @@
 import logging
 import pathlib
 
-from qhub.keycloak import do_keycloak
+from nebari.keycloak import do_keycloak
 
 logger = logging.getLogger(__name__)
 
 
 def create_keycloak_subcommand(subparser):
     subparser = subparser.add_parser("keycloak")
-    subparser.add_argument("-c", "--config", help="qhub configuration", required=True)
+    subparser.add_argument("-c", "--config", help="nebari configuration", required=True)
     subparser.add_argument(
         "keycloak_action",
         nargs="+",

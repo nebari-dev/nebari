@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-st.title("My first StreamLit QHub app")
+st.title("My first StreamLit Nebari app")
 
 st.write("Here's our first attempt at using data to create a table:")
 st.write(

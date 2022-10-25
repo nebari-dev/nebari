@@ -6,21 +6,20 @@ import shutil
 import sys
 from typing import Dict, List
 
+from nebari.deprecate import DEPRECATED_FILE_PATHS
+from nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
+from nebari.provider.cicd.gitlab import gen_gitlab_ci
+from nebari.stages import tf_objects
 from rich import print
 from rich.table import Table
 from ruamel.yaml import YAML
 
-from qhub.deprecate import DEPRECATED_FILE_PATHS
-from qhub.provider.cicd.github import gen_qhub_linter, gen_qhub_ops
-from qhub.provider.cicd.gitlab import gen_gitlab_ci
-from qhub.stages import tf_objects
-
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
-    # get directory for qhub templates
-    import qhub
+    # get directory for nebari templates
+    import nebari
 
-    template_directory = pathlib.Path(qhub.__file__).parent / "template"
+    template_directory = pathlib.Path(nebari.__file__).parent / "template"
 
     # would be nice to remove assumption that input directory
     # is in local filesystem and a directory
@@ -31,7 +30,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
     output_directory = pathlib.Path(output_directory).resolve()
 
     if output_directory == str(pathlib.Path.home()):
-        print("ERROR: Deploying QHub in home directory is not advised!")
+        print("ERROR: Deploying Nebari in home directory is not advised!")
         sys.exit(1)
 
     # mkdir all the way down to repo dir so we can copy .gitignore
@@ -49,12 +48,12 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
         config = yaml.load(f)
 
     # For any config values that start with
-    # QHUB_SECRET_, set the values using the
+    # NEBARI_SECRET_, set the values using the
     # corresponding env var.
     set_env_vars_in_config(config)
 
     config["repo_directory"] = output_directory.name
-    config["qhub_config_yaml_path"] = str(config_filename.absolute())
+    config["nebari_config_yaml_path"] = str(config_filename.absolute())
 
     contents = render_contents(config)
 
@@ -65,7 +64,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
         "stages/05-kubernetes-keycloak",
         "stages/06-kubernetes-keycloak-configuration",
         "stages/07-kubernetes-services",
-        "stages/08-qhub-tf-extensions",
+        "stages/08-nebari-tf-extensions",
     ]
     if (
         config["provider"] not in {"existing", "local"}
@@ -147,7 +146,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
 
 
 def render_contents(config: Dict):
-    """Dynamically generated contents from QHub configuration"""
+    """Dynamically generated contents from Nebari configuration"""
 
     contents = {
         **tf_objects.stage_01_terraform_state(config),
@@ -157,7 +156,7 @@ def render_contents(config: Dict):
         **tf_objects.stage_05_kubernetes_keycloak(config),
         **tf_objects.stage_06_kubernetes_keycloak_configuration(config),
         **tf_objects.stage_07_kubernetes_services(config),
-        **tf_objects.stage_08_qhub_tf_extensions(config),
+        **tf_objects.stage_08_nebari_tf_extensions(config),
     }
 
     if config.get("ci_cd"):
@@ -205,16 +204,16 @@ def gen_cicd(config):
     `ci_cd` key in the `config`.
 
     For more detail on schema:
-    GiHub-Actions - qhub/providers/cicd/github.py
-    GitLab-CI - qhub/providers/cicd/gitlab.py
+    GiHub-Actions - nebari/providers/cicd/github.py
+    GitLab-CI - nebari/providers/cicd/gitlab.py
     """
     cicd_files = {}
     cicd_provider = config["ci_cd"]["type"]
 
     if cicd_provider == "github-actions":
         gha_dir = ".github/workflows/"
-        cicd_files[gha_dir + "qhub-ops.yaml"] = gen_qhub_ops(config)
-        cicd_files[gha_dir + "qhub-linter.yaml"] = gen_qhub_linter(config)
+        cicd_files[gha_dir + "nebari-ops.yaml"] = gen_nebari_ops(config)
+        cicd_files[gha_dir + "nebari-linter.yaml"] = gen_nebari_linter(config)
 
     elif cicd_provider == "gitlab-ci":
         cicd_files[".gitlab-ci.yml"] = gen_gitlab_ci(config)
@@ -312,7 +311,7 @@ def hash_file(file_path: str):
 def set_env_vars_in_config(config):
     """
 
-    For values in the config starting with 'QHUB_SECRET_XXX' the environment
+    For values in the config starting with 'NEBARI_SECRET_XXX' the environment
     variables are searched for the pattern XXX and the config value is
     modified. This enables setting secret values that should not be directly
     stored in the config file.
@@ -323,7 +322,7 @@ def set_env_vars_in_config(config):
     """
     private_entries = get_secret_config_entries(config)
     for idx in private_entries:
-        set_qhub_secret(config, idx)
+        set_nebari_secret(config, idx)
 
 
 def get_secret_config_entries(config, config_idx=None, private_entries=None):
@@ -341,7 +340,7 @@ def get_secret_config_entries(config, config_idx=None, private_entries=None):
             )
             output = [*output, *sub_dict_outputs]
         else:
-            if "QHUB_SECRET_" in str(value):
+            if "NEBARI_SECRET_" in str(value):
                 output = [*output, [*config_idx, key]]
     return output
 
@@ -356,19 +355,19 @@ def set_sub_config(conf, conf_idx, value):
     get_sub_config(conf, conf_idx[:-1])[conf_idx[-1]] = value
 
 
-def set_qhub_secret(config, idx):
+def set_nebari_secret(config, idx):
     placeholder = get_sub_config(config, idx)
-    secret_var = get_qhub_secret(placeholder)
+    secret_var = get_nebari_secret(placeholder)
     set_sub_config(config, idx, secret_var)
 
 
-def get_qhub_secret(secret_var):
-    env_var = secret_var.lstrip("QHUB_SECRET_")
+def get_nebari_secret(secret_var):
+    env_var = secret_var.lstrip("NEBARI_SECRET_")
     val = os.environ.get(env_var)
     if not val:
         raise EnvironmentError(
             f"Since '{secret_var}' was found in the"
-            " QHub config, the environment variable"
+            " Nebari config, the environment variable"
             f" '{env_var}' must be set."
         )
     return val

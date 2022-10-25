@@ -3,10 +3,10 @@ import os
 import subprocess
 import textwrap
 
-from qhub.provider import terraform
-from qhub.provider.dns.cloudflare import update_record
-from qhub.stages import checks, input_vars, state_imports
-from qhub.utils import (
+from nebari.provider import terraform
+from nebari.provider.dns.cloudflare import update_record
+from nebari.stages import checks, input_vars, state_imports
+from nebari.utils import (
     check_cloud_credentials,
     keycloak_provider_context,
     kubernetes_provider_context,
@@ -174,12 +174,12 @@ def provision_07_kubernetes_services(stage_outputs, config, disable_checks=False
         checks.stage_07_kubernetes_services(stage_outputs, config)
 
 
-def provision_08_qhub_tf_extensions(stage_outputs, config, disable_checks=False):
-    directory = "stages/08-qhub-tf-extensions"
+def provision_08_nebari_tf_extensions(stage_outputs, config, disable_checks=False):
+    directory = "stages/08-nebari-tf-extensions"
 
     stage_outputs[directory] = terraform.deploy(
         directory=directory,
-        input_vars=input_vars.stage_08_qhub_tf_extensions(stage_outputs, config),
+        input_vars=input_vars.stage_08_nebari_tf_extensions(stage_outputs, config),
     )
 
     if not disable_checks:
@@ -233,9 +233,9 @@ def guided_install(
                 stage_outputs, config, disable_checks
             )
             provision_07_kubernetes_services(stage_outputs, config, disable_checks)
-            provision_08_qhub_tf_extensions(stage_outputs, config, disable_checks)
+            provision_08_nebari_tf_extensions(stage_outputs, config, disable_checks)
 
-            print("QHub deployed successfully")
+            print("Nebari deployed successfully")
 
     print("Services:")
     for service_name, service in stage_outputs["stages/07-kubernetes-services"][
@@ -254,7 +254,7 @@ def guided_install(
         print(f"Kubecloak master realm username={username} password={password}")
 
     print(
-        "Additional administration docs can be found at https://docs.qhub.dev/en/stable/source/admin_guide/"
+        "Additional administration docs can be found at https://docs.nebari.dev/en/stable/source/admin_guide/"
     )
 
 
@@ -267,31 +267,31 @@ def deploy_configuration(
     skip_remote_state_provision,
 ):
     if config.get("prevent_deploy", False):
-        # Note if we used the Pydantic model properly, we might get that qhub_config.prevent_deploy always exists but defaults to False
+        # Note if we used the Pydantic model properly, we might get that nebari_config.prevent_deploy always exists but defaults to False
         raise ValueError(
             textwrap.dedent(
                 """
-        Deployment prevented due to the prevent_deploy setting in your qhub-config.yaml file.
-        You could remove that field to deploy your QHub, but please do NOT do so without fully understanding why that value was set in the first place.
+        Deployment prevented due to the prevent_deploy setting in your nebari-config.yaml file.
+        You could remove that field to deploy your Nebari, but please do NOT do so without fully understanding why that value was set in the first place.
 
-        It may have been set during an upgrade of your qhub-config.yaml file because we do not believe it is safe to redeploy the new
-        version of QHub without having a full backup of your system ready to restore. It may be known that an in-situ upgrade is impossible
-        and that redeployment will tear down your existing infrastructure before creating an entirely new QHub without your old data.
+        It may have been set during an upgrade of your nebari-config.yaml file because we do not believe it is safe to redeploy the new
+        version of Nebari without having a full backup of your system ready to restore. It may be known that an in-situ upgrade is impossible
+        and that redeployment will tear down your existing infrastructure before creating an entirely new Nebari without your old data.
 
-        PLEASE get in touch with Quansight at https://github.com/Quansight/qhub for assistance in proceeding.
+        PLEASE get in touch with Quansight at https://github.com/Quansight/nebari for assistance in proceeding.
         Your data may be at risk without our guidance.
         """
             )
         )
 
-    logger.info(f'All qhub endpoints will be under https://{config["domain"]}')
+    logger.info(f'All nebari endpoints will be under https://{config["domain"]}')
 
     if disable_checks:
         logger.warning(
             "The validation checks at the end of each stage have been disabled"
         )
 
-    with timer(logger, "deploying QHub"):
+    with timer(logger, "deploying Nebari"):
         try:
             guided_install(
                 config,

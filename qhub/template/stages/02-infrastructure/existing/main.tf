@@ -12,6 +12,6 @@ output "kubernetes_credentials" {
 }
 
 output "kubeconfig_filename" {
-  description = "filename for qhub kubeconfig"
+  description = "filename for nebari kubeconfig"
   value       = pathexpand("~/.kube/config")
 }

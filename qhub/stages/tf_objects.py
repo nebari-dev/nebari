@@ -1,37 +1,42 @@
 from typing import Dict
 
-from qhub.provider.terraform import Data, Provider, TerraformBackend, tf_render_objects
-from qhub.utils import deep_merge
+from nebari.provider.terraform import (
+    Data,
+    Provider,
+    TerraformBackend,
+    tf_render_objects,
+)
+from nebari.utils import deep_merge
 
 
-def QHubAWSProvider(qhub_config: Dict):
-    return Provider("aws", region=qhub_config["amazon_web_services"]["region"])
+def NebariAWSProvider(nebari_config: Dict):
+    return Provider("aws", region=nebari_config["amazon_web_services"]["region"])
 
 
-def QHubGCPProvider(qhub_config: Dict):
+def NebariGCPProvider(nebari_config: Dict):
     return Provider(
         "google",
-        project=qhub_config["google_cloud_platform"]["project"],
-        region=qhub_config["google_cloud_platform"]["region"],
+        project=nebari_config["google_cloud_platform"]["project"],
+        region=nebari_config["google_cloud_platform"]["region"],
     )
 
 
-def QHubAzureProvider(qhub_config: Dict):
+def NebariAzureProvider(nebari_config: Dict):
     return Provider("azurerm", features={})
 
 
-def QHubDigitalOceanProvider(qhub_config: Dict):
+def NebariDigitalOceanProvider(nebari_config: Dict):
     return Provider("digitalocean")
 
 
-def QHubKubernetesProvider(qhub_config: Dict):
-    if qhub_config["provider"] == "aws":
-        cluster_name = f"{qhub_config['project_name']}-{qhub_config['namespace']}"
+def NebariKubernetesProvider(nebari_config: Dict):
+    if nebari_config["provider"] == "aws":
+        cluster_name = f"{nebari_config['project_name']}-{nebari_config['namespace']}"
         # The AWS provider needs to be added, as we are using aws related resources #1254
         return deep_merge(
             Data("aws_eks_cluster", "default", name=cluster_name),
             Data("aws_eks_cluster_auth", "default", name=cluster_name),
-            Provider("aws", region=qhub_config["amazon_web_services"]["region"]),
+            Provider("aws", region=nebari_config["amazon_web_services"]["region"]),
             Provider(
                 "kubernetes",
                 experiments={"manifest_resource": True},
@@ -46,9 +51,9 @@ def QHubKubernetesProvider(qhub_config: Dict):
     )
 
 
-def QHubHelmProvider(qhub_config: Dict):
-    if qhub_config["provider"] == "aws":
-        cluster_name = f"{qhub_config['project_name']}-{qhub_config['namespace']}"
+def NebariHelmProvider(nebari_config: Dict):
+    if nebari_config["provider"] == "aws":
+        cluster_name = f"{nebari_config['project_name']}-{nebari_config['namespace']}"
 
         return deep_merge(
             Data("aws_eks_cluster", "default", name=cluster_name),
@@ -65,65 +70,67 @@ def QHubHelmProvider(qhub_config: Dict):
     return Provider("helm")
 
 
-def QHubTerraformState(directory: str, qhub_config: Dict):
-    if qhub_config["terraform_state"]["type"] == "local":
+def NebariTerraformState(directory: str, nebari_config: Dict):
+    if nebari_config["terraform_state"]["type"] == "local":
         return {}
-    elif qhub_config["terraform_state"]["type"] == "existing":
+    elif nebari_config["terraform_state"]["type"] == "existing":
         return TerraformBackend(
-            qhub_config["terraform_state"]["backend"],
-            **qhub_config["terraform_state"]["config"],
+            nebari_config["terraform_state"]["backend"],
+            **nebari_config["terraform_state"]["config"],
         )
-    elif qhub_config["provider"] == "aws":
+    elif nebari_config["provider"] == "aws":
         return TerraformBackend(
             "s3",
-            bucket=f"{qhub_config['project_name']}-{qhub_config['namespace']}-terraform-state",
-            key=f"terraform/{qhub_config['project_name']}-{qhub_config['namespace']}/{directory}.tfstate",
-            region=qhub_config["amazon_web_services"]["region"],
+            bucket=f"{nebari_config['project_name']}-{nebari_config['namespace']}-terraform-state",
+            key=f"terraform/{nebari_config['project_name']}-{nebari_config['namespace']}/{directory}.tfstate",
+            region=nebari_config["amazon_web_services"]["region"],
             encrypt=True,
-            dynamodb_table=f"{qhub_config['project_name']}-{qhub_config['namespace']}-terraform-state-lock",
+            dynamodb_table=f"{nebari_config['project_name']}-{nebari_config['namespace']}-terraform-state-lock",
         )
-    elif qhub_config["provider"] == "gcp":
+    elif nebari_config["provider"] == "gcp":
         return TerraformBackend(
             "gcs",
-            bucket=f"{qhub_config['project_name']}-{qhub_config['namespace']}-terraform-state",
-            prefix=f"terraform/{qhub_config['project_name']}/{directory}",
+            bucket=f"{nebari_config['project_name']}-{nebari_config['namespace']}-terraform-state",
+            prefix=f"terraform/{nebari_config['project_name']}/{directory}",
         )
-    elif qhub_config["provider"] == "do":
+    elif nebari_config["provider"] == "do":
         return TerraformBackend(
             "s3",
-            endpoint=f"{qhub_config['digital_ocean']['region']}.digitaloceanspaces.com",
+            endpoint=f"{nebari_config['digital_ocean']['region']}.digitaloceanspaces.com",
             region="us-west-1",  # fake aws region required by terraform
-            bucket=f"{qhub_config['project_name']}-{qhub_config['namespace']}-terraform-state",
-            key=f"terraform/{qhub_config['project_name']}-{qhub_config['namespace']}/{directory}.tfstate",
+            bucket=f"{nebari_config['project_name']}-{nebari_config['namespace']}-terraform-state",
+            key=f"terraform/{nebari_config['project_name']}-{nebari_config['namespace']}/{directory}.tfstate",
             skip_credentials_validation=True,
             skip_metadata_api_check=True,
         )
-    elif qhub_config["provider"] == "azure":
+    elif nebari_config["provider"] == "azure":
         return TerraformBackend(
             "azurerm",
-            resource_group_name=f"{qhub_config['project_name']}-{qhub_config['namespace']}-state",
+            resource_group_name=f"{nebari_config['project_name']}-{nebari_config['namespace']}-state",
             # storage account must be globally unique
-            storage_account_name=f"{qhub_config['project_name']}{qhub_config['namespace']}{qhub_config['azure']['storage_account_postfix']}",
-            container_name=f"{qhub_config['project_name']}-{qhub_config['namespace']}-state",
-            key=f"terraform/{qhub_config['project_name']}-{qhub_config['namespace']}/{directory}",
+            storage_account_name=f"{nebari_config['project_name']}{nebari_config['namespace']}{nebari_config['azure']['storage_account_postfix']}",
+            container_name=f"{nebari_config['project_name']}-{nebari_config['namespace']}-state",
+            key=f"terraform/{nebari_config['project_name']}-{nebari_config['namespace']}/{directory}",
         )
-    elif qhub_config["provider"] == "existing":
+    elif nebari_config["provider"] == "existing":
         optional_kwargs = {}
-        if "kube_context" in qhub_config["existing"]:
-            optional_kwargs["confix_context"] = qhub_config["existing"]["kube_context"]
+        if "kube_context" in nebari_config["existing"]:
+            optional_kwargs["confix_context"] = nebari_config["existing"][
+                "kube_context"
+            ]
         return TerraformBackend(
             "kubernetes",
-            secret_suffix=f"{qhub_config['project_name']}-{qhub_config['namespace']}-{directory}",
+            secret_suffix=f"{nebari_config['project_name']}-{nebari_config['namespace']}-{directory}",
             load_config_file=True,
             **optional_kwargs,
         )
-    elif qhub_config["provider"] == "local":
+    elif nebari_config["provider"] == "local":
         optional_kwargs = {}
-        if "kube_context" in qhub_config["local"]:
-            optional_kwargs["confix_context"] = qhub_config["local"]["kube_context"]
+        if "kube_context" in nebari_config["local"]:
+            optional_kwargs["confix_context"] = nebari_config["local"]["kube_context"]
         return TerraformBackend(
             "kubernetes",
-            secret_suffix=f"{qhub_config['project_name']}-{qhub_config['namespace']}-{directory}",
+            secret_suffix=f"{nebari_config['project_name']}-{nebari_config['namespace']}-{directory}",
             load_config_file=True,
             **optional_kwargs,
         )
@@ -134,17 +141,17 @@ def QHubTerraformState(directory: str, qhub_config: Dict):
 def stage_01_terraform_state(config):
     if config["provider"] == "gcp":
         return {
-            "stages/01-terraform-state/gcp/_qhub.tf.json": tf_render_objects(
+            "stages/01-terraform-state/gcp/_nebari.tf.json": tf_render_objects(
                 [
-                    QHubGCPProvider(config),
+                    NebariGCPProvider(config),
                 ]
             )
         }
     elif config["provider"] == "aws":
         return {
-            "stages/01-terraform-state/aws/_qhub.tf.json": tf_render_objects(
+            "stages/01-terraform-state/aws/_nebari.tf.json": tf_render_objects(
                 [
-                    QHubAWSProvider(config),
+                    NebariAWSProvider(config),
                 ]
             )
         }
@@ -155,35 +162,35 @@ def stage_01_terraform_state(config):
 def stage_02_infrastructure(config):
     if config["provider"] == "gcp":
         return {
-            "stages/02-infrastructure/gcp/_qhub.tf.json": tf_render_objects(
+            "stages/02-infrastructure/gcp/_nebari.tf.json": tf_render_objects(
                 [
-                    QHubGCPProvider(config),
-                    QHubTerraformState("02-infrastructure", config),
+                    NebariGCPProvider(config),
+                    NebariTerraformState("02-infrastructure", config),
                 ]
             )
         }
     elif config["provider"] == "do":
         return {
-            "stages/02-infrastructure/do/_qhub.tf.json": tf_render_objects(
+            "stages/02-infrastructure/do/_nebari.tf.json": tf_render_objects(
                 [
-                    QHubTerraformState("02-infrastructure", config),
+                    NebariTerraformState("02-infrastructure", config),
                 ]
             )
         }
     elif config["provider"] == "azure":
         return {
-            "stages/02-infrastructure/azure/_qhub.tf.json": tf_render_objects(
+            "stages/02-infrastructure/azure/_nebari.tf.json": tf_render_objects(
                 [
-                    QHubTerraformState("02-infrastructure", config),
+                    NebariTerraformState("02-infrastructure", config),
                 ]
             ),
         }
     elif config["provider"] == "aws":
         return {
-            "stages/02-infrastructure/aws/_qhub.tf.json": tf_render_objects(
+            "stages/02-infrastructure/aws/_nebari.tf.json": tf_render_objects(
                 [
-                    QHubAWSProvider(config),
-                    QHubTerraformState("02-infrastructure", config),
+                    NebariAWSProvider(config),
+                    NebariTerraformState("02-infrastructure", config),
                 ]
             )
         }
@@ -193,11 +200,11 @@ def stage_02_infrastructure(config):
 
 def stage_03_kubernetes_initialize(config):
     return {
-        "stages/03-kubernetes-initialize/_qhub.tf.json": tf_render_objects(
+        "stages/03-kubernetes-initialize/_nebari.tf.json": tf_render_objects(
             [
-                QHubTerraformState("03-kubernetes-initialize", config),
-                QHubKubernetesProvider(config),
-                QHubHelmProvider(config),
+                NebariTerraformState("03-kubernetes-initialize", config),
+                NebariKubernetesProvider(config),
+                NebariHelmProvider(config),
             ]
         ),
     }
@@ -205,11 +212,11 @@ def stage_03_kubernetes_initialize(config):
 
 def stage_04_kubernetes_ingress(config):
     return {
-        "stages/04-kubernetes-ingress/_qhub.tf.json": tf_render_objects(
+        "stages/04-kubernetes-ingress/_nebari.tf.json": tf_render_objects(
             [
-                QHubTerraformState("04-kubernetes-ingress", config),
-                QHubKubernetesProvider(config),
-                QHubHelmProvider(config),
+                NebariTerraformState("04-kubernetes-ingress", config),
+                NebariKubernetesProvider(config),
+                NebariHelmProvider(config),
             ]
         ),
     }
@@ -217,11 +224,11 @@ def stage_04_kubernetes_ingress(config):
 
 def stage_05_kubernetes_keycloak(config):
     return {
-        "stages/05-kubernetes-keycloak/_qhub.tf.json": tf_render_objects(
+        "stages/05-kubernetes-keycloak/_nebari.tf.json": tf_render_objects(
             [
-                QHubTerraformState("05-kubernetes-keycloak", config),
-                QHubKubernetesProvider(config),
-                QHubHelmProvider(config),
+                NebariTerraformState("05-kubernetes-keycloak", config),
+                NebariKubernetesProvider(config),
+                NebariHelmProvider(config),
             ]
         ),
     }
@@ -229,9 +236,9 @@ def stage_05_kubernetes_keycloak(config):
 
 def stage_06_kubernetes_keycloak_configuration(config):
     return {
-        "stages/06-kubernetes-keycloak-configuration/_qhub.tf.json": tf_render_objects(
+        "stages/06-kubernetes-keycloak-configuration/_nebari.tf.json": tf_render_objects(
             [
-                QHubTerraformState("06-kubernetes-keycloak-configuration", config),
+                NebariTerraformState("06-kubernetes-keycloak-configuration", config),
             ]
         ),
     }
@@ -239,23 +246,23 @@ def stage_06_kubernetes_keycloak_configuration(config):
 
 def stage_07_kubernetes_services(config):
     return {
-        "stages/07-kubernetes-services/_qhub.tf.json": tf_render_objects(
+        "stages/07-kubernetes-services/_nebari.tf.json": tf_render_objects(
             [
-                QHubTerraformState("07-kubernetes-services", config),
-                QHubKubernetesProvider(config),
-                QHubHelmProvider(config),
+                NebariTerraformState("07-kubernetes-services", config),
+                NebariKubernetesProvider(config),
+                NebariHelmProvider(config),
             ]
         ),
     }
 
 
-def stage_08_qhub_tf_extensions(config):
+def stage_08_nebari_tf_extensions(config):
     return {
-        "stages/08-qhub-tf-extensions/_qhub.tf.json": tf_render_objects(
+        "stages/08-nebari-tf-extensions/_nebari.tf.json": tf_render_objects(
             [
-                QHubTerraformState("08-qhub-tf-extensions", config),
-                QHubKubernetesProvider(config),
-                QHubHelmProvider(config),
+                NebariTerraformState("08-nebari-tf-extensions", config),
+                NebariKubernetesProvider(config),
+                NebariHelmProvider(config),
             ]
         ),
     }

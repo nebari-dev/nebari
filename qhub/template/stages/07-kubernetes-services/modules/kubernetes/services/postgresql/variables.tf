@@ -1,7 +1,7 @@
 variable "name" {
   description = "Name prefix to deploy conda-store server"
   type        = string
-  default     = "qhub"
+  default     = "nebari"
 }
 
 

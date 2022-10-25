@@ -7,24 +7,23 @@ import string
 import tempfile
 
 import requests
-
-from qhub.provider import git
-from qhub.provider.cicd import github
-from qhub.provider.oauth.auth0 import create_client
-from qhub.utils import (
+from nebari.provider import git
+from nebari.provider.cicd import github
+from nebari.provider.oauth.auth0 import create_client
+from nebari.utils import (
     check_cloud_credentials,
     namestr_regex,
     set_docker_image_tag,
     set_kubernetes_version,
-    set_qhub_dask_version,
+    set_nebari_dask_version,
 )
 
 from .version import __version__
 
 logger = logging.getLogger(__name__)
 
-qhub_image_tag = set_docker_image_tag()
-qhub_dask_version = set_qhub_dask_version()
+nebari_image_tag = set_docker_image_tag()
+nebari_dask_version = set_nebari_dask_version()
 
 
 BASE_CONFIGURATION = {
@@ -38,9 +37,9 @@ BASE_CONFIGURATION = {
         "authentication": None,
     },
     "default_images": {
-        "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{qhub_image_tag}",
-        "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{qhub_image_tag}",
-        "dask_worker": f"quay.io/nebari/nebari-dask-worker:{qhub_image_tag}",
+        "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{nebari_image_tag}",
+        "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{nebari_image_tag}",
+        "dask_worker": f"quay.io/nebari/nebari-dask-worker:{nebari_image_tag}",
     },
     "storage": {"conda_store": "200Gi", "shared_filesystem": "200Gi"},
     "theme": {
@@ -48,7 +47,7 @@ BASE_CONFIGURATION = {
             "hub_title": None,
             "hub_subtitle": None,
             "welcome": None,
-            "logo": "/hub/custom/images/jupyter_qhub_logo.svg",
+            "logo": "/hub/custom/images/jupyter_nebari_logo.svg",
             "primary_color": "#4f4173",
             "secondary_color": "#957da6",
             "accent_color": "#32C574",
@@ -239,7 +238,7 @@ DEFAULT_ENVIRONMENTS = {
             "python",
             "ipykernel",
             "ipywidgets==7.7.1",
-            f"qhub-dask =={qhub_dask_version}",
+            f"nebari-dask =={nebari_dask_version}",
             "python-graphviz",
             "pyarrow",
             "s3fs",
@@ -261,7 +260,7 @@ DEFAULT_ENVIRONMENTS = {
             "python==3.9.13",
             "ipykernel==6.15.1",
             "ipywidgets==7.7.1",
-            f"qhub-dask=={qhub_dask_version}",
+            f"nebari-dask=={nebari_dask_version}",
             "param==1.12.2",
             "python-graphviz==0.20.1",
             "matplotlib==3.3.2",
@@ -277,7 +276,7 @@ DEFAULT_ENVIRONMENTS = {
 
 def render_config(
     project_name,
-    qhub_domain,
+    nebari_domain,
     cloud_provider,
     ci_provider,
     repository,
@@ -317,12 +316,12 @@ def render_config(
             "namespace should contain only letters and hyphens/underscores (but not at the start or end)"
         )
 
-    if qhub_domain is None and not disable_prompt:
-        qhub_domain = input("Provide domain: ")
-    config["domain"] = qhub_domain
+    if nebari_domain is None and not disable_prompt:
+        nebari_domain = input("Provide domain: ")
+    config["domain"] = nebari_domain
 
-    # In qhub_version only use major.minor.patch version - drop any pre/post/dev suffixes
-    config["qhub_version"] = __version__
+    # In nebari_version only use major.minor.patch version - drop any pre/post/dev suffixes
+    config["nebari_version"] = __version__
 
     # Generate default password for Keycloak root user and also example-user if using password auth
     default_password = "".join(
@@ -331,16 +330,16 @@ def render_config(
 
     # Save default password to file
     default_password_filename = os.path.join(
-        tempfile.gettempdir(), "QHUB_DEFAULT_PASSWORD"
+        tempfile.gettempdir(), "NEBARI_DEFAULT_PASSWORD"
     )
     with open(default_password_filename, "w") as f:
         f.write(default_password)
     os.chmod(default_password_filename, 0o700)
 
-    config["theme"]["jupyterhub"]["hub_title"] = f"QHub - { project_name }"
+    config["theme"]["jupyterhub"]["hub_title"] = f"Nebari - { project_name }"
     config["theme"]["jupyterhub"][
         "welcome"
-    ] = f"""Welcome to { qhub_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github issue tracker</a>."""
+    ] = f"""Welcome to { nebari_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/nebari/">https://github.com/Quansight/nebari/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/nebari/issues">github issue tracker</a>."""
 
     if auth_provider == "github":
         config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()
@@ -460,7 +459,7 @@ def github_auto_provision(config, owner, repo):
             github.create_repository(
                 owner,
                 repo,
-                description=f'QHub {config["project_name"]}-{config["provider"]}',
+                description=f'Nebari {config["project_name"]}-{config["provider"]}',
                 homepage=f'https://{config["domain"]}',
             )
         except requests.exceptions.HTTPError as he:

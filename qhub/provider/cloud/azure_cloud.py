@@ -4,8 +4,7 @@ import os
 
 from azure.identity import EnvironmentCredential
 from azure.mgmt.containerservice import ContainerServiceClient
-
-from qhub.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 
 logger = logging.getLogger("azure")
 logger.setLevel(logging.ERROR)

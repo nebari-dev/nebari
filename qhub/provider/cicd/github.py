@@ -5,10 +5,9 @@ from typing import Dict, List, Optional, Union
 
 import requests
 from nacl import encoding, public
+from nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
+from nebari.provider.cicd.common import pip_install_nebari
 from pydantic import BaseModel, Field
-
-from qhub.constants import LATEST_SUPPORTED_PYTHON_VERSION
-from qhub.provider.cicd.common import pip_install_qhub
 
 GITHUB_BASE_URL = "https://api.github.com/"
 
@@ -117,14 +116,14 @@ def gha_env_vars(config):
         "GITHUB_TOKEN": "${{ secrets.GITHUB_TOKEN }}",
     }
 
-    if os.environ.get("QHUB_GH_BRANCH"):
-        env_vars["QHUB_GH_BRANCH"] = "${{ secrets.QHUB_GH_BRANCH }}"
+    if os.environ.get("NEBARI_GH_BRANCH"):
+        env_vars["NEBARI_GH_BRANCH"] = "${{ secrets.NEBARI_GH_BRANCH }}"
 
     # This assumes that the user is using the omitting sensitive values configuration for the token.
     if config.get("prefect", {}).get("enabled", False):
         env_vars[
-            "QHUB_SECRET_prefect_token"
-        ] = "${{ secrets.QHUB_SECRET_PREFECT_TOKEN }}"
+            "NEBARI_SECRET_prefect_token"
+        ] = "${{ secrets.NEBARI_SECRET_PREFECT_TOKEN }}"
 
     if config["provider"] == "aws":
         env_vars["AWS_ACCESS_KEY_ID"] = "${{ secrets.AWS_ACCESS_KEY_ID }}"
@@ -205,11 +204,11 @@ class GHA(BaseModel):
     jobs: GHA_jobs
 
 
-class QhubOps(GHA):
+class NebariOps(GHA):
     pass
 
 
-class QhubLinter(GHA):
+class NebariLinter(GHA):
     pass
 
 
@@ -240,33 +239,33 @@ def setup_python_step():
     )
 
 
-def install_qhub_step(qhub_version):
-    return GHA_job_step(name="Install QHub", run=pip_install_qhub(qhub_version))
+def install_nebari_step(nebari_version):
+    return GHA_job_step(name="Install Nebari", run=pip_install_nebari(nebari_version))
 
 
-def gen_qhub_ops(config):
+def gen_nebari_ops(config):
 
     env_vars = gha_env_vars(config)
     branch = config["ci_cd"]["branch"]
     commit_render = config["ci_cd"].get("commit_render", True)
-    qhub_version = config["qhub_version"]
+    nebari_version = config["nebari_version"]
 
-    push = GHA_on_extras(branches=[branch], paths=["qhub-config.yaml"])
+    push = GHA_on_extras(branches=[branch], paths=["nebari-config.yaml"])
     on = GHA_on(__root__={"push": push})
 
     step1 = checkout_image_step()
     step2 = setup_python_step()
-    step3 = install_qhub_step(qhub_version)
+    step3 = install_nebari_step(nebari_version)
 
     step4 = GHA_job_step(
-        name="Deploy Changes made in qhub-config.yaml",
-        run=f"qhub deploy -c qhub-config.yaml --disable-prompt{' --skip-remote-state-provision' if os.environ.get('QHUB_GH_BRANCH') else ''}",
+        name="Deploy Changes made in nebari-config.yaml",
+        run=f"nebari deploy -c nebari-config.yaml --disable-prompt{' --skip-remote-state-provision' if os.environ.get('NEBARI_GH_BRANCH') else ''}",
     )
 
     step5 = GHA_job_step(
         name="Push Changes",
         run=(
-            "git config user.email 'qhub@quansight.com' ; "
+            "git config user.email 'nebari@quansight.com' ; "
             "git config user.name 'github action' ; "
             "git add . ; "
             "git diff --quiet && git diff --staged --quiet || (git commit -m '${{ env.COMMIT_MSG }}') ; "
@@ -274,7 +273,7 @@ def gen_qhub_ops(config):
         ),
         env={
             "COMMIT_MSG": GHA_job_steps_extras(
-                __root__="qhub-config.yaml automated commit: ${{ github.sha }}"
+                __root__="nebari-config.yaml automated commit: ${{ github.sha }}"
             )
         },
     )
@@ -283,35 +282,35 @@ def gen_qhub_ops(config):
     if commit_render:
         gha_steps.append(step5)
 
-    job1 = GHA_job_id(name="qhub", runs_on_="ubuntu-latest", steps=gha_steps)
+    job1 = GHA_job_id(name="nebari", runs_on_="ubuntu-latest", steps=gha_steps)
     jobs = GHA_jobs(__root__={"build": job1})
 
-    return QhubOps(
-        name="qhub auto update",
+    return NebariOps(
+        name="nebari auto update",
         on=on,
         env=env_vars,
         jobs=jobs,
     )
 
 
-def gen_qhub_linter(config):
+def gen_nebari_linter(config):
 
     env_vars = {}
-    qhub_gh_branch = os.environ.get("QHUB_GH_BRANCH")
-    if qhub_gh_branch:
-        env_vars["QHUB_GH_BRANCH"] = "${{ secrets.QHUB_GH_BRANCH }}"
+    nebari_gh_branch = os.environ.get("NEBARI_GH_BRANCH")
+    if nebari_gh_branch:
+        env_vars["NEBARI_GH_BRANCH"] = "${{ secrets.NEBARI_GH_BRANCH }}"
     else:
         env_vars = None
 
     branch = config["ci_cd"]["branch"]
-    qhub_version = config["qhub_version"]
+    nebari_version = config["nebari_version"]
 
-    pull_request = GHA_on_extras(branches=[branch], paths=["qhub-config.yaml"])
+    pull_request = GHA_on_extras(branches=[branch], paths=["nebari-config.yaml"])
     on = GHA_on(__root__={"pull_request": pull_request})
 
     step1 = checkout_image_step()
     step2 = setup_python_step()
-    step3 = install_qhub_step(qhub_version)
+    step3 = install_nebari_step(nebari_version)
 
     step4_envs = {
         "PR_NUMBER": GHA_job_steps_extras(__root__="${{ github.event.number }}"),
@@ -322,22 +321,22 @@ def gen_qhub_linter(config):
     }
 
     step4 = GHA_job_step(
-        name="QHub Lintify",
-        run="qhub validate --config qhub-config.yaml --enable-commenting",
+        name="Nebari Lintify",
+        run="nebari validate --config nebari-config.yaml --enable-commenting",
         env=step4_envs,
     )
 
     job1 = GHA_job_id(
-        name="qhub", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4]
+        name="nebari", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4]
     )
     jobs = GHA_jobs(
         __root__={
-            "qhub-validate": job1,
+            "nebari-validate": job1,
         }
     )
 
-    return QhubLinter(
-        name="qhub linter",
+    return NebariLinter(
+        name="nebari linter",
         on=on,
         env=env_vars,
         jobs=jobs,

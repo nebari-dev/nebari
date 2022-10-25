@@ -1,6 +1,6 @@
 import sys
 
-from qhub.cli import cli
+from nebari.cli import cli
 
 
 def main():

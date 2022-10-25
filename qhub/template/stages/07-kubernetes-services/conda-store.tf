@@ -43,7 +43,7 @@ variable "conda-store-image-tag" {
 module "kubernetes-conda-store-server" {
   source = "./modules/kubernetes/services/conda-store"
 
-  name      = "qhub"
+  name      = "nebari"
   namespace = var.environment
 
   external-url = var.endpoint

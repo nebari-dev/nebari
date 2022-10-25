@@ -6,15 +6,15 @@ locals {
 
   oauth2client_envs = (var.oauth2client) ? ([{
     name  = "OAUTH2_AUTHORIZE_URL"
-    value = "https://${var.external-url}/auth/realms/${var.qhub-realm-id}/protocol/openid-connect/auth"
+    value = "https://${var.external-url}/auth/realms/${var.nebari-realm-id}/protocol/openid-connect/auth"
     },
     {
       name  = "OAUTH2_ACCESS_TOKEN_URL"
-      value = "https://${var.external-url}/auth/realms/${var.qhub-realm-id}/protocol/openid-connect/token"
+      value = "https://${var.external-url}/auth/realms/${var.nebari-realm-id}/protocol/openid-connect/token"
     },
     {
       name  = "OAUTH2_USER_DATA_URL"
-      value = "https://${var.external-url}/auth/realms/${var.qhub-realm-id}/protocol/openid-connect/userinfo"
+      value = "https://${var.external-url}/auth/realms/${var.nebari-realm-id}/protocol/openid-connect/userinfo"
     },
     {
       name  = "OAUTH2_REDIRECT_BASE"
@@ -30,7 +30,7 @@ locals {
     },
     {
       name  = "OAUTH2_CLIENT_SECRET"
-      value = random_password.qhub-ext-client[0].result
+      value = random_password.nebari-ext-client[0].result
   }]) : ([])
 
   keycloakadmin_envs = (var.keycloakadmin) ? ([{
@@ -39,15 +39,15 @@ locals {
     },
     {
       name  = "KEYCLOAK_REALM"
-      value = var.qhub-realm-id
+      value = var.nebari-realm-id
     },
     {
       name  = "KEYCLOAK_ADMIN_USERNAME"
-      value = "qhub-bot"
+      value = "nebari-bot"
     },
     {
       name  = "KEYCLOAK_ADMIN_PASSWORD"
-      value = var.keycloak_qhub_bot_password
+      value = var.keycloak_nebari_bot_password
   }]) : ([])
 
   jwt_envs = (var.jwt) ? ([{
@@ -56,6 +56,6 @@ locals {
     },
     {
       name  = "JWT_SECRET_KEY"
-      value = random_password.qhub-jwt-secret[0].result
+      value = random_password.nebari-jwt-secret[0].result
   }]) : ([])
 }

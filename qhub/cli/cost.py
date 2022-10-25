@@ -1,7 +1,7 @@
 import ast
 import logging
 
-from qhub.cost import infracost_report
+from nebari.cost import infracost_report
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ def create_cost_subcommand(subparser):
     subparser.add_argument(
         "-p",
         "--path",
-        help="Pass the path of your stages directory generated after rendering QHub configurations before deployment",
+        help="Pass the path of your stages directory generated after rendering Nebari configurations before deployment",
         required=False,
     )
     subparser.add_argument(

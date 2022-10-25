@@ -3,7 +3,7 @@ resource "kubernetes_manifest" "gateway-middleware" {
     apiVersion = "traefik.containo.us/v1alpha1"
     kind       = "Middleware"
     metadata = {
-      name      = "qhub-dask-gateway-gateway-api"
+      name      = "nebari-dask-gateway-gateway-api"
       namespace = var.namespace
     }
     spec = {
@@ -25,7 +25,7 @@ resource "kubernetes_manifest" "chain-middleware" {
     apiVersion = "traefik.containo.us/v1alpha1"
     kind       = "Middleware"
     metadata = {
-      name      = "qhub-dask-gateway-chain" # Updated name to -chain from -cluster to avoid upgrade confusion
+      name      = "nebari-dask-gateway-chain" # Updated name to -chain from -cluster to avoid upgrade confusion
       namespace = var.namespace
     }
     spec = {
@@ -50,7 +50,7 @@ resource "kubernetes_manifest" "cluster-middleware-stripprefix" {
     apiVersion = "traefik.containo.us/v1alpha1"
     kind       = "Middleware"
     metadata = {
-      name      = "qhub-dask-gateway-cluster-stripprefix"
+      name      = "nebari-dask-gateway-cluster-stripprefix"
       namespace = var.namespace
     }
     spec = {

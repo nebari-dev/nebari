@@ -11,31 +11,30 @@ import time
 from typing import Dict, List
 
 import requests
-from requests.exceptions import ConnectionError
-from ruamel.yaml import YAML
-
-from qhub.constants import DEFAULT_QHUB_DASK_VERSION, DEFAULT_QHUB_IMAGE_TAG
-from qhub.provider.cicd.github import get_latest_repo_tag
-from qhub.provider.cloud import (
+from nebari.constants import DEFAULT_NEBARI_DASK_VERSION, DEFAULT_NEBARI_IMAGE_TAG
+from nebari.provider.cicd.github import get_latest_repo_tag
+from nebari.provider.cloud import (
     amazon_web_services,
     azure_cloud,
     digital_ocean,
     google_cloud,
 )
+from requests.exceptions import ConnectionError
+from ruamel.yaml import YAML
 
 # environment variable overrides
-QHUB_K8S_VERSION = os.getenv("QHUB_K8S_VERSION", None)
-QHUB_GH_BRANCH = os.getenv("QHUB_GH_BRANCH", None)
-QHUB_IMAGE_TAG = os.getenv("QHUB_IMAGE_TAG", None)
-QHUB_DASK_VERSION = os.getenv("QHUB_DASK_VERSION", None)
+NEBARI_K8S_VERSION = os.getenv("NEBARI_K8S_VERSION", None)
+NEBARI_GH_BRANCH = os.getenv("NEBARI_GH_BRANCH", None)
+NEBARI_IMAGE_TAG = os.getenv("NEBARI_IMAGE_TAG", None)
+NEBARI_DASK_VERSION = os.getenv("NEBARI_DASK_VERSION", None)
 
 DO_ENV_DOCS = (
-    "https://docs.qhub.dev/en/stable/source/installation/setup.html#digital-ocean"
+    "https://docs.nebari.dev/en/stable/source/installation/setup.html#digital-ocean"
 )
-AWS_ENV_DOCS = "https://docs.qhub.dev/en/stable/source/installation/setup.html#amazon-web-services-aws"
-GCP_ENV_DOCS = "https://docs.qhub.dev/en/stable/source/installation/setup.html#google-cloud-platform"
+AWS_ENV_DOCS = "https://docs.nebari.dev/en/stable/source/installation/setup.html#amazon-web-services-aws"
+GCP_ENV_DOCS = "https://docs.nebari.dev/en/stable/source/installation/setup.html#google-cloud-platform"
 AZURE_ENV_DOCS = (
-    "https://docs.qhub.dev/en/stable/source/installation/setup.html#microsoft-azure"
+    "https://docs.nebari.dev/en/stable/source/installation/setup.html#microsoft-azure"
 )
 
 CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
@@ -254,11 +253,11 @@ def set_kubernetes_version(
         region = cloud_config["region"]
 
         # to avoid using cloud provider SDK
-        # set QHUB_K8S_VERSION environment variable
-        if not QHUB_K8S_VERSION:
+        # set NEBARI_K8S_VERSION environment variable
+        if not NEBARI_K8S_VERSION:
             k8s_versions = func(region)
         else:
-            k8s_versions = [QHUB_K8S_VERSION]
+            k8s_versions = [NEBARI_K8S_VERSION]
 
         if kubernetes_version:
             if kubernetes_version in k8s_versions:
@@ -390,32 +389,32 @@ def deep_merge(*args):
 def set_docker_image_tag() -> str:
     """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
     try:
-        qhub_image_tag = get_latest_repo_tag(DOCKER_IMAGE_OWNER, DOCKER_IMAGE_REPO)
+        nebari_image_tag = get_latest_repo_tag(DOCKER_IMAGE_OWNER, DOCKER_IMAGE_REPO)
     except ConnectionError:
         print(
-            f"Unable to connect to the GitHub API, falling back to the default value: {DEFAULT_QHUB_IMAGE_TAG}."
+            f"Unable to connect to the GitHub API, falling back to the default value: {DEFAULT_NEBARI_IMAGE_TAG}."
         )
-        qhub_image_tag = DEFAULT_QHUB_IMAGE_TAG
+        nebari_image_tag = DEFAULT_NEBARI_IMAGE_TAG
 
-    if QHUB_IMAGE_TAG:
-        qhub_image_tag = QHUB_IMAGE_TAG
+    if NEBARI_IMAGE_TAG:
+        nebari_image_tag = NEBARI_IMAGE_TAG
 
-    return qhub_image_tag
+    return nebari_image_tag
 
 
-def set_qhub_dask_version() -> str:
-    """Set version of `qhub-dask` meta package."""
+def set_nebari_dask_version() -> str:
+    """Set version of `nebari-dask` meta package."""
     try:
         resp = requests.get(CONDA_FORGE_CHANNEL_DATA_URL)
-        qhub_dask_version = resp.json()["packages"]["qhub-dask"]["version"]
+        nebari_dask_version = resp.json()["packages"]["nebari-dask"]["version"]
         resp.raise_for_status()
     except ConnectionError:
         print(
-            f"Unable to connect to the Conda-Forge channel data, falling back to the default value: {DEFAULT_QHUB_DASK_VERSION}"
+            f"Unable to connect to the Conda-Forge channel data, falling back to the default value: {DEFAULT_NEBARI_DASK_VERSION}"
         )
-        qhub_dask_version = DEFAULT_QHUB_DASK_VERSION
+        nebari_dask_version = DEFAULT_NEBARI_DASK_VERSION
 
-    if QHUB_DASK_VERSION:
-        qhub_dask_version = QHUB_DASK_VERSION
+    if NEBARI_DASK_VERSION:
+        nebari_dask_version = NEBARI_DASK_VERSION
 
-    return qhub_dask_version
+    return nebari_dask_version

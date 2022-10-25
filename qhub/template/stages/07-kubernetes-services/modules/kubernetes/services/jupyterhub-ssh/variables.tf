@@ -1,7 +1,7 @@
 variable "name" {
   description = "name prefix to assign to jupyterhub-ssh"
   type        = string
-  default     = "qhub"
+  default     = "nebari"
 }
 
 variable "namespace" {

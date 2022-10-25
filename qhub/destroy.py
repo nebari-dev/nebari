@@ -2,9 +2,9 @@ import functools
 import logging
 import os
 
-from qhub.provider import terraform
-from qhub.stages import input_vars, state_imports
-from qhub.utils import (
+from nebari.provider import terraform
+from nebari.stages import input_vars, state_imports
+from nebari.utils import (
     check_cloud_credentials,
     keycloak_provider_context,
     kubernetes_provider_context,
@@ -69,9 +69,9 @@ def gather_stage_outputs(config):
         input_vars=input_vars.stage_07_kubernetes_services(stage_outputs, config),
     )
 
-    stage_outputs["stages/08-qhub-tf-extensions"] = _terraform_init_output(
-        directory="stages/08-qhub-tf-extensions",
-        input_vars=input_vars.stage_08_qhub_tf_extensions(stage_outputs, config),
+    stage_outputs["stages/08-nebari-tf-extensions"] = _terraform_init_output(
+        directory="stages/08-nebari-tf-extensions",
+        input_vars=input_vars.stage_08_nebari_tf_extensions(stage_outputs, config),
     )
 
     return stage_outputs
@@ -103,9 +103,9 @@ def destroy_stages(stage_outputs, config):
                 "value"
             ]
         ):
-            status["stages/08-qhub-tf-extensions"] = _terraform_destroy(
-                directory="stages/08-qhub-tf-extensions",
-                input_vars=input_vars.stage_08_qhub_tf_extensions(
+            status["stages/08-nebari-tf-extensions"] = _terraform_destroy(
+                directory="stages/08-nebari-tf-extensions",
+                input_vars=input_vars.stage_08_nebari_tf_extensions(
                     stage_outputs, config
                 ),
                 ignore_errors=True,
@@ -170,7 +170,7 @@ def destroy_stages(stage_outputs, config):
 def destroy_configuration(config):
     logger.info(
         """Removing all infrastructure, your local files will still remain,
-    you can use 'qhub deploy' to re-install infrastructure using same config file\n"""
+    you can use 'nebari deploy' to re-install infrastructure using same config file\n"""
     )
     check_cloud_credentials(config)
 
@@ -178,7 +178,7 @@ def destroy_configuration(config):
     # get credentials to kubernetes and keycloak context
     stage_outputs = gather_stage_outputs(config)
 
-    with timer(logger, "destroying QHub"):
+    with timer(logger, "destroying Nebari"):
         status = destroy_stages(stage_outputs, config)
 
     for stage_name, success in status.items():
@@ -187,7 +187,7 @@ def destroy_configuration(config):
 
     if not all(status.values()):
         logger.error(
-            "ERROR: not all qhub stages were destroyed properly. For cloud deployments of QHub typically only stages 01 and 02 need to succeed to properly destroy everything"
+            "ERROR: not all nebari stages were destroyed properly. For cloud deployments of Nebari typically only stages 01 and 02 need to succeed to properly destroy everything"
         )
     else:
-        print("QHub properly destroyed all resources without error")
+        print("Nebari properly destroyed all resources without error")

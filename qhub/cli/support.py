@@ -4,18 +4,18 @@ from zipfile import ZipFile
 from kubernetes import client, config
 from ruamel import yaml
 
-QHUB_SUPPORT_LOG_FILE = "./qhub-support-logs.zip"
+NEBARI_SUPPORT_LOG_FILE = "./nebari-support-logs.zip"
 
 
 def create_support_subcommand(subparser):
     subparser = subparser.add_parser("support")
 
     subparser.add_argument(
-        "-c", "--config", help="qhub configuration yaml file", required=True
+        "-c", "--config", help="nebari configuration yaml file", required=True
     )
 
     subparser.add_argument(
-        "-o", "--output", default=QHUB_SUPPORT_LOG_FILE, help="output filename"
+        "-o", "--output", default=NEBARI_SUPPORT_LOG_FILE, help="output filename"
     )
 
     subparser.set_defaults(func=handle_support)
@@ -65,7 +65,7 @@ def handle_support(args):
                 file.write("%s not available" % pod.metadata.name)
                 raise e
 
-    with ZipFile(QHUB_SUPPORT_LOG_FILE, "w") as zip:
+    with ZipFile(NEBARI_SUPPORT_LOG_FILE, "w") as zip:
         for file in list(Path(f"./log/{namespace}").glob("*.txt")):
             print(file)
             zip.write(file)

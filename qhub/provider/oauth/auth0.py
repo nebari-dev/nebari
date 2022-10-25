@@ -23,7 +23,7 @@ def create_client(jupyterhub_endpoint, project_name, reuse_existing=True):
     auth0 = Auth0(os.environ["AUTH0_DOMAIN"], mgmt_api_token)
 
     oauth_callback_url = (
-        f"https://{jupyterhub_endpoint}/auth/realms/qhub/broker/auth0/endpoint"
+        f"https://{jupyterhub_endpoint}/auth/realms/nebari/broker/auth0/endpoint"
     )
 
     for client in auth0.clients.all(
@@ -48,7 +48,7 @@ def create_client(jupyterhub_endpoint, project_name, reuse_existing=True):
     client = auth0.clients.create(
         {
             "name": project_name,
-            "description": f"QHub - {project_name} - {jupyterhub_endpoint}",
+            "description": f"Nebari - {project_name} - {jupyterhub_endpoint}",
             "callbacks": [oauth_callback_url],
             "app_type": "regular_web",
         }

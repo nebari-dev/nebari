@@ -2,7 +2,7 @@ import functools
 import json
 import subprocess
 
-from qhub.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 
 
 @functools.lru_cache()

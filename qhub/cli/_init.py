@@ -3,9 +3,8 @@ import os
 import questionary
 import rich
 import typer
-
-from qhub.initialize import render_config
-from qhub.schema import (
+from nebari.initialize import render_config
+from nebari.schema import (
     AuthenticationEnum,
     CiEnum,
     InitInputs,
@@ -13,7 +12,7 @@ from qhub.schema import (
     TerraformStateEnum,
     project_name_convention,
 )
-from qhub.utils import QHUB_DASK_VERSION, QHUB_IMAGE_TAG, yaml
+from nebari.utils import NEBARI_DASK_VERSION, NEBARI_IMAGE_TAG, yaml
 
 MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[green]\t{link_to_docs}[/green]\n\n"
 LINKS_TO_DOCS_TEMPLATE = (
@@ -47,14 +46,14 @@ def handle_init(inputs: InitInputs):
     """
     Take the inputs from the `nebari init` command, render the config and write it to a local yaml file.
     """
-    if QHUB_IMAGE_TAG:
+    if NEBARI_IMAGE_TAG:
         print(
-            f"Modifying the image tags for the `default_images`, setting tags to: {QHUB_IMAGE_TAG}"
+            f"Modifying the image tags for the `default_images`, setting tags to: {NEBARI_IMAGE_TAG}"
         )
 
-    if QHUB_DASK_VERSION:
+    if NEBARI_DASK_VERSION:
         print(
-            f"Modifying the version of the `qhub_dask` package, setting version to: {QHUB_DASK_VERSION}"
+            f"Modifying the version of the `nebari_dask` package, setting version to: {NEBARI_DASK_VERSION}"
         )
 
     # this will force the `set_kubernetes_version` to grab the latest version
@@ -64,7 +63,7 @@ def handle_init(inputs: InitInputs):
     config = render_config(
         cloud_provider=inputs.cloud_provider,
         project_name=inputs.project_name,
-        qhub_domain=inputs.domain_name,
+        nebari_domain=inputs.domain_name,
         namespace=inputs.namespace,
         auth_provider=inputs.auth_provider,
         auth_auto_provision=inputs.auth_auto_provision,
@@ -78,7 +77,7 @@ def handle_init(inputs: InitInputs):
     )
 
     # TODO remove when Typer CLI is out of BETA
-    whoami = "qhub"
+    whoami = "nebari"
     if inputs.nebari:
         whoami = "nebari"
 
@@ -87,7 +86,7 @@ def handle_init(inputs: InitInputs):
             yaml.dump(config, f)
     except FileExistsError:
         raise ValueError(
-            "A qhub-config.yaml file already exists. Please move or delete it and try again."
+            "A nebari-config.yaml file already exists. Please move or delete it and try again."
         )
 
 
@@ -268,7 +267,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
     Guided Init Wizard is a user-friendly questionnaire used to help generate the `nebari-config.yaml`.
     """
     qmark = "  "
-    disable_checks = os.environ.get("QHUB_DISABLE_INIT_CHECKS", False)
+    disable_checks = os.environ.get("NEBARI_DISABLE_INIT_CHECKS", False)
 
     if not guided_init:
         return guided_init
@@ -384,7 +383,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 (
                     ":warning: If you haven't done so already, please ensure the following:\n"
                     f"The `Homepage URL` is set to: [green]https://{inputs.domain_name}[/green]\n"
-                    f"The `Authorization callback URL` is set to: [green]https://{inputs.domain_name}/auth/realms/qhub/broker/github/endpoint[/green]\n\n"
+                    f"The `Authorization callback URL` is set to: [green]https://{inputs.domain_name}/auth/realms/nebari/broker/github/endpoint[/green]\n\n"
                 )
             )
 

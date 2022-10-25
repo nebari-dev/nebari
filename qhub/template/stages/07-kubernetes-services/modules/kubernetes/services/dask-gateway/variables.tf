@@ -1,7 +1,7 @@
 variable "name" {
   description = "name prefix to assign to dask-gateway"
   type        = string
-  default     = "qhub"
+  default     = "nebari"
 }
 
 variable "namespace" {

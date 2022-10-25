@@ -1,5 +1,5 @@
 variable "name" {
-  description = "Prefix name to assign to QHub resources"
+  description = "Prefix name to assign to Nebari resources"
   type        = string
 }
 
@@ -19,7 +19,7 @@ variable "project_id" {
 }
 
 variable "availability_zones" {
-  description = "Avalability zones to use for QHub deployment"
+  description = "Avalability zones to use for Nebari deployment"
   type        = list(string)
   default     = []
 }

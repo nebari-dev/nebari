@@ -2,8 +2,7 @@ import functools
 import os
 
 import requests
-
-from qhub.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 
 
 def digital_ocean_request(url, method="GET", json=None):

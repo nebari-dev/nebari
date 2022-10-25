@@ -3,9 +3,8 @@ import typing
 from abc import ABC
 
 import pydantic
+from nebari.utils import namestr_regex
 from pydantic import root_validator, validator
-
-from qhub.utils import namestr_regex
 
 from .version import __version__, rounded_ver_parse
 
@@ -276,7 +275,7 @@ class NodeGroup(Base):
                 count (int): Number of GPUs to attach to the instance
 
                 See general information regarding GPU support at:
-                https://docs.qhub.dev/en/stable/source/admin_guide/gpu.html?#add-gpu-node-group
+                https://docs.nebari.dev/en/stable/source/admin_guide/gpu.html?#add-gpu-node-group
             """
             try:
                 assert "name" in i and "count" in i
@@ -425,12 +424,12 @@ class CDSDashboards(Base):
 # =============== Extensions = = ==============
 
 
-class QHubExtensionEnv(Base):
+class NebariExtensionEnv(Base):
     name: str
     value: str
 
 
-class QHubExtension(Base):
+class NebariExtension(Base):
     name: str
     image: str
     urlslug: str
@@ -438,9 +437,9 @@ class QHubExtension(Base):
     oauth2client: bool = False
     keycloakadmin: bool = False
     jwt: bool = False
-    qhubconfigyaml: bool = False
+    nebariconfigyaml: bool = False
     logout: typing.Optional[str]
-    envs: typing.Optional[typing.List[QHubExtensionEnv]]
+    envs: typing.Optional[typing.List[NebariExtensionEnv]]
 
 
 class Ingress(Base):
@@ -550,7 +549,7 @@ class Main(Base):
     provider: ProviderEnum
     project_name: str
     namespace: typing.Optional[letter_dash_underscore_pydantic]
-    qhub_version: str = ""
+    nebari_version: str = ""
     ci_cd: typing.Optional[CICD]
     domain: str
     terraform_state: typing.Optional[TerraformState]
@@ -576,26 +575,26 @@ class Main(Base):
     kbatch: typing.Optional[KBatch]
     monitoring: typing.Optional[Monitoring]
     clearml: typing.Optional[ClearML]
-    tf_extensions: typing.Optional[typing.List[QHubExtension]]
+    tf_extensions: typing.Optional[typing.List[NebariExtension]]
     jupyterhub: typing.Optional[JupyterHub]
     prevent_deploy: bool = (
         False  # Optional, but will be given default value if not present
     )
     ingress: typing.Optional[Ingress]
 
-    # If the qhub_version in the schema is old
-    # we must tell the user to first run qhub upgrade
-    @validator("qhub_version", pre=True, always=True)
+    # If the nebari_version in the schema is old
+    # we must tell the user to first run nebari upgrade
+    @validator("nebari_version", pre=True, always=True)
     def check_default(cls, v):
         """
-        Always called even if qhub_version is not supplied at all (so defaults to ''). That way we can give a more helpful error message.
+        Always called even if nebari_version is not supplied at all (so defaults to ''). That way we can give a more helpful error message.
         """
         if not cls.is_version_accepted(v):
             if v == "":
                 v = "not supplied"
             raise ValueError(
-                f"qhub_version in the config file must be equivalent to {__version__} to be processed by this version of qhub (your config file version is {v})."
-                " Install a different version of qhub or run qhub upgrade to ensure your config file is compatible."
+                f"nebari_version in the config file must be equivalent to {__version__} to be processed by this version of nebari (your config file version is {v})."
+                " Install a different version of nebari or run nebari upgrade to ensure your config file is compatible."
             )
         return v
 
@@ -615,7 +614,7 @@ def verify(config):
 def is_version_accepted(v):
     """
     Given a version string, return boolean indicating whether
-    qhub_version in the qhub-config.yaml would be acceptable
-    for deployment with the current QHub package.
+    nebari_version in the nebari-config.yaml would be acceptable
+    for deployment with the current Nebari package.
     """
     return Main.is_version_accepted(v)

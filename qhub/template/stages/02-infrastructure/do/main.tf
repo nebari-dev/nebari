@@ -20,6 +20,6 @@ module "kubernetes" {
     "provision::terraform",
     "project::${var.name}",
     "namespace::${var.environment}",
-    "owner::qhub",
+    "owner::nebari",
   ], var.tags)
 }

@@ -12,8 +12,8 @@ import urllib.request
 import zipfile
 from typing import Any, Dict, List
 
-from qhub import constants
-from qhub.utils import deep_merge, run_subprocess_cmd, timer
+from nebari import constants
+from nebari.utils import deep_merge, run_subprocess_cmd, timer
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
 variable "name" {
   description = "name prefix to assign to traefik"
   type        = string
-  default     = "qhub"
+  default     = "nebari"
 }
 
 variable "namespace" {

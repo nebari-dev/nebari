@@ -10,7 +10,7 @@ variable "location" {
 }
 
 variable "resource_group_name" {
-  description = "name of qhub resource group"
+  description = "name of nebari resource group"
   type        = string
 }
 

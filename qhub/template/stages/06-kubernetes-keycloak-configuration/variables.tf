@@ -1,10 +1,10 @@
 variable "realm" {
-  description = "Keycloak realm to use for QHub"
+  description = "Keycloak realm to use for Nebari"
   type        = string
 }
 
 variable "realm_display_name" {
-  description = "Keycloak realm display name for QHub"
+  description = "Keycloak realm display name for Nebari"
   type        = string
 }
 

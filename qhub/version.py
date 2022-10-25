@@ -1,4 +1,4 @@
-"""a backport for the qhub version references"""
+"""a backport for the nebari version references"""
 
 import re
 
@@ -7,7 +7,7 @@ try:
 except ModuleNotFoundError:
     from importlib_metadata import distribution
 
-__version__ = distribution("qhub").version
+__version__ = distribution("nebari").version
 
 
 def rounded_ver_parse(versionstr):

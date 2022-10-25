@@ -1,7 +1,7 @@
 variable "name" {
   description = "name prefix to assign to kbatch"
   type        = string
-  default     = "qhub"
+  default     = "nebari"
 }
 
 variable "jupyterhub_api_token" {

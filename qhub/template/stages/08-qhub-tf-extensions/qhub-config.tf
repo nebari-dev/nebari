@@ -1,10 +1,10 @@
-resource "kubernetes_secret" "qhub_yaml_secret" {
+resource "kubernetes_secret" "nebari_yaml_secret" {
   metadata {
-    name      = "qhub-config-yaml"
+    name      = "nebari-config-yaml"
     namespace = var.environment
   }
 
   data = {
-    "qhub-config.yaml" = yamlencode(var.qhub_config_yaml)
+    "nebari-config.yaml" = yamlencode(var.nebari_config_yaml)
   }
 }

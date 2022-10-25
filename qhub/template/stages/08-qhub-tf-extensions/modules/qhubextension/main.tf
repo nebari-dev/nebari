@@ -7,14 +7,14 @@ terraform {
   }
 }
 
-resource "kubernetes_service" "qhub-extension-service" {
+resource "kubernetes_service" "nebari-extension-service" {
   metadata {
     name      = "${var.name}-service"
     namespace = var.namespace
   }
   spec {
     selector = {
-      app = kubernetes_deployment.qhub-extension-deployment.spec.0.template.0.metadata[0].labels.app
+      app = kubernetes_deployment.nebari-extension-deployment.spec.0.template.0.metadata[0].labels.app
     }
     port {
       port        = 80
@@ -25,7 +25,7 @@ resource "kubernetes_service" "qhub-extension-service" {
   }
 }
 
-resource "kubernetes_deployment" "qhub-extension-deployment" {
+resource "kubernetes_deployment" "nebari-extension-deployment" {
   metadata {
     name      = "${var.name}-deployment"
     namespace = var.namespace
@@ -71,10 +71,10 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
           }
 
           dynamic "volume_mount" {
-            for_each = var.qhubconfigyaml ? [true] : []
+            for_each = var.nebariconfigyaml ? [true] : []
             content {
-              name       = "qhubyamlsecret"
-              mount_path = "/etc/qhubyamlsecret/"
+              name       = "nebariyamlsecret"
+              mount_path = "/etc/nebariyamlsecret/"
               read_only  = true
             }
           }
@@ -82,11 +82,11 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
         }
 
         dynamic "volume" {
-          for_each = var.qhubconfigyaml ? [true] : []
+          for_each = var.nebariconfigyaml ? [true] : []
           content {
-            name = "qhubyamlsecret"
+            name = "nebariyamlsecret"
             secret {
-              secret_name = "qhub-config-yaml"
+              secret_name = "nebari-config-yaml"
             }
           }
         }
@@ -96,7 +96,7 @@ resource "kubernetes_deployment" "qhub-extension-deployment" {
   }
 }
 
-resource "random_password" "qhub-jwt-secret" {
+resource "random_password" "nebari-jwt-secret" {
   count   = var.jwt ? 1 : 0
   length  = 32
   special = false

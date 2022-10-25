@@ -11,7 +11,7 @@ from rich.table import Table
 logger = logging.getLogger(__name__)
 
 INFRACOST_NOTE = """
-QHub rely upon node-pools which is a usage resource but doesn't get captured in the above report. A general node-pool
+Nebari rely upon node-pools which is a usage resource but doesn't get captured in the above report. A general node-pool
 will always have one node running will add quite an additional charge. Please check in with your cloud provider to see
 the associated costs with node pools.
 
@@ -145,7 +145,7 @@ def infracost_report(path, dashboard, file, currency_code, compare):
     """
     Generate a report of the infracost cost of the given path
     args:
-        path: path to the qhub stages directory
+        path: path to the nebari stages directory
     """
     console = Console()
     # If path is not provided, use the current directory with `stages` subdirectory
@@ -246,7 +246,7 @@ def infracost_report(path, dashboard, file, currency_code, compare):
                 console.print(Markdown(INFRACOST_NOTE))
             else:
                 logger.error(
-                    "No data was generated. Please check your QHub configuration and generated stages."
+                    "No data was generated. Please check your Nebari configuration and generated stages."
                 )
     else:
         logger.error("Infracost is not installed or the API key is not configured")

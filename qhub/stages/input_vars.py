@@ -3,7 +3,7 @@ import os
 import tempfile
 from urllib.parse import urlencode
 
-from qhub.constants import DEFAULT_CONDA_STORE_IMAGE_TAG, DEFAULT_TRAEFIK_IMAGE_TAG
+from nebari.constants import DEFAULT_CONDA_STORE_IMAGE_TAG, DEFAULT_TRAEFIK_IMAGE_TAG
 
 
 def stage_01_terraform_state(stage_outputs, config):
@@ -40,7 +40,7 @@ def stage_02_infrastructure(stage_outputs, config):
     if config["provider"] == "local":
         return {
             "kubeconfig_filename": os.path.join(
-                tempfile.gettempdir(), "QHUB_KUBECONFIG"
+                tempfile.gettempdir(), "NEBARI_KUBECONFIG"
             ),
             "kube_context": config["local"].get("kube_context"),
         }
@@ -54,7 +54,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubernetes_version": config["digital_ocean"]["kubernetes_version"],
             "node_groups": config["digital_ocean"]["node_groups"],
             "kubeconfig_filename": os.path.join(
-                tempfile.gettempdir(), "QHUB_KUBECONFIG"
+                tempfile.gettempdir(), "NEBARI_KUBECONFIG"
             ),
             **config.get("do", {}).get("terraform_overrides", {}),
         }
@@ -78,7 +78,7 @@ def stage_02_infrastructure(stage_outputs, config):
                 for key, value in config["google_cloud_platform"]["node_groups"].items()
             ],
             "kubeconfig_filename": os.path.join(
-                tempfile.gettempdir(), "QHUB_KUBECONFIG"
+                tempfile.gettempdir(), "NEBARI_KUBECONFIG"
             ),
             **config.get("gcp", {}).get("terraform_overrides", {}),
         }
@@ -90,7 +90,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubernetes_version": config["azure"]["kubernetes_version"],
             "node_groups": config["azure"]["node_groups"],
             "kubeconfig_filename": os.path.join(
-                tempfile.gettempdir(), "QHUB_KUBECONFIG"
+                tempfile.gettempdir(), "NEBARI_KUBECONFIG"
             ),
             "resource_group_name": f'{config["project_name"]}-{config["namespace"]}',
             "node_resource_group_name": f'{config["project_name"]}-{config["namespace"]}-node-resource-group',
@@ -114,7 +114,7 @@ def stage_02_infrastructure(stage_outputs, config):
                 for key, value in config["amazon_web_services"]["node_groups"].items()
             ],
             "kubeconfig_filename": os.path.join(
-                tempfile.gettempdir(), "QHUB_KUBECONFIG"
+                tempfile.gettempdir(), "NEBARI_KUBECONFIG"
             ),
             **config.get("aws", {}).get("terraform_overrides", {}),
         }
@@ -224,7 +224,7 @@ def stage_05_kubernetes_keycloak(stage_outputs, config):
 
 
 def stage_06_kubernetes_keycloak_configuration(stage_outputs, config):
-    realm_id = "qhub"
+    realm_id = "nebari"
 
     users_group = (
         ["users"] if config["security"].get("shared_users_group", False) else []
@@ -261,7 +261,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
     if config["theme"]["jupyterhub"].get("display_version") and (
         not config["theme"]["jupyterhub"].get("version", False)
     ):
-        jupyterhub_theme.update({"version": f"v{config['qhub_version']}"})
+        jupyterhub_theme.update({"version": f"v{config['nebari_version']}"})
 
     return {
         "name": config["project_name"],
@@ -348,7 +348,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
     }
 
 
-def stage_08_qhub_tf_extensions(stage_outputs, config):
+def stage_08_nebari_tf_extensions(stage_outputs, config):
     return {
         "environment": config["namespace"],
         "endpoint": config["domain"],
@@ -356,9 +356,9 @@ def stage_08_qhub_tf_extensions(stage_outputs, config):
             "realm_id"
         ]["value"],
         "tf_extensions": config.get("tf_extensions", []),
-        "qhub_config_yaml": config,
-        "keycloak_qhub_bot_password": stage_outputs["stages/05-kubernetes-keycloak"][
-            "keycloak_qhub_bot_password"
+        "nebari_config_yaml": config,
+        "keycloak_nebari_bot_password": stage_outputs["stages/05-kubernetes-keycloak"][
+            "keycloak_nebari_bot_password"
         ]["value"],
         "helm_extensions": config.get("helm_extensions", []),
     }

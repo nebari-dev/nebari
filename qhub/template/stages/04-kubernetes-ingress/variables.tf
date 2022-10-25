@@ -26,7 +26,7 @@ variable "traefik-image" {
 
 variable "acme-email" {
   description = "ACME server email"
-  default     = "qhub@example.com"
+  default     = "nebari@example.com"
 }
 
 variable "acme-server" {

@@ -1,4 +1,4 @@
-from qhub.constants import HIGHEST_SUPPORTED_K8S_VERSION
+from nebari.constants import HIGHEST_SUPPORTED_K8S_VERSION
 
 
 def filter_by_highest_supported_k8s_version(k8s_versions_list):

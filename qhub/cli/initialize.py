@@ -1,19 +1,19 @@
-from qhub.initialize import render_config
-from qhub.schema import ProviderEnum
-from qhub.utils import QHUB_DASK_VERSION, QHUB_IMAGE_TAG, yaml
+from nebari.initialize import render_config
+from nebari.schema import ProviderEnum
+from nebari.utils import NEBARI_DASK_VERSION, NEBARI_IMAGE_TAG, yaml
 
 
 def create_init_subcommand(subparser):
     subparser = subparser.add_parser("init")
     subparser.add_argument(
         "platform",
-        help="Cloud to deploy qhub on",
+        help="Cloud to deploy nebari on",
         type=str,
         choices=[_.value for _ in ProviderEnum],
     )
-    subparser.add_argument("--project", help="Name to assign to qhub resources")
+    subparser.add_argument("--project", help="Name to assign to nebari resources")
     subparser.add_argument(
-        "--namespace", default="dev", help="Namespace to assign to qhub resources"
+        "--namespace", default="dev", help="Namespace to assign to nebari resources"
     )
     subparser.add_argument(
         "--domain",
@@ -30,7 +30,7 @@ def create_init_subcommand(subparser):
         default="github",
         help="auth provider to use for authentication",
     )
-    subparser.add_argument("--repository", help="Repository to initialize qhub")
+    subparser.add_argument("--repository", help="Repository to initialize nebari")
     subparser.add_argument(
         "--repository-auto-provision",
         action="store_true",
@@ -66,20 +66,20 @@ def create_init_subcommand(subparser):
 
 def handle_init(args):
 
-    if QHUB_IMAGE_TAG:
+    if NEBARI_IMAGE_TAG:
         print(
-            f"Modifying the image tags for the `default_images`, setting tags equal to: {QHUB_IMAGE_TAG}"
+            f"Modifying the image tags for the `default_images`, setting tags equal to: {NEBARI_IMAGE_TAG}"
         )
 
-    if QHUB_DASK_VERSION:
+    if NEBARI_DASK_VERSION:
         print(
-            f"Modifying the version of the `qhub_dask` package, setting version equal to: {QHUB_DASK_VERSION}"
+            f"Modifying the version of the `nebari_dask` package, setting version equal to: {NEBARI_DASK_VERSION}"
         )
 
     config = render_config(
         project_name=args.project,
         namespace=args.namespace,
-        qhub_domain=args.domain,
+        nebari_domain=args.domain,
         cloud_provider=args.platform,
         ci_provider=args.ci_provider,
         repository=args.repository,
@@ -93,9 +93,9 @@ def handle_init(args):
     )
 
     try:
-        with open("qhub-config.yaml", "x") as f:
+        with open("nebari-config.yaml", "x") as f:
             yaml.dump(config, f)
     except FileExistsError:
         raise ValueError(
-            "A qhub-config.yaml file already exists. Please move or delete it and try again."
+            "A nebari-config.yaml file already exists. Please move or delete it and try again."
         )

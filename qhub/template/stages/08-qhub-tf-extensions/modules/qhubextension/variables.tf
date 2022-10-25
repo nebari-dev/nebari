@@ -9,7 +9,7 @@ variable "name" {
 }
 
 variable "external-url" {
-  description = "URL of the QHub"
+  description = "URL of the Nebari"
   type        = string
 }
 
@@ -47,8 +47,8 @@ variable "jwt" {
   default     = false
 }
 
-variable "qhubconfigyaml" {
-  description = "Mount qhub-config.yaml from configmap"
+variable "nebariconfigyaml" {
+  description = "Mount nebari-config.yaml from configmap"
   type        = bool
   default     = false
 }
@@ -59,13 +59,13 @@ variable "envs" {
   default     = []
 }
 
-variable "qhub-realm-id" {
-  description = "Keycloak qhub realm id"
+variable "nebari-realm-id" {
+  description = "Keycloak nebari realm id"
   type        = string
   default     = ""
 }
 
-variable "keycloak_qhub_bot_password" {
+variable "keycloak_nebari_bot_password" {
   description = "Keycloak client password"
   type        = string
   default     = ""

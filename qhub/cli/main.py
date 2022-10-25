@@ -6,11 +6,7 @@ import typer
 from click import Context
 from kubernetes import client
 from kubernetes import config as kube_config
-from rich import print
-from ruamel import yaml
-from typer.core import TyperGroup
-
-from qhub.cli._init import (
+from nebari.cli._init import (
     check_auth_provider_creds,
     check_cloud_provider_creds,
     check_project_name,
@@ -18,12 +14,12 @@ from qhub.cli._init import (
     guided_init_wizard,
     handle_init,
 )
-from qhub.cli._keycloak import app_keycloak
-from qhub.cost import infracost_report
-from qhub.deploy import deploy_configuration
-from qhub.destroy import destroy_configuration
-from qhub.render import render_template
-from qhub.schema import (
+from nebari.cli._keycloak import app_keycloak
+from nebari.cost import infracost_report
+from nebari.deploy import deploy_configuration
+from nebari.destroy import destroy_configuration
+from nebari.render import render_template
+from nebari.schema import (
     AuthenticationEnum,
     CiEnum,
     InitInputs,
@@ -31,9 +27,12 @@ from qhub.schema import (
     TerraformStateEnum,
     verify,
 )
-from qhub.upgrade import do_upgrade
-from qhub.utils import load_yaml
-from qhub.version import __version__
+from nebari.upgrade import do_upgrade
+from nebari.utils import load_yaml
+from nebari.version import __version__
+from rich import print
+from ruamel import yaml
+from typer.core import TyperGroup
 
 SECOND_COMMAND_GROUP_NAME = "Additional Commands"
 GUIDED_INIT_MSG = (
@@ -186,7 +185,7 @@ def validate(
         ...,
         "--config",
         "-c",
-        help="qhub configuration yaml file path, please pass in as -c/--config flag",
+        help="nebari configuration yaml file path, please pass in as -c/--config flag",
     ),
     enable_commenting: bool = typer.Option(
         False, "--enable_commenting", help="Toggle PR commenting on GitHub Actions"
@@ -314,7 +313,7 @@ def deploy(
 @app.command()
 def destroy(
     config: str = typer.Option(
-        ..., "-c", "--config", help="qhub configuration file path"
+        ..., "-c", "--config", help="nebari configuration file path"
     ),
     output: str = typer.Option(
         "./" "-o",
@@ -361,7 +360,7 @@ def cost(
         None,
         "-p",
         "--path",
-        help="Pass the path of your stages directory generated after rendering QHub configurations before deployment",
+        help="Pass the path of your stages directory generated after rendering Nebari configurations before deployment",
     ),
     dashboard: bool = typer.Option(
         True,
@@ -409,12 +408,12 @@ def upgrade(
         ...,
         "-c",
         "--config",
-        help="qhub configuration file path",
+        help="nebari configuration file path",
     ),
     attempt_fixes: bool = typer.Option(
         False,
         "--attempt-fixes",
-        help="Attempt to fix the config for any incompatibilities between your old and new QHub versions.",
+        help="Attempt to fix the config for any incompatibilities between your old and new Nebari versions.",
     ),
 ):
     """
@@ -439,10 +438,10 @@ def support(
         ...,
         "-c",
         "--config",
-        help="qhub configuration file path",
+        help="nebari configuration file path",
     ),
     output: str = typer.Option(
-        "./qhub-support-logs.zip",
+        "./nebari-support-logs.zip",
         "-o",
         "--output",
         help="output filename",

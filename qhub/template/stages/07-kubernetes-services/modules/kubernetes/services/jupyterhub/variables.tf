@@ -1,5 +1,5 @@
 variable "name" {
-  description = "name for qhub deployment"
+  description = "name for nebari deployment"
   type        = string
 }
 

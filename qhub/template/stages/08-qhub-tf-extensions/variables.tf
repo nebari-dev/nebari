@@ -14,12 +14,12 @@ variable "realm_id" {
 }
 
 variable "tf_extensions" {
-  description = "QHub Terraform Extensions"
+  description = "Nebari Terraform Extensions"
   default     = []
 }
 
-variable "qhub_config_yaml" {
-  description = "QHub Configuration"
+variable "nebari_config_yaml" {
+  description = "Nebari Configuration"
   type        = any
 }
 
@@ -28,6 +28,6 @@ variable "helm_extensions" {
   default     = []
 }
 
-variable "keycloak_qhub_bot_password" {
-  description = "Keycloak password for qhub-bot"
+variable "keycloak_nebari_bot_password" {
+  description = "Keycloak password for nebari-bot"
 }

@@ -23,18 +23,18 @@ def do_upgrade(config_filename, attempt_fixes=False):
     try:
         verify(config)
         rich.print(
-            f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for qhub version [green]{__version__}[/green]"
+            f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for nebari version [green]{__version__}[/green]"
         )
         return
     except (ValidationError, ValueError) as e:
-        if is_version_accepted(config.get("qhub_version", "")):
+        if is_version_accepted(config.get("nebari_version", "")):
             # There is an unrelated validation problem
             print(
-                f"Your config file {config_filename} appears to be already up-to-date for qhub version {__version__} but there is another validation error.\n"
+                f"Your config file {config_filename} appears to be already up-to-date for nebari version {__version__} but there is another validation error.\n"
             )
             raise e
 
-    start_version = config.get("qhub_version", "")
+    start_version = config.get("nebari_version", "")
 
     UpgradeStep.upgrade(
         config, start_version, __version__, config_filename, attempt_fixes
@@ -47,14 +47,14 @@ def do_upgrade(config_filename, attempt_fixes=False):
         yaml.dump(config, f)
 
     print(
-        f"Saving new config file {config_filename} ready for QHub version {__version__}"
+        f"Saving new config file {config_filename} ready for Nebari version {__version__}"
     )
 
     ci_cd = config.get("ci_cd", {}).get("type", "")
     if ci_cd in ("github-actions", "gitlab-ci"):
         print(
             f"\nSince you are using ci_cd {ci_cd} you also need to re-render the workflows and re-commit the files to your Git repo:\n"
-            f"   qhub render -c {config_filename}\n"
+            f"   nebari render -c {config_filename}\n"
         )
 
 
@@ -87,8 +87,8 @@ class UpgradeStep(ABC):
 
         if finish_ver < starting_ver:
             raise ValueError(
-                f"Your qhub-config.yaml already belongs to a later version ({start_version}) than the installed version of QHub ({finish_version}).\n"
-                "You should upgrade the installed qhub package (e.g. pip install --upgrade qhub) to work with your deployment."
+                f"Your nebari-config.yaml already belongs to a later version ({start_version}) than the installed version of Nebari ({finish_version}).\n"
+                "You should upgrade the installed nebari package (e.g. pip install --upgrade nebari) to work with your deployment."
             )
 
         step_versions = sorted(
@@ -118,7 +118,7 @@ class UpgradeStep(ABC):
     def get_version(self):
         return self.version
 
-    def requires_qhub_version_field(self):
+    def requires_nebari_version_field(self):
         return rounded_ver_parse(self.version) > rounded_ver_parse("0.3.13")
 
     def upgrade_step(self, config, start_version, config_filename, *args, **kwargs):
@@ -127,10 +127,10 @@ class UpgradeStep(ABC):
 
         Generally, this will be in-place in config, but must also return config dict.
 
-        config_filename may be useful to understand the file path for qhub-config.yaml, for example
+        config_filename may be useful to understand the file path for nebari-config.yaml, for example
         to output another file in the same location.
 
-        The standard body here will take care of setting qhub_version and also updating the image tags.
+        The standard body here will take care of setting nebari_version and also updating the image tags.
 
         It should normally be left as-is for all upgrades. Use _version_specific_upgrade below
         for any actions that are only required for the particular upgrade you are creating.
@@ -147,12 +147,12 @@ class UpgradeStep(ABC):
 
         # Set the new version
         if start_version == "":
-            assert "qhub_version" not in config
+            assert "nebari_version" not in config
         assert self.version != start_version
 
-        if self.requires_qhub_version_field():
-            print(f"Setting qhub_version to {self.version}")
-            config["qhub_version"] = self.version
+        if self.requires_nebari_version_field():
+            print(f"Setting nebari_version to {self.version}")
+            config["nebari_version"] = self.version
 
         # Update images
         start_version_regex = start_version.replace(".", "\\.")
@@ -218,7 +218,7 @@ class Upgrade_0_3_12(UpgradeStep):
         self, config, start_version, config_filename, *args, **kwargs
     ):
         """
-        This version of QHub requires a conda_store image for the first time.
+        This version of Nebari requires a conda_store image for the first time.
         """
         if config.get("default_images", {}).get("conda_store", None) is None:
             newimage = "quansight/conda-store-server:v0.3.3"
@@ -252,7 +252,7 @@ class Upgrade_0_4_0(UpgradeStep):
             )
             if not kwargs.get("attempt_fixes", False):
                 raise ValueError(
-                    f"{customauth_warning}\n\nRun `qhub upgrade --attempt-fixes` to switch to basic Keycloak authentication instead."
+                    f"{customauth_warning}\n\nRun `nebari upgrade --attempt-fixes` to switch to basic Keycloak authentication instead."
                 )
             else:
                 print(f"\nWARNING: {customauth_warning}")
@@ -263,9 +263,9 @@ class Upgrade_0_4_0(UpgradeStep):
 
         # Create a group/user import file for Keycloak
 
-        realm_import_filename = config_filename.parent / "qhub-users-import.json"
+        realm_import_filename = config_filename.parent / "nebari-users-import.json"
 
-        realm = {"id": "qhub", "realm": "qhub"}
+        realm = {"id": "nebari", "realm": "nebari"}
         realm["users"] = [
             {
                 "username": k,
@@ -295,7 +295,7 @@ class Upgrade_0_4_0(UpgradeStep):
 
         print(
             f"\nSaving user/group import file {realm_import_filename}.\n\n"
-            "ACTION REQUIRED: You must import this file into the Keycloak admin webpage after you redeploy QHub.\n"
+            "ACTION REQUIRED: You must import this file into the Keycloak admin webpage after you redeploy Nebari.\n"
             "Visit the URL path /auth/ and login as 'root'. Under Manage, click Import and select this file.\n\n"
             "Non-admin users will default to analyst group membership after the upgrade (no dask access), "
             "so you may wish to promote some users into the developer group.\n"
@@ -333,12 +333,12 @@ class Upgrade_0_4_0(UpgradeStep):
             f"Generated default random password={default_password} for Keycloak root user (Please change at /auth/ URL path).\n"
         )
 
-        # project was never needed in Azure - it remained as PLACEHOLDER in earlier qhub inits!
+        # project was never needed in Azure - it remained as PLACEHOLDER in earlier nebari inits!
         if "azure" in config:
             if "project" in config["azure"]:
                 del config["azure"]["project"]
 
-        # "oauth_callback_url" and "scope" not required in qhub-config.yaml
+        # "oauth_callback_url" and "scope" not required in nebari-config.yaml
         # for Auth0 and Github authentication
         auth_config = config["security"]["authentication"].get("config", None)
         if auth_config:

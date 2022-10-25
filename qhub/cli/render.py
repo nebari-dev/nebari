@@ -1,15 +1,15 @@
 import pathlib
 
-from qhub.render import render_template
-from qhub.schema import verify
-from qhub.utils import QHUB_GH_BRANCH, load_yaml
+from nebari.render import render_template
+from nebari.schema import verify
+from nebari.utils import NEBARI_GH_BRANCH, load_yaml
 
 
 def create_render_subcommand(subparser):
     subparser = subparser.add_parser("render")
     subparser.add_argument("-o", "--output", default="./", help="output directory")
     subparser.add_argument(
-        "-c", "--config", help="qhub configuration yaml file", required=True
+        "-c", "--config", help="nebari configuration yaml file", required=True
     )
     subparser.add_argument(
         "--dry-run",
@@ -21,9 +21,9 @@ def create_render_subcommand(subparser):
 
 def handle_render(args):
 
-    if QHUB_GH_BRANCH:
+    if NEBARI_GH_BRANCH:
         print(
-            f"Modifying the version of `qhub` used by git-ops workflows, installing `qhub` from branch: {QHUB_GH_BRANCH}"
+            f"Modifying the version of `nebari` used by git-ops workflows, installing `nebari` from branch: {NEBARI_GH_BRANCH}"
         )
 
     config_filename = pathlib.Path(args.config)

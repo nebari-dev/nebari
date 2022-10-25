@@ -1,9 +1,9 @@
 
 resource "keycloak_openid_client" "keycloak_ext_client" {
   count         = var.oauth2client ? 1 : 0
-  realm_id      = var.qhub-realm-id
+  realm_id      = var.nebari-realm-id
   client_id     = "${var.name}-client"
-  client_secret = random_password.qhub-ext-client[count.index].result
+  client_secret = random_password.nebari-ext-client[count.index].result
 
   name    = "${var.name} Client"
   enabled = true
@@ -16,7 +16,7 @@ resource "keycloak_openid_client" "keycloak_ext_client" {
   ]
 }
 
-resource "random_password" "qhub-ext-client" {
+resource "random_password" "nebari-ext-client" {
   count   = var.oauth2client ? 1 : 0
   length  = 32
   special = false
@@ -25,7 +25,7 @@ resource "random_password" "qhub-ext-client" {
 resource "keycloak_openid_group_membership_protocol_mapper" "group_membership_mapper" {
   count = var.oauth2client ? 1 : 0
 
-  realm_id  = var.qhub-realm-id
+  realm_id  = var.nebari-realm-id
   client_id = keycloak_openid_client.keycloak_ext_client[count.index].id
   name      = "group-membership-mapper"
 

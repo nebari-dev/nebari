@@ -9,7 +9,7 @@ variable "environment" {
 }
 
 variable "endpoint" {
-  description = "QHub cluster endpoint"
+  description = "Nebari cluster endpoint"
   type        = string
 }
 

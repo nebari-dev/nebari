@@ -1,17 +1,17 @@
 import logging
 import pathlib
 
-from qhub.destroy import destroy_configuration
-from qhub.render import render_template
-from qhub.schema import verify
-from qhub.utils import load_yaml
+from nebari.destroy import destroy_configuration
+from nebari.render import render_template
+from nebari.schema import verify
+from nebari.utils import load_yaml
 
 logger = logging.getLogger(__name__)
 
 
 def create_destroy_subcommand(subparser):
     subparser = subparser.add_parser("destroy")
-    subparser.add_argument("-c", "--config", help="qhub configuration", required=True)
+    subparser.add_argument("-c", "--config", help="nebari configuration", required=True)
     subparser.add_argument("-o", "--output", default="./", help="output directory")
     subparser.add_argument(
         "--disable-render",

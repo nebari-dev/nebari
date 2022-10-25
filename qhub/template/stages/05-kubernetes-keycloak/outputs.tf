@@ -4,9 +4,9 @@ output "keycloak_credentials" {
   value       = module.kubernetes-keycloak-helm.credentials
 }
 
-# At this point this might be redundant, see `qhub-bot-password` in ./modules/kubernetes/keycloak-helm/variables.tf
-output "keycloak_qhub_bot_password" {
-  description = "keycloak qhub-bot credentials"
+# At this point this might be redundant, see `nebari-bot-password` in ./modules/kubernetes/keycloak-helm/variables.tf
+output "keycloak_nebari_bot_password" {
+  description = "keycloak nebari-bot credentials"
   sensitive   = true
-  value       = random_password.keycloak-qhub-bot-password.result
+  value       = random_password.keycloak-nebari-bot-password.result
 }

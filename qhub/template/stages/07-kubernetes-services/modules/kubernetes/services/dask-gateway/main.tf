@@ -37,7 +37,7 @@ resource "kubernetes_manifest" "dask-gateway" {
 
           middlewares = [
             {
-              name      = "qhub-dask-gateway-gateway-api"
+              name      = "nebari-dask-gateway-gateway-api"
               namespace = var.namespace
             }
           ]

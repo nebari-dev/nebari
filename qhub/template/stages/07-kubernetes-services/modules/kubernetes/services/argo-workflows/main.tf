@@ -102,7 +102,7 @@ resource "kubernetes_manifest" "argo-workflows-middleware-stripprefix" {
     apiVersion = "traefik.containo.us/v1alpha1"
     kind       = "Middleware"
     metadata = {
-      name      = "qhub-argo-workflows-stripprefix"
+      name      = "nebari-argo-workflows-stripprefix"
       namespace = var.namespace
     }
     spec = {
