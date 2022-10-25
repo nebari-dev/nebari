@@ -1,0 +1,45 @@
+{
+    "variable": {
+      "TAG": {
+        "default": "latest"
+      }
+    },
+    "group": {
+      "default": {
+        "targets": [
+          "dask-worker",
+          "jupyterhub",
+          "jupyterlab"
+        ]
+      }
+    },
+    "target": {
+      "dask-worker": {
+        "context": "./",
+        "dockerfile": "Dockerfile.dask-worker",
+        "tags": [
+          "docker.io/quansight/nebari-dask-worker:${TAG}",
+          "ghcr.io/quansight/nebari-dask-worker:${TAG}",
+          "quay.io/quansight/nebari-dask-worker:${TAG}"
+        ]
+      },
+      "jupyterhub": {
+        "context": "./",
+        "dockerfile": "Dockerfile.jupyterhub",
+        "tags": [
+          "docker.io/quansight/nebari-jupyterhub:${TAG}",
+          "ghcr.io/quansight/nebari-jupyterhub:${TAG}",
+          "quay.io/quansight/nebari-jupyterhub:${TAG}"
+        ]
+      },
+      "jupyterlab": {
+        "context": "./",
+        "dockerfile": "Dockerfile.jupyterlab",
+        "tags": [
+          "docker.io/quansight/nebari-jupyterlab:${TAG}",
+          "ghcr.io/quansight/nebari-jupyterlab:${TAG}",
+          "quay.io/quansight/nebari-jupyterlab:${TAG}"
+        ]
+      }
+    }
+  }

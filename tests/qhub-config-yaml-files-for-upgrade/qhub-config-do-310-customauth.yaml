@@ -1,6 +1,6 @@
 project_name: do-pytest
 provider: do
-domain: do.qhub.dev
+domain: do.nebari.dev
 certificate:
   type: self-signed
 security:
@@ -22,23 +22,23 @@ security:
     admin:
       gid: 101
 default_images:
-  jupyterhub: quansight/qhub-jupyterhub:v0.3.10
-  jupyterlab: quansight/qhub-jupyterlab:v0.3.10
-  dask_worker: quansight/qhub-dask-worker:v0.3.10
-  dask_gateway: quansight/qhub-dask-gateway:v0.3.10
+  jupyterhub: quansight/nebari-jupyterhub:v0.3.10
+  jupyterlab: quansight/nebari-jupyterlab:v0.3.10
+  dask_worker: quansight/nebari-dask-worker:v0.3.10
+  dask_gateway: quansight/nebari-dask-gateway:v0.3.10
 storage:
   conda_store: 60Gi
   shared_filesystem: 100Gi
 theme:
   jupyterhub:
-    hub_title: QHub - do-pytest
+    hub_title: nebari - do-pytest
     hub_subtitle: Autoscaling Compute Environment on Digital Ocean
-    welcome: Welcome to do.qhub.dev. It is maintained by <a href="http://quansight.com">Quansight
+    welcome: Welcome to do.nebari.dev. It is maintained by <a href="http://quansight.com">Quansight
       staff</a>. The hub's configuration is stored in a github repository based on
-      <a href="https://github.com/Quansight/qhub/">https://github.com/Quansight/qhub/</a>.
-      To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/qhub/issues">github
+      <a href="https://github.com/Quansight/nebari/">https://github.com/Quansight/nebari/</a>.
+      To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/nebari/issues">github
       issue tracker</a>.
-    logo: /hub/custom/images/jupyter_qhub_logo.svg
+    logo: /hub/custom/images/jupyter_nebari_logo.svg
     primary_color: '#4f4173'
     secondary_color: '#957da6'
     accent_color: '#32C574'
@@ -78,7 +78,7 @@ profiles:
       cpu_guarantee: 0.75
       mem_limit: 4G
       mem_guarantee: 2.5G
-      image: quansight/qhub-jupyterlab:v0.3.10
+      image: quansight/nebari-jupyterlab:v0.3.10
   - display_name: Medium Instance
     description: Stable environment with 2 cpu / 8 GB ram
     kubespawner_override:
@@ -86,7 +86,7 @@ profiles:
       cpu_guarantee: 1.5
       mem_limit: 8G
       mem_guarantee: 5G
-      image: quansight/qhub-jupyterlab:v0.3.10
+      image: quansight/nebari-jupyterlab:v0.3.10
   dask_worker:
     Small Worker:
       worker_cores_limit: 1
@@ -94,14 +94,14 @@ profiles:
       worker_memory_limit: 4G
       worker_memory: 2.5G
       worker_threads: 1
-      image: quansight/qhub-dask-worker:v0.3.10
+      image: quansight/nebari-dask-worker:v0.3.10
     Medium Worker:
       worker_cores_limit: 2
       worker_cores: 1.5
       worker_memory_limit: 8G
       worker_memory: 5G
       worker_threads: 2
-      image: quansight/qhub-dask-worker:v0.3.10
+      image: quansight/nebari-dask-worker:v0.3.10
 environments:
   environment-dask.yaml:
     name: dask

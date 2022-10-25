@@ -40,7 +40,7 @@ describe('First Test', () => {
 
   } else if (security_authentication_type == 'password') {
 
-    it('Check QHub login and start JupyterLab', () => {
+    it('Check nebari login and start JupyterLab', () => {
 
       cy.loginWithPassword(EXAMPLE_USER_NAME, EXAMPLE_USER_PASSWORD);
 
@@ -88,7 +88,7 @@ describe('First Test', () => {
 
       // Visit Keycloak User Profile
 
-      cy.visit('/auth/realms/qhub/account/#/personal-info');
+      cy.visit('/auth/realms/nebari/account/#/personal-info');
 
       cy.get('input#user-name', { timeout: 20000 }).should('have.value', EXAMPLE_USER_NAME);
     })

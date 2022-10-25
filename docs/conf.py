@@ -5,7 +5,7 @@ import sys
 
 # -- Project information -----------------------------------------------------
 
-project = "QHub"
+project = "nebari"
 copyright = "2021, Quansight"
 author = "Quansight"
 
@@ -62,7 +62,7 @@ POSTS = (
 templates_path = ["_templates"]
 
 
-html_logo = "source/images/qhub_logo.png"
+html_logo = "source/images/nebari_logo.png"
 
 # exclude build directory and Jupyter backup files:
 exclude_patterns = [
@@ -79,9 +79,9 @@ exclude_patterns = [
 latex_documents = [
     (
         master_doc,
-        "qhub.tex",
+        "nebari.tex",
         "Infrastructure as Code",
-        "QHub",
+        "nebari",
         "manual",
     )
 ]
@@ -92,11 +92,11 @@ myst_update_mathjax = False
 # Generate heading anchors for heading levels <h[1-3]>
 myst_heading_anchors = 5
 
-# Import qhub version number
+# Import nebari version number
 here = os.path.abspath(os.path.dirname(__file__))
 __version__ = None
-exec(open(os.path.join(here, "../qhub/version.py")).read())
+exec(open(os.path.join(here, "../nebari/version.py")).read())
 
-qhub_version_string = __version__
+nebari_version_string = __version__
 
-# SITE_URL = "https://quansight.github.io/qhub-home/"
+# SITE_URL = "https://quansight.github.io/nebari-home/"

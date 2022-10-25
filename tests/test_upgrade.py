@@ -2,16 +2,16 @@ from pathlib import Path
 
 import pytest
 
-from qhub.upgrade import do_upgrade, load_yaml, verify
-from qhub.version import __version__, rounded_ver_parse
+from nebari.upgrade import do_upgrade, load_yaml, verify
+from nebari.version import __version__, rounded_ver_parse
 
 
 @pytest.fixture
-def qhub_users_import_json():
+def nebari_users_import_json():
     return (
         (
             Path(__file__).parent
-            / "./qhub-config-yaml-files-for-upgrade/qhub-users-import.json"
+            / "./nebari-config-yaml-files-for-upgrade/nebari-users-import.json"
         )
         .read_text()
         .rstrip()
@@ -19,53 +19,59 @@ def qhub_users_import_json():
 
 
 @pytest.mark.parametrize(
-    "old_qhub_config_path_str,attempt_fixes,expect_upgrade_error",
+    "old_nebari_config_path_str,attempt_fixes,expect_upgrade_error",
     [
-        ("./qhub-config-yaml-files-for-upgrade/qhub-config-do-310.yaml", False, False),
         (
-            "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310-customauth.yaml",
+            "./nebari-config-yaml-files-for-upgrade/nebari-config-do-310.yaml",
+            False,
+            False,
+        ),
+        (
+            "./nebari-config-yaml-files-for-upgrade/nebari-config-do-310-customauth.yaml",
             False,
             True,
         ),
         (
-            "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310-customauth.yaml",
+            "./nebari-config-yaml-files-for-upgrade/nebari-config-do-310-customauth.yaml",
             True,
             False,
         ),
     ],
 )
 def test_upgrade_4_0(
-    old_qhub_config_path_str,
+    old_nebari_config_path_str,
     attempt_fixes,
     expect_upgrade_error,
     tmp_path,
-    qhub_users_import_json,
+    nebari_users_import_json,
 ):
-    old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
+    old_nebari_config_path = Path(__file__).parent / old_nebari_config_path_str
 
-    tmp_qhub_config = Path(tmp_path, old_qhub_config_path.name)
-    tmp_qhub_config.write_text(old_qhub_config_path.read_text())  # Copy contents to tmp
+    tmp_nebari_config = Path(tmp_path, old_nebari_config_path.name)
+    tmp_nebari_config.write_text(
+        old_nebari_config_path.read_text()
+    )  # Copy contents to tmp
 
-    orig_contents = tmp_qhub_config.read_text()  # Read in initial contents
+    orig_contents = tmp_nebari_config.read_text()  # Read in initial contents
 
-    assert not Path(tmp_path, "qhub-users-import.json").exists()
+    assert not Path(tmp_path, "nebari-users-import.json").exists()
 
     # Do the upgrade
     if not expect_upgrade_error:
         do_upgrade(
-            tmp_qhub_config, attempt_fixes
-        )  # Would raise an error if invalid by current QHub version's standards
+            tmp_nebari_config, attempt_fixes
+        )  # Would raise an error if invalid by current nebari version's standards
     else:
         with pytest.raises(ValueError):
-            do_upgrade(tmp_qhub_config, attempt_fixes)
+            do_upgrade(tmp_nebari_config, attempt_fixes)
         return
 
     # Check the resulting YAML
-    config = load_yaml(tmp_qhub_config)
+    config = load_yaml(tmp_nebari_config)
 
     verify(
         config
-    )  # Would raise an error if invalid by current QHub version's standards
+    )  # Would raise an error if invalid by current nebari version's standards
 
     assert len(config["security"]["keycloak"]["initial_root_password"]) == 16
 
@@ -77,11 +83,11 @@ def test_upgrade_4_0(
     # Check image versions have been bumped up
     assert (
         config["default_images"]["jupyterhub"]
-        == f"quansight/qhub-jupyterhub:v{__rounded_version__}"
+        == f"quansight/nebari-jupyterhub:v{__rounded_version__}"
     )
     assert (
         config["profiles"]["jupyterlab"][0]["kubespawner_override"]["image"]
-        == f"quansight/qhub-jupyterlab:v{__rounded_version__}"
+        == f"quansight/nebari-jupyterlab:v{__rounded_version__}"
     )
 
     assert (
@@ -90,11 +96,13 @@ def test_upgrade_4_0(
 
     # Keycloak import users json
     assert (
-        Path(tmp_path, "qhub-users-import.json").read_text().rstrip()
-        == qhub_users_import_json
+        Path(tmp_path, "nebari-users-import.json").read_text().rstrip()
+        == nebari_users_import_json
     )
 
     # Check backup
-    tmp_qhub_config_backup = Path(tmp_path, f"{old_qhub_config_path.name}.old.backup")
+    tmp_nebari_config_backup = Path(
+        tmp_path, f"{old_nebari_config_path.name}.old.backup"
+    )
 
-    assert orig_contents == tmp_qhub_config_backup.read_text()
+    assert orig_contents == tmp_nebari_config_backup.read_text()

@@ -3,17 +3,17 @@ from unittest.mock import Mock
 
 import pytest
 
-from qhub.initialize import render_config
+from nebari.initialize import render_config
 
 INIT_INPUTS = [
     # project, namespace, domain, cloud_provider, ci_provider, auth_provider
-    ("pytestdo", "dev", "do.qhub.dev", "do", "github-actions", "github"),
-    ("pytestaws", "dev", "aws.qhub.dev", "aws", "github-actions", "github"),
-    ("pytestgcp", "dev", "gcp.qhub.dev", "gcp", "github-actions", "github"),
-    ("pytestazure", "dev", "azure.qhub.dev", "azure", "github-actions", "github"),
+    ("pytestdo", "dev", "do.nebari.dev", "do", "github-actions", "github"),
+    ("pytestaws", "dev", "aws.nebari.dev", "aws", "github-actions", "github"),
+    ("pytestgcp", "dev", "gcp.nebari.dev", "gcp", "github-actions", "github"),
+    ("pytestazure", "dev", "azure.nebari.dev", "azure", "github-actions", "github"),
 ]
 
-QHUB_CONFIG_FN = "qhub-config.yaml"
+nebari_CONFIG_FN = "nebari-config.yaml"
 PRESERVED_DIR = "preserved_dir"
 DEFAULT_GH_REPO = "github.com/test/test"
 DEFAULT_TERRAFORM_STATE = "remote"
@@ -34,7 +34,7 @@ render_config_partial = partial(
 def setup_fixture(request, monkeypatch, tmp_path):
     """This fixture helps simplify writing tests by:
     - parametrizing the different cloud provider inputs in a single place
-    - creating a tmp directory (and file) for the `qhub-config.yaml` to be save to
+    - creating a tmp directory (and file) for the `nebari-config.yaml` to be save to
     - monkeypatching functions that call out to external APIs
     """
     render_config_inputs = request.param
@@ -59,34 +59,34 @@ def setup_fixture(request, monkeypatch, tmp_path):
 
     if cloud_provider == "aws":
         monkeypatch.setattr(
-            "qhub.utils.amazon_web_services.kubernetes_versions",
+            "nebari.utils.amazon_web_services.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
     elif cloud_provider == "azure":
         monkeypatch.setattr(
-            "qhub.utils.azure_cloud.kubernetes_versions",
+            "nebari.utils.azure_cloud.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
     elif cloud_provider == "do":
         monkeypatch.setattr(
-            "qhub.utils.digital_ocean.kubernetes_versions",
+            "nebari.utils.digital_ocean.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
     elif cloud_provider == "gcp":
         monkeypatch.setattr(
-            "qhub.utils.google_cloud.kubernetes_versions",
+            "nebari.utils.google_cloud.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
 
     output_directory = tmp_path / f"{cloud_provider}_output_dir"
     output_directory.mkdir()
-    qhub_config_loc = output_directory / QHUB_CONFIG_FN
+    nebari_config_loc = output_directory / nebari_CONFIG_FN
 
-    # data that should NOT be deleted when `qhub render` is called
+    # data that should NOT be deleted when `nebari render` is called
     # see test_render.py::test_remove_existing_renders
     preserved_directory = output_directory / PRESERVED_DIR
     preserved_directory.mkdir()
     preserved_filename = preserved_directory / "file.txt"
     preserved_filename.write_text("This is a test...")
 
-    yield (qhub_config_loc, render_config_inputs)
+    yield (nebari_config_loc, render_config_inputs)

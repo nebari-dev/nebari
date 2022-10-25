@@ -110,9 +110,9 @@ def test_contains_jupyterhub_ssh(paramiko_object):
     commands_contain = [
         ("ls -la", ".bashrc"),
         ("ls -la /shared/examples", "dashboard_panel.ipynb"),
-        ("cat ~/.bashrc", "Managed by QHub"),
-        ("cat ~/.profile", "Managed by QHub"),
-        ("cat ~/.bash_logout", "Managed by QHub"),
+        ("cat ~/.bashrc", "Managed by nebari"),
+        ("cat ~/.profile", "Managed by nebari"),
+        ("cat ~/.bash_logout", "Managed by nebari"),
     ]
 
     for command, output in commands_contain:

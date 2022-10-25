@@ -7,13 +7,13 @@ body:
   - type: markdown
     attributes:
       value: |
-        Hi! Thanks for using QHub and taking some time to contribute to this project.
+        Hi! Thanks for using nebari and taking some time to contribute to this project.
 
         Please answer the following sections to help us troubleshoot the problem.
 
   - type: input
     attributes:
-      label: OS system and architecture in which you are running QHub
+      label: OS system and architecture in which you are running nebari
     validations:
       required: true
 
@@ -68,7 +68,7 @@ body:
         Describe your environment:
         - Conda version (use `conda --version`)
         - Kubernetes version (use `kubectl version`)
-        - QHub version
+        - nebari version
     validations:
       required: false
 
@@ -89,7 +89,7 @@ body:
   - type: dropdown
     attributes:
       label: Integrations
-      description: Is this issue related to onay of the QHub integrations?
+      description: Is this issue related to onay of the nebari integrations?
       multiple: true
       options:
         - "Prefect"
