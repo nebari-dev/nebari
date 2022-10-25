@@ -278,7 +278,7 @@ def deploy_configuration(
         version of Nebari without having a full backup of your system ready to restore. It may be known that an in-situ upgrade is impossible
         and that redeployment will tear down your existing infrastructure before creating an entirely new Nebari without your old data.
 
-        PLEASE get in touch with Quansight at https://github.com/Quansight/nebari for assistance in proceeding.
+        PLEASE get in touch with Nebari development team at https://github.com/nebari-dev/nebari for assistance in proceeding.
         Your data may be at risk without our guidance.
         """
             )

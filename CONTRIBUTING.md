@@ -19,6 +19,7 @@ This document will help you through your journey of open source. Here, you'll ge
   - [:computer: Contributing to the codebase](#computer-contributing-to-the-codebase)
     - [Development process - short summary](#development-process---short-summary)
       - [If you are a first-time contributor](#if-you-are-a-first-time-contributor)
+      - [Develop your contribution](#develop-your-contribution)
       - [Submitting your contribution](#submitting-your-contribution)
       - [Review process](#review-process)
       - [Document changes](#document-changes)
@@ -61,7 +62,7 @@ Check our [labels page][nebari-labels] for an overview of the system we use to t
 ## :computer: Contributing to the codebase
 
 You don't have to be a Python or Kubernetes pro to contribute, and we're happy to help you get started. If you're new to Nebari, an excellent place to start are the issues marked
-with the [type: good first issue](https://github.com/Quansight/Nebari/labels/type%3A%20good%20first%20issue) label, which we use to tag bugs and feature requests that require
+with the [type: good first issue](https://github.com/nebari-dev/nebari/labels/type%3A%20good%20first%20issue) label, which we use to tag bugs and feature requests that require
 low-effort (i.e. low entry-barrier or little in-depth knowledge needed) and self-contained. If you've decided to take on one of these problems and you're making good progress,
 don't forget to add a quick comment to the issue to assign this to yourself. You can also use the issue to ask questions or share your work in progress.
 
@@ -76,7 +77,7 @@ Never made an open-source contribution before? Wondering how contributions work 
 2. Clone the project to your local computer:
 
    ```bash
-   git clone https://github.com/your-username/Nebari.git
+   git clone https://github.com/your-username/nebari.git
    ```
 
 3. Change into the directory:
@@ -88,7 +89,7 @@ Never made an open-source contribution before? Wondering how contributions work 
 4. Add the upstream repository:
 
    ```bash
-   git remote add upstream https://github.com/Quansight/Nebari.git
+   git remote add upstream https://github.com/nebari-dev/nebari.git
    ```
 
 Now using the command `git remote -v` will show two remote repositories:
@@ -166,8 +167,8 @@ In the source code, be sure to preface any issue or PR reference with gh-xxxx.
 
 <!-- Links -->
 
-[nebari-issues]: https://github.com/Quansight/Nebari/issues
-[nebari-labels]: https://github.com/Quansight/Nebari/labels
-[nebari-qa]: https://github.com/Quansight/Nebari/discussions/categories/q-a
-[nebari-repo]: https://github.com/Quansight/Nebari/
-[nebari-templates]: https://github.com/Quansight/Nebari/issues/new/choose
+[nebari-issues]: https://github.com/nebari-dev/nebari/issues
+[nebari-labels]: https://github.com/nebari-dev/nebari/labels
+[nebari-qa]: https://github.com/nebari-dev/nebari/discussions/categories/q-a
+[nebari-repo]: https://github.com/nebari-dev/nebari/
+[nebari-templates]: https://github.com/nebari-dev/nebari/issues/new/choose

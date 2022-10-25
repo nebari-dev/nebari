@@ -6,8 +6,8 @@
 | Information | Links |
 | :---------- | :-----|
 |   Project   | [![License](https://img.shields.io/badge/License-BSD%203--Clause-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://opensource.org/licenses/BSD-3-Clause) [![QHUb documentation](https://img.shields.io/badge/%F0%9F%93%96%20Read-the%20docs-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://docs.nebari.dev/en/stable/) [![PyPI version](https://badge.fury.io/py/nebari.svg)](https://badge.fury.io/py/nebari) |
-|  Community  | [![GH discussions](https://img.shields.io/badge/%F0%9F%92%AC%20-Participate%20in%20discussions-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/Quansight/nebari/discussions) [![Open an issue](https://img.shields.io/badge/%F0%9F%93%9D%20Open-an%20issue-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/Quansight/nebari/issues/new/choose) |
-|     CI      | [![Kubernetes Tests](https://github.com/Quansight/nebari/actions/workflows/kubernetes_test.yaml/badge.svg)](https://github.com/Quansight/nebari/actions/workflows/kubernetes_test.yaml) [![Tests](https://github.com/Quansight/nebari/actions/workflows/test.yaml/badge.svg)](https://github.com/Quansight/nebari/actions/workflows/test.yaml) |
+|  Community  | [![GH discussions](https://img.shields.io/badge/%F0%9F%92%AC%20-Participate%20in%20discussions-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/nebari-dev/nebari/discussions) [![Open an issue](https://img.shields.io/badge/%F0%9F%93%9D%20Open-an%20issue-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/nebari-dev/nebari/issues/new/choose) |
+|     CI      | [![Kubernetes Tests](https://github.com/nebari-dev/nebari/actions/workflows/kubernetes_test.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/kubernetes_test.yaml) [![Tests](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml) |
 
 ## Table of contents
 
@@ -40,7 +40,7 @@ Not sure what to choose? Check out our [Setup Initialization](docs/source/instal
 
 Version of Nebari based on OpenHPC.
 
-> NOTE: The tool is currently under development. Curious? Check out the [Nebari HPC](https://github.com/Quansight/nebari-hpc) repository.
+> NOTE: The tool is currently under development. Curious? Check out the [Nebari HPC](https://github.com/Quansight/qhub-hpc) repository.
 
 ## Nebari
 
@@ -129,27 +129,27 @@ Have a look at our [FAQ](docs/source/user_guide/faq.md) to see if your query has
 
 We separate the queries for Nebari into:
 
-- [GitHub Discussions](https://github.com/Quansight/nebari/discussions) used to raise discussions about a subject, such as: "What is the recommended way to do X with Nebari?"
+- [GitHub Discussions](https://github.com/nebari-dev/nebari/discussions) used to raise discussions about a subject, such as: "What is the recommended way to do X with Nebari?"
 
-- [Issues](https://github.com/Quansight/nebari/issues/new/choose) for queries, bug reporting, feature requests,documentation, etc.
+- [Issues](https://github.com/nebari-dev/nebari/issues/new/choose) for queries, bug reporting, feature requests,documentation, etc.
 
 > We work around the clock to make Nebari better, but sometimes your query might take a while to get a reply. We apologise in advance and ask you to please, be patient :pray:.
 
 ## :book: Code of Conduct
 
-To guarantee a welcoming and friendly community, we require contributors to follow our [Code of Conduct](https://github.com/Quansight/.github/blob/master/CODE_OF_CONDUCT.md).
+To guarantee a welcoming and friendly community, we require contributors to follow our [Code of Conduct](https://github.com/nebari-dev/.github/blob/master/CODE_OF_CONDUCT.md).
 
 ## :gear: Installing the Development version of Nebari
 
 To install the latest developer version (unstable) use:
 
 ```bash
-pip install git+https://github.com/Quansight/nebari.git@dev
+pip install git+https://github.com/nebari-dev/nebari.git@dev
 ```
 
 ## :raised_hands: Contributions
 
-Thinking about contributing? Check out our [Contribution Guidelines](https://github.com/Quansight/nebari/blob/main/CONTRIBUTING.md).
+Thinking about contributing? Check out our [Contribution Guidelines](https://github.com/nebari-dev/nebari/blob/main/CONTRIBUTING.md).
 
 ## Ongoing Support
 
