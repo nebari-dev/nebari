@@ -25,8 +25,8 @@ jobs:
 
       - name: Create tag
         run: |
-          echo "QHUB_TAG=$(git describe --tags)" >> $GITHUB_ENV
-          echo ${{ env.QHUB_TAG }}
+          echo "NEBARI_TAG=$(git describe --tags)" >> $GITHUB_ENV
+          echo ${{ env.NEBARI_TAG }}
 
       - name: Build source and binary
         run: python -m build --sdist --wheel .
@@ -43,7 +43,7 @@ jobs:
             pip install \
             --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple \
-            nebari==${{ env.QHUB_TAG }}
+            nebari==${{ env.NEBARI_TAG }}
 
   release-pypi:
     name: Publish Nebari on PyPi
