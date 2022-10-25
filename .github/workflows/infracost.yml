@@ -146,7 +146,6 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
         id: parse
         run: |
-          echo "::set-output name=artifact_name_base::$(echo $BASE_REF | sed 's/\//-/g')"
           echo "artifact_name_base=$(echo $BASE_REF | sed 's/\//-/g')" >> $GITHUB_OUTPUT
 
       # Save artifacts to the PR
