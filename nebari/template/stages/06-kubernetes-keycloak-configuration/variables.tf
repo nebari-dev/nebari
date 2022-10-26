@@ -4,7 +4,7 @@ variable "realm" {
 }
 
 variable "realm_display_name" {
-  description = "Keycloak realm display name for Nebari"
+  description = "Keycloak realm display name for nebari"
   type        = string
 }
 
