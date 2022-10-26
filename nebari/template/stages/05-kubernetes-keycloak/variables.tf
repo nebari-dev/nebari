@@ -9,7 +9,7 @@ variable "environment" {
 }
 
 variable "endpoint" {
-  description = "Nebari cluster endpoint"
+  description = "nebari cluster endpoint"
   type        = string
 }
 
