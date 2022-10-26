@@ -53,7 +53,7 @@ def parse_arn(arn):
 def force_destroy_configuration(config):
     logging.info("""FORCE Removing all infrastructure (not using terraform).""")
 
-    with timer(logging, "destroying Nebari"):
+    with timer(logging, "destroying nebari"):
         # 01 Check we have cloud details we need
         check_cloud_credentials(config)
 
