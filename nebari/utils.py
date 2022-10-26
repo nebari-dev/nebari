@@ -405,11 +405,6 @@ def set_docker_image_tag() -> str:
 
 
 @functools.lru_cache(maxsize=None)
-def set_qhub_dask_version() -> str:
-    """Set version of `qhub-dask` meta package."""
-
-
-@functools.lru_cache(maxsize=None)
 def set_nebari_dask_version() -> str:
     """Set version of `nebari-dask` meta package."""
     try:
