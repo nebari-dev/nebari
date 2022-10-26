@@ -407,7 +407,7 @@ def set_nebari_dask_version() -> str:
     """Set version of `nebari-dask` meta package."""
     try:
         resp = requests.get(CONDA_FORGE_CHANNEL_DATA_URL)
-        nebari_dask_version = resp.json()["packages"]["qhub-dask"]["version"]
+        nebari_dask_version = resp.json()["packages"]["nebari-dask"]["version"]
         resp.raise_for_status()
     except ConnectionError:
         print(
