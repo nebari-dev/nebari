@@ -353,7 +353,7 @@ def render_config(
         f.write(default_password)
     os.chmod(default_password_filename, 0o700)
 
-    config["theme"]["jupyterhub"]["hub_title"] = f"nebari - { project_name }"
+    config["theme"]["jupyterhub"]["hub_title"] = f"Nebari - { project_name }"
     config["theme"]["jupyterhub"][
         "welcome"
     ] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
