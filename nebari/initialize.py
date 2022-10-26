@@ -347,7 +347,7 @@ def render_config(
 
     # Save default password to file
     default_password_filename = os.path.join(
-        tempfile.gettempdir(), "nebari_DEFAULT_PASSWORD"
+        tempfile.gettempdir(), "NEBARI_DEFAULT_PASSWORD"
     )
     with open(default_password_filename, "w") as f:
         f.write(default_password)
