@@ -12,7 +12,7 @@
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
-- [Nebari HPC](#nebari-hpc)
+- [QHub HPC](#qhub-hpc)
 - [Nebari](#nebari)
   - [:cloud: Cloud Providers](#cloud-cloud-providers)
 - [:computer: Installation](#computer-installation)
@@ -36,7 +36,7 @@ minimal DevOps experience.
 
 Not sure what to choose? Check out our [Setup Initialization](docs/source/installation/setup.md) page.
 
-## Nebari HPC
+## QHub HPC
 
 Version of Nebari based on OpenHPC.
 
