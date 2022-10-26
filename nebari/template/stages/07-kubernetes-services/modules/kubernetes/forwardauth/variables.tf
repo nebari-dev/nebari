@@ -4,7 +4,7 @@ variable "namespace" {
 }
 
 variable "external-url" {
-  description = "External domain where Nebari is accessible"
+  description = "External domain where nebari is accessible."
   type        = string
 }
 
