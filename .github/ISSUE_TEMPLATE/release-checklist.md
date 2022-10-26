@@ -26,7 +26,7 @@ Release captain responsible - <@gh_username>
 
 ## Looking forward - planning
 
-- [ ] [Create milestone for next release](https://github.com/Quansight/qhub/milestones) (if it doesn't already exist) and link it back here.
+- [ ] [Create milestone for next release](https://github.com/nebari-dev/nebari/milestones) (if it doesn't already exist) and link it back here.
 - [ ] Triage `bugs` to determine what be should included in the release and add it to the milestone.
 - [ ] What new features, if any, will be included in the release and add it to the milestone.
   - This will be, in large part, determined by the roadmap.
@@ -40,7 +40,7 @@ Release captain responsible - <@gh_username>
   - Has documentation been updated appropriately?
   - Are there any breaking changes that should be highlighted?
   - Are there any upstream releases we are waiting on?
-  - [Do we need to update the `dask` versions in the `qhub-dask`?](https://github.com/conda-forge/qhub-dask-feedstock/blob/main/recipe/meta.yaml#L13-L16)
+  - [Do we need to update the `dask` versions in the `nebari-dask`?](https://github.com/conda-forge/nebari-dask-feedstock/blob/main/recipe/meta.yaml#L13-L16)
   - Will there be an accompanying blog post?
 - [ ] Prepare for the release.
   - [ ] Announce build freeze.
@@ -49,20 +49,20 @@ Release captain responsible - <@gh_username>
       - [ ] Create a new branch off of the last version tag.
         - Use this branch to cut the pre-release and the "official" release.
       - [ ] `git cherry-pick` the commits that should be included.
-    - [ ] Perform end-to-end testing. [Use the Testing Checklist template.](https://github.com/Quansight/qhub/issues/new?assignees=&labels=type%3A+release+%F0%9F%8F%B7&template=testing-checklist.md&title=Testing+checklist+for+<version>)
+    - [ ] Perform end-to-end testing. [Use the Testing Checklist template.](https://github.com/nebari-dev/nebari/issues/new?assignees=&labels=type%3A+release+%F0%9F%8F%B7&template=testing-checklist.md&title=Testing+checklist+for+<version>)
       - For minor releases, relying on the end-to-end integration tests might suffice.
-    - [ ] [Cut RC via GHA release workflow (w/ "This is a pre-release" checked).](https://github.com/Quansight/qhub/releases/new)
+    - [ ] [Cut RC via GHA release workflow (w/ "This is a pre-release" checked).](https://github.com/nebari-dev/nebari/releases/new)
     - [ ] End-user validation.
       - If possible, pull in volunteers to help test.
       - (Repeat steps if necessary)
-  - [ ] [Update `RELEASE.md` notes.](https://github.com/Quansight/qhub/blob/main/RELEASE.md)
+  - [ ] [Update `RELEASE.md` notes.](https://github.com/nebari-dev/nebari/blob/main/RELEASE.md)
 
 
 ## Cut the official release
 
 *These steps must be actioned in the order they appear in this checklist.*
 - [ ] [Tag, build and push docker images](https://github.com/nebari-dev/nebari-docker-images/releases/new)
-- [ ] [Update and cut release for `qhub-dask` meta package on Conda-Forge.](https://github.com/conda-forge/qhub-dask-feedstock)
-- [ ] [Cut PyPI release via GHA release workflow.](https://github.com/Quansight/qhub/releases/new)
+- [ ] [Update and cut release for `nebari-dask` meta package on Conda-Forge.](https://github.com/conda-forge/nebari-dask-feedstock)
+- [ ] [Cut PyPI release via GHA release workflow.](https://github.com/nebari-dev/nebari/releases/new)
     - Copy release notes from `RELEASE.md`.
-- [ ] [Merge automated release PR for `qhub` on Conda-Forge.](https://github.com/conda-forge/qhub-feedstock)
+- [ ] [Merge automated release PR for `nebari` on Conda-Forge.](https://github.com/conda-forge/nebari-feedstock)

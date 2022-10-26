@@ -1,4 +1,4 @@
-name: qhub-dev
+name: nebari-dev
 channels:
   - conda-forge
 dependencies:
