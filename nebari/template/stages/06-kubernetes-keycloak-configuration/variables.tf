@@ -1,5 +1,5 @@
 variable "realm" {
-  description = "Keycloak realm to use for Nebari"
+  description = "Keycloak realm to use for nebari"
   type        = string
 }
 
