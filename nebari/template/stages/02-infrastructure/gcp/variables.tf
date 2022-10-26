@@ -19,7 +19,7 @@ variable "project_id" {
 }
 
 variable "availability_zones" {
-  description = "Avalability zones to use for Nebari deployment"
+  description = "Availability zones to use for nebari deployment"
   type        = list(string)
   default     = []
 }
