@@ -276,7 +276,7 @@ class NodeGroup(Base):
                 count (int): Number of GPUs to attach to the instance
 
                 See general information regarding GPU support at:
-				# TODO: replace with nebari.dev new URL
+                # TODO: replace with nebari.dev new URL
                 https://docs.nebari.dev/en/stable/source/admin_guide/gpu.html?#add-gpu-node-group
             """
             try:
