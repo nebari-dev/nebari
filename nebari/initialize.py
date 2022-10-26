@@ -48,13 +48,6 @@ BASE_CONFIGURATION = {
             "hub_title": None,
             "hub_subtitle": None,
             "welcome": None,
-            "logo": "/hub/custom/images/jupyter_nebari_logo.svg",
-            "primary_color": "#4f4173",
-            "secondary_color": "#957da6",
-            "accent_color": "#32C574",
-            "text_color": "#111111",
-            "h1_color": "#652e8e",
-            "h2_color": "#652e8e",
             "version": f"v{__version__}",
         }
     },
@@ -340,7 +333,7 @@ def render_config(
     config["theme"]["jupyterhub"]["hub_title"] = f"Nebari - { project_name }"
     config["theme"]["jupyterhub"][
         "welcome"
-    ] = f"""Welcome to { nebari_domain }. It is maintained by <a href="http://quansight.com">Quansight staff</a>. The hub's configuration is stored in a github repository based on <a href="https://github.com/Quansight/nebari/">https://github.com/Quansight/nebari/</a>. To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/nebari/issues">github issue tracker</a>."""
+    ] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
 
     if auth_provider == "github":
         config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()
@@ -365,14 +358,14 @@ def render_config(
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment on Digital Ocean"
+        ] = "Your open source data science platform, hosted on Digital Ocean."
         config["digital_ocean"] = DIGITAL_OCEAN.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
     elif cloud_provider == "gcp":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment on Google Cloud Platform"
+        ] = "Your open source data science platform, hosted on Google Cloud Platform."
         config["google_cloud_platform"] = GOOGLE_PLATFORM.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
@@ -386,14 +379,14 @@ def render_config(
     elif cloud_provider == "azure":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment on Azure"
+        ] = "Your open source data science platform, hosted on Azure."
         config["azure"] = AZURE.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment on Amazon Web Services"
+        ] = "Your open source data science platform, hosted on Amazon Web Services."
         config["amazon_web_services"] = AMAZON_WEB_SERVICES.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
         if "AWS_DEFAULT_REGION" in os.environ:
@@ -402,13 +395,13 @@ def render_config(
     elif cloud_provider == "existing":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment"
+        ] = "Your open source data science platform."
         config["existing"] = EXISTING.copy()
 
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment"
+        ] = "Your open source data science platform."
         config["local"] = LOCAL.copy()
 
     config["profiles"] = DEFAULT_PROFILES.copy()
