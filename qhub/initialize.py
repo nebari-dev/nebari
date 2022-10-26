@@ -48,13 +48,6 @@ BASE_CONFIGURATION = {
             "hub_title": None,
             "hub_subtitle": None,
             "welcome": None,
-            "logo": "/hub/custom/images/jupyter_qhub_logo.svg",
-            "primary_color": "#4f4173",
-            "secondary_color": "#957da6",
-            "accent_color": "#32C574",
-            "text_color": "#111111",
-            "h1_color": "#652e8e",
-            "h2_color": "#652e8e",
             "version": f"v{__version__}",
         }
     },
