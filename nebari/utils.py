@@ -387,6 +387,7 @@ def deep_merge(*args):
         return d1
 
 
+@functools.lru_cache(maxsize=None)
 def set_docker_image_tag() -> str:
     """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
     try:
@@ -403,6 +404,7 @@ def set_docker_image_tag() -> str:
     return nebari_image_tag
 
 
+@functools.lru_cache(maxsize=None)
 def set_nebari_dask_version() -> str:
     """Set version of `nebari-dask` meta package."""
     try:

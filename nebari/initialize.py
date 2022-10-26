@@ -23,50 +23,116 @@ from .version import __version__
 
 logger = logging.getLogger(__name__)
 
-nebari_image_tag = set_docker_image_tag()
-nebari_dask_version = set_nebari_dask_version()
+WELCOME_HEADER_TEXT = "Your open source data science platform, hosted"
 
 
-BASE_CONFIGURATION = {
-    "project_name": None,
-    "provider": None,
-    "domain": None,
-    "certificate": {
-        "type": "self-signed",
-    },
-    "security": {
-        "authentication": None,
-    },
-    "default_images": {
-        "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{nebari_image_tag}",
-        "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{nebari_image_tag}",
-        "dask_worker": f"quay.io/nebari/nebari-dask-worker:{nebari_image_tag}",
-    },
-    "storage": {"conda_store": "200Gi", "shared_filesystem": "200Gi"},
-    "theme": {
-        "jupyterhub": {
-            "hub_title": None,
-            "hub_subtitle": None,
-            "welcome": None,
-            "version": f"v{__version__}",
-        }
-    },
-    "helm_extensions": [],
-    "monitoring": {
-        "enabled": True,
-    },
-    "argo_workflows": {
-        "enabled": True,
-    },
-    "kbatch": {
-        "enabled": True,
-    },
-    "cdsdashboards": {
-        "enabled": True,
-        "cds_hide_user_named_servers": True,
-        "cds_hide_user_dashboard_servers": False,
-    },
-}
+def base_configuration():
+    nebari_image_tag = set_docker_image_tag()
+    return {
+        "project_name": None,
+        "provider": None,
+        "domain": None,
+        "certificate": {
+            "type": "self-signed",
+        },
+        "security": {
+            "authentication": None,
+        },
+        "default_images": {
+            "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{nebari_image_tag}",
+            "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{nebari_image_tag}",
+            "dask_worker": f"quay.io/nebari/nebari-dask-worker:{nebari_image_tag}",
+        },
+        "storage": {"conda_store": "200Gi", "shared_filesystem": "200Gi"},
+        "theme": {
+            "jupyterhub": {
+                "hub_title": None,
+                "hub_subtitle": None,
+                "welcome": None,
+                "logo": "/hub/custom/images/jupyter_nebari_logo.svg",
+                "primary_color": "#4f4173",
+                "secondary_color": "#957da6",
+                "accent_color": "#32C574",
+                "text_color": "#111111",
+                "h1_color": "#652e8e",
+                "h2_color": "#652e8e",
+                "version": f"v{__version__}",
+            }
+        },
+        "helm_extensions": [],
+        "monitoring": {
+            "enabled": True,
+        },
+        "argo_workflows": {
+            "enabled": True,
+        },
+        "kbatch": {
+            "enabled": True,
+        },
+        "cdsdashboards": {
+            "enabled": True,
+            "cds_hide_user_named_servers": True,
+            "cds_hide_user_dashboard_servers": False,
+        },
+    }
+
+
+def default_environments():
+    nebari_dask_version = set_nebari_dask_version()
+    return {
+        "environment-dask.yaml": {
+            "name": "dask",
+            "channels": ["conda-forge"],
+            "dependencies": [
+                "python",
+                "ipykernel",
+                "ipywidgets==7.7.1",
+                f"nebari-dask =={nebari_dask_version}",
+                "python-graphviz",
+                "pyarrow",
+                "s3fs",
+                "gcsfs",
+                "numpy",
+                "numba",
+                "pandas",
+                {
+                    "pip": [
+                        "kbatch",
+                    ],
+                },
+            ],
+        },
+        "environment-dashboard.yaml": {
+            "name": "dashboard",
+            "channels": ["conda-forge"],
+            "dependencies": [
+                "python==3.9.13",
+                "ipykernel==6.15.1",
+                "ipywidgets==7.7.1",
+                f"nebari-dask=={nebari_dask_version}",
+                "param==1.12.2",
+                "python-graphviz==0.20.1",
+                "matplotlib==3.3.2",
+                "panel==0.13.1",
+                "voila==0.3.6",
+                "streamlit==1.10.0",
+                "dash==2.6.1",
+                "cdsdashboards-singleuser==0.6.2",
+            ],
+        },
+    }
+
+
+def __getattr__(name):
+    if name == "nebari_image_tag":
+        return set_docker_image_tag()
+    elif name == "nebari_dask_version":
+        return set_nebari_dask_version()
+    elif name == "BASE_CONFIGURATION":
+        return base_configuration()
+    elif name == "DEFAULT_ENVIRONMENTS":
+        return default_environments()
+
 
 CICD_CONFIGURATION = {
     "type": "PLACEHOLDER",
@@ -224,49 +290,6 @@ DEFAULT_PROFILES = {
     },
 }
 
-DEFAULT_ENVIRONMENTS = {
-    "environment-dask.yaml": {
-        "name": "dask",
-        "channels": ["conda-forge"],
-        "dependencies": [
-            "python",
-            "ipykernel",
-            "ipywidgets==7.7.1",
-            f"nebari-dask =={nebari_dask_version}",
-            "python-graphviz",
-            "pyarrow",
-            "s3fs",
-            "gcsfs",
-            "numpy",
-            "numba",
-            "pandas",
-            {
-                "pip": [
-                    "kbatch",
-                ],
-            },
-        ],
-    },
-    "environment-dashboard.yaml": {
-        "name": "dashboard",
-        "channels": ["conda-forge"],
-        "dependencies": [
-            "python==3.9.13",
-            "ipykernel==6.15.1",
-            "ipywidgets==7.7.1",
-            f"nebari-dask=={nebari_dask_version}",
-            "param==1.12.2",
-            "python-graphviz==0.20.1",
-            "matplotlib==3.3.2",
-            "panel==0.13.1",
-            "voila==0.3.6",
-            "streamlit==1.10.0",
-            "dash==2.6.1",
-            "cdsdashboards-singleuser==0.6.2",
-        ],
-    },
-}
-
 
 def render_config(
     project_name,
@@ -283,7 +306,7 @@ def render_config(
     disable_prompt=False,
     ssl_cert_email=None,
 ):
-    config = BASE_CONFIGURATION.copy()
+    config = base_configuration().copy()
     config["provider"] = cloud_provider
 
     if ci_provider is not None and ci_provider != "none":
@@ -358,14 +381,14 @@ def render_config(
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Your open source data science platform, hosted on Digital Ocean."
+        ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
         config["digital_ocean"] = DIGITAL_OCEAN.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
     elif cloud_provider == "gcp":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Your open source data science platform, hosted on Google Cloud Platform."
+        ] = f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
         config["google_cloud_platform"] = GOOGLE_PLATFORM.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
@@ -379,33 +402,29 @@ def render_config(
     elif cloud_provider == "azure":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Your open source data science platform, hosted on Azure."
+        ] = f"{WELCOME_HEADER_TEXT} on Azure"
         config["azure"] = AZURE.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Your open source data science platform, hosted on Amazon Web Services."
+        ] = f"{WELCOME_HEADER_TEXT} on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
         if "AWS_DEFAULT_REGION" in os.environ:
             config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
 
     elif cloud_provider == "existing":
-        config["theme"]["jupyterhub"][
-            "hub_subtitle"
-        ] = "Your open source data science platform."
+        config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
         config["existing"] = EXISTING.copy()
 
     elif cloud_provider == "local":
-        config["theme"]["jupyterhub"][
-            "hub_subtitle"
-        ] = "Your open source data science platform."
+        config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
         config["local"] = LOCAL.copy()
 
     config["profiles"] = DEFAULT_PROFILES.copy()
-    config["environments"] = DEFAULT_ENVIRONMENTS.copy()
+    config["environments"] = default_environments().copy()
 
     if ssl_cert_email is not None:
         if not re.match("^[^ @]+@[^ @]+\\.[^ @]+$", ssl_cert_email):
