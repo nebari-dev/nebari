@@ -23,6 +23,8 @@ from .version import __version__
 
 logger = logging.getLogger(__name__)
 
+WELCOME_HEADER_TEXT = "Your open source data science platform, hosted"
+
 
 def base_configuration():
     nebari_image_tag = set_docker_image_tag()
@@ -379,14 +381,14 @@ def render_config(
     if cloud_provider == "do":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment on Digital Ocean"
+        ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
         config["digital_ocean"] = DIGITAL_OCEAN.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
     elif cloud_provider == "gcp":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment on Google Cloud Platform"
+        ] = f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
         config["google_cloud_platform"] = GOOGLE_PLATFORM.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
@@ -400,14 +402,14 @@ def render_config(
     elif cloud_provider == "azure":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment on Azure"
+        ] = f"{WELCOME_HEADER_TEXT} on Azure"
         config["azure"] = AZURE.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
     elif cloud_provider == "aws":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment on Amazon Web Services"
+        ] = f"{WELCOME_HEADER_TEXT} on Amazon Web Services"
         config["amazon_web_services"] = AMAZON_WEB_SERVICES.copy()
         set_kubernetes_version(config, kubernetes_version, cloud_provider)
         if "AWS_DEFAULT_REGION" in os.environ:
@@ -416,13 +418,13 @@ def render_config(
     elif cloud_provider == "existing":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment"
+        ] = WELCOME_HEADER_TEXT
         config["existing"] = EXISTING.copy()
 
     elif cloud_provider == "local":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
-        ] = "Autoscaling Compute Environment"
+        ] = WELCOME_HEADER_TEXT
         config["local"] = LOCAL.copy()
 
     config["profiles"] = DEFAULT_PROFILES.copy()
@@ -474,7 +476,7 @@ def github_auto_provision(config, owner, repo):
             github.create_repository(
                 owner,
                 repo,
-                description=f'nebari {config["project_name"]}-{config["provider"]}',
+                description=f'Nebari {config["project_name"]}-{config["provider"]}',
                 homepage=f'https://{config["domain"]}',
             )
         except requests.exceptions.HTTPError as he:
