@@ -8,7 +8,7 @@ on:
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "qhub/**"
+      - "nebari/**"
       - "setup.cfg"
       - "pyproject.yoml"
   push:
@@ -21,7 +21,7 @@ on:
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "qhub/**"
+      - "nebari/**"
       - "setup.cfg"
       - "pyproject.yoml"
 
@@ -33,9 +33,9 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: "Set QHUB_IMAGE_TAG=main"
+      - name: "Set NEBARI_IMAGE_TAG=main"
         run: |
-          echo "QHUB_IMAGE_TAG=main" >> "$GITHUB_ENV"
+          echo "NEBARI_IMAGE_TAG=main" >> "$GITHUB_ENV"
           echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           echo "GITHUB_REF: ${GITHUB_REF}"

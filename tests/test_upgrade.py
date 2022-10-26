@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from qhub.upgrade import do_upgrade, load_yaml, verify
-from qhub.version import __version__, rounded_ver_parse
+from nebari.upgrade import do_upgrade, load_yaml, verify
+from nebari.version import __version__, rounded_ver_parse
 
 
 @pytest.fixture
@@ -21,7 +21,11 @@ def qhub_users_import_json():
 @pytest.mark.parametrize(
     "old_qhub_config_path_str,attempt_fixes,expect_upgrade_error",
     [
-        ("./qhub-config-yaml-files-for-upgrade/qhub-config-do-310.yaml", False, False),
+        (
+            "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310.yaml",
+            False,
+            False,
+        ),
         (
             "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310-customauth.yaml",
             False,
@@ -54,7 +58,7 @@ def test_upgrade_4_0(
     if not expect_upgrade_error:
         do_upgrade(
             tmp_qhub_config, attempt_fixes
-        )  # Would raise an error if invalid by current QHub version's standards
+        )  # Would raise an error if invalid by current Nebari version's standards
     else:
         with pytest.raises(ValueError):
             do_upgrade(tmp_qhub_config, attempt_fixes)
@@ -65,7 +69,7 @@ def test_upgrade_4_0(
 
     verify(
         config
-    )  # Would raise an error if invalid by current QHub version's standards
+    )  # Would raise an error if invalid by current Nebari version's standards
 
     assert len(config["security"]["keycloak"]["initial_root_password"]) == 16
 
@@ -77,11 +81,11 @@ def test_upgrade_4_0(
     # Check image versions have been bumped up
     assert (
         config["default_images"]["jupyterhub"]
-        == f"quansight/qhub-jupyterhub:v{__rounded_version__}"
+        == f"quansight/nebari-jupyterhub:v{__rounded_version__}"
     )
     assert (
         config["profiles"]["jupyterlab"][0]["kubespawner_override"]["image"]
-        == f"quansight/qhub-jupyterlab:v{__rounded_version__}"
+        == f"quansight/nebari-jupyterlab:v{__rounded_version__}"
     )
 
     assert (
@@ -90,7 +94,7 @@ def test_upgrade_4_0(
 
     # Keycloak import users json
     assert (
-        Path(tmp_path, "qhub-users-import.json").read_text().rstrip()
+        Path(tmp_path, "nebari-users-import.json").read_text().rstrip()
         == qhub_users_import_json
     )
 

@@ -10,13 +10,13 @@
         "pattern": "linuxize.com"
     },
     {
-        "pattern": "github-actions.qhub.dev"
+        "pattern": "github-actions.nebari.dev"
     },
     {
         "pattern": "127.0.0.1:8000"
     },
     {
-        "pattern": "myqhubsite.com"
+        "pattern": "mynebarisite.com"
     },
     {
         "pattern": "https://cloud.google.com"

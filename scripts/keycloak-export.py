@@ -4,14 +4,14 @@ import logging
 import pathlib
 import sys
 
-from qhub.keycloak import get_keycloak_admin_from_config
+from nebari.keycloak import get_keycloak_admin_from_config
 
 logging.basicConfig(level=logging.INFO)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Export users and groups from QHub.")
-    parser.add_argument("-c", "--config", help="qhub configuration", required=True)
+    parser = argparse.ArgumentParser(description="Export users and groups from Nebari.")
+    parser.add_argument("-c", "--config", help="nebari configuration", required=True)
     args = parser.parse_args()
 
     handle_keycloak_export(args)
@@ -26,7 +26,7 @@ def handle_keycloak_export(args):
 
     keycloak_admin = get_keycloak_admin_from_config(config_filename)
 
-    realm = {"id": "qhub", "realm": "qhub"}
+    realm = {"id": "nebari", "realm": "nebari"}
 
     def process_user(u):
         uid = u["id"]
