@@ -416,15 +416,11 @@ def render_config(
             config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
 
     elif cloud_provider == "existing":
-        config["theme"]["jupyterhub"][
-            "hub_subtitle"
-        ] = WELCOME_HEADER_TEXT
+        config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
         config["existing"] = EXISTING.copy()
 
     elif cloud_provider == "local":
-        config["theme"]["jupyterhub"][
-            "hub_subtitle"
-        ] = WELCOME_HEADER_TEXT
+        config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
         config["local"] = LOCAL.copy()
 
     config["profiles"] = DEFAULT_PROFILES.copy()
