@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from qhub.schema import InitInputs
-from qhub.utils import load_yaml
+from nebari.schema import InitInputs
+from nebari.utils import load_yaml
 
 PROJECT_NAME = "clitest"
 DOMAIN_NAME = "clitest.dev"
