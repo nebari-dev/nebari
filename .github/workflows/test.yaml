@@ -14,7 +14,7 @@ on:
   push:
     branches:
       - main
-      - release/\d{4}.\d{2}.\d{1,2}
+      - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test.yaml"
       - "tests/**"
@@ -27,7 +27,7 @@ on:
 
 jobs:
   test-general:
-    name: 'Test Package'
+    name: 'Pytest'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -48,15 +48,6 @@ jobs:
       - name: Install Nebari
         run: |
           pip install .[dev]
-      - name: Black Formatting
-        run: |
-          black --version
-          black nebari --diff --exclude "nebari/_version.py"
-          black --check nebari --exclude "nebari/_version.py"
-      - name: Flake8 Formatting
-        run: |
-          flake8 --version
-          flake8
       - name: Test Nebari
         run: |
           pytest --version

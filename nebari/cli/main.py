@@ -14,6 +14,7 @@ from nebari.cli.init import (
     check_auth_provider_creds,
     check_cloud_provider_creds,
     check_project_name,
+    check_ssl_cert_email,
     enum_to_list,
     guided_init_wizard,
     handle_init,
@@ -139,6 +140,7 @@ def init(
     ),
     ssl_cert_email: str = typer.Option(
         None,
+        callback=check_ssl_cert_email,
     ),
     disable_prompt: bool = typer.Option(
         False,
@@ -269,7 +271,7 @@ def deploy(
     dns_auto_provision: bool = typer.Option(
         False,
         "--dns-auto-provision",
-        help="Attempt to automatically provision DNS. For Auth0 is requires environment variables AUTH0_DOMAIN, AUTH0_CLIENTID, AUTH0_CLIENT_SECRET",
+        help="Attempt to automatically provision DNS, currently only available for `cloudflare`",
     ),
     disable_prompt: bool = typer.Option(
         False,
@@ -280,6 +282,16 @@ def deploy(
         False,
         "--disable-render",
         help="Disable auto-rendering in deploy stage",
+    ),
+    disable_checks: bool = typer.Option(
+        False,
+        "--disable-checks",
+        help="Disable the checks performed after each stage",
+    ),
+    skip_remote_state_provision: bool = typer.Option(
+        True,
+        "--skip-remote-state-provision",
+        help="Skip terraform state deployment which is often required in CI once the terraform remote state bootstrapping phase is complete",
     ),
 ):
     """
@@ -304,8 +316,8 @@ def deploy(
         dns_provider=dns_provider,
         dns_auto_provision=dns_auto_provision,
         disable_prompt=disable_prompt,
-        disable_checks=False,
-        skip_remote_state_provision=False,
+        disable_checks=disable_checks,
+        skip_remote_state_provision=skip_remote_state_provision,
     )
 
 
@@ -315,7 +327,8 @@ def destroy(
         ..., "-c", "--config", help="nebari configuration file path"
     ),
     output: str = typer.Option(
-        "./" "-o",
+        "./",
+        "-o",
         "--output",
         help="output directory",
     ),
@@ -333,10 +346,8 @@ def destroy(
     """
     Destroy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
     """
-    if not disable_prompt:
-        if typer.confirm("Are you sure you want to destroy your Nebari cluster?"):
-            raise typer.Abort()
-    else:
+
+    def _run_destroy(config=config, disable_render=disable_render):
         config_filename = Path(config)
         if not config_filename.is_file():
             raise ValueError(
@@ -351,6 +362,13 @@ def destroy(
             render_template(output, config, force=True)
 
         destroy_configuration(config_yaml)
+
+    if disable_prompt:
+        _run_destroy()
+    elif typer.confirm("Are you sure you want to destroy your Nebari cluster?"):
+        _run_destroy()
+    else:
+        raise typer.Abort()
 
 
 @app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
