@@ -1,27 +1,52 @@
-import logging
-import pathlib
+from pathlib import Path
+from typing import Tuple
+
+import typer
 
 from nebari.keycloak import do_keycloak
 
-logger = logging.getLogger(__name__)
+app_keycloak = typer.Typer(
+    add_completion=False,
+    no_args_is_help=True,
+    rich_markup_mode="rich",
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 
 
-def create_keycloak_subcommand(subparser):
-    subparser = subparser.add_parser("keycloak")
-    subparser.add_argument("-c", "--config", help="nebari configuration", required=True)
-    subparser.add_argument(
-        "keycloak_action",
-        nargs="+",
-        help="`adduser <username> [password]` or `listusers`",
+@app_keycloak.command(name="adduser")
+def add_user(
+    add_users: Tuple[str, str] = typer.Option(
+        ..., "--user", help="Provide both: <username> <password>"
+    ),
+    config_filename: str = typer.Option(
+        ...,
+        "-c",
+        "--config",
+        help="nebari configuration file path",
+    ),
+):
+    """Add a user to Keycloak. User will be automatically added to the [italic]analyst[/italic] group."""
+    if isinstance(config_filename, str):
+        config_filename = Path(config_filename)
+
+    args = ["adduser", add_users[0], add_users[1]]
+
+    do_keycloak(config_filename, *args)
+
+
+@app_keycloak.command(name="listusers")
+def list_users(
+    config_filename: str = typer.Option(
+        ...,
+        "-c",
+        "--config",
+        help="nebari configuration file path",
     )
-    subparser.set_defaults(func=handle_keycloak)
+):
+    """List the users in Keycloak."""
+    if isinstance(config_filename, str):
+        config_filename = Path(config_filename)
 
+    args = ["listusers"]
 
-def handle_keycloak(args):
-    config_filename = pathlib.Path(args.config)
-    if not config_filename.is_file():
-        raise ValueError(
-            f"passed in configuration filename={config_filename} must exist"
-        )
-
-    do_keycloak(config_filename, *args.keycloak_action)
+    do_keycloak(config_filename, *args)
