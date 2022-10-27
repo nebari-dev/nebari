@@ -10,7 +10,7 @@ from rich import print
 from ruamel import yaml
 from typer.core import TyperGroup
 
-from nebari.cli._init import (
+from nebari.cli.init import (
     check_auth_provider_creds,
     check_cloud_provider_creds,
     check_project_name,
@@ -19,7 +19,7 @@ from nebari.cli._init import (
     guided_init_wizard,
     handle_init,
 )
-from nebari.cli._keycloak import app_keycloak
+from nebari.cli.keycloak import app_keycloak
 from nebari.cost import infracost_report
 from nebari.deploy import deploy_configuration
 from nebari.destroy import destroy_configuration
@@ -176,8 +176,6 @@ def init(
     inputs.kubernetes_version = kubernetes_version
     inputs.ssl_cert_email = ssl_cert_email
     inputs.disable_prompt = disable_prompt
-    # TODO remove when Typer CLI is out of BETA
-    inputs.nebari = True
 
     handle_init(inputs)
 
