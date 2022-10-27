@@ -1,0 +1,9 @@
+# Configuration for repository issue template syncing
+# ref: https://github.com/BetaHuhn/repo-file-sync-action
+group:
+  # files shared across all repositories
+  - files:
+      - source: docs/api_docs/api_doc.md
+        dest: docs/docs/reference/api_doc.md
+    repos: |
+      nebari-dev/nebari-docs

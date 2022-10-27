@@ -1,0 +1,25 @@
+name: Sync API docs
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/api_docs/api_doc.md"
+  workflow_dispatch:
+
+jobs:
+  sync-api-docs:
+    name: Sync API docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository 🛎
+        uses: actions/checkout@v3
+
+      - name: Run GitHub File Sync ♻️
+        uses: BetaHuhn/repo-file-sync-action@v1.17.21
+        with:
+          GH_PAT: ${{ secrets.GH_PAT }}
+          BRANCH_PREFIX: github
+          COMMIT_BODY: "MAINT - Sync API doc files :robot:"
+          PR_LABELS: |
+            type: file sync ♻️
