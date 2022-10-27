@@ -174,8 +174,6 @@ def init(
     inputs.kubernetes_version = kubernetes_version
     inputs.ssl_cert_email = ssl_cert_email
     inputs.disable_prompt = disable_prompt
-    # TODO remove when Typer CLI is out of BETA
-    inputs.nebari = True
 
     handle_init(inputs)
 

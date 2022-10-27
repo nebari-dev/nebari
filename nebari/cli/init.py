@@ -77,13 +77,8 @@ def handle_init(inputs: InitInputs):
         disable_prompt=inputs.disable_prompt,
     )
 
-    # TODO remove when Typer CLI is out of BETA
-    whoami = "nebari"
-    if inputs.nebari:
-        whoami = "nebari"
-
     try:
-        with open(f"{whoami}-config.yaml", "x") as f:
+        with open("nebari-config.yaml", "x") as f:
             yaml.dump(config, f)
     except FileExistsError:
         raise ValueError(
@@ -289,8 +284,6 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
         # pull in default values for each of the below
         inputs = InitInputs()
-        # TODO remove when Typer CLI is out of BETA
-        inputs.nebari = True
 
         # CLOUD PROVIDER
         rich.print(
