@@ -50,7 +50,7 @@ def base_configuration():
                 "hub_subtitle": None,
                 "welcome": None,
                 "logo": "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg",
-                "version": f"{__version__}",
+                "display_version": True,
             }
         },
         "helm_extensions": [],
