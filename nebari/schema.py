@@ -528,7 +528,6 @@ def project_name_convention(value: typing.Any, values):
         return letter_dash_underscore_pydantic
 
 
-# CLEAN UP
 class InitInputs(Base):
     cloud_provider: typing.Type[ProviderEnum] = "local"
     project_name: str = ""
@@ -539,7 +538,7 @@ class InitInputs(Base):
     repository: typing.Union[str, None] = None
     repository_auto_provision: bool = False
     ci_provider: typing.Optional[CiEnum] = None
-    terraform_state: typing.Optional[TerraformStateEnum] = None
+    terraform_state: typing.Optional[TerraformStateEnum] = "remote"
     kubernetes_version: typing.Union[str, None] = None
     ssl_cert_email: typing.Union[str, None] = None
     disable_prompt: bool = False
