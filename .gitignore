@@ -3,7 +3,7 @@
 _build
 
 # setuptools scm
-qhub/_version.py
+nebari/_version.py
 
 # ignore terraform state
 .terraform
@@ -40,7 +40,7 @@ data*
 # modules - removed this because .terraform folder is in .gitignore of deployments,
 # this should cover imported modules while not gitignoring our new direct 'modules' folder.
 
-# ignore qhub files
-qhub-config.yaml
+# ignore nebari files
+nebari-config.yaml
 
 .vscode/

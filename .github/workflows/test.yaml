@@ -8,7 +8,7 @@ on:
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "qhub/**"
+      - "nebari/**"
       - "setup.cfg"
       - "pyproject.yoml"
   push:
@@ -21,7 +21,7 @@ on:
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "qhub/**"
+      - "nebari/**"
       - "setup.cfg"
       - "pyproject.yoml"
 
@@ -42,22 +42,22 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install QHub
+      - name: Install Nebari
         run: |
           pip install .[dev]
       - name: Black Formatting
         run: |
           black --version
-          black qhub --diff --exclude "qhub/_version.py"
-          black --check qhub --exclude "qhub/_version.py"
+          black nebari --diff --exclude "nebari/_version.py"
+          black --check nebari --exclude "nebari/_version.py"
       - name: Flake8 Formatting
         run: |
           flake8 --version
           flake8
-      - name: Test QHub
+      - name: Test Nebari
         run: |
           pytest --version
           pytest --ignore=tests_deployment
