@@ -289,7 +289,7 @@ def deploy(
         help="Disable the checks performed after each stage",
     ),
     skip_remote_state_provision: bool = typer.Option(
-        True,
+        False,
         "--skip-remote-state-provision",
         help="Skip terraform state deployment which is often required in CI once the terraform remote state bootstrapping phase is complete",
     ),
