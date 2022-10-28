@@ -33,7 +33,7 @@
 
 **⚠️ Warning ⚠️**
 
-> The project has recently been renamed from QHub to Nebari. If you're deployment is is still managed by `qhub`, performing an inplace upgrade will **IRREVOCABLY BREAK** your deployment; this will cause you to lose any data stored on the platform, including but not limited to, NFS (filesystem) data, conda-store environments, Keycloak users and groups, etc. Please [backup](https://docs.qhub.dev/en/latest/source/admin_guide/backup.html) your data before attempting an upgrade.
+> The project has recently been renamed from QHub to Nebari. If your deployment is is still managed by `qhub`, performing an inplace upgrade will **IRREVOCABLY BREAK** your deployment. This will cause you to lose any data stored on the platform, including but not limited to, NFS (filesystem) data, conda-store environments, Keycloak users and groups, etc. Please [backup](https://docs.qhub.dev/en/latest/source/admin_guide/backup.html) your data before attempting an upgrade.
 
 Automated data science platform. From [JupyterHub](https://jupyter.org/hub "Multi-user version of the Notebook") to Cloud environments with
 [Dask Gateway](https://docs.dask.org/ "Parallel computing in Python").
