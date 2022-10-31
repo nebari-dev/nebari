@@ -14,6 +14,16 @@ variable "cluster_subnets" {
   type        = list(string)
 }
 
+variable "region" {
+  description = "AWS region for EKS cluster"
+  type        = string
+}
+
+variable "kubernetes_version" {
+  description = "AWS kubernetes version for EKS cluster"
+  type        = string
+}
+
 variable "cluster_security_groups" {
   description = "AWS security groups to use for EKS cluster"
   type        = list(string)

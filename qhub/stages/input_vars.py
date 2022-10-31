@@ -3,7 +3,7 @@ import os
 import tempfile
 from urllib.parse import urlencode
 
-from qhub.constants import DEFAULT_CONDA_STORE_IMAGE_TAG
+from qhub.constants import DEFAULT_CONDA_STORE_IMAGE_TAG, DEFAULT_TRAEFIK_IMAGE_TAG
 
 
 def stage_01_terraform_state(stage_outputs, config):
@@ -100,6 +100,8 @@ def stage_02_infrastructure(stage_outputs, config):
         return {
             "name": config["project_name"],
             "environment": config["namespace"],
+            "region": config["amazon_web_services"]["region"],
+            "kubernetes_version": config["amazon_web_services"]["kubernetes_version"],
             "node_groups": [
                 {
                     "name": key,
@@ -189,6 +191,10 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
 
     return {
         **{
+            "traefik-image": {
+                "image": "traefik",
+                "tag": DEFAULT_TRAEFIK_IMAGE_TAG,
+            },
             "name": config["project_name"],
             "environment": config["namespace"],
             "node_groups": _calculate_node_groups(config),
@@ -276,6 +282,9 @@ def stage_07_kubernetes_services(stage_outputs, config):
                 },
             }
         },
+        "conda-store-default-namespace": config.get("conda_store", {}).get(
+            "default_namespace", "nebari-git"
+        ),
         "conda-store-extra-settings": config.get("conda_store", {}).get(
             "extra_settings", {}
         ),

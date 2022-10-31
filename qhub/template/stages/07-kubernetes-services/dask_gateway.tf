@@ -32,8 +32,9 @@ module "dask-gateway" {
   dask-etc-configmap-name = "dask-etc"
 
   # environments
-  conda-store-pvc   = module.conda-store-nfs-mount.persistent_volume_claim.name
-  conda-store-mount = "/home/conda"
+  conda-store-pvc               = module.conda-store-nfs-mount.persistent_volume_claim.name
+  conda-store-mount             = "/home/conda"
+  default-conda-store-namespace = var.conda-store-default-namespace
 
   # profiles
   profiles = var.dask-gateway-profiles

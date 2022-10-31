@@ -41,6 +41,8 @@ c.S3Storage.secret_key = config["minio-password"]
 c.S3Storage.region = "us-east-1"  # minio region default
 c.S3Storage.bucket_name = "conda-store"
 
+c.CondaStore.default_namespace = "global"
+c.CondaStore.filesystem_namespace = config["default-namespace"]
 
 # ==================================
 #        server settings
@@ -102,11 +104,12 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             if role in role_mappings
         }
         username = user_data["preferred_username"]
-        namespaces = {username, "default", "filesystem"}
+        default_namespace = config["default-namespace"]
+        namespaces = {username, "global", default_namespace}
         role_bindings = {
             f"{username}/*": {"admin"},
-            "filesystem/*": {"viewer"},
-            "default/*": roles,
+            f"{default_namespace}/*": {"viewer"},
+            "global/*": roles,
         }
 
         for group in user_data.get("groups", []):

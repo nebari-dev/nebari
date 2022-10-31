@@ -8,7 +8,34 @@ ______________________________________________________________________
 
 ### Feature changes and enhancements
 
+## Release v0.4.5 - October 14, 2022
 
+Enhancements for this release include:
+
+- Fix reported bug with Azure deployments due to outdated azurerm provider
+- All dashboards related conda-store environments are now visible as options for spawning dashboards
+- New Nebari entrypoint
+- New Typer-based CLI for Qhub (available using new entrypoint)
+- Renamed built-in conda-store namespaces and added customization support
+- Updated Traefik version to support the latest Kubernetes API
+
+## What's Changed
+* Update azurerm version by @tjcrone in https://github.com/Quansight/qhub/pull/1471
+* Make CDSDashboards.conda_envs dynamically update from function by @costrouc in https://github.com/Quansight/qhub/pull/1358
+* Fix get_latest_repo_tag fn by @iameskild in https://github.com/Quansight/qhub/pull/1485
+* Nebari Typer CLI  by @asmijafar20 in https://github.com/Quansight/qhub/pull/1443
+* Pass AWS `region`, `kubernetes_version` to terraform scripts by @iameskild in https://github.com/Quansight/qhub/pull/1493
+* Enable ebs-csi driver on AWS, add region + kubernetes_version vars by @iameskild in https://github.com/Quansight/qhub/pull/1494
+* Update traefik version + CRD by @iameskild in https://github.com/Quansight/qhub/pull/1489
+* [ENH] Switch default and filesystem name envs by @viniciusdc in https://github.com/Quansight/qhub/pull/1357
+
+## New Contributors
+* @tjcrone made their first contribution in https://github.com/Quansight/qhub/pull/1471
+
+## Migration note
+
+If you are upgrading from a version of Nebari prior to `0.4.5`, you will need to manually update your conda-store namespaces
+to be compatible with the new Nebari version. This is a one-time migration step that will need to be performed after upgrading to continue using the service. Refer to [How to migrate base conda-store namespaces](https://deploy-preview-178--nebari-docs.netlify.app/troubleshooting#conda-store-compatibility-migration-steps-when-upgrading-to-045) for further instructions.
 
 ## Release v0.4.4 - September 22, 2022
 
