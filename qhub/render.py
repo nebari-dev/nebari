@@ -1,5 +1,6 @@
 import functools
 import hashlib
+import json
 import os
 import pathlib
 import shutil
@@ -14,6 +15,7 @@ from qhub.deprecate import DEPRECATED_FILE_PATHS
 from qhub.provider.cicd.github import gen_qhub_linter, gen_qhub_ops
 from qhub.provider.cicd.gitlab import gen_gitlab_ci
 from qhub.stages import tf_objects
+import yaml
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
@@ -162,16 +164,18 @@ def render_contents(config: Dict):
 
     if config.get("ci_cd"):
         for fn, workflow in gen_cicd(config).items():
-            contents.update(
-                {
-                    fn: workflow.json(
-                        indent=2,
-                        by_alias=True,
-                        exclude_unset=True,
-                        exclude_defaults=True,
-                    )
-                }
+            workflow_json = workflow.json(
+                indent=2,
+                by_alias=True,
+                exclude_unset=True,
+                exclude_defaults=True,
             )
+            workflow_yaml = yaml.dump(
+                json.loads(workflow_json),
+                sort_keys=False,
+                indent=2
+            )
+            contents.update({fn: workflow_yaml})
 
     contents.update(gen_gitignore(config))
 
