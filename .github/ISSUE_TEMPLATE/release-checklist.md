@@ -64,5 +64,6 @@ Release captain responsible - <@gh_username>
 - [ ] [Tag, build and push docker images](https://github.com/nebari-dev/nebari-docker-images/releases/new)
 - [ ] [Update and cut release for `nebari-dask` meta package on Conda-Forge.](https://github.com/conda-forge/nebari-dask-feedstock)
 - [ ] [Cut PyPI release via GHA release workflow.](https://github.com/nebari-dev/nebari/releases/new)
+  - Avoid appending `v` to tag.
     - Copy release notes from `RELEASE.md`.
 - [ ] [Merge automated release PR for `nebari` on Conda-Forge.](https://github.com/conda-forge/nebari-feedstock)
