@@ -24,26 +24,27 @@ jobs:
           fetch-depth: 0
 
       - name: Create tag
+        # if present, remove leading `v`
         run: |
-          echo "NEBARI_TAG=$(git describe --tags)" >> $GITHUB_ENV
+          echo "NEBARI_TAG=$(git describe --tags | sed 's/^v//')" >> $GITHUB_ENV
           echo ${{ env.NEBARI_TAG }}
 
       - name: Build source and binary
         run: python -m build --sdist --wheel .
 
-      - name: Publish to test PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+      # - name: Publish to test PyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      #     repository_url: https://test.pypi.org/legacy/
 
-      - name: Test install from Test PyPI
-        run: |
-            pip install \
-            --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple \
-            nebari==${{ env.NEBARI_TAG }}
+      # - name: Test install from Test PyPI
+      #   run: |
+      #       pip install \
+      #       --index-url https://test.pypi.org/simple/ \
+      #       --extra-index-url https://pypi.org/simple \
+      #       nebari==${{ env.NEBARI_TAG }}
 
   release-pypi:
     name: Publish Nebari on PyPi
