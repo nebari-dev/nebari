@@ -118,8 +118,12 @@ def list_dask_environments(conda_store_mount):
 
 
 def base_node_group(options):
-    worker_node_group = config["profiles"][options.profile]["worker_extra_pod_config"]["nodeSelector"]
-    scheduler_node_group = config["profiles"][options.profile]["scheduler_extra_pod_config"]["nodeSelector"]
+    worker_node_group = config["profiles"][options.profile]["worker_extra_pod_config"][
+        "nodeSelector"
+    ]
+    scheduler_node_group = config["profiles"][options.profile][
+        "scheduler_extra_pod_config"
+    ]["nodeSelector"]
 
     return {
         "scheduler_extra_pod_config": {"nodeSelector": scheduler_node_group},
