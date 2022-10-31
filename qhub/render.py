@@ -171,9 +171,7 @@ def render_contents(config: Dict):
                 exclude_defaults=True,
             )
             workflow_yaml = yaml.dump(
-                json.loads(workflow_json),
-                sort_keys=False,
-                indent=2
+                json.loads(workflow_json), sort_keys=False, indent=2
             )
             contents.update({fn: workflow_yaml})
 
