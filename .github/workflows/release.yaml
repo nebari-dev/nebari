@@ -24,8 +24,9 @@ jobs:
           fetch-depth: 0
 
       - name: Create tag
+        # if present, remove leading `v`
         run: |
-          echo "NEBARI_TAG=$(git describe --tags)" >> $GITHUB_ENV
+          echo "NEBARI_TAG=$(git describe --tags | sed 's/^v//')" >> $GITHUB_ENV
           echo ${{ env.NEBARI_TAG }}
 
       - name: Build source and binary
