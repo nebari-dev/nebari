@@ -7,6 +7,7 @@ import shutil
 import sys
 from typing import Dict, List
 
+import yaml
 from rich import print
 from rich.table import Table
 from ruamel.yaml import YAML
@@ -15,7 +16,6 @@ from qhub.deprecate import DEPRECATED_FILE_PATHS
 from qhub.provider.cicd.github import gen_qhub_linter, gen_qhub_ops
 from qhub.provider.cicd.gitlab import gen_gitlab_ci
 from qhub.stages import tf_objects
-import yaml
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
