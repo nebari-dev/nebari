@@ -8,19 +8,20 @@ on:
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "qhub/**"
+      - "nebari/**"
       - "setup.cfg"
       - "pyproject.yoml"
   push:
     branches:
       - main
+      - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test-provider.yaml"
       - "tests/**"
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "qhub/**"
+      - "nebari/**"
       - "setup.cfg"
       - "pyproject.yoml"
 

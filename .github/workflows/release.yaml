@@ -24,9 +24,10 @@ jobs:
           fetch-depth: 0
 
       - name: Create tag
+        # if present, remove leading `v`
         run: |
-          echo "QHUB_TAG=$(git describe --tags)" >> $GITHUB_ENV
-          echo ${{ env.QHUB_TAG }}
+          echo "NEBARI_TAG=$(git describe --tags | sed 's/^v//')" >> $GITHUB_ENV
+          echo ${{ env.NEBARI_TAG }}
 
       - name: Build source and binary
         run: python -m build --sdist --wheel .
@@ -43,10 +44,10 @@ jobs:
             pip install \
             --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple \
-            qhub==${{ env.QHUB_TAG }}
+            nebari==${{ env.NEBARI_TAG }}
 
   release-pypi:
-    name: Publish QHub on PyPi
+    name: Publish Nebari on PyPi
     runs-on: ubuntu-latest
     needs: test-pypi
 
@@ -70,5 +71,4 @@ jobs:
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: ${{ secrets.PYPI_USERNAME }}
-          password: ${{ secrets.pypi_password }}
+          password: ${{ secrets.PYPI_API_TOKEN }}

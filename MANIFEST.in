@@ -1,4 +1,4 @@
-graft qhub
+graft nebari
 prune home
 prune docs
 prune architecture

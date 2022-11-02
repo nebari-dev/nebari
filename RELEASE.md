@@ -8,6 +8,41 @@ ______________________________________________________________________
 
 ### Feature changes and enhancements
 
+## Release 2022.10.1 - October 28, 2022
+
+### **WARNING**
+
+> The project has recently been renamed from QHub to Nebari. If your deployment is is still managed by `qhub`, performing an inplace upgrade will **IRREVOCABLY BREAK** your deployment. This will cause you to lose any data stored on the platform, including but not limited to, NFS (filesystem) data, conda-store environments, Keycloak users and groups, etc. Please [backup](https://www.nebari.dev/docs/how-tos/manual-backup) your data before attempting an upgrade.
+
+
+### Feature changes and enhancements
+
+We are happy to announce the first official release of Nebari (formly QHub)! This release lays the groundwork for many exciting new features and improvements to come.
+
+This release introduces several important changes which include:
+- a major project name change from QHub to Nebari - [PR 1508](https://github.com/nebari-dev/nebari/pull/1508)
+- a switch from the SemVer to CalVer versioning format - [PR 1501](https://github.com/nebari-dev/nebari/pull/1501)
+- a new, Typer-based CLI for improved user experience - [PR 1443](https://github.com/Quansight/qhub/pull/1443) + [PR 1519](https://github.com/nebari-dev/nebari/pull/1519)
+
+Although breaking changes are never fun, the Nebari development team believes these changes are important for the immediate and future success of the project. If you experience any issues or have any questions about these changes, feel free to open an [issue on our Github repo](https://github.com/nebari-dev/nebari/issues).
+
+
+### What's Changed
+* Switch to CalVer by @iameskild in https://github.com/nebari-dev/nebari/pull/1501
+* Update theme welcome messages to use Nebari by @pavithraes in https://github.com/nebari-dev/nebari/pull/1503
+* Name change QHub --> Nebari by @iameskild in https://github.com/nebari-dev/nebari/pull/1508
+* qhub/initialize: lazy load attributes that require remote information by @FFY00 in https://github.com/nebari-dev/nebari/pull/1509
+* Update README logo reference by @viniciusdc in https://github.com/nebari-dev/nebari/pull/1514
+* Add fix, enhancements and pytests for CLI by @iameskild in https://github.com/nebari-dev/nebari/pull/1498
+* Remove old CLI + cleanup by @iameskild in https://github.com/nebari-dev/nebari/pull/1519
+* Update `skip_remote_state_provision` default value by @viniciusdc in https://github.com/nebari-dev/nebari/pull/1521
+* Add release notes for 2022.10.1 in https://github.com/nebari-dev/nebari/pull/1523
+
+## New Contributors
+* @pavithraes made their first contribution in https://github.com/nebari-dev/nebari/pull/1503
+* @FFY00 made their first contribution in https://github.com/nebari-dev/nebari/pull/1509
+
+
 ## Release v0.4.5 - October 14, 2022
 
 Enhancements for this release include:
@@ -19,7 +54,7 @@ Enhancements for this release include:
 - Renamed built-in conda-store namespaces and added customization support
 - Updated Traefik version to support the latest Kubernetes API
 
-## What's Changed
+### What's Changed
 * Update azurerm version by @tjcrone in https://github.com/Quansight/qhub/pull/1471
 * Make CDSDashboards.conda_envs dynamically update from function by @costrouc in https://github.com/Quansight/qhub/pull/1358
 * Fix get_latest_repo_tag fn by @iameskild in https://github.com/Quansight/qhub/pull/1485
@@ -50,7 +85,7 @@ Enhancements for this release include:
 - Add option to supply additional arguments to ingress from qhub-config.yaml
 - Add support for Kubernetes Kind (local)
 
-## What's Changed
+### What's Changed
 * Add support for terraform binary download for M1 by @aktech in https://github.com/Quansight/qhub/pull/1370
 * Improvements in the QHub Cost estimate tool by @HarshCasper in https://github.com/Quansight/qhub/pull/1365
 * Add Python-3.10 by @HarshCasper in https://github.com/Quansight/qhub/pull/1352
