@@ -101,25 +101,28 @@ exclude = "/nebari/template/"
 
 
 [tool.codespell]
-builtin = [
-    "rare",
-    "clear",
-    "informal",
-    "names",
-]
-skip = [
-    "_build",
-    "*/build/*",
-    "*/node_modules/*",
-    "nebari.egg-info",
-    ".nox",
-    "*.git",
-    "*.js",
-    "*.json",
-    "*.yaml",
-    "*.yml",
-]
-ignore-words-list = ["AKS", "aks"]
+builtin = "rare,clear,informal,names"
+skip = "_build,*/build/*,*/node_modules/*,nebari.egg-info,.nox,*.git,*.js,*.json,*.yaml,*.yml"
+ignore-words-list = "AKS,aks"
+# builtin = [
+#     "rare",
+#     "clear",
+#     "informal",
+#     "names",
+# ]
+# skip = [
+#     "_build",
+#     "*/build/*",
+#     "*/node_modules/*",
+#     "nebari.egg-info",
+#     ".nox",
+#     "*.git",
+#     "*.js",
+#     "*.json",
+#     "*.yaml",
+#     "*.yml",
+# ]
+# ignore-words-list = ["AKS", "aks"]
 
 
 # [tool.setuptools_scm]

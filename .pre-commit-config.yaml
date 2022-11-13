@@ -21,7 +21,6 @@ repos:
   hooks:
   - id: codespell
     # --write (-w) enabled here
-    # see setup.cfg for more config options
     entry: codespell -w
     language: python
 
