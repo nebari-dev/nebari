@@ -18,6 +18,9 @@ author = "Quansight"
 BLOG_TITLE = title = html_title = "Docs"
 BLOG_AUTHOR = author = "Quansight"
 html_theme = "pydata_sphinx_theme"
+html_sidebars = {
+    "**": ["announcement", "search-field", "sidebar-nav-bs", "sidebar-ethical-ads"],
+}
 
 # The master toctree document.
 master_doc = "index"
@@ -95,7 +98,7 @@ myst_heading_anchors = 5
 # Import qhub version number
 here = os.path.abspath(os.path.dirname(__file__))
 __version__ = None
-exec(open(os.path.join(here, "../qhub/version.py")).read())
+exec(open(os.path.join(here, "../nebari/version.py")).read())
 
 qhub_version_string = __version__
 
