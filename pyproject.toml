@@ -1,3 +1,20 @@
+### Build ###
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+include = ["nebari"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "nebari/_version.py"
+local_scheme = "node-and-timestamp"
+
+
+### Project ###
 [project]
 name = "nebari"
 dynamic = ["version"]
@@ -15,14 +32,13 @@ keywords = [
     "azure",
     "nebari",
     "dask",
-    "jupyterhub",
+    "jupyter",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Build Tools",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -75,19 +91,11 @@ Source = "https://github.com/nebari-dev/nebari"
 nebari = "nebari.cli.main:app"
 
 
-### build-system ###
-[build-system]
-requires = ["hatchling", "hatch-vcs"]
-build-backend = "hatchling.build"
-
-
-### tool.hatch ###
-[tool.hatch.version]
-source = "vcs"
-
-[tool.hatch.build.hooks.vcs]
-version-file = "nebari/_version.py"
-local_scheme = "node-and-timestamp"
+### Tools ###
+[tool.codespell]
+builtin = "rare,clear,informal,names"
+skip = "_build,*/build/*,*/node_modules/*,nebari.egg-info,.nox,*.git,*.js,*.json,*.yaml,*.yml"
+ignore-words-list = "AKS,aks"
 
 [tool.black]
 line-length = 88
@@ -95,44 +103,5 @@ target-version = [
     'py38',
     'py39',
     'py310',
-    'py311',
 ]
 exclude = "/nebari/template/"
-
-
-[tool.codespell]
-builtin = "rare,clear,informal,names"
-skip = "_build,*/build/*,*/node_modules/*,nebari.egg-info,.nox,*.git,*.js,*.json,*.yaml,*.yml"
-ignore-words-list = "AKS,aks"
-# builtin = [
-#     "rare",
-#     "clear",
-#     "informal",
-#     "names",
-# ]
-# skip = [
-#     "_build",
-#     "*/build/*",
-#     "*/node_modules/*",
-#     "nebari.egg-info",
-#     ".nox",
-#     "*.git",
-#     "*.js",
-#     "*.json",
-#     "*.yaml",
-#     "*.yml",
-# ]
-# ignore-words-list = ["AKS", "aks"]
-
-
-# [tool.setuptools_scm]
-# write_to = "nebari/_version.py"
-# local_scheme = "node-and-timestamp"
-
-# [tool.hatch]
-# [tools.setuptools_scm.version_scheme]
-# calver_by_date = "calver-by-date"
-
-# TODO: set version dynamically
-# path = "nebari/_version.py"
-# pattern = "__version__ = version = '(?P<version>.*)'"

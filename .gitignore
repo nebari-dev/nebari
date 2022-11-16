@@ -44,3 +44,4 @@ data*
 nebari-config.yaml
 
 .vscode/
+.pytest_cache
