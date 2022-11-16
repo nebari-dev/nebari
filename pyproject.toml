@@ -89,19 +89,3 @@ Source = "https://github.com/nebari-dev/nebari"
 
 [project.scripts]
 nebari = "nebari.cli.main:app"
-
-
-### Tools ###
-[tool.codespell]
-builtin = "rare,clear,informal,names"
-skip = "_build,*/build/*,*/node_modules/*,nebari.egg-info,.nox,*.git,*.js,*.json,*.yaml,*.yml"
-ignore-words-list = "AKS,aks"
-
-[tool.black]
-line-length = 88
-target-version = [
-    'py38',
-    'py39',
-    'py310',
-]
-exclude = "/nebari/template/"
