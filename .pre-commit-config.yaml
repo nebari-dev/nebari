@@ -20,8 +20,12 @@ repos:
   rev: v2.1.0
   hooks:
   - id: codespell
-    # --write (-w) enabled here
-    entry: codespell -w
+    args: [
+      "--builtin=rare,clear,informal,names",
+      "--skip=_build,*/build/*,*/node_modules/*,nebari.egg-info,.nox,*.git,*.js,*.json,*.yaml,*.yml",
+      "--ignore-words-list=AKS,aks",
+      "--write",
+    ]
     language: python
 
 # python
@@ -29,13 +33,23 @@ repos:
   rev: 22.3.0
   hooks:
   - id: black
+    args: [
+      "--line-length=88",
+      "--target-version=py38",
+      "--target-version=py39",
+      "--target-version=py310",
+      "--exclude=/nebari/template/",
+    ]
 
 - repo: https://github.com/pycqa/flake8
   rev: 3.8.4
   hooks:
   - id: flake8
     args: [
-      "--builtins=c"
+      "--builtins=c",
+      "--ignore=E203,E266,E501,W503",
+      "--max-line-length=89",
+      "--exclude=[.git,__pycache__,docs/source/conf.py,nebari/template,build,dist,docs,home]"
     ]
 
 - repo: https://github.com/pycqa/isort
