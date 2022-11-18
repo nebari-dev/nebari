@@ -1,8 +1,13 @@
-# Changelog
+# Release notes
 
-> Contains description of QHub releases.
+*Contains description of Nebari releases.*
 
-______________________________________________________________________
+<!-- Note:
+The RELEASE.md file at the root of the Nebari codebase is the source of truth for all release notes.
+If you want to update the release notes, open a PR against nebari-dev/nebari.
+This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
+
+---
 
 ## Upcoming Release
 

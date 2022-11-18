@@ -1,0 +1,8 @@
+# Configuration for ./workflows/release-notes-sync
+# Ref: https://github.com/BetaHuhn/repo-file-sync-action
+
+group:
+  repos: nebari-dev/nebari-docs
+  files:
+    - source: RELEASE.md
+      dest: docs/reference/RELEASE.md
