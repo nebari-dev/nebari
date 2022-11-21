@@ -189,7 +189,7 @@ def validate(
         help="nebari configuration yaml file path, please pass in as -c/--config flag",
     ),
     enable_commenting: bool = typer.Option(
-        False, "--enable_commenting", help="Toggle PR commenting on GitHub Actions"
+        False, "--enable-commenting", help="Toggle PR commenting on GitHub Actions"
     ),
 ):
     """

@@ -159,6 +159,8 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
             "Paste your SPACES_SECRET_ACCESS_KEY",
             hide_input=True,
         )
+        os.environ["AWS_ACCESS_KEY_ID"] = os.getenv("SPACES_ACCESS_KEY_ID")
+        os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("AWS_SECRET_ACCESS_KEY")
 
     # AZURE
     elif cloud_provider == ProviderEnum.azure.value.lower() and (
