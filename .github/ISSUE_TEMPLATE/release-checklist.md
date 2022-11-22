@@ -30,7 +30,7 @@ Release captain responsible - <@gh_username>
 - [ ] Triage `bugs` to determine what be should included in the release and add it to the milestone.
 - [ ] What new features, if any, will be included in the release and add it to the milestone.
   - This will be, in large part, determined by the roadmap.
-  - Is there a focus for this release (i.e. UX/UI, stabilitation, etc.)?
+  - Is there a focus for this release (i.e. UX/UI, stabilization, etc.)?
 
 
 ## Pre-release process
