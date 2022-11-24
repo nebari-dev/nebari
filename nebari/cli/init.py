@@ -37,8 +37,8 @@ CREATE_AUTH0_CREDS = "https://auth0.com/docs/get-started/auth0-overview/create-a
 CREATE_GITHUB_OAUTH_CREDS = "https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app"
 
 # links to Nebari docs
-DOCS_HOME = "https://nebari.dev"
-CHOOSE_CLOUD_PROVIDER = "https://nebari.dev/getting-started/deploy"
+DOCS_HOME = "https://nebari.dev/docs/"
+CHOOSE_CLOUD_PROVIDER = "https://nebari.dev/docs/get-started/deploy"
 
 
 def enum_to_list(enum_cls):
@@ -544,7 +544,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 "You can now deploy your Nebari instance with:\n\n"
                 "\t[green]nebari deploy -c nebari-config.yaml[/green]\n\n"
                 "For more information, run [green]nebari deploy --help[/green] or check out the documentation: "
-                "[green]https://www.nebari.dev/how-tos/[/green]"
+                "[green]https://www.nebari.dev/docs/how-tos/[/green]"
             )
         )
 
