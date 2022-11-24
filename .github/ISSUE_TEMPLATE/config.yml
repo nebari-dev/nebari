@@ -1,11 +1,14 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Nebari Documentation 📖
-    url: https://docs.nebari.dev/en/stable/
-    about: Read Nebari docs and development guide.
-  - name: GitHub discussions 💬
-    url: https://github.com/Quansight/nebari/discussions
-    about: Keep up to date with the community discussions
-  - name: "(maintainers only) Blank issue"
-    url: https://github.com/Quansight/nebari/issues/new
+  - name: Nebari Documentation
+    url: https://www.nebari.dev/docs/
+    about: Check out the Nebari documentation
+  - name: Nebari Discussions - our user forum
+    url: https://github.com/orgs/nebari-dev/discussions
+    about: Ask questions, discuss RFDs and help other Nebari's users
+  - name: Documentation issues 📖
+    about: Did you find an error in our documentation? Report your findings here.
+    url: https://github.com/nebari-dev/nebari-docs/issues/new/choose
+  - name: (maintainers only) - Blank issue
+    url: https://github.com/nebari-dev/nebari/issues/new
     about: For maintainers only - should be used sparingly
