@@ -1,5 +1,5 @@
 # Self-Hosted Github Action Runners on AWS via Cirun.io
-# Reference: https://docs.cirun.io/reference/yaml.html
+# Reference: https://docs.cirun.io/reference/yaml
 runners:
   - name: run-k8s-tests
     # Cloud Provider: AWS

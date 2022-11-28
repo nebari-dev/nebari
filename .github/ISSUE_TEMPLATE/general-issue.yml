@@ -1,0 +1,52 @@
+name: "General issue 💡"
+description: "A general template for many kinds of issues."
+title: "<title>"
+labels: ["needs: triage 🚦"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Welcome 👋
+
+        Thanks for using Nebari and taking some time to contribute to this project.
+
+        Please fill out each section below. This info allows Nebari maintainers to diagnose (and fix!) your issue as
+        quickly as possible.
+        Before submitting a bug, please make sure the issue hasn't been already addressed by searching through
+        the past issues in this repository.
+
+        Useful links:
+
+        - Documentation: https://www.nebari.dev
+        - Contributing: https://www.nebari.dev/community/
+
+  - type: textarea
+    attributes:
+      label: Context
+      description: |
+        Describe what you are proposing. Provide as much context as possible and link to related issues and/or pull requests.
+        This section should contain "what" you are proposing.
+        Are you having any problems? Briefly describe what your pain points are.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Value and/or benefit
+      description: |
+        What is the value of adding this feature, and who will benefit from it? Include any information that could help us prioritize the issue.
+        This section should contain "why" this issue should be resolved.
+        ✨ If this is for a new feature or enhancement, consider adding [user stories](https://www.atlassian.com/agile/project-management/user-stories).
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: |
+        Links? References? Anything that will give us more context about the issue you are encountering!
+
+        Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
+    validations:
+      required: false

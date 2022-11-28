@@ -7,7 +7,7 @@ from .conftest import render_config_partial
     "k8s_version, expected", [(None, True), ("1.19", True), (1000, ValueError)]
 )
 def test_init(setup_fixture, k8s_version, expected):
-    (qhub_config_loc, render_config_inputs) = setup_fixture
+    (nebari_config_loc, render_config_inputs) = setup_fixture
     (
         project,
         namespace,
@@ -24,7 +24,7 @@ def test_init(setup_fixture, k8s_version, expected):
             render_config_partial(
                 project_name=project,
                 namespace=namespace,
-                qhub_domain=domain,
+                nebari_domain=domain,
                 cloud_provider=cloud_provider,
                 ci_provider=ci_provider,
                 auth_provider=auth_provider,
@@ -34,7 +34,7 @@ def test_init(setup_fixture, k8s_version, expected):
         render_config_partial(
             project_name=project,
             namespace=namespace,
-            qhub_domain=domain,
+            nebari_domain=domain,
             cloud_provider=cloud_provider,
             ci_provider=ci_provider,
             auth_provider=auth_provider,
