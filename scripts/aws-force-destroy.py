@@ -3,14 +3,14 @@ import logging
 import pathlib
 import time
 
-from qhub.utils import check_cloud_credentials, load_yaml, timer
+from nebari.utils import check_cloud_credentials, load_yaml, timer
 
 logging.basicConfig(level=logging.INFO)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Force Destroy AWS environment.")
-    parser.add_argument("-c", "--config", help="qhub configuration", required=True)
+    parser.add_argument("-c", "--config", help="nebari configuration", required=True)
     args = parser.parse_args()
 
     handle_force_destroy(args)
@@ -53,7 +53,7 @@ def parse_arn(arn):
 def force_destroy_configuration(config):
     logging.info("""FORCE Removing all infrastructure (not using terraform).""")
 
-    with timer(logging, "destroying QHub"):
+    with timer(logging, "destroying nebari"):
         # 01 Check we have cloud details we need
         check_cloud_credentials(config)
 
@@ -67,14 +67,14 @@ def force_destroy_configuration(config):
 
         if "amazon_web_services" not in config:
             raise ValueError(
-                "amazon_web_services section must exist in qhub-config.yaml"
+                "amazon_web_services section must exist in nebari-config.yaml"
             )
 
         region = config["amazon_web_services"].get("region", "").strip()
 
         if region == "":
             raise ValueError(
-                "amazon_web_services.region must exist in qhub-config.yaml"
+                "amazon_web_services.region must exist in nebari-config.yaml"
             )
 
         logging.info(f"Remove AWS project {project_name} in region {region}")

@@ -1,5 +1,5 @@
 {
-  description = "QHub";
+  description = "Nebari";
 
   inputs = {
     nixpkgs = { url = "github:nixos/nixpkgs/nixpkgs-unstable"; };
@@ -50,7 +50,7 @@
       ];
     in rec {
       defaultApp.x86_64-linux = pythonPackages.buildPythonPackage {
-        pname = "qhub";
+        pname = "nebari";
         version = "latest";
         format = "pyproject";
 

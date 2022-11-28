@@ -29,3 +29,4 @@ At minimum, the following services will need to be tested:
 - [ ] [Open VS-Code extension](https://nebari-docs.netlify.app/tutorials/using-vscode)
   - [ ] [Add the Python extension](https://nebari-docs.netlify.app/tutorials/using-vscode#adding-extensions)
   - [ ] [Create a `.py` file and run it](https://nebari-docs.netlify.app/tutorials/using-vscode#running-python-code)
+

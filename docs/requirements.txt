@@ -1,1 +1,1 @@
-jupyter-book
+jupyter-book # We don't use jupyter-book directly, it includes all the dependencies we need.
