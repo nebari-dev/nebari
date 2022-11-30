@@ -10,7 +10,7 @@ on:
       - "scripts/**"
       - "nebari/**"
       - "setup.cfg"
-      - "pyproject.yoml"
+      - "pyproject.toml"
   push:
     branches:
       - main
@@ -24,23 +24,40 @@ on:
       - "nebari/**"
       - "setup.cfg"
       - "pyproject.yoml"
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
 
 jobs:
   test-kubernetes:
+    if: github.event.pull_request.head.repo.name == github.repository || github.event_name != 'pull_request'
     name: "Kubernetes Tests"
-    runs-on: [self-hosted, cirun-runner]
+    runs-on: "cirun-runner--${{ github.run_id }}"
     defaults:
       run:
         shell: bash -l {0}
     steps:
+
       - name: "Set NEBARI_IMAGE_TAG=main"
         run: |
           echo "NEBARI_IMAGE_TAG=main" >> "$GITHUB_ENV"
           echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
           echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
           echo "GITHUB_REF: ${GITHUB_REF}"
+
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
+
+      - name: Checkout the branch from the PR that triggered the job
+        if: ${{ github.event_name == 'issue_comment' }}
+        run: |
+          hub version
+          hub pr checkout ${{ inputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Python
         uses: conda-incubator/setup-miniconda@v2
         env:
@@ -103,9 +120,9 @@ jobs:
 
       ### CYPRESS TESTS
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '16'
       - name: npm version
         run: |
           npm --version
@@ -129,7 +146,7 @@ jobs:
           nebari keycloak listusers --config "${NEBARI_CONFIG_PATH}"
 
       - name: Cypress run
-        uses: cypress-io/github-action@v2
+        uses: cypress-io/github-action@v4
         env:
           CYPRESS_BASE_URL: https://github-actions.nebari.dev/
         with:
@@ -137,7 +154,7 @@ jobs:
 
       - name: Save Cypress screenshots and videos
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: e2e-cypress
           path: |

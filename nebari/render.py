@@ -1,11 +1,13 @@
 import functools
 import hashlib
+import json
 import os
 import pathlib
 import shutil
 import sys
 from typing import Dict, List
 
+import yaml
 from rich import print
 from rich.table import Table
 from ruamel.yaml import YAML
@@ -162,16 +164,16 @@ def render_contents(config: Dict):
 
     if config.get("ci_cd"):
         for fn, workflow in gen_cicd(config).items():
-            contents.update(
-                {
-                    fn: workflow.json(
-                        indent=2,
-                        by_alias=True,
-                        exclude_unset=True,
-                        exclude_defaults=True,
-                    )
-                }
+            workflow_json = workflow.json(
+                indent=2,
+                by_alias=True,
+                exclude_unset=True,
+                exclude_defaults=True,
             )
+            workflow_yaml = yaml.dump(
+                json.loads(workflow_json), sort_keys=False, indent=2
+            )
+            contents.update({fn: workflow_yaml})
 
     contents.update(gen_gitignore(config))
 
