@@ -1,8 +1,13 @@
-# Changelog
+# Release notes
 
-> Contains description of QHub releases.
+*Contains description of Nebari releases.*
 
-______________________________________________________________________
+<!-- Note:
+The RELEASE.md file at the root of the Nebari codebase is the source of truth for all release notes.
+If you want to update the release notes, open a PR against nebari-dev/nebari.
+This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
+
+---
 
 ## Upcoming Release
 
@@ -38,10 +43,11 @@ Although breaking changes are never fun, the Nebari development team believes th
 * Update `skip_remote_state_provision` default value by @viniciusdc in https://github.com/nebari-dev/nebari/pull/1521
 * Add release notes for 2022.10.1 in https://github.com/nebari-dev/nebari/pull/1523
 
-## New Contributors
+### New Contributors
 * @pavithraes made their first contribution in https://github.com/nebari-dev/nebari/pull/1503
 * @FFY00 made their first contribution in https://github.com/nebari-dev/nebari/pull/1509
 
+**Note: The following releases (v0.4.5 and lower) were made under the name `Quansight/qhub`.**
 
 ## Release v0.4.5 - October 14, 2022
 
@@ -64,10 +70,10 @@ Enhancements for this release include:
 * Update traefik version + CRD by @iameskild in https://github.com/Quansight/qhub/pull/1489
 * [ENH] Switch default and filesystem name envs by @viniciusdc in https://github.com/Quansight/qhub/pull/1357
 
-## New Contributors
+### New Contributors
 * @tjcrone made their first contribution in https://github.com/Quansight/qhub/pull/1471
 
-## Migration note
+### Migration note
 
 If you are upgrading from a version of Nebari prior to `0.4.5`, you will need to manually update your conda-store namespaces
 to be compatible with the new Nebari version. This is a one-time migration step that will need to be performed after upgrading to continue using the service. Refer to [How to migrate base conda-store namespaces](https://deploy-preview-178--nebari-docs.netlify.app/troubleshooting#conda-store-compatibility-migration-steps-when-upgrading-to-045) for further instructions.
@@ -119,7 +125,7 @@ Enhancements for this release include:
 * Pin dask ipywidgets version to `7.7.1` by @viniciusdc in https://github.com/Quansight/qhub/pull/1442
 * Set qhub-dask version to 0.4.4 by @iameskild in https://github.com/Quansight/qhub/pull/1470
 
-## New Contributors
+### New Contributors
 * @konkapv made their first contribution in https://github.com/Quansight/qhub/pull/1424
 
 ## Release v0.4.3 - July 7, 2022
