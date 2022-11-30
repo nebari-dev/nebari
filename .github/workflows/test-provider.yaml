@@ -8,21 +8,27 @@ on:
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "qhub/**"
+      - "nebari/**"
       - "setup.cfg"
       - "pyproject.yoml"
   push:
     branches:
       - main
+      - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test-provider.yaml"
       - "tests/**"
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "qhub/**"
+      - "nebari/**"
       - "setup.cfg"
       - "pyproject.yoml"
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
 
 env:
   DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
@@ -36,6 +42,7 @@ env:
 
 jobs:
   test-render-providers:
+    if: github.event.pull_request.head.repo.name == github.repository || github.event_name != 'pull_request'
     name: 'Test Nebari Provider'
     runs-on: ubuntu-latest
     strategy:
@@ -54,6 +61,13 @@ jobs:
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
+
+      - name: Checkout the branch from the PR that triggered the job
+        if: ${{ github.event_name == 'issue_comment' }}
+        run: hub pr checkout ${{ inputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Python
         uses: actions/setup-python@v1
         with:

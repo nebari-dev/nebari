@@ -123,8 +123,8 @@ prometheus
 pydantic
 pydata
 pypi
-qhub
-Qhub
+nebari
+Nebari
 quansight
 Quansight
 Rajat

@@ -3,8 +3,13 @@ name: Infracost CI
 on:
   pull_request:
     paths:
-      - 'qhub/template/stages/02-infrastructure'
+      - 'nebari/template/stages/02-infrastructure'
       - '.github/workflows/infracost.yml'
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -16,7 +21,8 @@ env:
 
 jobs:
   infracost:
-    name: Run Infracost on QHub Infrastructure
+    if: github.event.pull_request.head.repo.name == github.repository || github.event_name != 'pull_request'
+    name: Run Infracost on Nebari Infrastructure
     runs-on: ubuntu-latest
 
     strategy:
@@ -38,6 +44,12 @@ jobs:
         with:
           ref: '${{ github.event.pull_request.base.ref }}'
 
+      - name: Checkout the branch from the PR that triggered the job
+        if: ${{ github.event_name == 'issue_comment' }}
+        run: hub pr checkout ${{ inputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       # Detects changes in the infrastructure for each specific cloud service provider
       - name: Detect changed infrastructure
         uses: dorny/paths-filter@v2
@@ -45,12 +57,12 @@ jobs:
         with:
           filters: |
             aws:
-              - 'qhub/template/stages/02-infrastructure/aws/**'
-              - 'qhub/template/stages/01-terraform-state/aws/**'
+              - 'nebari/template/stages/02-infrastructure/aws/**'
+              - 'nebari/template/stages/01-terraform-state/aws/**'
             gcp:
-              - 'qhub/template/stages/02-infrastructure/gcp/**'
+              - 'nebari/template/stages/02-infrastructure/gcp/**'
             azure:
-              - 'qhub/template/stages/02-infrastructure/azure/**'
+              - 'nebari/template/stages/02-infrastructure/azure/**'
 
       # Setup Google Cloud SDK
       - name: Set up Cloud SDK
@@ -72,19 +84,19 @@ jobs:
         with:
           python-version: 3.8
 
-      # Install QHub
-      - name: Install QHub
+      # Install Nebari
+      - name: Install Nebari
         if: steps.changes.outputs.${{ matrix.provider }} == 'true'
         run: |
           pip install .[dev]
 
-      # Initialize QHub and render the infrastructure
-      - name: QHub initialize and render
+      # Initialize Nebari and render the infrastructure
+      - name: Nebari initialize and render
         run: |
           mkdir data && cd data
-          qhub init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
-          cat qhub-config.yaml
-          qhub render -c qhub-config.yaml
+          nebari init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.nebari.dev" --auth-provider github --disable-prompt
+          cat nebari-config.yaml
+          nebari render -c nebari-config.yaml
 
       # Run Infracost on the base branch to generate the baseline cost
       - name: Generate Infracost cost estimate baseline
@@ -98,19 +110,19 @@ jobs:
       - name: Checkout PR branch
         uses: actions/checkout@v3
 
-      # Install QHub
-      - name: Install QHub
+      # Install Nebari
+      - name: Install Nebari
         if: steps.changes.outputs.${{ matrix.provider }} == 'true'
         run: |
           pip install .[dev]
 
-      # Initialize QHub and render the infrastructure
-      - name: QHub initialize and render
+      # Initialize Nebari and render the infrastructure
+      - name: Nebari initialize and render
         run: |
           mkdir data && cd data
-          qhub init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.qhub.dev" --auth-provider github --disable-prompt
-          cat qhub-config.yaml
-          qhub render -c qhub-config.yaml
+          nebari init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.nebari.dev" --auth-provider github --disable-prompt
+          cat nebari-config.yaml
+          nebari render -c nebari-config.yaml
 
       # Generate Infracost diff cost estimate only if the file has been changed
       - name: Generate Infracost diff
@@ -140,11 +152,19 @@ jobs:
             echo "No changes detected in infrastructure"
           fi
 
+      # parse pull_request.base.ref before generating artifacts
+      - name: Parse artifact name
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        id: parse
+        run: |
+          echo "artifact_name_base=$(echo $BASE_REF | sed 's/\//-/g')" >> $GITHUB_OUTPUT
+
       # Save artifacts to the PR
       - name: Save artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: infracost-data-${{ matrix.provider }}-${{ github.event.pull_request.base.ref }}
+          name: infracost-data-${{ matrix.provider }}-${{ steps.parse.outputs.artifact_name_base }}
           path: |
             /tmp/infracost.json
             /tmp/infracost-base.json

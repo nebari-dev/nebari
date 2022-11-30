@@ -5,9 +5,11 @@ build-backend = "setuptools.build_meta"
 [tool.black]
 line-length = 88
 target-version = ['py37', 'py38']
-exclude = '/qhub/template/'
+exclude = '/nebari/template/'
 
 [tool.setuptools_scm]
-write_to = "qhub/_version.py"
-version_scheme = "release-branch-semver"
+write_to = "nebari/_version.py"
 local_scheme = "node-and-timestamp"
+
+[tools.setuptools_scm.version_scheme]
+calver_by_date = "calver-by-date"
