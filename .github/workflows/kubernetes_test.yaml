@@ -103,9 +103,9 @@ jobs:
 
       ### CYPRESS TESTS
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
-          node-version: '14'
+          node-version: '16'
       - name: npm version
         run: |
           npm --version
@@ -129,7 +129,7 @@ jobs:
           nebari keycloak listusers --config "${NEBARI_CONFIG_PATH}"
 
       - name: Cypress run
-        uses: cypress-io/github-action@v2
+        uses: cypress-io/github-action@v4
         env:
           CYPRESS_BASE_URL: https://github-actions.nebari.dev/
         with:
@@ -137,7 +137,7 @@ jobs:
 
       - name: Save Cypress screenshots and videos
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: e2e-cypress
           path: |
