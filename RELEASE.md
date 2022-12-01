@@ -42,7 +42,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Add release notes for 2022.11.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/1584
 
 
-## New Contributors
+### New Contributors
 * @nebari-sensei made their first contribution in https://github.com/nebari-dev/nebari/pull/1550
 * @limacarvalho made their first contribution in https://github.com/nebari-dev/nebari/pull/1487
 
