@@ -40,7 +40,7 @@ jobs:
           repository_url: https://test.pypi.org/legacy/
 
       - name: Sleep
-        run: sleep 60
+        run: sleep 90
 
       - name: Test install from Test PyPI
         run: |
