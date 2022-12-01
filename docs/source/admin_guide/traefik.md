@@ -4,9 +4,11 @@
 
 ### Creating the certificate
 
-[Lego](https://go-acme.github.io/lego/installation/) is a command line tool for provisioning certificates for a domain. If you are trying to install QHub within an enterprise you
-may need to contact someone in IT to create the certificate and key-pair for you. Ensure that this certificate has all of the domains that QHub is running on. Lego supports
-[multiple DNS providers](https://go-acme.github.io/lego/dns/). For this example we will assume Cloudflare as your DNS provider.
+[Lego](https://go-acme.github.io/lego/installation/) is a command line tool for provisioning certificates for a domain.
+If you are trying to install QHub within an enterprise you may need to contact someone in IT to create the certificate
+and key-pair for you. Ensure that this certificate has all of the domains that QHub is running on. Lego supports
+[multiple DNS providers](https://go-acme.github.io/lego/dns/). For this example we will assume Cloudflare as your DNS
+provider.
 
 ```shell
 export CLOUDFLARE_DNS_API_TOKEN=1234567890abcdefghijklmnopqrstuvwxyz

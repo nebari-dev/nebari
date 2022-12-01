@@ -9,9 +9,11 @@ Open source tooling for data science research, development, and deployment.
 
 # What is QHub?
 
-QHUb is an integrated data science environment designed and developed by scientists at [**Quansight**](https://www.quansight.com/). It enables teams to build and maintain a cost
-effective and scalable compute/data science platform in the Cloud, providing an [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) platform that
-streamlines the deployment of data science infrastructure.
+QHUb is an integrated data science environment designed and developed by scientists at
+[**Quansight**](https://www.quansight.com/). It enables teams to build and maintain a cost effective and scalable
+compute/data science platform in the Cloud, providing an
+[**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) platform that streamlines the
+deployment of data science infrastructure.
 
 ```{toctree}
 :maxdepth: 1

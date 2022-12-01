@@ -27,7 +27,7 @@ on:
 
 jobs:
   test-general:
-    name: 'Pytest'
+    name: "Pytest"
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -37,8 +37,8 @@ jobs:
           - "3.9"
           - "3.10"
     steps:
-      - name: 'Checkout Infrastructure'
-        uses: actions/checkout@main
+      - name: "Checkout Infrastructure"
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Set up Python

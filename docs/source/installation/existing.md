@@ -1,19 +1,22 @@
 # Deploy QHub to an existing kubernetes cluster
 
-If you have an existing kubernetes cluster running in the cloud and would like to deploy QHub on the same cluster, this is the guide for you.
+If you have an existing kubernetes cluster running in the cloud and would like to deploy QHub on the same cluster, this
+is the guide for you.
 
-To illustrate how this is done, the guide walks through a simple example. The guide below is meant to serve as a reference, the setup of your existing kubernetes might differ
-rending some of these additional setups steps unnecessary.
+To illustrate how this is done, the guide walks through a simple example. The guide below is meant to serve as a
+reference, the setup of your existing kubernetes might differ rending some of these additional setups steps unnecessary.
 
 ## Deploy QHub to an existing AWS EKS cluster
 
 In this example, there already exists a basic web app running on an EKS cluster.
 [Here is the tutorial on how to setup this particular Guestbook web app](https://logz.io/blog/amazon-eks-cluster/).
 
-The existing EKS cluster has one VPC with three subnets (each in their own Availability Zone) and no node groups. There are three nodes each running on a `t3.medium` EC2 instance,
-unfortunately QHub's `general` node group requires a more powerful instance type.
+The existing EKS cluster has one VPC with three subnets (each in their own Availability Zone) and no node groups. There
+are three nodes each running on a `t3.medium` EC2 instance, unfortunately QHub's `general` node group requires a more
+powerful instance type.
 
-Now create three new node groups in preparation for the incoming QHub deployment. Before proceeding, ensure the following:
+Now create three new node groups in preparation for the incoming QHub deployment. Before proceeding, ensure the
+following:
 
 - that the subnets can
   ["automatically assign public IP addresses to instances launched into it"](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-ip-addressing.html#subnet-public-ip)
@@ -74,8 +77,9 @@ Now create three new node groups in preparation for the incoming QHub deployment
 
 Skip this step if node groups already exist.
 
-For AWS, [follow this guide to create new node groups](https://docs.aws.amazon.com/eks/latest/userguide/create-managed-node-group.html). Be sure to fill in the following fields
-carefully:
+For AWS,
+[follow this guide to create new node groups](https://docs.aws.amazon.com/eks/latest/userguide/create-managed-node-group.html).
+Be sure to fill in the following fields carefully:
 
 - "Node Group configuration"
   - `Name` must be either `general`, `user` or `worker`
@@ -247,4 +251,5 @@ Once updated, deploy QHub. When prompted be ready to manually update the DNS rec
 python -m qhub deploy --config qhub-config.yaml
 ```
 
-The deployment completes successfully and all the pods appear to be running and so do the pre-existing Guestbook web app.
+The deployment completes successfully and all the pods appear to be running and so do the pre-existing Guestbook web
+app.
