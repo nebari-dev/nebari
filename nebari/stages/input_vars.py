@@ -155,7 +155,7 @@ def stage_03_kubernetes_initialize(stage_outputs, config):
     }
 
 
-def _calculate_note_groups(config):
+def _calculate_node_groups(config):
     if config["provider"] == "aws":
         return {
             group: {"key": "eks.amazonaws.com/nodegroup", "value": group}
@@ -197,7 +197,7 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
             },
             "name": config["project_name"],
             "environment": config["namespace"],
-            "node_groups": _calculate_note_groups(config),
+            "node_groups": _calculate_node_groups(config),
             **config.get("ingress", {}).get("terraform_overrides", {}),
         },
         **cert_details,
@@ -219,7 +219,7 @@ def stage_05_kubernetes_keycloak(stage_outputs, config):
         "overrides": [
             json.dumps(config["security"].get("keycloak", {}).get("overrides", {}))
         ],
-        "node-group": _calculate_note_groups(config)["general"],
+        "node-group": _calculate_node_groups(config)["general"],
     }
 
 
@@ -270,7 +270,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "realm_id": stage_outputs["stages/06-kubernetes-keycloak-configuration"][
             "realm_id"
         ]["value"],
-        "node_groups": _calculate_note_groups(config),
+        "node_groups": _calculate_node_groups(config),
         # conda-store
         "conda-store-environments": config["environments"],
         "conda-store-filesystem-storage": config["storage"]["conda_store"],

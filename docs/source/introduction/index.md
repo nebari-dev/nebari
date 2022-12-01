@@ -2,11 +2,11 @@
 
 QHub is an open source tool for data science research, development, and deployment.
 
-QHub is [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) that simplifies the deployment of data science projects using JupyterHub and Dask Gateway
-for you and your team.
+QHub is [**Infrastructure as Code**](https://en.wikipedia.org/wiki/Infrastructure_as_code) that simplifies the
+deployment of data science projects using JupyterHub and Dask Gateway for you and your team.
 
-Designed to simplify the deployment and maintenance of scalable computational platforms in the cloud, QHub is ideal for organizations that need a shared compute platform that's
-flexible, accessible, and scalable.
+Designed to simplify the deployment and maintenance of scalable computational platforms in the cloud, QHub is ideal for
+organizations that need a shared compute platform that's flexible, accessible, and scalable.
 
 ## QHub Technology Stack
 
@@ -16,25 +16,33 @@ flexible, accessible, and scalable.
 
 The technology stack is an integration of the following existing open source libraries:
 
-- [**Terraform**](https://www.terraform.io/intro/index.html) a tool for building, changing, and versioning infrastructure.
+- [**Terraform**](https://www.terraform.io/intro/index.html) a tool for building, changing, and versioning
+  infrastructure.
 - [**Kubernetes**](https://kubernetes.io/docs/home/) a cloud-agnostic orchestration system
 - [**Helm**](https://helm.sh/): a package manager for Kubernetes
 - [**JupyterHub**](https://jupyter.org/hub): a shareable compute platform for data science
-- [**JupyterLab**](https://jupyterlab.readthedocs.io/en/stable/): a web-based interactive development environment for Jupyter Notebooks
+- [**JupyterLab**](https://jupyterlab.readthedocs.io/en/stable/): a web-based interactive development environment for
+  Jupyter Notebooks
 - [**Dask**](https://docs.dask.org/en/latest/): a scalable and flexible library for parallel computing in Python
   - [**Dask-Gateway**](https://gateway.dask.org/): a secure, multi-tenant server for managing Dask clusters
 - [**Keycloak**](https://www.keycloak.org/) Open Source Identity and Access Management
-- [**GitHub Actions**](https://docs.github.com/en/actions): a tool to automate, customize, and execute software development workflows in a GitHub repository.
+- [**GitHub Actions**](https://docs.github.com/en/actions): a tool to automate, customize, and execute software
+  development workflows in a GitHub repository.
 - [**traefik**](https://traefik.io/) for routing web/tcp traffic inside cluster
-  - [**traefik-forward-auth**](https://github.com/thomseddon/traefik-forward-auth) single sign on and easy securing of web applications
+  - [**traefik-forward-auth**](https://github.com/thomseddon/traefik-forward-auth) single sign on and easy securing of
+    web applications
 
 Amongst the newly created open source libraries on the tech stack are:
 
-- [**jupyterhub-ssh**](https://github.com/yuvipanda/jupyterhub-ssh) brings the SSH experience to a modern cluster manager.
-- [**jupyter-videochat**](https://github.com/yuvipanda/jupyter-videochat) allows video-chat with JupyterHub peers inside JupyterLab, powered by Jitsi.
-- [**conda-store**](https://github.com/quansight/conda-store) serves identical conda environments and controls its life-cycle.
-- [**conda-docker**](https://github.com/conda-incubator/conda-docker), an extension to the docker concept of having declarative environments that are associated with Docker images
-  allowing tricks and behaviour that otherwise would not be allowed.
+- [**jupyterhub-ssh**](https://github.com/yuvipanda/jupyterhub-ssh) brings the SSH experience to a modern cluster
+  manager.
+- [**jupyter-videochat**](https://github.com/yuvipanda/jupyter-videochat) allows video-chat with JupyterHub peers inside
+  JupyterLab, powered by Jitsi.
+- [**conda-store**](https://github.com/quansight/conda-store) serves identical conda environments and controls its
+  life-cycle.
+- [**conda-docker**](https://github.com/conda-incubator/conda-docker), an extension to the docker concept of having
+  declarative environments that are associated with Docker images allowing tricks and behaviour that otherwise would not
+  be allowed.
 - [**vscode**](https://github.com/cdr/code-server) built-in web editor tied to jupyterlab server
 
 ### Integrations
