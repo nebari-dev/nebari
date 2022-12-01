@@ -32,12 +32,12 @@ jobs:
       - name: Build source and binary
         run: python -m build --sdist --wheel .
 
-      - name: Publish to test PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+      # - name: Publish to test PyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      #     repository_url: https://test.pypi.org/legacy/
 
       - name: Sleep
         run: sleep 90
