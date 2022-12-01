@@ -21,12 +21,13 @@ repos:
       - id: trailing-whitespace
       - id: check-json
       - id: check-yaml
-      - id: check-toml
         # jinja2 templates for helm charts
         exclude: "nebari/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)"
         args: [--allow-multiple-documents]
+      - id: check-toml
       # Lint: Checks that non-binary executables have a proper shebang.
       - id: check-executables-have-shebangs
+        exclude: "^nebari/template/"
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.2.2
