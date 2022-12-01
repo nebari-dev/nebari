@@ -15,7 +15,6 @@ on:
     branches:
       - main
       - release/\d{4}.\d{1,2}.\d{1,2}
-      - precheck
     paths:
       - ".github/workflows/test-provider.yaml"
       - "tests/**"
@@ -42,19 +41,6 @@ env:
 
 
 jobs:
-
-  precheck:
-    name: "Check for following jobs"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check
-        run: |
-          echo "HEAD Repository: ${{ github.event.pull_request.head.repo.full_name }}"
-          echo "github.repository: ${{ github.repository}}"
-          echo "github.event_name: ${{ github.event_name }}"
-          echo "Should the following job run:"
-          echo ${{ github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request' }}
-
   test-render-providers:
     if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
     name: 'Test Nebari Provider'
