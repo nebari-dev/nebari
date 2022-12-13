@@ -1,16 +1,15 @@
 ---
 name: Testing Checklist
 about: For maintainers only.
-title: 'Testing checklist for <version>'
+title: "Testing checklist for <version>"
 labels:
- - 'type: release 🏷'
-assignees: ''
-
+  - "type: release 🏷"
+assignees: ""
 ---
 
 # Testing Checklist
 
-*Use/modify this checklist to capture the platform's core services that need to be manually tested .*
+_Use/modify this checklist to capture the platform's core services that need to be manually tested ._
 
 ## Manual testing: core services
 
@@ -18,6 +17,7 @@ If the integration tests for all of the cloud providers are successful, that is 
 However, the following core services still need to be manually validated (until we can automate them).
 
 At minimum, the following services will need to be tested:
+
 - [ ] [Log into keycloak as root user](https://nebari-docs.netlify.app/how-tos/configuring-keycloak#change-keycloak-root-password)
   - [ ] [Add a user](https://nebari-docs.netlify.app/how-tos/configuring-keycloak#adding-a-nebari-user)
 - [ ] [Log into conda-store and create](https://nebari-docs.netlify.app/tutorials/creating-new-environments)
