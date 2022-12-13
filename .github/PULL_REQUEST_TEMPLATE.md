@@ -1,22 +1,24 @@
-Fixes | Closes | Resolves #
+<!--
+Thanks for contributing a pull request! Please ensure you have taken a look at
+the contribution guidelines: https://nebari.dev/community
+-->
 
-> Please remove anything marked as optional that you don't need to fill in.
-> Choose one of the keywords preceding to refer to the issue this PR solves, followed by the issue number (e.g Fixes # 666).
-> If there is no issue, remove the line. Remove this note after reading.
+## Reference Issues or PRs
 
-## Changes introduced in this PR:
+<!--
+Example: Fixes #1234. See also #3456.
+Please use keywords (e.g., Fixes) to create a link to the issues or pull requests
+you resolved, so that they will automatically be closed when your pull request
+is merged. See https://github.com/blog/1506-closing-issues-via-pull-requests
+-->
 
--
+## What does this implement/fix?
 
-## Types of changes
-
-What types of changes does your PR introduce?
-
-_Put an `x` in the boxes that apply_
+_Put a `x` in the boxes that apply_
 
 - [ ] Bug fix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds a feature)
-- [ ] Breaking change (fix or feature that would cause existing features to not work as expected)
+- [ ] Breaking change (fix or feature that would cause existing features not to work as expected)
 - [ ] Documentation Update
 - [ ] Code style update (formatting, renaming)
 - [ ] Refactoring (no functional changes, no API changes)
@@ -25,25 +27,17 @@ _Put an `x` in the boxes that apply_
 
 ## Testing
 
-### Requires testing
+- [ ] Did you test the pull request locally?
+- [ ] Did you add new tests?
 
-- [ ] Yes
-- [ ] No
+## Any other comments?
 
-### In case you checked yes, did you write tests?
-
-- [ ] Yes
-- [ ] No
-
-## Documentation
-
-Does your contribution include breaking changes or deprecations?
-If so have you updated the documentation?
-
-- [ ] Yes, docstrings
-- [ ] Yes, main documentation
-- [ ] Yes, deprecation notices
-
-## Further comments (optional)
-
-If this is a relatively large or complex change, kick off the discussion by explaining why you chose the solution you did and what alternatives you considered and more.
+<!--
+Please be aware that we are a loose team of volunteers, so patience is necessary;
+assistance handling other issues is very welcome.
+We value all user contributions. If we are slow to review, either the pull request needs some benchmarking, tinkering,
+convincing, etc., or the reviewers are likely busy. In either case,
+we ask for your understanding during the
+review process.
+Thanks for contributing to Nebari 🙏🏼!
+-->

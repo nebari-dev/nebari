@@ -1,0 +1,55 @@
+name: Contributor Tests trigger
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build:
+    name: Build
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/bot run tests') && contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)}}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create comment on the PR
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Contributor Tests Triggered by @${{ github.event.comment.user.login }}
+            - via [comment](${{ github.event.comment.html_url }})
+            - Build is running [here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          reactions: 'rocket'
+
+  kubernetes-tests:
+    name: "Contributor #${{ github.event.issue.number }}"
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/bot run tests') && contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)}}
+    uses: nebari-dev/nebari/.github/workflows/kubernetes_test.yaml@release/2022.11.1
+    with:
+      pr_number: ${{ github.event.issue.number }}
+    secrets: inherit
+
+  infracost-tests:
+    name: "Contributor #${{ github.event.issue.number }}"
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/bot run tests') && contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)}}
+    uses: nebari-dev/nebari/.github/workflows/infracost.yml@release/2022.11.1
+    with:
+      pr_number: ${{ github.event.issue.number }}
+    secrets: inherit
+
+  provider-tests:
+    name: "Contributor #${{ github.event.issue.number }}"
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/bot run tests') && contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)}}
+    uses: nebari-dev/nebari/.github/workflows/test-provider.yaml@release/2022.11.1
+    with:
+      pr_number: ${{ github.event.issue.number }}
+    secrets: inherit

@@ -219,7 +219,7 @@ class NebariLinter(GHA):
 def checkout_image_step():
     return GHA_job_step(
         name="Checkout Image",
-        uses="actions/checkout@master",
+        uses="actions/checkout@v3",
         with_={
             "token": GHA_job_steps_extras(
                 __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
@@ -231,7 +231,7 @@ def checkout_image_step():
 def setup_python_step():
     return GHA_job_step(
         name="Set up Python",
-        uses="actions/setup-python@v2",
+        uses="actions/setup-python@v4",
         with_={
             "python-version": GHA_job_steps_extras(
                 __root__=LATEST_SUPPORTED_PYTHON_VERSION

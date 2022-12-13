@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Set up python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
@@ -19,7 +19,7 @@ jobs:
         run: python -m pip install --upgrade pip build
 
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -39,12 +39,15 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
 
+      - name: Sleep
+        run: sleep 60
+
       - name: Test install from Test PyPI
         run: |
-            pip install \
-            --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple \
-            nebari==${{ env.NEBARI_TAG }}
+          pip install \
+          --index-url https://test.pypi.org/simple/ \
+          --extra-index-url https://pypi.org/simple \
+          nebari==${{ env.NEBARI_TAG }}
 
   release-pypi:
     name: Publish Nebari on PyPi
@@ -53,7 +56,7 @@ jobs:
 
     steps:
       - name: Set up python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
@@ -61,7 +64,7 @@ jobs:
         run: python -m pip install --upgrade pip build
 
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 

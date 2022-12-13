@@ -1,11 +1,10 @@
 ---
 name: Release Checklist
 about: For maintainers only.
-title: '[RELEASE] <version>'
+title: "[RELEASE] <version>"
 labels:
- - 'type: release 🏷'
-assignees: ''
-
+  - "type: release 🏷"
+assignees: ""
 ---
 
 # Release Checklist
@@ -16,13 +15,11 @@ Scheduled release date - <yyyy/mm/dd>
 
 Release captain responsible - <@gh_username>
 
-
 ## Starting point - a new release is out
 
-- [x] Create *this* issue to track and discuss the upcoming release.
+- [x] Create _this_ issue to track and discuss the upcoming release.
 - [ ] Use the previous release issue for any final release-specific discussions, then close.
   - This can be a good time to debrief and discuss improvements to the release process.
-
 
 ## Looking forward - planning
 
@@ -30,8 +27,7 @@ Release captain responsible - <@gh_username>
 - [ ] Triage `bugs` to determine what be should included in the release and add it to the milestone.
 - [ ] What new features, if any, will be included in the release and add it to the milestone.
   - This will be, in large part, determined by the roadmap.
-  - Is there a focus for this release (i.e. UX/UI, stabilitation, etc.)?
-
+  - Is there a focus for this release (i.e. UX/UI, stabilization, etc.)?
 
 ## Pre-release process
 
@@ -57,10 +53,10 @@ Release captain responsible - <@gh_username>
       - (Repeat steps if necessary)
   - [ ] [Update `RELEASE.md` notes.](https://github.com/nebari-dev/nebari/blob/main/RELEASE.md)
 
-
 ## Cut the official release
 
-*These steps must be actioned in the order they appear in this checklist.*
+_These steps must be actioned in the order they appear in this checklist._
+
 - [ ] [Tag, build and push docker images](https://github.com/nebari-dev/nebari-docker-images/releases/new)
 - [ ] [Update and cut release for `nebari-dask` meta package on Conda-Forge.](https://github.com/conda-forge/nebari-dask-feedstock)
 - [ ] [Cut PyPI release via GHA release workflow.](https://github.com/nebari-dev/nebari/releases/new)

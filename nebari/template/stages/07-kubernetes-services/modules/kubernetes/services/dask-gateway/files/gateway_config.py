@@ -117,13 +117,33 @@ def list_dask_environments(conda_store_mount):
             yield namespace, name, conda_prefix
 
 
-def base_node_group():
-    worker_node_group = {
+def base_node_group(options):
+    default_node_group = {
         config["worker-node-group"]["key"]: config["worker-node-group"]["value"]
     }
 
+    # check `worker_extra_pod_config` first
+    worker_node_group = (
+        config["profiles"][options.profile]
+        .get("worker_extra_pod_config", {})
+        .get("nodeSelector")
+    )
+    worker_node_group = (
+        default_node_group if worker_node_group is None else worker_node_group
+    )
+
+    # check `schduler_extra_pod_config` first
+    scheduler_node_group = (
+        config["profiles"][options.profile]
+        .get("scheduler_extra_pod_config", {})
+        .get("nodeSelector")
+    )
+    scheduler_node_group = (
+        default_node_group if scheduler_node_group is None else scheduler_node_group
+    )
+
     return {
-        "scheduler_extra_pod_config": {"nodeSelector": worker_node_group},
+        "scheduler_extra_pod_config": {"nodeSelector": scheduler_node_group},
         "worker_extra_pod_config": {"nodeSelector": worker_node_group},
     }
 
@@ -216,7 +236,7 @@ def worker_profile(options, user):
     return functools.reduce(
         deep_merge,
         [
-            base_node_group(),
+            base_node_group(options),
             base_conda_store_mounts(namespace, name),
             base_username_mount(user.name),
             config["profiles"][options.profile],
