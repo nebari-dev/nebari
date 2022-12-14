@@ -46,23 +46,23 @@ def modify_autogen_api_docs(autogen_path: Path, outpath: Path) -> None:
 
     # fix header flags (otherwise page nav won't work)
     for idx, line in enumerate(text):
-        if line[0:7] == "# qhub.":
+        if line[0:7] == "# nebari.":
             text[idx] = "##" + line
-        elif line == "# qhub\n":
-            text[idx] = "## qhub\n"
+        elif line == "# nebari\n":
+            text[idx] = "## nebari\n"
 
     keep_docs = [
-        '"qhub.initialize',
-        '"qhub.cli.deploy',
-        '"qhub.cli.destroy',
-        '"qhub.cli.initialize',
-        '"qhub.cli.render',
-        '"qhub.cli.support',
-        '"qhub.cli',
-        '"qhub.cli.upgrade',
-        '"qhub.cli.validate',
-        '"qhub.render',
-        '"qhub.destroy',
+        '"nebari.initialize',
+        '"nebari.cli.deploy',
+        '"nebari.cli.destroy',
+        '"nebari.cli.initialize',
+        '"nebari.cli.render',
+        '"nebari.cli.support',
+        '"nebari.cli',
+        '"nebari.cli.upgrade',
+        '"nebari.cli.validate',
+        '"nebari.render',
+        '"nebari.destroy',
     ]
 
     id_idx = []
@@ -88,10 +88,9 @@ def modify_autogen_api_docs(autogen_path: Path, outpath: Path) -> None:
     all_headers = zip(keep_idx, offset_idx)
     map = dict(zip(keep_idx, all_headers))
 
-    # for idx in keep_idx:
     for idx, group in map.items():
         clean_list.extend(text[slice(*group)])
-    print(Path(outpath).resolve())
+
     if not Path(outpath).exists:
         print(Path(outpath).resolve())
 

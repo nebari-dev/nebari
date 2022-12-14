@@ -23,4 +23,6 @@ cd docs/api_docs/
 pydoc-markdown -I "../../" -p nebari --render-toc > api_temp.md
 # make formatting modifications and copy into the docs repo
 python api_doc_mods.py --autogen_path api_temp.md --outpath api_doc.md
+# run linting and formatting
+pre-commit run --files api_doc.md
 ```
