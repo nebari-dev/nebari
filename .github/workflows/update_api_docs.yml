@@ -22,12 +22,12 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: "3.10"
-          activate-environment: qhub-dev
+          activate-environment: nebari-dev
           environment-file: environment-dev.yaml
           auto-activate-base: true
 
       - name: Install nebari and docs dependencies
-        run: pip install -e ".[docs]"
+        run: pip install -e "../..[docs]"
 
       - name: Conda list
         run: conda list
@@ -37,20 +37,18 @@ jobs:
         id: verify-changed-files
         with:
           files: |
-            qhub/cli/*
+            nebari/cli/*
 
-      - name: Run step only when files change.
+      - name: Look for file changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           echo "Changed files: ${{ steps.verify-changed-files.outputs.changed_files }}"
-        # Outputs: "Changed files: new.txt test_directory/new.txt"
 
       - name: Generate new API docs
         run: |
-          # cd docs/api_docs/
-          # generate the new docs
-          pydoc-markdown -I "../../" -p qhub --render-toc > api_temp.md
-          # make modifications to clean up
+          echo "generate the new docs"
+          pydoc-markdown -I "../../" -p nebari --render-toc > api_temp.md
+          echo "make modifications to clean up"
           python api_doc_mods.py --autogen_path api_temp.md --outpath api_doc.md
 
       - name: Check for changes
