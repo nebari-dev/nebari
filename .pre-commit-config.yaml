@@ -16,6 +16,8 @@ ci:
   autoupdate_schedule: monthly
   autofix_commit_msg: |
     [pre-commit.ci] Apply automatic pre-commit fixes
+  # this does not work on pre-commit ci
+  skip: [terraform_fmt]
 
 repos:
   # general
@@ -66,7 +68,7 @@ repos:
 
   # terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.76.0
+    rev: v1.77.0
     hooks:
       - id: terraform_fmt
         args:
