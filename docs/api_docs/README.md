@@ -14,8 +14,8 @@ pip install -e ".[docs]"
 
 The docs may be built manually through the following workflow, or executed as part of an autoupdate via GH Actions CI.
 
-The workflow described below will create the API docs. A formatting script is used to do a bit of cleanup and then 
-copy the resulting file over to the local docs repo.
+The workflow described below will create the API docs. A formatting script is used to do a bit of cleanup and then copy
+the resulting file over to the local docs repo.
 
 ```bash
 # clone the docs repo
@@ -28,4 +28,4 @@ pydoc-markdown -I "../../" -p nebari --render-toc > api_temp.md
 python api_doc_mods.py --autogen_path api_temp.md --outpath ../../nebari-docs/docs/docs/references/api_docs.md
 ```
 
-Now you are ready to open up a PR with these changes. 
+Now you are ready to open up a PR with these changes.
