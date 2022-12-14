@@ -49,16 +49,11 @@ repos:
     hooks:
       - id: black
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 5.0.4
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.178
     hooks:
-      - id: flake8
-        args:
-          [
-            "--builtins=c",
-            "--ignore=E203,E266,E501,W503",
-            "--exclude=[.git,__pycache__,docs/source/conf.py,nebari/template,build,dist,docs,home]",
-          ]
+      - id: ruff
+        args: ["--fix"]
 
   - repo: https://github.com/pycqa/isort
     rev: 5.10.1
