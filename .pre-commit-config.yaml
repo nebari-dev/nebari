@@ -72,7 +72,7 @@ repos:
 
 # terraform
 - repo: https://github.com/antonbabenko/pre-commit-terraform
-  rev: v1.76.0
+  rev: v1.76.1
   hooks:
     - id: terraform_fmt
       args:
