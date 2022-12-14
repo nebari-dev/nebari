@@ -14,20 +14,20 @@
 
 repos:
   # general
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
-    hooks:
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: check-json
-      - id: check-yaml
-        # jinja2 templates for helm charts
-        exclude: "nebari/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)"
-        args: [--allow-multiple-documents]
-      - id: check-toml
-      # Lint: Checks that non-binary executables have a proper shebang.
-      - id: check-executables-have-shebangs
-        exclude: "^nebari/template/"
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.3.0
+  hooks:
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+    - id: check-json
+    - id: check-yaml
+      # jinja2 templates for helm charts
+      exclude: "nebari/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)"
+      args: [--allow-multiple-documents]
+    - id: check-toml
+    # Lint: Checks that non-binary executables have a proper shebang.
+    - id: check-executables-have-shebangs
+      exclude: "^nebari/template/"
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.1.0
@@ -61,33 +61,33 @@ repos:
       "--exclude=[.git,__pycache__,docs/source/conf.py,nebari/template,build,dist,docs,home]"
     ]
 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.10.1
-    hooks:
-      - id: isort
-        name: isort
-        additional_dependencies: [toml]
-        files: \.py$
-        args: ["--profile", "black"]
+- repo: https://github.com/pycqa/isort
+  rev: 5.10.1
+  hooks:
+    - id: isort
+      name: isort
+      additional_dependencies: [toml]
+      files: \.py$
+      args: ["--profile", "black"]
 
-  # terraform
-  - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.76.0
-    hooks:
-      - id: terraform_fmt
-        args:
-          - --args=-write=true
+# terraform
+- repo: https://github.com/antonbabenko/pre-commit-terraform
+  rev: v1.76.0
+  hooks:
+    - id: terraform_fmt
+      args:
+        - --args=-write=true
 
-  # markdown
-  - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.16
-    hooks:
-      - id: mdformat
-        files: ^docs/
-        name: mdformat
-        entry: mdformat --wrap=120 --number --end-of-line=lf
-        language: python
-        types: [markdown]
-        minimum_pre_commit_version: "2.0.0"
-        additional_dependencies:
-          - mdformat-tables
+# markdown
+- repo: https://github.com/executablebooks/mdformat
+  rev: 0.7.16
+  hooks:
+    - id: mdformat
+      files: ^docs/
+      name: mdformat
+      entry: mdformat --wrap=120 --number --end-of-line=lf
+      language: python
+      types: [markdown]
+      minimum_pre_commit_version: "2.0.0"
+      additional_dependencies:
+        - mdformat-tables
