@@ -100,11 +100,12 @@ Get the hex digest of the given file
 def set_env_vars_in_config(config)
 ```
 
-For values in the config starting with 'NEBARI_SECRET_XXX' the environment variables are searched for the pattern XXX and the config value is modified. This enables setting secret
-values that should not be directly stored in the config file.
+For values in the config starting with 'NEBARI_SECRET_XXX' the environment variables are searched for the pattern XXX
+and the config value is modified. This enables setting secret values that should not be directly stored in the config
+file.
 
-NOTE: variables are most likely written to a file somewhere upon render. In order to further reduce risk of exposure of any of these variables you might consider preventing storage
-of the terraform render output.
+NOTE: variables are most likely written to a file somewhere upon render. In order to further reduce risk of exposure of
+any of these variables you might consider preventing storage of the terraform render output.
 
 <a id="nebari.cli"></a>
 
@@ -285,8 +286,8 @@ Create and initialize your \[purple\]nebari-config.yaml\[/purple\] file.
 
 This command will create and initialize your \[purple\]nebari-config.yaml\[/purple\] :sparkles:
 
-This file contains all your Nebari cluster configuration details and, is used as input to later commands such as \[green\]nebari render\[/green\], \[green\]nebari deploy\[/green\],
-etc.
+This file contains all your Nebari cluster configuration details and, is used as input to later commands such as
+\[green\]nebari render\[/green\], \[green\]nebari deploy\[/green\], etc.
 
 If you're new to Nebari, we recommend you use the Guided Init wizard. To get started simply run:
 
@@ -474,9 +475,11 @@ def cost(path: str = typer.Option(
          ))
 ```
 
-Estimate the cost of deploying Nebari based on your \[purple\]nebari-config.yaml\[/purple\]. \[italic\]Experimental.\[/italic\]
+Estimate the cost of deploying Nebari based on your \[purple\]nebari-config.yaml\[/purple\].
+\[italic\]Experimental.\[/italic\]
 
-\[italic\]This is still only experimental using Infracost under the hood. The estimated value is a base cost and does not include usage costs.\[/italic\]
+\[italic\]This is still only experimental using Infracost under the hood. The estimated value is a base cost and does
+not include usage costs.\[/italic\]
 
 <a id="nebari.cli.main.upgrade"></a>
 
@@ -502,8 +505,9 @@ def upgrade(
 
 Upgrade your \[purple\]nebari-config.yaml\[/purple\] from pre-0.4.0 to 0.4.0.
 
-Due to several breaking changes that came with the 0.4.0 release, this utility is available to help update your \[purple\]nebari-config.yaml\[/purple\] to comply with the
-introduced changes. See the project \[green\]RELEASE.md\[/green\] for details.
+Due to several breaking changes that came with the 0.4.0 release, this utility is available to help update your
+\[purple\]nebari-config.yaml\[/purple\] to comply with the introduced changes. See the project
+\[green\]RELEASE.md\[/green\] for details.
 
 <a id="nebari.cli.main.support"></a>
 
@@ -527,4 +531,5 @@ def support(config_filename: str = typer.Option(
 
 Support tool to write all Kubernetes logs locally and compress them into a zip file.
 
-The Nebari team recommends k9s to manage and inspect the state of the cluster. However, this command occasionally helpful for debugging purposes should the logs need to be shared.
+The Nebari team recommends k9s to manage and inspect the state of the cluster. However, this command occasionally
+helpful for debugging purposes should the logs need to be shared.
