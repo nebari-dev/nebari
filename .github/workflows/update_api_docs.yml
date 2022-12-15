@@ -48,8 +48,8 @@ jobs:
           python api_doc_mods.py --autogen_path api_temp.md --outpath api_doc.md
 
       - name: Lint the new docs
+        continue-on-error: true
         run: |
-          set -e
           echo "run linting and formatting"
           pre-commit run --files api_doc.md
           echo "run it again to prove its clean now"
