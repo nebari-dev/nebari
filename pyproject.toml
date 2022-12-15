@@ -13,3 +13,16 @@ local_scheme = "node-and-timestamp"
 
 [tools.setuptools_scm.version_scheme]
 calver_by_date = "calver-by-date"
+
+[tool.ruff]
+ignore = [
+    "E501", # Line too long
+    "F821", # Undefined name
+]
+extend-exclude = [
+    "nebari/template",
+    "docs/source/conf.py",
+    "docs",
+    "home",
+    "__pycache__"
+]

@@ -1,4 +1,4 @@
-"""a backport for the nebari version references"""
+"""a backport for the nebari version references."""
 
 import re
 

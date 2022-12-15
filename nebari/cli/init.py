@@ -90,7 +90,6 @@ def handle_init(inputs: InitInputs):
 
 def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
     """Validate that the necessary cloud credentials have been set as environment variables."""
-
     if ctx.params.get("disable_prompt"):
         return cloud_provider
 
@@ -197,7 +196,6 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
 
 def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     """Validating the the necessary auth provider credentials have been set as environment variables."""
-
     if ctx.params.get("disable_prompt"):
         return auth_provider
 
@@ -254,7 +252,6 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
 
 def check_project_name(ctx: typer.Context, project_name: str):
     """Validate the project_name is acceptable. Depends on `cloud_provider`."""
-
     project_name_convention(
         project_name.lower(), {"provider": ctx.params["cloud_provider"]}
     )

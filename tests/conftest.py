@@ -35,7 +35,7 @@ def setup_fixture(request, monkeypatch, tmp_path):
     """This fixture helps simplify writing tests by:
     - parametrizing the different cloud provider inputs in a single place
     - creating a tmp directory (and file) for the `nebari-config.yaml` to be save to
-    - monkeypatching functions that call out to external APIs
+    - monkeypatching functions that call out to external APIs.
     """
     render_config_inputs = request.param
     (

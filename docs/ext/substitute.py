@@ -1,12 +1,12 @@
 """
 This is a hard replace as soon as the source file is read, so no respect for any markup at all
-Simply forces replace of ||QHUB_VERSION|| with the qhub_version_string in conf.py
+Simply forces replace of ||QHUB_VERSION|| with the qhub_version_string in conf.py.
 """
 
 
 def dosubs(app, docname, source):
     """
-    Replace QHUB_VERSION with the qhub version
+    Replace QHUB_VERSION with the qhub version.
     """
     if app.config.qhub_version_string != "":
         src = source[0]

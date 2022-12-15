@@ -44,3 +44,5 @@ data*
 nebari-config.yaml
 
 .vscode/
+
+/.ruff_cache
