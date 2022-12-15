@@ -27,7 +27,7 @@ the associated costs with node pools.
 
 def _check_infracost():
     """
-    Check if infracost is installed
+    Check if infracost is installed.
     """
     try:
         subprocess.check_output(["infracost", "--version"])
@@ -38,7 +38,7 @@ def _check_infracost():
 
 def _check_infracost_api_key():
     """
-    Check if infracost API key is configured
+    Check if infracost API key is configured.
     """
     try:
         subprocess.check_output(["infracost", "configure", "get", "api_key"])
@@ -49,7 +49,7 @@ def _check_infracost_api_key():
 
 def _set_currency_code(currency_code):
     """
-    Specify the currency code for infracost
+    Specify the currency code for infracost.
     """
     try:
         subprocess.check_output(
@@ -62,7 +62,7 @@ def _set_currency_code(currency_code):
 
 def _run_infracost(path):
     """
-    Run infracost on the given path and return the JSON output
+    Run infracost on the given path and return the JSON output.
     """
     try:
         process = subprocess.Popen(
@@ -86,7 +86,7 @@ def _run_infracost(path):
 
 def _enable_infracost_dashboard():
     """
-    Enable infracost dashboard
+    Enable infracost dashboard.
     """
     try:
         subprocess.check_output(
@@ -99,7 +99,7 @@ def _enable_infracost_dashboard():
 
 def _disable_infracost_dashboard():
     """
-    Disable infracost dashboard
+    Disable infracost dashboard.
     """
     try:
         subprocess.check_output(
@@ -112,7 +112,7 @@ def _disable_infracost_dashboard():
 
 def infracost_diff(path, compare_to_path):
     """
-    Compare the infracost report of the given path to a previous infracost report
+    Compare the infracost report of the given path to a previous infracost report.
     """
     try:
         process = subprocess.Popen(
@@ -145,7 +145,7 @@ def infracost_report(path, dashboard, file, currency_code, compare):
     """
     Generate a report of the infracost cost of the given path
     args:
-        path: path to the nebari stages directory
+        path: path to the nebari stages directory.
     """
     console = Console()
     # If path is not provided, use the current directory with `stages` subdirectory

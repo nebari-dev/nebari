@@ -11,6 +11,13 @@
 # These pre-commit hooks are run as CI.
 #
 # NOTE: if it can be avoided, add configs/args in pyproject.toml, setup.cfg or below instead of creating a new `.config.file`.
+# https://pre-commit.ci/#configuration
+ci:
+  autoupdate_schedule: monthly
+  autofix_commit_msg: |
+    [pre-commit.ci] Apply automatic pre-commit fixes
+  # this does not work on pre-commit ci
+  skip: [terraform_fmt]
 
 repos:
   # general
@@ -51,15 +58,11 @@ repos:
       "--exclude=/nebari/template/",
     ]
 
-- repo: https://github.com/pycqa/flake8
-  rev: 3.8.4
-  hooks:
-  - id: flake8
-    args: [
-      "--builtins=c",
-      "--ignore=E203,E266,E501,W503",
-      "--exclude=[.git,__pycache__,docs/source/conf.py,nebari/template,build,dist,docs,home]"
-    ]
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.178
+    hooks:
+      - id: ruff
+        args: ["--fix"]
 
 - repo: https://github.com/pycqa/isort
   rev: 5.10.1
@@ -70,13 +73,13 @@ repos:
       files: \.py$
       args: ["--profile", "black"]
 
-# terraform
-- repo: https://github.com/antonbabenko/pre-commit-terraform
-  rev: v1.76.1
-  hooks:
-    - id: terraform_fmt
-      args:
-        - --args=-write=true
+  # terraform
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.77.0
+    hooks:
+      - id: terraform_fmt
+        args:
+          - --args=-write=true
 
 # markdown
 - repo: https://github.com/executablebooks/mdformat

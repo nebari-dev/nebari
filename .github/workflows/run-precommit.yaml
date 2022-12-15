@@ -16,11 +16,14 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: Checkout repository
+      - name: Checkout repository 🔔
         uses: actions/checkout@v3
 
-      - name: Install pre-commit
+      # https://github.com/pre-commit/action to enable cache
+      - uses: pre-commit/action@v3.0.0
+
+      - name: Install pre-commit 📦
         run: pip install pre-commit
 
-      - name: Run pre-commit
-        run: pre-commit run --all
+      - name: Run terraform pre-commit ⚡️
+        run: pre-commit run terraform_fmt

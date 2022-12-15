@@ -31,7 +31,7 @@ def deploy(
     input_vars: Dict[str, Any] = None,
     state_imports: List = None,
 ):
-    """Execute a given terraform directory
+    """Execute a given terraform directory.
 
     Parameters:
       directory: directory in which to run terraform operations on

@@ -89,3 +89,16 @@ Source = "https://github.com/nebari-dev/nebari"
 
 [project.scripts]
 nebari = "nebari.cli.main:app"
+
+[tool.ruff]
+ignore = [
+    "E501", # Line too long
+    "F821", # Undefined name
+]
+extend-exclude = [
+    "nebari/template",
+    "docs/source/conf.py",
+    "docs",
+    "home",
+    "__pycache__"
+]
