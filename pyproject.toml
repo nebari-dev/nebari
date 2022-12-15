@@ -82,6 +82,11 @@ dev = [
     "pytest",
     "pytest-timeout",
 ]
+docs = [
+    "novella",
+    "pydoc-markdown",
+    "pre-commit"
+]
 
 [project.urls]
 Documentation = "https://www.nebari.dev/docs"
