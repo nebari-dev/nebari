@@ -37,19 +37,24 @@ repos:
         exclude: "^nebari/template/"
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.2
+    rev: v2.1.0
     hooks:
       - id: codespell
-        # --write (-w) enabled here
-        # see setup.cfg for more config options
-        entry: codespell -w
+        args:
+          [
+            "--builtin=rare,clear,informal,names",
+            "--skip=_build,*/build/*,*/node_modules/*,nebari.egg-info,.nox,*.git,*.js,*.json,*.yaml,*.yml",
+            "--ignore-words-list=AKS,aks",
+            "--write",
+          ]
         language: python
 
   # python
   - repo: https://github.com/psf/black
-    rev: 22.10.0
+    rev: 22.3.0
     hooks:
       - id: black
+        args: ["--line-length=88", "--exclude=/nebari/template/"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.178
