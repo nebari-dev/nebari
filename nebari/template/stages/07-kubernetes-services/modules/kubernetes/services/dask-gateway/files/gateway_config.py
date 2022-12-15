@@ -118,12 +118,29 @@ def list_dask_environments(conda_store_mount):
 
 
 def base_node_group(options):
-    worker_node_group = config["profiles"][options.profile]["worker_extra_pod_config"][
-        "nodeSelector"
-    ]
-    scheduler_node_group = config["profiles"][options.profile][
-        "scheduler_extra_pod_config"
-    ]["nodeSelector"]
+    default_node_group = {
+        config["worker-node-group"]["key"]: config["worker-node-group"]["value"]
+    }
+
+    # check `worker_extra_pod_config` first
+    worker_node_group = (
+        config["profiles"][options.profile]
+        .get("worker_extra_pod_config", {})
+        .get("nodeSelector")
+    )
+    worker_node_group = (
+        default_node_group if worker_node_group is None else worker_node_group
+    )
+
+    # check `schduler_extra_pod_config` first
+    scheduler_node_group = (
+        config["profiles"][options.profile]
+        .get("scheduler_extra_pod_config", {})
+        .get("nodeSelector")
+    )
+    scheduler_node_group = (
+        default_node_group if scheduler_node_group is None else scheduler_node_group
+    )
 
     return {
         "scheduler_extra_pod_config": {"nodeSelector": scheduler_node_group},
@@ -283,7 +300,7 @@ def deep_merge(d1, d2):
     'b': {'c': 1, 'z': [5, 6]},
     'e': {'f': {'g': {}}},
     'm': 1,
-    }
+    }.
 
     >>> value_2 = {
         'a': [3, 4],

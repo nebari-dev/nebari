@@ -29,7 +29,6 @@ def initiate_container_service_client():
 @functools.lru_cache()
 def kubernetes_versions(region="Central US"):
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
-
     client = initiate_container_service_client()
     azure_location = region.replace(" ", "").lower()
 

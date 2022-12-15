@@ -405,7 +405,7 @@ def cost(
     ),
 ):
     """
-    Estimate the cost of deploying Nebari based on your [purple]nebari-config.yaml[/purple]. [italic]Experimental.[/italic]
+    Estimate the cost of deploying Nebari based on your [purple]nebari-config.yaml[/purple]. [italic]Experimental.[/italic].
 
     [italic]This is still only experimental using Infracost under the hood.
     The estimated value is a base cost and does not include usage costs.[/italic]
@@ -470,7 +470,6 @@ def support(
     The Nebari team recommends k9s to manage and inspect the state of the cluster.
     However, this command occasionally helpful for debugging purposes should the logs need to be shared.
     """
-
     kube_config.load_kube_config()
 
     v1 = client.CoreV1Api()

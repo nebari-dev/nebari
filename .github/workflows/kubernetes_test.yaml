@@ -14,6 +14,7 @@ on:
   push:
     branches:
       - main
+      - develop
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/kubernetes_test.yaml"
@@ -32,7 +33,7 @@ on:
 
 jobs:
   test-kubernetes:
-    if: github.event.pull_request.head.repo.name == github.repository || github.event_name != 'pull_request'
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
     name: "Kubernetes Tests"
     runs-on: "cirun-runner--${{ github.run_id }}"
     defaults:

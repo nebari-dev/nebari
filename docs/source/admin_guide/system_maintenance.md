@@ -6,24 +6,26 @@ All modifications to the infrastructure should be done with GitHub Pull-Requests
 
 ### Modifying docker images: jupyterlab, jupyterhub, dask-workers
 
-The docker images used for dask-worker and jupyterlab user environments are pulled from a docker container registry. The images are built based on the images specified in the
-`image` folder. There are three images that are currently built
+The docker images used for dask-worker and jupyterlab user environments are pulled from a docker container registry. The
+images are built based on the images specified in the `image` folder. There are three images that are currently built
 
 - jupyterlab :: modification of jupyterlab instances for each user
 - dask-worker :: modification of dask workers and dask scheduler
 - jupyterhub :: the jupyterhub server (allows for customization of hub UI)
 - conda-store :: Environment management tool for QHub
 
-Each docker image is customized with its respective directory (for example `image/Dockerfile.jupyterlab` -> `image/jupyterlab/*`. For jupyterlab the environment is located at
-`image/jupyterlab/environment.yaml`. Thus to add a package to the environment simply submit a pull request with the new package.
+Each docker image is customized with its respective directory (for example `image/Dockerfile.jupyterlab` ->
+`image/jupyterlab/*`. For jupyterlab the environment is located at `image/jupyterlab/environment.yaml`. Thus to add a
+package to the environment simply submit a pull request with the new package.
 
-At this current point in time once a user submits a pull request to create the given docker image and the PR is accepted with images built, a PR must follow that adds the image to
-the qhub deployment. This can be done by modifying `infrastructure/variables.tf` and the configuration file.
+At this current point in time once a user submits a pull request to create the given docker image and the PR is accepted
+with images built, a PR must follow that adds the image to the qhub deployment. This can be done by modifying
+`infrastructure/variables.tf` and the configuration file.
 
 ### Adding additional worker nodegroups
 
-Adding additional nodegroups can be done by editing the configuration file. While a `general`, `user`, and `worker` nodegroup are required you may create any additional node group.
-Take for example the Digital Ocean configuration.
+Adding additional nodegroups can be done by editing the configuration file. While a `general`, `user`, and `worker`
+nodegroup are required you may create any additional node group. Take for example the Digital Ocean configuration.
 
 ```yaml
 digital_ocean:
@@ -44,7 +46,8 @@ digital_ocean:
       max_nodes: 5
 ```
 
-To add a node group for a node group called `worker-high-mem` simply add to the configuration. The same applies for AWS, GCP, and DO.
+To add a node group for a node group called `worker-high-mem` simply add to the configuration. The same applies for AWS,
+GCP, and DO.
 
 ```yaml
 digital_ocean:
@@ -71,8 +74,9 @@ digital_ocean:
 
 ### Setting specific JupyterLab profile to run on a nodegroup
 
-Sometimes we would like a profile to execute on nodes that are not in the normal nodegroup. In the example above we created a high memory node group. To make the jupyterlab profile
-`small worker` use the high memory nodegroup do the following.
+Sometimes we would like a profile to execute on nodes that are not in the normal nodegroup. In the example above we
+created a high memory node group. To make the jupyterlab profile `small worker` use the high memory nodegroup do the
+following.
 
 ```yaml
 profiles:
@@ -118,7 +122,8 @@ profiles:
 
 ### Setting specific dask workers to run on a nodegroup
 
-Suppose we want a specific dask worker profile to run on a specific node group. Here we demonstrate annotating the DO example configuration.
+Suppose we want a specific dask worker profile to run on a specific node group. Here we demonstrate annotating the DO
+example configuration.
 
 ```yaml
 profiles:
@@ -131,8 +136,9 @@ profiles:
       image: "quansight/qhub-dask-worker:v||QHUB_VERSION||"
 ```
 
-[Dask-gateway](https://gateway.dask.org/api-server.html#kube-cluster-config) takes additional configuration for the scheduler pods and workers. Remember similar to assigning node
-groups to specific jupyterlab instances we must get the key for the node pool.
+[Dask-gateway](https://gateway.dask.org/api-server.html#kube-cluster-config) takes additional configuration for the
+scheduler pods and workers. Remember similar to assigning node groups to specific jupyterlab instances we must get the
+key for the node pool.
 
 - AWS :: `eks.amazonaws.com/nodegroup`
 - GCP :: `cloud.google.com/gke-nodepool`

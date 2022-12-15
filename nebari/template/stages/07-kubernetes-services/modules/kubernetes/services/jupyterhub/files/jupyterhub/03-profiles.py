@@ -8,7 +8,7 @@ from tornado import gen
 
 
 def base_profile_home_mounts(username):
-    """Configure the home directory mount for user
+    """Configure the home directory mount for user.
 
     Ensure that user directory exists and user has permissions to
     read/write/execute.
@@ -72,7 +72,7 @@ def base_profile_home_mounts(username):
 
 
 def base_profile_shared_mounts(groups):
-    """Configure the group directory mounts for user
+    """Configure the group directory mounts for user.
 
     Ensure that {shared}/{group} directory exists and user has
     permissions to read/write/execute. Kubernetes does not allow the
@@ -133,7 +133,7 @@ def base_profile_shared_mounts(groups):
 
 def profile_conda_store_mounts(username, groups):
     """Configure the conda_store environment directories mounts for
-    user
+    user.
 
     Ensure that {shared}/{group} directory exists and user has
     permissions to read/write/execute.
@@ -304,7 +304,7 @@ def configure_user(username, groups, uid=1000, gid=100):
 
 
 def render_profile(profile, username, groups, keycloak_profilenames):
-    """Render each profile for user
+    """Render each profile for user.
 
     If profile is not available for given username, groups returns
     None. Otherwise profile is transformed into kubespawner profile.
@@ -407,7 +407,7 @@ def deep_merge(d1, d2):
     'b': {'c': 1, 'z': [5, 6]},
     'e': {'f': {'g': {}}},
     'm': 1,
-    }
+    }.
 
     >>> value_2 = {
         'a': [3, 4],

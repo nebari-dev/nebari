@@ -33,7 +33,6 @@ def zones(project, region):
 @functools.lru_cache()
 def kubernetes_versions(region):
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
-
     output = subprocess.check_output(
         [
             "gcloud",

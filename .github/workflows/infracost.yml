@@ -21,7 +21,7 @@ env:
 
 jobs:
   infracost:
-    if: github.event.pull_request.head.repo.name == github.repository || github.event_name != 'pull_request'
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
     name: Run Infracost on Nebari Infrastructure
     runs-on: ubuntu-latest
 

@@ -2,8 +2,8 @@
 
 Your cloud provider may have native ways to backup your Kubernetes cluster and volumes.
 
-This guide describes how you would manually obtain the data you need to repopulate your QHub if your cluster is lost and you wish to start it up again from the `qhub-config.yaml`
-file.
+This guide describes how you would manually obtain the data you need to repopulate your QHub if your cluster is lost and
+you wish to start it up again from the `qhub-config.yaml` file.
 
 There are three main locations that you need to backup:
 
@@ -28,7 +28,8 @@ This specific guide shows how to do this on an AWS cluster and upload to AWS S3.
 
 ### Kubectl configuration
 
-To setup kubectl, obtain the name of the cluster. If you know the deployment region of the current cluster, this is straightforward:
+To setup kubectl, obtain the name of the cluster. If you know the deployment region of the current cluster, this is
+straightforward:
 
 ```shell
 aws eks list-clusters --region=us-west-2
@@ -42,8 +43,8 @@ aws eks update-kubeconfig  --region us-west-2 --name <relevant-name>
 
 ### Pod deployment
 
-With `kubectl` configured, the next step will be to deploy the pod that allows you to access the cluster files. First, save the following pod specification to a file named
-`pod.yaml`:
+With `kubectl` configured, the next step will be to deploy the pod that allows you to access the cluster files. First,
+save the following pod specification to a file named `pod.yaml`:
 
 ```yaml
 kind: Pod
@@ -65,7 +66,8 @@ spec:
           name: volume-to-debug-ubuntu
 ```
 
-> Note in QHub versions before v0.4 replace `claimName: "jupyterhub-dev-share"` with `claimName: "nfs-mount-dev-share"` above.
+> Note in QHub versions before v0.4 replace `claimName: "jupyterhub-dev-share"` with `claimName: "nfs-mount-dev-share"`
+> above.
 
 Once the file `pod.yml` has been created, run the following command:
 
@@ -73,7 +75,8 @@ Once the file `pod.yml` has been created, run the following command:
 kubectl apply -f pod.yaml -n dev
 ```
 
-If you have a namespace other than the default dev, replace `dev` with your namespace when running `kubectl`. To get a shell to this running pod, run:
+If you have a namespace other than the default dev, replace `dev` with your namespace when running `kubectl`. To get a
+shell to this running pod, run:
 
 ```shell
 kubectl exec -n dev --stdin --tty volume-debugger-ubuntu -- /bin/bash
@@ -100,7 +103,8 @@ unzip awscliv2.zip
 aws configure
 ```
 
-The last line in the command above prompts for your AWS public/private key and default region. Paste each of these and press enter. To ignore and skip the output, press enter.
+The last line in the command above prompts for your AWS public/private key and default region. Paste each of these and
+press enter. To ignore and skip the output, press enter.
 
 ### Backups
 
@@ -111,8 +115,8 @@ cd /data
 tar -cvf <custom_name>.tar .
 ```
 
-The preferred naming scheme includes a year-month-day, example `2021-04-23_home_backup.tar`. You can utilize multi-backups through this step. This step takes several minutes
-depending on the size of the home directories.
+The preferred naming scheme includes a year-month-day, example `2021-04-23_home_backup.tar`. You can utilize
+multi-backups through this step. This step takes several minutes depending on the size of the home directories.
 
 ### Upload to block storage
 
@@ -122,8 +126,8 @@ Once this is complete, upload the tar file to S3 using the AWS command-line tool
 aws s3 cp 2021-04-23.tar s3://<your_bucket_name>/backups/2021-04-23.tar
 ```
 
-Replacing `your_bucket_name` with a bucket you have created. If you don't have an existing bucket, instructions are here:
-<https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html>
+Replacing `your_bucket_name` with a bucket you have created. If you don't have an existing bucket, instructions are
+here: <https://docs.aws.amazon.com/AmazonS3/latest/userguide/create-bucket-overview.html>
 
 ### Download from block storage and decompress
 
@@ -152,9 +156,11 @@ The file permissions for the default tar is same as the original files.
 
 > **Important: If upgrading from 0.3.14 or earlier to 0.4 or later**
 >
-> QHub v0.4: If restoring your NFS as part of the upgrade you must also run some extra commands, immediately after extracting from the tar file.
+> QHub v0.4: If restoring your NFS as part of the upgrade you must also run some extra commands, immediately after
+> extracting from the tar file.
 >
-> Previous versions contained the `shared` folder within `home`. From `0.4.0` both `shared` and `home` directories are at the same level with respect to the QHub filesystem:
+> Previous versions contained the `shared` folder within `home`. From `0.4.0` both `shared` and `home` directories are
+> at the same level with respect to the QHub filesystem:
 >
 > ```shell
 > cd /data
@@ -173,8 +179,9 @@ The file permissions for the default tar is same as the original files.
 
 ### Google cloud provider
 
-To use the Google Cloud provider, install the [gsutil](https://cloud.google.com/storage/docs/gsutil_install) CLI instead of the AWS CLI. Otherwise, the instructions are the same as
-for AWS above, other than when working with S3. Here are the commands to access Google Spaces instead of S3 for copy/download of the backup:
+To use the Google Cloud provider, install the [gsutil](https://cloud.google.com/storage/docs/gsutil_install) CLI instead
+of the AWS CLI. Otherwise, the instructions are the same as for AWS above, other than when working with S3. Here are the
+commands to access Google Spaces instead of S3 for copy/download of the backup:
 
 ```shell
 cd /data
@@ -186,17 +193,21 @@ gsutil cp gs://<your_bucket_name>/backups/2021-04-23.tar .
 
 ### Digital Ocean
 
-Instructions will be similar to those for AWS above, but use Digital Ocean spaces instead of S3. This guide explains installation of the command-line tool:
+Instructions will be similar to those for AWS above, but use Digital Ocean spaces instead of S3. This guide explains
+installation of the command-line tool:
 <https://www.digitalocean.com/community/tutorials/how-to-migrate-from-amazon-s3-to-digitalocean-spaces-with-rclone>
 
 ## JupyterHub Database
 
-The JupyterHub database will mostly be recreated whenever you start a new cluster, but should be backed up to save Dashboard configurations.
+The JupyterHub database will mostly be recreated whenever you start a new cluster, but should be backed up to save
+Dashboard configurations.
 
-You want to do something very similar to the NFS backup, above - this time you need to back up just one file located in the PersistentVolume `hub-db-dir`.
+You want to do something very similar to the NFS backup, above - this time you need to back up just one file located in
+the PersistentVolume `hub-db-dir`.
 
-First, you might think you can just make a new `pod.yaml` file, this time specifying `claimName: "hub-db-dir"` instead of `claimName: "jupyterhub-dev-share"`. However, `hub-db-dir`
-is 'Read Write Once' - the 'Once' meaning it can only be mounted to one pod at a time, but the JupyterHub pod will already have this mounted! So the same approach will not work
+First, you might think you can just make a new `pod.yaml` file, this time specifying `claimName: "hub-db-dir"` instead
+of `claimName: "jupyterhub-dev-share"`. However, `hub-db-dir` is 'Read Write Once' - the 'Once' meaning it can only be
+mounted to one pod at a time, but the JupyterHub pod will already have this mounted! So the same approach will not work
 here.
 
 Instead of mounting to a new 'debugger pod' you have to access the JupyterHub pod directly using the `kubectl` CLI.
@@ -219,8 +230,9 @@ There is no need to TAR anything up since the only file required to be backed up
 
 ### Backing up JupyterHub DB
 
-Now we just need to upload the file to S3. You might want to [install the AWS CLI tool](#installations) as we did before, however, as the Hub container is a rather restricted
-environment the recommended approach is to upload files to AWS S3 buckets using curl.
+Now we just need to upload the file to S3. You might want to [install the AWS CLI tool](#installations) as we did
+before, however, as the Hub container is a rather restricted environment the recommended approach is to upload files to
+AWS S3 buckets using curl.
 
 For more details please refer to the [using curl to access AWS S3 buckets](./awss3curl.md) documentation.
 
@@ -238,18 +250,22 @@ As for uploads, [you may need to use curl to download items from an AWS S3 bucke
 
 ## Keycloak user/group database
 
-QHub provides a simple script to export the important user/group database. Your new QHub cluster will recreate a lot of Keycloak config (including new Keycloak clients which will
-have new secrets), so only the high-level Group and User info is exported.
+QHub provides a simple script to export the important user/group database. Your new QHub cluster will recreate a lot of
+Keycloak config (including new Keycloak clients which will have new secrets), so only the high-level Group and User info
+is exported.
 
 If you have a heavily customized Keycloak configuration, some details may be omitted in this export.
 
 ### Export Keycloak
 
-The export script is at [`qhub/scripts/keycloak-export.py`](https://github.com/Quansight/qhub/blob/main/scripts/keycloak-export.py).
+The export script is at
+[`qhub/scripts/keycloak-export.py`](https://github.com/Quansight/qhub/blob/main/scripts/keycloak-export.py).
 
-Locate your `qhub-config.yaml` file, for example by checking out of your Git repo for you QHub. Activate a virtual environment with the `qhub` Python package installed.
+Locate your `qhub-config.yaml` file, for example by checking out of your Git repo for you QHub. Activate a virtual
+environment with the `qhub` Python package installed.
 
-This assumes that the password visible in the `qhub-config.yaml` file under the `security.keycloak.initial_root_password` field is still valid for the root user.
+This assumes that the password visible in the `qhub-config.yaml` file under the
+`security.keycloak.initial_root_password` field is still valid for the root user.
 
 If not, first set the `KEYCLOAK_ADMIN_PASSWORD` environment variable to the new value.
 
@@ -263,8 +279,11 @@ You may wish to upload the Keycloak export to the same S3 location where you upl
 
 ### Import Keycloak
 
-To re-import your users and groups, [login to the /auth/ URL](../installation/login.md) using the root username and password.
+To re-import your users and groups, [login to the /auth/ URL](../installation/login.md) using the root username and
+password.
 
-Under 'Manage' on the left-hand side, click 'Import'. Locate the `exported-keycloak.json` file and select it. Then click the 'Import' button.
+Under 'Manage' on the left-hand side, click 'Import'. Locate the `exported-keycloak.json` file and select it. Then click
+the 'Import' button.
 
-All users and groups should now be present in Keycloak. Note that the passwords will not have been restored so you may need to be reset them after this step.
+All users and groups should now be present in Keycloak. Note that the passwords will not have been restored so you may
+need to be reset them after this step.
