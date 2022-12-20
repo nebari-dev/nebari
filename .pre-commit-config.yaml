@@ -11,6 +11,13 @@
 # These pre-commit hooks are run as CI.
 #
 # NOTE: if it can be avoided, add configs/args in pyproject.toml, setup.cfg or below instead of creating a new `.config.file`.
+# https://pre-commit.ci/#configuration
+ci:
+  autoupdate_schedule: monthly
+  autofix_commit_msg: |
+    [pre-commit.ci] Apply automatic pre-commit fixes
+  # this does not work on pre-commit ci
+  skip: [terraform_fmt]
 
 repos:
   # general
@@ -30,30 +37,30 @@ repos:
         exclude: "^nebari/template/"
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.2
+    rev: v2.1.0
     hooks:
       - id: codespell
-        # --write (-w) enabled here
-        # see setup.cfg for more config options
-        entry: codespell -w
+        args:
+          [
+            "--builtin=rare,clear,informal,names",
+            "--skip=_build,*/build/*,*/node_modules/*,nebari.egg-info,.nox,*.git,*.js,*.json,*.yaml,*.yml",
+            "--ignore-words-list=AKS,aks",
+            "--write",
+          ]
         language: python
 
   # python
   - repo: https://github.com/psf/black
-    rev: 22.10.0
+    rev: 22.3.0
     hooks:
       - id: black
+        args: ["--line-length=88", "--exclude=/nebari/template/"]
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 5.0.4
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.178
     hooks:
-      - id: flake8
-        args:
-          [
-            "--builtins=c",
-            "--ignore=E203,E266,E501,W503",
-            "--exclude=[.git,__pycache__,docs/source/conf.py,nebari/template,build,dist,docs,home]",
-          ]
+      - id: ruff
+        args: ["--fix"]
 
   - repo: https://github.com/pycqa/isort
     rev: 5.10.1
@@ -66,7 +73,7 @@ repos:
 
   # terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.76.0
+    rev: v1.77.0
     hooks:
       - id: terraform_fmt
         args:

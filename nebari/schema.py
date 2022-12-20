@@ -396,7 +396,7 @@ class Profiles(Base):
 
     @validator("jupyterlab")
     def check_default(cls, v, values):
-        """Check if only one default value is present"""
+        """Check if only one default value is present."""
         default = [attrs["default"] for attrs in v if "default" in attrs]
         if default.count(True) > 1:
             raise TypeError(
