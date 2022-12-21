@@ -44,23 +44,23 @@ kubectl delete pods -n dev -l component=singleuser-server,app=jupyterhub
 
 # delete and wait for worker nodegroup to be deleted
 echo "Deleting EKS node-group: worker"
-aws eks delete-nodegroup --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name worker || true
-aws eks wait nodegroup-deleted --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name worker || true
+aws eks delete-nodegroup --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name worker
+aws eks wait nodegroup-deleted --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name worker
 
 # delete and wait for user nodegroup to be deleted
 echo "Deleting EKS node-group: user"
-aws eks delete-nodegroup --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name user || true
-aws eks wait nodegroup-deleted --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name user || true
+aws eks delete-nodegroup --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name user
+aws eks wait nodegroup-deleted --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name user
 
 # delete and wait for general nodegroup to be deleted
 echo "Deleting EKS node-group: general"
-aws eks delete-nodegroup --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name general || true
-aws eks wait nodegroup-deleted --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name general || true
+aws eks delete-nodegroup --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name general
+aws eks wait nodegroup-deleted --cluster-name "${PROJECT_NAME}-${NAMESPACE}" --nodegroup-name general
 
 # delete and wait for eks cluster to be deleted
 echo "Deleting EKS cluster: $PROJECT_NAME-$NAMESPACE"
-aws eks delete-cluster --name "${PROJECT_NAME}-${NAMESPACE}" || true
-aws eks wait cluster-deleted --name "${PROJECT_NAME}-${NAMESPACE}" || true
+aws eks delete-cluster --name "${PROJECT_NAME}-${NAMESPACE}"
+aws eks wait cluster-deleted --name "${PROJECT_NAME}-${NAMESPACE}"
 
 # get VPC ID
 vpcid=$(aws ec2 describe-vpcs --filters "Name=tag:Project,Values='$PROJECT_NAME'" --query "Vpcs[0].VpcId" --output text)
@@ -70,7 +70,7 @@ elbname=$(aws elb describe-load-balancers --query "LoadBalancerDescriptions[?sta
 
 # delete ELB
 echo "Deleting Elastic Load Balancer (ELB): ${elbname}"
-aws elb delete-load-balancer --load-balancer-name $elbname || true
+aws elb delete-load-balancer --load-balancer-name $elbname
 
 # get EFS ID
 fsid=$(aws efs describe-file-systems --query "FileSystems[?starts_with(Name, '$PROJECT_NAME-$NAMESPACE')] | [0].FileSystemId" --output text)
@@ -83,34 +83,36 @@ fsmtb=$(aws efs describe-mount-targets --file-system-id $fsid --query "MountTarg
 
 # delete EFS Mount Target (subnet a)
 echo "Deleting Elastic File System (EFS) Mount Target 1: $fsmta"
-aws efs delete-mount-target --mount-target-id $fsmta || true
+aws efs delete-mount-target --mount-target-id $fsmta
 
 # delete EFS Mount Target (subnet b)
 echo "Deleting Elastic File System (EFS) Mount Target 2: $fsmtb"
-aws efs delete-mount-target --mount-target-id $fsmtb || true
+aws efs delete-mount-target --mount-target-id $fsmtb
 
+# to ensure all mount targets are deleted
 sleep 60
 
 # delete EFS
 echo "Deleting Elastic File System (EFS): $fsid"
-aws efs delete-file-system --file-system-id $fsid || true
+aws efs delete-file-system --file-system-id $fsid
 
 # get VPC Subnet IDs - possibly multiple
 subneta=$(aws ec2 describe-subnets --filters "Name=tag:Project,Values='$PROJECT_NAME'" --query 'Subnets[0].SubnetId' --output text)
 subnetb=$(aws ec2 describe-subnets --filters "Name=tag:Project,Values='$PROJECT_NAME'" --query 'Subnets[1].SubnetId' --output text)
 
+# TODO: add subnets to array and delete each individually
 # delete VPC Subnets
 echo "Deleting Virtual Private Network (VPC) Subnet 1: $subneta"
-aws ec2 delete-subnet --subnet-id $subneta || true
+aws ec2 delete-subnet --subnet-id $subneta
 echo "Deleting Virtual Private Network (VPC) Subnet 2: $subnetb"
-aws ec2 delete-subnet --subnet-id $subnetb || true
+aws ec2 delete-subnet --subnet-id $subnetb
 
 # get VPC Route Table ID
 rtid=$(aws ec2 describe-route-tables --filters "Name=tag:Project,Values='$PROJECT_NAME'" --query 'RouteTables[0].RouteTableId' --output text)
 
 # delete VPC Route Table
 echo "Deleting Virtual Private Network (VPC) Route Table"
-aws ec2 delete-route-table --route-table-id $rtid || true
+aws ec2 delete-route-table --route-table-id $rtid
 
 # get VPC Internet Gateway ID
 igwid=$(aws ec2 describe-internet-gateways --filters "Name=tag:Project,Values='$PROJECT_NAME'" --query 'InternetGateways[0].InternetGatewayId' --output text)
@@ -120,39 +122,40 @@ aws ec2 detach-internet-gateway --internet-gateway-id $igwid --vpc-id $vpcid
 
 # delete Internet Gateway from VPC
 echo "Deleting Virtual Private Network (VPC) Internet Gateway"
-aws ec2 delete-internet-gateway --internet-gateway-id $igwid || true
+aws ec2 delete-internet-gateway --internet-gateway-id $igwid
 
 # get VPC Security Group ID - possibly multiple
 sgida=$(aws ec2 describe-security-groups --query "SecurityGroups[?starts_with(VpcId, '$vpcid')] | [0].GroupId" --output text)
 sgidb=$(aws ec2 describe-security-groups --query "SecurityGroups[?starts_with(VpcId, '$vpcid')] | [1].GroupId" --output text)
 
+# TODO: add security groups to array and delete each individually
 # delete VPC Security Group
 echo "Deleting Virtual Private Network (VPC) Security Group"
-aws ec2 delete-security-group --group-id $sgida || true
-aws ec2 delete-security-group --group-id $sgidb || true
+aws ec2 delete-security-group --group-id $sgida
+aws ec2 delete-security-group --group-id $sgidb
 
 # delete VPC
 echo "Deleting Virtual Private Network (VPC): $vpcid"
-aws ec2 delete-vpc --vpc-id $vpcid || true
+aws ec2 delete-vpc --vpc-id $vpcid
 
 # get S3 bucket name
 s3name=$(aws s3api list-buckets --query "Buckets[?starts_with(Name, '$PROJECT_NAME')] | [0].Name" --output text)
 
 # delete S3 objects
 echo "Deleting S3 Objects"
-aws s3api delete-objects --bucket $s3name --delete "$(aws s3api list-object-versions --bucket $s3name --query '{Objects: Versions[].{Key: Key, VersionId: VersionId}}' --max-items 1000)"  || true
+aws s3api delete-objects --bucket $s3name --delete "$(aws s3api list-object-versions --bucket $s3name --query '{Objects: Versions[].{Key: Key, VersionId: VersionId}}' --max-items 1000)"
 
 # delete S3 bucket
 echo "Deleting S3 Bucket: $s3name"
-aws s3api delete-bucket --bucket $s3name || true
+aws s3api delete-bucket --bucket $s3name
 
 # delete DynamoDB table
 echo "Deleting DynamoDB Table"
-aws dynamodb delete-table --table-name "$PROJECT_NAME-$NAMESPACE-terraform-state-lock" || true
+aws dynamodb delete-table --table-name "$PROJECT_NAME-$NAMESPACE-terraform-state-lock"
 
 # delete Resource Group
 echo "Deleting Resource Group"
-aws resource-groups delete-group --group $PROJECT_NAME || true
+aws resource-groups delete-group --group $PROJECT_NAME
 
 
 # TODO: delete EC2 storage volumes
