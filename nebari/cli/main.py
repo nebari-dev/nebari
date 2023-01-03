@@ -28,6 +28,7 @@ from nebari.render import render_template
 from nebari.schema import (
     AuthenticationEnum,
     CiEnum,
+    GitRepoEnum,
     InitInputs,
     ProviderEnum,
     TerraformStateEnum,
@@ -132,6 +133,7 @@ def init(
     ),
     repository: str = typer.Option(
         None,
+        help=f"options: {enum_to_list(GitRepoEnum)}",
     ),
     repository_auto_provision: bool = typer.Option(
         False,

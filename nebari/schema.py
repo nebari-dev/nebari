@@ -32,6 +32,11 @@ class ProviderEnum(str, enum.Enum):
     azure = "azure"
 
 
+class GitRepoEnum(str, enum.Enum):
+    github = "github.com"
+    gitlab = "gitlab.com"
+
+
 class CiEnum(str, enum.Enum):
     github_actions = "github-actions"
     gitlab_ci = "gitlab-ci"
