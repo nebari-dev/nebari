@@ -10,6 +10,7 @@ from nebari.initialize import render_config
 from nebari.schema import (
     AuthenticationEnum,
     CiEnum,
+    GitRepoEnum,
     InitInputs,
     ProviderEnum,
     TerraformStateEnum,
@@ -195,7 +196,7 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
 
 
 def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
-    """Validating the the necessary auth provider credentials have been set as environment variables."""
+    """Validate the the necessary auth provider credentials have been set as environment variables."""
     if ctx.params.get("disable_prompt"):
         return auth_provider
 
@@ -260,10 +261,29 @@ def check_project_name(ctx: typer.Context, project_name: str):
 
 
 def check_ssl_cert_email(ctx: typer.Context, ssl_cert_email: str):
+    """Validate the email used for SSL cert is in a valid format."""
     if ssl_cert_email and not re.match("^[^ @]+@[^ @]+\\.[^ @]+$", ssl_cert_email):
         raise ValueError("ssl-cert-email should be a valid email address")
 
     return ssl_cert_email
+
+
+def check_repository_creds(ctx: typer.Context, git_provider: str):
+    """Validate the necessary Git provider (GitHub) credentials are set."""
+
+    if (
+        git_provider == GitRepoEnum.github.value.lower()
+        and not os.environ.get("GITHUB_USERNAME")
+        or not os.environ.get("GITHUB_TOKEN")
+    ):
+        os.environ["GITHUB_USERNAME"] = typer.prompt(
+            "Paste your GITHUB_USERNAME",
+            hide_input=True,
+        )
+        os.environ["GITHUB_TOKEN"] = typer.prompt(
+            "Paste your GITHUB_TOKEN",
+            hide_input=True,
+        )
 
 
 def guided_init_wizard(ctx: typer.Context, guided_init: str):
@@ -412,7 +432,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
             git_provider = questionary.select(
                 "Which git provider would you like to use?",
-                choices=["github.com", "gitlab.com"],
+                choices=enum_to_list(GitRepoEnum),
                 qmark=qmark,
             ).unsafe_ask()
 
@@ -430,20 +450,19 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 git_provider=git_provider, org_name=org_name, repo_name=repo_name
             )
 
-            if git_provider == "github.com":
+            if git_provider == GitRepoEnum.github.value.lower():
                 inputs.repository_auto_provision = questionary.confirm(
                     f"Would you like nebari to create a remote repository on {git_provider}?",
                     default=False,
                     qmark=qmark,
                 ).unsafe_ask()
 
-            # TODO: create `check_repository_creds` function
-            if not disable_checks:
-                pass
+            if not disable_checks and inputs.repository_auto_provision:
+                check_repository_creds(ctx, git_provider)
 
-            if git_provider == "github.com":
+            if git_provider == GitRepoEnum.github.value.lower():
                 inputs.ci_provider = CiEnum.github_actions.value.lower()
-            elif git_provider == "gitlab.com":
+            elif git_provider == GitRepoEnum.gitlab.value.lower():
                 inputs.ci_provider = CiEnum.gitlab_ci.value.lower()
 
         # SSL CERTIFICATE
