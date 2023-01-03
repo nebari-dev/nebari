@@ -4,7 +4,7 @@ from typing import Tuple
 
 import typer
 
-from nebari.keycloak import do_keycloak, export_keycloak_users, keycloak_rest_api_call
+from nebari.keycloak import do_keycloak, export_keycloak_users
 
 app_keycloak = typer.Typer(
     add_completion=False,
@@ -72,35 +72,5 @@ def export_users(
         config_filename = Path(config_filename)
 
     r = export_keycloak_users(config_filename, realm=realm)
-
-    print(json.dumps(r, indent=4))
-
-
-@app_keycloak.command(name="rest-api")
-def rest_api(
-    config_filename: str = typer.Option(
-        ...,
-        "-c",
-        "--config",
-        help="nebari configuration file path",
-    ),
-    request: str = typer.Option(
-        ...,
-        "-r",
-        "--request",
-        help="Send a REST API request, valid requests follow patterns found here: [green]keycloak.org/docs-api/15.0/rest-api[/green]",
-    ),
-):
-    """
-    Interact with the Keycloak REST API directly.
-
-    This is an advanced tool which can have potentially destructive consequences.
-    Please use this at your own risk.
-
-    """
-    if isinstance(config_filename, str):
-        config_filename = Path(config_filename)
-
-    r = keycloak_rest_api_call(config_filename, request=request)
 
     print(json.dumps(r, indent=4))

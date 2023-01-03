@@ -10,6 +10,7 @@ from rich import print
 from ruamel import yaml
 from typer.core import TyperGroup
 
+from nebari.cli.dev import app_dev
 from nebari.cli.init import (
     check_auth_provider_creds,
     check_cloud_provider_creds,
@@ -45,6 +46,7 @@ GUIDED_INIT_MSG = (
 KEYCLOAK_COMMAND_MSG = (
     "Interact with the Nebari Keycloak identity and access management tool."
 )
+DEV_COMMAND_MSG = "Development tools and advanced features."
 
 
 class OrderCommands(TyperGroup):
@@ -65,6 +67,12 @@ app.add_typer(
     app_keycloak,
     name="keycloak",
     help=KEYCLOAK_COMMAND_MSG,
+    rich_help_panel=SECOND_COMMAND_GROUP_NAME,
+)
+app.add_typer(
+    app_dev,
+    name="dev",
+    help=DEV_COMMAND_MSG,
     rich_help_panel=SECOND_COMMAND_GROUP_NAME,
 )
 
