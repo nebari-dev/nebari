@@ -1,5 +1,11 @@
 {
     "dask-labextension:plugin": {
         "browserDashboardCheck": true
+    },
+    "jupyterlab-conda-store:plugin": {
+        "apiUrl": "/conda-store/",
+        "authMethod": "cookie",
+        "loginUrl": "/conda-store/login?next=",
+        "authToken": ""
     }
 }
