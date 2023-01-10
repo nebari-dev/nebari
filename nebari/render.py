@@ -1,11 +1,13 @@
 import functools
 import hashlib
+import json
 import os
 import pathlib
 import shutil
 import sys
 from typing import Dict, List
 
+import yaml
 from rich import print
 from rich.table import Table
 from ruamel.yaml import YAML
@@ -147,8 +149,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
 
 
 def render_contents(config: Dict):
-    """Dynamically generated contents from Nebari configuration"""
-
+    """Dynamically generated contents from Nebari configuration."""
     contents = {
         **tf_objects.stage_01_terraform_state(config),
         **tf_objects.stage_02_infrastructure(config),
@@ -162,16 +163,16 @@ def render_contents(config: Dict):
 
     if config.get("ci_cd"):
         for fn, workflow in gen_cicd(config).items():
-            contents.update(
-                {
-                    fn: workflow.json(
-                        indent=2,
-                        by_alias=True,
-                        exclude_unset=True,
-                        exclude_defaults=True,
-                    )
-                }
+            workflow_json = workflow.json(
+                indent=2,
+                by_alias=True,
+                exclude_unset=True,
+                exclude_defaults=True,
             )
+            workflow_yaml = yaml.dump(
+                json.loads(workflow_json), sort_keys=False, indent=2
+            )
+            contents.update({fn: workflow_yaml})
 
     contents.update(gen_gitignore(config))
 
@@ -183,7 +184,6 @@ def gen_gitignore(config):
     Generate `.gitignore` file.
     Add files as needed.
     """
-
     from inspect import cleandoc
 
     filestoignore = """
@@ -237,7 +237,7 @@ def inspect_files(
     deleted_paths: List[str] = None,
     contents: Dict[str, str] = None,
 ):
-    """Return created, updated and untracked files by computing a checksum over the provided directory
+    """Return created, updated and untracked files by computing a checksum over the provided directory.
 
     Args:
         source_dirs (str): The source dir used as base for comparssion
@@ -300,7 +300,7 @@ def inspect_files(
 
 
 def hash_file(file_path: str):
-    """Get the hex digest of the given file
+    """Get the hex digest of the given file.
 
     Args:
         file_path (str): path to file

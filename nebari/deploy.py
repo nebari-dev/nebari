@@ -31,7 +31,7 @@ def provision_01_terraform_state(stage_outputs, config):
 
 
 def provision_02_infrastructure(stage_outputs, config, disable_checks=False):
-    """Generalized method to provision infrastructure
+    """Generalized method to provision infrastructure.
 
     After successful deployment the following properties are set on
     `stage_outputs[directory]`.

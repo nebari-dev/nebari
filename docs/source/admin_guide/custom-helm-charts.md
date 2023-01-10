@@ -15,5 +15,6 @@ helm_extensions:
             enabled: true
 ```
 
-The `overrides` section is optional, but corresponds to the helm chart's [values.yaml](https://helm.sh/docs/chart_template_guide/values_files/) file, and allows you to override the
-default helm chart settings.
+The `overrides` section is optional, but corresponds to the helm chart's
+[values.yaml](https://helm.sh/docs/chart_template_guide/values_files/) file, and allows you to override the default helm
+chart settings.

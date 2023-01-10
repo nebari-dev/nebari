@@ -27,6 +27,7 @@ from nebari.render import render_template
 from nebari.schema import (
     AuthenticationEnum,
     CiEnum,
+    GitRepoEnum,
     InitInputs,
     ProviderEnum,
     TerraformStateEnum,
@@ -124,6 +125,7 @@ def init(
     ),
     repository: str = typer.Option(
         None,
+        help=f"options: {enum_to_list(GitRepoEnum)}",
     ),
     repository_auto_provision: bool = typer.Option(
         False,
@@ -189,7 +191,7 @@ def validate(
         help="nebari configuration yaml file path, please pass in as -c/--config flag",
     ),
     enable_commenting: bool = typer.Option(
-        False, "--enable_commenting", help="Toggle PR commenting on GitHub Actions"
+        False, "--enable-commenting", help="Toggle PR commenting on GitHub Actions"
     ),
 ):
     """
@@ -405,7 +407,7 @@ def cost(
     ),
 ):
     """
-    Estimate the cost of deploying Nebari based on your [purple]nebari-config.yaml[/purple]. [italic]Experimental.[/italic]
+    Estimate the cost of deploying Nebari based on your [purple]nebari-config.yaml[/purple]. [italic]Experimental.[/italic].
 
     [italic]This is still only experimental using Infracost under the hood.
     The estimated value is a base cost and does not include usage costs.[/italic]
@@ -470,7 +472,6 @@ def support(
     The Nebari team recommends k9s to manage and inspect the state of the cluster.
     However, this command occasionally helpful for debugging purposes should the logs need to be shared.
     """
-
     kube_config.load_kube_config()
 
     v1 = client.CoreV1Api()

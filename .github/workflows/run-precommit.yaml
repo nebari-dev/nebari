@@ -1,0 +1,29 @@
+name: Run pre-commit
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - release/\d{4}.\d{1,2}.\d{1,2}
+  pull_request:
+
+jobs:
+  pre-commit:
+    if: github.event.pull_request.merged == false
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout repository 🔔
+        uses: actions/checkout@v3
+
+      # https://github.com/pre-commit/action to enable cache
+      - uses: pre-commit/action@v3.0.0
+
+      - name: Install pre-commit 📦
+        run: pip install pre-commit
+
+      - name: Run terraform pre-commit ⚡️
+        run: pre-commit run terraform_fmt

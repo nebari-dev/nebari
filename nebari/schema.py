@@ -32,6 +32,11 @@ class ProviderEnum(str, enum.Enum):
     azure = "azure"
 
 
+class GitRepoEnum(str, enum.Enum):
+    github = "github.com"
+    gitlab = "gitlab.com"
+
+
 class CiEnum(str, enum.Enum):
     github_actions = "github-actions"
     gitlab_ci = "gitlab-ci"
@@ -400,7 +405,7 @@ class Profiles(Base):
 
     @validator("jupyterlab")
     def check_default(cls, v, values):
-        """Check if only one default value is present"""
+        """Check if only one default value is present."""
         default = [attrs["default"] for attrs in v if "default" in attrs]
         if default.count(True) > 1:
             raise TypeError(

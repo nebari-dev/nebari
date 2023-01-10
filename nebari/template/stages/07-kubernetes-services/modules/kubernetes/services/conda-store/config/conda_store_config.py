@@ -29,7 +29,7 @@ c.CondaStore.redis_url = (
 )
 c.CondaStore.default_uid = 1000
 c.CondaStore.default_gid = 100
-c.CondaStore.default_permissions = "775"
+c.CondaStore.default_permissions = "555"
 c.CondaStore.conda_included_packages = ["ipykernel"]
 
 c.S3Storage.internal_endpoint = f"{config['minio-service']}:9000"

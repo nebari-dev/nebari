@@ -14,6 +14,7 @@ on:
   push:
     branches:
       - main
+      - develop
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test-provider.yaml"
@@ -24,6 +25,11 @@ on:
       - "nebari/**"
       - "setup.cfg"
       - "pyproject.yoml"
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
 
 env:
   DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
@@ -34,10 +40,10 @@ env:
   ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
-
 jobs:
   test-render-providers:
-    name: 'Test Nebari Provider'
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
+    name: "Test Nebari Provider"
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -53,10 +59,17 @@ jobs:
           - github-actions
           - gitlab-ci
     steps:
-      - name: 'Checkout Infrastructure'
-        uses: actions/checkout@main
+      - name: "Checkout Infrastructure"
+        uses: actions/checkout@v3
+
+      - name: Checkout the branch from the PR that triggered the job
+        if: ${{ github.event_name == 'issue_comment' }}
+        run: hub pr checkout ${{ inputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: 3.8
       - name: Set up Cloud SDK

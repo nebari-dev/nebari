@@ -1,69 +1,94 @@
+# pre-commit is a tool to perform a predefined set of tasks manually and/or
+# automatically before git commits are made.
+#
+# Config reference: https://pre-commit.com/#pre-commit-configyaml---top-level
+#
+# Common tasks
+#
+# - Register git hooks: pre-commit install --install-hooks
+# - Run on all files:   pre-commit run --all-files
+#
 # These pre-commit hooks are run as CI.
-
+#
 # NOTE: if it can be avoided, add configs/args in pyproject.toml, setup.cfg or below instead of creating a new `.config.file`.
-
+# https://pre-commit.ci/#configuration
+ci:
+  autoupdate_schedule: monthly
+  autofix_commit_msg: |
+    [pre-commit.ci] Apply automatic pre-commit fixes
+  # this does not work on pre-commit ci
+  skip: [terraform_fmt]
 
 repos:
-# general
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v2.3.0
-  hooks:
-  - id: end-of-file-fixer
-  - id: trailing-whitespace
-  - id: check-json
-  - id: check-yaml
-    # jinja2 templates for helm charts
-    exclude: 'nebari/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)'
-    args: [--allow-multiple-documents]
+  # general
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-json
+      - id: check-yaml
+        # jinja2 templates for helm charts
+        exclude: "nebari/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)"
+        args: [--allow-multiple-documents]
+      - id: check-toml
+      # Lint: Checks that non-binary executables have a proper shebang.
+      - id: check-executables-have-shebangs
+        exclude: "^nebari/template/"
 
-- repo: https://github.com/codespell-project/codespell
-  rev: v2.1.0
-  hooks:
-  - id: codespell
-    # --write (-w) enabled here
-    # see setup.cfg for more config options
-    entry: codespell -w
-    language: python
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.2
+    hooks:
+      - id: codespell
+        args:
+          [
+            "--builtin=rare,clear,informal,names",
+            "--skip=_build,*/build/*,*/node_modules/*,nebari.egg-info,.nox,*.git,*.js,*.json,*.yaml,*.yml",
+            "--ignore-words-list=AKS,aks",
+            "--write",
+          ]
+        language: python
 
-# python
-- repo: https://github.com/psf/black
-  rev: 22.3.0
-  hooks:
-  - id: black
+  # python
+  - repo: https://github.com/psf/black
+    rev: 22.12.0
+    hooks:
+      - id: black
+        args: ["--line-length=88", "--exclude=/nebari/template/"]
 
-- repo: https://github.com/pycqa/flake8
-  rev: 3.8.4
-  hooks:
-  - id: flake8
-    args: [
-      "--builtins=c"
-    ]
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.206
+    hooks:
+      - id: ruff
+        args: ["--fix"]
 
-- repo: https://github.com/pycqa/isort
-  rev: 5.10.1
-  hooks:
-  - id: isort
-    name: isort
-    args: ["--profile", "black"]
+  - repo: https://github.com/pycqa/isort
+    rev: 5.11.4
+    hooks:
+      - id: isort
+        name: isort
+        additional_dependencies: [toml]
+        files: \.py$
+        args: ["--profile", "black"]
 
-# terraform
-- repo: https://github.com/antonbabenko/pre-commit-terraform
-  rev: v1.71.0
-  hooks:
-  - id: terraform_fmt
-    args:
-      - --args=-write=true
+  # terraform
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.77.0
+    hooks:
+      - id: terraform_fmt
+        args:
+          - --args=-write=true
 
-# markdown
-- repo: https://github.com/executablebooks/mdformat
-  rev: 0.7.14
-  hooks:
-  - id: mdformat
-    files: ^docs/
-    name: mdformat
-    entry: mdformat --wrap=180 --number --end-of-line=lf
-    language: python
-    types: [markdown]
-    minimum_pre_commit_version: '2.0.0'
-    additional_dependencies:
-    - mdformat-tables
+  # markdown
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.16
+    hooks:
+      - id: mdformat
+        files: ^docs/
+        name: mdformat
+        entry: mdformat --wrap=120 --number --end-of-line=lf
+        language: python
+        types: [markdown]
+        minimum_pre_commit_version: "2.0.0"
+        additional_dependencies:
+          - mdformat-tables

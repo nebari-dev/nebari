@@ -1,15 +1,104 @@
+### Build ###
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm>=6.2"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
-[tool.black]
-line-length = 88
-target-version = ['py37', 'py38']
-exclude = '/nebari/template/'
+[tool.hatch.build.targets.wheel]
+include = ["nebari"]
 
-[tool.setuptools_scm]
-write_to = "nebari/_version.py"
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "nebari/_version.py"
 local_scheme = "node-and-timestamp"
 
-[tools.setuptools_scm.version_scheme]
-calver_by_date = "calver-by-date"
+
+### Project ###
+[project]
+name = "nebari"
+dynamic = ["version"]
+description = "A Jupyter and Dask-powered open source data science platform."
+readme = "README.md"
+requires-python = ">=3.8"
+license = "BSD-3-Clause"
+authors = [
+    { name = "Nebari development team", email = "internal-it@quansight.com" },
+]
+keywords = [
+    "aws",
+    "gcp",
+    "do",
+    "azure",
+    "nebari",
+    "dask",
+    "jupyter",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+    "Framework :: Jupyter :: JupyterLab",
+]
+
+dependencies = [
+    "auth0-python",
+    "azure-identity==1.6.1",
+    "azure-mgmt-containerservice==16.2.0",
+    "bcrypt",
+    "boto3",
+    "cloudflare",
+    "importlib_metadata; python_version<'3.8'",
+    "kubernetes",
+    "pydantic",
+    "pynacl",
+    "python-keycloak",
+    "questionary",
+    "rich",
+    "ruamel.yaml",
+    "typer",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black==22.3.0",
+    "dask-gateway",
+    "diagrams",
+    "escapism",
+    "flake8==3.8.4",
+    "importlib-metadata<5.0",
+    "jhub-client",
+    "paramiko",
+    "pre-commit",
+    "pytest",
+    "pytest-timeout",
+]
+
+[project.urls]
+Documentation = "https://www.nebari.dev/docs"
+Source = "https://github.com/nebari-dev/nebari"
+
+[project.scripts]
+nebari = "nebari.cli.main:app"
+
+[tool.ruff]
+ignore = [
+    "E501", # Line too long
+    "F821", # Undefined name
+]
+extend-exclude = [
+    "nebari/template",
+    "docs/source/conf.py",
+    "docs",
+    "home",
+    "__pycache__"
+]
