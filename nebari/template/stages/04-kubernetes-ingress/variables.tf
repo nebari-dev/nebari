@@ -69,3 +69,8 @@ variable "additional-arguments" {
   type        = list(string)
   default     = []
 }
+
+variable "kubernetes-provider-version" {
+  type    = string
+  default = "2.16.1"
+}
