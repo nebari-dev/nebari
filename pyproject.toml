@@ -85,7 +85,7 @@ dev = [
 docs = [
     "novella",
     "pydoc-markdown",
-    "pre-commit"
+    "pre-commit",
 ]
 
 [project.urls]
