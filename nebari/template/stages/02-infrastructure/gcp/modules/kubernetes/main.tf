@@ -14,11 +14,6 @@ resource "google_container_cluster" "main" {
   remove_default_node_pool = true
   initial_node_count       = 1
 
-  management {
-    auto_repair  = true
-    auto_upgrade = false
-  }
-
   master_auth {
     client_certificate_config {
       issue_client_certificate = true
