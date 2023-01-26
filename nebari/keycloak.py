@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from urllib.parse import urljoin
 
 import keycloak
 import requests
@@ -119,9 +120,8 @@ def keycloak_rest_api_call(config=None, request: str = None):
 
     config = load_yaml(config)
 
-    keycloak_server_url = os.environ.get(
-        "KEYCLOAK_SERVER_URL", f"https://{config['domain']}/auth"
-    )
+    keycloak_server_url = f"https://{config['domain']}/auth/"
+
     keycloak_admin_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
     keycloak_admin_password = os.environ.get(
         "KEYCLOAK_ADMIN_PASSWORD",
@@ -130,7 +130,9 @@ def keycloak_rest_api_call(config=None, request: str = None):
 
     try:
         # Get `token` to interact with Keycloak Admin
-        url = keycloak_server_url + "realms/master/protocol/openid-connect/token"
+        url = urljoin(
+            keycloak_server_url, "realms/master/protocol/openid-connect/token"
+        )
         headers = {
             "Content-Type": "application/x-www-form-urlencoded",
         }
@@ -145,6 +147,7 @@ def keycloak_rest_api_call(config=None, request: str = None):
             url=url,
             headers=headers,
             data=data,
+            verify=False,
         )
 
         if response.status_code == 200:
@@ -156,13 +159,17 @@ def keycloak_rest_api_call(config=None, request: str = None):
 
         # Send request to Keycloak REST API
         method, endpoint = request.split()
-        url = keycloak_server_url + "admin/realms" + endpoint
+        url = urljoin(
+            urljoin(keycloak_server_url, "admin/realms/"), endpoint.lstrip("/")
+        )
         headers = {
             "Accept": "application/json",
             "Authorization": f"Bearer {token}",
         }
 
-        response = requests.request(method=method, url=url, headers=headers)
+        response = requests.request(
+            method=method, url=url, headers=headers, verify=False
+        )
 
         if response.status_code == 200:
             content = json.loads(response.content.decode())
