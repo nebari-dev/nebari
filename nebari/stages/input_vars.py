@@ -188,6 +188,8 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
     if cert_type == "lets-encrypt":
         cert_details["acme-email"] = config["certificate"]["acme_email"]
         cert_details["acme-server"] = config["certificate"]["acme_server"]
+    elif cert_type == "existing":
+        cert_details["certificate-secret-name"] = config["certificate"]["secret_name"]
 
     return {
         **{
