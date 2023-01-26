@@ -2,9 +2,9 @@ data "google_client_config" "main" {
 }
 
 resource "google_container_cluster" "main" {
-  name           = var.name
-  location       = var.location
-  master_version = var.kubernetes_version
+  name               = var.name
+  location           = var.location
+  min_master_version = var.kubernetes_version
 
   node_locations = var.availability_zones
 
@@ -13,6 +13,11 @@ resource "google_container_cluster" "main" {
   # node pool and immediately delete it.
   remove_default_node_pool = true
   initial_node_count       = 1
+
+  management {
+    auto_repair  = true
+    auto_upgrade = false
+  }
 
   master_auth {
     client_certificate_config {
@@ -78,7 +83,7 @@ resource "google_container_node_pool" "main" {
 
   management {
     auto_repair  = true
-    auto_upgrade = true
+    auto_upgrade = false
   }
 
   node_config {
