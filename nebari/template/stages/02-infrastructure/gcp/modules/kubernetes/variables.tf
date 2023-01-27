@@ -30,6 +30,11 @@ variable "additional_node_group_oauth_scopes" {
   default     = []
 }
 
+variable "kubernetes_version" {
+  description = "Kubernetes version for GKE cluster"
+  type        = string
+}
+
 variable "node_groups" {
   description = "Node groups to add to GCP Kubernetes Cluster"
   type        = any

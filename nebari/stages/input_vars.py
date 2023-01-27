@@ -64,6 +64,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "environment": config["namespace"],
             "region": config["google_cloud_platform"]["region"],
             "project_id": config["google_cloud_platform"]["project"],
+            "kubernetes_version": config["google_cloud_platform"]["kubernetes_version"],
             "node_groups": [
                 {
                     "name": key,

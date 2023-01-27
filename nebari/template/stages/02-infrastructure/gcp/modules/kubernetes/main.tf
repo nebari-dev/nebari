@@ -2,8 +2,9 @@ data "google_client_config" "main" {
 }
 
 resource "google_container_cluster" "main" {
-  name     = var.name
-  location = var.location
+  name               = var.name
+  location           = var.location
+  min_master_version = var.kubernetes_version
 
   node_locations = var.availability_zones
 
@@ -66,6 +67,7 @@ resource "google_container_node_pool" "main" {
   name     = local.merged_node_groups[count.index].name
   location = var.location
   cluster  = google_container_cluster.main.name
+  version  = var.kubernetes_version
 
   initial_node_count = local.merged_node_groups[count.index].min_size
 
@@ -76,7 +78,7 @@ resource "google_container_node_pool" "main" {
 
   management {
     auto_repair  = true
-    auto_upgrade = true
+    auto_upgrade = false
   }
 
   node_config {

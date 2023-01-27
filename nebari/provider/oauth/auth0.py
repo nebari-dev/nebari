@@ -1,8 +1,8 @@
 import logging
 import os
 
-from auth0.v3.authentication import GetToken
-from auth0.v3.management import Auth0
+from auth0.authentication import GetToken
+from auth0.management import Auth0
 
 logger = logging.getLogger(__name__)
 
@@ -12,11 +12,13 @@ def create_client(jupyterhub_endpoint, project_name, reuse_existing=True):
         if variable not in os.environ:
             raise ValueError(f"Required environment variable={variable} not defined")
 
-    get_token = GetToken(os.environ["AUTH0_DOMAIN"])
-    token = get_token.client_credentials(
+    get_token = GetToken(
+        os.environ["AUTH0_DOMAIN"],
         os.environ["AUTH0_CLIENT_ID"],
-        os.environ["AUTH0_CLIENT_SECRET"],
-        f'https://{os.environ["AUTH0_DOMAIN"]}/api/v2/',
+        client_secret=os.environ["AUTH0_CLIENT_SECRET"],
+    )
+    token = get_token.client_credentials(
+        f'https://{os.environ["AUTH0_DOMAIN"]}/api/v2/'
     )
     mgmt_api_token = token["access_token"]
 
