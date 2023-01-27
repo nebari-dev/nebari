@@ -237,8 +237,18 @@ AMAZON_WEB_SERVICES = {
     "kubernetes_version": "PLACEHOLDER",
     "node_groups": {
         "general": {"instance": "m5.2xlarge", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 5},
-        "worker": {"instance": "m5.xlarge", "min_nodes": 1, "max_nodes": 5},
+        "user": {
+            "instance": "m5.xlarge",
+            "min_nodes": 1,
+            "max_nodes": 5,
+            "single_subnet": True,
+        },
+        "worker": {
+            "instance": "m5.xlarge",
+            "min_nodes": 1,
+            "max_nodes": 5,
+            "single_subnet": True,
+        },
     },
 }
 
