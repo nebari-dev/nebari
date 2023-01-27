@@ -32,4 +32,5 @@ module "kubernetes" {
   ip_allocation_policy              = var.ip_allocation_policy
   master_authorized_networks_config = var.master_authorized_networks_config
   private_cluster_config            = var.private_cluster_config
+  kubernetes_version                = var.kubernetes_version
 }
