@@ -20,6 +20,10 @@ resource "google_container_cluster" "main" {
     }
   }
 
+  release_channel {
+    channel = "UNSPECIFIED"
+  }
+
   networking_mode = var.networking_mode
   network         = var.network
   subnetwork      = var.subnetwork
