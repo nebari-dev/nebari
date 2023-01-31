@@ -79,3 +79,4 @@ jobs:
           labels: |
             "area: documentation 📖"
           draft: false
+          base: ${{ github.head_ref }}
