@@ -241,13 +241,13 @@ AMAZON_WEB_SERVICES = {
             "instance": "m5.xlarge",
             "min_nodes": 1,
             "max_nodes": 5,
-            "single_subnet": True,
+            "single_subnet": False,
         },
         "worker": {
             "instance": "m5.xlarge",
             "min_nodes": 1,
             "max_nodes": 5,
-            "single_subnet": True,
+            "single_subnet": False,
         },
     },
 }
