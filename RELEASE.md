@@ -13,6 +13,30 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ### Feature changes and enhancements
 
+## Release 2023.1.1 - January 30, 2023
+
+## What's Changed
+* 🔄 Synced file(s) with nebari-dev/.github by @nebari-sensei in https://github.com/nebari-dev/nebari/pull/1588
+* Make conda-store file system read-only by default by @alimanfoo in https://github.com/nebari-dev/nebari/pull/1595
+* ENH - Switch to ruff and pre-commit.ci by @trallard in https://github.com/nebari-dev/nebari/pull/1602
+* Migrate to hatch by @iameskild in https://github.com/nebari-dev/nebari/pull/1545
+* Add check_repository_cred function to CLI by @iameskild in https://github.com/nebari-dev/nebari/pull/1605
+* Adding jupyterlab-conda-store extension support to Nebari by @costrouc in https://github.com/nebari-dev/nebari/pull/1564
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/1613
+* Ensure Argo-Workflow controller containerRuntimeExecutor is set to emissary by @iameskild in https://github.com/nebari-dev/nebari/pull/1614
+* Pass `secret_name` to TF scripts when certificate type = existing by @iameskild in https://github.com/nebari-dev/nebari/pull/1621
+* Pin Nebari dependencies, set k8s version for GKE by @iameskild in https://github.com/nebari-dev/nebari/pull/1624
+* Create aws-force-destroy bash script by @iameskild in https://github.com/nebari-dev/nebari/pull/1611
+* Add option for AWS node-groups to run in a single subnet/AZ by @iameskild in https://github.com/nebari-dev/nebari/pull/1428
+* Add export-users to keycloak CLI command, add dev CLI command by @iameskild in https://github.com/nebari-dev/nebari/pull/1610
+* Unpin packages in default dashboard env by @iameskild in https://github.com/nebari-dev/pull/1628
+* Add release notes for 2023.1.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/1629
+* Set GKE release_channel to unspecified to prevent auto k8s updates by @iameskild inhttps://github.com/nebari-dev/nebari/pull/1630
+
+## New Contributors
+* @pre-commit-ci made their first contribution in https://github.com/nebari-dev/nebari/pull/1613
+
+
 ## Release 2022.11.1 - December 1, 2022
 
 ### What's Changed
