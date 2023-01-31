@@ -64,6 +64,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "environment": config["namespace"],
             "region": config["google_cloud_platform"]["region"],
             "project_id": config["google_cloud_platform"]["project"],
+            "kubernetes_version": config["google_cloud_platform"]["kubernetes_version"],
             "node_groups": [
                 {
                     "name": key,
@@ -110,6 +111,7 @@ def stage_02_infrastructure(stage_outputs, config):
                     "max_size": value["max_nodes"],
                     "gpu": value.get("gpu", False),
                     "instance_type": value["instance"],
+                    "single_subnet": value.get("single_subnet", False),
                 }
                 for key, value in config["amazon_web_services"]["node_groups"].items()
             ],
@@ -188,6 +190,8 @@ def stage_04_kubernetes_ingress(stage_outputs, config):
     if cert_type == "lets-encrypt":
         cert_details["acme-email"] = config["certificate"]["acme_email"]
         cert_details["acme-server"] = config["certificate"]["acme_server"]
+    elif cert_type == "existing":
+        cert_details["certificate-secret-name"] = config["certificate"]["secret_name"]
 
     return {
         **{

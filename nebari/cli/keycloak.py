@@ -1,9 +1,10 @@
+import json
 from pathlib import Path
 from typing import Tuple
 
 import typer
 
-from nebari.keycloak import do_keycloak
+from nebari.keycloak import do_keycloak, export_keycloak_users
 
 app_keycloak = typer.Typer(
     add_completion=False,
@@ -50,3 +51,26 @@ def list_users(
     args = ["listusers"]
 
     do_keycloak(config_filename, *args)
+
+
+@app_keycloak.command(name="export-users")
+def export_users(
+    config_filename: str = typer.Option(
+        ...,
+        "-c",
+        "--config",
+        help="nebari configuration file path",
+    ),
+    realm: str = typer.Option(
+        "nebari",
+        "--realm",
+        help="realm from which users are to be exported",
+    ),
+):
+    """Export the users in Keycloak."""
+    if isinstance(config_filename, str):
+        config_filename = Path(config_filename)
+
+    r = export_keycloak_users(config_filename, realm=realm)
+
+    print(json.dumps(r, indent=4))

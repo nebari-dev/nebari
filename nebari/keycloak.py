@@ -1,7 +1,10 @@
+import json
 import logging
 import os
+from urllib.parse import urljoin
 
 import keycloak
+import requests
 import rich
 
 from .schema import verify
@@ -110,3 +113,82 @@ def get_keycloak_admin_from_config(config):
         raise ValueError(f"Failed to connect to Keycloak server: {e}")
 
     return keycloak_admin
+
+
+def keycloak_rest_api_call(config=None, request: str = None):
+    """Communicate directly with the Keycloak REST API by passing it a request"""
+
+    config = load_yaml(config)
+
+    keycloak_server_url = f"https://{config['domain']}/auth/"
+
+    keycloak_admin_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
+    keycloak_admin_password = os.environ.get(
+        "KEYCLOAK_ADMIN_PASSWORD",
+        config.get("security", {}).get("keycloak", {}).get("initial_root_password", ""),
+    )
+
+    try:
+        # Get `token` to interact with Keycloak Admin
+        url = urljoin(
+            keycloak_server_url, "realms/master/protocol/openid-connect/token"
+        )
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
+        data = {
+            "username": keycloak_admin_username,
+            "password": keycloak_admin_password,
+            "grant_type": "password",
+            "client_id": "admin-cli",
+        }
+
+        response = requests.post(
+            url=url,
+            headers=headers,
+            data=data,
+            verify=False,
+        )
+
+        if response.status_code == 200:
+            token = json.loads(response.content.decode())["access_token"]
+        else:
+            raise ValueError(
+                f"Unable to retrieve Keycloak API token. Status code: {response.status_code}"
+            )
+
+        # Send request to Keycloak REST API
+        method, endpoint = request.split()
+        url = urljoin(
+            urljoin(keycloak_server_url, "admin/realms/"), endpoint.lstrip("/")
+        )
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {token}",
+        }
+
+        response = requests.request(
+            method=method, url=url, headers=headers, verify=False
+        )
+
+        if response.status_code == 200:
+            content = json.loads(response.content.decode())
+            return content
+        else:
+            raise ValueError(
+                f"Unable to communicate with Keycloak API. Status code: {response.status_code}"
+            )
+
+    except requests.exceptions.RequestException as e:
+        raise e
+
+
+def export_keycloak_users(config, realm):
+    request = f"GET /{realm}/users"
+
+    users = keycloak_rest_api_call(config, request=request)
+
+    return {
+        "realm": realm,
+        "users": users,
+    }
