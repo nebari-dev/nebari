@@ -6,149 +6,6 @@ ______________________________________________________________________
 
 ## Table of Contents
 
-<a id="nebari.destroy"></a>
-
-# nebari.destroy
-
-<a id="nebari.initialize"></a>
-
-# nebari.initialize
-
-<a id="nebari.render"></a>
-
-# nebari.render
-
-<a id="nebari.render.render_contents"></a>
-
-#### render_contents
-
-```python
-def render_contents(config: Dict)
-```
-
-Dynamically generated contents from Nebari configuration
-
-<a id="nebari.render.gen_gitignore"></a>
-
-#### gen_gitignore
-
-```python
-def gen_gitignore(config)
-```
-
-Generate `.gitignore` file. Add files as needed.
-
-<a id="nebari.render.gen_cicd"></a>
-
-#### gen_cicd
-
-```python
-def gen_cicd(config)
-```
-
-Use cicd schema to generate workflow files based on the `ci_cd` key in the `config`.
-
-For more detail on schema: GiHub-Actions - nebari/providers/cicd/github.py GitLab-CI - nebari/providers/cicd/gitlab.py
-
-<a id="nebari.render.inspect_files"></a>
-
-#### inspect_files
-
-```python
-def inspect_files(source_dirs: str,
-                  output_dirs: str,
-                  source_base_dir: str,
-                  output_base_dir: str,
-                  ignore_filenames: List[str] = None,
-                  ignore_directories: List[str] = None,
-                  deleted_paths: List[str] = None,
-                  contents: Dict[str, str] = None)
-```
-
-Return created, updated and untracked files by computing a checksum over the provided directory
-
-**Arguments**:
-
-- `source_dirs` _str_ - The source dir used as base for comparssion
-- `output_dirs` _str_ - The destination dir which will be matched with
-- `source_base_dir` _str_ - Relative base path to source directory
-- `output_base_dir` _str_ - Relative base path to output directory
-- `ignore_filenames` _list\[str\]_ - Filenames to ignore while comparing for changes
-- `ignore_directories` _list\[str\]_ - Directories to ignore while comparing for changes
-- `deleted_paths` _list\[str\]_ - Paths that if exist in output directory should be deleted
-- `contents` _dict_ - filename to content mapping for dynamically generated files
-
-<a id="nebari.render.hash_file"></a>
-
-#### hash_file
-
-```python
-def hash_file(file_path: str)
-```
-
-Get the hex digest of the given file
-
-**Arguments**:
-
-- `file_path` _str_ - path to file
-
-<a id="nebari.render.set_env_vars_in_config"></a>
-
-#### set_env_vars_in_config
-
-```python
-def set_env_vars_in_config(config)
-```
-
-For values in the config starting with 'NEBARI_SECRET_XXX' the environment variables are searched for the pattern XXX
-and the config value is modified. This enables setting secret values that should not be directly stored in the config
-file.
-
-NOTE: variables are most likely written to a file somewhere upon render. In order to further reduce risk of exposure of
-any of these variables you might consider preventing storage of the terraform render output.
-
-<a id="nebari.cli"></a>
-
-# nebari.cli
-
-<a id="nebari.cli.keycloak"></a>
-
-# nebari.cli.keycloak
-
-<a id="nebari.cli.keycloak.add_user"></a>
-
-#### add_user
-
-```python
-@app_keycloak.command(name="adduser")
-def add_user(add_users: Tuple[str, str] = typer.Option(
-    ..., "--user", help="Provide both: <username> <password>"),
-             config_filename: str = typer.Option(
-                 ...,
-                 "-c",
-                 "--config",
-                 help="nebari configuration file path",
-             ))
-```
-
-Add a user to Keycloak. User will be automatically added to the \[italic\]analyst\[/italic\] group.
-
-<a id="nebari.cli.keycloak.list_users"></a>
-
-#### list_users
-
-```python
-@app_keycloak.command(name="listusers")
-def list_users(config_filename: str = typer.Option(
-    ...,
-    "-c",
-    "--config",
-    help="nebari configuration file path",
-))
-```
-
-List the users in Keycloak.
-
 <a id="nebari.cli.init"></a>
 
 # nebari.cli.init
@@ -181,7 +38,7 @@ Validate that the necessary cloud credentials have been set as environment varia
 def check_auth_provider_creds(ctx: typer.Context, auth_provider: str)
 ```
 
-Validating the the necessary auth provider credentials have been set as environment variables.
+Validate the the necessary auth provider credentials have been set as environment variables.
 
 <a id="nebari.cli.init.check_project_name"></a>
 
@@ -193,6 +50,26 @@ def check_project_name(ctx: typer.Context, project_name: str)
 
 Validate the project_name is acceptable. Depends on `cloud_provider`.
 
+<a id="nebari.cli.init.check_ssl_cert_email"></a>
+
+#### check_ssl_cert_email
+
+```python
+def check_ssl_cert_email(ctx: typer.Context, ssl_cert_email: str)
+```
+
+Validate the email used for SSL cert is in a valid format.
+
+<a id="nebari.cli.init.check_repository_creds"></a>
+
+#### check_repository_creds
+
+```python
+def check_repository_creds(ctx: typer.Context, git_provider: str)
+```
+
+Validate the necessary Git provider (GitHub) credentials are set.
+
 <a id="nebari.cli.init.guided_init_wizard"></a>
 
 #### guided_init_wizard
@@ -202,6 +79,41 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str)
 ```
 
 Guided Init Wizard is a user-friendly questionnaire used to help generate the `nebari-config.yaml`.
+
+<a id="nebari.cli.dev"></a>
+
+# nebari.cli.dev
+
+<a id="nebari.cli.dev.keycloak_api"></a>
+
+#### keycloak_api
+
+```python
+@app_dev.command(name="keycloak-api")
+def keycloak_api(
+        config_filename: str = typer.Option(
+            ...,
+            "-c",
+            "--config",
+            help="nebari configuration file path",
+        ),
+        request: str = typer.
+    Option(
+        ...,
+        "-r",
+        "--request",
+        help=
+        "Send a REST API request, valid requests follow patterns found here: [green]keycloak.org/docs-api/15.0/rest-api[/green]",
+    ))
+```
+
+Interact with the Keycloak REST API directly.
+
+This is an advanced tool which can have potentially destructive consequences. Please use this at your own risk.
+
+<a id="nebari.cli"></a>
+
+# nebari.cli
 
 <a id="nebari.cli.main"></a>
 
@@ -263,7 +175,10 @@ def init(cloud_provider: str = typer.Argument(
              callback=check_auth_provider_creds,
          ),
          auth_auto_provision: bool = typer.Option(False, ),
-         repository: str = typer.Option(None, ),
+         repository: str = typer.Option(
+             None,
+             help=f"options: {enum_to_list(GitRepoEnum)}",
+         ),
          repository_auto_provision: bool = typer.Option(False, ),
          ci_provider: str = typer.Option(
              None,
@@ -476,7 +391,7 @@ def cost(path: str = typer.Option(
 ```
 
 Estimate the cost of deploying Nebari based on your \[purple\]nebari-config.yaml\[/purple\].
-\[italic\]Experimental.\[/italic\]
+\[italic\]Experimental.\[/italic\].
 
 \[italic\]This is still only experimental using Infracost under the hood. The estimated value is a base cost and does
 not include usage costs.\[/italic\]
@@ -533,3 +448,163 @@ Support tool to write all Kubernetes logs locally and compress them into a zip f
 
 The Nebari team recommends k9s to manage and inspect the state of the cluster. However, this command occasionally
 helpful for debugging purposes should the logs need to be shared.
+
+<a id="nebari.cli.keycloak"></a>
+
+# nebari.cli.keycloak
+
+<a id="nebari.cli.keycloak.add_user"></a>
+
+#### add_user
+
+```python
+@app_keycloak.command(name="adduser")
+def add_user(add_users: Tuple[str, str] = typer.Option(
+    ..., "--user", help="Provide both: <username> <password>"),
+             config_filename: str = typer.Option(
+                 ...,
+                 "-c",
+                 "--config",
+                 help="nebari configuration file path",
+             ))
+```
+
+Add a user to Keycloak. User will be automatically added to the \[italic\]analyst\[/italic\] group.
+
+<a id="nebari.cli.keycloak.list_users"></a>
+
+#### list_users
+
+```python
+@app_keycloak.command(name="listusers")
+def list_users(config_filename: str = typer.Option(
+    ...,
+    "-c",
+    "--config",
+    help="nebari configuration file path",
+))
+```
+
+List the users in Keycloak.
+
+<a id="nebari.cli.keycloak.export_users"></a>
+
+#### export_users
+
+```python
+@app_keycloak.command(name="export-users")
+def export_users(config_filename: str = typer.Option(
+    ...,
+    "-c",
+    "--config",
+    help="nebari configuration file path",
+),
+                 realm: str = typer.Option(
+                     "nebari",
+                     "--realm",
+                     help="realm from which users are to be exported",
+                 ))
+```
+
+Export the users in Keycloak.
+
+<a id="nebari.render"></a>
+
+# nebari.render
+
+<a id="nebari.render.render_contents"></a>
+
+#### render_contents
+
+```python
+def render_contents(config: Dict)
+```
+
+Dynamically generated contents from Nebari configuration.
+
+<a id="nebari.render.gen_gitignore"></a>
+
+#### gen_gitignore
+
+```python
+def gen_gitignore(config)
+```
+
+Generate `.gitignore` file. Add files as needed.
+
+<a id="nebari.render.gen_cicd"></a>
+
+#### gen_cicd
+
+```python
+def gen_cicd(config)
+```
+
+Use cicd schema to generate workflow files based on the `ci_cd` key in the `config`.
+
+For more detail on schema: GiHub-Actions - nebari/providers/cicd/github.py GitLab-CI - nebari/providers/cicd/gitlab.py
+
+<a id="nebari.render.inspect_files"></a>
+
+#### inspect_files
+
+```python
+def inspect_files(source_dirs: str,
+                  output_dirs: str,
+                  source_base_dir: str,
+                  output_base_dir: str,
+                  ignore_filenames: List[str] = None,
+                  ignore_directories: List[str] = None,
+                  deleted_paths: List[str] = None,
+                  contents: Dict[str, str] = None)
+```
+
+Return created, updated and untracked files by computing a checksum over the provided directory.
+
+**Arguments**:
+
+- `source_dirs` _str_ - The source dir used as base for comparssion
+- `output_dirs` _str_ - The destination dir which will be matched with
+- `source_base_dir` _str_ - Relative base path to source directory
+- `output_base_dir` _str_ - Relative base path to output directory
+- `ignore_filenames` _list\[str\]_ - Filenames to ignore while comparing for changes
+- `ignore_directories` _list\[str\]_ - Directories to ignore while comparing for changes
+- `deleted_paths` _list\[str\]_ - Paths that if exist in output directory should be deleted
+- `contents` _dict_ - filename to content mapping for dynamically generated files
+
+<a id="nebari.render.hash_file"></a>
+
+#### hash_file
+
+```python
+def hash_file(file_path: str)
+```
+
+Get the hex digest of the given file.
+
+**Arguments**:
+
+- `file_path` _str_ - path to file
+
+<a id="nebari.render.set_env_vars_in_config"></a>
+
+#### set_env_vars_in_config
+
+```python
+def set_env_vars_in_config(config)
+```
+
+For values in the config starting with 'NEBARI_SECRET_XXX' the environment variables are searched for the pattern XXX
+and the config value is modified. This enables setting secret values that should not be directly stored in the config
+file.
+
+NOTE: variables are most likely written to a file somewhere upon render. In order to further reduce risk of exposure of
+any of these variables you might consider preventing storage of the terraform render output.
+
+<a id="nebari.destroy"></a>
+
+# nebari.destroy
+
+<a id="nebari.initialize"></a>
+
+# nebari.initialize
