@@ -10,8 +10,8 @@ Keycloak with your usual credentials.
 
 ## Overrides of Argo Workflows Helm Chart values
 
-Argo Workflows is deployed using the Argo Workflows Helm Chart. The values.yaml for the helm chart can be
-overridden as needed via the overrides flag. The default values file can be found
+Argo Workflows is deployed using the Argo Workflows Helm Chart. The values.yaml for the helm chart can be overridden as
+needed via the overrides flag. The default values file can be found
 [here](https://github.com/argoproj/argo-helm/blob/argo-workflows-0.22.9/charts/argo-workflows/values.yaml). For example,
 the following could be done to add additional environment variables to the controller container.
 
@@ -27,8 +27,8 @@ argo_workflows:
 
 ## Disabling Argo Workflows
 
-To turn off the cluster monitoring on Nebari deployments, simply turn off the feature flag within your `nebari-config.yaml`
-file. For example:
+To turn off the cluster monitoring on Nebari deployments, simply turn off the feature flag within your
+`nebari-config.yaml` file. For example:
 
 ```yaml
 argo_workflows:

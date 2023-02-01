@@ -15,7 +15,7 @@ resource "helm_release" "argo-workflows" {
 
     jsonencode({
       singleNamespace = true # Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
-      
+
       workflow = {
         serviceAccount = {
           create = true
