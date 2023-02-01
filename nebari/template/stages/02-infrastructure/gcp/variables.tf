@@ -42,6 +42,11 @@ variable "tags" {
   default     = {}
 }
 
+variable "kubernetes_version" {
+  description = "Kubernetes version for GKE cluster"
+  type        = string
+}
+
 variable "networking_mode" {
   description = "Determines whether alias IPs or routes will be used for pod IPs in the cluster. Options are VPC_NATIVE or ROUTES."
   type        = string

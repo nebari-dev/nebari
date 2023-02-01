@@ -32,6 +32,11 @@ class ProviderEnum(str, enum.Enum):
     azure = "azure"
 
 
+class GitRepoEnum(str, enum.Enum):
+    github = "github.com"
+    gitlab = "gitlab.com"
+
+
 class CiEnum(str, enum.Enum):
     github_actions = "github-actions"
     gitlab_ci = "gitlab-ci"
@@ -286,6 +291,10 @@ class NodeGroup(Base):
                 raise ValueError(assertion_error_message)
 
 
+class AWSNodeGroup(NodeGroup):
+    single_subnet: typing.Optional[bool] = False
+
+
 class DigitalOceanProvider(Base):
     region: str
     kubernetes_version: str
@@ -315,7 +324,7 @@ class AmazonWebServicesProvider(Base):
     region: str
     availability_zones: typing.Optional[typing.List[str]]
     kubernetes_version: str
-    node_groups: typing.Dict[str, NodeGroup]
+    node_groups: typing.Dict[str, AWSNodeGroup]
     terraform_overrides: typing.Any
 
 
@@ -396,7 +405,7 @@ class Profiles(Base):
 
     @validator("jupyterlab")
     def check_default(cls, v, values):
-        """Check if only one default value is present"""
+        """Check if only one default value is present."""
         default = [attrs["default"] for attrs in v if "default" in attrs]
         if default.count(True) > 1:
             raise TypeError(

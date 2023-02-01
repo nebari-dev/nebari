@@ -1,11 +1,7 @@
-"""a backport for the nebari version references"""
+"""a backport for the nebari version references."""
 
 import re
-
-try:
-    from importlib.metadata import distribution
-except ModuleNotFoundError:
-    from importlib_metadata import distribution
+from importlib.metadata import distribution
 
 __version__ = distribution("nebari").version
 

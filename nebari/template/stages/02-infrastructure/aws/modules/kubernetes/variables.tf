@@ -50,6 +50,7 @@ variable "node_groups" {
     min_size      = number
     desired_size  = number
     max_size      = number
+    single_subnet = bool
   }))
 }
 

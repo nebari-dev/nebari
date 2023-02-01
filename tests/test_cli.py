@@ -14,7 +14,6 @@ DOMAIN_NAME = "clitest.dev"
 
 def run_cli_cmd(command: str, working_dir: typing.Union[str, Path]):
     """Run the provided CLI command using subprocess."""
-
     try:
         os.chdir(working_dir)
         subprocess.call(command.split())
@@ -33,7 +32,6 @@ def run_cli_cmd(command: str, working_dir: typing.Union[str, Path]):
 )
 def test_nebari_init(tmp_path, namespace, auth_provider, ci_provider, ssl_cert_email):
     """Test `nebari init` CLI command."""
-
     command = f"nebari init local --project {PROJECT_NAME} --domain {DOMAIN_NAME} --disable-prompt"
 
     default_values = InitInputs()

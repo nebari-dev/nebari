@@ -62,8 +62,9 @@ resource "helm_release" "argo-workflows" {
           "${var.node-group.key}" = var.node-group.value
         }
       }
-
-      containerRuntimeExecutor = "emissary"
+      controller = {
+        containerRuntimeExecutor = "emissary"
+      }
 
     })
   ], var.overrides)

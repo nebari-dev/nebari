@@ -123,7 +123,7 @@ class UpgradeStep(ABC):
 
     def upgrade_step(self, config, start_version, config_filename, *args, **kwargs):
         """
-        Perform the upgrade from start_version to self.version
+        Perform the upgrade from start_version to self.version.
 
         Generally, this will be in-place in config, but must also return config dict.
 
@@ -135,7 +135,6 @@ class UpgradeStep(ABC):
         It should normally be left as-is for all upgrades. Use _version_specific_upgrade below
         for any actions that are only required for the particular upgrade you are creating.
         """
-
         finish_version = self.get_version()
         __rounded_finish_version__ = ".".join(
             [str(c) for c in rounded_ver_parse(finish_version)]
@@ -206,7 +205,7 @@ class UpgradeStep(ABC):
         self, config, start_version, config_filename, *args, **kwargs
     ):
         """
-        Override this method in subclasses if you need to do anything specific to your version
+        Override this method in subclasses if you need to do anything specific to your version.
         """
         return config
 
