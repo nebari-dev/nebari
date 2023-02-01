@@ -10,12 +10,9 @@ import threading
 import time
 from typing import Dict, List
 
-import requests
-from requests.exceptions import ConnectionError
 from ruamel.yaml import YAML
 
 from nebari.constants import DEFAULT_NEBARI_DASK_VERSION, DEFAULT_NEBARI_IMAGE_TAG
-from nebari.provider.cicd.github import get_latest_repo_tag
 from nebari.provider.cloud import (
     amazon_web_services,
     azure_cloud,
@@ -39,9 +36,6 @@ AZURE_ENV_DOCS = (
 )
 
 CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
-
-DOCKER_IMAGE_OWNER = "nebari-dev"
-DOCKER_IMAGE_REPO = "nebari-docker-images"
 
 # Regex for suitable project names
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
@@ -387,37 +381,19 @@ def deep_merge(*args):
         return d1
 
 
-@functools.lru_cache(maxsize=None)
 def set_docker_image_tag() -> str:
     """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
-    try:
-        nebari_image_tag = get_latest_repo_tag(DOCKER_IMAGE_OWNER, DOCKER_IMAGE_REPO)
-    except ConnectionError:
-        print(
-            f"Unable to connect to the GitHub API, falling back to the default value: {DEFAULT_NEBARI_IMAGE_TAG}."
-        )
-        nebari_image_tag = DEFAULT_NEBARI_IMAGE_TAG
 
     if NEBARI_IMAGE_TAG:
-        nebari_image_tag = NEBARI_IMAGE_TAG
+        return NEBARI_IMAGE_TAG
 
-    return nebari_image_tag
+    return DEFAULT_NEBARI_IMAGE_TAG
 
 
-@functools.lru_cache(maxsize=None)
 def set_nebari_dask_version() -> str:
     """Set version of `nebari-dask` meta package."""
-    try:
-        resp = requests.get(CONDA_FORGE_CHANNEL_DATA_URL)
-        nebari_dask_version = resp.json()["packages"]["nebari-dask"]["version"]
-        resp.raise_for_status()
-    except ConnectionError:
-        print(
-            f"Unable to connect to the Conda-Forge channel data, falling back to the default value: {DEFAULT_NEBARI_DASK_VERSION}"
-        )
-        nebari_dask_version = DEFAULT_NEBARI_DASK_VERSION
 
     if NEBARI_DASK_VERSION:
-        nebari_dask_version = NEBARI_DASK_VERSION
+        return NEBARI_DASK_VERSION
 
-    return nebari_dask_version
+    return DEFAULT_NEBARI_DASK_VERSION

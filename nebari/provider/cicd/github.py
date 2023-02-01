@@ -1,6 +1,5 @@
 import base64
 import os
-import re
 from typing import Dict, List, Optional, Union
 
 import requests
@@ -69,21 +68,6 @@ def get_repository(owner, repo):
 
 def get_repo_tags(owner, repo):
     return github_request(f"repos/{owner}/{repo}/tags", authenticate=False).json()
-
-
-def get_latest_repo_tag(owner: str, repo: str, only_clean_tags: bool = True) -> str:
-    """
-    Get the latest available tag on GitHub for owner/repo.
-
-    NOTE: Set `only_clean_tags=False` to include dev / pre-release (if latest).
-    """
-    tags = get_repo_tags(owner, repo)
-    if not only_clean_tags and len(tags) >= 1:
-        return tags[0].get("name")
-    for t in tags:
-        rel = list(filter(None, re.sub(r"[A-Za-z]", " ", t["name"]).split(" ")))
-        if len(rel) == 1:
-            return t.get("name")
 
 
 def create_repository(owner, repo, description, homepage, private=True):
