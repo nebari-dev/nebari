@@ -34,10 +34,10 @@ resource "helm_release" "argo-workflows" {
           "${var.node-group.key}" = var.node-group.value
         }
         workflowDefaults = {
-            spec = {
-              serviceAccountName = "argo-workflow"
-            }
+          spec = {
+            serviceAccountName = "argo-workflow"
           }
+        }
       }
 
       server = {
