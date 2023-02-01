@@ -7,8 +7,5 @@
         "authMethod": "cookie",
         "loginUrl": "/conda-store/login?next=",
         "authToken": ""
-    },
-    "@jupyterlab/apputils-extension:notification": {
-        "fetchNews": "false"
     }
 }
