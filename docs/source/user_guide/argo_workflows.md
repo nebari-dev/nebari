@@ -8,7 +8,7 @@ workflows comes enabled by default with Nebari deployments.
 If Argo Workflows is enabled, users can access argo workflows server at: `your-nebari-domain.com/argo`. Log in via
 Keycloak with your usual credentials.
 
-## Submitting a workflow via Argo Server
+## Submitting a Workflow via Argo Server
 
 You can submit a workflow by clicking "SUBMIT NEW WORKFLOW" on the landing page assuming you have the appropriate permissions.
 
