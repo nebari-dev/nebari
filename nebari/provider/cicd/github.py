@@ -229,7 +229,6 @@ def install_nebari_step(nebari_version):
 
 
 def gen_nebari_ops(config):
-
     env_vars = gha_env_vars(config)
     branch = config["ci_cd"]["branch"]
     commit_render = config["ci_cd"].get("commit_render", True)
@@ -279,7 +278,6 @@ def gen_nebari_ops(config):
 
 
 def gen_nebari_linter(config):
-
     env_vars = {}
     nebari_gh_branch = os.environ.get("NEBARI_GH_BRANCH")
     if nebari_gh_branch:
