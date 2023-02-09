@@ -38,7 +38,6 @@ variable "kubernetes_version" {
 variable "release_channel" {
   description = "The cadence of GKE version upgrades"
   type        = string
-  default     = "UNSPECIFIED"
 }
 
 variable "node_groups" {
