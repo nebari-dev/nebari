@@ -35,6 +35,12 @@ variable "kubernetes_version" {
   type        = string
 }
 
+variable "release_channel" {
+  description = "The cadence of GKE version upgrades"
+  type        = string
+  default     = "UNSPECIFIED"
+}
+
 variable "node_groups" {
   description = "Node groups to add to GCP Kubernetes Cluster"
   type        = any

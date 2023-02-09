@@ -47,6 +47,12 @@ variable "kubernetes_version" {
   type        = string
 }
 
+variable "release_channel" {
+  description = "The cadence of GKE version upgrades"
+  type        = string
+  default     = "UNSPECIFIED"
+}
+
 variable "networking_mode" {
   description = "Determines whether alias IPs or routes will be used for pod IPs in the cluster. Options are VPC_NATIVE or ROUTES."
   type        = string
