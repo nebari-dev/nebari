@@ -7,7 +7,7 @@
 
 # Timeout (in seconds) in which a terminal has been inactive and ready to
 # be culled.
-c.TerminalManager.cull_inactive_timeout = 15 * 60
+c.TerminalManager.cull_inactive_timeout = 30 * 60
 
 # The interval (in seconds) on which to check for terminals exceeding the
 # inactive timeout value.
@@ -15,7 +15,7 @@ c.TerminalManager.cull_interval = 5 * 60
 
 # cull_idle_timeout: timeout (in seconds) after which an idle kernel is
 # considered ready to be culled
-c.MappingKernelManager.cull_idle_timeout = 15 * 60
+c.MappingKernelManager.cull_idle_timeout = 30 * 60
 
 # cull_interval: the interval (in seconds) on which to check for idle
 # kernels exceeding the cull timeout value
@@ -31,7 +31,7 @@ c.MappingKernelManager.cull_busy = False
 
 # Shut down the server after N seconds with no kernels or terminals
 # running and no activity.
-c.NotebookApp.shutdown_no_activity_timeout = 15 * 60
+c.NotebookApp.shutdown_no_activity_timeout = 30 * 60
 
 ###############################################################################
 # JupyterHub idle culler total timeout corresponds (approximately) to:
