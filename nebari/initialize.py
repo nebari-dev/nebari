@@ -132,7 +132,6 @@ def default_environments():
                 {
                     "pip": [
                         "streamlit-image-comparison==0.0.3",
-                        "streamlit-image-comparison==0.0.3",
                         "noaa-coops==0.2.1",
                         "dash_core_components==2.0.0",
                         "dash_html_components==2.0.0",
