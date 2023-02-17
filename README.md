@@ -16,7 +16,7 @@
 |  Community  | [![GH discussions](https://img.shields.io/badge/%F0%9F%92%AC%20-Participate%20in%20discussions-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/nebari-dev/nebari/discussions) [![Open an issue](https://img.shields.io/badge/%F0%9F%93%9D%20Open-an%20issue-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/nebari-dev/nebari/issues/new/choose) [![Community guidelines](https://img.shields.io/badge/🤝%20Community-guidelines-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://www.nebari.dev/docs/community/) |
 |     CI      | [![Kubernetes Tests](https://github.com/nebari-dev/nebari/actions/workflows/kubernetes_test.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/kubernetes_test.yaml) [![Tests](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml) |
 
-Who is this for, what problem does it solve?  I know what JupyterHub does (I think).  I have some pre-concieved notion of what dask does, what does Nebari do?  
+Who is this for, what problem does it solve?  I know what JupyterHub does (I think).  I have some pre-concieved notion of what dask does, what does Nebari do?
 
 If defining exactly what Nebari does is too big an ask.  Describe the workflow that it makes easier. maybe it helps with "Remember how different developing locally then deploying to the cloud is? Nebari makes that a thing of the past,  All of your models run the same locally as in the cloud because you only run in the cloud"
 
