@@ -1,3 +1,4 @@
+import subprocess
 from functools import partial
 from unittest.mock import Mock
 
@@ -17,6 +18,8 @@ NEBARI_CONFIG_FN = "nebari-config.yaml"
 PRESERVED_DIR = "preserved_dir"
 DEFAULT_GH_REPO = "github.com/test/test"
 DEFAULT_TERRAFORM_STATE = "remote"
+
+TEST_CONDA_ENV_NAME = "nebari-test-dependencies"
 
 
 # use this partial function for all tests that need to call `render_config`
@@ -90,3 +93,20 @@ def setup_fixture(request, monkeypatch, tmp_path):
     preserved_filename.write_text("This is a test...")
 
     yield (nebari_config_loc, render_config_inputs)
+
+
+@pytest.fixture
+@pytest.mark.conda
+def conda_env_file(tmp_path):
+    """Create a temporary environment.yaml file."""
+
+    yield tmp_path / "environment.yaml"
+
+    # remove created conda environment
+    try:
+        subprocess.run(
+            ["conda", "env", "remove", "-n", TEST_CONDA_ENV_NAME, "-y"],
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        raise e
