@@ -21,13 +21,6 @@ resource "helm_release" "argo-workflows" {
 
       singleNamespace = true # Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
 
-      workflow = {
-        serviceAccount = {
-          create = true
-          name   = "argo-workflow"
-        }
-      }
-
       controller = {
         metricsConfig = {
           enabled = true # enable prometheus
@@ -37,11 +30,6 @@ resource "helm_release" "argo-workflows" {
         ]
         nodeSelector = {
           "${var.node-group.key}" = var.node-group.value
-        }
-        workflowDefaults = {
-          spec = {
-            serviceAccountName = "argo-workflow"
-          }
         }
       }
 
