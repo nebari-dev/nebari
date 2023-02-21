@@ -1,10 +1,10 @@
 import re
 import subprocess
-import tomllib
 from pathlib import Path
 
 import pytest
 import ruamel.yaml
+import toml
 
 from .conftest import TEST_CONDA_ENV_NAME
 
@@ -27,8 +27,8 @@ def test_pyproject_dependencies(conda_env_file):
 
     assert PYPROJECT.exists()
 
-    with open(PYPROJECT, "rb") as f:
-        data = tomllib.load(f)
+    with open(PYPROJECT, "r") as f:
+        data = toml.load(f)
 
     for dep in data["project"].get("dependencies"):
         dep_details = re.split(r"([=><]{1,2})", dep)
