@@ -245,7 +245,6 @@ resource "kubernetes_manifest" "customresourcedefinition_clusterworkflowtemplate
     "kind"       = "CustomResourceDefinition"
     "metadata" = {
       "annotations" = {
-        "helm.sh/resource-policy" = "keep"
       }
       "name" = "clusterworkflowtemplates.argoproj.io"
     }
@@ -304,7 +303,6 @@ resource "kubernetes_manifest" "customresourcedefinition_cronworkflows_argoproj_
     "kind"       = "CustomResourceDefinition"
     "metadata" = {
       "annotations" = {
-        "helm.sh/resource-policy" = "keep"
       }
       "name" = "cronworkflows.argoproj.io"
     }
@@ -368,7 +366,6 @@ resource "kubernetes_manifest" "customresourcedefinition_workflowartifactgctasks
     "kind"       = "CustomResourceDefinition"
     "metadata" = {
       "annotations" = {
-        "helm.sh/resource-policy" = "keep"
       }
       "name" = "workflowartifactgctasks.argoproj.io"
     }
@@ -434,7 +431,6 @@ resource "kubernetes_manifest" "customresourcedefinition_workfloweventbindings_a
     "kind"       = "CustomResourceDefinition"
     "metadata" = {
       "annotations" = {
-        "helm.sh/resource-policy" = "keep"
       }
       "name" = "workfloweventbindings.argoproj.io"
     }
@@ -492,7 +488,6 @@ resource "kubernetes_manifest" "customresourcedefinition_workflows_argoproj_io" 
     "kind"       = "CustomResourceDefinition"
     "metadata" = {
       "annotations" = {
-        "helm.sh/resource-policy" = "keep"
       }
       "name" = "workflows.argoproj.io"
     }
@@ -577,7 +572,6 @@ resource "kubernetes_manifest" "customresourcedefinition_workflowtaskresults_arg
     "kind"       = "CustomResourceDefinition"
     "metadata" = {
       "annotations" = {
-        "helm.sh/resource-policy" = "keep"
       }
       "name" = "workflowtaskresults.argoproj.io"
     }
@@ -1479,7 +1473,6 @@ resource "kubernetes_manifest" "customresourcedefinition_workflowtasksets_argopr
     "kind"       = "CustomResourceDefinition"
     "metadata" = {
       "annotations" = {
-        "helm.sh/resource-policy" = "keep"
       }
       "name" = "workflowtasksets.argoproj.io"
     }
@@ -1545,7 +1538,6 @@ resource "kubernetes_manifest" "customresourcedefinition_workflowtemplates_argop
     "kind"       = "CustomResourceDefinition"
     "metadata" = {
       "annotations" = {
-        "helm.sh/resource-policy" = "keep"
       }
       "name" = "workflowtemplates.argoproj.io"
     }
