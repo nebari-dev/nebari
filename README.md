@@ -180,7 +180,7 @@ If you're using an older version of Nebari and would like professional support, 
 
 <!-- links -->
 [nebari-issues]: https://github.com/nebari-dev/nebari/issues
-[nebari-faqs]: https://www.nebari.dev/faq
+[nebari-faqs]: https://www.nebari.dev/docs/faq
 [gh-discussions]: https://github.com/nebari-dev/nebari/discussions
 [docs-get-started]: https://www.nebari.dev/docs/category/get-started
 [docs-deploy]: https://www.nebari.dev/docs/get-started/deploy
