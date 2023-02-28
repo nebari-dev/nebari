@@ -1,0 +1,56 @@
+name: "Playwright"
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/test.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "nebari/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
+  push:
+    branches:
+      - main
+      - develop
+      - release/\d{4}.\d{1,2}.\d{1,2}
+    paths:
+      - ".github/workflows/test.yaml"
+      - "tests/**"
+      - "tests_deployment/**"
+      - "tests_e2e/**"
+      - "scripts/**"
+      - "nebari/**"
+      - "setup.cfg"
+      - "pyproject.yoml"
+  workflow_call:
+
+jobs:
+  test-e2e:
+    name: "Playwright"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.10"
+        browser:
+          - "chromium"
+    steps:
+      - name: "Checkout Infrastructure"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Nebari and Playwright
+        run: |
+          pip install .[dev]
+          playwright install
+      - name: Test Nebari using Playwright
+        run: |
+          pytest --version
+          pytest --browser ${{ matrix.browser }} --headed tests_e2e/playwright
