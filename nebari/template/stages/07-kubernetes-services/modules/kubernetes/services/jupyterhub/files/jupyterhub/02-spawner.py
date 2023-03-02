@@ -78,8 +78,8 @@ if cdsdashboards["enabled"]:
     )
 
     # TODO: make timeouts configurable
-    c.VariableMixin.proxy_ready_timeout = 600
-    c.VariableMixin.proxy_request_timeout = 600
+    c.VariableMixin.proxy_ready_timeout = 300
+    c.VariableMixin.proxy_request_timeout = 300
 
     home_username = f"/home/{os.getenv('PREFERRED_USERNAME')}"
     c.CDSDashboardsConfig.extra_presentation_types = ["panel-serve"]
