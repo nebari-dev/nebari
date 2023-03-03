@@ -243,7 +243,7 @@ def gen_nebari_ops(config):
     step3 = install_nebari_step(nebari_version)
     gha_steps = [step1, step2, step3]
 
-    for step in config['ci_cd'].get('before_script', []):
+    for step in config["ci_cd"].get("before_script", []):
         gha_steps.append(GHA_job_step(**step))
 
     step4 = GHA_job_step(
@@ -270,7 +270,7 @@ def gen_nebari_ops(config):
     if commit_render:
         gha_steps.append(step5)
 
-    for step in config['ci_cd'].get('after_script', []):
+    for step in config["ci_cd"].get("after_script", []):
         gha_steps.append(GHA_job_step(**step))
 
     job1 = GHA_job_id(name="nebari", runs_on_="ubuntu-latest", steps=gha_steps)
