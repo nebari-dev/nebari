@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 def do_upgrade(config_filename, attempt_fixes=False):
-
     config = load_yaml(config_filename)
 
     try:

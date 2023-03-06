@@ -51,13 +51,13 @@ repos:
 
   # python
   - repo: https://github.com/psf/black
-    rev: 22.12.0
+    rev: 23.1.0
     hooks:
       - id: black
         args: ["--line-length=88", "--exclude=/nebari/template/"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.206
+    rev: v0.0.242
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -73,7 +73,7 @@ repos:
 
   # terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.77.0
+    rev: v1.77.1
     hooks:
       - id: terraform_fmt
         args:

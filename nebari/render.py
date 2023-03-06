@@ -352,7 +352,6 @@ def get_sub_config(conf, conf_idx):
 
 
 def set_sub_config(conf, conf_idx, value):
-
     get_sub_config(conf, conf_idx[:-1])[conf_idx[-1]] = value
 
 
