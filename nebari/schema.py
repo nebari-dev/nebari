@@ -70,8 +70,8 @@ class CICD(Base):
     type: CiEnum
     branch: str
     commit_render: typing.Optional[bool] = True
-    before_script: typing.Optional[typing.List[str]]
-    after_script: typing.Optional[typing.List[str]]
+    before_script: typing.Optional[typing.List[typing.Union[str, typing.Dict]]]
+    after_script: typing.Optional[typing.List[typing.Union[str, typing.Dict]]]
 
 
 # ======== Generic Helm Extensions ========
