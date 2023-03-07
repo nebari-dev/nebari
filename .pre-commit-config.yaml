@@ -57,7 +57,7 @@ repos:
         args: ["--line-length=88", "--exclude=/nebari/template/"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.242
+    rev: v0.0.254
     hooks:
       - id: ruff
         args: ["--fix"]
