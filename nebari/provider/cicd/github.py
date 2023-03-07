@@ -257,7 +257,7 @@ def gen_nebari_ops(config):
         run=(
             "git config user.email 'nebari@quansight.com' ; "
             "git config user.name 'github action' ; "
-            "git add . ; "
+            "git add ./.gitignore ./.github ./stages; "
             "git diff --quiet && git diff --staged --quiet || (git commit -m '${{ env.COMMIT_MSG }}') ; "
             f"git push origin {branch}"
         ),
