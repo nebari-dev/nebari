@@ -31,7 +31,6 @@ def nebari_validate(config):
 
 
 def generate_lint_message(config):
-
     # prep for linting
     pr_config = pathlib.Path("nebari-config.yaml")
     # lint/validate nebari-config.yaml
