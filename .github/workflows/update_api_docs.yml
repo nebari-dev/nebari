@@ -43,15 +43,7 @@ jobs:
           echo "run it again to prove its clean now"
           pre-commit run --files api_doc.md
 
-      - name: Check for changes
-        run: |
-          if git diff --exit-code; then
-            echo "changes_exist=true" >> $GITHUB_ENV
-          else
-            echo "changes_exist=false" >> $GITHUB_ENV
-          fi
-
-      - name: Look for changes to cli files
+      - name: Look for changes to generated docss
         uses: tj-actions/verify-changed-files@v12
         id: verify-changed-files
         with:
@@ -64,7 +56,7 @@ jobs:
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         with:
           token: ${{ secrets.NEBARI_SENSEI_API_DOCS_PR_OPENER }}
-          commit-message: Update report
+          commit-message: Update api docs
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           signoff: false
