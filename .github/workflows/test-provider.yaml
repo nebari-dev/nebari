@@ -31,15 +31,6 @@ on:
         required: true
         type: string
 
-env:
-  DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-
 jobs:
   test-render-providers:
     if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
@@ -72,34 +63,69 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: 3.8
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0
-        if: ${{ matrix.provider == 'gcp' }}
+
+      - name: Retrieve secret from Vault
+        uses: hashicorp/vault-action@v2.5.0
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GOOGLE_CREDENTIALS }}
-      - name: Use gcloud CLI
+          method: jwt
+          url: "https://quansight-public-vault-fe415d04.c219cf75.z1.hashicorp.cloud:8200"
+          namespace: "admin/quansight"
+          role: "repository-quansight-nebari-dev-role"
+          secrets: |
+            kv/data/repository/Quansight/nebari-dev/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci project_id | PROJECT_ID;
+            kv/data/repository/Quansight/nebari-dev/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci workload_identity_provider | GCP_WORKFLOW_PROVIDER;
+            kv/data/repository/Quansight/nebari-dev/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci service_account_name | GCP_SERVICE_ACCOUNT;
+            kv/data/repository/Quansight/nebari-dev/amazon_web_services/nebari-dev-ci role_name | AWS_ROLE_ARN;
+            kv/data/repository/Quansight/nebari-dev/azure/nebari-dev-ci/github-nebari-dev-repo-ci client_id | ARM_CLIENT_ID;
+            kv/data/repository/Quansight/nebari-dev/azure/nebari-dev-ci/github-nebari-dev-repo-ci tenant_id | ARM_TENANT_ID;
+            kv/data/repository/Quansight/nebari-dev/azure/nebari-dev-ci/github-nebari-dev-repo-ci subscription_id | ARM_SUBSCRIPTION_ID;
+            kv/data/repository/Quansight/nebari-dev/shared_secrets ARM_CLIENT_SECRET | ARM_CLIENT_SECRET;
+            kv/data/repository/Quansight/nebari-dev/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
+
+      - name: 'Authenticate to GCP'
         if: ${{ matrix.provider == 'gcp' }}
-        run: gcloud info
-      - name: Login to Azure
+        uses: 'google-github-actions/auth@v1'
+        with:
+          token_format: access_token
+          create_credentials_file: 'true'
+          workload_identity_provider: ${{ env.GCP_WORKFLOW_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set required environment variables
+        if: ${{ matrix.provider == 'gcp' }}
+        run: |
+          echo "GOOGLE_CREDENTIALS=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}" >> $GITHUB_ENV
+
+      - name: 'Authenticate to AWS'
+        if: ${{ matrix.provider == 'aws' }}
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          role-session-name: github-action
+          aws-region: us-east-1
+
+      - name: 'Azure login'
+        if: ${{ matrix.provider == 'azure' }}
         uses: azure/login@v1
-        if: ${{ matrix.provider == 'azure' }}
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Use az CLI
-        if: ${{ matrix.provider == 'azure' }}
-        run: az version
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+
       - name: Install Nebari
         run: |
           pip install .[dev]
+
       - name: Nebari Initialize
         run: |
           nebari init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.nebari.dev" --auth-provider github --disable-prompt --ci-provider ${{ matrix.cicd }}
           cat "nebari-config.yaml"
+
       - name: Nebari Render
         run: |
           nebari render -c "nebari-config.yaml" -o "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
           cp "nebari-config.yaml" "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment/nebari-config.yaml"
+
       - name: Nebari Render Artifact
         uses: actions/upload-artifact@master
         with:
