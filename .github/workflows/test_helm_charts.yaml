@@ -39,6 +39,4 @@ jobs:
           helm version
       - name: Test Helm Charts
         run: |
-          echo $(pwd)
-          echo $(ls -la)
-          python scripts/test_helm_charts.py
+          python scripts/helm-validate.py
