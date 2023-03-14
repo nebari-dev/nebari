@@ -24,7 +24,7 @@ on:
       - "scripts/**"
       - "nebari/**"
       - "setup.cfg"
-      - "pyproject.yoml"
+      - "pyproject.toml"
   workflow_call:
     inputs:
       pr_number:
