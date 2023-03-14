@@ -1,0 +1,42 @@
+name: "Validate Helm Charts downloads"
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/test_helm_charts.yaml"
+      - "nebari/**"
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - ".github/workflows/test_helm_charts.yaml"
+      - "nebari/**"
+
+jobs:
+  test-helm-charts:
+    name: "Helm Charts Validation"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Infrastructure"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+      - name: Install python-hcl2
+        run: |
+          pip install python-hcl2
+      - name: Install Helm
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
+      - name: Test Helm installation
+        run: |
+          helm version
+      - name: Test Helm Charts
+        run: |
+          python scripts/test_helm_charts.py
