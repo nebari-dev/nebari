@@ -2,6 +2,7 @@ import pathlib
 import re
 
 import hcl2
+
 from nebari.utils import deep_merge
 
 # 1. Get a list of paths whose files contains the helm_release resource
@@ -12,6 +13,7 @@ from nebari.utils import deep_merge
 STAGES_DIR = "nebari/template/stages"
 SKIP_CHARTS = ["prefect", "clearml", "helm-extensions"]
 DEBUG = False
+
 
 def get_filepaths_that_contain_helm_release():
     """Get list of helm charts from nebari code-base"""
@@ -40,6 +42,7 @@ def _argument_contains_variable_hook(argument):
         # we are checking this here but grabbing this value would be really difficult
         return True
 
+
 def _clean_var_name(var_name, type):
     """Clean variable name"""
     if type == "local":
@@ -48,6 +51,7 @@ def _clean_var_name(var_name, type):
     if type == "var":
         # $(var.var_name)
         return re.findall(r"var.(.*[a-z])", var_name)[0]
+
 
 def _load_variable_value(argument, parent_contents):
     if "local." in argument:
@@ -86,7 +90,9 @@ def retrieve_helm_information(filepath):
 
     for resource in parent_contents.get("resource", {}):
         if "helm_release" not in resource:
-            print(f"-- Skipping {resource.keys()} (not helm_release)") if DEBUG else None
+            print(
+                f"-- Skipping {resource.keys()} (not helm_release)"
+            ) if DEBUG else None
             continue
         try:
             for release_name, release_attrs in resource["helm_release"].items():
@@ -96,24 +102,42 @@ def retrieve_helm_information(filepath):
                 chart_repository = release_attrs.get("repository", "")
                 # if chart_version is a variable, we need to get the value from locals or variables(?)
                 if _argument_contains_variable_hook(chart_version):
-                    print(f"-- Spotted {chart_version} in {chart_name} chart metadata") if DEBUG else None
+                    print(
+                        f"-- Spotted {chart_version} in {chart_name} chart metadata"
+                    ) if DEBUG else None
                     chart_version = _load_variable_value(chart_version, parent_contents)
 
                 if _argument_contains_variable_hook(chart_repository):
-                    print(f"-- Spotted {chart_repository} in {chart_name} chart metadata") if DEBUG else None
-                    chart_repository = _load_variable_value(chart_repository, parent_contents)
+                    print(
+                        f"-- Spotted {chart_repository} in {chart_name} chart metadata"
+                    ) if DEBUG else None
+                    chart_repository = _load_variable_value(
+                        chart_repository, parent_contents
+                    )
 
-                print(f" Name: {chart_name} \n Version: {chart_version} \n Repository: {chart_repository}")
+                print(
+                    f" Name: {chart_name} \n Version: {chart_version} \n Repository: {chart_repository}"
+                )
 
-                _charts.update({chart_name : {"version": chart_version, "repository": chart_repository}})
+                _charts.update(
+                    {
+                        chart_name: {
+                            "version": chart_version,
+                            "repository": chart_repository,
+                        }
+                    }
+                )
         except KeyError:
             print(f"Could not find helm_release in {filepath} for")
             continue
 
     if not _charts:
-        print(f"-- Could not find any helm_release under module resources") if DEBUG else None
+        print(
+            "-- Could not find any helm_release under module resources"
+        ) if DEBUG else None
 
     return _charts
+
 
 def generate_index_of_helm_charts():
     """Generate index of helm charts"""
@@ -126,9 +150,11 @@ def generate_index_of_helm_charts():
         f.write(str(helm_charts))
     return helm_charts
 
-def pull_helm_chart(chart_index : dict):
+
+def pull_helm_chart(chart_index: dict):
     """Pull helm chart"""
     import os
+
     print("Creating helm_charts directory")
     os.system("mkdir helm_charts && cd helm_charts")
     for chart_name, chart_metadata in chart_index.items():
@@ -138,13 +164,16 @@ def pull_helm_chart(chart_index : dict):
         os.system(f"helm repo add {chart_name} {chart_repository}")
 
         print(f"Pulling {chart_name} chart")
-        os.system(f"helm pull {chart_name} --version {chart_version} --repo {chart_repository} --untar --untardir helm_charts")
+        os.system(
+            f"helm pull {chart_name} --version {chart_version} --repo {chart_repository} --untar --untardir helm_charts"
+        )
 
         print("Inspecting downloaded chart")
         if not os.path.exists(f"helm_charts/{chart_name}-{chart_version}.tgz"):
             raise f"Could not find {chart_name}:{chart_version} directory in helm_charts."
     print("All charts downloaded successfully, removing helm_charts directory")
     os.system("cd .. && rm -rf helm_charts")
+
 
 if __name__ == "__main__":
     charts = generate_index_of_helm_charts()
