@@ -109,7 +109,6 @@ def test_contains_jupyterhub_ssh(paramiko_object):
     # commands to run and string need to be contained in output
     commands_contain = [
         ("ls -la", ".bashrc"),
-        ("ls -la /shared/examples", "dashboard_panel.ipynb"),
         ("cat ~/.bashrc", "Managed by Nebari"),
         ("cat ~/.profile", "Managed by Nebari"),
         ("cat ~/.bash_logout", "Managed by Nebari"),

@@ -48,16 +48,3 @@ resource "kubernetes_config_map" "jupyterlab-settings" {
     filename => file("${path.module}/files/jupyterlab/${filename}")
   }
 }
-
-
-resource "kubernetes_config_map" "shared-examples" {
-  metadata {
-    name      = "shared-examples"
-    namespace = var.namespace
-  }
-
-  data = {
-    for filename in fileset("${path.module}/files/examples", "*") :
-    filename => file("${path.module}/files/examples/${filename}")
-  }
-}

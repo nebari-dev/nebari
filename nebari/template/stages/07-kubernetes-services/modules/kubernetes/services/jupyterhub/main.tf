@@ -59,11 +59,6 @@ resource "helm_release" "jupyterhub" {
               kind      = "configmap"
             }
 
-            "/shared/examples" = {
-              name      = kubernetes_config_map.shared-examples.metadata.0.name
-              namespace = kubernetes_config_map.shared-examples.metadata.0.namespace
-              kind      = "configmap"
-            }
           }
         )
         environments = var.conda-store-environments
