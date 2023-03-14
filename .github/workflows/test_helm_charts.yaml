@@ -29,6 +29,9 @@ jobs:
       - name: Install python-hcl2
         run: |
           pip install python-hcl2
+      - name: Install nebari
+        run: |
+          pip install .
       - name: Install Helm
         run: |
           curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
