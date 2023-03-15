@@ -70,17 +70,17 @@ jobs:
           method: jwt
           url: "https://quansight-public-vault-fe415d04.c219cf75.z1.hashicorp.cloud:8200"
           namespace: "admin/quansight"
-          role: "repository-quansight-nebari-dev-role"
+          role: "repository-nebari-dev-nebari-role"
           secrets: |
-            kv/data/repository/Quansight/nebari-dev/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci project_id | PROJECT_ID;
-            kv/data/repository/Quansight/nebari-dev/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci workload_identity_provider | GCP_WORKFLOW_PROVIDER;
-            kv/data/repository/Quansight/nebari-dev/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci service_account_name | GCP_SERVICE_ACCOUNT;
-            kv/data/repository/Quansight/nebari-dev/amazon_web_services/nebari-dev-ci role_name | AWS_ROLE_ARN;
-            kv/data/repository/Quansight/nebari-dev/azure/nebari-dev-ci/github-nebari-dev-repo-ci client_id | ARM_CLIENT_ID;
-            kv/data/repository/Quansight/nebari-dev/azure/nebari-dev-ci/github-nebari-dev-repo-ci tenant_id | ARM_TENANT_ID;
-            kv/data/repository/Quansight/nebari-dev/azure/nebari-dev-ci/github-nebari-dev-repo-ci subscription_id | ARM_SUBSCRIPTION_ID;
-            kv/data/repository/Quansight/nebari-dev/shared_secrets ARM_CLIENT_SECRET | ARM_CLIENT_SECRET;
-            kv/data/repository/Quansight/nebari-dev/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
+            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci project_id | PROJECT_ID;
+            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci workload_identity_provider | GCP_WORKFLOW_PROVIDER;
+            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci service_account_name | GCP_SERVICE_ACCOUNT;
+            kv/data/repository/nebari-dev/nebari/amazon_web_services/nebari-dev-ci role_name | AWS_ROLE_ARN;
+            kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci client_id | ARM_CLIENT_ID;
+            kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci tenant_id | ARM_TENANT_ID;
+            kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci subscription_id | ARM_SUBSCRIPTION_ID;
+            kv/data/repository/nebari-dev/nebari/shared_secrets ARM_CLIENT_SECRET | ARM_CLIENT_SECRET;
+            kv/data/repository/nebari-dev/nebari/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
 
       - name: 'Authenticate to GCP'
         if: ${{ matrix.provider == 'gcp' }}
