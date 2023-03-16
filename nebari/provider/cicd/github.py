@@ -280,7 +280,7 @@ def gen_nebari_ops(config):
             "id-token": "write",
             "contents": "read",
         },
-        steps=gha_steps
+        steps=gha_steps,
     )
     jobs = GHA_jobs(__root__={"build": job1})
 
