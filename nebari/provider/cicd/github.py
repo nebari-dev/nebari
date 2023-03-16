@@ -171,6 +171,7 @@ class GHA_job_step(BaseModel):
 class GHA_job_id(BaseModel):
     name: str
     runs_on_: str = Field(alias="runs-on")
+    permissions: Optional[Dict[str, str]]
     steps: List[GHA_job_step]
 
     class Config:
@@ -229,7 +230,6 @@ def install_nebari_step(nebari_version):
 
 
 def gen_nebari_ops(config):
-
     env_vars = gha_env_vars(config)
     branch = config["ci_cd"]["branch"]
     commit_render = config["ci_cd"].get("commit_render", True)
@@ -241,18 +241,23 @@ def gen_nebari_ops(config):
     step1 = checkout_image_step()
     step2 = setup_python_step()
     step3 = install_nebari_step(nebari_version)
+    gha_steps = [step1, step2, step3]
+
+    for step in config["ci_cd"].get("before_script", []):
+        gha_steps.append(GHA_job_step(**step))
 
     step4 = GHA_job_step(
         name="Deploy Changes made in nebari-config.yaml",
         run=f"nebari deploy -c nebari-config.yaml --disable-prompt{' --skip-remote-state-provision' if os.environ.get('NEBARI_GH_BRANCH') else ''}",
     )
+    gha_steps.append(step4)
 
     step5 = GHA_job_step(
         name="Push Changes",
         run=(
             "git config user.email 'nebari@quansight.com' ; "
             "git config user.name 'github action' ; "
-            "git add . ; "
+            "git add ./.gitignore ./.github ./stages; "
             "git diff --quiet && git diff --staged --quiet || (git commit -m '${{ env.COMMIT_MSG }}') ; "
             f"git push origin {branch}"
         ),
@@ -262,12 +267,21 @@ def gen_nebari_ops(config):
             )
         },
     )
-
-    gha_steps = [step1, step2, step3, step4]
     if commit_render:
         gha_steps.append(step5)
 
-    job1 = GHA_job_id(name="nebari", runs_on_="ubuntu-latest", steps=gha_steps)
+    for step in config["ci_cd"].get("after_script", []):
+        gha_steps.append(GHA_job_step(**step))
+
+    job1 = GHA_job_id(
+        name="nebari",
+        runs_on_="ubuntu-latest",
+        permissions={
+            "id-token": "write",
+            "contents": "read",
+        },
+        steps=gha_steps,
+    )
     jobs = GHA_jobs(__root__={"build": job1})
 
     return NebariOps(
@@ -279,7 +293,6 @@ def gen_nebari_ops(config):
 
 
 def gen_nebari_linter(config):
-
     env_vars = {}
     nebari_gh_branch = os.environ.get("NEBARI_GH_BRANCH")
     if nebari_gh_branch:

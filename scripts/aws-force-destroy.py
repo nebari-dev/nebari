@@ -148,12 +148,10 @@ def force_destroy_configuration(config):
 
         iam = boto3.resource("iam")
         for suffix in ("eks-cluster-role", "eks-node-group-role"):
-
             try:
                 role = iam.Role(f"{project_name}-{env}-{suffix}")
 
                 if role.tags is not None:
-
                     tags_dict = dict(
                         [(t["Key"], t.get("Value", "")) for t in role.tags]
                     )
