@@ -81,6 +81,7 @@ dev = [
     "pre-commit",
     "pytest",
     "pytest-timeout",
+    "grayskull",
 ]
 
 [project.urls]
