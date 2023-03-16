@@ -82,6 +82,7 @@ dev = [
     "pytest",
     "pytest-timeout",
     "grayskull",
+    "build",
 ]
 
 [project.urls]
