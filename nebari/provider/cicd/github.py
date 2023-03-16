@@ -171,6 +171,7 @@ class GHA_job_step(BaseModel):
 class GHA_job_id(BaseModel):
     name: str
     runs_on_: str = Field(alias="runs-on")
+    permissions: Optional[Dict[str, str]]
     steps: List[GHA_job_step]
 
     class Config:
@@ -272,7 +273,15 @@ def gen_nebari_ops(config):
     for step in config["ci_cd"].get("after_script", []):
         gha_steps.append(GHA_job_step(**step))
 
-    job1 = GHA_job_id(name="nebari", runs_on_="ubuntu-latest", steps=gha_steps)
+    job1 = GHA_job_id(
+        name="nebari",
+        runs_on_="ubuntu-latest",
+        permissions={
+            "id-token": "write",
+            "contents": "read",
+        },
+        steps=gha_steps
+    )
     jobs = GHA_jobs(__root__={"build": job1})
 
     return NebariOps(
