@@ -46,6 +46,8 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: ${{ matrix.python-version }}
+          channel-priority: strict
+          channels: conda-forge
       - name: Install Nebari
         run: |
           pip install .[dev]
