@@ -117,7 +117,7 @@ class Navigator:
             ).click()
             self.page.get_by_role("button", name="Start").click()
 
-        except:
+        except Exception:
             # if the server is already running
             start_locator = self.page.get_by_role(
                 "button", name="My Server", exact=True
@@ -163,7 +163,7 @@ class Navigator:
             )
             shut_down_all.wait_for(timeout=300, state="attached")
             shut_down_all.click()
-        except:
+        except Exception:
             logger.debug('Did not find "Shut Down All" menu option')
 
         # shut down kernel if only one notebook is running
@@ -172,7 +172,7 @@ class Navigator:
             shut_down_current = self.page.get_by_text("Shut Down Kernel", exact=True)
             shut_down_current.wait_for(timeout=300, state="attached")
             shut_down_current.click()
-        except:
+        except Exception:
             logger.debug('Did not find "Shut Down Kernel" menu option')
 
         # go back to root folder
@@ -203,7 +203,7 @@ class Navigator:
             # close dialog (deal with the two formats of this dialog)
             try:
                 self.page.get_by_text("Cancel", exact=True).click()
-            except:
+            except Exception:
                 self.page.locator("div").filter(has_text="No KernelSelect").get_by_role(
                     "button", name="No Kernel"
                 ).wait_for(timeout=300, state="attached")
@@ -215,7 +215,7 @@ class Navigator:
             # click Select to close popup (deal with the two formats of this dialog)
             try:
                 self.page.get_by_role("button", name="Select", exact=True).click()
-            except:
+            except Exception:
                 self.page.locator("div").filter(has_text="No KernelSelect").get_by_role(
                     "button", name="Select"
                 ).click()
@@ -288,6 +288,7 @@ if __name__ == "__main__":
     nav.reset_workspace()
     test_app = RunNotebook(navigator=nav)
     test_app.run_notebook(
-        path="dashboard_panel.ipynb", expected_output_text="success 3333"
+        path="test_data/test_notebook_output.ipynb",
+        expected_output_text="success: 6",
     )
     nav.teardown()

@@ -72,6 +72,7 @@ dev = [
     "black==22.3.0",
     "dask-gateway",
     "diagrams",
+    "dotenv",
     "escapism",
     "flake8==3.8.4",
     "importlib-metadata<5.0",

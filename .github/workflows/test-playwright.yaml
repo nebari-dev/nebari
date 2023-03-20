@@ -27,6 +27,10 @@ on:
       - "pyproject.yoml"
   workflow_call:
 
+env:
+  GOOGLE_EMAIL: ${{ secrets.EXAMPLE_USER_NAME }}
+  GOOGLE_PASSWORD: ${{ secrets.EXAMPLE_USER_PASSWORD }}
+
 jobs:
   test-e2e:
     name: "Playwright"
@@ -42,14 +46,21 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Install Nebari and Playwright
         run: |
-          pip install .[dev]
+          pip install -e ".[dev]"
           playwright install
+
+      - name: Create Environment variables file
+        run: |
+          envsubst < .env.tpl > .env
+
       - name: Test Nebari using Playwright
         run: |
           pytest --version

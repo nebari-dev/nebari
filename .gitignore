@@ -45,5 +45,6 @@ nebari-config.yaml
 
 .vscode/
 .pytest_cache
+.ipynb_checkpoints
 
 /.ruff_cache

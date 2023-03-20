@@ -5,7 +5,6 @@ from basic import Navigator, RunNotebook
 
 
 def test_notebook():
-    # TODO: Pam add the main test here
     dotenv.load_dotenv()
     nav = Navigator(
         nebari_url="https://nebari.quansight.dev",
@@ -17,6 +16,7 @@ def test_notebook():
     nav.reset_workspace()
     test_app = RunNotebook(navigator=nav)
     test_app.run_notebook(
-        path="dashboard_panel.ipynb", expected_output_text="success 3333"
+        path="test_data/test_notebook_output.ipynb",
+        expected_output_text="success: 6",
     )
     nav.teardown()
