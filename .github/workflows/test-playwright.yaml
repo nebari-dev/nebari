@@ -55,7 +55,7 @@ jobs:
       - name: Install Nebari and Playwright
         run: |
           pip install -e ".[dev]"
-          playwright install
+          playwright install --with-deps
 
       - name: Create Environment variables file
         run: |

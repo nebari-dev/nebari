@@ -4,7 +4,7 @@ import dotenv
 from basic import Navigator, RunNotebook
 
 
-def test_notebook():
+def test_notebook(browser_name):
     dotenv.load_dotenv()
     nav = Navigator(
         nebari_url="https://nebari.quansight.dev",
@@ -12,6 +12,7 @@ def test_notebook():
         username=os.environ["GOOGLE_EMAIL"],
         google_password=os.environ["GOOGLE_PASSWORD"],
         headless=True,
+        browserr=browser_name,
     )
     nav.google_login_start_server()
     nav.reset_workspace()
