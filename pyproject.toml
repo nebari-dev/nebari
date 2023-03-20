@@ -82,9 +82,9 @@ dev = [
     "pytest-timeout",
 ]
 docs = [
-    "novella",
-    "pydoc-markdown",
-    "pre-commit",
+    [dev],
+    "sphinx",
+    "sphinx_click",
 ]
 
 [project.urls]

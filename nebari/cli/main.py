@@ -78,6 +78,7 @@ app.add_typer(
 )
 
 
+
 @app.callback(invoke_without_command=True)
 def version(
     version: Optional[bool] = typer.Option(
@@ -529,6 +530,12 @@ def support(
             zip.write(file)
 
 
+# get the click object from the typer app so that we can autodoc the cli
+# NOTE: this must happen _after_ all the subcommands have been added.
+# Adapted from https://typer.tiangolo.com/tutorial/using-click/
+typer_click_app = typer.main.get_command(app)
+
+
 def get_config_namespace(config):
     config_filename = Path(config)
     if not config_filename.is_file():
@@ -543,4 +550,4 @@ def get_config_namespace(config):
 
 
 if __name__ == "__main__":
-    app()
+    typer_click_app()
