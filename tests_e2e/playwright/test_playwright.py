@@ -11,6 +11,7 @@ def test_notebook():
         google_email=os.environ["GOOGLE_EMAIL"],
         username=os.environ["GOOGLE_EMAIL"],
         google_password=os.environ["GOOGLE_PASSWORD"],
+        headless=True,
     )
     nav.google_login_start_server()
     nav.reset_workspace()

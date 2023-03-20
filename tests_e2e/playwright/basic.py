@@ -35,26 +35,34 @@ class Navigator:
         google_password,
         headless=False,
         slow_mo=100,
-        playwright=None,
         browser=None,
-        context=None,
-        page=None,
     ):
         self.nebari_url = nebari_url
         self.google_email = google_email
         self.google_password = google_password
         self.username = username
         self.initialized = False
+        self.headless = headless
+        self.slow_mo = slow_mo
+        self.browser = browser
 
-        self.setup()
+        self.setup(
+            browser=self.browser,
+            headless=self.headless,
+            slow_mo=self.slow_mo,
+        )
         self.wait_for_server_spinup = 5 * 60 * 1000  # 5 minutes in ms
 
     @property
     def initialize(self):
         if not self.initialized:
-            self.setup()
+            self.setup(
+                browser=self.browser,
+                headless=self.headless,
+                slow_mo=self.slow_mo,
+            )
 
-    def setup(self, browser="chromium", headless=False, slow_mo=100):
+    def setup(self, browser, headless, slow_mo):
         logger.debug(">>> Setting up browser for Playwright")
 
         self.playwright = sync_playwright().start()
