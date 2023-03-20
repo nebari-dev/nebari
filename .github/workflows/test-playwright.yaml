@@ -59,9 +59,10 @@ jobs:
 
       - name: Create Environment variables file
         run: |
-          envsubst < .env.tpl > .env
+          envsubst < tests_e2e/playwright/.env.tpl > tests_e2e/playwright/.env
 
       - name: Test Nebari using Playwright
         run: |
+          cd tests_e2e/playwright
           pytest --version
-          pytest --browser ${{ matrix.browser }} --headed tests_e2e/playwright
+          pytest --browser ${{ matrix.browser }} --headed .
