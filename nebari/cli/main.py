@@ -78,7 +78,6 @@ app.add_typer(
 )
 
 
-
 @app.callback(invoke_without_command=True)
 def version(
     version: Optional[bool] = typer.Option(

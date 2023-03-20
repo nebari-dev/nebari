@@ -1,9 +1,9 @@
-project = 'Nebari CLI documentation'
-copyright = '2023, Nebari'
-author = 'Nebari team'
+project = "Nebari CLI documentation"
+copyright = "2023, Nebari"
+author = "Nebari team"
 
-extensions = ['sphinx_click']
+extensions = ["sphinx_click"]
 
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
-html_theme = 'alabaster'
+html_theme = "alabaster"
