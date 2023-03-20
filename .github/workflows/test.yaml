@@ -20,7 +20,7 @@ on:
       - ".github/workflows/test.yaml"
       - "tests/**"
       - "tests_deployment/**"
-      - "tests_e2e/**"
+      - "tests_e2e/cyrpress/**"
       - "scripts/**"
       - "nebari/**"
       - "setup.cfg"
