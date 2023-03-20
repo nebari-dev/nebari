@@ -38,7 +38,6 @@ class GLCI(BaseModel):
 
 
 def gen_gitlab_ci(config):
-
     branch = config["ci_cd"]["branch"]
     commit_render = config["ci_cd"].get("commit_render", True)
     before_script = config["ci_cd"].get("before_script")
