@@ -31,6 +31,9 @@ on:
         required: true
         type: string
 
+env:
+  NEBARI_BASE_URL: "github-actions.nebari.dev"
+
 jobs:
   test-kubernetes:
     if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
@@ -70,6 +73,7 @@ jobs:
         run: |
           conda install -c anaconda pip
           pip install .[dev]
+          playwright install --with-deps
       - name: Download and Install Kubectl
         run: |
           mkdir -p bin
@@ -92,12 +96,12 @@ jobs:
           ip route
       - name: Add DNS entry to hosts
         run: |
-          sudo echo "172.18.1.100  github-actions.nebari.dev" | sudo tee -a /etc/hosts
+          sudo echo "172.18.1.100  $NEBARI_BASE_URL" | sudo tee -a /etc/hosts
       - name: Initialize Nebari Cloud
         run: |
           mkdir -p local-deployment
           cd local-deployment
-          nebari init local --project=thisisatest --domain github-actions.nebari.dev --auth-provider=password
+          nebari init local --project=thisisatest --domain $NEBARI_BASE_URL --auth-provider=password
 
           # Need smaller profiles on Local Kind
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
@@ -112,12 +116,12 @@ jobs:
         if: always()
         run: |
           kubectl get all,cm,secret,ing -A
-      - name: Check github-actions.nebari.dev resolves
+      - name: Check $NEBARI_BASE_URL resolves
         run: |
-          nslookup github-actions.nebari.dev
+          nslookup $NEBARI_BASE_URL
       - name: Curl jupyterhub login page
         run: |
-          curl -k https://github-actions.nebari.dev/hub/home -i
+          curl -k https://$NEBARI_BASE_URL/hub/home -i
 
       ### CYPRESS TESTS
       - name: Setup Node
@@ -149,7 +153,7 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v4
         env:
-          CYPRESS_BASE_URL: https://github-actions.nebari.dev/
+          CYPRESS_BASE_URL: https://$NEBARI_BASE_URL/
         with:
           working-directory: tests_e2e
 
@@ -174,12 +178,22 @@ jobs:
         run: |
           export JUPYTERHUB_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
           export JUPYTERHUB_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
-          jhubctl --verbose run --hub=https://github-actions.nebari.dev \
+          jhubctl --verbose run --hub=https://$NEBARI_BASE_URL \
                                 --auth-type=keycloak \
                                 --validate --no-verify-ssl \
                                 --kernel python3 \
                                 --stop-server \
                                 --notebook tests_deployment/assets/notebook/simple.ipynb \
+
+      - name: Playwright Tests
+        env:
+          GOOGLE_EMAIL: ${{ secrets.EXAMPLE_USER_NAME }}
+          GOOGLE_PASSWORD: ${{ secrets.EXAMPLE_USER_PASSWORD }}
+        with:
+          working-directory: tests_e2e/playwright
+        run: |
+          envsubst < tests_e2e/playwright/.env.tpl > tests_e2e/playwright/.env
+          pytest --browser chromium
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
