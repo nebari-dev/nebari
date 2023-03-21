@@ -189,8 +189,7 @@ jobs:
         env:
           GOOGLE_EMAIL: ${{ secrets.EXAMPLE_USER_NAME }}
           GOOGLE_PASSWORD: ${{ secrets.EXAMPLE_USER_PASSWORD }}
-        with:
-          working-directory: tests_e2e/playwright
+        working-directory: tests_e2e/playwright
         run: |
           envsubst < tests_e2e/playwright/.env.tpl > tests_e2e/playwright/.env
           pytest --browser chromium
