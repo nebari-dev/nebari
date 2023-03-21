@@ -6,7 +6,7 @@ on:
       - ".github/workflows/test.yaml"
       - "tests/**"
       - "tests_deployment/**"
-      - "tests_e2e/**"
+      - "tests_e2e/cypress/**"
       - "scripts/**"
       - "nebari/**"
       - "setup.cfg"
@@ -20,7 +20,7 @@ on:
       - ".github/workflows/test.yaml"
       - "tests/**"
       - "tests_deployment/**"
-      - "tests_e2e/cyrpress/**"
+      - "tests_e2e/cypress/**"
       - "scripts/**"
       - "nebari/**"
       - "setup.cfg"
@@ -52,4 +52,4 @@ jobs:
       - name: Test Nebari
         run: |
           pytest --version
-          pytest --ignore=tests_deployment
+          pytest --ignore=tests_deployment --ignore=tests_e2e/playwright
