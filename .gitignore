@@ -1,6 +1,7 @@
 # docs
 .nox
 _build
+.env
 
 # setuptools scm
 nebari/_version.py
@@ -46,5 +47,6 @@ nebari-config.yaml
 .vscode/
 .pytest_cache
 .ipynb_checkpoints
+.DS_Store
 
 /.ruff_cache
