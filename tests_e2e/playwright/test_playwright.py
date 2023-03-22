@@ -7,10 +7,9 @@ from basic import Navigator, RunNotebook
 def test_notebook(browser_name):
     dotenv.load_dotenv()
     nav = Navigator(
-        nebari_url="https://nebari.quansight.dev",
-        google_email=os.environ["GOOGLE_EMAIL"],
-        username=os.environ["GOOGLE_EMAIL"],
-        google_password=os.environ["GOOGLE_PASSWORD"],
+        nebari_url=os.environ["NEBARI_BASE_URL"],
+        username=os.environ["USERNAME"],
+        password=os.environ["PASSWORD"],
         headless=True,
         browser=browser_name,
     )

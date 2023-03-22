@@ -150,6 +150,15 @@ jobs:
           nebari keycloak adduser --user "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}" --config "${NEBARI_CONFIG_PATH}"
           nebari keycloak listusers --config "${NEBARI_CONFIG_PATH}"
 
+      - name: Playwright Tests
+        env:
+          USERNAME: ${{ secrets.EXAMPLE_USER_NAME }}
+          PASSWORD: ${{ secrets.EXAMPLE_USER_PASSWORD }}
+        working-directory: tests_e2e/playwright
+        run: |
+          envsubst < .env.tpl > .env
+          pytest --browser chromium
+
       - name: Cypress run
         uses: cypress-io/github-action@v4
         env:
@@ -185,14 +194,7 @@ jobs:
                                 --stop-server \
                                 --notebook tests_deployment/assets/notebook/simple.ipynb \
 
-      - name: Playwright Tests
-        env:
-          GOOGLE_EMAIL: ${{ secrets.EXAMPLE_USER_NAME }}
-          GOOGLE_PASSWORD: ${{ secrets.EXAMPLE_USER_PASSWORD }}
-        working-directory: tests_e2e/playwright
-        run: |
-          envsubst < tests_e2e/playwright/.env.tpl > tests_e2e/playwright/.env
-          pytest --browser chromium
+
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment

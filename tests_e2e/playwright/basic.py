@@ -30,21 +30,23 @@ class Navigator:
     def __init__(
         self,
         nebari_url,
-        google_email,
         username,
-        google_password,
+        password,
+        auth,
         headless=False,
         slow_mo=100,
-        browser=None,
+        browser="chromium",
+        instance_name="small-instance",
     ):
         self.nebari_url = nebari_url
-        self.google_email = google_email
-        self.google_password = google_password
         self.username = username
+        self.password = password
+        self.auth = auth
         self.initialized = False
         self.headless = headless
         self.slow_mo = slow_mo
         self.browser = browser
+        self.instance_name = instance_name
 
         self.setup(
             browser=self.browser,
@@ -90,27 +92,50 @@ class Navigator:
         self.playwright.stop()
         logger.debug(">>> Teardown complete.")
 
-    def google_login_start_server(self) -> None:
-        """Go to a nebari deployment, login via Google, and start a new server."""
+    def login(self) -> None:
+        if self.auth == "google":
+            self.login_google()
+        elif self.auth == "password":
+            self.login_password()
+        else:
+            raise ValueError(f"Auth type of {self.auth} is invalid.")
+
+    def login_google(self) -> None:
+        """Go to a nebari deployment, login via Google"""
         logger.debug(">>> Sign in via Google and start the server")
         self.page.goto(self.nebari_url)
         expect(self.page).to_have_url(re.compile(f"{self.nebari_url}*"))
 
         self.page.get_by_role("button", name="Sign in with Keycloak").click()
         self.page.get_by_role("link", name="Google").click()
-        self.page.get_by_role("textbox", name="Email or phone").fill(self.google_email)
+        self.page.get_by_role("textbox", name="Email or phone").fill(self.username)
         self.page.get_by_role("button", name="Next").click()
-        self.page.get_by_role("textbox", name="Enter your password").fill(
-            self.google_password
-        )
+        self.page.get_by_role("textbox", name="Enter your password").fill(self.password)
 
         self.page.wait_for_load_state("networkidle")
         self.page.get_by_role("button", name="Next").click()
 
-        self.page.wait_for_load_state(
-            "networkidle"
-        )  # let the page load (use this to avoid a long wait in the try statement)
+        # let the page load
+        self.page.wait_for_load_state("networkidle")
 
+    def login_password(self) -> None:
+        """Go to a nebari deployment, login via Username/Password, and start
+        a new server.
+        """
+        logger.debug(">>> Sign in via Username/Password")
+        self.page.goto(self.nebari_url)
+        expect(self.page).to_have_url(re.compile(f"{self.nebari_url}*"))
+
+        self.page.get_by_role("button", name="Sign in with Keycloak").click()
+        self.page.get_by_label("Username").fill(self.username)
+        self.page.get_by_label("Password").click()
+        self.page.get_by_label("Password").fill(self.password)
+        self.page.get_by_role("button", name="Sign In").click()
+
+        # let the page load
+        self.page.wait_for_load_state("networkidle")
+
+    def start_server(self) -> None:
         # if server is not yet running
         start_locator = self.page.get_by_role("button", name="Start My Server")
         try:
@@ -120,9 +145,10 @@ class Navigator:
             # your server is not yet running, would like to start it?
             self.page.get_by_role("button", name="Launch server").click()
             # select instance type
-            self.page.locator(
-                "#profile-item-small-instance-with-conda-store-ui"
-            ).click()
+            # self.page.locator(
+            #     "#profile-item-small-instance-with-conda-store-ui"
+            # ).click()
+            self.page.locator(f"#profile-item-{self.instance_name}").click()
             self.page.get_by_role("button", name="Start").click()
 
         except Exception:
@@ -184,7 +210,7 @@ class Navigator:
             logger.debug('Did not find "Shut Down Kernel" menu option')
 
         # go back to root folder
-        self.page.get_by_title(f"/home/{self.google_email}", exact=True).locator(
+        self.page.get_by_title(f"/home/{self.username}", exact=True).locator(
             "path"
         ).click()
 
@@ -263,8 +289,9 @@ class RunNotebook:
             "Open from Path…"
         ).click()
         self.nav.page.get_by_placeholder("/path/relative/to/jlab/root").fill(path)
-        self.nav.page.get_by_role("button", name="Open").click()
-        # give the page a second to open, otherwise the options in the kernel menu will be disabled.
+        self.nav.page.get_by_role("button", name="Open", exact=True).click()
+        # give the page a second to open, otherwise the options in the kernel
+        # menu will be disabled.
         self.nav.page.wait_for_load_state("networkidle")
         # make sure the focus is on the dashboard tab we want to run
         self.nav.page.get_by_role("tab", name=path).get_by_text(path).click()
@@ -280,7 +307,10 @@ class RunNotebook:
         ).get_by_text("Restart Kernel and Run All Cells…").click()
         self.nav.page.get_by_role("button", name="Restart", exact=True).click()
 
-        # expect(self.nav.page.get_by_text(expected_output_text, exact=True)).to_have_text(f"{expected_output_text}") # not sure why this doesn't work
+        # expect(self.nav.page.get_by_text(
+        #     expected_output_text, exact=True
+        #     )).to_have_text(f"{expected_output_text}"
+        #     ) # not sure why this doesn't work
         assert self.nav.page.get_by_text(expected_output_text, exact=True).is_visible()
 
 
@@ -288,11 +318,13 @@ if __name__ == "__main__":
     dotenv.load_dotenv()
     nav = Navigator(
         nebari_url="https://nebari.quansight.dev",
-        google_email=os.environ["GOOGLE_EMAIL"],
-        username=os.environ["GOOGLE_EMAIL"],
-        google_password=os.environ["GOOGLE_PASSWORD"],
+        username=os.environ["USERNAME"],
+        password=os.environ["PASSWORD"],
+        auth="password",
+        instance_name="small-instance-w-jupyterlab-conda-store-v0-2-7",
     )
-    nav.google_login_start_server()
+    nav.login()
+    nav.start_server()
     nav.reset_workspace()
     test_app = RunNotebook(navigator=nav)
     test_app.run_notebook(
