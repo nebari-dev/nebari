@@ -295,7 +295,7 @@ class RunNotebook:
         self.nav.page.wait_for_load_state("networkidle")
         # make sure the focus is on the dashboard tab we want to run
         self.nav.page.get_by_role("tab", name=path).get_by_text(path).click()
-        self.nav.set_environment(kernel="conda-env-global-global-dashboard-v3-py")
+        self.nav.set_environment(kernel="conda-env-nebari-git-nebari-git-dashboard-py")
 
         # make sure that this notebook is one currently selected
         self.nav.page.get_by_role("tab", name=path).get_by_text(path).click()

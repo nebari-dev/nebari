@@ -12,8 +12,11 @@ def test_notebook(browser_name):
         password=os.environ["PASSWORD"],
         headless=True,
         browser=browser_name,
+        auth="password",
+        instance_name="small-instance",
     )
-    nav.google_login_start_server()
+    nav.login_password()
+    nav.start_server()
     nav.reset_workspace()
     test_app = RunNotebook(navigator=nav)
     test_app.run_notebook(
