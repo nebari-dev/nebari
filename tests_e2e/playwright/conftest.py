@@ -1,23 +1,34 @@
-from typing import Dict
+import os
 
+import dotenv
 import pytest
-from playwright.sync_api import BrowserType
+from basic import Navigator
 
 
 @pytest.fixture(scope="session")
-def context(
-    browser_type: BrowserType,
-    browser_type_launch_args: Dict,
-    browser_context_args: Dict,
-):
-    # TODO copied from docs, currently unused
-    context = browser_type.launch_persistent_context(
-        "./foobar",
-        **{
-            **browser_type_launch_args,
-            **browser_context_args,
-            "locale": "de-DE",
-        },
+def _navigator_session(browser_name):
+    """Set up a navigator instance, login with username/password, start
+    a server. Teardown when session is complete. Use `navigator` fixture
+    for individual tests."""
+    dotenv.load_dotenv()
+    nav = Navigator(
+        nebari_url=os.environ["NEBARI_FULL_URL"],
+        username=os.environ["USERNAME"],
+        password=os.environ["PASSWORD"],
+        headless=True,
+        browser=browser_name,
+        auth="password",
+        instance_name="small-instance",
     )
-    yield context
-    context.close()
+    nav.login_password()
+    nav.start_server()
+    yield nav
+
+    nav.teardown()
+
+
+@pytest.fixture(scope="function")
+def navigator(_navigator_session):
+    """High level navigator instance with a reset workspace."""
+    _navigator_session.reset_workspace()
+    yield _navigator_session

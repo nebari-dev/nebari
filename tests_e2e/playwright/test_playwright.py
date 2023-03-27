@@ -4,7 +4,7 @@ import dotenv
 from basic import Navigator, RunNotebook
 
 
-def test_notebook(browser_name):
+def test_navigator_startup_teardown(browser_name):
     dotenv.load_dotenv()
     nav = Navigator(
         nebari_url=os.environ["NEBARI_BASE_URL"],
@@ -18,9 +18,12 @@ def test_notebook(browser_name):
     nav.login_password()
     nav.start_server()
     nav.reset_workspace()
-    test_app = RunNotebook(navigator=nav)
+    nav.teardown()
+
+
+def test_notebook(navigator):
+    test_app = RunNotebook(navigator=navigator)
     test_app.run_notebook(
         path="test_data/test_notebook_output.ipynb",
         expected_output_text="success: 6",
     )
-    nav.teardown()

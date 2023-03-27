@@ -154,6 +154,7 @@ jobs:
         env:
           USERNAME: ${{ secrets.EXAMPLE_USER_NAME }}
           PASSWORD: ${{ secrets.EXAMPLE_USER_PASSWORD }}
+          NEBARI_FULL_URL: "https://${{ env.NEBARI_BASE_URL }}/"
         working-directory: tests_e2e/playwright
         run: |
           envsubst < .env.tpl > .env
