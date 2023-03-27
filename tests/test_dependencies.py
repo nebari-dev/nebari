@@ -61,4 +61,5 @@ def test_build_by_conda_forge(tmp_path):
             check=True,
         )
     except subprocess.CalledProcessError as e:
+        print(e.stderr.decode("utf-8"))
         raise e
