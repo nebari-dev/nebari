@@ -352,6 +352,23 @@ class JupyterHub(Base):
     overrides: typing.Optional[typing.Dict]
 
 
+# ================= JupyterLab ==================
+
+
+class IdleCuller(Base):
+    terminal_cull_inactive_timeout = typing.Optional[int]
+    terminal_cull_interval = typing.Optional[int]
+    kernel_cull_idle_timeout = typing.Optional[int]
+    kernel_cull_interval = typing.Optional[int]
+    kernel_cull_connected = typing.Optional[bool]
+    kernel_cull_busy = typing.Optional[bool]
+    server_shutdown_no_activity_timeout = typing.Optional[int]
+
+
+class JupyterLab(Base):
+    idle_culler: typing.Optional[IdleCuller]
+
+
 # ================== Profiles ==================
 
 
@@ -585,6 +602,7 @@ class Main(Base):
     clearml: typing.Optional[ClearML]
     tf_extensions: typing.Optional[typing.List[NebariExtension]]
     jupyterhub: typing.Optional[JupyterHub]
+    jupyterlab: typing.Optional[JupyterLab]
     prevent_deploy: bool = (
         False  # Optional, but will be given default value if not present
     )

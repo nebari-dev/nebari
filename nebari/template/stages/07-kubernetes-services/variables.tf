@@ -56,3 +56,38 @@ variable "conda-store-service-token-scopes" {
     }
   }
 }
+
+variable "terminal_cull_inactive_timeout" {
+  description = "Timeout (in minutess) in which a terminal has been inactive and ready to be culled"
+  type        = number
+}
+
+variable "terminal_cull_interval" {
+  description = "The interval (in minutes) on which to check for terminals exceeding the inactive timeout value"
+  type        = number
+}
+
+variable "kernel_cull_idle_timeout" {
+  description = "Timeout (in minutes) after which an idle kernel is considered ready to be culled"
+  type        = number
+}
+
+variable "kernel_cull_interval" {
+  description = "The interval (in minutes) on which to check for idle kernels exceeding the cull timeout value"
+  type        = number
+}
+
+variable "kernel_cull_connected" {
+  description = "Whether to consider culling kernels which have one or more connections"
+  type        = bool
+}
+
+variable "kernel_cull_busy" {
+  description = "Whether to consider culling kernels which are currently busy running some code"
+  type        = bool
+}
+
+variable "server_shutdown_no_activity_timeout" {
+  description = "Shut down the server after N minutes with no kernels or terminals running and no activity"
+  type        = number
+}
