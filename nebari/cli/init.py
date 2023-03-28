@@ -174,15 +174,10 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
                 provider="Azure", link_to_docs=CREATE_AZURE_CREDS
             )
         )
-
         os.environ["ARM_CLIENT_ID"] = typer.prompt(
             "Paste your ARM_CLIENT_ID",
             hide_input=True,
         )
-        # os.environ["ARM_CLIENT_SECRET"] = typer.prompt(
-        #     "Paste your ARM_CLIENT_SECRET",
-        #     hide_input=True,
-        # )
         os.environ["ARM_SUBSCRIPTION_ID"] = typer.prompt(
             "Paste your ARM_SUBSCRIPTION_ID",
             hide_input=True,
@@ -191,6 +186,11 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
             "Paste your ARM_TENANT_ID",
             hide_input=True,
         )
+        # TODO: allow users to specify ARM_CLIENT_SECRET if they have it available
+        # os.environ["ARM_CLIENT_SECRET"] = typer.prompt(
+        #     "Paste your ARM_CLIENT_SECRET",
+        #     hide_input=True,
+        # )
 
     return cloud_provider
 

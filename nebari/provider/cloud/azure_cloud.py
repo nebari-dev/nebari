@@ -15,13 +15,6 @@ logger.setLevel(logging.ERROR)
 def initiate_container_service_client():
     subscription_id = os.environ.get("ARM_SUBSCRIPTION_ID", None)
 
-    # Python SDK needs different env var names to Terraform SDK
-    # REMOVED "CLIENT_SECRET"
-    # for envname in ("TENANT_ID", "CLIENT_ID"):
-    #     azure_name = f"AZURE_{envname}"
-    #     if azure_name not in os.environ:
-    #         os.environ[azure_name] = os.environ[f"ARM_{envname}"]
-
     credentials = DefaultAzureCredential()
 
     return ContainerServiceClient(
