@@ -15,10 +15,10 @@ def _navigator_session(browser_name):
         nebari_url=os.environ["NEBARI_FULL_URL"],
         username=os.environ["USERNAME"],
         password=os.environ["PASSWORD"],
-        headless=True,
+        headless=False,
         browser=browser_name,
         auth="password",
-        instance_name="small-instance",
+        instance_name=os.environ["INSTANCE_NAME"],
     )
     nav.login_password()
     nav.start_server()

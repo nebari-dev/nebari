@@ -82,7 +82,7 @@ class Navigator:
             )
         else:
             raise RuntimeError(f"{browser} browser is not recognized.")
-        self.context = self.browser.new_context()
+        self.context = self.browser.new_context(ignore_https_errors=True)
         self.page = self.context.new_page()
         self.initialized = True
 
@@ -142,12 +142,13 @@ class Navigator:
             start_locator.wait_for(timeout=3000, state="attached")
             start_locator.click()
 
-            # your server is not yet running, would like to start it?
-            self.page.get_by_role("button", name="Launch server").click()
-            # select instance type
-            # self.page.locator(
-            #     "#profile-item-small-instance-with-conda-store-ui"
-            # ).click()
+            # I'm not sure why this is no longer needed. Leaving it here for
+            # future reference.
+            # # your server is not yet running, would like to start it?
+            # self.page.get_by_role("button", name="Launch server").click()
+
+            # select instance type (TODO will fail if this instance type is not
+            # available)
             self.page.locator(f"#profile-item-{self.instance_name}").click()
             self.page.get_by_role("button", name="Start").click()
 
