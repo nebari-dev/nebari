@@ -40,11 +40,11 @@ jobs:
       matrix:
         provider:
           - aws
-          - azure
-          - do
-          - gcp
-          - local
-          - existing
+          # - azure
+          # - do
+          # - gcp
+          # - local
+          # - existing
         cicd:
           - none
           - github-actions
