@@ -175,6 +175,7 @@ jobs:
           path: |
             ./tests_e2e/cypress/screenshots/
             ./tests_e2e/cypress/videos/
+            ${NEBARI_CONFIG_PATH}
 
       - name: Deployment Pytests
         run: |
