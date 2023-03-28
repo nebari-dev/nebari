@@ -43,10 +43,10 @@ jobs:
     strategy:
       matrix:
         provider:
-          - aws
+          # - aws
           # - azure
           # - do
-          # - gcp
+          - gcp
           # - local
           # - existing
         cicd:
