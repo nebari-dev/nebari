@@ -165,7 +165,7 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
     # AZURE
     elif cloud_provider == ProviderEnum.azure.value.lower() and (
         not os.environ.get("ARM_CLIENT_ID")
-        or not os.environ.get("ARM_CLIENT_SECRET")
+        # or not os.environ.get("ARM_CLIENT_SECRET")
         or not os.environ.get("ARM_SUBSCRIPTION_ID")
         or not os.environ.get("ARM_TENANT_ID")
     ):
@@ -179,10 +179,10 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
             "Paste your ARM_CLIENT_ID",
             hide_input=True,
         )
-        os.environ["ARM_CLIENT_SECRET"] = typer.prompt(
-            "Paste your ARM_CLIENT_SECRET",
-            hide_input=True,
-        )
+        # os.environ["ARM_CLIENT_SECRET"] = typer.prompt(
+        #     "Paste your ARM_CLIENT_SECRET",
+        #     hide_input=True,
+        # )
         os.environ["ARM_SUBSCRIPTION_ID"] = typer.prompt(
             "Paste your ARM_SUBSCRIPTION_ID",
             hide_input=True,
