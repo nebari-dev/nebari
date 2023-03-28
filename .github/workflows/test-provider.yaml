@@ -37,6 +37,8 @@ jobs:
     name: "Test Nebari Provider"
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
+      contents: read
       pull-requests: write
     strategy:
       matrix:
