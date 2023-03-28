@@ -2,7 +2,7 @@ import functools
 import logging
 import os
 
-from azure.identity import EnvironmentCredential
+from azure.identity import DefaultAzureCredential
 from azure.mgmt.containerservice import ContainerServiceClient
 
 from nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
@@ -17,13 +17,15 @@ def initiate_container_service_client():
 
     # Python SDK needs different env var names to Terraform SDK
     # REMOVED "CLIENT_SECRET"
-    for envname in ("TENANT_ID", "CLIENT_ID"):
-        azure_name = f"AZURE_{envname}"
-        if azure_name not in os.environ:
-            os.environ[azure_name] = os.environ[f"ARM_{envname}"]
+    # for envname in ("TENANT_ID", "CLIENT_ID"):
+    #     azure_name = f"AZURE_{envname}"
+    #     if azure_name not in os.environ:
+    #         os.environ[azure_name] = os.environ[f"ARM_{envname}"]
+
+    credentials = DefaultAzureCredential()
 
     return ContainerServiceClient(
-        credential=EnvironmentCredential(), subscription_id=subscription_id
+        credential=credentials, subscription_id=subscription_id
     )
 
 
