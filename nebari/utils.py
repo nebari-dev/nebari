@@ -126,7 +126,7 @@ def check_cloud_credentials(config):
     elif config["provider"] == "azure":
         for variable in {
             "ARM_CLIENT_ID",
-            "ARM_CLIENT_SECRET",
+            # "ARM_CLIENT_SECRET", # TODO: allow users to deploy without setting ARM_CLIENT_SECRET (workflow identity)
             "ARM_SUBSCRIPTION_ID",
             "ARM_TENANT_ID",
         }:
