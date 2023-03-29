@@ -116,7 +116,7 @@ def gha_env_vars(config):
         env_vars["AWS_DEFAULT_REGION"] = "${{ secrets.AWS_DEFAULT_REGION }}"
     elif config["provider"] == "azure":
         env_vars["ARM_CLIENT_ID"] = "${{ secrets.ARM_CLIENT_ID }}"
-        env_vars["ARM_CLIENT_SECRET"] = "${{ secrets.ARM_CLIENT_SECRET }}"
+        # env_vars["ARM_CLIENT_SECRET"] = "${{ secrets.ARM_CLIENT_SECRET }}"
         env_vars["ARM_SUBSCRIPTION_ID"] = "${{ secrets.ARM_SUBSCRIPTION_ID }}"
         env_vars["ARM_TENANT_ID"] = "${{ secrets.ARM_TENANT_ID }}"
     elif config["provider"] == "do":
