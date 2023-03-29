@@ -54,3 +54,9 @@ variable "private_cluster_enabled" {
   default     = false
   type        = bool
 }
+
+variable "use_oidc" {
+  description = "Determines whether authentication with Azure uses OIDC"
+  type        = bool
+  default     = true
+}
