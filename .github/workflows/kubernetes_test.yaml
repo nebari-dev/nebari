@@ -152,8 +152,8 @@ jobs:
 
       - name: Playwright Tests
         env:
-          USERNAME: ${{ secrets.EXAMPLE_USER_NAME }}
-          PASSWORD: ${{ secrets.EXAMPLE_USER_PASSWORD }}
+          USERNAME: ${{ env.CYPRESS_EXAMPLE_USER_NAME }}
+          PASSWORD: ${{ env.CYPRESS_EXAMPLE_USER_PASSWORD }}
           NEBARI_FULL_URL: "https://${{ env.NEBARI_BASE_URL }}/"
           INSTANCE_NAME: "small-instance"
         working-directory: tests_e2e/playwright
