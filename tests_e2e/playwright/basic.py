@@ -25,6 +25,38 @@ class Navigator:
     Navigator classes are able to run either standalone, or inside of pytest.
     This makes it easy to develop new tests, but also fully prepared to be
     included as part of the test suite.
+
+    Parameters
+    ----------
+    nebari_url: str
+        Nebari URL to access for testing
+    username: str
+        Login username for Nebari. For Google login, this will be email address.
+    password: str
+        Login password for Nebari. For Google login, this will be the Google
+        password.
+    auth: str
+        Authentication type of this Nebari instance. Options are "google" and
+        "password".
+    headless: bool
+        (Optional) Run the tests in headless mode (without visuals). Defaults
+        to False.
+    slow_mo: int
+        (Optional) Additional milliseconds to add to each Playwright command,
+        creating the effect of running the tests in slow motion so they are
+        easier for humans to follow. Defaults to 0.
+    browser: str
+        (Optional) Browser on which to run tests. Options are "chromium",
+        "webkit", and "firefox". Defaults to "chromium".
+    instance_name: str
+        (Optional) Server instance type on which to run tests. Options are
+        based on the configuration of the Nebari instance. Defaults to
+        "small-instance". Note that special characters (such as parenthesis)
+        will need to be converted to dashes. Check the HTML element to get the
+        exact structure.
+    video_dir: None or str
+        (Optional) Directory in which to save videos. If None, no video will
+        be saved. Defaults to None.
     """
 
     def __init__(
@@ -34,9 +66,10 @@ class Navigator:
         password,
         auth,
         headless=False,
-        slow_mo=100,
+        slow_mo=0,
         browser="chromium",
         instance_name="small-instance",
+        video_dir=None,
     ):
         self.nebari_url = nebari_url
         self.username = username
@@ -47,6 +80,7 @@ class Navigator:
         self.slow_mo = slow_mo
         self.browser = browser
         self.instance_name = instance_name
+        self.video_dir = video_dir
 
         self.setup(
             browser=self.browser,
@@ -82,13 +116,16 @@ class Navigator:
             )
         else:
             raise RuntimeError(f"{browser} browser is not recognized.")
-        self.context = self.browser.new_context(ignore_https_errors=True)
+        self.context = self.browser.new_context(
+            ignore_https_errors=True,
+            record_video_dir=self.video_dir,
+        )
         self.page = self.context.new_page()
         self.initialized = True
 
     def teardown(self):
         self.context.close()
-        self.browser.close()
+        self.browser.close()  # Make sure to close, so that videos are saved.
         self.playwright.stop()
         logger.debug(">>> Teardown complete.")
 

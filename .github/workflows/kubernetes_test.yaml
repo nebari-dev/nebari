@@ -159,7 +159,7 @@ jobs:
         working-directory: tests_e2e/playwright
         run: |
           envsubst < .env.tpl > .env
-          pytest --browser chromium
+          xvfb-run pytest --browser chromium
 
       - name: Cypress run
         uses: cypress-io/github-action@v4
@@ -176,6 +176,7 @@ jobs:
           path: |
             ./tests_e2e/cypress/screenshots/
             ./tests_e2e/cypress/videos/
+            ./tests_e2e/playwright/videos/
             ${{ env.NEBARI_CONFIG_PATH }}
 
       - name: Deployment Pytests
