@@ -1,22 +1,4 @@
-import os
-
-from basic import Navigator, RunNotebook
-
-
-def test_login():
-    nav = Navigator(
-        nebari_url=os.environ["NEBARI_FULL_URL"],
-        username=os.environ["USERNAME"],
-        password=os.environ["PASSWORD"],
-        headless=False,
-        browser="chromium",
-        auth="password",
-        instance_name=os.environ["INSTANCE_NAME"],
-        video_dir="videos/",
-    )
-    nav.login_password()
-    nav.start_server()
-    nav.teardown()
+from basic import RunNotebook
 
 
 def test_notebook(navigator):
