@@ -200,10 +200,9 @@ class Navigator:
             start_locator.wait_for(timeout=3000, state="attached")
             start_locator.click()
 
-        # commented because this fails on CI
-        # wait for redirect
+        # wait for redirect - be wary of extra slashes here!
         self.page.wait_for_url(
-            f"{self.nebari_url}/user/{self.username}/*",
+            f"{self.nebari_url}user/{self.username}/*",
             timeout=self.wait_for_server_spinup,
         )
         # let page load after redirect
