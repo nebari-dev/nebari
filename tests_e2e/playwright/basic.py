@@ -363,7 +363,7 @@ class RunNotebook:
         self.nav = navigator
         self.nav.initialize
 
-    def run_notebook(self, path, expected_output_text):
+    def run_notebook(self, path, expected_output_text, runtime=30000):
         """Run jupyter notebook and check for expected output text anywhere on
         the page.
 
@@ -377,7 +377,7 @@ class RunNotebook:
         file_locator = self.nav.page.get_by_text("File", exact=True)
 
         file_locator.wait_for(
-            timeout=nav.wait_for_server_spinup,
+            timeout=self.nav.wait_for_server_spinup,
             state="attached",
         )
         file_locator.click()
@@ -412,13 +412,15 @@ class RunNotebook:
         #     expected_output_text, exact=True
         #     )).to_have_text(f"{expected_output_text}"
         #     ) # not sure why this doesn't work
-        assert self.nav.page.get_by_text(expected_output_text, exact=True).is_visible()
+        output_locator = self.nav.page.get_by_text(expected_output_text, exact=True)
+        output_locator.wait_for(timeout=runtime)  # wait for notebook to run
+        assert output_locator.is_visible()
 
 
 if __name__ == "__main__":
     dotenv.load_dotenv()
     nav = Navigator(
-        nebari_url="https://nebari.quansight.dev",
+        nebari_url="https://nebari.quansight.dev/",
         username=os.environ["USERNAME"],
         password=os.environ["PASSWORD"],
         auth="password",
