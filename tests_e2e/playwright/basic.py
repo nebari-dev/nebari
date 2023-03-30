@@ -200,6 +200,7 @@ class Navigator:
             start_locator.wait_for(timeout=3000, state="attached")
             start_locator.click()
 
+        # commented because this fails on CI
         # wait for redirect
         self.page.wait_for_url(
             f"{self.nebari_url}/user/{self.username}/*",
@@ -207,6 +208,8 @@ class Navigator:
         )
         # let page load after redirect
         self.page.wait_for_load_state("networkidle")
+
+        logger.debug(">>> Sign in complete.")
 
     def _check_for_kernel_popup(self):
         """Is the kernel popup currently open?
@@ -241,7 +244,7 @@ class Navigator:
             shut_down_all.wait_for(timeout=300, state="attached")
             shut_down_all.click()
         except Exception:
-            logger.debug('Did not find "Shut Down All" menu option')
+            pass
 
         # shut down kernel if only one notebook is running
         kernel_menuitem.click()
@@ -250,7 +253,7 @@ class Navigator:
             shut_down_current.wait_for(timeout=300, state="attached")
             shut_down_current.click()
         except Exception:
-            logger.debug('Did not find "Shut Down Kernel" menu option')
+            pass
 
         # go back to root folder
         self.page.get_by_title(f"/home/{self.username}", exact=True).locator(
@@ -267,8 +270,9 @@ class Navigator:
             self.page.get_by_role("button", name="Discard", exact=True).click()
 
     def _set_environment_via_popup(self, kernel=None):
-        """Set the environment kernel via the popup dialog box.
-        If kernel is `None`, `No Kernel` is selected and the popup is dismissed.
+        """Set the environment kernel on a jupyter notebook via the popup
+        dialog box. If kernel is `None`, `No Kernel` is selected and the
+        popup is dismissed.
 
         Attributes
         ----------
@@ -298,7 +302,20 @@ class Navigator:
                 ).click()
 
     def set_environment(self, kernel):
-        """The focus MUST be on the dashboard we are trying to run"""
+        """Set environment of a jupyter notebook.
+
+        IMPORTANT: The focus MUST be on the notebook on which you want to set
+        the environment.
+
+        Parameters
+        ----------
+        kernel: str
+            Name of kernel to set.
+
+        Returns
+        -------
+        None
+        """
 
         popup = self._check_for_kernel_popup()
         # if there is not a kernel popup, make it appear
@@ -311,7 +328,22 @@ class Navigator:
         self._set_environment_via_popup(kernel)
 
     def clone_repo(self, git_url, branch=None):
-        """git@github.com:nebari-dev/nebari.git"""
+        """Clone a git repo into the jupyterlab file structure.
+
+        Parameters
+        ----------
+        git_url: str
+            url of git repo (must be public, referenced as http rather than ssh
+            format, e.g. https://github.com/nebari-dev/nebari.git)
+        branch: bool or str
+            (Optional) branch to checkout from the repo. Defaults to None to use
+            the default branch.
+
+        Returns
+        -------
+        None
+        """
+        logger.debug(f">>> Clone git repo: {git_url}")
 
         input_string = f"git clone {git_url}"
         if branch:
@@ -333,17 +365,22 @@ class RunNotebook:
         self.nav.initialize
 
     def run_notebook(self, path, expected_output_text):
-        logger.debug(">>> Run test notebook")
-        filename = Path(path).name
+        """Run jupyter notebook and check for expected output text anywhere on
+        the page.
 
-        # TODO: add nbgitpuller here?
+        Note: This will look for and exact match of expected_output_text
+        _anywhere_ on the page so be sure that your text is unique.
+        """
+        logger.debug(f">>> Running notebook: {path}")
+        filename = Path(path).name
 
         # navigate to specific notebook
         file_locator = self.nav.page.get_by_text("File", exact=True)
 
         file_locator.wait_for(
-            timeout=300000, state="attached"
-        )  # 5 minutes max for server to spin up
+            timeout=nav.wait_for_server_spinup,
+            state="attached",
+        )
         file_locator.click()
         self.nav.page.get_by_role("menuitem", name="Open from Path…").get_by_text(
             "Open from Path…"
@@ -395,7 +432,7 @@ if __name__ == "__main__":
     nav.reset_workspace()
     test_app = RunNotebook(navigator=nav)
     test_app.nav.clone_repo(
-        "git://github.com/nebari-dev/nebari.git", branch="add_playwright"
+        "https://github.com/nebari-dev/nebari.git", branch="add_playwright"
     )
     test_app.run_notebook(
         path="nebari/tests_e2e/playwright/test_data/test_notebook_output.ipynb",
