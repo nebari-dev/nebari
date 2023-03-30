@@ -1,8 +1,12 @@
+import logging
 import os
 
 import dotenv
 import pytest
 from basic import Navigator
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 
 @pytest.fixture(scope="session")
@@ -28,7 +32,8 @@ def _navigator_session(browser_name):
         nav.login_password()
         nav.start_server()
         yield nav
-    except Exception:
+    except Exception as e:
+        logger.debug(e)
         nav.teardown()
 
 

@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+from pathlib import Path
 
 import dotenv
 from playwright.sync_api import expect, sync_playwright
@@ -192,14 +193,18 @@ class Navigator:
         except Exception:
             # if the server is already running
             start_locator = self.page.get_by_role(
-                "button", name="My Server", exact=True
+                "button",
+                name="My Server",
+                exact=True,
             )
             start_locator.wait_for(timeout=3000, state="attached")
-
             start_locator.click()
 
         # wait for redirect
-        self.page.wait_for_url(f"{self.nebari_url}/user/{self.username}/*")
+        self.page.wait_for_url(
+            f"{self.nebari_url}/user/{self.username}/*",
+            timeout=self.wait_for_server_spinup,
+        )
         # let page load after redirect
         self.page.wait_for_load_state("networkidle")
 
@@ -305,6 +310,22 @@ class Navigator:
 
         self._set_environment_via_popup(kernel)
 
+    def clone_repo(self, git_url, branch=None):
+        """git@github.com:nebari-dev/nebari.git"""
+
+        input_string = f"git clone {git_url}"
+        if branch:
+            input_string = f"{input_string} --branch {branch}"
+        self.page.get_by_text("File", exact=True).click()
+        self.page.get_by_text("New", exact=True).click()
+        self.page.get_by_role("menuitem", name="Terminal").get_by_text(
+            "Terminal"
+        ).click()
+        self.page.get_by_role("textbox", name="Terminal input").fill(input_string)
+        self.page.get_by_role("textbox", name="Terminal input").press("Enter")
+
+        self.reset_workspace()
+
 
 class RunNotebook:
     def __init__(self, navigator: Navigator):
@@ -313,6 +334,7 @@ class RunNotebook:
 
     def run_notebook(self, path, expected_output_text):
         logger.debug(">>> Run test notebook")
+        filename = Path(path).name
 
         # TODO: add nbgitpuller here?
 
@@ -331,12 +353,17 @@ class RunNotebook:
         # give the page a second to open, otherwise the options in the kernel
         # menu will be disabled.
         self.nav.page.wait_for_load_state("networkidle")
+        if self.nav.page.get_by_text(
+            f"Could not find path: {path}", exact=True
+        ).is_visible():
+            logger.debug("Path to notebook is invalid")
+            raise RuntimeError("Path to notebook is invalid")
         # make sure the focus is on the dashboard tab we want to run
-        self.nav.page.get_by_role("tab", name=path).get_by_text(path).click()
+        self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
         self.nav.set_environment(kernel="conda-env-nebari-git-nebari-git-dashboard-py")
 
         # make sure that this notebook is one currently selected
-        self.nav.page.get_by_role("tab", name=path).get_by_text(path).click()
+        self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
 
         # restart run all cells
         self.nav.page.get_by_text("Kernel", exact=True).click()
@@ -360,13 +387,18 @@ if __name__ == "__main__":
         password=os.environ["PASSWORD"],
         auth="password",
         instance_name="small-instance-w-jupyterlab-conda-store-v0-2-7",
+        headless=False,
+        slow_mo=100,
     )
     nav.login()
     nav.start_server()
     nav.reset_workspace()
     test_app = RunNotebook(navigator=nav)
+    test_app.nav.clone_repo(
+        "git://github.com/nebari-dev/nebari.git", branch="add_playwright"
+    )
     test_app.run_notebook(
-        path="test_data/test_notebook_output.ipynb",
+        path="nebari/tests_e2e/playwright/test_data/test_notebook_output.ipynb",
         expected_output_text="success: 6",
     )
     nav.teardown()
