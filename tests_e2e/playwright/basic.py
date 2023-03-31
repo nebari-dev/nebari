@@ -190,15 +190,15 @@ class Navigator:
             self.page.locator(f"#profile-item-{self.instance_name}").click()
             self.page.get_by_role("button", name="Start").click()
 
-            # wait for server to spinup
-            server_message = self.page.get_by_text(
-                f"Server ready at /user/{self.username}/",
-                exact=True,
-            )
-            server_message.wait_for(
-                timeout=self.wait_for_server_spinup,
-                state="attached",
-            )
+            # # wait for server to spinup
+            # server_message = self.page.get_by_text(
+            #     f"Server ready at /user/{self.username}/",
+            #     exact=True,
+            # )
+            # server_message.wait_for(
+            #     timeout=self.wait_for_server_spinup,
+            #     state="attached",
+            # )
 
         except Exception:
             # if the server is already running
@@ -222,6 +222,7 @@ class Navigator:
 
         file_locator = self.page.get_by_text("File", exact=True)
         file_locator.wait_for(
+            timeout=self.wait_for_server_spinup,
             state="attached",
         )
 
