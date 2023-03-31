@@ -88,7 +88,7 @@ class Navigator:
             headless=self.headless,
             slow_mo=self.slow_mo,
         )
-        self.wait_for_server_spinup = 5 * 60 * 1000  # 5 minutes in ms
+        self.wait_for_server_spinup = 30000  # 5 * 60 * 1000  # 5 minutes in ms
 
     @property
     def initialize(self):
@@ -190,6 +190,16 @@ class Navigator:
             self.page.locator(f"#profile-item-{self.instance_name}").click()
             self.page.get_by_role("button", name="Start").click()
 
+            # wait for server to spinup
+            server_message = self.page.get_by_text(
+                f"Server ready at /user/{self.username}/",
+                exact=True,
+            )
+            server_message.wait_for(
+                timeout=self.wait_for_server_spinup,
+                state="attached",
+            )
+
         except Exception:
             # if the server is already running
             start_locator = self.page.get_by_role(
@@ -200,13 +210,20 @@ class Navigator:
             start_locator.wait_for(timeout=3000, state="attached")
             start_locator.click()
 
-        # wait for redirect - be wary of extra slashes here!
+        # server spinup https://nebari.quansight.dev/hub/spawn-pending/kcpevey@quansight.com
+        # wait for redirect - be wary of extra slashes here! https://nebari.quansight.dev/user/kcpevey@quansight.com/lab
+        # the jupyter page loads independent of the url???
         self.page.wait_for_url(
-            f"{self.nebari_url}user/{self.username}/*",
-            timeout=self.wait_for_server_spinup,
+            f"{self.nebari_url}user/{self.username}/*", wait_until="networkidle"
+        )  # why did this not work on the latest ci test???? # TODO on friday!!
+
+        # # let page load after redirect
+        # self.page.wait_for_load_state("networkidle")
+
+        file_locator = self.page.get_by_text("File", exact=True)
+        file_locator.wait_for(
+            state="attached",
         )
-        # let page load after redirect
-        self.page.wait_for_load_state("networkidle")
 
         logger.debug(">>> Sign in complete.")
 
