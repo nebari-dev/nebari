@@ -1,19 +1,19 @@
 locals {
-  jupyter_notebook_config_py_template = templatefile("${path.module}/files/jupyter/jupyter_notebook_config.py.tpl", {
-    terminal_cull_inactive_timeout      = var.terminal_cull_inactive_timeout
-    terminal_cull_interval              = var.terminal_cull_interval
-    kernel_cull_idle_timeout            = var.kernel_cull_idle_timeout
-    kernel_cull_interval                = var.kernel_cull_interval
-    kernel_cull_connected               = var.kernel_cull_connected ? "True" : "False" # for Python compatible boolean values
-    kernel_cull_busy                    = var.kernel_cull_busy ? "True" : "False"      # for Python compatible boolean values
-    server_shutdown_no_activity_timeout = var.server_shutdown_no_activity_timeout
+  jupyter-notebook-config-py-template = templatefile("${path.module}/files/jupyter/jupyter_notebook_config.py.tpl", {
+    terminal_cull_inactive_timeout      = var.idle-culler-settings.terminal_cull_inactive_timeout
+    terminal_cull_interval              = var.idle-culler-settings.terminal_cull_interval
+    kernel_cull_idle_timeout            = var.idle-culler-settings.kernel_cull_idle_timeout
+    kernel_cull_interval                = var.idle-culler-settings.kernel_cull_interval
+    kernel_cull_connected               = var.idle-culler-settings.kernel_cull_connected ? "True" : "False" # for Python compatible boolean values
+    kernel_cull_busy                    = var.idle-culler-settings.kernel_cull_busy ? "True" : "False"      # for Python compatible boolean values
+    server_shutdown_no_activity_timeout = var.idle-culler-settings.server_shutdown_no_activity_timeout
     }
   )
 }
 
 
 resource "local_file" "jupyter_notebook_config_py" {
-  content  = local.jupyter_notebook_config_py_template
+  content  = local.jupyter-notebook-config-py-template
   filename = "${path.module}/files/jupyter/jupyter_notebook_config.py"
 }
 

@@ -145,44 +145,15 @@ variable "default-conda-store-namespace" {
   type        = string
 }
 
-variable "terminal_cull_inactive_timeout" {
-  description = "Timeout (in minutess) in which a terminal has been inactive and ready to be culled"
-  type        = number
-  default     = 30
-}
-
-variable "terminal_cull_interval" {
-  description = "The interval (in minutes) on which to check for terminals exceeding the inactive timeout value"
-  type        = number
-  default     = 5
-}
-
-variable "kernel_cull_idle_timeout" {
-  description = "Timeout (in minutes) after which an idle kernel is considered ready to be culled"
-  type        = number
-  default     = 30
-}
-
-variable "kernel_cull_interval" {
-  description = "The interval (in minutes) on which to check for idle kernels exceeding the cull timeout value"
-  type        = number
-  default     = 5
-}
-
-variable "kernel_cull_connected" {
-  description = "Whether to consider culling kernels which have one or more connections"
-  type        = bool
-  default     = true
-}
-
-variable "kernel_cull_busy" {
-  description = "Whether to consider culling kernels which are currently busy running some code"
-  type        = bool
-  default     = false
-}
-
-variable "server_shutdown_no_activity_timeout" {
-  description = "Shut down the server after N minutes with no kernels or terminals running and no activity"
-  type        = number
-  default     = 15
+variable "idle-culler-settings" {
+  description = "Idle culler timeout settings (in minutes)"
+  type = object({
+    kernel_cull_busy                    = bool
+    kernel_cull_connected               = bool
+    kernel_cull_idle_timeout            = number
+    kernel_cull_interval                = number
+    server_shutdown_no_activity_timeout = number
+    terminal_cull_inactive_timeout      = number
+    terminal_cull_interval              = number
+  })
 }

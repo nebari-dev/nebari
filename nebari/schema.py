@@ -356,13 +356,13 @@ class JupyterHub(Base):
 
 
 class IdleCuller(Base):
-    terminal_cull_inactive_timeout = typing.Optional[int]
-    terminal_cull_interval = typing.Optional[int]
-    kernel_cull_idle_timeout = typing.Optional[int]
-    kernel_cull_interval = typing.Optional[int]
-    kernel_cull_connected = typing.Optional[bool]
-    kernel_cull_busy = typing.Optional[bool]
-    server_shutdown_no_activity_timeout = typing.Optional[int]
+    terminal_cull_inactive_timeout: typing.Optional[int]
+    terminal_cull_interval: typing.Optional[int]
+    kernel_cull_idle_timeout: typing.Optional[int]
+    kernel_cull_interval: typing.Optional[int]
+    kernel_cull_connected: typing.Optional[bool]
+    kernel_cull_busy: typing.Optional[int]
+    server_shutdown_no_activity_timeout: typing.Optional[int]
 
 
 class JupyterLab(Base):
