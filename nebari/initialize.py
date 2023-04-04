@@ -533,7 +533,7 @@ def github_auto_provision(config, owner, repo):
         elif config["provider"] == "azure":
             for name in {
                 "ARM_CLIENT_ID",
-                # "ARM_CLIENT_SECRET",
+                "ARM_CLIENT_SECRET",
                 "ARM_SUBSCRIPTION_ID",
                 "ARM_TENANT_ID",
             }:
