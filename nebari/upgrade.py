@@ -17,8 +17,12 @@ logger = logging.getLogger(__name__)
 
 
 def do_upgrade(config_filename, attempt_fixes=False):
-
     config = load_yaml(config_filename)
+    if config.get("qhub_version"):
+        rich.print(
+            f"Your config file [purple]{config_filename}[/purple] uses the deprecated qhub_version key.  Please change qhub_version to nebari_version and re-run the upgrade command."
+        )
+        return
 
     try:
         verify(config)
@@ -27,14 +31,14 @@ def do_upgrade(config_filename, attempt_fixes=False):
         )
         return
     except (ValidationError, ValueError) as e:
-        if is_version_accepted(config.get("qhub_version", "")):
+        if is_version_accepted(config.get("nebari_version")):
             # There is an unrelated validation problem
             print(
                 f"Your config file {config_filename} appears to be already up-to-date for Nebari version {__version__} but there is another validation error.\n"
             )
             raise e
 
-    start_version = config.get("qhub_version", "")
+    start_version = config.get("nebari_version")
 
     UpgradeStep.upgrade(
         config, start_version, __version__, config_filename, attempt_fixes
@@ -43,6 +47,7 @@ def do_upgrade(config_filename, attempt_fixes=False):
     # Backup old file
     backup_config_file(config_filename, f".{start_version or 'old'}")
 
+    breakpoint()
     with config_filename.open("wt") as f:
         yaml.dump(config, f)
 
@@ -146,7 +151,7 @@ class UpgradeStep(ABC):
 
         # Set the new version
         if start_version == "":
-            assert "qhub_version" not in config
+            assert "nebari_version" not in config
         assert self.version != start_version
 
         if self.requires_nebari_version_field():
