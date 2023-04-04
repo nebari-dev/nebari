@@ -23,15 +23,8 @@ variable "state_resource_group_name" {
   type        = string
 }
 
-variable "use_oidc" {
-  description = "Determines whether authentication with Azure uses OIDC"
-  type        = bool
-  default     = true
-}
-
 provider "azurerm" {
   features {}
-  use_oidc = true
 }
 
 module "terraform-state" {
