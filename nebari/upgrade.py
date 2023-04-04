@@ -47,7 +47,6 @@ def do_upgrade(config_filename, attempt_fixes=False):
     # Backup old file
     backup_config_file(config_filename, f".{start_version or 'old'}")
 
-    breakpoint()
     with config_filename.open("wt") as f:
         yaml.dump(config, f)
 
