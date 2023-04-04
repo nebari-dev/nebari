@@ -33,7 +33,7 @@ def do_upgrade(config_filename, attempt_fixes=False):
             )
             raise e
 
-    start_version = config.get("nebari_version", "")
+    start_version = config.get("qhub_version", "")
 
     UpgradeStep.upgrade(
         config, start_version, __version__, config_filename, attempt_fixes
