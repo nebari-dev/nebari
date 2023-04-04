@@ -18,6 +18,11 @@ logger = logging.getLogger(__name__)
 
 def do_upgrade(config_filename, attempt_fixes=False):
     config = load_yaml(config_filename)
+    if config.get("qhub_version"):
+        rich.print(
+            f"Your config file [purple]{config_filename}[/purple] uses the deprecated qhub_version key.  Please change qhub_version to nebari_version and re-run the upgrade command."
+        )
+        return
 
     try:
         verify(config)
