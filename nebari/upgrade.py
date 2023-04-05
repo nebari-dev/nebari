@@ -8,6 +8,7 @@ from abc import ABC
 
 import rich
 from pydantic.error_wrappers import ValidationError
+from rich.prompt import Prompt
 
 from .schema import is_version_accepted, verify
 from .utils import backup_config_file, load_yaml, yaml
@@ -382,6 +383,32 @@ class Upgrade_0_4_1(UpgradeStep):
             print(
                 f"Setting access type of JupyterLab profile {name} to {profile['access']}"
             )
+        return config
+
+
+class Upgrade_2023_5_1(UpgradeStep):
+    version = "2023.5.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: pathlib.Path, *args, **kwargs
+    ):
+        """
+        Prompt users to delete Argo CRDs
+        """
+
+        kubectl_delete_argo_crds_cmd = "kubectl delete crds clusterworkflowtemplates.argoproj.io cronworkflows.argoproj.io workfloweventbindings.argoproj.io workflows.argoproj.io workflowtasksets.argoproj.io workflowtemplates.argoproj.io"
+
+        rich.print(
+            f"\n\n[bold cyan]Note:[/] Upgrading requires a one-time manual deletion of the Argo Workflows Custom Resource Definitions (CRDs). \n\n[red bold]Warning:  [link=https://{config['domain']}/argo/workflows]Workflows[/link] and [link=https://{config['domain']}/argo/workflows]CronWorkflows[/link] created before deleting the CRDs will be erased when the CRDs are deleted and will not be restored.[/red bold] \n\nThe updated CRDs will be installed during the next [cyan bold]nebari deploy[/cyan bold]. Argo Workflows will not function after deleting the CRDs until the updated CRDs are installed in the next nebari deploy. You must delete the Argo CRDs before upgrading to {self.version} or deploy step will fail.  Please delete them before proceeding.\n\nThe command to do this is:\n\n\t[cyan bold]{kubectl_delete_argo_crds_cmd} [/cyan bold]\n"
+            ""
+        )
+
+        continue_ = Prompt.ask("Have you deleted the Argo CRDs? \[y/N]", default="N")
+        if not continue_ == "y":
+            raise ValueError(
+                f"You must delete the Argo CRDs before upgrading to {self.version}"
+            )
+
         return config
 
 
