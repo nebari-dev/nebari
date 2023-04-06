@@ -53,6 +53,9 @@ jobs:
     name: Publish Nebari on PyPi
     runs-on: ubuntu-latest
     needs: test-pypi
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Set up python
