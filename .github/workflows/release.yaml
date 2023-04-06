@@ -71,7 +71,19 @@ jobs:
       - name: Build source and binary
         run: python -m build --sdist --wheel .
 
+      - name: Retrieve secret from Vault
+        uses: hashicorp/vault-action@v2.5.0
+        with:
+          method: jwt
+          url: "https://quansight-public-vault-fe415d04.c219cf75.z1.hashicorp.cloud:8200"
+          namespace: "admin/quansight"
+          role: "repository-nebari-dev-nebari-role"
+          secrets: |
+            kv/data/repository/nebari-dev/nebari/shared_secrets PYPI_USERNAME | PYPI_USERNAME;
+            kv/data/repository/nebari-dev/nebari/shared_secrets PYPI_PASSWORD | PYPI_PASSWORD;
+
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          user: ${{ env.PYPI_USERNAME }}
+          password: ${{ env.PYPI_PASSWORD }}
