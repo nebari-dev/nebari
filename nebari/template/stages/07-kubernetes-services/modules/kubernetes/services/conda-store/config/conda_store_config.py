@@ -44,7 +44,11 @@ c.S3Storage.bucket_name = "conda-store"
 c.CondaStore.default_namespace = "global"
 c.CondaStore.filesystem_namespace = config["default-namespace"]
 c.CondaStore.conda_allowed_channels = []  # allow all channels
-c.CondaStore.conda_indexed_channels = ["main", "conda-forge", "https://repo.anaconda.com/pkgs/main"]
+c.CondaStore.conda_indexed_channels = [
+    "main",
+    "conda-forge",
+    "https://repo.anaconda.com/pkgs/main",
+]
 
 # ==================================
 #        server settings
