@@ -68,7 +68,7 @@ jobs:
           miniconda-version: "latest"
       - name: Install Nebari
         run: |
-          conda install -c anaconda pip
+          conda install --quiet --yes -c anaconda pip
           pip install .[dev]
       - name: Download and Install Kubectl
         run: |
