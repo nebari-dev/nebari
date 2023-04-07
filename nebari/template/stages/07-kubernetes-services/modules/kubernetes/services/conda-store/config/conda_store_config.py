@@ -43,6 +43,8 @@ c.S3Storage.bucket_name = "conda-store"
 
 c.CondaStore.default_namespace = "global"
 c.CondaStore.filesystem_namespace = config["default-namespace"]
+c.CondaStore.conda_allowed_channels = []  # allow all channels
+c.CondaStore.conda_indexed_channels = ["main", "conda-forge", "https://repo.anaconda.com/pkgs/main"]
 
 # ==================================
 #        server settings
@@ -93,6 +95,15 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         response.raise_for_status()
         user_data = response.json()
 
+        username = user_data["preferred_username"]
+
+        # superadmin gets access to everything
+        if "conda_store_superadmin" in user_data.get("roles", []):
+            return schema.AuthenticationToken(
+                primary_namespace=username,
+                role_bindings={"*/*": {"admin"}},
+            )
+
         role_mappings = {
             "conda_store_admin": "admin",
             "conda_store_developer": "developer",
@@ -103,7 +114,6 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             for role in user_data.get("roles", [])
             if role in role_mappings
         }
-        username = user_data["preferred_username"]
         default_namespace = config["default-namespace"]
         namespaces = {username, "global", default_namespace}
         role_bindings = {
