@@ -11,6 +11,7 @@ on:
       - "nebari/**"
       - "setup.cfg"
       - "pyproject.toml"
+      - "pytest.ini"
   push:
     branches:
       - main
@@ -25,6 +26,7 @@ on:
       - "nebari/**"
       - "setup.cfg"
       - "pyproject.toml"
+      - "pytest.ini"
   workflow_call:
     inputs:
       pr_number:
