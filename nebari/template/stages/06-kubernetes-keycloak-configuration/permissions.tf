@@ -1,36 +1,32 @@
 data "keycloak_openid_client" "realm_management" {
-  realm_id  = var.realm_id
+  realm_id  = keycloak_realm.main.id
   client_id = "realm-management"
 }
 
 data "keycloak_role" "manage-users" {
-  realm_id  = var.realm_id
-  client_id = keycloak_openid_client.realm_management.id
+  realm_id  = keycloak_realm.main.id
+  client_id = data.keycloak_openid_client.realm_management.id
   name      = "manage-users"
 }
 
 data "keycloak_role" "realm-admin" {
-  realm_id  = var.realm_id
-  client_id = keycloak_openid_client.realm_management.id
+  realm_id  = keycloak_realm.main.id
+  client_id = data.keycloak_openid_client.realm_management.id
   name      = "realm-admin"
 }
 
 resource "keycloak_group_roles" "admin_roles" {
-  for_each = var.role_mapping
-
-  realm_id = var.realm_id
-  group_id = keycloak_group.groups[index(var.keycloak_groups, "admin")].id
-  role_ids = [keycloak_role.manage-users]
+  realm_id = keycloak_realm.main.id
+  group_id = keycloak_group.groups["admin"].id
+  role_ids = [data.keycloak_role.manage-users.id]
 
   exhaustive = false
 }
 
 resource "keycloak_group_roles" "superadmin_roles" {
-  for_each = var.role_mapping
-
-  realm_id = var.realm_id
-  group_id = keycloak_group.groups[index(var.keycloak_groups, "superadmin")].id
-  role_ids = [keycloak_role.realm-admin]
+  realm_id = keycloak_realm.main.id
+  group_id = keycloak_group.groups["superadmin"].id
+  role_ids = [data.keycloak_role.realm-admin.id]
 
   exhaustive = false
 }
