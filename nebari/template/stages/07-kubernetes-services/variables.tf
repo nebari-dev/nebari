@@ -53,7 +53,7 @@ variable "conda-store-service-token-scopes" {
       "role_bindings" : {
         "*/*" : ["viewer"],
       }
-    }
+    },
   }
 }
 

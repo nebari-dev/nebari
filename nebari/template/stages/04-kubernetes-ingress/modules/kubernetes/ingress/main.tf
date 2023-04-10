@@ -2,11 +2,13 @@ locals {
   default_cert = [
     "--entrypoints.websecure.http.tls.certResolver=default",
     "--entrypoints.minio.http.tls.certResolver=default",
+    "--entrypoints.docker-registry.http.tls.certResolver=default",
   ]
   certificate-settings = {
     lets-encrypt = [
       "--entrypoints.websecure.http.tls.certResolver=letsencrypt",
       "--entrypoints.minio.http.tls.certResolver=letsencrypt",
+      "--entrypoints.docker-registry.http.tls.certResolver=letsencrypt",
       "--certificatesresolvers.letsencrypt.acme.tlschallenge",
       "--certificatesresolvers.letsencrypt.acme.email=${var.acme-email}",
       "--certificatesresolvers.letsencrypt.acme.storage=acme.json",
@@ -103,6 +105,13 @@ resource "kubernetes_service" "main" {
       protocol    = "TCP"
       port        = 443
       target_port = 443
+    }
+
+    port {
+      name        = "docker-registry"
+      protocol    = "TCP"
+      port        = 5000
+      target_port = 5000
     }
 
     port {
@@ -246,6 +255,7 @@ resource "kubernetes_deployment" "main" {
             # Define two entrypoint ports, and setup a redirect from HTTP to HTTPS.
             "--entryPoints.web.address=:80",
             "--entryPoints.websecure.address=:443",
+            "--entryPoints.docker-registry.address=:5000",
             "--entrypoints.ssh.address=:8022",
             "--entrypoints.sftp.address=:8023",
             "--entryPoints.tcp.address=:8786",
@@ -273,6 +283,11 @@ resource "kubernetes_deployment" "main" {
           port {
             name           = "https"
             container_port = 443
+          }
+
+          port {
+            name           = "docker-registry"
+            container_port = 5000
           }
 
           port {

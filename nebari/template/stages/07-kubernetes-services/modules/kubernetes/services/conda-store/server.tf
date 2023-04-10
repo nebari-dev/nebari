@@ -1,3 +1,8 @@
+resource "random_password" "conda_store_registry" {
+  length  = 32
+  special = false
+}
+
 resource "random_password" "conda_store_service_token" {
   for_each = var.services
 
@@ -26,6 +31,7 @@ resource "kubernetes_secret" "conda-store-secret" {
       extra-settings    = var.extra-settings
       extra-config      = var.extra-config
       default-namespace = var.default-namespace-name
+      docker-registry-token = random_password.conda_store_registry.result
       service-tokens = {
         for service, value in var.services : base64encode(random_password.conda_store_service_token[service].result) => value
       }
@@ -62,6 +68,56 @@ module "conda-store-openid-client" {
   callback-url-paths = [
     "https://${var.external-url}/conda-store/oauth_callback"
   ]
+}
+
+
+resource "kubernetes_secret" "docker_registry" {
+  metadata {
+    name = "${var.name}-conda-store-registry-key"
+    namespace = var.namespace
+  }
+
+  data = {
+    ".dockerconfigjson" = jsonencode({
+      auths = {
+        "${var.external-url}:5010" = {
+          "username" = "docker-registry" # username isn't checked
+          "password" = random_password.conda_store_registry.result
+          "email"    = "docker-registry@conda.store"
+          "auth"     = base64encode("docker-registry:${random_password.conda_store_registry.result}")
+        }
+      }
+    })
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
+}
+
+
+resource "kubernetes_manifest" "conda-store-docker-registry" {
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "IngressRoute"
+    metadata = {
+      name      = "conda-store-docker-registry"
+      namespace = var.namespace
+    }
+    spec = {
+      entryPoints = ["docker-registry"]
+      routes = [
+        {
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`)"
+          services = [
+            {
+              name = kubernetes_service.server.metadata.0.name
+              port = 5000
+            }
+          ]
+        }
+      ]
+    }
+  }
 }
 
 
