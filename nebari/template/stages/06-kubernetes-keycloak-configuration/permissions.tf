@@ -9,6 +9,18 @@ data "keycloak_role" "manage-users" {
   name      = "manage-users"
 }
 
+data "keycloak_role" "query-users" {
+  realm_id  = keycloak_realm.main.id
+  client_id = data.keycloak_openid_client.realm_management.id
+  name      = "query-users"
+}
+
+data "keycloak_role" "query-groups" {
+  realm_id  = keycloak_realm.main.id
+  client_id = data.keycloak_openid_client.realm_management.id
+  name      = "query-groups"
+}
+
 data "keycloak_role" "realm-admin" {
   realm_id  = keycloak_realm.main.id
   client_id = data.keycloak_openid_client.realm_management.id
@@ -18,7 +30,11 @@ data "keycloak_role" "realm-admin" {
 resource "keycloak_group_roles" "admin_roles" {
   realm_id = keycloak_realm.main.id
   group_id = keycloak_group.groups["admin"].id
-  role_ids = [data.keycloak_role.manage-users.id]
+  role_ids = [
+    data.keycloak_role.query-users.id,
+    data.keycloak_role.query-groups.id,
+    data.keycloak_role.manage-users.id
+  ]
 
   exhaustive = false
 }
