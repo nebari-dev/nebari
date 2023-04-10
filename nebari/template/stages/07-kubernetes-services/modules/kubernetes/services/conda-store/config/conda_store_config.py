@@ -133,16 +133,16 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
 c.CondaStoreServer.authentication_class = KeyCloakAuthentication
 c.AuthenticationBackend.predefined_tokens = {
-    config['docker-registry-token']: {
-      "primary_namespace" : "global",
-      "role_bindings" : {
-        "*/*" : ["viewer"],
-      }
+    config["docker-registry-token"]: {
+        "primary_namespace": "global",
+        "role_bindings": {
+            "*/*": ["viewer"],
+        },
     },
     **{
         service_token: service_permissions
         for service_token, service_permissions in config["service-tokens"].items()
-    }
+    },
 }
 
 # ==================================
