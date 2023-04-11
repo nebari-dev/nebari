@@ -380,15 +380,7 @@ class Navigator:
         self.page.get_by_role("textbox", name="Terminal input").fill(input_string)
         self.page.get_by_role("textbox", name="Terminal input").press("Enter")
 
-        # TODO temporarily checkout this branch so that it has the notebook to test
-        self.page.get_by_role("textbox", name="Terminal input").fill("cd nebari")
-        self.page.get_by_role("textbox", name="Terminal input").press("Enter")
-        self.page.get_by_role("textbox", name="Terminal input").fill(
-            "git checkout add_playwright"
-        )
-        self.page.get_by_role("textbox", name="Terminal input").press("Enter")
-
-        # ensure that playwright doesn't move on/change context until all the
+        # ensure that playwright doesn't move on/change context until all the 
         # above commands are complete.
         time.sleep(20)
         self.reset_workspace()
