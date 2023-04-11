@@ -1,8 +1,8 @@
 import logging
 import os
 import re
-from pathlib import Path
 import time
+from pathlib import Path
 
 import dotenv
 from playwright.sync_api import expect, sync_playwright
@@ -350,9 +350,9 @@ class Navigator:
 
         The terminal is a blackbox for the browser. We can't access any of the
         displayed text, therefore we have no way of knowing if the commands
-        are done excecuting. For this reason, there is an unavoidable sleep
+        are done executing. For this reason, there is an unavoidable sleep
         here that prevents playwright from moving on to ensure that the focus
-        remains on the Terminal until we are done issuing our commands. 
+        remains on the Terminal until we are done issuing our commands.
 
         Parameters
         ----------
@@ -383,12 +383,14 @@ class Navigator:
         # TODO temporarily checkout this branch so that it has the notebook to test
         self.page.get_by_role("textbox", name="Terminal input").fill("cd nebari")
         self.page.get_by_role("textbox", name="Terminal input").press("Enter")
-        self.page.get_by_role("textbox", name="Terminal input").fill("git checkout add_playwright")
+        self.page.get_by_role("textbox", name="Terminal input").fill(
+            "git checkout add_playwright"
+        )
         self.page.get_by_role("textbox", name="Terminal input").press("Enter")
-        
-        # ensure that playwright doesn't move on/change context until all the 
+
+        # ensure that playwright doesn't move on/change context until all the
         # above commands are complete.
-        time.sleep(20) 
+        time.sleep(20)
         self.reset_workspace()
 
 
