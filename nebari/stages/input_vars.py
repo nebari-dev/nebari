@@ -321,6 +321,8 @@ def stage_07_kubernetes_services(stage_outputs, config):
             .get("hub", {})
             .get("extraEnv", [])
         ),
+        # jupyterlab
+        "idle-culler-settings": config.get("jupyterlab", {}).get("idle_culler", {}),
         # dask-gateway
         "dask-worker-image": _split_docker_image_name(
             config["default_images"]["dask_worker"]
