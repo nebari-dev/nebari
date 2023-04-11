@@ -36,7 +36,7 @@ variable "conda-store-image" {
 variable "conda-store-image-tag" {
   description = "Version of conda-store to use"
   type        = string
-  default     = "v0.4.12"
+  default     = "v0.4.14"
 }
 
 # ====================== RESOURCES =======================

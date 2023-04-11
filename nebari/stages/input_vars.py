@@ -240,7 +240,8 @@ def stage_06_kubernetes_keycloak_configuration(stage_outputs, config):
         .get("keycloak", {})
         .get("realm_display_name", realm_id),
         "authentication": config["security"]["authentication"],
-        "keycloak_groups": ["admin", "developer", "analyst"] + users_group,
+        "keycloak_groups": ["superadmin", "admin", "developer", "analyst"]
+        + users_group,
         "default_groups": ["analyst"] + users_group,
     }
 
@@ -321,6 +322,8 @@ def stage_07_kubernetes_services(stage_outputs, config):
             .get("hub", {})
             .get("extraEnv", [])
         ),
+        # jupyterlab
+        "idle-culler-settings": config.get("jupyterlab", {}).get("idle_culler", {}),
         # dask-gateway
         "dask-worker-image": _split_docker_image_name(
             config["default_images"]["dask_worker"]
