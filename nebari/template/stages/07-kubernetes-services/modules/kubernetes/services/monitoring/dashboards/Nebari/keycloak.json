@@ -1412,7 +1412,7 @@
           "refId": "B"
         }
       ],
-      "title": "Registrations per CLIENT on relm $realm",
+      "title": "Registrations per CLIENT on Realm $realm",
       "type": "timeseries"
     },
     {
