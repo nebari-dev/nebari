@@ -19,11 +19,6 @@ startupScripts:
     /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u root -p "{{ .Values.initial_root_password }}"
     /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u nebari-bot -p "{{ .Values.nebari_bot_password }}"
 
-extraServiceMonitor:
-  enabled: true
-  labels:
-    release: nebari
-
 extraInitContainers: |
     - command:
       - sh

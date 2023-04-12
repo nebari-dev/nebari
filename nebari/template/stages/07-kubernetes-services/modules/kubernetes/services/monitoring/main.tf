@@ -243,6 +243,69 @@ resource "kubernetes_config_map" "dashboard" {
   }
 }
 
+resource "kubernetes_manifest" "keycloak-service-monitor" {
+  manifest = {
+    "apiVersion" : "monitoring.coreos.com/v1",
+    "kind" : "ServiceMonitor",
+    "metadata" : {
+      "annotations" : null,
+      "labels" : {
+        "release" : "nebari"
+      },
+      "name" : "keycloak-sm",
+      "namespace" : "dev"
+    },
+    "spec" : {
+      "endpoints" : [
+        {
+          "interval" : "10s",
+          "path" : "/auth/realms/master/metrics",
+          "port" : "http",
+          "scrapeTimeout" : "10s"
+        }
+      ],
+      "selector" : {
+        "matchLabels" : {
+          "app.kubernetes.io/component" : "http",
+          "app.kubernetes.io/instance" : "keycloak",
+          "app.kubernetes.io/name" : "keycloak"
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_manifest" "conda-store-service-monitor" {
+  manifest = {
+    "apiVersion" : "monitoring.coreos.com/v1",
+    "kind" : "ServiceMonitor",
+    "metadata" : {
+      "annotations" : null,
+      "labels" : {
+        "release" : "nebari"
+      },
+      "name" : "conda-store-sm",
+      "namespace" : "dev"
+    },
+    "spec" : {
+      "endpoints" : [
+        {
+          "interval" : "10s",
+          "path" : "/conda-store/metrics",
+          "port" : "conda-store-server",
+          "scrapeTimeout" : "10s"
+        }
+      ],
+      "selector" : {
+        "matchLabels" : {
+          app       = "conda-store"
+          component = "conda-store-server"
+        }
+      }
+    }
+  }
+}
+
 
 resource "kubernetes_manifest" "grafana-ingress-route" {
   manifest = {

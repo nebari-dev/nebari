@@ -47,6 +47,7 @@ resource "keycloak_default_groups" "default" {
   ]
 }
 
+# needed for keycloak monitoring to function
 resource "keycloak_realm_events" "realm_events" {
   realm_id = keycloak_realm.main.id
 

@@ -171,7 +171,7 @@
       "span": 0,
       "targets": [
         {
-          "expr": "sum(jvm_memory_bytes_used{kubernetes_pod_name=\"$instance\", area=\"heap\"})*100/sum(jvm_memory_bytes_max{kubernetes_pod_name=\"$instance\", area=\"heap\"})",
+          "expr": "sum(jvm_memory_bytes_used{pod=\"$instance\", area=\"heap\"})*100/sum(jvm_memory_bytes_max{pod=\"$instance\", area=\"heap\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -305,7 +305,7 @@
       "span": 0,
       "targets": [
         {
-          "expr": "sum(jvm_memory_bytes_used{kubernetes_pod_name=\"$instance\", area=\"nonheap\"})*100/sum(jvm_memory_bytes_max{kubernetes_pod_name=\"$instance\", area=\"nonheap\"})",
+          "expr": "sum(jvm_memory_bytes_used{pod=\"$instance\", area=\"nonheap\"})*100/sum(jvm_memory_bytes_max{pod=\"$instance\", area=\"nonheap\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -391,7 +391,7 @@
       "pluginVersion": "8.3.3",
       "targets": [
         {
-          "expr": "sum(jvm_memory_bytes_max{kubernetes_pod_name=\"$instance\"})",
+          "expr": "sum(jvm_memory_bytes_max{pod=\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -399,7 +399,7 @@
           "refId": "A"
         },
         {
-          "expr": "sum(jvm_memory_bytes_committed{kubernetes_pod_name=\"$instance\"})",
+          "expr": "sum(jvm_memory_bytes_committed{pod=\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -407,7 +407,7 @@
           "refId": "C"
         },
         {
-          "expr": "sum(jvm_memory_bytes_used{kubernetes_pod_name=\"$instance\"})",
+          "expr": "sum(jvm_memory_bytes_used{pod=\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -2041,7 +2041,7 @@
         "datasource": {
           "uid": "$Datasource"
         },
-        "definition": "label_values(keycloak_logins,kubernetes_pod_name)",
+        "definition": "label_values(keycloak_logins,pod)",
         "hide": 0,
         "includeAll": false,
         "label": "Instance",
@@ -2050,7 +2050,7 @@
         "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(keycloak_logins,kubernetes_pod_name)",
+          "query": "label_values(keycloak_logins,pod)",
           "refId": "Prometheus-instance-Variable-Query"
         },
         "refresh": 1,

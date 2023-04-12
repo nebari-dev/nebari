@@ -69,6 +69,10 @@ resource "kubernetes_service" "server" {
   metadata {
     name      = "${var.name}-conda-store-server"
     namespace = var.namespace
+    labels = {
+      app       = "conda-store"
+      component = "conda-store-server"
+    }
   }
 
   spec {
