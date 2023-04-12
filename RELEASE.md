@@ -41,7 +41,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Retrieve secrets from Vault, fix test-provider CI by @iameskild in https://github.com/nebari-dev/nebari/pull/1676
 * Pull PyPI secrets from Vault by @iameskild in https://github.com/nebari-dev/nebari/pull/1696
 * Adding newest conda-store 0.4.14 along with superadmin credentials by @costrouc in https://github.com/nebari-dev/nebari/pull/1701
-* Update release notes for 2023.4.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/1701
+* Update release notes for 2023.4.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/1722
 
 ## New Contributors
 * @ppwadhwa made their first contribution in https://github.com/nebari-dev/nebari/pull/1646
