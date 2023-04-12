@@ -380,7 +380,11 @@ class Navigator:
         self.page.get_by_role("textbox", name="Terminal input").fill(input_string)
         self.page.get_by_role("textbox", name="Terminal input").press("Enter")
 
-        # ensure that playwright doesn't move on/change context until all the 
+        # TODO temporary to check if environments are built
+        self.page.get_by_role("textbox", name="Terminal input").fill("conda env list")
+        self.page.get_by_role("textbox", name="Terminal input").press("Enter")
+
+        # ensure that playwright doesn't move on/change context until all the
         # above commands are complete.
         time.sleep(20)
         self.reset_workspace()
@@ -452,7 +456,7 @@ if __name__ == "__main__":
         username=os.environ["USERNAME"],
         password=os.environ["PASSWORD"],
         auth="password",
-        instance_name="small-instance-w-jupyterlab-conda-store-v0-2-7",
+        instance_name="small-instance",
         headless=False,
         slow_mo=100,
     )
