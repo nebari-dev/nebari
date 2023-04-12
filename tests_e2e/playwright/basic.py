@@ -308,6 +308,9 @@ class Navigator:
                 ).wait_for(timeout=300, state="attached")
         else:
             # set the environment
+            # failure here indicates that the environment doesn't exist either
+            # because of incorrect naming syntax or because the env is still
+            # being built
             self.page.get_by_role("combobox").nth(1).select_option(
                 f'{{"name":"{kernel}"}}'
             )
@@ -324,6 +327,8 @@ class Navigator:
 
         IMPORTANT: The focus MUST be on the notebook on which you want to set
         the environment.
+
+        Conda environments may still be being built shortly after deployment.
 
         Parameters
         ----------
@@ -395,12 +400,19 @@ class RunNotebook:
         self.nav = navigator
         self.nav.initialize
 
-    def run_notebook(self, path, expected_output_text, runtime=30000):
+    def run_notebook(self, path, expected_output_text, conda_env, runtime=30000):
         """Run jupyter notebook and check for expected output text anywhere on
         the page.
 
         Note: This will look for and exact match of expected_output_text
         _anywhere_ on the page so be sure that your text is unique.
+
+        Conda environments may still be being built shortly after deployment.
+
+        conda_env: str
+            Name of conda environment. Python conda environments have the
+            structure "conda-env-nebari-git-nebari-git-dashboard-py" where
+            the actual name of the environment is "dashboard".
         """
         logger.debug(f">>> Running notebook: {path}")
         filename = Path(path).name
@@ -428,7 +440,7 @@ class RunNotebook:
             raise RuntimeError("Path to notebook is invalid")
         # make sure the focus is on the dashboard tab we want to run
         self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
-        self.nav.set_environment(kernel="conda-env-nebari-git-nebari-git-dashboard-py")
+        self.nav.set_environment(kernel=conda_env)
 
         # make sure that this notebook is one currently selected
         self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
@@ -470,5 +482,6 @@ if __name__ == "__main__":
     test_app.run_notebook(
         path="nebari/tests_e2e/playwright/test_data/test_notebook_output.ipynb",
         expected_output_text="success: 6",
+        conda_env="conda-env-default-py",
     )
     nav.teardown()
