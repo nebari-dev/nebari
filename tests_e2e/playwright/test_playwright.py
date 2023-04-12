@@ -1,4 +1,4 @@
-from navigator import RunNotebook
+from run_notebook import RunNotebook
 
 
 def test_notebook(navigator):

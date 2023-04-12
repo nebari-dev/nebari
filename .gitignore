@@ -48,5 +48,5 @@ nebari-config.yaml
 .pytest_cache
 .ipynb_checkpoints
 .DS_Store
-
 /.ruff_cache
+videos/
