@@ -150,6 +150,13 @@ jobs:
           nebari keycloak adduser --user "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}" --config "${NEBARI_CONFIG_PATH}"
           nebari keycloak listusers --config "${NEBARI_CONFIG_PATH}"
 
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
+        env:
+          CYPRESS_BASE_URL: "https://${{ env.NEBARI_BASE_URL }}/"
+        with:
+          working-directory: tests_e2e
+
       - name: Playwright Tests
         env:
           USERNAME: ${{ env.CYPRESS_EXAMPLE_USER_NAME }}
@@ -160,13 +167,6 @@ jobs:
         run: |
           envsubst < .env.tpl > .env
           xvfb-run pytest --browser chromium
-
-      - name: Cypress run
-        uses: cypress-io/github-action@v4
-        env:
-          CYPRESS_BASE_URL: "https://${{ env.NEBARI_BASE_URL }}/"
-        with:
-          working-directory: tests_e2e
 
       - name: Save Cypress screenshots and videos
         if: always()

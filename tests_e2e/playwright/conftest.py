@@ -3,10 +3,16 @@ import os
 
 import dotenv
 import pytest
-from basic import Navigator
+from navigator import Navigator
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
+
+console = logging.StreamHandler()
+console.setLevel(level=logging.DEBUG)
+formatter = logging.Formatter("%(levelname)s : %(message)s")
+console.setFormatter(formatter)
+logger.addHandler(console)
 
 
 @pytest.fixture(scope="session")
