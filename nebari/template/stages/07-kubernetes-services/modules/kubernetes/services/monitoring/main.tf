@@ -161,7 +161,7 @@ resource "helm_release" "prometheus-grafana" {
         sidecar = {
           dashboards = {
             annotations = {
-              "dashboard/subdirectory" = "Other"
+              "dashboard/subdirectory" = "Supplementary"
             }
             provider = {
               foldersFromFilesStructure : true

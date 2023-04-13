@@ -21,7 +21,7 @@ variable "dashboards" {
   description = "Enabled grafana dashboards"
   type        = set(string)
   default = [
-    "Nebari",
+    "Main",
   ]
 }
 
