@@ -101,6 +101,8 @@ def init(
         callback=check_cloud_provider_creds,
         is_eager=True,
     ),
+    # Although this unused below, the functionality is contained in the callback. Thus,
+    # this attribute cannot be removed.
     guided_init: bool = typer.Option(
         False,
         help=GUIDED_INIT_MSG,
@@ -389,12 +391,6 @@ def cost(
         "--path",
         help="Pass the path of your stages directory generated after rendering Nebari configurations before deployment",
     ),
-    dashboard: bool = typer.Option(
-        True,
-        "-d",
-        "--dashboard",
-        help="Enable the cost dashboard",
-    ),
     file: str = typer.Option(
         None,
         "-f",
@@ -406,12 +402,6 @@ def cost(
         "-c",
         "--currency",
         help="Specify the currency code to use in the cost report",
-    ),
-    compare: bool = typer.Option(
-        False,
-        "-cc",
-        "--compare",
-        help="Compare the cost report to a previously generated report",
     ),
 ):
     """

@@ -18,7 +18,7 @@ from nebari.provider.cicd.gitlab import gen_gitlab_ci
 from nebari.stages import tf_objects
 
 
-def render_template(output_directory, config_filename, force=False, dry_run=False):
+def render_template(output_directory, config_filename, dry_run=False):
     # get directory for nebari templates
     import nebari
 
@@ -174,12 +174,12 @@ def render_contents(config: Dict):
             )
             contents.update({fn: workflow_yaml})
 
-    contents.update(gen_gitignore(config))
+    contents.update(gen_gitignore())
 
     return contents
 
 
-def gen_gitignore(config):
+def gen_gitignore():
     """
     Generate `.gitignore` file.
     Add files as needed.
