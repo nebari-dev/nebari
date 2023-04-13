@@ -47,7 +47,8 @@ class RunNotebook:
         # menu will be disabled.
         self.nav.page.wait_for_load_state("networkidle")
         if self.nav.page.get_by_text(
-            f"Could not find path: {path}", exact=True
+            "Could not find path:",
+            exact=False,
         ).is_visible():
             logger.debug("Path to notebook is invalid")
             raise RuntimeError("Path to notebook is invalid")
