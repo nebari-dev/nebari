@@ -22,7 +22,6 @@ variable "dashboards" {
   type        = set(string)
   default = [
     "Nebari",
-    "JupyterHub",
   ]
 }
 
