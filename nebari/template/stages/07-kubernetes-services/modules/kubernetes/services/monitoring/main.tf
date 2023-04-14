@@ -56,7 +56,7 @@ resource "helm_release" "prometheus-grafana" {
                 }
               ]
             },
-                        {
+            {
               job_name     = "Conda Store Target"
               metrics_path = "/conda-store/metrics"
               static_configs = [
