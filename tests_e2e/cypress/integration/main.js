@@ -56,7 +56,7 @@ describe('First Test', () => {
         .should('have.attr', 'value', 'Start').click();
 
       // Minimal check that JupyterLab has opened
-      cy.get('div#jp-MainLogo', { timeout: 60000 }).should('exist').wait(2000);
+      cy.get('div#jp-MainLogo', { timeout: 60000 }).should('exist').wait(10000);
 
       // Click VS Code Launcher exists
       cy.get('div.jp-LauncherCard[title="VS Code [↗]"]').should('exist');
