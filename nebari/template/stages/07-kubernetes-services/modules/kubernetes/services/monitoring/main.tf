@@ -47,6 +47,26 @@ resource "helm_release" "prometheus-grafana" {
           }
           additionalScrapeConfigs = [
             {
+              job_name     = "Keycloak Target"
+              metrics_path = "/auth/realms/master/metrics"
+              static_configs = [
+                { targets = [
+                  "keycloak-http.${var.namespace}.svc",
+                  ]
+                }
+              ]
+            },
+                        {
+              job_name     = "Conda Store Target"
+              metrics_path = "/conda-store/metrics"
+              static_configs = [
+                { targets = [
+                  "nebari-conda-store-server.${var.namespace}.svc:5000",
+                  ]
+                }
+              ]
+            },
+            {
               job_name     = "Jupyterhub"
               metrics_path = "/hub/metrics"
               static_configs = [
@@ -61,10 +81,8 @@ resource "helm_release" "prometheus-grafana" {
               }
             },
             {
-              "job_name" = "Kubernetes Services"
-
+              "job_name"     = "Kubernetes Services"
               "honor_labels" = true
-
               "kubernetes_sd_configs" = [{
                 "role" = "endpoints"
               }]
@@ -240,75 +258,6 @@ resource "kubernetes_config_map" "dashboard" {
   data = {
     for dashboard_file in fileset("${path.module}/dashboards/${each.value}", "*.json") :
     dashboard_file => file("${path.module}/dashboards/${each.value}/${dashboard_file}")
-  }
-}
-
-resource "kubernetes_manifest" "keycloak-service-monitor" {
-  depends_on = [
-    helm_release.prometheus-grafana
-  ]
-  manifest = {
-    "apiVersion" : "monitoring.coreos.com/v1",
-    "kind" : "ServiceMonitor",
-    "metadata" : {
-      "annotations" : null,
-      "labels" : {
-        "release" : "nebari"
-      },
-      "name" : "keycloak-sm",
-      "namespace" : "dev"
-    },
-    "spec" : {
-      "endpoints" : [
-        {
-          "interval" : "10s",
-          "path" : "/auth/realms/master/metrics",
-          "port" : "http",
-          "scrapeTimeout" : "10s"
-        }
-      ],
-      "selector" : {
-        "matchLabels" : {
-          "app.kubernetes.io/component" : "http",
-          "app.kubernetes.io/instance" : "keycloak",
-          "app.kubernetes.io/name" : "keycloak"
-        }
-      }
-    }
-  }
-}
-
-resource "kubernetes_manifest" "conda-store-service-monitor" {
-  depends_on = [
-    helm_release.prometheus-grafana
-  ]
-  manifest = {
-    "apiVersion" : "monitoring.coreos.com/v1",
-    "kind" : "ServiceMonitor",
-    "metadata" : {
-      "annotations" : null,
-      "labels" : {
-        "release" : "nebari"
-      },
-      "name" : "conda-store-sm",
-      "namespace" : "dev"
-    },
-    "spec" : {
-      "endpoints" : [
-        {
-          "interval" : "10s",
-          "path" : "/conda-store/metrics",
-          "port" : "conda-store-server",
-          "scrapeTimeout" : "10s"
-        }
-      ],
-      "selector" : {
-        "matchLabels" : {
-          app       = "conda-store"
-          component = "conda-store-server"
-        }
-      }
-    }
   }
 }
 
