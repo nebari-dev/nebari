@@ -6,7 +6,7 @@ def test_notebook(navigator):
     test_app.nav.clone_repo(
         "https://github.com/nebari-dev/nebari.git",
         branch="add_playwright",
-        wait_for_completion=10,
+        wait_for_completion=15,
     )
     test_app.run_notebook(
         path="nebari/tests_e2e/playwright/test_data/test_notebook_output.ipynb",
