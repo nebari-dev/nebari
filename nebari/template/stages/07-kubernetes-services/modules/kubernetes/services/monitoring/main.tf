@@ -244,6 +244,9 @@ resource "kubernetes_config_map" "dashboard" {
 }
 
 resource "kubernetes_manifest" "keycloak-service-monitor" {
+  depends_on = [
+    helm_release.prometheus-grafana
+  ]
   manifest = {
     "apiVersion" : "monitoring.coreos.com/v1",
     "kind" : "ServiceMonitor",
@@ -276,6 +279,9 @@ resource "kubernetes_manifest" "keycloak-service-monitor" {
 }
 
 resource "kubernetes_manifest" "conda-store-service-monitor" {
+  depends_on = [
+    helm_release.prometheus-grafana
+  ]
   manifest = {
     "apiVersion" : "monitoring.coreos.com/v1",
     "kind" : "ServiceMonitor",
