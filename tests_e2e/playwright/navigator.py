@@ -277,6 +277,11 @@ class Navigator:
         if self.page.get_by_text("Save your work", exact=True).is_visible():
             self.page.get_by_role("button", name="Discard", exact=True).click()
 
+        # wait to ensure that the Launcher is showing
+        self.page.get_by_text("VS Code [↗]", exact=True).wait_for(
+            timeout=3000, state="attached"
+        )
+
     def _set_environment_via_popup(self, kernel=None):
         """Set the environment kernel on a jupyter notebook via the popup
         dialog box. If kernel is `None`, `No Kernel` is selected and the
@@ -362,6 +367,10 @@ class Navigator:
         -------
         None
         """
+        import datetime as dt
+
+        start = dt.datetime.now()
+
         logger.debug(f">>> Clone git repo: {git_url}")
 
         input_string = f"git clone {git_url}"
@@ -379,7 +388,29 @@ class Navigator:
         self.page.get_by_role("textbox", name="Terminal input").fill("conda env list")
         self.page.get_by_role("textbox", name="Terminal input").press("Enter")
 
+        logger.debug(f"time to complete {dt.datetime.now() - start}")
         # ensure that playwright doesn't move on/change context until all the
         # above commands are complete.
         time.sleep(wait_for_completion)
         self.reset_workspace()
+
+
+if __name__ == "__main__":
+    import os
+
+    import dotenv
+
+    dotenv.load_dotenv()
+    nav = Navigator(
+        nebari_url="https://nebari.quansight.dev/",
+        username=os.environ["USERNAME"],
+        password=os.environ["PASSWORD"],
+        auth="password",
+        instance_name="small-instance",
+        headless=False,
+        slow_mo=100,
+    )
+    nav.login()
+    nav.start_server()
+    nav.reset_workspace()
+    nav.teardown()
