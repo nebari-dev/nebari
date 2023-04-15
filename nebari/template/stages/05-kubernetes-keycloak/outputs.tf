@@ -10,3 +10,9 @@ output "keycloak_nebari_bot_password" {
   sensitive   = true
   value       = random_password.keycloak-nebari-bot-password.result
 }
+
+output "keycloak_view_only_user_password" {
+  description = "keycloak view-only-user credentials"
+  sensitive   = true
+  value       = random_password.keycloak-view-only-user-password.result
+}

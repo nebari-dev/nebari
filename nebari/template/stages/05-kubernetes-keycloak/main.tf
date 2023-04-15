@@ -11,7 +11,7 @@ module "kubernetes-keycloak-helm" {
   external-url = var.endpoint
 
   nebari-bot-password = random_password.keycloak-nebari-bot-password.result
-
+  
   initial-root-password = var.initial-root-password
 
   overrides = var.overrides

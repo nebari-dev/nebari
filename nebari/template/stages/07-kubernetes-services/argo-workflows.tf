@@ -11,6 +11,12 @@ variable "argo-workflows-overrides" {
   default     = []
 }
 
+variable "keycloak_read_only_user_credentials" {
+  description = "Keycloak password for nebari-bot"
+  type        = map(string)
+  default     = {}
+}
+
 
 # ====================== RESOURCES =======================
 module "argo-workflows" {
@@ -23,4 +29,5 @@ module "argo-workflows" {
 
   node-group = var.node_groups.general
   overrides  = var.argo-workflows-overrides
+  keycloak_read_only_user_credentials = var.keycloak_read_only_user_credentials
 }

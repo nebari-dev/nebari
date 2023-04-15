@@ -22,8 +22,8 @@ resource "helm_release" "keycloak" {
       }
     })
   ], var.overrides)
-
-  set {
+  
+  set_sensitive {
     name  = "nebari_bot_password"
     value = var.nebari-bot-password
   }

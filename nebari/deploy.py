@@ -235,7 +235,7 @@ def guided_install(
             provision_07_kubernetes_services(stage_outputs, config, disable_checks)
             provision_08_nebari_tf_extensions(stage_outputs, config, disable_checks)
 
-            print("Nebari deployed successfully")
+        print("Nebari deployed successfully")
 
     print("Services:")
     for service_name, service in stage_outputs["stages/07-kubernetes-services"][

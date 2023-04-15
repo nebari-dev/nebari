@@ -34,3 +34,10 @@ variable "realm_id" {
   description = "Keycloak realm to use for deploying openid client"
   type        = string
 }
+
+variable "keycloak_read_only_user_credentials" {
+  sensitive   = true
+  description = "Keycloak password for nebari-bot"
+  type        = map(string)
+  default     = {}
+}

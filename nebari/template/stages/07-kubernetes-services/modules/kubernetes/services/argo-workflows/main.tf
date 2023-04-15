@@ -235,3 +235,144 @@ resource "kubernetes_cluster_role_binding" "argo-view-rb" {
     namespace = var.namespace
   }
 }
+
+# Workflow Admission Controller
+resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
+    metadata {
+    name = "keycloak-read-only-user-credentials"
+    namespace = var.namespace
+  }
+
+  data = {
+    username = var.keycloak_read_only_user_credentials["username"]
+    password = var.keycloak_read_only_user_credentials["password"]
+    client_id = var.keycloak_read_only_user_credentials["client_id"]
+    realm = var.keycloak_read_only_user_credentials["realm"]
+  }
+
+  type = "Opaque"
+}
+
+resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_controller" {
+  manifest = {
+    "apiVersion" = "admissionregistration.k8s.io/v1"
+    "kind" = "ValidatingWebhookConfiguration"
+    "metadata" = {
+      "name" = "admission-controller"
+    }
+    "webhooks" = [
+      {
+        "admissionReviewVersions" = [
+          "v1",
+          "v1beta1",
+        ]
+        "clientConfig" = {
+          "url" = "https://adam.nebari.dev/wf-adm-ctlr/validate"
+        }
+        "name" = "admission-controller.dev.svc"
+        "rules" = [
+          {
+            "apiGroups" = [
+              "argoproj.io",
+            ]
+            "apiVersions" = [
+              "v1alpha1",
+            ]
+            "operations" = [
+              "CREATE",
+            ]
+            "resources" = [
+              "workflows",
+            ]
+          },
+        ]
+        "sideEffects" = "None"
+      },
+    ]
+  }
+}
+
+resource "kubernetes_manifest" "deployment_admission_controller" {
+  manifest = {
+    "apiVersion" = "apps/v1"
+    "kind" = "Deployment"
+    "metadata" = {
+      "name" = "admission-controller"
+      "namespace" = var.namespace
+    }
+    "spec" = {
+      "replicas" = 1
+      "selector" = {
+        "matchLabels" = {
+          "app" = "wf-admission-controller"
+        }
+      }
+      "template" = {
+        "metadata" = {
+          "labels" = {
+            "app" = "wf-admission-controller"
+          }
+        }
+        "spec" = {
+          "containers" = [
+            {
+              "args" = [
+                "while true; do sleep 30; done;",
+              ]
+              "command" = [
+                "/bin/bash",
+                "-c",
+                "--",
+              ]
+              "env" = [
+                {
+                  "name" = "KEYCLOAK_USERNAME"
+                  "valueFrom" = {
+                    "secretKeyRef" = {
+                      "key" = "username"
+                      "name" = "keycloak-read-only-user-credentials"
+                    }
+                  }
+                },
+                {
+                  "name" = "KEYCLOAK_PASSWORD"
+                  "valueFrom" = {
+                    "secretKeyRef" = {
+                      "key" = "password"
+                      "name" = "keycloak-read-only-user-credentials"
+                    }
+                  }
+                },
+              ]
+              "image" = "balast/admsn:latest"
+              "name" = "admission-controller"
+            },
+          ]
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_manifest" "service_admission_controller" {
+  manifest = {
+    "apiVersion" = "v1"
+    "kind" = "Service"
+    "metadata" = {
+      "name" = "admission-controller"
+      "namespace" = var.namespace
+    }
+    "spec" = {
+      "ports" = [
+        {
+          "name" = "admission-controller"
+          "port" = 8080
+          "targetPort" = 8080
+        },
+      ]
+      "selector" = {
+        "app" = "wf-admission-controller"
+      }
+    }
+  }
+}
