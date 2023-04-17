@@ -59,7 +59,7 @@ def base_profile_home_mounts(username):
             "command": ["sh", "-c", command],
             "securityContext": {"runAsUser": 0},
             "volumeMounts": [
-                {"mountPath": "/mnt", "name": "home"},
+                {"mountPath": f"/mnt/{username}", "name": "home", "subPath": pvc_home_mount_path.format(username=username)},  
                 {"mountPath": "/etc/skel", "name": "skel"},
             ],
         }
@@ -118,9 +118,11 @@ def base_profile_shared_mounts(groups):
             "securityContext": {"runAsUser": 0},
             "volumeMounts": [
                 {
-                    "mountPath": "/mnt",
+                    "mountPath": f"/mnt/{pvc_shared_mount_path.format(group=group)}",
                     "name": "shared" if home_pvc_name != shared_pvc_name else "home",
+                    "subPath": pvc_shared_mount_path.format(group=group),
                 }
+                for group in groups
             ],
         }
     ]
@@ -181,9 +183,11 @@ def profile_conda_store_mounts(username, groups):
             "securityContext": {"runAsUser": 0},
             "volumeMounts": [
                 {
-                    "mountPath": "/mnt",
+                    "mountPath": f"/mnt/{namespace}",
                     "name": "conda-store",
+                    "subPath": namespace,
                 }
+                for namespace in conda_store_namespaces
             ],
         }
     ]
