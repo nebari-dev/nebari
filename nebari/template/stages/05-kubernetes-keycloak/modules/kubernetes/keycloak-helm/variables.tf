@@ -14,13 +14,6 @@ variable "overrides" {
   default     = []
 }
 
-variable "view-only-user-password" {
-  description = "view-only-user password for keycloak"
-  type        = string
-  sensitive = true
-}
-
-
 variable "nebari-bot-password" {
   description = "nebari-bot password for keycloak"
   type        = string
