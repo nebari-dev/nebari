@@ -116,6 +116,7 @@ module "jupyterhub" {
   services = concat([
     "dask-gateway"
     ],
+    (var.monitoring-enabled ? ["monitoring"] : []),
     (var.prefect-enabled ? ["prefect"] : []),
     (var.kbatch-enabled ? ["kbatch"] : [])
   )

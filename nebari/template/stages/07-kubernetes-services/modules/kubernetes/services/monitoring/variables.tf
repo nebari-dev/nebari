@@ -21,11 +21,14 @@ variable "dashboards" {
   description = "Enabled grafana dashboards"
   type        = set(string)
   default = [
-    "traefik.json",
-    "keycloak.json",
-    "jupyterhub.json",
-    "conda_store.json",
+    "Main",
   ]
+}
+
+variable "jupyterhub_api_token" {
+  type      = string
+  default   = ""
+  sensitive = true
 }
 
 variable "node-group" {

@@ -22,7 +22,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 5,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -40,10 +39,6 @@
       "type": "row"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -78,6 +73,7 @@
             }
           },
           "mappings": [],
+          "min": 0,
           "noValue": "0",
           "thresholds": {
             "mode": "absolute",
@@ -121,7 +117,7 @@
           "exemplar": true,
           "expr": "conda_store_build_queued",
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "conda_store_build_queued",
           "refId": "Queued"
         },
         {
@@ -134,7 +130,7 @@
           "hide": false,
           "instant": false,
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "conda_store_build_building",
           "refId": "Building"
         },
         {
@@ -147,7 +143,7 @@
           "hide": false,
           "instant": false,
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "conda_store_build_completed",
           "refId": "Completed"
         },
         {
@@ -159,7 +155,7 @@
           "expr": "conda_store_build_failed",
           "hide": false,
           "interval": "",
-          "legendFormat": "",
+          "legendFormat": "conda_store_build_failed",
           "refId": "Failed"
         }
       ],
@@ -720,6 +716,6 @@
   "timezone": "",
   "title": "Conda-Store",
   "uid": "7lHPaT1nz",
-  "version": 5,
+  "version": 1,
   "weekStart": ""
 }
