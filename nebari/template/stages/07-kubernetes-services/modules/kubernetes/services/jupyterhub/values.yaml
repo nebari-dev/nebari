@@ -1,4 +1,4 @@
-# https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/main/jupyterhub/values.yaml
+# https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/1.2.0/jupyterhub/values.yaml
 hub:
   db:
     type: sqlite-pvc
