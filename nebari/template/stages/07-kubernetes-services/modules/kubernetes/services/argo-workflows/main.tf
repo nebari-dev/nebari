@@ -343,6 +343,10 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                     }
                   }
                 },
+                {
+                  "name" = "KEYCLOAK_URL"
+                  "value" = "${var.external-url}/auth"
+                },
               ]
               "image" = "balast/admsn:latest"
               "name" = "admission-controller"
