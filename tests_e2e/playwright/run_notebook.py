@@ -1,8 +1,6 @@
 import logging
-import os
 from pathlib import Path
 
-import dotenv
 from navigator import Navigator
 
 logger = logging.getLogger()
@@ -66,16 +64,16 @@ class RunNotebook:
         ).get_by_text("Restart Kernel and Run All Cells…").click()
         self.nav.page.get_by_role("button", name="Restart", exact=True).click()
 
-        # expect(self.nav.page.get_by_text(
-        #     expected_output_text, exact=True
-        #     )).to_have_text(f"{expected_output_text}"
-        #     ) # not sure why this doesn't work
         output_locator = self.nav.page.get_by_text(expected_output_text, exact=True)
         output_locator.wait_for(timeout=runtime)  # wait for notebook to run
         assert output_locator.is_visible()
 
 
 if __name__ == "__main__":
+    import os
+
+    import dotenv
+
     dotenv.load_dotenv()
     nav = Navigator(
         nebari_url="https://nebari.quansight.dev/",

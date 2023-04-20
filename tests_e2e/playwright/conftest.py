@@ -6,22 +6,16 @@ import pytest
 from navigator import Navigator
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-
-console = logging.StreamHandler()
-console.setLevel(level=logging.DEBUG)
-formatter = logging.Formatter("%(levelname)s : %(message)s")
-console.setFormatter(formatter)
-logger.addHandler(console)
 
 
 @pytest.fixture(scope="session")
 def _navigator_session(browser_name):
     """Set up a navigator instance, login with username/password, start
-    a server. Teardown when session is complete. Use `navigator` fixture
-    for individual tests."""
+    a server. Teardown when session is complete.
+    Do not use this for individual tests, use `navigator` fixture
+    for tests."""
     dotenv.load_dotenv()
-    # TODO: try/except added here in attempt to reach teardown after error in
+    # try/except added here in attempt to reach teardown after error in
     # order to close the browser context which will save the video so I debug
     # the error.
     try:

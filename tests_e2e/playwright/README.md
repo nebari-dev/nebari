@@ -14,7 +14,7 @@ achieve test isolation. The context can either be created by default or
 manually (for the purposes of generating multiple contexts per test in the case
 of admin vs user testing). Next the page on the browser is created. For all
 tests this starts as a blank page, then during the test, we navigate to a given
-url.
+url. This is all achieved in the `setup` method of the `Navigator` class.
 
 ## Setup
 
@@ -22,22 +22,24 @@ Install Nebari with the development requirements (which include Playwright)
 
 `pip install -e ".[dev]"`
 
-The install playwright
+Then install playwright itself (rerquired).
 
 `playwright install`
 
 
 ## Writing Playwright tests
 
-In general most of the testing happens through `assertions` and `locators`.
-The Playwright API has several mechanism for getting a locator for an item on
-the page.
+In general most of the testing happens through `locators` which is Playwright's
+way of connecting a python object to the HTML element on the page.
+The Playwright API has several mechanisms for getting a locator for an item on
+the page (`get_by_role`, `get_by_text`, `get_by_label`, `get_by_placeholder`,
+etc).
 
 ```python
 button = self.page.get_by_role("button", name="Sign in with Keycloak")
 ```
 
-Once you have a handle locator, you can interact with it in different ways,
+Once you have a handle on a locator, you can interact with it in different ways,
 depending on the type of object. For example, clicking
 a button:
 
@@ -46,8 +48,7 @@ button.click()
 ```
 
 Occasionally you'll need to wait for things to load on the screen. We can
-achieve this through several mechanisms. We can either wait for the page to
-finish loading:
+either wait for the page to finish loading:
 
 ```python
 self.page.wait_for_load_state("networkidle")
@@ -59,9 +60,7 @@ or we can wait for something specific to happen with the locator itself:
 button.wait_for(timeout=3000, state="attached")
 ```
 
-
-
-## Notes
-Playwright dev tips:
-* when its running, don't touch anything - this should go without saying,
-but its easy to forget
+Note that waiting for the page to finish loading may be deceptive inside of
+Jupyterlab since things may need to load _inside_ the page, not necessarily
+causing network traffic - or causing several bursts network traffic, which
+would incorrectly pass the `wait_for_load_state` after the first burst.

@@ -11,11 +11,12 @@ class Navigator:
     """Base class for Nebari Playwright testing. This provides setup and
     teardown methods that all tests will need and some other generally useful
     methods such as clearing the workspace. Specific tests such has "Run a
-    notebook" will be a separate class which inherits from this one. It will
-    leverage the base class and add other specific tests.
+    notebook" are included in separate classes which use an instance of
+    this class.
 
-    Navigator classes are able to run either standalone, or inside of pytest.
-    This makes it easy to develop new tests, but also fully prepared to be
+    The Navigator class and the associated test classes are design to be able
+    to run either standalone, or inside of pytest. This makes it easy to
+    develop new tests, but also have them fully prepared to be
     included as part of the test suite.
 
     Parameters
@@ -83,6 +84,7 @@ class Navigator:
 
     @property
     def initialize(self):
+        """Ensure that the Navigator is setup and ready for testing."""
         if not self.initialized:
             self.setup(
                 browser=self.browser,
@@ -91,6 +93,21 @@ class Navigator:
             )
 
     def setup(self, browser, headless, slow_mo):
+        """Initial setup for running playwright. Starts playwright, creates
+        the browser object, a new browser context, and a new page object.
+
+        Parameters
+        ----------
+        browser: str
+            Browser on which to run tests. Options are "chromium",
+            "webkit", and "firefox".
+        headless: bool
+            Run the tests in headless mode (without visuals) if True
+        slow_mo: int
+            Additional milliseconds to add to each Playwright command,
+            creating the effect of running the tests in slow motion so they are
+            easier for humans to follow.
+        """
         logger.debug(">>> Setting up browser for Playwright")
 
         self.playwright = sync_playwright().start()
@@ -115,13 +132,16 @@ class Navigator:
         self.page = self.context.new_page()
         self.initialized = True
 
-    def teardown(self):
+    def teardown(self) -> None:
+        """Shut down and close playwright. This is important to ensure that
+        no leftover processes are left running in the background."""
         self.context.close()
         self.browser.close()  # Make sure to close, so that videos are saved.
         self.playwright.stop()
         logger.debug(">>> Teardown complete.")
 
     def login(self) -> None:
+        """Login to nebari deployment using the auth method on the class."""
         if self.auth == "google":
             self.login_google()
         elif self.auth == "password":
@@ -165,6 +185,12 @@ class Navigator:
         self.page.wait_for_load_state("networkidle")
 
     def start_server(self) -> None:
+        """Start a nebari server. There are several different web interfaces
+        possible in this process depending on if you already have a server
+        running or not. In order for this to work, we look for html elements,
+        wait because the page may need to load, and if they don't appear, we
+        check for another server start option.
+        """
         # if server is not yet running
         start_locator = self.page.get_by_role("button", name="Start My Server")
         try:
@@ -176,7 +202,7 @@ class Navigator:
             # # your server is not yet running, would like to start it?
             # self.page.get_by_role("button", name="Launch server").click()
 
-            # select instance type (TODO will fail if this instance type is not
+            # select instance type (this will fail if this instance type is not
             # available)
             self.page.locator(f"#profile-item-{self.instance_name}").click()
             self.page.get_by_role("button", name="Start").click()
@@ -201,16 +227,15 @@ class Navigator:
             start_locator.wait_for(timeout=3000, state="attached")
             start_locator.click()
 
-        # server spinup https://nebari.quansight.dev/hub/spawn-pending/kcpevey@quansight.com
-        # wait for redirect - be wary of extra slashes here! https://nebari.quansight.dev/user/kcpevey@quansight.com/lab
-        # the jupyter page loads independent of the url???
+        # wait for server spinup
         self.page.wait_for_url(
-            f"{self.nebari_url}user/{self.username}/*", wait_until="networkidle"
-        )  # why did this not work on the latest ci test???? # TODO on friday!!
+            f"{self.nebari_url}user/{self.username}/*",
+            wait_until="networkidle",
+        )
 
-        # # let page load after redirect
-        # self.page.wait_for_load_state("networkidle")
-
+        # the jupyter page loads independent of network activity so here
+        # we wait for the File menu to be available on the page, a proxy for
+        # the jupyterlab page being loaded.
         file_locator = self.page.get_by_text("File", exact=True)
         file_locator.wait_for(
             timeout=self.wait_for_server_spinup,
@@ -232,6 +257,13 @@ class Navigator:
         return visible
 
     def reset_workspace(self):
+        """Reset the Jupyterlab workspace.
+
+        * Closes all Tabs & handle possible popups for saving changes,
+        * make sure any kernel popups are dealt with
+        * reset file browser is reset to root
+        * Finally, ensure that the Launcher screen is showing
+        """
         logger.debug(">>> Reset JupyterLab workspace")
 
         # server is already running and there is no popup
