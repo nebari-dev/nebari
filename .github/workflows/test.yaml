@@ -53,7 +53,7 @@ jobs:
       - name: Install Nebari
         run: |
           pip install .[dev]
-          conda install conda-build -y
+          conda install --quiet --yes conda-build
       - name: Test Nebari
         run: |
           pytest --version
