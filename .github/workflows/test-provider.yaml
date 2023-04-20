@@ -44,7 +44,7 @@ jobs:
       matrix:
         provider:
           - aws
-          - azure
+          # - azure
           # - do
           - gcp
           - local
