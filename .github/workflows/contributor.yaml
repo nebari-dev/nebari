@@ -13,11 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: json
+        env:
+          CTX: ${{ toJSON(github) }}
         run: |
-          CTX=${{ toJSON(github) }}
-          echo "${CTX}"
-          echo "${CTX}" | jq
-
+          set -x
+          A=${{ github.event.issue.pull_request && true}}
+          B=${{ contains(github.event.comment.body, '/bot run tests') }}
+          C1=${{ fromJson('["OWNER", "COLLABORATOR", "MEMBER"]') }}
+          C=${{ contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }}
+          D=${{ A && B && C }}
+          
+          E=${{ contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.issue.author_association) }}
+          F=${{ A && (E || (B && C))}}
 #  build:
 #    name: Build
 #    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/bot run tests') && contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)}}
