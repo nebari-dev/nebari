@@ -183,7 +183,7 @@ def load_yaml(config_filename: pathlib.Path):
     """
     Return yaml dict containing config loaded from config_filename.
     """
-    with config_filename.open() as f:
+    with open(config_filename) as f:
         config = yaml.load(f.read())
 
     return config

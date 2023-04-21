@@ -1,7 +1,9 @@
 # Configuration file for the Sphinx documentation builder.
 
-import os
+from pathlib import Path
 import sys
+
+HERE = Path(__file__).parent
 
 # -- Project information -----------------------------------------------------
 
@@ -30,7 +32,7 @@ master_doc = "index"
 source_suffix = ".md .rst .ipynb .py".split()
 
 # To find the local substitute extension
-sys.path.append(os.path.abspath("./ext"))
+sys.path.append(str(HERE / "ext"))
 
 extensions = [
     "myst_parser",
@@ -96,9 +98,8 @@ myst_update_mathjax = False
 myst_heading_anchors = 5
 
 # Import qhub version number
-here = os.path.abspath(os.path.dirname(__file__))
 __version__ = None
-exec(open(os.path.join(here, "../nebari/version.py")).read())
+exec(open(HERE.parent / "nebari" / "version.py").read())
 
 qhub_version_string = __version__
 

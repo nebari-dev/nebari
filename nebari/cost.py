@@ -1,8 +1,8 @@
 import json
 import logging
-import os
 import re
 import subprocess
+from pathlib import Path
 
 from rich.console import Console
 from rich.markdown import Markdown
@@ -66,7 +66,7 @@ def _run_infracost(path):
     """
     try:
         process = subprocess.Popen(
-            ["infracost", "breakdown", "--path", path, "--format", "json"],
+            ["infracost", "breakdown", f"--path={path}", f"--format=json"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -119,12 +119,9 @@ def infracost_diff(path, compare_to_path):
             [
                 "infracost",
                 "diff",
-                "--path",
-                path,
-                "--compare-to",
-                compare_to_path,
-                "--format",
-                "json",
+                f"--path={path}",
+                f"--compare-to={compare_to_path}",
+                "--format=json",
             ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -150,7 +147,7 @@ def infracost_report(path, dashboard, file, currency_code, compare):
     console = Console()
     # If path is not provided, use the current directory with `stages` subdirectory
     if not path:
-        path = os.path.join(os.getcwd(), "stages")
+        path = Path.cwd() / "stages"
 
     # Checks if infracost is installed and an API key is configured
     if _check_infracost() and _check_infracost_api_key():
@@ -161,7 +158,7 @@ def infracost_report(path, dashboard, file, currency_code, compare):
             _enable_infracost_dashboard()
 
         # Check if the deployment is available on the given path
-        if not os.path.exists(path):
+        if not path.exists():
             logger.error("Deployment is not available")
         else:
             data = _run_infracost(path)
