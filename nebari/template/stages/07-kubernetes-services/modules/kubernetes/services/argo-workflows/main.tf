@@ -297,33 +297,25 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
     "apiVersion" = "apps/v1"
     "kind" = "Deployment"
     "metadata" = {
-      "name" = "admission-controller"
+      "name" = "nebari-workflow-controller"
       "namespace" = var.namespace
     }
     "spec" = {
       "replicas" = 1
       "selector" = {
         "matchLabels" = {
-          "app" = "wf-admission-controller"
+          "app" = "nebari-workflow-controller"
         }
       }
       "template" = {
         "metadata" = {
           "labels" = {
-            "app" = "wf-admission-controller"
+            "app" = "nebari-workflow-controller"
           }
         }
         "spec" = {
           "containers" = [
             {
-              "args" = [
-                "while true; do sleep 30; done;",
-              ]
-              "command" = [
-                "/bin/bash",
-                "-c",
-                "--",
-              ]
               "env" = [
                 {
                   "name" = "KEYCLOAK_USERNAME"
@@ -345,10 +337,10 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                 },
                 {
                   "name" = "KEYCLOAK_URL"
-                  "value" = "${var.external-url}/auth"
+                  "value" = "https://${var.external-url}/auth/"
                 },
               ]
-              "image" = "balast/admsn:latest"
+              "image" = "nebari/workflow-controller:latest"
               "name" = "admission-controller"
             },
           ]
@@ -375,7 +367,7 @@ resource "kubernetes_manifest" "service_admission_controller" {
         },
       ]
       "selector" = {
-        "app" = "wf-admission-controller"
+        "app" = "nebari-workflow-controller"
       }
     }
   }
