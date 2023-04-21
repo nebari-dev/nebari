@@ -61,8 +61,8 @@ resource "keycloak_user" "read-only-user" {
   username = "read-only-user"
   initial_password {
     value = random_password.keycloak-view-only-user-password.result
-    temporary = false  
-  }  
+    temporary = false
+  }
 }
 
 resource "keycloak_user_roles" "user_roles" {

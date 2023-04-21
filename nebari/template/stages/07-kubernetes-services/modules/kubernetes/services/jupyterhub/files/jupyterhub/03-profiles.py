@@ -59,7 +59,11 @@ def base_profile_home_mounts(username):
             "command": ["sh", "-c", command],
             "securityContext": {"runAsUser": 0},
             "volumeMounts": [
-                {"mountPath": f"/mnt/{username}", "name": "home", "subPath": pvc_home_mount_path.format(username=username)},  
+                {
+                    "mountPath": f"/mnt/{username}",
+                    "name": "home",
+                    "subPath": pvc_home_mount_path.format(username=username),
+                },
                 {"mountPath": "/etc/skel", "name": "skel"},
             ],
         }

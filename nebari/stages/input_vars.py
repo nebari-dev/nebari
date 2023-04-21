@@ -336,7 +336,9 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "argo-workflows-overrides": [
             json.dumps(config.get("argo_workflows", {}).get("overrides", {}))
         ],
-        "keycloak_read_only_user_credentials": stage_outputs["stages/06-kubernetes-keycloak-configuration"]["keycloak-read-only-user-credentials"]["value"],
+        "keycloak_read_only_user_credentials": stage_outputs[
+            "stages/06-kubernetes-keycloak-configuration"
+        ]["keycloak-read-only-user-credentials"]["value"],
         # kbatch
         "kbatch-enabled": config["kbatch"]["enabled"],
         # prefect
