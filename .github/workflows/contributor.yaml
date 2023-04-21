@@ -9,31 +9,27 @@ permissions:
   pull-requests: write
 
 jobs:
-  debug:
+  trigger-contributor-tests:
     runs-on: ubuntu-latest
     steps:
-      - name: json
-        env:
-          CTX: ${{ toJSON(github) }}
-        run: |
-          exit 0
+      - name: Comment is not on a PR
+        if: ! github.event.issue.pull_request
+        run: exit 1
 
-      - name: A
-        if: github.event.issue.pull_request
-        run: exit 0
+      - name: Comment does not contains the trigger phrase
+        if: ! contains(github.event.comment.body, '/bot run tests')
+        run: exit 1
 
-      - name: A1
-        if: github.event.issue.pull_request && true
-        run: exit 0
+      - name: Author of comment has insufficient permissions
+        if: ! contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)
+        run: exit 1
 
-      - name: B
-        if: contains(github.event.comment.body, '/bot run tests')
-        run: exit 0
-
-      - name: C
-        if: contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)
-        run: |
-          echo '["OWNER", "COLLABORATOR", "MEMBER"]' | jq
+  build:
+    needs: trigger-contributor-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: foo
+        run: echo bar
 
 #  build:
 #    name: Build
