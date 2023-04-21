@@ -11,7 +11,6 @@ permissions:
 jobs:
   debug:
     runs-on: ubuntu-latest
-    secrets: inherit
     steps:
       - name: parts
         run: |
