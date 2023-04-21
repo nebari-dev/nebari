@@ -32,7 +32,8 @@ jobs:
 
       - name: C
         if: contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)
-        run: echo ${{ fromJson('["OWNER", "COLLABORATOR", "MEMBER"]') }} | jq
+        run: |
+          echo '["OWNER", "COLLABORATOR", "MEMBER"]' | jq
 
 #  build:
 #    name: Build
