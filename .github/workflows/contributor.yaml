@@ -12,12 +12,6 @@ jobs:
   debug:
     runs-on: ubuntu-latest
     steps:
-      - name: parts
-        run: |
-          echo github.event.issue.pull_request=${{ github.event.issue.pull_request }} || true
-          echo contains(github.event.comment.body, '/bot run tests')=${{ contains(github.event.comment.body, '/bot run tests') }} || true
-          echo contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)=${{ contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }} || true
-
       - name: json
         run: |
           CTX=${{ toJSON(github) }}
