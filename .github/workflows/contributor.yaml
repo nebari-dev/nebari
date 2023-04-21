@@ -13,21 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     secrets: inherit
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-#      - name: parts
-#        run: |
-#          echo github.event.issue.pull_request=${{ github.event.issue.pull_request }} || true
-#          echo contains(github.event.comment.body, '/bot run tests')=${{ contains(github.event.comment.body, '/bot run tests') }} || true
-#          echo contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)=${{ contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }} || true
-#
-#      - name: json
-#        run: |
-#          CTX=${{ toJSON(github) }}
-#          echo "${CTX}"
-#          echo "${CTX}" | jq
+      - name: parts
+        run: |
+          echo github.event.issue.pull_request=${{ github.event.issue.pull_request }} || true
+          echo contains(github.event.comment.body, '/bot run tests')=${{ contains(github.event.comment.body, '/bot run tests') }} || true
+          echo contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)=${{ contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }} || true
+
+      - name: json
+        run: |
+          CTX=${{ toJSON(github) }}
+          echo "${CTX}"
+          echo "${CTX}" | jq
 
   build:
     name: Build
