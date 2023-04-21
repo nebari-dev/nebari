@@ -62,7 +62,14 @@ class RunNotebook:
         self.nav.page.get_by_role(
             "menuitem", name="Restart Kernel and Run All Cells…"
         ).get_by_text("Restart Kernel and Run All Cells…").click()
-        self.nav.page.get_by_role("button", name="Restart", exact=True).click()
+
+        # Restart dialog appears most, but not all of the time (e.g. set
+        # No Kernel, then Restart Run All)
+        restart_dialog_button = self.nav.page.get_by_role(
+            "button", name="Restart", exact=True
+        )
+        if restart_dialog_button.is_visible():
+            restart_dialog_button.click()
 
         output_locator = self.nav.page.get_by_text(expected_output_text, exact=True)
         output_locator.wait_for(timeout=runtime)  # wait for notebook to run
