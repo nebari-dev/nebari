@@ -296,7 +296,7 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "conda-store-extra-config": config.get("conda_store", {}).get(
             "extra_config", ""
         ),
-        "conda-store-image-tag": config.get("conda-store", {}).get(
+        "conda-store-image-tag": config.get("conda_store", {}).get(
             "image_tag", DEFAULT_CONDA_STORE_IMAGE_TAG
         ),
         # jupyterhub
