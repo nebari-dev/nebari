@@ -16,15 +16,24 @@ jobs:
         env:
           CTX: ${{ toJSON(github) }}
         run: |
-          set -x
-          A=${{ github.event.issue.pull_request && true}}
-          B=${{ contains(github.event.comment.body, '/bot run tests') }}
-          C1=${{ fromJson('["OWNER", "COLLABORATOR", "MEMBER"]') }}
-          C=${{ contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }}
-          
-          if [[ A && B && C ]]; then
-            echo "Hooray!"
-          fi
+          exit 0
+
+      - name: A
+        if: github.event.issue.pull_request
+        run: exit 0
+
+      - name: A1
+        if: github.event.issue.pull_request && true
+        run: exit 0
+
+      - name: B
+        if: contains(github.event.comment.body, '/bot run tests')
+        run: exit 0
+
+      - name: C
+        if: contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)
+        run: echo ${{ fromJson('["OWNER", "COLLABORATOR", "MEMBER"]') }} | jq
+
 #  build:
 #    name: Build
 #    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/bot run tests') && contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)}}
