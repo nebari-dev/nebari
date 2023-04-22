@@ -349,9 +349,9 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         - Letters from A to Z (upper and lower case) and numbers
         - Maximum accepted length of the name string is 16 characters
         """
-        if inputs.cloud_provider == ProviderEnum.aws.value.lower():
+        if inputs.cloud_provider == ProviderEnum.aws.name:
             name_guidelines += "- Should NOT start with the string `aws`\n"
-        elif inputs.cloud_provider == ProviderEnum.azure.value.lower():
+        elif inputs.cloud_provider == ProviderEnum.azure.name:
             name_guidelines += "- Should NOT contain `-`\n"
 
         # PROJECT NAME
