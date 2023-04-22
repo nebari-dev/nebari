@@ -25,11 +25,11 @@ class TerraformStateEnum(str, enum.Enum):
 
 class ProviderEnum(str, enum.Enum):
     local = "local"
-    existing = "existing"
-    do = "do"
-    aws = "aws"
-    gcp = "gcp"
-    azure = "azure"
+    existing = "existing K8s cluster"
+    do = "DigitalOcean"
+    aws = "Amazon Web Services (AWS)"
+    gcp = "Google Cloud Platform (GCP)"
+    azure = "Microsoft Azure"
 
 
 class GitRepoEnum(str, enum.Enum):

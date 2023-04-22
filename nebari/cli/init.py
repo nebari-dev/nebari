@@ -42,8 +42,10 @@ DOCS_HOME = "https://nebari.dev/docs/"
 CHOOSE_CLOUD_PROVIDER = "https://nebari.dev/docs/get-started/deploy"
 
 
-def enum_to_list(enum_cls):
-    return [e.value.lower() for e in enum_cls]
+def enum_to_list(enum_cls, lower=True):
+    if lower:
+        return [e.value.lower() for e in enum_cls]
+    return [e.value for e in enum_cls]
 
 
 def handle_init(inputs: InitInputs):
@@ -330,9 +332,11 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # try:
         inputs.cloud_provider = questionary.select(
             "Where would you like to deploy your Nebari cluster?",
-            choices=enum_to_list(ProviderEnum),
+            choices=enum_to_list(ProviderEnum, lower=False),
             qmark=qmark,
         ).unsafe_ask()
+
+        inputs.cloud_provider = ProviderEnum(inputs.cloud_provider).name
 
         if not disable_checks:
             check_cloud_provider_creds(ctx, cloud_provider=inputs.cloud_provider)
