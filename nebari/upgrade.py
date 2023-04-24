@@ -32,14 +32,14 @@ def do_upgrade(config_filename, attempt_fixes=False):
         )
         return
     except (ValidationError, ValueError) as e:
-        if is_version_accepted(config.get("nebari_version")):
+        if is_version_accepted(config.get("nebari_version", "")):
             # There is an unrelated validation problem
             print(
                 f"Your config file {config_filename} appears to be already up-to-date for Nebari version {__version__} but there is another validation error.\n"
             )
             raise e
 
-    start_version = config.get("nebari_version")
+    start_version = config.get("nebari_version", "")
 
     UpgradeStep.upgrade(
         config, start_version, __version__, config_filename, attempt_fixes

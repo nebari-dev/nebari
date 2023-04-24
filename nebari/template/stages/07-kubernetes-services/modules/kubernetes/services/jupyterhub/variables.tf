@@ -144,3 +144,16 @@ variable "default-conda-store-namespace" {
   description = "Default conda-store namespace"
   type        = string
 }
+
+variable "idle-culler-settings" {
+  description = "Idle culler timeout settings (in minutes)"
+  type = object({
+    kernel_cull_busy                    = bool
+    kernel_cull_connected               = bool
+    kernel_cull_idle_timeout            = number
+    kernel_cull_interval                = number
+    server_shutdown_no_activity_timeout = number
+    terminal_cull_inactive_timeout      = number
+    terminal_cull_interval              = number
+  })
+}
