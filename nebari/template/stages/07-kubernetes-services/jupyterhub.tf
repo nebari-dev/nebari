@@ -116,6 +116,7 @@ module "jupyterhub" {
   services = concat([
     "dask-gateway"
     ],
+    (var.monitoring-enabled ? ["monitoring"] : []),
     (var.prefect-enabled ? ["prefect"] : []),
     (var.kbatch-enabled ? ["kbatch"] : [])
   )
@@ -133,4 +134,7 @@ module "jupyterhub" {
 
   jupyterhub-logout-redirect-url = var.jupyterhub-logout-redirect-url
   jupyterhub-hub-extraEnv        = var.jupyterhub-hub-extraEnv
+
+  idle-culler-settings = local.idle-culler-settings
+
 }
