@@ -70,8 +70,8 @@ class CICD(Base):
     type: CiEnum
     branch: str
     commit_render: typing.Optional[bool] = True
-    before_script: typing.Optional[typing.List[str]]
-    after_script: typing.Optional[typing.List[str]]
+    before_script: typing.Optional[typing.List[typing.Union[str, typing.Dict]]]
+    after_script: typing.Optional[typing.List[typing.Union[str, typing.Dict]]]
 
 
 # ======== Generic Helm Extensions ========
@@ -353,6 +353,23 @@ class JupyterHub(Base):
     overrides: typing.Optional[typing.Dict]
 
 
+# ================= JupyterLab ==================
+
+
+class IdleCuller(Base):
+    terminal_cull_inactive_timeout: typing.Optional[int]
+    terminal_cull_interval: typing.Optional[int]
+    kernel_cull_idle_timeout: typing.Optional[int]
+    kernel_cull_interval: typing.Optional[int]
+    kernel_cull_connected: typing.Optional[bool]
+    kernel_cull_busy: typing.Optional[int]
+    server_shutdown_no_activity_timeout: typing.Optional[int]
+
+
+class JupyterLab(Base):
+    idle_culler: typing.Optional[IdleCuller]
+
+
 # ================== Profiles ==================
 
 
@@ -586,6 +603,7 @@ class Main(Base):
     clearml: typing.Optional[ClearML]
     tf_extensions: typing.Optional[typing.List[NebariExtension]]
     jupyterhub: typing.Optional[JupyterHub]
+    jupyterlab: typing.Optional[JupyterLab]
     prevent_deploy: bool = (
         False  # Optional, but will be given default value if not present
     )

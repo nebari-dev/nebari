@@ -7,6 +7,7 @@ resource "helm_release" "keycloak" {
   version    = "15.0.2"
 
   values = concat([
+    # https://github.com/codecentric/helm-charts/blob/keycloak-15.0.2/charts/keycloak/values.yaml
     file("${path.module}/values.yaml"),
     jsonencode({
       nodeSelector = {

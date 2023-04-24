@@ -10,7 +10,8 @@ on:
       - "scripts/**"
       - "nebari/**"
       - "setup.cfg"
-      - "pyproject.yoml"
+      - "pyproject.toml"
+      - "pytest.ini"
   push:
     branches:
       - main
@@ -24,7 +25,8 @@ on:
       - "scripts/**"
       - "nebari/**"
       - "setup.cfg"
-      - "pyproject.yoml"
+      - "pyproject.toml"
+      - "pytest.ini"
 
 jobs:
   test-general:
@@ -42,13 +44,16 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Setup miniconda
+        uses: conda-incubator/setup-miniconda@v2
         with:
           python-version: ${{ matrix.python-version }}
+          channel-priority: strict
+          channels: conda-forge
       - name: Install Nebari
         run: |
           pip install .[dev]
+          conda install --quiet --yes conda-build
       - name: Test Nebari
         run: |
           pytest --version

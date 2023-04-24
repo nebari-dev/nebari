@@ -174,13 +174,8 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
                 provider="Azure", link_to_docs=CREATE_AZURE_CREDS
             )
         )
-
         os.environ["ARM_CLIENT_ID"] = typer.prompt(
             "Paste your ARM_CLIENT_ID",
-            hide_input=True,
-        )
-        os.environ["ARM_CLIENT_SECRET"] = typer.prompt(
-            "Paste your ARM_CLIENT_SECRET",
             hide_input=True,
         )
         os.environ["ARM_SUBSCRIPTION_ID"] = typer.prompt(
@@ -189,6 +184,10 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
         )
         os.environ["ARM_TENANT_ID"] = typer.prompt(
             "Paste your ARM_TENANT_ID",
+            hide_input=True,
+        )
+        os.environ["ARM_CLIENT_SECRET"] = typer.prompt(
+            "Paste your ARM_CLIENT_SECRET",
             hide_input=True,
         )
 
@@ -232,7 +231,6 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
         not os.environ.get("GITHUB_CLIENT_ID")
         or not os.environ.get("GITHUB_CLIENT_SECRET")
     ):
-
         rich.print(
             MISSING_CREDS_TEMPLATE.format(
                 provider="GitHub OAuth App", link_to_docs=CREATE_GITHUB_OAUTH_CREDS
@@ -427,7 +425,6 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             default=False,
             qmark=qmark,
         ).unsafe_ask():
-
             repo_url = "http://{git_provider}/{org_name}/{repo_name}"
 
             git_provider = questionary.select(
@@ -501,7 +498,6 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             default=False,
             qmark=qmark,
         ).unsafe_ask():
-
             # TERRAFORM STATE
             inputs.terraform_state = questionary.select(
                 "Where should the Terraform State be provisioned?",
