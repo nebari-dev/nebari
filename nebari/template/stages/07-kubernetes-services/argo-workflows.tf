@@ -27,7 +27,7 @@ module "argo-workflows" {
   external-url = var.endpoint
   realm_id     = var.realm_id
 
-  node-group = var.node_groups.general
-  overrides  = var.argo-workflows-overrides
+  node-group                          = var.node_groups.general
+  overrides                           = var.argo-workflows-overrides
   keycloak_read_only_user_credentials = var.keycloak_read_only_user_credentials
 }
