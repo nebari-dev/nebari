@@ -48,7 +48,7 @@ resource "keycloak_default_groups" "default" {
 }
 
 data "keycloak_realm" "master" {
-    realm = "master"
+  realm = "master"
 }
 
 resource "random_password" "keycloak-view-only-user-password" {
@@ -60,7 +60,7 @@ resource "keycloak_user" "read-only-user" {
   realm_id = data.keycloak_realm.master.id
   username = "read-only-user"
   initial_password {
-    value = random_password.keycloak-view-only-user-password.result
+    value     = random_password.keycloak-view-only-user-password.result
     temporary = false
   }
 }

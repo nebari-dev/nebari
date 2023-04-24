@@ -130,6 +130,23 @@ resource "kubernetes_manifest" "argo-workflows-ingress-route" {
       routes = [
         {
           kind  = "Rule"
+          match = "Host(`${var.external-url}`) && Path(`/${local.argo-workflows-prefix}/validate`)"
+          middlewares = concat(
+            [{
+              name      = kubernetes_manifest.argo-workflows-middleware-stripprefix.manifest.metadata.name
+              namespace = var.namespace
+            }]
+          )
+          services = [
+            {
+              name      = "wf-admission-controller"
+              port      = 8080
+              namespace = var.namespace
+            }
+          ]
+        },
+        {
+          kind  = "Rule"
           match = "Host(`${var.external-url}`) && PathPrefix(`/${local.argo-workflows-prefix}`)"
 
           middlewares = concat(
@@ -146,7 +163,7 @@ resource "kubernetes_manifest" "argo-workflows-ingress-route" {
               namespace = var.namespace
             }
           ]
-        }
+        },
       ]
     }
   }
@@ -238,16 +255,16 @@ resource "kubernetes_cluster_role_binding" "argo-view-rb" {
 
 # Workflow Admission Controller
 resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
-    metadata {
-    name = "keycloak-read-only-user-credentials"
+  metadata {
+    name      = "keycloak-read-only-user-credentials"
     namespace = var.namespace
   }
 
   data = {
-    username = var.keycloak_read_only_user_credentials["username"]
-    password = var.keycloak_read_only_user_credentials["password"]
+    username  = var.keycloak_read_only_user_credentials["username"]
+    password  = var.keycloak_read_only_user_credentials["password"]
     client_id = var.keycloak_read_only_user_credentials["client_id"]
-    realm = var.keycloak_read_only_user_credentials["realm"]
+    realm     = var.keycloak_read_only_user_credentials["realm"]
   }
 
   type = "Opaque"
@@ -256,7 +273,7 @@ resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
 resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_controller" {
   manifest = {
     "apiVersion" = "admissionregistration.k8s.io/v1"
-    "kind" = "ValidatingWebhookConfiguration"
+    "kind"       = "ValidatingWebhookConfiguration"
     "metadata" = {
       "name" = "admission-controller"
     }
@@ -267,7 +284,7 @@ resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_control
           "v1beta1",
         ]
         "clientConfig" = {
-          "url" = "https://adam.nebari.dev/wf-adm-ctlr/validate"
+          "url" = "https://${var.external-url}/${local.argo-workflows-prefix}/validate"
         }
         "name" = "admission-controller.dev.svc"
         "rules" = [
@@ -295,9 +312,9 @@ resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_control
 resource "kubernetes_manifest" "deployment_admission_controller" {
   manifest = {
     "apiVersion" = "apps/v1"
-    "kind" = "Deployment"
+    "kind"       = "Deployment"
     "metadata" = {
-      "name" = "nebari-workflow-controller"
+      "name"      = "nebari-workflow-controller"
       "namespace" = var.namespace
     }
     "spec" = {
@@ -321,7 +338,7 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                   "name" = "KEYCLOAK_USERNAME"
                   "valueFrom" = {
                     "secretKeyRef" = {
-                      "key" = "username"
+                      "key"  = "username"
                       "name" = "keycloak-read-only-user-credentials"
                     }
                   }
@@ -330,18 +347,18 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                   "name" = "KEYCLOAK_PASSWORD"
                   "valueFrom" = {
                     "secretKeyRef" = {
-                      "key" = "password"
+                      "key"  = "password"
                       "name" = "keycloak-read-only-user-credentials"
                     }
                   }
                 },
                 {
-                  "name" = "KEYCLOAK_URL"
+                  "name"  = "KEYCLOAK_URL"
                   "value" = "https://${var.external-url}/auth/"
                 },
               ]
-              "image" = "nebari/workflow-controller:latest"
-              "name" = "admission-controller"
+              "image" = "quay.io/nebari/nebari-workflow-controller:main"
+              "name"  = "admission-controller"
             },
           ]
         }
@@ -353,16 +370,16 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
 resource "kubernetes_manifest" "service_admission_controller" {
   manifest = {
     "apiVersion" = "v1"
-    "kind" = "Service"
+    "kind"       = "Service"
     "metadata" = {
-      "name" = "admission-controller"
+      "name"      = "wf-admission-controller"
       "namespace" = var.namespace
     }
     "spec" = {
       "ports" = [
         {
-          "name" = "admission-controller"
-          "port" = 8080
+          "name"       = "wf-admission-controller"
+          "port"       = 8080
           "targetPort" = 8080
         },
       ]
