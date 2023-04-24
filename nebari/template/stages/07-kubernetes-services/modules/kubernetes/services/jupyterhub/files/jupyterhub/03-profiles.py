@@ -60,7 +60,7 @@ def base_profile_home_mounts(username):
             "securityContext": {"runAsUser": 0},
             "volumeMounts": [
                 {
-                    "mountPath": f"/mnt/{username}",
+                    "mountPath": f"/mnt/{pvc_home_mount_path.format(username=username)}",
                     "name": "home",
                     "subPath": pvc_home_mount_path.format(username=username),
                 },
