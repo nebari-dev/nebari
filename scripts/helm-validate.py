@@ -14,7 +14,6 @@ logging.basicConfig(level=logging.INFO)
 
 
 class HelmChartIndexer:
-
     # Define regex patterns to extract variable names
     LOCAL_VAR_PATTERN = re.compile(r"local.(.*[a-z])")
     VAR_PATTERN = re.compile(r"var.(.*[a-z])")
@@ -96,16 +95,29 @@ class HelmChartIndexer:
                 chart_repository = release_attrs.get("repository", "")
 
                 if self._argument_contains_variable_hook(chart_version):
-                    self.logger.debug(f"Spotted {chart_version} in {chart_name} chart metadata")
-                    chart_version = self._load_variable_value(chart_version, parent_contents)
+                    self.logger.debug(
+                        f"Spotted {chart_version} in {chart_name} chart metadata"
+                    )
+                    chart_version = self._load_variable_value(
+                        chart_version, parent_contents
+                    )
 
                 if self._argument_contains_variable_hook(chart_repository):
-                    self.logger.debug(f"Spotted {chart_repository} in {chart_name} chart metadata")
-                    chart_repository = self._load_variable_value(chart_repository, parent_contents)
+                    self.logger.debug(
+                        f"Spotted {chart_repository} in {chart_name} chart metadata"
+                    )
+                    chart_repository = self._load_variable_value(
+                        chart_repository, parent_contents
+                    )
 
-                self.logger.debug(f"Name: {chart_name} Version: {chart_version} Repository: {chart_repository}")
+                self.logger.debug(
+                    f"Name: {chart_name} Version: {chart_version} Repository: {chart_repository}"
+                )
 
-                self.charts[chart_name] = {"version": chart_version, "repository": chart_repository}
+                self.charts[chart_name] = {
+                    "version": chart_version,
+                    "repository": chart_repository,
+                }
 
         if not self.charts:
             self.logger.debug("Could not find any helm_release under module resources")
@@ -154,7 +166,9 @@ def pull_helm_chart(chart_index: dict, skip_charts: list) -> None:
     os.makedirs(chart_dir, exist_ok=True)
     os.chdir(chart_dir)
 
-    for chart_name, chart_metadata in tqdm(chart_index.items(), desc="Downloading charts"):
+    for chart_name, chart_metadata in tqdm(
+        chart_index.items(), desc="Downloading charts"
+    ):
         chart_version = chart_metadata["version"]
         chart_repository = chart_metadata["repository"]
 
@@ -162,16 +176,21 @@ def pull_helm_chart(chart_index: dict, skip_charts: list) -> None:
             continue
 
         os.system(f"helm repo add {chart_name} {chart_repository}")
-        os.system(f"helm pull {chart_name} --version {chart_version} --repo {chart_repository} --untar")
+        os.system(
+            f"helm pull {chart_name} --version {chart_version} --repo {chart_repository} --untar"
+        )
 
         chart_filename = f"{chart_name}-{chart_version}.tgz"
         if not os.path.exists(chart_filename):
-            raise ValueError(f"Could not find {chart_name}:{chart_version} directory in {chart_dir}.")
+            raise ValueError(
+                f"Could not find {chart_name}:{chart_version} directory in {chart_dir}."
+            )
 
     print("All charts downloaded successfully!")
     # shutil.rmtree(pathlib.Path(os.getcwd()).parent / chart_dir)
 
-def add_workflow_job_summary(chart_index : dict):
+
+def add_workflow_job_summary(chart_index: dict):
     """
     Based on the chart index, add a summary of the workflow job to the action log.
 
@@ -193,6 +212,8 @@ if __name__ == "__main__":
     STAGES_DIR = "nebari/template/stages"
     SKIP_CHARTS = ["prefect", "clearml", "helm-extensions"]
 
-    charts = HelmChartIndexer(stages_dir=STAGES_DIR, skip_charts=SKIP_CHARTS).generate_helm_chart_index()
+    charts = HelmChartIndexer(
+        stages_dir=STAGES_DIR, skip_charts=SKIP_CHARTS
+    ).generate_helm_chart_index()
     pull_helm_chart(charts, skip_charts=SKIP_CHARTS)
     add_workflow_job_summary(charts)
