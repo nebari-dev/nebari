@@ -386,8 +386,8 @@ class Upgrade_0_4_1(UpgradeStep):
         return config
 
 
-class Upgrade_2023_5_1(UpgradeStep):
-    version = "2023.5.1"
+class Upgrade_2023_4_2(UpgradeStep):
+    version = "2023.4.2"
 
     def _version_specific_upgrade(
         self, config, start_version, config_filename: pathlib.Path, *args, **kwargs
