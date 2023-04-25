@@ -405,9 +405,8 @@ class Upgrade_2023_4_2(UpgradeStep):
 
         continue_ = Prompt.ask("Have you deleted the Argo CRDs? \[y/N]", default="N")
         if not continue_ == "y":
-            raise ValueError(
-                f"You must delete the Argo CRDs before upgrading to {self.version}"
-            )
+            print(f"You must delete the Argo CRDs before upgrading to {self.version}")
+            exit()
 
         return config
 
