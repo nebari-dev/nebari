@@ -56,3 +56,23 @@ variable "conda-store-service-token-scopes" {
     }
   }
 }
+
+
+variable "idle-culler-settings" {
+  description = "Idle culler timeout settings (in minutes)"
+  type        = any
+}
+
+# allows us to merge variables set in the nebari-config.yaml with the default values below
+locals {
+  default-idle-culler-settings = {
+    kernel_cull_busy                    = false
+    kernel_cull_connected               = true
+    kernel_cull_idle_timeout            = 15
+    kernel_cull_interval                = 5
+    server_shutdown_no_activity_timeout = 15
+    terminal_cull_inactive_timeout      = 15
+    terminal_cull_interval              = 5
+  }
+  idle-culler-settings = merge(local.default-idle-culler-settings, var.idle-culler-settings)
+}

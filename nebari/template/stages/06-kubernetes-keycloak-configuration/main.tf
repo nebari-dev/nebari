@@ -46,3 +46,20 @@ resource "keycloak_default_groups" "default" {
     keycloak_group.groups[g].id
   ]
 }
+
+# needed for keycloak monitoring to function
+resource "keycloak_realm_events" "realm_events" {
+  realm_id = keycloak_realm.main.id
+
+  events_enabled = true
+
+  admin_events_enabled         = true
+  admin_events_details_enabled = true
+
+  # When omitted or left empty, keycloak will enable all event types
+  enabled_event_types = []
+
+  events_listeners = [
+    "jboss-logging", "metrics-listener",
+  ]
+}

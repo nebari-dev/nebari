@@ -8,21 +8,31 @@
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
       }
     ]
   },
   "description": "Traefik Metrics Overview",
   "editable": true,
+  "fiscalYearStartMonth": 0,
   "gnetId": 13165,
   "graphTooltip": 1,
-  "id": 27,
-  "iteration": 1630948875428,
+  "iteration": 1681240333933,
   "links": [],
+  "liveNow": false,
   "panels": [
     {
       "collapsed": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -35,8 +45,6 @@
       "type": "row"
     },
     {
-      "cacheTimeout": null,
-      "datasource": null,
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -78,7 +86,6 @@
         "y": 1
       },
       "id": 13,
-      "interval": null,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -96,11 +103,15 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.3.3",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "count(kube_pod_status_ready{namespace=\"$namespace\",condition=\"true\",pod=~\".*traefik.*\", job=\"traefik\"})",
+          "expr": "count(kube_pod_status_ready{namespace=\"$namespace\",condition=\"true\",pod=~\"nebari-traefik-ingress-.*\", job=\"kube-state-metrics\"})",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -117,7 +128,6 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -147,7 +157,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.3.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -167,9 +177,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Per instance latency $percentiles th perc over 5 min",
       "tooltip": {
         "shared": true,
@@ -178,38 +186,33 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "s",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
       "collapsed": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -226,7 +229,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$Prometheus",
+      "datasource": {
+        "uid": "$Prometheus"
+      },
       "fill": 7,
       "fillGradient": 0,
       "gridPos": {
@@ -259,7 +264,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.3.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -279,9 +284,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Open Connections",
       "tooltip": {
         "shared": true,
@@ -290,9 +293,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -300,24 +301,19 @@
         {
           "decimals": 0,
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -325,7 +321,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$Prometheus",
+      "datasource": {
+        "uid": "$Prometheus"
+      },
       "decimals": 2,
       "fill": 1,
       "fillGradient": 0,
@@ -346,7 +344,6 @@
         "min": false,
         "rightSide": true,
         "show": true,
-        "sideWidth": null,
         "total": false,
         "values": true
       },
@@ -358,7 +355,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.3.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -378,9 +375,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Apdex score (over 5 min)",
       "tooltip": {
         "shared": true,
@@ -389,9 +384,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -401,22 +394,18 @@
           "format": "short",
           "label": "",
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -424,7 +413,6 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "decimals": 2,
       "description": "",
       "fill": 1,
@@ -459,7 +447,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.3.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -479,9 +467,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Requests/min per entrypoint",
       "tooltip": {
         "shared": true,
@@ -490,9 +476,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -502,7 +486,6 @@
           "format": "short",
           "label": "",
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
@@ -511,19 +494,20 @@
           "format": "short",
           "label": "",
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
       "collapsed": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -540,7 +524,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$Prometheus",
+      "datasource": {
+        "uid": "$Prometheus"
+      },
       "decimals": 0,
       "fill": 7,
       "fillGradient": 0,
@@ -574,7 +560,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.3.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -594,9 +580,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Open Connections",
       "tooltip": {
         "shared": true,
@@ -605,9 +589,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -617,22 +599,18 @@
           "format": "short",
           "label": "",
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -640,7 +618,6 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "decimals": 2,
       "fill": 1,
       "fillGradient": 0,
@@ -671,7 +648,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.3.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -699,9 +676,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Apdex score (over 5 min)",
       "tooltip": {
         "shared": true,
@@ -710,9 +685,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -720,24 +693,19 @@
         {
           "decimals": 2,
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -745,7 +713,6 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "decimals": 2,
       "description": "",
       "fill": 1,
@@ -780,7 +747,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.3.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -800,9 +767,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Requests/min per service",
       "tooltip": {
         "shared": true,
@@ -811,9 +776,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -823,7 +786,6 @@
           "format": "short",
           "label": "",
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
@@ -832,19 +794,20 @@
           "format": "short",
           "label": "",
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
       "collapsed": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -861,7 +824,9 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$Prometheus",
+      "datasource": {
+        "uid": "$Prometheus"
+      },
       "decimals": 0,
       "description": "",
       "fill": 1,
@@ -874,7 +839,6 @@
       },
       "hiddenSeries": false,
       "id": 5,
-      "interval": null,
       "legend": {
         "alignAsTable": true,
         "avg": false,
@@ -885,7 +849,6 @@
         "min": false,
         "rightSide": true,
         "show": true,
-        "sideWidth": null,
         "total": true,
         "values": true
       },
@@ -897,7 +860,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.3.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -917,9 +880,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Status method/codes over 5min",
       "tooltip": {
         "shared": true,
@@ -928,9 +889,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -938,30 +897,28 @@
         {
           "decimals": 2,
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         },
         {
           "decimals": 2,
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
       "collapsed": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -978,7 +935,6 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -1008,7 +964,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.3.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1046,9 +1002,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Traefik memory usage",
       "tooltip": {
         "shared": true,
@@ -1057,33 +1011,24 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "bytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -1091,8 +1036,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$Prometheus",
-      "decimals": null,
+      "datasource": {
+        "uid": "$Prometheus"
+      },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
@@ -1121,7 +1067,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.3.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1159,9 +1105,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Traefik CPU usage",
       "tooltip": {
         "shared": true,
@@ -1170,38 +1114,29 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     }
   ],
-  "refresh": "",
-  "schemaVersion": 30,
+  "refresh": "10s",
+  "schemaVersion": 34,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -1212,8 +1147,6 @@
           "text": "Prometheus",
           "value": "Prometheus"
         },
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "Datasource",
@@ -1228,16 +1161,16 @@
         "type": "datasource"
       },
       {
-        "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "dev",
           "value": "dev"
         },
-        "datasource": "Prometheus",
-        "definition": "label_values(traefik_config_reloads_total, namespace)",
-        "description": null,
-        "error": null,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
+        "definition": "label_values(kube_pod_container_info{pod=~\".*traefik.*\"}, namespace)",
         "hide": 0,
         "includeAll": false,
         "label": "Namespace",
@@ -1245,8 +1178,8 @@
         "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(kube_pod_container_info{pod=~\".*traefik.*\", job=\"traefik\"}, namespace)",
-          "refId": "Prometheus-namespace-Variable-Query"
+          "query": "label_values(kube_pod_container_info{pod=~\".*traefik.*\"}, namespace)",
+          "refId": "StandardVariableQuery"
         },
         "refresh": 1,
         "regex": "",
@@ -1258,14 +1191,11 @@
         "useTags": false
       },
       {
-        "allValue": null,
         "current": {
           "selected": true,
           "text": "95",
           "value": "95"
         },
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "Percentiles",
@@ -1291,7 +1221,7 @@
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {
@@ -1319,5 +1249,6 @@
   "timezone": "",
   "title": "Traefik",
   "uid": "2p6nlgS7z",
-  "version": 4
+  "version": 1,
+  "weekStart": ""
 }

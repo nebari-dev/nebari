@@ -1,10 +1,10 @@
 import sys
 
-from nebari.cli import cli
+from nebari.cli.main import app
 
 
 def main():
-    cli(sys.argv[1:])
+    app(sys.argv[1:])
 
 
 if __name__ == "__main__":
