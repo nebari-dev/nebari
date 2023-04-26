@@ -268,6 +268,45 @@ resource "kubernetes_cluster_role_binding" "argo-view-rb" {
 }
 
 # Workflow Admission Controller
+resource "kubernetes_role" "pod_viewer" {
+
+  metadata {
+    name      = "nebari-pod-viewer"
+    namespace = var.namespace
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["pods"]
+    verbs      = ["get", "list"]
+  }
+}
+
+resource "kubernetes_service_account" "wf-admission-controller" {
+  metadata {
+    name      = "wf-admission-controller"
+    namespace = var.namespace
+  }
+}
+
+resource "kubernetes_role_binding" "wf-admission-controller-pod-viewer" {
+  metadata {
+    name      = "wf-admission-controller-pod-viewer"
+    namespace = var.namespace
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.pod_viewer.metadata.0.name
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.wf-admission-controller.metadata.0.name
+    namespace = var.namespace
+  }
+}
+
 resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
   metadata {
     name      = "keycloak-read-only-user-credentials"
@@ -303,7 +342,7 @@ resource "kubernetes_manifest" "mutatingwebhookconfiguration_admission_controlle
           "url" = "https://${var.external-url}/${local.argo-workflows-prefix}/validate"
         }
 
-        "name" = "admission-controller.dev.svc"
+        "name" = "wf-mutating-admission-controller.${var.namespace}.svc"
         "rules" = [
           {
             "apiGroups" = [
@@ -343,7 +382,7 @@ resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_control
         "clientConfig" = {
           "url" = "https://${var.external-url}/${local.argo-workflows-prefix}/validate"
         }
-        "name" = "admission-controller.dev.svc"
+        "name" = "wf-validating-admission-controller.${var.namespace}.svc"
         "rules" = [
           {
             "apiGroups" = [
@@ -389,11 +428,11 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
           }
         }
         "spec" = {
+          serviceAccountName           = kubernetes_service_account.wf-admission-controller.metadata.0.name
+          automountServiceAccountToken = true
           "containers" = [
             {
-              command            = ["sleep", "1000000"]
-              serviceAccountName = kubernetes_service_account.mu
-              #.metadata.0.name
+              command = ["sleep", "1000000"]
               "env" = [
                 {
                   "name" = "KEYCLOAK_USERNAME"
