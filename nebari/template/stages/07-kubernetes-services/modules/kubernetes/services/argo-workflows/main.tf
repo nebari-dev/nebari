@@ -324,47 +324,48 @@ resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
 }
 
 
-resource "kubernetes_manifest" "mutatingwebhookconfiguration_admission_controller" {
-  manifest = {
-    "apiVersion" = "admissionregistration.k8s.io/v1"
-    "kind"       = "MutatingWebhookConfiguration"
-    "metadata" = {
-      "name" = "wf-admission-controller"
-    }
-    "webhooks" = [
-      {
-        "admissionReviewVersions" = [
-          "v1",
-          "v1beta1",
-        ]
+# resource "kubernetes_manifest" "mutatingwebhookconfiguration_admission_controller" {
 
-        "clientConfig" = {
-          "url" = "https://${var.external-url}/${local.argo-workflows-prefix}/validate"
-        }
+#   manifest = {
+#     "apiVersion" = "admissionregistration.k8s.io/v1"
+#     "kind"       = "MutatingWebhookConfiguration"
+#     "metadata" = {
+#       "name" = "wf-admission-controller"
+#     }
+#     "webhooks" = [
+#       {
+#         "admissionReviewVersions" = [
+#           "v1",
+#           "v1beta1",
+#         ]
 
-        "name" = "wf-mutating-admission-controller.${var.namespace}.svc"
-        "rules" = [
-          {
-            "apiGroups" = [
-              "argoproj.io",
-            ]
-            "apiVersions" = [
-              "v1alpha1",
-            ]
-            "operations" = [
-              "CREATE",
-              "UPDATE",
-            ]
-            "resources" = [
-              "workflows",
-            ]
-          },
-        ]
-        "sideEffects" = "None"
-      },
-    ]
-  }
-}
+#         "clientConfig" = {
+#           "url" = "https://${var.external-url}/${local.argo-workflows-prefix}/validate"
+#         }
+
+#         "name" = "wf-mutating-admission-controller.${var.namespace}.svc"
+#         "rules" = [
+#           {
+#             "apiGroups" = [
+#               "argoproj.io",
+#             ]
+#             "apiVersions" = [
+#               "v1alpha1",
+#             ]
+#             "operations" = [
+#               "CREATE",
+#               "UPDATE",
+#             ]
+#             "resources" = [
+#               "workflows",
+#             ]
+#           },
+#         ]
+#         "sideEffects" = "None"
+#       },
+#     ]
+#   }
+# }
 
 resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_controller" {
   manifest = {
