@@ -170,6 +170,9 @@ jobs:
           export KEYCLOAK_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
           pytest tests_deployment/ -v -s
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: JupyterHub Notebook Tests
         # run jhub-client after pytest since jhubctl can cleanup
         # the running server
