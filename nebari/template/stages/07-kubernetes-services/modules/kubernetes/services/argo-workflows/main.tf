@@ -134,7 +134,24 @@ resource "kubernetes_manifest" "argo-workflows-ingress-route" {
           )
           services = [
             {
-              name      = "wf-admission-controller"
+              name      = "wf-validating-admission-controller"
+              port      = 8080
+              namespace = var.namespace
+            }
+          ]
+        },
+        {
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`) && Path(`/${local.argo-workflows-prefix}/mutate`)"
+          middlewares = concat(
+            [{
+              name      = kubernetes_manifest.argo-workflows-middleware-stripprefix.manifest.metadata.name
+              namespace = var.namespace
+            }]
+          )
+          services = [
+            {
+              name      = "wf-mutating-admission-controller"
               port      = 8080
               namespace = var.namespace
             }
@@ -267,12 +284,55 @@ resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
   type = "Opaque"
 }
 
+
+resource "kubernetes_manifest" "mutatingwebhookconfiguration_admission_controller" {
+  manifest = {
+    "apiVersion" = "admissionregistration.k8s.io/v1"
+    "kind"       = "MutatingWebhookConfiguration"
+    "metadata" = {
+      "name" = "wf-admission-controller"
+    }
+    "webhooks" = [
+      {
+        "admissionReviewVersions" = [
+          "v1",
+          "v1beta1",
+        ]
+
+        "clientConfig" = {
+          "url" = "https://${var.external-url}/${local.argo-workflows-prefix}/validate"
+        }
+
+        "name" = "admission-controller.dev.svc"
+        "rules" = [
+          {
+            "apiGroups" = [
+              "argoproj.io",
+            ]
+            "apiVersions" = [
+              "v1alpha1",
+            ]
+            "operations" = [
+              "CREATE",
+              "UPDATE",
+            ]
+            "resources" = [
+              "workflows",
+            ]
+          },
+        ]
+        "sideEffects" = "None"
+      },
+    ]
+  }
+}
+
 resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_controller" {
   manifest = {
     "apiVersion" = "admissionregistration.k8s.io/v1"
     "kind"       = "ValidatingWebhookConfiguration"
     "metadata" = {
-      "name" = "admission-controller"
+      "name" = "wf-admission-controller"
     }
     "webhooks" = [
       {
@@ -294,6 +354,7 @@ resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_control
             ]
             "operations" = [
               "CREATE",
+              "UPDATE",
             ]
             "resources" = [
               "workflows",
@@ -330,6 +391,9 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
         "spec" = {
           "containers" = [
             {
+              command            = ["sleep", "1000000"]
+              serviceAccountName = kubernetes_service_account.mu
+              #.metadata.0.name
               "env" = [
                 {
                   "name" = "KEYCLOAK_USERNAME"
@@ -354,7 +418,8 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                   "value" = "https://${var.external-url}/auth/"
                 },
               ]
-              "image" = "quay.io/nebari/nebari-workflow-controller:main"
+              # "image" = "quay.io/nebari/nebari-workflow-controller:main"
+              "image" = "balast/nebari-workflow-controller:latest"
               "name"  = "admission-controller"
             },
           ]
