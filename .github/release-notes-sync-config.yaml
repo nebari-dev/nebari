@@ -5,4 +5,4 @@ group:
   repos: nebari-dev/nebari-docs
   files:
     - source: RELEASE.md
-      dest: docs/references/RELEASE.md
+      dest: docs/docs/references/RELEASE.md
