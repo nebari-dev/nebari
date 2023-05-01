@@ -54,7 +54,7 @@ jobs:
   kubernetes-tests:
     needs: trigger-contributor-tests
     name: "Contributor #${{ github.event.issue.number }}"
-    uses: nebari-dev/nebari/.github/workflows/kubernetes_test.yaml@release/2023.4.1
+    uses: nebari-dev/nebari/.github/workflows/kubernetes_test.yaml@develop
     with:
       pr_number: ${{ github.event.issue.number }}
     secrets: inherit
@@ -62,15 +62,16 @@ jobs:
   infracost-tests:
     needs: trigger-contributor-tests
     name: "Contributor #${{ github.event.issue.number }}"
-    uses: nebari-dev/nebari/.github/workflows/infracost.yml@release/2023.4.1
+    uses: nebari-dev/nebari/.github/workflows/infracost.yml@develop
     with:
       pr_number: ${{ github.event.issue.number }}
     secrets: inherit
 
-  provider-tests:
-    needs: trigger-contributor-tests
-    name: "Contributor #${{ github.event.issue.number }}"
-    uses: nebari-dev/nebari/.github/workflows/test-provider.yaml@release/2023.4.1
-    with:
-      pr_number: ${{ github.event.issue.number }}
-    secrets: inherit
+# FIXME: this needs write permissions, but they might not be available for PRs coming from a fork
+#  provider-tests:
+#    needs: trigger-contributor-tests
+#    name: "Contributor #${{ github.event.issue.number }}"
+#    uses: nebari-dev/nebari/.github/workflows/test-provider.yaml@develop
+#    with:
+#      pr_number: ${{ github.event.issue.number }}
+#    secrets: inherit
