@@ -67,10 +67,11 @@ jobs:
       pr_number: ${{ github.event.issue.number }}
     secrets: inherit
 
-  provider-tests:
-    needs: trigger-contributor-tests
-    name: "Contributor #${{ github.event.issue.number }}"
-    uses: nebari-dev/nebari/.github/workflows/test-provider.yaml@develop
-    with:
-      pr_number: ${{ github.event.issue.number }}
-    secrets: inherit
+# FIXME: this needs write permissions, but they might not be available for PRs coming from a fork
+#  provider-tests:
+#    needs: trigger-contributor-tests
+#    name: "Contributor #${{ github.event.issue.number }}"
+#    uses: nebari-dev/nebari/.github/workflows/test-provider.yaml@develop
+#    with:
+#      pr_number: ${{ github.event.issue.number }}
+#    secrets: inherit
