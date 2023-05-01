@@ -24,6 +24,9 @@ jobs:
         if: ${{ !contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }}
         run: exit 1
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
   build:
     needs: trigger-contributor-tests
     name: Build
