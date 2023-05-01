@@ -23,11 +23,15 @@ jobs:
 
       - name: Comment does not contains the trigger phrase
         if: ${{ !contains(github.event.comment.body, '/bot run tests') }}
-        run: exit 1
+        run: |
+          echo ${{ github.event.comment.body }}
+          exit 1
 
       - name: Author of comment has insufficient permissions
         if: ${{ !contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }}
-        run: exit 1
+        run: |
+          echo ${{ github.event.comment.body }}
+          exit 1
 
   build:
     needs: trigger-contributor-tests
