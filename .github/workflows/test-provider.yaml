@@ -72,7 +72,7 @@ jobs:
         uses: hashicorp/vault-action@v2.5.0
         with:
           method: jwt
-          url: "https://quansight-public-vault-fe415d04.c219cf75.z1.hashicorp.cloud:8200"
+          url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"
           namespace: "admin/quansight"
           role: "repository-nebari-dev-nebari-role"
           secrets: |
