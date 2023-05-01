@@ -30,7 +30,7 @@ jobs:
       - name: Author of comment has insufficient permissions
         if: ${{ !contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }}
         run: |
-          echo ${{ github.event.comment.body }}
+          echo ${{ github.event.comment.author_association }}
           exit 1
 
   build:
