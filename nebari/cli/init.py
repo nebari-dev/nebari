@@ -292,7 +292,6 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
     """
     qmark = "  "
     disable_checks = os.environ.get("NEBARI_DISABLE_INIT_CHECKS", False)
-
     if Path("nebari-config.yaml").exists():
         raise ValueError(
             "A nebari-config.yaml file already exists. Please move or delete it and try again."
@@ -343,7 +342,6 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
         # specific context needed when `check_project_name` is called
         ctx.params["cloud_provider"] = inputs.cloud_provider
-
         name_guidelines = """
         The project name must adhere to the following requirements:
         - Letters from A to Z (upper and lower case) and numbers
