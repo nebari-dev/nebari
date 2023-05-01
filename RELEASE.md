@@ -11,11 +11,47 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ## Upcoming Release
 
+## Release 2023.4.1 - April 12, 2023
+
+> NOTE: Nebari requires Kubernetes version 1.23 and Digital Ocean now requires new clusters to run Kubernetes version 1.24. This means that if you are currently running on Digital Ocean, you should be fine but deploying on a new cluster on Digital Ocean is not possible until we upgrade Kubernetes version (see [issue 1622](https://github.com/nebari-dev/nebari/issues/1622) for more details).
+
+
 ### Feature changes and enhancements
+
+* Upgrades and improvements to conda-store including a new user-interface and greater administrator capabilities.
+* Idle-culler settings can now be configured directly from the `nebari-config.yaml`.
+
+
+### What's Changed
+* PR: Raise timeout for jupyter session by @ppwadhwa in https://github.com/nebari-dev/nebari/pull/1646
+* PR lower dashboard launch timeout by @ppwadhwa in https://github.com/nebari-dev/nebari/pull/1647
+* PR: Update dashboard environment by @ppwadhwa in https://github.com/nebari-dev/nebari/pull/1655
+* Fix doc link in README.md by @tkoyama010 in https://github.com/nebari-dev/nebari/pull/1660
+* PR: Update dask environment by @ppwadhwa in https://github.com/nebari-dev/nebari/pull/1654
+* Feature remove jupyterlab news by @costrouc in https://github.com/nebari-dev/nebari/pull/1641
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/1644
+* Feat GitHub actions before_script and after_script steps by @costrouc in https://github.com/nebari-dev/nebari/pull/1672
+* Remove examples folder by @ppwadhwa in https://github.com/nebari-dev/nebari/pull/1664
+* Fix GH action typos by @kcpevey in https://github.com/nebari-dev/nebari/pull/1677
+* Github Actions CI needs id-token write permissions by @costrouc in https://github.com/nebari-dev/nebari/pull/1682
+* Update AWS force destroy script, include lingering volumes by @iameskild in https://github.com/nebari-dev/nebari/pull/1681
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/1673
+* Make idle culler settings configurable from the `nebari-config.yaml` by @iameskild in https://github.com/nebari-dev/nebari/pull/1689
+* Update pyproject dependencies and add test to ensure it builds on conda-forge by @iameskild in https://github.com/nebari-dev/nebari/pull/1662
+* Retrieve secrets from Vault, fix test-provider CI by @iameskild in https://github.com/nebari-dev/nebari/pull/1676
+* Pull PyPI secrets from Vault by @iameskild in https://github.com/nebari-dev/nebari/pull/1696
+* Adding newest conda-store 0.4.14 along with superadmin credentials by @costrouc in https://github.com/nebari-dev/nebari/pull/1701
+* Update release notes for 2023.4.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/1722
+
+### New Contributors
+* @ppwadhwa made their first contribution in https://github.com/nebari-dev/nebari/pull/1646
+* @tkoyama010 made their first contribution in https://github.com/nebari-dev/nebari/pull/1660
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.1.1...2023.4.1
 
 ## Release 2023.1.1 - January 30, 2023
 
-## What's Changed
+### What's Changed
 * 🔄 Synced file(s) with nebari-dev/.github by @nebari-sensei in https://github.com/nebari-dev/nebari/pull/1588
 * Make conda-store file system read-only by default by @alimanfoo in https://github.com/nebari-dev/nebari/pull/1595
 * ENH - Switch to ruff and pre-commit.ci by @trallard in https://github.com/nebari-dev/nebari/pull/1602
@@ -34,7 +70,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Set GKE release_channel to unspecified to prevent auto k8s updates by @iameskild in https://github.com/nebari-dev/nebari/pull/1630
 * Update default nebari-dask, nebari image tags by @iameskild in https://github.com/nebari-dev/nebari/pull/1636
 
-## New Contributors
+### New Contributors
 * @pre-commit-ci made their first contribution in https://github.com/nebari-dev/nebari/pull/1613
 
 
