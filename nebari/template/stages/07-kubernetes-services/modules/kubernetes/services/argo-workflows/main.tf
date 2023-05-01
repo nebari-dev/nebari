@@ -142,6 +142,23 @@ resource "kubernetes_manifest" "argo-workflows-ingress-route" {
         },
         {
           kind  = "Rule"
+          match = "Host(`${var.external-url}`) && Path(`/${local.argo-workflows-prefix}/mutate`)"
+          middlewares = concat(
+            [{
+              name      = kubernetes_manifest.argo-workflows-middleware-stripprefix.manifest.metadata.name
+              namespace = var.namespace
+            }]
+          )
+          services = [
+            {
+              name      = "wf-admission-controller"
+              port      = 8080
+              namespace = var.namespace
+            }
+          ]
+        },
+        {
+          kind  = "Rule"
           match = "Host(`${var.external-url}`) && PathPrefix(`/${local.argo-workflows-prefix}`)"
 
           middlewares = concat(
@@ -251,6 +268,45 @@ resource "kubernetes_cluster_role_binding" "argo-view-rb" {
 }
 
 # Workflow Admission Controller
+resource "kubernetes_role" "pod_viewer" {
+
+  metadata {
+    name      = "nebari-pod-viewer"
+    namespace = var.namespace
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["pods"]
+    verbs      = ["get", "list"]
+  }
+}
+
+resource "kubernetes_service_account" "wf-admission-controller" {
+  metadata {
+    name      = "wf-admission-controller-sa"
+    namespace = var.namespace
+  }
+}
+
+resource "kubernetes_role_binding" "wf-admission-controller-pod-viewer" {
+  metadata {
+    name      = "wf-admission-controller-pod-viewer"
+    namespace = var.namespace
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.pod_viewer.metadata.0.name
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.wf-admission-controller.metadata.0.name
+    namespace = var.namespace
+  }
+}
+
 resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
   metadata {
     name      = "keycloak-read-only-user-credentials"
@@ -267,12 +323,55 @@ resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
   type = "Opaque"
 }
 
+
+resource "kubernetes_manifest" "mutatingwebhookconfiguration_admission_controller" {
+
+  manifest = {
+    "apiVersion" = "admissionregistration.k8s.io/v1"
+    "kind"       = "MutatingWebhookConfiguration"
+    "metadata" = {
+      "name" = "wf-admission-controller"
+    }
+    "webhooks" = [
+      {
+        "admissionReviewVersions" = [
+          "v1",
+          "v1beta1",
+        ]
+
+        "clientConfig" = {
+          "url" = "https://${var.external-url}/${local.argo-workflows-prefix}/mutate"
+        }
+
+        "name" = "wf-mutating-admission-controller.${var.namespace}.svc"
+        "rules" = [
+          {
+            "apiGroups" = [
+              "argoproj.io",
+            ]
+            "apiVersions" = [
+              "v1alpha1",
+            ]
+            "operations" = [
+              "CREATE",
+            ]
+            "resources" = [
+              "workflows",
+            ]
+          },
+        ]
+        "sideEffects" = "None"
+      },
+    ]
+  }
+}
+
 resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_controller" {
   manifest = {
     "apiVersion" = "admissionregistration.k8s.io/v1"
     "kind"       = "ValidatingWebhookConfiguration"
     "metadata" = {
-      "name" = "admission-controller"
+      "name" = "wf-admission-controller"
     }
     "webhooks" = [
       {
@@ -283,7 +382,7 @@ resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_control
         "clientConfig" = {
           "url" = "https://${var.external-url}/${local.argo-workflows-prefix}/validate"
         }
-        "name" = "admission-controller.dev.svc"
+        "name" = "wf-validating-admission-controller.${var.namespace}.svc"
         "rules" = [
           {
             "apiGroups" = [
@@ -328,8 +427,11 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
           }
         }
         "spec" = {
+          serviceAccountName           = kubernetes_service_account.wf-admission-controller.metadata.0.name
+          automountServiceAccountToken = true
           "containers" = [
             {
+              command = ["sleep", "1000000"]
               "env" = [
                 {
                   "name" = "KEYCLOAK_USERNAME"
@@ -353,8 +455,13 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                   "name"  = "KEYCLOAK_URL"
                   "value" = "https://${var.external-url}/auth/"
                 },
+                {
+                  "name"  = "NAMESPACE"
+                  "value" = var.namespace
+                },
               ]
-              "image" = "quay.io/nebari/nebari-workflow-controller:main"
+              # "image" = "quay.io/nebari/nebari-workflow-controller:main"
+              "image" = "balast/nebari-workflow-controller:latest"
               "name"  = "admission-controller"
             },
           ]
