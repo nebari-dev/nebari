@@ -59,7 +59,7 @@ describe('First Test', () => {
       cy.get('div#jp-MainLogo', { timeout: 60000 }).should('exist').wait(2000);
 
       // Click VS Code Launcher exists
-      cy.get('div.jp-LauncherCard[title="VS Code [↗]"]').should('exist');
+      cy.get('div.jp-LauncherCard[title="VS Code [↗]"]').should('exist').wait(2000);
 
       // Stop my Jupyter server - must do this so PVC can be destroyed on Minikube
       cy.visit('/hub/home');
