@@ -17,20 +17,17 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      #- name: Comment is not on a PR
-      #  if: ${{ !github.event.issue.pull_request }}
-      #  run: exit 1
+      - name: Comment is not on a PR
+        if: ${{ !github.event.issue.pull_request }}
+        run: exit 1
 
-      #- name: Comment does not contains the trigger phrase
-      #  if: ${{ !contains(github.event.comment.body, '/bot run tests') }}
-      #  run: exit 1
+      - name: Comment does not contains the trigger phrase
+        if: ${{ !contains(github.event.comment.body, '/bot run tests') }}
+        run: exit 1
 
-      #- name: Author of comment has insufficient permissions
-      #  if: ${{ !contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }}
-      #  run: exit 1
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      - name: Author of comment has insufficient permissions
+        if: ${{ !contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }}
+        run: exit 1
 
   build:
     needs: trigger-contributor-tests
