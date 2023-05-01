@@ -117,6 +117,7 @@ jobs:
 
       - name: Install Nebari
         run: |
+          pip install --upgrade pip
           pip install .[dev]
 
       - name: Nebari Initialize
