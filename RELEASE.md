@@ -43,17 +43,15 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Adding newest conda-store 0.4.14 along with superadmin credentials by @costrouc in https://github.com/nebari-dev/nebari/pull/1701
 * Update release notes for 2023.4.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/1722
 
-## New Contributors
+### New Contributors
 * @ppwadhwa made their first contribution in https://github.com/nebari-dev/nebari/pull/1646
 * @tkoyama010 made their first contribution in https://github.com/nebari-dev/nebari/pull/1660
 
 **Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.1.1...2023.4.1
 
-### Feature changes and enhancements
-
 ## Release 2023.1.1 - January 30, 2023
 
-## What's Changed
+### What's Changed
 * 🔄 Synced file(s) with nebari-dev/.github by @nebari-sensei in https://github.com/nebari-dev/nebari/pull/1588
 * Make conda-store file system read-only by default by @alimanfoo in https://github.com/nebari-dev/nebari/pull/1595
 * ENH - Switch to ruff and pre-commit.ci by @trallard in https://github.com/nebari-dev/nebari/pull/1602
@@ -72,7 +70,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Set GKE release_channel to unspecified to prevent auto k8s updates by @iameskild in https://github.com/nebari-dev/nebari/pull/1630
 * Update default nebari-dask, nebari image tags by @iameskild in https://github.com/nebari-dev/nebari/pull/1636
 
-## New Contributors
+### New Contributors
 * @pre-commit-ci made their first contribution in https://github.com/nebari-dev/nebari/pull/1613
 
 
