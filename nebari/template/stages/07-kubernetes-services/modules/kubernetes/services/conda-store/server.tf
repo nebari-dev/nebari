@@ -55,9 +55,10 @@ module "conda-store-openid-client" {
   client_id    = "conda_store"
   external-url = var.external-url
   role_mapping = {
-    "admin"     = ["conda_store_admin"]
-    "developer" = ["conda_store_developer"]
-    "analyst"   = ["conda_store_developer"]
+    "superadmin" = ["conda_store_superadmin"]
+    "admin"      = ["conda_store_admin"]
+    "developer"  = ["conda_store_developer"]
+    "analyst"    = ["conda_store_developer"]
   }
   callback-url-paths = [
     "https://${var.external-url}/conda-store/oauth_callback"
