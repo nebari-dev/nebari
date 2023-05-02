@@ -93,9 +93,15 @@ Source = "https://github.com/nebari-dev/nebari"
 nebari = "nebari.cli.main:app"
 
 [tool.ruff]
+select = [
+    "E",
+    "F",
+    "PTH",
+]
 ignore = [
     "E501", # Line too long
     "F821", # Undefined name
+    "PTH123", # open() should be replaced by Path.open()
 ]
 extend-exclude = [
     "nebari/template",
