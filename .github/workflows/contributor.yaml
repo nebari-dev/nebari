@@ -31,6 +31,16 @@ jobs:
         if: ${{ !contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }}
         run: |
           echo ${{ github.event.comment.author_association }}
+          echo
+          echo If you think you should have the right permissions to trigger this,
+          echo they are likely not visible publicly!
+          echo
+          echo To fix this
+          echo
+          echo 1. navigate to https://github.com/nebari-dev,
+          echo 2. click on \'People\' in the top bar,
+          echo 3. scroll down to your entry, and
+          echo 4. change \'🔒 Private\' to \'Public\'.
           exit 1
 
   build:
