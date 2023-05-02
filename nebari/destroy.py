@@ -1,6 +1,6 @@
 import functools
 import logging
-import os
+from pathlib import Path
 
 from nebari.provider import terraform
 from nebari.stages import input_vars, state_imports
@@ -30,13 +30,13 @@ def gather_stage_outputs(config):
         and config["terraform_state"]["type"] == "remote"
     ):
         stage_outputs["stages/01-terraform-state"] = _terraform_init_output(
-            directory=os.path.join("stages/01-terraform-state", config["provider"]),
+            directory=Path("stages/01-terraform-state") / config["provider"],
             input_vars=input_vars.stage_01_terraform_state(stage_outputs, config),
             state_imports=state_imports.stage_01_terraform_state(stage_outputs, config),
         )
 
     stage_outputs["stages/02-infrastructure"] = _terraform_init_output(
-        directory=os.path.join("stages/02-infrastructure", config["provider"]),
+        directory=Path("stages/02-infrastructure") / config["provider"],
         input_vars=input_vars.stage_02_infrastructure(stage_outputs, config),
     )
 
@@ -146,7 +146,7 @@ def destroy_stages(stage_outputs, config):
         )
 
     status["stages/02-infrastructure"] = _terraform_destroy(
-        directory=os.path.join("stages/02-infrastructure", config["provider"]),
+        directory=Path("stages/02-infrastructure") / config["provider"],
         input_vars=input_vars.stage_02_infrastructure(stage_outputs, config),
         ignore_errors=True,
     )
@@ -159,7 +159,7 @@ def destroy_stages(stage_outputs, config):
             # acl and force_destroy do not import properly
             # and only get refreshed properly with an apply
             terraform_apply=True,
-            directory=os.path.join("stages/01-terraform-state", config["provider"]),
+            directory=Path("stages/01-terraform-state") / config["provider"],
             input_vars=input_vars.stage_01_terraform_state(stage_outputs, config),
             ignore_errors=True,
         )

@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Optional
 from zipfile import ZipFile
-from typing import Union
 
 import typer
 from click import Context
@@ -50,19 +49,16 @@ KEYCLOAK_COMMAND_MSG = (
 )
 DEV_COMMAND_MSG = "Development tools and advanced features."
 
-def make_path_callback(*, must_be_file: Union[bool, str] = False):
-    if must_be_file is True:
-        must_be_file = "{value} is not a file!"
-    def callback(value: Path) -> Path:
-        value = value.expanduser().resolve()
-        if must_be_file and not value.is_file():
-            raise ValueError(
-                must_be_file.format(value)
-            )
-        return value
 
-    return callback
+def path_callback(value: Path) -> Path:
+    return value.expanduser().resolve()
 
+
+def config_path_callback(value: Path) -> Path:
+    value = path_callback(value)
+    if not value.is_file():
+        raise ValueError(f"Passed configuration path {value} does not exist!")
+    return value
 
 
 CONFIG_PATH_OPTION: Path = typer.Option(
@@ -70,16 +66,17 @@ CONFIG_PATH_OPTION: Path = typer.Option(
     "--config",
     "-c",
     help="nebari configuration yaml file path, please pass in as -c/--config flag",
-    callback=make_path_callback(must_be_file="Passed configuration path {value} does not exist!"),
+    callback=config_path_callback,
 )
 
-OUTPUT_PATH_OPTION:  Path = typer.Option(
+OUTPUT_PATH_OPTION: Path = typer.Option(
     Path.cwd(),
     "-o",
     "--output",
     help="output directory",
-callback=make_path_callback(),
+    callback=path_callback,
 )
+
 
 class OrderCommands(TyperGroup):
     def list_commands(self, ctx: Context):
@@ -223,7 +220,7 @@ def init(
 
 @app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def validate(
-    config_path = CONFIG_PATH_OPTION,
+    config_path=CONFIG_PATH_OPTION,
     enable_commenting: bool = typer.Option(
         False, "--enable-commenting", help="Toggle PR commenting on GitHub Actions"
     ),
@@ -245,7 +242,7 @@ def validate(
 @app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def render(
     output_path=OUTPUT_PATH_OPTION,
-    config_path = CONFIG_PATH_OPTION,
+    config_path=CONFIG_PATH_OPTION,
     dry_run: bool = typer.Option(
         False,
         "--dry-run",
@@ -264,7 +261,7 @@ def render(
 
 @app.command()
 def deploy(
-    config_path = CONFIG_PATH_OPTION,
+    config_path=CONFIG_PATH_OPTION,
     output_path=OUTPUT_PATH_OPTION,
     dns_provider: str = typer.Option(
         False,
@@ -319,7 +316,7 @@ def deploy(
 
 @app.command()
 def destroy(
-    config_path = CONFIG_PATH_OPTION,
+    config_path=CONFIG_PATH_OPTION,
     output_path=OUTPUT_PATH_OPTION,
     disable_render: bool = typer.Option(
         False,
@@ -404,7 +401,7 @@ def cost(
 
 @app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def upgrade(
-    config_path = CONFIG_PATH_OPTION,
+    config_path=CONFIG_PATH_OPTION,
     attempt_fixes: bool = typer.Option(
         False,
         "--attempt-fixes",
@@ -423,7 +420,7 @@ def upgrade(
 
 @app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def support(
-    config_path = CONFIG_PATH_OPTION,
+    config_path=CONFIG_PATH_OPTION,
     output_path=OUTPUT_PATH_OPTION,
 ):
     """

@@ -2,9 +2,9 @@ import functools
 import hashlib
 import json
 import os
-import pathlib
 import shutil
 import sys
+from pathlib import Path
 from typing import Dict, List
 
 import yaml
@@ -21,17 +21,14 @@ from nebari.stages import tf_objects
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
     # get directory for nebari templates
-    template_directory = pathlib.Path(nebari.__file__).parent / "template"
+    template_directory = Path(nebari.__file__).parent / "template"
 
     # would be nice to remove assumption that input directory
     # is in local filesystem and a directory
-    template_directory = pathlib.Path(template_directory)
     if not template_directory.is_dir():
         raise ValueError(f"template directory={template_directory} is not a directory")
 
-    output_directory = pathlib.Path(output_directory).resolve()
-
-    if output_directory == str(pathlib.Path.home()):
+    if output_directory == Path.home():
         print("ERROR: Deploying Nebari in home directory is not advised!")
         sys.exit(1)
 
@@ -39,7 +36,6 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
     # into it in remove_existing_renders
     output_directory.mkdir(exist_ok=True, parents=True)
 
-    config_filename = pathlib.Path(config_filename)
     if not config_filename.is_file():
         raise ValueError(
             f"cookiecutter configuration={config_filename} is not filename"
@@ -74,8 +70,8 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
     ):
         directories.append(f"stages/01-terraform-state/{config['provider']}")
 
-    source_dirs = [os.path.join(str(template_directory), _) for _ in directories]
-    output_dirs = [os.path.join(str(output_directory), _) for _ in directories]
+    source_dirs = [template_directory / Path(directory) for directory in directories]
+    output_dirs = [output_directory / Path(directory) for directory in directories]
     new, untracked, updated, deleted = inspect_files(
         source_dirs,
         output_dirs,
@@ -122,11 +118,10 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
         print("dry-run enabled no files will be created, updated, or deleted")
     else:
         for filename in new | updated:
-            input_filename = os.path.join(str(template_directory), filename)
-            output_filename = os.path.join(str(output_directory), filename)
-            os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+            input_filename = template_directory / filename
+            output_filename = output_directory / filename
 
-            if os.path.exists(input_filename):
+            if input_filename.exists():
                 shutil.copy(input_filename, output_filename)
             else:
                 with open(output_filename, "w") as f:

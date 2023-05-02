@@ -2,7 +2,6 @@ import contextlib
 import io
 import json
 import logging
-import os
 import platform
 import re
 import subprocess
@@ -10,6 +9,7 @@ import sys
 import tempfile
 import urllib.request
 import zipfile
+from pathlib import Path
 from typing import Any, Dict, List
 
 from nebari import constants
@@ -98,10 +98,10 @@ def download_terraform_binary(version=constants.TERRAFORM_VERSION):
     }
 
     download_url = f"https://releases.hashicorp.com/terraform/{version}/terraform_{version}_{os_mapping[sys.platform]}_{architecture_mapping[platform.machine()]}.zip"
-    filename_directory = os.path.join(tempfile.gettempdir(), "terraform", version)
-    filename_path = os.path.join(filename_directory, "terraform")
+    filename_directory = Path(tempfile.gettempdir()) / "terraform" / version
+    filename_path = filename_directory / "terraform"
 
-    if not os.path.isfile(filename_path):
+    if not filename_path.is_file():
         logger.info(
             f"downloading and extracting terraform binary from url={download_url} to path={filename_path}"
         )
@@ -110,7 +110,7 @@ def download_terraform_binary(version=constants.TERRAFORM_VERSION):
         download_file = zipfile.ZipFile(bytes_io)
         download_file.extract("terraform", filename_directory)
 
-    os.chmod(filename_path, 0o555)
+    filename_path.chmod(0o555)
     return filename_path
 
 
@@ -216,12 +216,12 @@ def destroy(directory=None, targets=None, var_files=None):
 
 def rm_local_state(directory=None):
     logger.info(f"rm local state file terraform.tfstate directory={directory}")
-    tfstate_path = "terraform.tfstate"
+    tfstate_path = Path("terraform.tfstate")
     if directory:
-        tfstate_path = os.path.join(directory, tfstate_path)
+        tfstate_path = directory / tfstate_path
 
-    if os.path.isfile(tfstate_path):
-        os.remove(tfstate_path)
+    if tfstate_path.is_file():
+        tfstate_path.unlink()
 
 
 # ========== Terraform JSON ============

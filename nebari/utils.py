@@ -1,13 +1,13 @@
 import contextlib
 import functools
 import os
-import pathlib
 import re
 import signal
 import subprocess
 import sys
 import threading
 import time
+from pathlib import Path
 from typing import Dict, List
 
 from ruamel.yaml import YAML
@@ -55,7 +55,7 @@ def timer(logger, prefix):
 
 @contextlib.contextmanager
 def change_directory(directory):
-    current_directory = os.getcwd()
+    current_directory = Path.cwd()
     os.chdir(directory)
     yield
     os.chdir(current_directory)
@@ -179,7 +179,7 @@ def check_cloud_credentials(config):
         raise ValueError("Cloud Provider configuration not supported")
 
 
-def load_yaml(config_filename: pathlib.Path):
+def load_yaml(config_filename: Path):
     """
     Return yaml dict containing config loaded from config_filename.
     """
@@ -189,17 +189,17 @@ def load_yaml(config_filename: pathlib.Path):
     return config
 
 
-def backup_config_file(filename: pathlib.Path, extrasuffix: str = ""):
+def backup_config_file(filename: Path, extrasuffix: str = ""):
     if not filename.exists():
         return
 
     # Backup old file
-    backup_filename = pathlib.Path(f"{filename}{extrasuffix}.backup")
+    backup_filename = Path(f"{filename}{extrasuffix}.backup")
 
     if backup_filename.exists():
         i = 1
         while True:
-            next_backup_filename = pathlib.Path(f"{backup_filename}~{i}")
+            next_backup_filename = Path(f"{backup_filename}~{i}")
             if not next_backup_filename.exists():
                 backup_filename = next_backup_filename
                 break
