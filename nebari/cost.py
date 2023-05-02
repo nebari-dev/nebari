@@ -66,7 +66,7 @@ def _run_infracost(path):
     """
     try:
         process = subprocess.Popen(
-            ["infracost", "breakdown", f"--path={path}", f"--format=json"],
+            ["infracost", "breakdown", f"--path={path}", "--format=json"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )

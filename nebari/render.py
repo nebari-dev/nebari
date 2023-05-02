@@ -45,7 +45,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
             f"cookiecutter configuration={config_filename} is not filename"
         )
 
-    with config_filename.open() as f:
+    with open(config_filename) as f:
         yaml = YAML(typ="safe", pure=True)
         config = yaml.load(f)
 
