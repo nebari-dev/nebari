@@ -8,6 +8,7 @@ from abc import ABC
 
 import rich
 from pydantic.error_wrappers import ValidationError
+from rich.prompt import Prompt
 
 from .schema import is_version_accepted, verify
 from .utils import backup_config_file, load_yaml, yaml
@@ -18,6 +19,11 @@ logger = logging.getLogger(__name__)
 
 def do_upgrade(config_filename, attempt_fixes=False):
     config = load_yaml(config_filename)
+    if config.get("qhub_version"):
+        rich.print(
+            f"Your config file [purple]{config_filename}[/purple] uses the deprecated qhub_version key.  Please change qhub_version to nebari_version and re-run the upgrade command."
+        )
+        return
 
     try:
         verify(config)
@@ -26,14 +32,14 @@ def do_upgrade(config_filename, attempt_fixes=False):
         )
         return
     except (ValidationError, ValueError) as e:
-        if is_version_accepted(config.get("qhub_version", "")):
+        if is_version_accepted(config.get("nebari_version", "")):
             # There is an unrelated validation problem
             print(
                 f"Your config file {config_filename} appears to be already up-to-date for Nebari version {__version__} but there is another validation error.\n"
             )
             raise e
 
-    start_version = config.get("qhub_version", "")
+    start_version = config.get("nebari_version", "")
 
     UpgradeStep.upgrade(
         config, start_version, __version__, config_filename, attempt_fixes
@@ -145,7 +151,7 @@ class UpgradeStep(ABC):
 
         # Set the new version
         if start_version == "":
-            assert "qhub_version" not in config
+            assert "nebari_version" not in config
         assert self.version != start_version
 
         if self.requires_nebari_version_field():
@@ -377,6 +383,31 @@ class Upgrade_0_4_1(UpgradeStep):
             print(
                 f"Setting access type of JupyterLab profile {name} to {profile['access']}"
             )
+        return config
+
+
+class Upgrade_2023_4_2(UpgradeStep):
+    version = "2023.4.2"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: pathlib.Path, *args, **kwargs
+    ):
+        """
+        Prompt users to delete Argo CRDs
+        """
+
+        kubectl_delete_argo_crds_cmd = "kubectl delete crds clusterworkflowtemplates.argoproj.io cronworkflows.argoproj.io workfloweventbindings.argoproj.io workflows.argoproj.io workflowtasksets.argoproj.io workflowtemplates.argoproj.io"
+
+        rich.print(
+            f"\n\n[bold cyan]Note:[/] Upgrading requires a one-time manual deletion of the Argo Workflows Custom Resource Definitions (CRDs). \n\n[red bold]Warning:  [link=https://{config['domain']}/argo/workflows]Workflows[/link] and [link=https://{config['domain']}/argo/workflows]CronWorkflows[/link] created before deleting the CRDs will be erased when the CRDs are deleted and will not be restored.[/red bold] \n\nThe updated CRDs will be installed during the next [cyan bold]nebari deploy[/cyan bold] step. Argo Workflows will not function after deleting the CRDs until the updated CRDs are installed in the next nebari deploy. You must delete the Argo CRDs before upgrading to {self.version} or deploy step will fail.  Please delete them before proceeding by generating a kubeconfig (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari/#generating-the-kubeconfig]docs[/link]), installing kubectl (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari#installing-kubectl]docs[/link]), and running the following command:\n\n\t[cyan bold]{kubectl_delete_argo_crds_cmd} [/cyan bold]\n"
+            ""
+        )
+
+        continue_ = Prompt.ask("Have you deleted the Argo CRDs? \[y/N]", default="N")
+        if not continue_ == "y":
+            print(f"You must delete the Argo CRDs before upgrading to {self.version}")
+            exit()
+
         return config
 
 

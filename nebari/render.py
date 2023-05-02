@@ -12,6 +12,7 @@ from rich import print
 from rich.table import Table
 from ruamel.yaml import YAML
 
+import nebari
 from nebari.deprecate import DEPRECATED_FILE_PATHS
 from nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from nebari.provider.cicd.gitlab import gen_gitlab_ci
@@ -20,8 +21,6 @@ from nebari.stages import tf_objects
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
     # get directory for nebari templates
-    import nebari
-
     template_directory = pathlib.Path(nebari.__file__).parent / "template"
 
     # would be nice to remove assumption that input directory

@@ -113,7 +113,7 @@ app.add_typer(
 def version(
     version: Optional[bool] = typer.Option(
         None,
-        "-v",
+        "-V",
         "--version",
         help="Nebari version number",
         is_eager=True,
