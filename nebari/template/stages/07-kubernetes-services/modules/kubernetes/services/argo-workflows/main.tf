@@ -8,12 +8,10 @@ resource "helm_release" "argo-workflows" {
   namespace  = var.namespace
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-workflows"
-  version    = "0.13.1"
+  version    = "0.22.9"
 
   values = concat([
     file("${path.module}/values.yaml"),
-    # https://github.com/argoproj/argo-helm/blob/argo-workflows-0.13.1/charts/argo-workflows/values.yaml
-
 
     jsonencode({
       singleNamespace = true # Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
@@ -61,9 +59,6 @@ resource "helm_release" "argo-workflows" {
         nodeSelector = {
           "${var.node-group.key}" = var.node-group.value
         }
-      }
-      controller = {
-        containerRuntimeExecutor = "emissary"
       }
 
     })
@@ -180,9 +175,9 @@ resource "kubernetes_cluster_role_binding" "argo-admin-rb" {
   }
 }
 
-resource "kubernetes_service_account" "argo-edit-sa" {
+resource "kubernetes_service_account" "argo-dev-sa" {
   metadata {
-    name      = "argo-edit"
+    name      = "argo-dev"
     namespace = var.namespace
     annotations = {
       "workflows.argoproj.io/rbac-rule" : "'argo_developer' in groups"
@@ -192,9 +187,9 @@ resource "kubernetes_service_account" "argo-edit-sa" {
   }
 }
 
-resource "kubernetes_cluster_role_binding" "argo-edit-rb" {
+resource "kubernetes_cluster_role_binding" "argo-dev-rb" {
   metadata {
-    name = "argo-edit"
+    name = "argo-dev"
   }
 
   role_ref {
@@ -204,10 +199,12 @@ resource "kubernetes_cluster_role_binding" "argo-edit-rb" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.argo-edit-sa.metadata.0.name
+    name      = kubernetes_service_account.argo-dev-sa.metadata.0.name
     namespace = var.namespace
   }
 }
+
+
 resource "kubernetes_service_account" "argo-view-sa" {
   metadata {
     name      = "argo-view"
