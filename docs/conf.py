@@ -1,7 +1,7 @@
 # Configuration file for the Sphinx documentation builder.
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 HERE = Path(__file__).parent
 
