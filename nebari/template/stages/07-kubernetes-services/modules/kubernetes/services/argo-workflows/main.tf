@@ -431,7 +431,6 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
           automountServiceAccountToken = true
           "containers" = [
             {
-              command = ["sleep", "1000000"]
               "env" = [
                 {
                   "name" = "KEYCLOAK_USERNAME"
