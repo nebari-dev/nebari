@@ -2,12 +2,9 @@ import os
 
 import dask_gateway
 import pytest
-import urllib3
 
 from tests_deployment import constants
 from tests_deployment.utils import get_jupyterhub_token, monkeypatch_ssl_context
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 monkeypatch_ssl_context()
 
@@ -25,11 +22,13 @@ def dask_gateway_object():
     )
 
 
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_dask_gateway(dask_gateway_object):
     """This test checks if we're able to connect to dask gateway."""
     assert dask_gateway_object.list_clusters() == []
 
 
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_dask_gateway_cluster_options(dask_gateway_object):
     """Tests Dask Gateway's cluster options."""
     cluster_options = dask_gateway_object.cluster_options()

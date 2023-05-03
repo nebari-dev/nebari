@@ -3,7 +3,6 @@ import uuid
 
 import paramiko
 import pytest
-import urllib3
 
 from tests_deployment import constants
 from tests_deployment.utils import (
@@ -11,8 +10,6 @@ from tests_deployment.utils import (
     get_jupyterhub_token,
     monkeypatch_ssl_context,
 )
-
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 monkeypatch_ssl_context()
 
@@ -63,11 +60,13 @@ def run_command(command, stdin, stdout, stderr):
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_simple_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_print_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
@@ -87,6 +86,7 @@ def test_print_jupyterhub_ssh(paramiko_object):
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_exact_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
@@ -106,6 +106,7 @@ def test_exact_jupyterhub_ssh(paramiko_object):
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_contains_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
