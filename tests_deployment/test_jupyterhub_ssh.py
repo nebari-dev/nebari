@@ -1,8 +1,10 @@
 import re
 import uuid
+import warnings
 
 import paramiko
 import pytest
+from urllib3.exceptions import InsecureRequestWarning
 
 from tests_deployment import constants
 from tests_deployment.utils import (
@@ -10,6 +12,9 @@ from tests_deployment.utils import (
     get_jupyterhub_token,
     monkeypatch_ssl_context,
 )
+
+warnings.simplefilter("ignore", InsecureRequestWarning)
+
 
 monkeypatch_ssl_context()
 
