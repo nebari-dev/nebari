@@ -5,7 +5,7 @@ variable "name" {
 
 variable "namespace" {
   description = "Namespace to create Kubernetes resources"
-  type= string
+  type        = string
 }
 
 module "terraform-state" {
