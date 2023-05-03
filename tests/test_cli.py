@@ -75,9 +75,7 @@ def test_python_invocation():
 
     command = ["nebari", "--version"]
 
-    # FIXME: this is only temporary until we have a toplevel nebari package again
-    # actual = run(["python", "-m", *command])
-    actual = run(["python", "-m", "_nebari", "--version"])
+    actual = run(["python", "-m", *command])
     expected = run(command)
 
     assert actual == expected
