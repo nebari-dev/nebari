@@ -9,7 +9,6 @@ on:
       - "tests_e2e/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
   push:
     branches:
@@ -23,7 +22,6 @@ on:
       - "tests_e2e/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
   workflow_call:
     inputs:
