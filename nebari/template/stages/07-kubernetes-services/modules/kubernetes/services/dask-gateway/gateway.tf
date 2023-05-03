@@ -21,6 +21,8 @@ resource "kubernetes_secret" "gateway" {
       conda-store-pvc                      = var.conda-store-pvc
       conda-store-mount                    = var.conda-store-mount
       worker-node-group                    = var.worker-node-group
+      conda-store-api-token                = var.conda-store-api-token
+      external-url                         = var.external-url
     })
   }
 }
