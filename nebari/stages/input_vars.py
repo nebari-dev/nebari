@@ -3,7 +3,11 @@ import os
 import tempfile
 from urllib.parse import urlencode
 
-from nebari.constants import DEFAULT_CONDA_STORE_IMAGE_TAG, DEFAULT_TRAEFIK_IMAGE_TAG
+from nebari.constants import (
+    DEFAULT_CONDA_STORE_IMAGE_TAG,
+    DEFAULT_NEBARI_WORKFLOW_CONTROLLER_IMAGE_TAG,
+    DEFAULT_TRAEFIK_IMAGE_TAG,
+)
 
 
 def stage_01_terraform_state(stage_outputs, config):
@@ -339,6 +343,10 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "keycloak_read_only_user_credentials": stage_outputs[
             "stages/06-kubernetes-keycloak-configuration"
         ]["keycloak-read-only-user-credentials"]["value"],
+        "workflow-controller-image-tag": config.get("argo_workflows", {}).get(
+            "workflow_controller_image_tag",
+            DEFAULT_NEBARI_WORKFLOW_CONTROLLER_IMAGE_TAG,
+        ),
         # kbatch
         "kbatch-enabled": config["kbatch"]["enabled"],
         # prefect

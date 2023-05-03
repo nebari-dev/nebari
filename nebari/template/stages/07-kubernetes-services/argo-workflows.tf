@@ -17,6 +17,11 @@ variable "keycloak_read_only_user_credentials" {
   default     = {}
 }
 
+variable "workflow-controller-image-tag" {
+  description = "Image tag for nebari-workflow-controller"
+  type        = string
+}
+
 
 # ====================== RESOURCES =======================
 module "argo-workflows" {
@@ -30,4 +35,5 @@ module "argo-workflows" {
   node-group                          = var.node_groups.general
   overrides                           = var.argo-workflows-overrides
   keycloak_read_only_user_credentials = var.keycloak_read_only_user_credentials
+  workflow-controller-image-tag       = var.workflow-controller-image-tag
 }

@@ -41,3 +41,8 @@ variable "keycloak_read_only_user_credentials" {
   type        = map(string)
   default     = {}
 }
+
+variable "workflow-controller-image-tag" {
+  description = "Image tag for nebari-workflow-controller"
+  type        = string
+}
