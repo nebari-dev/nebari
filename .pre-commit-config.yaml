@@ -29,12 +29,12 @@ repos:
       - id: check-json
       - id: check-yaml
         # jinja2 templates for helm charts
-        exclude: "nebari/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)"
+        exclude: "src/nebari/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)"
         args: [--allow-multiple-documents]
       - id: check-toml
       # Lint: Checks that non-binary executables have a proper shebang.
       - id: check-executables-have-shebangs
-        exclude: "^nebari/template/"
+        exclude: "^src/nebari/template/"
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.2.4
@@ -54,7 +54,7 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
-        args: ["--line-length=88", "--exclude=/nebari/template/"]
+        args: ["--line-length=88", "--exclude=/src/nebari/template/"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.263
