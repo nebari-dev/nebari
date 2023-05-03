@@ -22,7 +22,8 @@ resource "kubernetes_secret" "gateway" {
       conda-store-mount                    = var.conda-store-mount
       worker-node-group                    = var.worker-node-group
       conda-store-api-token                = var.conda-store-api-token
-      external-url                         = var.external-url
+      conda-store-service-name             = var.conda-store-service-name
+      conda-store-namespace                = var.namespace
     })
   }
 }

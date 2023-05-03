@@ -90,11 +90,14 @@ c.JupyterHubAuthenticator.jupyterhub_api_token = config["jupyterhub_api_token"]
 def list_dask_environments():
     necessary_dask_packages = {"dask", "distributed", "dask-gateway"}
     token = config["conda-store-api-token"]
-    external_url = config["external-url"]
+    conda_store_service_name, conda_store_service_port = config[
+        "conda-store-service-name"
+    ].split(":")
+    conda_store_endpoint = f"{conda_store_service_name}.{config['conda-store-namespace']}.svc:{conda_store_service_port}"
     environment_endpoint = "/conda-store/api/v1/environment/"
     query_params = f"?packages={'&packages='.join(necessary_dask_packages)}"
 
-    url = "https://" + external_url + environment_endpoint + query_params
+    url = "http://" + conda_store_endpoint + environment_endpoint + query_params
 
     http = urllib3.PoolManager()
     response = http.request("GET", url, headers={"Authorization": f"Bearer {token}"})
