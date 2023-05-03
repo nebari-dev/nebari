@@ -1,15 +1,13 @@
 import os
-import warnings
 
 import dask_gateway
 import pytest
-from urllib3.exceptions import InsecureRequestWarning
+import urllib3
 
 from tests_deployment import constants
 from tests_deployment.utils import get_jupyterhub_token, monkeypatch_ssl_context
 
-warnings.simplefilter("ignore", InsecureRequestWarning)
-
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 monkeypatch_ssl_context()
 
