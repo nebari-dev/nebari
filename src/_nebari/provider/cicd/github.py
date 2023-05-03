@@ -6,8 +6,8 @@ import requests
 from nacl import encoding, public
 from pydantic import BaseModel, Field
 
-from nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
-from nebari.provider.cicd.common import pip_install_nebari
+from _nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
+from _nebari.provider.cicd.common import pip_install_nebari
 
 GITHUB_BASE_URL = "https://api.github.com/"
 

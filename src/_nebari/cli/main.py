@@ -10,8 +10,8 @@ from rich import print
 from ruamel import yaml
 from typer.core import TyperGroup
 
-from nebari.cli.dev import app_dev
-from nebari.cli.init import (
+from _nebari.cli.dev import app_dev
+from _nebari.cli.init import (
     check_auth_provider_creds,
     check_cloud_provider_creds,
     check_project_name,
@@ -20,12 +20,12 @@ from nebari.cli.init import (
     guided_init_wizard,
     handle_init,
 )
-from nebari.cli.keycloak import app_keycloak
-from nebari.cost import infracost_report
-from nebari.deploy import deploy_configuration
-from nebari.destroy import destroy_configuration
-from nebari.render import render_template
-from nebari.schema import (
+from _nebari.cli.keycloak import app_keycloak
+from _nebari.cost import infracost_report
+from _nebari.deploy import deploy_configuration
+from _nebari.destroy import destroy_configuration
+from _nebari.render import render_template
+from _nebari.schema import (
     AuthenticationEnum,
     CiEnum,
     GitRepoEnum,
@@ -34,9 +34,9 @@ from nebari.schema import (
     TerraformStateEnum,
     verify,
 )
-from nebari.upgrade import do_upgrade
-from nebari.utils import load_yaml
-from nebari.version import __version__
+from _nebari.upgrade import do_upgrade
+from _nebari.utils import load_yaml
+from _nebari.version import __version__
 
 SECOND_COMMAND_GROUP_NAME = "Additional Commands"
 GUIDED_INIT_MSG = (

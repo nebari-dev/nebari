@@ -2,9 +2,9 @@ import functools
 import logging
 import os
 
-from nebari.provider import terraform
-from nebari.stages import input_vars, state_imports
-from nebari.utils import (
+from _nebari.provider import terraform
+from _nebari.stages import input_vars, state_imports
+from _nebari.utils import (
     check_cloud_credentials,
     keycloak_provider_context,
     kubernetes_provider_context,

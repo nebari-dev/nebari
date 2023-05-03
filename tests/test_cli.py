@@ -2,8 +2,8 @@ import subprocess
 
 import pytest
 
-from nebari.schema import InitInputs
-from nebari.utils import load_yaml
+from _nebari.schema import InitInputs
+from _nebari.utils import load_yaml
 
 PROJECT_NAME = "clitest"
 DOMAIN_NAME = "clitest.dev"
@@ -75,7 +75,9 @@ def test_python_invocation():
 
     command = ["nebari", "--version"]
 
-    actual = run(["python", "-m", *command])
+    # FIXME: this is only temporary until we have a toplevel nebari package again
+    # actual = run(["python", "-m", *command])
+    actual = run(["python", "-m", "_nebari", "--version"])
     expected = run(command)
 
     assert actual == expected

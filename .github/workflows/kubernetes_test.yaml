@@ -8,7 +8,7 @@ on:
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "src/nebari/**"
+      - "src/_nebari/**"
       - "setup.cfg"
       - "pyproject.toml"
       - "pytest.ini"

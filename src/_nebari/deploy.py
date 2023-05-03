@@ -3,10 +3,10 @@ import os
 import subprocess
 import textwrap
 
-from nebari.provider import terraform
-from nebari.provider.dns.cloudflare import update_record
-from nebari.stages import checks, input_vars, state_imports
-from nebari.utils import (
+from _nebari.provider import terraform
+from _nebari.provider.dns.cloudflare import update_record
+from _nebari.stages import checks, input_vars, state_imports
+from _nebari.utils import (
     check_cloud_credentials,
     keycloak_provider_context,
     kubernetes_provider_context,

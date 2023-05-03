@@ -5,7 +5,7 @@ import subprocess
 
 import boto3
 
-from nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 
 
 @functools.lru_cache()

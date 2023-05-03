@@ -2,8 +2,8 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
-from nebari.provider.cicd.common import pip_install_nebari
+from _nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
+from _nebari.provider.cicd.common import pip_install_nebari
 
 
 class GLCI_extras(BaseModel):

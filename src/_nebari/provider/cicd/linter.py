@@ -5,7 +5,7 @@ import textwrap
 
 import requests
 
-from nebari.schema import verify
+from _nebari.schema import verify
 
 
 def nebari_validate(config):

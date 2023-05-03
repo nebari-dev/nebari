@@ -12,16 +12,16 @@ from rich import print
 from rich.table import Table
 from ruamel.yaml import YAML
 
-import nebari
-from nebari.deprecate import DEPRECATED_FILE_PATHS
-from nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
-from nebari.provider.cicd.gitlab import gen_gitlab_ci
-from nebari.stages import tf_objects
+import _nebari
+from _nebari.deprecate import DEPRECATED_FILE_PATHS
+from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
+from _nebari.provider.cicd.gitlab import gen_gitlab_ci
+from _nebari.stages import tf_objects
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
     # get directory for nebari templates
-    template_directory = pathlib.Path(nebari.__file__).parent / "template"
+    template_directory = pathlib.Path(_nebari.__file__).parent / "template"
 
     # would be nice to remove assumption that input directory
     # is in local filesystem and a directory
@@ -148,7 +148,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
 
 
 def render_contents(config: Dict):
-    """Dynamically generated contents from Nebari configuration."""
+    """Dynamically generated contents from _nebari configuration."""
     contents = {
         **tf_objects.stage_01_terraform_state(config),
         **tf_objects.stage_02_infrastructure(config),

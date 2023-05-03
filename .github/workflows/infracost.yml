@@ -3,7 +3,7 @@ name: Infracost CI
 on:
   pull_request:
     paths:
-      - 'src/nebari/template/stages/02-infrastructure'
+      - 'src/_nebari/template/stages/02-infrastructure'
       - '.github/workflows/infracost.yml'
   workflow_call:
     inputs:

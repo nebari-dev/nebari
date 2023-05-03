@@ -1,12 +1,12 @@
 from typing import Dict
 
-from nebari.provider.terraform import (
+from _nebari.provider.terraform import (
     Data,
     Provider,
     TerraformBackend,
     tf_render_objects,
 )
-from nebari.utils import deep_merge
+from _nebari.utils import deep_merge
 
 
 def NebariAWSProvider(nebari_config: Dict):

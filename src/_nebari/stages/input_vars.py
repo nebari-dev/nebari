@@ -3,7 +3,7 @@ import os
 import tempfile
 from urllib.parse import urlencode
 
-from nebari.constants import DEFAULT_CONDA_STORE_IMAGE_TAG, DEFAULT_TRAEFIK_IMAGE_TAG
+from _nebari.constants import DEFAULT_CONDA_STORE_IMAGE_TAG, DEFAULT_TRAEFIK_IMAGE_TAG
 
 
 def stage_01_terraform_state(stage_outputs, config):
