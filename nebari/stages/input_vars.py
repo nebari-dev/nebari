@@ -3,7 +3,11 @@ import os
 import tempfile
 from urllib.parse import urlencode
 
-from nebari.constants import DEFAULT_CONDA_STORE_IMAGE_TAG, DEFAULT_TRAEFIK_IMAGE_TAG
+from nebari.constants import (
+    DEFAULT_CONDA_STORE_IMAGE_TAG,
+    DEFAULT_GKE_RELEASE_CHANNEL,
+    DEFAULT_TRAEFIK_IMAGE_TAG,
+)
 
 
 def stage_01_terraform_state(stage_outputs, config):
@@ -65,6 +69,9 @@ def stage_02_infrastructure(stage_outputs, config):
             "region": config["google_cloud_platform"]["region"],
             "project_id": config["google_cloud_platform"]["project"],
             "kubernetes_version": config["google_cloud_platform"]["kubernetes_version"],
+            "release_channel": config.get("google_cloud_platform", {}).get(
+                "release_channel", DEFAULT_GKE_RELEASE_CHANNEL
+            ),
             "node_groups": [
                 {
                     "name": key,
