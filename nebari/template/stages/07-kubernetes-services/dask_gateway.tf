@@ -35,6 +35,8 @@ module "dask-gateway" {
   conda-store-pvc               = module.conda-store-nfs-mount.persistent_volume_claim.name
   conda-store-mount             = "/home/conda"
   default-conda-store-namespace = var.conda-store-default-namespace
+  conda-store-api-token         = module.kubernetes-conda-store-server.service-tokens.dask-gateway
+  conda-store-service-name      = module.kubernetes-conda-store-server.service_name
 
   # profiles
   profiles = var.dask-gateway-profiles
