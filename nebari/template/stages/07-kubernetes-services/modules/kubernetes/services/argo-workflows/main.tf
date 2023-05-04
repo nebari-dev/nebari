@@ -147,7 +147,7 @@ resource "kubernetes_manifest" "argo-workflows-ingress-route" {
   }
 }
 
-resource "kubernetes_service_account" "argo-admin-sa" {
+resource "kubernetes_service_account_v1" "argo-admin-sa" {
   metadata {
     name      = "argo-admin"
     namespace = var.namespace
@@ -156,6 +156,18 @@ resource "kubernetes_service_account" "argo-admin-sa" {
       "workflows.argoproj.io/rbac-rule-precedence" : "11"
     }
   }
+}
+
+resource "kubernetes_secret_v1" "argo_admin_sa_token" {
+  metadata {
+    name      = "argo-admin.service-account-token"
+    namespace = var.namespace
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account_v1.argo-admin-sa.metadata[0].name
+
+    }
+  }
+  type = "kubernetes.io/service-account-token"
 }
 
 resource "kubernetes_cluster_role_binding" "argo-admin-rb" {
@@ -170,12 +182,12 @@ resource "kubernetes_cluster_role_binding" "argo-admin-rb" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.argo-admin-sa.metadata.0.name
+    name      = kubernetes_service_account_v1.argo-admin-sa.metadata.0.name
     namespace = var.namespace
   }
 }
 
-resource "kubernetes_service_account" "argo-dev-sa" {
+resource "kubernetes_service_account_v1" "argo-dev-sa" {
   metadata {
     name      = "argo-dev"
     namespace = var.namespace
@@ -183,8 +195,18 @@ resource "kubernetes_service_account" "argo-dev-sa" {
       "workflows.argoproj.io/rbac-rule" : "'argo_developer' in groups"
       "workflows.argoproj.io/rbac-rule-precedence" : "10"
     }
-
   }
+}
+
+resource "kubernetes_secret_v1" "argo_dev_sa_token" {
+  metadata {
+    name      = "argo-dev.service-account-token"
+    namespace = var.namespace
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account_v1.argo-dev-sa.metadata[0].name
+    }
+  }
+  type = "kubernetes.io/service-account-token"
 }
 
 resource "kubernetes_cluster_role_binding" "argo-dev-rb" {
@@ -199,21 +221,32 @@ resource "kubernetes_cluster_role_binding" "argo-dev-rb" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.argo-dev-sa.metadata.0.name
+    name      = kubernetes_service_account_v1.argo-dev-sa.metadata.0.name
     namespace = var.namespace
   }
 }
 
 
-resource "kubernetes_service_account" "argo-view-sa" {
+resource "kubernetes_service_account_v1" "argo-view-sa" {
   metadata {
-    name      = "argo-view"
+    name      = "argo-viewer"
     namespace = var.namespace
     annotations = {
       "workflows.argoproj.io/rbac-rule" : "'argo_viewer' in groups"
       "workflows.argoproj.io/rbac-rule-precedence" : "9"
     }
   }
+}
+
+resource "kubernetes_secret_v1" "argo_viewer_sa_token" {
+  metadata {
+    name      = "argo-viewer.service-account-token"
+    namespace = var.namespace
+    annotations = {
+      "kubernetes.io/service-account.name" = kubernetes_service_account_v1.argo-view-sa.metadata[0].name
+    }
+  }
+  type = "kubernetes.io/service-account-token"
 }
 
 resource "kubernetes_cluster_role_binding" "argo-view-rb" {
@@ -228,7 +261,7 @@ resource "kubernetes_cluster_role_binding" "argo-view-rb" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.argo-view-sa.metadata.0.name
+    name      = kubernetes_service_account_v1.argo-view-sa.metadata.0.name
     namespace = var.namespace
   }
 }

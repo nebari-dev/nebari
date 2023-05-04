@@ -403,6 +403,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 "Would you like us to auto provision the Auth0 Machine-to-Machine app?",
                 default=False,
                 qmark=qmark,
+                auto_enter=False,
             ).unsafe_ask()
 
         elif inputs.auth_provider.lower() == AuthenticationEnum.github.value.lower():
@@ -426,6 +427,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             "Would you like to adopt a GitOps approach to managing Nebari?",
             default=False,
             qmark=qmark,
+            auto_enter=False,
         ).unsafe_ask():
             repo_url = "http://{git_provider}/{org_name}/{repo_name}"
 
@@ -454,6 +456,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                     f"Would you like nebari to create a remote repository on {git_provider}?",
                     default=False,
                     qmark=qmark,
+                    auto_enter=False,
                 ).unsafe_ask()
 
             if not disable_checks and inputs.repository_auto_provision:
@@ -475,6 +478,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             "Would you like to add a Let's Encrypt SSL certificate to your domain?",
             default=False,
             qmark=qmark,
+            auto_enter=False,
         ).unsafe_ask()
 
         if ssl_cert:
@@ -499,6 +503,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             "Would you like to make advanced configuration changes?",
             default=False,
             qmark=qmark,
+            auto_enter=False,
         ).unsafe_ask():
             # TERRAFORM STATE
             inputs.terraform_state = questionary.select(

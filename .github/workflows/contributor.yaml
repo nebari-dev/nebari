@@ -9,7 +9,42 @@ permissions:
   pull-requests: write
 
 jobs:
+  trigger-contributor-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment is not on a PR
+        if: ${{ !github.event.issue.pull_request }}
+        run: exit 1
+
+      - name: Comment does not contains the trigger phrase
+        if: ${{ !contains(github.event.comment.body, '/bot run tests') }}
+        run: |
+          echo ${{ github.event.comment.body }}
+          exit 1
+
+      - name: Author of comment has insufficient permissions
+        if: ${{ !contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association) }}
+        run: |
+          echo ${{ github.event.comment.author_association }}
+          echo
+          echo If you think you should have the right permissions to trigger this,
+          echo they are likely not visible publicly!
+          echo
+          echo To fix this
+          echo
+          echo 1. navigate to https://github.com/nebari-dev,
+          echo 2. click on \'People\' in the top bar,
+          echo 3. scroll down to your entry, and
+          echo 4. change \'🔒 Private\' to \'Public\'.
+          exit 1
+
   build:
+    needs: trigger-contributor-tests
     name: Build
     if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/bot run tests') && contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)}}
     runs-on: ubuntu-latest
@@ -31,25 +66,26 @@ jobs:
           reactions: 'rocket'
 
   kubernetes-tests:
+    needs: trigger-contributor-tests
     name: "Contributor #${{ github.event.issue.number }}"
-    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/bot run tests') && contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)}}
-    uses: nebari-dev/nebari/.github/workflows/kubernetes_test.yaml@release/2022.11.1
+    uses: nebari-dev/nebari/.github/workflows/kubernetes_test.yaml@develop
     with:
       pr_number: ${{ github.event.issue.number }}
     secrets: inherit
 
   infracost-tests:
+    needs: trigger-contributor-tests
     name: "Contributor #${{ github.event.issue.number }}"
-    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/bot run tests') && contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)}}
-    uses: nebari-dev/nebari/.github/workflows/infracost.yml@release/2022.11.1
+    uses: nebari-dev/nebari/.github/workflows/infracost.yml@develop
     with:
       pr_number: ${{ github.event.issue.number }}
     secrets: inherit
 
-  provider-tests:
-    name: "Contributor #${{ github.event.issue.number }}"
-    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/bot run tests') && contains(fromJson('["OWNER", "COLLABORATOR", "MEMBER"]'), github.event.comment.author_association)}}
-    uses: nebari-dev/nebari/.github/workflows/test-provider.yaml@release/2022.11.1
-    with:
-      pr_number: ${{ github.event.issue.number }}
-    secrets: inherit
+# FIXME: this needs write permissions, but they might not be available for PRs coming from a fork
+#  provider-tests:
+#    needs: trigger-contributor-tests
+#    name: "Contributor #${{ github.event.issue.number }}"
+#    uses: nebari-dev/nebari/.github/workflows/test-provider.yaml@develop
+#    with:
+#      pr_number: ${{ github.event.issue.number }}
+#    secrets: inherit
