@@ -292,7 +292,13 @@ def stage_07_kubernetes_services(stage_outputs, config):
                 "role_bindings": {
                     "*/*": ["viewer"],
                 },
-            }
+            },
+            "dask-gateway": {
+                "primary_namespace": "",
+                "role_bindings": {
+                    "*/*": ["viewer"],
+                },
+            },
         },
         "conda-store-default-namespace": config.get("conda_store", {}).get(
             "default_namespace", "nebari-git"
