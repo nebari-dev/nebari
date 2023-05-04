@@ -16,7 +16,7 @@ monkeypatch_ssl_context()
 TIMEOUT_SECS = 300
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def paramiko_object():
     """Connects to JupyterHub ssh cluster from outside the cluster."""
     api_token = get_jupyterhub_token("jupyterhub-ssh")
@@ -61,12 +61,14 @@ def run_command(command, stdin, stdout, stderr):
 
 @pytest.mark.timeout(TIMEOUT_SECS)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_simple_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_print_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
@@ -87,6 +89,7 @@ def test_print_jupyterhub_ssh(paramiko_object):
 
 @pytest.mark.timeout(TIMEOUT_SECS)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_exact_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
@@ -107,6 +110,7 @@ def test_exact_jupyterhub_ssh(paramiko_object):
 
 @pytest.mark.timeout(TIMEOUT_SECS)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_contains_jupyterhub_ssh(paramiko_object):
     stdin, stdout, stderr = paramiko_object.exec_command("")
 
