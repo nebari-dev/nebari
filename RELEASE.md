@@ -23,7 +23,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * There is a minor breaking change for the Nebari CLI version shorthand, previously it `nebari -v` and now to align with Python convention, it will be `nebari -V`.
 
 > NOTE: After installing the Nebari version `2023.5.1`, please run `nebari upgrade -c nebari-config.yaml` to upgrade
-> the `nebari-config.yaml`. This command will also prompt you with delete a few Kubernetes resources (specifically
+> the `nebari-config.yaml`. This command will also prompt you to delete a few Kubernetes resources (specifically
 > the Argo-Workflows CRDS and service accounts) before you can upgrade.
 
 ### What's Changed
