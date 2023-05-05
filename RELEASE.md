@@ -13,6 +13,19 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ### Release 2023.5.1 - May 5, 2023
 
+### Feature changes and enhancements
+
+* Upgrade Argo-Workflows to version 3.4.4
+
+### Breaking Changes
+
+* The Argo-Workflows version upgrade will result in a breaking change if the existing Kubernetes CRDs are not deleted (see the NOTE below for more details).
+* There is a minor breaking change for the Nebari CLI version shorthand, previously it `nebari -v` and now to align with Python convention, it will be `nebari -V`.
+
+> NOTE: After installing the Nebari version `2023.5.1`, please run `nebari upgrade -c nebari-config.yaml` to upgrade
+> the `nebari-config.yaml`. This command will also prompt you with delete a few Kubernetes resources (specifically
+> the Argo-Workflows CRDS and service accounts) before you can upgrade.
+
 ### What's Changed
 * Use --quiet flag for conda install in CI by @pmeier in https://github.com/nebari-dev/nebari/pull/1699
 * improve CLI tests by @pmeier in https://github.com/nebari-dev/nebari/pull/1710
@@ -47,6 +60,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Upgrade to k8s 1.24 by @iameskild in https://github.com/nebari-dev/nebari/pull/1760
 * Overloaded dask gateway fix by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1777
 * Add option to specify GKE release channel by @iameskild in https://github.com/nebari-dev/nebari/pull/1648
+* Update upgrade command, add RELEASE notes by @iameskild in https://github.com/nebari-dev/nebari/pull/1789
 
 ### New Contributors
 * @pmeier made their first contribution in https://github.com/nebari-dev/nebari/pull/1699
