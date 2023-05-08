@@ -446,8 +446,8 @@ def upgrade(
     """
     Upgrade your [purple]nebari-config.yaml[/purple].
 
-    Due to occasional breaking changes that require manual steps during upgrade, this utility helps
-    update your [purple]nebari-config.yaml[/purple] to comply with the introduced changes.
+    Due to occasional breaking changes during upgrade, this utility updates your [purple]nebari-config.yaml[/purple] and if necessary, prompts users to perform manual upgrade steps required for the deploy process.
+
     See the project [green]RELEASE.md[/green] for details.
     """
     config_filename = Path(config)
