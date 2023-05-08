@@ -392,6 +392,7 @@ resource "kubernetes_manifest" "mutatingwebhookconfiguration_admission_controlle
             ]
             "resources" = [
               "workflows",
+              "cronworkflows",
             ]
           },
         ]
