@@ -444,9 +444,9 @@ def upgrade(
     ),
 ):
     """
-    Upgrade your [purple]nebari-config.yaml[/purple] from pre-0.4.0 to 0.4.0.
+    Upgrade your [purple]nebari-config.yaml[/purple].
 
-    Due to several breaking changes that came with the 0.4.0 release, this utility is available to help
+    Due to occasional breaking changes that require manual steps during upgrade, this utility helps
     update your [purple]nebari-config.yaml[/purple] to comply with the introduced changes.
     See the project [green]RELEASE.md[/green] for details.
     """
