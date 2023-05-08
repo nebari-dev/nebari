@@ -282,6 +282,20 @@ resource "kubernetes_role" "pod_viewer" {
   }
 }
 
+resource "kubernetes_role" "workflow_viewer" {
+
+  metadata {
+    name      = "nebari-workflow-viewer"
+    namespace = var.namespace
+  }
+
+  rule {
+    api_groups = ["argoproj.io"]
+    resources  = ["workflows", "cronworkflows"]
+    verbs      = ["get", "list"]
+  }
+}
+
 resource "kubernetes_service_account" "wf-admission-controller" {
   metadata {
     name      = "wf-admission-controller-sa"
@@ -300,12 +314,33 @@ resource "kubernetes_role_binding" "wf-admission-controller-pod-viewer" {
     kind      = "Role"
     name      = kubernetes_role.pod_viewer.metadata.0.name
   }
+
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account.wf-admission-controller.metadata.0.name
     namespace = var.namespace
   }
 }
+
+resource "kubernetes_role_binding" "wf-admission-controller-wf-viewer" {
+  metadata {
+    name      = "wf-admission-controller-wf-viewer"
+    namespace = var.namespace
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.workflow_viewer.metadata.0.name
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.wf-admission-controller.metadata.0.name
+    namespace = var.namespace
+  }
+}
+
 
 resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
   metadata {
@@ -431,6 +466,10 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
           automountServiceAccountToken = true
           "containers" = [
             {
+              command = ["bash", "-c"]
+              # args = ["python -m nebari_workflow_controller -l DEBUG"]
+              args = ["sleep 1000000"]
+
               "env" = [
                 {
                   "name" = "KEYCLOAK_USERNAME"
@@ -459,7 +498,8 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                   "value" = var.namespace
                 },
               ]
-              "image" = "quay.io/nebari/nebari-workflow-controller:${var.workflow-controller-image-tag}"
+              # "image" = "quay.io/nebari/nebari-workflow-controller:${var.workflow-controller-image-tag}"
+              "image" = "balast/nebari-workflow-controller:latest"
               "name"  = "admission-controller"
             },
           ]
