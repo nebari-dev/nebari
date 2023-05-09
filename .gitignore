@@ -12,6 +12,9 @@ terraform.tfstate
 terraform.tfstate.backup
 .terraform.tfstate.lock.info
 
+# tests
+videos/
+
 # python
 __pycache__
 build/
@@ -49,4 +52,3 @@ nebari-config.yaml
 .ipynb_checkpoints
 .DS_Store
 /.ruff_cache
-videos/

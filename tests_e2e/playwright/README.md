@@ -26,6 +26,9 @@ Then install playwright itself (rerquired).
 
 `playwright install`
 
+:::note
+If you see the warning `BEWARE: your OS is not officially supported by Playwright; downloading fallback build.`, it is not critical. Playwright will likely still
+work https://github.com/microsoft/playwright/issues/15124
 
 ## Writing Playwright tests
 
