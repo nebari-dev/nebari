@@ -1,17 +1,19 @@
+# Right now the trigger is set to run on every Monday at 13:00 UTC,
+# or when the workflow file is modified. An aditional manual trigger
+# is also available.
 name: "Validate Helm Charts downloads"
 
 on:
+  schedule:
+    # Run every Monday at 13:00 UTC
+    - cron: "0 13 * * 1"
   pull_request:
     paths:
       - ".github/workflows/test_helm_charts.yaml"
-      - "nebari/**"
   push:
-    branches:
-      - main
-      - develop
     paths:
       - ".github/workflows/test_helm_charts.yaml"
-      - "nebari/**"
+  workflow_dispatch:
 
 jobs:
   test-helm-charts:
