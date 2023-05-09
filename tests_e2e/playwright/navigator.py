@@ -80,7 +80,7 @@ class Navigator:
             headless=self.headless,
             slow_mo=self.slow_mo,
         )
-        self.wait_for_server_spinup = 30000  # 5 * 60 * 1000  # 5 minutes in ms
+        self.wait_for_server_spinup = 300_000  # 5 * 60 * 1_000  # 5 minutes in ms
 
     @property
     def initialize(self):
@@ -111,20 +111,12 @@ class Navigator:
         logger.debug(">>> Setting up browser for Playwright")
 
         self.playwright = sync_playwright().start()
-        if browser == "chromium":
-            self.browser = self.playwright.chromium.launch(
+        try:
+            self.browser = getattr(self.playwright, browser).launch(
                 headless=headless, slow_mo=slow_mo
             )
-        elif browser == "webkit":
-            self.browser = self.playwright.webkit.launch(
-                headless=headless, slow_mo=slow_mo
-            )
-        elif browser == "firefox":
-            self.browser = self.playwright.firefox.launch(
-                headless=headless, slow_mo=slow_mo
-            )
-        else:
-            raise RuntimeError(f"{browser} browser is not recognized.")
+        except AttributeError:
+            raise RuntimeError(f"{browser} browser is not recognized.") from None
         self.context = self.browser.new_context(
             ignore_https_errors=True,
             record_video_dir=self.video_dir,
@@ -142,12 +134,13 @@ class Navigator:
 
     def login(self) -> None:
         """Login to nebari deployment using the auth method on the class."""
-        if self.auth == "google":
-            self.login_google()
-        elif self.auth == "password":
-            self.login_password()
-        else:
-            raise ValueError(f"Auth type of {self.auth} is invalid.")
+        try:
+            return {
+                "google": self.login_google,
+                "password": self.login_password,
+            }()
+        except KeyError:
+            raise ValueError(f"Auth type of {self.auth} is invalid.") from None
 
     def login_google(self) -> None:
         """Go to a nebari deployment, login via Google"""
@@ -262,14 +255,12 @@ class Navigator:
         kernel_menuitem = self.page.get_by_text("Kernel", exact=True)
         kernel_menuitem.click()
         # shut down multiple running kernels
-        try:
+        with contextlib.suppress(Exception):
             shut_down_all = self.page.get_by_text(
                 "Shut Down All Kernels...", exact=True
             )
             shut_down_all.wait_for(timeout=300, state="attached")
             shut_down_all.click()
-        except Exception:
-            pass
 
         # shut down kernel if only one notebook is running
         kernel_menuitem.click()
