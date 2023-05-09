@@ -398,14 +398,23 @@ class Upgrade_2023_4_2(UpgradeStep):
 
         kubectl_delete_argo_crds_cmd = "kubectl delete crds clusterworkflowtemplates.argoproj.io cronworkflows.argoproj.io workfloweventbindings.argoproj.io workflows.argoproj.io workflowtasksets.argoproj.io workflowtemplates.argoproj.io"
 
+        kubectl_delete_argo_sa_cmd = (
+            f"kubectl delete sa -n {config['namespace']} argo-admin argo-dev argo-view"
+        )
+
         rich.print(
-            f"\n\n[bold cyan]Note:[/] Upgrading requires a one-time manual deletion of the Argo Workflows Custom Resource Definitions (CRDs). \n\n[red bold]Warning:  [link=https://{config['domain']}/argo/workflows]Workflows[/link] and [link=https://{config['domain']}/argo/workflows]CronWorkflows[/link] created before deleting the CRDs will be erased when the CRDs are deleted and will not be restored.[/red bold] \n\nThe updated CRDs will be installed during the next [cyan bold]nebari deploy[/cyan bold] step. Argo Workflows will not function after deleting the CRDs until the updated CRDs are installed in the next nebari deploy. You must delete the Argo CRDs before upgrading to {self.version} or deploy step will fail.  Please delete them before proceeding by generating a kubeconfig (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari/#generating-the-kubeconfig]docs[/link]), installing kubectl (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari#installing-kubectl]docs[/link]), and running the following command:\n\n\t[cyan bold]{kubectl_delete_argo_crds_cmd} [/cyan bold]\n"
+            f"\n\n[bold cyan]Note:[/] Upgrading requires a one-time manual deletion of the Argo Workflows Custom Resource Definitions (CRDs) and service accounts. \n\n[red bold]Warning:  [link=https://{config['domain']}/argo/workflows]Workflows[/link] and [link=https://{config['domain']}/argo/workflows]CronWorkflows[/link] created before deleting the CRDs will be erased when the CRDs are deleted and will not be restored.[/red bold] \n\nThe updated CRDs will be installed during the next [cyan bold]nebari deploy[/cyan bold] step. Argo Workflows will not function after deleting the CRDs until the updated CRDs and service accounts are installed in the next nebari deploy. You must delete the Argo Workflows CRDs and service accounts before upgrading to {self.version} (or later) or the deploy step will fail.  Please delete them before proceeding by generating a kubeconfig (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari/#generating-the-kubeconfig]docs[/link]), installing kubectl (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari#installing-kubectl]docs[/link]), and running the following two commands:\n\n\t[cyan bold]{kubectl_delete_argo_crds_cmd} [/cyan bold]\n\n\t[cyan bold]{kubectl_delete_argo_sa_cmd} [/cyan bold]"
             ""
         )
 
-        continue_ = Prompt.ask("Have you deleted the Argo CRDs? \[y/N]", default="N")
+        continue_ = Prompt.ask(
+            "Have you deleted the Argo Workflows CRDs and service accounts? [y/N]",
+            default="N",
+        )
         if not continue_ == "y":
-            print(f"You must delete the Argo CRDs before upgrading to {self.version}")
+            print(
+                f"You must delete the Argo Workflows CRDs and service accounts before upgrading to {self.version} (or later)."
+            )
             exit()
 
         return config

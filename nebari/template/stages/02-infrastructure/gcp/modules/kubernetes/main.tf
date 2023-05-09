@@ -21,7 +21,7 @@ resource "google_container_cluster" "main" {
   }
 
   release_channel {
-    channel = "UNSPECIFIED"
+    channel = var.release_channel
   }
 
   networking_mode = var.networking_mode
