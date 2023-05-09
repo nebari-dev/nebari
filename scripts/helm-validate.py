@@ -82,6 +82,10 @@ class HelmChartIndexer:
         parent_contents = {}
 
         for file in parent_path.glob("**/*.tf"):
+            if file.as_posix().endswith("configmaps.tf"):
+                # It should be safe to skip configmaps.tf files as they are not used to define helm_release resources
+                # This was included as an exception to avoid a parsing error: on services/jupyterhub/configmaps.tf at line 8, column 5.
+                continue
             with open(file, "r") as f:
                 parent_contents = deep_merge(parent_contents, hcl2.load(f))
 
