@@ -197,25 +197,10 @@ class Navigator:
             start_locator.wait_for(timeout=3000, state="attached")
             start_locator.click()
 
-            # I'm not sure why this is no longer needed. Leaving it here for
-            # future reference.
-            # # your server is not yet running, would like to start it?
-            # self.page.get_by_role("button", name="Launch server").click()
-
             # select instance type (this will fail if this instance type is not
             # available)
             self.page.locator(f"#profile-item-{self.instance_name}").click()
             self.page.get_by_role("button", name="Start").click()
-
-            # # wait for server to spinup
-            # server_message = self.page.get_by_text(
-            #     f"Server ready at /user/{self.username}/",
-            #     exact=True,
-            # )
-            # server_message.wait_for(
-            #     timeout=self.wait_for_server_spinup,
-            #     state="attached",
-            # )
 
         except Exception:
             # if the server is already running
