@@ -35,7 +35,7 @@ variable "realm_id" {
   type        = string
 }
 
-variable "keycloak_read_only_user_credentials" {
+variable "keycloak-read-only-user-credentials" {
   sensitive   = true
   description = "Keycloak password for nebari-bot"
   type        = map(string)
@@ -45,4 +45,9 @@ variable "keycloak_read_only_user_credentials" {
 variable "workflow-controller-image-tag" {
   description = "Image tag for nebari-workflow-controller"
   type        = string
+}
+
+variable "nebari-workflow-controller" {
+  description = "Nebari Workflow Controller enabled"
+  type        = bool
 }

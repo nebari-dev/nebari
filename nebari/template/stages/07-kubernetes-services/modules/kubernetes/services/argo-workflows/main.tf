@@ -382,10 +382,10 @@ resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
   }
 
   data = {
-    username  = var.keycloak_read_only_user_credentials["username"]
-    password  = var.keycloak_read_only_user_credentials["password"]
-    client_id = var.keycloak_read_only_user_credentials["client_id"]
-    realm     = var.keycloak_read_only_user_credentials["realm"]
+    username  = var.keycloak-read-only-user-credentials["username"]
+    password  = var.keycloak-read-only-user-credentials["password"]
+    client_id = var.keycloak-read-only-user-credentials["client_id"]
+    realm     = var.keycloak-read-only-user-credentials["realm"]
   }
 
   type = "Opaque"
@@ -393,6 +393,7 @@ resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
 
 
 resource "kubernetes_manifest" "mutatingwebhookconfiguration_admission_controller" {
+  count = var.nebari-workflow-controller ? 1 : 0
 
   manifest = {
     "apiVersion" = "admissionregistration.k8s.io/v1"
@@ -436,6 +437,7 @@ resource "kubernetes_manifest" "mutatingwebhookconfiguration_admission_controlle
 }
 
 resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_controller" {
+  count = var.nebari-workflow-controller ? 1 : 0
   manifest = {
     "apiVersion" = "admissionregistration.k8s.io/v1"
     "kind"       = "ValidatingWebhookConfiguration"
@@ -475,6 +477,7 @@ resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_control
 }
 
 resource "kubernetes_manifest" "deployment_admission_controller" {
+  count = var.nebari-workflow-controller ? 1 : 0
   manifest = {
     "apiVersion" = "apps/v1"
     "kind"       = "Deployment"

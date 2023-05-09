@@ -350,7 +350,10 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "argo-workflows-overrides": [
             json.dumps(config.get("argo_workflows", {}).get("overrides", {}))
         ],
-        "keycloak_read_only_user_credentials": stage_outputs[
+        "nebari-workflow-controller": config["argo_workflows"].get(
+            "nebari_workflow_controller", True
+        ),
+        "keycloak-read-only-user-credentials": stage_outputs[
             "stages/06-kubernetes-keycloak-configuration"
         ]["keycloak-read-only-user-credentials"]["value"],
         "workflow-controller-image-tag": config.get("argo_workflows", {}).get(
