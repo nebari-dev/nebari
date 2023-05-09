@@ -504,8 +504,8 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
           "containers" = [
             {
               command = ["bash", "-c"]
-              # args = ["python -m nebari_workflow_controller -l DEBUG"]
-              args = ["sleep 1000000"]
+              args    = ["python -m nebari_workflow_controller -l DEBUG"]
+              # args = ["sleep 1000000"]
 
               "env" = [
                 {
