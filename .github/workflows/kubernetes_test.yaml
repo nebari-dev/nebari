@@ -4,13 +4,10 @@ on:
   pull_request:
     paths:
       - ".github/workflows/kubernetes_test.yaml"
-      - "tests/**"
       - "tests_deployment/**"
       - "tests_e2e/**"
-      - "scripts/**"
-      - "nebari/**"
-      - "pyproject.toml"
-      - "pytest.ini"
+      - "nebari/stages/**"
+      - "nebari/template/stages/**"
   push:
     branches:
       - main
@@ -18,18 +15,20 @@ on:
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/kubernetes_test.yaml"
-      - "tests/**"
       - "tests_deployment/**"
       - "tests_e2e/**"
-      - "scripts/**"
-      - "nebari/**"
-      - "pyproject.toml"
-      - "pytest.ini"
+      - "nebari/stages/**"
+      - "nebari/template/stages/**"
   workflow_call:
     inputs:
       pr_number:
         required: true
         type: string
+
+# Used to cancel any currently running job or workflow in the same concurrency group
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-kubernetes:
