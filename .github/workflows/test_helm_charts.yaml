@@ -7,9 +7,6 @@ on:
   schedule:
     # Run every Monday at 13:00 UTC
     - cron: "0 13 * * 1"
-  pull_request:
-    paths:
-      - ".github/workflows/test_helm_charts.yaml"
   push:
     paths:
       - ".github/workflows/test_helm_charts.yaml"
