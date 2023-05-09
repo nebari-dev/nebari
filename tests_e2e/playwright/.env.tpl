@@ -1,4 +1,4 @@
 USERNAME="USERNAME_OR_GOOGLE_EMAIL"
 PASSWORD="PASSWORD"
 NEBARI_FULL_URL="https://nebari.quansight.dev/"
-INSTANCE_NAME=""
+INSTANCE_NAME="small-instance"

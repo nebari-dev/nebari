@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import re
 import time
@@ -138,7 +139,7 @@ class Navigator:
             return {
                 "google": self.login_google,
                 "password": self.login_password,
-            }()
+            }[self.auth]()
         except KeyError:
             raise ValueError(f"Auth type of {self.auth} is invalid.") from None
 
@@ -180,14 +181,17 @@ class Navigator:
     def start_server(self) -> None:
         """Start a nebari server. There are several different web interfaces
         possible in this process depending on if you already have a server
-        running or not. In order for this to work, we look for html elements,
-        wait because the page may need to load, and if they don't appear, we
-        check for another server start option.
+        running or not. In order for this to work, wait for the page to load,
+        we look for html elements that exist when no server is running, if
+        they aren't visible, we check for an existing server start option.
         """
+        # wait for the page to load
+        logout_button = self.page.get_by_text("Logout", exact=True)
+        logout_button.wait_for(state="attached")
+
         # if server is not yet running
         start_locator = self.page.get_by_role("button", name="Start My Server")
-        try:
-            start_locator.wait_for(timeout=3000, state="attached")
+        if start_locator.is_visible():
             start_locator.click()
 
             # select instance type (this will fail if this instance type is not
@@ -195,14 +199,14 @@ class Navigator:
             self.page.locator(f"#profile-item-{self.instance_name}").click()
             self.page.get_by_role("button", name="Start").click()
 
-        except Exception:
+        else:
             # if the server is already running
             start_locator = self.page.get_by_role(
                 "button",
                 name="My Server",
                 exact=True,
             )
-            start_locator.wait_for(timeout=3000, state="attached")
+            # start_locator.wait_for(timeout=3000, state="attached")
             start_locator.click()
 
         # wait for server spinup
@@ -264,12 +268,10 @@ class Navigator:
 
         # shut down kernel if only one notebook is running
         kernel_menuitem.click()
-        try:
+        with contextlib.suppress(Exception):
             shut_down_current = self.page.get_by_text("Shut Down Kernel", exact=True)
             shut_down_current.wait_for(timeout=300, state="attached")
             shut_down_current.click()
-        except Exception:
-            pass
 
         # go back to root folder
         self.page.get_by_title(f"/home/{self.username}", exact=True).locator(
@@ -375,8 +377,6 @@ class Navigator:
         -------
         None
         """
-        import datetime as dt
-
         start = dt.datetime.now()
 
         logger.debug(f">>> Clone git repo: {git_url}")

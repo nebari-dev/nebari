@@ -30,6 +30,20 @@ Then install playwright itself (rerquired).
 If you see the warning `BEWARE: your OS is not officially supported by Playwright; downloading fallback build.`, it is not critical. Playwright will likely still
 work https://github.com/microsoft/playwright/issues/15124
 
+### Create environment file
+
+Create a copy of the `.env` template file
+
+```bash
+cp .env.tpl .env
+```
+
+* USERNAME: Nebari username for username/password login OR Google email address or Google sign in
+* PASSWORD: Password associated with USERNAME
+* NEBARI_FULL_URL: full url path to Nebari instance, e.g. "https://nebari.quansight.dev/"
+* INSTANCE_NAME: Label of the server instance type you'd like to spin up. This is defined in `nebari-config.yaml`. By default, Nebari will include `small-instance`
+
+
 ## Writing Playwright tests
 
 In general most of the testing happens through `locators` which is Playwright's
@@ -67,3 +81,6 @@ Note that waiting for the page to finish loading may be deceptive inside of
 Jupyterlab since things may need to load _inside_ the page, not necessarily
 causing network traffic - or causing several bursts network traffic, which
 would incorrectly pass the `wait_for_load_state` after the first burst.
+
+Playwright has a built-in auto-wait feature which waits for a timeout period
+for some actionable items. See https://playwright.dev/docs/actionability .
