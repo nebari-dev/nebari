@@ -535,9 +535,9 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                   "value" = var.namespace
                 },
               ]
-              # "image" = "quay.io/nebari/nebari-workflow-controller:${var.workflow-controller-image-tag}"
-              "image" = "balast/nebari-workflow-controller:latest"
-              "name"  = "admission-controller"
+              "image" = "quay.io/nebari/nebari-workflow-controller:${var.workflow-controller-image-tag}"
+              # "image" = "balast/nebari-workflow-controller:latest"
+              "name" = "admission-controller"
             },
           ]
         }
