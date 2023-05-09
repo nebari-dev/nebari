@@ -9,7 +9,6 @@ on:
       - "tests_e2e/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
       - "pytest.ini"
   push:
@@ -24,7 +23,6 @@ on:
       - "tests_e2e/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
       - "pytest.ini"
 

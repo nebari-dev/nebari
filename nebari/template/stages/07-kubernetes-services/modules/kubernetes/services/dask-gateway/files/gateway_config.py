@@ -2,6 +2,7 @@ import functools
 import json
 import os
 
+import urllib3
 from aiohttp import web
 from dask_gateway_server.auth import JupyterHubAuthenticator
 from dask_gateway_server.options import Mapping, Options, Select
@@ -86,35 +87,27 @@ c.JupyterHubAuthenticator.jupyterhub_api_token = config["jupyterhub_api_token"]
 
 
 # ==================== Profiles =======================
-def get_packages(conda_prefix):
-    try:
-        packages = set()
-        for filename in os.listdir(os.path.join(conda_prefix, "conda-meta")):
-            if filename.endswith(".json"):
-                with open(os.path.join(conda_prefix, "conda-meta", filename)) as f:
-                    packages.add(json.load(f).get("name"))
-        return packages
-    except OSError as e:
-        import logging
+def list_dask_environments():
+    necessary_dask_packages = {"dask", "distributed", "dask-gateway"}
+    token = config["conda-store-api-token"]
+    conda_store_service_name, conda_store_service_port = config[
+        "conda-store-service-name"
+    ].split(":")
+    conda_store_endpoint = f"{conda_store_service_name}.{config['conda-store-namespace']}.svc:{conda_store_service_port}"
+    environment_endpoint = "/conda-store/api/v1/environment/"
+    query_params = f"?packages={'&packages='.join(necessary_dask_packages)}"
 
-        logger = logging.getLogger()
-        logger.error(f"An issue with a conda environment was encountered.\n{e}")
+    url = "http://" + conda_store_endpoint + environment_endpoint + query_params
 
+    http = urllib3.PoolManager()
+    response = http.request("GET", url, headers={"Authorization": f"Bearer {token}"})
 
-def get_conda_prefixes(conda_store_mount):
-    for namespace in os.listdir(conda_store_mount):
-        if os.path.isdir(os.path.join(conda_store_mount, namespace, "envs")):
-            for name in os.listdir(os.path.join(conda_store_mount, namespace, "envs")):
-                yield namespace, name, os.path.join(
-                    conda_store_mount, namespace, "envs", name
-                )
-
-
-def list_dask_environments(conda_store_mount):
-    for namespace, name, conda_prefix in get_conda_prefixes(conda_store_mount):
-        packages = get_packages(conda_prefix)
-        if packages and {"dask", "distributed"} <= packages:
-            yield namespace, name, conda_prefix
+    # parse response
+    j = json.loads(response.data.decode("UTF-8"))
+    return [
+        (conda_env["namespace"]["name"], conda_env["name"])
+        for conda_env in j.get("data", [])
+    ]
 
 
 def base_node_group(options):
@@ -251,21 +244,19 @@ def user_options(user):
     allowed_namespaces = set(
         [default_namespace, "global", user.name] + list(user.groups)
     )
-    environments = {
-        f"{namespace}/{name}": conda_prefix
-        for namespace, name, conda_prefix in list_dask_environments(
-            config["conda-store-mount"]
-        )
-        if namespace in allowed_namespaces
-    }
+    conda_environments = []
+    for namespace, name in list_dask_environments():
+        if namespace not in allowed_namespaces:
+            continue
+        conda_environments.append(f"{namespace}/{namespace}-{name}")
 
     args = []
-    if environments:
+    if conda_environments:
         args += [
             Select(
                 "conda_environment",
-                list(environments.keys()),
-                default=list(environments.keys())[0],
+                conda_environments,
+                default=conda_environments[0],
                 label="Environment",
             )
         ]
