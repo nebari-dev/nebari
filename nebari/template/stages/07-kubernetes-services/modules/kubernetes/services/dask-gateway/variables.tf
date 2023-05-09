@@ -189,3 +189,13 @@ variable "default-conda-store-namespace" {
   description = "Default conda-store namespace"
   type        = string
 }
+
+variable "conda-store-api-token" {
+  description = "Service token for conda-store api"
+  type        = string
+}
+
+variable "conda-store-service-name" {
+  description = "internal service-name:port where conda-store can be reached"
+  type        = string
+}
