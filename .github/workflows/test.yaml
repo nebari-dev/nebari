@@ -9,8 +9,8 @@ on:
       - "tests_e2e/cypress/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
+      - "pytest.ini"
   push:
     branches:
       - main
@@ -23,8 +23,8 @@ on:
       - "tests_e2e/cypress/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
+      - "pytest.ini"
 
 jobs:
   test-general:

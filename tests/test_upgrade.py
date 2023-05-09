@@ -44,7 +44,11 @@ def test_upgrade_4_0(
     expect_upgrade_error,
     tmp_path,
     qhub_users_import_json,
+    monkeypatch,
 ):
+    # Return "y" when asked if you've deleted the Argo CRDs
+    monkeypatch.setattr("builtins.input", lambda: "y")
+
     old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
 
     tmp_qhub_config = Path(tmp_path, old_qhub_config_path.name)

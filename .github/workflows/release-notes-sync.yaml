@@ -14,7 +14,7 @@ jobs:
       - name: Run Release File Sync ♻️
         uses: BetaHuhn/repo-file-sync-action@v1
         with:
-          GH_PAT: ${{ secrets.GITHUB_TOKEN }}
+          GH_PAT: ${{ secrets.NEBARI_SENSEI_API_DOCS_PR_OPENER }}
           CONFIG_PATH: .github/release-notes-sync-config.yaml
           COMMIT_BODY: "MAINT - Sync release notes :robot:"
           PR_LABELS: |

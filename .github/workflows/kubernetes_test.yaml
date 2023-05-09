@@ -9,8 +9,8 @@ on:
       - "tests_e2e/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
+      - "pytest.ini"
   push:
     branches:
       - main
@@ -23,8 +23,8 @@ on:
       - "tests_e2e/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
+      - "pytest.ini"
   workflow_call:
     inputs:
       pr_number:
@@ -187,6 +187,7 @@ jobs:
         # run jhub-client after pytest since jhubctl can cleanup
         # the running server
         run: |
+          sleep 60
           export JUPYTERHUB_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
           export JUPYTERHUB_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
           jhubctl --verbose run --hub=https://github-actions.nebari.dev \
