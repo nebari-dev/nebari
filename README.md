@@ -49,11 +49,13 @@ on [HPC](#nebari-hpc) or [Kubernetes](#nebari) with minimal DevOps overhead.
 
 Not sure what to choose? Check out our [Setup Initialization](docs/source/installation/setup.md) page.
 
+start
 ## QHub HPC
 
 The HPC version of Nebari is based on [OpenHPC](https://openhpc.community/).
 
 > NOTE: The tool is currently under development. Curious? Check out the [Nebari HPC](https://github.com/Quansight/qhub-hpc) repository.
+end
 
 ## Nebari
 
