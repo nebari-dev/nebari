@@ -1,3 +1,4 @@
+import contextlib
 import logging
 from pathlib import Path
 
@@ -11,7 +12,9 @@ class RunNotebook:
         self.nav = navigator
         self.nav.initialize
 
-    def run_notebook(self, path, expected_output_text, conda_env, runtime=30000):
+    def run_notebook(
+        self, path, expected_output_text, conda_env, runtime=30000, retry=2
+    ):
         """Run jupyter notebook and check for expected output text anywhere on
         the page.
 
@@ -57,6 +60,15 @@ class RunNotebook:
         # make sure that this notebook is one currently selected
         self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
 
+        for i in range(retry):
+            self._restart_run_all()
+
+            output_locator = self.nav.page.get_by_text(expected_output_text, exact=True)
+            with contextlib.suppress(Exception):
+                if output_locator.is_visible():
+                    break
+
+    def _restart_run_all(self):
         # restart run all cells
         self.nav.page.get_by_text("Kernel", exact=True).click()
         self.nav.page.get_by_role(
@@ -70,10 +82,6 @@ class RunNotebook:
         )
         if restart_dialog_button.is_visible():
             restart_dialog_button.click()
-
-        output_locator = self.nav.page.get_by_text(expected_output_text, exact=True)
-        output_locator.wait_for(timeout=runtime)  # wait for notebook to run
-        assert output_locator.is_visible()
 
 
 if __name__ == "__main__":

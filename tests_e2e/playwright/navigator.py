@@ -356,6 +356,14 @@ class Navigator:
 
         self._set_environment_via_popup(kernel)
 
+        # wait for the jupyter UI to catch up before moving forward
+        # extract conda env name
+        conda_env_label = re.search("conda-env-(.*)-py", kernel).group(1)
+        # see if the jupyter notebook label for the conda env is visible
+        kernel_label_loc = self.page.get_by_role("button", name=conda_env_label)
+        if not kernel_label_loc.is_visible():
+            kernel_label_loc.wait_for(state="attached")
+
     def clone_repo(self, git_url, branch=None, wait_for_completion=5):
         """Clone a git repo into the jupyterlab file structure.
 
