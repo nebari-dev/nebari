@@ -35,7 +35,7 @@ def write_nebari_config_to_file(setup_fixture):
     yaml = YAML(typ="unsafe", pure=True)
     yaml.dump(config, nebari_config_loc)
 
-    render_template(str(nebari_config_loc.parent), nebari_config_loc, force=True)
+    render_template(nebari_config_loc.parent, nebari_config_loc, force=True)
 
     yield setup_fixture
 

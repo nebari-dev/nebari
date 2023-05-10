@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict
 
 from nebari.provider.terraform import (
@@ -141,7 +142,10 @@ def NebariTerraformState(directory: str, nebari_config: Dict):
 def stage_01_terraform_state(config):
     if config["provider"] == "gcp":
         return {
-            "stages/01-terraform-state/gcp/_nebari.tf.json": tf_render_objects(
+            Path("stages")
+            / "01-terraform-state"
+            / "gcp"
+            / "_nebari.tf.json": tf_render_objects(
                 [
                     NebariGCPProvider(config),
                 ]
@@ -149,7 +153,10 @@ def stage_01_terraform_state(config):
         }
     elif config["provider"] == "aws":
         return {
-            "stages/01-terraform-state/aws/_nebari.tf.json": tf_render_objects(
+            Path("stages")
+            / "01-terraform-state"
+            / "aws"
+            / "_nebari.tf.json": tf_render_objects(
                 [
                     NebariAWSProvider(config),
                 ]
@@ -162,7 +169,10 @@ def stage_01_terraform_state(config):
 def stage_02_infrastructure(config):
     if config["provider"] == "gcp":
         return {
-            "stages/02-infrastructure/gcp/_nebari.tf.json": tf_render_objects(
+            Path("stages")
+            / "02-infrastructure"
+            / "gcp"
+            / "_nebari.tf.json": tf_render_objects(
                 [
                     NebariGCPProvider(config),
                     NebariTerraformState("02-infrastructure", config),
@@ -171,7 +181,10 @@ def stage_02_infrastructure(config):
         }
     elif config["provider"] == "do":
         return {
-            "stages/02-infrastructure/do/_nebari.tf.json": tf_render_objects(
+            Path("stages")
+            / "02-infrastructure"
+            / "do"
+            / "_nebari.tf.json": tf_render_objects(
                 [
                     NebariTerraformState("02-infrastructure", config),
                 ]
@@ -179,7 +192,10 @@ def stage_02_infrastructure(config):
         }
     elif config["provider"] == "azure":
         return {
-            "stages/02-infrastructure/azure/_nebari.tf.json": tf_render_objects(
+            Path("stages")
+            / "02-infrastructure"
+            / "azure"
+            / "_nebari.tf.json": tf_render_objects(
                 [
                     NebariTerraformState("02-infrastructure", config),
                 ]
@@ -187,7 +203,10 @@ def stage_02_infrastructure(config):
         }
     elif config["provider"] == "aws":
         return {
-            "stages/02-infrastructure/aws/_nebari.tf.json": tf_render_objects(
+            Path("stages")
+            / "02-infrastructure"
+            / "aws"
+            / "_nebari.tf.json": tf_render_objects(
                 [
                     NebariAWSProvider(config),
                     NebariTerraformState("02-infrastructure", config),
@@ -200,7 +219,9 @@ def stage_02_infrastructure(config):
 
 def stage_03_kubernetes_initialize(config):
     return {
-        "stages/03-kubernetes-initialize/_nebari.tf.json": tf_render_objects(
+        Path("stages")
+        / "03-kubernetes-initialize"
+        / "_nebari.tf.json": tf_render_objects(
             [
                 NebariTerraformState("03-kubernetes-initialize", config),
                 NebariKubernetesProvider(config),
@@ -212,7 +233,9 @@ def stage_03_kubernetes_initialize(config):
 
 def stage_04_kubernetes_ingress(config):
     return {
-        "stages/04-kubernetes-ingress/_nebari.tf.json": tf_render_objects(
+        Path("stages")
+        / "04-kubernetes-ingress"
+        / "_nebari.tf.json": tf_render_objects(
             [
                 NebariTerraformState("04-kubernetes-ingress", config),
                 NebariKubernetesProvider(config),
@@ -224,7 +247,9 @@ def stage_04_kubernetes_ingress(config):
 
 def stage_05_kubernetes_keycloak(config):
     return {
-        "stages/05-kubernetes-keycloak/_nebari.tf.json": tf_render_objects(
+        Path("stages")
+        / "05-kubernetes-keycloak"
+        / "_nebari.tf.json": tf_render_objects(
             [
                 NebariTerraformState("05-kubernetes-keycloak", config),
                 NebariKubernetesProvider(config),
@@ -236,7 +261,9 @@ def stage_05_kubernetes_keycloak(config):
 
 def stage_06_kubernetes_keycloak_configuration(config):
     return {
-        "stages/06-kubernetes-keycloak-configuration/_nebari.tf.json": tf_render_objects(
+        Path("stages")
+        / "06-kubernetes-keycloak-configuration"
+        / "_nebari.tf.json": tf_render_objects(
             [
                 NebariTerraformState("06-kubernetes-keycloak-configuration", config),
             ]
@@ -246,7 +273,9 @@ def stage_06_kubernetes_keycloak_configuration(config):
 
 def stage_07_kubernetes_services(config):
     return {
-        "stages/07-kubernetes-services/_nebari.tf.json": tf_render_objects(
+        Path("stages")
+        / "07-kubernetes-services"
+        / "_nebari.tf.json": tf_render_objects(
             [
                 NebariTerraformState("07-kubernetes-services", config),
                 NebariKubernetesProvider(config),
@@ -258,7 +287,9 @@ def stage_07_kubernetes_services(config):
 
 def stage_08_nebari_tf_extensions(config):
     return {
-        "stages/08-nebari-tf-extensions/_nebari.tf.json": tf_render_objects(
+        Path("stages")
+        / "08-nebari-tf-extensions"
+        / "_nebari.tf.json": tf_render_objects(
             [
                 NebariTerraformState("08-nebari-tf-extensions", config),
                 NebariKubernetesProvider(config),

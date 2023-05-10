@@ -397,3 +397,15 @@ def set_nebari_dask_version() -> str:
         return NEBARI_DASK_VERSION
 
     return DEFAULT_NEBARI_DASK_VERSION
+
+
+def is_relative_to(self: Path, other: Path, /) -> bool:
+    """Compatibility function to bring ``Path.is_relative_to`` to Python 3.8"""
+    if sys.version_info[:2] >= (3, 9):
+        return self.is_relative_to(other)
+
+    try:
+        self.relative_to(other)
+        return True
+    except ValueError:
+        return False

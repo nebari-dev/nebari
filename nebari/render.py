@@ -17,6 +17,7 @@ from nebari.deprecate import DEPRECATED_FILE_PATHS
 from nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from nebari.provider.cicd.gitlab import gen_gitlab_ci
 from nebari.stages import tf_objects
+from nebari.utils import is_relative_to
 
 
 def render_template(output_directory, config_filename, force=False, dry_run=False):
@@ -93,17 +94,17 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
     if new:
         table = Table("The following files will be created:", style="deep_sky_blue1")
         for filename in sorted(new):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
     if updated:
         table = Table("The following files will be updated:", style="deep_sky_blue1")
         for filename in sorted(updated):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
     if deleted:
         table = Table("The following files will be deleted:", style="deep_sky_blue1")
         for filename in sorted(deleted):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
     if untracked:
         table = Table(
@@ -111,7 +112,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
             style="deep_sky_blue1",
         )
         for filename in sorted(updated):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
 
     if dry_run:
@@ -120,6 +121,7 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
         for filename in new | updated:
             input_filename = template_directory / filename
             output_filename = output_directory / filename
+            output_filename.parent.mkdir(parents=True, exist_ok=True)
 
             if input_filename.exists():
                 shutil.copy(input_filename, output_filename)
@@ -128,17 +130,16 @@ def render_template(output_directory, config_filename, force=False, dry_run=Fals
                     f.write(contents[filename])
 
         for path in deleted:
-            abs_path = os.path.abspath(os.path.join(str(output_directory), path))
+            abs_path = (output_directory / path).resolve()
 
-            # be extra cautious that deleted path is within output_directory
-            if not abs_path.startswith(str(output_directory)):
+            if not is_relative_to(abs_path, output_directory):
                 raise Exception(
                     f"[ERROR] SHOULD NOT HAPPEN filename was about to be deleted but path={abs_path} is outside of output_directory"
                 )
 
-            if os.path.isfile(abs_path):
-                os.remove(abs_path)
-            elif os.path.isdir(abs_path):
+            if abs_path.is_file():
+                abs_path.unlink()
+            elif abs_path.is_dir():
                 shutil.rmtree(abs_path)
 
 
@@ -180,7 +181,7 @@ def gen_gitignore(config):
     """
     from inspect import cleandoc
 
-    filestoignore = """
+    files_to_ignore = """
         # ignore terraform state
         .terraform
         terraform.tfstate
@@ -190,7 +191,7 @@ def gen_gitignore(config):
         # python
         __pycache__
     """
-    return {".gitignore": cleandoc(filestoignore)}
+    return {Path(".gitignore"): cleandoc(files_to_ignore)}
 
 
 def gen_cicd(config):
@@ -206,12 +207,12 @@ def gen_cicd(config):
     cicd_provider = config["ci_cd"]["type"]
 
     if cicd_provider == "github-actions":
-        gha_dir = ".github/workflows/"
-        cicd_files[gha_dir + "nebari-ops.yaml"] = gen_nebari_ops(config)
-        cicd_files[gha_dir + "nebari-linter.yaml"] = gen_nebari_linter(config)
+        gha_dir = Path(".github") / "workflows"
+        cicd_files[gha_dir / "nebari-ops.yaml"] = gen_nebari_ops(config)
+        cicd_files[gha_dir / "nebari-linter.yaml"] = gen_nebari_linter(config)
 
     elif cicd_provider == "gitlab-ci":
-        cicd_files[".gitlab-ci.yml"] = gen_gitlab_ci(config)
+        cicd_files[Path(".gitlab-ci.yml")] = gen_gitlab_ci(config)
 
     else:
         raise ValueError(
@@ -222,10 +223,10 @@ def gen_cicd(config):
 
 
 def inspect_files(
-    source_dirs: str,
-    output_dirs: str,
-    source_base_dir: str,
-    output_base_dir: str,
+    source_dirs: Path,
+    output_dirs: Path,
+    source_base_dir: Path,
+    output_base_dir: Path,
     ignore_filenames: List[str] = None,
     ignore_directories: List[str] = None,
     deleted_paths: List[str] = None,
@@ -234,10 +235,10 @@ def inspect_files(
     """Return created, updated and untracked files by computing a checksum over the provided directory.
 
     Args:
-        source_dirs (str): The source dir used as base for comparssion
-        output_dirs (str): The destination dir which will be matched with
-        source_base_dir (str): Relative base path to source directory
-        output_base_dir (str): Relative base path to output directory
+        source_dirs (Path): The source dir used as base for comparison
+        output_dirs (Path): The destination dir which will be matched with
+        source_base_dir (Path): Relative base path to source directory
+        output_base_dir (Path): Relative base path to output directory
         ignore_filenames (list[str]): Filenames to ignore while comparing for changes
         ignore_directories (list[str]): Directories to ignore while comparing for changes
         deleted_paths (list[str]): Paths that if exist in output directory should be deleted
@@ -251,35 +252,41 @@ def inspect_files(
     output_files = {}
 
     def list_files(
-        directory: str, ignore_filenames: List[str], ignore_directories: List[str]
+        directory: Path, ignore_filenames: List[str], ignore_directories: List[str]
     ):
-        for root, dirs, files in os.walk(directory):
-            dirs[:] = [d for d in dirs if d not in ignore_directories]
-            for file in files:
-                if file not in ignore_filenames:
-                    yield os.path.join(root, file)
+        for path in directory.rglob("*"):
+            if not path.is_file():
+                continue
 
-    for filename in contents:
-        source_files[filename] = hashlib.sha256(
-            contents[filename].encode("utf8")
-        ).hexdigest()
-        output_filename = os.path.join(output_base_dir, filename)
-        if os.path.isfile(output_filename):
+            if path.name in ignore_filenames:
+                continue
+
+            if any(
+                d in ignore_directories for d in path.relative_to(directory).parts[:-1]
+            ):
+                continue
+
+            yield path
+
+    for filename, content in contents.items():
+        source_files[filename] = hashlib.sha256(content.encode("utf8")).hexdigest()
+        output_filename = output_base_dir / filename
+        if output_filename.is_file():
             output_files[filename] = hash_file(filename)
 
     deleted_paths = set()
     for path in deleted_paths:
-        absolute_path = os.path.join(output_base_dir, path)
-        if os.path.exists(absolute_path):
+        absolute_path = output_base_dir / path
+        if absolute_path.exists():
             deleted_paths.add(path)
 
     for source_dir, output_dir in zip(source_dirs, output_dirs):
         for filename in list_files(source_dir, ignore_filenames, ignore_directories):
-            relative_path = os.path.relpath(filename, source_base_dir)
+            relative_path = filename.relative_to(source_base_dir)
             source_files[relative_path] = hash_file(filename)
 
         for filename in list_files(output_dir, ignore_filenames, ignore_directories):
-            relative_path = os.path.relpath(filename, output_base_dir)
+            relative_path = filename.relative_to(source_base_dir)
             output_files[relative_path] = hash_file(filename)
 
     new_files = source_files.keys() - output_files.keys()
