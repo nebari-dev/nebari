@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import os
 
@@ -26,7 +27,7 @@ def _navigator_session(browser_name):
             headless=False,
             browser=browser_name,
             auth="password",
-            instance_name=os.environ["INSTANCE_NAME"],
+            instance_name="small-instance",  # small-instance included by default
             video_dir="videos/",
         )
         nav.login_password()
@@ -34,7 +35,8 @@ def _navigator_session(browser_name):
         yield nav
     except Exception as e:
         logger.debug(e)
-        nav.teardown()
+        with contextlib.suppress(NameError):
+            nav.teardown()
 
 
 @pytest.fixture(scope="function")

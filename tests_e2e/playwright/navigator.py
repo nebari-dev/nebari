@@ -3,6 +3,7 @@ import datetime as dt
 import logging
 import re
 import time
+import urllib
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -24,7 +25,7 @@ class Navigator:
     Parameters
     ----------
     nebari_url: str
-        Nebari URL to access for testing
+        Nebari URL to access for testing, e.g. "https://{nebari_url}
     username: str
         Login username for Nebari. For Google login, this will be email address.
     password: str
@@ -207,12 +208,11 @@ class Navigator:
                 name="My Server",
                 exact=True,
             )
-            # start_locator.wait_for(timeout=3000, state="attached")
             start_locator.click()
 
         # wait for server spinup
         self.page.wait_for_url(
-            f"{self.nebari_url}user/{self.username}/*",
+            urllib.parse.urljoin(self.nebari_url, f"user/{self.username}/*"),
             wait_until="networkidle",
         )
 

@@ -41,8 +41,6 @@ cp .env.tpl .env
 * USERNAME: Nebari username for username/password login OR Google email address or Google sign in
 * PASSWORD: Password associated with USERNAME
 * NEBARI_FULL_URL: full url path to Nebari instance, e.g. "https://nebari.quansight.dev/"
-* INSTANCE_NAME: Label of the server instance type you'd like to spin up. This is defined in `nebari-config.yaml`. By default, Nebari will include `small-instance`
-
 
 ## Writing Playwright tests
 
