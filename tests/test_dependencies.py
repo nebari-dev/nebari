@@ -55,7 +55,7 @@ def test_build_by_conda_forge(tmp_path):
         meta_loc = tmp_path / "nebari"
         # try to run conda build to build package from meta.yaml
         subprocess.run(
-            ["conda", "build", meta_loc],
+            ["conda", "build", "--channel=conda-forge", meta_loc],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             check=True,

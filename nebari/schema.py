@@ -308,6 +308,7 @@ class GoogleCloudPlatformProvider(Base):
     zone: typing.Optional[str]  # No longer used
     availability_zones: typing.Optional[typing.List[str]]  # Genuinely optional
     kubernetes_version: str
+    release_channel: typing.Optional[str]
     node_groups: typing.Dict[str, NodeGroup]
     terraform_overrides: typing.Any
 
