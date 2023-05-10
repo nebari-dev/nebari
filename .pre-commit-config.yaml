@@ -43,7 +43,7 @@ repos:
         args:
           [
             "--builtin=rare,clear,informal,names",
-            "--skip=_build,*/build/*,*/node_modules/*,nebari.egg-info,.nox,*.git,*.js,*.json,*.yaml,*.yml",
+            "--skip=_build,*/build/*,*/node_modules/*,nebari.egg-info,*.git,*.js,*.json,*.yaml,*.yml",
             "--ignore-words-list=AKS,aks",
             "--write",
           ]
@@ -84,7 +84,6 @@ repos:
     rev: 0.7.16
     hooks:
       - id: mdformat
-        files: ^docs/
         name: mdformat
         entry: mdformat --wrap=120 --number --end-of-line=lf
         language: python

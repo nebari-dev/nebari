@@ -1,6 +1,5 @@
 graft nebari
 prune home
-prune docs
 prune architecture
 prune .github
 global-exclude *.py[cod] __pycache__ *.so *.nix .envrc

@@ -1,7 +1,3 @@
-# docs
-.nox
-_build
-
 # setuptools scm
 nebari/_version.py
 
