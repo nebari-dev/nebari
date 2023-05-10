@@ -10,7 +10,7 @@
 #
 # These pre-commit hooks are run as CI.
 #
-# NOTE: if it can be avoided, add configs/args in pyproject.toml, setup.cfg or below instead of creating a new `.config.file`.
+# NOTE: if it can be avoided, add configs/args in pyproject.toml or below instead of creating a new `.config.file`.
 # https://pre-commit.ci/#configuration
 ci:
   autoupdate_schedule: monthly
