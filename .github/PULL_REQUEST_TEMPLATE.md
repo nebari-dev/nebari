@@ -16,19 +16,19 @@ is merged. See https://github.com/blog/1506-closing-issues-via-pull-requests
 
 _Put a `x` in the boxes that apply_
 
-- \[ \] Bug fix (non-breaking change which fixes an issue)
-- \[ \] New feature (non-breaking change which adds a feature)
-- \[ \] Breaking change (fix or feature that would cause existing features not to work as expected)
-- \[ \] Documentation Update
-- \[ \] Code style update (formatting, renaming)
-- \[ \] Refactoring (no functional changes, no API changes)
-- \[ \] Build related changes
-- \[ \] Other (please describe):
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds a feature)
+- [ ] Breaking change (fix or feature that would cause existing features not to work as expected)
+- [ ] Documentation Update
+- [ ] Code style update (formatting, renaming)
+- [ ] Refactoring (no functional changes, no API changes)
+- [ ] Build related changes
+- [ ] Other (please describe):
 
 ## Testing
 
-- \[ \] Did you test the pull request locally?
-- \[ \] Did you add new tests?
+- [ ] Did you test the pull request locally?
+- [ ] Did you add new tests?
 
 ## Any other comments?
 
