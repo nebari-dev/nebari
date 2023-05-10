@@ -272,11 +272,11 @@ def inspect_files(
         if os.path.isfile(output_filename):
             output_files[filename] = hash_file(filename)
 
-    deleted_paths = set()
+    deleted_files = set()
     for path in deleted_paths:
         absolute_path = os.path.join(output_base_dir, path)
         if os.path.exists(absolute_path):
-            deleted_paths.add(path)
+            deleted_files.add(path)
 
     for source_dir, output_dir in zip(source_dirs, output_dirs):
         for filename in list_files(source_dir, ignore_filenames, ignore_directories):
