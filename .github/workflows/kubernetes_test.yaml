@@ -159,7 +159,6 @@ jobs:
           USERNAME: ${{ env.CYPRESS_EXAMPLE_USER_NAME }}
           PASSWORD: ${{ env.CYPRESS_EXAMPLE_USER_PASSWORD }}
           NEBARI_FULL_URL: https://github-actions.nebari.dev/
-          INSTANCE_NAME: "small-instance"
         working-directory: tests_e2e/playwright
         run: |
           # create environment file

@@ -1,7 +1,9 @@
 import contextlib
 import logging
+import os
 from pathlib import Path
 
+import dotenv
 from navigator import Navigator
 
 logger = logging.getLogger()
@@ -85,10 +87,6 @@ class RunNotebook:
 
 
 if __name__ == "__main__":
-    import os
-
-    import dotenv
-
     dotenv.load_dotenv()
     nav = Navigator(
         nebari_url="https://nebari.quansight.dev/",
