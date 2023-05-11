@@ -1,4 +1,3 @@
-import contextlib
 import logging
 import os
 
@@ -19,7 +18,7 @@ def _navigator_session(browser_name):
     # try/except added here in attempt to reach teardown after error in
     # order to close the browser context which will save the video so I debug
     # the error.
-        try:
+    try:
         nav = Navigator(
             nebari_url=os.environ["NEBARI_FULL_URL"],
             username=os.environ["USERNAME"],
