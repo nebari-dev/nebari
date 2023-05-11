@@ -19,7 +19,7 @@ def _navigator_session(browser_name):
     # try/except added here in attempt to reach teardown after error in
     # order to close the browser context which will save the video so I debug
     # the error.
-    try:
+        try:
         nav = Navigator(
             nebari_url=os.environ["NEBARI_FULL_URL"],
             username=os.environ["USERNAME"],
@@ -30,13 +30,19 @@ def _navigator_session(browser_name):
             instance_name="small-instance",  # small-instance included by default
             video_dir="videos/",
         )
+    except Exception as e:
+        logger.debug(e)
+        raise
+
+    try:
         nav.login_password()
         nav.start_server()
         yield nav
     except Exception as e:
         logger.debug(e)
-        with contextlib.suppress(NameError):
-            nav.teardown()
+        raise
+    finally:
+        nav.teardown()
 
 
 @pytest.fixture(scope="function")
