@@ -558,7 +558,7 @@ def project_name_convention(value: typing.Any, values):
 class InitInputs(Base):
     cloud_provider: typing.Type[ProviderEnum] = "local"
     project_name: str = ""
-    domain_name: str = ""
+    domain_name: typing.Optional[str] = None
     namespace: typing.Optional[letter_dash_underscore_pydantic] = "dev"
     auth_provider: typing.Type[AuthenticationEnum] = "password"
     auth_auto_provision: bool = False
@@ -577,7 +577,7 @@ class Main(Base):
     namespace: typing.Optional[letter_dash_underscore_pydantic]
     nebari_version: str = ""
     ci_cd: typing.Optional[CICD]
-    domain: str
+    domain: typing.Optional[str]
     terraform_state: typing.Optional[TerraformState]
     certificate: Certificate
     helm_extensions: typing.Optional[typing.List[HelmExtension]]

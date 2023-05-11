@@ -114,8 +114,8 @@ def init(
         "-p",
         callback=check_project_name,
     ),
-    domain_name: str = typer.Option(
-        ...,
+    domain_name: Optional[str] = typer.Option(
+        None,
         "--domain-name",
         "--domain",
         "-d",

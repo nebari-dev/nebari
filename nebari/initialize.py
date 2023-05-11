@@ -362,8 +362,6 @@ def render_config(
             "namespace should contain only letters and hyphens/underscores (but not at the start or end)"
         )
 
-    if nebari_domain is None and not disable_prompt:
-        nebari_domain = input("Provide domain: ")
     config["domain"] = nebari_domain
 
     # In nebari_version only use major.minor.patch version - drop any pre/post/dev suffixes

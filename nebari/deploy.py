@@ -104,7 +104,7 @@ def provision_ingress_dns(
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
     ip_or_hostname = ip_or_name["hostname"] or ip_or_name["ip"]
 
-    if dns_auto_provision and dns_provider == "cloudflare":
+    if config["domain"] and dns_auto_provision and dns_provider == "cloudflare":
         record_name, zone_name = (
             config["domain"].split(".")[:-2],
             config["domain"].split(".")[-2:],
@@ -124,6 +124,8 @@ def provision_ingress_dns(
             logger.info(
                 f"Couldn't update the DNS record for cloud provider: {config['provider']}"
             )
+    elif not config["domain"]:
+        config["domain"] = ip_or_hostname
     elif not disable_prompt:
         input(
             f"Take IP Address {ip_or_hostname} and update DNS to point to "
