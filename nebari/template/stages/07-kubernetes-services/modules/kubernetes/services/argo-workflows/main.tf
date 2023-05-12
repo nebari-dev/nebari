@@ -504,8 +504,7 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
           "containers" = [
             {
               command = ["bash", "-c"]
-              args    = ["python -m nebari_workflow_controller -l DEBUG"]
-              # args = ["sleep 1000000"]
+              args    = ["python -m nebari_workflow_controller"]
 
               "env" = [
                 {
@@ -536,8 +535,7 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                 },
               ]
               "image" = "quay.io/nebari/nebari-workflow-controller:${var.workflow-controller-image-tag}"
-              # "image" = "balast/nebari-workflow-controller:latest"
-              "name" = "admission-controller"
+              "name"  = "admission-controller"
             },
           ]
         }
