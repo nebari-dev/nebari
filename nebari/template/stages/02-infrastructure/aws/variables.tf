@@ -11,13 +11,13 @@ variable "environment" {
 variable "existing_subnet_ids" {
   description = "Existing VPC ID to use for Kubernetes resources"
   type        = list(string)
-  default     = ["subnet-05b2b1f41f0b1d8a6", "subnet-017efc3309fbca2da"] # null
+  default     = null
 }
 
 variable "existing_security_group_id" {
   description = "Existing security group ID to use for Kubernetes resources"
   type        = string
-  default     = "sg-0e2c865bdd8824b1a" # null
+  default     = null
 }
 
 variable "region" {

@@ -5,21 +5,10 @@ data "aws_availability_zones" "awszones" {
   }
 }
 
-# data "vpc" "existing_vpc" {
-#   count = var.existing_vpc_id ? 1 : 0
-#   id = var.existing_vpc_id
-# }
-
-# data "aws_subnets"
-
-# data "security_group" "existing_vpc" {
-#   count = var.existing_vpc_id ? 1 : 0
-#   vpc_id = var.existing_vpc_id
-# }
 
 locals {
-  subnet_ids        = var.existing_subnet_ids == null ? module.network.subnet_ids : var.existing_subnet_ids
-  security_group_id = var.existing_security_group_id == null ? module.network.security_group_id : var.existing_security_group_id
+  subnet_ids        = var.existing_subnet_ids == null ? module.network[0].subnet_ids : var.existing_subnet_ids
+  security_group_id = var.existing_security_group_id == null ? module.network[0].security_group_id : var.existing_security_group_id
 }
 
 # ==================== ACCOUNTING ======================
@@ -35,7 +24,7 @@ module "accounting" {
 
 # ======================= NETWORK ======================
 module "network" {
-  count = var.existing_subnet_ids == null ? 1 : 0
+  count = (var.existing_subnet_ids == null) && (var.existing_security_group_id == null) ? 1 : 0
 
   source = "./modules/network"
 
@@ -99,7 +88,4 @@ module "kubernetes" {
 
   node_groups = var.node_groups
 
-  # depends_on = [
-  #   module.network
-  # ]
 }

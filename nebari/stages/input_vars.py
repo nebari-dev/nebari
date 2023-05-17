@@ -125,7 +125,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "NEBARI_KUBECONFIG"
             ),
-            **config.get("aws", {}).get("terraform_overrides", {}),
+            **config.get("amazon_web_services", {}).get("terraform_overrides", {}),
         }
     else:
         return {}
