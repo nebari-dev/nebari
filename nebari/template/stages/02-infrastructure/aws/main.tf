@@ -7,8 +7,10 @@ data "aws_availability_zones" "awszones" {
 
 
 locals {
-  subnet_ids        = var.existing_subnet_ids == null ? module.network[0].subnet_ids : var.existing_subnet_ids
-  security_group_id = var.existing_security_group_id == null ? module.network[0].security_group_id : var.existing_security_group_id
+  # Only override_network if both existing_subnet_ids and existing_security_group_id are not null.
+  override_network  = (var.existing_subnet_ids != null) && (var.existing_security_group_id != null)
+  subnet_ids        = local.override_network ? var.existing_subnet_ids : module.network[0].subnet_ids
+  security_group_id = local.override_network ? var.existing_security_group_id : module.network[0].security_group_id
 }
 
 # ==================== ACCOUNTING ======================
@@ -24,7 +26,7 @@ module "accounting" {
 
 # ======================= NETWORK ======================
 module "network" {
-  count = (var.existing_subnet_ids == null) && (var.existing_security_group_id == null) ? 1 : 0
+  count = local.override_network ? 0 : 1
 
   source = "./modules/network"
 
