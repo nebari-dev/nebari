@@ -5,6 +5,23 @@ data "aws_availability_zones" "awszones" {
   }
 }
 
+# data "vpc" "existing_vpc" {
+#   count = var.existing_vpc_id ? 1 : 0
+#   id = var.existing_vpc_id
+# }
+
+# data "aws_subnets"
+
+# data "security_group" "existing_vpc" {
+#   count = var.existing_vpc_id ? 1 : 0
+#   vpc_id = var.existing_vpc_id
+# }
+
+locals {
+  subnet_ids        = var.existing_subnet_ids == null ? module.network.subnet_ids : var.existing_subnet_ids
+  security_group_id = var.existing_security_group_id == null ? module.network.security_group_id : var.existing_security_group_id
+}
+
 # ==================== ACCOUNTING ======================
 module "accounting" {
   source = "./modules/accounting"
@@ -18,6 +35,8 @@ module "accounting" {
 
 # ======================= NETWORK ======================
 module "network" {
+  count = var.existing_subnet_ids == null ? 1 : 0
+
   source = "./modules/network"
 
   name = local.cluster_name
@@ -57,8 +76,8 @@ module "efs" {
   name = "${local.cluster_name}-jupyterhub-shared"
   tags = local.additional_tags
 
-  efs_subnets         = module.network.subnet_ids
-  efs_security_groups = [module.network.security_group_id]
+  efs_subnets         = local.subnet_ids
+  efs_security_groups = [local.security_group_id]
 }
 
 
@@ -71,8 +90,8 @@ module "kubernetes" {
   region             = var.region
   kubernetes_version = var.kubernetes_version
 
-  cluster_subnets         = module.network.subnet_ids
-  cluster_security_groups = [module.network.security_group_id]
+  cluster_subnets         = local.subnet_ids
+  cluster_security_groups = [local.security_group_id]
 
   node_group_additional_policies = [
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
@@ -80,7 +99,7 @@ module "kubernetes" {
 
   node_groups = var.node_groups
 
-  depends_on = [
-    module.network
-  ]
+  # depends_on = [
+  #   module.network
+  # ]
 }

@@ -8,6 +8,18 @@ variable "environment" {
   type        = string
 }
 
+variable "existing_subnet_ids" {
+  description = "Existing VPC ID to use for Kubernetes resources"
+  type        = list(string)
+  default     = ["subnet-05b2b1f41f0b1d8a6", "subnet-017efc3309fbca2da"] # null
+}
+
+variable "existing_security_group_id" {
+  description = "Existing security group ID to use for Kubernetes resources"
+  type        = string
+  default     = "sg-0e2c865bdd8824b1a" # null
+}
+
 variable "region" {
   description = "AWS region for EKS cluster"
   type        = string
