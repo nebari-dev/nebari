@@ -134,9 +134,8 @@ For detailed step-by-step instructions on how to deploy Nebari, check the [Nebar
 
 ## Nebari HPC
 
-The HPC version of Nebari is based on [OpenHPC](https://openhpc.community/).
-
-> NOTE: The tool is currently under development. Curious? Check out the [Nebari HPC](https://github.com/Quansight/qhub-hpc) repository.
+An HPC version of Nebari is currently not available. There is one under development for Nebaris precursor QHub.
+Curious? Check out the [QHub HPC](https://github.com/Quansight/qhub-hpc) repository.
 
 ## Contributing to Nebari 👩🏻‍💻
 
