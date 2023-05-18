@@ -10,7 +10,7 @@
 #
 # These pre-commit hooks are run as CI.
 #
-# NOTE: if it can be avoided, add configs/args in pyproject.toml, setup.cfg or below instead of creating a new `.config.file`.
+# NOTE: if it can be avoided, add configs/args in pyproject.toml or below instead of creating a new `.config.file`.
 # https://pre-commit.ci/#configuration
 ci:
   autoupdate_schedule: monthly
@@ -59,7 +59,7 @@ repos:
         args: ["--line-length=88", "--exclude=/nebari/template/"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.260
+    rev: v0.0.263
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -75,7 +75,7 @@ repos:
 
   # terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.77.1
+    rev: v1.78.0
     hooks:
       - id: terraform_fmt
         args:

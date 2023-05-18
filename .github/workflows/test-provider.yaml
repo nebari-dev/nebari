@@ -9,7 +9,6 @@ on:
       - "tests_e2e/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
   push:
     branches:
@@ -23,7 +22,6 @@ on:
       - "tests_e2e/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
   workflow_call:
     inputs:
@@ -45,7 +43,7 @@ jobs:
         provider:
           - aws
           - azure
-          # - do
+          - do
           - gcp
           - local
           - existing
@@ -53,6 +51,7 @@ jobs:
           - none
           - github-actions
           - gitlab-ci
+        fail-fast: false
     steps:
       - name: "Checkout Infrastructure"
         uses: actions/checkout@v3
@@ -83,7 +82,7 @@ jobs:
             kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci client_id | ARM_CLIENT_ID;
             kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci tenant_id | ARM_TENANT_ID;
             kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci subscription_id | ARM_SUBSCRIPTION_ID;
-          # kv/data/repository/nebari-dev/nebari/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
+            kv/data/repository/nebari-dev/nebari/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
 
       - name: 'Authenticate to GCP'
         if: ${{ matrix.provider == 'gcp' }}
@@ -117,6 +116,7 @@ jobs:
 
       - name: Install Nebari
         run: |
+          pip install --upgrade pip
           pip install .[dev]
 
       - name: Nebari Initialize
