@@ -51,6 +51,7 @@ jobs:
           - none
           - github-actions
           - gitlab-ci
+        fail-fast: false
     steps:
       - name: "Checkout Infrastructure"
         uses: actions/checkout@v3
