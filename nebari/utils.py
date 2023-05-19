@@ -29,7 +29,7 @@ NEBARI_DASK_VERSION = os.getenv("NEBARI_DASK_VERSION", None)
 DO_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-do"
 AWS_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-aws"
 GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
-AZURE_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-do"
+AZURE_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-azure"
 
 CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
 
