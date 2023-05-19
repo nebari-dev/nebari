@@ -5,6 +5,14 @@ data "aws_availability_zones" "awszones" {
   }
 }
 
+
+locals {
+  # Only override_network if both existing_subnet_ids and existing_security_group_id are not null.
+  override_network  = (var.existing_subnet_ids != null) && (var.existing_security_group_id != null)
+  subnet_ids        = local.override_network ? var.existing_subnet_ids : module.network[0].subnet_ids
+  security_group_id = local.override_network ? var.existing_security_group_id : module.network[0].security_group_id
+}
+
 # ==================== ACCOUNTING ======================
 module "accounting" {
   source = "./modules/accounting"
@@ -18,6 +26,8 @@ module "accounting" {
 
 # ======================= NETWORK ======================
 module "network" {
+  count = local.override_network ? 0 : 1
+
   source = "./modules/network"
 
   name = local.cluster_name
@@ -57,8 +67,8 @@ module "efs" {
   name = "${local.cluster_name}-jupyterhub-shared"
   tags = local.additional_tags
 
-  efs_subnets         = module.network.subnet_ids
-  efs_security_groups = [module.network.security_group_id]
+  efs_subnets         = local.subnet_ids
+  efs_security_groups = [local.security_group_id]
 }
 
 
@@ -71,8 +81,8 @@ module "kubernetes" {
   region             = var.region
   kubernetes_version = var.kubernetes_version
 
-  cluster_subnets         = module.network.subnet_ids
-  cluster_security_groups = [module.network.security_group_id]
+  cluster_subnets         = local.subnet_ids
+  cluster_security_groups = [local.security_group_id]
 
   node_group_additional_policies = [
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
@@ -80,7 +90,4 @@ module "kubernetes" {
 
   node_groups = var.node_groups
 
-  depends_on = [
-    module.network
-  ]
 }
