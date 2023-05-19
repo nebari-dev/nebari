@@ -434,10 +434,10 @@ def upgrade(
     ),
 ):
     """
-    Upgrade your [purple]nebari-config.yaml[/purple] from pre-0.4.0 to 0.4.0.
+    Upgrade your [purple]nebari-config.yaml[/purple].
 
-    Due to several breaking changes that came with the 0.4.0 release, this utility is available to help
-    update your [purple]nebari-config.yaml[/purple] to comply with the introduced changes.
+    Upgrade your [purple]nebari-config.yaml[/purple] after an nebari upgrade. If necessary, prompts users to perform manual upgrade steps required for the deploy process.
+
     See the project [green]RELEASE.md[/green] for details.
     """
     config_filename = Path(config)
