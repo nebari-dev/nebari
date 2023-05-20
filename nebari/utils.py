@@ -26,14 +26,10 @@ NEBARI_GH_BRANCH = os.getenv("NEBARI_GH_BRANCH", None)
 NEBARI_IMAGE_TAG = os.getenv("NEBARI_IMAGE_TAG", None)
 NEBARI_DASK_VERSION = os.getenv("NEBARI_DASK_VERSION", None)
 
-DO_ENV_DOCS = (
-    "https://docs.qhub.dev/en/stable/source/installation/setup.html#digital-ocean"
-)
-AWS_ENV_DOCS = "https://docs.qhub.dev/en/stable/source/installation/setup.html#amazon-web-services-aws"
-GCP_ENV_DOCS = "https://docs.qhub.dev/en/stable/source/installation/setup.html#google-cloud-platform"
-AZURE_ENV_DOCS = (
-    "https://docs.qhub.dev/en/stable/source/installation/setup.html#microsoft-azure"
-)
+DO_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-do"
+AWS_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-aws"
+GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
+AZURE_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-azure"
 
 CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
 
