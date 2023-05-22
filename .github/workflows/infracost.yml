@@ -1,0 +1,170 @@
+name: Infracost CI
+
+on:
+  pull_request:
+    paths:
+      - 'nebari/template/stages/02-infrastructure'
+      - '.github/workflows/infracost.yml'
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+jobs:
+  infracost:
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
+    name: Run Infracost on Nebari Infrastructure
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        provider:
+          - aws
+          - gcp
+          - azure
+      fail-fast: false
+
+    env:
+      # Specify the path where the Terraform state will be stored
+      TF_ROOT: data/stages/
+
+    steps:
+      # Checkout the base branch of the pull request
+      - name: Checkout infrastructure
+        uses: actions/checkout@v3
+        with:
+          ref: '${{ github.event.pull_request.base.ref }}'
+
+      - name: Checkout the branch from the PR that triggered the job
+        if: ${{ github.event_name == 'issue_comment' }}
+        run: hub pr checkout ${{ inputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Detects changes in the infrastructure for each specific cloud service provider
+      - name: Detect changed infrastructure
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            aws:
+              - 'nebari/template/stages/02-infrastructure/aws/**'
+              - 'nebari/template/stages/01-terraform-state/aws/**'
+            gcp:
+              - 'nebari/template/stages/02-infrastructure/gcp/**'
+            azure:
+              - 'nebari/template/stages/02-infrastructure/azure/**'
+
+      # Setup Google Cloud SDK
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+        if: ${{ matrix.provider == 'gcp' }}
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      # Setup Infracost
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v2
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      # Set up Python 3.8
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      # Install Nebari
+      - name: Install Nebari
+        if: steps.changes.outputs.${{ matrix.provider }} == 'true'
+        run: |
+          pip install .[dev]
+
+      # Initialize Nebari and render the infrastructure
+      - name: Nebari initialize and render
+        run: |
+          mkdir data && cd data
+          nebari init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.nebari.dev" --auth-provider github --disable-prompt
+          cat nebari-config.yaml
+          nebari render -c nebari-config.yaml
+
+      # Run Infracost on the base branch to generate the baseline cost
+      - name: Generate Infracost cost estimate baseline
+        run: |
+          infracost breakdown --path=${TF_ROOT} \
+                              --format=json \
+                              --out-file=/tmp/infracost-base.json
+          rm -rf data/
+
+      # Checkout the PR branch
+      - name: Checkout PR branch
+        uses: actions/checkout@v3
+
+      # Install Nebari
+      - name: Install Nebari
+        if: steps.changes.outputs.${{ matrix.provider }} == 'true'
+        run: |
+          pip install .[dev]
+
+      # Initialize Nebari and render the infrastructure
+      - name: Nebari initialize and render
+        run: |
+          mkdir data && cd data
+          nebari init "${{ matrix.provider }}" --project "TestProvider" --terraform-state=remote --domain "${{ matrix.provider }}.nebari.dev" --auth-provider github --disable-prompt
+          cat nebari-config.yaml
+          nebari render -c nebari-config.yaml
+
+      # Generate Infracost diff cost estimate only if the file has been changed
+      - name: Generate Infracost diff
+        run: |
+          infracost diff --path=${TF_ROOT} \
+                          --format=json \
+                          --compare-to=/tmp/infracost-base.json \
+                          --out-file=/tmp/infracost.json
+
+      # Generate the cost estimate report and submit it as a PR comment only if the file has been changed
+      - name: Post Infracost comment
+        run: |
+          run_infracost() {
+            infracost comment github --path=/tmp/infracost.json \
+                                      --repo=$GITHUB_REPOSITORY \
+                                      --github-token=${{github.token}} \
+                                      --pull-request=${{github.event.pull_request.number}} \
+                                      --behavior=update
+          }
+          if [[ "${{steps.changes.outputs.aws}}" == "true" ]] && [[ "${{matrix.provider}}" == "aws" ]]; then
+            run_infracost
+          elif [[ "${{steps.changes.outputs.gcp}}" == "true" ]] && [[ "${{matrix.provider}}" == "gcp" ]]; then
+            run_infracost
+          elif [[ "${{steps.changes.outputs.azure}}" == "true" ]] && [[ "${{matrix.provider}}" == "azure" ]]; then
+            run_infracost
+          else
+            echo "No changes detected in infrastructure"
+          fi
+
+      # parse pull_request.base.ref before generating artifacts
+      - name: Parse artifact name
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        id: parse
+        run: |
+          echo "artifact_name_base=$(echo $BASE_REF | sed 's/\//-/g')" >> $GITHUB_OUTPUT
+
+      # Save artifacts to the PR
+      - name: Save artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: infracost-data-${{ matrix.provider }}-${{ steps.parse.outputs.artifact_name_base }}
+          path: |
+            /tmp/infracost.json
+            /tmp/infracost-base.json
