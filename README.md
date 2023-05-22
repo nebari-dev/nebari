@@ -19,13 +19,13 @@
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
-- [QHub HPC](#qhub-hpc)
 - [Nebari](#nebari)
   - [Cloud Providers ☁️](#cloud-providers-️)
 - [Installation 💻](#installation-)
   - [Pre-requisites](#pre-requisites)
   - [Install Nebari](#install-nebari)
 - [Usage 🚀](#usage-)
+- [Nebari HPC](#nebari-hpc)
 - [Contributing to Nebari 👩🏻‍💻](#contributing-to-nebari-)
   - [Installing the Development version of Nebari ⚙️](#installing-the-development-version-of-nebari-️)
   - [Questions? 🤔](#questions-)
@@ -48,12 +48,6 @@ on [HPC](#nebari-hpc) or [Kubernetes](#nebari) with minimal DevOps overhead.
 **This repository details the [Nebari](https://nebari.dev/ "Official Nebari docs") (Kubernetes) version.**
 
 Not sure what to choose? Check out our [Setup Initialization](docs/source/installation/setup.md) page.
-
-## QHub HPC
-
-The HPC version of Nebari is based on [OpenHPC](https://openhpc.community/).
-
-> NOTE: The tool is currently under development. Curious? Check out the [Nebari HPC](https://github.com/Quansight/qhub-hpc) repository.
 
 ## Nebari
 
@@ -137,6 +131,11 @@ Once all the necessary credentials are gathered and set as [UNIX environment var
 deployed in minutes.
 
 For detailed step-by-step instructions on how to deploy Nebari, check the [Nebari documentation][docs-deploy].
+
+## Nebari HPC
+
+An HPC version of Nebari is currently not available. There is one under development for Nebaris precursor QHub.
+Curious? Check out the [QHub HPC](https://github.com/Quansight/qhub-hpc) repository.
 
 ## Contributing to Nebari 👩🏻‍💻
 
