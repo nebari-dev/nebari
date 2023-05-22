@@ -7,6 +7,8 @@ on:
   pull_request:
     paths:
       - ".github/workflows/test-provider.yaml"
+      - ".github/failed-workflow-issue-templates/test-provider.md"
+      - ".github/actions/publish-from-template"
       - "tests/**"
       - "tests_deployment/**"
       - "tests_e2e/**"
@@ -138,3 +140,13 @@ jobs:
         with:
           name: "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-artifact"
           path: "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
+
+      - if: failure() || github.event_name == 'pull_request'
+        name: Publish information from template
+        uses: ./.github/actions/publish-from-template
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROVIDER: ${{ matrix.provider }}
+          CICD: ${{ matrix.cicd }}
+        with:
+          filename: .github/failed-workflow-issue-templates/provider-tests.md
