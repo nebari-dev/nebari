@@ -86,9 +86,15 @@ class HelmExtension(Base):
 # ============== Argo-Workflows =========
 
 
+class NebariWorkflowController(Base):
+    enabled: bool
+    image_tag: typing.Optional[str]
+
+
 class ArgoWorkflows(Base):
     enabled: bool
     overrides: typing.Optional[typing.Dict]
+    nebari_workflow_controller: typing.Optional[NebariWorkflowController]
 
 
 # ============== kbatch =============
