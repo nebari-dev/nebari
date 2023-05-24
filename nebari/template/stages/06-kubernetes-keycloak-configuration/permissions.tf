@@ -9,6 +9,21 @@ data "keycloak_role" "manage-users" {
   name      = "manage-users"
 }
 
+data "keycloak_openid_client" "nebari-realm" {
+  depends_on = [
+    keycloak_realm.main,
+  ]
+  realm_id  = data.keycloak_realm.master.id
+  client_id = "${var.realm}-realm"
+}
+
+data "keycloak_role" "view-users" {
+  realm_id  = data.keycloak_realm.master.id
+  client_id = data.keycloak_openid_client.nebari-realm.id
+  name      = "view-users"
+}
+
+
 data "keycloak_role" "query-users" {
   realm_id  = keycloak_realm.main.id
   client_id = data.keycloak_openid_client.realm_management.id

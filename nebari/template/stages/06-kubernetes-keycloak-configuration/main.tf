@@ -47,6 +47,34 @@ resource "keycloak_default_groups" "default" {
   ]
 }
 
+data "keycloak_realm" "master" {
+  realm = "master"
+}
+
+resource "random_password" "keycloak-view-only-user-password" {
+  length  = 32
+  special = false
+}
+
+resource "keycloak_user" "read-only-user" {
+  realm_id = data.keycloak_realm.master.id
+  username = "read-only-user"
+  initial_password {
+    value     = random_password.keycloak-view-only-user-password.result
+    temporary = false
+  }
+}
+
+resource "keycloak_user_roles" "user_roles" {
+  realm_id = data.keycloak_realm.master.id
+  user_id  = keycloak_user.read-only-user.id
+
+  role_ids = [
+    data.keycloak_role.view-users.id,
+  ]
+  exhaustive = true
+}
+
 # needed for keycloak monitoring to function
 resource "keycloak_realm_events" "realm_events" {
   realm_id = keycloak_realm.main.id
