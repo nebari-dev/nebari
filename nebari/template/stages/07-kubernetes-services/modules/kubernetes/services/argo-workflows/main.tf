@@ -125,6 +125,40 @@ resource "kubernetes_manifest" "argo-workflows-ingress-route" {
       routes = [
         {
           kind  = "Rule"
+          match = "Host(`${var.external-url}`) && Path(`/${local.argo-workflows-prefix}/validate`)"
+          middlewares = concat(
+            [{
+              name      = kubernetes_manifest.argo-workflows-middleware-stripprefix.manifest.metadata.name
+              namespace = var.namespace
+            }]
+          )
+          services = [
+            {
+              name      = "wf-admission-controller"
+              port      = 8080
+              namespace = var.namespace
+            }
+          ]
+        },
+        {
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`) && Path(`/${local.argo-workflows-prefix}/mutate`)"
+          middlewares = concat(
+            [{
+              name      = kubernetes_manifest.argo-workflows-middleware-stripprefix.manifest.metadata.name
+              namespace = var.namespace
+            }]
+          )
+          services = [
+            {
+              name      = "wf-admission-controller"
+              port      = 8080
+              namespace = var.namespace
+            }
+          ]
+        },
+        {
+          kind  = "Rule"
           match = "Host(`${var.external-url}`) && PathPrefix(`/${local.argo-workflows-prefix}`)"
 
           middlewares = concat(
@@ -141,7 +175,7 @@ resource "kubernetes_manifest" "argo-workflows-ingress-route" {
               namespace = var.namespace
             }
           ]
-        }
+        },
       ]
     }
   }
@@ -263,5 +297,272 @@ resource "kubernetes_cluster_role_binding" "argo-view-rb" {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account_v1.argo-view-sa.metadata.0.name
     namespace = var.namespace
+  }
+}
+
+# Workflow Admission Controller
+resource "kubernetes_role" "pod_viewer" {
+
+  metadata {
+    name      = "nebari-pod-viewer"
+    namespace = var.namespace
+  }
+
+  rule {
+    api_groups = [""]
+    resources  = ["pods"]
+    verbs      = ["get", "list"]
+  }
+}
+
+resource "kubernetes_role" "workflow_viewer" {
+
+  metadata {
+    name      = "nebari-workflow-viewer"
+    namespace = var.namespace
+  }
+
+  rule {
+    api_groups = ["argoproj.io"]
+    resources  = ["workflows", "cronworkflows"]
+    verbs      = ["get", "list"]
+  }
+}
+
+resource "kubernetes_service_account" "wf-admission-controller" {
+  metadata {
+    name      = "wf-admission-controller-sa"
+    namespace = var.namespace
+  }
+}
+
+resource "kubernetes_role_binding" "wf-admission-controller-pod-viewer" {
+  metadata {
+    name      = "wf-admission-controller-pod-viewer"
+    namespace = var.namespace
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.pod_viewer.metadata.0.name
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.wf-admission-controller.metadata.0.name
+    namespace = var.namespace
+  }
+}
+
+resource "kubernetes_role_binding" "wf-admission-controller-wf-viewer" {
+  metadata {
+    name      = "wf-admission-controller-wf-viewer"
+    namespace = var.namespace
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.workflow_viewer.metadata.0.name
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.wf-admission-controller.metadata.0.name
+    namespace = var.namespace
+  }
+}
+
+
+resource "kubernetes_secret" "keycloak-read-only-user-credentials" {
+  metadata {
+    name      = "keycloak-read-only-user-credentials"
+    namespace = var.namespace
+  }
+
+  data = {
+    username  = var.keycloak-read-only-user-credentials["username"]
+    password  = var.keycloak-read-only-user-credentials["password"]
+    client_id = var.keycloak-read-only-user-credentials["client_id"]
+    realm     = var.keycloak-read-only-user-credentials["realm"]
+  }
+
+  type = "Opaque"
+}
+
+
+resource "kubernetes_manifest" "mutatingwebhookconfiguration_admission_controller" {
+  count = var.nebari-workflow-controller ? 1 : 0
+
+  manifest = {
+    "apiVersion" = "admissionregistration.k8s.io/v1"
+    "kind"       = "MutatingWebhookConfiguration"
+    "metadata" = {
+      "name" = "wf-admission-controller"
+    }
+    "webhooks" = [
+      {
+        "admissionReviewVersions" = [
+          "v1",
+          "v1beta1",
+        ]
+
+        "clientConfig" = {
+          "url" = "https://${var.external-url}/${local.argo-workflows-prefix}/mutate"
+        }
+
+        "name" = "wf-mutating-admission-controller.${var.namespace}.svc"
+        "rules" = [
+          {
+            "apiGroups" = [
+              "argoproj.io",
+            ]
+            "apiVersions" = [
+              "v1alpha1",
+            ]
+            "operations" = [
+              "CREATE",
+            ]
+            "resources" = [
+              "workflows",
+              "cronworkflows",
+            ]
+          },
+        ]
+        "sideEffects" = "None"
+      },
+    ]
+  }
+}
+
+resource "kubernetes_manifest" "validatingwebhookconfiguration_admission_controller" {
+  count = var.nebari-workflow-controller ? 1 : 0
+  manifest = {
+    "apiVersion" = "admissionregistration.k8s.io/v1"
+    "kind"       = "ValidatingWebhookConfiguration"
+    "metadata" = {
+      "name" = "wf-admission-controller"
+    }
+    "webhooks" = [
+      {
+        "admissionReviewVersions" = [
+          "v1",
+          "v1beta1",
+        ]
+        "clientConfig" = {
+          "url" = "https://${var.external-url}/${local.argo-workflows-prefix}/validate"
+        }
+        "name" = "wf-validating-admission-controller.${var.namespace}.svc"
+        "rules" = [
+          {
+            "apiGroups" = [
+              "argoproj.io",
+            ]
+            "apiVersions" = [
+              "v1alpha1",
+            ]
+            "operations" = [
+              "CREATE",
+            ]
+            "resources" = [
+              "workflows",
+            ]
+          },
+        ]
+        "sideEffects" = "None"
+      },
+    ]
+  }
+}
+
+resource "kubernetes_manifest" "deployment_admission_controller" {
+  count = var.nebari-workflow-controller ? 1 : 0
+  manifest = {
+    "apiVersion" = "apps/v1"
+    "kind"       = "Deployment"
+    "metadata" = {
+      "name"      = "nebari-workflow-controller"
+      "namespace" = var.namespace
+    }
+    "spec" = {
+      "replicas" = 1
+      "selector" = {
+        "matchLabels" = {
+          "app" = "nebari-workflow-controller"
+        }
+      }
+      "template" = {
+        "metadata" = {
+          "labels" = {
+            "app" = "nebari-workflow-controller"
+          }
+        }
+        "spec" = {
+          serviceAccountName           = kubernetes_service_account.wf-admission-controller.metadata.0.name
+          automountServiceAccountToken = true
+          "containers" = [
+            {
+              command = ["bash", "-c"]
+              args    = ["python -m nebari_workflow_controller"]
+
+              "env" = [
+                {
+                  "name" = "KEYCLOAK_USERNAME"
+                  "valueFrom" = {
+                    "secretKeyRef" = {
+                      "key"  = "username"
+                      "name" = "keycloak-read-only-user-credentials"
+                    }
+                  }
+                },
+                {
+                  "name" = "KEYCLOAK_PASSWORD"
+                  "valueFrom" = {
+                    "secretKeyRef" = {
+                      "key"  = "password"
+                      "name" = "keycloak-read-only-user-credentials"
+                    }
+                  }
+                },
+                {
+                  "name"  = "KEYCLOAK_URL"
+                  "value" = "https://${var.external-url}/auth/"
+                },
+                {
+                  "name"  = "NAMESPACE"
+                  "value" = var.namespace
+                },
+              ]
+              "image" = "quay.io/nebari/nebari-workflow-controller:${var.workflow-controller-image-tag}"
+              "name"  = "admission-controller"
+            },
+          ]
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_manifest" "service_admission_controller" {
+  manifest = {
+    "apiVersion" = "v1"
+    "kind"       = "Service"
+    "metadata" = {
+      "name"      = "wf-admission-controller"
+      "namespace" = var.namespace
+    }
+    "spec" = {
+      "ports" = [
+        {
+          "name"       = "wf-admission-controller"
+          "port"       = 8080
+          "targetPort" = 8080
+        },
+      ]
+      "selector" = {
+        "app" = "nebari-workflow-controller"
+      }
+    }
   }
 }
