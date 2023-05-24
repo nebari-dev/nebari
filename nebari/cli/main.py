@@ -100,6 +100,8 @@ def init(
         callback=check_cloud_provider_creds,
         is_eager=True,
     ),
+    # Although this unused below, the functionality is contained in the callback. Thus,
+    # this attribute cannot be removed.
     guided_init: bool = typer.Option(
         False,
         help=GUIDED_INIT_MSG,
@@ -255,7 +257,7 @@ def render(
 
     verify(config_yaml)
 
-    render_template(output, config, force=True, dry_run=dry_run)
+    render_template(output, config, dry_run=dry_run)
 
 
 @app.command()
@@ -318,7 +320,7 @@ def deploy(
     verify(config_yaml)
 
     if not disable_render:
-        render_template(output, config, force=True)
+        render_template(output, config)
 
     deploy_configuration(
         config_yaml,
@@ -368,7 +370,7 @@ def destroy(
         verify(config_yaml)
 
         if not disable_render:
-            render_template(output, config, force=True)
+            render_template(output, config)
 
         destroy_configuration(config_yaml)
 
