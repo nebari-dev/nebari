@@ -6,10 +6,6 @@ import typer
 from click import Context
 from kubernetes import client
 from kubernetes import config as kube_config
-from rich import print
-from ruamel import yaml
-from typer.core import TyperGroup
-
 from nebari.cli.dev import app_dev
 from nebari.cli.init import (
     check_auth_provider_creds,
@@ -37,6 +33,9 @@ from nebari.schema import (
 from nebari.upgrade import do_upgrade
 from nebari.utils import load_yaml
 from nebari.version import __version__
+from rich import print
+from ruamel import yaml
+from typer.core import TyperGroup
 
 SECOND_COMMAND_GROUP_NAME = "Additional Commands"
 GUIDED_INIT_MSG = (
@@ -258,7 +257,7 @@ def render(
 
     verify(config_yaml)
 
-    render_template(output, config, force=True, dry_run=dry_run)
+    render_template(output, config, dry_run=dry_run)
 
 
 @app.command()
@@ -321,7 +320,7 @@ def deploy(
     verify(config_yaml)
 
     if not disable_render:
-        render_template(output, config, force=True)
+        render_template(output, config)
 
     deploy_configuration(
         config_yaml,
@@ -371,7 +370,7 @@ def destroy(
         verify(config_yaml)
 
         if not disable_render:
-            render_template(output, config, force=True)
+            render_template(output, config)
 
         destroy_configuration(config_yaml)
 
