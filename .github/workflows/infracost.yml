@@ -26,12 +26,12 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      fail-fast: true
       matrix:
         provider:
           - aws
           - gcp
           - azure
+      fail-fast: false
 
     env:
       # Specify the path where the Terraform state will be stored
