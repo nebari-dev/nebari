@@ -9,10 +9,6 @@ PYPROJECT = SRC_DIR / "pyproject.toml"
 
 @pytest.mark.conda
 def test_build_by_conda_forge(tmp_path):
-    # FIXME: temporarily disable this because the conda build tries to import nebari
-    #  which is only available in the next commit
-    return
-
     """
     This test ensures that nebari can be built and packaged by conda-forge.
 

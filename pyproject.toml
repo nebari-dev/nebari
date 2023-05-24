@@ -4,7 +4,10 @@ requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/_nebari"]
+packages = [
+    "src/_nebari",
+    "src/nebari",
+]
 
 [tool.hatch.version]
 source = "vcs"
