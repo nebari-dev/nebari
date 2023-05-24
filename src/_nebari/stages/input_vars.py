@@ -3,7 +3,7 @@ import os
 import tempfile
 from urllib.parse import urlencode
 
-from nebari.constants import (
+from _nebari.constants import (
     DEFAULT_CONDA_STORE_IMAGE_TAG,
     DEFAULT_GKE_RELEASE_CHANNEL,
     DEFAULT_NEBARI_WORKFLOW_CONTROLLER_IMAGE_TAG,

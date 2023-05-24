@@ -3,7 +3,7 @@ import os
 
 import requests
 
-from nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 
 
 def digital_ocean_request(url, method="GET", json=None):

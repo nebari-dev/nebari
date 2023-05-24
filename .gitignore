@@ -1,5 +1,5 @@
 # setuptools scm
-src/nebari/_version.py
+src/_nebari/_version.py
 
 # ignore terraform state
 .terraform

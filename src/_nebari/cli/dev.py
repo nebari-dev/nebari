@@ -3,7 +3,7 @@ from pathlib import Path
 
 import typer
 
-from nebari.keycloak import keycloak_rest_api_call
+from _nebari.keycloak import keycloak_rest_api_call
 
 app_dev = typer.Typer(
     add_completion=False,

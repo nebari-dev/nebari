@@ -3,7 +3,7 @@ import logging
 import pathlib
 import time
 
-from nebari.utils import check_cloud_credentials, load_yaml, timer
+from _nebari.utils import check_cloud_credentials, load_yaml, timer
 
 logging.basicConfig(level=logging.INFO)
 

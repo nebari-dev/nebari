@@ -6,8 +6,8 @@ import questionary
 import rich
 import typer
 
-from nebari.initialize import render_config
-from nebari.schema import (
+from _nebari.initialize import render_config
+from _nebari.schema import (
     AuthenticationEnum,
     CiEnum,
     GitRepoEnum,
@@ -16,7 +16,7 @@ from nebari.schema import (
     TerraformStateEnum,
     project_name_convention,
 )
-from nebari.utils import NEBARI_DASK_VERSION, NEBARI_IMAGE_TAG, yaml
+from _nebari.utils import NEBARI_DASK_VERSION, NEBARI_IMAGE_TAG, yaml
 
 MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[green]\t{link_to_docs}[/green]\n\n"
 LINKS_TO_DOCS_TEMPLATE = (

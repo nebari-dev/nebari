@@ -5,7 +5,7 @@ from abc import ABC
 import pydantic
 from pydantic import root_validator, validator
 
-from nebari.utils import namestr_regex
+from _nebari.utils import namestr_regex
 
 from .version import __version__, rounded_ver_parse
 

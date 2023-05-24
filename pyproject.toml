@@ -4,13 +4,13 @@ requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/nebari"]
+packages = ["src/_nebari"]
 
 [tool.hatch.version]
 source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "src/nebari/_version.py"
+version-file = "src/_nebari/_version.py"
 local_scheme = "node-and-timestamp"
 
 
@@ -90,7 +90,7 @@ Documentation = "https://www.nebari.dev/docs"
 Source = "https://github.com/nebari-dev/nebari"
 
 [project.scripts]
-nebari = "nebari.cli.main:app"
+nebari = "_nebari.cli.main:app"
 
 [tool.ruff]
 ignore = [
@@ -98,7 +98,7 @@ ignore = [
     "F821", # Undefined name
 ]
 extend-exclude = [
-    "src/nebari/template",
+    "src/_nebari/template",
     "home",
     "__pycache__"
 ]

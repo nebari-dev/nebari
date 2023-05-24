@@ -4,7 +4,7 @@ import logging
 import pathlib
 import sys
 
-from nebari.keycloak import get_keycloak_admin_from_config
+from _nebari.keycloak import get_keycloak_admin_from_config
 
 logging.basicConfig(level=logging.INFO)
 

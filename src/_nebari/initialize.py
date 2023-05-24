@@ -8,10 +8,10 @@ import tempfile
 
 import requests
 
-from nebari.provider import git
-from nebari.provider.cicd import github
-from nebari.provider.oauth.auth0 import create_client
-from nebari.utils import (
+from _nebari.provider import git
+from _nebari.provider.cicd import github
+from _nebari.provider.oauth.auth0 import create_client
+from _nebari.utils import (
     check_cloud_credentials,
     namestr_regex,
     set_docker_image_tag,

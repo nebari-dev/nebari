@@ -4,7 +4,7 @@ from typing import Tuple
 
 import typer
 
-from nebari.keycloak import do_keycloak, export_keycloak_users
+from _nebari.keycloak import do_keycloak, export_keycloak_users
 
 app_keycloak = typer.Typer(
     add_completion=False,

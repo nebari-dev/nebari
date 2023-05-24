@@ -1,6 +1,6 @@
 import sys
 
-from nebari.cli.main import app
+from _nebari.cli.main import app
 
 
 def main():
