@@ -6,6 +6,10 @@ import typer
 from click import Context
 from kubernetes import client
 from kubernetes import config as kube_config
+from rich import print
+from ruamel import yaml
+from typer.core import TyperGroup
+
 from nebari.cli.dev import app_dev
 from nebari.cli.init import (
     check_auth_provider_creds,
@@ -33,9 +37,6 @@ from nebari.schema import (
 from nebari.upgrade import do_upgrade
 from nebari.utils import load_yaml
 from nebari.version import __version__
-from rich import print
-from ruamel import yaml
-from typer.core import TyperGroup
 
 SECOND_COMMAND_GROUP_NAME = "Additional Commands"
 GUIDED_INIT_MSG = (
