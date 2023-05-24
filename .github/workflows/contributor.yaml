@@ -73,14 +73,6 @@ jobs:
       pr_number: ${{ github.event.issue.number }}
     secrets: inherit
 
-  infracost-tests:
-    needs: trigger-contributor-tests
-    name: "Contributor #${{ github.event.issue.number }}"
-    uses: nebari-dev/nebari/.github/workflows/infracost.yml@develop
-    with:
-      pr_number: ${{ github.event.issue.number }}
-    secrets: inherit
-
 # FIXME: this needs write permissions, but they might not be available for PRs coming from a fork
 #  provider-tests:
 #    needs: trigger-contributor-tests
