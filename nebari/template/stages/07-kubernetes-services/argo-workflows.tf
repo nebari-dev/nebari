@@ -11,6 +11,24 @@ variable "argo-workflows-overrides" {
   default     = []
 }
 
+variable "nebari-workflow-controller" {
+  description = "Nebari Workflow Controller enabled"
+  type        = bool
+  default     = true
+}
+
+
+variable "keycloak-read-only-user-credentials" {
+  description = "Keycloak password for nebari-bot"
+  type        = map(string)
+  default     = {}
+}
+
+variable "workflow-controller-image-tag" {
+  description = "Image tag for nebari-workflow-controller"
+  type        = string
+}
+
 
 # ====================== RESOURCES =======================
 module "argo-workflows" {
@@ -21,6 +39,9 @@ module "argo-workflows" {
   external-url = var.endpoint
   realm_id     = var.realm_id
 
-  node-group = var.node_groups.general
-  overrides  = var.argo-workflows-overrides
+  node-group                          = var.node_groups.general
+  overrides                           = var.argo-workflows-overrides
+  keycloak-read-only-user-credentials = var.keycloak-read-only-user-credentials
+  workflow-controller-image-tag       = var.workflow-controller-image-tag
+  nebari-workflow-controller          = var.nebari-workflow-controller
 }
