@@ -21,7 +21,6 @@ from nebari.cli.init import (
     handle_init,
 )
 from nebari.cli.keycloak import app_keycloak
-from nebari.cost import infracost_report
 from nebari.deploy import deploy_configuration
 from nebari.destroy import destroy_configuration
 from nebari.render import render_template
@@ -381,42 +380,6 @@ def destroy(
         _run_destroy()
     else:
         raise typer.Abort()
-
-
-@app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
-def cost(
-    path: str = typer.Option(
-        None,
-        "-p",
-        "--path",
-        help="Pass the path of your stages directory generated after rendering Nebari configurations before deployment",
-    ),
-    file: str = typer.Option(
-        None,
-        "-f",
-        "--file",
-        help="Specify the path of the file to store the cost report",
-    ),
-    currency: str = typer.Option(
-        "USD",
-        "-c",
-        "--currency",
-        help="Specify the currency code to use in the cost report",
-    ),
-):
-    """
-    Estimate the cost of deploying Nebari based on your [purple]nebari-config.yaml[/purple]. [italic]Experimental.[/italic].
-
-    [italic]This is still only experimental using Infracost under the hood.
-    The estimated value is a base cost and does not include usage costs.[/italic]
-    """
-    infracost_report(
-        path=path,
-        dashboard=True,
-        file=file,
-        currency_code=currency,
-        compare=False,
-    )
 
 
 @app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
