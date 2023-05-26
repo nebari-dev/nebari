@@ -47,7 +47,7 @@ on [HPC](#nebari-hpc) or [Kubernetes](#nebari) with minimal DevOps overhead.
 
 **This repository details the [Nebari](https://nebari.dev/ "Official Nebari docs") (Kubernetes) version.**
 
-Not sure what to choose? Check out our [Setup Initialization](docs/source/installation/setup.md) page.
+Not sure what to choose? Check out our documentation on [choosing a deployment platform](https://www.nebari.dev/docs/get-started/deploy)
 
 ## Nebari
 

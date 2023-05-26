@@ -99,8 +99,6 @@ ignore = [
 ]
 extend-exclude = [
     "nebari/template",
-    "docs/source/conf.py",
-    "docs",
     "home",
     "__pycache__"
 ]
