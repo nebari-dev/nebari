@@ -90,9 +90,6 @@ jobs:
       - name: Get routing table for docker pods
         run: |
           ip route
-      - name: Add DNS entry to hosts
-        run: |
-          sudo echo "172.18.1.100  github-actions.nebari.dev" | sudo tee -a /etc/hosts
       - name: Initialize Nebari Cloud
         run: |
           mkdir -p local-deployment
