@@ -20,7 +20,6 @@ from _nebari.cli.init import (
     guided_init_wizard,
     handle_init,
 )
-
 from _nebari.cli.keycloak import app_keycloak
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
