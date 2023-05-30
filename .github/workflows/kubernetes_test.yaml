@@ -8,7 +8,7 @@ on:
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "nebari/**"
+      - "src/**"
       - "pyproject.toml"
       - "pytest.ini"
   push:
@@ -22,7 +22,7 @@ on:
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "nebari/**"
+      - "src/**"
       - "pyproject.toml"
       - "pytest.ini"
   workflow_call:
