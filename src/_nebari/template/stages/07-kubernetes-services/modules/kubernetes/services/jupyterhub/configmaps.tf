@@ -1,5 +1,5 @@
 locals {
-  jupyter-notebook-config-py-template = templatefile("${path.module}/files/jupyter/jupyter_notebook_config.py.tpl", {
+  jupyter-notebook-config-py-template = templatefile("${path.module}/files/jupyter/jupyter_server_config.py.tpl", {
     terminal_cull_inactive_timeout      = var.idle-culler-settings.terminal_cull_inactive_timeout
     terminal_cull_interval              = var.idle-culler-settings.terminal_cull_interval
     kernel_cull_idle_timeout            = var.idle-culler-settings.kernel_cull_idle_timeout
@@ -12,9 +12,9 @@ locals {
 }
 
 
-resource "local_file" "jupyter_notebook_config_py" {
+resource "local_file" "jupyter_server_config_py" {
   content  = local.jupyter-notebook-config-py-template
-  filename = "${path.module}/files/jupyter/jupyter_notebook_config.py"
+  filename = "${path.module}/files/jupyter/jupyter_server_config.py"
 }
 
 
@@ -33,7 +33,7 @@ resource "kubernetes_config_map" "etc-ipython" {
 
 resource "kubernetes_config_map" "etc-jupyter" {
   depends_on = [
-    local_file.jupyter_notebook_config_py
+    local_file.jupyter_server_config_py
   ]
 
   metadata {
@@ -42,7 +42,7 @@ resource "kubernetes_config_map" "etc-jupyter" {
   }
 
   data = {
-    "jupyter_notebook_config.py" : local_file.jupyter_notebook_config_py.content
+    "jupyter_server_config.py" : local_file.jupyter_server_config_py.content
   }
 }
 

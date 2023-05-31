@@ -311,6 +311,40 @@ def configure_user(username, groups, uid=1000, gid=100):
     }
 
 
+def profile_argo_token(groups):
+    # TODO: create a more robust check user's Argo-Workflow role
+
+    domain = z2jh.get_config("custom.external-url")
+
+    ADMIN = "admin"
+    DEVELOPER = "developer"
+    ANALYST = "analyst"
+
+    base = "argo-"
+
+    if ANALYST in groups:
+        argo_sa = base + "viewer"
+    if DEVELOPER in groups:
+        argo_sa = base + "developer"
+    if ADMIN in groups:
+        argo_sa = base + "admin"
+    else:
+        return {}
+
+    return {
+        "ARGO_BASE_HREF": "/argo",
+        "ARGO_SERVER": f"{domain}:443",
+        "ARGO_TOKEN": {
+            "valueFrom": {
+                "secretKeyRef": {
+                    "name": f"{argo_sa}.service-account-token",
+                    "key": "token",
+                }
+            }
+        },
+    }
+
+
 def render_profile(profile, username, groups, keycloak_profilenames):
     """Render each profile for user.
 
@@ -366,7 +400,7 @@ def render_profile(profile, username, groups, keycloak_profilenames):
     def preserve_envvars(spawner):
         # This adds in JUPYTERHUB_ANYONE/GROUP rather than overwrite all env vars,
         # if set in the spawner for a dashboard to control access.
-        return {**envvars_fixed, **spawner.environment}
+        return {**envvars_fixed, **spawner.environment, **profile_argo_token(groups)}
 
     profile["kubespawner_override"]["environment"] = preserve_envvars
 
@@ -404,6 +438,10 @@ def render_profiles(spawner):
     )
 
 
+c.KubeSpawner.args = ["--debug"]
+c.KubeSpawner.environment = {
+    "JUPYTERHUB_SINGLEUSER_APP": "jupyter_server.serverapp.ServerApp",
+}
 c.KubeSpawner.profile_list = render_profiles
 
 
