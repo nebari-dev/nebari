@@ -41,3 +41,4 @@ from argo_workflows_executor import ArgoExecutor, ArgoScheduler
 
 c.Scheduler.execution_manager_class=ArgoExecutor
 c.SchedulerApp.scheduler_class=ArgoScheduler
+c.SchedulerApp.scheduler_class.use_conda_store_env=True

@@ -128,6 +128,11 @@ variable "conda-store-cdsdashboard-token" {
   default     = ""
 }
 
+variable "conda-store-argo-workflows-jupyter-scheduler-token" {
+  description = "Token for argo-workflows-jupyter-schedule to use conda-store"
+  type        = string
+}
+
 variable "jupyterhub-logout-redirect-url" {
   description = "Next redirect destination following a Keycloak logout"
   type        = string

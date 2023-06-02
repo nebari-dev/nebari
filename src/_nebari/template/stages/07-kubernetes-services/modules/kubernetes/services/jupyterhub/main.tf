@@ -35,6 +35,7 @@ resource "helm_release" "jupyterhub" {
         default-conda-store-namespace = var.default-conda-store-namespace
         conda-store-service-name      = var.conda-store-service-name
         conda-store-cdsdashboards     = var.conda-store-cdsdashboard-token
+        conda-store-jupyter-scheduler = var.conda-store-argo-workflows-jupyter-scheduler-token
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace
@@ -209,4 +210,19 @@ module "jupyterhub-openid-client" {
     var.jupyterhub-logout-redirect-url
   ]
   jupyterlab_profiles_mapper = true
+}
+
+
+resource "kubernetes_secret" "argo-workflows-conda-store-token" {
+  metadata {
+    name      = "argo-workflows-conda-store-token"
+    namespace = var.namespace
+  }
+
+  data = {
+    "conda-store-api-token"    = var.conda-store-argo-workflows-jupyter-scheduler-token
+    "conda-store-service-name" = var.conda-store-service-name
+  }
+
+  type = "Opaque"
 }

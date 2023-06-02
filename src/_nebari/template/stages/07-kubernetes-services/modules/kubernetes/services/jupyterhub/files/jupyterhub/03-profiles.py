@@ -345,6 +345,27 @@ def profile_argo_token(groups):
     }
 
 
+def profile_conda_store_viewer_token():
+    return {
+        "CONDA_STORE_TOKEN": {
+            "valueFrom": {
+                "secretKeyRef": {
+                    "name": "argo-workflows-conda-store-token",
+                    "key": "conda-store-api-token",
+                }
+            }
+        },
+        "CONDA_STORE_SERVICE": {
+            "valueFrom": {
+                "secretKeyRef": {
+                    "name": "argo-workflows-conda-store-token",
+                    "key": "conda-store-service-name",
+                }
+            }
+        },
+    }
+
+
 def render_profile(profile, username, groups, keycloak_profilenames):
     """Render each profile for user.
 
@@ -400,7 +421,12 @@ def render_profile(profile, username, groups, keycloak_profilenames):
     def preserve_envvars(spawner):
         # This adds in JUPYTERHUB_ANYONE/GROUP rather than overwrite all env vars,
         # if set in the spawner for a dashboard to control access.
-        return {**envvars_fixed, **spawner.environment, **profile_argo_token(groups)}
+        return {
+            **envvars_fixed,
+            **spawner.environment,
+            **profile_argo_token(groups),
+            **profile_conda_store_viewer_token(),
+        }
 
     profile["kubespawner_override"]["environment"] = preserve_envvars
 
