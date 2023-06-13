@@ -1,12 +1,8 @@
-from typing import Optional
-from collections.abc import Iterable
 import contextlib
-import importlib
 import pathlib
-import logging
+from collections.abc import Iterable
 
-from pluggy import HookimplMarker
-from pluggy import HookspecMarker
+from pluggy import HookimplMarker, HookspecMarker
 
 hookspec = HookspecMarker("nebari")
 hookimpl = HookimplMarker("nebari")
@@ -41,10 +37,14 @@ class NebariStage:
         pass
 
     @contextlib.contextmanager
-    def destroy(self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]):
+    def destroy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+    ):
         raise NotImplementedError()
 
 
 @hookspec
-def nebari_stage(install_directory: pathlib.Path, config: schema.Main) -> Iterable[NebariStage]:
+def nebari_stage(
+    install_directory: pathlib.Path, config: schema.Main
+) -> Iterable[NebariStage]:
     """Registers stages in nebari"""
