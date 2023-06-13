@@ -1,12 +1,14 @@
-from typing import List, Dict
 import pathlib
-import sys
-
-from nebari.hookspecs import NebariStage, hookimpl
-from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import NebariTerraformState, NebariKubernetesProvider, NebariHelmProvider
+from typing import Dict, List
 
 from _nebari import schema
+from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.tf_objects import (
+    NebariHelmProvider,
+    NebariKubernetesProvider,
+    NebariTerraformState,
+)
+from nebari.hookspecs import NebariStage, hookimpl
 
 
 class NebariTFExtensionsStage(NebariTerraformStage):
@@ -34,15 +36,17 @@ class NebariTFExtensionsStage(NebariTerraformStage):
             ]["value"],
             "tf_extensions": self.config.tf_extensions,
             "nebari_config_yaml": self.config,
-            "keycloak_nebari_bot_password": stage_outputs["stages/05-kubernetes-keycloak"][
-                "keycloak_nebari_bot_password"
-            ]["value"],
+            "keycloak_nebari_bot_password": stage_outputs[
+                "stages/05-kubernetes-keycloak"
+            ]["keycloak_nebari_bot_password"]["value"],
             "helm_extensions": self.config.helm_extensions,
         }
 
 
 @hookimpl
-def nebari_stage(install_directory: pathlib.Path, config: schema.Main) -> List[NebariStage]:
+def nebari_stage(
+    install_directory: pathlib.Path, config: schema.Main
+) -> List[NebariStage]:
     return [
         NebariTFExtensionsStage(
             install_directory,

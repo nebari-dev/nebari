@@ -1,13 +1,15 @@
 import os
-from typing import List, Tuple
 import pathlib
-import sys
-
-from nebari.hookspecs import hookimpl, NebariStage
-from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import NebariTerraformState, NebariKubernetesProvider, NebariHelmProvider
+from typing import List, Tuple
 
 from _nebari import schema
+from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.tf_objects import (
+    NebariHelmProvider,
+    NebariKubernetesProvider,
+    NebariTerraformState,
+)
+from nebari.hookspecs import NebariStage, hookimpl
 
 
 class KubernetesInitializeStage(NebariTerraformStage):
@@ -98,18 +100,22 @@ class KubernetesInitializeStage(NebariTerraformStage):
                 "namespace": self.config.namespace,
                 "region": self.config.azure.region,
                 "storage_account_postfix": self.config.azure.storage_account_postfix,
-                "state_resource_group_name": f'{self.config.project_name}-{self.config.namespace}-state',
+                "state_resource_group_name": f"{self.config.project_name}-{self.config.namespace}-state",
             }
         else:
             return {}
 
 
 @hookimpl
-def nebari_stage(install_directory: pathlib.Path, config: schema.Main) -> List[NebariStage]:
+def nebari_stage(
+    install_directory: pathlib.Path, config: schema.Main
+) -> List[NebariStage]:
     if config.provider in [schema.ProviderEnum.local, schema.ProviderEnum.existing]:
         return []
 
-    template_directory = pathlib.Path(__file__).parent / "template" / config.provider.value
+    template_directory = (
+        pathlib.Path(__file__).parent / "template" / config.provider.value
+    )
     stage_prefix = pathlib.Path("stages/01-terraform-state") / config.provider.value
 
     return [
