@@ -580,7 +580,7 @@ class InitInputs(Base):
 class Main(Base):
     provider: ProviderEnum
     project_name: str
-    namespace: typing.Optional[letter_dash_underscore_pydantic]
+    namespace: typing.Optional[letter_dash_underscore_pydantic] = "dev"
     nebari_version: str = ""
     ci_cd: typing.Optional[CICD]
     domain: str
