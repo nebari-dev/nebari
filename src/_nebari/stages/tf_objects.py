@@ -1,11 +1,6 @@
 from typing import Dict
 
-from _nebari.provider.terraform import (
-    Data,
-    Provider,
-    TerraformBackend,
-    tf_render_objects,
-)
+from _nebari.provider.terraform import Data, Provider, TerraformBackend
 from _nebari.utils import deep_merge
 
 
