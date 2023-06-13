@@ -1,12 +1,11 @@
-from typing import List, Dict
 import pathlib
 import sys
-
-from nebari.hookspecs import NebariStage, hookimpl
-from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import NebariTerraformState
+from typing import Dict, List
 
 from _nebari import schema
+from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.tf_objects import NebariTerraformState
+from nebari.hookspecs import NebariStage, hookimpl
 
 
 class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
