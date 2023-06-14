@@ -6,8 +6,7 @@ import pydantic
 from pydantic import root_validator, validator
 
 from _nebari.utils import namestr_regex
-
-from .version import __version__, rounded_ver_parse
+from _nebari.version import __version__, rounded_ver_parse
 
 
 class CertificateEnum(str, enum.Enum):
@@ -67,11 +66,11 @@ class Base(pydantic.BaseModel):
 
 
 class CICD(Base):
-    type: CiEnum
-    branch: str
-    commit_render: typing.Optional[bool] = True
-    before_script: typing.Optional[typing.List[typing.Union[str, typing.Dict]]]
-    after_script: typing.Optional[typing.List[typing.Union[str, typing.Dict]]]
+    type: CiEnum = CiEnum.none
+    branch: str = "main"
+    commit_render: bool = True
+    before_script: typing.List[typing.Union[str, typing.Dict]] = []
+    after_script: typing.List[typing.Union[str, typing.Dict]] = []
 
 
 # ======== Generic Helm Extensions ========
@@ -115,18 +114,18 @@ class Monitoring(Base):
 
 
 class ClearML(Base):
-    enabled: bool
+    enabled: bool = False
     enable_forward_auth: typing.Optional[bool]
-    overrides: typing.Optional[typing.Dict]
+    overrides: typing.Dict = {}
 
 
 # ============== Prefect =============
 
 
 class Prefect(Base):
-    enabled: bool
+    enabled: bool = False
     image: typing.Optional[str]
-    overrides: typing.Optional[typing.Dict]
+    overrides: typing.Dict = {}
 
 
 # =========== Conda-Store ==============
@@ -152,7 +151,7 @@ class TerraformState(Base):
 
 
 class Certificate(Base):
-    type: CertificateEnum
+    type: CertificateEnum = CertificateEnum.selfsigned
     # existing
     secret_name: typing.Optional[str]
     # lets-encrypt
@@ -245,7 +244,7 @@ class Keycloak(Base):
 
 class Security(Base):
     authentication: Authentication
-    shared_users_group: typing.Optional[bool]
+    shared_users_group: bool = True
     keycloak: typing.Optional[Keycloak]
 
 
@@ -451,9 +450,9 @@ class CondaEnvironment(Base):
 
 
 class CDSDashboards(Base):
-    enabled: bool
-    cds_hide_user_named_servers: typing.Optional[bool]
-    cds_hide_user_dashboard_servers: typing.Optional[bool]
+    enabled: bool = True
+    cds_hide_user_named_servers: bool = True
+    cds_hide_user_dashboard_servers: bool = False
 
 
 # =============== Extensions = = ==============
@@ -580,16 +579,16 @@ class InitInputs(Base):
 class Main(Base):
     provider: ProviderEnum
     project_name: str
-    namespace: typing.Optional[letter_dash_underscore_pydantic] = "dev"
-    nebari_version: str = ""
-    ci_cd: typing.Optional[CICD]
+    namespace: letter_dash_underscore_pydantic = "dev"
+    nebari_version: str = __version__
+    ci_cd: CICD = CICD()
     domain: str
     terraform_state: typing.Optional[TerraformState]
-    certificate: Certificate
-    helm_extensions: typing.Optional[typing.List[HelmExtension]]
-    prefect: typing.Optional[Prefect]
-    cdsdashboards: CDSDashboards
-    security: Security
+    certificate: Certificate = Certificate()
+    helm_extensions: typing.List[HelmExtension] = []
+    prefect: Prefect = Prefect()
+    cdsdashboards: CDSDashboards = CDSDashboards()
+    security: Security = Security()
     external_container_reg: typing.Optional[ExtContainerReg]
     default_images: DefaultImages
     storage: typing.Dict[str, str]
