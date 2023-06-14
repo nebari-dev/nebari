@@ -4,9 +4,8 @@ from typing import Any, Dict, List, Tuple
 
 from _nebari.provider import terraform
 from _nebari.stages.tf_objects import NebariTerraformState
-from nebari.hookspecs import NebariStage
-
 from nebari import schema
+from nebari.hookspecs import NebariStage
 
 
 class NebariTerraformStage(NebariStage):
