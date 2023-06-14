@@ -1,16 +1,13 @@
+from typing import List, Dict, Any
 import pathlib
 import sys
-from typing import Dict, List
 from urllib.parse import urlencode
 
-from _nebari import schema
-from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import (
-    NebariHelmProvider,
-    NebariKubernetesProvider,
-    NebariTerraformState,
-)
 from nebari.hookspecs import NebariStage, hookimpl
+from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.tf_objects import NebariTerraformState, NebariKubernetesProvider, NebariHelmProvider
+
+from nebari import schema
 
 # check and retry settings
 NUM_ATTEMPTS = 10
@@ -50,13 +47,8 @@ def _calculate_node_groups(config: schema.Main):
 
 
 class KubernetesServicesStage(NebariTerraformStage):
-    @property
-    def name(self):
-        return "07-kubernetes-services"
-
-    @property
-    def priority(self):
-        return 70
+    name = "07-kubernetes-services"
+    priority = 70
 
     def tf_objects(self) -> List[Dict]:
         return [
@@ -159,7 +151,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             "prefect-image": self.config.prefect.image,
             "prefect-overrides": self.config.prefect.overrides,
             # clearml
-            "clearml-enabled": self.config.clearml.enabled
+            "clearml-enabled": self.config.clearml.enabled,
             "clearml-enable-forwardauth": self.config.clearml.enable_forward_auth,
             "clearml-overrides": [
                 json.dumps(self.config.clearml.overrides)
@@ -168,7 +160,7 @@ class KubernetesServicesStage(NebariTerraformStage):
         }
 
 
-    def check(self, stage_outputs: stage_outputs: Dict[str, Dict[str, Any]]):
+    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         directory = "stages/07-kubernetes-services"
         import requests
 
