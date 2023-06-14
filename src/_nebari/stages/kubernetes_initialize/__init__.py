@@ -1,6 +1,6 @@
+from typing import List, Dict, Any
 import pathlib
 import sys
-from typing import Dict, List
 
 from _nebari import schema
 from _nebari.stages.base import NebariTerraformStage
@@ -10,16 +10,12 @@ from _nebari.stages.tf_objects import (
     NebariTerraformState,
 )
 from nebari.hookspecs import NebariStage, hookimpl
+from nebari import schema
 
 
 class KubernetesInitializeStage(NebariTerraformStage):
-    @property
-    def name(self):
-        return "03-kubernetes-initialize"
-
-    @property
-    def priority(self):
-        return 30
+    name = "03-kubernetes-initialize"
+    priority = 30
 
     def tf_objects(self) -> List[Dict]:
         return [
@@ -58,7 +54,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
             "gpu_node_group_names": gpu_node_group_names,
         }
 
-    def check(self, stage_outputs: stage_outputs: Dict[str, Dict[str, Any]]):
+    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         from kubernetes import client, config
         from kubernetes.client.rest import ApiException
 

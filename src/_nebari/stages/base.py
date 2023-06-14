@@ -1,5 +1,6 @@
+from typing import List, Dict, Tuple, Any
 import pathlib
-from typing import Dict, List, Tuple
+import contextlib
 
 from _nebari import schema
 from _nebari.provider import terraform
@@ -15,7 +16,7 @@ class NebariTerraformStage(NebariStage):
         template_directory: pathlib.Path,
         stage_prefix: pathlib.Path,
     ):
-        super().__init__(self, output_directory, config)
+        super().__init__(output_directory, config)
         self.template_directory = pathlib.Path(template_directory)
         self.stage_prefix = pathlib.Path(stage_prefix)
 
@@ -43,7 +44,7 @@ class NebariTerraformStage(NebariStage):
     @contextlib.contextmanager
     def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
         deploy_config = dict(
-            directory=str(output_directory / stage_prefix),
+            directory=str(self.output_directory / self.stage_prefix),
             input_vars=self.input_vars(stage_outputs)
         )
         state_imports = self.state_imports()
@@ -59,8 +60,8 @@ class NebariTerraformStage(NebariStage):
 
     @contextlib.contextmanager
     def destroy(self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]):
-        stage_outputs["stages/" + self.name] = terraform.deploy((
-            directory=str(output_directory / stage_prefix),
+        stage_outputs["stages/" + self.name] = terraform.deploy(
+            directory=str(self.output_directory / self.stage_prefix),
             input_vars=self.input_vars(stage_outputs),
             terraform_init=True,
             terraform_import=True,

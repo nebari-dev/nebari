@@ -1,11 +1,19 @@
 import sys
+import importlib
 
 import pluggy
 
 from nebari import hookspecs
 
 DEFAULT_PLUGINS = [
-    "_nebari.stage.kubernetes_initialize_20",
+    "_nebari.stages.terraform_state",
+    "_nebari.stages.infrastructure",
+    "_nebari.stages.kubernetes_initialize",
+    "_nebari.stages.kubernetes_ingress",
+    "_nebari.stages.kubernetes_keycloak",
+    "_nebari.stages.kubernetes_keycloak_configuration",
+    "_nebari.stages.kubernetes_services",
+    "_nebari.stages.nebari_tf_extensions",
 ]
 
 pm = pluggy.PluginManager("nebari")

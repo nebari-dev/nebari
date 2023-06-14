@@ -1,7 +1,6 @@
+from typing import List, Dict, Any
 import pathlib
-from typing import Dict, List
 
-from _nebari import schema
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
     NebariHelmProvider,
@@ -10,15 +9,12 @@ from _nebari.stages.tf_objects import (
 )
 from nebari.hookspecs import NebariStage, hookimpl
 
+from nebari import schema
+
 
 class NebariTFExtensionsStage(NebariTerraformStage):
-    @property
-    def name(self):
-        return "08-nebari-tf-extensions"
-
-    @property
-    def priority(self):
-        return 80
+    name = "08-nebari-tf-extensions"
+    priority = 80
 
     def tf_objects(self) -> List[Dict]:
         return [
