@@ -7,8 +7,8 @@ import keycloak
 import requests
 import rich
 
-from nebari.schema import verify
 from _nebari.utils import load_yaml
+from nebari.schema import verify
 
 logger = logging.getLogger(__name__)
 

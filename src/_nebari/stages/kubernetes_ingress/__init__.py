@@ -1,7 +1,7 @@
-from typing import List, Dict, Any
 import pathlib
 import socket
 import sys
+from typing import Any, Dict, List
 
 from _nebari import constants, schema
 from _nebari.stages.base import NebariTerraformStage
@@ -10,15 +10,13 @@ from _nebari.stages.tf_objects import (
     NebariKubernetesProvider,
     NebariTerraformState,
 )
-from nebari.hookspecs import NebariStage, hookimpl
-from _nebari.stages.tf_objects import NebariTerraformState, NebariKubernetesProvider, NebariHelmProvider
-
 from nebari import schema
-from _nebari import constants
+from nebari.hookspecs import NebariStage, hookimpl
 
 # check and retry settings
 NUM_ATTEMPTS = 10
 TIMEOUT = 10  # seconds
+
 
 def _calculate_node_groups(config: schema.Main):
     if config.provider == schema.ProviderEnum.aws:
@@ -115,7 +113,9 @@ class KubernetesIngressStage(NebariTerraformStage):
             cert_details["acme-email"] = self.config.certificate.acme_email
             cert_details["acme-server"] = self.config.certificate.acme_server
         elif cert_type == "existing":
-            cert_details["certificate-secret-name"] = self.config.certificate.secret_name
+            cert_details[
+                "certificate-secret-name"
+            ] = self.config.certificate.secret_name
 
         return {
             **{
@@ -132,7 +132,9 @@ class KubernetesIngressStage(NebariTerraformStage):
         }
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        def _attempt_tcp_connect(host, port, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT):
+        def _attempt_tcp_connect(
+            host, port, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
+        ):
             for i in range(num_attempts):
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 try:
@@ -141,7 +143,9 @@ class KubernetesIngressStage(NebariTerraformStage):
                     s.settimeout(5)
                     result = s.connect_ex((ip, port))
                     if result == 0:
-                        print(f"Attempt {i+1} succeeded to connect to tcp://{ip}:{port}")
+                        print(
+                            f"Attempt {i+1} succeeded to connect to tcp://{ip}:{port}"
+                        )
                         return True
                     print(f"Attempt {i+1} failed to connect to tcp tcp://{ip}:{port}")
                 except socket.gaierror:
@@ -161,7 +165,9 @@ class KubernetesIngressStage(NebariTerraformStage):
             9080,  # minio
             8786,  # dask-scheduler
         }
-        ip_or_name = stage_outputs["stages/" + self.name]["load_balancer_address"]["value"]
+        ip_or_name = stage_outputs["stages/" + self.name]["load_balancer_address"][
+            "value"
+        ]
         host = ip_or_name["hostname"] or ip_or_name["ip"]
         host = host.strip("\n")
 

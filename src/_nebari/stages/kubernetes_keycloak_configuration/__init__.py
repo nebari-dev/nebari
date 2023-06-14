@@ -1,12 +1,11 @@
-from typing import List, Dict, Any
 import pathlib
 import sys
+from typing import Any, Dict, List
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariTerraformState
-from nebari.hookspecs import NebariStage, hookimpl
-
 from nebari import schema
+from nebari.hookspecs import NebariStage, hookimpl
 
 
 class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
@@ -21,9 +20,7 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         realm_id = "nebari"
 
-        users_group = (
-            ["users"] if self.config.security.shared_users_group else []
-        )
+        users_group = ["users"] if self.config.security.shared_users_group else []
 
         return {
             "realm": realm_id,
@@ -76,7 +73,9 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
                             f"Attempt {i+1} succeeded connecting to keycloak but nebari realm did not exist"
                         )
                 except KeycloakError:
-                    self.log.info(f"Attempt {i+1} failed connecting to keycloak master realm")
+                    self.log.info(
+                        f"Attempt {i+1} failed connecting to keycloak master realm"
+                    )
                 time.sleep(timeout)
             return False
 
@@ -100,7 +99,9 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage(install_directory: pathlib.Path, config: schema.Main) -> List[NebariStage]:
+def nebari_stage(
+    install_directory: pathlib.Path, config: schema.Main
+) -> List[NebariStage]:
     return [
         KubernetesKeycloakConfigurationStage(
             install_directory,
