@@ -1,6 +1,6 @@
-from typing import List, Dict, Any
 import pathlib
 import sys
+from typing import Any, Dict, List
 
 from _nebari import schema
 from _nebari.stages.base import NebariTerraformStage
@@ -9,8 +9,8 @@ from _nebari.stages.tf_objects import (
     NebariKubernetesProvider,
     NebariTerraformState,
 )
-from nebari.hookspecs import NebariStage, hookimpl
 from nebari import schema
+from nebari.hookspecs import NebariStage, hookimpl
 
 
 class KubernetesInitializeStage(NebariTerraformStage):
@@ -59,9 +59,9 @@ class KubernetesInitializeStage(NebariTerraformStage):
         from kubernetes.client.rest import ApiException
 
         config.load_kube_config(
-            config_file=stage_outputs["stages/02-infrastructure"]["kubeconfig_filename"][
-                "value"
-            ]
+            config_file=stage_outputs["stages/02-infrastructure"][
+                "kubeconfig_filename"
+            ]["value"]
         )
 
         try:
@@ -80,14 +80,13 @@ class KubernetesInitializeStage(NebariTerraformStage):
             )
             sys.exit(1)
 
-        self.log.info(
-            f"After stage={self.name} kubernetes initialized successfully"
-        )
-
+        self.log.info(f"After stage={self.name} kubernetes initialized successfully")
 
 
 @hookimpl
-def nebari_stage(install_directory: pathlib.Path, config: schema.Main) -> List[NebariStage]:
+def nebari_stage(
+    install_directory: pathlib.Path, config: schema.Main
+) -> List[NebariStage]:
     return [
         KubernetesInitializeStage(
             install_directory,

@@ -1,7 +1,7 @@
 import contextlib
-from typing import List, Dict, Any
 import pathlib
 import sys
+from typing import Any, Dict, List
 
 from _nebari import schema
 from _nebari.stages.base import NebariTerraformStage
@@ -11,9 +11,8 @@ from _nebari.stages.tf_objects import (
     NebariTerraformState,
 )
 from _nebari.utils import modified_environ
-from nebari.hookspecs import NebariStage, hookimpl
-
 from nebari import schema
+from nebari.hookspecs import NebariStage, hookimpl
 
 
 @contextlib.contextmanager
@@ -123,8 +122,8 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 "kubeconfig_filename": os.path.join(
                     tempfile.gettempdir(), "NEBARI_KUBECONFIG"
                 ),
-                "resource_group_name": f'{self.config.project_name}-{self.config.namespace}',
-                "node_resource_group_name": f'{self.config.project_name}-{self.config.namespace}-node-resource-group',
+                "resource_group_name": f"{self.config.project_name}-{self.config.namespace}",
+                "node_resource_group_name": f"{self.config.project_name}-{self.config.namespace}-node-resource-group",
                 **self.config.azure.terraform_overrides,
             }
         elif self.config.provider == schema.ProviderEnum.aws:
@@ -157,11 +156,10 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         from kubernetes import client, config
         from kubernetes.client.rest import ApiException
 
-        directory = "stages/02-infrastructure"
         config.load_kube_config(
-            config_file=stage_outputs["stages/02-infrastructure"]["kubeconfig_filename"][
-                "value"
-            ]
+            config_file=stage_outputs["stages/02-infrastructure"][
+                "kubeconfig_filename"
+            ]["value"]
         )
 
         try:
@@ -192,16 +190,23 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 yield
 
     @contextlib.contextmanager
-    def destroy(self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]):
+    def destroy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+    ):
         with super().destroy(stage_outputs, status):
             with kubernetes_provider_context(
                 stage_outputs["stages/" + self.name]["kubernetes_credentials"]["value"]
             ):
                 yield
 
+
 @hookimpl
-def nebari_stage(install_directory: pathlib.Path, config: schema.Main) -> List[NebariStage]:
-    template_directory = pathlib.Path(__file__).parent / "template" / config.provider.value
+def nebari_stage(
+    install_directory: pathlib.Path, config: schema.Main
+) -> List[NebariStage]:
+    template_directory = (
+        pathlib.Path(__file__).parent / "template" / config.provider.value
+    )
     stage_prefix = pathlib.Path("stages/02-infrastructure") / config.provider.value
 
     return [
