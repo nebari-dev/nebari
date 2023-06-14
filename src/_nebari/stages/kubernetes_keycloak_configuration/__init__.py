@@ -1,21 +1,17 @@
+from typing import List, Dict, Any
 import pathlib
 import sys
-from typing import Dict, List
 
-from _nebari import schema
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariTerraformState
 from nebari.hookspecs import NebariStage, hookimpl
 
+from nebari import schema
+
 
 class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
-    @property
-    def name(self):
-        return "06-kubernetes-keycloak-configuration"
-
-    @property
-    def priority(self):
-        return 60
+    name = "06-kubernetes-keycloak-configuration"
+    priority = 60
 
     def tf_objects(self) -> List[Dict]:
         return [
@@ -38,7 +34,7 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
             "default_groups": ["analyst"] + users_group,
         }
 
-    def check(self, stage_outputs: stage_outputs: Dict[str, Dict[str, Any]]):
+    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         directory = "stages/05-kubernetes-keycloak"
 
         from keycloak import KeycloakAdmin
@@ -110,6 +106,6 @@ def nebari_stage(install_directory: pathlib.Path, config: schema.Main) -> List[N
             install_directory,
             config,
             template_directory=(pathlib.Path(__file__).parent / "template"),
-            stage_directory=pathlib.Path("stages/06-kubernetes-keycloak-configuration"),
+            stage_prefix=pathlib.Path("stages/06-kubernetes-keycloak-configuration"),
         )
     ]
