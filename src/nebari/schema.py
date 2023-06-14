@@ -1,11 +1,11 @@
 import enum
-import typing
-from abc import ABC
 import secrets
 import string
+import typing
+from abc import ABC
 
 import pydantic
-from pydantic import root_validator, validator, Field
+from pydantic import Field, root_validator, validator
 
 from _nebari.utils import namestr_regex, set_docker_image_tag, set_nebari_dask_version
 from _nebari.version import __version__, rounded_ver_parse
@@ -172,6 +172,7 @@ class DefaultImages(Base):
 
 # =========== Storage =============
 
+
 class Storage(Base):
     conda_store: str = "200Gi"
     shared_filesystem: str = "200Gi"
@@ -256,7 +257,9 @@ class Keycloak(Base):
 
 
 class Security(Base):
-    authentication: Authentication = PasswordAuthentication(type=AuthenticationEnum.password)
+    authentication: Authentication = PasswordAuthentication(
+        type=AuthenticationEnum.password
+    )
     shared_users_group: bool = True
     keycloak: Keycloak = Keycloak()
 
@@ -362,10 +365,10 @@ class ExistingProvider(Base):
 
 class Theme(Base):
     jupyterhub: typing.Dict[str, typing.Union[str, list]] = dict(
-        hub_title = "Nebari",
-        hub_subtitle = "Your open source data science platform",
-        welcome = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>.""",
-        logo = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg",
+        hub_title="Nebari",
+        hub_subtitle="Your open source data science platform",
+        welcome="""Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>.""",
+        logo="https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg",
         display_version=True,
     )
 
@@ -444,42 +447,42 @@ class DaskWorkerProfile(Base):
 class Profiles(Base):
     jupyterlab: typing.List[JupyterLabProfile] = [
         JupyterLabProfile(
-            display_name = "Small Instance",
-            description = "Stable environment with 2 cpu / 8 GB ram",
-            default = True,
-            kubespawner_override = KubeSpawner(
-                cpu_limit = 2,
-                cpu_guarantee = 1.5,
-                mem_limit = "8G",
-                mem_guarantee = "5G",
-            )
+            display_name="Small Instance",
+            description="Stable environment with 2 cpu / 8 GB ram",
+            default=True,
+            kubespawner_override=KubeSpawner(
+                cpu_limit=2,
+                cpu_guarantee=1.5,
+                mem_limit="8G",
+                mem_guarantee="5G",
+            ),
         ),
         JupyterLabProfile(
-            display_name = "Medium Instance",
-            description = "Stable environment with 4 cpu / 16 GB ram",
-            kubespawner_override = KubeSpawner(
-                cpu_limit = 4,
-                cpu_guarantee = 3,
-                mem_limit = "16G",
-                mem_guarantee = "10G",
-            )
-        )
+            display_name="Medium Instance",
+            description="Stable environment with 4 cpu / 16 GB ram",
+            kubespawner_override=KubeSpawner(
+                cpu_limit=4,
+                cpu_guarantee=3,
+                mem_limit="16G",
+                mem_guarantee="10G",
+            ),
+        ),
     ]
     dask_worker: typing.Dict[str, DaskWorkerProfile] = {
         "Small Worker": DaskWorkerProfile(
-            worker_cores_limit = 2,
-            worker_cores = 1.5,
-            worker_memory_limit = "8G",
-            worker_memory = "5G",
-            worker_threads = 2,
+            worker_cores_limit=2,
+            worker_cores=1.5,
+            worker_memory_limit="8G",
+            worker_memory="5G",
+            worker_threads=2,
         ),
         "Medium Worker": DaskWorkerProfile(
-            worker_cores_limit = 4,
-            worker_cores = 3,
-            worker_memory_limit = "16G",
-            worker_memory = "10G",
-            worker_threads = 4,
-        )
+            worker_cores_limit=4,
+            worker_cores=3,
+            worker_memory_limit="16G",
+            worker_memory="10G",
+            worker_threads=4,
+        ),
     }
 
     @validator("jupyterlab")
@@ -658,9 +661,9 @@ class Main(Base):
     profiles: Profiles = Profiles()
     environments: typing.Dict[str, CondaEnvironment] = {
         "environment-dask.yaml": CondaEnvironment(
-            name = "dask",
-            channels = ["conda-forge"],
-            dependencies = [
+            name="dask",
+            channels=["conda-forge"],
+            dependencies=[
                 "python=3.10.8",
                 "ipykernel=6.21.0",
                 "ipywidgets==7.7.1",
@@ -680,9 +683,9 @@ class Main(Base):
             ],
         ),
         "environment-dashboard.yaml": CondaEnvironment(
-            name = "dashboard",
-            channels = ["conda-forge"],
-            dependencies = [
+            name="dashboard",
+            channels=["conda-forge"],
+            dependencies=[
                 "python=3.10",
                 "cdsdashboards-singleuser=0.6.3",
                 "cufflinks-py=0.17.3",
