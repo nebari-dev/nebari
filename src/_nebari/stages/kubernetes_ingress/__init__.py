@@ -3,7 +3,7 @@ import socket
 import sys
 from typing import Any, Dict, List
 
-from _nebari import constants, schema
+from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
     NebariHelmProvider,

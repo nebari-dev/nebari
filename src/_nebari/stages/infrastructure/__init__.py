@@ -3,7 +3,6 @@ import pathlib
 import sys
 from typing import Any, Dict, List
 
-from _nebari import schema
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
     NebariAWSProvider,
@@ -11,6 +10,7 @@ from _nebari.stages.tf_objects import (
     NebariTerraformState,
 )
 from _nebari.utils import modified_environ
+
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
