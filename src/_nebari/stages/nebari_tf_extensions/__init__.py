@@ -1,5 +1,5 @@
-from typing import List, Dict, Any
 import pathlib
+from typing import Any, Dict, List
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -7,9 +7,8 @@ from _nebari.stages.tf_objects import (
     NebariKubernetesProvider,
     NebariTerraformState,
 )
-from nebari.hookspecs import NebariStage, hookimpl
-
 from nebari import schema
+from nebari.hookspecs import NebariStage, hookimpl
 
 
 class NebariTFExtensionsStage(NebariTerraformStage):

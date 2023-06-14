@@ -1,13 +1,16 @@
-from typing import List, Dict, Any
 import pathlib
 import sys
+from typing import Any, Dict, List
 from urllib.parse import urlencode
 
-from nebari.hookspecs import NebariStage, hookimpl
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import NebariTerraformState, NebariKubernetesProvider, NebariHelmProvider
-
+from _nebari.stages.tf_objects import (
+    NebariHelmProvider,
+    NebariKubernetesProvider,
+    NebariTerraformState,
+)
 from nebari import schema
+from nebari.hookspecs import NebariStage, hookimpl
 
 # check and retry settings
 NUM_ATTEMPTS = 10
@@ -118,9 +121,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             "jupyterlab-image": _split_docker_image_name(
                 self.config.default_images.jupyterlab
             ),
-            "jupyterhub-overrides": [
-                json.dumps(self.config.jupyterhub.overrides)
-            ],
+            "jupyterhub-overrides": [json.dumps(self.config.jupyterhub.overrides)],
             "jupyterhub-hub-extraEnv": json.dumps(
                 self.config.jupyterhub.overrides.hub.extraEnv
             ),
@@ -153,12 +154,9 @@ class KubernetesServicesStage(NebariTerraformStage):
             # clearml
             "clearml-enabled": self.config.clearml.enabled,
             "clearml-enable-forwardauth": self.config.clearml.enable_forward_auth,
-            "clearml-overrides": [
-                json.dumps(self.config.clearml.overrides)
-            ],
+            "clearml-overrides": [json.dumps(self.config.clearml.overrides)],
             "jupyterhub-logout-redirect-url": final_logout_uri,
         }
-
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         directory = "stages/07-kubernetes-services"
@@ -186,13 +184,16 @@ class KubernetesServicesStage(NebariTerraformStage):
         for service_name, service in services.items():
             service_url = service["health_url"]
             if service_url and not _attempt_connect_url(service_url):
-                self.log.error(f"ERROR: Service {service_name} DOWN when checking url={service_url}")
+                self.log.error(
+                    f"ERROR: Service {service_name} DOWN when checking url={service_url}"
+                )
                 sys.exit(1)
 
 
-
 @hookimpl
-def nebari_stage(install_directory: pathlib.Path, config: schema.Main) -> List[NebariStage]:
+def nebari_stage(
+    install_directory: pathlib.Path, config: schema.Main
+) -> List[NebariStage]:
     return [
         KubernetesServicesStage(
             install_directory,
