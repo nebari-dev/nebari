@@ -11,6 +11,7 @@ from pydantic.error_wrappers import ValidationError
 from rich.prompt import Prompt
 
 from nebari.schema import is_version_accepted, verify
+
 from .utils import backup_config_file, load_yaml, yaml
 from .version import __version__, rounded_ver_parse
 

@@ -1,15 +1,18 @@
-from typing import List, Dict, Any
+import contextlib
+import json
 import pathlib
 import sys
-import json
-import contextlib
+from typing import Any, Dict, List
 
-from nebari.hookspecs import NebariStage, hookimpl
-from _nebari.utils import modified_environ
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import NebariTerraformState, NebariKubernetesProvider, NebariHelmProvider
-
+from _nebari.stages.tf_objects import (
+    NebariHelmProvider,
+    NebariKubernetesProvider,
+    NebariTerraformState,
+)
+from _nebari.utils import modified_environ
 from nebari import schema
+from nebari.hookspecs import NebariStage, hookimpl
 
 
 @contextlib.contextmanager
@@ -71,20 +74,15 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             "environment": self.config.namespace,
             "endpoint": self.config.domain,
             "initial-root-password": self.config.security.keycloak.initial_root_password,
-            "overrides": [
-                json.dumps(self.config.security.keycloak.overrides)
-            ],
+            "overrides": [json.dumps(self.config.security.keycloak.overrides)],
             "node-group": _calculate_node_groups(self.config)["general"],
         }
-
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         from keycloak import KeycloakAdmin
         from keycloak.exceptions import KeycloakError
 
-        keycloak_url = (
-            f"{stage_outputs['stages/' + self.name]['keycloak_credentials']['value']['url']}/auth/"
-        )
+        keycloak_url = f"{stage_outputs['stages/' + self.name]['keycloak_credentials']['value']['url']}/auth/"
 
         def _attempt_keycloak_connection(
             keycloak_url,
@@ -106,19 +104,31 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                         client_id=client_id,
                         verify=verify,
                     )
-                    self.log.info(f"Attempt {i+1} succeeded connecting to keycloak master realm")
+                    self.log.info(
+                        f"Attempt {i+1} succeeded connecting to keycloak master realm"
+                    )
                     return True
                 except KeycloakError:
-                    self.log.info(f"Attempt {i+1} failed connecting to keycloak master realm")
+                    self.log.info(
+                        f"Attempt {i+1} failed connecting to keycloak master realm"
+                    )
                 time.sleep(timeout)
             return False
 
         if not _attempt_keycloak_connection(
             keycloak_url,
-            stage_outputs['stages/' + self.name]["keycloak_credentials"]["value"]["username"],
-            stage_outputs['stages/' + self.name]["keycloak_credentials"]["value"]["password"],
-            stage_outputs['stages/' + self.name]["keycloak_credentials"]["value"]["realm"],
-            stage_outputs['stages/' + self.name]["keycloak_credentials"]["value"]["client_id"],
+            stage_outputs["stages/" + self.name]["keycloak_credentials"]["value"][
+                "username"
+            ],
+            stage_outputs["stages/" + self.name]["keycloak_credentials"]["value"][
+                "password"
+            ],
+            stage_outputs["stages/" + self.name]["keycloak_credentials"]["value"][
+                "realm"
+            ],
+            stage_outputs["stages/" + self.name]["keycloak_credentials"]["value"][
+                "client_id"
+            ],
             verify=False,
         ):
             self.log.error(
@@ -132,19 +142,17 @@ class KubernetesKeycloakStage(NebariTerraformStage):
     def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
         with super().deploy(stage_outputs):
             with keycloak_provider_context(
-                stage_outputs["stages/" + self.name]["keycloak_credentials"][
-                    "value"
-                ]
+                stage_outputs["stages/" + self.name]["keycloak_credentials"]["value"]
             ):
                 yield
 
     @contextlib.contextmanager
-    def destroy(self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]):
+    def destroy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+    ):
         with super().destroy(stage_outputs, status):
             with keycloak_provider_context(
-                stage_outputs["stages/" + self.name]["keycloak_credentials"][
-                    "value"
-                ]
+                stage_outputs["stages/" + self.name]["keycloak_credentials"]["value"]
             ):
                 yield
 
