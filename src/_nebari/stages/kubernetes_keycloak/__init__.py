@@ -1,17 +1,15 @@
-import json
+from typing import List, Dict, Any
 import pathlib
 import sys
-from typing import Dict, List
+import json
+import contextlib
 
-from _nebari import schema
-from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import (
-    NebariHelmProvider,
-    NebariKubernetesProvider,
-    NebariTerraformState,
-)
-from _nebari.utils import modified_environ
 from nebari.hookspecs import NebariStage, hookimpl
+from _nebari.utils import modified_environ
+from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.tf_objects import NebariTerraformState, NebariKubernetesProvider, NebariHelmProvider
+
+from nebari import schema
 
 
 @contextlib.contextmanager
@@ -57,13 +55,8 @@ def _calculate_node_groups(config: schema.Main):
 
 
 class KubernetesKeycloakStage(NebariTerraformStage):
-    @property
-    def name(self):
-        return "05-kubernetes-keycloak"
-
-    @property
-    def priority(self):
-        return 50
+    name = "05-kubernetes-keycloak"
+    priority = 50
 
     def tf_objects(self) -> List[Dict]:
         return [
@@ -85,7 +78,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         }
 
 
-    def check(self, stage_outputs: stage_outputs: Dict[str, Dict[str, Any]]):
+    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         from keycloak import KeycloakAdmin
         from keycloak.exceptions import KeycloakError
 

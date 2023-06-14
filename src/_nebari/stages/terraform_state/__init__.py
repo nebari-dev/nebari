@@ -1,8 +1,7 @@
 import os
+from typing import List, Tuple, Dict, Any
 import pathlib
-from typing import List, Tuple
 
-from _nebari import schema
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
     NebariHelmProvider,
@@ -11,15 +10,12 @@ from _nebari.stages.tf_objects import (
 )
 from nebari.hookspecs import NebariStage, hookimpl
 
+from nebari import schema
+
 
 class KubernetesInitializeStage(NebariTerraformStage):
-    @property
-    def name(self):
-        return "01-terraform-state"
-
-    @property
-    def priority(self):
-        return 10
+    name = "01-terraform-state"
+    priority = 10
 
     def state_imports(self) -> List[Tuple[str, str]]:
         if self.config.provider == schema.ProviderEnum.do:

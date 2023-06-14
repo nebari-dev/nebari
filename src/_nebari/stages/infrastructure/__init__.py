@@ -1,7 +1,7 @@
 import contextlib
+from typing import List, Dict, Any
 import pathlib
 import sys
-from typing import Dict, List
 
 from _nebari import schema
 from _nebari.stages.base import NebariTerraformStage
@@ -12,6 +12,8 @@ from _nebari.stages.tf_objects import (
 )
 from _nebari.utils import modified_environ
 from nebari.hookspecs import NebariStage, hookimpl
+
+from nebari import schema
 
 
 @contextlib.contextmanager
@@ -38,13 +40,8 @@ def kubernetes_provider_context(kubernetes_credentials: Dict[str, str]):
 
 
 class KubernetesInfrastructureStage(NebariTerraformStage):
-    @property
-    def name(self):
-        return "02-infrastructure"
-
-    @property
-    def priority(self):
-        return 20
+    name = "02-infrastructure"
+    priority = 20
 
     def tf_objects(self) -> List[Dict]:
         if self.config.provider == schema.ProviderEnum.gcp:
@@ -156,7 +153,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         else:
             return {}
 
-    def check(self, stage_outputs: stage_outputs: Dict[str, Dict[str, Any]]):
+    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         from kubernetes import client, config
         from kubernetes.client.rest import ApiException
 
