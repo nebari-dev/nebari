@@ -1,6 +1,6 @@
 import os
-from typing import List, Tuple, Dict, Any
 import pathlib
+from typing import Any, Dict, List, Tuple
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -8,9 +8,8 @@ from _nebari.stages.tf_objects import (
     NebariKubernetesProvider,
     NebariTerraformState,
 )
-from nebari.hookspecs import NebariStage, hookimpl
-
 from nebari import schema
+from nebari.hookspecs import NebariStage, hookimpl
 
 
 class KubernetesInitializeStage(NebariTerraformStage):
