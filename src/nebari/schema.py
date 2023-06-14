@@ -1,11 +1,13 @@
 import enum
 import typing
 from abc import ABC
+import secrets
+import string
 
 import pydantic
-from pydantic import root_validator, validator
+from pydantic import root_validator, validator, Field
 
-from _nebari.utils import namestr_regex
+from _nebari.utils import namestr_regex, set_docker_image_tag, set_nebari_dask_version
 from _nebari.version import __version__, rounded_ver_parse
 
 
@@ -163,9 +165,16 @@ class Certificate(Base):
 
 
 class DefaultImages(Base):
-    jupyterhub: str
-    jupyterlab: str
-    dask_worker: str
+    jupyterhub: str = f"quay.io/nebari/nebari-jupyterhub:{set_docker_image_tag()}"
+    jupyterlab: str = f"quay.io/nebari/nebari-jupyterlab:{set_docker_image_tag()}"
+    dask_worker: str = f"quay.io/nebari/nebari-dask-worker:{set_docker_image_tag()}"
+
+
+# =========== Storage =============
+
+class Storage(Base):
+    conda_store: str = "200Gi"
+    shared_filesystem: str = "200Gi"
 
 
 # =========== Authentication ==============
@@ -231,21 +240,25 @@ class GitHubAuthentication(Authentication):
 
 
 # ================= Keycloak ==================
+def random_password(length: int = 32):
+    return "".join(
+        secrets.choice(string.ascii_letters + string.digits) for i in range(16)
+    )
 
 
 class Keycloak(Base):
-    initial_root_password: typing.Optional[str]
-    overrides: typing.Optional[typing.Dict]
-    realm_display_name: typing.Optional[str]
+    initial_root_password: str = Field(default_factory=random_password)
+    overrides: typing.Dict = {}
+    realm_display_name: str = "Nebari"
 
 
 # ============== Security ================
 
 
 class Security(Base):
-    authentication: Authentication
+    authentication: Authentication = PasswordAuthentication(type=AuthenticationEnum.password)
     shared_users_group: bool = True
-    keycloak: typing.Optional[Keycloak]
+    keycloak: Keycloak = Keycloak()
 
 
 # ================ Providers ===============
@@ -348,7 +361,13 @@ class ExistingProvider(Base):
 
 
 class Theme(Base):
-    jupyterhub: typing.Dict[str, typing.Union[str, list]]
+    jupyterhub: typing.Dict[str, typing.Union[str, list]] = dict(
+        hub_title = "Nebari",
+        hub_subtitle = "Your open source data science platform",
+        welcome = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>.""",
+        logo = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg",
+        display_version=True,
+    )
 
 
 # ================= Theme ==================
@@ -423,8 +442,45 @@ class DaskWorkerProfile(Base):
 
 
 class Profiles(Base):
-    jupyterlab: typing.List[JupyterLabProfile]
-    dask_worker: typing.Dict[str, DaskWorkerProfile]
+    jupyterlab: typing.List[JupyterLabProfile] = [
+        JupyterLabProfile(
+            display_name = "Small Instance",
+            description = "Stable environment with 2 cpu / 8 GB ram",
+            default = True,
+            kubespawner_override = KubeSpawner(
+                cpu_limit = 2,
+                cpu_guarantee = 1.5,
+                mem_limit = "8G",
+                mem_guarantee = "5G",
+            )
+        ),
+        JupyterLabProfile(
+            display_name = "Medium Instance",
+            description = "Stable environment with 4 cpu / 16 GB ram",
+            kubespawner_override = KubeSpawner(
+                cpu_limit = 4,
+                cpu_guarantee = 3,
+                mem_limit = "16G",
+                mem_guarantee = "10G",
+            )
+        )
+    ]
+    dask_worker: typing.Dict[str, DaskWorkerProfile] = {
+        "Small Worker": DaskWorkerProfile(
+            worker_cores_limit = 2,
+            worker_cores = 1.5,
+            worker_memory_limit = "8G",
+            worker_memory = "5G",
+            worker_threads = 2,
+        ),
+        "Medium Worker": DaskWorkerProfile(
+            worker_cores_limit = 4,
+            worker_cores = 3,
+            worker_memory_limit = "16G",
+            worker_memory = "10G",
+            worker_threads = 4,
+        )
+    }
 
     @validator("jupyterlab")
     def check_default(cls, v, values):
@@ -577,7 +633,7 @@ class InitInputs(Base):
 
 
 class Main(Base):
-    provider: ProviderEnum
+    provider: ProviderEnum = ProviderEnum.local
     project_name: str
     namespace: letter_dash_underscore_pydantic = "dev"
     nebari_version: str = __version__
@@ -590,17 +646,83 @@ class Main(Base):
     cdsdashboards: CDSDashboards = CDSDashboards()
     security: Security = Security()
     external_container_reg: typing.Optional[ExtContainerReg]
-    default_images: DefaultImages
-    storage: typing.Dict[str, str]
+    default_images: DefaultImages = DefaultImages()
+    storage: Storage = Storage()
     local: typing.Optional[LocalProvider]
     existing: typing.Optional[ExistingProvider]
     google_cloud_platform: typing.Optional[GoogleCloudPlatformProvider]
     amazon_web_services: typing.Optional[AmazonWebServicesProvider]
     azure: typing.Optional[AzureProvider]
     digital_ocean: typing.Optional[DigitalOceanProvider]
-    theme: Theme
-    profiles: Profiles
-    environments: typing.Dict[str, CondaEnvironment]
+    theme: Theme = Theme()
+    profiles: Profiles = Profiles()
+    environments: typing.Dict[str, CondaEnvironment] = {
+        "environment-dask.yaml": CondaEnvironment(
+            name = "dask",
+            channels = ["conda-forge"],
+            dependencies = [
+                "python=3.10.8",
+                "ipykernel=6.21.0",
+                "ipywidgets==7.7.1",
+                f"nebari-dask =={set_nebari_dask_version()}",
+                "python-graphviz=0.20.1",
+                "pyarrow=10.0.1",
+                "s3fs=2023.1.0",
+                "gcsfs=2023.1.0",
+                "numpy=1.23.5",
+                "numba=0.56.4",
+                "pandas=1.5.3",
+                {
+                    "pip": [
+                        "kbatch==0.4.1",
+                    ],
+                },
+            ],
+        ),
+        "environment-dashboard.yaml": CondaEnvironment(
+            name = "dashboard",
+            channels = ["conda-forge"],
+            dependencies = [
+                "python=3.10",
+                "cdsdashboards-singleuser=0.6.3",
+                "cufflinks-py=0.17.3",
+                "dash=2.8.1",
+                "geopandas=0.12.2",
+                "geopy=2.3.0",
+                "geoviews=1.9.6",
+                "gunicorn=20.1.0",
+                "holoviews=1.15.4",
+                "ipykernel=6.21.2",
+                "ipywidgets=8.0.4",
+                "jupyter=1.0.0",
+                "jupyterlab=3.6.1",
+                "jupyter_bokeh=3.0.5",
+                "matplotlib=3.7.0",
+                f"nebari-dask=={set_nebari_dask_version()}",
+                "nodejs=18.12.1",
+                "numpy",
+                "openpyxl=3.1.1",
+                "pandas=1.5.3",
+                "panel=0.14.3",
+                "param=1.12.3",
+                "plotly=5.13.0",
+                "python-graphviz=0.20.1",
+                "rich=13.3.1",
+                "streamlit=1.9.0",
+                "sympy=1.11.1",
+                "voila=0.4.0",
+                "pip=23.0",
+                {
+                    "pip": [
+                        "streamlit-image-comparison==0.0.3",
+                        "noaa-coops==0.2.1",
+                        "dash_core_components==2.0.0",
+                        "dash_html_components==2.0.0",
+                    ],
+                },
+            ],
+        ),
+    }
     conda_store: typing.Optional[CondaStore]
     argo_workflows: typing.Optional[ArgoWorkflows]
     kbatch: typing.Optional[KBatch]
