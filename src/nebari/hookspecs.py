@@ -1,7 +1,7 @@
-from typing import Optional, Dict, Any
-from collections.abc import Iterable
 import contextlib
 import pathlib
+from collections.abc import Iterable
+from typing import Any, Dict
 
 from pluggy import HookimplMarker, HookspecMarker
 
