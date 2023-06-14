@@ -8,7 +8,7 @@ from pluggy import HookimplMarker, HookspecMarker
 hookspec = HookspecMarker("nebari")
 hookimpl = HookimplMarker("nebari")
 
-from _nebari import schema
+from nebari import schema
 
 
 class NebariStage:
