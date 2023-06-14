@@ -1,7 +1,7 @@
+from typing import List, Dict, Any
 import pathlib
 import socket
 import sys
-from typing import Dict, List
 
 from _nebari import constants, schema
 from _nebari.stages.base import NebariTerraformStage
@@ -11,6 +11,10 @@ from _nebari.stages.tf_objects import (
     NebariTerraformState,
 )
 from nebari.hookspecs import NebariStage, hookimpl
+from _nebari.stages.tf_objects import NebariTerraformState, NebariKubernetesProvider, NebariHelmProvider
+
+from nebari import schema
+from _nebari import constants
 
 # check and retry settings
 NUM_ATTEMPTS = 10
@@ -94,13 +98,8 @@ def check_ingress_dns(stage_outputs, config, disable_prompt):
 
 
 class KubernetesIngressStage(NebariTerraformStage):
-    @property
-    def name(self):
-        return "04-kubernetes-ingress"
-
-    @property
-    def priority(self):
-        return 40
+    name = "04-kubernetes-ingress"
+    priority = 40
 
     def tf_objects(self) -> List[Dict]:
         return [
@@ -132,7 +131,7 @@ class KubernetesIngressStage(NebariTerraformStage):
             **cert_details,
         }
 
-    def check(self, stage_outputs: stage_outputs: Dict[str, Dict[str, Any]]):
+    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         def _attempt_tcp_connect(host, port, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT):
             for i in range(num_attempts):
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
