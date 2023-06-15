@@ -1,7 +1,7 @@
 import contextlib
+import inspect
 import pathlib
 import sys
-import inspect
 from typing import Any, Dict, List
 
 from _nebari.stages.base import NebariTerraformStage
@@ -44,11 +44,15 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
     @property
     def template_directory(self):
-        return pathlib.Path(inspect.getfile(self.__class__).parent) / "template" / self.config.provider.value
+        return (
+            pathlib.Path(inspect.getfile(self.__class__).parent)
+            / "template"
+            / self.config.provider.value
+        )
 
     @property
     def stage_prefix(self):
-        return pathlib.Path('stages') / self.name / self.config.provider.value
+        return pathlib.Path("stages") / self.name / self.config.provider.value
 
     def tf_objects(self) -> List[Dict]:
         if self.config.provider == schema.ProviderEnum.gcp:
@@ -210,6 +214,4 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
 @hookimpl
 def nebari_stage() -> List[NebariStage]:
-    return [
-        KubernetesInfrastructureStage
-    ]
+    return [KubernetesInfrastructureStage]

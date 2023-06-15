@@ -1,4 +1,3 @@
-import pathlib
 import sys
 from typing import Any, Dict, List
 
@@ -84,6 +83,4 @@ class KubernetesInitializeStage(NebariTerraformStage):
 
 @hookimpl
 def nebari_stage() -> List[NebariStage]:
-    return [
-        KubernetesInitializeStage
-    ]
+    return [KubernetesInitializeStage]
