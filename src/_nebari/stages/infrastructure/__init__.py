@@ -3,7 +3,7 @@ import inspect
 import pathlib
 import sys
 import tempfile
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -17,7 +17,7 @@ from nebari.hookspecs import NebariStage, hookimpl
 
 
 def get_kubeconfig_filename():
-    return pathlib.Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG"
+    return str(pathlib.Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG")
 
 
 # TODO:
@@ -25,8 +25,8 @@ def get_kubeconfig_filename():
 
 
 class LocalInputVars(schema.Base):
-    kubeconfig_filename: Union[str, pathlib.Path] = get_kubeconfig_filename()
-    kube_context: str
+    kubeconfig_filename: str = get_kubeconfig_filename()
+    kube_context: Optional[str]
 
 
 class ExistingInputVars(schema.Base):

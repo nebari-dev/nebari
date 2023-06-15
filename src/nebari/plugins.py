@@ -19,7 +19,7 @@ DEFAULT_PLUGINS = [
     # subcommands
     "_nebari.subcommands.dev",
     "_nebari.subcommands.deploy",
-    # "_nebari.subcommands.destroy",
+    "_nebari.subcommands.destroy",
     "_nebari.subcommands.keycloak",
     "_nebari.subcommands.render",
     "_nebari.subcommands.support",

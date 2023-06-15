@@ -1,14 +1,21 @@
+import sys
+import os
+import re
 import enum
 import secrets
 import string
 import typing
+import pathlib
+import json
 from abc import ABC
 
+from ruamel.yaml import YAML
 import pydantic
 from pydantic import Field, root_validator, validator
 
 from _nebari.utils import namestr_regex, set_docker_image_tag, set_nebari_dask_version
 from _nebari.version import __version__, rounded_ver_parse
+from _nebari import constants
 
 
 class CertificateEnum(str, enum.Enum):
@@ -62,6 +69,7 @@ class Base(pydantic.BaseModel):
 
     class Config:
         extra = "forbid"
+        validate_assignment = True
 
 
 # ============== CI/CD =============
@@ -88,28 +96,28 @@ class HelmExtension(Base):
 
 
 class NebariWorkflowController(Base):
-    enabled: bool
-    image_tag: typing.Optional[str]
+    enabled: bool = True
+    image_tag: str = constants.DEFAULT_NEBARI_WORKFLOW_CONTROLLER_IMAGE_TAG
 
 
 class ArgoWorkflows(Base):
-    enabled: bool
-    overrides: typing.Optional[typing.Dict]
-    nebari_workflow_controller: typing.Optional[NebariWorkflowController]
+    enabled: bool = True
+    overrides: typing.Dict = {}
+    nebari_workflow_controller: NebariWorkflowController = NebariWorkflowController()
 
 
 # ============== kbatch =============
 
 
 class KBatch(Base):
-    enabled: bool
+    enabled: bool = True
 
 
 # ============== Monitoring =============
 
 
 class Monitoring(Base):
-    enabled: bool
+    enabled: bool = True
 
 
 # ============== ClearML =============
@@ -117,7 +125,7 @@ class Monitoring(Base):
 
 class ClearML(Base):
     enabled: bool = False
-    enable_forward_auth: typing.Optional[bool]
+    enable_forward_auth: bool = False
     overrides: typing.Dict = {}
 
 
@@ -128,25 +136,26 @@ class Prefect(Base):
     enabled: bool = False
     image: typing.Optional[str]
     overrides: typing.Dict = {}
+    token: typing.Optional[str]
 
 
 # =========== Conda-Store ==============
 
 
 class CondaStore(Base):
-    extra_settings: typing.Optional[typing.Dict[str, typing.Any]] = {}
-    extra_config: typing.Optional[str] = ""
-    image_tag: typing.Optional[str] = ""
-    default_namespace: typing.Optional[str] = ""
+    extra_settings: typing.Dict[str, typing.Any] = {}
+    extra_config: str = ""
+    image_tag: str = constants.DEFAULT_CONDA_STORE_IMAGE_TAG
+    default_namespace: str = "nebari-git"
 
 
 # ============= Terraform ===============
 
 
 class TerraformState(Base):
-    type: TerraformStateEnum
+    type: TerraformStateEnum = TerraformStateEnum.remote
     backend: typing.Optional[str]
-    config: typing.Optional[typing.Dict[str, str]]
+    config: typing.Dict[str, str] = {}
 
 
 # ============ Certificate =============
@@ -399,38 +408,47 @@ class ExistingProvider(Base):
 # ================= Theme ==================
 
 
+class JupyterHubTheme(Base):
+    hub_title: str = "Nebari",
+    hub_subtitle: str = "Your open source data science platform",
+    welcome: str = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>.""",
+    logo: str = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg",
+    primary_color: str = '#4f4173'
+    secondary_color: str = '#957da6'
+    accent_color: str = '#32C574'
+    text_color: str = '#111111'
+    h1_color: str = '#652e8e'
+    h2_color: str = '#652e8e'
+    version: str = f"v{__version__}"
+    display_version: bool = True
+
+
 class Theme(Base):
-    jupyterhub: typing.Dict[str, typing.Union[str, list]] = dict(
-        hub_title="Nebari",
-        hub_subtitle="Your open source data science platform",
-        welcome="""Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>.""",
-        logo="https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg",
-        display_version=True,
-    )
+    jupyterhub: JupyterHubTheme = JupyterHubTheme()
 
 
 # ================= Theme ==================
 
 
 class JupyterHub(Base):
-    overrides: typing.Optional[typing.Dict]
+    overrides: typing.Dict = {}
 
 
 # ================= JupyterLab ==================
 
 
 class IdleCuller(Base):
-    terminal_cull_inactive_timeout: typing.Optional[int]
-    terminal_cull_interval: typing.Optional[int]
-    kernel_cull_idle_timeout: typing.Optional[int]
-    kernel_cull_interval: typing.Optional[int]
-    kernel_cull_connected: typing.Optional[bool]
-    kernel_cull_busy: typing.Optional[int]
-    server_shutdown_no_activity_timeout: typing.Optional[int]
+    terminal_cull_inactive_timeout: int = 15
+    terminal_cull_interval: int = 5
+    kernel_cull_idle_timeout: int = 15
+    kernel_cull_interval: int = 5
+    kernel_cull_connected: bool = True
+    kernel_cull_busy: bool = False
+    server_shutdown_no_activity_timeout: int = 15
 
 
 class JupyterLab(Base):
-    idle_culler: typing.Optional[IdleCuller]
+    idle_culler: IdleCuller = IdleCuller()
 
 
 # ================== Profiles ==================
@@ -572,7 +590,7 @@ class NebariExtension(Base):
 
 
 class Ingress(Base):
-    terraform_overrides: typing.Any
+    terraform_overrides: typing.Dict = {}
 
 
 # ======== External Container Registry ========
@@ -678,7 +696,7 @@ class Main(Base):
     nebari_version: str = __version__
     ci_cd: CICD = CICD()
     domain: str
-    terraform_state: typing.Optional[TerraformState]
+    terraform_state: TerraformState = TerraformState()
     certificate: Certificate = Certificate()
     helm_extensions: typing.List[HelmExtension] = []
     prefect: Prefect = Prefect()
@@ -762,18 +780,18 @@ class Main(Base):
             ],
         ),
     }
-    conda_store: typing.Optional[CondaStore]
-    argo_workflows: typing.Optional[ArgoWorkflows]
-    kbatch: typing.Optional[KBatch]
-    monitoring: typing.Optional[Monitoring]
-    clearml: typing.Optional[ClearML]
-    tf_extensions: typing.Optional[typing.List[NebariExtension]]
-    jupyterhub: typing.Optional[JupyterHub]
-    jupyterlab: typing.Optional[JupyterLab]
+    conda_store: CondaStore = CondaStore()
+    argo_workflows: ArgoWorkflows = ArgoWorkflows()
+    kbatch: KBatch = KBatch()
+    monitoring: Monitoring = Monitoring()
+    clearml: ClearML = ClearML()
+    tf_extensions: typing.List[NebariExtension] = []
+    jupyterhub: JupyterHub = JupyterHub()
+    jupyterlab: JupyterLab = JupyterLab()
     prevent_deploy: bool = (
         False  # Optional, but will be given default value if not present
     )
-    ingress: typing.Optional[Ingress]
+    ingress: Ingress = Ingress()
 
     # If the nebari_version in the schema is old
     # we must tell the user to first run nebari upgrade
@@ -801,10 +819,6 @@ class Main(Base):
         return value
 
 
-def verify(config):
-    return Main(**config)
-
-
 def is_version_accepted(v):
     """
     Given a version string, return boolean indicating whether
@@ -812,3 +826,79 @@ def is_version_accepted(v):
     for deployment with the current Nebari package.
     """
     return Main.is_version_accepted(v)
+
+
+def set_nested_attribute(data: typing.Any, attrs: typing.List[str], value: typing.Any):
+    """Takes an arbitrary set of attributes and accesses the deep
+    nested object config to set value
+
+    """
+    def _get_attr(d: typing.Any, attr: str):
+        if hasattr(d, '__getitem__'):
+            if re.fullmatch('\d+', attr):
+                try:
+                    return d[int(attr)]
+                except Exception:
+                    return d[attr]
+            else:
+                return d[attr]
+        else:
+            return getattr(d, attr)
+
+    def _set_attr(d: typing.Any, attr: str, value: typing.Any):
+        if hasattr(d, '__getitem__'):
+            if re.fullmatch('\d+', attr):
+                try:
+                    d[int(attr)] = value
+                except Exception:
+                    d[attr] = value
+            else:
+                d[attr] = value
+        else:
+            return setattr(d, attr, value)
+
+    data_pos = data
+    for attr in attrs[:-1]:
+        data_pos = _get_attr(data_pos, attr)
+    _set_attr(data_pos, attrs[-1], value)
+
+
+def set_config_from_environment_variables(config: Main, keyword: str = 'NEBARI_SECRET', separator: str = "__"):
+    """Setting nebari configuration values from environment variables
+
+    For example `NEBARI_SECRET__ci_cd__branch=master` would set `ci_cd.branch = "master"`
+    """
+    nebari_secrets = [_ for _ in os.environ if _.startswith(keyword + separator)]
+    for secret in nebari_secrets:
+        attrs = secret[len(keyword + separator):].split(separator)
+        try:
+            set_nested_attribute(config, attrs, os.environ[secret])
+        except Exception as e:
+            print(f'FAILED: setting secret from environment variable={secret} due to the following error\n {e}')
+            sys.exit(1)
+    return config
+
+
+
+def read_configuration(config_filename: pathlib.Path, read_environment: bool = True):
+    """Read configuration from multiple sources and apply validation
+
+    """
+    filename = pathlib.Path(config_filename)
+
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    yaml.default_flow_style = False
+
+    if not filename.is_file():
+        raise ValueError(
+            f"passed in configuration filename={config_filename} does not exist"
+        )
+
+    with filename.open() as f:
+        config = Main(**yaml.load(f.read()))
+
+    if read_environment:
+        config = set_config_from_environment_variables(config)
+
+    return config
