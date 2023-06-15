@@ -94,7 +94,7 @@ Documentation = "https://www.nebari.dev/docs"
 Source = "https://github.com/nebari-dev/nebari"
 
 [project.scripts]
-nebari = "_nebari.__main__:main"
+nebari = "nebari.__main__:main"
 
 [tool.ruff]
 ignore = [
