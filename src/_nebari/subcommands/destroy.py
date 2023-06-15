@@ -4,7 +4,6 @@ import typer
 
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
-from _nebari.utils import load_yaml
 from nebari import schema
 from nebari.hookspecs import hookimpl
 
@@ -36,7 +35,10 @@ def nebari_subcommand(cli: typer.Typer):
         """
         Destroy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
         """
-        def _run_destroy(config_filename=config_filename, disable_render=disable_render):
+
+        def _run_destroy(
+            config_filename=config_filename, disable_render=disable_render
+        ):
             config = schema.read_configuration(config_filename)
 
             if not disable_render:

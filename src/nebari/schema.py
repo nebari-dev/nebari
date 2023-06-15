@@ -1,21 +1,20 @@
-import sys
-import os
-import re
 import enum
+import os
+import pathlib
+import re
 import secrets
 import string
+import sys
 import typing
-import pathlib
-import json
 from abc import ABC
 
-from ruamel.yaml import YAML
 import pydantic
 from pydantic import Field, root_validator, validator
+from ruamel.yaml import YAML
 
+from _nebari import constants
 from _nebari.utils import namestr_regex, set_docker_image_tag, set_nebari_dask_version
 from _nebari.version import __version__, rounded_ver_parse
-from _nebari import constants
 
 
 class CertificateEnum(str, enum.Enum):
@@ -409,16 +408,20 @@ class ExistingProvider(Base):
 
 
 class JupyterHubTheme(Base):
-    hub_title: str = "Nebari",
-    hub_subtitle: str = "Your open source data science platform",
-    welcome: str = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>.""",
-    logo: str = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg",
-    primary_color: str = '#4f4173'
-    secondary_color: str = '#957da6'
-    accent_color: str = '#32C574'
-    text_color: str = '#111111'
-    h1_color: str = '#652e8e'
-    h2_color: str = '#652e8e'
+    hub_title: str = ("Nebari",)
+    hub_subtitle: str = ("Your open source data science platform",)
+    welcome: str = (
+        """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>.""",
+    )
+    logo: str = (
+        "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg",
+    )
+    primary_color: str = "#4f4173"
+    secondary_color: str = "#957da6"
+    accent_color: str = "#32C574"
+    text_color: str = "#111111"
+    h1_color: str = "#652e8e"
+    h2_color: str = "#652e8e"
     version: str = f"v{__version__}"
     display_version: bool = True
 
@@ -833,9 +836,10 @@ def set_nested_attribute(data: typing.Any, attrs: typing.List[str], value: typin
     nested object config to set value
 
     """
+
     def _get_attr(d: typing.Any, attr: str):
-        if hasattr(d, '__getitem__'):
-            if re.fullmatch('\d+', attr):
+        if hasattr(d, "__getitem__"):
+            if re.fullmatch("\d+", attr):
                 try:
                     return d[int(attr)]
                 except Exception:
@@ -846,8 +850,8 @@ def set_nested_attribute(data: typing.Any, attrs: typing.List[str], value: typin
             return getattr(d, attr)
 
     def _set_attr(d: typing.Any, attr: str, value: typing.Any):
-        if hasattr(d, '__getitem__'):
-            if re.fullmatch('\d+', attr):
+        if hasattr(d, "__getitem__"):
+            if re.fullmatch("\d+", attr):
                 try:
                     d[int(attr)] = value
                 except Exception:
@@ -863,27 +867,28 @@ def set_nested_attribute(data: typing.Any, attrs: typing.List[str], value: typin
     _set_attr(data_pos, attrs[-1], value)
 
 
-def set_config_from_environment_variables(config: Main, keyword: str = 'NEBARI_SECRET', separator: str = "__"):
+def set_config_from_environment_variables(
+    config: Main, keyword: str = "NEBARI_SECRET", separator: str = "__"
+):
     """Setting nebari configuration values from environment variables
 
     For example `NEBARI_SECRET__ci_cd__branch=master` would set `ci_cd.branch = "master"`
     """
     nebari_secrets = [_ for _ in os.environ if _.startswith(keyword + separator)]
     for secret in nebari_secrets:
-        attrs = secret[len(keyword + separator):].split(separator)
+        attrs = secret[len(keyword + separator) :].split(separator)
         try:
             set_nested_attribute(config, attrs, os.environ[secret])
         except Exception as e:
-            print(f'FAILED: setting secret from environment variable={secret} due to the following error\n {e}')
+            print(
+                f"FAILED: setting secret from environment variable={secret} due to the following error\n {e}"
+            )
             sys.exit(1)
     return config
 
 
-
 def read_configuration(config_filename: pathlib.Path, read_environment: bool = True):
-    """Read configuration from multiple sources and apply validation
-
-    """
+    """Read configuration from multiple sources and apply validation"""
     filename = pathlib.Path(config_filename)
 
     yaml = YAML()

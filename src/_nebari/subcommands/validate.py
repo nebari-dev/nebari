@@ -3,7 +3,6 @@ import pathlib
 import typer
 from rich import print
 
-from _nebari.utils import load_yaml
 from nebari import schema
 from nebari.hookspecs import hookimpl
 
