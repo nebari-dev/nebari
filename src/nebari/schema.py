@@ -347,19 +347,27 @@ class GCPPrivateClusterConfig(Base):
 
 
 class DigitalOceanProvider(Base):
-    region: str
+    region: str = "nyc3"
     kubernetes_version: str
-    node_groups: typing.Dict[str, NodeGroup]
+    node_groups: typing.Dict[str, NodeGroup] = {
+        "general": NodeGroup(instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1),
+        "user": NodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
+        "worker": NodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
+    }
     tags: typing.Optional[typing.List[str]] = []
 
 
 class GoogleCloudPlatformProvider(Base):
     project: str
-    region: str
+    region: str = "us-central1"
     availability_zones: typing.Optional[typing.List[str]] = []
     kubernetes_version: str
     release_channel: typing.Optional[str]
-    node_groups: typing.Dict[str, NodeGroup]
+    node_groups: typing.Dict[str, NodeGroup] = {
+        "general": NodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
+        "user": NodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
+        "worker": NodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
+    }
     tags: typing.Optional[typing.List[str]] = []
     networking_mode: str = "ROUTE"
     network: str = "default"
@@ -376,19 +384,27 @@ class GoogleCloudPlatformProvider(Base):
 
 
 class AzureProvider(Base):
-    region: str
+    region: str = "Central US"
     kubernetes_version: str
-    node_groups: typing.Dict[str, NodeGroup]
+    node_groups: typing.Dict[str, NodeGroup] = {
+        "general": NodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
+        "user": NodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
+        "worker": NodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
+    }
     storage_account_postfix: str
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
 
 
 class AmazonWebServicesProvider(Base):
-    region: str
+    region: str = "us-west-2"
     availability_zones: typing.Optional[typing.List[str]]
     kubernetes_version: str
-    node_groups: typing.Dict[str, AWSNodeGroup]
+    node_groups: typing.Dict[str, AWSNodeGroup] = {
+        "general": NodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
+        "user": NodeGroup(instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False),
+        "worker": NodeGroup(instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False),
+    }
     existing_subnet_ids: typing.Optional[typing.List[str]]
     existing_security_group_ids: typing.Optional[str]
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -396,12 +412,20 @@ class AmazonWebServicesProvider(Base):
 
 class LocalProvider(Base):
     kube_context: typing.Optional[str]
-    node_selectors: typing.Dict[str, KeyValueDict]
+    node_selectors: typing.Dict[str, KeyValueDict] = {
+        "general": KeyValueDict(key="kubernetes.io/os", value="linux"),
+        "user": KeyValueDict(key="kubernetes.io/os", value="linux"),
+        "worker": KeyValueDict(key="kubernetes.io/os", value="linux"),
+    }
 
 
 class ExistingProvider(Base):
     kube_context: typing.Optional[str]
-    node_selectors: typing.Dict[str, KeyValueDict]
+    node_selectors: typing.Dict[str, KeyValueDict] = {
+        "general": KeyValueDict(key="kubernetes.io/os", value="linux"),
+        "user": KeyValueDict(key="kubernetes.io/os", value="linux"),
+        "worker": KeyValueDict(key="kubernetes.io/os", value="linux"),
+    }
 
 
 # ================= Theme ==================
@@ -811,6 +835,25 @@ class Main(Base):
                 " Install a different version of nebari or run nebari upgrade to ensure your config file is compatible."
             )
         return v
+
+    @root_validator(pre=True)
+    def check_provider(cls, values):
+        if values['provider'] == ProviderEnum.local and values.get('local') is None:
+            values['local'] = LocalProvider()
+        elif values['provider'] == ProviderEnum.existing and values.get('existing') is None:
+            values['existing'] = ExistingProvider()
+        elif values['provider'] == ProviderEnum.gcp and values.get('google_cloud_platform') is None:
+            values['google_cloud_platform'] = GoogleCloudPlatformProvider()
+        elif values['provider'] == ProviderEnum.aws and values.get('amazon_web_services') is None:
+            values['amazon_web_services'] = AmazonWebServicesProvider()
+        elif values['provider'] == ProviderEnum.azure and values.get('azure') is None:
+            values['azure'] = AzureProvider()
+        elif values['provider'] == ProviderEnum.do and values.get('digital_ocean') is None:
+            values['digital_ocean'] = DigitalOceanProvider()
+
+        if sum((_ in values and values[_] is not None) for _ in {'local', 'existing', 'google_cloud_platform', 'amazon_web_services', 'azure', 'digital_ocean'}) != 1:
+            raise ValueError('multiple providers set or wrong provider fields set')
+        return values
 
     @classmethod
     def is_version_accepted(cls, v):
