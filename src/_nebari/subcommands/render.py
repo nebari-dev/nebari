@@ -1,3 +1,4 @@
+import pathlib
 import typer
 
 from _nebari.render import render_template
@@ -31,7 +32,7 @@ def nebari_subcommand(cli: typer.Typer):
         """
         Dynamically render the Terraform scripts and other files from your [purple]nebari-config.yaml[/purple] file.
         """
-        config_filename = Path(config)
+        config_filename = pathlib.Path(config)
 
         if not config_filename.is_file():
             raise ValueError(

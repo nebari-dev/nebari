@@ -14,23 +14,14 @@ from ruamel.yaml import YAML
 
 import _nebari
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
-from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
-from _nebari.provider.cicd.gitlab import gen_gitlab_ci
-from _nebari.utils import is_relative_to
 from _nebari.stages.base import get_available_stages
-from nebari.hookspecs import NebariStage
+from nebari import schema
 
 
 def render_template(output_directory, config_filename, dry_run=False):
-    # get directory for nebari templates
-    template_directory = Path(_nebari.__file__).parent / "template"
+    output_directory = pathlib.Path(output_directory).resolve()
 
-    # would be nice to remove assumption that input directory
-    # is in local filesystem and a directory
-    if not template_directory.is_dir():
-        raise ValueError(f"template directory={template_directory} is not a directory")
-
-    if output_directory == Path.home():
+    if output_directory == str(pathlib.Path.home()):
         print("ERROR: Deploying Nebari in home directory is not advised!")
         sys.exit(1)
 
@@ -52,38 +43,15 @@ def render_template(output_directory, config_filename, dry_run=False):
     # corresponding env var.
     set_env_vars_in_config(config)
 
-    stages = [
-        _(
-            output_directory=output_directory,
-            config=config,
-        )
-        for _ in get_available_stages()
-    ]
+    contents = {}
+    config = schema.Main.parse_obj(config)
+    for stage in get_available_stages():
+        contents.update(stage(output_directory=output_directory, config=config).render())
 
-    contents = render_contents(stages, config)
+    print(contents.keys())
 
-    directories = [
-        f"stages/02-infrastructure/{config['provider']}",
-        "stages/03-kubernetes-initialize",
-        "stages/04-kubernetes-ingress",
-        "stages/05-kubernetes-keycloak",
-        "stages/06-kubernetes-keycloak-configuration",
-        "stages/07-kubernetes-services",
-        "stages/08-nebari-tf-extensions",
-    ]
-    if (
-        config["provider"] not in {"existing", "local"}
-        and config["terraform_state"]["type"] == "remote"
-    ):
-        directories.append(f"stages/01-terraform-state/{config['provider']}")
-
-    source_dirs = [template_directory / Path(directory) for directory in directories]
-    output_dirs = [output_directory / Path(directory) for directory in directories]
     new, untracked, updated, deleted = inspect_files(
-        source_dirs,
-        output_dirs,
-        source_base_dir=template_directory,
-        output_base_dir=output_directory,
+        output_base_dir=str(output_directory),
         ignore_filenames=[
             "terraform.tfstate",
             ".terraform.lock.hcl",
@@ -125,14 +93,14 @@ def render_template(output_directory, config_filename, dry_run=False):
         print("dry-run enabled no files will be created, updated, or deleted")
     else:
         for filename in new | updated:
-            input_filename = template_directory / filename
-            output_filename = output_directory / filename
-            output_filename.parent.mkdir(parents=True, exist_ok=True)
+            output_filename = os.path.join(str(output_directory), filename)
+            os.makedirs(os.path.dirname(output_filename), exist_ok=True)
 
-            if input_filename.exists():
-                shutil.copy(input_filename, output_filename)
-            else:
+            if isinstance(contents[filename], str):
                 with open(output_filename, "w") as f:
+                    f.write(contents[filename])
+            else:
+                with open(output_filename, "wb") as f:
                     f.write(contents[filename])
 
         for path in deleted:
@@ -149,83 +117,9 @@ def render_template(output_directory, config_filename, dry_run=False):
                 shutil.rmtree(abs_path)
 
 
-def render_contents(stages: List[NebariStage], config: Dict):
-    """Dynamically generated contents from _nebari configuration."""
-    contents = {}
-    for stage in stages:
-        contents.update(stage.render())
-
-    if config.get("ci_cd"):
-        for fn, workflow in gen_cicd(config).items():
-            workflow_json = workflow.json(
-                indent=2,
-                by_alias=True,
-                exclude_unset=True,
-                exclude_defaults=True,
-            )
-            workflow_yaml = yaml.dump(
-                json.loads(workflow_json), sort_keys=False, indent=2
-            )
-            contents.update({fn: workflow_yaml})
-
-    contents.update(gen_gitignore())
-
-    return contents
-
-
-def gen_gitignore():
-    """
-    Generate `.gitignore` file.
-    Add files as needed.
-    """
-    from inspect import cleandoc
-
-    files_to_ignore = """
-        # ignore terraform state
-        .terraform
-        terraform.tfstate
-        terraform.tfstate.backup
-        .terraform.tfstate.lock.info
-
-        # python
-        __pycache__
-    """
-    return {Path(".gitignore"): cleandoc(files_to_ignore)}
-
-
-def gen_cicd(config):
-    """
-    Use cicd schema to generate workflow files based on the
-    `ci_cd` key in the `config`.
-
-    For more detail on schema:
-    GiHub-Actions - nebari/providers/cicd/github.py
-    GitLab-CI - nebari/providers/cicd/gitlab.py
-    """
-    cicd_files = {}
-    cicd_provider = config["ci_cd"]["type"]
-
-    if cicd_provider == "github-actions":
-        gha_dir = Path(".github") / "workflows"
-        cicd_files[gha_dir / "nebari-ops.yaml"] = gen_nebari_ops(config)
-        cicd_files[gha_dir / "nebari-linter.yaml"] = gen_nebari_linter(config)
-
-    elif cicd_provider == "gitlab-ci":
-        cicd_files[Path(".gitlab-ci.yml")] = gen_gitlab_ci(config)
-
-    else:
-        raise ValueError(
-            f"The ci_cd provider, {cicd_provider}, is not supported. Supported providers include: `github-actions`, `gitlab-ci`."
-        )
-
-    return cicd_files
-
-
 def inspect_files(
-    source_dirs: Path,
-    output_dirs: Path,
-    source_base_dir: Path,
-    output_base_dir: Path,
+    output_base_dir: str,
+>>>>>>> c9abe710 (Working render!)
     ignore_filenames: List[str] = None,
     ignore_directories: List[str] = None,
     deleted_paths: List[Path] = None,
@@ -234,10 +128,7 @@ def inspect_files(
     """Return created, updated and untracked files by computing a checksum over the provided directory.
 
     Args:
-        source_dirs (Path): The source dir used as base for comparison
-        output_dirs (Path): The destination dir which will be matched with
-        source_base_dir (Path): Relative base path to source directory
-        output_base_dir (Path): Relative base path to output directory
+        output_base_dir (str): Relative base path to output directory
         ignore_filenames (list[str]): Filenames to ignore while comparing for changes
         ignore_directories (list[str]): Directories to ignore while comparing for changes
         deleted_paths (list[Path]): Paths that if exist in output directory should be deleted
@@ -257,20 +148,18 @@ def inspect_files(
             if not path.is_file():
                 continue
 
-            if path.name in ignore_filenames:
-                continue
+    for filename in contents:
+        if isinstance(contents[filename], str):
+            source_files[filename] = hashlib.sha256(
+                contents[filename].encode("utf8")
+            ).hexdigest()
+        else:
+            source_files[filename] = hashlib.sha256(
+                contents[filename]
+            ).hexdigest()
 
-            if any(
-                d in ignore_directories for d in path.relative_to(directory).parts[:-1]
-            ):
-                continue
-
-            yield path
-
-    for filename, content in contents.items():
-        source_files[filename] = hashlib.sha256(content.encode("utf8")).hexdigest()
-        output_filename = output_base_dir / filename
-        if output_filename.is_file():
+        output_filename = os.path.join(output_base_dir, filename)
+        if os.path.isfile(output_filename):
             output_files[filename] = hash_file(filename)
 
     deleted_files = set()
@@ -279,13 +168,9 @@ def inspect_files(
         if absolute_path.exists():
             deleted_files.add(path)
 
-    for source_dir, output_dir in zip(source_dirs, output_dirs):
-        for filename in list_files(source_dir, ignore_filenames, ignore_directories):
-            relative_path = filename.relative_to(source_base_dir)
-            source_files[relative_path] = hash_file(filename)
-
-        for filename in list_files(output_dir, ignore_filenames, ignore_directories):
-            relative_path = filename.relative_to(output_base_dir)
+    for filename in list_files(output_base_dir, ignore_filenames, ignore_directories):
+        relative_path = os.path.relpath(filename, output_base_dir)
+        if os.path.isfile(filename):
             output_files[relative_path] = hash_file(filename)
 
     new_files = source_files.keys() - output_files.keys()

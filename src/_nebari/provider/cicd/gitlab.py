@@ -38,19 +38,13 @@ class GLCI(BaseModel):
 
 
 def gen_gitlab_ci(config):
-    branch = config["ci_cd"]["branch"]
-    commit_render = config["ci_cd"].get("commit_render", True)
-    before_script = config["ci_cd"].get("before_script")
-    after_script = config["ci_cd"].get("after_script")
-    pip_install = pip_install_nebari(config["nebari_version"])
-
     render_vars = {
         "COMMIT_MSG": "nebari-config.yaml automated commit: {{ '$CI_COMMIT_SHA' }}",
     }
 
     script = [
-        f"git checkout {branch}",
-        f"{pip_install}",
+        f"git checkout {config.ci_cd.branch}",
+        pip_install_nebari(config.nebari_version),
         "nebari deploy --config nebari-config.yaml --disable-prompt --skip-remote-state-provision",
     ]
 
@@ -62,7 +56,7 @@ def gen_gitlab_ci(config):
         f"git push origin {branch})",
     ]
 
-    if commit_render:
+    if config.ci_cd.commit_render:
         script += commit_render_script
 
     rules = [
@@ -75,8 +69,8 @@ def gen_gitlab_ci(config):
     render_nebari = GLCI_job(
         image=f"python:{LATEST_SUPPORTED_PYTHON_VERSION}",
         variables=render_vars,
-        before_script=before_script,
-        after_script=after_script,
+        before_script=config.ci_cd.before_script,
+        after_script=config.ci_cd.after_script,
         script=script,
         rules=rules,
     )
