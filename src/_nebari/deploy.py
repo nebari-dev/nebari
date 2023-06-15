@@ -24,6 +24,9 @@ def guided_install(
         for stage in get_available_stages():
             s = stage(output_directory=pathlib.Path("."), config=config)
             stack.enter_context(s.deploy(stage_outputs))
+
+            if not disable_checks:
+                s.check(stage_outputs)
     print("Nebari deployed successfully")
 
     print("Services:")

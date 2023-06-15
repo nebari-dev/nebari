@@ -175,10 +175,10 @@ class KubernetesServicesStage(NebariTerraformStage):
             for i in range(num_attempts):
                 response = requests.get(url, verify=verify, timeout=timeout)
                 if response.status_code < 400:
-                    self.log.info(f"Attempt {i+1} health check succeeded for url={url}")
+                    print(f"Attempt {i+1} health check succeeded for url={url}")
                     return True
                 else:
-                    self.log.info(f"Attempt {i+1} health check failed for url={url}")
+                    print(f"Attempt {i+1} health check failed for url={url}")
                 time.sleep(timeout)
             return False
 
@@ -186,7 +186,7 @@ class KubernetesServicesStage(NebariTerraformStage):
         for service_name, service in services.items():
             service_url = service["health_url"]
             if service_url and not _attempt_connect_url(service_url):
-                self.log.error(
+                print(
                     f"ERROR: Service {service_name} DOWN when checking url={service_url}"
                 )
                 sys.exit(1)
