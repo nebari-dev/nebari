@@ -95,7 +95,7 @@ def _calculate_node_groups(config: schema.Main):
     elif config.provider == schema.ProviderEnum.existing:
         return config.existing.node_selectors
     else:
-        return config.local.dict()['node_selectors']
+        return config.local.dict()["node_selectors"]
 
 
 def check_ingress_dns(stage_outputs, config, disable_prompt):

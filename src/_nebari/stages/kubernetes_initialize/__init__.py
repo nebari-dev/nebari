@@ -46,7 +46,9 @@ class KubernetesInitializeStage(NebariTerraformStage):
             "name": self.config.project_name,
             "environment": self.config.namespace,
             "cloud-provider": self.config.provider.value,
-            "aws-region": self.config.amazon_web_services.region if self.config.provider == schema.ProviderEnum.aws else None,
+            "aws-region": self.config.amazon_web_services.region
+            if self.config.provider == schema.ProviderEnum.aws
+            else None,
             "external_container_reg": self.config.external_container_reg.dict(),
             "gpu_enabled": gpu_enabled,
             "gpu_node_group_names": gpu_node_group_names,
