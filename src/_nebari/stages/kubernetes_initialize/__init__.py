@@ -30,7 +30,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
             )
             gpu_node_group_names = []
 
-        elif self.config.provider == schema.ProvderEnum.aws:
+        elif self.config.provider == schema.ProviderEnum.aws:
             gpu_enabled = any(
                 node_group.gpu
                 for node_group in self.config.amazon_web_services.node_groups.values()
@@ -46,8 +46,8 @@ class KubernetesInitializeStage(NebariTerraformStage):
             "name": self.config.project_name,
             "environment": self.config.namespace,
             "cloud-provider": self.config.provider.value,
-            "aws-region": self.config.amazon_web_services.region,
-            "external_container_reg": self.config.external_container_reg.enabled,
+            "aws-region": self.config.amazon_web_services.region if self.config.provider == schema.ProviderEnum.aws else None,
+            "external_container_reg": self.config.external_container_reg.dict(),
             "gpu_enabled": gpu_enabled,
             "gpu_node_group_names": gpu_node_group_names,
         }
