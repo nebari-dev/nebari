@@ -1,11 +1,10 @@
-from typing import Dict, List
 from inspect import cleandoc
-
+from typing import Dict, List
 
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from _nebari.provider.cicd.gitlab import gen_gitlab_ci
-from nebari.hookspecs import NebariStage, hookimpl
 from nebari import schema
+from nebari.hookspecs import NebariStage, hookimpl
 
 
 def gen_gitignore():
@@ -54,7 +53,7 @@ def gen_cicd(config):
 
 
 class BootstrapStage(NebariStage):
-    name = "boostrap"
+    name = "bootstrap"
     priority = 0
 
     def render(self) -> Dict[str, str]:

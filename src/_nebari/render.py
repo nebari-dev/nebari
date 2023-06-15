@@ -1,18 +1,15 @@
 import functools
 import hashlib
-import json
 import os
 import pathlib
 import shutil
 import sys
 from typing import Dict, List
 
-import yaml
 from rich import print
 from rich.table import Table
 from ruamel.yaml import YAML
 
-import _nebari
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
 from _nebari.stages.base import get_available_stages
 from nebari import schema
@@ -47,7 +44,9 @@ def render_template(output_directory, config_filename, dry_run=False):
     contents = {}
     config = schema.Main.parse_obj(config)
     for stage in get_available_stages():
-        contents.update(stage(output_directory=output_directory, config=config).render())
+        contents.update(
+            stage(output_directory=output_directory, config=config).render()
+        )
 
     print(contents.keys())
 
@@ -157,9 +156,7 @@ def inspect_files(
                 contents[filename].encode("utf8")
             ).hexdigest()
         else:
-            source_files[filename] = hashlib.sha256(
-                contents[filename]
-            ).hexdigest()
+            source_files[filename] = hashlib.sha256(contents[filename]).hexdigest()
 
         output_filename = os.path.join(output_base_dir, filename)
         if os.path.isfile(output_filename):
