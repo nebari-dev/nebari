@@ -4,7 +4,6 @@ import typer
 
 from _nebari.deploy import deploy_configuration
 from _nebari.render import render_template
-from _nebari.utils import load_yaml
 from nebari import schema
 from nebari.hookspecs import hookimpl
 

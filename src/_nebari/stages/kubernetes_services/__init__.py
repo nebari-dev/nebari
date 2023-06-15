@@ -46,7 +46,7 @@ def _calculate_node_groups(config: schema.Main):
     elif config.provider == schema.ProviderEnum.existing:
         return config.existing.node_selectors
     else:
-        return config.local.dict()['node_selectors']
+        return config.local.dict()["node_selectors"]
 
 
 class KubernetesServicesStage(NebariTerraformStage):
@@ -87,7 +87,9 @@ class KubernetesServicesStage(NebariTerraformStage):
             ]["value"],
             "node_groups": _calculate_node_groups(self.config),
             # conda-store
-            "conda-store-environments": {k: v.dict() for k, v in self.config.environments.items()},
+            "conda-store-environments": {
+                k: v.dict() for k, v in self.config.environments.items()
+            },
             "conda-store-filesystem-storage": self.config.storage.conda_store,
             "conda-store-service-token-scopes": {
                 "cdsdashboards": {
@@ -117,13 +119,13 @@ class KubernetesServicesStage(NebariTerraformStage):
             "jupyterhub-shared-endpoint": stage_outputs["stages/02-infrastructure"]
             .get("nfs_endpoint", {})
             .get("value"),
-            "jupyterlab-profiles": self.config.profiles.dict()['jupyterlab'],
+            "jupyterlab-profiles": self.config.profiles.dict()["jupyterlab"],
             "jupyterlab-image": _split_docker_image_name(
                 self.config.default_images.jupyterlab
             ),
             "jupyterhub-overrides": [json.dumps(self.config.jupyterhub.overrides)],
             "jupyterhub-hub-extraEnv": json.dumps(
-                self.config.jupyterhub.overrides.get('hub', {}).get('extraEnv', [])
+                self.config.jupyterhub.overrides.get("hub", {}).get("extraEnv", [])
             ),
             # jupyterlab
             "idle-culler-settings": self.config.jupyterlab.idle_culler.dict(),
@@ -131,7 +133,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             "dask-worker-image": _split_docker_image_name(
                 self.config.default_images.dask_worker
             ),
-            "dask-gateway-profiles": self.config.profiles.dict()['dask_worker'],
+            "dask-gateway-profiles": self.config.profiles.dict()["dask_worker"],
             # monitoring
             "monitoring-enabled": self.config.monitoring.enabled,
             # argo-worfklows
