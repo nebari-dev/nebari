@@ -218,9 +218,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             )
             sys.exit(1)
 
-        print(
-            f"After stage={self.name} kubernetes cluster successfully provisioned"
-        )
+        print(f"After stage={self.name} kubernetes cluster successfully provisioned")
 
     @contextlib.contextmanager
     def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
