@@ -1,7 +1,9 @@
+import os
 import contextlib
 import inspect
 import pathlib
 import sys
+import tempfile
 from typing import Any, Dict, List
 
 from _nebari.stages.base import NebariTerraformStage
@@ -39,6 +41,21 @@ def kubernetes_provider_context(kubernetes_credentials: Dict[str, str]):
 
 
 class KubernetesInfrastructureStage(NebariTerraformStage):
+    """Generalized method to provision infrastructure.
+
+    After successful deployment the following properties are set on
+    `stage_outputs[directory]`.
+      - `kubernetes_credentials` which are sufficient credentials to
+        connect with the kubernetes provider
+      - `kubeconfig_filename` which is a path to a kubeconfig that can
+        be used to connect to a kubernetes cluster
+      - at least one node running such that resources in the
+        node_group.general can be scheduled
+
+    At a high level this stage is expected to provision a kubernetes
+    cluster on a given provider.
+    """
+
     name = "02-infrastructure"
     priority = 20
 
