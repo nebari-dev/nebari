@@ -45,6 +45,6 @@ def nebari_subcommand(cli: typer.Typer):
         Please use this at your own risk.
 
         """
-        config = schema.read_configuration(config_filename)
+        schema.read_configuration(config_filename)
         r = keycloak_rest_api_call(config_filename, request=request)
         print(json.dumps(r, indent=4))

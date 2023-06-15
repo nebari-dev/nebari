@@ -68,7 +68,10 @@ class NebariTerraformStage(NebariStage):
 
     @contextlib.contextmanager
     def destroy(
-            self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool], ignore_errors: bool = True
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        status: Dict[str, bool],
+        ignore_errors: bool = True,
     ):
         stage_outputs["stages/" + self.name] = terraform.deploy(
             directory=str(self.output_directory / self.stage_prefix),
