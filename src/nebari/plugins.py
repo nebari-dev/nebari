@@ -7,6 +7,7 @@ from nebari import hookspecs
 
 DEFAULT_PLUGINS = [
     # stages
+    "_nebari.stages.bootstrap",
     "_nebari.stages.terraform_state",
     "_nebari.stages.infrastructure",
     "_nebari.stages.kubernetes_initialize",

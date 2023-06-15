@@ -14,22 +14,11 @@ from ruamel.yaml import YAML
 
 import _nebari
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
-from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
-from _nebari.provider.cicd.gitlab import gen_gitlab_ci
 from _nebari.stages.base import get_available_stages
-from nebari.hookspecs import NebariStage
+from nebari import schema
 
 
 def render_template(output_directory, config_filename, dry_run=False):
-    # get directory for nebari templates
-    template_directory = pathlib.Path(_nebari.__file__).parent / "template"
-
-    # would be nice to remove assumption that input directory
-    # is in local filesystem and a directory
-    template_directory = pathlib.Path(template_directory)
-    if not template_directory.is_dir():
-        raise ValueError(f"template directory={template_directory} is not a directory")
-
     output_directory = pathlib.Path(output_directory).resolve()
 
     if output_directory == str(pathlib.Path.home()):
@@ -55,37 +44,14 @@ def render_template(output_directory, config_filename, dry_run=False):
     # corresponding env var.
     set_env_vars_in_config(config)
 
-    stages = [
-        _(
-            output_directory=output_directory,
-            config=config,
-        )
-        for _ in get_available_stages()
-    ]
+    contents = {}
+    config = schema.Main.parse_obj(config)
+    for stage in get_available_stages():
+        contents.update(stage(output_directory=output_directory, config=config).render())
 
-    contents = render_contents(stages, config)
+    print(contents.keys())
 
-    directories = [
-        f"stages/02-infrastructure/{config['provider']}",
-        "stages/03-kubernetes-initialize",
-        "stages/04-kubernetes-ingress",
-        "stages/05-kubernetes-keycloak",
-        "stages/06-kubernetes-keycloak-configuration",
-        "stages/07-kubernetes-services",
-        "stages/08-nebari-tf-extensions",
-    ]
-    if (
-        config["provider"] not in {"existing", "local"}
-        and config["terraform_state"]["type"] == "remote"
-    ):
-        directories.append(f"stages/01-terraform-state/{config['provider']}")
-
-    source_dirs = [os.path.join(str(template_directory), _) for _ in directories]
-    output_dirs = [os.path.join(str(output_directory), _) for _ in directories]
     new, untracked, updated, deleted = inspect_files(
-        source_dirs,
-        output_dirs,
-        source_base_dir=str(template_directory),
         output_base_dir=str(output_directory),
         ignore_filenames=[
             "terraform.tfstate",
@@ -128,14 +94,14 @@ def render_template(output_directory, config_filename, dry_run=False):
         print("dry-run enabled no files will be created, updated, or deleted")
     else:
         for filename in new | updated:
-            input_filename = os.path.join(str(template_directory), filename)
             output_filename = os.path.join(str(output_directory), filename)
             os.makedirs(os.path.dirname(output_filename), exist_ok=True)
 
-            if os.path.exists(input_filename):
-                shutil.copy(input_filename, output_filename)
-            else:
+            if isinstance(contents[filename], str):
                 with open(output_filename, "w") as f:
+                    f.write(contents[filename])
+            else:
+                with open(output_filename, "wb") as f:
                     f.write(contents[filename])
 
         for path in deleted:
@@ -153,82 +119,7 @@ def render_template(output_directory, config_filename, dry_run=False):
                 shutil.rmtree(abs_path)
 
 
-def render_contents(stages: List[NebariStage], config: Dict):
-    """Dynamically generated contents from _nebari configuration."""
-    contents = {}
-    for stage in stages:
-        contents.update(stage.render())
-
-    if config.get("ci_cd"):
-        for fn, workflow in gen_cicd(config).items():
-            workflow_json = workflow.json(
-                indent=2,
-                by_alias=True,
-                exclude_unset=True,
-                exclude_defaults=True,
-            )
-            workflow_yaml = yaml.dump(
-                json.loads(workflow_json), sort_keys=False, indent=2
-            )
-            contents.update({fn: workflow_yaml})
-
-    contents.update(gen_gitignore())
-
-    return contents
-
-
-def gen_gitignore():
-    """
-    Generate `.gitignore` file.
-    Add files as needed.
-    """
-    from inspect import cleandoc
-
-    filestoignore = """
-        # ignore terraform state
-        .terraform
-        terraform.tfstate
-        terraform.tfstate.backup
-        .terraform.tfstate.lock.info
-
-        # python
-        __pycache__
-    """
-    return {".gitignore": cleandoc(filestoignore)}
-
-
-def gen_cicd(config):
-    """
-    Use cicd schema to generate workflow files based on the
-    `ci_cd` key in the `config`.
-
-    For more detail on schema:
-    GiHub-Actions - nebari/providers/cicd/github.py
-    GitLab-CI - nebari/providers/cicd/gitlab.py
-    """
-    cicd_files = {}
-    cicd_provider = config["ci_cd"]["type"]
-
-    if cicd_provider == "github-actions":
-        gha_dir = ".github/workflows/"
-        cicd_files[gha_dir + "nebari-ops.yaml"] = gen_nebari_ops(config)
-        cicd_files[gha_dir + "nebari-linter.yaml"] = gen_nebari_linter(config)
-
-    elif cicd_provider == "gitlab-ci":
-        cicd_files[".gitlab-ci.yml"] = gen_gitlab_ci(config)
-
-    else:
-        raise ValueError(
-            f"The ci_cd provider, {cicd_provider}, is not supported. Supported providers include: `github-actions`, `gitlab-ci`."
-        )
-
-    return cicd_files
-
-
 def inspect_files(
-    source_dirs: str,
-    output_dirs: str,
-    source_base_dir: str,
     output_base_dir: str,
     ignore_filenames: List[str] = None,
     ignore_directories: List[str] = None,
@@ -238,9 +129,6 @@ def inspect_files(
     """Return created, updated and untracked files by computing a checksum over the provided directory.
 
     Args:
-        source_dirs (str): The source dir used as base for comparssion
-        output_dirs (str): The destination dir which will be matched with
-        source_base_dir (str): Relative base path to source directory
         output_base_dir (str): Relative base path to output directory
         ignore_filenames (list[str]): Filenames to ignore while comparing for changes
         ignore_directories (list[str]): Directories to ignore while comparing for changes
@@ -264,9 +152,15 @@ def inspect_files(
                     yield os.path.join(root, file)
 
     for filename in contents:
-        source_files[filename] = hashlib.sha256(
-            contents[filename].encode("utf8")
-        ).hexdigest()
+        if isinstance(contents[filename], str):
+            source_files[filename] = hashlib.sha256(
+                contents[filename].encode("utf8")
+            ).hexdigest()
+        else:
+            source_files[filename] = hashlib.sha256(
+                contents[filename]
+            ).hexdigest()
+
         output_filename = os.path.join(output_base_dir, filename)
         if os.path.isfile(output_filename):
             output_files[filename] = hash_file(filename)
@@ -277,13 +171,9 @@ def inspect_files(
         if os.path.exists(absolute_path):
             deleted_files.add(path)
 
-    for source_dir, output_dir in zip(source_dirs, output_dirs):
-        for filename in list_files(source_dir, ignore_filenames, ignore_directories):
-            relative_path = os.path.relpath(filename, source_base_dir)
-            source_files[relative_path] = hash_file(filename)
-
-        for filename in list_files(output_dir, ignore_filenames, ignore_directories):
-            relative_path = os.path.relpath(filename, output_base_dir)
+    for filename in list_files(output_base_dir, ignore_filenames, ignore_directories):
+        relative_path = os.path.relpath(filename, output_base_dir)
+        if os.path.isfile(filename):
             output_files[relative_path] = hash_file(filename)
 
     new_files = source_files.keys() - output_files.keys()
