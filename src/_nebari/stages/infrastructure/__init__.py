@@ -45,7 +45,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
     @property
     def template_directory(self):
         return (
-            pathlib.Path(inspect.getfile(self.__class__).parent)
+            pathlib.Path(inspect.getfile(self.__class__)).parent
             / "template"
             / self.config.provider.value
         )
