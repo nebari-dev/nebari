@@ -48,7 +48,11 @@ def provision_ingress_dns(
         )
         record_name = ".".join(record_name)
         zone_name = ".".join(zone_name)
-        if config.provider in {schema.ProviderEnum.do, schema.ProviderEnum.gcp, schema.ProviderEnum.azure}:
+        if config.provider in {
+            schema.ProviderEnum.do,
+            schema.ProviderEnum.gcp,
+            schema.ProviderEnum.azure,
+        }:
             update_record(zone_name, record_name, "A", ip_or_hostname)
             if config.clearml.enabled:
                 add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)

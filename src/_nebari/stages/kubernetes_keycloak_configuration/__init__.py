@@ -5,7 +5,6 @@ from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariTerraformState
 from nebari.hookspecs import NebariStage, hookimpl
 
-
 # check and retry settings
 NUM_ATTEMPTS = 10
 TIMEOUT = 10  # seconds
@@ -76,9 +75,7 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
                             f"Attempt {i+1} succeeded connecting to keycloak but nebari realm did not exist"
                         )
                 except KeycloakError:
-                    print(
-                        f"Attempt {i+1} failed connecting to keycloak master realm"
-                    )
+                    print(f"Attempt {i+1} failed connecting to keycloak master realm")
                 time.sleep(timeout)
             return False
 
