@@ -18,7 +18,7 @@ DEFAULT_PLUGINS = [
     "_nebari.stages.nebari_tf_extensions",
     # subcommands
     "_nebari.subcommands.dev",
-    # "_nebari.subcommands.deploy",
+    "_nebari.subcommands.deploy",
     # "_nebari.subcommands.destroy",
     "_nebari.subcommands.keycloak",
     "_nebari.subcommands.render",

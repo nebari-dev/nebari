@@ -550,7 +550,7 @@ class Ingress(Base):
 
 
 class ExtContainerReg(Base):
-    enabled: bool
+    enabled: bool = False
     access_key_id: typing.Optional[str]
     secret_access_key: typing.Optional[str]
     extcr_account: typing.Optional[str]
@@ -648,7 +648,7 @@ class Main(Base):
     prefect: Prefect = Prefect()
     cdsdashboards: CDSDashboards = CDSDashboards()
     security: Security = Security()
-    external_container_reg: typing.Optional[ExtContainerReg]
+    external_container_reg: ExtContainerReg = ExtContainerReg()
     default_images: DefaultImages = DefaultImages()
     storage: Storage = Storage()
     local: typing.Optional[LocalProvider]
@@ -762,6 +762,7 @@ class Main(Base):
     @validator("project_name")
     def _project_name_convention(cls, value: typing.Any, values):
         project_name_convention(value=value, values=values)
+        return value
 
 
 def verify(config):
