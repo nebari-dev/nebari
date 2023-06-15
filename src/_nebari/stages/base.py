@@ -1,7 +1,7 @@
-import os
 import contextlib
 import inspect
 import itertools
+import os
 import pathlib
 from typing import Any, Dict, List, Tuple
 
@@ -27,13 +27,20 @@ class NebariTerraformStage(NebariStage):
 
     def render(self) -> Dict[str, str]:
         contents = {
-            str(
-                self.stage_prefix / "_nebari.tf.json"
-            ): terraform.tf_render_objects(self.tf_objects())
+            str(self.stage_prefix / "_nebari.tf.json"): terraform.tf_render_objects(
+                self.tf_objects()
+            )
         }
         for root, dirs, filenames in os.walk(self.template_directory):
             for filename in filenames:
-                contents[os.path.join(self.stage_prefix, os.path.relpath(os.path.join(root, filename), self.template_directory))] = open(
+                contents[
+                    os.path.join(
+                        self.stage_prefix,
+                        os.path.relpath(
+                            os.path.join(root, filename), self.template_directory
+                        ),
+                    )
+                ] = open(
                     os.path.join(root, filename),
                     "rb",
                 ).read()
