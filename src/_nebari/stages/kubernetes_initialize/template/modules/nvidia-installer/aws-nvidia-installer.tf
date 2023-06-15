@@ -1,5 +1,5 @@
 resource "kubernetes_daemonset" "aws_nvidia_installer" {
-  count = var.gpu_enabled && (var.cloud-provider == "aws") ? 1 : 0
+  count = var.gpu_enabled && (var.cloud_provider == "aws") ? 1 : 0
   metadata {
     name      = "nvidia-device-plugin-daemonset-1.12"
     namespace = "kube-system"

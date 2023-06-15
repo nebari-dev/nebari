@@ -19,12 +19,12 @@ variable "nebari-bot-password" {
   type        = string
 }
 
-variable "initial-root-password" {
+variable "initial_root_password" {
   description = "initial root password for keycloak"
   type        = string
 }
 
-variable "node-group" {
+variable "node_group" {
   description = "Node key value pair for bound general resources"
   type = object({
     key   = string
