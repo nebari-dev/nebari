@@ -42,7 +42,7 @@ def render_template(output_directory, config_filename, dry_run=False):
     set_env_vars_in_config(config)
 
     contents = {}
-    config = schema.Main.parse_obj(config)
+    config = schema.Main(**config)
     for stage in get_available_stages():
         contents.update(
             stage(output_directory=output_directory, config=config).render()
