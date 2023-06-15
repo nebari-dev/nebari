@@ -1,19 +1,12 @@
+import contextlib
 import logging
-import os
 import pathlib
 import subprocess
 import textwrap
-import contextlib
 
-from _nebari.provider import terraform
-from _nebari.provider.dns.cloudflare import update_record
-from _nebari.utils import (
-    check_cloud_credentials,
-    timer,
-)
 from _nebari.stages.base import get_available_stages
+from _nebari.utils import check_cloud_credentials, timer
 from nebari import schema
-
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +26,7 @@ def guided_install(
     config = schema.Main(**config)
     with contextlib.ExitStack() as stack:
         for stage in get_available_stages():
-            s = stage(output_directory=pathlib.Path('.'), config=config)
+            s = stage(output_directory=pathlib.Path("."), config=config)
             stack.enter_context(s.deploy(stage_outputs))
     print("Nebari deployed successfully")
 
