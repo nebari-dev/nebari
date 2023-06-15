@@ -39,14 +39,7 @@ class NebariTFExtensionsStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage(
-    install_directory: pathlib.Path, config: schema.Main
-) -> List[NebariStage]:
+def nebari_stage() -> List[NebariStage]:
     return [
-        NebariTFExtensionsStage(
-            install_directory,
-            config,
-            template_directory=(pathlib.Path(__file__).parent / "template"),
-            stage_prefix=pathlib.Path("stages/08-nebari-tf-extensions"),
-        )
+        NebariTFExtensionsStage
     ]

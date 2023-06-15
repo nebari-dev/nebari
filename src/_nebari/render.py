@@ -16,7 +16,8 @@ import _nebari
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from _nebari.provider.cicd.gitlab import gen_gitlab_ci
-from _nebari.stages import tf_objects
+from _nebari.stages.base import get_available_stages
+from nebari.hookspecs import NebariStage
 
 
 def render_template(output_directory, config_filename, dry_run=False):
@@ -54,10 +55,12 @@ def render_template(output_directory, config_filename, dry_run=False):
     # corresponding env var.
     set_env_vars_in_config(config)
 
-    config["repo_directory"] = output_directory.name
-    config["nebari_config_yaml_path"] = str(config_filename.absolute())
+    stages = [_(
+        output_directory=output_directory,
+        config=config,
+    ) for _ in get_available_stages()]
 
-    contents = render_contents(config)
+    contents = render_contents(stages, config)
 
     directories = [
         f"stages/02-infrastructure/{config['provider']}",
@@ -147,18 +150,11 @@ def render_template(output_directory, config_filename, dry_run=False):
                 shutil.rmtree(abs_path)
 
 
-def render_contents(config: Dict):
+def render_contents(stages: List[NebariStage], config: Dict):
     """Dynamically generated contents from _nebari configuration."""
-    contents = {
-        **tf_objects.stage_01_terraform_state(config),
-        **tf_objects.stage_02_infrastructure(config),
-        **tf_objects.stage_03_kubernetes_initialize(config),
-        **tf_objects.stage_04_kubernetes_ingress(config),
-        **tf_objects.stage_05_kubernetes_keycloak(config),
-        **tf_objects.stage_06_kubernetes_keycloak_configuration(config),
-        **tf_objects.stage_07_kubernetes_services(config),
-        **tf_objects.stage_08_nebari_tf_extensions(config),
-    }
+    contents = {}
+    for stage in stages:
+        contents.update(stage.render())
 
     if config.get("ci_cd"):
         for fn, workflow in gen_cicd(config).items():

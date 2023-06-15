@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from typing import Any, Dict
 
 from pluggy import HookimplMarker, HookspecMarker
+import typer
 
 hookspec = HookspecMarker("nebari")
 hookimpl = HookimplMarker("nebari")
@@ -40,7 +41,10 @@ class NebariStage:
 
 
 @hookspec
-def nebari_stage(
-    install_directory: pathlib.Path, config: schema.Main
-) -> Iterable[NebariStage]:
+def nebari_stage() -> Iterable[NebariStage]:
     """Registers stages in nebari"""
+
+
+@hookspec
+def nebari_subcommand(cli: typer.Typer):
+    """Register Typer subcommand in nebari"""
