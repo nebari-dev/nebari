@@ -1,4 +1,3 @@
-import pathlib
 import socket
 import sys
 from typing import Any, Dict, List
@@ -187,6 +186,4 @@ class KubernetesIngressStage(NebariTerraformStage):
 
 @hookimpl
 def nebari_stage() -> List[NebariStage]:
-    return [
-        KubernetesIngressStage
-    ]
+    return [KubernetesIngressStage]

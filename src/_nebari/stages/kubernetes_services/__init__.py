@@ -1,4 +1,3 @@
-import pathlib
 import sys
 from typing import Any, Dict, List
 from urllib.parse import urlencode
@@ -192,6 +191,4 @@ class KubernetesServicesStage(NebariTerraformStage):
 
 @hookimpl
 def nebari_stage() -> List[NebariStage]:
-    return [
-        KubernetesServicesStage
-    ]
+    return [KubernetesServicesStage]

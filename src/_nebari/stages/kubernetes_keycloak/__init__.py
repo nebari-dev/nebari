@@ -1,6 +1,5 @@
 import contextlib
 import json
-import pathlib
 import sys
 from typing import Any, Dict, List
 
@@ -159,6 +158,4 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
 @hookimpl
 def nebari_stage() -> List[NebariStage]:
-    return [
-        KubernetesKeycloakStage
-    ]
+    return [KubernetesKeycloakStage]
