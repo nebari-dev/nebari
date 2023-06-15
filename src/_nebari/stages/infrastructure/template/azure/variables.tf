@@ -30,7 +30,6 @@ variable "node_groups" {
 variable "kubeconfig_filename" {
   description = "Kubernetes kubeconfig written to filesystem"
   type        = string
-  default     = null
 }
 
 variable "resource_group_name" {
@@ -46,7 +45,6 @@ variable "node_resource_group_name" {
 variable "vnet_subnet_id" {
   description = "The ID of a Subnet where the Kubernetes Node Pool should exist. Changing this forces a new resource to be created."
   type        = string
-  default     = null
 }
 
 variable "private_cluster_enabled" {
