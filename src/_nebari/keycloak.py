@@ -8,15 +8,12 @@ import requests
 import rich
 
 from _nebari.utils import load_yaml
-from nebari.schema import verify
+from nebari import schema
 
 logger = logging.getLogger(__name__)
 
 
-def do_keycloak(config_filename, *args):
-    config = load_yaml(config_filename)
-    verify(config)
-
+def do_keycloak(config: schema.Main, *args):
     # suppress insecure warnings
     import urllib3
 
@@ -32,7 +29,7 @@ def do_keycloak(config_filename, *args):
 
         username = args[1]
         password = args[2] if len(args) >= 3 else None
-        create_user(keycloak_admin, username, password, domain=config["domain"])
+        create_user(keycloak_admin, username, password, domain=config.domain)
     elif args[0] == "listusers":
         list_users(keycloak_admin)
     else:
@@ -83,18 +80,18 @@ def list_users(keycloak_admin: keycloak.KeycloakAdmin):
         )
 
 
-def get_keycloak_admin_from_config(config):
+def get_keycloak_admin_from_config(config: schema.Main):
     keycloak_server_url = os.environ.get(
-        "KEYCLOAK_SERVER_URL", f"https://{config['domain']}/auth/"
+        "KEYCLOAK_SERVER_URL", f"https://{config.domain}/auth/"
     )
 
     keycloak_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
     keycloak_password = os.environ.get(
         "KEYCLOAK_ADMIN_PASSWORD",
-        config.get("security", {}).get("keycloak", {}).get("initial_root_password", ""),
+        config.security.keycloak.initial_root_password
     )
 
-    should_verify_tls = config.get("certificate", {}).get("type", "") != "self-signed"
+    should_verify_tls = config.certificate.type != schema.CertificateEnum.selfsigned
 
     try:
         keycloak_admin = keycloak.KeycloakAdmin(
@@ -115,17 +112,14 @@ def get_keycloak_admin_from_config(config):
     return keycloak_admin
 
 
-def keycloak_rest_api_call(config=None, request: str = None):
+def keycloak_rest_api_call(config: schema.Main = None, request: str = None):
     """Communicate directly with the Keycloak REST API by passing it a request"""
-
-    config = load_yaml(config)
-
-    keycloak_server_url = f"https://{config['domain']}/auth/"
+    keycloak_server_url = f"https://{config.domain}/auth/"
 
     keycloak_admin_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
     keycloak_admin_password = os.environ.get(
         "KEYCLOAK_ADMIN_PASSWORD",
-        config.get("security", {}).get("keycloak", {}).get("initial_root_password", ""),
+        config.security.keycloak.initial_root_password,
     )
 
     try:
@@ -183,7 +177,7 @@ def keycloak_rest_api_call(config=None, request: str = None):
         raise e
 
 
-def export_keycloak_users(config, realm):
+def export_keycloak_users(config: schema.Main, realm: str):
     request = f"GET /{realm}/users"
 
     users = keycloak_rest_api_call(config, request=request)

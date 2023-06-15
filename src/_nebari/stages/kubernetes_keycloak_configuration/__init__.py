@@ -23,7 +23,7 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
         return {
             "realm": realm_id,
             "realm_display_name": self.config.security.keycloak.realm_display_name,
-            "authentication": self.config.security.authentication,
+            "authentication": self.config.security.authentication.dict(),
             "keycloak_groups": ["superadmin", "admin", "developer", "analyst"]
             + users_group,
             "default_groups": ["analyst"] + users_group,
