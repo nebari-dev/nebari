@@ -3,9 +3,7 @@ import inspect
 import pathlib
 import sys
 import tempfile
-from typing import Any, Dict, List
-
-from pydantic import BaseModel
+from typing import Any, Dict, List, Union
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -26,16 +24,16 @@ def get_kubeconfig_filename():
 # - create schema for node group for each provider
 
 
-class LocalInputVars(BaseModel):
-    kubeconfig_filename: get_kubeconfig_filename()
+class LocalInputVars(schema.Base):
+    kubeconfig_filename: Union[str, pathlib.Path] = get_kubeconfig_filename()
     kube_context: str
 
 
-class ExistingInputVars(BaseModel):
+class ExistingInputVars(schema.Base):
     kube_context: str
 
 
-class BaseCloudProviderInputVars(BaseModel):
+class BaseCloudProviderInputVars(schema.Base):
     name: str
     environment: str
     kubeconfig_filename: str = get_kubeconfig_filename()
