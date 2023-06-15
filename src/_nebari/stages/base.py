@@ -1,3 +1,4 @@
+import os
 import contextlib
 import inspect
 import itertools
@@ -12,7 +13,7 @@ from nebari.hookspecs import NebariStage
 class NebariTerraformStage(NebariStage):
     @property
     def template_directory(self):
-        return pathlib.Path(inspect.getfile(self.__class__).parent) / "template"
+        return pathlib.Path(inspect.getfile(self.__class__)).parent / "template"
 
     @property
     def stage_prefix(self):
@@ -22,18 +23,19 @@ class NebariTerraformStage(NebariStage):
         return []
 
     def tf_objects(self) -> List[Dict]:
-        return [NebariTerraformState(self.name, config)]
+        return [NebariTerraformState(self.name, self.config)]
 
-    def render(self):
+    def render(self) -> Dict[str, str]:
         contents = {
             str(
-                self.output_directory / stage_prefix / "_nebari.tf.json"
+                self.stage_prefix / "_nebari.tf.json"
             ): terraform.tf_render_objects(self.tf_objects())
         }
-        for root, dirs, files in os.walk(self.template_directory):
+        for root, dirs, filenames in os.walk(self.template_directory):
             for filename in filenames:
-                contents[os.path.join(root, filename)] = open(
-                    os.path.join(root, filename)
+                contents[os.path.join(self.stage_prefix, os.path.relpath(os.path.join(root, filename), self.template_directory))] = open(
+                    os.path.join(root, filename),
+                    "rb",
                 ).read()
         return contents
 
@@ -71,7 +73,7 @@ class NebariTerraformStage(NebariStage):
         )
         yield
         status["stages/" + self.name] = _terraform_destroy(
-            directory=str(output_directory / stage_prefix),
+            directory=str(output_directory / self.stage_prefix),
             input_vars=self.input_vars(stage_outputs),
             ignore_errors=True,
         )
