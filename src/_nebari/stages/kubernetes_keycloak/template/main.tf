@@ -12,9 +12,9 @@ module "kubernetes-keycloak-helm" {
 
   nebari-bot-password = random_password.keycloak-nebari-bot-password.result
 
-  initial-root-password = var.initial-root-password
+  initial_root_password = var.initial_root_password
 
   overrides = var.overrides
 
-  node-group = var.node-group
+  node_group = var.node_group
 }

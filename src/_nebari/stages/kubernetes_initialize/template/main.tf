@@ -6,13 +6,13 @@ module "kubernetes-initialization" {
 }
 
 module "kubernetes-autoscaling" {
-  count = var.cloud-provider == "aws" ? 1 : 0
+  count = var.cloud_provider == "aws" ? 1 : 0
 
   source = "./modules/cluster-autoscaler"
 
   namespace = var.environment
 
-  aws-region   = var.aws-region
+  aws_region   = var.aws_region
   cluster-name = local.cluster_name
 }
 
@@ -25,7 +25,7 @@ module "nvidia-driver-installer" {
 
   source = "./modules/nvidia-installer"
 
-  cloud-provider       = var.cloud-provider
+  cloud_provider       = var.cloud_provider
   gpu_enabled          = var.gpu_enabled
   gpu_node_group_names = var.gpu_node_group_names
 }

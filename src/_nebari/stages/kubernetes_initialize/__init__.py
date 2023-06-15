@@ -1,5 +1,5 @@
 import sys
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -9,6 +9,16 @@ from _nebari.stages.tf_objects import (
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
+
+
+class InputVars(schema.BaseModel):
+    name: str
+    environment: str
+    cloud_provider: str
+    aws_region: Union[str, None] = None
+    external_container_reg: Union[schema.ExtContainerReg, None] = None
+    gpu_enabled: bool = False
+    gpu_node_group_names: List[str] = []
 
 
 class KubernetesInitializeStage(NebariTerraformStage):
@@ -23,36 +33,30 @@ class KubernetesInitializeStage(NebariTerraformStage):
         ]
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
+        input_vars = InputVars(
+            name=self.config.project_name,
+            environment=self.config.namespace,
+            cloud_provider=self.config.provider.value,
+            external_container_reg=self.config.external_container_reg.dict(),
+        )
+
         if self.config.provider == schema.ProviderEnum.gcp:
-            gpu_enabled = any(
+            input_vars.gpu_enabled = any(
                 node_group.guest_accelerators
                 for node_group in self.config.google_cloud_platform.node_groups.values()
             )
-            gpu_node_group_names = []
 
         elif self.config.provider == schema.ProviderEnum.aws:
-            gpu_enabled = any(
+            input_vars.gpu_enabled = any(
                 node_group.gpu
                 for node_group in self.config.amazon_web_services.node_groups.values()
             )
-            gpu_node_group_names = [
+            input_vars.gpu_node_group_names = [
                 group for group in self.config.amazon_web_services.node_groups.keys()
             ]
-        else:
-            gpu_enabled = False
-            gpu_node_group_names = []
+            input_vars.aws_region = self.config.amazon_web_services.region
 
-        return {
-            "name": self.config.project_name,
-            "environment": self.config.namespace,
-            "cloud-provider": self.config.provider.value,
-            "aws-region": self.config.amazon_web_services.region
-            if self.config.provider == schema.ProviderEnum.aws
-            else None,
-            "external_container_reg": self.config.external_container_reg.dict(),
-            "gpu_enabled": gpu_enabled,
-            "gpu_node_group_names": gpu_node_group_names,
-        }
+        return input_vars.dict()
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         from kubernetes import client, config
