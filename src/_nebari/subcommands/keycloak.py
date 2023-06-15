@@ -1,5 +1,5 @@
 import json
-from pathlib import Path
+import pathlib
 from typing import Tuple
 
 import typer
@@ -29,7 +29,7 @@ def nebari_subcommand(cli: typer.Typer):
         add_users: Tuple[str, str] = typer.Option(
             ..., "--user", help="Provide both: <username> <password>"
         ),
-        config_filename: str = typer.Option(
+        config_filename: pathlib.Path = typer.Option(
             ...,
             "-c",
             "--config",
@@ -37,16 +37,13 @@ def nebari_subcommand(cli: typer.Typer):
         ),
     ):
         """Add a user to Keycloak. User will be automatically added to the [italic]analyst[/italic] group."""
-        if isinstance(config_filename, str):
-            config_filename = Path(config_filename)
-
         args = ["adduser", add_users[0], add_users[1]]
-
-        do_keycloak(config_filename, *args)
+        config = schema.read_configuration(config_filename)
+        do_keycloak(config, *args)
 
     @app_keycloak.command(name="listusers")
     def list_users(
-        config_filename: str = typer.Option(
+        config_filename: pathlib.Path = typer.Option(
             ...,
             "-c",
             "--config",
@@ -54,16 +51,13 @@ def nebari_subcommand(cli: typer.Typer):
         )
     ):
         """List the users in Keycloak."""
-        if isinstance(config_filename, str):
-            config_filename = Path(config_filename)
-
         args = ["listusers"]
-
-        do_keycloak(config_filename, *args)
+        config = schema.read_configuration(config_filename)
+        do_keycloak(config, *args)
 
     @app_keycloak.command(name="export-users")
     def export_users(
-        config_filename: str = typer.Option(
+        config_filename: pathlib.Path = typer.Option(
             ...,
             "-c",
             "--config",
@@ -76,9 +70,6 @@ def nebari_subcommand(cli: typer.Typer):
         ),
     ):
         """Export the users in Keycloak."""
-        if isinstance(config_filename, str):
-            config_filename = Path(config_filename)
-
-        r = export_keycloak_users(config_filename, realm=realm)
-
+        config = schema.read_configuration(config_filename)
+        r = export_keycloak_users(config, realm=realm)
         print(json.dumps(r, indent=4))
