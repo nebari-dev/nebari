@@ -1,11 +1,7 @@
-import pathlib
 
 import typer
 
 from nebari.hookspecs import hookimpl
-from nebari import schema
-from _nebari.utils import load_yaml
-from _nebari.upgrade import do_upgrade
 
 
 def get_config_namespace(config):

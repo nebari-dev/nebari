@@ -1,10 +1,8 @@
-import pathlib
 import sys
 from typing import Any, Dict, List
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariTerraformState
-from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
 
@@ -100,6 +98,4 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
 
 @hookimpl
 def nebari_stage() -> List[NebariStage]:
-    return [
-        KubernetesKeycloakConfigurationStage
-    ]
+    return [KubernetesKeycloakConfigurationStage]

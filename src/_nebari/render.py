@@ -55,10 +55,13 @@ def render_template(output_directory, config_filename, dry_run=False):
     # corresponding env var.
     set_env_vars_in_config(config)
 
-    stages = [_(
-        output_directory=output_directory,
-        config=config,
-    ) for _ in get_available_stages()]
+    stages = [
+        _(
+            output_directory=output_directory,
+            config=config,
+        )
+        for _ in get_available_stages()
+    ]
 
     contents = render_contents(stages, config)
 

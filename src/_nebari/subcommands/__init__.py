@@ -1,7 +1,6 @@
 from typing import Optional
 
 import typer
-from click import Context
 from typer.core import TyperGroup
 
 from _nebari.version import __version__

@@ -44,7 +44,6 @@ def nebari_subcommand(cli: typer.Typer):
 
         do_keycloak(config_filename, *args)
 
-
     @app_keycloak.command(name="listusers")
     def list_users(
         config_filename: str = typer.Option(
@@ -61,7 +60,6 @@ def nebari_subcommand(cli: typer.Typer):
         args = ["listusers"]
 
         do_keycloak(config_filename, *args)
-
 
     @app_keycloak.command(name="export-users")
     def export_users(
