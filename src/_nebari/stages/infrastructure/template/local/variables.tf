@@ -1,7 +1,6 @@
 variable "kubeconfig_filename" {
   description = "Kubernetes kubeconfig written to filesystem"
   type        = string
-  default     = null
 }
 
 variable "kube_context" {
