@@ -8,6 +8,29 @@ from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
 
+class BaseCloudProviderInputVars(schema.Base):
+    name: str
+    namespace: str
+
+
+class DigitalOceanInputVars(BaseCloudProviderInputVars):
+    region: str
+
+
+class GCPInputVars(BaseCloudProviderInputVars):
+    region: str
+
+
+class AzureInputVars(BaseCloudProviderInputVars):
+    region: str
+    storage_account_postfix: str
+    state_resource_group_name: str
+
+
+class AWSInputVars(BaseCloudProviderInputVars):
+    pass
+
+
 class TerraformStateStage(NebariTerraformStage):
     name = "01-terraform-state"
     priority = 10
@@ -79,32 +102,37 @@ class TerraformStateStage(NebariTerraformStage):
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         if self.config.provider == schema.ProviderEnum.do:
-            return {
-                "name": self.config.project_name,
-                "namespace": self.config.namespace,
-                "region": self.config.digital_ocean.region,
-            }
+            return DigitalOceanInputVars(
+                name=self.config.project_name,
+                namespace=self.config.namespace,
+                region=self.config.digital_ocean.region,
+            ).dict()
         elif self.config.provider == schema.ProviderEnum.gcp:
-            return {
-                "name": self.config.project_name,
-                "namespace": self.config.namespace,
-                "region": self.config.google_cloud_platform.region,
-            }
+            return GCPInputVars(
+                name=self.config.project_name,
+                namespace=self.config.namespace,
+                region=self.config.google_cloud_platform.region,
+            ).dict()
         elif self.config.provider == schema.ProviderEnum.aws:
-            return {
-                "name": self.config.project_name,
-                "namespace": self.config.namespace,
-            }
+            return AWSInputVars(
+                name=self.config.project_name,
+                namespace=self.config.namespace,
+            ).dict()
         elif self.config.provider == schema.ProviderEnum.azure:
-            return {
-                "name": self.config.project_name,
-                "namespace": self.config.namespace,
-                "region": self.config.azure.region,
-                "storage_account_postfix": self.config.azure.storage_account_postfix,
-                "state_resource_group_name": f"{self.config.project_name}-{self.config.namespace}-state",
-            }
-        else:
+            return AzureInputVars(
+                name=self.config.project_name,
+                namespace=self.config.namespace,
+                region=self.config.azure.region,
+                storage_account_postfix=self.config.azure.storage_account_postfix,
+                state_resource_group_name=f"{self.config.project_name}-{self.config.namespace}-state",
+            ).dict()
+        elif (
+            self.config.provider == schema.ProviderEnum.local
+            or self.config.provider == schema.ProviderEnum.existing
+        ):
             return {}
+        else:
+            ValueError(f"Unknown provider: {self.config.provider}")
 
 
 @hookimpl

@@ -13,7 +13,7 @@ resource "helm_release" "autoscaler" {
       }
 
       cloudProvider = "aws"
-      awsRegion     = var.aws-region
+      awsRegion     = var.aws_region
 
       autoDiscovery = {
         clusterName = var.cluster-name

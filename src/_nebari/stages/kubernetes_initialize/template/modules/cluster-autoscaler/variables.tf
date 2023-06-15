@@ -8,7 +8,7 @@ variable "cluster-name" {
   type        = string
 }
 
-variable "aws-region" {
+variable "aws_region" {
   description = "AWS Region that cluster autoscaler is running"
   type        = string
 }
