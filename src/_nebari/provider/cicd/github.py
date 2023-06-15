@@ -297,7 +297,9 @@ def gen_nebari_linter(config):
     else:
         env_vars = None
 
-    pull_request = GHA_on_extras(branches=[config.ci_cd.branch], paths=["nebari-config.yaml"])
+    pull_request = GHA_on_extras(
+        branches=[config.ci_cd.branch], paths=["nebari-config.yaml"]
+    )
     on = GHA_on(__root__={"pull_request": pull_request})
 
     step1 = checkout_image_step()
