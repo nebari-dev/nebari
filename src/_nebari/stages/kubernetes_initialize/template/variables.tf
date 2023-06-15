@@ -8,12 +8,12 @@ variable "environment" {
   type        = string
 }
 
-variable "cloud-provider" {
+variable "cloud_provider" {
   description = "Cloud provider being used in deployment"
   type        = string
 }
 
-variable "aws-region" {
+variable "aws_region" {
   description = "AWS region is cloud provider is AWS"
   type        = string
 }
@@ -25,10 +25,8 @@ variable "external_container_reg" {
 variable "gpu_enabled" {
   description = "Enable GPU support"
   type        = bool
-  default     = false
 }
 
 variable "gpu_node_group_names" {
   description = "Names of node groups with GPU"
-  default     = []
 }

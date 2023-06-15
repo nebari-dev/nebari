@@ -13,7 +13,7 @@ variable "endpoint" {
   type        = string
 }
 
-variable "initial-root-password" {
+variable "initial_root_password" {
   description = "Keycloak root user password"
   type        = string
 }
@@ -22,10 +22,9 @@ variable "overrides" {
   # https://github.com/codecentric/helm-charts/blob/master/charts/keycloak/values.yaml
   description = "Keycloak helm chart overrides"
   type        = list(string)
-  default     = []
 }
 
-variable "node-group" {
+variable "node_group" {
   description = "Node key value pair for bound general resources"
   type = object({
     key   = string

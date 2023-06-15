@@ -8,7 +8,7 @@ variable "gpu_enabled" {
   default     = false
 }
 
-variable "cloud-provider" {
-  description = "Name of cloud-provider"
+variable "cloud_provider" {
+  description = "Name of cloud_provider"
   type        = string
 }

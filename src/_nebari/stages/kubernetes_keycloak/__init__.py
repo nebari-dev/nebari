@@ -1,6 +1,7 @@
 import contextlib
 import json
 import sys
+import time
 from typing import Any, Dict, List
 
 from _nebari.stages.base import NebariTerraformStage
@@ -12,6 +13,18 @@ from _nebari.stages.tf_objects import (
 from _nebari.utils import modified_environ
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
+
+NUM_ATTEMPTS = 10
+TIMEOUT = 10
+
+
+class InputVars(schema.Base):
+    name: str
+    environment: str
+    endpoint: str
+    initial_root_password: str
+    overrides: List[str]
+    node_group: Dict[str, str]
 
 
 @contextlib.contextmanager
@@ -68,14 +81,14 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         ]
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        return {
-            "name": self.config.project_name,
-            "environment": self.config.namespace,
-            "endpoint": self.config.domain,
-            "initial-root-password": self.config.security.keycloak.initial_root_password,
-            "overrides": [json.dumps(self.config.security.keycloak.overrides)],
-            "node-group": _calculate_node_groups(self.config)["general"],
-        }
+        return InputVars(
+            name=self.config.project_name,
+            environment=self.config.namespace,
+            endpoint=self.config.domain,
+            initial_root_password=self.config.security.keycloak.initial_root_password,
+            overrides=[json.dumps(self.config.security.keycloak.overrides)],
+            node_group=_calculate_node_groups(self.config)["general"],
+        ).dict()
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         from keycloak import KeycloakAdmin

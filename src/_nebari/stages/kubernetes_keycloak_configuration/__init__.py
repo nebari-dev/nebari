@@ -1,9 +1,22 @@
 import sys
+import time
 from typing import Any, Dict, List
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariTerraformState
+from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
+
+NUM_ATTEMPTS = 10
+TIMEOUT = 10
+
+
+class InputVars(schema.Base):
+    realm: str = "nebari"
+    realm_display_name: str
+    authentication: Dict[str, Any]
+    keycloak_groups: List[str] = ["superadmin", "admin", "developer", "analyst"]
+    default_groups: List[str] = ["analyst"]
 
 
 class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
@@ -16,18 +29,17 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
         ]
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        realm_id = "nebari"
+        input_vars = InputVars(
+            realm_display_name=self.config.security.keycloak.realm_display_name,
+            authentication=self.config.security.authentication,
+        )
 
         users_group = ["users"] if self.config.security.shared_users_group else []
 
-        return {
-            "realm": realm_id,
-            "realm_display_name": self.config.security.keycloak.realm_display_name,
-            "authentication": self.config.security.authentication,
-            "keycloak_groups": ["superadmin", "admin", "developer", "analyst"]
-            + users_group,
-            "default_groups": ["analyst"] + users_group,
-        }
+        input_vars.keycloak_groups += users_group
+        input_vars.default_groups += users_group
+
+        return input_vars.dict()
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         directory = "stages/05-kubernetes-keycloak"
