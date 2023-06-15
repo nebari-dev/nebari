@@ -4,7 +4,6 @@ import typer
 
 from _nebari.deploy import deploy_configuration
 from _nebari.render import render_template
-from _nebari.utils import load_yaml
 from nebari import schema
 from nebari.hookspecs import hookimpl
 
@@ -13,13 +12,13 @@ from nebari.hookspecs import hookimpl
 def nebari_subcommand(cli: typer.Typer):
     @cli.command()
     def deploy(
-        config: str = typer.Option(
+        config_filename: pathlib.Path = typer.Option(
             ...,
             "--config",
             "-c",
             help="nebari configuration yaml file path",
         ),
-        output: str = typer.Option(
+        output_directory: pathlib.Path = typer.Option(
             "./",
             "-o",
             "--output",
@@ -59,22 +58,13 @@ def nebari_subcommand(cli: typer.Typer):
         """
         Deploy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
         """
-        config_filename = pathlib.Path(config)
-
-        if not config_filename.is_file():
-            raise ValueError(
-                f"passed in configuration filename={config_filename} must exist"
-            )
-
-        config_yaml = load_yaml(config_filename)
-
-        schema.verify(config_yaml)
+        config = schema.read_configuration(config_filename)
 
         if not disable_render:
-            render_template(output, config)
+            render_template(output_directory, config)
 
         deploy_configuration(
-            config_yaml,
+            config,
             dns_provider=dns_provider,
             dns_auto_provision=dns_auto_provision,
             disable_prompt=disable_prompt,

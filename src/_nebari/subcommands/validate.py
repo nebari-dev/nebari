@@ -3,7 +3,6 @@ import pathlib
 import typer
 from rich import print
 
-from _nebari.utils import load_yaml
 from nebari import schema
 from nebari.hookspecs import hookimpl
 
@@ -12,7 +11,7 @@ from nebari.hookspecs import hookimpl
 def nebari_subcommand(cli: typer.Typer):
     @cli.command(rich_help_panel="Additional Commands")
     def validate(
-        config: str = typer.Option(
+        config_filename: pathlib.Path = typer.Option(
             ...,
             "--config",
             "-c",
@@ -25,18 +24,10 @@ def nebari_subcommand(cli: typer.Typer):
         """
         Validate the values in the [purple]nebari-config.yaml[/purple] file are acceptable.
         """
-        config_filename = pathlib.Path(config)
-        if not config_filename.is_file():
-            raise ValueError(
-                f"Passed in configuration filename={config_filename} must exist."
-            )
-
-        config = load_yaml(config_filename)
-
         if enable_commenting:
             # for PR's only
             # comment_on_pr(config)
             pass
         else:
-            schema.verify(config)
+            schema.read_configuration(config_filename)
             print("[bold purple]Successfully validated configuration.[/bold purple]")

@@ -3,7 +3,7 @@ import inspect
 import pathlib
 import sys
 import tempfile
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -17,7 +17,7 @@ from nebari.hookspecs import NebariStage, hookimpl
 
 
 def get_kubeconfig_filename():
-    return pathlib.Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG"
+    return str(pathlib.Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG")
 
 
 # TODO:
@@ -25,8 +25,8 @@ def get_kubeconfig_filename():
 
 
 class LocalInputVars(schema.Base):
-    kubeconfig_filename: Union[str, pathlib.Path] = get_kubeconfig_filename()
-    kube_context: str
+    kubeconfig_filename: str = get_kubeconfig_filename()
+    kube_context: Optional[str]
 
 
 class ExistingInputVars(schema.Base):
@@ -207,20 +207,18 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             api_instance = client.CoreV1Api()
             result = api_instance.list_namespace()
         except ApiException:
-            self.log.error(
+            print(
                 f"ERROR: After stage={self.name} unable to connect to kubernetes cluster"
             )
             sys.exit(1)
 
         if len(result.items) < 1:
-            self.log.error(
+            print(
                 f"ERROR: After stage={self.name} no nodes provisioned within kubernetes cluster"
             )
             sys.exit(1)
 
-        self.log.info(
-            f"After stage={self.name} kubernetes cluster successfully provisioned"
-        )
+        print(f"After stage={self.name} kubernetes cluster successfully provisioned")
 
     @contextlib.contextmanager
     def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):

@@ -1,3 +1,4 @@
+import json
 import sys
 from typing import Any, Dict, List
 from urllib.parse import urlencode
@@ -45,7 +46,7 @@ def _calculate_node_groups(config: schema.Main):
     elif config.provider == schema.ProviderEnum.existing:
         return config.existing.node_selectors
     else:
-        return config.local.node_selectors
+        return config.local.dict()["node_selectors"]
 
 
 class KubernetesServicesStage(NebariTerraformStage):
@@ -60,7 +61,7 @@ class KubernetesServicesStage(NebariTerraformStage):
         ]
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        final_logout_uri = f"https://{config['domain']}/hub/login"
+        final_logout_uri = f"https://{self.config.domain}/hub/login"
 
         # Compound any logout URLs from extensions so they are are logged out in succession
         # when Keycloak and JupyterHub are logged out
@@ -86,7 +87,9 @@ class KubernetesServicesStage(NebariTerraformStage):
             ]["value"],
             "node_groups": _calculate_node_groups(self.config),
             # conda-store
-            "conda-store-environments": self.config.environments,
+            "conda-store-environments": {
+                k: v.dict() for k, v in self.config.environments.items()
+            },
             "conda-store-filesystem-storage": self.config.storage.conda_store,
             "conda-store-service-token-scopes": {
                 "cdsdashboards": {
@@ -107,8 +110,8 @@ class KubernetesServicesStage(NebariTerraformStage):
             "conda-store-extra-config": self.config.conda_store.extra_config,
             "conda-store-image-tag": self.config.conda_store.image_tag,
             # jupyterhub
-            "cdsdashboards": self.config.cdsdashboards,
-            "jupyterhub-theme": jupyterhub_theme,
+            "cdsdashboards": self.config.cdsdashboards.dict(),
+            "jupyterhub-theme": self.config.theme.jupyterhub.dict(),
             "jupyterhub-image": _split_docker_image_name(
                 self.config.default_images.jupyterhub
             ),
@@ -116,21 +119,21 @@ class KubernetesServicesStage(NebariTerraformStage):
             "jupyterhub-shared-endpoint": stage_outputs["stages/02-infrastructure"]
             .get("nfs_endpoint", {})
             .get("value"),
-            "jupyterlab-profiles": self.config.profiles.jupyterlab,
+            "jupyterlab-profiles": self.config.profiles.dict()["jupyterlab"],
             "jupyterlab-image": _split_docker_image_name(
                 self.config.default_images.jupyterlab
             ),
             "jupyterhub-overrides": [json.dumps(self.config.jupyterhub.overrides)],
             "jupyterhub-hub-extraEnv": json.dumps(
-                self.config.jupyterhub.overrides.hub.extraEnv
+                self.config.jupyterhub.overrides.get("hub", {}).get("extraEnv", [])
             ),
             # jupyterlab
-            "idle-culler-settings": self.config.jupyterlab.idle_culler,
+            "idle-culler-settings": self.config.jupyterlab.idle_culler.dict(),
             # dask-gateway
             "dask-worker-image": _split_docker_image_name(
                 self.config.default_images.dask_worker
             ),
-            "dask-gateway-profiles": self.config.profiles.dask_worker,
+            "dask-gateway-profiles": self.config.profiles.dict()["dask_worker"],
             # monitoring
             "monitoring-enabled": self.config.monitoring.enabled,
             # argo-worfklows
@@ -172,10 +175,10 @@ class KubernetesServicesStage(NebariTerraformStage):
             for i in range(num_attempts):
                 response = requests.get(url, verify=verify, timeout=timeout)
                 if response.status_code < 400:
-                    self.log.info(f"Attempt {i+1} health check succeeded for url={url}")
+                    print(f"Attempt {i+1} health check succeeded for url={url}")
                     return True
                 else:
-                    self.log.info(f"Attempt {i+1} health check failed for url={url}")
+                    print(f"Attempt {i+1} health check failed for url={url}")
                 time.sleep(timeout)
             return False
 
@@ -183,7 +186,7 @@ class KubernetesServicesStage(NebariTerraformStage):
         for service_name, service in services.items():
             service_url = service["health_url"]
             if service_url and not _attempt_connect_url(service_url):
-                self.log.error(
+                print(
                     f"ERROR: Service {service_name} DOWN when checking url={service_url}"
                 )
                 sys.exit(1)

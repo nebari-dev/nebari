@@ -5,29 +5,28 @@ import subprocess
 import textwrap
 
 from _nebari.stages.base import get_available_stages
-from _nebari.utils import check_cloud_credentials, timer
+from _nebari.utils import timer
 from nebari import schema
 
 logger = logging.getLogger(__name__)
 
 
 def guided_install(
-    config,
+    config: schema.Main,
     dns_provider,
     dns_auto_provision,
     disable_prompt=False,
     disable_checks=False,
     skip_remote_state_provision=False,
 ):
-    # 01 Check Environment Variables
-    check_cloud_credentials(config)
-
     stage_outputs = {}
-    config = schema.Main(**config)
     with contextlib.ExitStack() as stack:
         for stage in get_available_stages():
             s = stage(output_directory=pathlib.Path("."), config=config)
             stack.enter_context(s.deploy(stage_outputs))
+
+            if not disable_checks:
+                s.check(stage_outputs)
     print("Nebari deployed successfully")
 
     print("Services:")
@@ -50,15 +49,14 @@ def guided_install(
 
 
 def deploy_configuration(
-    config,
+    config: schema.Main,
     dns_provider,
     dns_auto_provision,
     disable_prompt,
     disable_checks,
     skip_remote_state_provision,
 ):
-    if config.get("prevent_deploy", False):
-        # Note if we used the Pydantic model properly, we might get that nebari_config.prevent_deploy always exists but defaults to False
+    if config.prevent_deploy:
         raise ValueError(
             textwrap.dedent(
                 """
@@ -75,7 +73,7 @@ def deploy_configuration(
             )
         )
 
-    logger.info(f'All nebari endpoints will be under https://{config["domain"]}')
+    logger.info(f"All nebari endpoints will be under https://{config.domain}")
 
     if disable_checks:
         logger.warning(

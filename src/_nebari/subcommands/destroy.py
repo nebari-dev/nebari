@@ -4,19 +4,18 @@ import typer
 
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
-from _nebari.utils import load_yaml
 from nebari import schema
 from nebari.hookspecs import hookimpl
 
 
 @hookimpl
 def nebari_subcommand(cli: typer.Typer):
-    @app.command()
+    @cli.command()
     def destroy(
-        config: str = typer.Option(
+        config_filename: pathlib.Path = typer.Option(
             ..., "-c", "--config", help="nebari configuration file path"
         ),
-        output: str = typer.Option(
+        output_directory: pathlib.Path = typer.Option(
             "./",
             "-o",
             "--output",
@@ -37,21 +36,15 @@ def nebari_subcommand(cli: typer.Typer):
         Destroy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
         """
 
-        def _run_destroy(config=config, disable_render=disable_render):
-            config_filename = pathlib.Path(config)
-            if not config_filename.is_file():
-                raise ValueError(
-                    f"passed in configuration filename={config_filename} must exist"
-                )
-
-            config_yaml = load_yaml(config_filename)
-
-            schema.verify(config_yaml)
+        def _run_destroy(
+            config_filename=config_filename, disable_render=disable_render
+        ):
+            config = schema.read_configuration(config_filename)
 
             if not disable_render:
-                render_template(output, config)
+                render_template(output_directory, config)
 
-            destroy_configuration(config_yaml)
+            destroy_configuration(config)
 
         if disable_prompt:
             _run_destroy()

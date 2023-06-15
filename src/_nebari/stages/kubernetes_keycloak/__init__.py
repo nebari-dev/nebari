@@ -66,7 +66,7 @@ def _calculate_node_groups(config: schema.Main):
     elif config.provider == schema.ProviderEnum.existing:
         return config.existing.node_selectors
     else:
-        return config.local.node_selectors
+        return config.local.dict()["node_selectors"]
 
 
 class KubernetesKeycloakStage(NebariTerraformStage):
@@ -116,14 +116,12 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                         client_id=client_id,
                         verify=verify,
                     )
-                    self.log.info(
+                    print(
                         f"Attempt {i+1} succeeded connecting to keycloak master realm"
                     )
                     return True
                 except KeycloakError:
-                    self.log.info(
-                        f"Attempt {i+1} failed connecting to keycloak master realm"
-                    )
+                    print(f"Attempt {i+1} failed connecting to keycloak master realm")
                 time.sleep(timeout)
             return False
 
@@ -143,12 +141,12 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             ],
             verify=False,
         ):
-            self.log.error(
+            print(
                 f"ERROR: unable to connect to keycloak master realm at url={keycloak_url} with root credentials"
             )
             sys.exit(1)
 
-        self.log.info("Keycloak service successfully started")
+        print("Keycloak service successfully started")
 
     @contextlib.contextmanager
     def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):

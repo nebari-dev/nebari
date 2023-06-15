@@ -68,7 +68,10 @@ class NebariTerraformStage(NebariStage):
 
     @contextlib.contextmanager
     def destroy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        status: Dict[str, bool],
+        ignore_errors: bool = True,
     ):
         stage_outputs["stages/" + self.name] = terraform.deploy(
             directory=str(self.output_directory / self.stage_prefix),
@@ -79,11 +82,20 @@ class NebariTerraformStage(NebariStage):
             terraform_destroy=False,
         )
         yield
-        status["stages/" + self.name] = _terraform_destroy(
-            directory=str(output_directory / self.stage_prefix),
-            input_vars=self.input_vars(stage_outputs),
-            ignore_errors=True,
-        )
+        try:
+            terraform.deploy(
+                directory=str(self.output_directory / self.stage_prefix),
+                input_vars=self.input_vars(stage_outputs),
+                terraform_init=True,
+                terraform_import=True,
+                terraform_apply=False,
+                terraform_destroy=True,
+            )
+            status["stages/" + self.name] = True
+        except terraform.TerraformException as e:
+            if not ignore_errors:
+                raise e
+            status["stages/" + self.name] = False
 
 
 def get_available_stages():
