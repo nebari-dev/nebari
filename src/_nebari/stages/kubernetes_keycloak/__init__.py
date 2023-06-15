@@ -14,6 +14,11 @@ from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
 
+# check and retry settings
+NUM_ATTEMPTS = 10
+TIMEOUT = 10  # seconds
+
+
 @contextlib.contextmanager
 def keycloak_provider_context(keycloak_credentials: Dict[str, str]):
     credential_mapping = {
@@ -103,12 +108,12 @@ class KubernetesKeycloakStage(NebariTerraformStage):
                         client_id=client_id,
                         verify=verify,
                     )
-                    self.log.info(
+                    print(
                         f"Attempt {i+1} succeeded connecting to keycloak master realm"
                     )
                     return True
                 except KeycloakError:
-                    self.log.info(
+                    print(
                         f"Attempt {i+1} failed connecting to keycloak master realm"
                     )
                 time.sleep(timeout)
@@ -130,12 +135,12 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             ],
             verify=False,
         ):
-            self.log.error(
+            print(
                 f"ERROR: unable to connect to keycloak master realm at url={keycloak_url} with root credentials"
             )
             sys.exit(1)
 
-        self.log.info("Keycloak service successfully started")
+        print("Keycloak service successfully started")
 
     @contextlib.contextmanager
     def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):

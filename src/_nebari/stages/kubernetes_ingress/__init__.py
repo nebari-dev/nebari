@@ -43,28 +43,28 @@ def provision_ingress_dns(
 
     if dns_auto_provision and dns_provider == "cloudflare":
         record_name, zone_name = (
-            config["domain"].split(".")[:-2],
-            config["domain"].split(".")[-2:],
+            config.domain.split(".")[:-2],
+            config.domain.split(".")[-2:],
         )
         record_name = ".".join(record_name)
         zone_name = ".".join(zone_name)
-        if config["provider"] in {"do", "gcp", "azure"}:
+        if config.provider in {schema.ProviderEnum.do, schema.ProviderEnum.gcp, schema.ProviderEnum.azure}:
             update_record(zone_name, record_name, "A", ip_or_hostname)
-            if config.get("clearml", {}).get("enabled"):
+            if config.clearml.enabled:
                 add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
 
-        elif config["provider"] == "aws":
+        elif config.provider == schema.ProviderEnum.aws:
             update_record(zone_name, record_name, "CNAME", ip_or_hostname)
-            if config.get("clearml", {}).get("enabled"):
+            if config.clearml.enabled:
                 add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
         else:
             logger.info(
-                f"Couldn't update the DNS record for cloud provider: {config['provider']}"
+                f"Couldn't update the DNS record for cloud provider: {config.provider}"
             )
     elif not disable_prompt:
         input(
             f"Take IP Address {ip_or_hostname} and update DNS to point to "
-            f'"{config["domain"]}" [Press Enter when Complete]'
+            f'"{config.domain}" [Press Enter when Complete]'
         )
 
     if not disable_checks:
@@ -103,7 +103,7 @@ def check_ingress_dns(stage_outputs, config, disable_prompt):
 
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
     ip = socket.gethostbyname(ip_or_name["hostname"] or ip_or_name["ip"])
-    domain_name = config["domain"]
+    domain_name = config.domain
 
     def _attempt_dns_lookup(
         domain_name, ip, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
@@ -231,7 +231,7 @@ class KubernetesIngressStage(NebariTerraformStage):
                 )
                 sys.exit(1)
 
-        self.log.info(
+        print(
             f"After stage={self.name} kubernetes ingress available on tcp ports={tcp_ports}"
         )
 
