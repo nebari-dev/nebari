@@ -83,14 +83,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage(
-    install_directory: pathlib.Path, config: schema.Main
-) -> List[NebariStage]:
+def nebari_stage() -> List[NebariStage]:
     return [
-        KubernetesInitializeStage(
-            install_directory,
-            config,
-            template_directory=(pathlib.Path(__file__).parent / "template"),
-            stage_prefix=pathlib.Path("stages/03-kubernetes-initialize"),
-        )
+        KubernetesInitializeStage
     ]

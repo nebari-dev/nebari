@@ -1,5 +1,6 @@
 import os
 import pathlib
+import inspect
 from typing import Any, Dict, List, Tuple
 
 from _nebari.stages.base import NebariTerraformStage
@@ -12,9 +13,17 @@ from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
 
-class KubernetesInitializeStage(NebariTerraformStage):
+class TerraformStateStage(NebariTerraformStage):
     name = "01-terraform-state"
     priority = 10
+
+    @property
+    def template_directory(self):
+        return pathlib.Path(inspect.getfile(self.__class__).parent) / "template" / self.config.provider.value
+
+    @property
+    def stage_prefix(self):
+        return pathlib.Path('stages') / self.name / self.config.provider.value
 
     def state_imports(self) -> List[Tuple[str, str]]:
         if self.config.provider == schema.ProviderEnum.do:
@@ -63,13 +72,11 @@ class KubernetesInitializeStage(NebariTerraformStage):
                     f"{self.config.project_name}-{self.config.namespace}-terraform-state-lock",
                 ),
             ]
+        else:
+            return []
 
     def tf_objects(self) -> List[Dict]:
-        return [
-            NebariTerraformState(self.name, self.config),
-            NebariKubernetesProvider(self.config),
-            NebariHelmProvider(self.config),
-        ]
+        return []
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         if self.config.provider == schema.ProviderEnum.do:
@@ -102,22 +109,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage(
-    install_directory: pathlib.Path, config: schema.Main
-) -> List[NebariStage]:
-    if config.provider in [schema.ProviderEnum.local, schema.ProviderEnum.existing]:
-        return []
-
-    template_directory = (
-        pathlib.Path(__file__).parent / "template" / config.provider.value
-    )
-    stage_prefix = pathlib.Path("stages/01-terraform-state") / config.provider.value
-
+def nebari_stage() -> List[NebariStage]:
     return [
-        TerraformStateStage(
-            install_directory,
-            config,
-            template_directory=template_directory,
-            stage_prefix=stage_prefix,
-        )
+        TerraformStateStage
     ]

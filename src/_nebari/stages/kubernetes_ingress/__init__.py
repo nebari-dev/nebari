@@ -186,12 +186,7 @@ class KubernetesIngressStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage(install_directory: pathlib.Path, config: schema.Main) -> [NebariStage]:
+def nebari_stage() -> List[NebariStage]:
     return [
-        KubernetesIngressStage(
-            install_directory,
-            config,
-            template_directory=(pathlib.Path(__file__).parent / "template"),
-            stage_prefix=pathlib.Path("stages/04-kubernetes-ingress"),
-        )
+        KubernetesIngressStage
     ]
