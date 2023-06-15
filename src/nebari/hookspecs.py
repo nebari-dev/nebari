@@ -23,12 +23,12 @@ class NebariStage:
     def validate(self):
         pass
 
-    def render(self, output_directory: pathlib.Path):
-        raise NotImplementedError()
+    def render(self) -> Dict[str, str]:
+        return {}
 
     @contextlib.contextmanager
     def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        raise NotImplementedError()
+        return {}
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]) -> bool:
         pass
@@ -37,7 +37,7 @@ class NebariStage:
     def destroy(
         self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
     ):
-        raise NotImplementedError()
+        pass
 
 
 @hookspec

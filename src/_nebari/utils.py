@@ -316,7 +316,9 @@ def deep_merge(*args):
     >>> print(deep_merge(value_1, value_2))
     {'m': 1, 'e': {'f': {'g': {}, 'h': 1}}, 'b': {'d': 2, 'c': 1, 'z': [5, 6, 7]}, 'a': [1, 2, 3,  4]}
     """
-    if len(args) == 1:
+    if len(args) == 0:
+        return {}
+    elif len(args) == 1:
         return args[0]
     elif len(args) > 2:
         return functools.reduce(deep_merge, args, {})
