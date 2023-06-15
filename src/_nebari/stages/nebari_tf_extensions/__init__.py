@@ -27,12 +27,12 @@ class NebariTFExtensionsStage(NebariTerraformStage):
             "realm_id": stage_outputs["stages/06-kubernetes-keycloak-configuration"][
                 "realm_id"
             ]["value"],
-            "tf_extensions": self.config.tf_extensions,
-            "nebari_config_yaml": self.config,
+            "tf_extensions": [_.dict() for _ in self.config.tf_extensions],
+            "nebari_config_yaml": self.config.dict(),
             "keycloak_nebari_bot_password": stage_outputs[
                 "stages/05-kubernetes-keycloak"
             ]["keycloak_nebari_bot_password"]["value"],
-            "helm_extensions": self.config.helm_extensions,
+            "helm_extensions": [_.dict() for _ in self.config.helm_extensions],
         }
 
 
