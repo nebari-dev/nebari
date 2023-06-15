@@ -11,12 +11,12 @@ resource "helm_release" "keycloak" {
     file("${path.module}/values.yaml"),
     jsonencode({
       nodeSelector = {
-        "${var.node-group.key}" = var.node-group.value
+        "${var.node_group.key}" = var.node_group.value
       }
       postgresql = {
         primary = {
           nodeSelector = {
-            "${var.node-group.key}" = var.node-group.value
+            "${var.node_group.key}" = var.node_group.value
           }
         }
       }
@@ -30,7 +30,7 @@ resource "helm_release" "keycloak" {
 
   set {
     name  = "initial_root_password"
-    value = var.initial-root-password
+    value = var.initial_root_password
   }
 }
 
