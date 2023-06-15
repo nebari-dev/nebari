@@ -207,18 +207,18 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             api_instance = client.CoreV1Api()
             result = api_instance.list_namespace()
         except ApiException:
-            self.log.error(
+            print(
                 f"ERROR: After stage={self.name} unable to connect to kubernetes cluster"
             )
             sys.exit(1)
 
         if len(result.items) < 1:
-            self.log.error(
+            print(
                 f"ERROR: After stage={self.name} no nodes provisioned within kubernetes cluster"
             )
             sys.exit(1)
 
-        self.log.info(
+        print(
             f"After stage={self.name} kubernetes cluster successfully provisioned"
         )
 
