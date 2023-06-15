@@ -17,6 +17,60 @@ NUM_ATTEMPTS = 10
 TIMEOUT = 10  # seconds
 
 
+def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
+    dns_records = [
+        f"app.clearml.{record_name}",
+        f"api.clearml.{record_name}",
+        f"files.clearml.{record_name}",
+    ]
+
+    for dns_record in dns_records:
+        update_record(zone_name, dns_record, record_type, ip_or_hostname)
+
+
+def provision_ingress_dns(
+    stage_outputs,
+    config,
+    dns_provider: str,
+    dns_auto_provision: bool,
+    disable_prompt: bool = True,
+    disable_checks: bool = False,
+):
+    directory = "stages/04-kubernetes-ingress"
+
+    ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
+    ip_or_hostname = ip_or_name["hostname"] or ip_or_name["ip"]
+
+    if dns_auto_provision and dns_provider == "cloudflare":
+        record_name, zone_name = (
+            config["domain"].split(".")[:-2],
+            config["domain"].split(".")[-2:],
+        )
+        record_name = ".".join(record_name)
+        zone_name = ".".join(zone_name)
+        if config["provider"] in {"do", "gcp", "azure"}:
+            update_record(zone_name, record_name, "A", ip_or_hostname)
+            if config.get("clearml", {}).get("enabled"):
+                add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
+
+        elif config["provider"] == "aws":
+            update_record(zone_name, record_name, "CNAME", ip_or_hostname)
+            if config.get("clearml", {}).get("enabled"):
+                add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
+        else:
+            logger.info(
+                f"Couldn't update the DNS record for cloud provider: {config['provider']}"
+            )
+    elif not disable_prompt:
+        input(
+            f"Take IP Address {ip_or_hostname} and update DNS to point to "
+            f'"{config["domain"]}" [Press Enter when Complete]'
+        )
+
+    if not disable_checks:
+        checks.check_ingress_dns(stage_outputs, config, disable_prompt)
+
+
 def _calculate_node_groups(config: schema.Main):
     if config.provider == schema.ProviderEnum.aws:
         return {
@@ -41,7 +95,7 @@ def _calculate_node_groups(config: schema.Main):
     elif config.provider == schema.ProviderEnum.existing:
         return config.existing.node_selectors
     else:
-        return config.local.node_selectors
+        return config.local.dict()['node_selectors']
 
 
 def check_ingress_dns(stage_outputs, config, disable_prompt):
@@ -125,7 +179,7 @@ class KubernetesIngressStage(NebariTerraformStage):
                 "name": self.config.project_name,
                 "environment": self.config.namespace,
                 "node_groups": _calculate_node_groups(self.config),
-                **config.ingress.terraform_overrides,
+                **self.config.ingress.terraform_overrides,
             },
             **cert_details,
         }
