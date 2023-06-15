@@ -70,7 +70,7 @@ def deploy_configuration(
             )
         )
 
-    logger.info(f'All nebari endpoints will be under https://{config.domain}')
+    logger.info(f"All nebari endpoints will be under https://{config.domain}")
 
     if disable_checks:
         logger.warning(

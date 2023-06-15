@@ -1,4 +1,3 @@
-import functools
 import hashlib
 import os
 import pathlib
@@ -8,7 +7,6 @@ from typing import Dict, List
 
 from rich import print
 from rich.table import Table
-from ruamel.yaml import YAML
 
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
 from _nebari.stages.base import get_available_stages

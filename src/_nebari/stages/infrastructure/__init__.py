@@ -3,7 +3,7 @@ import inspect
 import pathlib
 import sys
 import tempfile
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Optional
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
