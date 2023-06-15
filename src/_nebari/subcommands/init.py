@@ -8,6 +8,7 @@ from _nebari.cli.init import (
     handle_init,
 )
 
+
 @app.command()
 def init(
     cloud_provider: str = typer.Argument(
