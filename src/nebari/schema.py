@@ -402,8 +402,12 @@ class AmazonWebServicesProvider(Base):
     kubernetes_version: str
     node_groups: typing.Dict[str, AWSNodeGroup] = {
         "general": NodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
-        "user": NodeGroup(instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False),
-        "worker": NodeGroup(instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False),
+        "user": NodeGroup(
+            instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
+        ),
+        "worker": NodeGroup(
+            instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
+        ),
     }
     existing_subnet_ids: typing.Optional[typing.List[str]]
     existing_security_group_ids: typing.Optional[str]
@@ -838,21 +842,46 @@ class Main(Base):
 
     @root_validator(pre=True)
     def check_provider(cls, values):
-        if values['provider'] == ProviderEnum.local and values.get('local') is None:
-            values['local'] = LocalProvider()
-        elif values['provider'] == ProviderEnum.existing and values.get('existing') is None:
-            values['existing'] = ExistingProvider()
-        elif values['provider'] == ProviderEnum.gcp and values.get('google_cloud_platform') is None:
-            values['google_cloud_platform'] = GoogleCloudPlatformProvider()
-        elif values['provider'] == ProviderEnum.aws and values.get('amazon_web_services') is None:
-            values['amazon_web_services'] = AmazonWebServicesProvider()
-        elif values['provider'] == ProviderEnum.azure and values.get('azure') is None:
-            values['azure'] = AzureProvider()
-        elif values['provider'] == ProviderEnum.do and values.get('digital_ocean') is None:
-            values['digital_ocean'] = DigitalOceanProvider()
+        if values["provider"] == ProviderEnum.local and values.get("local") is None:
+            values["local"] = LocalProvider()
+        elif (
+            values["provider"] == ProviderEnum.existing
+            and values.get("existing") is None
+        ):
+            values["existing"] = ExistingProvider()
+        elif (
+            values["provider"] == ProviderEnum.gcp
+            and values.get("google_cloud_platform") is None
+        ):
+            values["google_cloud_platform"] = GoogleCloudPlatformProvider()
+        elif (
+            values["provider"] == ProviderEnum.aws
+            and values.get("amazon_web_services") is None
+        ):
+            values["amazon_web_services"] = AmazonWebServicesProvider()
+        elif values["provider"] == ProviderEnum.azure and values.get("azure") is None:
+            values["azure"] = AzureProvider()
+        elif (
+            values["provider"] == ProviderEnum.do
+            and values.get("digital_ocean") is None
+        ):
+            values["digital_ocean"] = DigitalOceanProvider()
 
-        if sum((_ in values and values[_] is not None) for _ in {'local', 'existing', 'google_cloud_platform', 'amazon_web_services', 'azure', 'digital_ocean'}) != 1:
-            raise ValueError('multiple providers set or wrong provider fields set')
+        if (
+            sum(
+                (_ in values and values[_] is not None)
+                for _ in {
+                    "local",
+                    "existing",
+                    "google_cloud_platform",
+                    "amazon_web_services",
+                    "azure",
+                    "digital_ocean",
+                }
+            )
+            != 1
+        ):
+            raise ValueError("multiple providers set or wrong provider fields set")
         return values
 
     @classmethod
