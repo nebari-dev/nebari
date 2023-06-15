@@ -2,11 +2,11 @@ import pathlib
 
 import typer
 
-from nebari.hookspecs import hookimpl
-from nebari import schema
-from _nebari.utils import load_yaml
-from _nebari.render import render_template
 from _nebari.destroy import destroy_configuration
+from _nebari.render import render_template
+from _nebari.utils import load_yaml
+from nebari import schema
+from nebari.hookspecs import hookimpl
 
 
 @hookimpl

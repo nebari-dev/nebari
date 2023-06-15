@@ -1,14 +1,9 @@
+import inspect
 import os
 import pathlib
-import inspect
 from typing import Any, Dict, List, Tuple
 
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import (
-    NebariHelmProvider,
-    NebariKubernetesProvider,
-    NebariTerraformState,
-)
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -19,11 +14,15 @@ class TerraformStateStage(NebariTerraformStage):
 
     @property
     def template_directory(self):
-        return pathlib.Path(inspect.getfile(self.__class__).parent) / "template" / self.config.provider.value
+        return (
+            pathlib.Path(inspect.getfile(self.__class__).parent)
+            / "template"
+            / self.config.provider.value
+        )
 
     @property
     def stage_prefix(self):
-        return pathlib.Path('stages') / self.name / self.config.provider.value
+        return pathlib.Path("stages") / self.name / self.config.provider.value
 
     def state_imports(self) -> List[Tuple[str, str]]:
         if self.config.provider == schema.ProviderEnum.do:
@@ -110,6 +109,4 @@ class TerraformStateStage(NebariTerraformStage):
 
 @hookimpl
 def nebari_stage() -> List[NebariStage]:
-    return [
-        TerraformStateStage
-    ]
+    return [TerraformStateStage]

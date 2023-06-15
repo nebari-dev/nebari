@@ -15,7 +15,6 @@ DEFAULT_PLUGINS = [
     "_nebari.stages.kubernetes_keycloak_configuration",
     "_nebari.stages.kubernetes_services",
     "_nebari.stages.nebari_tf_extensions",
-
     # subcommands
     "_nebari.subcommands.dev",
     # "_nebari.subcommands.deploy",
