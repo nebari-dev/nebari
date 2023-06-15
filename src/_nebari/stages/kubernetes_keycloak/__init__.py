@@ -158,12 +158,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage(install_directory: pathlib.Path, config: schema.Main) -> [NebariStage]:
+def nebari_stage() -> List[NebariStage]:
     return [
-        KubernetesKeycloakStage(
-            install_directory,
-            config,
-            template_directory=(pathlib.Path(__file__).parent / "template"),
-            stage_prefix=pathlib.Path("stages/05-kubernetes-keycloak"),
-        )
+        KubernetesKeycloakStage
     ]
