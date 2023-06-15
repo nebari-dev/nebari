@@ -1,12 +1,11 @@
 import contextlib
-import pathlib
 import inspect
 import itertools
+import pathlib
 from typing import Any, Dict, List, Tuple
 
 from _nebari.provider import terraform
 from _nebari.stages.tf_objects import NebariTerraformState
-from nebari import schema
 from nebari.hookspecs import NebariStage
 
 
@@ -17,7 +16,7 @@ class NebariTerraformStage(NebariStage):
 
     @property
     def stage_prefix(self):
-        return pathlib.Path('stages') / self.name
+        return pathlib.Path("stages") / self.name
 
     def state_imports(self) -> List[Tuple[str, str]]:
         return []
@@ -80,6 +79,7 @@ class NebariTerraformStage(NebariStage):
 
 def get_available_stages():
     from nebari.plugins import pm
+
     stages = itertools.chain.from_iterable(pm.hook.nebari_stage())
 
     # order stages by priority
