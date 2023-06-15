@@ -7,7 +7,6 @@ import keycloak
 import requests
 import rich
 
-from _nebari.utils import load_yaml
 from nebari import schema
 
 logger = logging.getLogger(__name__)
@@ -87,8 +86,7 @@ def get_keycloak_admin_from_config(config: schema.Main):
 
     keycloak_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
     keycloak_password = os.environ.get(
-        "KEYCLOAK_ADMIN_PASSWORD",
-        config.security.keycloak.initial_root_password
+        "KEYCLOAK_ADMIN_PASSWORD", config.security.keycloak.initial_root_password
     )
 
     should_verify_tls = config.certificate.type != schema.CertificateEnum.selfsigned
