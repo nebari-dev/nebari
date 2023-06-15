@@ -28,7 +28,7 @@ class NebariStage:
 
     @contextlib.contextmanager
     def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        return {}
+        yield
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]) -> bool:
         pass
@@ -37,7 +37,7 @@ class NebariStage:
     def destroy(
         self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
     ):
-        pass
+        yield
 
 
 @hookspec

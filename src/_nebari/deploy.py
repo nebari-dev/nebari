@@ -1,189 +1,21 @@
 import logging
 import os
+import pathlib
 import subprocess
 import textwrap
+import contextlib
 
 from _nebari.provider import terraform
 from _nebari.provider.dns.cloudflare import update_record
-from _nebari.stages import checks, input_vars, state_imports
 from _nebari.utils import (
     check_cloud_credentials,
-    keycloak_provider_context,
-    kubernetes_provider_context,
     timer,
 )
+from _nebari.stages.base import get_available_stages
+from nebari import schema
+
 
 logger = logging.getLogger(__name__)
-
-
-def provision_01_terraform_state(stage_outputs, config):
-    directory = "stages/01-terraform-state"
-
-    if config["provider"] in {"existing", "local"}:
-        stage_outputs[directory] = {}
-    else:
-        stage_outputs[directory] = terraform.deploy(
-            terraform_import=True,
-            directory=os.path.join(directory, config["provider"]),
-            input_vars=input_vars.stage_01_terraform_state(stage_outputs, config),
-            state_imports=state_imports.stage_01_terraform_state(stage_outputs, config),
-        )
-
-
-def provision_02_infrastructure(stage_outputs, config, disable_checks=False):
-    """Generalized method to provision infrastructure.
-
-    After successful deployment the following properties are set on
-    `stage_outputs[directory]`.
-      - `kubernetes_credentials` which are sufficient credentials to
-        connect with the kubernetes provider
-      - `kubeconfig_filename` which is a path to a kubeconfig that can
-        be used to connect to a kubernetes cluster
-      - at least one node running such that resources in the
-        node_group.general can be scheduled
-
-    At a high level this stage is expected to provision a kubernetes
-    cluster on a given provider.
-    """
-    directory = "stages/02-infrastructure"
-
-    stage_outputs[directory] = terraform.deploy(
-        os.path.join(directory, config["provider"]),
-        input_vars=input_vars.stage_02_infrastructure(stage_outputs, config),
-    )
-
-    if not disable_checks:
-        checks.stage_02_infrastructure(stage_outputs, config)
-
-
-def provision_03_kubernetes_initialize(stage_outputs, config, disable_checks=False):
-    directory = "stages/03-kubernetes-initialize"
-
-    stage_outputs[directory] = terraform.deploy(
-        directory=directory,
-        input_vars=input_vars.stage_03_kubernetes_initialize(stage_outputs, config),
-    )
-
-    if not disable_checks:
-        checks.stage_03_kubernetes_initialize(stage_outputs, config)
-
-
-def provision_04_kubernetes_ingress(stage_outputs, config, disable_checks=False):
-    directory = "stages/04-kubernetes-ingress"
-
-    stage_outputs[directory] = terraform.deploy(
-        directory=directory,
-        input_vars=input_vars.stage_04_kubernetes_ingress(stage_outputs, config),
-    )
-
-    if not disable_checks:
-        checks.stage_04_kubernetes_ingress(stage_outputs, config)
-
-
-def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
-    dns_records = [
-        f"app.clearml.{record_name}",
-        f"api.clearml.{record_name}",
-        f"files.clearml.{record_name}",
-    ]
-
-    for dns_record in dns_records:
-        update_record(zone_name, dns_record, record_type, ip_or_hostname)
-
-
-def provision_ingress_dns(
-    stage_outputs,
-    config,
-    dns_provider: str,
-    dns_auto_provision: bool,
-    disable_prompt: bool = True,
-    disable_checks: bool = False,
-):
-    directory = "stages/04-kubernetes-ingress"
-
-    ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
-    ip_or_hostname = ip_or_name["hostname"] or ip_or_name["ip"]
-
-    if dns_auto_provision and dns_provider == "cloudflare":
-        record_name, zone_name = (
-            config["domain"].split(".")[:-2],
-            config["domain"].split(".")[-2:],
-        )
-        record_name = ".".join(record_name)
-        zone_name = ".".join(zone_name)
-        if config["provider"] in {"do", "gcp", "azure"}:
-            update_record(zone_name, record_name, "A", ip_or_hostname)
-            if config.get("clearml", {}).get("enabled"):
-                add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
-
-        elif config["provider"] == "aws":
-            update_record(zone_name, record_name, "CNAME", ip_or_hostname)
-            if config.get("clearml", {}).get("enabled"):
-                add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
-        else:
-            logger.info(
-                f"Couldn't update the DNS record for cloud provider: {config['provider']}"
-            )
-    elif not disable_prompt:
-        input(
-            f"Take IP Address {ip_or_hostname} and update DNS to point to "
-            f'"{config["domain"]}" [Press Enter when Complete]'
-        )
-
-    if not disable_checks:
-        checks.check_ingress_dns(stage_outputs, config, disable_prompt)
-
-
-def provision_05_kubernetes_keycloak(stage_outputs, config, disable_checks=False):
-    directory = "stages/05-kubernetes-keycloak"
-
-    stage_outputs[directory] = terraform.deploy(
-        directory=directory,
-        input_vars=input_vars.stage_05_kubernetes_keycloak(stage_outputs, config),
-    )
-
-    if not disable_checks:
-        checks.stage_05_kubernetes_keycloak(stage_outputs, config)
-
-
-def provision_06_kubernetes_keycloak_configuration(
-    stage_outputs, config, disable_checks=False
-):
-    directory = "stages/06-kubernetes-keycloak-configuration"
-
-    stage_outputs[directory] = terraform.deploy(
-        directory=directory,
-        input_vars=input_vars.stage_06_kubernetes_keycloak_configuration(
-            stage_outputs, config
-        ),
-    )
-
-    if not disable_checks:
-        checks.stage_06_kubernetes_keycloak_configuration(stage_outputs, config)
-
-
-def provision_07_kubernetes_services(stage_outputs, config, disable_checks=False):
-    directory = "stages/07-kubernetes-services"
-
-    stage_outputs[directory] = terraform.deploy(
-        directory=directory,
-        input_vars=input_vars.stage_07_kubernetes_services(stage_outputs, config),
-    )
-
-    if not disable_checks:
-        checks.stage_07_kubernetes_services(stage_outputs, config)
-
-
-def provision_08_nebari_tf_extensions(stage_outputs, config, disable_checks=False):
-    directory = "stages/08-nebari-tf-extensions"
-
-    stage_outputs[directory] = terraform.deploy(
-        directory=directory,
-        input_vars=input_vars.stage_08_nebari_tf_extensions(stage_outputs, config),
-    )
-
-    if not disable_checks:
-        pass
 
 
 def guided_install(
@@ -198,44 +30,12 @@ def guided_install(
     check_cloud_credentials(config)
 
     stage_outputs = {}
-    if (
-        config["provider"] not in {"existing", "local"}
-        and config["terraform_state"]["type"] == "remote"
-    ):
-        if skip_remote_state_provision:
-            print("Skipping remote state provision")
-        else:
-            provision_01_terraform_state(stage_outputs, config)
-
-    provision_02_infrastructure(stage_outputs, config, disable_checks)
-
-    with kubernetes_provider_context(
-        stage_outputs["stages/02-infrastructure"]["kubernetes_credentials"]["value"]
-    ):
-        provision_03_kubernetes_initialize(stage_outputs, config, disable_checks)
-        provision_04_kubernetes_ingress(stage_outputs, config, disable_checks)
-        provision_ingress_dns(
-            stage_outputs,
-            config,
-            dns_provider=dns_provider,
-            dns_auto_provision=dns_auto_provision,
-            disable_prompt=disable_prompt,
-            disable_checks=disable_checks,
-        )
-        provision_05_kubernetes_keycloak(stage_outputs, config, disable_checks)
-
-        with keycloak_provider_context(
-            stage_outputs["stages/05-kubernetes-keycloak"]["keycloak_credentials"][
-                "value"
-            ]
-        ):
-            provision_06_kubernetes_keycloak_configuration(
-                stage_outputs, config, disable_checks
-            )
-            provision_07_kubernetes_services(stage_outputs, config, disable_checks)
-            provision_08_nebari_tf_extensions(stage_outputs, config, disable_checks)
-
-        print("Nebari deployed successfully")
+    config = schema.Main(**config)
+    with contextlib.ExitStack() as stack:
+        for stage in get_available_stages():
+            s = stage(output_directory=pathlib.Path('.'), config=config)
+            stack.enter_context(s.deploy(stage_outputs))
+    print("Nebari deployed successfully")
 
     print("Services:")
     for service_name, service in stage_outputs["stages/07-kubernetes-services"][
@@ -247,9 +47,7 @@ def guided_install(
         f"Kubernetes kubeconfig located at file://{stage_outputs['stages/02-infrastructure']['kubeconfig_filename']['value']}"
     )
     username = "root"
-    password = (
-        config.get("security", {}).get("keycloak", {}).get("initial_root_password", "")
-    )
+    password = config.security.keycloak.initial_root_password
     if password:
         print(f"Kubecloak master realm username={username} password={password}")
 
