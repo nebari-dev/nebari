@@ -316,22 +316,55 @@ class AWSNodeGroup(NodeGroup):
     single_subnet: typing.Optional[bool] = False
 
 
+class GCPIPAllocationPolicy(Base):
+    cluster_secondary_range_name: str
+    services_secondary_range_name: str
+    cluster_ipv4_cidr_block: str
+    services_ipv4_cidr_block: str
+
+
+class GCPCIDRBlock(Base):
+    cidr_block: str
+    display_name: str
+
+
+class GCPMasterAuthorizedNetworksConfig(Base):
+    cidr_blocks: typing.List[GCPCIDRBlock]
+
+
+class GCPPrivateClusterConfig(Base):
+    enable_private_endpoint: bool
+    enable_private_nodes: bool
+    master_ipv4_cidr_block: str
+
+
 class DigitalOceanProvider(Base):
     region: str
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
-    terraform_overrides: typing.Any
+    tags: typing.Optional[typing.List[str]] = []
 
 
 class GoogleCloudPlatformProvider(Base):
     project: str
     region: str
-    zone: typing.Optional[str]  # No longer used
-    availability_zones: typing.Optional[typing.List[str]]  # Genuinely optional
+    availability_zones: typing.Optional[typing.List[str]] = []
     kubernetes_version: str
     release_channel: typing.Optional[str]
     node_groups: typing.Dict[str, NodeGroup]
-    terraform_overrides: typing.Any
+    tags: typing.Optional[typing.List[str]] = []
+    networking_mode: str = "ROUTE"
+    network: str = "default"
+    subnetwork: typing.Optional[typing.Union[str, None]] = None
+    ip_allocation_policy: typing.Optional[
+        typing.Union[GCPIPAllocationPolicy, None]
+    ] = None
+    master_authorized_networks_config: typing.Optional[
+        typing.Union[GCPCIDRBlock, None]
+    ] = None
+    private_cluster_config: typing.Optional[
+        typing.Union[GCPPrivateClusterConfig, None]
+    ] = None
 
 
 class AzureProvider(Base):
@@ -339,7 +372,8 @@ class AzureProvider(Base):
     kubernetes_version: str
     node_groups: typing.Dict[str, NodeGroup]
     storage_account_postfix: str
-    terraform_overrides: typing.Any
+    vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
+    private_cluster_enabled: bool = False
 
 
 class AmazonWebServicesProvider(Base):
@@ -347,7 +381,9 @@ class AmazonWebServicesProvider(Base):
     availability_zones: typing.Optional[typing.List[str]]
     kubernetes_version: str
     node_groups: typing.Dict[str, AWSNodeGroup]
-    terraform_overrides: typing.Any
+    existing_subnet_ids: typing.Optional[typing.List[str]]
+    existing_security_group_ids: typing.Optional[str]
+    vpc_cidr_block: str = "10.10.0.0/16"
 
 
 class LocalProvider(Base):
