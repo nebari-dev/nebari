@@ -1,10 +1,9 @@
 import contextlib
 import inspect
-import os
 import pathlib
 import sys
 import tempfile
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -15,6 +14,46 @@ from _nebari.stages.tf_objects import (
 from _nebari.utils import modified_environ
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
+
+
+def get_kubeconfig_filename():
+    return pathlib.Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG"
+
+
+# TODO:
+# - create schema for node group for each provider
+
+
+class LocalInputVars(schema.Base):
+    kubeconfig_filename: Union[str, pathlib.Path] = get_kubeconfig_filename()
+    kube_context: str
+
+
+class ExistingInputVars(schema.Base):
+    kube_context: str
+
+
+class BaseCloudProviderInputVars(schema.Base):
+    name: str
+    environment: str
+    kubeconfig_filename: str = get_kubeconfig_filename()
+
+
+class DigitalOceanInputVars(BaseCloudProviderInputVars, schema.DigitalOceanProvider):
+    pass
+
+
+class GCPInputVars(BaseCloudProviderInputVars, schema.GoogleCloudPlatformProvider):
+    pass
+
+
+class AzureInputVars(BaseCloudProviderInputVars, schema.AzureProvider):
+    resource_group_name: str
+    node_resource_group_name: str
+
+
+class AWSInputVars(BaseCloudProviderInputVars, schema.AmazonWebServicesProvider):
+    pass
 
 
 @contextlib.contextmanager
@@ -95,91 +134,64 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         if self.config.provider == schema.ProviderEnum.local:
-            return {
-                "kubeconfig_filename": os.path.join(
-                    tempfile.gettempdir(), "NEBARI_KUBECONFIG"
-                ),
-                "kube_context": self.config.local.kube_context,
-            }
+            return LocalInputVars(kube_context=self.config.local.kube_context).dict()
         elif self.config.provider == schema.ProviderEnum.existing:
-            return {"kube_context": self.config.existing.kube_context}
+            return ExistingInputVars(
+                kube_context=self.config.existing.kube_context
+            ).dict()
         elif self.config.provider == schema.ProviderEnum.do:
-            return {
-                "name": self.config.project_name,
-                "environment": self.config.namespace,
-                "region": self.config.digital_ocean.region,
-                "kubernetes_version": self.config.digital_ocean.kubernetes_version,
-                "node_groups": self.config.digital_ocean.node_groups,
-                "kubeconfig_filename": os.path.join(
-                    tempfile.gettempdir(), "NEBARI_KUBECONFIG"
-                ),
-                **self.config.do.terraform_overrides,
-            }
+            return DigitalOceanInputVars(
+                name=self.config.project_name,
+                environment=self.config.namespace,
+                region=self.config.digital_ocean.region,
+                tags=self.config.digital_ocean.tags,
+                kubernetes_version=self.config.digital_ocean.kubernetes_version,
+                node_groups=self.config.digital_ocean.node_groups,
+            ).dict()
         elif self.config.provider == schema.ProviderEnum.gcp:
-            return {
-                "name": self.config.project_name,
-                "environment": self.config.namespace,
-                "region": self.config.google_cloud_platform.region,
-                "project_id": self.config.google_cloud_platform.project,
-                "kubernetes_version": self.config.google_cloud_platform.kubernetes_version,
-                "release_channel": self.config.google_cloud_platform.release_channel,
-                "node_groups": [
-                    {
-                        "name": key,
-                        "instance_type": value["instance"],
-                        "min_size": value["min_nodes"],
-                        "max_size": value["max_nodes"],
-                        "guest_accelerators": value["guest_accelerators"]
-                        if "guest_accelerators" in value
-                        else [],
-                        **value,
-                    }
-                    for key, value in self.config.google_cloud_platform.node_groups.items()
-                ],
-                "kubeconfig_filename": os.path.join(
-                    tempfile.gettempdir(), "NEBARI_KUBECONFIG"
-                ),
-                **self.config.gcp.terraform_overrides,
-            }
+            return GCPInputVars(
+                name=self.config.project_name,
+                environment=self.config.namespace,
+                region=self.config.google_cloud_platform.region,
+                project_id=self.config.google_cloud_platform.project,
+                availability_zones=self.config.google_cloud_platform.availability_zones,
+                node_groups=self.config.google_cloud_platform.node_groups,
+                tags=self.config.google_cloud_platform.tags,
+                kubernetes_version=self.config.google_cloud_platform.kubernetes_version,
+                release_channel=self.config.google_cloud_platform.release_channel,
+                networking_mode=self.config.google_cloud_platform.networking_mode,
+                network=self.config.google_cloud_platform.network,
+                subnetwork=self.config.google_cloud_platform.subnetwork,
+                ip_allocation_policy=self.config.google_cloud_platform.ip_allocation_policy,
+                master_authorized_networks_config=self.config.google_cloud_platform.master_authorized_networks_config,
+                private_cluster_config=self.config.google_cloud_platform.private_cluster_config,
+            ).dict()
         elif self.config.provider == schema.ProviderEnum.azure:
-            return {
-                "name": self.config.project_name,
-                "environment": self.config.namespace,
-                "region": self.config.azure.region,
-                "kubernetes_version": self.config.azure.kubernetes_version,
-                "node_groups": self.config.azure.node_groups,
-                "kubeconfig_filename": os.path.join(
-                    tempfile.gettempdir(), "NEBARI_KUBECONFIG"
-                ),
-                "resource_group_name": f"{self.config.project_name}-{self.config.namespace}",
-                "node_resource_group_name": f"{self.config.project_name}-{self.config.namespace}-node-resource-group",
-                **self.config.azure.terraform_overrides,
-            }
+            return AzureInputVars(
+                name=self.config.project_name,
+                environment=self.config.namespace,
+                region=self.config.azure.region,
+                kubernetes_version=self.config.azure.kubernetes_version,
+                node_groups=self.config.azure.node_groups,
+                resource_group_name=f"{self.config.project_name}-{self.config.namespace}",
+                node_resource_group_name=f"{self.config.project_name}-{self.config.namespace}-node-resource-group",
+                vnet_subnet_id=self.config.azure.vnet_subnet_id,
+                private_cluster_enabled=self.config.azure.private_cluster_enabled,
+            ).dict()
         elif self.config.provider == schema.ProviderEnum.aws:
-            return {
-                "name": self.config.project_name,
-                "environment": self.config.namespace,
-                "region": self.config.amazon_web_services.region,
-                "kubernetes_version": self.config.amazon_web_services.kubernetes_version,
-                "node_groups": [
-                    {
-                        "name": key,
-                        "min_size": value["min_nodes"],
-                        "desired_size": max(value["min_nodes"], 1),
-                        "max_size": value["max_nodes"],
-                        "gpu": value.get("gpu", False),
-                        "instance_type": value["instance"],
-                        "single_subnet": value.get("single_subnet", False),
-                    }
-                    for key, value in self.config.amazon_web_services.node_groups.items()
-                ],
-                "kubeconfig_filename": os.path.join(
-                    tempfile.gettempdir(), "NEBARI_KUBECONFIG"
-                ),
-                **self.config.amazon_web_services.terraform_overrides,
-            }
+            return AWSInputVars(
+                name=self.config.project_name,
+                environment=self.config.namespace,
+                existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
+                existing_security_group_ids=self.config.amazon_web_services.existing_security_group_ids,
+                region=self.config.amazon_web_services.region,
+                kubernetes_version=self.config.amazon_web_services.kubernetes_version,
+                node_groups=self.config.amazon_web_services.node_groups,
+                availability_zones=self.config.amazon_web_services.availability_zones,
+                vpc_cidr_block=self.config.amazon_web_services.vpc_cidr_block,
+            ).dict()
         else:
-            return {}
+            raise ValueError(f"Unknown provider: {self.config.provider}")
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         from kubernetes import client, config
