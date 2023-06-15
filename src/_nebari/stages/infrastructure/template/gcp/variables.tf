@@ -21,25 +21,21 @@ variable "project_id" {
 variable "availability_zones" {
   description = "Availability zones to use for nebari deployment"
   type        = list(string)
-  default     = []
 }
 
 variable "node_groups" {
   description = "GCP node groups"
   type        = any
-  default     = null
 }
 
 variable "kubeconfig_filename" {
   description = "Kubernetes kubeconfig written to filesystem"
   type        = string
-  default     = null
 }
 
 variable "tags" {
   description = "Google Cloud Platform tags to assign to resources"
-  type        = map(string)
-  default     = {}
+  type        = list(string)
 }
 
 variable "kubernetes_version" {
@@ -55,19 +51,16 @@ variable "release_channel" {
 variable "networking_mode" {
   description = "Determines whether alias IPs or routes will be used for pod IPs in the cluster. Options are VPC_NATIVE or ROUTES."
   type        = string
-  default     = "ROUTES"
 }
 
 variable "network" {
   description = "Name of the VPC network, where the cluster should be deployed"
   type        = string
-  default     = "default"
 }
 
 variable "subnetwork" {
   description = "Name of the subnet for deploying cluster into"
   type        = string
-  default     = null
 }
 
 variable "ip_allocation_policy" {
@@ -78,7 +71,6 @@ variable "ip_allocation_policy" {
     cluster_ipv4_cidr_block       = string
     services_ipv4_cidr_block      = string
   }))
-  default = null
 }
 
 variable "master_authorized_networks_config" {
@@ -89,7 +81,6 @@ variable "master_authorized_networks_config" {
       display_name = string
     }))
   }))
-  default = null
 }
 
 variable "private_cluster_config" {
@@ -99,5 +90,4 @@ variable "private_cluster_config" {
     enable_private_endpoint = bool
     master_ipv4_cidr_block  = string
   }))
-  default = null
 }
