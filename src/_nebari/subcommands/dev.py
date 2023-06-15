@@ -1,5 +1,5 @@
 import json
-from pathlib import Path
+import pathlib
 
 import typer
 
@@ -25,7 +25,7 @@ def nebari_subcommand(cli: typer.Typer):
 
     @app_dev.command(name="keycloak-api")
     def keycloak_api(
-        config_filename: str = typer.Option(
+        config_filename: pathlib.Path = typer.Option(
             ...,
             "-c",
             "--config",
@@ -45,9 +45,6 @@ def nebari_subcommand(cli: typer.Typer):
         Please use this at your own risk.
 
         """
-        if isinstance(config_filename, str):
-            config_filename = Path(config_filename)
-
+        config = schema.read_configuration(config_filename)
         r = keycloak_rest_api_call(config_filename, request=request)
-
         print(json.dumps(r, indent=4))
