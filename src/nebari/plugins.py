@@ -6,6 +6,7 @@ import pluggy
 from nebari import hookspecs
 
 DEFAULT_PLUGINS = [
+    # stages
     "_nebari.stages.terraform_state",
     "_nebari.stages.infrastructure",
     "_nebari.stages.kubernetes_initialize",
@@ -14,6 +15,16 @@ DEFAULT_PLUGINS = [
     "_nebari.stages.kubernetes_keycloak_configuration",
     "_nebari.stages.kubernetes_services",
     "_nebari.stages.nebari_tf_extensions",
+
+    # subcommands
+    "_nebari.subcommands.dev",
+    # "_nebari.subcommands.deploy",
+    # "_nebari.subcommands.destroy",
+    "_nebari.subcommands.keycloak",
+    "_nebari.subcommands.render",
+    "_nebari.subcommands.support",
+    # "_nebari.subcommands.upgrade",
+    "_nebari.subcommands.validate",
 ]
 
 pm = pluggy.PluginManager("nebari")

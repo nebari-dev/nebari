@@ -1,5 +1,7 @@
 import contextlib
 import pathlib
+import inspect
+import itertools
 from typing import Any, Dict, List, Tuple
 
 from _nebari.provider import terraform
@@ -9,16 +11,13 @@ from nebari.hookspecs import NebariStage
 
 
 class NebariTerraformStage(NebariStage):
-    def __init__(
-        self,
-        output_directory: pathlib.Path,
-        config: schema.Main,
-        template_directory: pathlib.Path,
-        stage_prefix: pathlib.Path,
-    ):
-        super().__init__(output_directory, config)
-        self.template_directory = pathlib.Path(template_directory)
-        self.stage_prefix = pathlib.Path(stage_prefix)
+    @property
+    def template_directory(self):
+        return pathlib.Path(inspect.getfile(self.__class__).parent) / "template"
+
+    @property
+    def stage_prefix(self):
+        return pathlib.Path('stages') / self.name
 
     def state_imports(self) -> List[Tuple[str, str]]:
         return []
@@ -77,3 +76,22 @@ class NebariTerraformStage(NebariStage):
             input_vars=self.input_vars(stage_outputs),
             ignore_errors=True,
         )
+
+
+def get_available_stages():
+    from nebari.plugins import pm
+    stages = itertools.chain.from_iterable(pm.hook.nebari_stage())
+
+    # order stages by priority
+    sorted_stages = sorted(stages, key=lambda s: s.priority)
+
+    # filter out duplicate stages with same name (keep highest priority)
+    visited_stage_names = set()
+    filtered_stages = []
+    for stage in reversed(sorted_stages):
+        if stage.name in visited_stage_names:
+            continue
+        filtered_stages.insert(0, stage)
+        visited_stage_names.add(stage.name)
+
+    return filtered_stages
