@@ -101,7 +101,7 @@ def render_config(
         config.theme.jupyterhub.hub_subtitle = WELCOME_HEADER_TEXT
 
     if ssl_cert_email:
-        config.certificate.type = CertificateEnum.letsencrypt
+        config.certificate.type = schema.CertificateEnum.letsencrypt
         config.certificate.acme_email = ssl_cert_email
 
     if repository_auto_provision:
