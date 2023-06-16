@@ -10,7 +10,7 @@ import rich
 from pydantic.error_wrappers import ValidationError
 from rich.prompt import Prompt
 
-from nebari.schema import is_version_accepted, verify
+from nebari import schema
 
 from .utils import backup_config_file, load_yaml, yaml
 from .version import __version__, rounded_ver_parse
@@ -32,13 +32,13 @@ def do_upgrade(config_filename, attempt_fixes=False):
         return
 
     try:
-        verify(config)
+        schema.read_configuration(config_filename)
         rich.print(
             f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for Nebari version [green]{__version__}[/green]"
         )
         return
     except (ValidationError, ValueError) as e:
-        if is_version_accepted(config.get("nebari_version", "")):
+        if schema.is_version_accepted(config.get("nebari_version", "")):
             # There is an unrelated validation problem
             rich.print(
                 f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for Nebari version [green]{__version__}[/green] but there is another validation error.\n"
