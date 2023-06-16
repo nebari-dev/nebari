@@ -429,7 +429,7 @@ class DigitalOceanProvider(Base):
 
 
 class GoogleCloudPlatformProvider(Base):
-    project: str = Field(default_factory=lambda: os.environ['PROJECT_ID'])
+    project: str = Field(default_factory=lambda: os.environ["PROJECT_ID"])
     region: str = "us-central1"
     availability_zones: typing.Optional[typing.List[str]] = []
     kubernetes_version: str = Field(
