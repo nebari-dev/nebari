@@ -19,12 +19,11 @@ from _nebari.provider.cloud import (
     digital_ocean,
     google_cloud,
 )
+from nebari import schema
 
 # environment variable overrides
 NEBARI_K8S_VERSION = os.getenv("NEBARI_K8S_VERSION", None)
 NEBARI_GH_BRANCH = os.getenv("NEBARI_GH_BRANCH", None)
-NEBARI_IMAGE_TAG = os.getenv("NEBARI_IMAGE_TAG", None)
-NEBARI_DASK_VERSION = os.getenv("NEBARI_DASK_VERSION", None)
 
 DO_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-do"
 AWS_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-aws"
@@ -32,9 +31,6 @@ GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
 AZURE_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-azure"
 
 CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
-
-# Regex for suitable project names
-namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
 
 # Create a ruamel object with our favored config, for universal use
 yaml = YAML()
@@ -139,6 +135,66 @@ def backup_config_file(filename: pathlib.Path, extrasuffix: str = ""):
 
     filename.rename(backup_filename)
     print(f"Backing up {filename} as {backup_filename}")
+
+
+def check_cloud_credentials(config: schema.Main):
+    if config.provider == schema.ProviderEnum.gcp:
+        for variable in {"GOOGLE_CREDENTIALS"}:
+            if variable not in os.environ:
+                raise ValueError(
+                    f"""Missing the following required environment variable: {variable}\n
+                    Please see the documentation for more information: {GCP_ENV_DOCS}"""
+                )
+    elif config.provider == schema.ProviderEnum.azure:
+        for variable in {
+            "ARM_CLIENT_ID",
+            "ARM_CLIENT_SECRET",
+            "ARM_SUBSCRIPTION_ID",
+            "ARM_TENANT_ID",
+        }:
+            if variable not in os.environ:
+                raise ValueError(
+                    f"""Missing the following required environment variable: {variable}\n
+                    Please see the documentation for more information: {AZURE_ENV_DOCS}"""
+                )
+    elif config.provider == schema.ProviderEnum.aws:
+        for variable in {
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+        }:
+            if variable not in os.environ:
+                raise ValueError(
+                    f"""Missing the following required environment variable: {variable}\n
+                    Please see the documentation for more information: {AWS_ENV_DOCS}"""
+                )
+    elif config.provider == schema.ProviderEnum.do:
+        for variable in {
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "SPACES_ACCESS_KEY_ID",
+            "SPACES_SECRET_ACCESS_KEY",
+            "DIGITALOCEAN_TOKEN",
+        }:
+            if variable not in os.environ:
+                raise ValueError(
+                    f"""Missing the following required environment variable: {variable}\n
+                    Please see the documentation for more information: {DO_ENV_DOCS}"""
+                )
+
+        if os.environ["AWS_ACCESS_KEY_ID"] != os.environ["SPACES_ACCESS_KEY_ID"]:
+            raise ValueError(
+                f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must be equal\n
+                See {DO_ENV_DOCS} for more information"""
+            )
+
+        if (
+            os.environ["AWS_SECRET_ACCESS_KEY"]
+            != os.environ["SPACES_SECRET_ACCESS_KEY"]
+        ):
+            raise ValueError(
+                f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must be equal\n
+                See {DO_ENV_DOCS} for more information"""
+            )
 
 
 def set_kubernetes_version(
@@ -275,21 +331,3 @@ def deep_merge(*args):
         return [*d1, *d2]
     else:  # if they don't match use left one
         return d1
-
-
-def set_docker_image_tag() -> str:
-    """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
-
-    if NEBARI_IMAGE_TAG:
-        return NEBARI_IMAGE_TAG
-
-    return DEFAULT_NEBARI_IMAGE_TAG
-
-
-def set_nebari_dask_version() -> str:
-    """Set version of `nebari-dask` meta package."""
-
-    if NEBARI_DASK_VERSION:
-        return NEBARI_DASK_VERSION
-
-    return DEFAULT_NEBARI_DASK_VERSION
