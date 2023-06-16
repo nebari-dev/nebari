@@ -1,18 +1,14 @@
-import rich
-
-import re
 import os
-import json
 import pathlib
-from typing import Tuple
+import re
 
 import questionary
+import rich
 import typer
 
-from _nebari.keycloak import do_keycloak, export_keycloak_users
 from _nebari.initialize import render_config
-from nebari.hookspecs import hookimpl
 from nebari import schema
+from nebari.hookspecs import hookimpl
 
 MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[green]\t{link_to_docs}[/green]\n\n"
 LINKS_TO_DOCS_TEMPLATE = (
@@ -83,7 +79,7 @@ def handle_init(inputs: schema.InitInputs):
     )
 
     try:
-        schema.write_configuration(pathlib.Path("nebari-config.yaml"), config, mode='x')
+        schema.write_configuration(pathlib.Path("nebari-config.yaml"), config, mode="x")
     except FileExistsError:
         raise ValueError(
             "A nebari-config.yaml file already exists. Please move or delete it and try again."
@@ -481,7 +477,10 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         if not disable_checks:
             check_auth_provider_creds(ctx, auth_provider=inputs.auth_provider)
 
-        if inputs.auth_provider.lower() == schema.AuthenticationEnum.auth0.value.lower():
+        if (
+            inputs.auth_provider.lower()
+            == schema.AuthenticationEnum.auth0.value.lower()
+        ):
             inputs.auth_auto_provision = questionary.confirm(
                 "Would you like us to auto provision the Auth0 Machine-to-Machine app?",
                 default=False,
@@ -489,7 +488,10 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 auto_enter=False,
             ).unsafe_ask()
 
-        elif inputs.auth_provider.lower() == schema.AuthenticationEnum.github.value.lower():
+        elif (
+            inputs.auth_provider.lower()
+            == schema.AuthenticationEnum.github.value.lower()
+        ):
             rich.print(
                 (
                     ":warning: If you haven't done so already, please ensure the following:\n"
