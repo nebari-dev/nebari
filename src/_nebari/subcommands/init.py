@@ -1,22 +1,16 @@
+import os
+
+import rich
+import typer
+
 from _nebari.cli.init import (
     check_project_name,
     check_ssl_cert_email,
     guided_init_wizard,
     handle_init,
 )
-
-import rich
-
-import os
-import json
-import pathlib
-from typing import Tuple
-
-import typer
-
-from _nebari.keycloak import do_keycloak, export_keycloak_users
-from nebari.hookspecs import hookimpl
 from nebari import schema
+from nebari.hookspecs import hookimpl
 
 MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[green]\t{link_to_docs}[/green]\n\n"
 LINKS_TO_DOCS_TEMPLATE = (
@@ -47,8 +41,9 @@ GUIDED_INIT_MSG = (
     "It is an [i]alternative[/i] to passing the options listed below."
 )
 
+
 def enum_to_list(enum_cls):
-    return ', '.join([e.value.lower() for e in enum_cls])
+    return ", ".join([e.value.lower() for e in enum_cls])
 
 
 def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
@@ -265,7 +260,8 @@ def nebari_subcommand(cli: typer.Typer):
             help=f"options: {enum_to_list(schema.CiEnum)}",
         ),
         terraform_state: schema.TerraformStateEnum = typer.Option(
-            schema.TerraformStateEnum.remote, help=f"options: {enum_to_list(schema.TerraformStateEnum)}"
+            schema.TerraformStateEnum.remote,
+            help=f"options: {enum_to_list(schema.TerraformStateEnum)}",
         ),
         kubernetes_version: str = typer.Option(
             "latest",
