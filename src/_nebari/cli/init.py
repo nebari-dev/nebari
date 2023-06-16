@@ -1,6 +1,6 @@
 import os
-import re
 import pathlib
+import re
 
 import questionary
 import rich
@@ -72,7 +72,7 @@ def handle_init(inputs: schema.InitInputs):
     )
 
     try:
-        schema.write_configuration(pathlib.Path("nebari-config.yaml"), config, mode='x')
+        schema.write_configuration(pathlib.Path("nebari-config.yaml"), config, mode="x")
     except FileExistsError:
         raise ValueError(
             "A nebari-config.yaml file already exists. Please move or delete it and try again."

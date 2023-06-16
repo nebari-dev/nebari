@@ -1,9 +1,6 @@
 import logging
 import os
-import random
 import re
-import secrets
-import string
 import tempfile
 
 import requests
@@ -12,7 +9,6 @@ from _nebari.provider import git
 from _nebari.provider.cicd import github
 from _nebari.provider.oauth.auth0 import create_client
 from _nebari.utils import check_cloud_credentials
-
 from _nebari.version import __version__
 from nebari import schema
 
@@ -47,7 +43,7 @@ def render_config(
         domain=nebari_domain,
         provider=cloud_provider,
         namespace=namespace,
-        nebari_version=__version__
+        nebari_version=__version__,
     )
     config.ci_cd.type = ci_provider
     config.terraform_state.type = terraform_state
@@ -67,8 +63,8 @@ def render_config(
     if config.security.authentication.type == schema.AuthenticationEnum.github:
         if not disable_prompt:
             config.security.authentication.config = schema.GithubConfig(
-                client_id = input("Github client_id: "),
-                client_secret = input("Github client_secret: "),
+                client_id=input("Github client_id: "),
+                client_secret=input("Github client_secret: "),
             )
     elif config.security.authentication.type == schema.AuthenticationEnum.auth0:
         if auth_auto_provision:
@@ -76,15 +72,17 @@ def render_config(
             config.security.authentication.config = schema.Auth0Config(**auth0_config)
         else:
             config.security.authentication.config = schema.Auth0Config(
-                client_id = input("Auth0 client_id: "),
-                client_secret = input("Auth0 client_secret: "),
-                auth0_subdomain = input("Auth0 subdomain: "),
+                client_id=input("Auth0 client_id: "),
+                client_secret=input("Auth0 client_secret: "),
+                auth0_subdomain=input("Auth0 subdomain: "),
             )
 
     if config.provider == schema.ProviderEnum.do:
         config.theme.jupyterhub.hub_subtitle = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
     elif config.provider == schema.ProviderEnum.gcp:
-        config.theme.jupyterhub.hub_subtitle = f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
+        config.theme.jupyterhub.hub_subtitle = (
+            f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
+        )
         if "PROJECT_ID" in os.environ:
             config.google_cloud_platform.project = os.environ["PROJECT_ID"]
         elif not disable_prompt:
@@ -94,7 +92,9 @@ def render_config(
     elif config.provider == schema.ProviderEnum.azure:
         config.theme.jupyterhub.hub_subtitle = f"{WELCOME_HEADER_TEXT} on Azure"
     elif config.provider == schema.ProviderEnum.aws:
-        config.theme.jupyterhub.hub_subtitle = f"{WELCOME_HEADER_TEXT} on Amazon Web Services"
+        config.theme.jupyterhub.hub_subtitle = (
+            f"{WELCOME_HEADER_TEXT} on Amazon Web Services"
+        )
     elif cloud_provider == "existing":
         config.theme.jupyterhub.hub_subtitle = WELCOME_HEADER_TEXT
     elif cloud_provider == "local":
@@ -137,8 +137,8 @@ def github_auto_provision(config: schema.Main, owner: str, repo: str):
             github.create_repository(
                 owner,
                 repo,
-                description=f'Nebari {config.project_name}-{config.provider}',
-                homepage=f'https://{config.domain}',
+                description=f"Nebari {config.project_name}-{config.provider}",
+                homepage=f"https://{config.domain}",
             )
         except requests.exceptions.HTTPError as he:
             raise ValueError(
