@@ -11,7 +11,7 @@ from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
 
-class InputVars(schema.BaseModel):
+class InputVars(schema.Base):
     name: str
     environment: str
     cloud_provider: str
