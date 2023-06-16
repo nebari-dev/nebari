@@ -1,9 +1,9 @@
 import pathlib
 from zipfile import ZipFile
 
-import typer
-import kubernetes.config
 import kubernetes.client
+import kubernetes.config
+import typer
 
 from nebari import schema
 from nebari.hookspecs import hookimpl
