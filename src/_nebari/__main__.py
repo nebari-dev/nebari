@@ -1,4 +1,4 @@
-from _nebari.subcommands import create_cli
+from _nebari.cli import create_cli
 
 
 def main():
