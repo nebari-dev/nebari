@@ -429,11 +429,11 @@ class DigitalOceanProvider(Base):
 
 
 class GoogleCloudPlatformProvider(Base):
-    project: str
+    project: str = Field(default_factory=lambda: os.environ['PROJECT_ID'])
     region: str = "us-central1"
     availability_zones: typing.Optional[typing.List[str]] = []
     kubernetes_version: str = Field(
-        default_factory=lambda: google_cloud.kubernetes_versions()[-1]
+        default_factory=lambda: google_cloud.kubernetes_versions("us-central1")[-1]
     )
 
     release_channel: typing.Optional[str]
@@ -458,7 +458,7 @@ class GoogleCloudPlatformProvider(Base):
 
     @validator("kubernetes_version")
     def _validate_kubernetes_version(cls, value):
-        available_kubernetes_versions = google_cloud.kubernetes_versions()
+        available_kubernetes_versions = google_cloud.kubernetes_versions("us-central1")
         if value not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
@@ -1093,4 +1093,4 @@ def write_configuration(config_filename: pathlib.Path, config: Main, mode: str =
     yaml.default_flow_style = False
 
     with config_filename.open(mode) as f:
-        yaml.dump(config.dict(exclude_unset=True), f)
+        yaml.dump(config.dict(), f)
