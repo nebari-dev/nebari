@@ -23,7 +23,7 @@ DEFAULT_PLUGINS = [
     "_nebari.subcommands.keycloak",
     "_nebari.subcommands.render",
     "_nebari.subcommands.support",
-    # "_nebari.subcommands.upgrade",
+    "_nebari.subcommands.upgrade",
     "_nebari.subcommands.validate",
 ]
 
