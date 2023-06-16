@@ -1,22 +1,13 @@
 import os
 import re
-from pathlib import Path
+import pathlib
 
 import questionary
 import rich
 import typer
 
 from _nebari.initialize import render_config
-from _nebari.schema import (
-    AuthenticationEnum,
-    CiEnum,
-    GitRepoEnum,
-    InitInputs,
-    ProviderEnum,
-    TerraformStateEnum,
-    project_name_convention,
-)
-from _nebari.utils import NEBARI_DASK_VERSION, NEBARI_IMAGE_TAG, yaml
+from nebari import schema
 
 MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[green]\t{link_to_docs}[/green]\n\n"
 LINKS_TO_DOCS_TEMPLATE = (
@@ -46,19 +37,19 @@ def enum_to_list(enum_cls):
     return [e.value.lower() for e in enum_cls]
 
 
-def handle_init(inputs: InitInputs):
+def handle_init(inputs: schema.InitInputs):
     """
     Take the inputs from the `nebari init` command, render the config and write it to a local yaml file.
     """
-    if NEBARI_IMAGE_TAG:
-        print(
-            f"Modifying the image tags for the `default_images`, setting tags to: {NEBARI_IMAGE_TAG}"
-        )
+    # if NEBARI_IMAGE_TAG:
+    #     print(
+    #         f"Modifying the image tags for the `default_images`, setting tags to: {NEBARI_IMAGE_TAG}"
+    #     )
 
-    if NEBARI_DASK_VERSION:
-        print(
-            f"Modifying the version of the `nebari_dask` package, setting version to: {NEBARI_DASK_VERSION}"
-        )
+    # if NEBARI_DASK_VERSION:
+    #     print(
+    #         f"Modifying the version of the `nebari_dask` package, setting version to: {NEBARI_DASK_VERSION}"
+    #     )
 
     # this will force the `set_kubernetes_version` to grab the latest version
     if inputs.kubernetes_version == "latest":
@@ -81,8 +72,7 @@ def handle_init(inputs: InitInputs):
     )
 
     try:
-        with open("nebari-config.yaml", "x") as f:
-            yaml.dump(config, f)
+        schema.write_configuration(pathlib.Path("nebari-config.yaml"), config, mode='x')
     except FileExistsError:
         raise ValueError(
             "A nebari-config.yaml file already exists. Please move or delete it and try again."
@@ -97,7 +87,7 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
     cloud_provider = cloud_provider.lower()
 
     # AWS
-    if cloud_provider == ProviderEnum.aws.value.lower() and (
+    if cloud_provider == schema.ProviderEnum.aws.value.lower() and (
         not os.environ.get("AWS_ACCESS_KEY_ID")
         or not os.environ.get("AWS_SECRET_ACCESS_KEY")
     ):
@@ -117,7 +107,7 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
         )
 
     # GCP
-    elif cloud_provider == ProviderEnum.gcp.value.lower() and (
+    elif cloud_provider == schema.ProviderEnum.gcp.value.lower() and (
         not os.environ.get("GOOGLE_CREDENTIALS") or not os.environ.get("PROJECT_ID")
     ):
         rich.print(
@@ -136,7 +126,7 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
         )
 
     # DO
-    elif cloud_provider == ProviderEnum.do.value.lower() and (
+    elif cloud_provider == schema.ProviderEnum.do.value.lower() and (
         not os.environ.get("DIGITALOCEAN_TOKEN")
         or not os.environ.get("SPACES_ACCESS_KEY_ID")
         or not os.environ.get("SPACES_SECRET_ACCESS_KEY")
@@ -163,7 +153,7 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
         os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("AWS_SECRET_ACCESS_KEY")
 
     # AZURE
-    elif cloud_provider == ProviderEnum.azure.value.lower() and (
+    elif cloud_provider == schema.ProviderEnum.azure.value.lower() and (
         not os.environ.get("ARM_CLIENT_ID")
         or not os.environ.get("ARM_CLIENT_SECRET")
         or not os.environ.get("ARM_SUBSCRIPTION_ID")
@@ -251,7 +241,7 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
 
 def check_project_name(ctx: typer.Context, project_name: str):
     """Validate the project_name is acceptable. Depends on `cloud_provider`."""
-    project_name_convention(
+    schema.project_name_convention(
         project_name.lower(), {"provider": ctx.params["cloud_provider"]}
     )
 
@@ -291,7 +281,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
     qmark = "  "
     disable_checks = os.environ.get("NEBARI_DISABLE_INIT_CHECKS", False)
 
-    if Path("nebari-config.yaml").exists():
+    if pathlib.Path("nebari-config.yaml").exists():
         raise ValueError(
             "A nebari-config.yaml file already exists. Please move or delete it and try again."
         )
@@ -314,7 +304,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             )
 
         # pull in default values for each of the below
-        inputs = InitInputs()
+        inputs = schema.InitInputs()
 
         # CLOUD PROVIDER
         rich.print(
@@ -345,7 +335,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         - Letters from A to Z (upper and lower case) and numbers
         - Maximum accepted length of the name string is 16 characters
         """
-        if inputs.cloud_provider == ProviderEnum.aws.value.lower():
+        if inputs.cloud_provider == schema.ProviderEnum.aws.value.lower():
             name_guidelines += "- Should NOT start with the string `aws`\n"
         elif inputs.cloud_provider == ProviderEnum.azure.value.lower():
             name_guidelines += "- Should NOT contain `-`\n"
@@ -396,7 +386,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         if not disable_checks:
             check_auth_provider_creds(ctx, auth_provider=inputs.auth_provider)
 
-        if inputs.auth_provider.lower() == AuthenticationEnum.auth0.value.lower():
+        if inputs.auth_provider.lower() == schemaAuthenticationEnum.auth0.value.lower():
             inputs.auth_auto_provision = questionary.confirm(
                 "Would you like us to auto provision the Auth0 Machine-to-Machine app?",
                 default=False,
