@@ -1,26 +1,19 @@
+import pathlib
+from zipfile import ZipFile
+
 import typer
+import kubernetes.config
+import kubernetes.client
 
+from nebari import schema
 from nebari.hookspecs import hookimpl
-
-
-def get_config_namespace(config):
-    config_filename = Path(config)
-    if not config_filename.is_file():
-        raise ValueError(
-            f"passed in configuration filename={config_filename} must exist"
-        )
-
-    with config_filename.open() as f:
-        config = yaml.safe_load(f.read())
-
-    return config["namespace"]
 
 
 @hookimpl
 def nebari_subcommand(cli: typer.Typer):
     @cli.command(rich_help_panel="Additional Commands")
     def support(
-        config_filename: str = typer.Option(
+        config_filename: pathlib.Path = typer.Option(
             ...,
             "-c",
             "--config",
@@ -39,17 +32,17 @@ def nebari_subcommand(cli: typer.Typer):
         The Nebari team recommends k9s to manage and inspect the state of the cluster.
         However, this command occasionally helpful for debugging purposes should the logs need to be shared.
         """
-        kube_config.load_kube_config()
+        kubernetes.config.kube_config.load_kube_config()
 
-        v1 = client.CoreV1Api()
+        v1 = kubernetes.client.CoreV1Api()
 
-        namespace = get_config_namespace(config=config_filename)
+        namespace = schema.read_configuration(config_filename).namespace
 
         pods = v1.list_namespaced_pod(namespace=namespace)
 
         for pod in pods.items:
-            Path(f"./log/{namespace}").mkdir(parents=True, exist_ok=True)
-            path = Path(f"./log/{namespace}/{pod.metadata.name}.txt")
+            pathlib.Path(f"./log/{namespace}").mkdir(parents=True, exist_ok=True)
+            path = pathlib.Path(f"./log/{namespace}/{pod.metadata.name}.txt")
             with path.open(mode="wt") as file:
                 try:
                     file.write(
@@ -83,6 +76,6 @@ def nebari_subcommand(cli: typer.Typer):
                     raise e
 
         with ZipFile(output, "w") as zip:
-            for file in list(Path(f"./log/{namespace}").glob("*.txt")):
+            for file in list(pathlib.Path(f"./log/{namespace}").glob("*.txt")):
                 print(file)
                 zip.write(file)

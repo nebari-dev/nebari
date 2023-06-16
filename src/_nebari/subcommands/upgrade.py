@@ -10,7 +10,7 @@ from nebari.hookspecs import hookimpl
 def nebari_subcommand(cli: typer.Typer):
     @cli.command(rich_help_panel="Additional Commands")
     def upgrade(
-        config_filename: pathlib = typer.Option(
+        config_filename: pathlib.Path = typer.Option(
             ...,
             "-c",
             "--config",
