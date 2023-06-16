@@ -10,8 +10,8 @@ from abc import ABC
 
 import pydantic
 from pydantic import Field, root_validator, validator
-
 from ruamel.yaml import YAML, yaml_object
+
 yaml = YAML()
 yaml.preserve_quotes = True
 yaml.default_flow_style = False
@@ -29,20 +29,20 @@ from _nebari.version import __version__, rounded_ver_parse
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
 
 
-def random_secure_string(length: int = 32, chars: str = string.ascii_lowercase + string.digits):
-    return "".join(
-        secrets.choice(chars) for i in range(length)
-    )
+def random_secure_string(
+    length: int = 32, chars: str = string.ascii_lowercase + string.digits
+):
+    return "".join(secrets.choice(chars) for i in range(length))
 
 
 def set_docker_image_tag() -> str:
     """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
-    return os.environ.get('NEBARI_IMAGE_TAG', constants.DEFAULT_NEBARI_IMAGE_TAG)
+    return os.environ.get("NEBARI_IMAGE_TAG", constants.DEFAULT_NEBARI_IMAGE_TAG)
 
 
 def set_nebari_dask_version() -> str:
     """Set version of `nebari-dask` meta package."""
-    return os.environ.get('NEBARI_DASK_VERSION', constants.DEFAULT_NEBARI_DASK_VERSION)
+    return os.environ.get("NEBARI_DASK_VERSION", constants.DEFAULT_NEBARI_DASK_VERSION)
 
 
 @yaml_object(yaml)
@@ -313,6 +313,7 @@ class GitHubAuthentication(Authentication):
 
 # ================= Keycloak ==================
 
+
 class Keycloak(Base):
     initial_root_password: str = Field(default_factory=random_secure_string)
     overrides: typing.Dict = {}
@@ -491,7 +492,9 @@ class AzureProvider(Base):
 
 
 class AmazonWebServicesProvider(Base):
-    region: str = Field(default_factory=lambda: os.environ.get("AWS_DEFAULT_REGION", "us-west-2"))
+    region: str = Field(
+        default_factory=lambda: os.environ.get("AWS_DEFAULT_REGION", "us-west-2")
+    )
     availability_zones: typing.Optional[typing.List[str]]
     kubernetes_version: str = Field(
         default_factory=lambda: amazon_web_services.kubernetes_versions()[-1]
@@ -1084,7 +1087,7 @@ def read_configuration(config_filename: pathlib.Path, read_environment: bool = T
     return config
 
 
-def write_configuration(config_filename: pathlib.Path, config: Main, mode: str = 'w'):
+def write_configuration(config_filename: pathlib.Path, config: Main, mode: str = "w"):
     yaml = YAML()
     yaml.preserve_quotes = True
     yaml.default_flow_style = False
