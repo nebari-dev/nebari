@@ -10,7 +10,7 @@ from nebari.hookspecs import hookimpl
 def nebari_subcommand(cli: typer.Typer):
     @cli.command(rich_help_panel="Additional Commands")
     def upgrade(
-        config: str = typer.Option(
+        config_filename: pathlib = typer.Option(
             ...,
             "-c",
             "--config",
@@ -29,7 +29,6 @@ def nebari_subcommand(cli: typer.Typer):
 
         See the project [green]RELEASE.md[/green] for details.
         """
-        config_filename = pathlib.Path(config)
         if not config_filename.is_file():
             raise ValueError(
                 f"passed in configuration filename={config_filename} must exist"
