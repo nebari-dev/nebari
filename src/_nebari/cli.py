@@ -1,4 +1,3 @@
-from typing import Optional
 import importlib
 
 import typer
@@ -37,8 +36,16 @@ def create_cli():
     @app.callback(invoke_without_command=True)
     def common(
         ctx: typer.Context,
-        version: bool = typer.Option(None, "-V", "--version", help="Nebari version number", callback=version_callback),
-        import_module: str = typer.Option(None, "--import-module", help="Import nebari module", callback=import_module),
+        version: bool = typer.Option(
+            None,
+            "-V",
+            "--version",
+            help="Nebari version number",
+            callback=version_callback,
+        ),
+        import_module: str = typer.Option(
+            None, "--import-module", help="Import nebari module", callback=import_module
+        ),
     ):
         pass
 
