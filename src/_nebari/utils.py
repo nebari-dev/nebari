@@ -12,7 +12,6 @@ from typing import Dict, List
 
 from ruamel.yaml import YAML
 
-from _nebari.constants import DEFAULT_NEBARI_DASK_VERSION, DEFAULT_NEBARI_IMAGE_TAG
 from _nebari.provider.cloud import (
     amazon_web_services,
     azure_cloud,
