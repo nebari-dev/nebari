@@ -1,4 +1,5 @@
 from typing import Optional
+import importlib
 
 import typer
 from typer.core import TyperGroup
@@ -13,6 +14,16 @@ class OrderCommands(TyperGroup):
         return list(self.commands)
 
 
+def version_callback(value: bool):
+    if value:
+        typer.echo(__version__)
+        raise typer.Exit()
+
+
+def import_module(module: str):
+    importlib.__import__(module)
+
+
 def create_cli():
     app = typer.Typer(
         cls=OrderCommands,
@@ -22,20 +33,15 @@ def create_cli():
         rich_markup_mode="rich",
         context_settings={"help_option_names": ["-h", "--help"]},
     )
-    pm.hook.nebari_subcommand(cli=app)
 
     @app.callback(invoke_without_command=True)
-    def version(
-        version: Optional[bool] = typer.Option(
-            None,
-            "-V",
-            "--version",
-            help="Nebari version number",
-            is_eager=True,
-        ),
+    def common(
+        ctx: typer.Context,
+        version: bool = typer.Option(None, "-V", "--version", help="Nebari version number", callback=version_callback),
+        import_module: str = typer.Option(None, "--import-module", help="Import nebari module", callback=import_module),
     ):
-        if version:
-            print(__version__)
-            raise typer.Exit()
+        pass
+
+    pm.hook.nebari_subcommand(cli=app)
 
     return app
