@@ -15,6 +15,7 @@ from ruamel.yaml import YAML
 from _nebari import constants
 from _nebari.utils import namestr_regex, set_docker_image_tag, set_nebari_dask_version
 from _nebari.version import __version__, rounded_ver_parse
+from _nebari.provider.cloud import azure_cloud, amazon_web_services, digital_ocean, google_cloud
 
 
 class CertificateEnum(str, enum.Enum):
@@ -348,7 +349,7 @@ class GCPPrivateClusterConfig(Base):
 
 class DigitalOceanProvider(Base):
     region: str = "nyc3"
-    kubernetes_version: str
+    kubernetes_version: str = Field(default_factory=lambda: digital_ocean.kubernetes_versions()[-1])
     node_groups: typing.Dict[str, NodeGroup] = {
         "general": NodeGroup(instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1),
         "user": NodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
@@ -356,12 +357,20 @@ class DigitalOceanProvider(Base):
     }
     tags: typing.Optional[typing.List[str]] = []
 
+    @validator('kubernetes_version')
+    def _validate_kubernetes_version(cls, value):
+        available_kubernetes_versions = digital_ocean.kubernetes_versions()
+        if value not in available_kubernetes_versions:
+            raise ValueError(f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available.")
+        return value
+
 
 class GoogleCloudPlatformProvider(Base):
     project: str
     region: str = "us-central1"
     availability_zones: typing.Optional[typing.List[str]] = []
-    kubernetes_version: str
+    kubernetes_version: str = Field(default_factory=lambda: google_cloud.kubernetes_versions()[-1])
+
     release_channel: typing.Optional[str]
     node_groups: typing.Dict[str, NodeGroup] = {
         "general": NodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
@@ -382,10 +391,18 @@ class GoogleCloudPlatformProvider(Base):
         typing.Union[GCPPrivateClusterConfig, None]
     ] = None
 
+    @validator('kubernetes_version')
+    def _validate_kubernetes_version(cls, value):
+        available_kubernetes_versions = google_cloud.kubernetes_versions()
+        if value not in available_kubernetes_versions:
+            raise ValueError(f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available.")
+        return value
+
 
 class AzureProvider(Base):
     region: str = "Central US"
-    kubernetes_version: str
+    kubernetes_version: str = Field(default_factory=lambda: azure_cloud.kubernetes_versions()[-1])
+
     node_groups: typing.Dict[str, NodeGroup] = {
         "general": NodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
         "user": NodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
@@ -395,11 +412,20 @@ class AzureProvider(Base):
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
 
+    @validator('kubernetes_version')
+    def _validate_kubernetes_version(cls, value):
+        available_kubernetes_versions = azure_cloud.kubernetes_versions()
+        if value not in available_kubernetes_versions:
+            raise ValueError(f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available.")
+        return value
+
+
 
 class AmazonWebServicesProvider(Base):
     region: str = "us-west-2"
     availability_zones: typing.Optional[typing.List[str]]
-    kubernetes_version: str
+    kubernetes_version: str = Field(default_factory=lambda: amazon_web_services.kubernetes_versions()[-1])
+
     node_groups: typing.Dict[str, AWSNodeGroup] = {
         "general": NodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
         "user": NodeGroup(
@@ -412,6 +438,14 @@ class AmazonWebServicesProvider(Base):
     existing_subnet_ids: typing.Optional[typing.List[str]]
     existing_security_group_ids: typing.Optional[str]
     vpc_cidr_block: str = "10.10.0.0/16"
+
+    @validator('kubernetes_version')
+    def _validate_kubernetes_version(cls, value):
+        available_kubernetes_versions = amazon_web_services.kubernetes_versions()
+        if value not in available_kubernetes_versions:
+            raise ValueError(f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available.")
+        return value
+
 
 
 class LocalProvider(Base):
