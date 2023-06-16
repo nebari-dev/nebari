@@ -10,7 +10,11 @@ from abc import ABC
 
 import pydantic
 from pydantic import Field, root_validator, validator
-from ruamel.yaml import YAML
+
+from ruamel.yaml import YAML, yaml_object
+yaml = YAML()
+yaml.preserve_quotes = True
+yaml.default_flow_style = False
 
 from _nebari import constants
 from _nebari.provider.cloud import (
@@ -19,23 +23,52 @@ from _nebari.provider.cloud import (
     digital_ocean,
     google_cloud,
 )
-from _nebari.utils import namestr_regex, set_docker_image_tag, set_nebari_dask_version
 from _nebari.version import __version__, rounded_ver_parse
 
+# Regex for suitable project names
+namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
 
+
+def random_secure_string(length: int = 32, chars: str = string.ascii_lowercase + string.digits):
+    return "".join(
+        secrets.choice(chars) for i in range(length)
+    )
+
+
+def set_docker_image_tag() -> str:
+    """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
+    return os.environ.get('NEBARI_IMAGE_TAG', constants.DEFAULT_NEBARI_IMAGE_TAG)
+
+
+def set_nebari_dask_version() -> str:
+    """Set version of `nebari-dask` meta package."""
+    return os.environ.get('NEBARI_DASK_VERSION', constants.DEFAULT_NEBARI_DASK_VERSION)
+
+
+@yaml_object(yaml)
 class CertificateEnum(str, enum.Enum):
     letsencrypt = "lets-encrypt"
     selfsigned = "self-signed"
     existing = "existing"
     disabled = "disabled"
 
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
 
+
+@yaml_object(yaml)
 class TerraformStateEnum(str, enum.Enum):
     remote = "remote"
     local = "local"
     existing = "existing"
 
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
 
+
+@yaml_object(yaml)
 class ProviderEnum(str, enum.Enum):
     local = "local"
     existing = "existing"
@@ -44,29 +77,53 @@ class ProviderEnum(str, enum.Enum):
     gcp = "gcp"
     azure = "azure"
 
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
 
+
+@yaml_object(yaml)
 class GitRepoEnum(str, enum.Enum):
     github = "github.com"
     gitlab = "gitlab.com"
 
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
 
+
+@yaml_object(yaml)
 class CiEnum(str, enum.Enum):
     github_actions = "github-actions"
     gitlab_ci = "gitlab-ci"
     none = "none"
 
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
 
+
+@yaml_object(yaml)
 class AuthenticationEnum(str, enum.Enum):
     password = "password"
     github = "GitHub"
     auth0 = "Auth0"
     custom = "custom"
 
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
 
+
+@yaml_object(yaml)
 class AccessEnum(str, enum.Enum):
     all = "all"
     yaml = "yaml"
     keycloak = "keycloak"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
 
 
 class Base(pydantic.BaseModel):
@@ -172,7 +229,7 @@ class Certificate(Base):
     secret_name: typing.Optional[str]
     # lets-encrypt
     acme_email: typing.Optional[str]
-    acme_server: typing.Optional[str]
+    acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
 
 
 # ========== Default Images ==============
@@ -255,14 +312,9 @@ class GitHubAuthentication(Authentication):
 
 
 # ================= Keycloak ==================
-def random_password(length: int = 32):
-    return "".join(
-        secrets.choice(string.ascii_letters + string.digits) for i in range(16)
-    )
-
 
 class Keycloak(Base):
-    initial_root_password: str = Field(default_factory=random_password)
+    initial_root_password: str = Field(default_factory=random_secure_string)
     overrides: typing.Dict = {}
     realm_display_name: str = "Nebari"
 
@@ -357,6 +409,7 @@ class DigitalOceanProvider(Base):
     kubernetes_version: str = Field(
         default_factory=lambda: digital_ocean.kubernetes_versions()[-1]
     )
+    # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
     node_groups: typing.Dict[str, NodeGroup] = {
         "general": NodeGroup(instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1),
         "user": NodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
@@ -423,7 +476,7 @@ class AzureProvider(Base):
         "user": NodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
         "worker": NodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     }
-    storage_account_postfix: str
+    storage_account_postfix: str = Field(default_factory=random_secure_string)
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
 
@@ -438,7 +491,7 @@ class AzureProvider(Base):
 
 
 class AmazonWebServicesProvider(Base):
-    region: str = "us-west-2"
+    region: str = Field(default_factory=lambda: os.environ.get("AWS_DEFAULT_REGION", "us-west-2"))
     availability_zones: typing.Optional[typing.List[str]]
     kubernetes_version: str = Field(
         default_factory=lambda: amazon_web_services.kubernetes_versions()[-1]
@@ -447,10 +500,10 @@ class AmazonWebServicesProvider(Base):
     node_groups: typing.Dict[str, AWSNodeGroup] = {
         "general": NodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
         "user": NodeGroup(
-            instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
+            instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
         ),
         "worker": NodeGroup(
-            instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
+            instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
         ),
     }
     existing_subnet_ids: typing.Optional[typing.List[str]]
@@ -754,16 +807,16 @@ def project_name_convention(value: typing.Any, values):
 
 
 class InitInputs(Base):
-    cloud_provider: typing.Type[ProviderEnum] = "local"
+    cloud_provider: ProviderEnum = ProviderEnum.local
     project_name: str = ""
     domain_name: str = ""
     namespace: typing.Optional[letter_dash_underscore_pydantic] = "dev"
-    auth_provider: typing.Type[AuthenticationEnum] = "password"
+    auth_provider: AuthenticationEnum = AuthenticationEnum.password
     auth_auto_provision: bool = False
     repository: typing.Union[str, None] = None
     repository_auto_provision: bool = False
-    ci_provider: typing.Optional[CiEnum] = None
-    terraform_state: typing.Optional[TerraformStateEnum] = "remote"
+    ci_provider: CiEnum = CiEnum.none
+    terraform_state: TerraformStateEnum = TerraformStateEnum.remote
     kubernetes_version: typing.Union[str, None] = None
     ssl_cert_email: typing.Union[str, None] = None
     disable_prompt: bool = False
@@ -773,6 +826,7 @@ class Main(Base):
     provider: ProviderEnum = ProviderEnum.local
     project_name: str
     namespace: letter_dash_underscore_pydantic = "dev"
+    # In nebari_version only use major.minor.patch version - drop any pre/post/dev suffixes
     nebari_version: str = __version__
     ci_cd: CICD = CICD()
     domain: str
@@ -1028,3 +1082,12 @@ def read_configuration(config_filename: pathlib.Path, read_environment: bool = T
         config = set_config_from_environment_variables(config)
 
     return config
+
+
+def write_configuration(config_filename: pathlib.Path, config: Main, mode: str = 'w'):
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    yaml.default_flow_style = False
+
+    with config_filename.open(mode) as f:
+        yaml.dump(config.dict(exclude_unset=True), f)
