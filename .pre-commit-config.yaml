@@ -29,12 +29,12 @@ repos:
       - id: check-json
       - id: check-yaml
         # jinja2 templates for helm charts
-        exclude: "nebari/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)"
+        exclude: "src/_nebari/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)"
         args: [--allow-multiple-documents]
       - id: check-toml
       # Lint: Checks that non-binary executables have a proper shebang.
       - id: check-executables-have-shebangs
-        exclude: "^nebari/template/"
+        exclude: "^src/_nebari/template/"
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.2.4
@@ -43,7 +43,7 @@ repos:
         args:
           [
             "--builtin=rare,clear,informal,names",
-            "--skip=_build,*/build/*,*/node_modules/*,nebari.egg-info,.nox,*.git,*.js,*.json,*.yaml,*.yml",
+            "--skip=_build,*/build/*,*/node_modules/*,nebari.egg-info,*.git,*.js,*.json,*.yaml,*.yml",
             "--ignore-words-list=AKS,aks",
             "--write",
           ]
@@ -54,10 +54,10 @@ repos:
     rev: 23.3.0
     hooks:
       - id: black
-        args: ["--line-length=88", "--exclude=/nebari/template/"]
+        args: ["--line-length=88", "--exclude=/src/_nebari/template/"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.263
+    rev: v0.0.270
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -73,22 +73,8 @@ repos:
 
   # terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.78.0
+    rev: v1.80.0
     hooks:
       - id: terraform_fmt
         args:
           - --args=-write=true
-
-  # markdown
-  - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.16
-    hooks:
-      - id: mdformat
-        files: ^docs/
-        name: mdformat
-        entry: mdformat --wrap=120 --number --end-of-line=lf
-        language: python
-        types: [markdown]
-        minimum_pre_commit_version: "2.0.0"
-        additional_dependencies:
-          - mdformat-tables

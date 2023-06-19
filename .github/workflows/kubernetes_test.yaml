@@ -6,8 +6,8 @@ on:
       - ".github/workflows/kubernetes_test.yaml"
       - "tests_deployment/**"
       - "tests_e2e/**"
-      - "nebari/stages/**"
-      - "nebari/template/stages/**"
+      - "src/_nebari/stages/**"
+      - "src/_nebari/template/stages/**"
 
   push:
     branches:
@@ -18,8 +18,8 @@ on:
       - ".github/workflows/kubernetes_test.yaml"
       - "tests_deployment/**"
       - "tests_e2e/**"
-      - "nebari/stages/**"
-      - "nebari/template/stages/**"
+      - "src/_nebari/stages/**"
+      - "src/_nebari/template/stages/**"
 
   workflow_call:
     inputs:
@@ -91,9 +91,6 @@ jobs:
       - name: Get routing table for docker pods
         run: |
           ip route
-      - name: Add DNS entry to hosts
-        run: |
-          sudo echo "172.18.1.100  github-actions.nebari.dev" | sudo tee -a /etc/hosts
       - name: Initialize Nebari Cloud
         run: |
           mkdir -p local-deployment
