@@ -1,9 +1,14 @@
+# This is only workflow that requires cloud credentials and therefore will not run on PRs coming from forks.
 name: "Test Nebari Provider"
 
 on:
+  schedule:
+    - cron: "0 3 * * *"
   pull_request:
     paths:
       - ".github/workflows/test-provider.yaml"
+      - ".github/failed-workflow-issue-templates/test-provider.md"
+      - ".github/actions/publish-from-template"
       - "tests/**"
       - "tests_deployment/**"
       - "tests_e2e/**"
@@ -31,6 +36,7 @@ on:
 
 jobs:
   test-render-providers:
+    # avoid running on PRs coming from a fork
     if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
     name: "Test Nebari Provider"
     runs-on: ubuntu-latest
@@ -134,3 +140,13 @@ jobs:
         with:
           name: "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-artifact"
           path: "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
+
+      - if: failure() || github.event_name == 'pull_request'
+        name: Publish information from template
+        uses: ./.github/actions/publish-from-template
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROVIDER: ${{ matrix.provider }}
+          CICD: ${{ matrix.cicd }}
+        with:
+          filename: .github/failed-workflow-issue-templates/provider-tests.md
