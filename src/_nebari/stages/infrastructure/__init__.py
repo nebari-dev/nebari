@@ -214,7 +214,8 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         desired_size=node_group.min_nodes,
                         max_size=node_group.max_nodes,
                         single_subnet=node_group.single_subnet,
-                    ) for name, node_group in self.config.amazon_web_services.node_groups.items()
+                    )
+                    for name, node_group in self.config.amazon_web_services.node_groups.items()
                 ],
                 availability_zones=self.config.amazon_web_services.availability_zones,
                 vpc_cidr_block=self.config.amazon_web_services.vpc_cidr_block,
