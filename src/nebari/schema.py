@@ -12,10 +12,6 @@ import pydantic
 from pydantic import Field, root_validator, validator
 from ruamel.yaml import YAML, yaml_object
 
-yaml = YAML()
-yaml.preserve_quotes = True
-yaml.default_flow_style = False
-
 from _nebari import constants
 from _nebari.provider.cloud import (
     amazon_web_services,
@@ -24,6 +20,10 @@ from _nebari.provider.cloud import (
     google_cloud,
 )
 from _nebari.version import __version__, rounded_ver_parse
+
+yaml = YAML()
+yaml.preserve_quotes = True
+yaml.default_flow_style = False
 
 # Regex for suitable project names
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
@@ -207,8 +207,10 @@ class Prefect(Base):
 class CondaStore(Base):
     extra_settings: typing.Dict[str, typing.Any] = {}
     extra_config: str = ""
+    image: str = "quansight/conda-store-server"
     image_tag: str = constants.DEFAULT_CONDA_STORE_IMAGE_TAG
     default_namespace: str = "nebari-git"
+    object_storage: typing.Union[str, None] = None
 
 
 # ============= Terraform ===============
