@@ -529,9 +529,9 @@ class AmazonWebServicesProvider(Base):
     @root_validator
     def _validate_provider(cls, values):
         # populate availability zones if empty
-        if values.get('availability_zones') is None:
-            zones = amazon_web_services.zones(values['region'])
-            values['availability_zones'] = list(sorted(zones))[:2]
+        if values.get("availability_zones") is None:
+            zones = amazon_web_services.zones(values["region"])
+            values["availability_zones"] = list(sorted(zones))[:2]
         return values
 
 
