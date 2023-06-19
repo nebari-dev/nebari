@@ -1,7 +1,6 @@
 import contextlib
 import pathlib
-from collections.abc import Iterable
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import typer
 from pluggy import HookimplMarker, HookspecMarker
@@ -41,7 +40,7 @@ class NebariStage:
 
 
 @hookspec
-def nebari_stage() -> Iterable[NebariStage]:
+def nebari_stage() -> List[NebariStage]:
     """Registers stages in nebari"""
 
 
