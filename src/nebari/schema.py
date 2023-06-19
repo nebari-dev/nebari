@@ -349,8 +349,8 @@ class NodeGroup(Base):
     instance: str
     min_nodes: int
     max_nodes: int
-    gpu: typing.Optional[bool] = False
-    guest_accelerators: typing.Optional[typing.List[typing.Dict]] = []
+    gpu: bool = False
+    guest_accelerators: typing.List[typing.Dict] = []
 
     class Config:
         extra = "allow"
@@ -377,10 +377,6 @@ class NodeGroup(Base):
                 assert isinstance(i["name"], str) and isinstance(i["count"], int)
             except AssertionError:
                 raise ValueError(assertion_error_message)
-
-
-class AWSNodeGroup(NodeGroup):
-    single_subnet: typing.Optional[bool] = False
 
 
 class GCPIPAllocationPolicy(Base):
@@ -491,6 +487,14 @@ class AzureProvider(Base):
         return value
 
 
+class AWSNodeGroup(Base):
+    instance: str
+    min_nodes: int = 0
+    max_nodes: int
+    gpu: bool = False
+    single_subnet: bool = False
+
+
 class AmazonWebServicesProvider(Base):
     region: str = Field(
         default_factory=lambda: os.environ.get("AWS_DEFAULT_REGION", "us-west-2")
@@ -501,16 +505,16 @@ class AmazonWebServicesProvider(Base):
     )
 
     node_groups: typing.Dict[str, AWSNodeGroup] = {
-        "general": NodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
-        "user": NodeGroup(
+        "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
+        "user": AWSNodeGroup(
             instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
         ),
-        "worker": NodeGroup(
+        "worker": AWSNodeGroup(
             instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
         ),
     }
-    existing_subnet_ids: typing.Optional[typing.List[str]]
-    existing_security_group_ids: typing.Optional[str]
+    existing_subnet_ids: typing.List[str] = None
+    existing_security_group_ids: str = None
     vpc_cidr_block: str = "10.10.0.0/16"
 
     @validator("kubernetes_version")
@@ -521,6 +525,14 @@ class AmazonWebServicesProvider(Base):
                 f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
         return value
+
+    @root_validator
+    def _validate_provider(cls, values):
+        # populate availability zones if empty
+        if values.get('availability_zones') is None:
+            zones = amazon_web_services.zones(values['region'])
+            values['availability_zones'] = list(sorted(zones))[:2]
+        return values
 
 
 class LocalProvider(Base):

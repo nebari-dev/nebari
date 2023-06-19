@@ -52,8 +52,27 @@ class AzureInputVars(BaseCloudProviderInputVars, schema.AzureProvider):
     node_resource_group_name: str
 
 
-class AWSInputVars(BaseCloudProviderInputVars, schema.AmazonWebServicesProvider):
-    pass
+class AWSNodeGroupInputVars(schema.Base):
+    name: str
+    instance_type: str
+    gpu: bool = False
+    min_size: int
+    desired_size: int
+    max_size: int
+    single_subnet: bool
+
+
+class AWSInputVars(schema.Base):
+    name: str
+    environment: str
+    existing_security_group_id: str = None
+    existing_subnet_ids: List[str] = None
+    region: str
+    kubernetes_version: str
+    node_groups: List[AWSNodeGroupInputVars]
+    availability_zones: List[str]
+    vpc_cidr_block: str
+    kubeconfig_filename: str = get_kubeconfig_filename()
 
 
 @contextlib.contextmanager
@@ -183,10 +202,20 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 name=self.config.project_name,
                 environment=self.config.namespace,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
-                existing_security_group_ids=self.config.amazon_web_services.existing_security_group_ids,
+                existing_security_group_id=self.config.amazon_web_services.existing_security_group_ids,
                 region=self.config.amazon_web_services.region,
                 kubernetes_version=self.config.amazon_web_services.kubernetes_version,
-                node_groups=self.config.amazon_web_services.node_groups,
+                node_groups=[
+                    AWSNodeGroupInputVars(
+                        name=name,
+                        instance_type=node_group.instance,
+                        gpu=node_group.gpu,
+                        min_size=node_group.min_nodes,
+                        desired_size=node_group.min_nodes,
+                        max_size=node_group.max_nodes,
+                        single_subnet=node_group.single_subnet,
+                    ) for name, node_group in self.config.amazon_web_services.node_groups.items()
+                ],
                 availability_zones=self.config.amazon_web_services.availability_zones,
                 vpc_cidr_block=self.config.amazon_web_services.vpc_cidr_block,
             ).dict()
