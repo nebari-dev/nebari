@@ -1,4 +1,5 @@
 import importlib
+import typing
 
 import typer
 from typer.core import TyperGroup
@@ -20,7 +21,8 @@ def version_callback(value: bool):
 
 
 def import_module(module: str):
-    importlib.__import__(module)
+    if module is not None:
+        importlib.__import__(module)
 
 
 def create_cli():
@@ -43,7 +45,7 @@ def create_cli():
             help="Nebari version number",
             callback=version_callback,
         ),
-        import_module: str = typer.Option(
+        import_module: typing.Optional[str] = typer.Option(
             None, "--import-module", help="Import nebari module", callback=import_module
         ),
     ):
