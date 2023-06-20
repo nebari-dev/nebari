@@ -132,6 +132,7 @@ class Base(pydantic.BaseModel):
     class Config:
         extra = "forbid"
         validate_assignment = True
+        allow_population_by_field_name = True
 
 
 # ============== CI/CD =============
@@ -210,7 +211,7 @@ class CondaStore(Base):
     image: str = "quansight/conda-store-server"
     image_tag: str = constants.DEFAULT_CONDA_STORE_IMAGE_TAG
     default_namespace: str = "nebari-git"
-    object_storage: typing.Union[str, None] = None
+    object_storage: str = "200Gi"
 
 
 # ============= Terraform ===============
