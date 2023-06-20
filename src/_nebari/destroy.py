@@ -19,7 +19,9 @@ def destroy_stages(config: schema.Main):
                 stack.enter_context(s.destroy(stage_outputs, status))
             except Exception as e:
                 stats[s.name] = False
-                print(f"ERROR: stage={s.name} failed due to {e}. Due to stages depending on each other we can only destroy stages that occur before this stage")
+                print(
+                    f"ERROR: stage={s.name} failed due to {e}. Due to stages depending on each other we can only destroy stages that occur before this stage"
+                )
                 break
     return status
 
