@@ -43,8 +43,44 @@ class DigitalOceanInputVars(BaseCloudProviderInputVars, schema.DigitalOceanProvi
     pass
 
 
-class GCPInputVars(BaseCloudProviderInputVars, schema.GoogleCloudPlatformProvider):
-    pass
+class GCPGuestAccelerators(schema.Base):
+    type: str
+    count: int
+
+
+class GCPNodeGroupInputVars(schema.Base):
+    name: str
+    instance_type: str
+    min_size: int
+    max_size: int
+    labels: Dict[str, str] = {}
+    preemptible: bool = False
+    guest_accelerators: List[GCPGuestAccelerators]
+
+
+class GCPPrivateClusterConfig(schema.Base):
+    enable_private_nodes: bool
+    enable_private_endpoint: bool
+    master_ipv4_cidr_block: str
+
+
+class GCPInputVars(schema.Base):
+    name: str
+    environment: str
+    region: str
+    project_id: str
+    availability_zones: List[str]
+    node_groups: List[GCPNodeGroupInputVars]
+    kubeconfig_filename: str = get_kubeconfig_filename()
+    tags: List[str]
+    kubernetes_version: str
+    release_channel: str
+    networking_mode: str
+    network: str
+    subnetwork: str = None
+    ip_allocation_policy: Dict[str, str] = None
+    master_authorized_networks_config: Dict[str, str] = None
+    private_cluster_config: GCPPrivateClusterConfig = None
 
 
 class AzureInputVars(BaseCloudProviderInputVars, schema.AzureProvider):
@@ -174,7 +210,16 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 region=self.config.google_cloud_platform.region,
                 project_id=self.config.google_cloud_platform.project,
                 availability_zones=self.config.google_cloud_platform.availability_zones,
-                node_groups=self.config.google_cloud_platform.node_groups,
+                node_groups=[
+                    GCPNodeGroupInputVars(
+                        name=name,
+                        instance_type=node_group.instance,
+                        min_size=node_group.min_nodes,
+                        max_size=node_group.max_nodes,
+                        guest_accelerators=node_group.guest_accelerators,
+                    )
+                    for name, node_group in self.config.google_cloud_platform.node_groups.items()
+                ],
                 tags=self.config.google_cloud_platform.tags,
                 kubernetes_version=self.config.google_cloud_platform.kubernetes_version,
                 release_channel=self.config.google_cloud_platform.release_channel,
