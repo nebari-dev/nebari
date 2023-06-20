@@ -5,17 +5,11 @@ variable "cdsdashboards" {
     cds_hide_user_named_servers     = bool
     cds_hide_user_dashboard_servers = bool
   })
-  default = {
-    enabled                         = true
-    cds_hide_user_named_servers     = true
-    cds_hide_user_dashboard_servers = false
-  }
 }
 
 variable "jupyterhub-theme" {
   description = "JupyterHub theme"
   type        = map(any)
-  default     = {}
 }
 
 variable "jupyterhub-image" {
@@ -40,7 +34,6 @@ variable "jupyterhub-shared-storage" {
 variable "jupyterhub-shared-endpoint" {
   description = "JupyterHub shared storage nfs endpoint"
   type        = string
-  default     = null
 }
 
 variable "jupyterlab-image" {
@@ -53,7 +46,17 @@ variable "jupyterlab-image" {
 
 variable "jupyterlab-profiles" {
   description = "JupyterHub profiles to expose to user"
-  default     = []
+}
+
+variable "jupyterhub-hub-extraEnv" {
+  description = "Extracted overrides to merge with jupyterhub.hub.extraEnv"
+  type        = string
+  default     = "[]"
+}
+
+variable "idle-culler-settings" {
+  description = "Idle culler timeout settings (in minutes)"
+  type        = any
 }
 
 
@@ -135,6 +138,6 @@ module "jupyterhub" {
   jupyterhub-logout-redirect-url = var.jupyterhub-logout-redirect-url
   jupyterhub-hub-extraEnv        = var.jupyterhub-hub-extraEnv
 
-  idle-culler-settings = local.idle-culler-settings
+  idle-culler-settings = var.idle-culler-settings
 
 }
