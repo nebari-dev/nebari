@@ -43,15 +43,9 @@ class CondaStoreInputVars(schema.Base):
     conda_store_environments: Dict[str, schema.CondaEnvironment] = Field(
         alias="conda-store-environments"
     )
-    conda_store_default_namespace: str = Field(
-        alias="conda-store-default-namespace"
-    )
-    conda_store_filesystem_storage: str = Field(
-        alias="conda-store-filesystem-storage"
-    )
-    conda_store_object_storage: str = Field(
-        alias="conda-store-object-storage"
-    )
+    conda_store_default_namespace: str = Field(alias="conda-store-default-namespace")
+    conda_store_filesystem_storage: str = Field(alias="conda-store-filesystem-storage")
+    conda_store_object_storage: str = Field(alias="conda-store-object-storage")
     conda_store_extra_settings: Dict[str, Any] = Field(
         alias="conda-store-extra-settings"
     )
@@ -70,7 +64,9 @@ class JupyterhubInputVars(schema.Base):
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
     jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
     jupyterhub_shared_endpoint: str = Field(None, alias="jupyterhub-shared-endpoint")
-    jupyterhub_profiles: List[schema.JupyterLabProfile] = Field(alias="jupyterlab-profiles")
+    jupyterhub_profiles: List[schema.JupyterLabProfile] = Field(
+        alias="jupyterlab-profiles"
+    )
     jupyterhub_image: ImageNameTag = Field(alias="jupyterhub-image")
     jupyterhub_hub_extraEnv: str = Field(alias="jupyterhub-hub-extraEnv")
     idle_culler_settings: Dict[str, Any] = Field(alias="idle-culler-settings")
