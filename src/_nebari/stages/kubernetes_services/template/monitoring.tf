@@ -1,7 +1,6 @@
 variable "monitoring-enabled" {
   description = "Prometheus and Grafana monitoring enabled"
   type        = bool
-  default     = true
 }
 
 module "monitoring" {
