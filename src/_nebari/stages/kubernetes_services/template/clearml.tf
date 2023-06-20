@@ -2,20 +2,17 @@
 variable "clearml-enabled" {
   description = "Clearml enabled or disabled"
   type        = bool
-  default     = false
 }
 
 variable "clearml-enable-forwardauth" {
   description = "Clearml enabled or disabled forward authentication"
   type        = bool
-  default     = false
 }
 
 
 variable "clearml-overrides" {
   description = "Clearml helm chart overrides"
   type        = list(string)
-  default     = []
 }
 
 
