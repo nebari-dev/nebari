@@ -2,26 +2,22 @@
 variable "argo-workflows-enabled" {
   description = "Argo Workflows enabled"
   type        = bool
-  default     = true
 }
 
 variable "argo-workflows-overrides" {
   description = "Argo Workflows helm chart overrides"
   type        = list(string)
-  default     = []
 }
 
 variable "nebari-workflow-controller" {
   description = "Nebari Workflow Controller enabled"
   type        = bool
-  default     = true
 }
 
 
 variable "keycloak-read-only-user-credentials" {
   description = "Keycloak password for nebari-bot"
   type        = map(string)
-  default     = {}
 }
 
 variable "workflow-controller-image-tag" {
