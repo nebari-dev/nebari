@@ -9,7 +9,6 @@ variable "dask-worker-image" {
 
 variable "dask-gateway-profiles" {
   description = "Dask Gateway profiles to expose to user"
-  default     = []
 }
 
 
