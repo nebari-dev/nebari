@@ -11,7 +11,6 @@ from _nebari.stages.tf_objects import (
     NebariGCPProvider,
     NebariTerraformState,
 )
-from _nebari import constants
 from _nebari.utils import modified_environ
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -218,7 +217,8 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         min_size=node_group.min_nodes,
                         max_size=node_group.max_nodes,
                         guest_accelerators=node_group.guest_accelerators,
-                    ) for name, node_group in self.config.google_cloud_platform.node_groups.items()
+                    )
+                    for name, node_group in self.config.google_cloud_platform.node_groups.items()
                 ],
                 tags=self.config.google_cloud_platform.tags,
                 kubernetes_version=self.config.google_cloud_platform.kubernetes_version,
