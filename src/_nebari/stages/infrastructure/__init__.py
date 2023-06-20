@@ -255,7 +255,8 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         instance=node_group.instance,
                         min_nodes=node_group.min_nodes,
                         max_nodes=node_group.max_nodes,
-                    ) for name, node_group in self.config.azure.node_groups.items()
+                    )
+                    for name, node_group in self.config.azure.node_groups.items()
                 },
                 resource_group_name=f"{self.config.project_name}-{self.config.namespace}",
                 node_resource_group_name=f"{self.config.project_name}-{self.config.namespace}-node-resource-group",
