@@ -432,7 +432,7 @@ class GoogleCloudPlatformProvider(Base):
         default_factory=lambda: google_cloud.kubernetes_versions("us-central1")[-1]
     )
 
-    release_channel: typing.Optional[str]
+    release_channel: str = constants.DEFAULT_GKE_RELEASE_CHANNEL
     node_groups: typing.Dict[str, NodeGroup] = {
         "general": NodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
         "user": NodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
