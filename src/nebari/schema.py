@@ -473,7 +473,7 @@ class AzureProvider(Base):
         "user": NodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
         "worker": NodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     }
-    storage_account_postfix: str = Field(default_factory=random_secure_string)
+    storage_account_postfix: str = Field(default_factory=lambda: random_secure_string(length=4))
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
 
