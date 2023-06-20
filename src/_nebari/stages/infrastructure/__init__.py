@@ -83,9 +83,23 @@ class GCPInputVars(schema.Base):
     private_cluster_config: GCPPrivateClusterConfig = None
 
 
-class AzureInputVars(BaseCloudProviderInputVars, schema.AzureProvider):
+class AzureNodeGroupInputVars(schema.Base):
+    instance: str
+    min_nodes: int
+    max_nodes: int
+
+
+class AzureInputVars(schema.Base):
+    name: str
+    environment: str
+    region: str
+    kubeconfig_filename: str = get_kubeconfig_filename()
+    kubernetes_version: str
+    node_groups: Dict[str, AzureNodeGroupInputVars]
     resource_group_name: str
     node_resource_group_name: str
+    vnet_subnet_id: str = None
+    private_cluster_enabled: bool
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -236,7 +250,13 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 environment=self.config.namespace,
                 region=self.config.azure.region,
                 kubernetes_version=self.config.azure.kubernetes_version,
-                node_groups=self.config.azure.node_groups,
+                node_groups={
+                    name: AzureNodeGroupInputVars(
+                        instance=node_group.instance,
+                        min_nodes=node_group.min_nodes,
+                        max_nodes=node_group.max_nodes,
+                    ) for name, node_group in self.config.azure.node_groups.items()
+                },
                 resource_group_name=f"{self.config.project_name}-{self.config.namespace}",
                 node_resource_group_name=f"{self.config.project_name}-{self.config.namespace}-node-resource-group",
                 vnet_subnet_id=self.config.azure.vnet_subnet_id,
