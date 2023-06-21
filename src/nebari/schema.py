@@ -9,7 +9,7 @@ import typing
 from abc import ABC
 
 import pydantic
-from pydantic import Field, root_validator, validator, conint
+from pydantic import Field, conint, root_validator, validator
 from ruamel.yaml import YAML, yaml_object
 
 from _nebari import constants
@@ -351,9 +351,10 @@ class NodeSelector(Base):
 class DigitalOceanNodeGroup(Base):
     """Representation of a node group with Digital Ocean
 
-     - Kubernetes limits: https://docs.digitalocean.com/products/kubernetes/details/limits/
-     - Available instance types: https://slugs.do-api.dev/
+    - Kubernetes limits: https://docs.digitalocean.com/products/kubernetes/details/limits/
+    - Available instance types: https://slugs.do-api.dev/
     """
+
     instance: str
     min_nodes: conint(ge=1) = 1
     max_nodes: conint(ge=1) = 1
@@ -364,21 +365,32 @@ class DigitalOceanProvider(Base):
     kubernetes_version: typing.Optional[str]
     # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
     node_groups: typing.Dict[str, DigitalOceanNodeGroup] = {
-        "general": DigitalOceanNodeGroup(instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1),
-        "user": DigitalOceanNodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
-        "worker": DigitalOceanNodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
+        "general": DigitalOceanNodeGroup(
+            instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1
+        ),
+        "user": DigitalOceanNodeGroup(
+            instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5
+        ),
+        "worker": DigitalOceanNodeGroup(
+            instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5
+        ),
     }
     tags: typing.Optional[typing.List[str]] = []
 
     @root_validator
     def _validate_kubernetes_version(cls, values):
-        available_kubernetes_versions = digital_ocean.kubernetes_versions(values["region"])
-        if values['kubernetes_version'] is not None and values['kubernetes_version'] not in available_kubernetes_versions:
+        available_kubernetes_versions = digital_ocean.kubernetes_versions(
+            values["region"]
+        )
+        if (
+            values["kubernetes_version"] is not None
+            and values["kubernetes_version"] not in available_kubernetes_versions
+        ):
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
         else:
-            values['kubernetes_version'] = available_kubernetes_versions[-1]
+            values["kubernetes_version"] = available_kubernetes_versions[-1]
         return values
 
 
@@ -410,6 +422,7 @@ class GCPGuestAccelerator(Base):
     # TODO: replace with nebari.dev new URL
     https://docs.nebari.dev/en/stable/source/admin_guide/gpu.html?#add-gpu-node-group
     """
+
     name: str
     count: conint(ge=1) = 1
 
@@ -450,13 +463,18 @@ class GoogleCloudPlatformProvider(Base):
 
     @root_validator
     def _validate_kubernetes_version(cls, values):
-        available_kubernetes_versions = google_cloud.kubernetes_versions(values["region"])
-        if values['kubernetes_version'] is not None and values['kubernetes_version'] not in available_kubernetes_versions:
+        available_kubernetes_versions = google_cloud.kubernetes_versions(
+            values["region"]
+        )
+        if (
+            values["kubernetes_version"] is not None
+            and values["kubernetes_version"] not in available_kubernetes_versions
+        ):
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
         else:
-            values['kubernetes_version'] = available_kubernetes_versions[-1]
+            values["kubernetes_version"] = available_kubernetes_versions[-1]
         return values
 
 

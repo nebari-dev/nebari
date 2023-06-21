@@ -345,7 +345,9 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
         print(f"After stage={self.name} kubernetes cluster successfully provisioned")
 
-    def set_outputs(self, stage_outputs: Dict[str, Dict[str, Any]], outputs: Dict[str, Any]):
+    def set_outputs(
+        self, stage_outputs: Dict[str, Dict[str, Any]], outputs: Dict[str, Any]
+    ):
         outputs["node_selectors"] = _calculate_node_groups(self.config)
         super().set_outputs(stage_outputs, outputs)
 
