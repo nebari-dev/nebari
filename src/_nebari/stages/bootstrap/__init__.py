@@ -1,3 +1,4 @@
+import io
 from inspect import cleandoc
 from typing import Any, Dict, List
 
@@ -61,12 +62,11 @@ class BootstrapStage(NebariStage):
         contents = {}
         if self.config.ci_cd.type != schema.CiEnum.none:
             for fn, workflow in gen_cicd(self.config).items():
+                stream = io.StringIO()
                 workflow_yaml = schema.yaml.dump(
-                    workflow.dict(
-                        by_alias=True, exclude_unset=True, exclude_defaults=True
-                    ),
+                    workflow.dict(by_alias=True, exclude_unset=True, exclude_defaults=True), stream
                 )
-                contents.update({fn: workflow_yaml})
+                contents.update({fn: stream.getvalue()})
 
         contents.update(gen_gitignore())
         return contents
