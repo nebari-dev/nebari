@@ -60,7 +60,9 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             endpoint=stage_outputs["stages/04-kubernetes-ingress"]["domain"],
             initial_root_password=self.config.security.keycloak.initial_root_password,
             overrides=[json.dumps(self.config.security.keycloak.overrides)],
-            node_group=stage_outputs["stages/02-infrastructure"]["node_selectors"]["general"],
+            node_group=stage_outputs["stages/02-infrastructure"]["node_selectors"][
+                "general"
+            ],
         ).dict()
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
