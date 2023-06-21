@@ -53,8 +53,8 @@ class GCPNodeGroupInputVars(schema.Base):
     instance_type: str
     min_size: int
     max_size: int
-    labels: Dict[str, str] = {}
-    preemptible: bool = False
+    labels: Dict[str, str]
+    preemptible: bool
     guest_accelerators: List[GCPGuestAccelerators]
 
 
@@ -123,6 +123,33 @@ class AWSInputVars(schema.Base):
     availability_zones: List[str]
     vpc_cidr_block: str
     kubeconfig_filename: str = get_kubeconfig_filename()
+
+
+def _calculate_node_groups(config: schema.Main):
+    if config.provider == schema.ProviderEnum.aws:
+        return {
+            group: {"key": "eks.amazonaws.com/nodegroup", "value": group}
+            for group in ["general", "user", "worker"]
+        }
+    elif config.provider == schema.ProviderEnum.gcp:
+        return {
+            group: {"key": "cloud.google.com/gke-nodepool", "value": group}
+            for group in ["general", "user", "worker"]
+        }
+    elif config.provider == schema.ProviderEnum.azure:
+        return {
+            group: {"key": "azure-node-pool", "value": group}
+            for group in ["general", "user", "worker"]
+        }
+    elif config.provider == schema.ProviderEnum.do:
+        return {
+            group: {"key": "doks.digitalocean.com/node-pool", "value": group}
+            for group in ["general", "user", "worker"]
+        }
+    elif config.provider == schema.ProviderEnum.existing:
+        return config.existing.node_selectors
+    else:
+        return config.local.dict()["node_selectors"]
 
 
 @contextlib.contextmanager
@@ -227,9 +254,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 node_groups=[
                     GCPNodeGroupInputVars(
                         name=name,
+                        labels=node_group.labels,
                         instance_type=node_group.instance,
                         min_size=node_group.min_nodes,
                         max_size=node_group.max_nodes,
+                        preemptible=node_group.preemptible,
                         guest_accelerators=node_group.guest_accelerators,
                     )
                     for name, node_group in self.config.google_cloud_platform.node_groups.items()
@@ -315,6 +344,10 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             sys.exit(1)
 
         print(f"After stage={self.name} kubernetes cluster successfully provisioned")
+
+    def set_outputs(self, stage_outputs: Dict[str, Dict[str, Any]], outputs: Dict[str, Any]):
+        outputs["node_selectors"] = _calculate_node_groups(self.config)
+        super().set_outputs(stage_outputs, outputs)
 
     @contextlib.contextmanager
     def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):

@@ -76,39 +76,12 @@ def provision_ingress_dns(
         checks.check_ingress_dns(stage_outputs, config, disable_prompt)
 
 
-def _calculate_node_groups(config: schema.Main):
-    if config.provider == schema.ProviderEnum.aws:
-        return {
-            group: {"key": "eks.amazonaws.com/nodegroup", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.gcp:
-        return {
-            group: {"key": "cloud.google.com/gke-nodepool", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.azure:
-        return {
-            group: {"key": "azure-node-pool", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.do:
-        return {
-            group: {"key": "doks.digitalocean.com/node-pool", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.existing:
-        return config.existing.node_selectors
-    else:
-        return config.local.dict()["node_selectors"]
-
-
 def check_ingress_dns(stage_outputs, config, disable_prompt):
     directory = "stages/04-kubernetes-ingress"
 
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
     ip = socket.gethostbyname(ip_or_name["hostname"] or ip_or_name["ip"])
-    domain_name = config.domain
+    domain_name = stage_outputs[directory]["domain"]
 
     def _attempt_dns_lookup(
         domain_name, ip, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
@@ -183,11 +156,25 @@ class KubernetesIngressStage(NebariTerraformStage):
                 },
                 "name": self.config.project_name,
                 "environment": self.config.namespace,
-                "node_groups": _calculate_node_groups(self.config),
+                "node_groups": stage_outputs["stages/02-infrastructure"]["node_selectors"],
                 **self.config.ingress.terraform_overrides,
             },
             **cert_details,
         }
+
+    def set_outputs(self, stage_outputs: Dict[str, Dict[str, Any]], outputs: Dict[str, Any]):
+        ip_or_name = outputs["load_balancer_address"][
+            "value"
+        ]
+        host = ip_or_name["hostname"] or ip_or_name["ip"]
+        host = host.strip("\n")
+
+        if self.config.domain is None:
+            outputs["domain"] = host
+        else:
+            outputs["domain"] = self.config.domain
+
+        super().set_outputs(stage_outputs, outputs)
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         def _attempt_tcp_connect(
