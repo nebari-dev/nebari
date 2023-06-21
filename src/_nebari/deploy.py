@@ -4,9 +4,9 @@ import pathlib
 import subprocess
 import textwrap
 
-from _nebari.stages.base import get_available_stages
 from _nebari.utils import timer
 from nebari import schema
+from nebari.plugins import get_available_stages
 
 logger = logging.getLogger(__name__)
 

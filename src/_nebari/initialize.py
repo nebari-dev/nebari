@@ -11,6 +11,7 @@ from _nebari.provider.oauth.auth0 import create_client
 from _nebari.utils import check_cloud_credentials
 from _nebari.version import __version__
 from nebari import schema
+from nebari.plugins import extend_schema
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,10 @@ def render_config(
     if nebari_domain is None and not disable_prompt:
         nebari_domain = input("Provide domain: ")
 
-    config = schema.Main(
+    # extend schema with plugin specific schemas
+    Main = extend_schema(schema.Main)
+
+    config = Main(
         project_name=project_name,
         domain=nebari_domain,
         provider=cloud_provider,

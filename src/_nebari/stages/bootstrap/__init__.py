@@ -1,6 +1,8 @@
 from inspect import cleandoc
 from typing import Any, Dict, List
 
+from pydantic import BaseModel, Field
+
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from _nebari.provider.cicd.gitlab import gen_gitlab_ci
 from _nebari.utils import check_cloud_credentials
@@ -53,9 +55,16 @@ def gen_cicd(config):
     return cicd_files
 
 
+# TODO: remove
+# Just a demonstration that this propagates to the nebari-config after `nebari init`
+class ExtraSchema(BaseModel):
+    blah_blah: str = Field("foo")
+
+
 class BootstrapStage(NebariStage):
     name = "bootstrap"
     priority = 0
+    stage_schema = ExtraSchema
 
     def render(self) -> Dict[str, str]:
         contents = {}

@@ -4,16 +4,18 @@ from typing import Any, Dict, List
 
 import typer
 from pluggy import HookimplMarker, HookspecMarker
+from pydantic import BaseModel
+
+from nebari import schema
 
 hookspec = HookspecMarker("nebari")
 hookimpl = HookimplMarker("nebari")
 
-from nebari import schema
-
 
 class NebariStage:
-    name = None
-    priority = None
+    name: str = None
+    priority: int = None
+    stage_schema: BaseModel = None
 
     def __init__(self, output_directory: pathlib.Path, config: schema.Main):
         self.output_directory = output_directory

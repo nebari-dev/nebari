@@ -9,8 +9,8 @@ from rich import print
 from rich.table import Table
 
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
-from _nebari.stages.base import get_available_stages
 from nebari import schema
+from nebari.plugins import get_available_stages
 
 
 def render_template(output_directory: pathlib.Path, config: schema.Main, dry_run=False):

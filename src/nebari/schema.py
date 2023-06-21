@@ -130,7 +130,6 @@ class Base(pydantic.BaseModel):
     ...
 
     class Config:
-        extra = "forbid"
         validate_assignment = True
         allow_population_by_field_name = True
 

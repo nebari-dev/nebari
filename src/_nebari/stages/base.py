@@ -1,6 +1,5 @@
 import contextlib
 import inspect
-import itertools
 import os
 import pathlib
 from typing import Any, Dict, List, Tuple
@@ -96,23 +95,3 @@ class NebariTerraformStage(NebariStage):
             if not ignore_errors:
                 raise e
             status["stages/" + self.name] = False
-
-
-def get_available_stages():
-    from nebari.plugins import pm
-
-    stages = itertools.chain.from_iterable(pm.hook.nebari_stage())
-
-    # order stages by priority
-    sorted_stages = sorted(stages, key=lambda s: s.priority)
-
-    # filter out duplicate stages with same name (keep highest priority)
-    visited_stage_names = set()
-    filtered_stages = []
-    for stage in reversed(sorted_stages):
-        if stage.name in visited_stage_names:
-            continue
-        filtered_stages.insert(0, stage)
-        visited_stage_names.add(stage.name)
-
-    return filtered_stages
