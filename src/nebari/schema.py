@@ -405,9 +405,7 @@ class GCPPrivateClusterConfig(Base):
 
 class DigitalOceanProvider(Base):
     region: str = "nyc3"
-    kubernetes_version: str = Field(
-        default_factory=lambda: digital_ocean.kubernetes_versions()[-1]
-    )
+    kubernetes_version: typing.Optional[str]
     # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
     node_groups: typing.Dict[str, NodeGroup] = {
         "general": NodeGroup(instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1),
@@ -416,14 +414,21 @@ class DigitalOceanProvider(Base):
     }
     tags: typing.Optional[typing.List[str]] = []
 
-    @validator("kubernetes_version")
-    def _validate_kubernetes_version(cls, value):
-        available_kubernetes_versions = digital_ocean.kubernetes_versions()
-        if value not in available_kubernetes_versions:
+    @root_validator
+    def _validate_kubernetes_version(cls, values):
+        available_kubernetes_versions = digital_ocean.kubernetes_versions(
+            values["region"]
+        )
+        if (
+            values["kubernetes_version"] is not None
+            and values["kubernetes_version"] not in available_kubernetes_versions
+        ):
             raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+                f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
-        return value
+        else:
+            values["kubernetes_version"] = available_kubernetes_versions[-1]
+        return values
 
 
 class GoogleCloudPlatformProvider(Base):
