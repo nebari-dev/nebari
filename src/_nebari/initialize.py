@@ -19,7 +19,7 @@ WELCOME_HEADER_TEXT = "Your open source data science platform, hosted"
 
 def render_config(
     project_name: str,
-    nebari_domain: str,
+    nebari_domain: str = None,
     cloud_provider: schema.ProviderEnum = schema.ProviderEnum.local,
     ci_provider: schema.CiEnum = schema.CiEnum.none,
     repository: str = None,
@@ -42,9 +42,8 @@ def render_config(
         project_name = input("Provide project name: ")
     config["project_name"] = project_name
 
-    if nebari_domain is None and not disable_prompt:
-        nebari_domain = input("Provide domain: ")
-    config["domain"] = nebari_domain
+    if nebari_domain is not None:
+        config["domain"] = nebari_domain
 
     config["ci_cd"] = {"type": ci_provider.value}
     config["terraform_state"] = {"type": terraform_state.value}
