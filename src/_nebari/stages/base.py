@@ -49,6 +49,13 @@ class NebariTerraformStage(NebariStage):
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         return {}
 
+    def set_outputs(self, stage_outputs: Dict[str, Dict[str, Any]], outputs: Dict[str, Any]):
+        stage_key = "stages/" + self.name
+        if stage_key not in stage_outputs:
+            stage_outputs[stage_key] = {**outputs}
+        else:
+            stage_outputs[stage_key].update(outputs)
+
     @contextlib.contextmanager
     def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
         deploy_config = dict(
@@ -60,7 +67,7 @@ class NebariTerraformStage(NebariStage):
             deploy_config["terraform_import"] = True
             deploy_config["state_imports"] = state_imports
 
-        stage_outputs["stages/" + self.name] = terraform.deploy(**deploy_config)
+        self.set_outputs(stage_outputs, terraform.deploy(**deploy_config))
         yield
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
@@ -73,14 +80,14 @@ class NebariTerraformStage(NebariStage):
         status: Dict[str, bool],
         ignore_errors: bool = True,
     ):
-        stage_outputs["stages/" + self.name] = terraform.deploy(
+        self.set_outputs(stage_outputs, terraform.deploy(
             directory=str(self.output_directory / self.stage_prefix),
             input_vars=self.input_vars(stage_outputs),
             terraform_init=True,
             terraform_import=True,
             terraform_apply=False,
             terraform_destroy=False,
-        )
+        ))
         yield
         try:
             terraform.deploy(

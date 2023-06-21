@@ -9,7 +9,7 @@ import typing
 from abc import ABC
 
 import pydantic
-from pydantic import Field, root_validator, validator
+from pydantic import Field, root_validator, validator, conint
 from ruamel.yaml import YAML, yaml_object
 
 from _nebari import constants
@@ -348,38 +348,38 @@ class NodeSelector(Base):
     worker: KeyValueDict
 
 
-class NodeGroup(Base):
+class DigitalOceanNodeGroup(Base):
+    """Representation of a node group with Digital Ocean
+
+     - Kubernetes limits: https://docs.digitalocean.com/products/kubernetes/details/limits/
+     - Available instance types: https://slugs.do-api.dev/
+    """
     instance: str
-    min_nodes: int
-    max_nodes: int
-    gpu: bool = False
-    guest_accelerators: typing.List[typing.Dict] = []
+    min_nodes: conint(ge=1) = 1
+    max_nodes: conint(ge=1) = 1
 
-    class Config:
-        extra = "allow"
 
-    @validator("guest_accelerators")
-    def validate_guest_accelerators(cls, v):
-        if not v:
-            return v
-        if not isinstance(v, list):
-            raise ValueError("guest_accelerators must be a list")
-        for i in v:
-            assertion_error_message = """
-                In order to successfully use guest accelerators, you must specify the following parameters:
+class DigitalOceanProvider(Base):
+    region: str = "nyc3"
+    kubernetes_version: typing.Optional[str]
+    # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
+    node_groups: typing.Dict[str, DigitalOceanNodeGroup] = {
+        "general": DigitalOceanNodeGroup(instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1),
+        "user": DigitalOceanNodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
+        "worker": DigitalOceanNodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
+    }
+    tags: typing.Optional[typing.List[str]] = []
 
-                name (str): Machine type name of the GPU, available at https://cloud.google.com/compute/docs/gpus
-                count (int): Number of GPUs to attach to the instance
-
-                See general information regarding GPU support at:
-                # TODO: replace with nebari.dev new URL
-                https://docs.nebari.dev/en/stable/source/admin_guide/gpu.html?#add-gpu-node-group
-            """
-            try:
-                assert "name" in i and "count" in i
-                assert isinstance(i["name"], str) and isinstance(i["count"], int)
-            except AssertionError:
-                raise ValueError(assertion_error_message)
+    @root_validator
+    def _validate_kubernetes_version(cls, values):
+        available_kubernetes_versions = digital_ocean.kubernetes_versions(values["region"])
+        if values['kubernetes_version'] is not None and values['kubernetes_version'] not in available_kubernetes_versions:
+            raise ValueError(
+                f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+            )
+        else:
+            values['kubernetes_version'] = available_kubernetes_versions[-1]
+        return values
 
 
 class GCPIPAllocationPolicy(Base):
@@ -404,47 +404,35 @@ class GCPPrivateClusterConfig(Base):
     master_ipv4_cidr_block: str
 
 
-class DigitalOceanProvider(Base):
-    region: str = "nyc3"
-    kubernetes_version: typing.Optional[str]
-    # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
-    node_groups: typing.Dict[str, NodeGroup] = {
-        "general": NodeGroup(instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1),
-        "user": NodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
-        "worker": NodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
-    }
-    tags: typing.Optional[typing.List[str]] = []
+class GCPGuestAccelerator(Base):
+    """
+    See general information regarding GPU support at:
+    # TODO: replace with nebari.dev new URL
+    https://docs.nebari.dev/en/stable/source/admin_guide/gpu.html?#add-gpu-node-group
+    """
+    name: str
+    count: conint(ge=1) = 1
 
-    @root_validator
-    def _validate_kubernetes_version(cls, values):
-        available_kubernetes_versions = digital_ocean.kubernetes_versions(
-            values["region"]
-        )
-        if (
-            values["kubernetes_version"] is not None
-            and values["kubernetes_version"] not in available_kubernetes_versions
-        ):
-            raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
-            )
-        else:
-            values["kubernetes_version"] = available_kubernetes_versions[-1]
-        return values
+
+class GCPNodeGroup(Base):
+    instance: str
+    min_nodes: conint(ge=0) = 0
+    max_nodes: conint(ge=1) = 1
+    preemptible: bool = False
+    labels: typing.Dict[str, str] = {}
+    guest_accelerators: typing.List[GCPGuestAccelerator] = []
 
 
 class GoogleCloudPlatformProvider(Base):
     project: str = Field(default_factory=lambda: os.environ["PROJECT_ID"])
     region: str = "us-central1"
     availability_zones: typing.Optional[typing.List[str]] = []
-    kubernetes_version: str = Field(
-        default_factory=lambda: google_cloud.kubernetes_versions("us-central1")[-1]
-    )
-
+    kubernetes_version: typing.Optional[str]
     release_channel: str = constants.DEFAULT_GKE_RELEASE_CHANNEL
-    node_groups: typing.Dict[str, NodeGroup] = {
-        "general": NodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
-        "user": NodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
-        "worker": NodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
+    node_groups: typing.Dict[str, GCPNodeGroup] = {
+        "general": GCPNodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
+        "user": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
+        "worker": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
     }
     tags: typing.Optional[typing.List[str]] = []
     networking_mode: str = "ROUTE"
@@ -460,26 +448,31 @@ class GoogleCloudPlatformProvider(Base):
         typing.Union[GCPPrivateClusterConfig, None]
     ] = None
 
-    @validator("kubernetes_version")
-    def _validate_kubernetes_version(cls, value):
-        available_kubernetes_versions = google_cloud.kubernetes_versions("us-central1")
-        if value not in available_kubernetes_versions:
+    @root_validator
+    def _validate_kubernetes_version(cls, values):
+        available_kubernetes_versions = google_cloud.kubernetes_versions(values["region"])
+        if values['kubernetes_version'] is not None and values['kubernetes_version'] not in available_kubernetes_versions:
             raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+                f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
-        return value
+        else:
+            values['kubernetes_version'] = available_kubernetes_versions[-1]
+        return values
+
+
+class AzureNodeGroup(Base):
+    instance: str
+    min_nodes: int
+    max_nodes: int
 
 
 class AzureProvider(Base):
     region: str = "Central US"
-    kubernetes_version: str = Field(
-        default_factory=lambda: azure_cloud.kubernetes_versions()[-1]
-    )
-
-    node_groups: typing.Dict[str, NodeGroup] = {
-        "general": NodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
-        "user": NodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
-        "worker": NodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
+    kubernetes_version: typing.Optional[str]
+    node_groups: typing.Dict[str, AzureNodeGroup] = {
+        "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
+        "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
+        "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     }
     storage_account_postfix: str = Field(
         default_factory=lambda: random_secure_string(length=4)
@@ -490,7 +483,9 @@ class AzureProvider(Base):
     @validator("kubernetes_version")
     def _validate_kubernetes_version(cls, value):
         available_kubernetes_versions = azure_cloud.kubernetes_versions()
-        if value not in available_kubernetes_versions:
+        if value is None:
+            value = available_kubernetes_versions[-1]
+        elif value not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
@@ -510,10 +505,7 @@ class AmazonWebServicesProvider(Base):
         default_factory=lambda: os.environ.get("AWS_DEFAULT_REGION", "us-west-2")
     )
     availability_zones: typing.Optional[typing.List[str]]
-    kubernetes_version: str = Field(
-        default_factory=lambda: amazon_web_services.kubernetes_versions()[-1]
-    )
-
+    kubernetes_version: typing.Optional[str]
     node_groups: typing.Dict[str, AWSNodeGroup] = {
         "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
         "user": AWSNodeGroup(
@@ -530,16 +522,17 @@ class AmazonWebServicesProvider(Base):
     @validator("kubernetes_version")
     def _validate_kubernetes_version(cls, value):
         available_kubernetes_versions = amazon_web_services.kubernetes_versions()
-        if value not in available_kubernetes_versions:
+        if value is None:
+            value = available_kubernetes_versions[-1]
+        elif value not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
         return value
 
     @root_validator
-    def _validate_provider(cls, values):
-        # populate availability zones if empty
-        if values.get("availability_zones") is None:
+    def _validate_availability_zones(cls, values):
+        if values["availability_zones"] is None:
             zones = amazon_web_services.zones(values["region"])
             values["availability_zones"] = list(sorted(zones))[:2]
         return values
@@ -854,7 +847,7 @@ class Main(Base):
     # In nebari_version only use major.minor.patch version - drop any pre/post/dev suffixes
     nebari_version: str = __version__
     ci_cd: CICD = CICD()
-    domain: str
+    domain: typing.Optional[str]
     terraform_state: TerraformState = TerraformState()
     certificate: Certificate = Certificate()
     helm_extensions: typing.List[HelmExtension] = []

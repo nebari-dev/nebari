@@ -108,33 +108,6 @@ class ClearMLInputVars(schema.Base):
     clearml_overrides: List[str] = Field(alias="clearml-overrides")
 
 
-def _calculate_node_groups(config: schema.Main):
-    if config.provider == schema.ProviderEnum.aws:
-        return {
-            group: {"key": "eks.amazonaws.com/nodegroup", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.gcp:
-        return {
-            group: {"key": "cloud.google.com/gke-nodepool", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.azure:
-        return {
-            group: {"key": "azure-node-pool", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.do:
-        return {
-            group: {"key": "doks.digitalocean.com/node-pool", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.existing:
-        return config.existing.node_selectors
-    else:
-        return config.local.dict()["node_selectors"]
-
-
 class KubernetesServicesStage(NebariTerraformStage):
     name = "07-kubernetes-services"
     priority = 70
@@ -147,7 +120,8 @@ class KubernetesServicesStage(NebariTerraformStage):
         ]
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        final_logout_uri = f"https://{self.config.domain}/hub/login"
+        domain = stage_outputs["stages/04-kubernetes-ingress"]["domain"]
+        final_logout_uri = f"https://{domain}/hub/login"
 
         realm_id = stage_outputs["stages/06-kubernetes-keycloak-configuration"][
             "realm_id"
@@ -181,7 +155,7 @@ class KubernetesServicesStage(NebariTerraformStage):
         for ext in self.config.tf_extensions:
             if ext.logout != "":
                 final_logout_uri = "{}?{}".format(
-                    f"https://{self.config.domain}/{ext.urlslug}{ext.logout}",
+                    f"https://{domain}/{ext.urlslug}{ext.logout}",
                     urlencode({"redirect_uri": final_logout_uri}),
                 )
 
@@ -194,9 +168,9 @@ class KubernetesServicesStage(NebariTerraformStage):
         kubernetes_services_vars = KubernetesServicesInputVars(
             name=self.config.project_name,
             environment=self.config.namespace,
-            endpoint=self.config.domain,
+            endpoint=domain,
             realm_id=realm_id,
-            node_groups=_calculate_node_groups(self.config),
+            node_groups=stage_outputs["stages/02-infrastructure"]["node_selectors"],
             jupyterhub_logout_redirect_url=final_logout_uri,
         )
 
