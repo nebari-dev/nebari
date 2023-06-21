@@ -3,7 +3,6 @@ import subprocess
 import pytest
 
 from nebari import schema
-from _nebari.utils import load_yaml
 
 PROJECT_NAME = "clitest"
 DOMAIN_NAME = "clitest.dev"
