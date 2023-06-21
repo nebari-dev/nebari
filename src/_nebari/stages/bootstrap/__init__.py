@@ -1,4 +1,3 @@
-import json
 from inspect import cleandoc
 from typing import Any, Dict, List
 
@@ -62,14 +61,8 @@ class BootstrapStage(NebariStage):
         contents = {}
         if self.config.ci_cd.type != schema.CiEnum.none:
             for fn, workflow in gen_cicd(self.config).items():
-                workflow_json = workflow.json(
-                    indent=2,
-                    by_alias=True,
-                    exclude_unset=True,
-                    exclude_defaults=True,
-                )
                 workflow_yaml = schema.yaml.dump(
-                    json.loads(workflow_json), sort_keys=False, indent=2
+                    workflow.dict(by_alias=True, exclude_unset=True, exclude_defaults=True),
                 )
                 contents.update({fn: workflow_yaml})
 
