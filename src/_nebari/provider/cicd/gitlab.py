@@ -53,7 +53,7 @@ def gen_gitlab_ci(config):
         "git config user.name 'gitlab ci'",
         "git add .",
         "git diff --quiet && git diff --staged --quiet || (git commit -m '${COMMIT_MSG}'",
-        f"git push origin {branch})",
+        f"git push origin {config.ci_cd.branch})",
     ]
 
     if config.ci_cd.commit_render:
