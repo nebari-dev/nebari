@@ -1,6 +1,7 @@
 import os
 import pathlib
 import re
+import typing
 
 import questionary
 import rich
@@ -288,7 +289,7 @@ def nebari_subcommand(cli: typer.Typer):
             "-p",
             callback=check_project_name,
         ),
-        domain_name: str = typer.Option(
+        domain_name: typing.Optional[str] = typer.Option(
             ...,
             "--domain-name",
             "--domain",
@@ -449,15 +450,17 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # DOMAIN NAME
         rich.print(
             (
-                "\n\n 🪴  Great! Now you need to provide a valid domain name (i.e. the URL) to access your Nebri instance. "
-                "This should be a domain that you own.\n\n"
+                "\n\n 🪴  Great! Now you can provide a valid domain name (i.e. the URL) to access your Nebri instance. "
+                "This should be a domain that you own. Default if unspecified is the IP of the load balancer.\n\n"
             )
         )
-        inputs.domain_name = questionary.text(
-            "What domain name would you like to use?",
-            qmark=qmark,
-            validate=lambda text: True if len(text) > 0 else "Please enter a value",
-        ).unsafe_ask()
+        inputs.domain_name = (
+            questionary.text(
+                "What domain name would you like to use?",
+                qmark=qmark,
+            ).unsafe_ask()
+            or None
+        )
 
         # AUTH PROVIDER
         rich.print(
@@ -553,27 +556,28 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 inputs.ci_provider = CiEnum.gitlab_ci.value.lower()
 
         # SSL CERTIFICATE
-        rich.print(
-            (
-                "\n\n 🪴  This next section is [italic]optional[/italic] but recommended. If you want your Nebari domain to use a Let's Encrypt SSL certificate, "
-                "all we need is an email address from you.\n\n"
+        if inputs.domain_name:
+            rich.print(
+                (
+                    "\n\n 🪴  This next section is [italic]optional[/italic] but recommended. If you want your Nebari domain to use a Let's Encrypt SSL certificate, "
+                    "all we need is an email address from you.\n\n"
+                )
             )
-        )
-        ssl_cert = questionary.confirm(
-            "Would you like to add a Let's Encrypt SSL certificate to your domain?",
-            default=False,
-            qmark=qmark,
-            auto_enter=False,
-        ).unsafe_ask()
-
-        if ssl_cert:
-            inputs.ssl_cert_email = questionary.text(
-                "Which email address should Let's Encrypt associate the certificate with?",
+            ssl_cert = questionary.confirm(
+                "Would you like to add a Let's Encrypt SSL certificate to your domain?",
+                default=False,
                 qmark=qmark,
+                auto_enter=False,
             ).unsafe_ask()
 
-            if not disable_checks:
-                check_ssl_cert_email(ctx, ssl_cert_email=inputs.ssl_cert_email)
+            if ssl_cert:
+                inputs.ssl_cert_email = questionary.text(
+                    "Which email address should Let's Encrypt associate the certificate with?",
+                    qmark=qmark,
+                ).unsafe_ask()
+
+                if not disable_checks:
+                    check_ssl_cert_email(ctx, ssl_cert_email=inputs.ssl_cert_email)
 
         # ADVANCED FEATURES
         rich.print(
