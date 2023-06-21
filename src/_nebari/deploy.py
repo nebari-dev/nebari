@@ -74,7 +74,9 @@ def deploy_configuration(
         )
 
     if config.domain is None:
-        logger.info(f"All nebari endpoints will be under kubernetes load balancer address which cannot be known before deployment")
+        logger.info(
+            "All nebari endpoints will be under kubernetes load balancer address which cannot be known before deployment"
+        )
     else:
         logger.info(f"All nebari endpoints will be under https://{config.domain}")
 

@@ -156,16 +156,18 @@ class KubernetesIngressStage(NebariTerraformStage):
                 },
                 "name": self.config.project_name,
                 "environment": self.config.namespace,
-                "node_groups": stage_outputs["stages/02-infrastructure"]["node_selectors"],
+                "node_groups": stage_outputs["stages/02-infrastructure"][
+                    "node_selectors"
+                ],
                 **self.config.ingress.terraform_overrides,
             },
             **cert_details,
         }
 
-    def set_outputs(self, stage_outputs: Dict[str, Dict[str, Any]], outputs: Dict[str, Any]):
-        ip_or_name = outputs["load_balancer_address"][
-            "value"
-        ]
+    def set_outputs(
+        self, stage_outputs: Dict[str, Dict[str, Any]], outputs: Dict[str, Any]
+    ):
+        ip_or_name = outputs["load_balancer_address"]["value"]
         host = ip_or_name["hostname"] or ip_or_name["ip"]
         host = host.strip("\n")
 
