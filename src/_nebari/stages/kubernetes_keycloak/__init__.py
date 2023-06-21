@@ -42,33 +42,6 @@ def keycloak_provider_context(keycloak_credentials: Dict[str, str]):
         yield
 
 
-def _calculate_node_groups(config: schema.Main):
-    if config.provider == schema.ProviderEnum.aws:
-        return {
-            group: {"key": "eks.amazonaws.com/nodegroup", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.gcp:
-        return {
-            group: {"key": "cloud.google.com/gke-nodepool", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.azure:
-        return {
-            group: {"key": "azure-node-pool", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.do:
-        return {
-            group: {"key": "doks.digitalocean.com/node-pool", "value": group}
-            for group in ["general", "user", "worker"]
-        }
-    elif config.provider == schema.ProviderEnum.existing:
-        return config.existing.node_selectors
-    else:
-        return config.local.dict()["node_selectors"]
-
-
 class KubernetesKeycloakStage(NebariTerraformStage):
     name = "05-kubernetes-keycloak"
     priority = 50
@@ -84,10 +57,10 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         return InputVars(
             name=self.config.project_name,
             environment=self.config.namespace,
-            endpoint=self.config.domain,
+            endpoint=stage_outputs["stages/04-kubernetes-ingress"]["domain"],
             initial_root_password=self.config.security.keycloak.initial_root_password,
             overrides=[json.dumps(self.config.security.keycloak.overrides)],
-            node_group=_calculate_node_groups(self.config)["general"],
+            node_group=stage_outputs["stages/02-infrastructure"]["node_selectors"]["general"],
         ).dict()
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
