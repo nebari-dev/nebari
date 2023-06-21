@@ -152,7 +152,7 @@ class HelmExtension(Base):
     repository: str
     chart: str
     version: str
-    overrides: typing.Optional[typing.Dict]
+    overrides: typing.Dict = {}
 
 
 # ============== Argo-Workflows =========
@@ -537,16 +537,16 @@ class AmazonWebServicesProvider(Base):
     existing_security_group_ids: str = None
     vpc_cidr_block: str = "10.10.0.0/16"
 
-    @validator("kubernetes_version")
-    def _validate_kubernetes_version(cls, value):
+    @root_validator
+    def _validate_kubernetes_version(cls, values):
         available_kubernetes_versions = amazon_web_services.kubernetes_versions()
-        if value is None:
-            value = available_kubernetes_versions[-1]
-        elif value not in available_kubernetes_versions:
+        if values["kubernetes_version"] is None:
+            values["kubernetes_version"] = available_kubernetes_versions[-1]
+        elif values["kubernetes_version"] not in available_kubernetes_versions:
             raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+                f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
-        return value
+        return values
 
     @root_validator
     def _validate_availability_zones(cls, values):
@@ -638,7 +638,7 @@ class JupyterLabProfile(Base):
     access: AccessEnum = AccessEnum.all
     display_name: str
     description: str
-    default: typing.Optional[bool]
+    default: bool = False
     users: typing.Optional[typing.List[str]]
     groups: typing.Optional[typing.List[str]]
     kubespawner_override: typing.Optional[KubeSpawner]
@@ -1120,10 +1120,13 @@ def read_configuration(config_filename: pathlib.Path, read_environment: bool = T
     return config
 
 
-def write_configuration(config_filename: pathlib.Path, config: Main, mode: str = "w"):
+def write_configuration(config_filename: pathlib.Path, config: typing.Union[Main, typing.Dict], mode: str = "w"):
     yaml = YAML()
     yaml.preserve_quotes = True
     yaml.default_flow_style = False
 
     with config_filename.open(mode) as f:
-        yaml.dump(config.dict(), f)
+        if isinstance(config, Main):
+            yaml.dump(config.dict(), f)
+        else:
+            yaml.dump(config, f)
