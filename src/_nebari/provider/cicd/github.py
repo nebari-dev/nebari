@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 from _nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
 from _nebari.provider.cicd.common import pip_install_nebari
+from nebari import schema
 
 GITHUB_BASE_URL = "https://api.github.com/"
 
