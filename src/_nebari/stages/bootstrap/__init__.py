@@ -67,7 +67,7 @@ class BootstrapStage(NebariStage):
                     exclude_unset=True,
                     exclude_defaults=True,
                 )
-                workflow_yaml = yaml.dump(
+                workflow_yaml = schema.yaml.dump(
                     json.loads(workflow_json), sort_keys=False, indent=2
                 )
                 contents.update({fn: workflow_yaml})
