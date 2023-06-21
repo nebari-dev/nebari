@@ -33,78 +33,86 @@ def render_config(
     ssl_cert_email: str = None,
 ):
     config = {
-        'provider': cloud_provider.value,
-        'namespace': namespace,
-        'nebari_version': __version__,
+        "provider": cloud_provider.value,
+        "namespace": namespace,
+        "nebari_version": __version__,
     }
 
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
-    config['project_name'] = project_name
+    config["project_name"] = project_name
 
     if nebari_domain is None and not disable_prompt:
         nebari_domain = input("Provide domain: ")
-    config['domain'] = nebari_domain
+    config["domain"] = nebari_domain
 
-    config['ci_cd'] = {'type': ci_provider.value}
-    config['terraform_state'] = {'type': terraform_state.value}
+    config["ci_cd"] = {"type": ci_provider.value}
+    config["terraform_state"] = {"type": terraform_state.value}
 
     # Save default password to file
     default_password_filename = os.path.join(
         tempfile.gettempdir(), "NEBARI_DEFAULT_PASSWORD"
     )
-    config['security'] = {'keycloak': {'initial_root_password': schema.random_secure_string(length=32)}}
+    config["security"] = {
+        "keycloak": {"initial_root_password": schema.random_secure_string(length=32)}
+    }
     with open(default_password_filename, "w") as f:
-        f.write(config['security']['keycloak']['initial_root_password'])
+        f.write(config["security"]["keycloak"]["initial_root_password"])
     os.chmod(default_password_filename, 0o700)
 
-    config['theme'] = {'jupyterhub': {'hub_title': f"Nebari - { project_name }"}}
-    config['theme']['jupyterhub']['welcome'] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
+    config["theme"] = {"jupyterhub": {"hub_title": f"Nebari - { project_name }"}}
+    config["theme"]["jupyterhub"][
+        "welcome"
+    ] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
 
-    config['security']['authentication'] = {'type': auth_provider.value}
+    config["security"]["authentication"] = {"type": auth_provider.value}
     if auth_provider == schema.AuthenticationEnum.github:
         if not disable_prompt:
-            config['security']['authentication']['config'] = {
-                'client_id': input("Github client_id: "),
-                'client_secret': input("Github client_secret: "),
+            config["security"]["authentication"]["config"] = {
+                "client_id": input("Github client_id: "),
+                "client_secret": input("Github client_secret: "),
             }
     elif auth_provider == schema.AuthenticationEnum.auth0:
         if auth_auto_provision:
             auth0_config = create_client(config.domain, config.project_name)
-            config['security']['authentication']['config'] = auth0_config
+            config["security"]["authentication"]["config"] = auth0_config
         else:
-            config['security']['authentication']['config'] = {
-                'client_id': input("Auth0 client_id: "),
-                'client_secret': input("Auth0 client_secret: "),
-                'auth0_subdomain': input("Auth0 subdomain: "),
+            config["security"]["authentication"]["config"] = {
+                "client_id": input("Auth0 client_id: "),
+                "client_secret": input("Auth0 client_secret: "),
+                "auth0_subdomain": input("Auth0 subdomain: "),
             }
 
     if cloud_provider == schema.ProviderEnum.do:
-        config['theme']['jupyterhub']['hub_subtitle'] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
     elif cloud_provider == schema.ProviderEnum.gcp:
-        config['theme']['jupyterhub']['hub_subtitle'] = (
-            f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
-        )
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
         if "PROJECT_ID" in os.environ:
-            config['google_cloud_platform'] = {'project': os.environ["PROJECT_ID"]}
+            config["google_cloud_platform"] = {"project": os.environ["PROJECT_ID"]}
         elif not disable_prompt:
-            config['google_cloud_platform'] = {'project': input(
-                "Enter Google Cloud Platform Project ID: "
-            )}
+            config["google_cloud_platform"] = {
+                "project": input("Enter Google Cloud Platform Project ID: ")
+            }
     elif cloud_provider == schema.ProviderEnum.azure:
-        config['theme']['jupyterhub']['hub_subtitle'] = f"{WELCOME_HEADER_TEXT} on Azure"
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = f"{WELCOME_HEADER_TEXT} on Azure"
     elif cloud_provider == schema.ProviderEnum.aws:
-        config['theme']['jupyterhub']['hub_subtitle'] = (
-            f"{WELCOME_HEADER_TEXT} on Amazon Web Services"
-        )
+        config["theme"]["jupyterhub"][
+            "hub_subtitle"
+        ] = f"{WELCOME_HEADER_TEXT} on Amazon Web Services"
     elif cloud_provider == schema.ProviderEnum.existing:
-        config['theme']['jupyterhub']['hub_subtitle'] = WELCOME_HEADER_TEXT
+        config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
     elif cloud_provider == schema.ProviderEnum.local:
-        config['theme']['jupyterhub']['hub_subtitle'] = WELCOME_HEADER_TEXT
+        config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
 
     if ssl_cert_email:
-        config['certificate'] = {'type': schema.CertificateEnum.letsencrypt.value}
-        config['certificate']['acme_email'] = ssl_cert_email
+        config["certificate"] = {"type": schema.CertificateEnum.letsencrypt.value}
+        config["certificate"]["acme_email"] = ssl_cert_email
 
     if repository_auto_provision:
         GITHUB_REGEX = "(https://)?github.com/([^/]+)/([^/]+)/?"
