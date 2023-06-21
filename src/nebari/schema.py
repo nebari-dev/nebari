@@ -1120,7 +1120,11 @@ def read_configuration(config_filename: pathlib.Path, read_environment: bool = T
     return config
 
 
-def write_configuration(config_filename: pathlib.Path, config: typing.Union[Main, typing.Dict], mode: str = "w"):
+def write_configuration(
+    config_filename: pathlib.Path,
+    config: typing.Union[Main, typing.Dict],
+    mode: str = "w",
+):
     yaml = YAML()
     yaml.preserve_quotes = True
     yaml.default_flow_style = False
