@@ -107,7 +107,7 @@ def check_ssl_cert_email(ctx: typer.Context, ssl_cert_email: str):
 def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     """Validate the the necessary auth provider credentials have been set as environment variables."""
     if ctx.params.get("disable_prompt"):
-        return auth_provider
+        return auth_provider.lower()
 
     auth_provider = auth_provider.lower()
 
@@ -159,10 +159,11 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     return auth_provider
 
 
-def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: str):
+def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: schema.ProviderEnum):
     """Validate that the necessary cloud credentials have been set as environment variables."""
+
     if ctx.params.get("disable_prompt"):
-        return cloud_provider
+        return cloud_provider.lower()
 
     cloud_provider = cloud_provider.lower()
 
