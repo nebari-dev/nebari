@@ -417,13 +417,18 @@ class DigitalOceanProvider(Base):
 
     @root_validator
     def _validate_kubernetes_version(cls, values):
-        available_kubernetes_versions = digital_ocean.kubernetes_versions(values["region"])
-        if values['kubernetes_version'] is not None and values['kubernetes_version'] not in available_kubernetes_versions:
+        available_kubernetes_versions = digital_ocean.kubernetes_versions(
+            values["region"]
+        )
+        if (
+            values["kubernetes_version"] is not None
+            and values["kubernetes_version"] not in available_kubernetes_versions
+        ):
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
         else:
-            values['kubernetes_version'] = available_kubernetes_versions[-1]
+            values["kubernetes_version"] = available_kubernetes_versions[-1]
         return values
 
 
