@@ -63,8 +63,11 @@ class BootstrapStage(NebariStage):
         if self.config.ci_cd.type != schema.CiEnum.none:
             for fn, workflow in gen_cicd(self.config).items():
                 stream = io.StringIO()
-                workflow_yaml = schema.yaml.dump(
-                    workflow.dict(by_alias=True, exclude_unset=True, exclude_defaults=True), stream
+                schema.yaml.dump(
+                    workflow.dict(
+                        by_alias=True, exclude_unset=True, exclude_defaults=True
+                    ),
+                    stream,
                 )
                 contents.update({fn: stream.getvalue()})
 
