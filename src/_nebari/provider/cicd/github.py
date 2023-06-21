@@ -257,7 +257,7 @@ def gen_nebari_ops(config):
             "git config user.name 'github action' ; "
             "git add ./.gitignore ./.github ./stages; "
             "git diff --quiet && git diff --staged --quiet || (git commit -m '${{ env.COMMIT_MSG }}') ; "
-            f"git push origin {branch}"
+            f"git push origin {config.ci_cd.branch}"
         ),
         env={
             "COMMIT_MSG": GHA_job_steps_extras(

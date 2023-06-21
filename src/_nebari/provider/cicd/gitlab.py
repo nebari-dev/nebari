@@ -61,7 +61,7 @@ def gen_gitlab_ci(config):
 
     rules = [
         GLCI_rules(
-            if_=f"$CI_COMMIT_BRANCH == '{branch}'",
+            if_=f"$CI_COMMIT_BRANCH == '{config.ci_cd.branch}'",
             changes=["nebari-config.yaml"],
         )
     ]
