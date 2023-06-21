@@ -845,7 +845,7 @@ def project_name_convention(value: typing.Any, values):
 class InitInputs(Base):
     cloud_provider: ProviderEnum = ProviderEnum.local
     project_name: str = ""
-    domain_name: str = ""
+    domain_name: typing.Optional[str] = None
     namespace: typing.Optional[letter_dash_underscore_pydantic] = "dev"
     auth_provider: AuthenticationEnum = AuthenticationEnum.password
     auth_auto_provision: bool = False
