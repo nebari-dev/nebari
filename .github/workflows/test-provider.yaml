@@ -127,7 +127,7 @@ jobs:
 
       - name: Nebari Initialize
         run: |
-          nebari init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.nebari.dev" --auth-provider GitHub --disable-prompt --ci-provider ${{ matrix.cicd }}
+          nebari init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.nebari.dev" --auth-provider password --disable-prompt --ci-provider ${{ matrix.cicd }}
           cat "nebari-config.yaml"
 
       - name: Nebari Render
