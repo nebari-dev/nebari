@@ -16,7 +16,7 @@ runs:
       shell: bash
       env: ${{ env }}
       run:
-        python .github/actions/publish-from-template/render_template.py ${{
+        python ${{ github.action_path }}/render_template.py ${{
         inputs.filename }}
 
     - uses: JasonEtco/create-an-issue@v2
