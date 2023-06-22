@@ -9,10 +9,15 @@ from rich import print
 from rich.table import Table
 
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
-from nebari import schema, hookspecs
+from nebari import hookspecs, schema
 
 
-def render_template(output_directory: pathlib.Path, config: schema.Main, stages: List[hookspecs.NebariStage], dry_run=False):
+def render_template(
+    output_directory: pathlib.Path,
+    config: schema.Main,
+    stages: List[hookspecs.NebariStage],
+    dry_run=False,
+):
     output_directory = pathlib.Path(output_directory).resolve()
     if output_directory == pathlib.Path.home():
         print("ERROR: Deploying Nebari in home directory is not advised!")

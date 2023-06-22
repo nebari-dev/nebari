@@ -1,7 +1,7 @@
 import importlib
+import os
 import sys
 import typing
-import os
 
 import pluggy
 
@@ -28,6 +28,7 @@ if not hasattr(sys, "_called_from_test"):
     # Only load plugins if not running tests
     pm.load_setuptools_entrypoints("nebari")
 
+
 # Load default plugins
 def load_plugins(plugins: typing.List[str]):
     def _import_module_from_filename(filename: str):
@@ -39,11 +40,12 @@ def load_plugins(plugins: typing.List[str]):
         return mod
 
     for plugin in plugins:
-        if plugin.endswith('.py'):
+        if plugin.endswith(".py"):
             mod = _import_module_from_filename(plugin)
         else:
             mod = importlib.import_module(plugin)
 
         pm.register(mod, plugin)
+
 
 load_plugins(DEFAULT_SUBCOMMAND_PLUGINS)
