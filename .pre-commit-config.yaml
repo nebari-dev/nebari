@@ -29,7 +29,7 @@ repos:
       - id: check-json
       - id: check-yaml
         # jinja2 templates for helm charts
-        exclude: "src/_nebari/template/stages/07-kubernetes-services/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)"
+        exclude: "src/_nebari/stages/kubernetes-services/template/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)"
         args: [--allow-multiple-documents]
       - id: check-toml
       # Lint: Checks that non-binary executables have a proper shebang.
