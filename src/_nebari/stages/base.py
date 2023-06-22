@@ -1,7 +1,9 @@
 import contextlib
 import inspect
 import itertools
+import importlib
 import os
+import re
 import pathlib
 from typing import Any, Dict, List, Tuple
 
@@ -110,8 +112,23 @@ class NebariTerraformStage(NebariStage):
             status["stages/" + self.name] = False
 
 
-def get_available_stages():
-    from nebari.plugins import pm
+def get_available_stages(exclude_default_stages: bool = False, exclude_stages: List[str] = []):
+    from nebari.plugins import pm, load_plugins
+
+    DEFAULT_STAGES = [
+        "_nebari.stages.bootstrap",
+        "_nebari.stages.terraform_state",
+        "_nebari.stages.infrastructure",
+        "_nebari.stages.kubernetes_initialize",
+        "_nebari.stages.kubernetes_ingress",
+        "_nebari.stages.kubernetes_keycloak",
+        "_nebari.stages.kubernetes_keycloak_configuration",
+        "_nebari.stages.kubernetes_services",
+        "_nebari.stages.nebari_tf_extensions",
+    ]
+
+    if not exclude_default_stages:
+        load_plugins(DEFAULT_STAGES)
 
     stages = itertools.chain.from_iterable(pm.hook.nebari_stage())
 
@@ -127,4 +144,13 @@ def get_available_stages():
         filtered_stages.insert(0, stage)
         visited_stage_names.add(stage.name)
 
-    return filtered_stages
+    # filter out stages which match excluded stages
+    included_stages = []
+    for stage in filtered_stages:
+        for exclude_stage in exclude_stages:
+            if re.fullmatch(exclude_stage, stage.name) is not None:
+                break
+        else:
+            included_stages.append(stage)
+
+    return included_stages

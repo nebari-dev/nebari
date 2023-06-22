@@ -858,6 +858,10 @@ class InitInputs(Base):
     disable_prompt: bool = False
 
 
+class CLIContext(Base):
+    stages: typing.List = []
+
+
 class Main(Base):
     provider: ProviderEnum = ProviderEnum.local
     project_name: str

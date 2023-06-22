@@ -12,6 +12,7 @@ from nebari.hookspecs import hookimpl
 def nebari_subcommand(cli: typer.Typer):
     @cli.command()
     def destroy(
+        ctx: typer.Context,
         config_filename: pathlib.Path = typer.Option(
             ..., "-c", "--config", help="nebari configuration file path"
         ),
@@ -42,9 +43,9 @@ def nebari_subcommand(cli: typer.Typer):
             config = schema.read_configuration(config_filename)
 
             if not disable_render:
-                render_template(output_directory, config)
+                render_template(output_directory, config, ctx.obj.stages)
 
-            destroy_configuration(config)
+            destroy_configuration(config, ctx.obj.stages)
 
         if disable_prompt:
             _run_destroy()
