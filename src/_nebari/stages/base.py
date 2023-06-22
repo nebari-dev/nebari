@@ -1,10 +1,9 @@
 import contextlib
 import inspect
 import itertools
-import importlib
 import os
-import re
 import pathlib
+import re
 from typing import Any, Dict, List, Tuple
 
 from _nebari.provider import terraform
@@ -112,8 +111,10 @@ class NebariTerraformStage(NebariStage):
             status["stages/" + self.name] = False
 
 
-def get_available_stages(exclude_default_stages: bool = False, exclude_stages: List[str] = []):
-    from nebari.plugins import pm, load_plugins
+def get_available_stages(
+    exclude_default_stages: bool = False, exclude_stages: List[str] = []
+):
+    from nebari.plugins import load_plugins, pm
 
     DEFAULT_STAGES = [
         "_nebari.stages.bootstrap",
