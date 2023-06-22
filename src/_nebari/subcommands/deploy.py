@@ -12,6 +12,7 @@ from nebari.hookspecs import hookimpl
 def nebari_subcommand(cli: typer.Typer):
     @cli.command()
     def deploy(
+        ctx: typer.Context,
         config_filename: pathlib.Path = typer.Option(
             ...,
             "--config",
@@ -61,10 +62,11 @@ def nebari_subcommand(cli: typer.Typer):
         config = schema.read_configuration(config_filename)
 
         if not disable_render:
-            render_template(output_directory, config)
+            render_template(output_directory, ctx.obj.config, stages)
 
         deploy_configuration(
             config,
+            ctx.obj.stages,
             dns_provider=dns_provider,
             dns_auto_provision=dns_auto_provision,
             disable_prompt=disable_prompt,
