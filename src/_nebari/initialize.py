@@ -96,7 +96,9 @@ def render_config(
         if "PROJECT_ID" in os.environ:
             config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
         elif not disable_prompt:
-            config["google_cloud_platform"]["project"] = input("Enter Google Cloud Platform Project ID: ")
+            config["google_cloud_platform"]["project"] = input(
+                "Enter Google Cloud Platform Project ID: "
+            )
 
         if kubernetes_version is not None:
             config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
