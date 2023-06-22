@@ -628,7 +628,6 @@ class KubeSpawner(Base):
     cpu_guarantee: int
     mem_limit: str
     mem_guarantee: str
-    image: typing.Optional[str]
 
     class Config:
         extra = "allow"
