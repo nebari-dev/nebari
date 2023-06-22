@@ -30,7 +30,7 @@ def test_minimal_schema_from_file_with_env(tmp_path, monkeypatch):
     assert config.storage.conda_store == "1000Gi"
 
 
-def test_minimal_schema_from_file_with_env(tmp_path, monkeypatch):
+def test_minimal_schema_from_file_without_env(tmp_path, monkeypatch):
     filename = tmp_path / "nebari-config.yaml"
     with filename.open("w") as f:
         f.write("project_name: test\n")
