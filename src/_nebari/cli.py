@@ -1,15 +1,11 @@
-import importlib
 import typing
-import pathlib
-import sys
-import os
 
 import typer
 from typer.core import TyperGroup
 
 from _nebari.version import __version__
 from nebari import schema
-from nebari.plugins import pm, load_plugins
+from nebari.plugins import load_plugins, pm
 
 
 class OrderCommands(TyperGroup):
@@ -39,8 +35,10 @@ def exclude_default_stages(ctx: typer.Context, exclude_default_stages: bool):
 def import_plugin(plugins: typing.List[str]):
     try:
         load_plugins(plugins)
-    except ModuleNotFoundError as e:
-        typer.echo("ERROR: Python module {e.name} not found. Make sure that the module is in your python path {sys.path}")
+    except ModuleNotFoundError:
+        typer.echo(
+            "ERROR: Python module {e.name} not found. Make sure that the module is in your python path {sys.path}"
+        )
         typer.Exit()
     return plugins
 
@@ -67,28 +65,36 @@ def create_cli():
             callback=version_callback,
         ),
         plugins: typing.List[str] = typer.Option(
-            [], "--import-plugin", help="Import nebari plugin",
+            [],
+            "--import-plugin",
+            help="Import nebari plugin",
         ),
         excluded_stages: typing.List[str] = typer.Option(
-            [], "--exclude-stage", help="Exclude nebari stage(s) by name or regex",
+            [],
+            "--exclude-stage",
+            help="Exclude nebari stage(s) by name or regex",
         ),
         exclude_default_stages: bool = typer.Option(
-            False, '--exclude-default-stages', help="Exclude default nebari included stages",
-        )
+            False,
+            "--exclude-default-stages",
+            help="Exclude default nebari included stages",
+        ),
     ):
         try:
             load_plugins(plugins)
-        except ModuleNotFoundError as e:
-            typer.echo("ERROR: Python module {e.name} not found. Make sure that the module is in your python path {sys.path}")
+        except ModuleNotFoundError:
+            typer.echo(
+                "ERROR: Python module {e.name} not found. Make sure that the module is in your python path {sys.path}"
+            )
             typer.Exit()
 
         from _nebari.stages.base import get_available_stages
+
         ctx.ensure_object(schema.CLIContext)
         ctx.obj.stages = get_available_stages(
             exclude_default_stages=exclude_default_stages,
-            exclude_stages=excluded_stages
+            exclude_stages=excluded_stages,
         )
-
 
     pm.hook.nebari_subcommand(cli=app)
 

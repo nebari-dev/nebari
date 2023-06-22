@@ -1,13 +1,11 @@
 import contextlib
 import logging
 import pathlib
-import subprocess
 import textwrap
 from typing import List
 
-from _nebari.stages.base import get_available_stages
 from _nebari.utils import timer
-from nebari import schema, hookspecs
+from nebari import hookspecs, schema
 
 logger = logging.getLogger(__name__)
 
