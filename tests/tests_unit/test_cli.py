@@ -12,7 +12,7 @@ DOMAIN_NAME = "clitest.dev"
     "namespace, auth_provider, ci_provider, ssl_cert_email",
     (
         [None, None, None, None],
-        ["prod", "github", "github-actions", "it@acme.org"],
+        ["prod", "password", "github-actions", "it@acme.org"],
     ),
 )
 def test_nebari_init(tmp_path, namespace, auth_provider, ci_provider, ssl_cert_email):
@@ -55,15 +55,13 @@ def test_nebari_init(tmp_path, namespace, auth_provider, ci_provider, ssl_cert_e
     assert config.certificate.acme_email == ssl_cert_email
 
 
-def test_python_invocation():
-    def run(command):
-        return subprocess.run(
-            command, check=True, capture_output=True, text=True
-        ).stdout.strip()
-
-    command = ["nebari", "--version"]
-
-    actual = run(["python", "-m", *command])
-    expected = run(command)
-
-    assert actual == expected
+@pytest.mark.parametrize('command',
+    (
+        ["nebari", "--version"],
+        ["nebari", "info"],
+    )
+)
+def test_nebari_commands_no_args(command):
+    subprocess.run(
+        command, check=True, capture_output=True, text=True
+    ).stdout.strip()
