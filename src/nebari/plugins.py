@@ -1,21 +1,13 @@
 import importlib
 import sys
+import typing
+import os
 
 import pluggy
 
 from nebari import hookspecs
 
-DEFAULT_PLUGINS = [
-    # stages
-    "_nebari.stages.bootstrap",
-    "_nebari.stages.terraform_state",
-    "_nebari.stages.infrastructure",
-    "_nebari.stages.kubernetes_initialize",
-    "_nebari.stages.kubernetes_ingress",
-    "_nebari.stages.kubernetes_keycloak",
-    "_nebari.stages.kubernetes_keycloak_configuration",
-    "_nebari.stages.kubernetes_services",
-    "_nebari.stages.nebari_tf_extensions",
+DEFAULT_SUBCOMMAND_PLUGINS = [
     # subcommands
     "_nebari.subcommands.init",
     "_nebari.subcommands.dev",
@@ -26,6 +18,7 @@ DEFAULT_PLUGINS = [
     "_nebari.subcommands.support",
     "_nebari.subcommands.upgrade",
     "_nebari.subcommands.validate",
+    "_nebari.subcommands.info",
 ]
 
 pm = pluggy.PluginManager("nebari")
@@ -36,6 +29,21 @@ if not hasattr(sys, "_called_from_test"):
     pm.load_setuptools_entrypoints("nebari")
 
 # Load default plugins
-for plugin in DEFAULT_PLUGINS:
-    mod = importlib.import_module(plugin)
-    pm.register(mod, plugin)
+def load_plugins(plugins: typing.List[str]):
+    def _import_module_from_filename(filename: str):
+        module_name = f"_nebari.stages._files.{plugin.replace(os.sep, '.')}"
+        spec = importlib.util.spec_from_file_location(module_name, plugin)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = mod
+        spec.loader.exec_module(mod)
+        return mod
+
+    for plugin in plugins:
+        if plugin.endswith('.py'):
+            mod = _import_module_from_filename(plugin)
+        else:
+            mod = importlib.import_module(plugin)
+
+        pm.register(mod, plugin)
+
+load_plugins(DEFAULT_SUBCOMMAND_PLUGINS)
