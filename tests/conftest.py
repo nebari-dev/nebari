@@ -1,4 +1,3 @@
-from functools import partial
 from unittest.mock import Mock
 
 import pytest
@@ -8,10 +7,38 @@ from nebari import schema
 
 INIT_INPUTS = [
     # project, namespace, domain, cloud_provider, ci_provider, auth_provider
-    ("pytestdo", "dev", "do.nebari.dev", schema.ProviderEnum.do, schema.CiEnum.github_actions, schema.AuthenticationEnum.password),
-    ("pytestaws", "dev", "aws.nebari.dev", schema.ProviderEnum.aws, schema.CiEnum.github_actions, schema.AuthenticationEnum.password),
-    ("pytestgcp", "dev", "gcp.nebari.dev", schema.ProviderEnum.gcp, schema.CiEnum.github_actions, schema.AuthenticationEnum.password),
-    ("pytestazure", "dev", "azure.nebari.dev", schema.ProviderEnum.azure, schema.CiEnum.github_actions, schema.AuthenticationEnum.password),
+    (
+        "pytestdo",
+        "dev",
+        "do.nebari.dev",
+        schema.ProviderEnum.do,
+        schema.CiEnum.github_actions,
+        schema.AuthenticationEnum.password,
+    ),
+    (
+        "pytestaws",
+        "dev",
+        "aws.nebari.dev",
+        schema.ProviderEnum.aws,
+        schema.CiEnum.github_actions,
+        schema.AuthenticationEnum.password,
+    ),
+    (
+        "pytestgcp",
+        "dev",
+        "gcp.nebari.dev",
+        schema.ProviderEnum.gcp,
+        schema.CiEnum.github_actions,
+        schema.AuthenticationEnum.password,
+    ),
+    (
+        "pytestazure",
+        "dev",
+        "azure.nebari.dev",
+        schema.ProviderEnum.azure,
+        schema.CiEnum.github_actions,
+        schema.AuthenticationEnum.password,
+    ),
 ]
 
 NEBARI_CONFIG_FN = "nebari-config.yaml"
@@ -25,15 +52,18 @@ DEFAULT_TERRAFORM_STATE = schema.TerraformStateEnum.remote
 def render_config_partial():
     def _render_config_partial(*args, **kwargs):
         print(args, kwargs)
-        return schema.Main(**render_config(
-            *args,
-            **kwargs,
-            repository=DEFAULT_GH_REPO,
-            repository_auto_provision=False,
-            auth_auto_provision=False,
-            terraform_state=DEFAULT_TERRAFORM_STATE,
-            disable_prompt=True,
-        ))
+        return schema.Main(
+            **render_config(
+                *args,
+                **kwargs,
+                repository=DEFAULT_GH_REPO,
+                repository_auto_provision=False,
+                auth_auto_provision=False,
+                terraform_state=DEFAULT_TERRAFORM_STATE,
+                disable_prompt=True,
+            )
+        )
+
     return _render_config_partial
 
 
@@ -66,7 +96,7 @@ def setup_fixture(request, monkeypatch, tmp_path):
 
     def _mock_aws_availability_zones(region="us-west-2"):
         m = Mock()
-        m.return_value = ['us-west-2a', 'us-west-2b']
+        m.return_value = ["us-west-2a", "us-west-2b"]
         return m
 
     if cloud_provider == "aws":
