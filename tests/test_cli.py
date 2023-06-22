@@ -55,13 +55,12 @@ def test_nebari_init(tmp_path, namespace, auth_provider, ci_provider, ssl_cert_e
     assert config.certificate.acme_email == ssl_cert_email
 
 
-@pytest.mark.parametrize('command',
+@pytest.mark.parametrize(
+    "command",
     (
         ["nebari", "--version"],
         ["nebari", "info"],
-    )
+    ),
 )
 def test_nebari_commands_no_args(command):
-    subprocess.run(
-        command, check=True, capture_output=True, text=True
-    ).stdout.strip()
+    subprocess.run(command, check=True, capture_output=True, text=True).stdout.strip()

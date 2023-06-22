@@ -6,6 +6,7 @@ from _nebari.upgrade import do_upgrade
 from _nebari.version import __version__, rounded_ver_parse
 from nebari import schema
 
+
 @pytest.fixture
 def qhub_users_import_json():
     return (
@@ -78,12 +79,21 @@ def test_upgrade_4_0(
     __rounded_version__ = ".".join([str(c) for c in rounded_ver_parse(__version__)])
 
     # Check image versions have been bumped up
-    assert config.default_images.jupyterhub == f"quansight/nebari-jupyterhub:v{__rounded_version__}"
-    assert config.profiles.jupyterlab[0].kubespawner_override.image == f"quansight/nebari-jupyterlab:v{__rounded_version__}"
+    assert (
+        config.default_images.jupyterhub
+        == f"quansight/nebari-jupyterhub:v{__rounded_version__}"
+    )
+    assert (
+        config.profiles.jupyterlab[0].kubespawner_override.image
+        == f"quansight/nebari-jupyterlab:v{__rounded_version__}"
+    )
     assert config.security.authentication.type != "custom"
 
     # Keycloak import users json
-    assert Path(tmp_path, "nebari-users-import.json").read_text().rstrip() == qhub_users_import_json
+    assert (
+        Path(tmp_path, "nebari-users-import.json").read_text().rstrip()
+        == qhub_users_import_json
+    )
 
     # Check backup
     tmp_qhub_config_backup = Path(tmp_path, f"{old_qhub_config_path.name}.old.backup")
