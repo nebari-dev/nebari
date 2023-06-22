@@ -30,7 +30,7 @@ namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
 
 
 def random_secure_string(
-    length: int = 32, chars: str = string.ascii_lowercase + string.digits
+    length: int = 16, chars: str = string.ascii_lowercase + string.digits
 ):
     return "".join(secrets.choice(chars) for i in range(length))
 
@@ -1053,7 +1053,7 @@ def set_nested_attribute(data: typing.Any, attrs: typing.List[str], value: typin
 
     def _get_attr(d: typing.Any, attr: str):
         if hasattr(d, "__getitem__"):
-            if re.fullmatch("\d+", attr):
+            if re.fullmatch(r"\d+", attr):
                 try:
                     return d[int(attr)]
                 except Exception:
@@ -1065,7 +1065,7 @@ def set_nested_attribute(data: typing.Any, attrs: typing.List[str], value: typin
 
     def _set_attr(d: typing.Any, attr: str, value: typing.Any):
         if hasattr(d, "__getitem__"):
-            if re.fullmatch("\d+", attr):
+            if re.fullmatch(r"\d+", attr):
                 try:
                     d[int(attr)] = value
                 except Exception:

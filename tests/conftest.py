@@ -4,30 +4,37 @@ from unittest.mock import Mock
 import pytest
 
 from _nebari.initialize import render_config
+from nebari import schema
 
 INIT_INPUTS = [
     # project, namespace, domain, cloud_provider, ci_provider, auth_provider
-    ("pytestdo", "dev", "do.nebari.dev", "do", "github-actions", "github"),
-    ("pytestaws", "dev", "aws.nebari.dev", "aws", "github-actions", "github"),
-    ("pytestgcp", "dev", "gcp.nebari.dev", "gcp", "github-actions", "github"),
-    ("pytestazure", "dev", "azure.nebari.dev", "azure", "github-actions", "github"),
+    ("pytestdo", "dev", "do.nebari.dev", schema.ProviderEnum.do, schema.CiEnum.github_actions, schema.AuthenticationEnum.password),
+    ("pytestaws", "dev", "aws.nebari.dev", schema.ProviderEnum.aws, schema.CiEnum.github_actions, schema.AuthenticationEnum.password),
+    ("pytestgcp", "dev", "gcp.nebari.dev", schema.ProviderEnum.gcp, schema.CiEnum.github_actions, schema.AuthenticationEnum.password),
+    ("pytestazure", "dev", "azure.nebari.dev", schema.ProviderEnum.azure, schema.CiEnum.github_actions, schema.AuthenticationEnum.password),
 ]
 
 NEBARI_CONFIG_FN = "nebari-config.yaml"
 PRESERVED_DIR = "preserved_dir"
 DEFAULT_GH_REPO = "github.com/test/test"
-DEFAULT_TERRAFORM_STATE = "remote"
+DEFAULT_TERRAFORM_STATE = schema.TerraformStateEnum.remote
 
 
 # use this partial function for all tests that need to call `render_config`
-render_config_partial = partial(
-    render_config,
-    repository=DEFAULT_GH_REPO,
-    repository_auto_provision=False,
-    auth_auto_provision=False,
-    terraform_state=DEFAULT_TERRAFORM_STATE,
-    disable_prompt=True,
-)
+@pytest.fixture
+def render_config_partial():
+    def _render_config_partial(*args, **kwargs):
+        print(args, kwargs)
+        return schema.Main(**render_config(
+            *args,
+            **kwargs,
+            repository=DEFAULT_GH_REPO,
+            repository_auto_provision=False,
+            auth_auto_provision=False,
+            terraform_state=DEFAULT_TERRAFORM_STATE,
+            disable_prompt=True,
+        ))
+    return _render_config_partial
 
 
 @pytest.fixture(params=INIT_INPUTS)
@@ -57,26 +64,36 @@ def setup_fixture(request, monkeypatch, tmp_path):
             m.return_value = k8s_versions[-1]
         return m
 
+    def _mock_aws_availability_zones(region="us-west-2"):
+        m = Mock()
+        m.return_value = ['us-west-2a', 'us-west-2b']
+        return m
+
     if cloud_provider == "aws":
         monkeypatch.setattr(
-            "_nebari.utils.amazon_web_services.kubernetes_versions",
+            "_nebari.provider.cloud.amazon_web_services.kubernetes_versions",
             _mock_kubernetes_versions(),
+        )
+        monkeypatch.setattr(
+            "_nebari.provider.cloud.amazon_web_services.zones",
+            _mock_aws_availability_zones(),
         )
     elif cloud_provider == "azure":
         monkeypatch.setattr(
-            "_nebari.utils.azure_cloud.kubernetes_versions",
+            "_nebari.provider.cloud.azure_cloud.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
     elif cloud_provider == "do":
         monkeypatch.setattr(
-            "_nebari.utils.digital_ocean.kubernetes_versions",
+            "_nebari.provider.cloud.digital_ocean.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
     elif cloud_provider == "gcp":
         monkeypatch.setattr(
-            "_nebari.utils.google_cloud.kubernetes_versions",
+            "_nebari.provider.cloud.google_cloud.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
+        monkeypatch.setenv("PROJECT_ID", "pytest-project")
 
     output_directory = tmp_path / f"{cloud_provider}_output_dir"
     output_directory.mkdir()
