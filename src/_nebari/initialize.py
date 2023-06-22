@@ -86,24 +86,32 @@ def render_config(
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
+        if kubernetes_version is not None:
+            config["digital_ocean"] = {"kubernetes_version": kubernetes_version}
     elif cloud_provider == schema.ProviderEnum.gcp:
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
+        config["google_cloud_platform"] = {}
         if "PROJECT_ID" in os.environ:
-            config["google_cloud_platform"] = {"project": os.environ["PROJECT_ID"]}
+            config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
         elif not disable_prompt:
-            config["google_cloud_platform"] = {
-                "project": input("Enter Google Cloud Platform Project ID: ")
-            }
+            config["google_cloud_platform"]["project"] = input("Enter Google Cloud Platform Project ID: ")
+
+        if kubernetes_version is not None:
+            config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
     elif cloud_provider == schema.ProviderEnum.azure:
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Azure"
+        if kubernetes_version is not None:
+            config["azure"] = {"kubernetes_version": kubernetes_version}
     elif cloud_provider == schema.ProviderEnum.aws:
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Amazon Web Services"
+        if kubernetes_version is not None:
+            config["amazon_web_services"] = {"kubernetes_version": kubernetes_version}
     elif cloud_provider == schema.ProviderEnum.existing:
         config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
     elif cloud_provider == schema.ProviderEnum.local:

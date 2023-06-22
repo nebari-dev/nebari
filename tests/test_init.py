@@ -1,12 +1,10 @@
 import pytest
 
-from .conftest import render_config_partial
-
 
 @pytest.mark.parametrize(
     "k8s_version, expected", [(None, True), ("1.19", True), (1000, ValueError)]
 )
-def test_init(setup_fixture, k8s_version, expected):
+def test_init(setup_fixture, k8s_version, expected, render_config_partial):
     (nebari_config_loc, render_config_inputs) = setup_fixture
     (
         project,
