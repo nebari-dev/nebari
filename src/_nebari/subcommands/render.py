@@ -11,6 +11,7 @@ from nebari.hookspecs import hookimpl
 def nebari_subcommand(cli: typer.Typer):
     @cli.command(rich_help_panel="Additional Commands")
     def render(
+        ctx: typer.Context,
         output_directory: pathlib.Path = typer.Option(
             "./",
             "-o",
@@ -33,4 +34,4 @@ def nebari_subcommand(cli: typer.Typer):
         Dynamically render the Terraform scripts and other files from your [purple]nebari-config.yaml[/purple] file.
         """
         config = schema.read_configuration(config_filename)
-        render_template(output_directory, config, dry_run=dry_run)
+        render_template(output_directory, config, ctx.obj.stages, dry_run=dry_run)
