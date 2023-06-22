@@ -62,7 +62,7 @@ def nebari_subcommand(cli: typer.Typer):
         config = schema.read_configuration(config_filename)
 
         if not disable_render:
-            render_template(output_directory, ctx.obj.config, stages)
+            render_template(output_directory, config, ctx.obj.stages)
 
         deploy_configuration(
             config,
