@@ -4,13 +4,14 @@ from pathlib import Path
 import pytest
 from ruamel.yaml import YAML
 
-from _nebari.render import render_template, set_env_vars_in_config
+from _nebari.render import render_template
+from _nebari.stages.base import get_available_stages
 
-from .conftest import PRESERVED_DIR, render_config_partial
+from .conftest import PRESERVED_DIR
 
 
 @pytest.fixture
-def write_nebari_config_to_file(setup_fixture):
+def write_nebari_config_to_file(setup_fixture, render_config_partial):
     nebari_config_loc, render_config_inputs = setup_fixture
     (
         project,
@@ -31,45 +32,10 @@ def write_nebari_config_to_file(setup_fixture):
         kubernetes_version=None,
     )
 
-    # write to nebari_config.yaml
-    yaml = YAML(typ="unsafe", pure=True)
-    yaml.dump(config, nebari_config_loc)
-
-    render_template(str(nebari_config_loc.parent), nebari_config_loc)
+    stages = get_available_stages()
+    render_template(str(nebari_config_loc.parent), config, stages)
 
     yield setup_fixture
-
-
-def test_get_secret_config_entries(monkeypatch):
-    sec1 = "secret1"
-    sec2 = "nestedsecret1"
-    config_orig = {
-        "key1": "value1",
-        "key2": "NEBARI_SECRET_secret_val",
-        "key3": {
-            "nested_key1": "nested_value1",
-            "nested_key2": "NEBARI_SECRET_nested_secret_val",
-        },
-    }
-    expected = {
-        "key1": "value1",
-        "key2": sec1,
-        "key3": {
-            "nested_key1": "nested_value1",
-            "nested_key2": sec2,
-        },
-    }
-
-    # should raise error if implied env var is not set
-    with pytest.raises(EnvironmentError):
-        config = config_orig.copy()
-        set_env_vars_in_config(config)
-
-    monkeypatch.setenv("secret_val", sec1, prepend=False)
-    monkeypatch.setenv("nested_secret_val", sec2, prepend=False)
-    config = config_orig.copy()
-    set_env_vars_in_config(config)
-    assert config == expected
 
 
 def test_render_template(write_nebari_config_to_file):
