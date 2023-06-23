@@ -45,7 +45,11 @@ def load_plugins(plugins: typing.List[str]):
         else:
             mod = importlib.import_module(plugin)
 
-        pm.register(mod, plugin)
+        try:
+            pm.register(mod, plugin)
+        except ValueError:
+            # Pluin already registered
+            pass
 
 
 load_plugins(DEFAULT_SUBCOMMAND_PLUGINS)
