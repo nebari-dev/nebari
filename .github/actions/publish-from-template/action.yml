@@ -16,7 +16,7 @@ runs:
       shell: bash
       env: ${{ env }}
       run:
-        python ${{ github.action_path }}/publish-from-template.py ${{inputs.filename }}
+        python ${{ github.action_path }}/render_template.py ${{inputs.filename }}
 
     - uses: JasonEtco/create-an-issue@v2
       # Only render template and create an issue in case the workflow is a scheduled one
