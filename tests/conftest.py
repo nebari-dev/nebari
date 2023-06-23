@@ -11,7 +11,10 @@ from nebari import schema
 
 @pytest.fixture(autouse=True)
 def mock_all_cloud_methods(monkeypatch):
-    def _mock_kubernetes_versions(k8s_versions: typing.List[str] = ["1.18", "1.19", "1.20"], grab_latest_version=False):
+    def _mock_kubernetes_versions(
+        k8s_versions: typing.List[str] = ["1.18", "1.19", "1.20"],
+        grab_latest_version=False,
+    ):
         # template for all `kubernetes_versions` calls
         # monkeypatched to avoid making outbound API calls in CI
         m = Mock()
@@ -48,47 +51,45 @@ def mock_all_cloud_methods(monkeypatch):
     monkeypatch.setenv("PROJECT_ID", "pytest-project")
 
 
-
-@pytest.fixture(params=[
-    # project, namespace, domain, cloud_provider, ci_provider, auth_provider
-    (
-        "pytestdo",
-        "dev",
-        "do.nebari.dev",
-        schema.ProviderEnum.do,
-        schema.CiEnum.github_actions,
-        schema.AuthenticationEnum.password,
-    ),
-    (
-        "pytestaws",
-        "dev",
-        "aws.nebari.dev",
-        schema.ProviderEnum.aws,
-        schema.CiEnum.github_actions,
-        schema.AuthenticationEnum.password,
-    ),
-    (
-        "pytestgcp",
-        "dev",
-        "gcp.nebari.dev",
-        schema.ProviderEnum.gcp,
-        schema.CiEnum.github_actions,
-        schema.AuthenticationEnum.password,
-    ),
-    (
-        "pytestazure",
-        "dev",
-        "azure.nebari.dev",
-        schema.ProviderEnum.azure,
-        schema.CiEnum.github_actions,
-        schema.AuthenticationEnum.password,
-    ),
-])
+@pytest.fixture(
+    params=[
+        # project, namespace, domain, cloud_provider, ci_provider, auth_provider
+        (
+            "pytestdo",
+            "dev",
+            "do.nebari.dev",
+            schema.ProviderEnum.do,
+            schema.CiEnum.github_actions,
+            schema.AuthenticationEnum.password,
+        ),
+        (
+            "pytestaws",
+            "dev",
+            "aws.nebari.dev",
+            schema.ProviderEnum.aws,
+            schema.CiEnum.github_actions,
+            schema.AuthenticationEnum.password,
+        ),
+        (
+            "pytestgcp",
+            "dev",
+            "gcp.nebari.dev",
+            schema.ProviderEnum.gcp,
+            schema.CiEnum.github_actions,
+            schema.AuthenticationEnum.password,
+        ),
+        (
+            "pytestazure",
+            "dev",
+            "azure.nebari.dev",
+            schema.ProviderEnum.azure,
+            schema.CiEnum.github_actions,
+            schema.AuthenticationEnum.password,
+        ),
+    ]
+)
 def nebari_config_options(request) -> schema.Main:
-    """This fixtures creates a set of nebari configurations for tests
-
-    """
-    PRESERVED_DIR = "preserved_dir"
+    """This fixtures creates a set of nebari configurations for tests"""
     DEFAULT_GH_REPO = "github.com/test/test"
     DEFAULT_TERRAFORM_STATE = schema.TerraformStateEnum.remote
 
