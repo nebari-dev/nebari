@@ -149,4 +149,4 @@ jobs:
           PROVIDER: ${{ matrix.provider }}
           CICD: ${{ matrix.cicd }}
         with:
-          filename: .github/failed-workflow-issue-templates/provider-tests.md
+          filename: .github/failed-workflow-issue-templates/test-provider.md
