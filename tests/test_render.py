@@ -1,14 +1,24 @@
 import os
 
-import pytest
 from nebari import schema
 
 
 def test_render_config(nebari_render):
     output_directory, config_filename = nebari_render
     config = schema.read_configuration(config_filename)
-    assert {'nebari-config.yaml', 'stages', '.gitignore'} <= set(os.listdir(output_directory))
-    assert {'07-kubernetes-services', '02-infrastructure', '01-terraform-state', '05-kubernetes-keycloak', '08-nebari-tf-extensions', '06-kubernetes-keycloak-configuration', '04-kubernetes-ingress', '03-kubernetes-initialize'} == set(os.listdir(output_directory / "stages"))
+    assert {"nebari-config.yaml", "stages", ".gitignore"} <= set(
+        os.listdir(output_directory)
+    )
+    assert {
+        "07-kubernetes-services",
+        "02-infrastructure",
+        "01-terraform-state",
+        "05-kubernetes-keycloak",
+        "08-nebari-tf-extensions",
+        "06-kubernetes-keycloak-configuration",
+        "04-kubernetes-ingress",
+        "03-kubernetes-initialize",
+    } == set(os.listdir(output_directory / "stages"))
 
     if config.provider == schema.ProviderEnum.do:
         assert (output_directory / "stages" / "01-terraform-state/do").is_dir()
@@ -27,7 +37,6 @@ def test_render_config(nebari_render):
         assert (output_directory / ".github/workflows/").is_dir()
     elif config.ci_cd.type == schema.CiEnum.gitlab_ci:
         assert (output_directory / ".gitlab-ci.yml").is_file()
-
 
 
 # @pytest.fixture
