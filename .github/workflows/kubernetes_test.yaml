@@ -165,6 +165,7 @@ jobs:
           pytest tests_deployment/ -v -s
 
       - name: JupyterHub Notebook Tests
+        timeout-minutes: 2
         # run jhub-client after pytest since jhubctl can cleanup
         # the running server
         run: |
