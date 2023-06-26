@@ -1,9 +1,8 @@
-from _nebari.cli import create_cli
+from nebari.plugins import Nebari
 
 
 def main():
-    cli = create_cli()
-    cli()
+    Nebari()
 
 
 if __name__ == "__main__":
