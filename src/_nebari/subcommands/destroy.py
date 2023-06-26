@@ -49,7 +49,7 @@ def nebari_subcommand(cli: typer.Typer):
             )
 
             if not disable_render:
-                render_template(output_directory, stages)
+                render_template(output_directory, config, stages)
 
             destroy_configuration(config, stages)
 
