@@ -59,14 +59,19 @@ def nebari_subcommand(cli: typer.Typer):
         """
         Deploy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
         """
-        config = schema.read_configuration(config_filename)
+        from nebari.plugins import nebari_plugin_manager
+
+        stages = nebari_plugin_manager.ordered_stages
+        config_schema = nebari_plugin_manager.config_schema
+
+        config = schema.read_configuration(config_filename, config_schema=config_schema)
 
         if not disable_render:
-            render_template(output_directory, config, ctx.obj.stages)
+            render_template(output_directory, config, stages)
 
         deploy_configuration(
             config,
-            ctx.obj.stages,
+            stages,
             dns_provider=dns_provider,
             dns_auto_provision=dns_auto_provision,
             disable_prompt=disable_prompt,

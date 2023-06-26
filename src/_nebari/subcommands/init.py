@@ -640,7 +640,9 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
         from nebari.plugins import nebari_plugin_manager
 
-        handle_init(inputs, config_schema=nebari_plugin_manager.config_schema)
+        config_schema = nebari_plugin_manager.config_schema
+
+        handle_init(inputs, config_schema=config_schema)
 
         rich.print(
             (

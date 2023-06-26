@@ -31,7 +31,7 @@ def nebari_subcommand(cli: typer.Typer):
         else:
             from nebari.plugins import nebari_plugin_manager
 
-            schema.read_configuration(
-                config_filename, config_schema=nebari_plugin_manager.config_schema
-            )
+            config_schema = nebari_plugin_manager.config_schema
+
+            schema.read_configuration(config_filename, config_schema=config_schema)
             print("[bold purple]Successfully validated configuration.[/bold purple]")

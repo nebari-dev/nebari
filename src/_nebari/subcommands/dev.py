@@ -4,6 +4,7 @@ import pathlib
 import typer
 
 from _nebari.keycloak import keycloak_rest_api_call
+from nebari import schema
 from nebari.hookspecs import hookimpl
 
 
@@ -45,6 +46,10 @@ def nebari_subcommand(cli: typer.Typer):
         Please use this at your own risk.
 
         """
-        schema.read_configuration(config_filename)
+        from nebari.plugins import nebari_plugin_manager
+
+        config_schema = nebari_plugin_manager.config_schema
+
+        schema.read_configuration(config_filename, config_schema=config_schema)
         r = keycloak_rest_api_call(config_filename, request=request)
         print(json.dumps(r, indent=4))
