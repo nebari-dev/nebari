@@ -15,7 +15,7 @@ from rich.table import Table
 from typer.core import TyperGroup
 
 from _nebari.version import __version__
-from nebari import hookspecs
+from nebari import hookspecs, schema
 
 DEFAULT_SUBCOMMAND_PLUGINS = [
     # subcommands
@@ -31,6 +31,7 @@ DEFAULT_SUBCOMMAND_PLUGINS = [
 ]
 
 DEFAULT_STAGES_PLUGINS = [
+    # stages
     "_nebari.stages.bootstrap",
     "_nebari.stages.terraform_state",
     "_nebari.stages.infrastructure",
@@ -43,7 +44,7 @@ DEFAULT_STAGES_PLUGINS = [
 ]
 
 
-class Nebari:
+class NebariPluginManager:
     plugin_manager = pluggy.PluginManager("nebari")
 
     ordered_stages: typing.List[hookspecs.NebariStage] = []
@@ -53,7 +54,8 @@ class Nebari:
     cli: typer.Typer = None
 
     schema_name: str = "NebariConfig"
-    config_path: typing.Union[str, Path, None] = None
+    config_schema: typing.Union[BaseModel, None] = None
+    config_path: typing.Union[Path, None] = None
     config: typing.Union[BaseModel, None] = None
 
     def __init__(self) -> None:
@@ -63,10 +65,9 @@ class Nebari:
             # Only load plugins if not running tests
             self.plugin_manager.load_setuptools_entrypoints("nebari")
 
-        # create and start CLI
         self.load_subcommands(DEFAULT_SUBCOMMAND_PLUGINS)
-        self.cli = self._create_cli()
-        self.cli()
+        self.ordered_stages = self.get_available_stages()
+        self.config_schema = self.extend_schema()
 
     def load_subcommands(self, subcommand: typing.List[str]):
         self._load_plugins(subcommand)
@@ -124,32 +125,45 @@ class Nebari:
 
         return included_stages
 
-    def create_dynamic_schema(self, plugin: BaseModel, base: BaseModel) -> BaseModel:
-        extra_fields = {}
-        for n, f in plugin.__fields__.items():
-            extra_fields[n] = (f.type_, f.default if f.default is not None else ...)
+    def load_config(self, config_path: typing.Union[str, Path]):
+        if isinstance(config_path, str):
+            config_path = Path(config_path)
+
+        if not config_path.exists():
+            raise FileNotFoundError(f"Config file {config_path} not found")
+
+        self.config_path = config_path
+        self.config = schema.read_configuration(config_path)
+
+    def _create_dynamic_schema(
+        self, base: BaseModel, stage: BaseModel, stage_name: str
+    ) -> BaseModel:
+        stage_fields = {
+            n: (f.type_, f.default if f.default is not None else ...)
+            for n, f in stage.__fields__.items()
+        }
+        # ensure top-level key for `stage` is set to `stage_name`
+        stage_model = create_model(stage_name, __base__=schema.Base, **stage_fields)
+        extra_fields = {stage_name: (stage_model, None)}
         return create_model(self.schema_name, __base__=base, **extra_fields)
 
-    def extend_schema(self, base_schema: BaseModel) -> BaseModel:
-        if not self.config:
-            return
-
-        for stages in self.ordered_stages():
+    def extend_schema(self, base_schema: BaseModel = schema.Main) -> BaseModel:
+        config_schema = base_schema
+        for stages in self.ordered_stages:
             if stages.stage_schema:
-                self.config = self.create_dynamic_schema(
-                    stages.stage_schema, base_schema
+                config_schema = self._create_dynamic_schema(
+                    config_schema,
+                    stages.stage_schema,
+                    stages.name,
                 )
-
-        if self.config:
-            return self.config
-        return base_schema
+        return config_schema
 
     def _version_callback(self, value: bool):
         if value:
             typer.echo(__version__)
             raise typer.Exit()
 
-    def _create_cli(self) -> typer.Typer:
+    def create_cli(self) -> typer.Typer:
         class OrderCommands(TyperGroup):
             def list_commands(self, ctx: typer.Context):
                 """Return list of commands in the order appear."""
@@ -208,6 +222,7 @@ class Nebari:
             self.exclude_default_stages = exclude_default_stages
             self.exclude_stages = excluded_stages
             self.ordered_stages = self.get_available_stages()
+            self.config_schema = self.extend_schema()
 
         @cli.command()
         def info(ctx: typer.Context):
@@ -245,4 +260,11 @@ class Nebari:
             rich.print(table)
 
         self.plugin_manager.hook.nebari_subcommand(cli=cli)
+
+        self.cli = cli
+        self.cli()
+
         return cli
+
+
+nebari_plugin_manager = NebariPluginManager()

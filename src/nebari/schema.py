@@ -855,6 +855,7 @@ class InitInputs(Base):
     kubernetes_version: typing.Union[str, None] = None
     ssl_cert_email: typing.Union[str, None] = None
     disable_prompt: bool = False
+    output: pathlib.Path = pathlib.Path("nebari-config.yaml")
 
 
 class CLIContext(Base):
@@ -1101,7 +1102,11 @@ def set_config_from_environment_variables(
     return config
 
 
-def read_configuration(config_filename: pathlib.Path, read_environment: bool = True):
+def read_configuration(
+    config_filename: pathlib.Path,
+    read_environment: bool = True,
+    config_schema: pydantic.BaseModel = Main,
+):
     """Read configuration from multiple sources and apply validation"""
     filename = pathlib.Path(config_filename)
 
@@ -1115,7 +1120,7 @@ def read_configuration(config_filename: pathlib.Path, read_environment: bool = T
         )
 
     with filename.open() as f:
-        config = Main(**yaml.load(f.read()))
+        config = config_schema(**yaml.load(f.read()))
 
     if read_environment:
         config = set_config_from_environment_variables(config)
@@ -1127,13 +1132,14 @@ def write_configuration(
     config_filename: pathlib.Path,
     config: typing.Union[Main, typing.Dict],
     mode: str = "w",
+    config_schema: pydantic.BaseModel = Main,
 ):
     yaml = YAML()
     yaml.preserve_quotes = True
     yaml.default_flow_style = False
 
     with config_filename.open(mode) as f:
-        if isinstance(config, Main):
+        if isinstance(config, config_schema):
             yaml.dump(config.dict(), f)
         else:
             yaml.dump(config, f)
