@@ -33,5 +33,10 @@ def nebari_subcommand(cli: typer.Typer):
         """
         Dynamically render the Terraform scripts and other files from your [purple]nebari-config.yaml[/purple] file.
         """
-        config = schema.read_configuration(config_filename)
-        render_template(output_directory, config, ctx.obj.stages, dry_run=dry_run)
+        from nebari.plugins import nebari_plugin_manager
+
+        stages = nebari_plugin_manager.ordered_stages
+        config_schema = nebari_plugin_manager.config_schema
+
+        config = schema.read_configuration(config_filename, config_schema=config_schema)
+        render_template(output_directory, config, stages, dry_run=dry_run)

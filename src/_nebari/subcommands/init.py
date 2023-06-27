@@ -6,6 +6,7 @@ import typing
 import questionary
 import rich
 import typer
+from pydantic import BaseModel
 
 from _nebari.initialize import render_config
 from nebari import schema
@@ -45,19 +46,10 @@ def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
 
 
-def handle_init(inputs: schema.InitInputs):
+def handle_init(inputs: schema.InitInputs, config_schema: BaseModel):
     """
     Take the inputs from the `nebari init` command, render the config and write it to a local yaml file.
     """
-    # if NEBARI_IMAGE_TAG:
-    #     print(
-    #         f"Modifying the image tags for the `default_images`, setting tags to: {NEBARI_IMAGE_TAG}"
-    #     )
-
-    # if NEBARI_DASK_VERSION:
-    #     print(
-    #         f"Modifying the version of the `nebari_dask` package, setting version to: {NEBARI_DASK_VERSION}"
-    #     )
 
     # this will force the `set_kubernetes_version` to grab the latest version
     if inputs.kubernetes_version == "latest":
@@ -80,7 +72,9 @@ def handle_init(inputs: schema.InitInputs):
     )
 
     try:
-        schema.write_configuration(pathlib.Path("nebari-config.yaml"), config, mode="x")
+        schema.write_configuration(
+            inputs.output, config, mode="x", config_schema=config_schema
+        )
     except FileExistsError:
         raise ValueError(
             "A nebari-config.yaml file already exists. Please move or delete it and try again."
@@ -102,6 +96,24 @@ def check_ssl_cert_email(ctx: typer.Context, ssl_cert_email: str):
         raise ValueError("ssl-cert-email should be a valid email address")
 
     return ssl_cert_email
+
+
+def check_repository_creds(ctx: typer.Context, git_provider: str):
+    """Validate the necessary Git provider (GitHub) credentials are set."""
+
+    if (
+        git_provider == schema.GitRepoEnum.github.value.lower()
+        and not os.environ.get("GITHUB_USERNAME")
+        or not os.environ.get("GITHUB_TOKEN")
+    ):
+        os.environ["GITHUB_USERNAME"] = typer.prompt(
+            "Paste your GITHUB_USERNAME",
+            hide_input=True,
+        )
+        os.environ["GITHUB_TOKEN"] = typer.prompt(
+            "Paste your GITHUB_TOKEN",
+            hide_input=True,
+        )
 
 
 def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
@@ -333,6 +345,12 @@ def nebari_subcommand(cli: typer.Typer):
             False,
             is_eager=True,
         ),
+        output: str = typer.Option(
+            pathlib.Path("nebari-config.yaml"),
+            "--output",
+            "-o",
+            help="Output file path for the rendered config file.",
+        ),
     ):
         """
         Create and initialize your [purple]nebari-config.yaml[/purple] file.
@@ -363,8 +381,13 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.kubernetes_version = kubernetes_version
         inputs.ssl_cert_email = ssl_cert_email
         inputs.disable_prompt = disable_prompt
+        inputs.output = output
 
-        handle_init(inputs)
+        from nebari.plugins import nebari_plugin_manager
+
+        handle_init(inputs, config_schema=nebari_plugin_manager.config_schema)
+
+        nebari_plugin_manager.load_config(output)
 
 
 def guided_init_wizard(ctx: typer.Context, guided_init: str):
@@ -522,7 +545,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
             git_provider = questionary.select(
                 "Which git provider would you like to use?",
-                choices=enum_to_list(GitRepoEnum),
+                choices=enum_to_list(schema.GitRepoEnum),
                 qmark=qmark,
             ).unsafe_ask()
 
@@ -540,7 +563,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 git_provider=git_provider, org_name=org_name, repo_name=repo_name
             )
 
-            if git_provider == GitRepoEnum.github.value.lower():
+            if git_provider == schema.GitRepoEnum.github.value.lower():
                 inputs.repository_auto_provision = questionary.confirm(
                     f"Would you like nebari to create a remote repository on {git_provider}?",
                     default=False,
@@ -551,10 +574,10 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             if not disable_checks and inputs.repository_auto_provision:
                 check_repository_creds(ctx, git_provider)
 
-            if git_provider == GitRepoEnum.github.value.lower():
-                inputs.ci_provider = CiEnum.github_actions.value.lower()
-            elif git_provider == GitRepoEnum.gitlab.value.lower():
-                inputs.ci_provider = CiEnum.gitlab_ci.value.lower()
+            if git_provider == schema.GitRepoEnum.github.value.lower():
+                inputs.ci_provider = schema.CiEnum.github_actions.value.lower()
+            elif git_provider == schema.GitRepoEnum.gitlab.value.lower():
+                inputs.ci_provider = schema.CiEnum.gitlab_ci.value.lower()
 
         # SSL CERTIFICATE
         if inputs.domain_name:
@@ -598,7 +621,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             # TERRAFORM STATE
             inputs.terraform_state = questionary.select(
                 "Where should the Terraform State be provisioned?",
-                choices=enum_to_list(TerraformStateEnum),
+                choices=enum_to_list(schema.TerraformStateEnum),
                 qmark=qmark,
             ).unsafe_ask()
 
@@ -615,7 +638,11 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 qmark=qmark,
             ).unsafe_ask()
 
-        handle_init(inputs)
+        from nebari.plugins import nebari_plugin_manager
+
+        config_schema = nebari_plugin_manager.config_schema
+
+        handle_init(inputs, config_schema=config_schema)
 
         rich.print(
             (

@@ -71,6 +71,10 @@ def nebari_subcommand(cli: typer.Typer):
         ),
     ):
         """Export the users in Keycloak."""
-        config = schema.read_configuration(config_filename)
+        from nebari.plugins import nebari_plugin_manager
+
+        config_schema = nebari_plugin_manager.config_schema
+
+        config = schema.read_configuration(config_filename, config_schema=config_schema)
         r = export_keycloak_users(config, realm=realm)
         print(json.dumps(r, indent=4))
