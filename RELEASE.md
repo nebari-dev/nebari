@@ -11,6 +11,64 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ## Upcoming Release
 
+### Release 2023.5.1 - May 5, 2023
+
+### Feature changes and enhancements
+
+* Upgrade Argo-Workflows to version 3.4.4
+
+### Breaking Changes
+
+* The Argo-Workflows version upgrade will result in a breaking change if the existing Kubernetes CRDs are not deleted (see the NOTE below for more details).
+* There is a minor breaking change for the Nebari CLI version shorthand, previously it `nebari -v` and now to align with Python convention, it will be `nebari -V`.
+
+> NOTE: After installing the Nebari version `2023.5.1`, please run `nebari upgrade -c nebari-config.yaml` to upgrade
+> the `nebari-config.yaml`. This command will also prompt you to delete a few Kubernetes resources (specifically
+> the Argo-Workflows CRDS and service accounts) before you can upgrade.
+
+### What's Changed
+* Use --quiet flag for conda install in CI by @pmeier in https://github.com/nebari-dev/nebari/pull/1699
+* improve CLI tests by @pmeier in https://github.com/nebari-dev/nebari/pull/1710
+* Fix Existing dashboards by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1723
+* Fix dashboards by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1727
+* Typo in the conda-store <-> conda_store key by @costrouc in https://github.com/nebari-dev/nebari/pull/1740
+* use -V (upper case) for --version short form by @pmeier in https://github.com/nebari-dev/nebari/pull/1720
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/1692
+* improve pytest configuration by @pmeier in https://github.com/nebari-dev/nebari/pull/1700
+* fix upgrade command to look for nebari_version instead of qhub_version by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1693
+* remove lazy import by @pmeier in https://github.com/nebari-dev/nebari/pull/1721
+* fix nebari invocation through python by @pmeier in https://github.com/nebari-dev/nebari/pull/1711
+* Update Argo Workflows to latest version by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1639
+* Update secret token in release-notes-sync action by @pavithraes in https://github.com/nebari-dev/nebari/pull/1753
+* Typo fix in release-notes-sync action by @pavithraes in https://github.com/nebari-dev/nebari/pull/1756
+* 🔄 Synced file(s) with nebari-dev/.github by @nebari-sensei in https://github.com/nebari-dev/nebari/pull/1758
+* Update path in release-notes-sync action by @pavithraes in https://github.com/nebari-dev/nebari/pull/1757
+* Updating heading format in release notes by @pavithraes in https://github.com/nebari-dev/nebari/pull/1761
+* Update vault url by @costrouc in https://github.com/nebari-dev/nebari/pull/1752
+* Fix? contributor test trigger by @pmeier in https://github.com/nebari-dev/nebari/pull/1734
+* Consistent user Experience with y/N. by @AM-O7 in https://github.com/nebari-dev/nebari/pull/1747
+* Fix contributor trigger by @pmeier in https://github.com/nebari-dev/nebari/pull/1765
+* add more debug output to contributor test trigger by @pmeier in https://github.com/nebari-dev/nebari/pull/1766
+* fix copy-paste error by @pmeier in https://github.com/nebari-dev/nebari/pull/1767
+* add instructions insufficient permissions of contributor trigger by @pmeier in https://github.com/nebari-dev/nebari/pull/1772
+* fix invalid escape sequence by @pmeier in https://github.com/nebari-dev/nebari/pull/1770
+* Update AMI  in `.cirun.yml` for nebari-dev-ci AWS account by @aktech in https://github.com/nebari-dev/nebari/pull/1776
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/1768
+* turn warnings into errors with pytest by @pmeier in https://github.com/nebari-dev/nebari/pull/1774
+* purge setup.cfg by @pmeier in https://github.com/nebari-dev/nebari/pull/1781
+* improve pre-commit run on GHA by @pmeier in https://github.com/nebari-dev/nebari/pull/1782
+* Upgrade to k8s 1.24 by @iameskild in https://github.com/nebari-dev/nebari/pull/1760
+* Overloaded dask gateway fix by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1777
+* Add option to specify GKE release channel by @iameskild in https://github.com/nebari-dev/nebari/pull/1648
+* Update upgrade command, add RELEASE notes by @iameskild in https://github.com/nebari-dev/nebari/pull/1789
+
+### New Contributors
+* @pmeier made their first contribution in https://github.com/nebari-dev/nebari/pull/1699
+* @AM-O7 made their first contribution in https://github.com/nebari-dev/nebari/pull/1747
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.4.1...2023.5.1
+
+
 ## Release 2023.4.1 - April 12, 2023
 
 > NOTE: Nebari requires Kubernetes version 1.23 and Digital Ocean now requires new clusters to run Kubernetes version 1.24. This means that if you are currently running on Digital Ocean, you should be fine but deploying on a new cluster on Digital Ocean is not possible until we upgrade Kubernetes version (see [issue 1622](https://github.com/nebari-dev/nebari/issues/1622) for more details).
@@ -43,17 +101,15 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Adding newest conda-store 0.4.14 along with superadmin credentials by @costrouc in https://github.com/nebari-dev/nebari/pull/1701
 * Update release notes for 2023.4.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/1722
 
-## New Contributors
+### New Contributors
 * @ppwadhwa made their first contribution in https://github.com/nebari-dev/nebari/pull/1646
 * @tkoyama010 made their first contribution in https://github.com/nebari-dev/nebari/pull/1660
 
 **Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.1.1...2023.4.1
 
-### Feature changes and enhancements
-
 ## Release 2023.1.1 - January 30, 2023
 
-## What's Changed
+### What's Changed
 * 🔄 Synced file(s) with nebari-dev/.github by @nebari-sensei in https://github.com/nebari-dev/nebari/pull/1588
 * Make conda-store file system read-only by default by @alimanfoo in https://github.com/nebari-dev/nebari/pull/1595
 * ENH - Switch to ruff and pre-commit.ci by @trallard in https://github.com/nebari-dev/nebari/pull/1602
@@ -72,7 +128,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Set GKE release_channel to unspecified to prevent auto k8s updates by @iameskild in https://github.com/nebari-dev/nebari/pull/1630
 * Update default nebari-dask, nebari image tags by @iameskild in https://github.com/nebari-dev/nebari/pull/1636
 
-## New Contributors
+### New Contributors
 * @pre-commit-ci made their first contribution in https://github.com/nebari-dev/nebari/pull/1613
 
 

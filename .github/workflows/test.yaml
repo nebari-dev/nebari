@@ -9,8 +9,8 @@ on:
       - "tests_e2e/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
+      - "pytest.ini"
   push:
     branches:
       - main
@@ -23,8 +23,8 @@ on:
       - "tests_e2e/**"
       - "scripts/**"
       - "nebari/**"
-      - "setup.cfg"
       - "pyproject.toml"
+      - "pytest.ini"
 
 jobs:
   test-general:
@@ -51,7 +51,7 @@ jobs:
       - name: Install Nebari
         run: |
           pip install .[dev]
-          conda install conda-build -y
+          conda install --quiet --yes conda-build
       - name: Test Nebari
         run: |
           pytest --version
