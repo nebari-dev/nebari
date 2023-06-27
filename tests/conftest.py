@@ -5,8 +5,10 @@ import pytest
 
 from _nebari.initialize import render_config
 from _nebari.render import render_template
-from _nebari.stages.base import get_available_stages
 from nebari import schema
+
+# from _nebari.stages.base import get_available_stages
+from nebari.plugins import nebari_plugin_manager
 
 
 @pytest.fixture(autouse=True)
@@ -123,8 +125,14 @@ def nebari_config(nebari_config_options):
 
 
 @pytest.fixture
-def nebari_stages():
-    return get_available_stages()
+def nebari_object():
+    return nebari_plugin_manager
+
+
+@pytest.fixture
+def nebari_stages(nebari_object):
+    print(nebari_object)
+    return nebari_object.ordered_stages
 
 
 @pytest.fixture
