@@ -36,16 +36,22 @@ def nebari_subcommand(cli: typer.Typer):
         """
         Destroy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
         """
+        from nebari.plugins import nebari_plugin_manager
+
+        stages = nebari_plugin_manager.ordered_stages
+        config_schema = nebari_plugin_manager.config_schema
 
         def _run_destroy(
             config_filename=config_filename, disable_render=disable_render
         ):
-            config = schema.read_configuration(config_filename)
+            config = schema.read_configuration(
+                config_filename, config_schema=config_schema
+            )
 
             if not disable_render:
-                render_template(output_directory, config, ctx.obj.stages)
+                render_template(output_directory, config, stages)
 
-            destroy_configuration(config, ctx.obj.stages)
+            destroy_configuration(config, stages)
 
         if disable_prompt:
             _run_destroy()
