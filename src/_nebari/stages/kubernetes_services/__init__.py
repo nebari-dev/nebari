@@ -1,10 +1,16 @@
+import enum
+import os
 import json
 import sys
+import typing
 from typing import Any, Dict, List
 from urllib.parse import urlencode
 
+import pydantic
 from pydantic import Field
 
+from _nebari.version import __version__
+from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
     NebariHelmProvider,
@@ -17,6 +23,311 @@ from nebari.hookspecs import NebariStage, hookimpl
 # check and retry settings
 NUM_ATTEMPTS = 10
 TIMEOUT = 10  # seconds
+
+
+def set_docker_image_tag() -> str:
+    """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
+    return os.environ.get("NEBARI_IMAGE_TAG", constants.DEFAULT_NEBARI_IMAGE_TAG)
+
+
+def set_nebari_dask_version() -> str:
+    """Set version of `nebari-dask` meta package."""
+    return os.environ.get("NEBARI_DASK_VERSION", constants.DEFAULT_NEBARI_DASK_VERSION)
+
+
+@schema.yaml_object(schema.yaml)
+class AccessEnum(str, enum.Enum):
+    all = "all"
+    yaml = "yaml"
+    keycloak = "keycloak"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
+class Prefect(schema.Base):
+    enabled: bool = False
+    image: typing.Optional[str]
+    overrides: typing.Dict = {}
+    token: typing.Optional[str]
+
+
+class CDSDashboards(schema.Base):
+    enabled: bool = True
+    cds_hide_user_named_servers: bool = True
+    cds_hide_user_dashboard_servers: bool = False
+
+
+class DefaultImages(schema.Base):
+    jupyterhub: str = f"quay.io/nebari/nebari-jupyterhub:{set_docker_image_tag()}"
+    jupyterlab: str = f"quay.io/nebari/nebari-jupyterlab:{set_docker_image_tag()}"
+    dask_worker: str = f"quay.io/nebari/nebari-dask-worker:{set_docker_image_tag()}"
+
+
+class Storage(schema.Base):
+    conda_store: str = "200Gi"
+    shared_filesystem: str = "200Gi"
+
+
+class JupyterHubTheme(schema.Base):
+    hub_title: str = "Nebari"
+    hub_subtitle: str = "Your open source data science platform"
+    welcome: str = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
+    logo: str = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg"
+    primary_color: str = "#4f4173"
+    secondary_color: str = "#957da6"
+    accent_color: str = "#32C574"
+    text_color: str = "#111111"
+    h1_color: str = "#652e8e"
+    h2_color: str = "#652e8e"
+    version: str = f"v{__version__}"
+    display_version: str = "True"  # limitation of theme everything is a str
+
+
+class Theme(schema.Base):
+    jupyterhub: JupyterHubTheme = JupyterHubTheme()
+
+
+class KubeSpawner(schema.Base):
+    cpu_limit: int
+    cpu_guarantee: int
+    mem_limit: str
+    mem_guarantee: str
+
+    class Config:
+        extra = "allow"
+
+
+class JupyterLabProfile(schema.Base):
+    access: AccessEnum = AccessEnum.all
+    display_name: str
+    description: str
+    default: bool = False
+    users: typing.Optional[typing.List[str]]
+    groups: typing.Optional[typing.List[str]]
+    kubespawner_override: typing.Optional[KubeSpawner]
+
+    @pydantic.root_validator
+    def only_yaml_can_have_groups_and_users(cls, values):
+        if values["access"] != AccessEnum.yaml:
+            if (
+                values.get("users", None) is not None
+                or values.get("groups", None) is not None
+            ):
+                raise ValueError(
+                    "Profile must not contain groups or users fields unless access = yaml"
+                )
+        return values
+
+
+class DaskWorkerProfile(schema.Base):
+    worker_cores_limit: int
+    worker_cores: int
+    worker_memory_limit: str
+    worker_memory: str
+    image: typing.Optional[str]
+
+    class Config:
+        extra = "allow"
+
+
+class Profiles(schema.Base):
+    jupyterlab: typing.List[JupyterLabProfile] = [
+        JupyterLabProfile(
+            display_name="Small Instance",
+            description="Stable environment with 2 cpu / 8 GB ram",
+            default=True,
+            kubespawner_override=KubeSpawner(
+                cpu_limit=2,
+                cpu_guarantee=1.5,
+                mem_limit="8G",
+                mem_guarantee="5G",
+            ),
+        ),
+        JupyterLabProfile(
+            display_name="Medium Instance",
+            description="Stable environment with 4 cpu / 16 GB ram",
+            kubespawner_override=KubeSpawner(
+                cpu_limit=4,
+                cpu_guarantee=3,
+                mem_limit="16G",
+                mem_guarantee="10G",
+            ),
+        ),
+    ]
+    dask_worker: typing.Dict[str, DaskWorkerProfile] = {
+        "Small Worker": DaskWorkerProfile(
+            worker_cores_limit=2,
+            worker_cores=1.5,
+            worker_memory_limit="8G",
+            worker_memory="5G",
+            worker_threads=2,
+        ),
+        "Medium Worker": DaskWorkerProfile(
+            worker_cores_limit=4,
+            worker_cores=3,
+            worker_memory_limit="16G",
+            worker_memory="10G",
+            worker_threads=4,
+        ),
+    }
+
+    @pydantic.validator("jupyterlab")
+    def check_default(cls, v, values):
+        """Check if only one default value is present."""
+        default = [attrs["default"] for attrs in v if "default" in attrs]
+        if default.count(True) > 1:
+            raise TypeError(
+                "Multiple default Jupyterlab profiles may cause unexpected problems."
+            )
+        return v
+
+
+class CondaEnvironment(schema.Base):
+    name: str
+    channels: typing.Optional[typing.List[str]]
+    dependencies: typing.List[typing.Union[str, typing.Dict[str, typing.List[str]]]]
+
+
+class CondaStore(schema.Base):
+    extra_settings: typing.Dict[str, typing.Any] = {}
+    extra_config: str = ""
+    image: str = "quansight/conda-store-server"
+    image_tag: str = constants.DEFAULT_CONDA_STORE_IMAGE_TAG
+    default_namespace: str = "nebari-git"
+    object_storage: str = "200Gi"
+
+
+class NebariWorkflowController(schema.Base):
+    enabled: bool = True
+    image_tag: str = constants.DEFAULT_NEBARI_WORKFLOW_CONTROLLER_IMAGE_TAG
+
+
+class ArgoWorkflows(schema.Base):
+    enabled: bool = True
+    overrides: typing.Dict = {}
+    nebari_workflow_controller: NebariWorkflowController = NebariWorkflowController()
+
+
+class KBatch(schema.Base):
+    enabled: bool = True
+
+
+class Monitoring(schema.Base):
+    enabled: bool = True
+
+
+class ClearML(schema.Base):
+    enabled: bool = False
+    enable_forward_auth: bool = False
+    overrides: typing.Dict = {}
+
+
+class JupyterHub(schema.Base):
+    overrides: typing.Dict = {}
+
+
+
+class IdleCuller(schema.Base):
+    terminal_cull_inactive_timeout: int = 15
+    terminal_cull_interval: int = 5
+    kernel_cull_idle_timeout: int = 15
+    kernel_cull_interval: int = 5
+    kernel_cull_connected: bool = True
+    kernel_cull_busy: bool = False
+    server_shutdown_no_activity_timeout: int = 15
+
+
+class JupyterLab(schema.Base):
+    idle_culler: IdleCuller = IdleCuller()
+
+
+class InputSchema(schema.Base):
+    prefect: Prefect = Prefect()
+    cdsdashboards: CDSDashboards = CDSDashboards()
+    default_images: DefaultImages = DefaultImages()
+    storage: Storage = Storage()
+    theme: Theme = Theme()
+    profiles: Profiles = Profiles()
+    environments: typing.Dict[str, CondaEnvironment] = {
+        "environment-dask.yaml": CondaEnvironment(
+            name="dask",
+            channels=["conda-forge"],
+            dependencies=[
+                "python=3.10.8",
+                "ipykernel=6.21.0",
+                "ipywidgets==7.7.1",
+                f"nebari-dask =={set_nebari_dask_version()}",
+                "python-graphviz=0.20.1",
+                "pyarrow=10.0.1",
+                "s3fs=2023.1.0",
+                "gcsfs=2023.1.0",
+                "numpy=1.23.5",
+                "numba=0.56.4",
+                "pandas=1.5.3",
+                {
+                    "pip": [
+                        "kbatch==0.4.1",
+                    ],
+                },
+            ],
+        ),
+        "environment-dashboard.yaml": CondaEnvironment(
+            name="dashboard",
+            channels=["conda-forge"],
+            dependencies=[
+                "python=3.10",
+                "cdsdashboards-singleuser=0.6.3",
+                "cufflinks-py=0.17.3",
+                "dash=2.8.1",
+                "geopandas=0.12.2",
+                "geopy=2.3.0",
+                "geoviews=1.9.6",
+                "gunicorn=20.1.0",
+                "holoviews=1.15.4",
+                "ipykernel=6.21.2",
+                "ipywidgets=8.0.4",
+                "jupyter=1.0.0",
+                "jupyterlab=3.6.1",
+                "jupyter_bokeh=3.0.5",
+                "matplotlib=3.7.0",
+                f"nebari-dask=={set_nebari_dask_version()}",
+                "nodejs=18.12.1",
+                "numpy",
+                "openpyxl=3.1.1",
+                "pandas=1.5.3",
+                "panel=0.14.3",
+                "param=1.12.3",
+                "plotly=5.13.0",
+                "python-graphviz=0.20.1",
+                "rich=13.3.1",
+                "streamlit=1.9.0",
+                "sympy=1.11.1",
+                "voila=0.4.0",
+                "pip=23.0",
+                {
+                    "pip": [
+                        "streamlit-image-comparison==0.0.3",
+                        "noaa-coops==0.2.1",
+                        "dash_core_components==2.0.0",
+                        "dash_html_components==2.0.0",
+                    ],
+                },
+            ],
+        ),
+    }
+    conda_store: CondaStore = CondaStore()
+    argo_workflows: ArgoWorkflows = ArgoWorkflows()
+    kbatch: KBatch = KBatch()
+    monitoring: Monitoring = Monitoring()
+    clearml: ClearML = ClearML()
+    jupyterhub: JupyterHub = JupyterHub()
+    jupyterlab: JupyterLab = JupyterLab()
+
+
+class OutputSchema(schema.Base):
+    pass
 
 
 # variables shared by multiple services
@@ -40,7 +351,7 @@ class ImageNameTag(schema.Base):
 
 
 class CondaStoreInputVars(schema.Base):
-    conda_store_environments: Dict[str, schema.CondaEnvironment] = Field(
+    conda_store_environments: Dict[str, CondaEnvironment] = Field(
         alias="conda-store-environments"
     )
     conda_store_default_namespace: str = Field(alias="conda-store-default-namespace")
@@ -64,7 +375,7 @@ class JupyterhubInputVars(schema.Base):
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
     jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
     jupyterhub_shared_endpoint: str = Field(None, alias="jupyterhub-shared-endpoint")
-    jupyterhub_profiles: List[schema.JupyterLabProfile] = Field(
+    jupyterhub_profiles: List[JupyterLabProfile] = Field(
         alias="jupyterlab-profiles"
     )
     jupyterhub_image: ImageNameTag = Field(alias="jupyterhub-image")
@@ -111,6 +422,9 @@ class ClearMLInputVars(schema.Base):
 class KubernetesServicesStage(NebariTerraformStage):
     name = "07-kubernetes-services"
     priority = 70
+
+    input_schema = InputSchema
+    output_schema = OutputSchema
 
     def tf_objects(self) -> List[Dict]:
         return [

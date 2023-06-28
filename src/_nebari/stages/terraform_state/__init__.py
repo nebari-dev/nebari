@@ -1,6 +1,8 @@
+import enum
 import inspect
 import os
 import pathlib
+import typing
 from typing import Any, Dict, List, Tuple
 
 from _nebari.stages.base import NebariTerraformStage
@@ -8,32 +10,62 @@ from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
 
-class BaseCloudProviderInputVars(schema.Base):
+class DigitalOceanInputVars(schema.Base):
     name: str
     namespace: str
-
-
-class DigitalOceanInputVars(BaseCloudProviderInputVars):
     region: str
 
 
-class GCPInputVars(BaseCloudProviderInputVars):
+class GCPInputVars(schema.Base):
+    name: str
+    namespace: str
     region: str
 
 
-class AzureInputVars(BaseCloudProviderInputVars):
+class AzureInputVars(schema.Base):
+    name: str
+    namespace: str
     region: str
     storage_account_postfix: str
     state_resource_group_name: str
 
 
-class AWSInputVars(BaseCloudProviderInputVars):
+class AWSInputVars(schema.Base):
+    name: str
+    namespace: str
+
+
+@schema.yaml_object(schema.yaml)
+class TerraformStateEnum(str, enum.Enum):
+    remote = "remote"
+    local = "local"
+    existing = "existing"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
+class TerraformState(schema.Base):
+    type: TerraformStateEnum = TerraformStateEnum.remote
+    backend: typing.Optional[str]
+    config: typing.Dict[str, str] = {}
+
+
+class InputSchema(schema.Base):
+    terraform_state: TerraformState = TerraformState()
+
+
+class OutputSchema(schema.Base):
     pass
 
 
 class TerraformStateStage(NebariTerraformStage):
     name = "01-terraform-state"
     priority = 10
+
+    input_schema = InputSchema
+    output_schema = OutputSchema
 
     @property
     def template_directory(self):
