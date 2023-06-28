@@ -1,5 +1,7 @@
 import io
+import enum
 from inspect import cleandoc
+import typing
 from typing import Any, Dict, List
 
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
@@ -54,9 +56,39 @@ def gen_cicd(config):
     return cicd_files
 
 
+@schema.yaml_object(schema.yaml)
+class CiEnum(str, enum.Enum):
+    github_actions = "github-actions"
+    gitlab_ci = "gitlab-ci"
+    none = "none"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
+class CICD(schema.Base):
+    type: CiEnum = CiEnum.none
+    branch: str = "main"
+    commit_render: bool = True
+    before_script: typing.List[typing.Union[str, typing.Dict]] = []
+    after_script: typing.List[typing.Union[str, typing.Dict]] = []
+
+
+class InputSchema(schema.Base):
+    ci_cd: CICD = CICD()
+
+
+class OutputSchema(schema.Base):
+    pass
+
+
 class BootstrapStage(NebariStage):
     name = "bootstrap"
     priority = 0
+
+    input_schema = InputSchema
+    output_schema = OutputSchema
 
     def render(self) -> Dict[str, str]:
         contents = {}
