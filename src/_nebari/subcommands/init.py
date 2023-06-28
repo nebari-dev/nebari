@@ -6,7 +6,6 @@ import typing
 import questionary
 import rich
 import typer
-from pydantic import BaseModel
 
 from _nebari.initialize import render_config
 from nebari import schema
@@ -44,41 +43,6 @@ GUIDED_INIT_MSG = (
 
 def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
-
-
-def handle_init(inputs: schema.InitInputs, config_schema: BaseModel):
-    """
-    Take the inputs from the `nebari init` command, render the config and write it to a local yaml file.
-    """
-
-    # this will force the `set_kubernetes_version` to grab the latest version
-    if inputs.kubernetes_version == "latest":
-        inputs.kubernetes_version = None
-
-    config = render_config(
-        cloud_provider=inputs.cloud_provider,
-        project_name=inputs.project_name,
-        nebari_domain=inputs.domain_name,
-        namespace=inputs.namespace,
-        auth_provider=inputs.auth_provider,
-        auth_auto_provision=inputs.auth_auto_provision,
-        ci_provider=inputs.ci_provider,
-        repository=inputs.repository,
-        repository_auto_provision=inputs.repository_auto_provision,
-        kubernetes_version=inputs.kubernetes_version,
-        terraform_state=inputs.terraform_state,
-        ssl_cert_email=inputs.ssl_cert_email,
-        disable_prompt=inputs.disable_prompt,
-    )
-
-    try:
-        schema.write_configuration(
-            inputs.output, config, mode="x", config_schema=config_schema
-        )
-    except FileExistsError:
-        raise ValueError(
-            "A nebari-config.yaml file already exists. Please move or delete it and try again."
-        )
 
 
 def check_project_name(ctx: typer.Context, project_name: str):
@@ -366,6 +330,8 @@ def nebari_subcommand(cli: typer.Typer):
                 [green]nebari init --guided-init[/green]
 
         """
+        from nebari.plugins import nebari_plugin_manager
+
         inputs = schema.InitInputs()
 
         inputs.cloud_provider = cloud_provider
@@ -383,11 +349,33 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.disable_prompt = disable_prompt
         inputs.output = output
 
-        from nebari.plugins import nebari_plugin_manager
+        # this will force the `set_kubernetes_version` to grab the latest version
+        if inputs.kubernetes_version == "latest":
+            inputs.kubernetes_version = None
 
-        handle_init(inputs, config_schema=nebari_plugin_manager.config_schema)
+        config = render_config(
+            cloud_provider=inputs.cloud_provider,
+            project_name=inputs.project_name,
+            nebari_domain=inputs.domain_name,
+            namespace=inputs.namespace,
+            auth_provider=inputs.auth_provider,
+            auth_auto_provision=inputs.auth_auto_provision,
+            ci_provider=inputs.ci_provider,
+            repository=inputs.repository,
+            repository_auto_provision=inputs.repository_auto_provision,
+            kubernetes_version=inputs.kubernetes_version,
+            terraform_state=inputs.terraform_state,
+            ssl_cert_email=inputs.ssl_cert_email,
+            disable_prompt=inputs.disable_prompt,
+        )
 
-        nebari_plugin_manager.load_config(output)
+        try:
+            nebari_plugin_manager.write_configuration(inputs.output, config, mode="x")
+
+        except FileExistsError:
+            raise ValueError(
+                f"A {inputs.output} file already exists. Please move or delete it and try again."
+            )
 
 
 def guided_init_wizard(ctx: typer.Context, guided_init: str):

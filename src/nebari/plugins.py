@@ -2,13 +2,17 @@ import importlib
 import itertools
 import os
 import re
+import shutil
 import sys
 import typing
 from pathlib import Path
 
 import pluggy
 import pydantic
+from ruamel.yaml import YAML
 
+from _nebari.deprecate import DEPRECATED_FILE_PATHS
+from _nebari.utils import gen_render_diff, inspect_files
 from nebari import hookspecs, schema
 
 DEFAULT_SUBCOMMAND_PLUGINS = [
@@ -47,6 +51,23 @@ class NebariPluginManager:
 
     config_path: typing.Union[Path, None] = None
     config: typing.Union[pydantic.BaseModel, None] = None
+
+    template_directory: typing.Union[Path, None] = None
+
+    _ignore_filenames = (
+        [
+            "terraform.tfstate",
+            ".terraform.lock.hcl",
+            "terraform.tfstate.backup",
+        ],
+    )
+    _ignore_directories = (
+        [
+            ".terraform",
+            "__pycache__",
+        ],
+    )
+    _deleted_paths = (DEPRECATED_FILE_PATHS,)
 
     def __init__(self) -> None:
         self.plugin_manager.add_hookspecs(hookspecs)
@@ -107,16 +128,6 @@ class NebariPluginManager:
 
         return included_stages
 
-    def load_config(self, config_path: typing.Union[str, Path]):
-        if isinstance(config_path, str):
-            config_path = Path(config_path)
-
-        if not config_path.exists():
-            raise FileNotFoundError(f"Config file {config_path} not found")
-
-        self.config_path = config_path
-        self.config = schema.read_configuration(config_path)
-
     @property
     def ordered_stages(self):
         return self.get_available_stages()
@@ -127,6 +138,113 @@ class NebariPluginManager:
             _.input_schema for _ in self.ordered_stages if _.input_schema is not None
         ]
         return type("ConfigSchema", tuple(classes), {})
+
+    def write_configuration(
+        self,
+        config_filename: Path,
+        config: typing.Union[schema.Main, typing.Dict],
+        mode: str = "w",
+    ):
+        yaml = YAML()
+        yaml.preserve_quotes = True
+        yaml.default_flow_style = False
+
+        with config_filename.open(mode) as f:
+            if isinstance(config, self.config_schema):
+                yaml.dump(config.dict(), f)
+            else:
+                yaml.dump(config, f)
+
+        self.config_path = config_filename
+        self.config = self.read_configuration(self.config_path)
+
+    def read_configuration(
+        self,
+        config_filename: Path,
+        read_environment: bool = True,
+    ):
+        """Read configuration from multiple sources and apply validation"""
+        filename = Path(config_filename)
+
+        yaml = YAML()
+        yaml.preserve_quotes = True
+        yaml.default_flow_style = False
+
+        if not filename.is_file():
+            raise ValueError(
+                f"passed in configuration filename={config_filename} does not exist"
+            )
+
+        with filename.open() as f:
+            config = self.config_schema(**yaml.load(f.read()))
+
+        if read_environment:
+            config = schema.set_config_from_environment_variables(config)
+
+        return config
+
+    def validate_stages(self):
+        pass
+
+    def render_stages(self, template_directory: Path, dry_run: bool = False):
+        output_directory = Path(template_directory).resolve()
+        if output_directory == Path.home():
+            print("ERROR: Deploying Nebari in home directory is not advised!")
+            sys.exit(1)
+
+        # mkdir all the way down to repo dir so we can copy .gitignore
+        # into it in remove_existing_renders
+        output_directory.mkdir(exist_ok=True, parents=True)
+
+        contents = {}
+        for stage in self.ordered_stages:
+            contents.update(
+                stage(output_directory=output_directory, config=self.config).render()
+            )
+
+        new, untracked, updated, deleted = inspect_files(
+            output_base_dir=str(output_directory),
+            ignore_filenames=self._ignore_filenames,
+            ignore_directories=self._ignore_directories,
+            deleted_paths=self._deleted_paths,
+            contents=contents,
+        )
+
+        gen_render_diff(new, untracked, updated, deleted)
+
+        if dry_run:
+            print("dry-run enabled no files will be created, updated, or deleted")
+        else:
+            for filename in new | updated:
+                output_filename = os.path.join(str(output_directory), filename)
+                os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+
+                if isinstance(contents[filename], str):
+                    with open(output_filename, "w") as f:
+                        f.write(contents[filename])
+                else:
+                    with open(output_filename, "wb") as f:
+                        f.write(contents[filename])
+
+            for path in deleted:
+                abs_path = os.path.abspath(os.path.join(str(output_directory), path))
+
+                # be extra cautious that deleted path is within output_directory
+                if not abs_path.startswith(str(output_directory)):
+                    raise Exception(
+                        f"[ERROR] SHOULD NOT HAPPEN filename was about to be deleted but path={abs_path} is outside of output_directory"
+                    )
+
+                if os.path.isfile(abs_path):
+                    os.remove(abs_path)
+                elif os.path.isdir(abs_path):
+                    shutil.rmtree(abs_path)
+
+    def deploy_stages(self):
+        pass
+
+    def destroy_stages(self):
+        pass
 
 
 nebari_plugin_manager = NebariPluginManager()

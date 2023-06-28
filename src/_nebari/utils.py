@@ -1,5 +1,6 @@
 import contextlib
 import functools
+import hashlib
 import os
 import pathlib
 import re
@@ -10,6 +11,7 @@ import threading
 import time
 from typing import Dict, List
 
+from rich.table import Table
 from ruamel.yaml import YAML
 
 from _nebari.provider.cloud import (
@@ -330,3 +332,105 @@ def deep_merge(*args):
         return [*d1, *d2]
     else:  # if they don't match use left one
         return d1
+
+
+def inspect_files(
+    output_base_dir: str,
+    ignore_filenames: List[str] = None,
+    ignore_directories: List[str] = None,
+    deleted_paths: List[str] = None,
+    contents: Dict[str, str] = None,
+):
+    """Return created, updated and untracked files by computing a checksum over the provided directory.
+
+    Args:
+        output_base_dir (str): Relative base path to output directory
+        ignore_filenames (list[str]): Filenames to ignore while comparing for changes
+        ignore_directories (list[str]): Directories to ignore while comparing for changes
+        deleted_paths (list[str]): Paths that if exist in output directory should be deleted
+        contents (dict): filename to content mapping for dynamically generated files
+    """
+    ignore_filenames = ignore_filenames or []
+    ignore_directories = ignore_directories or []
+    contents = contents or {}
+
+    source_files = {}
+    output_files = {}
+
+    def list_files(
+        directory: str, ignore_filenames: List[str], ignore_directories: List[str]
+    ):
+        for root, dirs, files in os.walk(directory):
+            dirs[:] = [d for d in dirs if d not in ignore_directories]
+            for file in files:
+                if file not in ignore_filenames:
+                    yield os.path.join(root, file)
+
+    for filename in contents:
+        if isinstance(contents[filename], str):
+            source_files[filename] = hashlib.sha256(
+                contents[filename].encode("utf8")
+            ).hexdigest()
+        else:
+            source_files[filename] = hashlib.sha256(contents[filename]).hexdigest()
+
+        output_filename = os.path.join(output_base_dir, filename)
+        if os.path.isfile(output_filename):
+            output_files[filename] = hash_file(filename)
+
+    deleted_files = set()
+    for path in deleted_paths:
+        absolute_path = os.path.join(output_base_dir, path)
+        if os.path.exists(absolute_path):
+            deleted_files.add(path)
+
+    for filename in list_files(output_base_dir, ignore_filenames, ignore_directories):
+        relative_path = os.path.relpath(filename, output_base_dir)
+        if os.path.isfile(filename):
+            output_files[relative_path] = hash_file(filename)
+
+    new_files = source_files.keys() - output_files.keys()
+    untracted_files = output_files.keys() - source_files.keys()
+
+    updated_files = set()
+    for prevalent_file in source_files.keys() & output_files.keys():
+        if source_files[prevalent_file] != output_files[prevalent_file]:
+            updated_files.add(prevalent_file)
+
+    return new_files, untracted_files, updated_files, deleted_paths
+
+
+def hash_file(file_path: str):
+    """Get the hex digest of the given file.
+
+    Args:
+        file_path (str): path to file
+    """
+    with open(file_path, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()
+
+
+def gen_render_diff(new_files, untracted_files, updated_files, deleted_paths):
+    if new_files:
+        table = Table("The following files will be created:", style="deep_sky_blue1")
+        for filename in sorted(new_files):
+            table.add_row(filename, style="green")
+        print(table)
+    if updated_files:
+        table = Table("The following files will be updated:", style="deep_sky_blue1")
+        for filename in sorted(updated_files):
+            table.add_row(filename, style="green")
+        print(table)
+    if deleted_paths:
+        table = Table("The following files will be deleted:", style="deep_sky_blue1")
+        for filename in sorted(deleted_paths):
+            table.add_row(filename, style="green")
+        print(table)
+    if untracted_files:
+        table = Table(
+            "The following files are untracked (only exist in output directory):",
+            style="deep_sky_blue1",
+        )
+        for filename in sorted(untracted_files):
+            table.add_row(filename, style="green")
+        print(table)

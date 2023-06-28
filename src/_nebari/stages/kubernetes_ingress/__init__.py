@@ -7,6 +7,7 @@ from typing import Any, Dict, List
 
 from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.infrastructure import KubernetesCredentials, NodeSelectorKeyValue
 from _nebari.stages.tf_objects import (
     NebariHelmProvider,
     NebariKubernetesProvider,
@@ -169,12 +170,21 @@ class OutputSchema(schema.Base):
     domain: str
 
 
+class RequiredTargets(schema.Base):
+    node_selectors: Dict[str, NodeSelectorKeyValue]
+    kubernetes_credentials: KubernetesCredentials
+    kubeconfig_filename: str
+    nfs_endpoint: typing.Optional[str]
+
+
 class KubernetesIngressStage(NebariTerraformStage):
     name = "04-kubernetes-ingress"
     priority = 40
 
     input_schema = InputSchema
     output_schema = OutputSchema
+
+    required_targets = RequiredTargets
 
     def tf_objects(self) -> List[Dict]:
         return [
@@ -202,9 +212,10 @@ class KubernetesIngressStage(NebariTerraformStage):
                 },
                 "name": self.config.project_name,
                 "environment": self.config.namespace,
-                "node_groups": stage_outputs["stages/02-infrastructure"][
-                    "node_selectors"
-                ],
+                "node_groups": self.required_targets.node_selectors,
+                # "node_groups": stage_outputs["stages/02-infrastructure"][
+                #     "node_selectors"
+                # ],
                 **self.config.ingress.terraform_overrides,
             },
             **cert_details,

@@ -1,6 +1,6 @@
 import contextlib
 import pathlib
-from typing import Any, Dict, List
+from typing import Dict, List
 
 import pydantic
 import typer
@@ -19,6 +19,9 @@ class NebariStage:
     input_schema: pydantic.BaseModel = None
     output_schema: pydantic.BaseModel = None
 
+    # replacement for `stage_outputs`
+    required_targets: pydantic.BaseModel = None
+
     def __init__(self, output_directory: pathlib.Path, config: schema.Main):
         self.output_directory = output_directory
         self.config = config
@@ -27,19 +30,20 @@ class NebariStage:
         pass
 
     def render(self) -> Dict[str, str]:
+        """
+        Returns a dictionary where the keys represent the file paths and the values represent the file contents.
+        """
         return {}
 
     @contextlib.contextmanager
-    def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
+    def deploy(self):
         yield
 
-    def check(self, stage_outputs: Dict[str, Dict[str, Any]]) -> bool:
+    def check(self) -> bool:
         pass
 
     @contextlib.contextmanager
-    def destroy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
-    ):
+    def destroy(self, status: Dict[str, bool]):
         yield
 
 
