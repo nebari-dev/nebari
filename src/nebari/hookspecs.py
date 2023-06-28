@@ -2,9 +2,9 @@ import contextlib
 import pathlib
 from typing import Any, Dict, List
 
+import pydantic
 import typer
 from pluggy import HookimplMarker, HookspecMarker
-import pydantic
 
 from nebari import schema
 
