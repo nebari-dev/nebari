@@ -9,9 +9,7 @@ from pathlib import Path
 import pluggy
 import pydantic
 
-from _nebari.version import __version__
 from nebari import hookspecs, schema
-
 
 DEFAULT_SUBCOMMAND_PLUGINS = [
     # subcommands
@@ -128,7 +126,7 @@ class NebariPluginManager:
         classes = [schema.Main] + [
             _.input_schema for _ in self.ordered_stages if _.input_schema is not None
         ]
-        return type('ConfigSchema', tuple(classes), {})
+        return type("ConfigSchema", tuple(classes), {})
 
 
 nebari_plugin_manager = NebariPluginManager()
