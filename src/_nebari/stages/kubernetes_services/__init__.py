@@ -1,6 +1,6 @@
 import enum
-import os
 import json
+import os
 import sys
 import typing
 from typing import Any, Dict, List
@@ -9,7 +9,6 @@ from urllib.parse import urlencode
 import pydantic
 from pydantic import Field
 
-from _nebari.version import __version__
 from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -17,6 +16,7 @@ from _nebari.stages.tf_objects import (
     NebariKubernetesProvider,
     NebariTerraformState,
 )
+from _nebari.version import __version__
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -228,7 +228,6 @@ class JupyterHub(schema.Base):
     overrides: typing.Dict = {}
 
 
-
 class IdleCuller(schema.Base):
     terminal_cull_inactive_timeout: int = 15
     terminal_cull_interval: int = 5
@@ -375,9 +374,7 @@ class JupyterhubInputVars(schema.Base):
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
     jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
     jupyterhub_shared_endpoint: str = Field(None, alias="jupyterhub-shared-endpoint")
-    jupyterhub_profiles: List[JupyterLabProfile] = Field(
-        alias="jupyterlab-profiles"
-    )
+    jupyterhub_profiles: List[JupyterLabProfile] = Field(alias="jupyterlab-profiles")
     jupyterhub_image: ImageNameTag = Field(alias="jupyterhub-image")
     jupyterhub_hub_extraEnv: str = Field(alias="jupyterhub-hub-extraEnv")
     idle_culler_settings: Dict[str, Any] = Field(alias="idle-culler-settings")

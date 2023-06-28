@@ -9,13 +9,13 @@ from typing import Any, Dict, List, Optional
 import pydantic
 
 from _nebari import constants
-from _nebari.stages.base import NebariTerraformStage
 from _nebari.provider.cloud import (
     amazon_web_services,
     azure_cloud,
     digital_ocean,
     google_cloud,
 )
+from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
     NebariAWSProvider,
     NebariGCPProvider,
@@ -429,7 +429,10 @@ class InputSchema(schema.Base):
 
     @pydantic.root_validator
     def check_provider(cls, values):
-        if values["provider"] == schema.ProviderEnum.local and values.get("local") is None:
+        if (
+            values["provider"] == schema.ProviderEnum.local
+            and values.get("local") is None
+        ):
             values["local"] = LocalProvider()
         elif (
             values["provider"] == schema.ProviderEnum.existing
@@ -446,7 +449,10 @@ class InputSchema(schema.Base):
             and values.get("amazon_web_services") is None
         ):
             values["amazon_web_services"] = schema.AmazonWebServicesProvider()
-        elif values["provider"] == schema.ProviderEnum.azure and values.get("azure") is None:
+        elif (
+            values["provider"] == schema.ProviderEnum.azure
+            and values.get("azure") is None
+        ):
             values["azure"] = AzureProvider()
         elif (
             values["provider"] == schema.ProviderEnum.do

@@ -1,5 +1,5 @@
-import socket
 import enum
+import socket
 import sys
 import time
 import typing

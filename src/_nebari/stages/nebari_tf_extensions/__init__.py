@@ -7,8 +7,8 @@ from _nebari.stages.tf_objects import (
     NebariKubernetesProvider,
     NebariTerraformState,
 )
-from nebari.hookspecs import NebariStage, hookimpl
 from nebari import schema
+from nebari.hookspecs import NebariStage, hookimpl
 
 
 class NebariExtensionEnv(schema.Base):
