@@ -2,6 +2,8 @@ import logging
 import os
 import re
 import tempfile
+import string
+import secrets
 
 import requests
 
@@ -15,6 +17,12 @@ from nebari import schema
 logger = logging.getLogger(__name__)
 
 WELCOME_HEADER_TEXT = "Your open source data science platform, hosted"
+
+
+def random_secure_string(
+    length: int = 16, chars: str = string.ascii_lowercase + string.digits
+):
+    return "".join(secrets.choice(chars) for i in range(length))
 
 
 def render_config(
@@ -53,7 +61,7 @@ def render_config(
         tempfile.gettempdir(), "NEBARI_DEFAULT_PASSWORD"
     )
     config["security"] = {
-        "keycloak": {"initial_root_password": schema.random_secure_string(length=32)}
+        "keycloak": {"initial_root_password": random_secure_string(length=32)}
     }
     with open(default_password_filename, "w") as f:
         f.write(config["security"]["keycloak"]["initial_root_password"])

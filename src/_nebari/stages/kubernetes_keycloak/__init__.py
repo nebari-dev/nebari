@@ -1,8 +1,15 @@
+import enum
+import secrets
+import string
 import contextlib
 import json
 import sys
 import time
+import typing
 from typing import Any, Dict, List
+from abc import ABC
+
+import pydantic
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -42,9 +49,120 @@ def keycloak_provider_context(keycloak_credentials: Dict[str, str]):
         yield
 
 
+@schema.yaml_object(schema.yaml)
+class AuthenticationEnum(str, enum.Enum):
+    password = "password"
+    github = "GitHub"
+    auth0 = "Auth0"
+    custom = "custom"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
+class GitHubConfig(schema.Base):
+    client_id: str
+    client_secret: str
+
+
+class Auth0Config(schema.Base):
+    client_id: str
+    client_secret: str
+    auth0_subdomain: str
+
+
+class Authentication(schema.Base, ABC):
+    _types: typing.Dict[str, type] = {}
+
+    type: AuthenticationEnum
+
+    # Based on https://github.com/samuelcolvin/pydantic/issues/2177#issuecomment-739578307
+
+    # This allows type field to determine which subclass of Authentication should be used for validation.
+
+    # Used to register automatically all the submodels in `_types`.
+    def __init_subclass__(cls):
+        cls._types[cls._typ.value] = cls
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, value: typing.Dict[str, typing.Any]) -> "Authentication":
+        if "type" not in value:
+            raise ValueError("type field is missing from security.authentication")
+
+        specified_type = value.get("type")
+        sub_class = cls._types.get(specified_type, None)
+
+        if not sub_class:
+            raise ValueError(
+                f"No registered Authentication type called {specified_type}"
+            )
+
+        # init with right submodel
+        return sub_class(**value)
+
+
+def random_secure_string(
+    length: int = 16, chars: str = string.ascii_lowercase + string.digits
+):
+    return "".join(secrets.choice(chars) for i in range(length))
+
+
+class PasswordAuthentication(Authentication):
+    _typ = AuthenticationEnum.password
+
+
+class Auth0Authentication(Authentication):
+    _typ = AuthenticationEnum.auth0
+    config: Auth0Config
+
+
+class GitHubAuthentication(Authentication):
+    _typ = AuthenticationEnum.github
+    config: GitHubConfig
+
+
+class Keycloak(schema.Base):
+    initial_root_password: str = pydantic.Field(default_factory=random_secure_string)
+    overrides: typing.Dict = {}
+    realm_display_name: str = "Nebari"
+
+
+class Security(schema.Base):
+    authentication: Authentication = PasswordAuthentication(
+        type=AuthenticationEnum.password
+    )
+    shared_users_group: bool = True
+    keycloak: Keycloak = Keycloak()
+
+
+class InputSchema(schema.Base):
+    security: Security = Security()
+
+
+class KeycloakCredentials(schema.Base):
+    url: str
+    client_id: str
+    realm: str
+    username: str
+    password: str
+
+
+class OutputSchema(schema.Base):
+    keycloak_credentials: KeycloakCredentials
+    keycloak_nebari_bot_password: str
+
+
 class KubernetesKeycloakStage(NebariTerraformStage):
     name = "05-kubernetes-keycloak"
     priority = 50
+
+    input_schema = InputSchema
+    output_schema = OutputSchema
 
     def tf_objects(self) -> List[Dict]:
         return [
