@@ -1,6 +1,8 @@
 import socket
+import enum
 import sys
 import time
+import typing
 from typing import Any, Dict, List
 
 from _nebari import constants
@@ -126,9 +128,53 @@ def check_ingress_dns(stage_outputs, config, disable_prompt):
             sys.exit(1)
 
 
+@schema.yaml_object(schema.yaml)
+class CertificateEnum(str, enum.Enum):
+    letsencrypt = "lets-encrypt"
+    selfsigned = "self-signed"
+    existing = "existing"
+    disabled = "disabled"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
+class Certificate(schema.Base):
+    type: CertificateEnum = CertificateEnum.selfsigned
+    # existing
+    secret_name: typing.Optional[str]
+    # lets-encrypt
+    acme_email: typing.Optional[str]
+    acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
+
+
+class Ingress(schema.Base):
+    terraform_overrides: typing.Dict = {}
+
+
+class InputSchema(schema.Base):
+    domain: typing.Optional[str]
+    certificate: Certificate = Certificate()
+    ingress: Ingress = Ingress()
+
+
+class IngressEndpoint(schema.Base):
+    ip: str
+    hostname: str
+
+
+class OutputSchema(schema.Base):
+    load_balancer_address: typing.List[IngressEndpoint]
+    domain: str
+
+
 class KubernetesIngressStage(NebariTerraformStage):
     name = "04-kubernetes-ingress"
     priority = 40
+
+    input_schema = InputSchema
+    output_schema = OutputSchema
 
     def tf_objects(self) -> List[Dict]:
         return [

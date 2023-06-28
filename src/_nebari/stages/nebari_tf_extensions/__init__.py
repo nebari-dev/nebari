@@ -1,3 +1,4 @@
+import typing
 from typing import Any, Dict, List
 
 from _nebari.stages.base import NebariTerraformStage
@@ -7,11 +8,50 @@ from _nebari.stages.tf_objects import (
     NebariTerraformState,
 )
 from nebari.hookspecs import NebariStage, hookimpl
+from nebari import schema
+
+
+class NebariExtensionEnv(schema.Base):
+    name: str
+    value: str
+
+
+class NebariExtension(schema.Base):
+    name: str
+    image: str
+    urlslug: str
+    private: bool = False
+    oauth2client: bool = False
+    keycloakadmin: bool = False
+    jwt: bool = False
+    nebariconfigyaml: bool = False
+    logout: typing.Optional[str]
+    envs: typing.Optional[typing.List[NebariExtensionEnv]]
+
+
+class HelmExtension(schema.Base):
+    name: str
+    repository: str
+    chart: str
+    version: str
+    overrides: typing.Dict = {}
+
+
+class InputSchema(schema.Base):
+    helm_extensions: typing.List[HelmExtension] = []
+    tf_extensions: typing.List[NebariExtension] = []
+
+
+class OutputSchema(schema.Base):
+    pass
 
 
 class NebariTFExtensionsStage(NebariTerraformStage):
     name = "08-nebari-tf-extensions"
     priority = 80
+
+    input_schema = InputSchema
+    output_schema = OutputSchema
 
     def tf_objects(self) -> List[Dict]:
         return [
