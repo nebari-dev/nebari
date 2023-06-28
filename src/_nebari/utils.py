@@ -11,6 +11,7 @@ import threading
 import time
 from typing import Dict, List
 
+import rich
 from rich.table import Table
 from ruamel.yaml import YAML
 
@@ -410,22 +411,22 @@ def hash_file(file_path: str):
         return hashlib.sha256(f.read()).hexdigest()
 
 
-def gen_render_diff(new_files, untracted_files, updated_files, deleted_paths):
+def print_rendered_files(new_files, untracted_files, updated_files, deleted_paths):
     if new_files:
         table = Table("The following files will be created:", style="deep_sky_blue1")
         for filename in sorted(new_files):
             table.add_row(filename, style="green")
-        print(table)
+        rich.print(table)
     if updated_files:
         table = Table("The following files will be updated:", style="deep_sky_blue1")
         for filename in sorted(updated_files):
             table.add_row(filename, style="green")
-        print(table)
+        rich.print(table)
     if deleted_paths:
         table = Table("The following files will be deleted:", style="deep_sky_blue1")
         for filename in sorted(deleted_paths):
             table.add_row(filename, style="green")
-        print(table)
+        rich.print(table)
     if untracted_files:
         table = Table(
             "The following files are untracked (only exist in output directory):",
@@ -433,4 +434,4 @@ def gen_render_diff(new_files, untracted_files, updated_files, deleted_paths):
         )
         for filename in sorted(untracted_files):
             table.add_row(filename, style="green")
-        print(table)
+        rich.print(table)

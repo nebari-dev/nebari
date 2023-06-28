@@ -64,8 +64,10 @@ def nebari_subcommand(cli: typer.Typer):
         stages = nebari_plugin_manager.ordered_stages
         config = nebari_plugin_manager.read_configuration(config_filename)
 
-        # if not disable_render:
-        #     render_template(output_directory, config, stages)
+        if not disable_render:
+            nebari_plugin_manager.render_stages(
+                template_directory=output_directory, dry_run=False
+            )
 
         deploy_configuration(
             config,

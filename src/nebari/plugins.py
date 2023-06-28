@@ -12,7 +12,7 @@ import pydantic
 from ruamel.yaml import YAML
 
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
-from _nebari.utils import gen_render_diff, inspect_files
+from _nebari.utils import inspect_files, print_rendered_files
 from nebari import hookspecs, schema
 
 DEFAULT_SUBCOMMAND_PLUGINS = [
@@ -67,7 +67,7 @@ class NebariPluginManager:
             "__pycache__",
         ],
     )
-    _deleted_paths = (DEPRECATED_FILE_PATHS,)
+    _deleted_paths = DEPRECATED_FILE_PATHS
 
     def __init__(self) -> None:
         self.plugin_manager.add_hookspecs(hookspecs)
@@ -156,7 +156,7 @@ class NebariPluginManager:
                 yaml.dump(config, f)
 
         self.config_path = config_filename
-        self.config = self.read_configuration(self.config_path)
+        self.read_configuration(self.config_path)
 
     def read_configuration(
         self,
@@ -180,6 +180,8 @@ class NebariPluginManager:
 
         if read_environment:
             config = schema.set_config_from_environment_variables(config)
+
+        self.config = config
 
         return config
 
@@ -210,7 +212,7 @@ class NebariPluginManager:
             contents=contents,
         )
 
-        gen_render_diff(new, untracked, updated, deleted)
+        print_rendered_files(new, untracked, updated, deleted)
 
         if dry_run:
             print("dry-run enabled no files will be created, updated, or deleted")
