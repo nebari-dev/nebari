@@ -11,6 +11,23 @@ logger = logging.getLogger("azure")
 logger.setLevel(logging.ERROR)
 
 
+def check_credentials():
+    AZURE_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-azure"
+
+    for variable in {
+        "ARM_CLIENT_ID",
+        "ARM_CLIENT_SECRET",
+        "ARM_SUBSCRIPTION_ID",
+        "ARM_TENANT_ID",
+    }:
+        if variable not in os.environ:
+            raise ValueError(
+                f"""Missing the following required environment variable: {variable}\n
+                Please see the documentation for more information: {AZURE_ENV_DOCS}"""
+            )
+
+
+
 @functools.lru_cache()
 def initiate_container_service_client():
     subscription_id = os.environ.get("ARM_SUBSCRIPTION_ID", None)
