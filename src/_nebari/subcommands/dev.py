@@ -3,8 +3,8 @@ import pathlib
 
 import typer
 
-from _nebari.keycloak import keycloak_rest_api_call
 from _nebari.config import read_configuration
+from _nebari.keycloak import keycloak_rest_api_call
 from nebari.hookspecs import hookimpl
 
 

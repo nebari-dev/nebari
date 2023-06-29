@@ -1,25 +1,21 @@
 import logging
 import os
 import re
-import secrets
-import string
 import tempfile
 
-import requests
 import pydantic
+import requests
 
-from _nebari.utils import random_secure_string
 from _nebari.provider import git
 from _nebari.provider.cicd import github
 from _nebari.provider.oauth.auth0 import create_client
-from _nebari.version import __version__
-
 from _nebari.stages.bootstrap import CiEnum
 from _nebari.stages.infrastructure import ProviderEnum
 from _nebari.stages.kubernetes_ingress import CertificateEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
-
+from _nebari.utils import random_secure_string
+from _nebari.version import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +130,7 @@ def render_config(
 
     # validate configuration and convert to model
     from nebari.plugins import nebari_plugin_manager
+
     config_model = nebari_plugin_manager.config_schema.parse_obj(config)
 
     if repository_auto_provision:
