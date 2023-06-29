@@ -91,7 +91,7 @@ class BootstrapStage(NebariStage):
 
     def render(self) -> Dict[str, str]:
         contents = {}
-        if self.config.ci_cd.type != schema.CiEnum.none:
+        if self.config.ci_cd.type != CiEnum.none:
             for fn, workflow in gen_cicd(self.config).items():
                 stream = io.StringIO()
                 schema.yaml.dump(

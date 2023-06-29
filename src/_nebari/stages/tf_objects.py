@@ -3,26 +3,6 @@ from _nebari.utils import deep_merge
 from nebari import schema
 
 
-def NebariAWSProvider(nebari_config: schema.Main):
-    return Provider("aws", region=nebari_config.amazon_web_services.region)
-
-
-def NebariGCPProvider(nebari_config: schema.Main):
-    return Provider(
-        "google",
-        project=nebari_config.google_cloud_platform.project,
-        region=nebari_config.google_cloud_platform.region,
-    )
-
-
-def NebariAzureProvider(nebari_config: schema.Main):
-    return Provider("azurerm", features={})
-
-
-def NebariDigitalOceanProvider(nebari_config: schema.Main):
-    return Provider("digitalocean")
-
-
 def NebariKubernetesProvider(nebari_config: schema.Main):
     if nebari_config.provider == schema.ProviderEnum.aws:
         cluster_name = f"{nebari_config.project_name}-{nebari_config.namespace}"

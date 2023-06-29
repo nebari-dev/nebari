@@ -3,7 +3,7 @@ import pathlib
 import typer
 
 from _nebari.render import render_template
-from nebari import schema
+from _nebari.config import read_configuration
 from nebari.hookspecs import hookimpl
 
 
@@ -38,5 +38,5 @@ def nebari_subcommand(cli: typer.Typer):
         stages = nebari_plugin_manager.ordered_stages
         config_schema = nebari_plugin_manager.config_schema
 
-        config = schema.read_configuration(config_filename, config_schema=config_schema)
+        config = read_configuration(config_filename, config_schema=config_schema)
         render_template(output_directory, config, stages, dry_run=dry_run)

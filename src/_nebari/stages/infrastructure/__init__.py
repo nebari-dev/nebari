@@ -5,6 +5,7 @@ import pathlib
 import sys
 import tempfile
 import typing
+import string
 from typing import Any, Dict, List, Optional
 
 import pydantic
@@ -17,12 +18,11 @@ from _nebari.provider.cloud import (
     google_cloud,
 )
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.provider import terraform
 from _nebari.stages.tf_objects import (
-    NebariAWSProvider,
-    NebariGCPProvider,
     NebariTerraformState,
 )
-from _nebari.utils import modified_environ
+from _nebari.utils import modified_environ, escape_string, deep_merge
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -556,7 +556,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
     def tf_objects(self) -> List[Dict]:
         if self.config.provider == ProviderEnum.gcp:
             return [
-                NebariGCPProvider(self.config),
+                terraform.Provider(
+                    "google",
+                    project=nebari_config.google_cloud_platform.project,
+                    region=nebari_config.google_cloud_platform.region,
+                ),
                 NebariTerraformState(self.name, self.config),
             ]
         elif self.config.provider == ProviderEnum.do:
@@ -569,13 +573,29 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ]
         elif self.config.provider == ProviderEnum.aws:
             return [
-                NebariAWSProvider(self.config),
+                terraform.Provider("aws", region=nebari_config.amazon_web_services.region),
                 NebariTerraformState(self.name, self.config),
             ]
         else:
             return []
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
+        def escape_project_name(project_name: str, provider: ProviderEnum):
+            if provider == ProviderEnum.azure and '-' in project_name:
+                project_name = escape_string(
+                    project_name,
+                    escape_char='a'
+                )
+
+            if provider == ProviderEnum.aws and project_name.startswith('aws'):
+                project_name = 'a' + project_name
+
+            if len(project_name) > 16:
+                project_name = project_name[:16]
+
+            return project_name
+
+
         if self.config.provider == ProviderEnum.local:
             return LocalInputVars(kube_context=self.config.local.kube_context).dict()
         elif self.config.provider == ProviderEnum.existing:
@@ -584,7 +604,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ).dict()
         elif self.config.provider == ProviderEnum.do:
             return DigitalOceanInputVars(
-                name=self.config.project_name,
+                name=escape_project_name(self.config.project_name, self.config.provider),
                 environment=self.config.namespace,
                 region=self.config.digital_ocean.region,
                 tags=self.config.digital_ocean.tags,
@@ -593,7 +613,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ).dict()
         elif self.config.provider == ProviderEnum.gcp:
             return GCPInputVars(
-                name=self.config.project_name,
+                name=escape_project_name(self.config.project_name, self.config.provider),
                 environment=self.config.namespace,
                 region=self.config.google_cloud_platform.region,
                 project_id=self.config.google_cloud_platform.project,
@@ -622,7 +642,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ).dict()
         elif self.config.provider == ProviderEnum.azure:
             return AzureInputVars(
-                name=self.config.project_name,
+                name=escape_project_name(self.config.project_name, self.config.provider),
                 environment=self.config.namespace,
                 region=self.config.azure.region,
                 kubernetes_version=self.config.azure.kubernetes_version,
@@ -641,7 +661,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ).dict()
         elif self.config.provider == ProviderEnum.aws:
             return AWSInputVars(
-                name=self.config.project_name,
+                name=escape_project_name(self.config.project_name, self.config.provider),
                 environment=self.config.namespace,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_ids,

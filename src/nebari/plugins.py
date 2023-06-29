@@ -115,7 +115,7 @@ class NebariPluginManager:
             raise FileNotFoundError(f"Config file {config_path} not found")
 
         self.config_path = config_path
-        self.config = schema.read_configuration(config_path)
+        self.config = schema.read_configuration(config_path, self.config_schema)
 
     @property
     def ordered_stages(self):
