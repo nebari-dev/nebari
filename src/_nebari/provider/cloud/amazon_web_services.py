@@ -22,7 +22,6 @@ def check_credentials():
             )
 
 
-
 @functools.lru_cache()
 def regions():
     output = subprocess.check_output(["aws", "ec2", "describe-regions"])
