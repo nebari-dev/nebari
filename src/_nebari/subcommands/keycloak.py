@@ -4,8 +4,8 @@ from typing import Tuple
 
 import typer
 
-from _nebari.keycloak import do_keycloak, export_keycloak_users
 from _nebari.config import read_configuration
+from _nebari.keycloak import do_keycloak, export_keycloak_users
 from nebari.hookspecs import hookimpl
 
 
