@@ -5,7 +5,7 @@ import kubernetes.client
 import kubernetes.config
 import typer
 
-from nebari import schema
+from _nebari.config import read_configuration
 from nebari.hookspecs import hookimpl
 
 
@@ -32,11 +32,14 @@ def nebari_subcommand(cli: typer.Typer):
         The Nebari team recommends k9s to manage and inspect the state of the cluster.
         However, this command occasionally helpful for debugging purposes should the logs need to be shared.
         """
+        from nebari.plugins import nebari_plugin_manager
+
         kubernetes.config.kube_config.load_kube_config()
 
         v1 = kubernetes.client.CoreV1Api()
 
-        namespace = schema.read_configuration(config_filename).namespace
+        config_schema = nebari_plugin_manager.config_schema
+        namespace = read_configuration(config_filename, config_schema).namespace
 
         pods = v1.list_namespaced_pod(namespace=namespace)
 

@@ -6,35 +6,37 @@ import string
 import tempfile
 
 import requests
+import pydantic
 
+from _nebari.utils import random_secure_string
 from _nebari.provider import git
 from _nebari.provider.cicd import github
 from _nebari.provider.oauth.auth0 import create_client
 from _nebari.version import __version__
-from nebari import schema
+
+from _nebari.stages.bootstrap import CiEnum
+from _nebari.stages.infrastructure import ProviderEnum
+from _nebari.stages.kubernetes_ingress import CertificateEnum
+from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
+from _nebari.stages.terraform_state import TerraformStateEnum
+
 
 logger = logging.getLogger(__name__)
 
 WELCOME_HEADER_TEXT = "Your open source data science platform, hosted"
 
 
-def random_secure_string(
-    length: int = 16, chars: str = string.ascii_lowercase + string.digits
-):
-    return "".join(secrets.choice(chars) for i in range(length))
-
-
 def render_config(
     project_name: str,
     nebari_domain: str = None,
-    cloud_provider: schema.ProviderEnum = schema.ProviderEnum.local,
-    ci_provider: schema.CiEnum = schema.CiEnum.none,
+    cloud_provider: ProviderEnum = ProviderEnum.local,
+    ci_provider: CiEnum = CiEnum.none,
     repository: str = None,
-    auth_provider: schema.AuthenticationEnum = schema.AuthenticationEnum.password,
+    auth_provider: AuthenticationEnum = AuthenticationEnum.password,
     namespace: str = "dev",
     repository_auto_provision: bool = False,
     auth_auto_provision: bool = False,
-    terraform_state: schema.TerraformStateEnum = schema.TerraformStateEnum.remote,
+    terraform_state: TerraformStateEnum = TerraformStateEnum.remote,
     kubernetes_version: str = None,
     disable_prompt: bool = False,
     ssl_cert_email: str = None,
@@ -72,13 +74,13 @@ def render_config(
     ] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
 
     config["security"]["authentication"] = {"type": auth_provider.value}
-    if auth_provider == schema.AuthenticationEnum.github:
+    if auth_provider == AuthenticationEnum.github:
         if not disable_prompt:
             config["security"]["authentication"]["config"] = {
                 "client_id": input("Github client_id: "),
                 "client_secret": input("Github client_secret: "),
             }
-    elif auth_provider == schema.AuthenticationEnum.auth0:
+    elif auth_provider == AuthenticationEnum.auth0:
         if auth_auto_provision:
             auth0_config = create_client(config.domain, config.project_name)
             config["security"]["authentication"]["config"] = auth0_config
@@ -89,13 +91,13 @@ def render_config(
                 "auth0_subdomain": input("Auth0 subdomain: "),
             }
 
-    if cloud_provider == schema.ProviderEnum.do:
+    if cloud_provider == ProviderEnum.do:
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
         if kubernetes_version is not None:
             config["digital_ocean"] = {"kubernetes_version": kubernetes_version}
-    elif cloud_provider == schema.ProviderEnum.gcp:
+    elif cloud_provider == ProviderEnum.gcp:
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
@@ -109,35 +111,37 @@ def render_config(
 
         if kubernetes_version is not None:
             config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
-    elif cloud_provider == schema.ProviderEnum.azure:
+    elif cloud_provider == ProviderEnum.azure:
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Azure"
         if kubernetes_version is not None:
             config["azure"] = {"kubernetes_version": kubernetes_version}
-    elif cloud_provider == schema.ProviderEnum.aws:
+    elif cloud_provider == ProviderEnum.aws:
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Amazon Web Services"
         if kubernetes_version is not None:
             config["amazon_web_services"] = {"kubernetes_version": kubernetes_version}
-    elif cloud_provider == schema.ProviderEnum.existing:
+    elif cloud_provider == ProviderEnum.existing:
         config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
-    elif cloud_provider == schema.ProviderEnum.local:
+    elif cloud_provider == ProviderEnum.local:
         config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
 
     if ssl_cert_email:
-        config["certificate"] = {"type": schema.CertificateEnum.letsencrypt.value}
+        config["certificate"] = {"type": CertificateEnum.letsencrypt.value}
         config["certificate"]["acme_email"] = ssl_cert_email
 
-    # TODO: attempt to load config into schema for validation
+    # validate configuration and convert to model
+    from nebari.plugins import nebari_plugin_manager
+    config_model = nebari_plugin_manager.config_schema.parse_obj(config)
 
     if repository_auto_provision:
         GITHUB_REGEX = "(https://)?github.com/([^/]+)/([^/]+)/?"
         if re.search(GITHUB_REGEX, repository):
             match = re.search(GITHUB_REGEX, repository)
             git_repository = github_auto_provision(
-                schema.Main.parse_obj(config), match.group(2), match.group(3)
+                config_model, match.group(2), match.group(3)
             )
             git_repository_initialize(git_repository)
         else:
@@ -148,7 +152,7 @@ def render_config(
     return config
 
 
-def github_auto_provision(config: schema.Main, owner: str, repo: str):
+def github_auto_provision(config: pydantic.BaseModel, owner: str, repo: str):
     already_exists = True
     try:
         github.get_repository(owner, repo)
@@ -173,7 +177,7 @@ def github_auto_provision(config: schema.Main, owner: str, repo: str):
 
     try:
         # Secrets
-        if config.provider == schema.ProviderEnum.do:
+        if config.provider == ProviderEnum.do:
             for name in {
                 "AWS_ACCESS_KEY_ID",
                 "AWS_SECRET_ACCESS_KEY",
@@ -182,17 +186,17 @@ def github_auto_provision(config: schema.Main, owner: str, repo: str):
                 "DIGITALOCEAN_TOKEN",
             }:
                 github.update_secret(owner, repo, name, os.environ[name])
-        elif config.provider == schema.ProviderEnum.aws:
+        elif config.provider == ProviderEnum.aws:
             for name in {
                 "AWS_ACCESS_KEY_ID",
                 "AWS_SECRET_ACCESS_KEY",
             }:
                 github.update_secret(owner, repo, name, os.environ[name])
-        elif config.provider == schema.ProviderEnum.gcp:
+        elif config.provider == ProviderEnum.gcp:
             github.update_secret(owner, repo, "PROJECT_ID", os.environ["PROJECT_ID"])
             with open(os.environ["GOOGLE_CREDENTIALS"]) as f:
                 github.update_secret(owner, repo, "GOOGLE_CREDENTIALS", f.read())
-        elif config.provider == schema.ProviderEnum.azure:
+        elif config.provider == ProviderEnum.azure:
             for name in {
                 "ARM_CLIENT_ID",
                 "ARM_CLIENT_SECRET",

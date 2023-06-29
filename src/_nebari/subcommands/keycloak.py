@@ -5,7 +5,7 @@ from typing import Tuple
 import typer
 
 from _nebari.keycloak import do_keycloak, export_keycloak_users
-from nebari import schema
+from _nebari.config import read_configuration
 from nebari.hookspecs import hookimpl
 
 
@@ -38,8 +38,11 @@ def nebari_subcommand(cli: typer.Typer):
         ),
     ):
         """Add a user to Keycloak. User will be automatically added to the [italic]analyst[/italic] group."""
+        from nebari.plugins import nebari_plugin_manager
+
         args = ["adduser", add_users[0], add_users[1]]
-        config = schema.read_configuration(config_filename)
+        config_schema = nebari_plugin_manager.config_schema
+        config = read_configuration(config_filename, config_schema)
         do_keycloak(config, *args)
 
     @app_keycloak.command(name="listusers")
@@ -52,8 +55,11 @@ def nebari_subcommand(cli: typer.Typer):
         )
     ):
         """List the users in Keycloak."""
+        from nebari.plugins import nebari_plugin_manager
+
         args = ["listusers"]
-        config = schema.read_configuration(config_filename)
+        config_schema = nebari_plugin_manager.config_schema
+        config = read_configuration(config_filename, config_schema)
         do_keycloak(config, *args)
 
     @app_keycloak.command(name="export-users")
@@ -74,7 +80,6 @@ def nebari_subcommand(cli: typer.Typer):
         from nebari.plugins import nebari_plugin_manager
 
         config_schema = nebari_plugin_manager.config_schema
-
-        config = schema.read_configuration(config_filename, config_schema=config_schema)
+        config = read_configuration(config_filename, config_schema=config_schema)
         r = export_keycloak_users(config, realm=realm)
         print(json.dumps(r, indent=4))
