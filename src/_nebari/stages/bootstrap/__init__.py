@@ -2,9 +2,7 @@ import enum
 import io
 import typing
 from inspect import cleandoc
-from typing import Any, Dict, List
-
-import questionary
+from typing import Dict, List
 
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from _nebari.provider.cicd.gitlab import gen_gitlab_ci

@@ -28,15 +28,11 @@ def check_credentials():
             See {DO_ENV_DOCS} for more information"""
         )
 
-    if (
-        os.environ["AWS_SECRET_ACCESS_KEY"]
-        != os.environ["SPACES_SECRET_ACCESS_KEY"]
-    ):
+    if os.environ["AWS_SECRET_ACCESS_KEY"] != os.environ["SPACES_SECRET_ACCESS_KEY"]:
         raise ValueError(
             f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must be equal\n
             See {DO_ENV_DOCS} for more information"""
         )
-
 
 
 def digital_ocean_request(url, method="GET", json=None):

@@ -1,5 +1,5 @@
-import enum
 import contextlib
+import enum
 import inspect
 import pathlib
 import sys
@@ -452,10 +452,7 @@ class InputSchema(schema.Base):
 
     @pydantic.root_validator
     def check_provider(cls, values):
-        if (
-            values["provider"] == ProviderEnum.local
-            and values.get("local") is None
-        ):
+        if values["provider"] == ProviderEnum.local and values.get("local") is None:
             values["local"] = LocalProvider()
         elif (
             values["provider"] == ProviderEnum.existing
@@ -472,10 +469,7 @@ class InputSchema(schema.Base):
             and values.get("amazon_web_services") is None
         ):
             values["amazon_web_services"] = AmazonWebServicesProvider()
-        elif (
-            values["provider"] == ProviderEnum.azure
-            and values.get("azure") is None
-        ):
+        elif values["provider"] == ProviderEnum.azure and values.get("azure") is None:
             values["azure"] = AzureProvider()
         elif (
             values["provider"] == ProviderEnum.do

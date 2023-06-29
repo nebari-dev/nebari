@@ -1,6 +1,6 @@
-import os
 import functools
 import json
+import os
 import subprocess
 
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
@@ -14,7 +14,6 @@ def check_credentials():
                 f"""Missing the following required environment variable: {variable}\n
                 Please see the documentation for more information: {GCP_ENV_DOCS}"""
             )
-
 
 
 @functools.lru_cache()
