@@ -4,7 +4,7 @@ import typer
 
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
-from nebari import schema
+from _nebari.config import read_configuration
 from nebari.hookspecs import hookimpl
 
 
@@ -44,7 +44,7 @@ def nebari_subcommand(cli: typer.Typer):
         def _run_destroy(
             config_filename=config_filename, disable_render=disable_render
         ):
-            config = schema.read_configuration(
+            config = read_configuration(
                 config_filename, config_schema=config_schema
             )
 
