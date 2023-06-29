@@ -117,6 +117,7 @@ class NebariPluginManager:
         self.config_path = config_path
 
         from _nebari.config import read_configuration
+
         self.config = read_configuration(config_path, self.config_schema)
 
     @property
