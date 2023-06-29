@@ -2,6 +2,7 @@ import os
 import pathlib
 import re
 import typing
+import enum
 
 import questionary
 import rich
@@ -9,8 +10,15 @@ import typer
 from pydantic import BaseModel
 
 from _nebari.initialize import render_config
+from _nebari.config import write_configuration
 from nebari import schema
 from nebari.hookspecs import hookimpl
+
+from _nebari.stages.bootstrap import CiEnum
+from _nebari.stages.infrastructure import ProviderEnum
+from _nebari.stages.kubernetes_ingress import CertificateEnum
+from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
+from _nebari.stages.terraform_state import TerraformStateEnum
 
 MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[green]\t{link_to_docs}[/green]\n\n"
 LINKS_TO_DOCS_TEMPLATE = (
@@ -42,11 +50,33 @@ GUIDED_INIT_MSG = (
 )
 
 
+class GitRepoEnum(str, enum.Enum):
+    github = "github.com"
+    gitlab = "gitlab.com"
+
+
+class InitInputs(schema.Base):
+    cloud_provider: ProviderEnum = ProviderEnum.local
+    project_name: schema.letter_dash_underscore_pydantic = ""
+    domain_name: typing.Optional[str] = None
+    namespace: typing.Optional[schema.letter_dash_underscore_pydantic] = "dev"
+    auth_provider: AuthenticationEnum = AuthenticationEnum.password
+    auth_auto_provision: bool = False
+    repository: typing.Union[str, None] = None
+    repository_auto_provision: bool = False
+    ci_provider: CiEnum = CiEnum.none
+    terraform_state: TerraformStateEnum = TerraformStateEnum.remote
+    kubernetes_version: typing.Union[str, None] = None
+    ssl_cert_email: typing.Union[schema.email_pydantic, None] = None
+    disable_prompt: bool = False
+    output: pathlib.Path = pathlib.Path("nebari-config.yaml")
+
+
 def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
 
 
-def handle_init(inputs: schema.InitInputs, config_schema: BaseModel):
+def handle_init(inputs: InitInputs, config_schema: BaseModel):
     """
     Take the inputs from the `nebari init` command, render the config and write it to a local yaml file.
     """
@@ -72,8 +102,8 @@ def handle_init(inputs: schema.InitInputs, config_schema: BaseModel):
     )
 
     try:
-        schema.write_configuration(
-            inputs.output, config, mode="x", config_schema=config_schema
+        write_configuration(
+            inputs.output, config, mode="x",
         )
     except FileExistsError:
         raise ValueError(
@@ -81,28 +111,11 @@ def handle_init(inputs: schema.InitInputs, config_schema: BaseModel):
         )
 
 
-def check_project_name(ctx: typer.Context, project_name: str):
-    """Validate the project_name is acceptable. Depends on `cloud_provider`."""
-    schema.project_name_convention(
-        project_name.lower(), {"provider": ctx.params["cloud_provider"]}
-    )
-
-    return project_name
-
-
-def check_ssl_cert_email(ctx: typer.Context, ssl_cert_email: str):
-    """Validate the email used for SSL cert is in a valid format."""
-    if ssl_cert_email and not re.match("^[^ @]+@[^ @]+\\.[^ @]+$", ssl_cert_email):
-        raise ValueError("ssl-cert-email should be a valid email address")
-
-    return ssl_cert_email
-
-
 def check_repository_creds(ctx: typer.Context, git_provider: str):
     """Validate the necessary Git provider (GitHub) credentials are set."""
 
     if (
-        git_provider == schema.GitRepoEnum.github.value.lower()
+        git_provider == GitRepoEnum.github.value.lower()
         and not os.environ.get("GITHUB_USERNAME")
         or not os.environ.get("GITHUB_TOKEN")
     ):
@@ -116,6 +129,28 @@ def check_repository_creds(ctx: typer.Context, git_provider: str):
         )
 
 
+def typer_validate_regex(regex: str, error_message: str = None):
+    def callback(value):
+        if value is None:
+            return value
+
+        if re.fullmatch(regex, value):
+            return value
+        message = error_message or f"Does not match {regex}"
+        raise typer.BadParameter(message)
+    return callback
+
+
+def questionary_validate_regex(regex: str, error_message: str = None):
+    def callback(value):
+        if re.fullmatch(regex, value):
+            return True
+
+        message = error_message or f"Invalid input. Does not match {regex}"
+        return message
+    return callback
+
+
 def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     """Validate the the necessary auth provider credentials have been set as environment variables."""
     if ctx.params.get("disable_prompt"):
@@ -124,7 +159,7 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     auth_provider = auth_provider.lower()
 
     # Auth0
-    if auth_provider == schema.AuthenticationEnum.auth0.value.lower() and (
+    if auth_provider == AuthenticationEnum.auth0.value.lower() and (
         not os.environ.get("AUTH0_CLIENT_ID")
         or not os.environ.get("AUTH0_CLIENT_SECRET")
         or not os.environ.get("AUTH0_DOMAIN")
@@ -149,7 +184,7 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
         )
 
     # GitHub
-    elif auth_provider == schema.AuthenticationEnum.github.value.lower() and (
+    elif auth_provider == AuthenticationEnum.github.value.lower() and (
         not os.environ.get("GITHUB_CLIENT_ID")
         or not os.environ.get("GITHUB_CLIENT_SECRET")
     ):
@@ -171,7 +206,7 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     return auth_provider
 
 
-def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: schema.ProviderEnum):
+def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: ProviderEnum):
     """Validate that the necessary cloud credentials have been set as environment variables."""
 
     if ctx.params.get("disable_prompt"):
@@ -180,7 +215,7 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: schema.Provid
     cloud_provider = cloud_provider.lower()
 
     # AWS
-    if cloud_provider == schema.ProviderEnum.aws.value.lower() and (
+    if cloud_provider == ProviderEnum.aws.value.lower() and (
         not os.environ.get("AWS_ACCESS_KEY_ID")
         or not os.environ.get("AWS_SECRET_ACCESS_KEY")
     ):
@@ -200,7 +235,7 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: schema.Provid
         )
 
     # GCP
-    elif cloud_provider == schema.ProviderEnum.gcp.value.lower() and (
+    elif cloud_provider == ProviderEnum.gcp.value.lower() and (
         not os.environ.get("GOOGLE_CREDENTIALS") or not os.environ.get("PROJECT_ID")
     ):
         rich.print(
@@ -219,7 +254,7 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: schema.Provid
         )
 
     # DO
-    elif cloud_provider == schema.ProviderEnum.do.value.lower() and (
+    elif cloud_provider == ProviderEnum.do.value.lower() and (
         not os.environ.get("DIGITALOCEAN_TOKEN")
         or not os.environ.get("SPACES_ACCESS_KEY_ID")
         or not os.environ.get("SPACES_SECRET_ACCESS_KEY")
@@ -246,7 +281,7 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: schema.Provid
         os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("AWS_SECRET_ACCESS_KEY")
 
     # AZURE
-    elif cloud_provider == schema.ProviderEnum.azure.value.lower() and (
+    elif cloud_provider == ProviderEnum.azure.value.lower() and (
         not os.environ.get("ARM_CLIENT_ID")
         or not os.environ.get("ARM_CLIENT_SECRET")
         or not os.environ.get("ARM_SUBSCRIPTION_ID")
@@ -281,9 +316,9 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: schema.Provid
 def nebari_subcommand(cli: typer.Typer):
     @cli.command()
     def init(
-        cloud_provider: schema.ProviderEnum = typer.Argument(
-            schema.ProviderEnum.local,
-            help=f"options: {enum_to_list(schema.ProviderEnum)}",
+        cloud_provider: ProviderEnum = typer.Argument(
+            ProviderEnum.local,
+            help=f"options: {enum_to_list(ProviderEnum)}",
             callback=check_cloud_provider_creds,
             is_eager=True,
         ),
@@ -300,46 +335,47 @@ def nebari_subcommand(cli: typer.Typer):
             "--project-name",
             "--project",
             "-p",
-            callback=check_project_name,
+            callback=typer_validate_regex(schema.namestr_regex, "Project name must begin with a letter and consist of letters, numbers, dashes, or underscores."),
         ),
         domain_name: typing.Optional[str] = typer.Option(
-            ...,
+            None,
             "--domain-name",
             "--domain",
             "-d",
         ),
         namespace: str = typer.Option(
             "dev",
+            callback=typer_validate_regex(schema.namestr_regex, "Namespace must begin with a letter and consist of letters, numbers, dashes, or underscores."),
         ),
-        auth_provider: schema.AuthenticationEnum = typer.Option(
-            schema.AuthenticationEnum.password,
-            help=f"options: {enum_to_list(schema.AuthenticationEnum)}",
+        auth_provider: AuthenticationEnum = typer.Option(
+            AuthenticationEnum.password,
+            help=f"options: {enum_to_list(AuthenticationEnum)}",
             callback=check_auth_provider_creds,
         ),
         auth_auto_provision: bool = typer.Option(
             False,
         ),
-        repository: schema.GitRepoEnum = typer.Option(
+        repository: GitRepoEnum = typer.Option(
             None,
-            help=f"options: {enum_to_list(schema.GitRepoEnum)}",
+            help=f"options: {enum_to_list(GitRepoEnum)}",
         ),
         repository_auto_provision: bool = typer.Option(
             False,
         ),
-        ci_provider: schema.CiEnum = typer.Option(
-            schema.CiEnum.none,
-            help=f"options: {enum_to_list(schema.CiEnum)}",
+        ci_provider: CiEnum = typer.Option(
+            CiEnum.none,
+            help=f"options: {enum_to_list(CiEnum)}",
         ),
-        terraform_state: schema.TerraformStateEnum = typer.Option(
-            schema.TerraformStateEnum.remote,
-            help=f"options: {enum_to_list(schema.TerraformStateEnum)}",
+        terraform_state: TerraformStateEnum = typer.Option(
+            TerraformStateEnum.remote,
+            help=f"options: {enum_to_list(TerraformStateEnum)}",
         ),
         kubernetes_version: str = typer.Option(
             "latest",
         ),
         ssl_cert_email: str = typer.Option(
             None,
-            callback=check_ssl_cert_email,
+            callback=typer_validate_regex(schema.email_regex, f"Email must be valid and match the regex {schema.email_regex}"),
         ),
         disable_prompt: bool = typer.Option(
             False,
@@ -366,7 +402,7 @@ def nebari_subcommand(cli: typer.Typer):
                 [green]nebari init --guided-init[/green]
 
         """
-        inputs = schema.InitInputs()
+        inputs = InitInputs()
 
         inputs.cloud_provider = cloud_provider
         inputs.project_name = project_name
@@ -420,7 +456,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             )
 
         # pull in default values for each of the below
-        inputs = schema.InitInputs()
+        inputs = InitInputs()
 
         # CLOUD PROVIDER
         rich.print(
@@ -436,7 +472,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # try:
         inputs.cloud_provider = questionary.select(
             "Where would you like to deploy your Nebari cluster?",
-            choices=enum_to_list(schema.ProviderEnum),
+            choices=enum_to_list(ProviderEnum),
             qmark=qmark,
         ).unsafe_ask()
 
@@ -451,9 +487,9 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         - Letters from A to Z (upper and lower case) and numbers
         - Maximum accepted length of the name string is 16 characters
         """
-        if inputs.cloud_provider == schema.ProviderEnum.aws.value.lower():
+        if inputs.cloud_provider == ProviderEnum.aws.value.lower():
             name_guidelines += "- Should NOT start with the string `aws`\n"
-        elif inputs.cloud_provider == schema.ProviderEnum.azure.value.lower():
+        elif inputs.cloud_provider == ProviderEnum.azure.value.lower():
             name_guidelines += "- Should NOT contain `-`\n"
 
         # PROJECT NAME
@@ -465,11 +501,8 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         inputs.project_name = questionary.text(
             "What project name would you like to use?",
             qmark=qmark,
-            validate=lambda text: True if len(text) > 0 else "Please enter a value",
+            validate=questionary_validate_regex(schema.namestr_regex),
         ).unsafe_ask()
-
-        if not disable_checks:
-            check_project_name(ctx, inputs.project_name)
 
         # DOMAIN NAME
         rich.print(
@@ -497,7 +530,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         )
         inputs.auth_provider = questionary.select(
             "What authentication provider would you like?",
-            choices=enum_to_list(schema.AuthenticationEnum),
+            choices=enum_to_list(AuthenticationEnum),
             qmark=qmark,
         ).unsafe_ask()
 
@@ -506,7 +539,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
         if (
             inputs.auth_provider.lower()
-            == schema.AuthenticationEnum.auth0.value.lower()
+            == AuthenticationEnum.auth0.value.lower()
         ):
             inputs.auth_auto_provision = questionary.confirm(
                 "Would you like us to auto provision the Auth0 Machine-to-Machine app?",
@@ -517,7 +550,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
         elif (
             inputs.auth_provider.lower()
-            == schema.AuthenticationEnum.github.value.lower()
+            == AuthenticationEnum.github.value.lower()
         ):
             rich.print(
                 (
@@ -545,7 +578,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
             git_provider = questionary.select(
                 "Which git provider would you like to use?",
-                choices=enum_to_list(schema.GitRepoEnum),
+                choices=enum_to_list(GitRepoEnum),
                 qmark=qmark,
             ).unsafe_ask()
 
@@ -563,7 +596,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 git_provider=git_provider, org_name=org_name, repo_name=repo_name
             )
 
-            if git_provider == schema.GitRepoEnum.github.value.lower():
+            if git_provider == GitRepoEnum.github.value.lower():
                 inputs.repository_auto_provision = questionary.confirm(
                     f"Would you like nebari to create a remote repository on {git_provider}?",
                     default=False,
@@ -574,10 +607,10 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             if not disable_checks and inputs.repository_auto_provision:
                 check_repository_creds(ctx, git_provider)
 
-            if git_provider == schema.GitRepoEnum.github.value.lower():
-                inputs.ci_provider = schema.CiEnum.github_actions.value.lower()
-            elif git_provider == schema.GitRepoEnum.gitlab.value.lower():
-                inputs.ci_provider = schema.CiEnum.gitlab_ci.value.lower()
+            if git_provider == GitRepoEnum.github.value.lower():
+                inputs.ci_provider = CiEnum.github_actions.value.lower()
+            elif git_provider == GitRepoEnum.gitlab.value.lower():
+                inputs.ci_provider = CiEnum.gitlab_ci.value.lower()
 
         # SSL CERTIFICATE
         if inputs.domain_name:
@@ -621,7 +654,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             # TERRAFORM STATE
             inputs.terraform_state = questionary.select(
                 "Where should the Terraform State be provisioned?",
-                choices=enum_to_list(schema.TerraformStateEnum),
+                choices=enum_to_list(TerraformStateEnum),
                 qmark=qmark,
             ).unsafe_ask()
 

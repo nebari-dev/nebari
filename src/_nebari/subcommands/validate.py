@@ -3,7 +3,7 @@ import pathlib
 import typer
 from rich import print
 
-from nebari import schema
+from _nebari.config import read_configuration
 from nebari.hookspecs import hookimpl
 
 
@@ -31,7 +31,7 @@ def nebari_subcommand(cli: typer.Typer):
         else:
             from nebari.plugins import nebari_plugin_manager
 
-            schema.read_configuration(
+            read_configuration(
                 config_filename, config_schema=nebari_plugin_manager.config_schema
             )
             print("[bold purple]Successfully validated configuration.[/bold purple]")

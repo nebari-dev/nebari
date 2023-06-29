@@ -8,12 +8,14 @@ import subprocess
 import sys
 import threading
 import time
+import string
+import secrets
 from typing import Dict, List
 
+import escapism
 from ruamel.yaml import YAML
 
 # environment variable overrides
-NEBARI_K8S_VERSION = os.getenv("NEBARI_K8S_VERSION", None)
 NEBARI_GH_BRANCH = os.getenv("NEBARI_GH_BRANCH", None)
 
 CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
@@ -103,26 +105,6 @@ def load_yaml(config_filename: pathlib.Path):
     return config
 
 
-def backup_config_file(filename: pathlib.Path, extrasuffix: str = ""):
-    if not filename.exists():
-        return
-
-    # Backup old file
-    backup_filename = pathlib.Path(f"{filename}{extrasuffix}.backup")
-
-    if backup_filename.exists():
-        i = 1
-        while True:
-            next_backup_filename = pathlib.Path(f"{backup_filename}~{i}")
-            if not next_backup_filename.exists():
-                backup_filename = next_backup_filename
-                break
-            i = i + 1
-
-    filename.rename(backup_filename)
-    print(f"Backing up {filename} as {backup_filename}")
-
-
 @contextlib.contextmanager
 def modified_environ(*remove: List[str], **update: Dict[str, str]):
     """
@@ -198,3 +180,17 @@ def deep_merge(*args):
         return [*d1, *d2]
     else:  # if they don't match use left one
         return d1
+
+
+def escape_string(
+    s: str,
+    safe_chars=string.ascii_letters + string.digits,
+    escape_char='-'
+):
+    return escapism.escape(s, safe=safe_chars, escape_char=escape_char)
+
+
+def random_secure_string(
+    length: int = 16, chars: str = string.ascii_lowercase + string.digits
+):
+    return "".join(secrets.choice(chars) for i in range(length))

@@ -12,8 +12,9 @@ from rich.prompt import Prompt
 
 from nebari import schema
 
-from .utils import backup_config_file, load_yaml, yaml
-from .version import __version__, rounded_ver_parse
+from _nebari.config import backup_configuration
+from _nebari.utils import load_yaml, yaml
+from _nebari.version import __version__, rounded_ver_parse
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ def do_upgrade(config_filename, attempt_fixes=False):
     )
 
     # Backup old file
-    backup_config_file(config_filename, f".{start_version or 'old'}")
+    backup_configuration(config_filename, f".{start_version or 'old'}")
 
     with config_filename.open("wt") as f:
         yaml.dump(config, f)
@@ -293,7 +294,7 @@ class Upgrade_0_4_0(UpgradeStep):
             if k not in {"users", "admin"}
         ]
 
-        backup_config_file(realm_import_filename)
+        backup_configuration(realm_import_filename)
 
         with realm_import_filename.open("wt") as f:
             json.dump(realm, f, indent=2)
