@@ -4,7 +4,7 @@ from nebari import schema
 
 
 def NebariKubernetesProvider(nebari_config: schema.Main):
-    if nebari_config.provider == schema.ProviderEnum.aws:
+    if nebari_config.provider == "aws":
         cluster_name = f"{nebari_config.project_name}-{nebari_config.namespace}"
         # The AWS provider needs to be added, as we are using aws related resources #1254
         return deep_merge(
@@ -26,7 +26,7 @@ def NebariKubernetesProvider(nebari_config: schema.Main):
 
 
 def NebariHelmProvider(nebari_config: schema.Main):
-    if nebari_config.provider == schema.ProviderEnum.aws:
+    if nebari_config.provider == "aws":
         cluster_name = f"{nebari_config.project_name}-{nebari_config.namespace}"
 
         return deep_merge(
@@ -45,14 +45,14 @@ def NebariHelmProvider(nebari_config: schema.Main):
 
 
 def NebariTerraformState(directory: str, nebari_config: schema.Main):
-    if nebari_config.terraform_state.type == schema.TerraformStateEnum.local:
+    if nebari_config.terraform_state.type == "local":
         return {}
-    elif nebari_config.terraform_state.type == schema.TerraformStateEnum.existing:
+    elif nebari_config.terraform_state.type == "existing":
         return TerraformBackend(
             nebari_config["terraform_state"]["backend"],
             **nebari_config["terraform_state"]["config"],
         )
-    elif nebari_config.provider == schema.ProviderEnum.aws:
+    elif nebari_config.provider == "aws":
         return TerraformBackend(
             "s3",
             bucket=f"{nebari_config.project_name}-{nebari_config.namespace}-terraform-state",
@@ -61,13 +61,13 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
             encrypt=True,
             dynamodb_table=f"{nebari_config.project_name}-{nebari_config.namespace}-terraform-state-lock",
         )
-    elif nebari_config.provider == schema.ProviderEnum.gcp:
+    elif nebari_config.provider == "gcp":
         return TerraformBackend(
             "gcs",
             bucket=f"{nebari_config.project_name}-{nebari_config.namespace}-terraform-state",
             prefix=f"terraform/{nebari_config.project_name}/{directory}",
         )
-    elif nebari_config.provider == schema.ProviderEnum.do:
+    elif nebari_config.provider == "do":
         return TerraformBackend(
             "s3",
             endpoint=f"{nebari_config.digital_ocean.region}.digitaloceanspaces.com",
@@ -77,7 +77,7 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
             skip_credentials_validation=True,
             skip_metadata_api_check=True,
         )
-    elif nebari_config.provider == schema.ProviderEnum.azure:
+    elif nebari_config.provider == "azure":
         return TerraformBackend(
             "azurerm",
             resource_group_name=f"{nebari_config.project_name}-{nebari_config.namespace}-state",
@@ -86,7 +86,7 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
             container_name=f"{nebari_config.project_name}-{nebari_config.namespace}-state",
             key=f"terraform/{nebari_config.project_name}-{nebari_config.namespace}/{directory}",
         )
-    elif nebari_config.provider == schema.ProviderEnum.existing:
+    elif nebari_config.provider == "existing":
         optional_kwargs = {}
         if "kube_context" in nebari_config.existing:
             optional_kwargs["config_context"] = nebari_config.existing.kube_context
@@ -96,7 +96,7 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
             load_config_file=True,
             **optional_kwargs,
         )
-    elif nebari_config.provider == schema.ProviderEnum.local:
+    elif nebari_config.provider == "local":
         optional_kwargs = {}
         if "kube_context" in nebari_config.local:
             optional_kwargs["config_context"] = nebari_config.local.kube_context
