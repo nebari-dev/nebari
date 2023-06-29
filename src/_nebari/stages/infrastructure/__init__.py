@@ -18,7 +18,7 @@ from _nebari.provider.cloud import (
 )
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariTerraformState
-from _nebari.utils import escape_string, modified_environ
+from _nebari.utils import escape_string, modified_environ, random_secure_string
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
