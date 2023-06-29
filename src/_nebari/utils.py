@@ -3,13 +3,13 @@ import functools
 import os
 import pathlib
 import re
+import secrets
 import signal
+import string
 import subprocess
 import sys
 import threading
 import time
-import string
-import secrets
 from typing import Dict, List
 
 import escapism
@@ -183,9 +183,7 @@ def deep_merge(*args):
 
 
 def escape_string(
-    s: str,
-    safe_chars=string.ascii_letters + string.digits,
-    escape_char='-'
+    s: str, safe_chars=string.ascii_letters + string.digits, escape_char="-"
 ):
     return escapism.escape(s, safe=safe_chars, escape_char=escape_char)
 
