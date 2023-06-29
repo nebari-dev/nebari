@@ -10,12 +10,12 @@ from _nebari.provider import git
 from _nebari.provider.cicd import github
 from _nebari.provider.oauth.auth0 import create_client
 from _nebari.stages.bootstrap import CiEnum
-from nebari.schema import ProviderEnum
 from _nebari.stages.kubernetes_ingress import CertificateEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
 from _nebari.utils import random_secure_string
 from _nebari.version import __version__
+from nebari.schema import ProviderEnum
 
 logger = logging.getLogger(__name__)
 

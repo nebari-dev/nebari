@@ -1,5 +1,4 @@
 import contextlib
-import enum
 import inspect
 import pathlib
 import sys
@@ -434,7 +433,10 @@ class InputSchema(schema.Base):
 
     @pydantic.root_validator
     def check_provider(cls, values):
-        if values["provider"] == schema.ProviderEnum.local and values.get("local") is None:
+        if (
+            values["provider"] == schema.ProviderEnum.local
+            and values.get("local") is None
+        ):
             values["local"] = LocalProvider()
         elif (
             values["provider"] == schema.ProviderEnum.existing
@@ -451,7 +453,10 @@ class InputSchema(schema.Base):
             and values.get("amazon_web_services") is None
         ):
             values["amazon_web_services"] = AmazonWebServicesProvider()
-        elif values["provider"] == schema.ProviderEnum.azure and values.get("azure") is None:
+        elif (
+            values["provider"] == schema.ProviderEnum.azure
+            and values.get("azure") is None
+        ):
             values["azure"] = AzureProvider()
         elif (
             values["provider"] == schema.ProviderEnum.do
@@ -565,14 +570,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         def escape_project_name(project_name: str, provider: schema.ProviderEnum):
-            if provider == schema.ProviderEnum.azure and '-' in project_name:
-                project_name = escape_string(
-                    project_name,
-                    escape_char='a'
-                )
+            if provider == schema.ProviderEnum.azure and "-" in project_name:
+                project_name = escape_string(project_name, escape_char="a")
 
-            if provider == schema.ProviderEnum.aws and project_name.startswith('aws'):
-                project_name = 'a' + project_name
+            if provider == schema.ProviderEnum.aws and project_name.startswith("aws"):
+                project_name = "a" + project_name
 
             if len(project_name) > 16:
                 project_name = project_name[:16]
