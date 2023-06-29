@@ -28,20 +28,6 @@ def get_kubeconfig_filename():
     return str(pathlib.Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG")
 
 
-@schema.yaml_object(schema.yaml)
-class ProviderEnum(str, enum.Enum):
-    local = "local"
-    existing = "existing"
-    do = "do"
-    aws = "aws"
-    gcp = "gcp"
-    azure = "azure"
-
-    @classmethod
-    def to_yaml(cls, representer, node):
-        return representer.represent_str(node.value)
-
-
 class LocalInputVars(schema.Base):
     kubeconfig_filename: str = get_kubeconfig_filename()
     kube_context: Optional[str]
@@ -150,27 +136,27 @@ class AWSInputVars(schema.Base):
 
 
 def _calculate_node_groups(config: schema.Main):
-    if config.provider == ProviderEnum.aws:
+    if config.provider == schema.ProviderEnum.aws:
         return {
             group: {"key": "eks.amazonaws.com/nodegroup", "value": group}
             for group in ["general", "user", "worker"]
         }
-    elif config.provider == ProviderEnum.gcp:
+    elif config.provider == schema.ProviderEnum.gcp:
         return {
             group: {"key": "cloud.google.com/gke-nodepool", "value": group}
             for group in ["general", "user", "worker"]
         }
-    elif config.provider == ProviderEnum.azure:
+    elif config.provider == schema.ProviderEnum.azure:
         return {
             group: {"key": "azure-node-pool", "value": group}
             for group in ["general", "user", "worker"]
         }
-    elif config.provider == ProviderEnum.do:
+    elif config.provider == schema.ProviderEnum.do:
         return {
             group: {"key": "doks.digitalocean.com/node-pool", "value": group}
             for group in ["general", "user", "worker"]
         }
-    elif config.provider == ProviderEnum.existing:
+    elif config.provider == schema.ProviderEnum.existing:
         return config.existing.node_selectors
     else:
         return config.local.dict()["node_selectors"]
@@ -439,7 +425,6 @@ class ExistingProvider(schema.Base):
 
 
 class InputSchema(schema.Base):
-    provider: ProviderEnum = ProviderEnum.local
     local: typing.Optional[LocalProvider]
     existing: typing.Optional[ExistingProvider]
     google_cloud_platform: typing.Optional[GoogleCloudPlatformProvider]
@@ -449,27 +434,27 @@ class InputSchema(schema.Base):
 
     @pydantic.root_validator
     def check_provider(cls, values):
-        if values["provider"] == ProviderEnum.local and values.get("local") is None:
+        if values["provider"] == schema.ProviderEnum.local and values.get("local") is None:
             values["local"] = LocalProvider()
         elif (
-            values["provider"] == ProviderEnum.existing
+            values["provider"] == schema.ProviderEnum.existing
             and values.get("existing") is None
         ):
             values["existing"] = ExistingProvider()
         elif (
-            values["provider"] == ProviderEnum.gcp
+            values["provider"] == schema.ProviderEnum.gcp
             and values.get("google_cloud_platform") is None
         ):
             values["google_cloud_platform"] = GoogleCloudPlatformProvider()
         elif (
-            values["provider"] == ProviderEnum.aws
+            values["provider"] == schema.ProviderEnum.aws
             and values.get("amazon_web_services") is None
         ):
             values["amazon_web_services"] = AmazonWebServicesProvider()
-        elif values["provider"] == ProviderEnum.azure and values.get("azure") is None:
+        elif values["provider"] == schema.ProviderEnum.azure and values.get("azure") is None:
             values["azure"] = AzureProvider()
         elif (
-            values["provider"] == ProviderEnum.do
+            values["provider"] == schema.ProviderEnum.do
             and values.get("digital_ocean") is None
         ):
             values["digital_ocean"] = DigitalOceanProvider()
@@ -551,7 +536,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         return pathlib.Path("stages") / self.name / self.config.provider.value
 
     def tf_objects(self) -> List[Dict]:
-        if self.config.provider == ProviderEnum.gcp:
+        if self.config.provider == schema.ProviderEnum.gcp:
             return [
                 terraform.Provider(
                     "google",
@@ -560,15 +545,15 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 ),
                 NebariTerraformState(self.name, self.config),
             ]
-        elif self.config.provider == ProviderEnum.do:
+        elif self.config.provider == schema.ProviderEnum.do:
             return [
                 NebariTerraformState(self.name, self.config),
             ]
-        elif self.config.provider == ProviderEnum.azure:
+        elif self.config.provider == schema.ProviderEnum.azure:
             return [
                 NebariTerraformState(self.name, self.config),
             ]
-        elif self.config.provider == ProviderEnum.aws:
+        elif self.config.provider == schema.ProviderEnum.aws:
             return [
                 terraform.Provider(
                     "aws", region=nebari_config.amazon_web_services.region
@@ -579,25 +564,28 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             return []
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        def escape_project_name(project_name: str, provider: ProviderEnum):
-            if provider == ProviderEnum.azure and "-" in project_name:
-                project_name = escape_string(project_name, escape_char="a")
+        def escape_project_name(project_name: str, provider: schema.ProviderEnum):
+            if provider == schema.ProviderEnum.azure and '-' in project_name:
+                project_name = escape_string(
+                    project_name,
+                    escape_char='a'
+                )
 
-            if provider == ProviderEnum.aws and project_name.startswith("aws"):
-                project_name = "a" + project_name
+            if provider == schema.ProviderEnum.aws and project_name.startswith('aws'):
+                project_name = 'a' + project_name
 
             if len(project_name) > 16:
                 project_name = project_name[:16]
 
             return project_name
 
-        if self.config.provider == ProviderEnum.local:
+        if self.config.provider == schema.ProviderEnum.local:
             return LocalInputVars(kube_context=self.config.local.kube_context).dict()
-        elif self.config.provider == ProviderEnum.existing:
+        elif self.config.provider == schema.ProviderEnum.existing:
             return ExistingInputVars(
                 kube_context=self.config.existing.kube_context
             ).dict()
-        elif self.config.provider == ProviderEnum.do:
+        elif self.config.provider == schema.ProviderEnum.do:
             return DigitalOceanInputVars(
                 name=escape_project_name(
                     self.config.project_name, self.config.provider
@@ -608,7 +596,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 kubernetes_version=self.config.digital_ocean.kubernetes_version,
                 node_groups=self.config.digital_ocean.node_groups,
             ).dict()
-        elif self.config.provider == ProviderEnum.gcp:
+        elif self.config.provider == schema.ProviderEnum.gcp:
             return GCPInputVars(
                 name=escape_project_name(
                     self.config.project_name, self.config.provider
@@ -639,7 +627,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 master_authorized_networks_config=self.config.google_cloud_platform.master_authorized_networks_config,
                 private_cluster_config=self.config.google_cloud_platform.private_cluster_config,
             ).dict()
-        elif self.config.provider == ProviderEnum.azure:
+        elif self.config.provider == schema.ProviderEnum.azure:
             return AzureInputVars(
                 name=escape_project_name(
                     self.config.project_name, self.config.provider
@@ -660,7 +648,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 vnet_subnet_id=self.config.azure.vnet_subnet_id,
                 private_cluster_enabled=self.config.azure.private_cluster_enabled,
             ).dict()
-        elif self.config.provider == ProviderEnum.aws:
+        elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
                 name=escape_project_name(
                     self.config.project_name, self.config.provider

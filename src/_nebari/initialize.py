@@ -10,7 +10,7 @@ from _nebari.provider import git
 from _nebari.provider.cicd import github
 from _nebari.provider.oauth.auth0 import create_client
 from _nebari.stages.bootstrap import CiEnum
-from _nebari.stages.infrastructure import ProviderEnum
+from nebari.schema import ProviderEnum
 from _nebari.stages.kubernetes_ingress import CertificateEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
