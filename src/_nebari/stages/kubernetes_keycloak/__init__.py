@@ -12,6 +12,9 @@ from typing import Any, Dict, List
 import pydantic
 
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.infrastructure import InfrastructureOutputSchema
+from _nebari.stages.kubernetes_ingress import KubernetesIngressOutputSchema
+from _nebari.stages.terraform_state import TerraformStateOutputSchema
 from _nebari.stages.tf_objects import (
     NebariHelmProvider,
     NebariKubernetesProvider,
@@ -152,7 +155,7 @@ class KeycloakCredentials(schema.Base):
     password: str
 
 
-class OutputSchema(schema.Base):
+class KubernetesKeycloakOutputSchema(schema.Base):
     keycloak_credentials: KeycloakCredentials
     keycloak_nebari_bot_password: str
 
@@ -162,7 +165,13 @@ class KubernetesKeycloakStage(NebariTerraformStage):
     priority = 50
 
     input_schema = InputSchema
-    output_schema = OutputSchema
+    output_schema = KubernetesKeycloakOutputSchema
+
+    dependencies = [
+        TerraformStateOutputSchema,
+        InfrastructureOutputSchema,
+        KubernetesIngressOutputSchema,
+    ]
 
     def tf_objects(self) -> List[Dict]:
         return [

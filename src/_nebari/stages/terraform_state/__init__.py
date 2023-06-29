@@ -16,10 +16,18 @@ class DigitalOceanInputVars(schema.Base):
     region: str
 
 
+class DigitalOceanOutputVars(schema.Base):
+    pass
+
+
 class GCPInputVars(schema.Base):
     name: str
     namespace: str
     region: str
+
+
+class GCPOutputVars(schema.Base):
+    pass
 
 
 class AzureInputVars(schema.Base):
@@ -30,9 +38,18 @@ class AzureInputVars(schema.Base):
     state_resource_group_name: str
 
 
+class AzureOutputVars(schema.Base):
+    pass
+
+
 class AWSInputVars(schema.Base):
     name: str
     namespace: str
+
+
+class AWSOutputVars(schema.Base):
+    # TODO: define a generic schema for `terraform output -json`
+    credentials: typing.Dict[str, str]
 
 
 @schema.yaml_object(schema.yaml)
@@ -56,8 +73,11 @@ class InputSchema(schema.Base):
     terraform_state: TerraformState = TerraformState()
 
 
-class OutputSchema(schema.Base):
-    pass
+class TerraformStateOutputSchema(schema.Base):
+    # [(addr, id)] or in other words
+    # [(path to Terraform state module, cloud resource ID)]
+    # TODO: tf_state = terraform.deploy()
+    tf_state: List[Tuple[str, str]] = []
 
 
 class TerraformStateStage(NebariTerraformStage):
@@ -65,7 +85,7 @@ class TerraformStateStage(NebariTerraformStage):
     priority = 10
 
     input_schema = InputSchema
-    output_schema = OutputSchema
+    output_schema = TerraformStateOutputSchema
 
     @property
     def template_directory(self):

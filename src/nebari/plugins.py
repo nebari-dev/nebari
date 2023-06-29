@@ -1,12 +1,12 @@
 import importlib
 import itertools
 import os
-import re
 import shutil
 import sys
 import typing
 from pathlib import Path
 
+import networkx as nx
 import pluggy
 import pydantic
 from ruamel.yaml import YAML
@@ -105,28 +105,31 @@ class NebariPluginManager:
 
         stages = itertools.chain.from_iterable(self.plugin_manager.hook.nebari_stage())
 
-        # order stages by priority
-        sorted_stages = sorted(stages, key=lambda s: s.priority)
+        G = nx.DiGraph()
 
-        # filter out duplicate stages with same name (keep highest priority)
-        visited_stage_names = set()
-        filtered_stages = []
-        for stage in reversed(sorted_stages):
-            if stage.name in visited_stage_names:
-                continue
-            filtered_stages.insert(0, stage)
-            visited_stage_names.add(stage.name)
+        for stage in stages:
+            G.add_node(stage, priority=stage.priority)
 
-        # filter out stages which match excluded stages
-        included_stages = []
-        for stage in filtered_stages:
-            for exclude_stage in self.exclude_stages:
-                if re.fullmatch(exclude_stage, stage.name) is not None:
-                    break
-            else:
-                included_stages.append(stage)
+        for stage in stages:
+            for dep in stage.dependencies:
+                output_stages = [s for s in stages if s.output_schema is dep]
+                for output_stage in output_stages:
+                    G.add_edge(output_stage, stage)
 
-        return included_stages
+        # stages with no dependencies should be deployed first
+        no_dependencies = [node for node, deg in G.in_degree() if deg == 0]
+        with_dependencies = [
+            node
+            for node in nx.algorithms.dag.topological_sort(G)
+            if node not in no_dependencies
+        ]
+
+        # if stages have the same dependencies, sort based on priority
+        sorted_stages = sorted(
+            no_dependencies, key=lambda stage: stage.priority
+        ) + sorted(with_dependencies, key=lambda stage: stage.priority)
+
+        return sorted_stages
 
     @property
     def ordered_stages(self):

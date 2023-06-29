@@ -1,6 +1,6 @@
 import contextlib
 import pathlib
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import pydantic
 import typer
@@ -19,8 +19,7 @@ class NebariStage:
     input_schema: pydantic.BaseModel = None
     output_schema: pydantic.BaseModel = None
 
-    # replacement for `stage_outputs`
-    required_targets: pydantic.BaseModel = None
+    dependencies: List[pydantic.BaseModel] = None
 
     def __init__(self, output_directory: pathlib.Path, config: schema.Main):
         self.output_directory = output_directory
@@ -33,14 +32,16 @@ class NebariStage:
         return {}
 
     @contextlib.contextmanager
-    def deploy(self):
+    def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
         yield
 
-    def check(self) -> bool:
+    def check(self, stage_outputs: Dict[str, Dict[str, Any]]) -> bool:
         pass
 
     @contextlib.contextmanager
-    def destroy(self, status: Dict[str, bool]):
+    def destroy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+    ):
         yield
 
 

@@ -3,6 +3,9 @@ import time
 from typing import Any, Dict, List
 
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.infrastructure import InfrastructureOutputSchema
+from _nebari.stages.kubernetes_keycloak import KubernetesKeycloakOutputSchema
+from _nebari.stages.terraform_state import TerraformStateOutputSchema
 from _nebari.stages.tf_objects import NebariTerraformState
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -22,6 +25,14 @@ class InputVars(schema.Base):
 class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
     name = "06-kubernetes-keycloak-configuration"
     priority = 60
+
+    input_vars_schema = InputVars
+
+    dependencies = [
+        TerraformStateOutputSchema,
+        InfrastructureOutputSchema,
+        KubernetesKeycloakOutputSchema,
+    ]
 
     def tf_objects(self) -> List[Dict]:
         return [

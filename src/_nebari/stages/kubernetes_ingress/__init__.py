@@ -1,4 +1,5 @@
 import enum
+import logging
 import socket
 import sys
 import time
@@ -6,8 +7,10 @@ import typing
 from typing import Any, Dict, List
 
 from _nebari import constants
+from _nebari.provider.dns.cloudflare import update_record
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.infrastructure import KubernetesCredentials, NodeSelectorKeyValue
+from _nebari.stages.infrastructure import InfrastructureOutputSchema
+from _nebari.stages.terraform_state import TerraformStateOutputSchema
 from _nebari.stages.tf_objects import (
     NebariHelmProvider,
     NebariKubernetesProvider,
@@ -19,6 +22,8 @@ from nebari.hookspecs import NebariStage, hookimpl
 # check and retry settings
 NUM_ATTEMPTS = 10
 TIMEOUT = 10  # seconds
+
+logger = logging.getLogger(__name__)
 
 
 def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
@@ -76,7 +81,7 @@ def provision_ingress_dns(
         )
 
     if not disable_checks:
-        checks.check_ingress_dns(stage_outputs, config, disable_prompt)
+        check_ingress_dns(stage_outputs, config, disable_prompt)
 
 
 def check_ingress_dns(stage_outputs, config, disable_prompt):
@@ -165,16 +170,9 @@ class IngressEndpoint(schema.Base):
     hostname: str
 
 
-class OutputSchema(schema.Base):
+class KubernetesIngressOutputSchema(schema.Base):
     load_balancer_address: typing.List[IngressEndpoint]
     domain: str
-
-
-class RequiredTargets(schema.Base):
-    node_selectors: Dict[str, NodeSelectorKeyValue]
-    kubernetes_credentials: KubernetesCredentials
-    kubeconfig_filename: str
-    nfs_endpoint: typing.Optional[str]
 
 
 class KubernetesIngressStage(NebariTerraformStage):
@@ -182,9 +180,9 @@ class KubernetesIngressStage(NebariTerraformStage):
     priority = 40
 
     input_schema = InputSchema
-    output_schema = OutputSchema
+    output_schema = KubernetesIngressOutputSchema
 
-    required_targets = RequiredTargets
+    dependencies = [TerraformStateOutputSchema, InfrastructureOutputSchema]
 
     def tf_objects(self) -> List[Dict]:
         return [
@@ -212,10 +210,9 @@ class KubernetesIngressStage(NebariTerraformStage):
                 },
                 "name": self.config.project_name,
                 "environment": self.config.namespace,
-                "node_groups": self.required_targets.node_selectors,
-                # "node_groups": stage_outputs["stages/02-infrastructure"][
-                #     "node_selectors"
-                # ],
+                "node_groups": stage_outputs["stages/02-infrastructure"][
+                    "node_selectors"
+                ],
                 **self.config.ingress.terraform_overrides,
             },
             **cert_details,

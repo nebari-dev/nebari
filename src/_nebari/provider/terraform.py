@@ -10,6 +10,7 @@ import sys
 import tempfile
 import urllib.request
 import zipfile
+from pathlib import Path
 from typing import Any, Dict, List
 
 from _nebari import constants
@@ -23,14 +24,14 @@ class TerraformException(Exception):
 
 
 def deploy(
-    directory,
+    directory: Path,
     terraform_init: bool = True,
     terraform_import: bool = False,
     terraform_apply: bool = True,
     terraform_destroy: bool = False,
     input_vars: Dict[str, Any] = None,
     state_imports: List = None,
-):
+) -> Dict[str, Any]:
     """Execute a given terraform directory.
 
     Parameters:
@@ -154,7 +155,7 @@ def apply(directory=None, targets=None, var_files=None):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
-def output(directory=None):
+def output(directory=None) -> Dict[str, Any]:
     terraform_path = download_terraform_binary()
 
     logger.info(f"terraform={terraform_path} output directory={directory}")

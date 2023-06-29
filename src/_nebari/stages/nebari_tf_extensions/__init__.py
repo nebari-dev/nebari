@@ -2,6 +2,9 @@ import typing
 from typing import Any, Dict, List
 
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.infrastructure import InfrastructureOutputSchema
+from _nebari.stages.kubernetes_keycloak import KubernetesKeycloakOutputSchema
+from _nebari.stages.terraform_state import TerraformStateOutputSchema
 from _nebari.stages.tf_objects import (
     NebariHelmProvider,
     NebariKubernetesProvider,
@@ -42,16 +45,17 @@ class InputSchema(schema.Base):
     tf_extensions: typing.List[NebariExtension] = []
 
 
-class OutputSchema(schema.Base):
-    pass
-
-
 class NebariTFExtensionsStage(NebariTerraformStage):
     name = "08-nebari-tf-extensions"
     priority = 80
 
     input_schema = InputSchema
-    output_schema = OutputSchema
+
+    dependencies = [
+        TerraformStateOutputSchema,
+        KubernetesKeycloakOutputSchema,
+        InfrastructureOutputSchema,
+    ]
 
     def tf_objects(self) -> List[Dict]:
         return [

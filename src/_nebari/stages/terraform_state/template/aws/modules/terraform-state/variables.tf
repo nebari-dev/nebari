@@ -6,5 +6,4 @@ variable "name" {
 variable "tags" {
   description = "Additional tags to apply to resource"
   type        = map(string)
-  default     = {}
 }

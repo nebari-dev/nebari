@@ -1,6 +1,7 @@
 import contextlib
 import enum
 import inspect
+import os
 import pathlib
 import sys
 import tempfile
@@ -17,6 +18,7 @@ from _nebari.provider.cloud import (
     google_cloud,
 )
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.terraform_state import TerraformStateOutputSchema
 from _nebari.stages.tf_objects import (
     NebariAWSProvider,
     NebariGCPProvider,
@@ -512,7 +514,7 @@ class KubernetesCredentials(schema.Base):
     config_context: typing.Optional[str]
 
 
-class OutputSchema(schema.Base):
+class InfrastructureOutputSchema(schema.Base):
     node_selectors: Dict[str, NodeSelectorKeyValue]
     kubernetes_credentials: KubernetesCredentials
     kubeconfig_filename: str
@@ -539,7 +541,9 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
     priority = 20
 
     input_schema = InputSchema
-    output_schema = OutputSchema
+    output_schema = InfrastructureOutputSchema
+
+    dependencies = [TerraformStateOutputSchema]
 
     @property
     def template_directory(self):

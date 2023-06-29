@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Union
 import pydantic
 
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.infrastructure import InfrastructureOutputSchema
+from _nebari.stages.terraform_state import TerraformStateOutputSchema
 from _nebari.stages.tf_objects import (
     NebariHelmProvider,
     NebariKubernetesProvider,
@@ -55,16 +57,16 @@ class InputSchema(schema.Base):
     external_container_reg: ExtContainerReg = ExtContainerReg()
 
 
-class OutputSchema(schema.Base):
-    pass
-
-
 class KubernetesInitializeStage(NebariTerraformStage):
     name = "03-kubernetes-initialize"
     priority = 30
 
     input_schema = InputSchema
-    output_schema = OutputSchema
+
+    dependencies = [
+        TerraformStateOutputSchema,
+        InfrastructureOutputSchema,
+    ]
 
     def tf_objects(self) -> List[Dict]:
         return [
