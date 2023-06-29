@@ -23,9 +23,6 @@ class NebariStage:
         self.output_directory = output_directory
         self.config = config
 
-    def validate(self):
-        pass
-
     def render(self) -> Dict[str, str]:
         return {}
 

@@ -10,7 +10,6 @@ import requests
 from _nebari.provider import git
 from _nebari.provider.cicd import github
 from _nebari.provider.oauth.auth0 import create_client
-from _nebari.utils import check_cloud_credentials
 from _nebari.version import __version__
 from nebari import schema
 
@@ -131,6 +130,8 @@ def render_config(
         config["certificate"] = {"type": schema.CertificateEnum.letsencrypt.value}
         config["certificate"]["acme_email"] = ssl_cert_email
 
+    # TODO: attempt to load config into schema for validation
+
     if repository_auto_provision:
         GITHUB_REGEX = "(https://)?github.com/([^/]+)/([^/]+)/?"
         if re.search(GITHUB_REGEX, repository):
@@ -148,10 +149,6 @@ def render_config(
 
 
 def github_auto_provision(config: schema.Main, owner: str, repo: str):
-    check_cloud_credentials(
-        config
-    )  # We may need env vars such as AWS_ACCESS_KEY_ID depending on provider
-
     already_exists = True
     try:
         github.get_repository(owner, repo)
