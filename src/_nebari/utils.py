@@ -15,22 +15,9 @@ import rich
 from rich.table import Table
 from ruamel.yaml import YAML
 
-from _nebari.provider.cloud import (
-    amazon_web_services,
-    azure_cloud,
-    digital_ocean,
-    google_cloud,
-)
-from nebari import schema
-
 # environment variable overrides
 NEBARI_K8S_VERSION = os.getenv("NEBARI_K8S_VERSION", None)
 NEBARI_GH_BRANCH = os.getenv("NEBARI_GH_BRANCH", None)
-
-DO_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-do"
-AWS_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-aws"
-GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
-AZURE_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-azure"
 
 CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
 
@@ -137,125 +124,6 @@ def backup_config_file(filename: pathlib.Path, extrasuffix: str = ""):
 
     filename.rename(backup_filename)
     print(f"Backing up {filename} as {backup_filename}")
-
-
-def check_cloud_credentials(config: schema.Main):
-    if config.provider == schema.ProviderEnum.gcp:
-        for variable in {"GOOGLE_CREDENTIALS"}:
-            if variable not in os.environ:
-                raise ValueError(
-                    f"""Missing the following required environment variable: {variable}\n
-                    Please see the documentation for more information: {GCP_ENV_DOCS}"""
-                )
-    elif config.provider == schema.ProviderEnum.azure:
-        for variable in {
-            "ARM_CLIENT_ID",
-            "ARM_CLIENT_SECRET",
-            "ARM_SUBSCRIPTION_ID",
-            "ARM_TENANT_ID",
-        }:
-            if variable not in os.environ:
-                raise ValueError(
-                    f"""Missing the following required environment variable: {variable}\n
-                    Please see the documentation for more information: {AZURE_ENV_DOCS}"""
-                )
-    elif config.provider == schema.ProviderEnum.aws:
-        for variable in {
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-        }:
-            if variable not in os.environ:
-                raise ValueError(
-                    f"""Missing the following required environment variable: {variable}\n
-                    Please see the documentation for more information: {AWS_ENV_DOCS}"""
-                )
-    elif config.provider == schema.ProviderEnum.do:
-        for variable in {
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "SPACES_ACCESS_KEY_ID",
-            "SPACES_SECRET_ACCESS_KEY",
-            "DIGITALOCEAN_TOKEN",
-        }:
-            if variable not in os.environ:
-                raise ValueError(
-                    f"""Missing the following required environment variable: {variable}\n
-                    Please see the documentation for more information: {DO_ENV_DOCS}"""
-                )
-
-        if os.environ["AWS_ACCESS_KEY_ID"] != os.environ["SPACES_ACCESS_KEY_ID"]:
-            raise ValueError(
-                f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must be equal\n
-                See {DO_ENV_DOCS} for more information"""
-            )
-
-        if (
-            os.environ["AWS_SECRET_ACCESS_KEY"]
-            != os.environ["SPACES_SECRET_ACCESS_KEY"]
-        ):
-            raise ValueError(
-                f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must be equal\n
-                See {DO_ENV_DOCS} for more information"""
-            )
-
-
-def set_kubernetes_version(
-    config, kubernetes_version, cloud_provider, grab_latest_version=True
-):
-    cloud_provider_dict = {
-        "aws": {
-            "full_name": "amazon_web_services",
-            "k8s_version_checker_func": amazon_web_services.kubernetes_versions,
-        },
-        "azure": {
-            "full_name": "azure",
-            "k8s_version_checker_func": azure_cloud.kubernetes_versions,
-        },
-        "do": {
-            "full_name": "digital_ocean",
-            "k8s_version_checker_func": digital_ocean.kubernetes_versions,
-        },
-        "gcp": {
-            "full_name": "google_cloud_platform",
-            "k8s_version_checker_func": google_cloud.kubernetes_versions,
-        },
-    }
-    cloud_full_name = cloud_provider_dict[cloud_provider]["full_name"]
-    func = cloud_provider_dict[cloud_provider]["k8s_version_checker_func"]
-    cloud_config = config[cloud_full_name]
-
-    def _raise_value_error(cloud_provider, k8s_versions):
-        raise ValueError(
-            f"\nInvalid `kubernetes-version` provided: {kubernetes_version}.\nPlease select from one of the following {cloud_provider.upper()} supported Kubernetes versions: {k8s_versions} or omit flag to use latest Kubernetes version available."
-        )
-
-    def _check_and_set_kubernetes_version(
-        kubernetes_version=kubernetes_version,
-        cloud_provider=cloud_provider,
-        cloud_config=cloud_config,
-        func=func,
-    ):
-        region = cloud_config["region"]
-
-        # to avoid using cloud provider SDK
-        # set NEBARI_K8S_VERSION environment variable
-        if not NEBARI_K8S_VERSION:
-            k8s_versions = func(region)
-        else:
-            k8s_versions = [NEBARI_K8S_VERSION]
-
-        if kubernetes_version:
-            if kubernetes_version in k8s_versions:
-                cloud_config["kubernetes_version"] = kubernetes_version
-            else:
-                _raise_value_error(cloud_provider, k8s_versions)
-        elif grab_latest_version:
-            cloud_config["kubernetes_version"] = k8s_versions[-1]
-        else:
-            # grab oldest version
-            cloud_config["kubernetes_version"] = k8s_versions[0]
-
-    return _check_and_set_kubernetes_version()
 
 
 @contextlib.contextmanager

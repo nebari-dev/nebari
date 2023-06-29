@@ -26,9 +26,6 @@ class NebariStage:
         self.output_directory = output_directory
         self.config = config
 
-    def validate(self):
-        pass
-
     def render(self) -> Dict[str, str]:
         """
         Returns a dictionary where the keys represent the file paths and the values represent the file contents.

@@ -8,6 +8,20 @@ import boto3
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 
 
+def check_credentials():
+    AWS_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-aws"
+
+    for variable in {
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+    }:
+        if variable not in os.environ:
+            raise ValueError(
+                f"""Missing the following required environment variable: {variable}\n
+                Please see the documentation for more information: {AWS_ENV_DOCS}"""
+            )
+
+
 @functools.lru_cache()
 def regions():
     output = subprocess.check_output(["aws", "ec2", "describe-regions"])

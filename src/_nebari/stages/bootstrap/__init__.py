@@ -2,11 +2,10 @@ import enum
 import io
 import typing
 from inspect import cleandoc
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from _nebari.provider.cicd.gitlab import gen_gitlab_ci
-from _nebari.utils import check_cloud_credentials
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -29,7 +28,7 @@ def gen_gitignore():
     return {".gitignore": cleandoc(filestoignore)}
 
 
-def gen_cicd(config):
+def gen_cicd(config: schema.Main):
     """
     Use cicd schema to generate workflow files based on the
     `ci_cd` key in the `config`.
@@ -40,12 +39,12 @@ def gen_cicd(config):
     """
     cicd_files = {}
 
-    if config.ci_cd.type == schema.CiEnum.github_actions:
+    if config.ci_cd.type == CiEnum.github_actions:
         gha_dir = ".github/workflows/"
         cicd_files[gha_dir + "nebari-ops.yaml"] = gen_nebari_ops(config)
         cicd_files[gha_dir + "nebari-linter.yaml"] = gen_nebari_linter(config)
 
-    elif config.ci_cd.type == schema.CiEnum.gitlab_ci:
+    elif config.ci_cd.type == CiEnum.gitlab_ci:
         cicd_files[".gitlab-ci.yml"] = gen_gitlab_ci(config)
 
     else:
@@ -105,9 +104,6 @@ class BootstrapStage(NebariStage):
 
         contents.update(gen_gitignore())
         return contents
-
-    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        check_cloud_credentials(self.config)
 
 
 @hookimpl
