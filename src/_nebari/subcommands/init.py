@@ -1,24 +1,22 @@
+import enum
 import os
 import pathlib
 import re
 import typing
-import enum
 
 import questionary
 import rich
 import typer
 from pydantic import BaseModel
 
-from _nebari.initialize import render_config
 from _nebari.config import write_configuration
-from nebari import schema
-from nebari.hookspecs import hookimpl
-
+from _nebari.initialize import render_config
 from _nebari.stages.bootstrap import CiEnum
 from _nebari.stages.infrastructure import ProviderEnum
-from _nebari.stages.kubernetes_ingress import CertificateEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
+from nebari import schema
+from nebari.hookspecs import hookimpl
 
 MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[green]\t{link_to_docs}[/green]\n\n"
 LINKS_TO_DOCS_TEMPLATE = (
@@ -103,7 +101,9 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
 
     try:
         write_configuration(
-            inputs.output, config, mode="x",
+            inputs.output,
+            config,
+            mode="x",
         )
     except FileExistsError:
         raise ValueError(
@@ -138,6 +138,7 @@ def typer_validate_regex(regex: str, error_message: str = None):
             return value
         message = error_message or f"Does not match {regex}"
         raise typer.BadParameter(message)
+
     return callback
 
 
@@ -148,6 +149,7 @@ def questionary_validate_regex(regex: str, error_message: str = None):
 
         message = error_message or f"Invalid input. Does not match {regex}"
         return message
+
     return callback
 
 
@@ -335,7 +337,10 @@ def nebari_subcommand(cli: typer.Typer):
             "--project-name",
             "--project",
             "-p",
-            callback=typer_validate_regex(schema.namestr_regex, "Project name must begin with a letter and consist of letters, numbers, dashes, or underscores."),
+            callback=typer_validate_regex(
+                schema.namestr_regex,
+                "Project name must begin with a letter and consist of letters, numbers, dashes, or underscores.",
+            ),
         ),
         domain_name: typing.Optional[str] = typer.Option(
             None,
@@ -345,7 +350,10 @@ def nebari_subcommand(cli: typer.Typer):
         ),
         namespace: str = typer.Option(
             "dev",
-            callback=typer_validate_regex(schema.namestr_regex, "Namespace must begin with a letter and consist of letters, numbers, dashes, or underscores."),
+            callback=typer_validate_regex(
+                schema.namestr_regex,
+                "Namespace must begin with a letter and consist of letters, numbers, dashes, or underscores.",
+            ),
         ),
         auth_provider: AuthenticationEnum = typer.Option(
             AuthenticationEnum.password,
@@ -375,7 +383,10 @@ def nebari_subcommand(cli: typer.Typer):
         ),
         ssl_cert_email: str = typer.Option(
             None,
-            callback=typer_validate_regex(schema.email_regex, f"Email must be valid and match the regex {schema.email_regex}"),
+            callback=typer_validate_regex(
+                schema.email_regex,
+                f"Email must be valid and match the regex {schema.email_regex}",
+            ),
         ),
         disable_prompt: bool = typer.Option(
             False,
@@ -537,10 +548,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         if not disable_checks:
             check_auth_provider_creds(ctx, auth_provider=inputs.auth_provider)
 
-        if (
-            inputs.auth_provider.lower()
-            == AuthenticationEnum.auth0.value.lower()
-        ):
+        if inputs.auth_provider.lower() == AuthenticationEnum.auth0.value.lower():
             inputs.auth_auto_provision = questionary.confirm(
                 "Would you like us to auto provision the Auth0 Machine-to-Machine app?",
                 default=False,
@@ -548,10 +556,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 auto_enter=False,
             ).unsafe_ask()
 
-        elif (
-            inputs.auth_provider.lower()
-            == AuthenticationEnum.github.value.lower()
-        ):
+        elif inputs.auth_provider.lower() == AuthenticationEnum.github.value.lower():
             rich.print(
                 (
                     ":warning: If you haven't done so already, please ensure the following:\n"

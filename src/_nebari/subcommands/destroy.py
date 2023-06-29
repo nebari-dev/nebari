@@ -2,9 +2,9 @@ import pathlib
 
 import typer
 
+from _nebari.config import read_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
-from _nebari.config import read_configuration
 from nebari.hookspecs import hookimpl
 
 
@@ -44,9 +44,7 @@ def nebari_subcommand(cli: typer.Typer):
         def _run_destroy(
             config_filename=config_filename, disable_render=disable_render
         ):
-            config = read_configuration(
-                config_filename, config_schema=config_schema
-            )
+            config = read_configuration(config_filename, config_schema=config_schema)
 
             if not disable_render:
                 render_template(output_directory, config, stages)

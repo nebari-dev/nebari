@@ -2,9 +2,9 @@ import pathlib
 
 import typer
 
+from _nebari.config import read_configuration
 from _nebari.deploy import deploy_configuration
 from _nebari.render import render_template
-from _nebari.config import read_configuration
 from nebari.hookspecs import hookimpl
 
 

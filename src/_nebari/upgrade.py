@@ -10,11 +10,10 @@ import rich
 from pydantic.error_wrappers import ValidationError
 from rich.prompt import Prompt
 
-from nebari import schema
-
 from _nebari.config import backup_configuration
 from _nebari.utils import load_yaml, yaml
 from _nebari.version import __version__, rounded_ver_parse
+from nebari import schema
 
 logger = logging.getLogger(__name__)
 
