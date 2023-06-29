@@ -12,12 +12,11 @@ from pydantic import BaseModel
 from _nebari.config import write_configuration
 from _nebari.initialize import render_config
 from _nebari.stages.bootstrap import CiEnum
-from nebari.schema import ProviderEnum
-from _nebari.stages.kubernetes_ingress import CertificateEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
 from nebari import schema
 from nebari.hookspecs import hookimpl
+from nebari.schema import ProviderEnum
 
 MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to this guide on how to generate them:\n\n[green]\t{link_to_docs}[/green]\n\n"
 LINKS_TO_DOCS_TEMPLATE = (
