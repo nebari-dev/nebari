@@ -1,7 +1,6 @@
 import enum
 
 import pydantic
-from pydantic import validator
 from ruamel.yaml import yaml_object
 
 from _nebari.utils import yaml
@@ -51,7 +50,7 @@ class Main(Base):
 
     # If the nebari_version in the schema is old
     # we must tell the user to first run nebari upgrade
-    @validator("nebari_version", pre=True, always=True)
+    @pydantic.validator("nebari_version", pre=True, always=True)
     def check_default(cls, v):
         """
         Always called even if nebari_version is not supplied at all (so defaults to ''). That way we can give a more helpful error message.
@@ -77,6 +76,3 @@ def is_version_accepted(v):
     for deployment with the current Nebari package.
     """
     return Main.is_version_accepted(v)
-
-
-# from _nebari.config import read_configuration, write_configuration
