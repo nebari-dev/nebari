@@ -38,20 +38,10 @@ class ProviderEnum(str, enum.Enum):
         return representer.represent_str(node.value)
 
 
-@yaml_object(yaml)
-class TerraformStateEnum(str, enum.Enum):
-    remote = "remote"
-    local = "local"
-    existing = "existing"
-
-    @classmethod
-    def to_yaml(cls, representer, node):
-        return representer.represent_str(node.value)
-
-
 class Main(Base):
     project_name: letter_dash_underscore_pydantic
     namespace: letter_dash_underscore_pydantic = "dev"
+    provider: ProviderEnum = ProviderEnum.local
     # In nebari_version only use major.minor.patch version - drop any pre/post/dev suffixes
     nebari_version: str = __version__
 

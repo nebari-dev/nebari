@@ -12,7 +12,8 @@ from pydantic import BaseModel
 from _nebari.config import write_configuration
 from _nebari.initialize import render_config
 from _nebari.stages.bootstrap import CiEnum
-from _nebari.stages.infrastructure import ProviderEnum
+from nebari.schema import ProviderEnum
+from _nebari.stages.kubernetes_ingress import CertificateEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
 from nebari import schema
