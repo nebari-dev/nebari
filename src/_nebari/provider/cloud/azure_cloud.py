@@ -27,7 +27,6 @@ def check_credentials():
             )
 
 
-
 @functools.lru_cache()
 def initiate_container_service_client():
     subscription_id = os.environ.get("ARM_SUBSCRIPTION_ID", None)
