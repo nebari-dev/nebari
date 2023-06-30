@@ -3,12 +3,12 @@ from unittest.mock import Mock
 
 import pytest
 
+from _nebari.config import write_configuration
 from _nebari.initialize import render_config
 from _nebari.render import render_template
 from _nebari.stages.bootstrap import CiEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
-from _nebari.config import write_configuration
 from nebari import schema
 
 # from _nebari.stages.base import get_available_stages
@@ -125,7 +125,9 @@ def nebari_config_options(request) -> schema.Main:
 
 @pytest.fixture
 def nebari_config(nebari_config_options):
-    return nebari_plugin_manager.config_schema.parse_obj(render_config(**nebari_config_options))
+    return nebari_plugin_manager.config_schema.parse_obj(
+        render_config(**nebari_config_options)
+    )
 
 
 @pytest.fixture
