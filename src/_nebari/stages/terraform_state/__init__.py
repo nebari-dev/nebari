@@ -1,10 +1,10 @@
+import contextlib
 import enum
 import inspect
 import os
 import pathlib
 import typing
 from typing import Any, Dict, List, Tuple
-import contextlib
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.utils import modified_environ
@@ -175,10 +175,12 @@ class TerraformStateStage(NebariTerraformStage):
             # DigitalOcean terraform remote state using Spaces Bucket
             # assumes aws credentials thus we set them to match spaces credentials
             if self.config.provider == schema.ProviderEnum.do:
-                env_mapping.update({
-                    "AWS_ACCESS_KEY_ID": os.environ["SPACES_ACCESS_KEY_ID"],
-                    "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
-                })
+                env_mapping.update(
+                    {
+                        "AWS_ACCESS_KEY_ID": os.environ["SPACES_ACCESS_KEY_ID"],
+                        "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
+                    }
+                )
 
             with modified_environ(**env_mapping):
                 yield
@@ -192,10 +194,12 @@ class TerraformStateStage(NebariTerraformStage):
             # DigitalOcean terraform remote state using Spaces Bucket
             # assumes aws credentials thus we set them to match spaces credentials
             if self.config.provider == schema.ProviderEnum.do:
-                env_mapping.update({
-                    "AWS_ACCESS_KEY_ID": os.environ["SPACES_ACCESS_KEY_ID"],
-                    "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
-                })
+                env_mapping.update(
+                    {
+                        "AWS_ACCESS_KEY_ID": os.environ["SPACES_ACCESS_KEY_ID"],
+                        "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
+                    }
+                )
 
             with modified_environ(**env_mapping):
                 yield

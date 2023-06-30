@@ -7,7 +7,6 @@ import typing
 from pathlib import Path
 
 import pluggy
-import pydantic
 
 from nebari import hookspecs, schema
 
@@ -112,6 +111,7 @@ class NebariPluginManager:
             raise FileNotFoundError(f"Config file {config_path} not found")
 
         from _nebari.config import read_configuration
+
         return read_configuration(config_path, self.config_schema)
 
     @property
