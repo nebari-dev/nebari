@@ -2,8 +2,8 @@ import subprocess
 
 import pytest
 
-from nebari.plugins import nebari_plugin_manager
 from _nebari.subcommands.init import InitInputs
+from nebari.plugins import nebari_plugin_manager
 
 PROJECT_NAME = "clitest"
 DOMAIN_NAME = "clitest.dev"
