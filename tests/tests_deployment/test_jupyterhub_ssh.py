@@ -1,9 +1,9 @@
 import re
+import string
 import uuid
 
 import paramiko
 import pytest
-import string
 
 from tests.tests_deployment import constants
 from tests.tests_deployment.utils import (
@@ -102,7 +102,10 @@ def test_exact_jupyterhub_ssh(paramiko_object):
         ("pwd", f"/home/{constants.KEYCLOAK_USERNAME}"),
         ("echo $HOME", f"/home/{constants.KEYCLOAK_USERNAME}"),
         ("conda activate default && echo $CONDA_PREFIX", "/opt/conda/envs/default"),
-        ("hostname", f"jupyter-{escape_string(constants.KEYCLOAK_USERNAME, safe=set(string.ascii_lowercase + string.digits), escape_char='-').lower()}"),
+        (
+            "hostname",
+            f"jupyter-{escape_string(constants.KEYCLOAK_USERNAME, safe=set(string.ascii_lowercase + string.digits), escape_char='-').lower()}",
+        ),
     ]
 
     for command, output in commands_exact:
