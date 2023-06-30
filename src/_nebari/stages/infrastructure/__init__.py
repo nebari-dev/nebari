@@ -598,8 +598,8 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             return [
                 terraform.Provider(
                     "google",
-                    project=nebari_config.google_cloud_platform.project,
-                    region=nebari_config.google_cloud_platform.region,
+                    project=self.config.google_cloud_platform.project,
+                    region=self.config.google_cloud_platform.region,
                 ),
                 NebariTerraformState(self.name, self.config),
             ]
