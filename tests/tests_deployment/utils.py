@@ -61,11 +61,3 @@ def monkeypatch_ssl_context():
 
     sslcontext = ssl.create_default_context()
     ssl.create_default_context = create_default_context(sslcontext)
-
-
-def escape_string(s):
-    # https://github.com/jupyterhub/kubespawner/blob/main/kubespawner/spawner.py#L1681
-    # Make sure username and servername match the restrictions for DNS labels
-    # Note: '-' is not in safe_chars, as it is being used as escape character
-    safe_chars = set(string.ascii_lowercase + string.digits)
-    return escapism.escape(s, safe=safe_chars, escape_char="-").lower()
