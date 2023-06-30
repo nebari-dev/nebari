@@ -182,10 +182,13 @@ def deep_merge(*args):
         return d1
 
 
-
-
 # https://github.com/minrk/escapism/blob/master/escapism.py
-def escape_string(to_escape, safe=set(string.ascii_letters + string.digits), escape_char='_', allow_collisions=False):
+def escape_string(
+    to_escape,
+    safe=set(string.ascii_letters + string.digits),
+    escape_char="_",
+    allow_collisions=False,
+):
     """Escape a string so that it only contains characters in a safe set.
 
     Characters outside the safe list will be escaped with _%x_,
@@ -207,8 +210,10 @@ def escape_string(to_escape, safe=set(string.ascii_letters + string.digits), esc
 
     """
     if sys.version_info >= (3,):
-        _ord = lambda byte: byte
-        _bchr = lambda n: bytes([n])
+        def _ord(byte):
+            return byte
+        def _bchr(n):
+            return bytes([n])
     else:
         _ord = ord
         _bchr = chr
@@ -216,14 +221,14 @@ def escape_string(to_escape, safe=set(string.ascii_letters + string.digits), esc
     def _escape_char(c, escape_char=escape_char):
         """Escape a single character"""
         buf = []
-        for byte in c.encode('utf8'):
+        for byte in c.encode("utf8"):
             buf.append(escape_char)
-            buf.append('%X' % _ord(byte))
-        return ''.join(buf)
+            buf.append("%X" % _ord(byte))
+        return "".join(buf)
 
     if isinstance(to_escape, bytes):
         # always work on text
-        to_escape = to_escape.decode('utf8')
+        to_escape = to_escape.decode("utf8")
 
     if not isinstance(safe, set):
         safe = set(safe)
@@ -246,7 +251,7 @@ def escape_string(to_escape, safe=set(string.ascii_letters + string.digits), esc
             chars.append(c)
         else:
             chars.append(_escape_char(c, escape_char))
-    return u''.join(chars)
+    return "".join(chars)
 
 
 def random_secure_string(
