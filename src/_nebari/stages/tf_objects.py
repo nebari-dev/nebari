@@ -5,7 +5,7 @@ from nebari import schema
 
 def NebariKubernetesProvider(nebari_config: schema.Main):
     if nebari_config.provider == "aws":
-        cluster_name = f"{nebari_config.project_name}-{nebari_config.namespace}"
+        cluster_name = f"{nebari_config.escaped_project_name}-{nebari_config.namespace}"
         # The AWS provider needs to be added, as we are using aws related resources #1254
         return deep_merge(
             Data("aws_eks_cluster", "default", name=cluster_name),
@@ -27,7 +27,7 @@ def NebariKubernetesProvider(nebari_config: schema.Main):
 
 def NebariHelmProvider(nebari_config: schema.Main):
     if nebari_config.provider == "aws":
-        cluster_name = f"{nebari_config.project_name}-{nebari_config.namespace}"
+        cluster_name = f"{nebari_config.escaped_project_name}-{nebari_config.namespace}"
 
         return deep_merge(
             Data("aws_eks_cluster", "default", name=cluster_name),
@@ -55,36 +55,36 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
     elif nebari_config.provider == "aws":
         return TerraformBackend(
             "s3",
-            bucket=f"{nebari_config.project_name}-{nebari_config.namespace}-terraform-state",
-            key=f"terraform/{nebari_config.project_name}-{nebari_config.namespace}/{directory}.tfstate",
+            bucket=f"{nebari_config.escaped_project_name}-{nebari_config.namespace}-terraform-state",
+            key=f"terraform/{nebari_config.escaped_project_name}-{nebari_config.namespace}/{directory}.tfstate",
             region=nebari_config.amazon_web_services.region,
             encrypt=True,
-            dynamodb_table=f"{nebari_config.project_name}-{nebari_config.namespace}-terraform-state-lock",
+            dynamodb_table=f"{nebari_config.escaped_project_name}-{nebari_config.namespace}-terraform-state-lock",
         )
     elif nebari_config.provider == "gcp":
         return TerraformBackend(
             "gcs",
-            bucket=f"{nebari_config.project_name}-{nebari_config.namespace}-terraform-state",
-            prefix=f"terraform/{nebari_config.project_name}/{directory}",
+            bucket=f"{nebari_config.escaped_project_name}-{nebari_config.namespace}-terraform-state",
+            prefix=f"terraform/{nebari_config.escaped_project_name}/{directory}",
         )
     elif nebari_config.provider == "do":
         return TerraformBackend(
             "s3",
             endpoint=f"{nebari_config.digital_ocean.region}.digitaloceanspaces.com",
             region="us-west-1",  # fake aws region required by terraform
-            bucket=f"{nebari_config.project_name}-{nebari_config.namespace}-terraform-state",
-            key=f"terraform/{nebari_config.project_name}-{nebari_config.namespace}/{directory}.tfstate",
+            bucket=f"{nebari_config.escaped_project_name}-{nebari_config.namespace}-terraform-state",
+            key=f"terraform/{nebari_config.escaped_project_name}-{nebari_config.namespace}/{directory}.tfstate",
             skip_credentials_validation=True,
             skip_metadata_api_check=True,
         )
     elif nebari_config.provider == "azure":
         return TerraformBackend(
             "azurerm",
-            resource_group_name=f"{nebari_config.project_name}-{nebari_config.namespace}-state",
+            resource_group_name=f"{nebari_config.escaped_project_name}-{nebari_config.namespace}-state",
             # storage account must be globally unique
-            storage_account_name=f"{nebari_config.project_name}{nebari_config.namespace}{nebari_config.azure.storage_account_postfix}",
-            container_name=f"{nebari_config.project_name}-{nebari_config.namespace}-state",
-            key=f"terraform/{nebari_config.project_name}-{nebari_config.namespace}/{directory}",
+            storage_account_name=f"{nebari_config.escaped_project_name}{nebari_config.namespace}{nebari_config.azure.storage_account_postfix}",
+            container_name=f"{nebari_config.escaped_project_name}-{nebari_config.namespace}-state",
+            key=f"terraform/{nebari_config.escaped_project_name}-{nebari_config.namespace}/{directory}",
         )
     elif nebari_config.provider == "existing":
         optional_kwargs = {}
@@ -92,7 +92,7 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
             optional_kwargs["config_context"] = nebari_config.existing.kube_context
         return TerraformBackend(
             "kubernetes",
-            secret_suffix=f"{nebari_config.project_name}-{nebari_config.namespace}-{directory}",
+            secret_suffix=f"{nebari_config.escaped_project_name}-{nebari_config.namespace}-{directory}",
             load_config_file=True,
             **optional_kwargs,
         )
@@ -102,7 +102,7 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
             optional_kwargs["config_context"] = nebari_config.local.kube_context
         return TerraformBackend(
             "kubernetes",
-            secret_suffix=f"{nebari_config.project_name}-{nebari_config.namespace}-{directory}",
+            secret_suffix=f"{nebari_config.escaped_project_name}-{nebari_config.namespace}-{directory}",
             load_config_file=True,
             **optional_kwargs,
         )

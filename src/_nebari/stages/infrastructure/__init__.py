@@ -1,3 +1,4 @@
+import os
 import contextlib
 import inspect
 import pathlib
@@ -49,7 +50,7 @@ class DigitalOceanInputVars(schema.Base):
     tags: typing.List[str]
     kubernetes_version: str
     node_groups: typing.Dict[str, DigitalOceanNodeGroup]
-    kubeconfig_filename: str
+    kubeconfig_filename: str = get_kubeconfig_filename()
 
 
 class GCPGuestAccelerators(schema.Base):
@@ -200,6 +201,16 @@ class DigitalOceanNodeGroup(schema.Base):
     min_nodes: pydantic.conint(ge=1) = 1
     max_nodes: pydantic.conint(ge=1) = 1
 
+    @pydantic.validator('instance')
+    def _validate_instance(cls, value):
+        digital_ocean.check_credentials()
+
+        available_instances = {_['slug'] for _ in digital_ocean.instances()}
+        if value not in available_instances:
+            raise ValueError(f'Digital Ocean instance size={instance} not one of available instance types={available_instances}')
+
+        return value
+
 
 class DigitalOceanProvider(schema.Base):
     region: str = "nyc3"
@@ -218,9 +229,21 @@ class DigitalOceanProvider(schema.Base):
     }
     tags: typing.Optional[typing.List[str]] = []
 
+    @pydantic.validator('region')
+    def _validate_region(cls, value):
+        digital_ocean.check_credentials()
+
+        available_regions = set(_['slug'] for _ in digital_ocean.regions())
+        if value not in available_regions:
+            raise ValueError(f'Digital Ocean region={value} is not one of {available_regions}')
+        return value
+
     @pydantic.root_validator
     def _validate_kubernetes_version(cls, values):
         digital_ocean.check_credentials()
+
+        if "region" not in values:
+            raise ValueError("region required in order to set kubernetes version")
 
         available_kubernetes_versions = digital_ocean.kubernetes_versions(
             values["region"]
@@ -569,18 +592,6 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             return []
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        def escape_project_name(project_name: str, provider: schema.ProviderEnum):
-            if provider == schema.ProviderEnum.azure and "-" in project_name:
-                project_name = escape_string(project_name, escape_char="a")
-
-            if provider == schema.ProviderEnum.aws and project_name.startswith("aws"):
-                project_name = "a" + project_name
-
-            if len(project_name) > 16:
-                project_name = project_name[:16]
-
-            return project_name
-
         if self.config.provider == schema.ProviderEnum.local:
             return LocalInputVars(kube_context=self.config.local.kube_context).dict()
         elif self.config.provider == schema.ProviderEnum.existing:
@@ -589,9 +600,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ).dict()
         elif self.config.provider == schema.ProviderEnum.do:
             return DigitalOceanInputVars(
-                name=escape_project_name(
-                    self.config.project_name, self.config.provider
-                ),
+                name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 region=self.config.digital_ocean.region,
                 tags=self.config.digital_ocean.tags,
@@ -600,9 +609,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ).dict()
         elif self.config.provider == schema.ProviderEnum.gcp:
             return GCPInputVars(
-                name=escape_project_name(
-                    self.config.project_name, self.config.provider
-                ),
+                name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 region=self.config.google_cloud_platform.region,
                 project_id=self.config.google_cloud_platform.project,
@@ -631,9 +638,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ).dict()
         elif self.config.provider == schema.ProviderEnum.azure:
             return AzureInputVars(
-                name=escape_project_name(
-                    self.config.project_name, self.config.provider
-                ),
+                name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 region=self.config.azure.region,
                 kubernetes_version=self.config.azure.kubernetes_version,
@@ -652,9 +657,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ).dict()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
-                name=escape_project_name(
-                    self.config.project_name, self.config.provider
-                ),
+                name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_ids,

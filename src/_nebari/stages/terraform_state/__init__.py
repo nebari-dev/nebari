@@ -4,8 +4,10 @@ import os
 import pathlib
 import typing
 from typing import Any, Dict, List, Tuple
+import contextlib
 
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.utils import modified_environ
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -165,6 +167,38 @@ class TerraformStateStage(NebariTerraformStage):
             return {}
         else:
             ValueError(f"Unknown provider: {self.config.provider}")
+
+    @contextlib.contextmanager
+    def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
+        with super().deploy(stage_outputs):
+            env_mapping = {}
+            # DigitalOcean terraform remote state using Spaces Bucket
+            # assumes aws credentials thus we set them to match spaces credentials
+            if self.config.provider == schema.ProviderEnum.do:
+                env_mapping.update({
+                    "AWS_ACCESS_KEY_ID": os.environ["SPACES_ACCESS_KEY_ID"],
+                    "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
+                })
+
+            with modified_environ(**env_mapping):
+                yield
+
+    @contextlib.contextmanager
+    def destroy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+    ):
+        with super().destroy(stage_outputs, status):
+            env_mapping = {}
+            # DigitalOcean terraform remote state using Spaces Bucket
+            # assumes aws credentials thus we set them to match spaces credentials
+            if self.config.provider == schema.ProviderEnum.do:
+                env_mapping.update({
+                    "AWS_ACCESS_KEY_ID": os.environ["SPACES_ACCESS_KEY_ID"],
+                    "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
+                })
+
+            with modified_environ(**env_mapping):
+                yield
 
 
 @hookimpl
