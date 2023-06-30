@@ -3,7 +3,7 @@ import enum
 import pydantic
 from ruamel.yaml import yaml_object
 
-from _nebari.utils import yaml
+from _nebari.utils import yaml, escape_string
 from _nebari.version import __version__, rounded_ver_parse
 
 # Regex for suitable project names
@@ -67,6 +67,23 @@ class Main(Base):
     @classmethod
     def is_version_accepted(cls, v):
         return v != "" and rounded_ver_parse(v) == rounded_ver_parse(__version__)
+
+    @property
+    def escaped_project_name(self):
+        """Escaped project-name know to be compatible with all clouds
+        """
+        project_name = self.project_name
+
+        if self.provider == ProviderEnum.azure and "-" in project_name:
+            project_name = escape_string(project_name, escape_char="a")
+
+        if self.provider == ProviderEnum.aws and project_name.startswith("aws"):
+                project_name = "a" + project_name
+
+        if len(project_name) > 16:
+            project_name = project_name[:16]
+
+        return project_name
 
 
 def is_version_accepted(v):

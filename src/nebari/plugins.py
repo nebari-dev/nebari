@@ -45,9 +45,6 @@ class NebariPluginManager:
     exclude_default_stages: bool = False
     exclude_stages: typing.List[str] = []
 
-    config_path: typing.Union[Path, None] = None
-    config: typing.Union[pydantic.BaseModel, None] = None
-
     def __init__(self) -> None:
         self.plugin_manager.add_hookspecs(hookspecs)
 
@@ -107,18 +104,15 @@ class NebariPluginManager:
 
         return included_stages
 
-    def load_config(self, config_path: typing.Union[str, Path]):
+    def read_config(self, config_path: typing.Union[str, Path]):
         if isinstance(config_path, str):
             config_path = Path(config_path)
 
         if not config_path.exists():
             raise FileNotFoundError(f"Config file {config_path} not found")
 
-        self.config_path = config_path
-
         from _nebari.config import read_configuration
-
-        self.config = read_configuration(config_path, self.config_schema)
+        return read_configuration(config_path, self.config_schema)
 
     @property
     def ordered_stages(self):
