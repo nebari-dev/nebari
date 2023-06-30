@@ -247,7 +247,7 @@ class DigitalOceanProvider(schema.Base):
         digital_ocean.check_credentials()
 
         if "region" not in values:
-            raise ValueError("region required in order to set kubernetes version")
+            raise ValueError("Region required in order to set kubernetes_version")
 
         available_kubernetes_versions = digital_ocean.kubernetes_versions(
             values["region"]
@@ -391,6 +391,14 @@ class AWSNodeGroup(schema.Base):
     gpu: bool = False
     single_subnet: bool = False
 
+    @pydantic.validator('instance')
+    def _validate_instance(cls, value):
+        amazon_web_services.check_credentials()
+
+        available_instances = amazon_web_services.instances()
+        if value not in available_instances:
+            raise ValueError(f"Instance {value} not available out of available instances {available_instances.keys()}")
+        return value
 
 class AmazonWebServicesProvider(schema.Base):
     region: str = pydantic.Field(
@@ -424,8 +432,19 @@ class AmazonWebServicesProvider(schema.Base):
             )
         return values
 
+    @pydantic.validator('region')
+    def _validate_region(cls, value):
+        amazon_web_services.check_credentials()
+
+        available_regions = amazon_web_services.regions()
+        if value not in available_regions:
+            raise ValueError(f"Region {region} is not one of available regions {available_regions}")
+        return value
+
     @pydantic.root_validator
     def _validate_availability_zones(cls, values):
+        amazon_web_services.check_credentials()
+
         if values["availability_zones"] is None:
             zones = amazon_web_services.zones(values["region"])
             values["availability_zones"] = list(sorted(zones))[:2]
@@ -588,7 +607,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         elif self.config.provider == schema.ProviderEnum.aws:
             return [
                 terraform.Provider(
-                    "aws", region=nebari_config.amazon_web_services.region
+                    "aws", region=self.config.amazon_web_services.region
                 ),
                 NebariTerraformState(self.name, self.config),
             ]
