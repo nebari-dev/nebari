@@ -1,8 +1,6 @@
 import re
 import ssl
-import string
 
-import escapism
 import requests
 
 from tests_deployment import constants
