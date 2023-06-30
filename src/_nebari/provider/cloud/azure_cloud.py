@@ -6,14 +6,13 @@ from azure.identity import DefaultAzureCredential
 from azure.mgmt.containerservice import ContainerServiceClient
 
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari import constants
 
 logger = logging.getLogger("azure")
 logger.setLevel(logging.ERROR)
 
 
 def check_credentials():
-    AZURE_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-azure"
-
     for variable in {
         "ARM_CLIENT_ID",
         "ARM_CLIENT_SECRET",
@@ -23,7 +22,7 @@ def check_credentials():
         if variable not in os.environ:
             raise ValueError(
                 f"""Missing the following required environment variable: {variable}\n
-                Please see the documentation for more information: {AZURE_ENV_DOCS}"""
+                Please see the documentation for more information: {constants.AZURE_ENV_DOCS}"""
             )
 
 

@@ -4,11 +4,10 @@ import os
 import requests
 
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari import constants
 
 
 def check_credentials():
-    DO_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-do"
-
     for variable in {
         "SPACES_ACCESS_KEY_ID",
         "SPACES_SECRET_ACCESS_KEY",
@@ -17,7 +16,7 @@ def check_credentials():
         if variable not in os.environ:
             raise ValueError(
                 f"""Missing the following required environment variable: {variable}\n
-                Please see the documentation for more information: {DO_ENV_DOCS}"""
+                Please see the documentation for more information: {constants.DO_ENV_DOCS}"""
             )
 
 

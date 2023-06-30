@@ -1,7 +1,7 @@
 import pytest
 import requests
 
-from _nebari.utils import AWS_ENV_DOCS, AZURE_ENV_DOCS, DO_ENV_DOCS, GCP_ENV_DOCS
+from _nebari.constants import AWS_ENV_DOCS, AZURE_ENV_DOCS, DO_ENV_DOCS, GCP_ENV_DOCS
 
 LINKS_TO_TEST = [
     DO_ENV_DOCS,
