@@ -1,8 +1,8 @@
 import os
 
 from _nebari.stages.bootstrap import CiEnum
-from nebari.plugins import nebari_plugin_manager
 from nebari import schema
+from nebari.plugins import nebari_plugin_manager
 
 
 def test_render_config(nebari_render):
