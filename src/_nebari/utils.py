@@ -250,6 +250,7 @@ def escape_string(
             chars.append(c)
         else:
             chars.append(_escape_char(c, escape_char))
+
     return "".join(chars)
 
 
