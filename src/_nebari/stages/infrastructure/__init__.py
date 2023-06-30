@@ -1,6 +1,6 @@
-import os
 import contextlib
 import inspect
+import os
 import pathlib
 import sys
 import tempfile
@@ -19,7 +19,7 @@ from _nebari.provider.cloud import (
 )
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariTerraformState
-from _nebari.utils import escape_string, modified_environ, random_secure_string
+from _nebari.utils import modified_environ, random_secure_string
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -201,13 +201,15 @@ class DigitalOceanNodeGroup(schema.Base):
     min_nodes: pydantic.conint(ge=1) = 1
     max_nodes: pydantic.conint(ge=1) = 1
 
-    @pydantic.validator('instance')
+    @pydantic.validator("instance")
     def _validate_instance(cls, value):
         digital_ocean.check_credentials()
 
-        available_instances = {_['slug'] for _ in digital_ocean.instances()}
+        available_instances = {_["slug"] for _ in digital_ocean.instances()}
         if value not in available_instances:
-            raise ValueError(f'Digital Ocean instance size={instance} not one of available instance types={available_instances}')
+            raise ValueError(
+                f"Digital Ocean instance size={instance} not one of available instance types={available_instances}"
+            )
 
         return value
 
@@ -229,13 +231,15 @@ class DigitalOceanProvider(schema.Base):
     }
     tags: typing.Optional[typing.List[str]] = []
 
-    @pydantic.validator('region')
+    @pydantic.validator("region")
     def _validate_region(cls, value):
         digital_ocean.check_credentials()
 
-        available_regions = set(_['slug'] for _ in digital_ocean.regions())
+        available_regions = set(_["slug"] for _ in digital_ocean.regions())
         if value not in available_regions:
-            raise ValueError(f'Digital Ocean region={value} is not one of {available_regions}')
+            raise ValueError(
+                f"Digital Ocean region={value} is not one of {available_regions}"
+            )
         return value
 
     @pydantic.root_validator
