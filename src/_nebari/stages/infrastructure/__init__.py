@@ -201,18 +201,6 @@ class DigitalOceanNodeGroup(schema.Base):
     min_nodes: pydantic.conint(ge=1) = 1
     max_nodes: pydantic.conint(ge=1) = 1
 
-    @pydantic.validator("instance")
-    def _validate_instance(cls, value):
-        digital_ocean.check_credentials()
-
-        available_instances = {_["slug"] for _ in digital_ocean.instances()}
-        if value not in available_instances:
-            raise ValueError(
-                f"Digital Ocean instance size={instance} not one of available instance types={available_instances}"
-            )
-
-        return value
-
 
 class DigitalOceanProvider(schema.Base):
     region: str = "nyc3"
@@ -240,6 +228,19 @@ class DigitalOceanProvider(schema.Base):
             raise ValueError(
                 f"Digital Ocean region={value} is not one of {available_regions}"
             )
+        return value
+
+    @pydantic.validator("node_groups")
+    def _validate_node_group(cls, value):
+        digital_ocean.check_credentials()
+
+        available_instances = {_["slug"] for _ in digital_ocean.instances()}
+        for name, node_group in value.items():
+            if node_group.instance not in available_instances:
+                raise ValueError(
+                    f"Digital Ocean instance {node_group.instance} not one of available instance types={available_instances}"
+                )
+
         return value
 
     @pydantic.root_validator
@@ -391,17 +392,6 @@ class AWSNodeGroup(schema.Base):
     gpu: bool = False
     single_subnet: bool = False
 
-    @pydantic.validator("instance")
-    def _validate_instance(cls, value):
-        amazon_web_services.check_credentials()
-
-        available_instances = amazon_web_services.instances()
-        if value not in available_instances:
-            raise ValueError(
-                f"Instance {value} not available out of available instances {available_instances.keys()}"
-            )
-        return value
-
 
 class AmazonWebServicesProvider(schema.Base):
     region: str = pydantic.Field(
@@ -434,6 +424,18 @@ class AmazonWebServicesProvider(schema.Base):
                 f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
         return values
+
+    @pydantic.validator("node_groups")
+    def _validate_node_group(cls, value):
+        amazon_web_services.check_credentials()
+
+        available_instances = amazon_web_services.instances()
+        for name, node_group in value.items():
+            if node_group.instance not in available_instances:
+                raise ValueError(
+                    f"Instance {node_group.instance} not available out of available instances {available_instances.keys()}"
+                )
+        return value
 
     @pydantic.validator("region")
     def _validate_region(cls, value):
