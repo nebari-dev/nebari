@@ -39,8 +39,7 @@ def mock_all_cloud_methods(monkeypatch):
         _mock_kubernetes_versions(),
     )
     monkeypatch.setattr(
-        "_nebari.provider.cloud.amazon_web_services.check_credentials",
-        lambda: True
+        "_nebari.provider.cloud.amazon_web_services.check_credentials", lambda: True
     )
     monkeypatch.setattr(
         "_nebari.provider.cloud.amazon_web_services.zones",
