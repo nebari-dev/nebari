@@ -27,7 +27,8 @@ def do_upgrade(config_filename, attempt_fixes=False):
         return
 
     try:
-        schema.read_configuration(config_filename)
+        from nebari.plugins import nebari_plugin_manager
+        nebari_plugin_manager.read_config(config_filename)
         rich.print(
             f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for Nebari version [green]{__version__}[/green]"
         )

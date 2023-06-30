@@ -39,6 +39,10 @@ def mock_all_cloud_methods(monkeypatch):
         _mock_kubernetes_versions(),
     )
     monkeypatch.setattr(
+        "_nebari.provider.cloud.amazon_web_services.check_credentials",
+        lambda: True
+    )
+    monkeypatch.setattr(
         "_nebari.provider.cloud.amazon_web_services.zones",
         _mock_aws_availability_zones(),
     )
@@ -47,12 +51,24 @@ def mock_all_cloud_methods(monkeypatch):
         _mock_kubernetes_versions(),
     )
     monkeypatch.setattr(
+        "_nebari.provider.cloud.azure_cloud.check_credentials",
+        lambda: True,
+    )
+    monkeypatch.setattr(
         "_nebari.provider.cloud.digital_ocean.kubernetes_versions",
         _mock_kubernetes_versions(["1.19.2-do.3", "1.20.2-do.0", "1.21.5-do.0"]),
     )
     monkeypatch.setattr(
+        "_nebari.provider.cloud.digital_ocean.check_credentials",
+        lambda: True,
+    )
+    monkeypatch.setattr(
         "_nebari.provider.cloud.google_cloud.kubernetes_versions",
         _mock_kubernetes_versions(),
+    )
+    monkeypatch.setattr(
+        "_nebari.provider.cloud.google_cloud.check_credentials",
+        lambda: True,
     )
     monkeypatch.setenv("PROJECT_ID", "pytest-project")
 

@@ -1,12 +1,13 @@
 import os
 
 from _nebari.stages.bootstrap import CiEnum
+from nebari.plugins import nebari_plugin_manager
 from nebari import schema
 
 
 def test_render_config(nebari_render):
     output_directory, config_filename = nebari_render
-    config = schema.read_configuration(config_filename)
+    config = nebari_plugin_manager.read_config(config_filename)
     assert {"nebari-config.yaml", "stages", ".gitignore"} <= set(
         os.listdir(output_directory)
     )
