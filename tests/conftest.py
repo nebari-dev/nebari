@@ -41,31 +41,53 @@ def mock_all_cloud_methods(monkeypatch):
 
     MOCK_VALUES = {
         # AWS
-        "_nebari.provider.cloud.amazon_web_services.kubernetes_versions": ["1.18", "1.19", "1.20"],
+        "_nebari.provider.cloud.amazon_web_services.kubernetes_versions": [
+            "1.18",
+            "1.19",
+            "1.20",
+        ],
         "_nebari.provider.cloud.amazon_web_services.check_credentials": None,
-        "_nebari.provider.cloud.amazon_web_services.regions": ["us-east-1", "us-west-2"],
-        "_nebari.provider.cloud.amazon_web_services.zones": ["us-west-2a", "us-west-2b"],
+        "_nebari.provider.cloud.amazon_web_services.regions": [
+            "us-east-1",
+            "us-west-2",
+        ],
+        "_nebari.provider.cloud.amazon_web_services.zones": [
+            "us-west-2a",
+            "us-west-2b",
+        ],
         "_nebari.provider.cloud.amazon_web_services.instances": {
             "m5.xlarge": "m5.xlarge",
             "m5.2xlarge": "m5.2xlarge",
         },
         # Azure
-        "_nebari.provider.cloud.azure_cloud.kubernetes_versions": ["1.18", "1.19", "1.20"],
+        "_nebari.provider.cloud.azure_cloud.kubernetes_versions": [
+            "1.18",
+            "1.19",
+            "1.20",
+        ],
         "_nebari.provider.cloud.azure_cloud.check_credentials": None,
         # Digital Ocean
-        "_nebari.provider.cloud.digital_ocean.kubernetes_versions": ["1.19.2-do.3", "1.20.2-do.0", "1.21.5-do.0"],
+        "_nebari.provider.cloud.digital_ocean.kubernetes_versions": [
+            "1.19.2-do.3",
+            "1.20.2-do.0",
+            "1.21.5-do.0",
+        ],
         "_nebari.provider.cloud.digital_ocean.check_credentials": None,
         "_nebari.provider.cloud.digital_ocean.regions": [
-            {'name': 'New York 3', 'slug': 'nyc3'},
+            {"name": "New York 3", "slug": "nyc3"},
         ],
         "_nebari.provider.cloud.digital_ocean.instances": [
-            {'name': 's-2vcpu-4gb', 'slug': 's-2vcpu-4gb'},
-            {'name': 'g-2vcpu-8gb', 'slug': 'g-2vcpu-8gb'},
-            {'name': 'g-8vcpu-32gb', 'slug': 'g-8vcpu-32gb'},
-            {'name': 'g-4vcpu-16gb', 'slug': 'g-4vcpu-16gb'}
+            {"name": "s-2vcpu-4gb", "slug": "s-2vcpu-4gb"},
+            {"name": "g-2vcpu-8gb", "slug": "g-2vcpu-8gb"},
+            {"name": "g-8vcpu-32gb", "slug": "g-8vcpu-32gb"},
+            {"name": "g-4vcpu-16gb", "slug": "g-4vcpu-16gb"},
         ],
         # Google Cloud
-        "_nebari.provider.cloud.google_cloud.kubernetes_versions": ["1.18", "1.19", "1.20"],
+        "_nebari.provider.cloud.google_cloud.kubernetes_versions": [
+            "1.18",
+            "1.19",
+            "1.20",
+        ],
         "_nebari.provider.cloud.google_cloud.check_credentials": None,
     }
 
