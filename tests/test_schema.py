@@ -1,5 +1,5 @@
 from nebari import schema
-from nebari.plugin import nebari_plugin_manager
+from nebari.plugins import nebari_plugin_manager
 
 
 def test_minimal_schema():
