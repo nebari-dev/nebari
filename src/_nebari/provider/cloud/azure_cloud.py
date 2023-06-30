@@ -5,8 +5,8 @@ import os
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.containerservice import ContainerServiceClient
 
-from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 from _nebari import constants
+from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 
 logger = logging.getLogger("azure")
 logger.setLevel(logging.ERROR)
