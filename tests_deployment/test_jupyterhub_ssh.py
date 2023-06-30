@@ -5,8 +5,8 @@ import paramiko
 import pytest
 
 from tests_deployment import constants
+from _nebari.utils import escape_string
 from tests_deployment.utils import (
-    escape_string,
     get_jupyterhub_token,
     monkeypatch_ssl_context,
 )
