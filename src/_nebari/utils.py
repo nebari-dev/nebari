@@ -221,7 +221,7 @@ def escape_string(
         _ord = ord
         _bchr = chr
 
-    def _escape_char(c, escape_char=escape_char):
+    def _escape_char(c, escape_char):
         """Escape a single character"""
         buf = []
         for byte in c.encode("utf8"):
