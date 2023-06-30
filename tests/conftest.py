@@ -29,45 +29,73 @@ def mock_all_cloud_methods(monkeypatch):
             m.return_value = k8s_versions[-1]
         return m
 
+    def _mock_return_value(return_value):
+        m = Mock()
+        m.return_value = return_value
+        return m
+
     def _mock_aws_availability_zones(region="us-west-2"):
         m = Mock()
         m.return_value = ["us-west-2a", "us-west-2b"]
         return m
 
+    # AWS
     monkeypatch.setattr(
         "_nebari.provider.cloud.amazon_web_services.kubernetes_versions",
-        _mock_kubernetes_versions(),
+        _mock_return_value(["1.18", "1.19", "1.20"])
     )
     monkeypatch.setattr(
-        "_nebari.provider.cloud.amazon_web_services.check_credentials", lambda: True
+        "_nebari.provider.cloud.amazon_web_services.check_credentials",
+        _mock_return_value(None),
     )
     monkeypatch.setattr(
         "_nebari.provider.cloud.amazon_web_services.zones",
-        _mock_aws_availability_zones(),
+        _mock_return_value(["us-west-2a", "us-west-2b"])
     )
+
+    # Azure
     monkeypatch.setattr(
         "_nebari.provider.cloud.azure_cloud.kubernetes_versions",
-        _mock_kubernetes_versions(),
+        _mock_return_value(["1.18", "1.19", "1.20"])
     )
     monkeypatch.setattr(
         "_nebari.provider.cloud.azure_cloud.check_credentials",
-        lambda: True,
+        _mock_return_value(None)
     )
+
+    # Digital Ocean
     monkeypatch.setattr(
         "_nebari.provider.cloud.digital_ocean.kubernetes_versions",
-        _mock_kubernetes_versions(["1.19.2-do.3", "1.20.2-do.0", "1.21.5-do.0"]),
+        _mock_return_value(["1.19.2-do.3", "1.20.2-do.0", "1.21.5-do.0"]),
     )
     monkeypatch.setattr(
         "_nebari.provider.cloud.digital_ocean.check_credentials",
-        lambda: True,
+        _mock_return_value(None),
+    )
+    monkeypatch.setattr(
+        "_nebari.provider.cloud.digital_ocean.instances",
+        _mock_return_value([
+            {'name': 's-2vcpu-4gb', 'slug': 's-2vcpu-4gb'},
+            {'name': 'g-2vcpu-8gb', 'slug': 'g-2vcpu-8gb'},
+            {'name': 'g-8vcpu-32gb', 'slug': 'g-8vcpu-32gb'},
+            {'name': 'g-4vcpu-16gb', 'slug': 'g-4vcpu-16gb'}
+        ]),
+    )
+    monkeypatch.setattr(
+        "_nebari.provider.cloud.digital_ocean.regions",
+        _mock_return_value([
+            {'name': 'New York 3', 'slug': 'nyc3'},
+        ]),
     )
     monkeypatch.setattr(
         "_nebari.provider.cloud.google_cloud.kubernetes_versions",
-        _mock_kubernetes_versions(),
+        _mock_return_value(["1.18", "1.19", "1.20"])
     )
+
+    # Google Cloud
     monkeypatch.setattr(
         "_nebari.provider.cloud.google_cloud.check_credentials",
-        lambda: True,
+        _mock_return_value(None),
     )
     monkeypatch.setenv("PROJECT_ID", "pytest-project")
 
