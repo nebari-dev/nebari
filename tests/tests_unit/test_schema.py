@@ -4,7 +4,7 @@ from .utils import render_config_partial
 
 
 def test_minimal_schema():
-    config = schema.Main(project_name="test")
+    config = nebari_plugin_manager.config_schema(project_name="test")
     assert config.project_name == "test"
     assert config.storage.conda_store == "200Gi"
 

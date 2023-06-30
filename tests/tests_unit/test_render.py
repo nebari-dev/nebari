@@ -11,7 +11,7 @@ from .utils import PRESERVED_DIR, render_config_partial
 
 def test_render_config(nebari_render):
     output_directory, config_filename = nebari_render
-    config = schema.read_configuration(config_filename)
+    config = nebari_plugin_manager.read_config(config_filename)
     assert {"nebari-config.yaml", "stages", ".gitignore"} <= set(
         os.listdir(output_directory)
     )
