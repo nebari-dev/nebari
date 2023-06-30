@@ -7,12 +7,11 @@ from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_versi
 
 
 def check_credentials():
-    GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
     for variable in {"GOOGLE_CREDENTIALS"}:
         if variable not in os.environ:
             raise ValueError(
                 f"""Missing the following required environment variable: {variable}\n
-                Please see the documentation for more information: {GCP_ENV_DOCS}"""
+                Please see the documentation for more information: {constants.GCP_ENV_DOCS}"""
             )
 
 
