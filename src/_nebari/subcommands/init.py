@@ -434,7 +434,7 @@ def nebari_subcommand(cli: typer.Typer):
 
         handle_init(inputs, config_schema=nebari_plugin_manager.config_schema)
 
-        nebari_plugin_manager.load_config(output)
+        nebari_plugin_manager.read_config(output)
 
 
 def guided_init_wizard(ctx: typer.Context, guided_init: str):
