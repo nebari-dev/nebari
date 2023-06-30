@@ -5,7 +5,11 @@ import pytest
 
 from _nebari.initialize import render_config
 from _nebari.render import render_template
+
 from nebari import schema
+from _nebari.stages.bootstrap import CiEnum
+from _nebari.stages.terraform_state import TerraformStateEnum
+from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 
 # from _nebari.stages.base import get_available_stages
 from nebari.plugins import nebari_plugin_manager
@@ -61,39 +65,39 @@ def mock_all_cloud_methods(monkeypatch):
             "dev",
             "do.nebari.dev",
             schema.ProviderEnum.do,
-            schema.CiEnum.github_actions,
-            schema.AuthenticationEnum.password,
+            CiEnum.github_actions,
+            AuthenticationEnum.password,
         ),
         (
             "pytestaws",
             "dev",
             "aws.nebari.dev",
             schema.ProviderEnum.aws,
-            schema.CiEnum.github_actions,
-            schema.AuthenticationEnum.password,
+            CiEnum.github_actions,
+            AuthenticationEnum.password,
         ),
         (
             "pytestgcp",
             "dev",
             "gcp.nebari.dev",
             schema.ProviderEnum.gcp,
-            schema.CiEnum.github_actions,
-            schema.AuthenticationEnum.password,
+            CiEnum.github_actions,
+            AuthenticationEnum.password,
         ),
         (
             "pytestazure",
             "dev",
             "azure.nebari.dev",
             schema.ProviderEnum.azure,
-            schema.CiEnum.github_actions,
-            schema.AuthenticationEnum.password,
+            CiEnum.github_actions,
+            AuthenticationEnum.password,
         ),
     ]
 )
 def nebari_config_options(request) -> schema.Main:
     """This fixtures creates a set of nebari configurations for tests"""
     DEFAULT_GH_REPO = "github.com/test/test"
-    DEFAULT_TERRAFORM_STATE = schema.TerraformStateEnum.remote
+    DEFAULT_TERRAFORM_STATE = TerraformStateEnum.remote
 
     (
         project,

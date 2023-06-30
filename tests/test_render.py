@@ -1,6 +1,7 @@
 import os
 
 from nebari import schema
+from _nebari.stages.bootstrap import CiEnum
 
 
 def test_render_config(nebari_render):
@@ -33,9 +34,9 @@ def test_render_config(nebari_render):
         assert (output_directory / "stages" / "01-terraform-state/azure").is_dir()
         assert (output_directory / "stages" / "02-infrastructure/azure").is_dir()
 
-    if config.ci_cd.type == schema.CiEnum.github_actions:
+    if config.ci_cd.type == CiEnum.github_actions:
         assert (output_directory / ".github/workflows/").is_dir()
-    elif config.ci_cd.type == schema.CiEnum.gitlab_ci:
+    elif config.ci_cd.type == CiEnum.gitlab_ci:
         assert (output_directory / ".gitlab-ci.yml").is_file()
 
 
