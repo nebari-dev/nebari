@@ -1,7 +1,7 @@
 import os
 
-from nebari import schema
 from _nebari.stages.bootstrap import CiEnum
+from nebari import schema
 
 
 def test_render_config(nebari_render):
