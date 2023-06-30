@@ -444,7 +444,7 @@ class AmazonWebServicesProvider(schema.Base):
         available_regions = amazon_web_services.regions()
         if value not in available_regions:
             raise ValueError(
-                f"Region {region} is not one of available regions {available_regions}"
+                f"Region {value} is not one of available regions {available_regions}"
             )
         return value
 
