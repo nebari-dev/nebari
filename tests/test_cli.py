@@ -2,7 +2,8 @@ import subprocess
 
 import pytest
 
-from nebari import schema
+from nebari.plugins import nebari_plugin_manager
+from _nebari.subcommands.init import InitInputs
 
 PROJECT_NAME = "clitest"
 DOMAIN_NAME = "clitest.dev"
@@ -26,7 +27,7 @@ def test_nebari_init(tmp_path, namespace, auth_provider, ci_provider, ssl_cert_e
         "--disable-prompt",
     ]
 
-    default_values = schema.InitInputs()
+    default_values = InitInputs()
 
     if namespace:
         command.append(f"--namespace={namespace}")
@@ -47,7 +48,7 @@ def test_nebari_init(tmp_path, namespace, auth_provider, ci_provider, ssl_cert_e
 
     subprocess.run(command, cwd=tmp_path, check=True)
 
-    config = schema.read_configuration(tmp_path / "nebari-config.yaml")
+    config = nebari_plugin_manager.read_config(tmp_path / "nebari-config.yaml")
 
     assert config.namespace == namespace
     assert config.security.authentication.type.lower() == auth_provider

@@ -4,7 +4,7 @@ import pytest
 
 from _nebari.upgrade import do_upgrade
 from _nebari.version import __version__, rounded_ver_parse
-from nebari import schema
+from nebari.plugins import nebari_plugin_manager
 
 
 @pytest.fixture
@@ -70,7 +70,7 @@ def test_upgrade_4_0(
         return
 
     # Check the resulting YAML
-    config = schema.read_configuration(tmp_qhub_config)
+    config = nebari_plugin_manager.read_config(tmp_qhub_config)
 
     assert len(config.security.keycloak.initial_root_password) == 16
     assert not hasattr(config.security, "users")
