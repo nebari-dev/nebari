@@ -7,8 +7,8 @@ import keycloak
 import requests
 import rich
 
-from _nebari.stages.kubernetes_keycloak import CertificateEnum
 from nebari import schema
+from _nebari.stages.kubernetes_ingress import CertificateEnum
 
 logger = logging.getLogger(__name__)
 
