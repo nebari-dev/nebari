@@ -1,6 +1,6 @@
-import typing
 import functools
 import os
+import typing
 
 import requests
 
