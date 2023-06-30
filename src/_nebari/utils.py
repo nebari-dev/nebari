@@ -210,10 +210,13 @@ def escape_string(
 
     """
     if sys.version_info >= (3,):
+
         def _ord(byte):
             return byte
+
         def _bchr(n):
             return bytes([n])
+
     else:
         _ord = ord
         _bchr = chr
