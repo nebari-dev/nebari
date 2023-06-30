@@ -89,6 +89,8 @@ jobs:
             kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci tenant_id | ARM_TENANT_ID;
             kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci subscription_id | ARM_SUBSCRIPTION_ID;
             kv/data/repository/nebari-dev/nebari/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
+            kv/data/repository/nebari-dev/nebari/shared_secrets SPACES_ACCESS_KEY_ID | SPACES_ACCESS_KEY_ID;
+            kv/data/repository/nebari-dev/nebari/shared_secrets SPACES_SECRET_ACCESS_KEY | SPACES_SECRET_ACCESS_KEY;
 
       - name: 'Authenticate to GCP'
         if: ${{ matrix.provider == 'gcp' }}
