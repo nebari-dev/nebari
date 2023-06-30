@@ -2,6 +2,7 @@ import pathlib
 
 import typer
 from rich import print
+import pydantic
 
 from _nebari.config import read_configuration
 from nebari.hookspecs import hookimpl
@@ -31,7 +32,10 @@ def nebari_subcommand(cli: typer.Typer):
         else:
             from nebari.plugins import nebari_plugin_manager
 
-            read_configuration(
-                config_filename, config_schema=nebari_plugin_manager.config_schema
-            )
-            print("[bold purple]Successfully validated configuration.[/bold purple]")
+            try:
+                nebari_plugin_manager.read_config(config_filename)
+                print("[bold purple]Successfully validated configuration.[/bold purple]")
+            except pydantic.ValidationError as e:
+                print(f"[bold red]ERROR validating configuration {config_filename.absolute()}[/bold red]")
+                print(str(e))
+                typer.Abort()
