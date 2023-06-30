@@ -1,4 +1,5 @@
 from nebari import schema
+from nebari.plugin import nebari_plugin_manager
 
 
 def test_minimal_schema():
@@ -12,7 +13,7 @@ def test_minimal_schema_from_file(tmp_path):
     with filename.open("w") as f:
         f.write("project_name: test\n")
 
-    config = schema.read_configuration(filename)
+    config = nebari_plugin_manager.read_config(filename)
     assert config.project_name == "test"
     assert config.storage.conda_store == "200Gi"
 
@@ -25,7 +26,7 @@ def test_minimal_schema_from_file_with_env(tmp_path, monkeypatch):
     monkeypatch.setenv("NEBARI_SECRET__project_name", "env")
     monkeypatch.setenv("NEBARI_SECRET__storage__conda_store", "1000Gi")
 
-    config = schema.read_configuration(filename)
+    config = nebari_plugin_manager.read_config(filename)
     assert config.project_name == "env"
     assert config.storage.conda_store == "1000Gi"
 
@@ -38,7 +39,7 @@ def test_minimal_schema_from_file_without_env(tmp_path, monkeypatch):
     monkeypatch.setenv("NEBARI_SECRET__project_name", "env")
     monkeypatch.setenv("NEBARI_SECRET__storage__conda_store", "1000Gi")
 
-    config = schema.read_configuration(filename, read_environment=False)
+    config = nebari_plugin_manager.read_config(filename, read_environment=False)
     assert config.project_name == "test"
     assert config.storage.conda_store == "200Gi"
 

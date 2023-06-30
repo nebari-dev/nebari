@@ -103,7 +103,7 @@ class NebariPluginManager:
 
         return included_stages
 
-    def read_config(self, config_path: typing.Union[str, Path]):
+    def read_config(self, config_path: typing.Union[str, Path], **kwargs):
         if isinstance(config_path, str):
             config_path = Path(config_path)
 
@@ -112,7 +112,7 @@ class NebariPluginManager:
 
         from _nebari.config import read_configuration
 
-        return read_configuration(config_path, self.config_schema)
+        return read_configuration(config_path, self.config_schema, **kwargs)
 
     @property
     def ordered_stages(self):
