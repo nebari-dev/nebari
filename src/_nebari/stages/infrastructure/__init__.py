@@ -391,14 +391,17 @@ class AWSNodeGroup(schema.Base):
     gpu: bool = False
     single_subnet: bool = False
 
-    @pydantic.validator('instance')
+    @pydantic.validator("instance")
     def _validate_instance(cls, value):
         amazon_web_services.check_credentials()
 
         available_instances = amazon_web_services.instances()
         if value not in available_instances:
-            raise ValueError(f"Instance {value} not available out of available instances {available_instances.keys()}")
+            raise ValueError(
+                f"Instance {value} not available out of available instances {available_instances.keys()}"
+            )
         return value
+
 
 class AmazonWebServicesProvider(schema.Base):
     region: str = pydantic.Field(
@@ -432,13 +435,15 @@ class AmazonWebServicesProvider(schema.Base):
             )
         return values
 
-    @pydantic.validator('region')
+    @pydantic.validator("region")
     def _validate_region(cls, value):
         amazon_web_services.check_credentials()
 
         available_regions = amazon_web_services.regions()
         if value not in available_regions:
-            raise ValueError(f"Region {region} is not one of available regions {available_regions}")
+            raise ValueError(
+                f"Region {region} is not one of available regions {available_regions}"
+            )
         return value
 
     @pydantic.root_validator
