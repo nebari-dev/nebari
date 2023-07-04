@@ -74,8 +74,9 @@ resource "kubernetes_daemonset" "gcp_nvidia_installer" {
           }
         }
         init_container {
-          image = "cos-nvidia-installer:fixed"
-          name  = "nvidia-driver-installer"
+          image   = "cos-nvidia-installer:fixed"
+          name    = "nvidia-driver-installer"
+          command = ["/cos-gpu-installer", "install", "--version=latest"]
           resources {
             requests = {
               cpu = 0.15

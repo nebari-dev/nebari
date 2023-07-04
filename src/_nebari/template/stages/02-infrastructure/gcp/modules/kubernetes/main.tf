@@ -106,4 +106,10 @@ resource "google_container_node_pool" "main" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      node_config[0].taint
+    ]
+  }
 }
