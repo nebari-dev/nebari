@@ -150,3 +150,9 @@ variable "tags" {
   type        = list(string)
   default     = []
 }
+
+variable "labels" {
+  description = "Google Cloud Platform labels to assign to resources"
+  type        = map(string)
+  default     = {}
+}

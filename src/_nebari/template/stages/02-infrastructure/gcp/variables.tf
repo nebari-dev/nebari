@@ -42,6 +42,13 @@ variable "tags" {
   default     = []
 }
 
+variable "labels" {
+  description = "Google Cloud Platform labels to assign to resources"
+  type        = map(string)
+  default     = {}
+}
+
+
 variable "kubernetes_version" {
   description = "Kubernetes version for GKE cluster"
   type        = string

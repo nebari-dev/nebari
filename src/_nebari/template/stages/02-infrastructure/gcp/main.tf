@@ -35,4 +35,5 @@ module "kubernetes" {
   kubernetes_version                = var.kubernetes_version
   release_channel                   = var.release_channel
   tags                              = var.tags
+  labels                            = var.labels
 }
