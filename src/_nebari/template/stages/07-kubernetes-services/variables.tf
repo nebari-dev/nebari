@@ -47,14 +47,7 @@ variable "conda-store-default-namespace" {
 variable "conda-store-service-token-scopes" {
   description = "Map of services tokens and scopes for conda-store"
   type        = map(any)
-  default = {
-    "cdsdashboards" = {
-      "primary_namespace" : "cdsdashboards",
-      "role_bindings" : {
-        "*/*" : ["viewer"],
-      }
-    }
-  }
+  default     = {}
 }
 
 

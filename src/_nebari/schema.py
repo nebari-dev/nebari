@@ -447,18 +447,6 @@ class CondaEnvironment(Base):
     dependencies: typing.List[typing.Union[str, typing.Dict[str, typing.List[str]]]]
 
 
-# =============== CDSDashboards ==============
-
-
-class CDSDashboards(Base):
-    enabled: bool
-    cds_hide_user_named_servers: typing.Optional[bool]
-    cds_hide_user_dashboard_servers: typing.Optional[bool]
-
-
-# =============== Extensions = = ==============
-
-
 class NebariExtensionEnv(Base):
     name: str
     value: str
@@ -588,7 +576,6 @@ class Main(Base):
     certificate: Certificate
     helm_extensions: typing.Optional[typing.List[HelmExtension]]
     prefect: typing.Optional[Prefect]
-    cdsdashboards: CDSDashboards
     security: Security
     external_container_reg: typing.Optional[ExtContainerReg]
     default_images: DefaultImages

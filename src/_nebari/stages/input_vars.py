@@ -288,12 +288,6 @@ def stage_07_kubernetes_services(stage_outputs, config):
         "conda-store-environments": config["environments"],
         "conda-store-filesystem-storage": config["storage"]["conda_store"],
         "conda-store-service-token-scopes": {
-            "cdsdashboards": {
-                "primary_namespace": "cdsdashboards",
-                "role_bindings": {
-                    "*/*": ["viewer"],
-                },
-            },
             "dask-gateway": {
                 "primary_namespace": "",
                 "role_bindings": {
@@ -314,7 +308,6 @@ def stage_07_kubernetes_services(stage_outputs, config):
             "image_tag", DEFAULT_CONDA_STORE_IMAGE_TAG
         ),
         # jupyterhub
-        "cdsdashboards": config["cdsdashboards"],
         "jupyterhub-theme": jupyterhub_theme,
         "jupyterhub-image": _split_docker_image_name(
             config["default_images"]["jupyterhub"]

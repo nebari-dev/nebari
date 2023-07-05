@@ -45,10 +45,10 @@ theme:
     text_color: '#111111'
     h1_color: '#652e8e'
     h2_color: '#652e8e'
-cdsdashboards:
-  enabled: true
-  cds_hide_user_named_servers: true
-  cds_hide_user_dashboard_servers: false
+# cdsdashboards:
+#   enabled: true
+#   cds_hide_user_named_servers: true
+#   cds_hide_user_dashboard_servers: false
 terraform_state:
   type: remote
 namespace: dev

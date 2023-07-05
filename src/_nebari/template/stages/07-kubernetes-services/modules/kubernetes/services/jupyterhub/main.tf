@@ -26,14 +26,12 @@ resource "helm_release" "jupyterhub" {
       custom = {
         theme                         = var.theme
         profiles                      = var.profiles
-        cdsdashboards                 = var.cdsdashboards
         home-pvc                      = var.home-pvc
         shared-pvc                    = var.shared-pvc
         conda-store-pvc               = var.conda-store-pvc
         conda-store-mount             = var.conda-store-mount
         default-conda-store-namespace = var.default-conda-store-namespace
         conda-store-service-name      = var.conda-store-service-name
-        conda-store-cdsdashboards     = var.conda-store-cdsdashboard-token
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace

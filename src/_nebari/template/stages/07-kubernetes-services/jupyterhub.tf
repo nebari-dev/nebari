@@ -1,17 +1,3 @@
-variable "cdsdashboards" {
-  description = "Enable CDS Dashboards"
-  type = object({
-    enabled                         = bool
-    cds_hide_user_named_servers     = bool
-    cds_hide_user_dashboard_servers = bool
-  })
-  default = {
-    enabled                         = true
-    cds_hide_user_named_servers     = true
-    cds_hide_user_dashboard_servers = false
-  }
-}
-
 variable "jupyterhub-theme" {
   description = "JupyterHub theme"
   type        = map(any)
@@ -98,12 +84,11 @@ module "jupyterhub" {
 
   shared-pvc = module.jupyterhub-nfs-mount.persistent_volume_claim.name
 
-  conda-store-pvc                = module.conda-store-nfs-mount.persistent_volume_claim.name
-  conda-store-mount              = "/home/conda"
-  conda-store-environments       = var.conda-store-environments
-  default-conda-store-namespace  = var.conda-store-default-namespace
-  conda-store-cdsdashboard-token = module.kubernetes-conda-store-server.service-tokens.cdsdashboards
-  conda-store-service-name       = module.kubernetes-conda-store-server.service_name
+  conda-store-pvc               = module.conda-store-nfs-mount.persistent_volume_claim.name
+  conda-store-mount             = "/home/conda"
+  conda-store-environments      = var.conda-store-environments
+  default-conda-store-namespace = var.conda-store-default-namespace
+  conda-store-service-name      = module.kubernetes-conda-store-server.service_name
 
   extra-mounts = {
     "/etc/dask" = {
@@ -126,8 +111,6 @@ module "jupyterhub" {
 
   jupyterhub-image = var.jupyterhub-image
   jupyterlab-image = var.jupyterlab-image
-
-  cdsdashboards = var.cdsdashboards
 
   theme    = var.jupyterhub-theme
   profiles = var.jupyterlab-profiles

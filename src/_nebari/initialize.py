@@ -63,11 +63,6 @@ def base_configuration():
         "kbatch": {
             "enabled": True,
         },
-        "cdsdashboards": {
-            "enabled": True,
-            "cds_hide_user_named_servers": True,
-            "cds_hide_user_dashboard_servers": False,
-        },
     }
 
 
@@ -101,7 +96,6 @@ def default_environments():
             "channels": ["conda-forge"],
             "dependencies": [
                 "python=3.10",
-                "cdsdashboards-singleuser=0.6.3",
                 "cufflinks-py=0.17.3",
                 "dash=2.8.1",
                 "geopandas=0.12.2",

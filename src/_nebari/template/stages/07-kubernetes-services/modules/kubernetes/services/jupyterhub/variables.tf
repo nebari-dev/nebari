@@ -97,20 +97,6 @@ variable "profiles" {
   default     = []
 }
 
-variable "cdsdashboards" {
-  description = "Enable CDS Dashboards"
-  type = object({
-    enabled                         = bool
-    cds_hide_user_named_servers     = bool
-    cds_hide_user_dashboard_servers = bool
-  })
-  default = {
-    enabled                         = true
-    cds_hide_user_named_servers     = true
-    cds_hide_user_dashboard_servers = false
-  }
-}
-
 variable "conda-store-service-name" {
   description = "Name of conda-store service"
   type        = string
@@ -122,11 +108,6 @@ variable "conda-store-environments" {
   default     = {}
 }
 
-variable "conda-store-cdsdashboard-token" {
-  description = "Token for cdsdashboards to use conda-store"
-  type        = string
-  default     = ""
-}
 
 variable "jupyterhub-logout-redirect-url" {
   description = "Next redirect destination following a Keycloak logout"
