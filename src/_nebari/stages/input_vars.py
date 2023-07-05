@@ -89,7 +89,7 @@ def stage_02_infrastructure(stage_outputs, config):
             "kubeconfig_filename": os.path.join(
                 tempfile.gettempdir(), "NEBARI_KUBECONFIG"
             ),
-            **config.get("gcp", {}).get("terraform_overrides", {}),
+            **config.get("google_cloud_platform", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "azure":
         return {
