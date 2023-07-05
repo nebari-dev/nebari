@@ -5,12 +5,14 @@ data "aws_availability_zones" "awszones" {
   }
 }
 
+data "aws_partition" "current" {}
 
 locals {
   # Only override_network if both existing_subnet_ids and existing_security_group_id are not null.
   override_network  = (var.existing_subnet_ids != null) && (var.existing_security_group_id != null)
   subnet_ids        = local.override_network ? var.existing_subnet_ids : module.network[0].subnet_ids
   security_group_id = local.override_network ? var.existing_security_group_id : module.network[0].security_group_id
+  partition         = data.aws_partition.current.partition
 }
 
 # ==================== ACCOUNTING ======================
@@ -79,13 +81,14 @@ module "kubernetes" {
   name               = local.cluster_name
   tags               = local.additional_tags
   region             = var.region
+  partition          = local.partition
   kubernetes_version = var.kubernetes_version
 
   cluster_subnets         = local.subnet_ids
   cluster_security_groups = [local.security_group_id]
 
   node_group_additional_policies = [
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+    "arn:${local.partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   ]
 
   node_groups = var.node_groups

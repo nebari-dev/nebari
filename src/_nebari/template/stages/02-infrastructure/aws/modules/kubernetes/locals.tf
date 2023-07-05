@@ -1,14 +1,14 @@
 locals {
   cluster_policies = concat([
-    "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
-    "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
+    "arn:${var.partition}:iam::aws:policy/AmazonEKSClusterPolicy",
+    "arn:${var.partition}:iam::aws:policy/AmazonEKSServicePolicy",
+    "arn:${var.partition}:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
   ], var.cluster_additional_policies)
 
   node_group_policies = concat([
-    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-    "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
+    "arn:${var.partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    "arn:${var.partition}:iam::aws:policy/AmazonEKS_CNI_Policy",
+    "arn:${var.partition}:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
     aws_iam_policy.worker_autoscaling.arn
   ], var.node_group_additional_policies)
 
