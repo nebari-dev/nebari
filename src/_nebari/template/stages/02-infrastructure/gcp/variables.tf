@@ -38,8 +38,8 @@ variable "kubeconfig_filename" {
 
 variable "tags" {
   description = "Google Cloud Platform tags to assign to resources"
-  type        = map(string)
-  default     = {}
+  type        = list(string)
+  default     = []
 }
 
 variable "kubernetes_version" {

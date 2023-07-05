@@ -144,3 +144,9 @@ variable "private_cluster_config" {
   }))
   default = null
 }
+
+variable "tags" {
+  description = "Google Cloud Platform tags to assign to resources"
+  type        = list(string)
+  default     = []
+}

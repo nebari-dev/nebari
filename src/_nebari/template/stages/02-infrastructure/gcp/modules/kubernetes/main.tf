@@ -57,7 +57,6 @@ resource "google_container_cluster" "main" {
     }
   }
 
-
   lifecycle {
     ignore_changes = [
       node_locations
@@ -105,6 +104,7 @@ resource "google_container_node_pool" "main" {
         count = guest_accelerator.value.count
       }
     }
+    tags = var.tags
   }
 
   lifecycle {
