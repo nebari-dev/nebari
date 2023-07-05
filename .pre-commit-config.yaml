@@ -37,7 +37,7 @@ repos:
         exclude: "^src/_nebari/template/"
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.4
+    rev: v2.2.5
     hooks:
       - id: codespell
         args:
@@ -56,8 +56,8 @@ repos:
       - id: black
         args: ["--line-length=88", "--exclude=/src/_nebari/template/"]
 
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.270
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.0.276
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -73,7 +73,7 @@ repos:
 
   # terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.80.0
+    rev: v1.81.0
     hooks:
       - id: terraform_fmt
         args:
