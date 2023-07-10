@@ -23,6 +23,10 @@ class NebariStage:
         self.output_directory = output_directory
         self.config = config
 
+    @property
+    def stage_prefix(self):
+        return pathlib.Path("stages") / self.name
+
     def render(self) -> Dict[str, str]:
         return {}
 

@@ -7,6 +7,7 @@ import typing
 from pathlib import Path
 
 import pluggy
+from pydantic import BaseModel, create_model
 
 from nebari import hookspecs, schema
 
@@ -26,15 +27,15 @@ DEFAULT_SUBCOMMAND_PLUGINS = [
 
 DEFAULT_STAGES_PLUGINS = [
     # stages
-    "_nebari.stages.bootstrap",
-    "_nebari.stages.terraform_state",
-    "_nebari.stages.infrastructure",
-    "_nebari.stages.kubernetes_initialize",
-    "_nebari.stages.kubernetes_ingress",
-    "_nebari.stages.kubernetes_keycloak",
-    "_nebari.stages.kubernetes_keycloak_configuration",
-    "_nebari.stages.kubernetes_services",
-    "_nebari.stages.nebari_tf_extensions",
+    # "_nebari.stages.bootstrap",
+    # "_nebari.stages.terraform_state",
+    # "_nebari.stages.infrastructure",
+    # "_nebari.stages.kubernetes_initialize",
+    # "_nebari.stages.kubernetes_ingress",
+    # "_nebari.stages.kubernetes_keycloak",
+    # "_nebari.stages.kubernetes_keycloak_configuration",
+    # "_nebari.stages.kubernetes_services",
+    # "_nebari.stages.nebari_tf_extensions",
 ]
 
 
@@ -120,10 +121,30 @@ class NebariPluginManager:
 
     @property
     def config_schema(self):
-        classes = [schema.Main] + [
-            _.input_schema for _ in self.ordered_stages if _.input_schema is not None
-        ]
-        return type("ConfigSchema", tuple(classes), {})
+        return self._extend_schema()
+
+    def _create_dynamic_schema(
+        self, base: BaseModel, stage: BaseModel, stage_name: str
+    ) -> BaseModel:
+        stage_fields = {
+            n: (f.type_, f.default if f.default is not None else ...)
+            for n, f in stage.__fields__.items()
+        }
+        # ensure top-level key for `stage` is set to `stage_name`
+        stage_model = create_model(stage_name, __base__=schema.Base, **stage_fields)
+        extra_fields = {stage_name: (stage_model, None)}
+        return create_model("NebariConfig", __base__=base, **extra_fields)
+
+    def _extend_schema(self, base_schema: BaseModel = schema.Main) -> BaseModel:
+        config_schema = base_schema
+        for stages in self.ordered_stages:
+            if stages.input_schema:
+                config_schema = self._create_dynamic_schema(
+                    config_schema,
+                    stages.input_schema,
+                    stages.name,
+                )
+        return config_schema
 
 
 nebari_plugin_manager = NebariPluginManager()

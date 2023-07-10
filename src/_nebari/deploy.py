@@ -18,6 +18,7 @@ def deploy_configuration(
     disable_prompt: bool = False,
     disable_checks: bool = False,
     skip_remote_state_provision: bool = False,
+    output_directory: pathlib.Path = pathlib.Path("."),
 ):
     if config.prevent_deploy:
         raise ValueError(
@@ -36,12 +37,13 @@ def deploy_configuration(
             )
         )
 
-    if config.domain is None:
+    domain = getattr(config, "domain", None)
+    if domain is None:
         logger.info(
             "All nebari endpoints will be under kubernetes load balancer address which cannot be known before deployment"
         )
     else:
-        logger.info(f"All nebari endpoints will be under https://{config.domain}")
+        logger.info(f"All nebari endpoints will be under https://{domain}")
 
     if disable_checks:
         logger.warning(
@@ -52,7 +54,7 @@ def deploy_configuration(
         stage_outputs = {}
         with contextlib.ExitStack() as stack:
             for stage in stages:
-                s = stage(output_directory=pathlib.Path("."), config=config)
+                s = stage(output_directory=output_directory, config=config)
                 stack.enter_context(s.deploy(stage_outputs))
 
                 if not disable_checks:
@@ -60,16 +62,26 @@ def deploy_configuration(
         print("Nebari deployed successfully")
 
         print("Services:")
-        for service_name, service in stage_outputs["stages/07-kubernetes-services"][
-            "service_urls"
-        ]["value"].items():
+        for service_name, service in (
+            stage_outputs.get("stages/07-kubernetes-services", {})
+            .get("service_urls", {})
+            .get("value", {})
+            .items()
+        ):
             print(f" - {service_name} -> {service['url']}")
 
-        print(
-            f"Kubernetes kubeconfig located at file://{stage_outputs['stages/02-infrastructure']['kubeconfig_filename']['value']}"
+        kubeconfig = (
+            stage_outputs.get("stages/02-infrastructure", {})
+            .get("kubeconfig_filename", {})
+            .get("value")
         )
+        print(f"Kubernetes kubeconfig located at file://{kubeconfig}")
         username = "root"
-        password = config.security.keycloak.initial_root_password
+        password = (
+            getattr(config, "security", {})
+            .get("keycloak", {})
+            .get("initial_root_password")
+        )
         if password:
             print(f"Kubecloak master realm username={username} password={password}")
 

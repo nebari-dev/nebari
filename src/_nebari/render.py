@@ -68,9 +68,9 @@ def render_template(
             "The following files are untracked (only exist in output directory):",
             style="deep_sky_blue1",
         )
-        for filename in sorted(updated):
+        for filename in sorted(untracked):
             table.add_row(filename, style="green")
-        print(table)
+        # print(table)
 
     if dry_run:
         print("dry-run enabled no files will be created, updated, or deleted")
@@ -164,7 +164,7 @@ def inspect_files(
         if source_files[prevalent_file] != output_files[prevalent_file]:
             updated_files.add(prevalent_file)
 
-    return new_files, untracted_files, updated_files, deleted_paths
+    return new_files, untracted_files, updated_files, deleted_files
 
 
 def hash_file(file_path: str):

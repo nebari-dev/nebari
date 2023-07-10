@@ -77,4 +77,5 @@ def nebari_subcommand(cli: typer.Typer):
             disable_prompt=disable_prompt,
             disable_checks=disable_checks,
             skip_remote_state_provision=skip_remote_state_provision,
+            output_directory=output_directory,
         )

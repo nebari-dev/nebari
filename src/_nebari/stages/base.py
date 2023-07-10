@@ -14,10 +14,6 @@ class NebariTerraformStage(NebariStage):
     def template_directory(self):
         return pathlib.Path(inspect.getfile(self.__class__)).parent / "template"
 
-    @property
-    def stage_prefix(self):
-        return pathlib.Path("stages") / self.name
-
     def state_imports(self) -> List[Tuple[str, str]]:
         return []
 
