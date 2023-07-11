@@ -60,3 +60,13 @@ variable "kubeconfig_filename" {
   type        = string
   default     = null
 }
+
+variable "eks_endpoint_private_access" {
+  type    = bool
+  default = false
+}
+
+variable "eks_public_access_cidrs" {
+  type    = list(string)
+  default = ["0.0.0.0/0"]
+}
