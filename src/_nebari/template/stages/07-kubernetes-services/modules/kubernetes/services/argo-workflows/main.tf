@@ -541,7 +541,7 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
               "volumeMounts" = [
                 {
                   "mountPath" = "/etc/config"
-                  "name"      = "valid_argo_roles"
+                  "name"      = "valid-argo-roles"
                   "readOnly"  = true
                 },
               ]
@@ -551,9 +551,9 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
           ]
           "volumes" = [
             {
-              "name" = "valid_argo_roles"
+              "name" = "valid-argo-roles"
               "configMap" = {
-                "name" = "valid_argo_roles"
+                "name" = "valid-argo-roles"
               }
             },
           ]
@@ -586,13 +586,13 @@ resource "kubernetes_manifest" "service_admission_controller" {
   }
 }
 
-resource "kubernetes_config_map" "valid_argo_roles" {
+resource "kubernetes_config_map" "valid-argo-roles" {
   metadata {
-    name      = "valid_argo_roles"
+    name      = "valid-argo-roles"
     namespace = var.namespace
   }
 
   data = {
-    "valid_argo_roles" = jsonencode([local.admin, local.dev])
+    "valid-argo-roles" = jsonencode([local.admin, local.dev])
   }
 }
