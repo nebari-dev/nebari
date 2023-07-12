@@ -1,6 +1,10 @@
 locals {
   name                  = "argo-workflows"
   argo-workflows-prefix = "argo"
+  # roles
+  admin  = "argo_admin"
+  dev    = "argo_developer"
+  viewer = "argo_viewer"
 }
 
 resource "helm_release" "argo-workflows" {
@@ -83,9 +87,9 @@ module "argo-workflow-openid-client" {
   client_id    = "argo-server-sso"
   external-url = var.external-url
   role_mapping = {
-    "admin"     = ["argo_admin"]
-    "developer" = ["argo_developer"]
-    "analyst"   = ["argo_viewer"]
+    "admin"     = ["${local.admin}"]
+    "developer" = ["${local.dev}"]
+    "analyst"   = ["${local.viewer}"]
   }
 
   callback-url-paths = [
@@ -186,7 +190,7 @@ resource "kubernetes_service_account_v1" "argo-admin-sa" {
     name      = "argo-admin"
     namespace = var.namespace
     annotations = {
-      "workflows.argoproj.io/rbac-rule" : "'argo_admin' in groups"
+      "workflows.argoproj.io/rbac-rule" : "'${local.admin}' in groups"
       "workflows.argoproj.io/rbac-rule-precedence" : "11"
     }
   }
@@ -226,7 +230,7 @@ resource "kubernetes_service_account_v1" "argo-dev-sa" {
     name      = "argo-dev"
     namespace = var.namespace
     annotations = {
-      "workflows.argoproj.io/rbac-rule" : "'argo_developer' in groups"
+      "workflows.argoproj.io/rbac-rule" : "'${local.dev}' in groups"
       "workflows.argoproj.io/rbac-rule-precedence" : "10"
     }
   }
@@ -266,7 +270,7 @@ resource "kubernetes_service_account_v1" "argo-view-sa" {
     name      = "argo-viewer"
     namespace = var.namespace
     annotations = {
-      "workflows.argoproj.io/rbac-rule" : "'argo_viewer' in groups"
+      "workflows.argoproj.io/rbac-rule" : "'${local.viewer}' in groups"
       "workflows.argoproj.io/rbac-rule-precedence" : "9"
     }
   }
@@ -534,8 +538,23 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                   "value" = var.namespace
                 },
               ]
+              "volumeMounts" = [
+                {
+                  "mountPath" = "/etc/config"
+                  "name"      = "valid_argo_roles"
+                  "readOnly"  = true
+                },
+              ]
               "image" = "quay.io/nebari/nebari-workflow-controller:${var.workflow-controller-image-tag}"
               "name"  = "admission-controller"
+            },
+          ]
+          "volumes" = [
+            {
+              "name" = "valid_argo_roles"
+              "configMap" = {
+                "name" = "valid_argo_roles"
+              }
             },
           ]
         }
@@ -564,5 +583,16 @@ resource "kubernetes_manifest" "service_admission_controller" {
         "app" = "nebari-workflow-controller"
       }
     }
+  }
+}
+
+resource "kubernetes_config_map" "valid_argo_roles" {
+  metadata {
+    name      = "valid_argo_roles"
+    namespace = var.namespace
+  }
+
+  data = {
+    "valid_argo_roles" = jsonencode([local.admin, local.dev])
   }
 }
