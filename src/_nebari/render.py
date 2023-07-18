@@ -12,6 +12,7 @@ from rich import print
 from rich.table import Table
 from ruamel.yaml import YAML
 
+import _nebari
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from _nebari.provider.cicd.gitlab import gen_gitlab_ci
@@ -21,7 +22,7 @@ from _nebari.utils import is_relative_to
 
 def render_template(output_directory, config_filename, dry_run=False):
     # get directory for nebari templates
-    template_directory = Path(nebari.__file__).parent / "template"
+    template_directory = Path(_nebari.__file__).parent / "template"
 
     # would be nice to remove assumption that input directory
     # is in local filesystem and a directory
@@ -75,8 +76,8 @@ def render_template(output_directory, config_filename, dry_run=False):
     new, untracked, updated, deleted = inspect_files(
         source_dirs,
         output_dirs,
-        source_base_dir=str(template_directory),
-        output_base_dir=str(output_directory),
+        source_base_dir=template_directory,
+        output_base_dir=output_directory,
         ignore_filenames=[
             "terraform.tfstate",
             ".terraform.lock.hcl",
@@ -228,7 +229,7 @@ def inspect_files(
     output_base_dir: Path,
     ignore_filenames: List[str] = None,
     ignore_directories: List[str] = None,
-    deleted_paths: List[str] = None,
+    deleted_paths: List[Path] = None,
     contents: Dict[str, str] = None,
 ):
     """Return created, updated and untracked files by computing a checksum over the provided directory.
@@ -240,7 +241,7 @@ def inspect_files(
         output_base_dir (Path): Relative base path to output directory
         ignore_filenames (list[str]): Filenames to ignore while comparing for changes
         ignore_directories (list[str]): Directories to ignore while comparing for changes
-        deleted_paths (list[str]): Paths that if exist in output directory should be deleted
+        deleted_paths (list[Path]): Paths that if exist in output directory should be deleted
         contents (dict): filename to content mapping for dynamically generated files
     """
     ignore_filenames = ignore_filenames or []
