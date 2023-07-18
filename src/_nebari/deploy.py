@@ -45,10 +45,10 @@ def provision_02_infrastructure(stage_outputs, config, disable_checks=False):
     At a high level this stage is expected to provision a kubernetes
     cluster on a given provider.
     """
-    directory = Path("stages/02-infrastructure")
+    directory = "stages/02-infrastructure"
 
     stage_outputs[directory] = terraform.deploy(
-        directory / config["provider"],
+        Path(directory) / config["provider"],
         input_vars=input_vars.stage_02_infrastructure(stage_outputs, config),
     )
 

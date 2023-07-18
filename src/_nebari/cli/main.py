@@ -49,11 +49,11 @@ KEYCLOAK_COMMAND_MSG = (
 DEV_COMMAND_MSG = "Development tools and advanced features."
 
 
-def path_callback(value: Path) -> Path:
-    return value.expanduser().resolve()
+def path_callback(value: str) -> Path:
+    return Path(value).expanduser().resolve()
 
 
-def config_path_callback(value: Path) -> Path:
+def config_path_callback(value: str) -> Path:
     value = path_callback(value)
     if not value.is_file():
         raise ValueError(f"Passed configuration path {value} does not exist!")

@@ -44,7 +44,9 @@ def stage_01_terraform_state(stage_outputs, config):
 def stage_02_infrastructure(stage_outputs, config):
     if config["provider"] == "local":
         return {
-            "kubeconfig_filename": Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG",
+            "kubeconfig_filename": str(
+                Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG"
+            ),
             "kube_context": config["local"].get("kube_context"),
         }
     elif config["provider"] == "existing":
@@ -56,7 +58,9 @@ def stage_02_infrastructure(stage_outputs, config):
             "region": config["digital_ocean"]["region"],
             "kubernetes_version": config["digital_ocean"]["kubernetes_version"],
             "node_groups": config["digital_ocean"]["node_groups"],
-            "kubeconfig_filename": Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG",
+            "kubeconfig_filename": str(
+                Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG"
+            ),
             **config.get("do", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "gcp":
@@ -82,7 +86,9 @@ def stage_02_infrastructure(stage_outputs, config):
                 }
                 for key, value in config["google_cloud_platform"]["node_groups"].items()
             ],
-            "kubeconfig_filename": Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG",
+            "kubeconfig_filename": str(
+                Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG"
+            ),
             **config.get("gcp", {}).get("terraform_overrides", {}),
         }
     elif config["provider"] == "azure":
@@ -92,7 +98,9 @@ def stage_02_infrastructure(stage_outputs, config):
             "region": config["azure"]["region"],
             "kubernetes_version": config["azure"]["kubernetes_version"],
             "node_groups": config["azure"]["node_groups"],
-            "kubeconfig_filename": Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG",
+            "kubeconfig_filename": str(
+                Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG"
+            ),
             "resource_group_name": f'{config["project_name"]}-{config["namespace"]}',
             "node_resource_group_name": f'{config["project_name"]}-{config["namespace"]}-node-resource-group',
             **config.get("azure", {}).get("terraform_overrides", {}),
@@ -115,7 +123,9 @@ def stage_02_infrastructure(stage_outputs, config):
                 }
                 for key, value in config["amazon_web_services"]["node_groups"].items()
             ],
-            "kubeconfig_filename": Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG",
+            "kubeconfig_filename": str(
+                Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG"
+            ),
             **config.get("amazon_web_services", {}).get("terraform_overrides", {}),
         }
     else:
