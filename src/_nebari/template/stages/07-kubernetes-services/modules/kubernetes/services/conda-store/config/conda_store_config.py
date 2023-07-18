@@ -1,7 +1,7 @@
 import json
 import logging
-import os
 import tempfile
+from pathlib import Path
 
 import requests
 from conda_store_server import api, orm, schema
@@ -128,7 +128,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
         for group in user_data.get("groups", []):
             # Use only the base name of Keycloak groups
-            group_name = os.path.basename(group)
+            group_name = Path(group).name
             namespaces.add(group_name)
             role_bindings[f"{group_name}/*"] = roles
 
@@ -169,7 +169,7 @@ for classname, attributes in conda_store_settings.items():
 
 # run arbitrary python code
 # compiling makes debugging easier: https://stackoverflow.com/a/437857
-extra_config_filename = os.path.join(tempfile.gettempdir(), "extra-config.py")
+extra_config_filename = Path(tempfile.gettempdir()) / "extra-config.py"
 extra_config = config.get("extra-config", "")
 with open(extra_config_filename, "w") as f:
     f.write(extra_config)

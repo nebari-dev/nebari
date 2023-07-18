@@ -1,7 +1,7 @@
 import copy
 import functools
 import json
-import os
+from pathlib import Path
 
 import z2jh
 from tornado import gen
@@ -146,7 +146,7 @@ def profile_conda_store_mounts(username, groups):
 
     """
     conda_store_pvc_name = z2jh.get_config("custom.conda-store-pvc")
-    conda_store_mount = z2jh.get_config("custom.conda-store-mount")
+    conda_store_mount = Path(z2jh.get_config("custom.conda-store-mount"))
     default_namespace = z2jh.get_config("custom.default-conda-store-namespace")
 
     extra_pod_config = {
@@ -164,7 +164,7 @@ def profile_conda_store_mounts(username, groups):
     extra_container_config = {
         "volumeMounts": [
             {
-                "mountPath": os.path.join(conda_store_mount, namespace),
+                "mountPath": str(conda_store_mount / namespace),
                 "name": "conda-store",
                 "subPath": namespace,
             }
@@ -386,7 +386,7 @@ def render_profiles(spawner):
     # only return the lowest level group name
     # e.g. /projects/myproj -> myproj
     # and /developers -> developers
-    groups = [os.path.basename(_) for _ in auth_state["oauth_user"]["groups"]]
+    groups = [Path(group).name for group in auth_state["oauth_user"]["groups"]]
     spawner.log.error(f"user info: {username} {groups}")
 
     keycloak_profilenames = auth_state["oauth_user"].get("jupyterlab_profiles", [])
