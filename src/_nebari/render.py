@@ -286,7 +286,7 @@ def inspect_files(
             source_files[relative_path] = hash_file(filename)
 
         for filename in list_files(output_dir, ignore_filenames, ignore_directories):
-            relative_path = filename.relative_to(source_base_dir)
+            relative_path = filename.relative_to(output_base_dir)
             output_files[relative_path] = hash_file(filename)
 
     new_files = source_files.keys() - output_files.keys()
