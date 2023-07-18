@@ -4,7 +4,7 @@ from run_notebook import RunNotebook
 def test_notebook(navigator):
     test_app = RunNotebook(navigator=navigator)
     notebook_filepath_in_repo = (
-        "tests_e2e/playwright/test_data/test_notebook_output.ipynb"
+        "test_data/test_notebook_output.ipynb"
     )
     notebook_filepath_on_nebari = "test_notebook_output.ipynb"
     with open(notebook_filepath_in_repo, "r") as notebook:
