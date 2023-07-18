@@ -2,8 +2,8 @@ import subprocess
 
 import pytest
 
-from nebari.schema import InitInputs
-from nebari.utils import load_yaml
+from _nebari.schema import InitInputs
+from _nebari.utils import load_yaml
 
 PROJECT_NAME = "clitest"
 DOMAIN_NAME = "clitest.dev"

@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from nebari.initialize import render_config
+from _nebari.initialize import render_config
 
 INIT_INPUTS = [
     # project, namespace, domain, cloud_provider, ci_provider, auth_provider
@@ -59,22 +59,22 @@ def setup_fixture(request, monkeypatch, tmp_path):
 
     if cloud_provider == "aws":
         monkeypatch.setattr(
-            "nebari.utils.amazon_web_services.kubernetes_versions",
+            "_nebari.utils.amazon_web_services.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
     elif cloud_provider == "azure":
         monkeypatch.setattr(
-            "nebari.utils.azure_cloud.kubernetes_versions",
+            "_nebari.utils.azure_cloud.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
     elif cloud_provider == "do":
         monkeypatch.setattr(
-            "nebari.utils.digital_ocean.kubernetes_versions",
+            "_nebari.utils.digital_ocean.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
     elif cloud_provider == "gcp":
         monkeypatch.setattr(
-            "nebari.utils.google_cloud.kubernetes_versions",
+            "_nebari.utils.google_cloud.kubernetes_versions",
             _mock_kubernetes_versions(),
         )
 

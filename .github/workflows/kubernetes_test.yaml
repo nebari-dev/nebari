@@ -8,7 +8,7 @@ on:
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "nebari/**"
+      - "src/**"
       - "pyproject.toml"
       - "pytest.ini"
   push:
@@ -22,7 +22,7 @@ on:
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "nebari/**"
+      - "src/**"
       - "pyproject.toml"
       - "pytest.ini"
   workflow_call:
@@ -33,7 +33,6 @@ on:
 
 jobs:
   test-kubernetes:
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
     name: "Kubernetes Tests"
     runs-on: "cirun-runner--${{ github.run_id }}"
     defaults:
@@ -90,9 +89,6 @@ jobs:
       - name: Get routing table for docker pods
         run: |
           ip route
-      - name: Add DNS entry to hosts
-        run: |
-          sudo echo "172.18.1.100  github-actions.nebari.dev" | sudo tee -a /etc/hosts
       - name: Initialize Nebari Cloud
         run: |
           mkdir -p local-deployment

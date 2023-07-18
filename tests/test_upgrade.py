@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from nebari.upgrade import do_upgrade, load_yaml, verify
-from nebari.version import __version__, rounded_ver_parse
+from _nebari.upgrade import do_upgrade, load_yaml, verify
+from _nebari.version import __version__, rounded_ver_parse
 
 
 @pytest.fixture
