@@ -367,6 +367,7 @@ class Navigator:
             kernel_label_loc.wait_for(state="attached")
 
     def open_terminal(self):
+        """Open Terminal in the Nebari Jupyter Lab"""
         self.page.get_by_text("File", exact=True).click()
         self.page.get_by_text("New", exact=True).click()
         self.page.get_by_role("menuitem", name="Terminal").get_by_text(
@@ -374,22 +375,18 @@ class Navigator:
         ).click()
 
     def run_terminal_command(self, command):
+        """Run a command on the terminal in the Nebari Jupyter Lab
+
+        Parameters
+        ----------
+        command: str
+            command to run in the terminal
+        """
         self.page.get_by_role("textbox", name="Terminal input").fill(command)
         self.page.get_by_role("textbox", name="Terminal input").press("Enter")
 
     def write_file(self, filepath, content):
-        start = dt.datetime.now()
-        logger.debug(f"Writing notebook to {filepath}")
-        self.open_terminal()
-        self.run_terminal_command(f"cat <<EOF >{filepath}")
-        self.run_terminal_command(content)
-        self.run_terminal_command("EOF")
-        self.run_terminal_command(f"ls {filepath}")
-        logger.debug(f"time to complete {dt.datetime.now() - start}")
-        time.sleep(2)
-
-    def clone_repo(self, git_url, branch=None, wait_for_completion=5):
-        """Clone a git repo into the jupyterlab file structure.
+        """Write a file to Nebari instance filesystem
 
         The terminal is a blackbox for the browser. We can't access any of the
         displayed text, therefore we have no way of knowing if the commands
@@ -399,41 +396,20 @@ class Navigator:
 
         Parameters
         ----------
-        git_url: str
-            url of git repo (must be public, referenced as http rather than ssh
-            format, e.g. https://github.com/nebari-dev/nebari.git)
-        branch: bool or str
-            (Optional) branch to checkout from the repo. Defaults to None to use
-            the default branch.
-
-        Returns
-        -------
-        None
+        filepath: str
+            path to write the file on the nebari file system
+        content: str
+            text to write to that file.
         """
         start = dt.datetime.now()
-
-        logger.debug(f">>> Clone git repo: {git_url}")
-
-        input_string = f"git clone {git_url}"
-        if branch:
-            input_string = f"{input_string} --branch {branch}"
-        self.page.get_by_text("File", exact=True).click()
-        self.page.get_by_text("New", exact=True).click()
-        self.page.get_by_role("menuitem", name="Terminal").get_by_text(
-            "Terminal"
-        ).click()
-        self.page.get_by_role("textbox", name="Terminal input").fill(input_string)
-        self.page.get_by_role("textbox", name="Terminal input").press("Enter")
-
-        # TODO temporary to check if environments are built
-        self.page.get_by_role("textbox", name="Terminal input").fill("conda env list")
-        self.page.get_by_role("textbox", name="Terminal input").press("Enter")
-
+        logger.debug(f"Writing notebook to {filepath}")
+        self.open_terminal()
+        self.run_terminal_command(f"cat <<EOF >{filepath}")
+        self.run_terminal_command(content)
+        self.run_terminal_command("EOF")
+        self.run_terminal_command(f"ls {filepath}")
         logger.debug(f"time to complete {dt.datetime.now() - start}")
-        # ensure that playwright doesn't move on/change context until all the
-        # above commands are complete.
-        time.sleep(wait_for_completion)
-        self.reset_workspace()
+        time.sleep(2)
 
 
 if __name__ == "__main__":
