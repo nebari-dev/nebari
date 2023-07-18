@@ -101,9 +101,7 @@ if __name__ == "__main__":
     nav.start_server()
     nav.reset_workspace()
     test_app = RunNotebook(navigator=nav)
-    notebook_filepath_in_repo = (
-        "test_data/test_notebook_output.ipynb"
-    )
+    notebook_filepath_in_repo = "test_data/test_notebook_output.ipynb"
     notebook_filepath_on_nebari = "test_notebook_output.ipynb"
     with open(notebook_filepath_in_repo, "r") as notebook:
         test_app.nav.write_file(

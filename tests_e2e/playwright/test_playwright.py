@@ -3,9 +3,7 @@ from run_notebook import RunNotebook
 
 def test_notebook(navigator):
     test_app = RunNotebook(navigator=navigator)
-    notebook_filepath_in_repo = (
-        "test_data/test_notebook_output.ipynb"
-    )
+    notebook_filepath_in_repo = "test_data/test_notebook_output.ipynb"
     notebook_filepath_on_nebari = "test_notebook_output.ipynb"
     with open(notebook_filepath_in_repo, "r") as notebook:
         test_app.nav.write_file(
