@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from ruamel.yaml import YAML
 
-from nebari.render import render_template, set_env_vars_in_config
+from _nebari.render import render_template, set_env_vars_in_config
 
 from .conftest import PRESERVED_DIR, render_config_partial
 
@@ -35,7 +35,7 @@ def write_nebari_config_to_file(setup_fixture):
     yaml = YAML(typ="unsafe", pure=True)
     yaml.dump(config, nebari_config_loc)
 
-    render_template(str(nebari_config_loc.parent), nebari_config_loc, force=True)
+    render_template(str(nebari_config_loc.parent), nebari_config_loc)
 
     yield setup_fixture
 

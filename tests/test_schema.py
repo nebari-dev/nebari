@@ -1,4 +1,4 @@
-import nebari.schema
+import _nebari.schema
 
 from .conftest import render_config_partial
 
@@ -24,4 +24,4 @@ def test_schema(setup_fixture):
         kubernetes_version=None,
     )
 
-    nebari.schema.verify(config)
+    _nebari.schema.verify(config)
