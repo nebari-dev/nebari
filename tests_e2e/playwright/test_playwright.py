@@ -3,13 +3,16 @@ from run_notebook import RunNotebook
 
 def test_notebook(navigator):
     test_app = RunNotebook(navigator=navigator)
-    test_app.nav.clone_repo(
-        "https://github.com/nebari-dev/nebari.git",
-        branch="add_playwright",
-        wait_for_completion=30,
+    notebook_filepath_in_repo = (
+        "tests_e2e/playwright/test_data/test_notebook_output.ipynb"
     )
+    notebook_filepath_on_nebari = "test_notebook_output.ipynb"
+    with open(notebook_filepath_in_repo, "r") as notebook:
+        test_app.nav.write_file(
+            filepath=notebook_filepath_on_nebari, content=notebook.read()
+        )
     test_app.run_notebook(
-        path="nebari/tests_e2e/playwright/test_data/test_notebook_output.ipynb",
+        path=notebook_filepath_on_nebari,
         expected_output_text="success: 6",
         conda_env="conda-env-default-py",
         runtime=60000,

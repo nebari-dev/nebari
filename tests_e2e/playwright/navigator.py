@@ -366,6 +366,28 @@ class Navigator:
         if not kernel_label_loc.is_visible():
             kernel_label_loc.wait_for(state="attached")
 
+    def open_terminal(self):
+        self.page.get_by_text("File", exact=True).click()
+        self.page.get_by_text("New", exact=True).click()
+        self.page.get_by_role("menuitem", name="Terminal").get_by_text(
+            "Terminal"
+        ).click()
+
+    def run_terminal_command(self, command):
+        self.page.get_by_role("textbox", name="Terminal input").fill(command)
+        self.page.get_by_role("textbox", name="Terminal input").press("Enter")
+
+    def write_file(self, filepath, content):
+        start = dt.datetime.now()
+        logger.debug(f"Writing notebook to {filepath}")
+        self.open_terminal()
+        self.run_terminal_command(f"cat <<EOF >{filepath}")
+        self.run_terminal_command(content)
+        self.run_terminal_command("EOF")
+        self.run_terminal_command(f"ls {filepath}")
+        logger.debug(f"time to complete {dt.datetime.now() - start}")
+        time.sleep(2)
+
     def clone_repo(self, git_url, branch=None, wait_for_completion=5):
         """Clone a git repo into the jupyterlab file structure.
 

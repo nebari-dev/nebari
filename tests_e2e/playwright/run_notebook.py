@@ -101,9 +101,14 @@ if __name__ == "__main__":
     nav.start_server()
     nav.reset_workspace()
     test_app = RunNotebook(navigator=nav)
-    test_app.nav.clone_repo(
-        "https://github.com/nebari-dev/nebari.git", branch="add_playwright"
+    notebook_filepath_in_repo = (
+        "tests_e2e/playwright/test_data/test_notebook_output.ipynb"
     )
+    notebook_filepath_on_nebari = "test_notebook_output.ipynb"
+    with open(notebook_filepath_in_repo, "r") as notebook:
+        test_app.nav.write_file(
+            filepath=notebook_filepath_on_nebari, content=notebook.read()
+        )
     test_app.run_notebook(
         path="nebari/tests_e2e/playwright/test_data/test_notebook_output.ipynb",
         expected_output_text="success: 6",
