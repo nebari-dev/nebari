@@ -1,7 +1,7 @@
 import argparse
 import logging
-import pathlib
 import time
+from pathlib import Path
 
 from _nebari.utils import check_cloud_credentials, load_yaml, timer
 
@@ -17,7 +17,7 @@ def main():
 
 
 def handle_force_destroy(args):
-    config_filename = pathlib.Path(args.config)
+    config_filename = Path(args.config)
     if not config_filename.is_file():
         raise ValueError(
             f"passed in configuration filename={config_filename} must exist"

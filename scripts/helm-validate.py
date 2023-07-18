@@ -72,7 +72,7 @@ class HelmChartIndexer:
                 raise ValueError(f"Could not find variable {var_name}")
 
     def retrieve_helm_information(self, filepath):
-        parent_path = pathlib.Path(filepath).parent
+        parent_path = Path(filepath).parent
 
         if parent_path.name in self.skip_charts:
             self.logger.debug(f"Skipping {parent_path.name}")
@@ -192,7 +192,7 @@ def pull_helm_chart(chart_index: dict, skip_charts: list) -> None:
             )
 
     print("All charts downloaded successfully!")
-    # shutil.rmtree(pathlib.Path(os.getcwd()).parent / chart_dir)
+    # shutil.rmtree(Path(os.getcwd()).parent / chart_dir)
 
 
 def add_workflow_job_summary(chart_index: dict):
