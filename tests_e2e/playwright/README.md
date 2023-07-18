@@ -22,7 +22,7 @@ Install Nebari with the development requirements (which include Playwright)
 
 `pip install -e ".[dev]"`
 
-Then install playwright itself (rerquired).
+Then install playwright itself (required).
 
 `playwright install`
 
