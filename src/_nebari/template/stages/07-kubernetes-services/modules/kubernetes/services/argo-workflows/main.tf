@@ -540,7 +540,7 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
               ]
               "volumeMounts" = [
                 {
-                  "mountPath" = "/etc/config"
+                  "mountPath" = "/etc/argo"
                   "name"      = "valid-argo-roles"
                   "readOnly"  = true
                 },
