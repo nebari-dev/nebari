@@ -80,10 +80,15 @@ Another option is to run playwright methods outside of pytest. Both
     nav.reset_workspace()
     # instantiate our test application
     test_app = RunNotebook(navigator=nav)
-    # clone the nebari repo into the nebari instance
-    test_app.nav.clone_repo(
-        "https://github.com/nebari-dev/nebari.git",
+    # Write the sample notebook on the nebari instance
+    notebook_filepath_in_repo = (
+        "tests_e2e/playwright/test_data/test_notebook_output.ipynb"
     )
+    notebook_filepath_on_nebari = "test_notebook_output.ipynb"
+    with open(notebook_filepath_in_repo, "r") as notebook:
+        test_app.nav.write_file(
+            filepath=notebook_filepath_on_nebari, content=notebook.read()
+        )
     # run a sample notebook
     test_app.run_notebook(
         path="nebari/tests_e2e/playwright/test_data/test_notebook_output.ipynb",
@@ -137,10 +142,6 @@ for some actionable items. See https://playwright.dev/docs/actionability .
 
 ### Workflow for creating new tests
 
-**If you are creating a new notebook to be run** (or a test that requires a new
-file), the you will have to push your changes up to a branch, then be sure to
-clone that branch into Nebari in order to use the new files.
-
 An example of running a new run notebook test might look like this:
 
 ```python
@@ -168,10 +169,15 @@ An example of running a new run notebook test might look like this:
     nav.reset_workspace()
     # instantiate our test application
     test_app = RunNotebook(navigator=nav)
-    # clone the nebari repo into the nebari instance
-    test_app.nav.clone_repo(
-        "https://github.com/nebari-dev/nebari.git", branch="add_playwright"
+    # Write the sample notebook on the nebari instance
+    notebook_filepath_in_repo = (
+        "tests_e2e/playwright/test_data/test_notebook_output.ipynb"
     )
+    notebook_filepath_on_nebari = "test_notebook_output.ipynb"
+    with open(notebook_filepath_in_repo, "r") as notebook:
+        test_app.nav.write_file(
+            filepath=notebook_filepath_on_nebari, content=notebook.read()
+        )
     # run a sample notebook
     test_app.run_notebook(
         path="nebari/tests_e2e/playwright/test_data/test_notebook_output.ipynb",
@@ -181,14 +187,3 @@ An example of running a new run notebook test might look like this:
     # close out playwright and its associated browser handles
     nav.teardown()
 ```
-
-Where you're new notebook only exists on the `add_playwright` branch of
-`https://github.com/nebari-dev/nebari.git`.
-
-Another alternative to pushing changes to your file up to the repo for every
-test is to work off on existing nebari deployment.
-
-
-**If you are making changes to the Nebari codebase** and not changes to the
-tests, then you can just run the playwright tests inside of `test_playwright.py`
-without pushing up new files or modifying the repo clone.
