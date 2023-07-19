@@ -67,7 +67,11 @@ class NebariTerraformStage(NebariStage):
             deploy_config["state_imports"] = state_imports
 
         self.set_outputs(stage_outputs, terraform.deploy(**deploy_config))
+        self.post_deploy(stage_outputs)
         yield
+
+    def post_deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
+        pass
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         pass
