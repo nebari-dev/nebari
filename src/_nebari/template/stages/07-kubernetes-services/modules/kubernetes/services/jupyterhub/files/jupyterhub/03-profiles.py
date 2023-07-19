@@ -315,6 +315,7 @@ def profile_argo_token(groups):
     # TODO: create a more robust check user's Argo-Workflow role
 
     domain = z2jh.get_config("custom.external-url")
+    namespace = z2jh.get_config("custom.namespace")
 
     ADMIN = "admin"
     DEVELOPER = "developer"
@@ -335,6 +336,7 @@ def profile_argo_token(groups):
     return {
         "ARGO_BASE_HREF": "/argo",
         "ARGO_SERVER": f"{domain}:443",
+        "ARGO_NAMESPACE": namespace,
         "ARGO_TOKEN": {
             "valueFrom": {
                 "secretKeyRef": {
