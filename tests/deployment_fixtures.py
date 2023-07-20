@@ -7,6 +7,7 @@ from urllib3.exceptions import InsecureRequestWarning
 import yaml
 
 from _nebari.deploy import deploy_configuration
+from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
 from .utils import render_config_partial
 
@@ -25,6 +26,7 @@ def random_letters(length=5):
 
 
 def get_or_create_deployment_directory(cloud):
+    # deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob("do*"))
     deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob("pytestdoxvzyr"))
     if deployment_dirs:
         deployment_dir = deployment_dirs[0]
@@ -44,7 +46,6 @@ def deploy(
     cloud = request.param
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=InsecureRequestWarning)
-    # deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob("do*"))
     deployment_dir = get_or_create_deployment_directory(cloud)
     config = render_config_partial(
         project_name=deployment_dir.name,
@@ -74,6 +75,13 @@ def deploy(
         logger.exception(e)
         raise
     assert 1 == 1
+
+
+def destroy(cloud):
+    deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob(f"{cloud}*"))
+    if not deployment_dirs:
+        print("Configuration not found")
+        destroy_configuration(deployment_dirs[0] / Path("nebari-config.yaml"))
 
 
 def on_cloud(param):
