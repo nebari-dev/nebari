@@ -34,8 +34,7 @@ def random_letters(length=5):
 
 
 def get_or_create_deployment_directory(cloud):
-    # deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob("do*"))
-    deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob("pytestdoxvzyr"))
+    deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob("pytest{cloud}*"))
     if deployment_dirs:
         deployment_dir = deployment_dirs[0]
     else:
@@ -78,14 +77,11 @@ def deploy(request):
         logger.exception(e)
         raise
     logger.info("Teardown")
-    return destroy(cloud)
+    return destroy(config)
 
 
-def destroy(cloud):
-    deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob(f"{cloud}*"))
-    if not deployment_dirs:
-        logger.info("Configuration not found")
-        destroy_configuration(deployment_dirs[0] / Path("nebari-config.yaml"))
+def destroy(config):
+    destroy_configuration(config)
 
 
 def on_cloud(param):
