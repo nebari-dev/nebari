@@ -49,7 +49,7 @@ def test_integration():
     with open(config_filepath, "w") as f:
         yaml.dump(config, f)
 
-    # render_template(tmpdir, config_filepath)
+    render_template(tmpdir, config_filepath)
     try:
         deploy_configuration(
             config=config,
@@ -60,8 +60,7 @@ def test_integration():
             skip_remote_state_provision=False,
         )
     except Exception as e:
-        print(f"Test Exception: {e}")
+        print(f"Deploy Failed, Exception: {e}")
         logger.exception(e)
-        import ipdb as pdb; pdb.set_trace()
         raise
     assert 1 == 1
