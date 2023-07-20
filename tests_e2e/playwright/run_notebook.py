@@ -9,12 +9,12 @@ from navigator import Navigator
 logger = logging.getLogger()
 
 
-class RunNotebook:
+class Notebook:
     def __init__(self, navigator: Navigator):
         self.nav = navigator
         self.nav.initialize
 
-    def run_notebook(
+    def run(
         self, path, expected_output_text, conda_env, runtime=30000, retry=2
     ):
         """Run jupyter notebook and check for expected output text anywhere on
