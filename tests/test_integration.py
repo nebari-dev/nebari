@@ -1,6 +1,7 @@
 import logging
+import pytest
 import os
-import pathlib
+from pathlib import Path
 from urllib3.exceptions import InsecureRequestWarning
 
 import yaml
@@ -12,6 +13,8 @@ from .conftest import render_config_partial
 import random
 import string
 import warnings
+
+DEPLOYMENT_DIR = '_test_deploy'
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,29 +30,42 @@ def random_letters(length=5):
     return ''.join(random.choice(letters) for _ in range(length)).lower()
 
 
-def test_integration():
+def get_or_create_deployment_directory(cloud):
+    deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob("pytestdoxvzyr"))
+    if deployment_dirs:
+        deployment_dir = deployment_dirs[0]
+    else:
+        project_name = f"pytest{cloud}{random_letters()}"
+        deployment_dir = Path(Path(Path(DEPLOYMENT_DIR) / cloud) / project_name)
+        deployment_dir.mkdir()
+    return deployment_dir
+
+
+@pytest.fixture
+def deploy(
+        request,
+):
     # Ignore this for now, as test is failing due to a
     # DeprecationWarning
+    cloud = request.param
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=InsecureRequestWarning)
-    # project_name = f"pytestdo{random_letters()}"
-    project_name = "pytestdoxvzyr"
+    # deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob("do*"))
+    deployment_dir = get_or_create_deployment_directory(cloud)
     config = render_config_partial(
-        project_name=project_name,
+        project_name=deployment_dir.name,
         namespace="dev",
-        nebari_domain="do.nebari.dev",
-        cloud_provider="do",
+        nebari_domain=f"{cloud}.nebari.dev",
+        cloud_provider=cloud,
         ci_provider="github-actions",
         auth_provider="github",
     )
-    tmpdir = os.getcwd() / pathlib.Path("pytestdotemp")
-    os.chdir(tmpdir)
-    print(f"Temporary directory: {tmpdir}")
-    config_filepath = tmpdir / "nebari-config.yaml"
-    with open(config_filepath, "w") as f:
+    deployment_dir_abs = deployment_dir.absolute()
+    os.chdir(deployment_dir)
+    print(f"Temporary directory: {deployment_dir}")
+    with open(Path("nebari-config.yaml"), "w") as f:
         yaml.dump(config, f)
-
-    render_template(tmpdir, config_filepath)
+    render_template(deployment_dir_abs, Path("nebari-config.yaml"))
     try:
         deploy_configuration(
             config=config,
@@ -64,3 +80,12 @@ def test_integration():
         logger.exception(e)
         raise
     assert 1 == 1
+
+
+def on_cloud(param):
+    return pytest.mark.parametrize("deploy", [param], indirect=True)
+
+
+@on_cloud("do")
+def test_do_deployment(deploy):
+    assert True
