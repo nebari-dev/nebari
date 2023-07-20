@@ -6,7 +6,7 @@ from ruamel.yaml import YAML
 
 from _nebari.render import render_template, set_env_vars_in_config
 
-from .conftest import PRESERVED_DIR, render_config_partial
+from .utils import render_config_partial, PRESERVED_DIR
 
 
 @pytest.fixture

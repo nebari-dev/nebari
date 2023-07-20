@@ -1,33 +1,10 @@
-from functools import partial
 from unittest.mock import Mock
 
 import pytest
 
-from _nebari.initialize import render_config
+from tests.utils import INIT_INPUTS, NEBARI_CONFIG_FN, PRESERVED_DIR
 
-INIT_INPUTS = [
-    # project, namespace, domain, cloud_provider, ci_provider, auth_provider
-    ("pytestdo", "dev", "do.nebari.dev", "do", "github-actions", "github"),
-    ("pytestaws", "dev", "aws.nebari.dev", "aws", "github-actions", "github"),
-    ("pytestgcp", "dev", "gcp.nebari.dev", "gcp", "github-actions", "github"),
-    ("pytestazure", "dev", "azure.nebari.dev", "azure", "github-actions", "github"),
-]
-
-NEBARI_CONFIG_FN = "nebari-config.yaml"
-PRESERVED_DIR = "preserved_dir"
-DEFAULT_GH_REPO = "github.com/test/test"
-DEFAULT_TERRAFORM_STATE = "remote"
-
-
-# use this partial function for all tests that need to call `render_config`
-render_config_partial = partial(
-    render_config,
-    repository=DEFAULT_GH_REPO,
-    repository_auto_provision=False,
-    auth_auto_provision=False,
-    terraform_state=DEFAULT_TERRAFORM_STATE,
-    disable_prompt=True,
-)
+pytest_plugins = ["tests.deployment_fixtures"]
 
 
 @pytest.fixture(params=INIT_INPUTS)
