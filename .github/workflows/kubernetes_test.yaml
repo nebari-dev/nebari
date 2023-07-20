@@ -69,6 +69,7 @@ jobs:
         run: |
           conda install --quiet --yes -c anaconda pip
           pip install .[dev]
+          playwright install
       - name: Download and Install Kubectl
         run: |
           mkdir -p bin
@@ -149,6 +150,18 @@ jobs:
         with:
           working-directory: tests_e2e
 
+      - name: Playwright Tests
+        env:
+          KEYCLOAK_USERNAME: ${{ env.CYPRESS_EXAMPLE_USER_NAME }}
+          KEYCLOAK_PASSWORD: ${{ env.CYPRESS_EXAMPLE_USER_PASSWORD }}
+          NEBARI_FULL_URL: https://github-actions.nebari.dev/
+        working-directory: tests_e2e/playwright
+        run: |
+          # create environment file
+          envsubst < .env.tpl > .env
+          # run playwright pytest tests in headed mode with the chromium browser
+          xvfb-run pytest --browser chromium
+
       - name: Save Cypress screenshots and videos
         if: always()
         uses: actions/upload-artifact@v3
@@ -157,6 +170,7 @@ jobs:
           path: |
             ./tests_e2e/cypress/screenshots/
             ./tests_e2e/cypress/videos/
+            ./tests_e2e/playwright/videos/
 
       - name: Deployment Pytests
         run: |

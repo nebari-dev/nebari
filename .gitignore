@@ -1,3 +1,8 @@
+# docs
+.nox
+_build
+.env
+
 # setuptools scm
 src/_nebari/_version.py
 
@@ -6,6 +11,9 @@ src/_nebari/_version.py
 terraform.tfstate
 terraform.tfstate.backup
 .terraform.tfstate.lock.info
+
+# tests
+videos/
 
 # python
 __pycache__
@@ -41,5 +49,6 @@ nebari-config.yaml
 
 .vscode/
 .pytest_cache
-
+.ipynb_checkpoints
+.DS_Store
 /.ruff_cache
