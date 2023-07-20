@@ -34,7 +34,7 @@ def random_letters(length=5):
 
 
 def get_or_create_deployment_directory(cloud):
-    deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob("pytest{cloud}*"))
+    deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob(f"pytest{cloud}*"))
     if deployment_dirs:
         deployment_dir = deployment_dirs[0]
     else:
@@ -44,15 +44,21 @@ def get_or_create_deployment_directory(cloud):
     return deployment_dir
 
 
+def set_do_environment():
+    os.environ['AWS_ACCESS_KEY_ID'] = os.environ['SPACES_ACCESS_KEY_ID']
+    os.environ['AWS_SECRET_ACCESS_KEY'] = os.environ['SPACES_SECRET_ACCESS_KEY']
+
+
 @pytest.fixture(scope="session")
 def deploy(request):
     ignore_warnings()
     cloud = request.param
+    set_do_environment()
     deployment_dir = get_or_create_deployment_directory(cloud)
     config = render_config_partial(
         project_name=deployment_dir.name,
         namespace="dev",
-        nebari_domain=f"{cloud}.nebari.dev",
+        nebari_domain=f"ci-{cloud}.nebari.dev",
         cloud_provider=cloud,
         ci_provider="github-actions",
         auth_provider="github",
