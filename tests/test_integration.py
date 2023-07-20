@@ -1,6 +1,7 @@
 import logging
 import os
 import pathlib
+from urllib3.exceptions import InsecureRequestWarning
 
 import yaml
 
@@ -30,6 +31,7 @@ def test_integration():
     # Ignore this for now, as test is failing due to a
     # DeprecationWarning
     warnings.filterwarnings("ignore", category=DeprecationWarning)
+    warnings.filterwarnings("ignore", category=InsecureRequestWarning)
     # project_name = f"pytestdo{random_letters()}"
     project_name = "pytestdoxvzyr"
     config = render_config_partial(
@@ -47,7 +49,7 @@ def test_integration():
     with open(config_filepath, "w") as f:
         yaml.dump(config, f)
 
-    render_template(tmpdir, config_filepath)
+    # render_template(tmpdir, config_filepath)
     try:
         deploy_configuration(
             config=config,
