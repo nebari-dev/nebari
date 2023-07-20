@@ -311,6 +311,64 @@ def configure_user(username, groups, uid=1000, gid=100):
     }
 
 
+def profile_argo_token(groups):
+    # TODO: create a more robust check user's Argo-Workflow role
+
+    domain = z2jh.get_config("custom.external-url")
+    namespace = z2jh.get_config("custom.namespace")
+
+    ADMIN = "admin"
+    DEVELOPER = "developer"
+    ANALYST = "analyst"
+
+    base = "argo-"
+    argo_sa = None
+
+    if ANALYST in groups:
+        argo_sa = base + "view"
+    if DEVELOPER in groups:
+        argo_sa = base + "developer"
+    if ADMIN in groups:
+        argo_sa = base + "admin"
+    if not argo_sa:
+        return {}
+
+    return {
+        "ARGO_BASE_HREF": "/argo",
+        "ARGO_SERVER": f"{domain}:443",
+        "ARGO_NAMESPACE": namespace,
+        "ARGO_TOKEN": {
+            "valueFrom": {
+                "secretKeyRef": {
+                    "name": f"{argo_sa}.service-account-token",
+                    "key": "token",
+                }
+            }
+        },
+    }
+
+
+def profile_conda_store_viewer_token():
+    return {
+        "CONDA_STORE_TOKEN": {
+            "valueFrom": {
+                "secretKeyRef": {
+                    "name": "argo-workflows-conda-store-token",
+                    "key": "conda-store-api-token",
+                }
+            }
+        },
+        "CONDA_STORE_SERVICE": {
+            "valueFrom": {
+                "secretKeyRef": {
+                    "name": "argo-workflows-conda-store-token",
+                    "key": "conda-store-service-name",
+                }
+            }
+        },
+    }
+
+
 def render_profile(profile, username, groups, keycloak_profilenames):
     """Render each profile for user.
 
@@ -366,7 +424,12 @@ def render_profile(profile, username, groups, keycloak_profilenames):
     def preserve_envvars(spawner):
         # This adds in JUPYTERHUB_ANYONE/GROUP rather than overwrite all env vars,
         # if set in the spawner for a dashboard to control access.
-        return {**envvars_fixed, **spawner.environment}
+        return {
+            **envvars_fixed,
+            **spawner.environment,
+            **profile_argo_token(groups),
+            **profile_conda_store_viewer_token(),
+        }
 
     profile["kubespawner_override"]["environment"] = preserve_envvars
 
@@ -404,6 +467,10 @@ def render_profiles(spawner):
     )
 
 
+c.KubeSpawner.args = ["--debug"]
+c.KubeSpawner.environment = {
+    "JUPYTERHUB_SINGLEUSER_APP": "jupyter_server.serverapp.ServerApp",
+}
 c.KubeSpawner.profile_list = render_profiles
 
 

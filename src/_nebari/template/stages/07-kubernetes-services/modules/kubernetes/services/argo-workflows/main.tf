@@ -1,6 +1,10 @@
 locals {
   name                  = "argo-workflows"
   argo-workflows-prefix = "argo"
+  # roles
+  admin     = "argo-admin"
+  developer = "argo-developer"
+  viewer    = "argo-viewer"
 }
 
 resource "helm_release" "argo-workflows" {
@@ -30,7 +34,7 @@ resource "helm_release" "argo-workflows" {
 
       server = {
         # `sso` for OIDC/OAuth
-        extraArgs = ["--auth-mode=sso", "--insecure-skip-verify"]
+        extraArgs = ["--auth-mode=sso", "--auth-mode=client", "--insecure-skip-verify"]
         # to enable TLS, `secure = true`
         secure   = false
         baseHref = "/${local.argo-workflows-prefix}/"
@@ -83,9 +87,9 @@ module "argo-workflow-openid-client" {
   client_id    = "argo-server-sso"
   external-url = var.external-url
   role_mapping = {
-    "admin"     = ["argo_admin"]
-    "developer" = ["argo_developer"]
-    "analyst"   = ["argo_viewer"]
+    "admin"     = ["${local.admin}"]
+    "developer" = ["${local.developer}"]
+    "analyst"   = ["${local.viewer}"]
   }
 
   callback-url-paths = [
@@ -183,18 +187,18 @@ resource "kubernetes_manifest" "argo-workflows-ingress-route" {
 
 resource "kubernetes_service_account_v1" "argo-admin-sa" {
   metadata {
-    name      = "argo-admin"
+    name      = local.admin
     namespace = var.namespace
     annotations = {
-      "workflows.argoproj.io/rbac-rule" : "'argo_admin' in groups"
+      "workflows.argoproj.io/rbac-rule" : "'${local.admin}' in groups"
       "workflows.argoproj.io/rbac-rule-precedence" : "11"
     }
   }
 }
 
-resource "kubernetes_secret_v1" "argo_admin_sa_token" {
+resource "kubernetes_secret_v1" "argo-admin-sa-token" {
   metadata {
-    name      = "argo-admin.service-account-token"
+    name      = "${local.admin}.service-account-token"
     namespace = var.namespace
     annotations = {
       "kubernetes.io/service-account.name" = kubernetes_service_account_v1.argo-admin-sa.metadata[0].name
@@ -206,7 +210,7 @@ resource "kubernetes_secret_v1" "argo_admin_sa_token" {
 
 resource "kubernetes_cluster_role_binding" "argo-admin-rb" {
   metadata {
-    name = "argo-admin"
+    name = local.admin
   }
 
   role_ref {
@@ -221,12 +225,12 @@ resource "kubernetes_cluster_role_binding" "argo-admin-rb" {
   }
 }
 
-resource "kubernetes_service_account_v1" "argo-dev-sa" {
+resource "kubernetes_service_account_v1" "argo-developer-sa" {
   metadata {
-    name      = "argo-dev"
+    name      = local.developer
     namespace = var.namespace
     annotations = {
-      "workflows.argoproj.io/rbac-rule" : "'argo_developer' in groups"
+      "workflows.argoproj.io/rbac-rule" : "'${local.developer}' in groups"
       "workflows.argoproj.io/rbac-rule-precedence" : "10"
     }
   }
@@ -234,18 +238,18 @@ resource "kubernetes_service_account_v1" "argo-dev-sa" {
 
 resource "kubernetes_secret_v1" "argo_dev_sa_token" {
   metadata {
-    name      = "argo-dev.service-account-token"
+    name      = "${local.developer}.service-account-token"
     namespace = var.namespace
     annotations = {
-      "kubernetes.io/service-account.name" = kubernetes_service_account_v1.argo-dev-sa.metadata[0].name
+      "kubernetes.io/service-account.name" = kubernetes_service_account_v1.argo-developer-sa.metadata[0].name
     }
   }
   type = "kubernetes.io/service-account-token"
 }
 
-resource "kubernetes_cluster_role_binding" "argo-dev-rb" {
+resource "kubernetes_cluster_role_binding" "argo-developer-rb" {
   metadata {
-    name = "argo-dev"
+    name = local.developer
   }
 
   role_ref {
@@ -255,7 +259,7 @@ resource "kubernetes_cluster_role_binding" "argo-dev-rb" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account_v1.argo-dev-sa.metadata.0.name
+    name      = kubernetes_service_account_v1.argo-developer-sa.metadata.0.name
     namespace = var.namespace
   }
 }
@@ -266,13 +270,13 @@ resource "kubernetes_service_account_v1" "argo-view-sa" {
     name      = "argo-viewer"
     namespace = var.namespace
     annotations = {
-      "workflows.argoproj.io/rbac-rule" : "'argo_viewer' in groups"
+      "workflows.argoproj.io/rbac-rule" : "'${local.viewer}' in groups"
       "workflows.argoproj.io/rbac-rule-precedence" : "9"
     }
   }
 }
 
-resource "kubernetes_secret_v1" "argo_viewer_sa_token" {
+resource "kubernetes_secret_v1" "argo-viewer-sa-token" {
   metadata {
     name      = "argo-viewer.service-account-token"
     namespace = var.namespace
@@ -534,8 +538,23 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                   "value" = var.namespace
                 },
               ]
+              "volumeMounts" = [
+                {
+                  "mountPath" = "/etc/argo"
+                  "name"      = "valid-argo-roles"
+                  "readOnly"  = true
+                },
+              ]
               "image" = "quay.io/nebari/nebari-workflow-controller:${var.workflow-controller-image-tag}"
               "name"  = "admission-controller"
+            },
+          ]
+          "volumes" = [
+            {
+              "name" = "valid-argo-roles"
+              "configMap" = {
+                "name" = "valid-argo-roles"
+              }
             },
           ]
         }
@@ -564,5 +583,16 @@ resource "kubernetes_manifest" "service_admission_controller" {
         "app" = "nebari-workflow-controller"
       }
     }
+  }
+}
+
+resource "kubernetes_config_map" "valid-argo-roles" {
+  metadata {
+    name      = "valid-argo-roles"
+    namespace = var.namespace
+  }
+
+  data = {
+    "valid-argo-roles" = jsonencode([local.admin, local.developer])
   }
 }

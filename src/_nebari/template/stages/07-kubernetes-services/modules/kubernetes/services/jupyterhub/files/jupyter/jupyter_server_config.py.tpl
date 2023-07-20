@@ -36,3 +36,10 @@ c.NotebookApp.shutdown_no_activity_timeout = ${server_shutdown_no_activity_timeo
 ###############################################################################
 # JupyterHub idle culler total timeout corresponds (approximately) to:
 # max(cull_idle_timeout, cull_inactive_timeout) + shutdown_no_activity_timeout
+
+from argo_jupyter_scheduler.executor import ArgoExecutor
+from argo_jupyter_scheduler.scheduler import ArgoScheduler
+
+c.Scheduler.execution_manager_class=ArgoExecutor
+c.SchedulerApp.scheduler_class=ArgoScheduler
+c.SchedulerApp.scheduler_class.use_conda_store_env=True
