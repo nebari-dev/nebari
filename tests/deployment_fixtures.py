@@ -62,7 +62,7 @@ def deploy(
         yaml.dump(config, f)
     render_template(deployment_dir_abs, Path("nebari-config.yaml"))
     try:
-        deploy_configuration(
+        return deploy_configuration(
             config=config,
             dns_provider="cloudflare",
             dns_auto_provision=True,
@@ -74,7 +74,6 @@ def deploy(
         print(f"Deploy Failed, Exception: {e}")
         logger.exception(e)
         raise
-    assert 1 == 1
 
 
 def destroy(cloud):
