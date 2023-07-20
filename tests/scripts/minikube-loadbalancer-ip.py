@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import json
-import os
 import subprocess
 import sys
+from pathlib import Path
 
 minikube_cmd = ["minikube", "ssh", "--", "ip", "-j", "a"]
 minikube_output = subprocess.check_output(minikube_cmd, encoding="utf-8")[:-1]
@@ -16,7 +16,7 @@ else:
     print("minikube interface eth0 not found")
     sys.exit(1)
 
-filename = os.path.expanduser("~/.minikube/profiles/minikube/config.json")
+filename = Path.home() / ".minikube" / "profiles" / "minikube" / "config.json"
 with open(filename) as f:
     data = json.load(f)
 

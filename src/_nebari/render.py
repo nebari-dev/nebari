@@ -2,9 +2,9 @@ import functools
 import hashlib
 import json
 import os
-import pathlib
 import shutil
 import sys
+from pathlib import Path
 from typing import Dict, List
 
 import yaml
@@ -17,21 +17,19 @@ from _nebari.deprecate import DEPRECATED_FILE_PATHS
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from _nebari.provider.cicd.gitlab import gen_gitlab_ci
 from _nebari.stages import tf_objects
+from _nebari.utils import is_relative_to
 
 
 def render_template(output_directory, config_filename, dry_run=False):
     # get directory for nebari templates
-    template_directory = pathlib.Path(_nebari.__file__).parent / "template"
+    template_directory = Path(_nebari.__file__).parent / "template"
 
     # would be nice to remove assumption that input directory
     # is in local filesystem and a directory
-    template_directory = pathlib.Path(template_directory)
     if not template_directory.is_dir():
         raise ValueError(f"template directory={template_directory} is not a directory")
 
-    output_directory = pathlib.Path(output_directory).resolve()
-
-    if output_directory == str(pathlib.Path.home()):
+    if output_directory == Path.home():
         print("ERROR: Deploying Nebari in home directory is not advised!")
         sys.exit(1)
 
@@ -39,13 +37,12 @@ def render_template(output_directory, config_filename, dry_run=False):
     # into it in remove_existing_renders
     output_directory.mkdir(exist_ok=True, parents=True)
 
-    config_filename = pathlib.Path(config_filename)
     if not config_filename.is_file():
         raise ValueError(
             f"cookiecutter configuration={config_filename} is not filename"
         )
 
-    with config_filename.open() as f:
+    with open(config_filename) as f:
         yaml = YAML(typ="safe", pure=True)
         config = yaml.load(f)
 
@@ -74,13 +71,13 @@ def render_template(output_directory, config_filename, dry_run=False):
     ):
         directories.append(f"stages/01-terraform-state/{config['provider']}")
 
-    source_dirs = [os.path.join(str(template_directory), _) for _ in directories]
-    output_dirs = [os.path.join(str(output_directory), _) for _ in directories]
+    source_dirs = [template_directory / Path(directory) for directory in directories]
+    output_dirs = [output_directory / Path(directory) for directory in directories]
     new, untracked, updated, deleted = inspect_files(
         source_dirs,
         output_dirs,
-        source_base_dir=str(template_directory),
-        output_base_dir=str(output_directory),
+        source_base_dir=template_directory,
+        output_base_dir=output_directory,
         ignore_filenames=[
             "terraform.tfstate",
             ".terraform.lock.hcl",
@@ -97,17 +94,17 @@ def render_template(output_directory, config_filename, dry_run=False):
     if new:
         table = Table("The following files will be created:", style="deep_sky_blue1")
         for filename in sorted(new):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
     if updated:
         table = Table("The following files will be updated:", style="deep_sky_blue1")
         for filename in sorted(updated):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
     if deleted:
         table = Table("The following files will be deleted:", style="deep_sky_blue1")
         for filename in sorted(deleted):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
     if untracked:
         table = Table(
@@ -115,35 +112,34 @@ def render_template(output_directory, config_filename, dry_run=False):
             style="deep_sky_blue1",
         )
         for filename in sorted(updated):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
 
     if dry_run:
         print("dry-run enabled no files will be created, updated, or deleted")
     else:
         for filename in new | updated:
-            input_filename = os.path.join(str(template_directory), filename)
-            output_filename = os.path.join(str(output_directory), filename)
-            os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+            input_filename = template_directory / filename
+            output_filename = output_directory / filename
+            output_filename.parent.mkdir(parents=True, exist_ok=True)
 
-            if os.path.exists(input_filename):
+            if input_filename.exists():
                 shutil.copy(input_filename, output_filename)
             else:
                 with open(output_filename, "w") as f:
                     f.write(contents[filename])
 
         for path in deleted:
-            abs_path = os.path.abspath(os.path.join(str(output_directory), path))
+            abs_path = (output_directory / path).resolve()
 
-            # be extra cautious that deleted path is within output_directory
-            if not abs_path.startswith(str(output_directory)):
+            if not is_relative_to(abs_path, output_directory):
                 raise Exception(
                     f"[ERROR] SHOULD NOT HAPPEN filename was about to be deleted but path={abs_path} is outside of output_directory"
                 )
 
-            if os.path.isfile(abs_path):
-                os.remove(abs_path)
-            elif os.path.isdir(abs_path):
+            if abs_path.is_file():
+                abs_path.unlink()
+            elif abs_path.is_dir():
                 shutil.rmtree(abs_path)
 
 
@@ -185,7 +181,7 @@ def gen_gitignore():
     """
     from inspect import cleandoc
 
-    filestoignore = """
+    files_to_ignore = """
         # ignore terraform state
         .terraform
         terraform.tfstate
@@ -195,7 +191,7 @@ def gen_gitignore():
         # python
         __pycache__
     """
-    return {".gitignore": cleandoc(filestoignore)}
+    return {Path(".gitignore"): cleandoc(files_to_ignore)}
 
 
 def gen_cicd(config):
@@ -211,12 +207,12 @@ def gen_cicd(config):
     cicd_provider = config["ci_cd"]["type"]
 
     if cicd_provider == "github-actions":
-        gha_dir = ".github/workflows/"
-        cicd_files[gha_dir + "nebari-ops.yaml"] = gen_nebari_ops(config)
-        cicd_files[gha_dir + "nebari-linter.yaml"] = gen_nebari_linter(config)
+        gha_dir = Path(".github") / "workflows"
+        cicd_files[gha_dir / "nebari-ops.yaml"] = gen_nebari_ops(config)
+        cicd_files[gha_dir / "nebari-linter.yaml"] = gen_nebari_linter(config)
 
     elif cicd_provider == "gitlab-ci":
-        cicd_files[".gitlab-ci.yml"] = gen_gitlab_ci(config)
+        cicd_files[Path(".gitlab-ci.yml")] = gen_gitlab_ci(config)
 
     else:
         raise ValueError(
@@ -227,25 +223,25 @@ def gen_cicd(config):
 
 
 def inspect_files(
-    source_dirs: str,
-    output_dirs: str,
-    source_base_dir: str,
-    output_base_dir: str,
+    source_dirs: Path,
+    output_dirs: Path,
+    source_base_dir: Path,
+    output_base_dir: Path,
     ignore_filenames: List[str] = None,
     ignore_directories: List[str] = None,
-    deleted_paths: List[str] = None,
+    deleted_paths: List[Path] = None,
     contents: Dict[str, str] = None,
 ):
     """Return created, updated and untracked files by computing a checksum over the provided directory.
 
     Args:
-        source_dirs (str): The source dir used as base for comparssion
-        output_dirs (str): The destination dir which will be matched with
-        source_base_dir (str): Relative base path to source directory
-        output_base_dir (str): Relative base path to output directory
+        source_dirs (Path): The source dir used as base for comparison
+        output_dirs (Path): The destination dir which will be matched with
+        source_base_dir (Path): Relative base path to source directory
+        output_base_dir (Path): Relative base path to output directory
         ignore_filenames (list[str]): Filenames to ignore while comparing for changes
         ignore_directories (list[str]): Directories to ignore while comparing for changes
-        deleted_paths (list[str]): Paths that if exist in output directory should be deleted
+        deleted_paths (list[Path]): Paths that if exist in output directory should be deleted
         contents (dict): filename to content mapping for dynamically generated files
     """
     ignore_filenames = ignore_filenames or []
@@ -256,35 +252,41 @@ def inspect_files(
     output_files = {}
 
     def list_files(
-        directory: str, ignore_filenames: List[str], ignore_directories: List[str]
+        directory: Path, ignore_filenames: List[str], ignore_directories: List[str]
     ):
-        for root, dirs, files in os.walk(directory):
-            dirs[:] = [d for d in dirs if d not in ignore_directories]
-            for file in files:
-                if file not in ignore_filenames:
-                    yield os.path.join(root, file)
+        for path in directory.rglob("*"):
+            if not path.is_file():
+                continue
 
-    for filename in contents:
-        source_files[filename] = hashlib.sha256(
-            contents[filename].encode("utf8")
-        ).hexdigest()
-        output_filename = os.path.join(output_base_dir, filename)
-        if os.path.isfile(output_filename):
+            if path.name in ignore_filenames:
+                continue
+
+            if any(
+                d in ignore_directories for d in path.relative_to(directory).parts[:-1]
+            ):
+                continue
+
+            yield path
+
+    for filename, content in contents.items():
+        source_files[filename] = hashlib.sha256(content.encode("utf8")).hexdigest()
+        output_filename = output_base_dir / filename
+        if output_filename.is_file():
             output_files[filename] = hash_file(filename)
 
     deleted_files = set()
     for path in deleted_paths:
-        absolute_path = os.path.join(output_base_dir, path)
-        if os.path.exists(absolute_path):
+        absolute_path = output_base_dir / path
+        if absolute_path.exists():
             deleted_files.add(path)
 
     for source_dir, output_dir in zip(source_dirs, output_dirs):
         for filename in list_files(source_dir, ignore_filenames, ignore_directories):
-            relative_path = os.path.relpath(filename, source_base_dir)
+            relative_path = filename.relative_to(source_base_dir)
             source_files[relative_path] = hash_file(filename)
 
         for filename in list_files(output_dir, ignore_filenames, ignore_directories):
-            relative_path = os.path.relpath(filename, output_base_dir)
+            relative_path = filename.relative_to(output_base_dir)
             output_files[relative_path] = hash_file(filename)
 
     new_files = source_files.keys() - output_files.keys()
