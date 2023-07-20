@@ -4,8 +4,6 @@ import pytest
 
 from tests.utils import INIT_INPUTS, NEBARI_CONFIG_FN, PRESERVED_DIR
 
-pytest_plugins = ["tests.deployment_fixtures"]
-
 
 @pytest.fixture(params=INIT_INPUTS)
 def setup_fixture(request, monkeypatch, tmp_path):
