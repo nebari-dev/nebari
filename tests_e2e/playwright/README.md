@@ -49,7 +49,6 @@ This user can be created with the following command (or you can use an existing 
 nebari keycloak adduser --user <username> <password> --config <NEBARI_CONFIG_PATH>
 ```
 
-
 ## Running the Playwright tests
 
 The playwright tests are run inside of pytest using
@@ -58,7 +57,10 @@ The playwright tests are run inside of pytest using
 pytest tests_e2e/playwright/test_playwright.py
 ```
 
-Videos of the test playback will be available in `tests_e2e/playwright/videos/`.
+Videos of the test playback will be available in `$PWD/videos/`.
+To see what is happening while the test is run, pass the `--headed` option to `pytest`.
+You can also add the `--slowmo=$MILLI_SECONDS` option to add a delay before each action
+by Playwright and thus slowing down the process.
 
 Another option is to run playwright methods outside of pytest. Both
 `navigator.py` and `run_notebook.py` can be run as scripts. For example,

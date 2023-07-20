@@ -10,7 +10,7 @@ logger = logging.getLogger()
 
 
 @pytest.fixture(scope="session")
-def _navigator_session(browser_name):
+def _navigator_session(browser_name, pytestconfig):
     """Set up a navigator instance, login with username/password, start
     a server. Teardown when session is complete.
     Do not use this for individual tests, use `navigator` fixture
@@ -24,7 +24,8 @@ def _navigator_session(browser_name):
             nebari_url=os.environ["NEBARI_FULL_URL"],
             username=os.environ["KEYCLOAK_USERNAME"],
             password=os.environ["KEYCLOAK_PASSWORD"],
-            headless=False,
+            headless=not pytestconfig.getoption("--headed"),
+            slow_mo=pytestconfig.getoption("--slowmo"),
             browser=browser_name,
             auth="password",
             instance_name="small-instance",  # small-instance included by default
