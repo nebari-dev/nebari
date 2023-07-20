@@ -1,10 +1,10 @@
 import json
 import logging
-import pathlib
 import re
 import secrets
 import string
 from abc import ABC
+from pathlib import Path
 
 import rich
 from pydantic.error_wrappers import ValidationError
@@ -235,7 +235,7 @@ class Upgrade_0_4_0(UpgradeStep):
     version = "0.4.0"
 
     def _version_specific_upgrade(
-        self, config, start_version, config_filename: pathlib.Path, *args, **kwargs
+        self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         """
         Upgrade to Keycloak.
@@ -364,7 +364,7 @@ class Upgrade_0_4_1(UpgradeStep):
     version = "0.4.1"
 
     def _version_specific_upgrade(
-        self, config, start_version, config_filename: pathlib.Path, *args, **kwargs
+        self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         """
         Upgrade jupyterlab profiles.
@@ -390,7 +390,7 @@ class Upgrade_2023_4_2(UpgradeStep):
     version = "2023.4.2"
 
     def _version_specific_upgrade(
-        self, config, start_version, config_filename: pathlib.Path, *args, **kwargs
+        self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         """
         Prompt users to delete Argo CRDs

@@ -1,7 +1,7 @@
 import logging
-import os
 import subprocess
 import textwrap
+from pathlib import Path
 
 from _nebari.provider import terraform
 from _nebari.provider.dns.cloudflare import update_record
@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 
 
 def provision_01_terraform_state(stage_outputs, config):
-    directory = "stages/01-terraform-state"
+    directory = Path("stages/01-terraform-state")
 
     if config["provider"] in {"existing", "local"}:
         stage_outputs[directory] = {}
     else:
         stage_outputs[directory] = terraform.deploy(
             terraform_import=True,
-            directory=os.path.join(directory, config["provider"]),
+            directory=directory / config["provider"],
             input_vars=input_vars.stage_01_terraform_state(stage_outputs, config),
             state_imports=state_imports.stage_01_terraform_state(stage_outputs, config),
         )
@@ -48,7 +48,7 @@ def provision_02_infrastructure(stage_outputs, config, disable_checks=False):
     directory = "stages/02-infrastructure"
 
     stage_outputs[directory] = terraform.deploy(
-        os.path.join(directory, config["provider"]),
+        Path(directory) / config["provider"],
         input_vars=input_vars.stage_02_infrastructure(stage_outputs, config),
     )
 

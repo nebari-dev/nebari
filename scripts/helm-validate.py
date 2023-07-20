@@ -1,13 +1,13 @@
 import json
 import logging
 import os
-import pathlib
 import re
+from pathlib import Path
 
 import hcl2
 from tqdm import tqdm
 
-from nebari.utils import deep_merge
+from _nebari.utils import deep_merge
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +28,7 @@ class HelmChartIndexer:
         """Get list of helm charts from nebari code-base"""
         # using pathlib to get list of files in the project root dir, look for all .tf files that
         # contain helm_release
-        path = pathlib.Path(__file__).parent.parent.absolute()
+        path = Path(__file__).parent.parent.absolute()
         path_tree = path.glob(f"{self.stages_dir}/**/main.tf")
         paths = []
         for file in path_tree:
@@ -72,7 +72,7 @@ class HelmChartIndexer:
                 raise ValueError(f"Could not find variable {var_name}")
 
     def retrieve_helm_information(self, filepath):
-        parent_path = pathlib.Path(filepath).parent
+        parent_path = Path(filepath).parent
 
         if parent_path.name in self.skip_charts:
             self.logger.debug(f"Skipping {parent_path.name}")
@@ -166,8 +166,9 @@ def pull_helm_chart(chart_index: dict, skip_charts: list) -> None:
     Raises:
         ValueError: If a chart could not be found in the `helm_charts` directory after pulling.
     """
-    chart_dir = "helm_charts"
-    os.makedirs(chart_dir, exist_ok=True)
+    chart_dir = Path("helm_charts")
+    chart_dir.mkdir(parents=True, exist_ok=True)
+
     os.chdir(chart_dir)
 
     for chart_name, chart_metadata in tqdm(
@@ -184,14 +185,14 @@ def pull_helm_chart(chart_index: dict, skip_charts: list) -> None:
             f"helm pull {chart_name} --version {chart_version} --repo {chart_repository} --untar"
         )
 
-        chart_filename = f"{chart_name}-{chart_version}.tgz"
-        if not os.path.exists(chart_filename):
+        chart_filename = Path(f"{chart_name}-{chart_version}.tgz")
+        if not chart_filename.exists():
             raise ValueError(
                 f"Could not find {chart_name}:{chart_version} directory in {chart_dir}."
             )
 
     print("All charts downloaded successfully!")
-    # shutil.rmtree(pathlib.Path(os.getcwd()).parent / chart_dir)
+    # shutil.rmtree(Path(os.getcwd()).parent / chart_dir)
 
 
 def add_workflow_job_summary(chart_index: dict):

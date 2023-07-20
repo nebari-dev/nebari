@@ -49,6 +49,34 @@ KEYCLOAK_COMMAND_MSG = (
 DEV_COMMAND_MSG = "Development tools and advanced features."
 
 
+def path_callback(value: str) -> Path:
+    return Path(value).expanduser().resolve()
+
+
+def config_path_callback(value: str) -> Path:
+    value = path_callback(value)
+    if not value.is_file():
+        raise ValueError(f"Passed configuration path {value} does not exist!")
+    return value
+
+
+CONFIG_PATH_OPTION: Path = typer.Option(
+    ...,
+    "--config",
+    "-c",
+    help="nebari configuration yaml file path, please pass in as -c/--config flag",
+    callback=config_path_callback,
+)
+
+OUTPUT_PATH_OPTION: Path = typer.Option(
+    Path.cwd(),
+    "-o",
+    "--output",
+    help="output directory",
+    callback=path_callback,
+)
+
+
 class OrderCommands(TyperGroup):
     def list_commands(self, ctx: Context):
         """Return list of commands in the order appear."""
@@ -193,12 +221,7 @@ def init(
 
 @app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def validate(
-    config: str = typer.Option(
-        ...,
-        "--config",
-        "-c",
-        help="nebari configuration yaml file path, please pass in as -c/--config flag",
-    ),
+    config_path=CONFIG_PATH_OPTION,
     enable_commenting: bool = typer.Option(
         False, "--enable-commenting", help="Toggle PR commenting on GitHub Actions"
     ),
@@ -206,13 +229,7 @@ def validate(
     """
     Validate the values in the [purple]nebari-config.yaml[/purple] file are acceptable.
     """
-    config_filename = Path(config)
-    if not config_filename.is_file():
-        raise ValueError(
-            f"Passed in configuration filename={config_filename} must exist."
-        )
-
-    config = load_yaml(config_filename)
+    config = load_yaml(config_path)
 
     if enable_commenting:
         # for PR's only
@@ -225,18 +242,8 @@ def validate(
 
 @app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def render(
-    output: str = typer.Option(
-        "./",
-        "-o",
-        "--output",
-        help="output directory",
-    ),
-    config: str = typer.Option(
-        ...,
-        "-c",
-        "--config",
-        help="nebari configuration yaml file path",
-    ),
+    output_path=OUTPUT_PATH_OPTION,
+    config_path=CONFIG_PATH_OPTION,
     dry_run: bool = typer.Option(
         False,
         "--dry-run",
@@ -246,34 +253,17 @@ def render(
     """
     Dynamically render the Terraform scripts and other files from your [purple]nebari-config.yaml[/purple] file.
     """
-    config_filename = Path(config)
+    config = load_yaml(config_path)
 
-    if not config_filename.is_file():
-        raise ValueError(
-            f"passed in configuration filename={config_filename} must exist"
-        )
+    verify(config)
 
-    config_yaml = load_yaml(config_filename)
-
-    verify(config_yaml)
-
-    render_template(output, config, dry_run=dry_run)
+    render_template(output_path, config_path, dry_run=dry_run)
 
 
 @app.command()
 def deploy(
-    config: str = typer.Option(
-        ...,
-        "--config",
-        "-c",
-        help="nebari configuration yaml file path",
-    ),
-    output: str = typer.Option(
-        "./",
-        "-o",
-        "--output",
-        help="output directory",
-    ),
+    config_path=CONFIG_PATH_OPTION,
+    output_path=OUTPUT_PATH_OPTION,
     dns_provider: str = typer.Option(
         False,
         "--dns-provider",
@@ -308,22 +298,15 @@ def deploy(
     """
     Deploy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
     """
-    config_filename = Path(config)
+    config = load_yaml(config_path)
 
-    if not config_filename.is_file():
-        raise ValueError(
-            f"passed in configuration filename={config_filename} must exist"
-        )
-
-    config_yaml = load_yaml(config_filename)
-
-    verify(config_yaml)
+    verify(config)
 
     if not disable_render:
-        render_template(output, config)
+        render_template(output_path, config_path)
 
     deploy_configuration(
-        config_yaml,
+        config,
         dns_provider=dns_provider,
         dns_auto_provision=dns_auto_provision,
         disable_prompt=disable_prompt,
@@ -334,15 +317,8 @@ def deploy(
 
 @app.command()
 def destroy(
-    config: str = typer.Option(
-        ..., "-c", "--config", help="nebari configuration file path"
-    ),
-    output: str = typer.Option(
-        "./",
-        "-o",
-        "--output",
-        help="output directory",
-    ),
+    config_path=CONFIG_PATH_OPTION,
+    output_path=OUTPUT_PATH_OPTION,
     disable_render: bool = typer.Option(
         False,
         "--disable-render",
@@ -358,21 +334,15 @@ def destroy(
     Destroy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
     """
 
-    def _run_destroy(config=config, disable_render=disable_render):
-        config_filename = Path(config)
-        if not config_filename.is_file():
-            raise ValueError(
-                f"passed in configuration filename={config_filename} must exist"
-            )
+    def _run_destroy(config_path=config_path, disable_render=disable_render):
+        config = load_yaml(config_path)
 
-        config_yaml = load_yaml(config_filename)
-
-        verify(config_yaml)
+        verify(config)
 
         if not disable_render:
-            render_template(output, config)
+            render_template(output_path, config_path)
 
-        destroy_configuration(config_yaml)
+        destroy_configuration(config)
 
     if disable_prompt:
         _run_destroy()
@@ -384,12 +354,7 @@ def destroy(
 
 @app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def upgrade(
-    config: str = typer.Option(
-        ...,
-        "-c",
-        "--config",
-        help="nebari configuration file path",
-    ),
+    config_path=CONFIG_PATH_OPTION,
     attempt_fixes: bool = typer.Option(
         False,
         "--attempt-fixes",
@@ -403,29 +368,13 @@ def upgrade(
 
     See the project [green]RELEASE.md[/green] for details.
     """
-    config_filename = Path(config)
-    if not config_filename.is_file():
-        raise ValueError(
-            f"passed in configuration filename={config_filename} must exist"
-        )
-
-    do_upgrade(config_filename, attempt_fixes=attempt_fixes)
+    do_upgrade(config_path, attempt_fixes=attempt_fixes)
 
 
 @app.command(rich_help_panel=SECOND_COMMAND_GROUP_NAME)
 def support(
-    config_filename: str = typer.Option(
-        ...,
-        "-c",
-        "--config",
-        help="nebari configuration file path",
-    ),
-    output: str = typer.Option(
-        "./nebari-support-logs.zip",
-        "-o",
-        "--output",
-        help="output filename",
-    ),
+    config_path=CONFIG_PATH_OPTION,
+    output_path=OUTPUT_PATH_OPTION,
 ):
     """
     Support tool to write all Kubernetes logs locally and compress them into a zip file.
@@ -437,7 +386,7 @@ def support(
 
     v1 = client.CoreV1Api()
 
-    namespace = get_config_namespace(config=config_filename)
+    namespace = get_config_namespace(config_path)
 
     pods = v1.list_namespaced_pod(namespace=namespace)
 
@@ -476,20 +425,14 @@ def support(
                 file.write("%s not available" % pod.metadata.name)
                 raise e
 
-    with ZipFile(output, "w") as zip:
+    with ZipFile(output_path, "w") as zip:
         for file in list(Path(f"./log/{namespace}").glob("*.txt")):
             print(file)
             zip.write(file)
 
 
-def get_config_namespace(config):
-    config_filename = Path(config)
-    if not config_filename.is_file():
-        raise ValueError(
-            f"passed in configuration filename={config_filename} must exist"
-        )
-
-    with config_filename.open() as f:
+def get_config_namespace(config_path):
+    with open(config_path) as f:
         config = yaml.safe_load(f.read())
 
     return config["namespace"]

@@ -5,6 +5,7 @@ import re
 import secrets
 import string
 import tempfile
+from pathlib import Path
 
 import requests
 
@@ -375,12 +376,10 @@ def render_config(
     )
 
     # Save default password to file
-    default_password_filename = os.path.join(
-        tempfile.gettempdir(), "NEBARI_DEFAULT_PASSWORD"
-    )
+    default_password_filename = Path(tempfile.gettempdir()) / "NEBARI_DEFAULT_PASSWORD"
     with open(default_password_filename, "w") as f:
         f.write(default_password)
-    os.chmod(default_password_filename, 0o700)
+    default_password_filename.chmod(0o700)
 
     config["theme"]["jupyterhub"]["hub_title"] = f"Nebari - { project_name }"
     config["theme"]["jupyterhub"][

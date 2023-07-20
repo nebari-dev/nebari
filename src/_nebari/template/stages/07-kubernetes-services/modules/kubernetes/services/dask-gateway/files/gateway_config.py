@@ -1,6 +1,6 @@
 import functools
 import json
-import os
+from pathlib import Path
 
 import urllib3
 from aiohttp import web
@@ -77,7 +77,7 @@ class NebariAuthentication(JupyterHubAuthenticator):
             )
 
         user.admin = "dask_gateway_admin" in data["roles"]
-        user.groups = [os.path.basename(group) for group in data["groups"]]
+        user.groups = [Path(group).name for group in data["groups"]]
         return user
 
 
@@ -143,7 +143,7 @@ def base_node_group(options):
 
 def base_conda_store_mounts(namespace, name):
     conda_store_pvc_name = config["conda-store-pvc"]
-    conda_store_mount = config["conda-store-mount"]
+    conda_store_mount = Path(config["conda-store-mount"])
 
     return {
         "scheduler_extra_pod_config": {
@@ -159,7 +159,7 @@ def base_conda_store_mounts(namespace, name):
         "scheduler_extra_container_config": {
             "volumeMounts": [
                 {
-                    "mountPath": os.path.join(conda_store_mount, namespace),
+                    "mountPath": str(conda_store_mount / namespace),
                     "name": "conda-store",
                     "subPath": namespace,
                 }
@@ -178,7 +178,7 @@ def base_conda_store_mounts(namespace, name):
         "worker_extra_container_config": {
             "volumeMounts": [
                 {
-                    "mountPath": os.path.join(conda_store_mount, namespace),
+                    "mountPath": str(conda_store_mount / namespace),
                     "name": "conda-store",
                     "subPath": namespace,
                 }
@@ -187,9 +187,7 @@ def base_conda_store_mounts(namespace, name):
         "worker_cmd": "/opt/conda-run-worker",
         "scheduler_cmd": "/opt/conda-run-scheduler",
         "environment": {
-            "CONDA_ENVIRONMENT": os.path.join(
-                conda_store_mount, namespace, "envs", name
-            ),
+            "CONDA_ENVIRONMENT": str(conda_store_mount / namespace / "envs" / name),
         },
     }
 
