@@ -40,7 +40,7 @@ def get_or_create_deployment_directory(cloud):
     else:
         project_name = f"pytest{cloud}{random_letters()}"
         deployment_dir = Path(Path(Path(DEPLOYMENT_DIR) / cloud) / project_name)
-        deployment_dir.mkdir()
+        deployment_dir.mkdir(parents=True)
     return deployment_dir
 
 
