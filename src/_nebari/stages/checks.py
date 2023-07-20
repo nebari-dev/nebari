@@ -198,7 +198,8 @@ def stage_05_kubernetes_keycloak(stage_outputs, config):
                 )
                 print(f"Attempt {i+1} succeeded connecting to keycloak master realm")
                 return True
-            except KeycloakError:
+            except KeycloakError as e:
+                print(e)
                 print(f"Attempt {i+1} failed connecting to keycloak master realm")
             time.sleep(timeout)
         return False
