@@ -302,5 +302,6 @@ def deploy_configuration(
                 skip_remote_state_provision,
             )
         except subprocess.CalledProcessError as e:
+            logger.error("subprocess command failed")
             logger.error(e.output)
             raise e
