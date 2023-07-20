@@ -9,7 +9,7 @@ import yaml
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
-from .utils import render_config_partial
+from tests.utils import render_config_partial
 
 import random
 import string
