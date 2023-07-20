@@ -152,8 +152,8 @@ jobs:
 
       - name: Playwright Tests
         env:
-          USERNAME: ${{ env.CYPRESS_EXAMPLE_USER_NAME }}
-          PASSWORD: ${{ env.CYPRESS_EXAMPLE_USER_PASSWORD }}
+          KEYCLOAK_USERNAME: ${{ env.CYPRESS_EXAMPLE_USER_NAME }}
+          KEYCLOAK_PASSWORD: ${{ env.CYPRESS_EXAMPLE_USER_PASSWORD }}
           NEBARI_FULL_URL: https://github-actions.nebari.dev/
         working-directory: tests_e2e/playwright
         run: |
