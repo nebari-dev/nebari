@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 import dotenv
 import pytest
@@ -21,8 +22,8 @@ def _navigator_session(browser_name):
     try:
         nav = Navigator(
             nebari_url=os.environ["NEBARI_FULL_URL"],
-            username=os.environ["USERNAME"],
-            password=os.environ["PASSWORD"],
+            username=os.environ["KEYCLOAK_USERNAME"],
+            password=os.environ["KEYCLOAK_PASSWORD"],
             headless=False,
             browser=browser_name,
             auth="password",
@@ -49,3 +50,9 @@ def navigator(_navigator_session):
     """High level navigator instance with a reset workspace."""
     _navigator_session.reset_workspace()
     yield _navigator_session
+
+
+@pytest.fixture(scope="session")
+def test_data_root():
+    here = Path(__file__).parent
+    return here / "test_data"

@@ -416,8 +416,8 @@ if __name__ == "__main__":
     dotenv.load_dotenv()
     nav = Navigator(
         nebari_url="https://nebari.quansight.dev/",
-        username=os.environ["USERNAME"],
-        password=os.environ["PASSWORD"],
+        username=os.environ["KEYCLOAK_USERNAME"],
+        password=os.environ["KEYCLOAK_PASSWORD"],
         auth="password",
         instance_name="small-instance",
         headless=False,

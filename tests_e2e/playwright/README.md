@@ -33,6 +33,7 @@ Then install playwright itself (required).
 Create a copy of the `.env` template file
 
 ```bash
+cd tests_e2e/playwright
 cp .env.tpl .env
 ```
 
@@ -40,7 +41,7 @@ Fill in the newly created `.env` file with the following values:
 
 * USERNAME: Nebari username for username/password login OR Google email address or Google sign in
 * PASSWORD: Password associated with USERNAME
-* NEBARI_FULL_URL: full url path to Nebari instance, e.g. "https://nebari.quansight.dev/"
+* NEBARI_FULL_URL: full url path including scheme to Nebari instance, e.g. "https://nebari.quansight.dev/"
 
 ## Running the Playwright tests
 
@@ -64,8 +65,8 @@ Another option is to run playwright methods outside of pytest. Both
     # instantiate the navigator class
     nav = Navigator(
         nebari_url="https://nebari.quansight.dev/",
-        username=os.environ["USERNAME"],
-        password=os.environ["PASSWORD"],
+        username=os.environ["KEYCLOAK_USERNAME"],
+        password=os.environ["KEYCLOAK_PASSWORD"],
         auth="password",
         instance_name="small-instance",
         headless=False,
@@ -153,8 +154,8 @@ An example of running a new run notebook test might look like this:
     # instantiate the navigator class
     nav = Navigator(
         nebari_url="https://nebari.quansight.dev/",
-        username=os.environ["USERNAME"],
-        password=os.environ["PASSWORD"],
+        username=os.environ["KEYCLOAK_USERNAME"],
+        password=os.environ["KEYCLOAK_PASSWORD"],
         auth="password",
         instance_name="small-instance",
         headless=False,
