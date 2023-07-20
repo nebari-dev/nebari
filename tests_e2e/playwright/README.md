@@ -39,9 +39,16 @@ cp .env.tpl .env
 
 Fill in the newly created `.env` file with the following values:
 
-* USERNAME: Nebari username for username/password login OR Google email address or Google sign in
-* PASSWORD: Password associated with USERNAME
+* KEYCLOAK_USERNAME: Nebari username for username/password login OR Google email address or Google sign in
+* KEYCLOAK_PASSWORD: Password associated with USERNAME
 * NEBARI_FULL_URL: full url path including scheme to Nebari instance, e.g. "https://nebari.quansight.dev/"
+
+This user can be created with the following command (or you can use an existing non-root user):
+
+```
+nebari keycloak adduser --user <username> <password> --config <NEBARI_CONFIG_PATH>
+```
+
 
 ## Running the Playwright tests
 
