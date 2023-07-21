@@ -4,8 +4,6 @@ on:
   schedule:
     - cron: "0 0 * * MON"
   workflow_dispatch:
-  # DISABLE push before merge
-  push:
 
 jobs:
   test-integration:
