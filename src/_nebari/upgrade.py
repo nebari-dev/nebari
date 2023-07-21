@@ -10,6 +10,7 @@ import rich
 from pydantic.error_wrappers import ValidationError
 from rich.prompt import Prompt
 
+from .constants import DEFAULT_NEBARI_IMAGE_TAG
 from .schema import is_version_accepted, verify
 from .utils import backup_config_file, load_yaml, yaml
 from .version import __version__, rounded_ver_parse
@@ -34,8 +35,8 @@ def do_upgrade(config_filename, attempt_fixes=False):
     except (ValidationError, ValueError) as e:
         if is_version_accepted(config.get("nebari_version", "")):
             # There is an unrelated validation problem
-            print(
-                f"Your config file {config_filename} appears to be already up-to-date for Nebari version {__version__} but there is another validation error.\n"
+            rich.print(
+                f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for Nebari version [green]{__version__}[/green] but there is another validation error.\n"
             )
             raise e
 
@@ -51,15 +52,15 @@ def do_upgrade(config_filename, attempt_fixes=False):
     with config_filename.open("wt") as f:
         yaml.dump(config, f)
 
-    print(
-        f"Saving new config file {config_filename} ready for Nebari version {__version__}"
+    rich.print(
+        f"Saving new config file [purple]{config_filename}[/purple] ready for Nebari version [green]{__version__}[/green]"
     )
 
     ci_cd = config.get("ci_cd", {}).get("type", "")
     if ci_cd in ("github-actions", "gitlab-ci"):
-        print(
-            f"\nSince you are using ci_cd {ci_cd} you also need to re-render the workflows and re-commit the files to your Git repo:\n"
-            f"   nebari render -c {config_filename}\n"
+        rich.print(
+            f"\nSince you are using ci_cd [green]{ci_cd}[/green] you also need to re-render the workflows and re-commit the files to your Git repo:\n"
+            f"   nebari render -c [purple]{config_filename}[/purple]\n"
         )
 
 
@@ -141,12 +142,10 @@ class UpgradeStep(ABC):
         for any actions that are only required for the particular upgrade you are creating.
         """
         finish_version = self.get_version()
-        __rounded_finish_version__ = ".".join(
-            [str(c) for c in rounded_ver_parse(finish_version)]
-        )
+        ".".join([str(c) for c in rounded_ver_parse(finish_version)])
 
-        print(
-            f"\n---> Starting upgrade from {start_version or 'old version'} to {finish_version}\n"
+        rich.print(
+            f"\n---> Starting upgrade from [green]{start_version or 'old version'}[/green] to [green]{finish_version}[/green]\n"
         )
 
         # Set the new version
@@ -155,51 +154,53 @@ class UpgradeStep(ABC):
         assert self.version != start_version
 
         if self.requires_nebari_version_field():
-            print(f"Setting nebari_version to {self.version}")
+            rich.print(f"Setting nebari_version to [green]{self.version}[/green]")
             config["nebari_version"] = self.version
 
-        # Update images
-        start_version_regex = start_version.replace(".", "\\.")
-        if start_version == "":
-            print("Looking for any previous image version")
-            start_version_regex = "0\\.[0-3]\\.[0-9]{1,2}"
-        docker_image_regex = re.compile(
-            f"^([A-Za-z0-9_-]+/[A-Za-z0-9_-]+):v{start_version_regex}$"
-        )
+        def contains_image_and_tag(s: str) -> bool:
+            # The pattern matches any of the three images and checks for a tag of format yyyy.m.x
+            pattern = r"^quay\.io\/nebari\/nebari-(jupyterhub|jupyterlab|dask-worker):\d{4}\.\d+\.\d+$"
+            return bool(re.match(pattern, s))
 
-        def _new_docker_image(
-            v,
-        ):
-            m = docker_image_regex.match(v)
-            if m:
-                return ":".join([m.groups()[0], f"v{__rounded_finish_version__}"])
-            return None
+        def replace_image_tag(s: str, new_version: str, config_path: str) -> str:
+            if not contains_image_and_tag(s):
+                return s
+            image_name, current_tag = s.split(":")
+            if current_tag == new_version:
+                return s
+            loc = f"{config_path}: {image_name}"
+            response = Prompt.ask(
+                f"\nDo you want to replace current tag [green]{current_tag}[/green] with [green]{new_version}[/green] for:\n[purple]{loc}[/purple]? [Y/n] ",
+                default="Y",
+            )
+            if response.lower() in ["y", "yes", ""]:
+                return s.replace(current_tag, new_version)
+            else:
+                return s
 
         for k, v in config.get("default_images", {}).items():
-            newimage = _new_docker_image(v)
-            if newimage:
-                print(f"In default_images: {k}: upgrading {v} to {newimage}")
-                config["default_images"][k] = newimage
+            config_path = f"default_images.{k}"
+            image = replace_image_tag(v, DEFAULT_NEBARI_IMAGE_TAG, config_path)
+            if v != image:
+                config["default_images"][k] = image
 
         for i, v in enumerate(config.get("profiles", {}).get("jupyterlab", [])):
-            oldimage = v.get("kubespawner_override", {}).get("image", "")
-            newimage = _new_docker_image(oldimage)
-            if newimage:
-                print(
-                    f"In profiles: jupyterlab: [{i}]: upgrading {oldimage} to {newimage}"
-                )
-                config["profiles"]["jupyterlab"][i]["kubespawner_override"][
-                    "image"
-                ] = newimage
+            v = v.get("kubespawner_override", {}).get("image", None)
+            if v:
+                config_path = f"profiles.jupyterlab.{i}.kubespawner_override.image"
+                image = replace_image_tag(v, DEFAULT_NEBARI_IMAGE_TAG, config_path)
+                if v != image:
+                    config["profiles"]["jupyterlab"][i]["kubespawner_override"][
+                        "image"
+                    ] = image
 
         for k, v in config.get("profiles", {}).get("dask_worker", {}).items():
-            oldimage = v.get("image", "")
-            newimage = _new_docker_image(oldimage)
-            if newimage:
-                print(
-                    f"In profiles: dask_worker: {k}: upgrading {oldimage} to {newimage}"
-                )
-                config["profiles"]["dask_worker"][k]["image"] = newimage
+            v = v.get("kubespawner_override", {}).get("image", None)
+            if v:
+                config_path = f"profiles.dask_worker.{k}.kubespawner_override.image"
+                image = replace_image_tag(v, DEFAULT_NEBARI_IMAGE_TAG)
+                if v != image:
+                    config["profiles"]["dask_worker"][k]["image"] = image
 
         # Run any version-specific tasks
         return self._version_specific_upgrade(
@@ -226,7 +227,9 @@ class Upgrade_0_3_12(UpgradeStep):
         """
         if config.get("default_images", {}).get("conda_store", None) is None:
             newimage = "quansight/conda-store-server:v0.3.3"
-            print(f"Adding default_images: conda_store image as {newimage}")
+            rich.print(
+                f"Adding default_images: conda_store image as [green]{newimage}[/green]"
+            )
             config["default_images"]["conda_store"] = newimage
         return config
 
@@ -259,8 +262,8 @@ class Upgrade_0_4_0(UpgradeStep):
                     f"{customauth_warning}\n\nRun `nebari upgrade --attempt-fixes` to switch to basic Keycloak authentication instead."
                 )
             else:
-                print(f"\nWARNING: {customauth_warning}")
-                print(
+                rich.print(f"\nWARNING: {customauth_warning}")
+                rich.print(
                     "\nSwitching to basic Keycloak authentication instead since you specified --attempt-fixes."
                 )
                 config["security"]["authentication"] = {"type": "password"}
@@ -297,8 +300,8 @@ class Upgrade_0_4_0(UpgradeStep):
         with realm_import_filename.open("wt") as f:
             json.dump(realm, f, indent=2)
 
-        print(
-            f"\nSaving user/group import file {realm_import_filename}.\n\n"
+        rich.print(
+            f"\nSaving user/group import file [purple]{realm_import_filename}[/purple].\n\n"
             "ACTION REQUIRED: You must import this file into the Keycloak admin webpage after you redeploy Nebari.\n"
             "Visit the URL path /auth/ and login as 'root'. Under Manage, click Import and select this file.\n\n"
             "Non-admin users will default to analyst group membership after the upgrade (no dask access), "
@@ -315,7 +318,7 @@ class Upgrade_0_4_0(UpgradeStep):
 
         if "terraform_modules" in config:
             del config["terraform_modules"]
-            print(
+            rich.print(
                 "Removing terraform_modules field from config as it is no longer used.\n"
             )
 
@@ -333,8 +336,8 @@ class Upgrade_0_4_0(UpgradeStep):
         )
         security.setdefault("keycloak", {})["initial_root_password"] = default_password
 
-        print(
-            f"Generated default random password={default_password} for Keycloak root user (Please change at /auth/ URL path).\n"
+        rich.print(
+            f"Generated default random password=[green]{default_password}[/green] for Keycloak root user (Please change at /auth/ URL path).\n"
         )
 
         # project was never needed in Azure - it remained as PLACEHOLDER in earlier nebari inits!
@@ -369,7 +372,7 @@ class Upgrade_0_4_1(UpgradeStep):
         """
         Upgrade jupyterlab profiles.
         """
-        print("\nUpgrading jupyterlab profiles in order to specify access type:\n")
+        rich.print("\nUpgrading jupyterlab profiles in order to specify access type:\n")
 
         profiles_jupyterlab = config.get("profiles", {}).get("jupyterlab", [])
         for profile in profiles_jupyterlab:
@@ -380,8 +383,8 @@ class Upgrade_0_4_1(UpgradeStep):
             else:
                 profile["access"] = "all"
 
-            print(
-                f"Setting access type of JupyterLab profile {name} to {profile['access']}"
+            rich.print(
+                f"Setting access type of JupyterLab profile [green]{name}[/green] to [green]{profile['access']}[/green]"
             )
         return config
 
@@ -408,14 +411,37 @@ class Upgrade_2023_4_2(UpgradeStep):
         )
 
         continue_ = Prompt.ask(
-            "Have you deleted the Argo Workflows CRDs and service accounts? [y/N]",
+            "Have you deleted the Argo Workflows CRDs and service accounts? [y/N] ",
             default="N",
         )
         if not continue_ == "y":
-            print(
-                f"You must delete the Argo Workflows CRDs and service accounts before upgrading to {self.version} (or later)."
+            rich.print(
+                f"You must delete the Argo Workflows CRDs and service accounts before upgrading to [green]{self.version}[/green] (or later)."
             )
             exit()
+
+        return config
+
+
+class Upgrade_2023_7_1(UpgradeStep):
+    version = "2023.7.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        argo = config.get("argo_workflows", {})
+        if argo.get("enabled"):
+            response = Prompt.ask(
+                "\nDo you want to enable the [green][link=https://nebari-docs.netlify.app/docs/how-tos/using-argo#jupyterflow-override-beta]Nebari Workflow Controller[/link][/green], required for [green][link=https://github.com/nebari-dev/argo-jupyter-scheduler]Argo-Jupyter-Scheduler[/link][green]? [Y/n] ",
+                default="Y",
+            )
+            if response.lower() in ["y", "yes", ""]:
+                argo["nebari_workflow_controller"] = {"enabled": True}
+
+        rich.print("\n ⚠️ Deprecation Warnings ⚠️")
+        rich.print(
+            f"-> [green]{self.version}[/green] is the last Nebari version that supports CDS Dashboards"
+        )
 
         return config
 
