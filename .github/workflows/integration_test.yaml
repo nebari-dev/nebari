@@ -21,6 +21,9 @@ jobs:
         run: |
           pip install .[dev]
           conda install --quiet --yes conda-build
+      - name: Debugging with tmate
+        uses: mxschmitt/action-tmate@v3.16
+
       - name: Integration Tests
         run: |
           pytest --version
