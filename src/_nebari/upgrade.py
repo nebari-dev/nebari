@@ -10,12 +10,16 @@ import rich
 from pydantic.error_wrappers import ValidationError
 from rich.prompt import Prompt
 
-from .constants import DEFAULT_NEBARI_IMAGE_TAG
 from .schema import is_version_accepted, verify
 from .utils import backup_config_file, load_yaml, yaml
 from .version import __version__, rounded_ver_parse
 
 logger = logging.getLogger(__name__)
+
+NEBARI_WORKFLOW_CONTROLLER_DOCS = (
+    "https://www.nebari.dev/docs/how-tos/using-argo/#jupyterflow-override-beta"
+)
+ARGO_JUPYTER_SCHEDULER_REPO = "https://github.com/nebari-dev/argo-jupyter-scheduler"
 
 
 def do_upgrade(config_filename, attempt_fixes=False):
@@ -41,10 +45,13 @@ def do_upgrade(config_filename, attempt_fixes=False):
             raise e
 
     start_version = config.get("nebari_version", "")
+    print("start_version: ", start_version)
 
     UpgradeStep.upgrade(
         config, start_version, __version__, config_filename, attempt_fixes
     )
+    print(config.get("nebari_version"))
+    print(config.get("default_images"))
 
     # Backup old file
     backup_config_file(config_filename, f".{start_version or 'old'}")
@@ -90,6 +97,7 @@ class UpgradeStep(ABC):
         """
         starting_ver = rounded_ver_parse(start_version or "0.0.0")
         finish_ver = rounded_ver_parse(finish_version)
+        print("finish_ver: ", finish_ver)
 
         if finish_ver < starting_ver:
             raise ValueError(
@@ -106,6 +114,8 @@ class UpgradeStep(ABC):
             ],
             key=rounded_ver_parse,
         )
+
+        print("step_versions: ", step_versions)
 
         current_start_version = start_version
         for stepcls in [cls._steps[str(v)] for v in step_versions]:
@@ -142,8 +152,9 @@ class UpgradeStep(ABC):
         for any actions that are only required for the particular upgrade you are creating.
         """
         finish_version = self.get_version()
-        ".".join([str(c) for c in rounded_ver_parse(finish_version)])
-
+        __rounded_finish_version__ = ".".join(
+            [str(c) for c in rounded_ver_parse(finish_version)]
+        )
         rich.print(
             f"\n---> Starting upgrade from [green]{start_version or 'old version'}[/green] to [green]{finish_version}[/green]\n"
         )
@@ -158,11 +169,29 @@ class UpgradeStep(ABC):
             config["nebari_version"] = self.version
 
         def contains_image_and_tag(s: str) -> bool:
-            # The pattern matches any of the three images and checks for a tag of format yyyy.m.x
+            # match on `quay.io/nebari/nebari-<...>:YYYY.MM.XX``
             pattern = r"^quay\.io\/nebari\/nebari-(jupyterhub|jupyterlab|dask-worker):\d{4}\.\d+\.\d+$"
             return bool(re.match(pattern, s))
 
+        def replace_image_tag_legacy(image, start_version, new_version):
+            start_version_regex = start_version.replace(".", "\\.")
+            if not start_version:
+                start_version_regex = "0\\.[0-3]\\.[0-9]{1,2}"
+
+            docker_image_regex = re.compile(
+                f"^([A-Za-z0-9_-]+/[A-Za-z0-9_-]+):v{start_version_regex}$"
+            )
+
+            m = docker_image_regex.match(image)
+            if m:
+                return ":".join([m.groups()[0], f"v{new_version}"])
+            return None
+
         def replace_image_tag(s: str, new_version: str, config_path: str) -> str:
+            legacy_replacement = replace_image_tag_legacy(s, start_version, new_version)
+            if legacy_replacement:
+                return legacy_replacement
+
             if not contains_image_and_tag(s):
                 return s
             image_name, current_tag = s.split(":")
@@ -178,29 +207,55 @@ class UpgradeStep(ABC):
             else:
                 return s
 
+        def set_nested_item(config: dict, config_path: list, value: str):
+            config_path = config_path.split(".")
+            for k in config_path[:-1]:
+                try:
+                    k = int(k)
+                except ValueError:
+                    pass
+                config = config[k]
+            try:
+                config_path[-1] = int(config_path[-1])
+            except ValueError:
+                pass
+            config[config_path[-1]] = value
+
+        def update_image_tag(config, config_path, current_image, new_version):
+            new_image = replace_image_tag(current_image, new_version, config_path)
+            if new_image != current_image:
+                set_nested_item(config, config_path, new_image)
+
+            return config
+
+        # update default_images
         for k, v in config.get("default_images", {}).items():
             config_path = f"default_images.{k}"
-            image = replace_image_tag(v, DEFAULT_NEBARI_IMAGE_TAG, config_path)
-            if v != image:
-                config["default_images"][k] = image
+            config = update_image_tag(
+                config, config_path, v, __rounded_finish_version__
+            )
 
+        # update profiles.jupyterlab images
         for i, v in enumerate(config.get("profiles", {}).get("jupyterlab", [])):
-            v = v.get("kubespawner_override", {}).get("image", None)
-            if v:
-                config_path = f"profiles.jupyterlab.{i}.kubespawner_override.image"
-                image = replace_image_tag(v, DEFAULT_NEBARI_IMAGE_TAG, config_path)
-                if v != image:
-                    config["profiles"]["jupyterlab"][i]["kubespawner_override"][
-                        "image"
-                    ] = image
+            current_image = v.get("kubespawner_override", {}).get("image", None)
+            if current_image:
+                config = update_image_tag(
+                    config,
+                    f"profiles.jupyterlab.{i}.kubespawner_override.image",
+                    current_image,
+                    __rounded_finish_version__,
+                )
 
+        # update profiles.dask_worker images
         for k, v in config.get("profiles", {}).get("dask_worker", {}).items():
-            v = v.get("kubespawner_override", {}).get("image", None)
-            if v:
-                config_path = f"profiles.dask_worker.{k}.kubespawner_override.image"
-                image = replace_image_tag(v, DEFAULT_NEBARI_IMAGE_TAG)
-                if v != image:
-                    config["profiles"]["dask_worker"][k]["image"] = image
+            current_image = v.get("kubespawner_override", {}).get("image", None)
+            if current_image:
+                config = update_image_tag(
+                    config,
+                    f"profiles.dask_worker.{k}.kubespawner_override.image",
+                    current_image,
+                    __rounded_finish_version__,
+                )
 
         # Run any version-specific tasks
         return self._version_specific_upgrade(
@@ -423,8 +478,8 @@ class Upgrade_2023_4_2(UpgradeStep):
         return config
 
 
-class Upgrade_2023_7_1(UpgradeStep):
-    version = "2023.7.1"
+class Upgrade_2023_5_2(UpgradeStep):
+    version = "2023.5.2"
 
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
@@ -432,7 +487,7 @@ class Upgrade_2023_7_1(UpgradeStep):
         argo = config.get("argo_workflows", {})
         if argo.get("enabled"):
             response = Prompt.ask(
-                "\nDo you want to enable the [green][link=https://nebari-docs.netlify.app/docs/how-tos/using-argo#jupyterflow-override-beta]Nebari Workflow Controller[/link][/green], required for [green][link=https://github.com/nebari-dev/argo-jupyter-scheduler]Argo-Jupyter-Scheduler[/link][green]? [Y/n] ",
+                f"\nDo you want to enable the [green][link={NEBARI_WORKFLOW_CONTROLLER_DOCS}]Nebari Workflow Controller[/link][/green], required for [green][link={ARGO_JUPYTER_SCHEDULER_REPO}]Argo-Jupyter-Scheduler[/link][green]? [Y/n] ",
                 default="Y",
             )
             if response.lower() in ["y", "yes", ""]:
