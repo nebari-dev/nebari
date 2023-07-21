@@ -28,33 +28,37 @@ def ignore_warnings():
     warnings.filterwarnings("ignore", category=InsecureRequestWarning)
 
 
-def random_letters(length=5):
+def _random_letters(length=5):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for _ in range(length)).lower()
 
 
-def get_or_create_deployment_directory(cloud):
+def _get_or_create_deployment_directory(cloud):
+    """This will create a directory to initialise and deploy
+    Nebari from.
+    """
     deployment_dirs = list(Path(Path(DEPLOYMENT_DIR) / cloud).glob(f"pytest{cloud}*"))
     if deployment_dirs:
         deployment_dir = deployment_dirs[0]
     else:
-        project_name = f"pytest{cloud}{random_letters()}"
+        project_name = f"pytest{cloud}{_random_letters()}"
         deployment_dir = Path(Path(Path(DEPLOYMENT_DIR) / cloud) / project_name)
         deployment_dir.mkdir(parents=True)
     return deployment_dir
 
 
-def set_do_environment():
+def _set_do_environment():
     os.environ['AWS_ACCESS_KEY_ID'] = os.environ['SPACES_ACCESS_KEY_ID']
     os.environ['AWS_SECRET_ACCESS_KEY'] = os.environ['SPACES_SECRET_ACCESS_KEY']
 
 
 @pytest.fixture(scope="session")
 def deploy(request):
+    """Deploy Nebari on the given cloud, currently only DigitalOcean"""
     ignore_warnings()
     cloud = request.param
-    set_do_environment()
-    deployment_dir = get_or_create_deployment_directory(cloud)
+    _set_do_environment()
+    deployment_dir = _get_or_create_deployment_directory(cloud)
     config = render_config_partial(
         project_name=deployment_dir.name,
         namespace="dev",
@@ -81,12 +85,11 @@ def deploy(request):
     except Exception as e:
         logger.info(f"Deploy Failed, Exception: {e}")
         logger.exception(e)
-        raise
-    logger.info("Teardown")
-    return destroy(config)
+    logger.info("Tearing down")
+    return _destroy(config)
 
 
-def destroy(config):
+def _destroy(config):
     destroy_configuration(config)
 
 
