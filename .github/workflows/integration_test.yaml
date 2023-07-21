@@ -1,7 +1,10 @@
-name: "Integration Tests"
+name: "Deploy on Digital Ocean"
 
 on:
-  pull_request:
+  schedule:
+    - cron: "0 0 * * MON"
+  workflow_dispatch:
+  # DISABLE push before merge
   push:
 
 jobs:
@@ -21,13 +24,11 @@ jobs:
         run: |
           pip install .[dev]
           conda install --quiet --yes conda-build
-      - name: Debugging with tmate
-        uses: mxschmitt/action-tmate@v3.16
 
       - name: Integration Tests
         run: |
           pytest --version
-          pytest tests_integration/ -vvv
+          pytest tests_integration/ -vvv -s
         env:
           NEBARI_K8S_VERSION: 1.24.13-do.0
           DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
