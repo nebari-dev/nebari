@@ -24,7 +24,7 @@ jobs:
       - name: Integration Tests
         run: |
           pytest --version
-          pytest tests_integration -vvv
+          pytest tests_integration/ -vvv
         env:
           NEBARI_K8S_VERSION: 1.24.13-do.0
           DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
