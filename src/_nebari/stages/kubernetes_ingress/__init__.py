@@ -149,8 +149,10 @@ class Certificate(schema.Base):
     acme_email: typing.Optional[str]
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
 
-class DnsConfig(schema.Base):
+
+class DnsProvider(schema.Base):
     provider: typing.Optional[str]
+
 
 class Ingress(schema.Base):
     terraform_overrides: typing.Dict = {}
@@ -160,7 +162,7 @@ class InputSchema(schema.Base):
     domain: typing.Optional[str]
     certificate: Certificate = Certificate()
     ingress: Ingress = Ingress()
-    dns: DnsConfig = DnsConfig()
+    dns: DnsProvider = DnsProvider()
 
 
 class IngressEndpoint(schema.Base):
