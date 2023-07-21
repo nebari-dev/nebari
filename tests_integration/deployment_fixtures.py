@@ -1,22 +1,20 @@
 import logging
-import pytest
 import os
+import random
+import string
 import warnings
-
 from pathlib import Path
 
+import pytest
 import yaml
+from urllib3.exceptions import InsecureRequestWarning
 
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
-from urllib3.exceptions import InsecureRequestWarning
 from tests.utils import render_config_partial
 
-import random
-import string
-
-DEPLOYMENT_DIR = '_test_deploy'
+DEPLOYMENT_DIR = "_test_deploy"
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +28,7 @@ def ignore_warnings():
 
 def _random_letters(length=5):
     letters = string.ascii_letters
-    return ''.join(random.choice(letters) for _ in range(length)).lower()
+    return "".join(random.choice(letters) for _ in range(length)).lower()
 
 
 def _get_or_create_deployment_directory(cloud):
@@ -48,8 +46,8 @@ def _get_or_create_deployment_directory(cloud):
 
 
 def _set_do_environment():
-    os.environ['AWS_ACCESS_KEY_ID'] = os.environ['SPACES_ACCESS_KEY_ID']
-    os.environ['AWS_SECRET_ACCESS_KEY'] = os.environ['SPACES_SECRET_ACCESS_KEY']
+    os.environ["AWS_ACCESS_KEY_ID"] = os.environ["SPACES_ACCESS_KEY_ID"]
+    os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
 
 
 @pytest.fixture(scope="session")
