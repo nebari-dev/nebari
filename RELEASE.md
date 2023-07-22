@@ -11,7 +11,55 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ## Upcoming Release
 
-### Release 2023.5.1 - May 5, 2023
+## Release 2023.7.1 - July 21, 2023
+
+> WARNING: CDS Dashboards will be deprecated soon. Nebari 2023.7.1 will be the last release with support for CDS Dashboards integration. A new dashboard sharing mechanism added in the near future, but some releases in the interim will not have dashboard sharing capabilities..
+
+### Feature changes and enhancements
+
+* Addition of Nebari-Workflow-Controller in [PR 1741](https://github.com/nebari-dev/nebari/pull/1741)
+* Addition of Argo-Jupyter-Scheduler in [PR 1832](https://github.com/nebari-dev/nebari/pull/1832)
+* Make most of the API private
+
+### Breaking Changes
+
+* No known breaking changes.
+
+### What's Changed
+* use conda forge explicitly in conda build test by @pmeier in https://github.com/nebari-dev/nebari/pull/1771
+* document that the upgrade command is for all nebari upgrades by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1794
+* don't fail CI matrices fast by @pmeier in https://github.com/nebari-dev/nebari/pull/1804
+* unvendor keycloak_metrics_spi by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1810
+* Dedent fail-fast by @iameskild in https://github.com/nebari-dev/nebari/pull/1815
+* support deploying on existing vpc on aws by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1807
+* purge most danlging qhub references by @pmeier in https://github.com/nebari-dev/nebari/pull/1802
+* Add Argo Workflow Admission controller by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1741
+* purge infracost CLI command / CI jobs by @pmeier in https://github.com/nebari-dev/nebari/pull/1820
+* remove unused function parameters and CLI flags by @pmeier in https://github.com/nebari-dev/nebari/pull/1725
+* purge docs and nox by @pmeier in https://github.com/nebari-dev/nebari/pull/1801
+* Add Helm chart lint tool by @viniciusdc in https://github.com/nebari-dev/nebari/pull/1679
+* don't set /etc/hosts in CI by @pmeier in https://github.com/nebari-dev/nebari/pull/1729
+* remove execute permissions on templates by @pmeier in https://github.com/nebari-dev/nebari/pull/1798
+* fix deprecated file deletion by @pmeier in https://github.com/nebari-dev/nebari/pull/1799
+* make nebari API private by @pmeier in https://github.com/nebari-dev/nebari/pull/1778
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/1831
+* Simplify CI by @iameskild in https://github.com/nebari-dev/nebari/pull/1819
+* Fix edge-case where k8s_version is equal to HIGHEST_SUPPORTED_K8S_VER… by @iameskild in https://github.com/nebari-dev/nebari/pull/1842
+* add more configuration to enable private clusters on AWS by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1841
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/1851
+* AWS gov cloud support by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1857
+* Pathlib everywhere by @pmeier in https://github.com/nebari-dev/nebari/pull/1773
+* Initial playwright setup by @kcpevey in https://github.com/nebari-dev/nebari/pull/1665
+* Changes required for Jupyter-Scheduler integration  by @iameskild in https://github.com/nebari-dev/nebari/pull/1832
+* Update upgrade command in preparation for release by @iameskild in https://github.com/nebari-dev/nebari/pull/1868
+* Add release notes by @iameskild in https://github.com/nebari-dev/nebari/issues/1869
+
+### New Contributors
+* @sblair-metrostar made their first contribution in https://github.com/nebari-dev/nebari/pull/1857
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.5.1...2023.7.1
+
+## Release 2023.5.1 - May 5, 2023
 
 ### Feature changes and enhancements
 
