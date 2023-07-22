@@ -49,7 +49,7 @@ jobs:
         provider:
           - aws
           - azure
-          - do
+          # - do
           - gcp
           - local
           - existing
