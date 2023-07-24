@@ -94,7 +94,7 @@ def _destroy(config):
 
 
 def on_cloud(param=None):
-    all_clouds = ['aws', 'do']
+    all_clouds = ["aws", "do"]
 
     def _create_pytest_param(cloud):
         return pytest.param(cloud, marks=getattr(pytest.mark, cloud))
