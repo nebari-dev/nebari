@@ -55,7 +55,9 @@ def deploy(request):
     """Deploy Nebari on the given cloud, currently only DigitalOcean"""
     ignore_warnings()
     cloud = request.param
-    _set_do_environment()
+    logger.info(f"Deploying: {cloud}")
+    if cloud == "do":
+        _set_do_environment()
     deployment_dir = _get_or_create_deployment_directory(cloud)
     config = render_config_partial(
         project_name=deployment_dir.name,
@@ -91,5 +93,12 @@ def _destroy(config):
     destroy_configuration(config)
 
 
-def on_cloud(param):
-    return pytest.mark.parametrize("deploy", [param], indirect=True)
+def on_cloud(param=None):
+    all_clouds = ['aws', 'do']
+
+    def _create_pytest_param(cloud):
+        return pytest.param(cloud, marks=getattr(pytest.mark, cloud))
+
+    all_clouds_param = map(_create_pytest_param, all_clouds)
+    params = [_create_pytest_param(param)] if param else all_clouds_param
+    return pytest.mark.parametrize("deploy", params, indirect=True)

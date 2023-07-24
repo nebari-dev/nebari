@@ -9,7 +9,7 @@ def disable_warnings():
     ignore_warnings()
 
 
-@on_cloud("do")
+@on_cloud()
 def test_do_service_status(deploy):
     """Tests if deployment on DigitalOcean succeeds"""
     service_urls = deploy["stages/07-kubernetes-services"]["service_urls"]["value"]
@@ -39,7 +39,7 @@ def test_do_service_status(deploy):
     )
 
 
-@on_cloud("do")
+@on_cloud()
 def test_verify_keycloak_users(deploy):
     """Tests if keycloak is working and it has expected users"""
     keycloak_credentials = deploy["stages/05-kubernetes-keycloak"][
