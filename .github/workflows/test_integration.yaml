@@ -1,6 +1,7 @@
 name: "Deploy on Digital Ocean"
 
 on:
+  push:
   schedule:
     - cron: "0 0 * * MON"
   workflow_dispatch:
