@@ -12,7 +12,7 @@ from urllib3.exceptions import InsecureRequestWarning
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
-from tests.utils import render_config_partial
+from tests.tests_unit.utils import render_config_partial
 
 DEPLOYMENT_DIR = "_test_deploy"
 

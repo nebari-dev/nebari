@@ -1,7 +1,7 @@
 import pytest
 import requests
 
-from tests_integration.deployment_fixtures import ignore_warnings, on_cloud
+from tests.tests_integration.deployment_fixtures import ignore_warnings, on_cloud
 
 
 @pytest.fixture(autouse=True)

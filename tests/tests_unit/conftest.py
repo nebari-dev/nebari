@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from tests.utils import INIT_INPUTS, NEBARI_CONFIG_FN, PRESERVED_DIR
+from tests.tests_unit.utils import INIT_INPUTS, NEBARI_CONFIG_FN, PRESERVED_DIR
 
 
 @pytest.fixture(params=INIT_INPUTS)
