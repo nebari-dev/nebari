@@ -9,6 +9,11 @@ def disable_warnings():
     ignore_warnings()
 
 
+@on_cloud("aws")
+def test_playwright_int(deploy, navigator):
+    pass
+
+
 @on_cloud()
 def test_service_status(deploy):
     """Tests if deployment on DigitalOcean succeeds"""

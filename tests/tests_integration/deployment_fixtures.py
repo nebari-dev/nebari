@@ -50,6 +50,21 @@ def _set_do_environment():
     os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
 
 
+def _set_nebari_creds_in_environment(deploy_config):
+    pass
+    # import ipdb as pdb; pdb.set_trace()
+    # os.environ["NEBARI_FULL_URL"] = deploy_config
+    # os.environ["KEYCLOAK_USERNAME"] = deploy_config
+    # os.environ["KEYCLOAK_PASSWORD"] = deploy_config
+
+
+def _create_nebari_user(config, deploy_config):
+    from _nebari.keycloak import create_user, get_keycloak_admin_from_config
+    keycloak_admin = get_keycloak_admin_from_config(config)
+    user = create_user(keycloak_admin, "pytest", "pytest-password")
+    return user
+
+
 @pytest.fixture(scope="session")
 def deploy(request):
     """Deploy Nebari on the given cloud, currently only DigitalOcean"""
@@ -72,9 +87,12 @@ def deploy(request):
     logger.info(f"Temporary directory: {deployment_dir}")
     with open(Path("nebari-config.yaml"), "w") as f:
         yaml.dump(config, f)
-    render_template(deployment_dir_abs, Path("nebari-config.yaml"))
+    config_path = deployment_dir_abs / Path("nebari-config.yaml")
+    if not config_path.exists():
+        logger.info(f"Creating config at {config_path}")
+        render_template(deployment_dir_abs, Path("nebari-config.yaml"))
     try:
-        yield deploy_configuration(
+        deploy_config = deploy_configuration(
             config=config,
             dns_provider="cloudflare",
             dns_auto_provision=True,
@@ -82,6 +100,9 @@ def deploy(request):
             disable_checks=False,
             skip_remote_state_provision=False,
         )
+        # import ipdb as pdb; pdb.set_trace()
+        _set_nebari_creds_in_environment(deploy_config)
+        yield deploy_config
     except Exception as e:
         logger.info(f"Deploy Failed, Exception: {e}")
         logger.exception(e)
