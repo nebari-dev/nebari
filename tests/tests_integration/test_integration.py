@@ -10,7 +10,7 @@ def disable_warnings():
 
 
 @on_cloud()
-def test_do_service_status(deploy):
+def test_service_status(deploy):
     """Tests if deployment on DigitalOcean succeeds"""
     service_urls = deploy["stages/07-kubernetes-services"]["service_urls"]["value"]
     assert (
