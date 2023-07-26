@@ -5,8 +5,6 @@ on:
     paths:
       - ".github/workflows/test.yaml"
       - "tests/**"
-      - "tests_deployment/**"
-      - "tests_e2e/cypress/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"
@@ -19,8 +17,6 @@ on:
     paths:
       - ".github/workflows/test.yaml"
       - "tests/**"
-      - "tests_deployment/**"
-      - "tests_e2e/cypress/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"
@@ -56,4 +52,4 @@ jobs:
       - name: Test Nebari
         run: |
           pytest --version
-          pytest --ignore=tests_deployment --ignore=tests_e2e/playwright
+          pytest --ignore=tests/tests_deployment --ignore=tests/tests_e2e/playwright --ignore=tests/tests_integration

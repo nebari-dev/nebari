@@ -48,4 +48,4 @@ jobs:
       - name: Integration Tests
         run: |
           pytest --version
-          pytest tests_integration/ -vvv -s -m ${{ matrix.provider }}
+          pytest tests/tests_integration/ -vvv -s -m ${{ matrix.provider }}
