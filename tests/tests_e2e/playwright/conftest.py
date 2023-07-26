@@ -1,1 +1,1 @@
-pytest_plugins = ["tests_e2e.playwright.fixtures"]
+pytest_plugins = ["tests.common.playwright_fixtures"]
