@@ -7,7 +7,6 @@ import pytest
 
 from tests.tests_e2e.playwright.navigator import Navigator
 
-
 logger = logging.getLogger()
 
 
