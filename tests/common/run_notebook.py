@@ -2,7 +2,7 @@ import contextlib
 import logging
 from pathlib import Path
 
-from navigator import Navigator
+from tests.common.navigator import Navigator
 
 logger = logging.getLogger()
 

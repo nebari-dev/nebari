@@ -5,7 +5,7 @@ from pathlib import Path
 import dotenv
 import pytest
 
-from tests.tests_e2e.playwright.navigator import Navigator
+from tests.common.navigator import Navigator
 
 logger = logging.getLogger()
 

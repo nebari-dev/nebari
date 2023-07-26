@@ -1,4 +1,4 @@
-from run_notebook import Notebook
+from tests.common.run_notebook import Notebook
 
 
 def test_notebook(navigator, test_data_root):
