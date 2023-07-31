@@ -1,4 +1,3 @@
-import contextlib
 import logging
 import re
 import time
@@ -72,11 +71,38 @@ class Notebook:
             self._restart_run_all()
             # Wait for a couple of seconds to make sure it's re-started
             time.sleep(2)
-            self.wait_for_commands_completion()
-            all_outputs = self.get_all_outputs()
+            self._wait_for_commands_completion()
+            self.run_in_last_cell("import torch;torch.cuda.is_available()")
+            import ipdb as pdb; pdb.set_trace()
+            self.assert_code_output("import torch;torch.cuda.is_available()", "True")
+            all_outputs = self._get_outputs()
             self.assert_match_all_outputs(expected_outputs, all_outputs)
 
-    def wait_for_commands_completion(self, timeout=120):
+    def assert_code_output(self, code, expected_output):
+        self.run_in_last_cell(code)
+        self._wait_for_commands_completion()
+        outputs = self._get_outputs()
+        assert expected_output == outputs[-1]
+
+    def run_in_last_cell(self, code):
+        self._create_new_cell()
+        cell = self._get_last_cell()
+        cell.click()
+        cell.type(code)
+        cell.press("Shift+Enter")
+
+    def _create_new_cell(self):
+        new_cell_button = self.nav.page.query_selector('button[data-command="notebook:insert-cell-below"]')
+        new_cell_button.click()
+
+    def _get_last_cell(self):
+        cells = self.nav.page.locator('.CodeMirror-code').all()
+        for cell in reversed(cells):
+            if cell.is_visible():
+                return cell
+        raise ValueError("Unable to get last cell")
+
+    def _wait_for_commands_completion(self, timeout=120):
         elapsed_time = 0
         start_time = time.time()
         still_visible = True
@@ -93,7 +119,7 @@ class Notebook:
                 f"but couldn't finish in {timeout} sec"
             )
 
-    def get_all_outputs(self):
+    def _get_outputs(self):
         output_elements = self.nav.page.query_selector_all(".jp-OutputArea-output")
         text_content = [element.text_content() for element in output_elements]
         return text_content
