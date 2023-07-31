@@ -62,6 +62,8 @@ class Notebook:
 
         for i in range(retry):
             self._restart_run_all()
+            # Wait for a couple of seconds to make sure it's re-started
+            time.sleep(2)
             self.wait_for_commands_completion()
             all_outputs = self.get_all_outputs()
             self.assert_match_all_outputs(expected_outputs, all_outputs)
@@ -71,8 +73,8 @@ class Notebook:
         start_time = time.time()
         still_visible = True
         while elapsed_time < timeout:
-            running = self.nav.page.get_by_text("[*]", exact=False)
-            still_visible = running.is_visible()
+            running = self.nav.page.get_by_text("[*]").all()
+            still_visible = any(list(map(lambda r: r.is_visible(), running)))
             elapsed_time = time.time() - start_time
             time.sleep(1)
             if not still_visible:

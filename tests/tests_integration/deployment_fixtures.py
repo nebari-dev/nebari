@@ -5,7 +5,6 @@ import string
 import warnings
 from pathlib import Path
 
-import keycloak
 import pytest
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -26,6 +25,11 @@ def ignore_warnings():
     # DeprecationWarning and InsecureRequestWarning
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=InsecureRequestWarning)
+
+
+@pytest.fixture(autouse=True)
+def disable_warnings():
+    ignore_warnings()
 
 
 def _random_letters(length=5):
@@ -59,6 +63,7 @@ def _set_nebari_creds_in_environment(config):
 
 
 def _create_nebari_user(config):
+    import keycloak
     from _nebari.keycloak import create_user, get_keycloak_admin_from_config
     keycloak_admin = get_keycloak_admin_from_config(config)
     try:
@@ -66,7 +71,7 @@ def _create_nebari_user(config):
         return user
     except keycloak.KeycloakPostError as e:
         if e.response_code == 409:
-            logger.warning(f"User already exists: {e.response_body}")
+            logger.info(f"User already exists: {e.response_body}")
 
 
 @pytest.fixture(scope="session")
