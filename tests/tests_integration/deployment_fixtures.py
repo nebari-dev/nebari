@@ -5,6 +5,7 @@ import string
 import warnings
 from pathlib import Path
 
+import keycloak
 import pytest
 from urllib3.exceptions import InsecureRequestWarning
 
@@ -12,6 +13,7 @@ from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
 from _nebari.utils import yaml
+from tests.common.gpu_config import add_gpu_config
 from tests.tests_unit.utils import render_config_partial
 
 DEPLOYMENT_DIR = "_test_deploy"
@@ -62,68 +64,9 @@ def _create_nebari_user(config):
     try:
         user = create_user(keycloak_admin, "pytest", "pytest-password")
         return user
-    except Exception as e:
-        # Handle: User exists with same username
-        pass
-
-
-def add_gpu_config(config):
-    gpu_node = {
-        'instance': 'g4dn.xlarge',
-        'min_nodes': 1,
-        'max_nodes': 4,
-        "single_subnet": False,
-        "gpu": True
-    }
-    gpu_docker_image = "quay.io/nebari/nebari-jupyterlab-gpu:2023.7.1"
-    jupyterlab_profile = {
-        'display_name': 'GPU Instance',
-        'description': '4 CPU / 16GB RAM / 1 NVIDIA T4 GPU (16 GB GPU RAM)',
-        'groups': [
-            "gpu-access"
-        ],
-        'kubespawner_override': {
-            "image": gpu_docker_image,
-            'cpu_limit': 4,
-            'cpu_guarantee': 3,
-            'mem_limit': '16G',
-            'mem_guarantee': '10G',
-            "extra_resource_limits": {
-                "nvidia.com/gpu": 1
-            },
-            "node_selector": {
-                "beta.kubernetes.io/instance-type": "g4dn.xlarge",
-            }
-        }
-    }
-    config['amazon_web_services']['node_groups']["gpu-tesla-g4"] = gpu_node
-    config['profiles']['jupyterlab'].append(jupyterlab_profile)
-
-    config['environments']['environment-gpu.yaml'] = {
-        'name': 'gpu',
-        'channels': [
-            'pytorch',
-            'nvidia',
-            "conda-forge"
-        ],
-        'dependencies': [
-            'python=3.10.8',
-            'ipykernel=6.21.0',
-            'ipywidgets==7.7.1',
-            'torchvision',
-            'torchaudio',
-            'cudatoolkit',
-            'pytorch-cuda=11.7',
-            'pytorch::pytorch',
-        ]
-    }
-
-    config['environments']['environment-dask.yaml']['dependencies'].append("torchvision")
-    config['environments']['environment-dask.yaml']['dependencies'].append("torchaudio")
-    config['environments']['environment-dask.yaml']['dependencies'].append("cudatoolkit")
-    config['environments']['environment-dask.yaml']['dependencies'].append("pytorch-cuda=11.7")
-    config['environments']['environment-dask.yaml']['dependencies'].append("pytorch")
-    return config
+    except keycloak.KeycloakPostError as e:
+        if e.response_code == 409:
+            logger.warning(f"User already exists: {e.response_body}")
 
 
 @pytest.fixture(scope="session")
@@ -149,7 +92,8 @@ def deploy(request):
         "acme_email": "internal-devops@quansight.com",
         "acme_server": "https://acme-v02.api.letsencrypt.org/directory",
     }
-    config = add_gpu_config(config)
+    if cloud == "aws":
+        config = add_gpu_config(config)
     deployment_dir_abs = deployment_dir.absolute()
     os.chdir(deployment_dir)
     logger.info(f"Temporary directory: {deployment_dir}")
