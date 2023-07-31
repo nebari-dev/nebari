@@ -6,12 +6,12 @@ import warnings
 from pathlib import Path
 
 import pytest
-import yaml
 from urllib3.exceptions import InsecureRequestWarning
 
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
+from _nebari.utils import yaml
 from tests.tests_unit.utils import render_config_partial
 
 DEPLOYMENT_DIR = "_test_deploy"
@@ -50,19 +50,80 @@ def _set_do_environment():
     os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
 
 
-def _set_nebari_creds_in_environment(deploy_config):
-    pass
-    # import ipdb as pdb; pdb.set_trace()
-    # os.environ["NEBARI_FULL_URL"] = deploy_config
-    # os.environ["KEYCLOAK_USERNAME"] = deploy_config
-    # os.environ["KEYCLOAK_PASSWORD"] = deploy_config
+def _set_nebari_creds_in_environment(config):
+    os.environ["NEBARI_FULL_URL"] = f"https://{config['domain']}/"
+    os.environ["KEYCLOAK_USERNAME"] = 'pytest'
+    os.environ["KEYCLOAK_PASSWORD"] = 'pytest-password'
 
 
-def _create_nebari_user(config, deploy_config):
+def _create_nebari_user(config):
     from _nebari.keycloak import create_user, get_keycloak_admin_from_config
     keycloak_admin = get_keycloak_admin_from_config(config)
-    user = create_user(keycloak_admin, "pytest", "pytest-password")
-    return user
+    try:
+        user = create_user(keycloak_admin, "pytest", "pytest-password")
+        return user
+    except Exception as e:
+        # Handle: User exists with same username
+        pass
+
+
+def add_gpu_config(config):
+    gpu_node = {
+        'instance': 'g4dn.xlarge',
+        'min_nodes': 1,
+        'max_nodes': 4,
+        "single_subnet": False,
+        "gpu": True
+    }
+    gpu_docker_image = "quay.io/nebari/nebari-jupyterlab-gpu:2023.7.1"
+    jupyterlab_profile = {
+        'display_name': 'GPU Instance',
+        'description': '4 CPU / 16GB RAM / 1 NVIDIA T4 GPU (16 GB GPU RAM)',
+        'groups': [
+            "gpu-access"
+        ],
+        'kubespawner_override': {
+            "image": gpu_docker_image,
+            'cpu_limit': 4,
+            'cpu_guarantee': 3,
+            'mem_limit': '16G',
+            'mem_guarantee': '10G',
+            "extra_resource_limits": {
+                "nvidia.com/gpu": 1
+            },
+            "node_selector": {
+                "beta.kubernetes.io/instance-type": "g4dn.xlarge",
+            }
+        }
+    }
+    config['amazon_web_services']['node_groups']["gpu-tesla-g4"] = gpu_node
+    config['profiles']['jupyterlab'].append(jupyterlab_profile)
+
+    config['environments']['environment-gpu.yaml'] = {
+        'name': 'gpu',
+        'channels': [
+            'pytorch',
+            'nvidia',
+            "conda-forge"
+        ],
+        'dependencies': [
+            'python=3.10.8',
+            'ipykernel=6.21.0',
+            'ipywidgets==7.7.1',
+            'torchvision',
+            'torchaudio',
+            'cudatoolkit',
+            'pytorch-cuda=11.7',
+            'pytorch::pytorch',
+        ]
+    }
+
+    config['environments']['environment-dask.yaml']['dependencies'].append("torchvision")
+    config['environments']['environment-dask.yaml']['dependencies'].append("torchaudio")
+    config['environments']['environment-dask.yaml']['dependencies'].append("cudatoolkit")
+    config['environments']['environment-dask.yaml']['dependencies'].append("pytorch-cuda=11.7")
+    config['environments']['environment-dask.yaml']['dependencies'].append("pytorch")
+    return config
 
 
 @pytest.fixture(scope="session")
@@ -82,15 +143,27 @@ def deploy(request):
         ci_provider="github-actions",
         auth_provider="github",
     )
+    # Generate certificate as well
+    config['certificate'] = {
+        "type": "lets-encrypt",
+        "acme_email": "internal-devops@quansight.com",
+        "acme_server": "https://acme-v02.api.letsencrypt.org/directory",
+    }
+    config = add_gpu_config(config)
     deployment_dir_abs = deployment_dir.absolute()
     os.chdir(deployment_dir)
     logger.info(f"Temporary directory: {deployment_dir}")
-    with open(Path("nebari-config.yaml"), "w") as f:
-        yaml.dump(config, f)
-    config_path = deployment_dir_abs / Path("nebari-config.yaml")
+    config_path = Path("nebari-config.yaml")
     if not config_path.exists():
-        logger.info(f"Creating config at {config_path}")
-        render_template(deployment_dir_abs, Path("nebari-config.yaml"))
+        with open(config_path, "w") as f:
+            yaml.dump(config, f)
+    else:
+        # We don't want to overwrite keycloak config for development
+        with open(config_path) as f:
+            current_config = yaml.load(f)
+            config['security']['keycloak']['initial_root_password'] = current_config['security']['keycloak']['initial_root_password']
+
+    render_template(deployment_dir_abs, Path("nebari-config.yaml"))
     try:
         deploy_config = deploy_configuration(
             config=config,
@@ -100,8 +173,8 @@ def deploy(request):
             disable_checks=False,
             skip_remote_state_provision=False,
         )
-        # import ipdb as pdb; pdb.set_trace()
-        _set_nebari_creds_in_environment(deploy_config)
+        _create_nebari_user(config)
+        _set_nebari_creds_in_environment(config)
         yield deploy_config
     except Exception as e:
         logger.info(f"Deploy Failed, Exception: {e}")

@@ -1,5 +1,7 @@
 import contextlib
 import logging
+import re
+import time
 from pathlib import Path
 
 from tests.common.navigator import Navigator
@@ -12,7 +14,7 @@ class Notebook:
         self.nav = navigator
         self.nav.initialize
 
-    def run(self, path, expected_output_text, conda_env, runtime=30000, retry=2):
+    def run(self, path, expected_outputs, conda_env, runtime=30000, retry=2, exact_match=True):
         """Run jupyter notebook and check for expected output text anywhere on
         the page.
 
@@ -60,11 +62,39 @@ class Notebook:
 
         for i in range(retry):
             self._restart_run_all()
+            self.wait_for_commands_completion()
+            all_outputs = self.get_all_outputs()
+            self.assert_match_all_outputs(expected_outputs, all_outputs)
 
-            output_locator = self.nav.page.get_by_text(expected_output_text, exact=True)
-            with contextlib.suppress(Exception):
-                if output_locator.is_visible():
-                    break
+    def wait_for_commands_completion(self, timeout=120):
+        elapsed_time = 0
+        start_time = time.time()
+        still_visible = True
+        while elapsed_time < timeout:
+            running = self.nav.page.get_by_text("[*]", exact=False)
+            still_visible = running.is_visible()
+            elapsed_time = time.time() - start_time
+            time.sleep(1)
+            if not still_visible:
+                break
+        if still_visible:
+            raise ValueError(f"Timeout Waited for commands to finish, "
+                             f"but couldn't finish in {timeout} sec")
+
+    def get_all_outputs(self):
+        output_elements = self.nav.page.query_selector_all('.jp-OutputArea-output')
+        text_content = [element.text_content() for element in output_elements]
+        return text_content
+
+    def assert_match_all_outputs(self, expected_outputs, actual_outputs):
+        for ex, act in zip(expected_outputs, actual_outputs):
+            self.assert_match_outputs(ex, act)
+
+    def assert_match_outputs(self, expected_output, actual_output):
+        if isinstance(expected_output, re.Pattern):
+            assert re.match(expected_output, actual_output)
+        else:
+            assert expected_output == actual_output
 
     def _restart_run_all(self):
         # restart run all cells

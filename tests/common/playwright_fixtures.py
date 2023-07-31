@@ -11,7 +11,7 @@ logger = logging.getLogger()
 
 
 @pytest.fixture(scope="session")
-def _navigator_session(browser_name, pytestconfig):
+def _navigator_session(request, browser_name, pytestconfig):
     """Set up a navigator instance, login with username/password, start
     a server. Teardown when session is complete.
     Do not use this for individual tests, use `navigator` fixture
@@ -22,14 +22,14 @@ def _navigator_session(browser_name, pytestconfig):
     # the error.
     try:
         nav = Navigator(
-            nebari_url=os.environ["NEBARI_FULL_URL"],
-            username=os.environ["KEYCLOAK_USERNAME"],
-            password=os.environ["KEYCLOAK_PASSWORD"],
+            nebari_url=request.param.get('nebari_url'),
+            username=request.param.get('keycloak_username'),
+            password=request.param.get('keycloak_password'),
             headless=not pytestconfig.getoption("--headed"),
             slow_mo=pytestconfig.getoption("--slowmo"),
             browser=browser_name,
             auth="password",
-            instance_name="small-instance",  # small-instance included by default
+            instance_name=request.param.get('instance_name'),  # small-instance included by default
             video_dir="videos/",
         )
     except Exception as e:
@@ -57,4 +57,19 @@ def navigator(_navigator_session):
 @pytest.fixture(scope="session")
 def test_data_root():
     here = Path(__file__).parent
-    return here / "test_data"
+    return here / "notebooks"
+
+
+def navigator_parameterized(
+        nebari_url=None,
+        keycloak_username=None,
+        keycloak_password=None,
+        instance_name=None
+):
+    param = {
+        "instance_name": instance_name or "small-instance",
+        "nebari_url": nebari_url or os.environ["NEBARI_FULL_URL"],
+        "keycloak_username": keycloak_username or os.environ["KEYCLOAK_USERNAME"],
+        "keycloak_password": keycloak_password or os.environ["KEYCLOAK_PASSWORD"],
+    }
+    return pytest.mark.parametrize("_navigator_session", [param], indirect=True)
