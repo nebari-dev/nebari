@@ -144,7 +144,7 @@ class Notebook:
 
     def _get_outputs(self):
         output_elements = self.nav.page.query_selector_all(".jp-OutputArea-output")
-        text_content = [element.text_content() for element in output_elements]
+        text_content = [element.text_content().strip() for element in output_elements]
         return text_content
 
     def assert_match_all_outputs(self, expected_outputs, actual_outputs):
