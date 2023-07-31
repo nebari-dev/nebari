@@ -64,6 +64,7 @@ def _set_nebari_creds_in_environment(config):
 
 def _create_nebari_user(config):
     import keycloak
+
     from _nebari.keycloak import create_user, get_keycloak_admin_from_config
 
     keycloak_admin = get_keycloak_admin_from_config(config)
