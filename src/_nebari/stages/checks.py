@@ -12,7 +12,6 @@ def stage_02_infrastructure(stage_outputs, nebari_config):
     from kubernetes.client.rest import ApiException
 
     directory = "stages/02-infrastructure"
-    stage_outputs = deploy
     config.load_kube_config(
         config_file=stage_outputs["stages/02-infrastructure"]["kubeconfig_filename"][
             "value"
