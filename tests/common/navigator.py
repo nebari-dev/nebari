@@ -236,8 +236,8 @@ class Navigator:
         True if the kernel popup is open.
         """
         self.page.wait_for_load_state("networkidle")
+        time.sleep(3)
         visible = self.page.get_by_text("Select Kernel", exact=True).is_visible()
-
         return visible
 
     def reset_workspace(self):
@@ -248,7 +248,7 @@ class Navigator:
         * reset file browser is reset to root
         * Finally, ensure that the Launcher screen is showing
         """
-        logger.debug(">>> Reset JupyterLab workspace")
+        logger.info(">>> Reset JupyterLab workspace")
 
         # server is already running and there is no popup
         popup = self._check_for_kernel_popup()
@@ -308,7 +308,11 @@ class Navigator:
         if kernel is None:
             # close dialog (deal with the two formats of this dialog)
             try:
-                self.page.get_by_text("Cancel", exact=True).click()
+                cancel_button = self.page.get_by_text("Cancel", exact=True)
+                if cancel_button.is_visible():
+                    cancel_button.click()
+                else:
+                    self.page.mouse.click(0, 0)
             except Exception:
                 self.page.locator("div").filter(has_text="No KernelSelect").get_by_role(
                     "button", name="No Kernel"

@@ -1,5 +1,3 @@
-import re
-
 from tests.common.playwright_fixtures import navigator_parameterized
 from tests.common.run_notebook import Notebook
 

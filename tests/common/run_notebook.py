@@ -39,8 +39,39 @@ class Notebook:
         filename = Path(path).name
 
         # navigate to specific notebook
-        file_locator = self.nav.page.get_by_text("File", exact=True)
+        self.open_notebook(path)
+        # make sure the focus is on the dashboard tab we want to run
+        self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
+        self.nav.set_environment(kernel=conda_env)
 
+        # make sure that this notebook is one currently selected
+        self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
+
+        for i in range(retry):
+            self._restart_run_all()
+            # Wait for a couple of seconds to make sure it's re-started
+            time.sleep(2)
+            self._wait_for_commands_completion()
+            all_outputs = self._get_outputs()
+            self.assert_match_all_outputs(expected_outputs, all_outputs)
+
+    def create_notebook(self, conda_env=None):
+        file_locator = self.nav.page.get_by_text("File", exact=True)
+        file_locator.wait_for(
+            timeout=self.nav.wait_for_server_spinup,
+            state="attached",
+        )
+        file_locator.click()
+        submenu = self.nav.page.locator('[data-type="submenu"]').all()
+        submenu[0].click()
+        self.nav.page.get_by_role("menuitem", name="Notebook").get_by_text("Notebook", exact=True).click()
+        self.nav.page.wait_for_load_state("networkidle")
+        # make sure the focus is on the dashboard tab we want to run
+        # self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
+        self.nav.set_environment(kernel=conda_env)
+
+    def open_notebook(self, path):
+        file_locator = self.nav.page.get_by_text("File", exact=True)
         file_locator.wait_for(
             timeout=self.nav.wait_for_server_spinup,
             state="attached",
@@ -54,42 +85,30 @@ class Notebook:
         # give the page a second to open, otherwise the options in the kernel
         # menu will be disabled.
         self.nav.page.wait_for_load_state("networkidle")
+
         if self.nav.page.get_by_text(
-            "Could not find path:",
-            exact=False,
+                "Could not find path:",
+                exact=False,
         ).is_visible():
             logger.debug("Path to notebook is invalid")
             raise RuntimeError("Path to notebook is invalid")
-        # make sure the focus is on the dashboard tab we want to run
-        self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
-        self.nav.set_environment(kernel=conda_env)
-
-        # make sure that this notebook is one currently selected
-        self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
-
-        for i in range(retry):
-            self._restart_run_all()
-            # Wait for a couple of seconds to make sure it's re-started
-            time.sleep(2)
-            self._wait_for_commands_completion()
-            self.run_in_last_cell("import torch;torch.cuda.is_available()")
-            import ipdb as pdb; pdb.set_trace()
-            self.assert_code_output("import torch;torch.cuda.is_available()", "True")
-            all_outputs = self._get_outputs()
-            self.assert_match_all_outputs(expected_outputs, all_outputs)
 
     def assert_code_output(self, code, expected_output):
         self.run_in_last_cell(code)
         self._wait_for_commands_completion()
         outputs = self._get_outputs()
-        assert expected_output == outputs[-1]
+        self.assert_match_output(expected_output, outputs[-1])
 
     def run_in_last_cell(self, code):
         self._create_new_cell()
         cell = self._get_last_cell()
         cell.click()
         cell.type(code)
+        # Wait for it to be ready to be executed
+        time.sleep(1)
         cell.press("Shift+Enter")
+        # Wait for execution to start
+        time.sleep(0.5)
 
     def _create_new_cell(self):
         new_cell_button = self.nav.page.query_selector('button[data-command="notebook:insert-cell-below"]')
@@ -126,9 +145,9 @@ class Notebook:
 
     def assert_match_all_outputs(self, expected_outputs, actual_outputs):
         for ex, act in zip(expected_outputs, actual_outputs):
-            self.assert_match_outputs(ex, act)
+            self.assert_match_output(ex, act)
 
-    def assert_match_outputs(self, expected_output, actual_output):
+    def assert_match_output(self, expected_output, actual_output):
         if isinstance(expected_output, re.Pattern):
             assert re.match(expected_output, actual_output)
         else:

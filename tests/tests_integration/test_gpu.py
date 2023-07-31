@@ -7,18 +7,16 @@ from tests.tests_integration.deployment_fixtures import on_cloud
 
 @on_cloud("aws")
 @navigator_parameterized(instance_name="gpu-instance")
-def test_gpu(navigator, test_data_root):
+def test_gpu(deploy, navigator, test_data_root):
     test_app = Notebook(navigator=navigator)
-    notebook_name = "test_gpu.ipynb"
-    notebook_path = test_data_root / notebook_name
-    assert notebook_path.exists()
-    with open(notebook_path, "r") as notebook:
-        test_app.nav.write_file(filepath=notebook_name, content=notebook.read())
-    expected_outputs = [re.compile(".*\n.*\n.*NVIDIA-SMI.*CUDA Version"), "True"]
-    test_app.run(
-        path=notebook_name,
-        expected_outputs=expected_outputs,
-        conda_env="conda-env-nebari-git-nebari-git-gpu-py",
-        runtime=60000,
-        exact_match=False,
+    conda_env = "gpu"
+    test_app.create_notebook(conda_env=f"conda-env-nebari-git-nebari-git-{conda_env}-py")
+    test_app.assert_code_output(
+        code="!nvidia-smi",
+        expected_output=re.compile(".*\n.*\n.*NVIDIA-SMI.*CUDA Version")
+    )
+
+    test_app.assert_code_output(
+        code="import torch;torch.cuda.is_available()",
+        expected_output="True"
     )
