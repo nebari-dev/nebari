@@ -58,13 +58,14 @@ def _set_do_environment():
 
 def _set_nebari_creds_in_environment(config):
     os.environ["NEBARI_FULL_URL"] = f"https://{config['domain']}/"
-    os.environ["KEYCLOAK_USERNAME"] = 'pytest'
-    os.environ["KEYCLOAK_PASSWORD"] = 'pytest-password'
+    os.environ["KEYCLOAK_USERNAME"] = "pytest"
+    os.environ["KEYCLOAK_PASSWORD"] = "pytest-password"
 
 
 def _create_nebari_user(config):
     import keycloak
     from _nebari.keycloak import create_user, get_keycloak_admin_from_config
+
     keycloak_admin = get_keycloak_admin_from_config(config)
     try:
         user = create_user(keycloak_admin, "pytest", "pytest-password")
@@ -92,7 +93,7 @@ def deploy(request):
         auth_provider="github",
     )
     # Generate certificate as well
-    config['certificate'] = {
+    config["certificate"] = {
         "type": "lets-encrypt",
         "acme_email": "internal-devops@quansight.com",
         "acme_server": "https://acme-v02.api.letsencrypt.org/directory",
@@ -110,7 +111,9 @@ def deploy(request):
         # We don't want to overwrite keycloak config for development
         with open(config_path) as f:
             current_config = yaml.load(f)
-            config['security']['keycloak']['initial_root_password'] = current_config['security']['keycloak']['initial_root_password']
+            config["security"]["keycloak"]["initial_root_password"] = current_config[
+                "security"
+            ]["keycloak"]["initial_root_password"]
 
     render_template(deployment_dir_abs, Path("nebari-config.yaml"))
     try:

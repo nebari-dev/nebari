@@ -14,7 +14,15 @@ class Notebook:
         self.nav = navigator
         self.nav.initialize
 
-    def run(self, path, expected_outputs, conda_env, runtime=30000, retry=2, exact_match=True):
+    def run(
+        self,
+        path,
+        expected_outputs,
+        conda_env,
+        runtime=30000,
+        retry=2,
+        exact_match=True,
+    ):
         """Run jupyter notebook and check for expected output text anywhere on
         the page.
 
@@ -80,11 +88,13 @@ class Notebook:
             if not still_visible:
                 break
         if still_visible:
-            raise ValueError(f"Timeout Waited for commands to finish, "
-                             f"but couldn't finish in {timeout} sec")
+            raise ValueError(
+                f"Timeout Waited for commands to finish, "
+                f"but couldn't finish in {timeout} sec"
+            )
 
     def get_all_outputs(self):
-        output_elements = self.nav.page.query_selector_all('.jp-OutputArea-output')
+        output_elements = self.nav.page.query_selector_all(".jp-OutputArea-output")
         text_content = [element.text_content() for element in output_elements]
         return text_content
 

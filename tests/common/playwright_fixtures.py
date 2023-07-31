@@ -22,14 +22,16 @@ def _navigator_session(request, browser_name, pytestconfig):
     # the error.
     try:
         nav = Navigator(
-            nebari_url=request.param.get('nebari_url'),
-            username=request.param.get('keycloak_username'),
-            password=request.param.get('keycloak_password'),
+            nebari_url=request.param.get("nebari_url"),
+            username=request.param.get("keycloak_username"),
+            password=request.param.get("keycloak_password"),
             headless=not pytestconfig.getoption("--headed"),
             slow_mo=pytestconfig.getoption("--slowmo"),
             browser=browser_name,
             auth="password",
-            instance_name=request.param.get('instance_name'),  # small-instance included by default
+            instance_name=request.param.get(
+                "instance_name"
+            ),  # small-instance included by default
             video_dir="videos/",
         )
     except Exception as e:
@@ -61,10 +63,7 @@ def test_data_root():
 
 
 def navigator_parameterized(
-        nebari_url=None,
-        keycloak_username=None,
-        keycloak_password=None,
-        instance_name=None
+    nebari_url=None, keycloak_username=None, keycloak_password=None, instance_name=None
 ):
     param = {
         "instance_name": instance_name or "small-instance",
