@@ -1,3 +1,6 @@
+PREEMPTIBLE_NODE_GROUP_NAME = "preemptible-node-group"
+
+
 def _create_gpu_environment():
     return {
         "name": "gpu",
@@ -47,12 +50,12 @@ def add_gpu_config(config):
     return config
 
 
-def add_preemptible_node_group(config, cloud='amazon_web_services'):
-    config[cloud]['node_groups']["preemptible-node-group"] = {
-        'instance': 'm5.xlarge',
-        'min_nodes': 1,
-        'max_nodes': 5,
-        'single_subnet': False,
-        'preemptible': True
+def add_preemptible_node_group(config, cloud="amazon_web_services"):
+    config[cloud]["node_groups"][PREEMPTIBLE_NODE_GROUP_NAME] = {
+        "instance": "m5.xlarge",
+        "min_nodes": 1,
+        "max_nodes": 5,
+        "single_subnet": False,
+        "preemptible": True,
     }
     return config

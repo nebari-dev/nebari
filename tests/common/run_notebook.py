@@ -64,7 +64,9 @@ class Notebook:
         file_locator.click()
         submenu = self.nav.page.locator('[data-type="submenu"]').all()
         submenu[0].click()
-        self.nav.page.get_by_role("menuitem", name="Notebook").get_by_text("Notebook", exact=True).click()
+        self.nav.page.get_by_role("menuitem", name="Notebook").get_by_text(
+            "Notebook", exact=True
+        ).click()
         self.nav.page.wait_for_load_state("networkidle")
         # make sure the focus is on the dashboard tab we want to run
         # self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
@@ -87,8 +89,8 @@ class Notebook:
         self.nav.page.wait_for_load_state("networkidle")
 
         if self.nav.page.get_by_text(
-                "Could not find path:",
-                exact=False,
+            "Could not find path:",
+            exact=False,
         ).is_visible():
             logger.debug("Path to notebook is invalid")
             raise RuntimeError("Path to notebook is invalid")
@@ -111,11 +113,13 @@ class Notebook:
         time.sleep(0.5)
 
     def _create_new_cell(self):
-        new_cell_button = self.nav.page.query_selector('button[data-command="notebook:insert-cell-below"]')
+        new_cell_button = self.nav.page.query_selector(
+            'button[data-command="notebook:insert-cell-below"]'
+        )
         new_cell_button.click()
 
     def _get_last_cell(self):
-        cells = self.nav.page.locator('.CodeMirror-code').all()
+        cells = self.nav.page.locator(".CodeMirror-code").all()
         for cell in reversed(cells):
             if cell.is_visible():
                 return cell
