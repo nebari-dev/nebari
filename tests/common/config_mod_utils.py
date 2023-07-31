@@ -45,3 +45,14 @@ def add_gpu_config(config):
 
     config["environments"]["environment-gpu.yaml"] = _create_gpu_environment()
     return config
+
+
+def add_preemptible_node_group(config, cloud='amazon_web_services'):
+    config[cloud]['node_groups']["preemptible-node-group"] = {
+        'instance': 'm5.xlarge',
+        'min_nodes': 1,
+        'max_nodes': 5,
+        'single_subnet': False,
+        'preemptible': True
+    }
+    return config

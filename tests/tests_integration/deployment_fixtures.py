@@ -12,7 +12,7 @@ from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
 from _nebari.utils import yaml
-from tests.common.gpu_config import add_gpu_config
+from tests.common.config_mod_utils import add_gpu_config, add_preemptible_node_group
 from tests.tests_unit.utils import render_config_partial
 
 DEPLOYMENT_DIR = "_test_deploy"
@@ -100,21 +100,22 @@ def deploy(request):
     }
     if cloud == "aws":
         config = add_gpu_config(config)
+        config = add_preemptible_node_group(config)
     deployment_dir_abs = deployment_dir.absolute()
     os.chdir(deployment_dir)
     logger.info(f"Temporary directory: {deployment_dir}")
     config_path = Path("nebari-config.yaml")
-    if not config_path.exists():
-        with open(config_path, "w") as f:
-            yaml.dump(config, f)
-    else:
-        # We don't want to overwrite keycloak config for development
+
+    if config_path.exists():
         with open(config_path) as f:
             current_config = yaml.load(f)
+
             config["security"]["keycloak"]["initial_root_password"] = current_config[
                 "security"
             ]["keycloak"]["initial_root_password"]
 
+    with open(config_path, "w") as f:
+        yaml.dump(config, f)
     render_template(deployment_dir_abs, Path("nebari-config.yaml"))
     try:
         deploy_config = deploy_configuration(
