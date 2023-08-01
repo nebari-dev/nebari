@@ -3,7 +3,6 @@ name: "Integration Tests"
 on:
   schedule:
     - cron: "0 0 * * MON"
-  push:
   workflow_dispatch:
 
 env:
@@ -16,7 +15,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-      pull-requests: write
     strategy:
       matrix:
         provider:
