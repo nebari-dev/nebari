@@ -99,10 +99,10 @@ def deploy(request):
         "acme_email": "internal-devops@quansight.com",
         "acme_server": "https://acme-v02.api.letsencrypt.org/directory",
     }
-    if cloud == "aws":
-        config = add_gpu_config(config)
+    if cloud in ["aws", "gcp"]:
+        config = add_gpu_config(config, cloud=cloud)
+        config = add_preemptible_node_group(config, cloud=cloud)
 
-    config = add_preemptible_node_group(config, cloud)
     deployment_dir_abs = deployment_dir.absolute()
     os.chdir(deployment_dir)
     logger.info(f"Temporary directory: {deployment_dir}")
@@ -147,11 +147,13 @@ def _destroy(config):
 
 
 def on_cloud(param=None):
-    all_clouds = ["aws", "do"]
+    """Decorator to run tests on a particular cloud or all cloud."""
+    clouds = ["aws", "do", "gcp"]
+    if param:
+        clouds = [param] if not isinstance(param, list) else param
 
     def _create_pytest_param(cloud):
         return pytest.param(cloud, marks=getattr(pytest.mark, cloud))
 
-    all_clouds_param = map(_create_pytest_param, all_clouds)
-    params = [_create_pytest_param(param)] if param else all_clouds_param
-    return pytest.mark.parametrize("deploy", params, indirect=True)
+    all_clouds_param = map(_create_pytest_param, clouds)
+    return pytest.mark.parametrize("deploy", all_clouds_param, indirect=True)

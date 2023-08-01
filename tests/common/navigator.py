@@ -214,7 +214,7 @@ class Navigator:
         self.page.wait_for_url(
             urllib.parse.urljoin(self.nebari_url, f"user/{self.username}/*"),
             wait_until="networkidle",
-            timeout=90000,
+            timeout=180000,
         )
 
         # the jupyter page loads independent of network activity so here

@@ -22,9 +22,9 @@ def _navigator_session(request, browser_name, pytestconfig):
     # the error.
     try:
         nav = Navigator(
-            nebari_url=request.param.get("nebari_url"),
-            username=request.param.get("keycloak_username"),
-            password=request.param.get("keycloak_password"),
+            nebari_url=request.param.get("nebari_url") or os.environ["NEBARI_FULL_URL"],
+            username=request.param.get("keycloak_username") or os.environ["KEYCLOAK_USERNAME"],
+            password=request.param.get("keycloak_password") or os.environ["KEYCLOAK_PASSWORD"],
             headless=not pytestconfig.getoption("--headed"),
             slow_mo=pytestconfig.getoption("--slowmo"),
             browser=browser_name,
@@ -66,9 +66,9 @@ def navigator_parameterized(
     nebari_url=None, keycloak_username=None, keycloak_password=None, instance_name=None
 ):
     param = {
-        "instance_name": instance_name or "small-instance",
-        "nebari_url": nebari_url or os.environ["NEBARI_FULL_URL"],
-        "keycloak_username": keycloak_username or os.environ["KEYCLOAK_USERNAME"],
-        "keycloak_password": keycloak_password or os.environ["KEYCLOAK_PASSWORD"],
+        "instance_name": instance_name,
+        "nebari_url": nebari_url,
+        "keycloak_username": keycloak_username,
+        "keycloak_password": keycloak_password,
     }
     return pytest.mark.parametrize("_navigator_session", [param], indirect=True)
