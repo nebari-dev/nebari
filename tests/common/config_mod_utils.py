@@ -70,7 +70,6 @@ def _create_gpu_environment():
 
 
 def add_gpu_config(config, cloud="aws"):
-
     gpu_config = GPU_CONFIG.get(cloud)
     if not gpu_config:
         raise ValueError(f"GPU not supported/tested on {cloud}")
