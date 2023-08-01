@@ -101,7 +101,8 @@ def deploy(request):
     }
     if cloud == "aws":
         config = add_gpu_config(config)
-        config = add_preemptible_node_group(config)
+
+    config = add_preemptible_node_group(config, cloud)
     deployment_dir_abs = deployment_dir.absolute()
     os.chdir(deployment_dir)
     logger.info(f"Temporary directory: {deployment_dir}")

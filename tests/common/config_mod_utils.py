@@ -50,9 +50,17 @@ def add_gpu_config(config):
     return config
 
 
-def add_preemptible_node_group(config, cloud="amazon_web_services"):
-    config[cloud]["node_groups"][PREEMPTIBLE_NODE_GROUP_NAME] = {
-        "instance": "m5.xlarge",
+def add_preemptible_node_group(config, cloud="aws"):
+    if cloud == "aws":
+        cloud_name = "amazon_web_services"
+        instance_name = "m5.xlarge"
+    elif cloud == "gcp":
+        cloud_name = "google_cloud_platform"
+        instance_name = "n1-standard-8"
+    else:
+        raise ValueError("Invalid cloud for preemptible config")
+    config[cloud_name]["node_groups"][PREEMPTIBLE_NODE_GROUP_NAME] = {
+        "instance": instance_name,
         "min_nodes": 1,
         "max_nodes": 5,
         "single_subnet": False,
