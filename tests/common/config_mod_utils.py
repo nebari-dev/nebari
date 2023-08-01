@@ -34,21 +34,12 @@ def add_gpu_config(config, cloud="aws"):
         cloud_name = "google_cloud_platform"
         gpu_name = "n1-standard-16"
         node_selector = "cloud.google.com/gke-nodepool"
-        extra_config = {
-            "guest_accelerators": [{
-                "name": "nvidia-tesla-t4",
-                "count": 1}
-            ]}
+        extra_config = {"guest_accelerators": [{"name": "nvidia-tesla-t4", "count": 1}]}
         node_selector_val = gpu_node_group
     else:
         raise ValueError(f"GPU not supported/tested on {cloud}")
 
-    gpu_node = {
-        "instance": gpu_name,
-        "min_nodes": 0,
-        "max_nodes": 4,
-        **extra_config
-    }
+    gpu_node = {"instance": gpu_name, "min_nodes": 0, "max_nodes": 4, **extra_config}
     gpu_docker_image = "quay.io/nebari/nebari-jupyterlab-gpu:2023.7.1"
     jupyterlab_profile = {
         "display_name": "GPU Instance",
@@ -60,9 +51,7 @@ def add_gpu_config(config, cloud="aws"):
             "cpu_guarantee": 3,
             "mem_limit": "16G",
             "mem_guarantee": "10G",
-            "extra_resource_limits": {
-                "nvidia.com/gpu": 1
-            },
+            "extra_resource_limits": {"nvidia.com/gpu": 1},
             "node_selector": {
                 node_selector: node_selector_val,
             },

@@ -23,8 +23,10 @@ def _navigator_session(request, browser_name, pytestconfig):
     try:
         nav = Navigator(
             nebari_url=request.param.get("nebari_url") or os.environ["NEBARI_FULL_URL"],
-            username=request.param.get("keycloak_username") or os.environ["KEYCLOAK_USERNAME"],
-            password=request.param.get("keycloak_password") or os.environ["KEYCLOAK_PASSWORD"],
+            username=request.param.get("keycloak_username")
+            or os.environ["KEYCLOAK_USERNAME"],
+            password=request.param.get("keycloak_password")
+            or os.environ["KEYCLOAK_PASSWORD"],
             headless=not pytestconfig.getoption("--headed"),
             slow_mo=pytestconfig.getoption("--slowmo"),
             browser=browser_name,

@@ -10,13 +10,13 @@ def test_preemptible(request, deploy):
     config.load_kube_config(
         config_file=deploy["stages/02-infrastructure"]["kubeconfig_filename"]["value"]
     )
-    if request.node.get_closest_marker('aws'):
+    if request.node.get_closest_marker("aws"):
         name_label = "eks.amazonaws.com/nodegroup"
         preemptible_key = "eks.amazonaws.com/capacityType"
         expected_value = "SPOT"
         pytest.xfail("Preemptible instances are not supported on AWS atm")
 
-    elif request.node.get_closest_marker('gcp'):
+    elif request.node.get_closest_marker("gcp"):
         name_label = "cloud.google.com/gke-nodepool"
         preemptible_key = "cloud.google.com/gke-preemptible"
         expected_value = "true"

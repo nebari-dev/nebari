@@ -120,9 +120,9 @@ def deploy(request):
         yaml.dump(config, f)
     render_template(deployment_dir_abs, Path("nebari-config.yaml"))
     try:
-        logger.info("*"*100)
+        logger.info("*" * 100)
         logger.info(f"Deploying Nebari on {cloud}")
-        logger.info("*"*100)
+        logger.info("*" * 100)
         deploy_config = deploy_configuration(
             config=config,
             dns_provider="cloudflare",
@@ -137,7 +137,7 @@ def deploy(request):
     except Exception as e:
         logger.error(f"Deploy Failed, Exception: {e}")
         logger.exception(e)
-    logger.info("*"*100)
+    logger.info("*" * 100)
     logger.info("Tearing down")
     return _destroy(config)
 
