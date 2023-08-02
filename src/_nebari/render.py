@@ -1,8 +1,8 @@
 import hashlib
 import os
+import pathlib
 import shutil
 import sys
-import pathlib
 from typing import Dict, List
 
 from rich import print
