@@ -34,7 +34,7 @@ def render_template(
         )
 
     new, untracked, updated, deleted = inspect_files(
-        output_base_dir=str(output_directory),
+        output_base_dir=output_directory,
         ignore_filenames=[
             "terraform.tfstate",
             ".terraform.lock.hcl",
@@ -101,7 +101,7 @@ def render_template(
 
 
 def inspect_files(
-    output_base_dir: str,
+    output_base_dir: pathlib.Path,
     ignore_filenames: List[str] = None,
     ignore_directories: List[str] = None,
     deleted_paths: List[pathlib.Path] = None,
