@@ -124,7 +124,9 @@ def inspect_files(
     output_files = {}
 
     def list_files(
-        directory: pathlib.Path, ignore_filenames: List[str], ignore_directories: List[str]
+        directory: pathlib.Path,
+        ignore_filenames: List[str],
+        ignore_directories: List[str],
     ):
         for path in directory.rglob("*"):
             if not path.is_file():
