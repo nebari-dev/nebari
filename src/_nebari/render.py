@@ -2,7 +2,7 @@ import hashlib
 import os
 import shutil
 import sys
-from pathlib import Path
+import pathlib
 from typing import Dict, List
 
 from rich import print
