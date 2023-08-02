@@ -108,6 +108,7 @@ select = [
 ignore = [
     "E501", # Line too long
     "F821", # Undefined name
+    "PTH118", # os.path.join() should be replaced by Path()
     "PTH123", # open() should be replaced by Path.open()
 ]
 extend-exclude = [

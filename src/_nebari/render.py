@@ -102,7 +102,6 @@ def render_template(
 
 def inspect_files(
     output_base_dir: str,
->>>>>>> c9abe710 (Working render!)
     ignore_filenames: List[str] = None,
     ignore_directories: List[str] = None,
     deleted_paths: List[Path] = None,
