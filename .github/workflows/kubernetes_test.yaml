@@ -11,6 +11,7 @@ on:
       - "src/**"
       - "pyproject.toml"
       - "pytest.ini"
+      - ".cirun.yml"
   push:
     branches:
       - main
@@ -25,6 +26,7 @@ on:
       - "src/**"
       - "pyproject.toml"
       - "pytest.ini"
+      - ".cirun.yml"
   workflow_call:
     inputs:
       pr_number:
