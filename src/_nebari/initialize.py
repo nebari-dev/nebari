@@ -54,7 +54,9 @@ def render_config(
     config["terraform_state"] = {"type": terraform_state.value}
 
     # Save default password to file
-    default_password_filename = pathlib.Path(tempfile.gettempdir()) / "NEBARI_DEFAULT_PASSWORD"
+    default_password_filename = (
+        pathlib.Path(tempfile.gettempdir()) / "NEBARI_DEFAULT_PASSWORD"
+    )
     config["security"] = {
         "keycloak": {"initial_root_password": random_secure_string(length=32)}
     }

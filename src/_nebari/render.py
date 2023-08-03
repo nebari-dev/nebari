@@ -9,8 +9,8 @@ from rich import print
 from rich.table import Table
 
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
-from nebari import hookspecs, schema
 from _nebari.utils import is_relative_to
+from nebari import hookspecs, schema
 
 
 def render_template(
