@@ -73,6 +73,11 @@ jobs:
           role-session-name: github-action
           aws-region: us-west-2
 
+      - name: Set Environment AWS
+        if: ${{ matrix.provider == 'aws' }}
+        run: |
+          echo "AWS_REGION=us-west-2" >> $GITHUB_ENV
+
       - name: Set Environment DO
         if: ${{ matrix.provider == 'do' }}
         run: |
