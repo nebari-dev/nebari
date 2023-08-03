@@ -19,6 +19,7 @@ jobs:
           - aws
           - do
           - gcp
+      fail-fast: false
 
     steps:
       - name: "Checkout Infrastructure"
