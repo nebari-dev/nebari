@@ -1,9 +1,9 @@
 import enum
 import io
+import pathlib
 import typing
 from inspect import cleandoc
 from typing import Dict, List
-import pathlib
 
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from _nebari.provider.cicd.gitlab import gen_gitlab_ci
