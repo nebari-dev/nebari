@@ -120,6 +120,7 @@ def deploy(request):
     with open(config_path, "w") as f:
         yaml.dump(config, f)
     render_template(deployment_dir_abs, Path("nebari-config.yaml"))
+    failed = False
     try:
         logger.info("*" * 100)
         logger.info(f"Deploying Nebari on {cloud}")
@@ -136,15 +137,18 @@ def deploy(request):
         _set_nebari_creds_in_environment(config)
         yield deploy_config
     except Exception as e:
+        failed = True
         logger.error(f"Deploy Failed, Exception: {e}")
         logger.exception(e)
     logger.info("*" * 100)
     logger.info("Tearing down")
-    return _destroy(config)
+    _destroy(config)
+    if failed:
+        raise AssertionError("Deployment failed")
 
 
 def _destroy(config):
-    destroy_configuration(config)
+    return destroy_configuration(config)
 
 
 def on_cloud(param=None):
