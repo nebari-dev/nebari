@@ -33,6 +33,7 @@ jobs:
         run: |
           pip install .[dev]
           conda install --quiet --yes conda-build
+          playwright install
 
       - name: Retrieve secret from Vault
         uses: hashicorp/vault-action@v2.5.0
