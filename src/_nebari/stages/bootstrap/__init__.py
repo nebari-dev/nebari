@@ -3,6 +3,7 @@ import io
 import typing
 from inspect import cleandoc
 from typing import Dict, List
+import pathlib
 
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from _nebari.provider.cicd.gitlab import gen_gitlab_ci
@@ -25,7 +26,7 @@ def gen_gitignore():
         # python
         __pycache__
     """
-    return {".gitignore": cleandoc(filestoignore)}
+    return {pathlib.Path(".gitignore"): cleandoc(filestoignore)}
 
 
 def gen_cicd(config: schema.Main):
@@ -40,12 +41,12 @@ def gen_cicd(config: schema.Main):
     cicd_files = {}
 
     if config.ci_cd.type == CiEnum.github_actions:
-        gha_dir = ".github/workflows/"
-        cicd_files[gha_dir + "nebari-ops.yaml"] = gen_nebari_ops(config)
-        cicd_files[gha_dir + "nebari-linter.yaml"] = gen_nebari_linter(config)
+        gha_dir = pathlib.Path(".github/workflows/")
+        cicd_files[gha_dir / "nebari-ops.yaml"] = gen_nebari_ops(config)
+        cicd_files[gha_dir / "nebari-linter.yaml"] = gen_nebari_linter(config)
 
     elif config.ci_cd.type == CiEnum.gitlab_ci:
-        cicd_files[".gitlab-ci.yml"] = gen_gitlab_ci(config)
+        cicd_files[pathlib.Path(".gitlab-ci.yml")] = gen_gitlab_ci(config)
 
     else:
         raise ValueError(
