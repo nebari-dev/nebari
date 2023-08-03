@@ -108,11 +108,6 @@ select = [
 ignore = [
     "E501", # Line too long
     "F821", # Undefined name
-    "PTH101", # `os.chmod()` should be replaced by `Path.chmod()`
-    "PTH103", # `os.makedirs()` should be replaced by `Path.mkdir(parents=True)`
-    "PTH113", # os.path.isfile() -> Path.is_file()
-    "PTH118", # os.path.join() should be replaced by Path()
-    "PTH120", # `os.path.dirname()` should be replaced by `Path.parent`
     "PTH123", # open() should be replaced by Path.open()
 ]
 extend-exclude = [
