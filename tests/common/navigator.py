@@ -189,7 +189,7 @@ class Navigator:
         """
         # wait for the page to load
         logout_button = self.page.get_by_text("Logout", exact=True)
-        logout_button.wait_for(state="attached")
+        logout_button.wait_for(state="attached", timeout=90000)
 
         # if server is not yet running
         start_locator = self.page.get_by_role("button", name="Start My Server")

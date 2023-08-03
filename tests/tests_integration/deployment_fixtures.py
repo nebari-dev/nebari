@@ -12,6 +12,7 @@ from urllib3.exceptions import InsecureRequestWarning
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
+from _nebari.schema import verify
 from _nebari.utils import yaml
 from tests.common.config_mod_utils import add_gpu_config, add_preemptible_node_group
 from tests.tests_unit.utils import render_config_partial
@@ -150,6 +151,7 @@ def deploy(request):
 
 
 def _destroy(config):
+    verify(config)
     return destroy_configuration(config)
 
 
