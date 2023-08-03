@@ -1,6 +1,6 @@
 import _nebari.schema
 
-from .conftest import render_config_partial
+from .utils import render_config_partial
 
 
 def test_schema(setup_fixture):

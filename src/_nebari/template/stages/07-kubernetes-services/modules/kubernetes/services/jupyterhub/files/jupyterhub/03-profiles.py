@@ -325,7 +325,7 @@ def profile_argo_token(groups):
     argo_sa = None
 
     if ANALYST in groups:
-        argo_sa = base + "view"
+        argo_sa = base + "viewer"
     if DEVELOPER in groups:
         argo_sa = base + "developer"
     if ADMIN in groups:
