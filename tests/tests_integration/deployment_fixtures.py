@@ -151,8 +151,12 @@ def deploy(request):
 
 
 def _destroy(config):
-    verify(config)
-    return destroy_configuration(config)
+    try:
+        return destroy_configuration(config)
+    except Exception as e:
+        logger.exception(e)
+        logger.info("Destroy failed!")
+        raise
 
 
 def on_cloud(param=None):
