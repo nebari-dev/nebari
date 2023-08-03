@@ -1,8 +1,8 @@
 import logging
 import os
+import pathlib
 import re
 import tempfile
-import pathlib
 
 import pydantic
 import requests
