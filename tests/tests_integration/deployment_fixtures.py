@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import string
+import uuid
 import warnings
 from pathlib import Path
 
@@ -59,7 +60,7 @@ def _set_do_environment():
 def _set_nebari_creds_in_environment(config):
     os.environ["NEBARI_FULL_URL"] = f"https://{config['domain']}/"
     os.environ["KEYCLOAK_USERNAME"] = "pytest"
-    os.environ["KEYCLOAK_PASSWORD"] = os.environ["PYTEST_KEYCLOAK_PASSWORD"]
+    os.environ["KEYCLOAK_PASSWORD"] = os.environ.get("PYTEST_KEYCLOAK_PASSWORD", uuid.uuid4().hex)
 
 
 def _create_nebari_user(config):
