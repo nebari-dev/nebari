@@ -24,7 +24,7 @@ class NebariTerraformStage(NebariStage):
     def tf_objects(self) -> List[Dict]:
         return [NebariTerraformState(self.name, self.config)]
 
-    def render(self) -> Dict[str, str]:
+    def render(self) -> Dict[pathlib.Path, str]:
         contents = {
             (self.stage_prefix / "_nebari.tf.json"): terraform.tf_render_objects(
                 self.tf_objects()
