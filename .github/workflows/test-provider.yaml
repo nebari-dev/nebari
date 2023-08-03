@@ -10,8 +10,6 @@ on:
       - ".github/failed-workflow-issue-templates/test-provider.md"
       - ".github/actions/publish-from-template"
       - "tests/**"
-      - "tests_deployment/**"
-      - "tests_e2e/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"
@@ -23,8 +21,6 @@ on:
     paths:
       - ".github/workflows/test-provider.yaml"
       - "tests/**"
-      - "tests_deployment/**"
-      - "tests_e2e/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"

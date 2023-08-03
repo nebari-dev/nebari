@@ -1,16 +1,10 @@
-import pytest
 import requests
 
-from tests_integration.deployment_fixtures import ignore_warnings, on_cloud
+from tests.tests_integration.deployment_fixtures import on_cloud
 
 
-@pytest.fixture(autouse=True)
-def disable_warnings():
-    ignore_warnings()
-
-
-@on_cloud("do")
-def test_do_service_status(deploy):
+@on_cloud()
+def test_service_status(deploy):
     """Tests if deployment on DigitalOcean succeeds"""
     service_urls = deploy["stages/07-kubernetes-services"]["service_urls"]["value"]
     assert (
@@ -39,7 +33,7 @@ def test_do_service_status(deploy):
     )
 
 
-@on_cloud("do")
+@on_cloud()
 def test_verify_keycloak_users(deploy):
     """Tests if keycloak is working and it has expected users"""
     keycloak_credentials = deploy["stages/05-kubernetes-keycloak"][

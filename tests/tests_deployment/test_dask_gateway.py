@@ -3,8 +3,8 @@ import os
 import dask_gateway
 import pytest
 
-from tests_deployment import constants
-from tests_deployment.utils import get_jupyterhub_token, monkeypatch_ssl_context
+from tests.tests_deployment import constants
+from tests.tests_deployment.utils import get_jupyterhub_token, monkeypatch_ssl_context
 
 monkeypatch_ssl_context()
 
