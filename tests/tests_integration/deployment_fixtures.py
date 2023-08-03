@@ -60,7 +60,9 @@ def _set_do_environment():
 def _set_nebari_creds_in_environment(config):
     os.environ["NEBARI_FULL_URL"] = f"https://{config['domain']}/"
     os.environ["KEYCLOAK_USERNAME"] = "pytest"
-    os.environ["KEYCLOAK_PASSWORD"] = os.environ.get("PYTEST_KEYCLOAK_PASSWORD", uuid.uuid4().hex)
+    os.environ["KEYCLOAK_PASSWORD"] = os.environ.get(
+        "PYTEST_KEYCLOAK_PASSWORD", uuid.uuid4().hex
+    )
 
 
 def _create_nebari_user(config):
