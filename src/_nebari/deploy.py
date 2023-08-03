@@ -256,6 +256,7 @@ def guided_install(
     print(
         "Additional administration docs can be found at https://docs.nebari.dev/en/stable/source/admin_guide/"
     )
+    return stage_outputs
 
 
 def deploy_configuration(
@@ -293,7 +294,7 @@ def deploy_configuration(
 
     with timer(logger, "deploying Nebari"):
         try:
-            guided_install(
+            return guided_install(
                 config,
                 dns_provider,
                 dns_auto_provision,
@@ -302,5 +303,6 @@ def deploy_configuration(
                 skip_remote_state_provision,
             )
         except subprocess.CalledProcessError as e:
+            logger.error("subprocess command failed")
             logger.error(e.output)
             raise e

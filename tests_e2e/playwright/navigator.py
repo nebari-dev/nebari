@@ -1,12 +1,10 @@
 import contextlib
 import datetime as dt
 import logging
-import os
 import re
 import time
 import urllib
 
-import dotenv
 from playwright.sync_api import expect, sync_playwright
 
 logger = logging.getLogger()
@@ -410,20 +408,3 @@ class Navigator:
         self.run_terminal_command(f"ls {filepath}")
         logger.debug(f"time to complete {dt.datetime.now() - start}")
         time.sleep(2)
-
-
-if __name__ == "__main__":
-    dotenv.load_dotenv()
-    nav = Navigator(
-        nebari_url="https://nebari.quansight.dev/",
-        username=os.environ["KEYCLOAK_USERNAME"],
-        password=os.environ["KEYCLOAK_PASSWORD"],
-        auth="password",
-        instance_name="small-instance",
-        headless=False,
-        slow_mo=100,
-    )
-    nav.login()
-    nav.start_server()
-    nav.reset_workspace()
-    nav.teardown()

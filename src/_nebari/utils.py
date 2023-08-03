@@ -106,6 +106,7 @@ def run_subprocess_cmd(processargs, **kwargs):
     if timeout_timer is not None:
         timeout_timer.cancel()
 
+    process.stdout.close()
     return process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout

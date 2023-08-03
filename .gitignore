@@ -52,3 +52,6 @@ nebari-config.yaml
 .ipynb_checkpoints
 .DS_Store
 /.ruff_cache
+
+# Integration tests deployments
+_test_deploy
