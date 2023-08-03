@@ -20,7 +20,6 @@ jobs:
           - do
           - gcp
       fail-fast: false
-
     steps:
       - name: "Checkout Infrastructure"
         uses: actions/checkout@v3
@@ -85,7 +84,3 @@ jobs:
         run: |
           pytest --version
           pytest tests/tests_integration/ -vvv -s -m ${{ matrix.provider }}
-        env:
-          NEBARI_K8S_VERSION: 1.25.12-do.0
-          SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
-          SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}
