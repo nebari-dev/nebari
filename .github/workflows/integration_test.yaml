@@ -10,6 +10,9 @@ jobs:
   test-integration:
     name: "Pytest Integration"
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: "Checkout Infrastructure"
         uses: actions/checkout@v3
