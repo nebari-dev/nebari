@@ -1,6 +1,6 @@
 import pytest
 
-from .conftest import render_config_partial
+from .utils import render_config_partial
 
 
 @pytest.mark.parametrize(

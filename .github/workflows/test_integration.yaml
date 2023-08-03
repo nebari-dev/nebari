@@ -1,0 +1,52 @@
+name: "Deploy on Digital Ocean"
+
+on:
+  schedule:
+    - cron: "0 0 * * MON"
+  workflow_dispatch:
+
+jobs:
+  test-integration:
+    name: "Pytest Integration"
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: "Checkout Infrastructure"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Retrieve secret from Vault
+        uses: hashicorp/vault-action@v2.5.0
+        with:
+          method: jwt
+          url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"
+          namespace: "admin/quansight"
+          role: "repository-nebari-dev-nebari-role"
+          secrets: |
+            kv/data/repository/nebari-dev/nebari/amazon_web_services/nebari-dev-ci role_name | AWS_ROLE_ARN;
+            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci project_id | PROJECT_ID;
+            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci workload_identity_provider | GCP_WORKFLOW_PROVIDER;
+            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci service_account_name | GCP_SERVICE_ACCOUNT;
+            kv/data/repository/nebari-dev/nebari/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
+            kv/data/repository/nebari-dev/nebari/cloudflare/internal-devops@quansight.com/nebari-dev-ci token | CLOUDFLARE_TOKEN;
+
+      - name: Install Nebari
+        run: |
+          pip install .[dev]
+          conda install --quiet --yes conda-build
+
+      - name: Integration Tests
+        run: |
+          pytest --version
+          pytest tests_integration/ -vvv -s
+        env:
+          NEBARI_K8S_VERSION: 1.25.12-do.0
+          SPACES_ACCESS_KEY_ID: ${{ secrets.SPACES_ACCESS_KEY_ID }}
+          SPACES_SECRET_ACCESS_KEY: ${{ secrets.SPACES_SECRET_ACCESS_KEY }}

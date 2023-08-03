@@ -14,18 +14,18 @@
 | :---------- | :-----|
 |   Project   | [![License](https://img.shields.io/badge/License-BSD%203--Clause-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://opensource.org/licenses/BSD-3-Clause) [![Nebari documentation](https://img.shields.io/badge/%F0%9F%93%96%20Read-the%20docs-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://www.nebari.dev/docs/welcome) [![PyPI](https://img.shields.io/pypi/v/nebari)](https://badge.fury.io/py/nebari) [![conda version](https://img.shields.io/conda/vn/conda-forge/nebari)]((https://anaconda.org/conda-forge/nebari))  |
 |  Community  | [![GH discussions](https://img.shields.io/badge/%F0%9F%92%AC%20-Participate%20in%20discussions-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/nebari-dev/nebari/discussions) [![Open an issue](https://img.shields.io/badge/%F0%9F%93%9D%20Open-an%20issue-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://github.com/nebari-dev/nebari/issues/new/choose) [![Community guidelines](https://img.shields.io/badge/🤝%20Community-guidelines-gray.svg?colorA=2D2A56&colorB=5936D9&style=flat.svg)](https://www.nebari.dev/docs/community/) |
-|     CI      | [![Kubernetes Tests](https://github.com/nebari-dev/nebari/actions/workflows/kubernetes_test.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/kubernetes_test.yaml) [![Tests](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml) |
+|     CI      | [![Kubernetes Tests](https://github.com/nebari-dev/nebari/actions/workflows/kubernetes_test.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/kubernetes_test.yaml) [![Tests](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test.yaml) [![Test Nebari Provider](https://github.com/nebari-dev/nebari/actions/workflows/test-provider.yaml/badge.svg)](https://github.com/nebari-dev/nebari/actions/workflows/test-provider.yaml) |
 
 ## Table of contents
 
 - [Table of contents](#table-of-contents)
-- [QHub HPC](#qhub-hpc)
 - [Nebari](#nebari)
   - [Cloud Providers ☁️](#cloud-providers-️)
 - [Installation 💻](#installation-)
   - [Pre-requisites](#pre-requisites)
   - [Install Nebari](#install-nebari)
 - [Usage 🚀](#usage-)
+- [Nebari HPC](#nebari-hpc)
 - [Contributing to Nebari 👩🏻‍💻](#contributing-to-nebari-)
   - [Installing the Development version of Nebari ⚙️](#installing-the-development-version-of-nebari-️)
   - [Questions? 🤔](#questions-)
@@ -47,13 +47,7 @@ on [HPC](#nebari-hpc) or [Kubernetes](#nebari) with minimal DevOps overhead.
 
 **This repository details the [Nebari](https://nebari.dev/ "Official Nebari docs") (Kubernetes) version.**
 
-Not sure what to choose? Check out our [Setup Initialization](docs/source/installation/setup.md) page.
-
-## QHub HPC
-
-The HPC version of Nebari is based on [OpenHPC](https://openhpc.community/).
-
-> NOTE: The tool is currently under development. Curious? Check out the [Nebari HPC](https://github.com/Quansight/qhub-hpc) repository.
+Not sure what to choose? Check out our documentation on [choosing a deployment platform](https://www.nebari.dev/docs/get-started/deploy)
 
 ## Nebari
 
@@ -137,6 +131,11 @@ Once all the necessary credentials are gathered and set as [UNIX environment var
 deployed in minutes.
 
 For detailed step-by-step instructions on how to deploy Nebari, check the [Nebari documentation][docs-deploy].
+
+## Nebari HPC
+
+An HPC version of Nebari is currently not available. There is one under development for Nebaris precursor QHub.
+Curious? Check out the [QHub HPC](https://github.com/Quansight/qhub-hpc) repository.
 
 ## Contributing to Nebari 👩🏻‍💻
 

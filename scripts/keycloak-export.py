@@ -1,10 +1,10 @@
 import argparse
 import json
 import logging
-import pathlib
 import sys
+from pathlib import Path
 
-from nebari.keycloak import get_keycloak_admin_from_config
+from _nebari.keycloak import get_keycloak_admin_from_config
 
 logging.basicConfig(level=logging.INFO)
 
@@ -18,7 +18,7 @@ def main():
 
 
 def handle_keycloak_export(args):
-    config_filename = pathlib.Path(args.config)
+    config_filename = Path(args.config)
     if not config_filename.is_file():
         raise ValueError(
             f"passed in configuration filename={config_filename} must exist"
