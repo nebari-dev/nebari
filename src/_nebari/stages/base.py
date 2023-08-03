@@ -32,15 +32,14 @@ class NebariTerraformStage(NebariStage):
         }
         for root, dirs, filenames in os.walk(self.template_directory):
             for filename in filenames:
-                with open(os.path.join(root, filename), "rb") as f:
-                    contents[
-                        os.path.join(
-                            self.stage_prefix,
-                            os.path.relpath(
-                                os.path.join(root, filename), self.template_directory
-                            ),
-                        )
-                    ] = f.read()
+                root_filename = pathlib.Path(root) / filename
+                with root_filename.open("rb") as f:
+                    contents[pathlib.Path(
+                        self.stage_prefix,
+                        os.path.relpath(
+                            root_filename, self.template_directory
+                        ),
+                    )] = f.read()
         return contents
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):

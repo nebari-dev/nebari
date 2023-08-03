@@ -262,3 +262,15 @@ def random_secure_string(
     length: int = 16, chars: str = string.ascii_lowercase + string.digits
 ):
     return "".join(secrets.choice(chars) for i in range(length))
+
+
+def is_relative_to(self: pathlib.Path, other: pathlib.Path, /) -> bool:
+    """Compatibility function to bring ``Path.is_relative_to`` to Python 3.8"""
+    if sys.version_info[:2] >= (3, 9):
+        return self.is_relative_to(other)
+
+    try:
+        self.relative_to(other)
+        return True
+    except ValueError:
+        return False

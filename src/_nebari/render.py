@@ -10,6 +10,7 @@ from rich.table import Table
 
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
 from nebari import hookspecs, schema
+from _nebari.utils import is_relative_to
 
 
 def render_template(
@@ -76,8 +77,8 @@ def render_template(
         print("dry-run enabled no files will be created, updated, or deleted")
     else:
         for filename in new | updated:
-            output_filename = os.path.join(str(output_directory), filename)
-            os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+            output_filename = output_directory / filename
+            output_filename.parent.mkdir(parents=True, exist_ok=True)
 
             if isinstance(contents[filename], str):
                 with open(output_filename, "w") as f:
@@ -131,6 +132,7 @@ def inspect_files(
         for path in directory.rglob("*"):
             if not path.is_file():
                 continue
+            yield path
 
     for filename in contents:
         if isinstance(contents[filename], str):
@@ -140,8 +142,8 @@ def inspect_files(
         else:
             source_files[filename] = hashlib.sha256(contents[filename]).hexdigest()
 
-        output_filename = os.path.join(output_base_dir, filename)
-        if os.path.isfile(output_filename):
+        output_filename = pathlib.Path(output_base_dir) / filename
+        if output_filename.is_file():
             output_files[filename] = hash_file(filename)
 
     deleted_files = set()
@@ -152,7 +154,7 @@ def inspect_files(
 
     for filename in list_files(output_base_dir, ignore_filenames, ignore_directories):
         relative_path = os.path.relpath(filename, output_base_dir)
-        if os.path.isfile(filename):
+        if filename.is_file():
             output_files[relative_path] = hash_file(filename)
 
     new_files = source_files.keys() - output_files.keys()

@@ -460,6 +460,12 @@ class KubernetesServicesStage(NebariTerraformStage):
                     "*/*": ["viewer"],
                 },
             },
+            "argo-workflows-jupyter-scheduler": {
+                "primary_namespace": "",
+                "role_bindings": {
+                    "*/*": ["viewer"],
+                },
+            },
         }
 
         # Compound any logout URLs from extensions so they are are logged out in succession
