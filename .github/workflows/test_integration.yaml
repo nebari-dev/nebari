@@ -71,7 +71,7 @@ jobs:
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           role-session-name: github-action
-          aws-region: us-east-1
+          aws-region: us-west-2
 
       - name: Set Environment DO
         if: ${{ matrix.provider == 'do' }}
