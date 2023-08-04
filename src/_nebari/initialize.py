@@ -549,9 +549,9 @@ def github_auto_provision(config, owner, repo):
 
 
 def git_repository_initialize(git_repository):
-    if not git.is_git_repo("./"):
-        git.initialize_git("./")
-    git.add_git_remote(git_repository, path="./", remote_name="origin")
+    if not git.is_git_repo(Path.cwd()):
+        git.initialize_git(Path.cwd())
+    git.add_git_remote(git_repository, path=Path.cwd(), remote_name="origin")
 
 
 def auth0_auto_provision(config):
