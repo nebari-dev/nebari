@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import re
 import tempfile
 
@@ -54,15 +55,15 @@ def render_config(
     config["terraform_state"] = {"type": terraform_state.value}
 
     # Save default password to file
-    default_password_filename = os.path.join(
-        tempfile.gettempdir(), "NEBARI_DEFAULT_PASSWORD"
+    default_password_filename = (
+        pathlib.Path(tempfile.gettempdir()) / "NEBARI_DEFAULT_PASSWORD"
     )
     config["security"] = {
         "keycloak": {"initial_root_password": random_secure_string(length=32)}
     }
-    with open(default_password_filename, "w") as f:
+    with default_password_filename.open("w") as f:
         f.write(config["security"]["keycloak"]["initial_root_password"])
-    os.chmod(default_password_filename, 0o700)
+    default_password_filename.chmod(0o700)
 
     config["theme"] = {"jupyterhub": {"hub_title": f"Nebari - { project_name }"}}
     config["theme"]["jupyterhub"][

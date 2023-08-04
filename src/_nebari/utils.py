@@ -35,7 +35,7 @@ def timer(logger, prefix):
 
 @contextlib.contextmanager
 def change_directory(directory):
-    current_directory = os.getcwd()
+    current_directory = Path.cwd()
     os.chdir(directory)
     yield
     os.chdir(current_directory)
@@ -99,7 +99,7 @@ def load_yaml(config_filename: pathlib.Path):
     """
     Return yaml dict containing config loaded from config_filename.
     """
-    with config_filename.open() as f:
+    with open(config_filename) as f:
         config = yaml.load(f.read())
 
     return config
@@ -262,3 +262,15 @@ def random_secure_string(
     length: int = 16, chars: str = string.ascii_lowercase + string.digits
 ):
     return "".join(secrets.choice(chars) for i in range(length))
+
+
+def is_relative_to(self: pathlib.Path, other: pathlib.Path, /) -> bool:
+    """Compatibility function to bring ``Path.is_relative_to`` to Python 3.8"""
+    if sys.version_info[:2] >= (3, 9):
+        return self.is_relative_to(other)
+
+    try:
+        self.relative_to(other)
+        return True
+    except ValueError:
+        return False

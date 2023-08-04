@@ -78,6 +78,9 @@ def provision_ingress_dns(
             f'"{config.domain}" [Press Enter when Complete]'
         )
 
+    if not disable_checks:
+        checks.check_ingress_dns(stage_outputs, config, disable_prompt)
+
 
 def check_ingress_dns(stage_outputs, config, disable_prompt):
     directory = "stages/04-kubernetes-ingress"

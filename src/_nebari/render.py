@@ -9,6 +9,7 @@ from rich import print
 from rich.table import Table
 
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
+from _nebari.utils import is_relative_to
 from nebari import hookspecs, schema
 
 
@@ -34,7 +35,7 @@ def render_template(
         )
 
     new, untracked, updated, deleted = inspect_files(
-        output_base_dir=str(output_directory),
+        output_base_dir=output_directory,
         ignore_filenames=[
             "terraform.tfstate",
             ".terraform.lock.hcl",
@@ -51,17 +52,17 @@ def render_template(
     if new:
         table = Table("The following files will be created:", style="deep_sky_blue1")
         for filename in sorted(new):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
     if updated:
         table = Table("The following files will be updated:", style="deep_sky_blue1")
         for filename in sorted(updated):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
     if deleted:
         table = Table("The following files will be deleted:", style="deep_sky_blue1")
         for filename in sorted(deleted):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
     if untracked:
         table = Table(
@@ -69,15 +70,15 @@ def render_template(
             style="deep_sky_blue1",
         )
         for filename in sorted(updated):
-            table.add_row(filename, style="green")
+            table.add_row(str(filename), style="green")
         print(table)
 
     if dry_run:
         print("dry-run enabled no files will be created, updated, or deleted")
     else:
         for filename in new | updated:
-            output_filename = os.path.join(str(output_directory), filename)
-            os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+            output_filename = output_directory / filename
+            output_filename.parent.mkdir(parents=True, exist_ok=True)
 
             if isinstance(contents[filename], str):
                 with open(output_filename, "w") as f:
@@ -87,25 +88,24 @@ def render_template(
                     f.write(contents[filename])
 
         for path in deleted:
-            abs_path = os.path.abspath(os.path.join(str(output_directory), path))
+            abs_path = (output_directory / path).resolve()
 
-            # be extra cautious that deleted path is within output_directory
-            if not abs_path.startswith(str(output_directory)):
+            if not is_relative_to(abs_path, output_directory):
                 raise Exception(
                     f"[ERROR] SHOULD NOT HAPPEN filename was about to be deleted but path={abs_path} is outside of output_directory"
                 )
 
-            if os.path.isfile(abs_path):
-                os.remove(abs_path)
-            elif os.path.isdir(abs_path):
+            if abs_path.is_file():
+                abs_path.unlink()
+            elif abs_path.is_dir():
                 shutil.rmtree(abs_path)
 
 
 def inspect_files(
-    output_base_dir: str,
+    output_base_dir: pathlib.Path,
     ignore_filenames: List[str] = None,
     ignore_directories: List[str] = None,
-    deleted_paths: List[str] = None,
+    deleted_paths: List[pathlib.Path] = None,
     contents: Dict[str, str] = None,
 ):
     """Return created, updated and untracked files by computing a checksum over the provided directory.
@@ -114,7 +114,7 @@ def inspect_files(
         output_base_dir (str): Relative base path to output directory
         ignore_filenames (list[str]): Filenames to ignore while comparing for changes
         ignore_directories (list[str]): Directories to ignore while comparing for changes
-        deleted_paths (list[str]): Paths that if exist in output directory should be deleted
+        deleted_paths (list[Path]): Paths that if exist in output directory should be deleted
         contents (dict): filename to content mapping for dynamically generated files
     """
     ignore_filenames = ignore_filenames or []
@@ -125,13 +125,14 @@ def inspect_files(
     output_files = {}
 
     def list_files(
-        directory: str, ignore_filenames: List[str], ignore_directories: List[str]
+        directory: pathlib.Path,
+        ignore_filenames: List[str],
+        ignore_directories: List[str],
     ):
-        for root, dirs, files in os.walk(directory):
-            dirs[:] = [d for d in dirs if d not in ignore_directories]
-            for file in files:
-                if file not in ignore_filenames:
-                    yield os.path.join(root, file)
+        for path in directory.rglob("*"):
+            if not path.is_file():
+                continue
+            yield path
 
     for filename in contents:
         if isinstance(contents[filename], str):
@@ -141,19 +142,19 @@ def inspect_files(
         else:
             source_files[filename] = hashlib.sha256(contents[filename]).hexdigest()
 
-        output_filename = os.path.join(output_base_dir, filename)
-        if os.path.isfile(output_filename):
+        output_filename = pathlib.Path(output_base_dir) / filename
+        if output_filename.is_file():
             output_files[filename] = hash_file(filename)
 
     deleted_files = set()
     for path in deleted_paths:
-        absolute_path = os.path.join(output_base_dir, path)
-        if os.path.exists(absolute_path):
+        absolute_path = output_base_dir / path
+        if absolute_path.exists():
             deleted_files.add(path)
 
     for filename in list_files(output_base_dir, ignore_filenames, ignore_directories):
-        relative_path = os.path.relpath(filename, output_base_dir)
-        if os.path.isfile(filename):
+        relative_path = pathlib.Path(os.path.relpath(filename, output_base_dir))
+        if filename.is_file():
             output_files[relative_path] = hash_file(filename)
 
     new_files = source_files.keys() - output_files.keys()

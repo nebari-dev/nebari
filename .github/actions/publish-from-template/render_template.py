@@ -1,6 +1,6 @@
 import os
-import pathlib
 import sys
+from pathlib import Path
 
 import jinja2
 
@@ -13,5 +13,5 @@ def main(template_path):
 
 
 if __name__ == "__main__":
-    template_path = pathlib.Path(sys.argv[1])
+    template_path = Path(sys.argv[1])
     main(template_path)

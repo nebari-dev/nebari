@@ -24,21 +24,20 @@ class NebariTerraformStage(NebariStage):
     def tf_objects(self) -> List[Dict]:
         return [NebariTerraformState(self.name, self.config)]
 
-    def render(self) -> Dict[str, str]:
+    def render(self) -> Dict[pathlib.Path, str]:
         contents = {
-            str(self.stage_prefix / "_nebari.tf.json"): terraform.tf_render_objects(
+            (self.stage_prefix / "_nebari.tf.json"): terraform.tf_render_objects(
                 self.tf_objects()
             )
         }
         for root, dirs, filenames in os.walk(self.template_directory):
             for filename in filenames:
-                with open(os.path.join(root, filename), "rb") as f:
+                root_filename = pathlib.Path(root) / filename
+                with root_filename.open("rb") as f:
                     contents[
-                        os.path.join(
+                        pathlib.Path(
                             self.stage_prefix,
-                            os.path.relpath(
-                                os.path.join(root, filename), self.template_directory
-                            ),
+                            os.path.relpath(root_filename, self.template_directory),
                         )
                     ] = f.read()
         return contents

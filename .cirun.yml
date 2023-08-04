@@ -11,6 +11,8 @@ runners:
     # Region: Oregon
     region: us-west-2
     # Use Spot Instances for cost savings
-    preemptible: false
+    preemptible:
+      - true
+      - false
     labels:
       - cirun-runner
