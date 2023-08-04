@@ -6,16 +6,12 @@ from pathlib import Path
 from _nebari.utils import change_directory
 
 
-def is_git_repo(path=None):
-    if isinstance(path, str):
-        path = Path(path)
+def is_git_repo(path: Path = None):
     path = path or Path.cwd()
     return ".git" in os.listdir(path)
 
 
-def initialize_git(path=None):
-    if isinstance(path, str):
-        path = Path(path)
+def initialize_git(path: Path = None):
     path = path or Path.cwd()
     with change_directory(path):
         subprocess.check_output(["git", "init"])
@@ -23,9 +19,7 @@ def initialize_git(path=None):
         subprocess.check_output(["git", "checkout", "-b", "main"])
 
 
-def add_git_remote(remote_path, path=None, remote_name="origin"):
-    if isinstance(path, str):
-        path = Path(path)
+def add_git_remote(remote_path: str, path: Path = None, remote_name: str = "origin"):
     path = path or Path.cwd()
 
     c = configparser.ConfigParser()
