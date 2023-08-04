@@ -1,6 +1,6 @@
 import sys
 
-from _nebari.cli.main import app as main
+from _nebari.cli.main import app as nebari
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    nebari(sys.argv[1:])

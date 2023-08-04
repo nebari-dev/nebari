@@ -1,6 +1,6 @@
 Nebari CLI
 ==========
 
-.. click:: nebari.cli.main:typer_click_app
+.. click:: _nebari.cli.main:typer_click_app
    :prog: main
    :nested: full
