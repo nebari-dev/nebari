@@ -430,10 +430,12 @@ def support(
             print(file)
             zip.write(file)
 
+
 # get the click object from the typer app so that we can autodoc the cli
 # NOTE: this must happen _after_ all the subcommands have been added.
 # Adapted from https://typer.tiangolo.com/tutorial/using-click/
 typer_click_app = typer.main.get_command(app)
+
 
 def get_config_namespace(config_path):
     with open(config_path) as f:

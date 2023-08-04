@@ -5,9 +5,9 @@ a full Sphinx website is required in order to generate the docs, only the
 `cli.html` file is used. This file gets copied over to the nebari-docs repo via
 a GitHub Action.
 
-The rich markup is currently unsupported by `sphinx-click` which means that the 
-color additions to the CLI get explicitly written in the docs 
-(https://github.com/ewels/rich-click/issues/48). 
+The rich markup is currently unsupported by `sphinx-click` which means that the
+color additions to the CLI get explicitly written in the docs
+(https://github.com/ewels/rich-click/issues/48).
 
 ## Automation via GitHub Actions
 
