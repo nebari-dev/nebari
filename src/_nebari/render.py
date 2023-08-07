@@ -153,7 +153,7 @@ def inspect_files(
             deleted_files.add(path)
 
     for filename in list_files(output_base_dir, ignore_filenames, ignore_directories):
-        relative_path = pathlib.Path(os.path.relpath(filename, output_base_dir))
+        relative_path = str(pathlib.Path(os.path.relpath(filename, output_base_dir)))
         if filename.is_file():
             output_files[relative_path] = hash_file(filename)
 

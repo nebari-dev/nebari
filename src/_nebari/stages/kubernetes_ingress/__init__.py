@@ -79,7 +79,7 @@ def provision_ingress_dns(
         )
 
     if not disable_checks:
-        checks.check_ingress_dns(stage_outputs, config, disable_prompt)
+        check_ingress_dns(stage_outputs, config, disable_prompt)
 
 
 def check_ingress_dns(stage_outputs, config, disable_prompt):
