@@ -6,7 +6,7 @@ from .utils import render_config_partial
 @pytest.mark.parametrize(
     "k8s_version, expected", [(None, True), ("1.19", True), (1000, ValueError)]
 )
-def test_init(setup_fixture, k8s_version, expected, render_config_partial):
+def test_init(setup_fixture, k8s_version, expected):
     (nebari_config_loc, render_config_inputs) = setup_fixture
     (
         project,

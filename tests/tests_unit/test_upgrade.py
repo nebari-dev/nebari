@@ -2,9 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from _nebari.upgrade import do_upgrade
+from _nebari.upgrade import do_upgrade, load_yaml, verify
 from _nebari.version import __version__, rounded_ver_parse
-from nebari.plugins import nebari_plugin_manager
 
 
 @pytest.fixture
@@ -70,24 +69,32 @@ def test_upgrade_4_0(
         return
 
     # Check the resulting YAML
-    config = nebari_plugin_manager.read_config(tmp_qhub_config)
+    config = load_yaml(tmp_qhub_config)
 
-    assert len(config.security.keycloak.initial_root_password) == 16
-    assert not hasattr(config.security, "users")
-    assert not hasattr(config.security, "groups")
+    verify(
+        config
+    )  # Would raise an error if invalid by current Nebari version's standards
+
+    assert len(config["security"]["keycloak"]["initial_root_password"]) == 16
+
+    assert "users" not in config["security"]
+    assert "groups" not in config["security"]
 
     __rounded_version__ = ".".join([str(c) for c in rounded_ver_parse(__version__)])
 
     # Check image versions have been bumped up
     assert (
-        config.default_images.jupyterhub
+        config["default_images"]["jupyterhub"]
         == f"quansight/nebari-jupyterhub:v{__rounded_version__}"
     )
     assert (
-        config.profiles.jupyterlab[0].kubespawner_override.image
+        config["profiles"]["jupyterlab"][0]["kubespawner_override"]["image"]
         == f"quansight/nebari-jupyterlab:v{__rounded_version__}"
     )
-    assert config.security.authentication.type != "custom"
+
+    assert (
+        config.get("security", {}).get("authentication", {}).get("type", "") != "custom"
+    )
 
     # Keycloak import users json
     assert (
