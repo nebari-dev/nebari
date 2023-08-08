@@ -1,7 +1,6 @@
 import contextlib
 import functools
 import os
-import pathlib
 import re
 import secrets
 import signal
@@ -11,6 +10,7 @@ import sys
 import threading
 import time
 import warnings
+from pathlib import Path
 from typing import Dict, List
 
 from ruamel.yaml import YAML
@@ -96,7 +96,7 @@ def run_subprocess_cmd(processargs, **kwargs):
     )  # Should already have finished because we have drained stdout
 
 
-def load_yaml(config_filename: pathlib.Path):
+def load_yaml(config_filename: Path):
     """
     Return yaml dict containing config loaded from config_filename.
     """
@@ -265,7 +265,7 @@ def random_secure_string(
     return "".join(secrets.choice(chars) for i in range(length))
 
 
-def is_relative_to(self: pathlib.Path, other: pathlib.Path, /) -> bool:
+def is_relative_to(self: Path, other: Path, /) -> bool:
     """Compatibility function to bring ``Path.is_relative_to`` to Python 3.8"""
     if sys.version_info[:2] >= (3, 9):
         return self.is_relative_to(other)

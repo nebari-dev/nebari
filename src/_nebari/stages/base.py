@@ -37,7 +37,9 @@ class NebariTerraformStage(NebariStage):
                     contents[
                         pathlib.Path(
                             self.stage_prefix,
-                            os.path.relpath(root_filename, self.template_directory),
+                            pathlib.Path.relative_to(
+                                pathlib.Path(root_filename), self.template_directory
+                            ),
                         )
                     ] = f.read()
         return contents
