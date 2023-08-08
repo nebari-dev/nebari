@@ -416,7 +416,9 @@ class AmazonWebServicesProvider(schema.Base):
     def _validate_kubernetes_version(cls, values):
         amazon_web_services.check_credentials()
 
-        available_kubernetes_versions = amazon_web_services.kubernetes_versions(values["region"])
+        available_kubernetes_versions = amazon_web_services.kubernetes_versions(
+            values["region"]
+        )
         if values["kubernetes_version"] is None:
             values["kubernetes_version"] = available_kubernetes_versions[-1]
         elif values["kubernetes_version"] not in available_kubernetes_versions:

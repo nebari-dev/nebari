@@ -48,7 +48,9 @@ c.KubeClusterConfig.worker_cores = config["cluster"]["worker_cores"]
 c.KubeClusterConfig.worker_cores_limit = config["cluster"]["worker_cores_limit"]
 c.KubeClusterConfig.worker_memory = config["cluster"]["worker_memory"]
 c.KubeClusterConfig.worker_memory_limit = config["cluster"]["worker_memory_limit"]
-c.KubeClusterConfig.worker_threads = config["cluster"].get("worker_threads", config["cluster"]["worker_cores"])
+c.KubeClusterConfig.worker_threads = config["cluster"].get(
+    "worker_threads", config["cluster"]["worker_cores"]
+)
 c.KubeClusterConfig.worker_extra_container_config = config["cluster"][
     "worker_extra_container_config"
 ]
