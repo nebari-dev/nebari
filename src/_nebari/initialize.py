@@ -1,6 +1,5 @@
 import logging
 import os
-import pathlib
 import re
 import tempfile
 
@@ -55,9 +54,7 @@ def render_config(
     config["terraform_state"] = {"type": terraform_state.value}
 
     # Save default password to file
-    default_password_filename = (
-        pathlib.Path(tempfile.gettempdir()) / "NEBARI_DEFAULT_PASSWORD"
-    )
+    default_password_filename = Path(tempfile.gettempdir()) / "NEBARI_DEFAULT_PASSWORD"
     config["security"] = {
         "keycloak": {"initial_root_password": random_secure_string(length=32)}
     }
@@ -216,7 +213,7 @@ def github_auto_provision(config: pydantic.BaseModel, owner: str, repo: str):
     return f"git@github.com:{owner}/{repo}.git"
 
 
-def git_repository_initialize(git_repository: str):
-    if not git.is_git_repo("./"):
-        git.initialize_git("./")
-    git.add_git_remote(git_repository, path="./", remote_name="origin")
+def git_repository_initialize(git_repository):
+    if not git.is_git_repo(Path.cwd()):
+        git.initialize_git(Path.cwd())
+    git.add_git_remote(git_repository, path=Path.cwd(), remote_name="origin")

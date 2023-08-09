@@ -639,7 +639,10 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 ).unsafe_ask()
 
                 if not disable_checks:
-                    check_ssl_cert_email(ctx, ssl_cert_email=inputs.ssl_cert_email)
+                    typer_validate_regex(
+                        schema.email_regex,
+                        f"Email must be valid and match the regex {schema.email_regex}",
+                    )
 
         # ADVANCED FEATURES
         rich.print(

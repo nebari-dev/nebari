@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-SRC_DIR = Path(__file__).parent.parent
+SRC_DIR = Path(__file__).parent.parent.parent
 PYPROJECT = SRC_DIR / "pyproject.toml"
 
 

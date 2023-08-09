@@ -3,7 +3,7 @@ import ssl
 
 import requests
 
-from tests_deployment import constants
+from tests.tests_deployment import constants
 
 
 def get_jupyterhub_session():

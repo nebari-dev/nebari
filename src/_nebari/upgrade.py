@@ -53,8 +53,6 @@ def do_upgrade(config_filename, attempt_fixes=False):
     UpgradeStep.upgrade(
         config, start_version, __version__, config_filename, attempt_fixes
     )
-    print(config.get("nebari_version"))
-    print(config.get("default_images"))
 
     # Backup old file
     backup_configuration(config_filename, f".{start_version or 'old'}")
@@ -481,8 +479,8 @@ class Upgrade_2023_4_2(UpgradeStep):
         return config
 
 
-class Upgrade_2023_5_2(UpgradeStep):
-    version = "2023.5.2"
+class Upgrade_2023_7_2(UpgradeStep):
+    version = "2023.7.2"
 
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs

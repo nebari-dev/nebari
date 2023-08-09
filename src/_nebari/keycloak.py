@@ -59,8 +59,9 @@ def create_user(
         rich.print(
             f"Creating user=[green]{username}[/green] without password (none supplied)"
         )
-    keycloak_admin.create_user(payload)
+    user = keycloak_admin.create_user(payload)
     rich.print(f"Created user=[green]{username}[/green]")
+    return user
 
 
 def list_users(keycloak_admin: keycloak.KeycloakAdmin):

@@ -11,6 +11,7 @@ import sys
 import threading
 import time
 import warnings
+from pathlib import Path
 from typing import Dict, List
 
 from ruamel.yaml import YAML
@@ -90,12 +91,13 @@ def run_subprocess_cmd(processargs, **kwargs):
     if timeout_timer is not None:
         timeout_timer.cancel()
 
+    process.stdout.close()
     return process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout
 
 
-def load_yaml(config_filename: pathlib.Path):
+def load_yaml(config_filename: Path):
     """
     Return yaml dict containing config loaded from config_filename.
     """

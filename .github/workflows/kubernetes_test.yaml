@@ -5,8 +5,6 @@ on:
     paths:
       - ".github/workflows/kubernetes_test.yaml"
       - "tests/**"
-      - "tests_deployment/**"
-      - "tests_e2e/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"
@@ -20,8 +18,6 @@ on:
     paths:
       - ".github/workflows/kubernetes_test.yaml"
       - "tests/**"
-      - "tests_deployment/**"
-      - "tests_e2e/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"
@@ -150,14 +146,14 @@ jobs:
         env:
           CYPRESS_BASE_URL: https://github-actions.nebari.dev/
         with:
-          working-directory: tests_e2e
+          working-directory: tests/tests_e2e
 
       - name: Playwright Tests
         env:
           KEYCLOAK_USERNAME: ${{ env.CYPRESS_EXAMPLE_USER_NAME }}
           KEYCLOAK_PASSWORD: ${{ env.CYPRESS_EXAMPLE_USER_PASSWORD }}
           NEBARI_FULL_URL: https://github-actions.nebari.dev/
-        working-directory: tests_e2e/playwright
+        working-directory: tests/tests_e2e/playwright
         run: |
           # create environment file
           envsubst < .env.tpl > .env
@@ -170,15 +166,15 @@ jobs:
         with:
           name: e2e-cypress
           path: |
-            ./tests_e2e/cypress/screenshots/
-            ./tests_e2e/cypress/videos/
-            ./tests_e2e/playwright/videos/
+            ./tests/tests_e2e/cypress/screenshots/
+            ./tests/tests_e2e/cypress/videos/
+            ./tests/tests_e2e/playwright/videos/
 
       - name: Deployment Pytests
         run: |
           export KEYCLOAK_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
           export KEYCLOAK_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
-          pytest tests_deployment/ -v -s
+          pytest tests/tests_deployment/ -v -s
 
       - name: JupyterHub Notebook Tests
         timeout-minutes: 2
@@ -193,7 +189,7 @@ jobs:
                                 --validate --no-verify-ssl \
                                 --kernel python3 \
                                 --stop-server \
-                                --notebook tests_deployment/assets/notebook/simple.ipynb \
+                                --notebook tests/tests_deployment/assets/notebook/simple.ipynb \
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
