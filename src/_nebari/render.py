@@ -1,4 +1,6 @@
+import functools
 import hashlib
+import os
 import pathlib
 import shutil
 import sys
@@ -177,3 +179,67 @@ def hash_file(file_path: str):
     """
     with open(file_path, "rb") as f:
         return hashlib.sha256(f.read()).hexdigest()
+
+
+def set_env_vars_in_config(config):
+    """
+
+    For values in the config starting with 'NEBARI_SECRET_XXX' the environment
+    variables are searched for the pattern XXX and the config value is
+    modified. This enables setting secret values that should not be directly
+    stored in the config file.
+
+    NOTE: variables are most likely written to a file somewhere upon render. In
+    order to further reduce risk of exposure of any of these variables you might
+    consider preventing storage of the terraform render output.
+    """
+    private_entries = get_secret_config_entries(config)
+    for idx in private_entries:
+        set_nebari_secret(config, idx)
+
+
+def get_secret_config_entries(config, config_idx=None, private_entries=None):
+    output = private_entries or []
+    if config_idx is None:
+        sub_dict = config
+        config_idx = []
+    else:
+        sub_dict = get_sub_config(config, config_idx)
+
+    for key, value in sub_dict.items():
+        if type(value) is dict:
+            sub_dict_outputs = get_secret_config_entries(
+                config, [*config_idx, key], private_entries
+            )
+            output = [*output, *sub_dict_outputs]
+        else:
+            if "NEBARI_SECRET_" in str(value):
+                output = [*output, [*config_idx, key]]
+    return output
+
+
+def get_sub_config(conf, conf_idx):
+    sub_config = functools.reduce(dict.__getitem__, conf_idx, conf)
+    return sub_config
+
+
+def set_sub_config(conf, conf_idx, value):
+    get_sub_config(conf, conf_idx[:-1])[conf_idx[-1]] = value
+
+
+def set_nebari_secret(config, idx):
+    placeholder = get_sub_config(config, idx)
+    secret_var = get_nebari_secret(placeholder)
+    set_sub_config(config, idx, secret_var)
+
+
+def get_nebari_secret(secret_var):
+    env_var = secret_var.lstrip("NEBARI_SECRET_")
+    val = os.environ.get(env_var)
+    if not val:
+        raise EnvironmentError(
+            f"Since '{secret_var}' was found in the"
+            " Nebari config, the environment variable"
+            f" '{env_var}' must be set."
+        )
+    return val
