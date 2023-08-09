@@ -1,4 +1,5 @@
 import enum
+import logging
 import socket
 import sys
 import time
@@ -6,6 +7,7 @@ import typing
 from typing import Any, Dict, List
 
 from _nebari import constants
+from _nebari.provider.dns.cloudflare import update_record
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
     NebariHelmProvider,
@@ -14,6 +16,8 @@ from _nebari.stages.tf_objects import (
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
+
+logger = logging.getLogger(__name__)
 
 # check and retry settings
 NUM_ATTEMPTS = 10
@@ -75,7 +79,7 @@ def provision_ingress_dns(
         )
 
     if not disable_checks:
-        checks.check_ingress_dns(stage_outputs, config, disable_prompt)
+        check_ingress_dns(stage_outputs, config, disable_prompt)
 
 
 def check_ingress_dns(stage_outputs, config, disable_prompt):
@@ -149,6 +153,10 @@ class Certificate(schema.Base):
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
 
 
+class DnsProvider(schema.Base):
+    provider: typing.Optional[str]
+
+
 class Ingress(schema.Base):
     terraform_overrides: typing.Dict = {}
 
@@ -157,6 +165,7 @@ class InputSchema(schema.Base):
     domain: typing.Optional[str]
     certificate: Certificate = Certificate()
     ingress: Ingress = Ingress()
+    dns: DnsProvider = DnsProvider()
 
 
 class IngressEndpoint(schema.Base):
@@ -223,6 +232,17 @@ class KubernetesIngressStage(NebariTerraformStage):
             outputs["domain"] = self.config.domain
 
         super().set_outputs(stage_outputs, outputs)
+
+    def post_deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
+        if self.config.dns and self.config.dns.provider:
+            provision_ingress_dns(
+                stage_outputs,
+                self.config,
+                dns_provider=self.config.dns.provider,
+                dns_auto_provision=True,
+                disable_prompt=True,
+                disable_checks=False,
+            )
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
         def _attempt_tcp_connect(

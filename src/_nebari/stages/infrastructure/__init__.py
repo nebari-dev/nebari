@@ -416,7 +416,9 @@ class AmazonWebServicesProvider(schema.Base):
     def _validate_kubernetes_version(cls, values):
         amazon_web_services.check_credentials()
 
-        available_kubernetes_versions = amazon_web_services.kubernetes_versions()
+        available_kubernetes_versions = amazon_web_services.kubernetes_versions(
+            values["region"]
+        )
         if values["kubernetes_version"] is None:
             values["kubernetes_version"] = available_kubernetes_versions[-1]
         elif values["kubernetes_version"] not in available_kubernetes_versions:
@@ -426,10 +428,10 @@ class AmazonWebServicesProvider(schema.Base):
         return values
 
     @pydantic.validator("node_groups")
-    def _validate_node_group(cls, value):
+    def _validate_node_group(cls, value, values):
         amazon_web_services.check_credentials()
 
-        available_instances = amazon_web_services.instances()
+        available_instances = amazon_web_services.instances(values["region"])
         for name, node_group in value.items():
             if node_group.instance not in available_instances:
                 raise ValueError(
