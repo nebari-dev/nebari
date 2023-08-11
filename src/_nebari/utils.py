@@ -2,39 +2,23 @@ import contextlib
 import functools
 import os
 import re
+import secrets
 import signal
+import string
 import subprocess
 import sys
 import threading
 import time
+import warnings
 from pathlib import Path
 from typing import Dict, List
 
 from ruamel.yaml import YAML
 
-from _nebari.constants import DEFAULT_NEBARI_DASK_VERSION, DEFAULT_NEBARI_IMAGE_TAG
-from _nebari.provider.cloud import (
-    amazon_web_services,
-    azure_cloud,
-    digital_ocean,
-    google_cloud,
-)
-
 # environment variable overrides
-NEBARI_K8S_VERSION = os.getenv("NEBARI_K8S_VERSION", None)
 NEBARI_GH_BRANCH = os.getenv("NEBARI_GH_BRANCH", None)
-NEBARI_IMAGE_TAG = os.getenv("NEBARI_IMAGE_TAG", None)
-NEBARI_DASK_VERSION = os.getenv("NEBARI_DASK_VERSION", None)
-
-DO_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-do"
-AWS_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-aws"
-GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
-AZURE_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-azure"
 
 CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
-
-# Regex for suitable project names
-namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
 
 # Create a ruamel object with our favored config, for universal use
 yaml = YAML()
@@ -112,70 +96,6 @@ def run_subprocess_cmd(processargs, **kwargs):
     )  # Should already have finished because we have drained stdout
 
 
-def check_cloud_credentials(config):
-    if config["provider"] == "gcp":
-        for variable in {"GOOGLE_CREDENTIALS"}:
-            if variable not in os.environ:
-                raise ValueError(
-                    f"""Missing the following required environment variable: {variable}\n
-                    Please see the documentation for more information: {GCP_ENV_DOCS}"""
-                )
-    elif config["provider"] == "azure":
-        for variable in {
-            "ARM_CLIENT_ID",
-            "ARM_CLIENT_SECRET",
-            "ARM_SUBSCRIPTION_ID",
-            "ARM_TENANT_ID",
-        }:
-            if variable not in os.environ:
-                raise ValueError(
-                    f"""Missing the following required environment variable: {variable}\n
-                    Please see the documentation for more information: {AZURE_ENV_DOCS}"""
-                )
-    elif config["provider"] == "aws":
-        for variable in {
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-        }:
-            if variable not in os.environ:
-                raise ValueError(
-                    f"""Missing the following required environment variable: {variable}\n
-                    Please see the documentation for more information: {AWS_ENV_DOCS}"""
-                )
-    elif config["provider"] == "do":
-        for variable in {
-            "AWS_ACCESS_KEY_ID",
-            "AWS_SECRET_ACCESS_KEY",
-            "SPACES_ACCESS_KEY_ID",
-            "SPACES_SECRET_ACCESS_KEY",
-            "DIGITALOCEAN_TOKEN",
-        }:
-            if variable not in os.environ:
-                raise ValueError(
-                    f"""Missing the following required environment variable: {variable}\n
-                    Please see the documentation for more information: {DO_ENV_DOCS}"""
-                )
-
-        if os.environ["AWS_ACCESS_KEY_ID"] != os.environ["SPACES_ACCESS_KEY_ID"]:
-            raise ValueError(
-                f"""The environment variables AWS_ACCESS_KEY_ID and SPACES_ACCESS_KEY_ID must be equal\n
-                See {DO_ENV_DOCS} for more information"""
-            )
-
-        if (
-            os.environ["AWS_SECRET_ACCESS_KEY"]
-            != os.environ["SPACES_SECRET_ACCESS_KEY"]
-        ):
-            raise ValueError(
-                f"""The environment variables AWS_SECRET_ACCESS_KEY and SPACES_SECRET_ACCESS_KEY must be equal\n
-                See {DO_ENV_DOCS} for more information"""
-            )
-    elif config["provider"] in ["local", "existing"]:
-        pass
-    else:
-        raise ValueError("Cloud Provider configuration not supported")
-
-
 def load_yaml(config_filename: Path):
     """
     Return yaml dict containing config loaded from config_filename.
@@ -184,85 +104,6 @@ def load_yaml(config_filename: Path):
         config = yaml.load(f.read())
 
     return config
-
-
-def backup_config_file(filename: Path, extrasuffix: str = ""):
-    if not filename.exists():
-        return
-
-    # Backup old file
-    backup_filename = Path(f"{filename}{extrasuffix}.backup")
-
-    if backup_filename.exists():
-        i = 1
-        while True:
-            next_backup_filename = Path(f"{backup_filename}~{i}")
-            if not next_backup_filename.exists():
-                backup_filename = next_backup_filename
-                break
-            i = i + 1
-
-    filename.rename(backup_filename)
-    print(f"Backing up {filename} as {backup_filename}")
-
-
-def set_kubernetes_version(
-    config, kubernetes_version, cloud_provider, grab_latest_version=True
-):
-    cloud_provider_dict = {
-        "aws": {
-            "full_name": "amazon_web_services",
-            "k8s_version_checker_func": amazon_web_services.kubernetes_versions,
-        },
-        "azure": {
-            "full_name": "azure",
-            "k8s_version_checker_func": azure_cloud.kubernetes_versions,
-        },
-        "do": {
-            "full_name": "digital_ocean",
-            "k8s_version_checker_func": digital_ocean.kubernetes_versions,
-        },
-        "gcp": {
-            "full_name": "google_cloud_platform",
-            "k8s_version_checker_func": google_cloud.kubernetes_versions,
-        },
-    }
-    cloud_full_name = cloud_provider_dict[cloud_provider]["full_name"]
-    func = cloud_provider_dict[cloud_provider]["k8s_version_checker_func"]
-    cloud_config = config[cloud_full_name]
-
-    def _raise_value_error(cloud_provider, k8s_versions):
-        raise ValueError(
-            f"\nInvalid `kubernetes-version` provided: {kubernetes_version}.\nPlease select from one of the following {cloud_provider.upper()} supported Kubernetes versions: {k8s_versions} or omit flag to use latest Kubernetes version available."
-        )
-
-    def _check_and_set_kubernetes_version(
-        kubernetes_version=kubernetes_version,
-        cloud_provider=cloud_provider,
-        cloud_config=cloud_config,
-        func=func,
-    ):
-        region = cloud_config["region"]
-
-        # to avoid using cloud provider SDK
-        # set NEBARI_K8S_VERSION environment variable
-        if not NEBARI_K8S_VERSION:
-            k8s_versions = func(region)
-        else:
-            k8s_versions = [NEBARI_K8S_VERSION]
-
-        if kubernetes_version:
-            if kubernetes_version in k8s_versions:
-                cloud_config["kubernetes_version"] = kubernetes_version
-            else:
-                _raise_value_error(cloud_provider, k8s_versions)
-        elif grab_latest_version:
-            cloud_config["kubernetes_version"] = k8s_versions[-1]
-        else:
-            # grab oldest version
-            cloud_config["kubernetes_version"] = k8s_versions[0]
-
-    return _check_and_set_kubernetes_version()
 
 
 @contextlib.contextmanager
@@ -297,44 +138,6 @@ def modified_environ(*remove: List[str], **update: Dict[str, str]):
         [env.pop(k) for k in remove_after]
 
 
-@contextlib.contextmanager
-def kubernetes_provider_context(kubernetes_credentials: Dict[str, str]):
-    credential_mapping = {
-        "config_path": "KUBE_CONFIG_PATH",
-        "config_context": "KUBE_CTX",
-        "username": "KUBE_USER",
-        "password": "KUBE_PASSWORD",
-        "client_certificate": "KUBE_CLIENT_CERT_DATA",
-        "client_key": "KUBE_CLIENT_KEY_DATA",
-        "cluster_ca_certificate": "KUBE_CLUSTER_CA_CERT_DATA",
-        "host": "KUBE_HOST",
-        "token": "KUBE_TOKEN",
-    }
-
-    credentials = {
-        credential_mapping[k]: v
-        for k, v in kubernetes_credentials.items()
-        if v is not None
-    }
-    with modified_environ(**credentials):
-        yield
-
-
-@contextlib.contextmanager
-def keycloak_provider_context(keycloak_credentials: Dict[str, str]):
-    credential_mapping = {
-        "client_id": "KEYCLOAK_CLIENT_ID",
-        "url": "KEYCLOAK_URL",
-        "username": "KEYCLOAK_USER",
-        "password": "KEYCLOAK_PASSWORD",
-        "realm": "KEYCLOAK_REALM",
-    }
-
-    credentials = {credential_mapping[k]: v for k, v in keycloak_credentials.items()}
-    with modified_environ(**credentials):
-        yield
-
-
 def deep_merge(*args):
     """Deep merge multiple dictionaries.
 
@@ -355,7 +158,9 @@ def deep_merge(*args):
     >>> print(deep_merge(value_1, value_2))
     {'m': 1, 'e': {'f': {'g': {}, 'h': 1}}, 'b': {'d': 2, 'c': 1, 'z': [5, 6, 7]}, 'a': [1, 2, 3,  4]}
     """
-    if len(args) == 1:
+    if len(args) == 0:
+        return {}
+    elif len(args) == 1:
         return args[0]
     elif len(args) > 2:
         return functools.reduce(deep_merge, args, {})
@@ -378,22 +183,86 @@ def deep_merge(*args):
         return d1
 
 
-def set_docker_image_tag() -> str:
-    """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
+# https://github.com/minrk/escapism/blob/master/escapism.py
+def escape_string(
+    to_escape,
+    safe=set(string.ascii_letters + string.digits),
+    escape_char="_",
+    allow_collisions=False,
+):
+    """Escape a string so that it only contains characters in a safe set.
 
-    if NEBARI_IMAGE_TAG:
-        return NEBARI_IMAGE_TAG
+    Characters outside the safe list will be escaped with _%x_,
+    where %x is the hex value of the character.
 
-    return DEFAULT_NEBARI_IMAGE_TAG
+    If `allow_collisions` is True, occurrences of `escape_char`
+    in the input will not be escaped.
+
+    In this case, `unescape` cannot be used to reverse the transform
+    because occurrences of the escape char in the resulting string are ambiguous.
+    Only use this mode when:
+
+    1. collisions cannot occur or do not matter, and
+    2. unescape will never be called.
+
+    .. versionadded: 1.0
+        allow_collisions argument.
+        Prior to 1.0, behavior was the same as allow_collisions=False (default).
+
+    """
+    if sys.version_info >= (3,):
+
+        def _ord(byte):
+            return byte
+
+        def _bchr(n):
+            return bytes([n])
+
+    else:
+        _ord = ord
+        _bchr = chr
+
+    def _escape_char(c, escape_char):
+        """Escape a single character"""
+        buf = []
+        for byte in c.encode("utf8"):
+            buf.append(escape_char)
+            buf.append("%X" % _ord(byte))
+        return "".join(buf)
+
+    if isinstance(to_escape, bytes):
+        # always work on text
+        to_escape = to_escape.decode("utf8")
+
+    if not isinstance(safe, set):
+        safe = set(safe)
+
+    if allow_collisions:
+        safe.add(escape_char)
+    elif escape_char in safe:
+        warnings.warn(
+            "Escape character %r cannot be a safe character."
+            " Set allow_collisions=True if you want to allow ambiguous escaped strings."
+            % escape_char,
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        safe.remove(escape_char)
+
+    chars = []
+    for c in to_escape:
+        if c in safe:
+            chars.append(c)
+        else:
+            chars.append(_escape_char(c, escape_char))
+
+    return "".join(chars)
 
 
-def set_nebari_dask_version() -> str:
-    """Set version of `nebari-dask` meta package."""
-
-    if NEBARI_DASK_VERSION:
-        return NEBARI_DASK_VERSION
-
-    return DEFAULT_NEBARI_DASK_VERSION
+def random_secure_string(
+    length: int = 16, chars: str = string.ascii_lowercase + string.digits
+):
+    return "".join(secrets.choice(chars) for i in range(length))
 
 
 def is_relative_to(self: Path, other: Path, /) -> bool:

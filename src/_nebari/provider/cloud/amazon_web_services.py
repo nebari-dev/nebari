@@ -5,7 +5,21 @@ import subprocess
 
 import boto3
 
+from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+
+
+def check_credentials():
+    for variable in {
+        "AWS_DEFAULT_REGION",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+    }:
+        if variable not in os.environ:
+            raise ValueError(
+                f"""Missing the following required environment variable: {variable}\n
+                Please see the documentation for more information: {constants.AWS_ENV_DOCS}"""
+            )
 
 
 @functools.lru_cache()
@@ -16,7 +30,7 @@ def regions():
 
 
 @functools.lru_cache()
-def zones(region):
+def zones(region: str = "us-west-2"):
     output = subprocess.check_output(
         ["aws", "ec2", "describe-availability-zones", "--region", region]
     )
@@ -30,6 +44,7 @@ def kubernetes_versions(region="us-west-2"):
     # AWS SDK (boto3) currently doesn't offer an intuitive way to list available kubernetes version. This implementation grabs kubernetes versions for specific EKS addons. It will therefore always be (at the very least) a subset of all kubernetes versions still supported by AWS.
     if not os.getenv("AWS_DEFAULT_REGION"):
         os.environ["AWS_DEFAULT_REGION"] = region
+
     client = boto3.client("eks")
     supported_kubernetes_versions = list()
     available_addons = client.describe_addon_versions()
@@ -45,7 +60,7 @@ def kubernetes_versions(region="us-west-2"):
 
 
 @functools.lru_cache()
-def instances(region):
+def instances(region: str = "us-west-2"):
     output = subprocess.check_output(
         ["aws", "ec2", "describe-instance-types", "--region", region]
     )

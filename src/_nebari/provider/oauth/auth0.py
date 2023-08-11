@@ -7,7 +7,7 @@ from auth0.management import Auth0
 logger = logging.getLogger(__name__)
 
 
-def create_client(jupyterhub_endpoint, project_name, reuse_existing=True):
+def create_client(jupyterhub_endpoint: str, project_name: str, reuse_existing=True):
     for variable in {"AUTH0_DOMAIN", "AUTH0_CLIENT_ID", "AUTH0_CLIENT_SECRET"}:
         if variable not in os.environ:
             raise ValueError(f"Required environment variable={variable} not defined")
