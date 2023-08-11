@@ -24,3 +24,8 @@ output "nfs_endpoint" {
   description = "Endpoint for nfs server"
   value       = module.efs.credentials.dns_name
 }
+
+output "oidc_provider_arn" {
+  description = "The ARN of the OIDC Provider"
+  value       = module.kubernetes.oidc_provider_arn
+}
