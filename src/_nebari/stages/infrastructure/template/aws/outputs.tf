@@ -25,6 +25,11 @@ output "nfs_endpoint" {
   value       = module.efs.credentials.dns_name
 }
 
+output "cluster_oidc_issuer_url" {
+  description = "The URL on the EKS cluster for the OpenID Connect identity provider"
+  value       = module.kubernetes.cluster_oidc_issuer_url
+}
+
 output "oidc_provider_arn" {
   description = "The ARN of the OIDC Provider"
   value       = module.kubernetes.oidc_provider_arn
