@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 from urllib3.exceptions import InsecureRequestWarning
 
+from _nebari.config import read_configuration, write_configuration
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.render import render_template
@@ -94,7 +95,7 @@ def deploy(request):
         nebari_domain=f"ci-{cloud}.nebari.dev",
         cloud_provider=cloud,
         ci_provider="github-actions",
-        auth_provider="github",
+        auth_provider="password",
     )
     # Generate certificate as well
     config["certificate"] = {
@@ -119,9 +120,20 @@ def deploy(request):
                 "security"
             ]["keycloak"]["initial_root_password"]
 
-    with open(config_path, "w") as f:
-        yaml.dump(config, f)
-    render_template(deployment_dir_abs, Path("nebari-config.yaml"))
+    write_configuration(config_path, config)
+
+    from nebari.plugins import nebari_plugin_manager
+
+    stages = nebari_plugin_manager.ordered_stages
+    config_schema = nebari_plugin_manager.config_schema
+
+    from pprint import pprint
+
+    pprint(config)
+
+    config = read_configuration(config_path, config_schema=config_schema)
+    render_template(deployment_dir_abs, config, stages)
+
     failed = False
     try:
         logger.info("*" * 100)
@@ -129,6 +141,7 @@ def deploy(request):
         logger.info("*" * 100)
         deploy_config = deploy_configuration(
             config=config,
+            stages=stages,
             dns_provider="cloudflare",
             dns_auto_provision=True,
             disable_prompt=True,
@@ -144,14 +157,14 @@ def deploy(request):
         logger.exception(e)
     logger.info("*" * 100)
     logger.info("Tearing down")
-    _destroy(config)
+    _destroy(config, stages)
     if failed:
         raise AssertionError("Deployment failed")
 
 
-def _destroy(config):
+def _destroy(config, stages):
     try:
-        return destroy_configuration(config)
+        return destroy_configuration(config, stages)
     except Exception as e:
         logger.exception(e)
         logger.info("Destroy failed!")
