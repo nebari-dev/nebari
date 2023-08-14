@@ -4,10 +4,10 @@ import uuid
 
 import paramiko
 import pytest
-from tests.tests_deployment import constants
-from tests.tests_deployment.utils import get_jupyterhub_token, monkeypatch_ssl_context
 
 from _nebari.utils import escape_string
+from tests.tests_deployment import constants
+from tests.tests_deployment.utils import get_jupyterhub_token, monkeypatch_ssl_context
 
 monkeypatch_ssl_context()
 
