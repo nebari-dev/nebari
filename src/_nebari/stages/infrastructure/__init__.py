@@ -253,6 +253,7 @@ class DigitalOceanProvider(schema.Base):
         available_kubernetes_versions = digital_ocean.kubernetes_versions(
             values["region"]
         )
+        assert available_kubernetes_versions
         if (
             values["kubernetes_version"] is not None
             and values["kubernetes_version"] not in available_kubernetes_versions
