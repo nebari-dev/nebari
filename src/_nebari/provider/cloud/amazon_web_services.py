@@ -88,7 +88,7 @@ def aws_session(region: str, digitalocean: bool = False):
 def delete_aws_s3_bucket(
     bucket_name: str,
     region: str,
-    endpoint: str | None = None,
+    endpoint: str = None,
     digitalocean: bool = False,
 ):
     MAX_RETRIES = 5
