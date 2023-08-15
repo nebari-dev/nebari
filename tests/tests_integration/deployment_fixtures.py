@@ -12,8 +12,9 @@ from urllib3.exceptions import InsecureRequestWarning
 from _nebari.config import read_configuration, write_configuration
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
+from _nebari.provider.cloud.digital_ocean import digital_ocean_cleanup
 from _nebari.render import render_template
-from _nebari.utils import yaml
+from _nebari.utils import set_do_environment, yaml
 from tests.common.config_mod_utils import add_gpu_config, add_preemptible_node_group
 from tests.tests_unit.utils import render_config_partial
 
@@ -53,13 +54,8 @@ def _get_or_create_deployment_directory(cloud):
     return deployment_dir
 
 
-def _set_do_environment():
-    os.environ["AWS_ACCESS_KEY_ID"] = os.environ["SPACES_ACCESS_KEY_ID"]
-    os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
-
-
 def _set_nebari_creds_in_environment(config):
-    os.environ["NEBARI_FULL_URL"] = f"https://{config['domain']}/"
+    os.environ["NEBARI_FULL_URL"] = f"https://{config.domain}/"
     os.environ["KEYCLOAK_USERNAME"] = "pytest"
     os.environ["KEYCLOAK_PASSWORD"] = os.environ.get(
         "PYTEST_KEYCLOAK_PASSWORD", uuid.uuid4().hex
@@ -87,7 +83,7 @@ def deploy(request):
     cloud = request.param
     logger.info(f"Deploying: {cloud}")
     if cloud == "do":
-        _set_do_environment()
+        set_do_environment()
     deployment_dir = _get_or_create_deployment_directory(cloud)
     config = render_config_partial(
         project_name=deployment_dir.name,
@@ -127,14 +123,12 @@ def deploy(request):
     stages = nebari_plugin_manager.ordered_stages
     config_schema = nebari_plugin_manager.config_schema
 
-    from pprint import pprint
-
-    pprint(config)
-
-    config = read_configuration(config_path, config_schema=config_schema)
+    config = read_configuration(config_path, config_schema)
     render_template(deployment_dir_abs, config, stages)
 
     failed = False
+
+    # deploy
     try:
         logger.info("*" * 100)
         logger.info(f"Deploying Nebari on {cloud}")
@@ -153,22 +147,27 @@ def deploy(request):
         yield deploy_config
     except Exception as e:
         failed = True
-        logger.error(f"Deploy Failed, Exception: {e}")
         logger.exception(e)
-    logger.info("*" * 100)
-    logger.info("Tearing down")
-    _destroy(config, stages)
+        logger.error(f"Deploy Failed, Exception: {e}")
+
+    # destroy
+    try:
+        logger.info("*" * 100)
+        logger.info("Tearing down")
+        logger.info("*" * 100)
+        destroy_configuration(config, stages)
+    except:
+        logger.exception(e)
+        logger.error("Destroy failed!")
+        raise
+    finally:
+        logger.info("*" * 100)
+        logger.info("Cleaning up any lingering resources")
+        logger.info("*" * 100)
+        _cleanup_nebari(config)
+
     if failed:
         raise AssertionError("Deployment failed")
-
-
-def _destroy(config, stages):
-    try:
-        return destroy_configuration(config, stages)
-    except Exception as e:
-        logger.exception(e)
-        logger.info("Destroy failed!")
-        raise
 
 
 def on_cloud(param=None):
@@ -182,3 +181,12 @@ def on_cloud(param=None):
 
     all_clouds_param = map(_create_pytest_param, clouds)
     return pytest.mark.parametrize("deploy", all_clouds_param, indirect=True)
+
+
+def _cleanup_nebari(config):
+    cloud_provider = config["provider"]
+
+    if cloud_provider == "do":
+        digital_ocean_cleanup(
+            name=config["name"], namespace=config["namespace"], region=config["region"]
+        )

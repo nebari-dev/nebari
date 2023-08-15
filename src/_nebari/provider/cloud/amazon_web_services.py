@@ -2,8 +2,10 @@ import functools
 import json
 import os
 import subprocess
+import time
 
 import boto3
+from botocore.exceptions import ClientError
 
 from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
@@ -66,3 +68,59 @@ def instances(region: str = "us-west-2"):
     )
     data = json.loads(output.decode("utf-8"))
     return {_["InstanceType"]: _["InstanceType"] for _ in data["InstanceTypes"]}
+
+
+def aws_session(region: str, digitalocean: bool = False):
+    if digitalocean:
+        aws_access_key_id = os.environ["SPACES_ACCESS_KEY_ID"]
+        aws_secret_access_key = os.environ["SPACES_SECRET_ACCESS_KEY"]
+    else:
+        aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
+        aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
+
+    return boto3.session.Session(
+        region_name=region,
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+    )
+
+
+def delete_aws_s3_bucket(
+    bucket_name: str,
+    region: str,
+    endpoint: str | None = None,
+    digitalocean: bool = False,
+):
+    MAX_RETRIES = 5
+    DELAY = 5
+
+    session = aws_session(region=region, digitalocean=digitalocean)
+    s3 = session.resource("s3", endpoint_url=endpoint)
+    try:
+        bucket = s3.Bucket(bucket_name)
+
+        for obj in bucket.objects.all():
+            obj.delete()
+
+        for obj_version in bucket.object_versions.all():
+            obj_version.delete()
+
+    except ClientError as e:
+        if "NoSuchBucket" in str(e):
+            print(f"Bucket {bucket_name} does not exist. Skipping...")
+            return
+        else:
+            raise e
+
+    for i in range(MAX_RETRIES):
+        try:
+            bucket.delete()
+            print(f"Successfully deleted bucket {bucket_name}")
+            return
+        except ClientError as e:
+            if "BucketNotEmpty" in str(e):
+                print(f"Bucket is not yet empty. Retrying in {DELAY} seconds...")
+                time.sleep(DELAY)
+            else:
+                raise e
+    print(f"Failed to delete bucket {bucket_name} after {MAX_RETRIES} retries.")
