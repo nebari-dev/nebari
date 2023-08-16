@@ -52,17 +52,17 @@ def render_template(
 
     if new:
         table = Table("The following files will be created:", style="deep_sky_blue1")
-        for filename in sorted(new):
+        for filename in sorted(set(map(str, new))):
             table.add_row(str(filename), style="green")
         print(table)
     if updated:
         table = Table("The following files will be updated:", style="deep_sky_blue1")
-        for filename in sorted(updated):
+        for filename in sorted(set(map(str, updated))):
             table.add_row(str(filename), style="green")
         print(table)
     if deleted:
         table = Table("The following files will be deleted:", style="deep_sky_blue1")
-        for filename in sorted(deleted):
+        for filename in sorted(set(map(str, deleted))):
             table.add_row(str(filename), style="green")
         print(table)
     if untracked:
@@ -70,7 +70,7 @@ def render_template(
             "The following files are untracked (only exist in output directory):",
             style="deep_sky_blue1",
         )
-        for filename in sorted(updated):
+        for filename in sorted(set(map(str, updated))):
             table.add_row(str(filename), style="green")
         print(table)
 
