@@ -13,11 +13,8 @@ logger = logging.getLogger(__name__)
 def deploy_configuration(
     config: schema.Main,
     stages: List[hookspecs.NebariStage],
-    dns_provider,
-    dns_auto_provision,
     disable_prompt: bool = False,
     disable_checks: bool = False,
-    skip_remote_state_provision: bool = False,
 ):
     if config.prevent_deploy:
         raise ValueError(
@@ -53,7 +50,8 @@ def deploy_configuration(
         with contextlib.ExitStack() as stack:
             for stage in stages:
                 s = stage(output_directory=pathlib.Path.cwd(), config=config)
-                stack.enter_context(s.deploy(stage_outputs))
+                print(stage.name)
+                stack.enter_context(s.deploy(stage_outputs, disable_prompt))
 
                 if not disable_checks:
                     s.check(stage_outputs)

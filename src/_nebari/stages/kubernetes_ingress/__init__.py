@@ -36,12 +36,11 @@ def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
 
 
 def provision_ingress_dns(
-    stage_outputs,
-    config,
+    stage_outputs: Dict[str, Dict[str, Any]],
+    config: schema.Main,
     dns_provider: str,
     dns_auto_provision: bool,
     disable_prompt: bool = True,
-    disable_checks: bool = False,
 ):
     directory = "stages/04-kubernetes-ingress"
 
@@ -78,11 +77,8 @@ def provision_ingress_dns(
             f'"{config.domain}" [Press Enter when Complete]'
         )
 
-    if not disable_checks:
-        check_ingress_dns(stage_outputs, config, disable_prompt)
 
-
-def check_ingress_dns(stage_outputs, config, disable_prompt):
+def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool):
     directory = "stages/04-kubernetes-ingress"
 
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
@@ -155,6 +151,7 @@ class Certificate(schema.Base):
 
 class DnsProvider(schema.Base):
     provider: typing.Optional[str]
+    auto_provision: typing.Optional[bool] = False
 
 
 class Ingress(schema.Base):
@@ -233,15 +230,16 @@ class KubernetesIngressStage(NebariTerraformStage):
 
         super().set_outputs(stage_outputs, outputs)
 
-    def post_deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
+    def post_deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
         if self.config.dns and self.config.dns.provider:
             provision_ingress_dns(
                 stage_outputs,
                 self.config,
                 dns_provider=self.config.dns.provider,
-                dns_auto_provision=True,
-                disable_prompt=True,
-                disable_checks=False,
+                dns_auto_provision=self.config.dns.auto_provision,
+                disable_prompt=disable_prompt,
             )
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):

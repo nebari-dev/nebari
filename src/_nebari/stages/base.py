@@ -57,7 +57,9 @@ class NebariTerraformStage(NebariStage):
             stage_outputs[stage_key].update(outputs)
 
     @contextlib.contextmanager
-    def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
+    def deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
         deploy_config = dict(
             directory=str(self.output_directory / self.stage_prefix),
             input_vars=self.input_vars(stage_outputs),
@@ -68,10 +70,12 @@ class NebariTerraformStage(NebariStage):
             deploy_config["state_imports"] = state_imports
 
         self.set_outputs(stage_outputs, terraform.deploy(**deploy_config))
-        self.post_deploy(stage_outputs)
+        self.post_deploy(stage_outputs, disable_prompt)
         yield
 
-    def post_deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
+    def post_deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
         pass
 
     def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
