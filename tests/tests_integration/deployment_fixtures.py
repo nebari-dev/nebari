@@ -116,6 +116,9 @@ def deploy(request):
                 "security"
             ]["keycloak"]["initial_root_password"]
 
+            config["dns"]["provider"] = "cloudflare"
+            config["dns"]["auto_provision"] = True
+
     write_configuration(config_path, config)
 
     from nebari.plugins import nebari_plugin_manager
@@ -136,11 +139,8 @@ def deploy(request):
         deploy_config = deploy_configuration(
             config=config,
             stages=stages,
-            dns_provider="cloudflare",
-            dns_auto_provision=True,
             disable_prompt=True,
             disable_checks=False,
-            skip_remote_state_provision=False,
         )
         _create_nebari_user(config)
         _set_nebari_creds_in_environment(config)

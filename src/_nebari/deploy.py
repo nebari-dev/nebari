@@ -50,7 +50,6 @@ def deploy_configuration(
         with contextlib.ExitStack() as stack:
             for stage in stages:
                 s = stage(output_directory=pathlib.Path.cwd(), config=config)
-                print(stage.name)
                 stack.enter_context(s.deploy(stage_outputs, disable_prompt))
 
                 if not disable_checks:
