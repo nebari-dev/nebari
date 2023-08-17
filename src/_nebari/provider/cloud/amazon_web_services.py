@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import functools
 import os
 
@@ -23,14 +21,14 @@ def check_credentials():
 
 
 @functools.lru_cache()
-def regions() -> dict[str, str]:
+def regions():
     client = boto3.client("ec2")
     response = client.describe_regions()
     return {_["RegionName"]: _["RegionName"] for _ in response["Regions"]}
 
 
 @functools.lru_cache()
-def zones(region: str) -> dict[str, str]:
+def zones(region: str):
     client = boto3.client("ec2")
     response = client.describe_availability_zones(region_name=region)
     return {_["ZoneName"]: _["ZoneName"] for _ in response["AvailabilityZones"]}
@@ -58,7 +56,7 @@ def kubernetes_versions(region="us-west-2"):
 
 
 @functools.lru_cache()
-def instances(region: str) -> dict[str, str]:
+def instances(region: str):
     client = boto3.client("ec2")
     response = client.describe_instance_types(region_name=region)
     return {_["InstanceType"]: _["InstanceType"] for _ in response["InstanceTypes"]}
