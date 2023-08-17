@@ -1,7 +1,7 @@
+from __future__ import annotations
+
 import functools
-import json
 import os
-import subprocess
 
 import boto3
 
@@ -23,19 +23,17 @@ def check_credentials():
 
 
 @functools.lru_cache()
-def regions():
-    output = subprocess.check_output(["aws", "ec2", "describe-regions"])
-    data = json.loads(output.decode("utf-8"))
-    return {_["RegionName"]: _["RegionName"] for _ in data["Regions"]}
+def regions() -> dict[str, str]:
+    client = boto3.client("ec2")
+    response = client.describe_regions()
+    return {_["RegionName"]: _["RegionName"] for _ in response["Regions"]}
 
 
 @functools.lru_cache()
-def zones(region: str = "us-west-2"):
-    output = subprocess.check_output(
-        ["aws", "ec2", "describe-availability-zones", "--region", region]
-    )
-    data = json.loads(output.decode("utf-8"))
-    return {_["ZoneName"]: _["ZoneName"] for _ in data["AvailabilityZones"]}
+def zones(region: str) -> dict[str, str]:
+    client = boto3.client("ec2")
+    response = client.describe_availability_zones(region_name=region)
+    return {_["ZoneName"]: _["ZoneName"] for _ in response["AvailabilityZones"]}
 
 
 @functools.lru_cache()
@@ -60,9 +58,7 @@ def kubernetes_versions(region="us-west-2"):
 
 
 @functools.lru_cache()
-def instances(region: str = "us-west-2"):
-    output = subprocess.check_output(
-        ["aws", "ec2", "describe-instance-types", "--region", region]
-    )
-    data = json.loads(output.decode("utf-8"))
-    return {_["InstanceType"]: _["InstanceType"] for _ in data["InstanceTypes"]}
+def instances(region: str) -> dict[str, str]:
+    client = boto3.client("ec2")
+    response = client.describe_instance_types(region_name=region)
+    return {_["InstanceType"]: _["InstanceType"] for _ in response["InstanceTypes"]}
