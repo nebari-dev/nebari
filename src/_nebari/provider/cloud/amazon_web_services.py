@@ -1,7 +1,5 @@
 import functools
-import json
 import os
-import subprocess
 
 import boto3
 
@@ -24,26 +22,22 @@ def check_credentials():
 
 @functools.lru_cache()
 def regions():
-    output = subprocess.check_output(["aws", "ec2", "describe-regions"])
-    data = json.loads(output.decode("utf-8"))
-    return {_["RegionName"]: _["RegionName"] for _ in data["Regions"]}
+    client = boto3.client("ec2")
+    response = client.describe_regions()
+    return {_["RegionName"]: _["RegionName"] for _ in response["Regions"]}
 
 
 @functools.lru_cache()
-def zones(region: str = "us-west-2"):
-    output = subprocess.check_output(
-        ["aws", "ec2", "describe-availability-zones", "--region", region]
-    )
-    data = json.loads(output.decode("utf-8"))
-    return {_["ZoneName"]: _["ZoneName"] for _ in data["AvailabilityZones"]}
+def zones():
+    client = boto3.client("ec2")
+    response = client.describe_availability_zones()
+    return {_["ZoneName"]: _["ZoneName"] for _ in response["AvailabilityZones"]}
 
 
 @functools.lru_cache()
-def kubernetes_versions(region="us-west-2"):
+def kubernetes_versions():
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
     # AWS SDK (boto3) currently doesn't offer an intuitive way to list available kubernetes version. This implementation grabs kubernetes versions for specific EKS addons. It will therefore always be (at the very least) a subset of all kubernetes versions still supported by AWS.
-    if not os.getenv("AWS_DEFAULT_REGION"):
-        os.environ["AWS_DEFAULT_REGION"] = region
 
     client = boto3.client("eks")
     supported_kubernetes_versions = list()
@@ -60,9 +54,7 @@ def kubernetes_versions(region="us-west-2"):
 
 
 @functools.lru_cache()
-def instances(region: str = "us-west-2"):
-    output = subprocess.check_output(
-        ["aws", "ec2", "describe-instance-types", "--region", region]
-    )
-    data = json.loads(output.decode("utf-8"))
-    return {_["InstanceType"]: _["InstanceType"] for _ in data["InstanceTypes"]}
+def instances():
+    client = boto3.client("ec2")
+    response = client.describe_instance_types()
+    return {_["InstanceType"]: _["InstanceType"] for _ in response["InstanceTypes"]}
