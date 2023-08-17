@@ -35,11 +35,9 @@ def zones(region: str):
 
 
 @functools.lru_cache()
-def kubernetes_versions(region="us-west-2"):
+def kubernetes_versions():
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
     # AWS SDK (boto3) currently doesn't offer an intuitive way to list available kubernetes version. This implementation grabs kubernetes versions for specific EKS addons. It will therefore always be (at the very least) a subset of all kubernetes versions still supported by AWS.
-    if not os.getenv("AWS_DEFAULT_REGION"):
-        os.environ["AWS_DEFAULT_REGION"] = region
 
     client = boto3.client("eks")
     supported_kubernetes_versions = list()
@@ -56,7 +54,7 @@ def kubernetes_versions(region="us-west-2"):
 
 
 @functools.lru_cache()
-def instances(region: str):
+def instances():
     client = boto3.client("ec2")
-    response = client.describe_instance_types(region_name=region)
+    response = client.describe_instance_types()
     return {_["InstanceType"]: _["InstanceType"] for _ in response["InstanceTypes"]}
