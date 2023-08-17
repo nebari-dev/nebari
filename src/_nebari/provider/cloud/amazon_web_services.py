@@ -28,9 +28,9 @@ def regions():
 
 
 @functools.lru_cache()
-def zones(region: str):
+def zones():
     client = boto3.client("ec2")
-    response = client.describe_availability_zones(region_name=region)
+    response = client.describe_availability_zones()
     return {_["ZoneName"]: _["ZoneName"] for _ in response["AvailabilityZones"]}
 
 
