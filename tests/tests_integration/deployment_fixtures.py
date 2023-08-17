@@ -14,7 +14,7 @@ from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.provider.cloud.digital_ocean import digital_ocean_cleanup
 from _nebari.render import render_template
-from _nebari.utils import set_do_environment, yaml
+from _nebari.utils import set_do_environment
 from tests.common.config_mod_utils import add_gpu_config, add_preemptible_node_group
 from tests.tests_unit.utils import render_config_partial
 
@@ -80,6 +80,8 @@ def _create_nebari_user(config):
 def deploy(request):
     """Deploy Nebari on the given cloud, currently only DigitalOcean"""
     ignore_warnings()
+
+    # initialize
     cloud = request.param
     logger.info(f"Deploying: {cloud}")
     if cloud == "do":
@@ -93,31 +95,11 @@ def deploy(request):
         ci_provider="github-actions",
         auth_provider="password",
     )
-    # Generate certificate as well
-    config["certificate"] = {
-        "type": "lets-encrypt",
-        "acme_email": "internal-devops@quansight.com",
-        "acme_server": "https://acme-v02.api.letsencrypt.org/directory",
-    }
-    if cloud in ["aws", "gcp"]:
-        config = add_gpu_config(config, cloud=cloud)
-        config = add_preemptible_node_group(config, cloud=cloud)
 
     deployment_dir_abs = deployment_dir.absolute()
     os.chdir(deployment_dir)
     logger.info(f"Temporary directory: {deployment_dir}")
     config_path = Path("nebari-config.yaml")
-
-    if config_path.exists():
-        with open(config_path) as f:
-            current_config = yaml.load(f)
-
-            config["security"]["keycloak"]["initial_root_password"] = current_config[
-                "security"
-            ]["keycloak"]["initial_root_password"]
-
-            config["dns"]["provider"] = "cloudflare"
-            config["dns"]["auto_provision"] = True
 
     write_configuration(config_path, config)
 
@@ -127,7 +109,22 @@ def deploy(request):
     config_schema = nebari_plugin_manager.config_schema
 
     config = read_configuration(config_path, config_schema)
+
+    # Modify config
+    config.certificate.type = "lets-encrypt"
+    config.certificate.acme_email = "internal-devops@quansight.com"
+    config.certificate.acme_server = "https://acme-v02.api.letsencrypt.org/directory"
+    config.dns.provider = "cloudflare"
+    config.dns.auto_provision = True
+
+    if cloud in ["aws", "gcp"]:
+        config = add_gpu_config(config, cloud=cloud)
+        config = add_preemptible_node_group(config, cloud=cloud)
+
+    # render
     render_template(deployment_dir_abs, config, stages)
+
+    print(config)
 
     failed = False
 
@@ -184,9 +181,11 @@ def on_cloud(param=None):
 
 
 def _cleanup_nebari(config):
-    cloud_provider = config["provider"]
+    cloud_provider = config.provider
 
     if cloud_provider == "do":
         digital_ocean_cleanup(
-            name=config["name"], namespace=config["namespace"], region=config["region"]
+            name=config["name"],
+            namespace=config.namespace,
+            region=config.digital_ocean.region,
         )

@@ -242,7 +242,9 @@ class KubernetesIngressStage(NebariTerraformStage):
                 disable_prompt=disable_prompt,
             )
 
-    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
+    def check(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
         def _attempt_tcp_connect(
             host, port, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
         ):
