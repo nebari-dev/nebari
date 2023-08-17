@@ -1,6 +1,5 @@
 resource "aws_s3_bucket" "terraform-state" {
   bucket = "${var.name}-terraform-state"
-  acl    = "private"
 
   force_destroy = true
 
@@ -9,6 +8,12 @@ resource "aws_s3_bucket" "terraform-state" {
   }
 
   tags = merge({ Name = "S3 remote terraform state store" }, var.tags)
+
+  lifecycle {
+    ignore_changes = [
+      server_side_encryption_configuration,
+    ]
+  }
 }
 
 resource "aws_dynamodb_table" "terraform-state-lock" {
