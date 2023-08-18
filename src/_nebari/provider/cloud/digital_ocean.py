@@ -107,7 +107,7 @@ def digital_ocean_delete_kubernetes_cluster(cluster_name: str):
     digital_ocean_request(f"kubernetes/clusters/{cluster_id}", method="DELETE")
 
 
-def digital_ocean_cleanup(name: str, namespace: str, region: str):
+def digital_ocean_cleanup(name: str, namespace: str):
     cluster_name = f"{name}-{namespace}"
     tf_state_bucket = f"{cluster_name}-terraform-state"
     do_spaces_endpoint = "https://nyc3.digitaloceanspaces.com"
@@ -124,6 +124,6 @@ def digital_ocean_cleanup(name: str, namespace: str, region: str):
 
     set_do_environment()
     aws_delete_s3_bucket(
-        tf_state_bucket, region=region, digitalocean=True, endpoint=do_spaces_endpoint
+        tf_state_bucket, digitalocean=True, endpoint=do_spaces_endpoint
     )
     digital_ocean_delete_kubernetes_cluster(cluster_name)

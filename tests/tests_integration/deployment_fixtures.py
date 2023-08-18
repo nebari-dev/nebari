@@ -12,6 +12,7 @@ from urllib3.exceptions import InsecureRequestWarning
 from _nebari.config import read_configuration, write_configuration
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
+from _nebari.provider.cloud.amazon_web_services import aws_cleanup
 from _nebari.provider.cloud.digital_ocean import digital_ocean_cleanup
 from _nebari.render import render_template
 from _nebari.utils import set_do_environment
@@ -182,10 +183,16 @@ def on_cloud(param=None):
 
 def _cleanup_nebari(config):
     cloud_provider = config.provider
+    project_name = config.name
+    namespace = config.namespace
 
     if cloud_provider == "do":
         digital_ocean_cleanup(
-            name=config["name"],
-            namespace=config.namespace,
-            region=config.digital_ocean.region,
+            name=project_name,
+            namespace=namespace,
+        )
+    elif cloud_provider == "aws":
+        aws_cleanup(
+            name=project_name,
+            namespace=namespace,
         )

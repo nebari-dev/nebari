@@ -32,16 +32,19 @@ def aws_session(digitalocean_region: str = None):
         aws_access_key_id = os.environ["SPACES_ACCESS_KEY_ID"]
         aws_secret_access_key = os.environ["SPACES_SECRET_ACCESS_KEY"]
         region = digitalocean_region
+        aws_session_token = None
     else:
         check_credentials()
         aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
         aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
+        aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
         region = os.environ["AWS_DEFAULT_REGION"]
 
     return boto3.Session(
         region_name=region,
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
+        aws_session_token=aws_session_token,
     )
 
 
