@@ -56,6 +56,8 @@ def kubernetes_versions():
 @functools.lru_cache()
 def instances():
     client = boto3.client("ec2")
-    paginator = client.get_paginator('describe_instance_types')
-    instance_types = sorted([ j["InstanceType"] for i in paginator.paginate() for j in i["InstanceTypes"] ])
+    paginator = client.get_paginator("describe_instance_types")
+    instance_types = sorted(
+        [j["InstanceType"] for i in paginator.paginate() for j in i["InstanceTypes"]]
+    )
     return {t: t for t in instance_types}
