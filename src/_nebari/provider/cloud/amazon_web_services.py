@@ -53,10 +53,12 @@ def regions():
     return {_["RegionName"]: _["RegionName"] for _ in regions}
 
 
+
 @functools.lru_cache()
 def zones():
     session = aws_session()
     client = session.client("ec2")
+
     response = client.describe_availability_zones()
     return {_["ZoneName"]: _["ZoneName"] for _ in response["AvailabilityZones"]}
 
@@ -67,6 +69,7 @@ def kubernetes_versions():
     # AWS SDK (boto3) currently doesn't offer an intuitive way to list available kubernetes version. This implementation grabs kubernetes versions for specific EKS addons. It will therefore always be (at the very least) a subset of all kubernetes versions still supported by AWS.
     session = aws_session()
     client = session.client("eks")
+
     supported_kubernetes_versions = list()
     available_addons = client.describe_addon_versions()
     for addon in available_addons.get("addons", None):
@@ -84,6 +87,7 @@ def kubernetes_versions():
 def instances():
     session = aws_session()
     client = session.client("ec2")
+
     response = client.describe_instance_types()
     return {_["InstanceType"]: _["InstanceType"] for _ in response["InstanceTypes"]}
 
