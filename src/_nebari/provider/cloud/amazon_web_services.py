@@ -53,7 +53,6 @@ def regions():
     return {_["RegionName"]: _["RegionName"] for _ in regions}
 
 
-
 @functools.lru_cache()
 def zones():
     session = aws_session()
