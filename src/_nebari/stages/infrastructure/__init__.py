@@ -687,13 +687,6 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 private_cluster_enabled=self.config.azure.private_cluster_enabled,
             ).dict()
         elif self.config.provider == schema.ProviderEnum.aws:
-            print("*" * 100)
-            for name, ng in self.config.amazon_web_services.node_groups.items():
-                print(name)
-                print(ng)
-                print("-----")
-            print("*" * 100)
-
             return AWSInputVars(
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
