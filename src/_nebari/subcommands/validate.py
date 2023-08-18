@@ -41,4 +41,4 @@ def nebari_subcommand(cli: typer.Typer):
                     f"[bold red]ERROR validating configuration {config_filename.absolute()}[/bold red]"
                 )
                 print(str(e))
-                typer.Abort()
+                raise typer.Abort()
