@@ -295,7 +295,7 @@ class KubernetesIngressStage(NebariTerraformStage):
             f"After stage={self.name} kubernetes ingress available on tcp ports={tcp_ports}"
         )
 
-        check_ingress_dns(stage_outputs, self.config, disable_prompt=False)
+        check_ingress_dns(stage_outputs, self.config, disable_prompt=disable_prompt)
 
 
 @hookimpl
