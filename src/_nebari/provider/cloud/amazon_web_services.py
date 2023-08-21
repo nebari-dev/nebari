@@ -96,7 +96,6 @@ def instances():
     return {t: t for t in instance_types}
 
 
-
 def aws_get_vpc_id(name: str, namespace: str) -> str:
     cluster_name = f"{name}-{namespace}"
     session = aws_session()
