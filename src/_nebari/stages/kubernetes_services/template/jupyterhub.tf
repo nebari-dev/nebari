@@ -59,11 +59,6 @@ variable "idle-culler-settings" {
   type        = any
 }
 
-variable "argo-workflows-enabled" {
-  description = "Enable Argo Workflows"
-  type        = bool
-}
-
 
 module "kubernetes-nfs-server" {
   count = var.jupyterhub-shared-endpoint == null ? 1 : 0
