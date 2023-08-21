@@ -1,5 +1,7 @@
 import os
 import pathlib
+import re
+import sys
 import typing
 
 import pydantic
@@ -10,32 +12,23 @@ from _nebari.utils import yaml
 def set_nested_attribute(data: typing.Any, attrs: typing.List[str], value: typing.Any):
     """Takes an arbitrary set of attributes and accesses the deep
     nested object config to set value
-
     """
 
     def _get_attr(d: typing.Any, attr: str):
-        if hasattr(d, "__getitem__"):
-            if re.fullmatch(r"\d+", attr):
-                try:
-                    return d[int(attr)]
-                except Exception:
-                    return d[attr]
-            else:
-                return d[attr]
+        if isinstance(d, list) and re.fullmatch(r"\d+", attr):
+            return d[int(attr)]
+        elif hasattr(d, "__getitem__"):
+            return d[attr]
         else:
             return getattr(d, attr)
 
     def _set_attr(d: typing.Any, attr: str, value: typing.Any):
-        if hasattr(d, "__getitem__"):
-            if re.fullmatch(r"\d+", attr):
-                try:
-                    d[int(attr)] = value
-                except Exception:
-                    d[attr] = value
-            else:
-                d[attr] = value
+        if isinstance(d, list) and re.fullmatch(r"\d+", attr):
+            d[int(attr)] = value
+        elif hasattr(d, "__getitem__"):
+            d[attr] = value
         else:
-            return setattr(d, attr, value)
+            setattr(d, attr, value)
 
     data_pos = data
     for attr in attrs[:-1]:
@@ -68,7 +61,7 @@ def read_configuration(
     config_schema: pydantic.BaseModel,
     read_environment: bool = True,
 ):
-    """Read configuration from multiple sources and apply validation"""
+    """Read the nebari configuration from disk and apply validation"""
     filename = pathlib.Path(config_filename)
 
     if not filename.is_file():
@@ -90,6 +83,7 @@ def write_configuration(
     config: typing.Union[pydantic.BaseModel, typing.Dict],
     mode: str = "w",
 ):
+    """Write the nebari configuration file to disk"""
     with config_filename.open(mode) as f:
         if isinstance(config, pydantic.BaseModel):
             yaml.dump(config.dict(), f)
