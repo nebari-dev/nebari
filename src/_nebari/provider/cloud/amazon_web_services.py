@@ -58,8 +58,11 @@ def kubernetes_versions():
 @functools.lru_cache()
 def instances():
     client = boto3.client("ec2")
-    response = client.describe_instance_types()
-    return {_["InstanceType"]: _["InstanceType"] for _ in response["InstanceTypes"]}
+    paginator = client.get_paginator("describe_instance_types")
+    instance_types = sorted(
+        [j["InstanceType"] for i in paginator.paginate() for j in i["InstanceTypes"]]
+    )
+    return {t: t for t in instance_types}
 
 
 def aws_session(region: str, digitalocean: bool = False):
@@ -116,3 +119,4 @@ def delete_aws_s3_bucket(
             else:
                 raise e
     print(f"Failed to delete bucket {bucket_name} after {MAX_RETRIES} retries.")
+
