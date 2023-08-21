@@ -54,6 +54,7 @@ classifiers = [
 ]
 
 dependencies = [
+    "pluggy==1.0.0",
     "auth0-python==4.0.0",
     "azure-identity==1.12.0",
     "azure-mgmt-containerservice==19.1.0",
@@ -76,6 +77,7 @@ dev = [
     "black==22.3.0",
     "dask-gateway",
     "diagrams",
+    "python-dotenv",
     "escapism",
     "flake8==3.8.4",
     "importlib-metadata<5.0",
@@ -84,6 +86,7 @@ dev = [
     "pre-commit",
     "pytest",
     "pytest-timeout",
+    "pytest-playwright",
     "grayskull",
     "build",
     "jinja2",
@@ -94,12 +97,18 @@ Documentation = "https://www.nebari.dev/docs"
 Source = "https://github.com/nebari-dev/nebari"
 
 [project.scripts]
-nebari = "_nebari.cli.main:app"
+nebari = "nebari.__main__:main"
 
 [tool.ruff]
+select = [
+    "E",
+    "F",
+    "PTH",
+]
 ignore = [
     "E501", # Line too long
     "F821", # Undefined name
+    "PTH123", # open() should be replaced by Path.open()
 ]
 extend-exclude = [
     "src/_nebari/template",

@@ -10,8 +10,6 @@ on:
       - ".github/failed-workflow-issue-templates/test-provider.md"
       - ".github/actions/publish-from-template"
       - "tests/**"
-      - "tests_deployment/**"
-      - "tests_e2e/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"
@@ -23,8 +21,6 @@ on:
     paths:
       - ".github/workflows/test-provider.yaml"
       - "tests/**"
-      - "tests_deployment/**"
-      - "tests_e2e/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"
@@ -89,6 +85,8 @@ jobs:
             kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci tenant_id | ARM_TENANT_ID;
             kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci subscription_id | ARM_SUBSCRIPTION_ID;
             kv/data/repository/nebari-dev/nebari/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
+            kv/data/repository/nebari-dev/nebari/shared_secrets SPACES_ACCESS_KEY_ID | SPACES_ACCESS_KEY_ID;
+            kv/data/repository/nebari-dev/nebari/shared_secrets SPACES_SECRET_ACCESS_KEY | SPACES_SECRET_ACCESS_KEY;
 
       - name: 'Authenticate to GCP'
         if: ${{ matrix.provider == 'gcp' }}
@@ -127,7 +125,7 @@ jobs:
 
       - name: Nebari Initialize
         run: |
-          nebari init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.nebari.dev" --auth-provider github --disable-prompt --ci-provider ${{ matrix.cicd }}
+          nebari init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.nebari.dev" --auth-provider password --disable-prompt --ci-provider ${{ matrix.cicd }}
           cat "nebari-config.yaml"
 
       - name: Nebari Render

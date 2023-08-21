@@ -1,7 +1,7 @@
 import json
 import os
-import pathlib
 import textwrap
+from pathlib import Path
 
 import requests
 
@@ -32,7 +32,7 @@ def nebari_validate(config):
 
 def generate_lint_message(config):
     # prep for linting
-    pr_config = pathlib.Path("nebari-config.yaml")
+    pr_config = Path("nebari-config.yaml")
     # lint/validate nebari-config.yaml
     all_pass, messages, validate_code = nebari_validate(config)
 
