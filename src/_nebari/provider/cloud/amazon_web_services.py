@@ -89,9 +89,12 @@ def kubernetes_versions():
 def instances():
     session = aws_session()
     client = session.client("ec2")
+    paginator = client.get_paginator("describe_instance_types")
+    instance_types = sorted(
+        [j["InstanceType"] for i in paginator.paginate() for j in i["InstanceTypes"]]
+    )
+    return {t: t for t in instance_types}
 
-    response = client.describe_instance_types()
-    return {_["InstanceType"]: _["InstanceType"] for _ in response["InstanceTypes"]}
 
 
 def aws_get_vpc_id(name: str, namespace: str) -> str:
