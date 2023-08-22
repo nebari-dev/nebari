@@ -280,3 +280,9 @@ def is_relative_to(self: Path, other: Path, /) -> bool:
 def set_do_environment():
     os.environ["AWS_ACCESS_KEY_ID"] = os.environ["SPACES_ACCESS_KEY_ID"]
     os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
+
+
+def set_azure_resource_group_name(
+    project_name: str, namespace: str, suffix: str = ""
+) -> str:
+    return f"{project_name}-{namespace}{suffix}"

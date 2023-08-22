@@ -7,7 +7,7 @@ import typing
 from typing import Any, Dict, List, Tuple
 
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.utils import modified_environ
+from _nebari.utils import modified_environ, set_azure_resource_group_name
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -99,7 +99,12 @@ class TerraformStateStage(NebariTerraformStage):
         elif self.config.provider == schema.ProviderEnum.azure:
             subscription_id = os.environ["ARM_SUBSCRIPTION_ID"]
             resource_name_prefix = f"{self.config.project_name}-{self.config.namespace}"
-            state_resource_group_name = f"{resource_name_prefix}-state"
+            state_resource_group_name = (
+                self.config.azure.resource_group_name
+                or set_azure_resource_group_name(
+                    self.config.name, self.config.namespace, suffix="-state"
+                )
+            )
             state_resource_name_prefix_safe = resource_name_prefix.replace("-", "")
             resource_group_url = f"/subscriptions/{subscription_id}/resourceGroups/{state_resource_group_name}"
 

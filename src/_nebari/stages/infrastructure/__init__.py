@@ -19,7 +19,11 @@ from _nebari.provider.cloud import (
 )
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariTerraformState
-from _nebari.utils import modified_environ, random_secure_string
+from _nebari.utils import (
+    modified_environ,
+    random_secure_string,
+    set_azure_resource_group_name,
+)
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -359,6 +363,8 @@ class AzureNodeGroup(schema.Base):
 
 
 class AzureProvider(schema.Base):
+    # TODO: add validation for resource_group_name
+    resource_group_name: str = None
     region: str = "Central US"
     kubernetes_version: typing.Optional[str]
     node_groups: typing.Dict[str, AzureNodeGroup] = {
@@ -681,8 +687,15 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                     )
                     for name, node_group in self.config.azure.node_groups.items()
                 },
-                resource_group_name=f"{self.config.project_name}-{self.config.namespace}",
-                node_resource_group_name=f"{self.config.project_name}-{self.config.namespace}-node-resource-group",
+                resource_group_name=(
+                    self.config.azure.resource_group_name
+                    or set_azure_resource_group_name(
+                        self.config.name, self.config.namespace
+                    )
+                ),
+                node_resource_group_name=set_azure_resource_group_name(
+                    self.config.name, self.config.namespace, "-node-resource-group"
+                ),
                 vnet_subnet_id=self.config.azure.vnet_subnet_id,
                 private_cluster_enabled=self.config.azure.private_cluster_enabled,
             ).dict()
