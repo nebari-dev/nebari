@@ -3,13 +3,18 @@ import enum
 import inspect
 import os
 import pathlib
+import re
 import typing
 from typing import Any, Dict, List, Tuple
+
+import pydantic
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.utils import modified_environ, set_azure_resource_group_name
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
+
+AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX = "-state"
 
 
 class DigitalOceanInputVars(schema.Base):
@@ -30,6 +35,22 @@ class AzureInputVars(schema.Base):
     region: str
     storage_account_postfix: str
     state_resource_group_name: str
+
+    @pydantic.validator("state_resource_group_name")
+    def validate_name(cls, value):
+        length = len(value) + len(AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX)
+        if length < 1 or length > 90:
+            raise ValueError(
+                f"Resource Group name must be between 1 and 90 characters long, when combined with the suffix `{AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX}`."
+            )
+        if not re.match(r"^[\w\-\.\(\)]+$", value):
+            raise ValueError(
+                "Resource Group name can only contain alphanumerics, underscores, parentheses, hyphens, and periods."
+            )
+        if value[-1] == ".":
+            raise ValueError("Resource Group name can't end with a period.")
+
+        return value
 
 
 class AWSInputVars(schema.Base):
@@ -99,11 +120,11 @@ class TerraformStateStage(NebariTerraformStage):
         elif self.config.provider == schema.ProviderEnum.azure:
             subscription_id = os.environ["ARM_SUBSCRIPTION_ID"]
             resource_name_prefix = f"{self.config.project_name}-{self.config.namespace}"
-            state_resource_group_name = (
-                self.config.azure.resource_group_name
-                or set_azure_resource_group_name(
-                    self.config.name, self.config.namespace, suffix="-state"
-                )
+            state_resource_group_name = set_azure_resource_group_name(
+                project_name=self.config.name,
+                namespace=self.config.namespace,
+                resource_group_name=self.config.azure.resource_group_name,
+                suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
             )
             state_resource_name_prefix_safe = resource_name_prefix.replace("-", "")
             resource_group_url = f"/subscriptions/{subscription_id}/resourceGroups/{state_resource_group_name}"

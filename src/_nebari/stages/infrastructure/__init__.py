@@ -2,6 +2,7 @@ import contextlib
 import inspect
 import os
 import pathlib
+import re
 import sys
 import tempfile
 import typing
@@ -26,6 +27,8 @@ from _nebari.utils import (
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
+
+AZURE_NODE_RESOURCE_GROUP_SUFFIX = "-node-resource-group"
 
 
 def get_kubeconfig_filename():
@@ -391,6 +394,22 @@ class AzureProvider(schema.Base):
             )
         return value
 
+    @pydantic.validator("resource_group_name")
+    def validate_name(cls, value):
+        length = len(value) + len(AZURE_NODE_RESOURCE_GROUP_SUFFIX)
+        if length < 1 or length > 90:
+            raise ValueError(
+                f"Resource Group name must be between 1 and 90 characters long, when combined with the suffix `{AZURE_NODE_RESOURCE_GROUP_SUFFIX}`."
+            )
+        if not re.match(r"^[\w\-\.\(\)]+$", value):
+            raise ValueError(
+                "Resource Group name can only contain alphanumerics, underscores, parentheses, hyphens, and periods."
+            )
+        if value[-1] == ".":
+            raise ValueError("Resource Group name can't end with a period.")
+
+        return value
+
 
 class AWSNodeGroup(schema.Base):
     instance: str
@@ -687,14 +706,16 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                     )
                     for name, node_group in self.config.azure.node_groups.items()
                 },
-                resource_group_name=(
-                    self.config.azure.resource_group_name
-                    or set_azure_resource_group_name(
-                        self.config.name, self.config.namespace
-                    )
+                resource_group_name=set_azure_resource_group_name(
+                    project_name=self.config.name,
+                    namespace=self.config.namespace,
+                    resource_group_name=self.config.azure.resource_group_name,
                 ),
                 node_resource_group_name=set_azure_resource_group_name(
-                    self.config.name, self.config.namespace, "-node-resource-group"
+                    project_name=self.config.name,
+                    namespace=self.config.namespace,
+                    resource_group_name=self.config.azure.resource_group_name,
+                    suffix=AZURE_NODE_RESOURCE_GROUP_SUFFIX,
                 ),
                 vnet_subnet_id=self.config.azure.vnet_subnet_id,
                 private_cluster_enabled=self.config.azure.private_cluster_enabled,

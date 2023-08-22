@@ -283,6 +283,11 @@ def set_do_environment():
 
 
 def set_azure_resource_group_name(
-    project_name: str, namespace: str, suffix: str = ""
+    project_name: str = "",
+    namespace: str = "",
+    resource_group_name: str = "",
+    suffix: str = "",
 ) -> str:
+    if resource_group_name:
+        return f"{resource_group_name}{suffix}"
     return f"{project_name}-{namespace}{suffix}"
