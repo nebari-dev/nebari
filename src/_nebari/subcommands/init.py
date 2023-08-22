@@ -22,6 +22,7 @@ MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to
 LINKS_TO_DOCS_TEMPLATE = (
     "For more details, refer to the Nebari docs:\n\n\t[green]{link_to_docs}[/green]\n\n"
 )
+LINKS_TO_EXTERNAL_DOCS_TEMPLATE = "For more details, refer to the {provider} docs:\n\n\t[green]{link_to_docs}[/green]\n\n"
 
 # links to external docs
 CREATE_AWS_CREDS = (
@@ -36,6 +37,12 @@ CREATE_DO_CREDS = (
 CREATE_AZURE_CREDS = "https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret#creating-a-service-principal-in-the-azure-portal"
 CREATE_AUTH0_CREDS = "https://auth0.com/docs/get-started/auth0-overview/create-applications/machine-to-machine-apps"
 CREATE_GITHUB_OAUTH_CREDS = "https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app"
+AWS_REGIONS = "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions"
+GCP_REGIONS = "https://cloud.google.com/compute/docs/regions-zones"
+AZURE_REGIONS = "https://azure.microsoft.com/en-us/explore/global-infrastructure/geographies/#overview"
+DO_REGIONS = (
+    "https://docs.digitalocean.com/products/platform/availability-matrix/#regions"
+)
 
 # links to Nebari docs
 DOCS_HOME = "https://nebari.dev/docs/"
@@ -65,6 +72,7 @@ class InitInputs(schema.Base):
     ci_provider: CiEnum = CiEnum.none
     terraform_state: TerraformStateEnum = TerraformStateEnum.remote
     kubernetes_version: typing.Union[str, None] = None
+    region: typing.Union[str, None] = None
     ssl_cert_email: typing.Union[schema.email_pydantic, None] = None
     disable_prompt: bool = False
     output: pathlib.Path = pathlib.Path("nebari-config.yaml")
@@ -72,6 +80,17 @@ class InitInputs(schema.Base):
 
 def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
+
+
+def get_region_docs(cloud_provider: str):
+    if cloud_provider == ProviderEnum.aws.value.lower():
+        return AWS_REGIONS
+    elif cloud_provider == ProviderEnum.gcp.value.lower():
+        return GCP_REGIONS
+    elif cloud_provider == ProviderEnum.azure.value.lower():
+        return AZURE_REGIONS
+    elif cloud_provider == ProviderEnum.do.value.lower():
+        return DO_REGIONS
 
 
 def handle_init(inputs: InitInputs, config_schema: BaseModel):
@@ -94,6 +113,7 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
         repository=inputs.repository,
         repository_auto_provision=inputs.repository_auto_provision,
         kubernetes_version=inputs.kubernetes_version,
+        region=inputs.region,
         terraform_state=inputs.terraform_state,
         ssl_cert_email=inputs.ssl_cert_email,
         disable_prompt=inputs.disable_prompt,
@@ -381,6 +401,10 @@ def nebari_subcommand(cli: typer.Typer):
         kubernetes_version: str = typer.Option(
             "latest",
         ),
+        region: str = typer.Option(
+            None,
+            help="The region you want to deploy your Nebari cluster to (if deploying to the cloud)",
+        ),
         ssl_cert_email: str = typer.Option(
             None,
             callback=typer_validate_regex(
@@ -426,6 +450,7 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.ci_provider = ci_provider
         inputs.terraform_state = terraform_state
         inputs.kubernetes_version = kubernetes_version
+        inputs.region = region
         inputs.ssl_cert_email = ssl_cert_email
         inputs.disable_prompt = disable_prompt
         inputs.output = output
@@ -492,6 +517,33 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
         # specific context needed when `check_project_name` is called
         ctx.params["cloud_provider"] = inputs.cloud_provider
+
+        # cloud region
+        if (
+            inputs.cloud_provider != ProviderEnum.local.value.lower()
+            or inputs.cloud_provider != ProviderEnum.existing.value.lower()
+            and region is None
+        ):
+            aws_region = os.environ.get("AWS_DEFAULT_REGION")
+            if inputs.cloud_provider == ProviderEnum.aws.value.lower() and aws_region:
+                region = aws_region
+            else:
+                region_docs = get_region_docs(inputs.cloud_provider)
+                rich.print(
+                    (
+                        "\n 🪴  Nebari clusters that run in the cloud require specifying which region to deploy to, "
+                        "please review the the cloud provider docs on the names and format these region take "
+                        f"{LINKS_TO_EXTERNAL_DOCS_TEMPLATE.format(provider=inputs.cloud_provider.value, link_to_docs=region_docs)}"
+                    )
+                )
+
+                region = questionary.text(
+                    "In which region would you like to deploy your Nebari cluster?",
+                    qmark=qmark,
+                ).unsafe_ask()
+
+        # TODO: add check for valid region
+        inputs.region = region
 
         name_guidelines = """
         The project name must adhere to the following requirements:

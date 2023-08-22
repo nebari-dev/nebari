@@ -35,6 +35,7 @@ def render_config(
     auth_auto_provision: bool = False,
     terraform_state: TerraformStateEnum = TerraformStateEnum.remote,
     kubernetes_version: str = None,
+    region: str = None,
     disable_prompt: bool = False,
     ssl_cert_email: str = None,
 ):
@@ -87,12 +88,43 @@ def render_config(
             }
 
     if cloud_provider == ProviderEnum.do:
+        if region is None:
+            if not disable_prompt:
+                config["digital_ocean"] = input("Enter Digital Ocean region: ")
+            else:
+                raise ValueError("Digital Ocean region must be specified.")
+        else:
+            config["digital_ocean"] = {"region": region}
+
+        if kubernetes_version is None:
+            from _nebari.provider.cloud.digital_ocean import kubernetes_versions
+
+            kubernetes_version = kubernetes_versions(region)[0]
+
+        config["digital_ocean"] = {"kubernetes_version": kubernetes_version}
+
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
-        if kubernetes_version is not None:
-            config["digital_ocean"] = {"kubernetes_version": kubernetes_version}
+
     elif cloud_provider == ProviderEnum.gcp:
+        if region is None:
+            if not disable_prompt:
+                config["google_cloud_platform"] = input(
+                    "Enter Google Cloud Platform region: "
+                )
+            else:
+                raise ValueError("Google Cloud Platform region must be specified.")
+        else:
+            config["google_cloud_platform"] = {"region": region}
+
+        if kubernetes_version is None:
+            from _nebari.provider.cloud.google_cloud import kubernetes_versions
+
+            kubernetes_version = kubernetes_versions(region)[0]
+
+        config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
+
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
@@ -104,22 +136,51 @@ def render_config(
                 "Enter Google Cloud Platform Project ID: "
             )
 
-        if kubernetes_version is not None:
-            config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
     elif cloud_provider == ProviderEnum.azure:
+        if region is None:
+            if not disable_prompt:
+                config["azure"] = input("Enter Azure region: ")
+            else:
+                raise ValueError("Azure region must be specified.")
+        else:
+            config["azure"] = {"region": region}
+
+        if kubernetes_version is None:
+            from _nebari.provider.cloud.azure_cloud import kubernetes_versions
+
+            kubernetes_version = kubernetes_versions(config["azure"]["region"])[0]
+
+        config["azure"] = {"kubernetes_version": kubernetes_version}
+
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Azure"
-        if kubernetes_version is not None:
-            config["azure"] = {"kubernetes_version": kubernetes_version}
+
     elif cloud_provider == ProviderEnum.aws:
+        if region is None:
+            if not disable_prompt:
+                config["amazon_web_services"] = input("Enter Azure region: ")
+            else:
+                raise ValueError("Amazon Web Services region must be specified.")
+        else:
+            config["amazon_web_services"] = {"region": region}
+
+        if kubernetes_version is None:
+            from _nebari.provider.cloud.amazon_web_services import kubernetes_versions
+
+            kubernetes_version = kubernetes_versions(
+                config["amazon_web_services"]["region"]
+            )[0]
+
+        config["amazon_web_services"] = {"kubernetes_version": kubernetes_version}
+
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Amazon Web Services"
-        if kubernetes_version is not None:
-            config["amazon_web_services"] = {"kubernetes_version": kubernetes_version}
+
     elif cloud_provider == ProviderEnum.existing:
         config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
+
     elif cloud_provider == ProviderEnum.local:
         config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
 
