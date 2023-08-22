@@ -126,8 +126,8 @@ def deploy(request):
     config.certificate.acme_server = "https://acme-v02.api.letsencrypt.org/directory"
     config.dns.provider = "cloudflare"
     config.dns.auto_provision = True
-    config.default_images.jupyterhub = "quay.io/nebari/nebari-jupyterhub:jhub"
-    config.default_images.jupyterlab = "quay.io/nebari/nebari-jupyterlab:jhub"
+    config.default_images.jupyterhub = "quay.io/nebari/nebari-jupyterhub:latest"
+    config.default_images.jupyterlab = "quay.io/nebari/nebari-jupyterlab:latest"
 
     if cloud in ["aws", "gcp"]:
         config = add_gpu_config(config, cloud=cloud)
@@ -135,8 +135,6 @@ def deploy(request):
 
     # render
     render_template(deployment_dir_abs, config, stages)
-
-    print(config)
 
     failed = False
 
@@ -197,6 +195,8 @@ def on_cloud(param=None):
 
 
 def _cleanup_nebari(config):
+    # TODO: Add cleanup for GCP and Azure
+
     cloud_provider = config.provider
     project_name = config.name
     namespace = config.namespace
