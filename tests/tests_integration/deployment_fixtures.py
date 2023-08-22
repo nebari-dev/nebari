@@ -136,6 +136,8 @@ def deploy(request):
     # render
     render_template(deployment_dir_abs, config, stages)
 
+    print(config)
+
     failed = False
 
     # deploy
