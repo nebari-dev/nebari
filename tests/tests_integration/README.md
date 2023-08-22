@@ -40,3 +40,18 @@ pytest tests_integration -vvv -s -m aws
 
 This will deploy on Nebari on Amazon Web Services, run tests on the deployment
 and then teardown the cluster.
+
+
+## Azure
+
+```bash
+ARM_SUBSCRIPTION_ID
+ARM_TENANT_ID
+ARM_CLIENT_ID
+ARM_CLIENT_SECRET
+CLOUDFLARE_TOKEN
+```
+
+```bash
+pytest tests_integration -vvv -s -m azure
+```

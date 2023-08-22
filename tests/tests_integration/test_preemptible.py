@@ -5,7 +5,7 @@ from tests.common.config_mod_utils import PREEMPTIBLE_NODE_GROUP_NAME
 from tests.tests_integration.deployment_fixtures import on_cloud
 
 
-@on_cloud()
+@on_cloud(["aws", "gcp"])
 def test_preemptible(request, deploy):
     config.load_kube_config(
         config_file=deploy["stages/02-infrastructure"]["kubeconfig_filename"]["value"]

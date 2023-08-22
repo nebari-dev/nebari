@@ -84,15 +84,24 @@ def deploy(request):
 
     # initialize
     cloud = request.param
+    region = None
     logger.info(f"Deploying: {cloud}")
     if cloud == "do":
         set_do_environment()
+        region = "nyc3"
+    elif cloud == "aws":
+        region = os.environ.get("AWS_DEFAULT_REGION", "us-west-1")
+    elif cloud == "gcp":
+        region = "us-central1"
+    elif cloud == "azure":
+        region = "Central US"
     deployment_dir = _get_or_create_deployment_directory(cloud)
     config = render_config_partial(
         project_name=deployment_dir.name,
         namespace="dev",
         nebari_domain=f"ci-{cloud}.nebari.dev",
         cloud_provider=cloud,
+        region=region,
         ci_provider="github-actions",
         auth_provider="password",
     )
@@ -117,6 +126,8 @@ def deploy(request):
     config.certificate.acme_server = "https://acme-v02.api.letsencrypt.org/directory"
     config.dns.provider = "cloudflare"
     config.dns.auto_provision = True
+    config.default_images.jupyterhub = "quay.io/nebari/nebari-jupyterhub:jhub"
+    config.default_images.jupyterlab = "quay.io/nebari/nebari-jupyterlab:jhub"
 
     if cloud in ["aws", "gcp"]:
         config = add_gpu_config(config, cloud=cloud)
@@ -148,6 +159,10 @@ def deploy(request):
         logger.exception(e)
         logger.error(f"Deploy Failed, Exception: {e}")
 
+    pause = input("Press any key to continue...")
+    if pause:
+        pass
+
     # destroy
     try:
         logger.info("*" * 100)
@@ -170,7 +185,7 @@ def deploy(request):
 
 def on_cloud(param=None):
     """Decorator to run tests on a particular cloud or all cloud."""
-    clouds = ["aws", "do", "gcp"]
+    clouds = ["aws", "do", "gcp", "azure"]
     if param:
         clouds = [param] if not isinstance(param, list) else param
 
