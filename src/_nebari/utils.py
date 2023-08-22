@@ -275,3 +275,8 @@ def is_relative_to(self: Path, other: Path, /) -> bool:
         return True
     except ValueError:
         return False
+
+
+def set_do_environment():
+    os.environ["AWS_ACCESS_KEY_ID"] = os.environ["SPACES_ACCESS_KEY_ID"]
+    os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
