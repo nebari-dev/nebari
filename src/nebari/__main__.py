@@ -1,6 +1,11 @@
-import sys
+from _nebari.cli import create_cli
 
-from _nebari.cli.main import app as nebari
+
+def main():
+    cli = create_cli()
+    cli()
+
 
 if __name__ == "__main__":
-    nebari(sys.argv[1:])
+    main()
+

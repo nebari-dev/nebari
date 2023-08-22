@@ -11,9 +11,20 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ## Upcoming Release
 
+## Release 2023.7.2 - August 3, 2023
+
+This is a hot-fix release that resolves an issue whereby users in the `analyst` group are unable to launch their JupyterLab server because the name of the viewer-specific `ARGO_TOKEN` was mislabeled; see [PR 1881](https://github.com/nebari-dev/nebari/pull/1881) for more details.
+
+### What's Changed
+* Fix argo-viewer service account reference by @iameskild in https://github.com/nebari-dev/nebari/pull/1881
+* Add release notes for 2023.7.2, update release notes for 2023.7.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/1886
+
+
 ## Release 2023.7.1 - July 21, 2023
 
-> WARNING: CDS Dashboards will be deprecated soon. Nebari 2023.7.1 will be the last release with support for CDS Dashboards integration. A new dashboard sharing mechanism added in the near future, but some releases in the interim will not have dashboard sharing capabilities..
+> WARNING: CDS Dashboards will be deprecated soon. Nebari `2023.7.1` will be the last release with support for CDS Dashboards integration. A new dashboard sharing mechanism added in the near future, but some releases in the interim will not have dashboard sharing capabilities..
+
+> WARNING: For those running on AWS, upgrading from previous versions to `2023.7.1` requires a [backup](https://www.nebari.dev/docs/how-tos/manual-backup). Due to changes made to the VPC (See [issue 1884](https://github.com/nebari-dev/nebari/issues/1884) for details), Terraform thinks it needs to destroy and reprovision a new VPC which causes the entire cluster to be destroyed and rebuilt.
 
 ### Feature changes and enhancements
 
@@ -23,7 +34,8 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ### Breaking Changes
 
-* No known breaking changes.
+* As mentioned in the above WARNING, clusters running on AWS should perform a [manual backup](https://www.nebari.dev/docs/how-tos/manual-backup) before running the upgrade to the latest version as changes to the AWS VPC will cause the cluster to be destroyed and redeployed.
+
 
 ### What's Changed
 * use conda forge explicitly in conda build test by @pmeier in https://github.com/nebari-dev/nebari/pull/1771

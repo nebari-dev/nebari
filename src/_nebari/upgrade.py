@@ -10,9 +10,10 @@ import rich
 from pydantic.error_wrappers import ValidationError
 from rich.prompt import Prompt
 
-from .schema import is_version_accepted, verify
-from .utils import backup_config_file, load_yaml, yaml
-from .version import __version__, rounded_ver_parse
+from _nebari.config import backup_configuration
+from _nebari.utils import load_yaml, yaml
+from _nebari.version import __version__, rounded_ver_parse
+from nebari import schema
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +32,15 @@ def do_upgrade(config_filename, attempt_fixes=False):
         return
 
     try:
-        verify(config)
+        from nebari.plugins import nebari_plugin_manager
+
+        nebari_plugin_manager.read_config(config_filename)
         rich.print(
             f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for Nebari version [green]{__version__}[/green]"
         )
         return
     except (ValidationError, ValueError) as e:
-        if is_version_accepted(config.get("nebari_version", "")):
+        if schema.is_version_accepted(config.get("nebari_version", "")):
             # There is an unrelated validation problem
             rich.print(
                 f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for Nebari version [green]{__version__}[/green] but there is another validation error.\n"
@@ -50,11 +53,9 @@ def do_upgrade(config_filename, attempt_fixes=False):
     UpgradeStep.upgrade(
         config, start_version, __version__, config_filename, attempt_fixes
     )
-    print(config.get("nebari_version"))
-    print(config.get("default_images"))
 
     # Backup old file
-    backup_config_file(config_filename, f".{start_version or 'old'}")
+    backup_configuration(config_filename, f".{start_version or 'old'}")
 
     with config_filename.open("wt") as f:
         yaml.dump(config, f)
@@ -350,7 +351,7 @@ class Upgrade_0_4_0(UpgradeStep):
             if k not in {"users", "admin"}
         ]
 
-        backup_config_file(realm_import_filename)
+        backup_configuration(realm_import_filename)
 
         with realm_import_filename.open("wt") as f:
             json.dump(realm, f, indent=2)
@@ -478,8 +479,8 @@ class Upgrade_2023_4_2(UpgradeStep):
         return config
 
 
-class Upgrade_2023_5_2(UpgradeStep):
-    version = "2023.5.2"
+class Upgrade_2023_7_2(UpgradeStep):
+    version = "2023.7.2"
 
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
