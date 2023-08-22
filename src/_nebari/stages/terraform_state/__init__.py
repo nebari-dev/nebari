@@ -40,6 +40,8 @@ class AzureInputVars(schema.Base):
 
     @pydantic.validator("state_resource_group_name")
     def _validate_resource_group_name(cls, value):
+        if value is None:
+            return value
         length = len(value) + len(AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX)
         if length < 1 or length > 90:
             raise ValueError(
