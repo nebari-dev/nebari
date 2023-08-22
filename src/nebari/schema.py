@@ -1,26 +1,29 @@
 import enum
+import sys
 
 import pydantic
 from ruamel.yaml import yaml_object
+from pydantic import StringConstraints, ConfigDict, field_validator, Field
 
 from _nebari.utils import escape_string, yaml
 from _nebari.version import __version__, rounded_ver_parse
 
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
+
 # Regex for suitable project names
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
-letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
+letter_dash_underscore_pydantic = Annotated[str, StringConstraints(pattern=namestr_regex)]
 
 email_regex = "^[^ @]+@[^ @]+\\.[^ @]+$"
-email_pydantic = pydantic.constr(regex=email_regex)
+email_pydantic = Annotated[str, StringConstraints(pattern=email_regex)]
 
 
 class Base(pydantic.BaseModel):
-    ...
-
-    class Config:
-        extra = "forbid"
-        validate_assignment = True
-        allow_population_by_field_name = True
+    model_config = ConfigDict(extra="forbid", validate_assignment=True, populate_by_name=True)
 
 
 @yaml_object(yaml)
@@ -38,11 +41,11 @@ class ProviderEnum(str, enum.Enum):
 
 
 class Main(Base):
-    project_name: letter_dash_underscore_pydantic
+    project_name: letter_dash_underscore_pydantic = "project-name"
     namespace: letter_dash_underscore_pydantic = "dev"
     provider: ProviderEnum = ProviderEnum.local
     # In nebari_version only use major.minor.patch version - drop any pre/post/dev suffixes
-    nebari_version: str = __version__
+    nebari_version: Annotated[str, Field(validate_default=True)] = __version__
 
     prevent_deploy: bool = (
         False  # Optional, but will be given default value if not present
@@ -50,7 +53,8 @@ class Main(Base):
 
     # If the nebari_version in the schema is old
     # we must tell the user to first run nebari upgrade
-    @pydantic.validator("nebari_version", pre=True, always=True)
+    @field_validator("nebari_version")
+    @classmethod
     def check_default(cls, v):
         """
         Always called even if nebari_version is not supplied at all (so defaults to ''). That way we can give a more helpful error message.

@@ -7,7 +7,7 @@ from abc import ABC
 from pathlib import Path
 
 import rich
-from pydantic.error_wrappers import ValidationError
+from pydantic import ValidationError
 from rich.prompt import Prompt
 
 from _nebari.config import backup_configuration

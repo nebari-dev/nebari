@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Union
 
 import requests
 from nacl import encoding, public
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel, ConfigDict
 
 from _nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
 from _nebari.provider.cicd.common import pip_install_nebari
@@ -145,17 +145,8 @@ class GHA_on_extras(BaseModel):
     paths: List[str]
 
 
-class GHA_on(BaseModel):
-    # to allow for dynamic key names
-    __root__: Dict[str, GHA_on_extras]
-
-    # TODO: validate __root__ values
-    # `push`, `pull_request`, etc.
-
-
-class GHA_job_steps_extras(BaseModel):
-    # to allow for dynamic key names
-    __root__: Union[str, float, int]
+GHA_on = RootModel[Dict[str, GHA_on_extras]]
+GHA_job_steps_extras = RootModel[Union[str, float, int]]
 
 
 class GHA_job_step(BaseModel):
@@ -164,9 +155,7 @@ class GHA_job_step(BaseModel):
     with_: Optional[Dict[str, GHA_job_steps_extras]] = Field(alias="with")
     run: Optional[str]
     env: Optional[Dict[str, GHA_job_steps_extras]]
-
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class GHA_job_id(BaseModel):
@@ -174,15 +163,10 @@ class GHA_job_id(BaseModel):
     runs_on_: str = Field(alias="runs-on")
     permissions: Optional[Dict[str, str]]
     steps: List[GHA_job_step]
-
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
-class GHA_jobs(BaseModel):
-    # to allow for dynamic key names
-    __root__: Dict[str, GHA_job_id]
-
+GHA_jobs = RootModel[Dict[str, GHA_job_id]]
 
 class GHA(BaseModel):
     name: str

@@ -50,7 +50,7 @@ class TerraformStateEnum(str, enum.Enum):
 
 class TerraformState(schema.Base):
     type: TerraformStateEnum = TerraformStateEnum.remote
-    backend: typing.Optional[str]
+    backend: typing.Optional[str] = None
     config: typing.Dict[str, str] = {}
 
 

@@ -8,7 +8,7 @@ from typing import Any, Dict, List
 from urllib.parse import urlencode
 
 import pydantic
-from pydantic import Field
+from pydantic import Field, model_validator, ConfigDict, field_validator
 
 from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
@@ -49,9 +49,9 @@ class AccessEnum(str, enum.Enum):
 
 class Prefect(schema.Base):
     enabled: bool = False
-    image: typing.Optional[str]
+    image: typing.Optional[str] = None
     overrides: typing.Dict = {}
-    token: typing.Optional[str]
+    token: typing.Optional[str] = None
 
 
 class CDSDashboards(schema.Base):
@@ -95,9 +95,7 @@ class KubeSpawner(schema.Base):
     cpu_guarantee: int
     mem_limit: str
     mem_guarantee: str
-
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")
 
 
 class JupyterLabProfile(schema.Base):
@@ -105,21 +103,21 @@ class JupyterLabProfile(schema.Base):
     display_name: str
     description: str
     default: bool = False
-    users: typing.Optional[typing.List[str]]
-    groups: typing.Optional[typing.List[str]]
-    kubespawner_override: typing.Optional[KubeSpawner]
+    users: typing.Optional[typing.List[str]] = None
+    groups: typing.Optional[typing.List[str]] = None
+    kubespawner_override: typing.Optional[KubeSpawner] = None
 
-    @pydantic.root_validator
-    def only_yaml_can_have_groups_and_users(cls, values):
-        if values["access"] != AccessEnum.yaml:
+    @model_validator(mode="after")
+    def only_yaml_can_have_groups_and_users(self):
+        if self.access != AccessEnum.yaml:
             if (
-                values.get("users", None) is not None
-                or values.get("groups", None) is not None
+                self.users is not None
+                or self.groups is not None
             ):
                 raise ValueError(
                     "Profile must not contain groups or users fields unless access = yaml"
                 )
-        return values
+        return self
 
 
 class DaskWorkerProfile(schema.Base):
@@ -129,9 +127,7 @@ class DaskWorkerProfile(schema.Base):
     worker_memory: str
     worker_threads: int = 1
     image: str = f"quay.io/nebari/nebari-dask-worker:{set_docker_image_tag()}"
-
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")
 
 
 class Profiles(schema.Base):
@@ -142,7 +138,7 @@ class Profiles(schema.Base):
             default=True,
             kubespawner_override=KubeSpawner(
                 cpu_limit=2,
-                cpu_guarantee=1.5,
+                cpu_guarantee=1,
                 mem_limit="8G",
                 mem_guarantee="5G",
             ),
@@ -161,7 +157,7 @@ class Profiles(schema.Base):
     dask_worker: typing.Dict[str, DaskWorkerProfile] = {
         "Small Worker": DaskWorkerProfile(
             worker_cores_limit=2,
-            worker_cores=1.5,
+            worker_cores=1,
             worker_memory_limit="8G",
             worker_memory="5G",
             worker_threads=2,
@@ -175,8 +171,8 @@ class Profiles(schema.Base):
         ),
     }
 
-    @pydantic.validator("jupyterlab")
-    def check_default(cls, v, values):
+    @field_validator("jupyterlab")
+    def check_default(cls, value):
         """Check if only one default value is present."""
         default = [attrs["default"] for attrs in v if "default" in attrs]
         if default.count(True) > 1:
@@ -188,7 +184,7 @@ class Profiles(schema.Base):
 
 class CondaEnvironment(schema.Base):
     name: str
-    channels: typing.Optional[typing.List[str]]
+    channels: typing.Optional[typing.List[str]] = None
     dependencies: typing.List[typing.Union[str, typing.Dict[str, typing.List[str]]]]
 
 

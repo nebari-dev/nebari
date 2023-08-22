@@ -25,8 +25,8 @@ class NebariExtension(schema.Base):
     keycloakadmin: bool = False
     jwt: bool = False
     nebariconfigyaml: bool = False
-    logout: typing.Optional[str]
-    envs: typing.Optional[typing.List[NebariExtensionEnv]]
+    logout: typing.Optional[str] = None
+    envs: typing.Optional[typing.List[NebariExtensionEnv]] = None
 
 
 class HelmExtension(schema.Base):

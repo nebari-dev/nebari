@@ -147,14 +147,14 @@ class CertificateEnum(str, enum.Enum):
 class Certificate(schema.Base):
     type: CertificateEnum = CertificateEnum.selfsigned
     # existing
-    secret_name: typing.Optional[str]
+    secret_name: typing.Optional[str] = None
     # lets-encrypt
-    acme_email: typing.Optional[str]
+    acme_email: typing.Optional[str] = None
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
 
 
 class DnsProvider(schema.Base):
-    provider: typing.Optional[str]
+    provider: typing.Optional[str] = None
 
 
 class Ingress(schema.Base):
@@ -162,7 +162,7 @@ class Ingress(schema.Base):
 
 
 class InputSchema(schema.Base):
-    domain: typing.Optional[str]
+    domain: typing.Optional[str] = None
     certificate: Certificate = Certificate()
     ingress: Ingress = Ingress()
     dns: DnsProvider = DnsProvider()

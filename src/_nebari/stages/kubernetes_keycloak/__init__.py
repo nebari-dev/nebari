@@ -72,58 +72,33 @@ class Auth0Config(schema.Base):
     auth0_subdomain: str
 
 
-class Authentication(schema.Base, ABC):
-    _types: typing.Dict[str, type] = {}
-
+class BaseAuthentication(schema.Base):
     type: AuthenticationEnum
 
-    # Based on https://github.com/samuelcolvin/pydantic/issues/2177#issuecomment-739578307
 
-    # This allows type field to determine which subclass of Authentication should be used for validation.
+class PasswordAuthentication(BaseAuthentication):
+    type: AuthenticationEnum = AuthenticationEnum.password
 
-    # Used to register automatically all the submodels in `_types`.
-    def __init_subclass__(cls):
-        cls._types[cls._typ.value] = cls
 
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+class Auth0Authentication(BaseAuthentication):
+    type: AuthenticationEnum = AuthenticationEnum.auth0
+    config: Auth0Config
 
-    @classmethod
-    def validate(cls, value: typing.Dict[str, typing.Any]) -> "Authentication":
-        if "type" not in value:
-            raise ValueError("type field is missing from security.authentication")
 
-        specified_type = value.get("type")
-        sub_class = cls._types.get(specified_type, None)
+class GitHubAuthentication(BaseAuthentication):
+    type: AuthenticationEnum = AuthenticationEnum.github
+    config: GitHubConfig
 
-        if not sub_class:
-            raise ValueError(
-                f"No registered Authentication type called {specified_type}"
-            )
 
-        # init with right submodel
-        return sub_class(**value)
+Authentication = typing.Union[
+    PasswordAuthentication, Auth0Authentication, GitHubAuthentication
+]
 
 
 def random_secure_string(
     length: int = 16, chars: str = string.ascii_lowercase + string.digits
 ):
     return "".join(secrets.choice(chars) for i in range(length))
-
-
-class PasswordAuthentication(Authentication):
-    _typ = AuthenticationEnum.password
-
-
-class Auth0Authentication(Authentication):
-    _typ = AuthenticationEnum.auth0
-    config: Auth0Config
-
-
-class GitHubAuthentication(Authentication):
-    _typ = AuthenticationEnum.github
-    config: GitHubConfig
 
 
 class Keycloak(schema.Base):
@@ -133,9 +108,7 @@ class Keycloak(schema.Base):
 
 
 class Security(schema.Base):
-    authentication: Authentication = PasswordAuthentication(
-        type=AuthenticationEnum.password
-    )
+    authentication: Authentication = PasswordAuthentication()
     shared_users_group: bool = True
     keycloak: Keycloak = Keycloak()
 

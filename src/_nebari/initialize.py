@@ -131,7 +131,7 @@ def render_config(
     from nebari.plugins import nebari_plugin_manager
 
     try:
-        config_model = nebari_plugin_manager.config_schema.parse_obj(config)
+        config_model = nebari_plugin_manager.config_schema.model_validate(config)
     except pydantic.ValidationError as e:
         print(str(e))
 

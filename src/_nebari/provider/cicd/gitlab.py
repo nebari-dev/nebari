@@ -1,15 +1,12 @@
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel, ConfigDict
 
 from _nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
 from _nebari.provider.cicd.common import pip_install_nebari
 
 
-class GLCI_extras(BaseModel):
-    # to allow for dynamic key names
-    __root__: Union[str, float, int]
-
+GLCI_extras = RootModel[Union[str, float, int]]
 
 class GLCI_image(BaseModel):
     name: str
@@ -19,9 +16,7 @@ class GLCI_image(BaseModel):
 class GLCI_rules(BaseModel):
     if_: Optional[str] = Field(alias="if")
     changes: Optional[List[str]]
-
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class GLCI_job(BaseModel):
@@ -33,8 +28,7 @@ class GLCI_job(BaseModel):
     rules: Optional[List[GLCI_rules]]
 
 
-class GLCI(BaseModel):
-    __root__: Dict[str, GLCI_job]
+GLCI = RootModel[Dict[str, GLCI_job]]
 
 
 def gen_gitlab_ci(config):
