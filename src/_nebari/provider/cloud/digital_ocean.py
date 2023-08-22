@@ -7,7 +7,7 @@ import requests
 from kubernetes import client, config
 
 from _nebari import constants
-from _nebari.provider.cloud.amazon_web_services import delete_aws_s3_bucket
+from _nebari.provider.cloud.amazon_web_services import aws_delete_s3_bucket
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 from _nebari.utils import set_do_environment
 
@@ -107,7 +107,7 @@ def digital_ocean_delete_kubernetes_cluster(cluster_name: str):
     digital_ocean_request(f"kubernetes/clusters/{cluster_id}", method="DELETE")
 
 
-def digital_ocean_cleanup(name: str, namespace: str, region: str):
+def digital_ocean_cleanup(name: str, namespace: str):
     cluster_name = f"{name}-{namespace}"
     tf_state_bucket = f"{cluster_name}-terraform-state"
     do_spaces_endpoint = "https://nyc3.digitaloceanspaces.com"
@@ -123,7 +123,7 @@ def digital_ocean_cleanup(name: str, namespace: str, region: str):
     )
 
     set_do_environment()
-    delete_aws_s3_bucket(
-        tf_state_bucket, region=region, digitalocean=True, endpoint=do_spaces_endpoint
+    aws_delete_s3_bucket(
+        tf_state_bucket, digitalocean=True, endpoint=do_spaces_endpoint
     )
     digital_ocean_delete_kubernetes_cluster(cluster_name)

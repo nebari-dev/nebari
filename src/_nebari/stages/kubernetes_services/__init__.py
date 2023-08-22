@@ -558,7 +558,9 @@ class KubernetesServicesStage(NebariTerraformStage):
             **clearml_vars.dict(by_alias=True),
         }
 
-    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
+    def check(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
         directory = "stages/07-kubernetes-services"
         import requests
 
