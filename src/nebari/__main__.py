@@ -1,5 +1,6 @@
-from _nebari.cli import create_cli
 import typer
+
+from _nebari.cli import create_cli
 
 
 def main():
