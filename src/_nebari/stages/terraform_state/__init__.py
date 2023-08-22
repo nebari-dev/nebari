@@ -169,8 +169,10 @@ class TerraformStateStage(NebariTerraformStage):
             ValueError(f"Unknown provider: {self.config.provider}")
 
     @contextlib.contextmanager
-    def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        with super().deploy(stage_outputs):
+    def deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
+        with super().deploy(stage_outputs, disable_prompt):
             env_mapping = {}
             # DigitalOcean terraform remote state using Spaces Bucket
             # assumes aws credentials thus we set them to match spaces credentials
