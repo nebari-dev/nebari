@@ -18,7 +18,8 @@ from ruamel.yaml import YAML
 # environment variable overrides
 NEBARI_GH_BRANCH = os.getenv("NEBARI_GH_BRANCH", None)
 
-CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
+AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX = "-state"
+AZURE_NODE_RESOURCE_GROUP_SUFFIX = "-node-resource-group"
 
 # Create a ruamel object with our favored config, for universal use
 yaml = YAML()

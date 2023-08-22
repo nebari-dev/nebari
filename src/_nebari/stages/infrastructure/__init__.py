@@ -21,14 +21,13 @@ from _nebari.provider.cloud import (
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariTerraformState
 from _nebari.utils import (
+    AZURE_NODE_RESOURCE_GROUP_SUFFIX,
     modified_environ,
     random_secure_string,
     set_azure_resource_group_name,
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
-
-AZURE_NODE_RESOURCE_GROUP_SUFFIX = "-node-resource-group"
 
 
 def get_kubeconfig_filename():
@@ -366,7 +365,6 @@ class AzureNodeGroup(schema.Base):
 
 
 class AzureProvider(schema.Base):
-    # TODO: add validation for resource_group_name
     resource_group_name: str = None
     region: str = "Central US"
     kubernetes_version: typing.Optional[str]
@@ -707,12 +705,12 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                     for name, node_group in self.config.azure.node_groups.items()
                 },
                 resource_group_name=set_azure_resource_group_name(
-                    project_name=self.config.name,
+                    project_name=self.config.project_name,
                     namespace=self.config.namespace,
                     resource_group_name=self.config.azure.resource_group_name,
                 ),
                 node_resource_group_name=set_azure_resource_group_name(
-                    project_name=self.config.name,
+                    project_name=self.config.project_name,
                     namespace=self.config.namespace,
                     resource_group_name=self.config.azure.resource_group_name,
                     suffix=AZURE_NODE_RESOURCE_GROUP_SUFFIX,
