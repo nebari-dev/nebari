@@ -406,7 +406,7 @@ class AzureProvider(schema.Base):
                 "Azure Resource Group name can only contain alphanumerics, underscores, parentheses, hyphens, and periods."
             )
         if value[-1] == ".":
-            raise ValueError("Resource Group name can't end with a period.")
+            raise ValueError("Azure Resource Group name can't end with a period.")
 
         return value
 
