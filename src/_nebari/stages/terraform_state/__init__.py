@@ -37,15 +37,15 @@ class AzureInputVars(schema.Base):
     state_resource_group_name: str
 
     @pydantic.validator("state_resource_group_name")
-    def validate_name(cls, value):
+    def _validate_resource_group_name(cls, value):
         length = len(value) + len(AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX)
         if length < 1 or length > 90:
             raise ValueError(
-                f"Resource Group name must be between 1 and 90 characters long, when combined with the suffix `{AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX}`."
+                f"Azure Resource Group name must be between 1 and 90 characters long, when combined with the suffix `{AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX}`."
             )
         if not re.match(r"^[\w\-\.\(\)]+$", value):
             raise ValueError(
-                "Resource Group name can only contain alphanumerics, underscores, parentheses, hyphens, and periods."
+                "Azure Resource Group name can only contain alphanumerics, underscores, parentheses, hyphens, and periods."
             )
         if value[-1] == ".":
             raise ValueError("Resource Group name can't end with a period.")
