@@ -36,7 +36,15 @@ variable "kubeconfig_filename" {
 variable "tags" {
   description = "Google Cloud Platform tags to assign to resources"
   type        = list(string)
+  default     = []
 }
+
+variable "labels" {
+  description = "Google Cloud Platform labels to assign to resources"
+  type        = map(string)
+  default     = {}
+}
+
 
 variable "kubernetes_version" {
   description = "Kubernetes version for GKE cluster"
