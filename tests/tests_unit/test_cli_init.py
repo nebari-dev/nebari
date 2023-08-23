@@ -48,8 +48,8 @@ MOCK_ENV = {
     "args, exit_code, content",
     [
         # --help
-        (["--help"], 0, ["Create and initialize your nebari-config.yaml file"]),
-        (["-h"], 0, ["Create and initialize your nebari-config.yaml file"]),
+        (["--help"], 0, ["Usage:", "nebari init"]),
+        (["-h"], 0, ["Usage:", "nebari init"]),
         # error, missing args
         ([], 2, ["Missing option"]),
         (["--no-guided-init"], 2, ["Missing option"]),
