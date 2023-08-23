@@ -15,7 +15,7 @@ from _nebari.destroy import destroy_configuration
 from _nebari.provider.cloud.amazon_web_services import aws_cleanup
 from _nebari.provider.cloud.digital_ocean import digital_ocean_cleanup
 from _nebari.render import render_template
-from _nebari.utils import set_do_environment
+from _nebari.utils import set_do_environment, set_docker_image_tag
 from tests.common.config_mod_utils import add_gpu_config, add_preemptible_node_group
 from tests.tests_unit.utils import render_config_partial
 
@@ -126,8 +126,15 @@ def deploy(request):
     config.certificate.acme_server = "https://acme-v02.api.letsencrypt.org/directory"
     config.dns.provider = "cloudflare"
     config.dns.auto_provision = True
-    config.default_images.jupyterhub = "quay.io/nebari/nebari-jupyterhub:latest"
-    config.default_images.jupyterlab = "quay.io/nebari/nebari-jupyterlab:latest"
+    config.default_images.jupyterhub = (
+        f"quay.io/nebari/nebari-jupyterhub:{set_docker_image_tag()}"
+    )
+    config.default_images.jupyterlab = (
+        f"quay.io/nebari/nebari-jupyterlab:{set_docker_image_tag()}"
+    )
+    config.default_images.dask_worker = (
+        f"quay.io/nebari/nebari-dask-worker:{set_docker_image_tag()}"
+    )
 
     if cloud in ["aws", "gcp"]:
         config = add_gpu_config(config, cloud=cloud)
@@ -200,7 +207,7 @@ def _cleanup_nebari(config):
     # TODO: Add cleanup for GCP and Azure
 
     cloud_provider = config.provider
-    project_name = config.name
+    project_name = config.project_name
     namespace = config.namespace
 
     if cloud_provider == "do":
