@@ -292,3 +292,7 @@ def set_docker_image_tag() -> str:
 def set_nebari_dask_version() -> str:
     """Set version of `nebari-dask` meta package."""
     return os.environ.get("NEBARI_DASK_VERSION", constants.DEFAULT_NEBARI_DASK_VERSION)
+
+
+def get_latest_kubernetes_version(versions: List[str]) -> str:
+    return sorted(versions)[-1]

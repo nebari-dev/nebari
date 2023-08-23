@@ -10,6 +10,12 @@ import pytest
 from urllib3.exceptions import InsecureRequestWarning
 
 from _nebari.config import read_configuration, write_configuration
+from _nebari.constants import (
+    AWS_DEFAULT_REGION,
+    AZURE_DEFAULT_REGION,
+    DO_DEFAULT_REGION,
+    GCP_DEFAULT_REGION,
+)
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.provider.cloud.amazon_web_services import aws_cleanup
@@ -88,13 +94,13 @@ def deploy(request):
     logger.info(f"Deploying: {cloud}")
     if cloud == "do":
         set_do_environment()
-        region = "nyc3"
+        region = DO_DEFAULT_REGION
     elif cloud == "aws":
-        region = os.environ.get("AWS_DEFAULT_REGION", "us-west-1")
+        region = os.environ.get("AWS_DEFAULT_REGION", AWS_DEFAULT_REGION)
     elif cloud == "gcp":
-        region = "us-central1"
+        region = GCP_DEFAULT_REGION
     elif cloud == "azure":
-        region = "Central US"
+        region = AZURE_DEFAULT_REGION
     deployment_dir = _get_or_create_deployment_directory(cloud)
     config = render_config_partial(
         project_name=deployment_dir.name,

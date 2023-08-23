@@ -17,10 +17,16 @@ from _nebari.constants import (
     GCP_DEFAULT_REGION,
 )
 from _nebari.initialize import render_config
-from _nebari.provider.cloud import amazon_web_services, digital_ocean, google_cloud
+from _nebari.provider.cloud import (
+    amazon_web_services,
+    azure_cloud,
+    digital_ocean,
+    google_cloud,
+)
 from _nebari.stages.bootstrap import CiEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
+from _nebari.utils import get_latest_kubernetes_version
 from nebari import schema
 from nebari.hookspecs import hookimpl
 from nebari.schema import ProviderEnum
@@ -60,6 +66,12 @@ GUIDED_INIT_MSG = (
     "to generate your [purple]nebari-config.yaml[/purple]. "
     "It is an [i]alternative[/i] to passing the options listed below."
 )
+
+DEFAULT_KUBERNETES_VERSION_MSG = (
+    "Defaulting to latest `{kubernetes_version}` Kubernetes version available."
+)
+
+LATEST = "latest"
 
 
 class GitRepoEnum(str, enum.Enum):
@@ -341,6 +353,72 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: ProviderEnum)
     return cloud_provider
 
 
+def check_cloud_provider_kubernetes_version(
+    ctx: typer.Context, kubernetes_version: str
+):
+    cloud_provider = ctx.params.get("cloud_provider")
+    region = ctx.params.get("region")
+
+    if cloud_provider == ProviderEnum.aws.value.lower():
+        versions = amazon_web_services.kubernetes_versions()
+
+        if not kubernetes_version or kubernetes_version == LATEST:
+            kubernetes_version = get_latest_kubernetes_version(versions)
+            rich.print(
+                DEFAULT_KUBERNETES_VERSION_MSG.format(
+                    kubernetes_version=kubernetes_version
+                )
+            )
+        if kubernetes_version not in versions:
+            raise ValueError(
+                f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the AWS docs for a list of valid versions: {versions}"
+            )
+    elif cloud_provider == ProviderEnum.azure.value.lower():
+        versions = azure_cloud.kubernetes_versions(region)
+
+        if not kubernetes_version or kubernetes_version == LATEST:
+            kubernetes_version = get_latest_kubernetes_version(versions)
+            rich.print(
+                DEFAULT_KUBERNETES_VERSION_MSG.format(
+                    kubernetes_version=kubernetes_version
+                )
+            )
+        if kubernetes_version not in versions:
+            raise ValueError(
+                f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the Azure docs for a list of valid versions: {versions}"
+            )
+    elif cloud_provider == ProviderEnum.gcp.value.lower():
+        versions = google_cloud.kubernetes_versions(region)
+
+        if not kubernetes_version or kubernetes_version == LATEST:
+            kubernetes_version = get_latest_kubernetes_version(versions)
+            rich.print(
+                DEFAULT_KUBERNETES_VERSION_MSG.format(
+                    kubernetes_version=kubernetes_version
+                )
+            )
+        if kubernetes_version not in versions:
+            raise ValueError(
+                f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the GCP docs for a list of valid versions: {versions}"
+            )
+    elif cloud_provider == ProviderEnum.do.value.lower():
+        versions = digital_ocean.kubernetes_versions(region)
+
+        if not kubernetes_version or kubernetes_version == LATEST:
+            kubernetes_version = get_latest_kubernetes_version(versions)
+            rich.print(
+                DEFAULT_KUBERNETES_VERSION_MSG.format(
+                    kubernetes_version=kubernetes_version
+                )
+            )
+        if kubernetes_version not in versions:
+            raise ValueError(
+                f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the DO docs for a list of valid versions: {versions}"
+            )
+
+    return kubernetes_version
+
+
 def check_cloud_provider_region(ctx: typer.Context, region: str):
     cloud_provider = ctx.params.get("cloud_provider")
     if cloud_provider == ProviderEnum.aws.value.lower():
@@ -442,7 +520,9 @@ def nebari_subcommand(cli: typer.Typer):
             help=f"options: {enum_to_list(TerraformStateEnum)}",
         ),
         kubernetes_version: str = typer.Option(
-            "latest",
+            LATEST,
+            help="The Kubernetes version you want to deploy your Nebari cluster to, leave blank for latest version",
+            callback=check_cloud_provider_kubernetes_version,
         ),
         region: str = typer.Option(
             None,
@@ -589,6 +669,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 check_cloud_provider_region(ctx, region)
 
             inputs.region = region
+            ctx.params["region"] = region
 
         name_guidelines = """
         The project name must adhere to the following requirements:
@@ -771,10 +852,15 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             ).unsafe_ask()
 
             # KUBERNETES VERSION
-            inputs.kubernetes_version = questionary.text(
+            kubernetes_version = questionary.text(
                 "Which Kubernetes version would you like to use (if none provided; latest version will be installed)?",
                 qmark=qmark,
             ).unsafe_ask()
+            if not disable_checks:
+                check_cloud_provider_kubernetes_version(
+                    ctx, kubernetes_version=kubernetes_version
+                )
+            inputs.kubernetes_version = kubernetes_version
 
         from nebari.plugins import nebari_plugin_manager
 

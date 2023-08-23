@@ -3,7 +3,6 @@ import os
 import re
 import tempfile
 from pathlib import Path
-from typing import List
 
 import pydantic
 import requests
@@ -89,13 +88,6 @@ def render_config(
             }
 
     if cloud_provider == ProviderEnum.do:
-        if kubernetes_version is None:
-            from _nebari.provider.cloud.digital_ocean import kubernetes_versions
-
-            kubernetes_version = get_latest_kubernetes_version(
-                kubernetes_versions(region)
-            )
-
         config["digital_ocean"] = {"kubernetes_version": kubernetes_version}
 
         config["theme"]["jupyterhub"][
@@ -103,13 +95,6 @@ def render_config(
         ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
 
     elif cloud_provider == ProviderEnum.gcp:
-        if kubernetes_version is None:
-            from _nebari.provider.cloud.google_cloud import kubernetes_versions
-
-            kubernetes_version = get_latest_kubernetes_version(
-                kubernetes_versions(region)
-            )
-
         config["google_cloud_platform"] = {
             "kubernetes_version": kubernetes_version,
             "region": region,
@@ -126,13 +111,6 @@ def render_config(
             )
 
     elif cloud_provider == ProviderEnum.azure:
-        if kubernetes_version is None:
-            from _nebari.provider.cloud.azure_cloud import kubernetes_versions
-
-            kubernetes_version = get_latest_kubernetes_version(
-                kubernetes_versions(region)
-            )
-
         config["azure"] = {
             "kubernetes_version": kubernetes_version,
             "region": region,
@@ -143,11 +121,6 @@ def render_config(
         ] = f"{WELCOME_HEADER_TEXT} on Azure"
 
     elif cloud_provider == ProviderEnum.aws:
-        if kubernetes_version is None:
-            from _nebari.provider.cloud.amazon_web_services import kubernetes_versions
-
-            kubernetes_version = get_latest_kubernetes_version(kubernetes_versions())
-
         config["amazon_web_services"] = {
             "kubernetes_version": kubernetes_version,
             "region": region,
@@ -258,7 +231,3 @@ def git_repository_initialize(git_repository):
     if not git.is_git_repo(Path.cwd()):
         git.initialize_git(Path.cwd())
     git.add_git_remote(git_repository, path=Path.cwd(), remote_name="origin")
-
-
-def get_latest_kubernetes_version(versions: List[str]) -> str:
-    return sorted(versions)[-1]

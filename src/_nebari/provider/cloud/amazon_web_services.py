@@ -50,13 +50,10 @@ def aws_session(digitalocean_region: str = None):
 
 @functools.lru_cache()
 def regions() -> List[str]:
-    try:
-        session = aws_session()
-        ec2_client = session.client("ec2")
-        regions = ec2_client.describe_regions()["Regions"]
-        return [region["RegionName"] for region in regions]
-    except ClientError as e:
-        print(e)
+    session = aws_session()
+    ec2_client = session.client("ec2")
+    regions = ec2_client.describe_regions()["Regions"]
+    return {_["RegionName"]: _["RegionName"] for _ in regions}
 
 
 @functools.lru_cache()
