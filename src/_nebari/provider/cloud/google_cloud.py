@@ -8,7 +8,7 @@ from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_versi
 
 
 def check_credentials():
-    for variable in {"GOOGLE_CREDENTIALS"}:
+    for variable in {"GOOGLE_CREDENTIALS", "PROJECT_ID"}:
         if variable not in os.environ:
             raise ValueError(
                 f"""Missing the following required environment variable: {variable}\n
@@ -24,7 +24,9 @@ def projects():
 
 
 @functools.lru_cache()
-def regions(project):
+def regions():
+    check_credentials()
+    project = os.environ.get("PROJECT_ID")
     output = subprocess.check_output(
         ["gcloud", "compute", "regions", "list", "--project", project, "--format=json"]
     )
@@ -33,7 +35,9 @@ def regions(project):
 
 
 @functools.lru_cache()
-def zones(project, region):
+def zones(region):
+    check_credentials()
+    project = os.environ.get("PROJECT_ID")
     output = subprocess.check_output(
         ["gcloud", "compute", "zones", "list", "--project", project, "--format=json"]
     )
@@ -60,7 +64,9 @@ def kubernetes_versions(region):
 
 
 @functools.lru_cache()
-def instances(project):
+def instances():
+    check_credentials()
+    project = os.environ.get("PROJECT_ID")
     output = subprocess.check_output(
         [
             "gcloud",

@@ -203,7 +203,7 @@ class DigitalOceanNodeGroup(schema.Base):
 
 
 class DigitalOceanProvider(schema.Base):
-    region: str = "nyc3"
+    region: str = constants.DO_DEFAULT_REGION
     kubernetes_version: typing.Optional[str]
     # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
     node_groups: typing.Dict[str, DigitalOceanNodeGroup] = {
@@ -310,7 +310,7 @@ class GCPNodeGroup(schema.Base):
 
 class GoogleCloudPlatformProvider(schema.Base):
     project: str = pydantic.Field(default_factory=lambda: os.environ["PROJECT_ID"])
-    region: str = "us-central1"
+    region: str = constants.GCP_DEFAULT_REGION
     availability_zones: typing.Optional[typing.List[str]] = []
     kubernetes_version: typing.Optional[str]
     release_channel: str = constants.DEFAULT_GKE_RELEASE_CHANNEL
@@ -351,6 +351,15 @@ class GoogleCloudPlatformProvider(schema.Base):
             values["kubernetes_version"] = available_kubernetes_versions[-1]
         return values
 
+    @pydantic.validator("region")
+    def _validate_region(cls, value):
+        available_regions = google_cloud.regions()
+        if value not in available_regions:
+            raise ValueError(
+                f"Google Cloud Platform region={value} is not one of {available_regions}"
+            )
+        return value
+
 
 class AzureNodeGroup(schema.Base):
     instance: str
@@ -359,7 +368,7 @@ class AzureNodeGroup(schema.Base):
 
 
 class AzureProvider(schema.Base):
-    region: str = "Central US"
+    region: str = constants.AZURE_DEFAULT_REGION
     kubernetes_version: typing.Optional[str]
     node_groups: typing.Dict[str, AzureNodeGroup] = {
         "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
@@ -396,7 +405,9 @@ class AWSNodeGroup(schema.Base):
 
 class AmazonWebServicesProvider(schema.Base):
     region: str = pydantic.Field(
-        default_factory=lambda: os.environ.get("AWS_DEFAULT_REGION", "us-west-2")
+        default_factory=lambda: os.environ.get(
+            "AWS_DEFAULT_REGION", constants.AWS_DEFAULT_REGION
+        )
     )
     availability_zones: typing.Optional[typing.List[str]]
     kubernetes_version: typing.Optional[str]

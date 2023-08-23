@@ -10,7 +10,14 @@ import typer
 from pydantic import BaseModel
 
 from _nebari.config import write_configuration
+from _nebari.constants import (
+    AWS_DEFAULT_REGION,
+    AZURE_DEFAULT_REGION,
+    DO_DEFAULT_REGION,
+    GCP_DEFAULT_REGION,
+)
 from _nebari.initialize import render_config
+from _nebari.provider.cloud import amazon_web_services, digital_ocean, google_cloud
 from _nebari.stages.bootstrap import CiEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
@@ -334,6 +341,42 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: ProviderEnum)
     return cloud_provider
 
 
+def check_cloud_provider_region(ctx: typer.Context, region: str):
+    cloud_provider = ctx.params.get("cloud_provider")
+    if cloud_provider == ProviderEnum.aws.value.lower():
+        region = region or os.environ.get("AWS_DEFAULT_REGION")
+        if not region:
+            region = AWS_DEFAULT_REGION
+            rich.print(f"Defaulting to `{region}` region.")
+        if region not in amazon_web_services.regions():
+            raise ValueError(
+                f"Invalid region `{region}`. Please refer to the AWS docs for a list of valid regions: {AWS_REGIONS}"
+            )
+    elif cloud_provider == ProviderEnum.azure.value.lower():
+        # TODO: Add a check for valid region for Azure
+        if not region:
+            region = AZURE_DEFAULT_REGION
+            rich.print(f"Defaulting to `{region}` region.")
+    elif cloud_provider == ProviderEnum.gcp.value.lower():
+        if not region:
+            region = GCP_DEFAULT_REGION
+            rich.print(f"Defaulting to `{region}` region.")
+        if region not in google_cloud.regions():
+            raise ValueError(
+                f"Invalid region `{region}`. Please refer to the GCP docs for a list of valid regions: {GCP_REGIONS}"
+            )
+    elif cloud_provider == ProviderEnum.do.value.lower():
+        if not region:
+            region = DO_DEFAULT_REGION
+            rich.print(f"Defaulting to `{region}` region.")
+
+        if region not in set(_["slug"] for _ in digital_ocean.regions()):
+            raise ValueError(
+                f"Invalid region `{region}`. Please refer to the DO docs for a list of valid regions: {DO_REGIONS}"
+            )
+    return region
+
+
 @hookimpl
 def nebari_subcommand(cli: typer.Typer):
     @cli.command()
@@ -404,6 +447,7 @@ def nebari_subcommand(cli: typer.Typer):
         region: str = typer.Option(
             None,
             help="The region you want to deploy your Nebari cluster to (if deploying to the cloud)",
+            callback=check_cloud_provider_region,
         ),
         ssl_cert_email: str = typer.Option(
             None,
@@ -521,8 +565,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # cloud region
         if (
             inputs.cloud_provider != ProviderEnum.local.value.lower()
-            or inputs.cloud_provider != ProviderEnum.existing.value.lower()
-            and region is None
+            and inputs.cloud_provider != ProviderEnum.existing.value.lower()
         ):
             aws_region = os.environ.get("AWS_DEFAULT_REGION")
             if inputs.cloud_provider == ProviderEnum.aws.value.lower() and aws_region:
@@ -542,8 +585,10 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                     qmark=qmark,
                 ).unsafe_ask()
 
-        # TODO: add check for valid region
-        inputs.region = region
+            if not disable_checks:
+                check_cloud_provider_region(ctx, region)
+
+            inputs.region = region
 
         name_guidelines = """
         The project name must adhere to the following requirements:

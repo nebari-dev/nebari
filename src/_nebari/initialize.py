@@ -3,6 +3,7 @@ import os
 import re
 import tempfile
 from pathlib import Path
+from typing import List
 
 import pydantic
 import requests
@@ -88,18 +89,12 @@ def render_config(
             }
 
     if cloud_provider == ProviderEnum.do:
-        if region is None:
-            if not disable_prompt:
-                config["digital_ocean"] = input("Enter Digital Ocean region: ")
-            else:
-                raise ValueError("Digital Ocean region must be specified.")
-        else:
-            config["digital_ocean"] = {"region": region}
-
         if kubernetes_version is None:
             from _nebari.provider.cloud.digital_ocean import kubernetes_versions
 
-            kubernetes_version = kubernetes_versions(region)[0]
+            kubernetes_version = get_latest_kubernetes_version(
+                kubernetes_versions(region)
+            )
 
         config["digital_ocean"] = {"kubernetes_version": kubernetes_version}
 
@@ -108,27 +103,21 @@ def render_config(
         ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
 
     elif cloud_provider == ProviderEnum.gcp:
-        if region is None:
-            if not disable_prompt:
-                config["google_cloud_platform"] = input(
-                    "Enter Google Cloud Platform region: "
-                )
-            else:
-                raise ValueError("Google Cloud Platform region must be specified.")
-        else:
-            config["google_cloud_platform"] = {"region": region}
-
         if kubernetes_version is None:
             from _nebari.provider.cloud.google_cloud import kubernetes_versions
 
-            kubernetes_version = kubernetes_versions(region)[0]
+            kubernetes_version = get_latest_kubernetes_version(
+                kubernetes_versions(region)
+            )
 
-        config["google_cloud_platform"]["kubernetes_version"] = kubernetes_version
+        config["google_cloud_platform"] = {
+            "kubernetes_version": kubernetes_version,
+            "region": region,
+        }
 
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
-        config["google_cloud_platform"] = {}
         if "PROJECT_ID" in os.environ:
             config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
         elif not disable_prompt:
@@ -137,42 +126,32 @@ def render_config(
             )
 
     elif cloud_provider == ProviderEnum.azure:
-        if region is None:
-            if not disable_prompt:
-                config["azure"] = input("Enter Azure region: ")
-            else:
-                raise ValueError("Azure region must be specified.")
-        else:
-            config["azure"] = {"region": region}
-
         if kubernetes_version is None:
             from _nebari.provider.cloud.azure_cloud import kubernetes_versions
 
-            kubernetes_version = kubernetes_versions(config["azure"]["region"])[0]
+            kubernetes_version = get_latest_kubernetes_version(
+                kubernetes_versions(region)
+            )
 
-        config["azure"] = {"kubernetes_version": kubernetes_version}
+        config["azure"] = {
+            "kubernetes_version": kubernetes_version,
+            "region": region,
+        }
 
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Azure"
 
     elif cloud_provider == ProviderEnum.aws:
-        if region is None:
-            if not disable_prompt:
-                config["amazon_web_services"] = input("Enter Azure region: ")
-            else:
-                raise ValueError("Amazon Web Services region must be specified.")
-        else:
-            config["amazon_web_services"] = {"region": region}
-
         if kubernetes_version is None:
             from _nebari.provider.cloud.amazon_web_services import kubernetes_versions
 
-            kubernetes_version = kubernetes_versions(
-                config["amazon_web_services"]["region"]
-            )[0]
+            kubernetes_version = get_latest_kubernetes_version(kubernetes_versions())
 
-        config["amazon_web_services"] = {"kubernetes_version": kubernetes_version}
+        config["amazon_web_services"] = {
+            "kubernetes_version": kubernetes_version,
+            "region": region,
+        }
 
         config["theme"]["jupyterhub"][
             "hub_subtitle"
@@ -279,3 +258,7 @@ def git_repository_initialize(git_repository):
     if not git.is_git_repo(Path.cwd()):
         git.initialize_git(Path.cwd())
     git.add_git_remote(git_repository, path=Path.cwd(), remote_name="origin")
+
+
+def get_latest_kubernetes_version(versions: List[str]) -> str:
+    return sorted(versions)[-1]
