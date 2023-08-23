@@ -8,7 +8,7 @@ import typing
 from typing import Any, Dict, List, Optional
 
 import pydantic
-from pydantic import model_validator, field_validator
+from pydantic import field_validator, model_validator
 
 from _nebari import constants
 from _nebari.provider import terraform
@@ -234,7 +234,9 @@ class DigitalOceanProvider(schema.Base):
 
     @pydantic.field_validator("node_groups")
     @classmethod
-    def _validate_node_group(cls, value: typing.Dict[str, DigitalOceanNodeGroup]) -> typing.Dict[str, DigitalOceanNodeGroup]:
+    def _validate_node_group(
+        cls, value: typing.Dict[str, DigitalOceanNodeGroup]
+    ) -> typing.Dict[str, DigitalOceanNodeGroup]:
         digital_ocean.check_credentials()
 
         available_instances = {_["slug"] for _ in digital_ocean.instances()}
@@ -248,15 +250,12 @@ class DigitalOceanProvider(schema.Base):
 
     @field_validator("kubernetes_version")
     @classmethod
-    def _validate_kubernetes_version(cls, value:typing.Optional[str]) -> str:
+    def _validate_kubernetes_version(cls, value: typing.Optional[str]) -> str:
         digital_ocean.check_credentials()
 
         available_kubernetes_versions = digital_ocean.kubernetes_versions()
         assert available_kubernetes_versions
-        if (
-            value is not None
-            and value not in available_kubernetes_versions
-        ):
+        if value is not None and value not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
@@ -427,7 +426,9 @@ class AmazonWebServicesProvider(schema.Base):
 
     @field_validator("node_groups")
     @classmethod
-    def _validate_node_group(cls, value: typing.Dict[str, AWSNodeGroup]) -> typing.Dict[str, AWSNodeGroup]:
+    def _validate_node_group(
+        cls, value: typing.Dict[str, AWSNodeGroup]
+    ) -> typing.Dict[str, AWSNodeGroup]:
         amazon_web_services.check_credentials()
 
         available_instances = amazon_web_services.instances()
@@ -452,7 +453,9 @@ class AmazonWebServicesProvider(schema.Base):
 
     @field_validator("availability_zones")
     @classmethod
-    def _validate_availability_zones(cls, value: typing.Optional[typing.List[str]]) -> typing.List[str]:
+    def _validate_availability_zones(
+        cls, value: typing.Optional[typing.List[str]]
+    ) -> typing.List[str]:
         amazon_web_services.check_credentials()
 
         if value is None:
@@ -489,18 +492,12 @@ class InputSchema(schema.Base):
 
     @model_validator(mode="after")
     def check_provider(self):
-        if (
-            self.provider == schema.ProviderEnum.local
-            and self.local is None
-        ):
+        if self.provider == schema.ProviderEnum.local and self.local is None:
             self.local = LocalProvider()
-        elif (
-            self.provider == schema.ProviderEnum.existing
-            and self.existing is None
-        ):
+        elif self.provider == schema.ProviderEnum.existing and self.existing is None:
             self.existing = ExistingProvider()
         elif (
-            self.provider  == schema.ProviderEnum.gcp
+            self.provider == schema.ProviderEnum.gcp
             and self.google_cloud_platform is None
         ):
             self.google_cloud_platform = GoogleCloudPlatformProvider()
@@ -509,27 +506,22 @@ class InputSchema(schema.Base):
             and self.amazon_web_services is None
         ):
             self.amazon_web_services = AmazonWebServicesProvider()
-        elif (
-            self.provider == schema.ProviderEnum.azure
-            and self.azure is None
-        ):
+        elif self.provider == schema.ProviderEnum.azure and self.azure is None:
             self.azure = AzureProvider()
-        elif (
-            self.provider == schema.ProviderEnum.do
-            and self.digital_ocean is None
-        ):
+        elif self.provider == schema.ProviderEnum.do and self.digital_ocean is None:
             self.digital_ocean = DigitalOceanProvider()
 
         if (
             sum(
-                (getattr(self, _) is not None
-                for _ in {
-                    "local",
-                    "existing",
-                    "google_cloud_platform",
-                    "amazon_web_services",
-                    "azure",
-                    "digital_ocean",
+                (
+                    getattr(self, _) is not None
+                    for _ in {
+                        "local",
+                        "existing",
+                        "google_cloud_platform",
+                        "amazon_web_services",
+                        "azure",
+                        "digital_ocean",
                     }
                 )
             )

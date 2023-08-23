@@ -31,10 +31,7 @@ class ExtContainerReg(schema.Base):
                 "extcr_region",
             ):
                 value = getattr(self, fldname)
-                if (
-                    value is None
-                    or value.strip() == ""
-                ):
+                if value is None or value.strip() == "":
                     raise ValueError(
                         f"external_container_reg must contain a non-blank {fldname} when enabled is true"
                     )

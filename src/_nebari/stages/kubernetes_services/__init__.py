@@ -7,8 +7,7 @@ import typing
 from typing import Any, Dict, List
 from urllib.parse import urlencode
 
-import pydantic
-from pydantic import Field, model_validator, ConfigDict, field_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
@@ -110,10 +109,7 @@ class JupyterLabProfile(schema.Base):
     @model_validator(mode="after")
     def only_yaml_can_have_groups_and_users(self):
         if self.access != AccessEnum.yaml:
-            if (
-                self.users is not None
-                or self.groups is not None
-            ):
+            if self.users is not None or self.groups is not None:
                 raise ValueError(
                     "Profile must not contain groups or users fields unless access = yaml"
                 )

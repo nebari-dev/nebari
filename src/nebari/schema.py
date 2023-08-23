@@ -2,8 +2,8 @@ import enum
 import sys
 
 import pydantic
+from pydantic import ConfigDict, Field, StringConstraints, field_validator
 from ruamel.yaml import yaml_object
-from pydantic import StringConstraints, ConfigDict, field_validator, Field
 
 from _nebari.utils import escape_string, yaml
 from _nebari.version import __version__, rounded_ver_parse
@@ -16,14 +16,18 @@ else:
 
 # Regex for suitable project names
 namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
-letter_dash_underscore_pydantic = Annotated[str, StringConstraints(pattern=namestr_regex)]
+letter_dash_underscore_pydantic = Annotated[
+    str, StringConstraints(pattern=namestr_regex)
+]
 
 email_regex = "^[^ @]+@[^ @]+\\.[^ @]+$"
 email_pydantic = Annotated[str, StringConstraints(pattern=email_regex)]
 
 
 class Base(pydantic.BaseModel):
-    model_config = ConfigDict(extra="forbid", validate_assignment=True, populate_by_name=True)
+    model_config = ConfigDict(
+        extra="forbid", validate_assignment=True, populate_by_name=True
+    )
 
 
 @yaml_object(yaml)

@@ -1,12 +1,12 @@
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, RootModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 from _nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
 from _nebari.provider.cicd.common import pip_install_nebari
 
-
 GLCI_extras = RootModel[Union[str, float, int]]
+
 
 class GLCI_image(BaseModel):
     name: str

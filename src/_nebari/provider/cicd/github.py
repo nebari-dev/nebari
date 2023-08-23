@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Union
 
 import requests
 from nacl import encoding, public
-from pydantic import BaseModel, Field, RootModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 from _nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
 from _nebari.provider.cicd.common import pip_install_nebari
@@ -167,6 +167,7 @@ class GHA_job_id(BaseModel):
 
 
 GHA_jobs = RootModel[Dict[str, GHA_job_id]]
+
 
 class GHA(BaseModel):
     name: str
