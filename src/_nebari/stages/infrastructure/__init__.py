@@ -715,7 +715,9 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         else:
             raise ValueError(f"Unknown provider: {self.config.provider}")
 
-    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
+    def check(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
         from kubernetes import client, config
         from kubernetes.client.rest import ApiException
 
@@ -749,8 +751,10 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         super().set_outputs(stage_outputs, outputs)
 
     @contextlib.contextmanager
-    def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        with super().deploy(stage_outputs):
+    def deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
+        with super().deploy(stage_outputs, disable_prompt):
             with kubernetes_provider_context(
                 stage_outputs["stages/" + self.name]["kubernetes_credentials"]["value"]
             ):

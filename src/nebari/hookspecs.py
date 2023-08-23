@@ -27,10 +27,14 @@ class NebariStage:
         return {}
 
     @contextlib.contextmanager
-    def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
+    def deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
         yield
 
-    def check(self, stage_outputs: Dict[str, Dict[str, Any]]) -> bool:
+    def check(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ) -> bool:
         pass
 
     @contextlib.contextmanager

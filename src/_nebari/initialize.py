@@ -39,7 +39,7 @@ def render_config(
     ssl_cert_email: str = None,
 ):
     config = {
-        "provider": cloud_provider.value,
+        "provider": cloud_provider,
         "namespace": namespace,
         "nebari_version": __version__,
     }
@@ -51,8 +51,8 @@ def render_config(
     if nebari_domain is not None:
         config["domain"] = nebari_domain
 
-    config["ci_cd"] = {"type": ci_provider.value}
-    config["terraform_state"] = {"type": terraform_state.value}
+    config["ci_cd"] = {"type": ci_provider}
+    config["terraform_state"] = {"type": terraform_state}
 
     # Save default password to file
     default_password_filename = Path(tempfile.gettempdir()) / "NEBARI_DEFAULT_PASSWORD"
@@ -68,7 +68,7 @@ def render_config(
         "welcome"
     ] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
 
-    config["security"]["authentication"] = {"type": auth_provider.value}
+    config["security"]["authentication"] = {"type": auth_provider}
     if auth_provider == AuthenticationEnum.github:
         if not disable_prompt:
             config["security"]["authentication"]["config"] = {

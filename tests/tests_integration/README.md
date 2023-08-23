@@ -1,9 +1,10 @@
 # Integration Testing via Pytest
 
 These tests are designed to test things on Nebari deployed
-on cloud. At the moment it only deploys on DigitalOcean.
+on cloud.
 
-You need the following environment variables to run these.
+
+## Digital Ocean
 
 ```bash
 DIGITALOCEAN_TOKEN
@@ -13,14 +14,29 @@ SPACES_SECRET_ACCESS_KEY
 CLOUDFLARE_TOKEN
 ```
 
-For instructions on how to get these variables check the documentation
-for DigitalOcean deployment.
-
-Running Tests:
+Once those are set, you can run:
 
 ```bash
-pytest tests_integration -vvv -s
+pytest tests_integration -vvv -s -m do
 ```
 
-This would deploy on digitalocean, run tests on the deployment
+This will deploy on Nebari on Amazon Web Services, run tests on the deployment
+and then teardown the cluster.
+
+## Amazon Web Services
+
+```bash
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_DEFAULT_REGION
+CLOUDFLARE_TOKEN
+```
+
+Once those are set, you can run:
+
+```bash
+pytest tests_integration -vvv -s -m aws
+```
+
+This will deploy on Nebari on Amazon Web Services, run tests on the deployment
 and then teardown the cluster.
