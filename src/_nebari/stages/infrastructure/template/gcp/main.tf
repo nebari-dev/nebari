@@ -34,4 +34,6 @@ module "kubernetes" {
   private_cluster_config            = var.private_cluster_config
   kubernetes_version                = var.kubernetes_version
   release_channel                   = var.release_channel
+  tags                              = var.tags
+  labels                            = var.labels
 }
