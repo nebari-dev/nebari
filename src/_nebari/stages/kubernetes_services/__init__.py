@@ -85,7 +85,7 @@ class Theme(schema.Base):
 
 class KubeSpawner(schema.Base):
     cpu_limit: int
-    cpu_guarantee: int
+    cpu_guarantee: float
     mem_limit: str
     mem_guarantee: str
     model_config = ConfigDict(extra="allow")
@@ -128,7 +128,7 @@ class Profiles(schema.Base):
             default=True,
             kubespawner_override=KubeSpawner(
                 cpu_limit=2,
-                cpu_guarantee=1,
+                cpu_guarantee=1.5,
                 mem_limit="8G",
                 mem_guarantee="5G",
             ),
