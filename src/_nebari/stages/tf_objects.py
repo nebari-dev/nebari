@@ -1,8 +1,8 @@
 from _nebari.provider.terraform import Data, Provider, TerraformBackend
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
+    construct_azure_resource_group_name,
     deep_merge,
-    set_azure_resource_group_name,
 )
 from nebari import schema
 
@@ -84,10 +84,10 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
     elif nebari_config.provider == "azure":
         return TerraformBackend(
             "azurerm",
-            resource_group_name=set_azure_resource_group_name(
+            resource_group_name=construct_azure_resource_group_name(
                 project_name=nebari_config.project_name,
                 namespace=nebari_config.namespace,
-                resource_group_name=nebari_config.azure.resource_group_name,
+                base_resource_group_name=nebari_config.azure.resource_group_name,
                 suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
             ),
             # storage account must be globally unique

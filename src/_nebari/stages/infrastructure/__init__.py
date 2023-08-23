@@ -22,9 +22,9 @@ from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariTerraformState
 from _nebari.utils import (
     AZURE_NODE_RESOURCE_GROUP_SUFFIX,
+    construct_azure_resource_group_name,
     modified_environ,
     random_secure_string,
-    set_azure_resource_group_name,
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -706,15 +706,15 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                     )
                     for name, node_group in self.config.azure.node_groups.items()
                 },
-                resource_group_name=set_azure_resource_group_name(
+                resource_group_name=construct_azure_resource_group_name(
                     project_name=self.config.project_name,
                     namespace=self.config.namespace,
-                    resource_group_name=self.config.azure.resource_group_name,
+                    base_resource_group_name=self.config.azure.resource_group_name,
                 ),
-                node_resource_group_name=set_azure_resource_group_name(
+                node_resource_group_name=construct_azure_resource_group_name(
                     project_name=self.config.project_name,
                     namespace=self.config.namespace,
-                    resource_group_name=self.config.azure.resource_group_name,
+                    base_resource_group_name=self.config.azure.resource_group_name,
                     suffix=AZURE_NODE_RESOURCE_GROUP_SUFFIX,
                 ),
                 vnet_subnet_id=self.config.azure.vnet_subnet_id,

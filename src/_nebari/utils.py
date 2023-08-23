@@ -283,12 +283,18 @@ def set_do_environment():
     os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
 
 
-def set_azure_resource_group_name(
+def construct_azure_resource_group_name(
     project_name: str = "",
     namespace: str = "",
-    resource_group_name: str = "",
+    base_resource_group_name: str = "",
     suffix: str = "",
 ) -> str:
-    if resource_group_name:
-        return f"{resource_group_name}{suffix}"
+    """
+    Construct a resource group name for Azure.
+
+    If the base_resource_group_name is provided, it will be used as the base,
+    otherwise default to the project_name-namespace.
+    """
+    if base_resource_group_name:
+        return f"{base_resource_group_name}{suffix}"
     return f"{project_name}-{namespace}{suffix}"

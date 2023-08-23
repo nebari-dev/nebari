@@ -12,8 +12,8 @@ import pydantic
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
+    construct_azure_resource_group_name,
     modified_environ,
-    set_azure_resource_group_name,
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -124,10 +124,10 @@ class TerraformStateStage(NebariTerraformStage):
         elif self.config.provider == schema.ProviderEnum.azure:
             subscription_id = os.environ["ARM_SUBSCRIPTION_ID"]
             resource_name_prefix = f"{self.config.project_name}-{self.config.namespace}"
-            state_resource_group_name = set_azure_resource_group_name(
+            state_resource_group_name = construct_azure_resource_group_name(
                 project_name=self.config.project_name,
                 namespace=self.config.namespace,
-                resource_group_name=self.config.azure.resource_group_name,
+                base_resource_group_name=self.config.azure.resource_group_name,
                 suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
             )
             state_resource_name_prefix_safe = resource_name_prefix.replace("-", "")
@@ -188,10 +188,10 @@ class TerraformStateStage(NebariTerraformStage):
                 namespace=self.config.namespace,
                 region=self.config.azure.region,
                 storage_account_postfix=self.config.azure.storage_account_postfix,
-                state_resource_group_name=set_azure_resource_group_name(
+                state_resource_group_name=construct_azure_resource_group_name(
                     project_name=self.config.project_name,
                     namespace=self.config.namespace,
-                    resource_group_name=self.config.azure.resource_group_name,
+                    base_resource_group_name=self.config.azure.resource_group_name,
                     suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
                 ),
             ).dict()
