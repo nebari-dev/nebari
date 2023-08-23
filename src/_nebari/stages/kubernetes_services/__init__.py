@@ -162,14 +162,15 @@ class Profiles(schema.Base):
     }
 
     @field_validator("jupyterlab")
+    @classmethod
     def check_default(cls, value):
         """Check if only one default value is present."""
-        default = [attrs["default"] for attrs in v if "default" in attrs]
+        default = [attrs["default"] for attrs in value if "default" in attrs]
         if default.count(True) > 1:
             raise TypeError(
                 "Multiple default Jupyterlab profiles may cause unexpected problems."
             )
-        return v
+        return value
 
 
 class CondaEnvironment(schema.Base):
