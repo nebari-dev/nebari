@@ -49,7 +49,7 @@ def aws_session(digitalocean_region: str = None):
 
 
 @functools.lru_cache()
-def regions() -> List[str]:
+def regions():
     session = aws_session()
     ec2_client = session.client("ec2")
     regions = ec2_client.describe_regions()["Regions"]
