@@ -37,6 +37,12 @@ resource "aws_eks_node_group" "main" {
     max_size     = var.node_groups[count.index].max_size
   }
 
+  lifecycle {
+    ignore_changes = [
+      scaling_config[0].desired_size,
+    ]
+  }
+
   # Ensure that IAM Role permissions are created before and deleted
   # after EKS Node Group handling.  Otherwise, EKS will not be able to
   # properly delete EC2 Instances and Elastic Network Interfaces.
