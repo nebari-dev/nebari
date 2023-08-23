@@ -528,6 +528,7 @@ def nebari_subcommand(cli: typer.Typer):
             None,
             help="The region you want to deploy your Nebari cluster to (if deploying to the cloud)",
             callback=check_cloud_provider_region,
+            is_eager=True,
         ),
         ssl_cert_email: str = typer.Option(
             None,
