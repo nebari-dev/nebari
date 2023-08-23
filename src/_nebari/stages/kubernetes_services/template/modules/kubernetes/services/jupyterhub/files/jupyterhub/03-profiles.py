@@ -469,6 +469,7 @@ def render_profiles(spawner):
 
 c.KubeSpawner.args = ["--debug"]
 c.KubeSpawner.environment = {
+    **c.KubeSpawner.environment,
     "JUPYTERHUB_SINGLEUSER_APP": "jupyter_server.serverapp.ServerApp",
 }
 c.KubeSpawner.profile_list = render_profiles
