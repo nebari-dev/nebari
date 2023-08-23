@@ -10,22 +10,22 @@ GLCI_extras = RootModel[Union[str, float, int]]
 
 class GLCI_image(BaseModel):
     name: str
-    entrypoint: Optional[str]
+    entrypoint: Optional[str] = None
 
 
 class GLCI_rules(BaseModel):
     if_: Optional[str] = Field(alias="if")
-    changes: Optional[List[str]]
+    changes: Optional[List[str]] = None
     model_config = ConfigDict(populate_by_name=True)
 
 
 class GLCI_job(BaseModel):
-    image: Optional[Union[str, GLCI_image]]
-    variables: Optional[Dict[str, str]]
-    before_script: Optional[List[str]]
-    after_script: Optional[List[str]]
+    image: Optional[Union[str, GLCI_image]] = None
+    variables: Optional[Dict[str, str]] = None
+    before_script: Optional[List[str]] = None
+    after_script: Optional[List[str]] = None
     script: List[str]
-    rules: Optional[List[GLCI_rules]]
+    rules: Optional[List[GLCI_rules]] = None
 
 
 GLCI = RootModel[Dict[str, GLCI_job]]

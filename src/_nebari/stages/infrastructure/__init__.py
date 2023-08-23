@@ -357,7 +357,7 @@ class AzureNodeGroup(schema.Base):
 
 class AzureProvider(schema.Base):
     region: str = "Central US"
-    kubernetes_version: typing.Optional[str]
+    kubernetes_version: typing.Optional[str] = None
     node_groups: typing.Dict[str, AzureNodeGroup] = {
         "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
         "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),

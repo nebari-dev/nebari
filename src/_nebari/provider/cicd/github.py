@@ -151,17 +151,17 @@ GHA_job_steps_extras = RootModel[Union[str, float, int]]
 
 class GHA_job_step(BaseModel):
     name: str
-    uses: Optional[str]
+    uses: Optional[str] = None
     with_: Optional[Dict[str, GHA_job_steps_extras]] = Field(alias="with")
-    run: Optional[str]
-    env: Optional[Dict[str, GHA_job_steps_extras]]
+    run: Optional[str] = None
+    env: Optional[Dict[str, GHA_job_steps_extras]] = None
     model_config = ConfigDict(populate_by_name=True)
 
 
 class GHA_job_id(BaseModel):
     name: str
     runs_on_: str = Field(alias="runs-on")
-    permissions: Optional[Dict[str, str]]
+    permissions: Optional[Dict[str, str]] = None
     steps: List[GHA_job_step]
     model_config = ConfigDict(populate_by_name=True)
 
@@ -171,7 +171,7 @@ GHA_jobs = RootModel[Dict[str, GHA_job_id]]
 class GHA(BaseModel):
     name: str
     on: GHA_on
-    env: Optional[Dict[str, str]]
+    env: Optional[Dict[str, str]] = None
     jobs: GHA_jobs
 
 
