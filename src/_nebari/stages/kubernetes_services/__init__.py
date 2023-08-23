@@ -54,12 +54,6 @@ class Prefect(schema.Base):
     token: typing.Optional[str]
 
 
-class CDSDashboards(schema.Base):
-    enabled: bool = True
-    cds_hide_user_named_servers: bool = True
-    cds_hide_user_dashboard_servers: bool = False
-
-
 class DefaultImages(schema.Base):
     jupyterhub: str = f"quay.io/nebari/nebari-jupyterhub:{set_docker_image_tag()}"
     jupyterlab: str = f"quay.io/nebari/nebari-jupyterlab:{set_docker_image_tag()}"
@@ -246,7 +240,6 @@ class JupyterLab(schema.Base):
 
 class InputSchema(schema.Base):
     prefect: Prefect = Prefect()
-    cdsdashboards: CDSDashboards = CDSDashboards()
     default_images: DefaultImages = DefaultImages()
     storage: Storage = Storage()
     theme: Theme = Theme()
@@ -279,7 +272,6 @@ class InputSchema(schema.Base):
             channels=["conda-forge"],
             dependencies=[
                 "python=3.10",
-                "cdsdashboards-singleuser=0.6.3",
                 "cufflinks-py=0.17.3",
                 "dash=2.8.1",
                 "geopandas=0.12.2",
@@ -370,7 +362,6 @@ class CondaStoreInputVars(schema.Base):
 
 
 class JupyterhubInputVars(schema.Base):
-    cdsdashboards: Dict[str, Any]
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
@@ -449,12 +440,6 @@ class KubernetesServicesStage(NebariTerraformStage):
         ]["keycloak-read-only-user-credentials"]["value"]
 
         conda_store_token_scopes = {
-            "cdsdashboards": {
-                "primary_namespace": "cdsdashboards",
-                "role_bindings": {
-                    "*/*": ["viewer"],
-                },
-            },
             "dask-gateway": {
                 "primary_namespace": "",
                 "role_bindings": {
@@ -508,7 +493,6 @@ class KubernetesServicesStage(NebariTerraformStage):
         )
 
         jupyterhub_vars = JupyterhubInputVars(
-            cdsdashboards=self.config.cdsdashboards.dict(),
             jupyterhub_theme=jupyterhub_theme.dict(),
             jupyterlab_image=_split_docker_image_name(
                 self.config.default_images.jupyterlab
