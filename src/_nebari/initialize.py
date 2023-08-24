@@ -88,7 +88,10 @@ def render_config(
             }
 
     if cloud_provider == ProviderEnum.do:
-        config["digital_ocean"] = {"kubernetes_version": kubernetes_version}
+        config["digital_ocean"] = {
+            "kubernetes_version": kubernetes_version,
+            "region": region,
+        }
 
         config["theme"]["jupyterhub"][
             "hub_subtitle"

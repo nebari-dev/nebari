@@ -1,4 +1,3 @@
-import typing
 from unittest.mock import Mock
 
 import pytest
@@ -21,26 +20,9 @@ from nebari.plugins import nebari_plugin_manager
 
 @pytest.fixture(autouse=True)
 def mock_all_cloud_methods(monkeypatch):
-    def _mock_kubernetes_versions(
-        k8s_versions: typing.List[str] = ["1.18", "1.19", "1.20"],
-        grab_latest_version=False,
-    ):
-        # template for all `kubernetes_versions` calls
-        # monkeypatched to avoid making outbound API calls in CI
-        m = Mock()
-        m.return_value = k8s_versions
-        if grab_latest_version:
-            m.return_value = k8s_versions[-1]
-        return m
-
     def _mock_return_value(return_value):
         m = Mock()
         m.return_value = return_value
-        return m
-
-    def _mock_aws_availability_zones(region="us-west-2"):
-        m = Mock()
-        m.return_value = ["us-west-2a", "us-west-2b"]
         return m
 
     MOCK_VALUES = {
