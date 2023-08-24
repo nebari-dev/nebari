@@ -191,11 +191,7 @@ def checkout_image_step():
     return GHA_job_step(
         name="Checkout Image",
         uses="actions/checkout@v3",
-        with_={
-            "token": GHA_job_steps_extras(
-                "${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
-            )
-        },
+        with_={"token": GHA_job_steps_extras("${{ secrets.REPOSITORY_ACCESS_TOKEN }}")},
     )
 
 
@@ -203,11 +199,7 @@ def setup_python_step():
     return GHA_job_step(
         name="Set up Python",
         uses="actions/setup-python@v4",
-        with_={
-            "python-version": GHA_job_steps_extras(
-                LATEST_SUPPORTED_PYTHON_VERSION
-            )
-        },
+        with_={"python-version": GHA_job_steps_extras(LATEST_SUPPORTED_PYTHON_VERSION)},
     )
 
 
@@ -295,9 +287,7 @@ def gen_nebari_linter(config):
     step4_envs = {
         "PR_NUMBER": GHA_job_steps_extras("${{ github.event.number }}"),
         "REPO_NAME": GHA_job_steps_extras("${{ github.repository }}"),
-        "GITHUB_TOKEN": GHA_job_steps_extras(
-            "${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
-        ),
+        "GITHUB_TOKEN": GHA_job_steps_extras("${{ secrets.REPOSITORY_ACCESS_TOKEN }}"),
     }
 
     step4 = GHA_job_step(
