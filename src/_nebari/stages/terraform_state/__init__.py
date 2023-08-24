@@ -7,7 +7,7 @@ import re
 import typing
 from typing import Any, Dict, List, Tuple
 
-import pydantic
+from pydantic import field_validator
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.utils import (
@@ -38,8 +38,9 @@ class AzureInputVars(schema.Base):
     storage_account_postfix: str
     state_resource_group_name: str
 
-    @pydantic.validator("state_resource_group_name")
-    def _validate_resource_group_name(cls, value):
+    @field_validator("state_resource_group_name")
+    @classmethod
+    def _validate_resource_group_name(cls, value: str) -> str:
         if value is None:
             return value
         length = len(value) + len(AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX)
