@@ -439,7 +439,7 @@ def check_cloud_provider_region(ctx: typer.Context, region: str):
         if not region:
             region = GCP_DEFAULT_REGION
             rich.print(f"Defaulting to `{region}` region.")
-        if region not in google_cloud.regions():
+        if region not in google_cloud.regions(os.environ["PROJECT_ID"]):
             raise ValueError(
                 f"Invalid region `{region}`. Please refer to the GCP docs for a list of valid regions: {GCP_REGIONS}"
             )

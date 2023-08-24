@@ -24,9 +24,7 @@ def projects():
 
 
 @functools.lru_cache()
-def regions():
-    check_credentials()
-    project = os.environ.get("PROJECT_ID")
+def regions(project):
     output = subprocess.check_output(
         ["gcloud", "compute", "regions", "list", "--project", project, "--format=json"]
     )
@@ -35,9 +33,7 @@ def regions():
 
 
 @functools.lru_cache()
-def zones(region):
-    check_credentials()
-    project = os.environ.get("PROJECT_ID")
+def zones(project, region):
     output = subprocess.check_output(
         ["gcloud", "compute", "zones", "list", "--project", project, "--format=json"]
     )
@@ -64,9 +60,7 @@ def kubernetes_versions(region):
 
 
 @functools.lru_cache()
-def instances():
-    check_credentials()
-    project = os.environ.get("PROJECT_ID")
+def instances(project):
     output = subprocess.check_output(
         [
             "gcloud",
