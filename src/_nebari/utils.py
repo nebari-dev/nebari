@@ -20,7 +20,8 @@ from _nebari import constants
 # environment variable overrides
 NEBARI_GH_BRANCH = os.getenv("NEBARI_GH_BRANCH", None)
 
-CONDA_FORGE_CHANNEL_DATA_URL = "https://conda.anaconda.org/conda-forge/channeldata.json"
+AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX = "-state"
+AZURE_NODE_RESOURCE_GROUP_SUFFIX = "-node-resource-group"
 
 # Create a ruamel object with our favored config, for universal use
 yaml = YAML()
@@ -296,3 +297,20 @@ def set_nebari_dask_version() -> str:
 
 def get_latest_kubernetes_version(versions: List[str]) -> str:
     return sorted(versions)[-1]
+
+
+def construct_azure_resource_group_name(
+    project_name: str = "",
+    namespace: str = "",
+    base_resource_group_name: str = "",
+    suffix: str = "",
+) -> str:
+    """
+    Construct a resource group name for Azure.
+
+    If the base_resource_group_name is provided, it will be used as the base,
+    otherwise default to the project_name-namespace.
+    """
+    if base_resource_group_name:
+        return f"{base_resource_group_name}{suffix}"
+    return f"{project_name}-{namespace}{suffix}"
