@@ -6,7 +6,7 @@ import re
 import sys
 import tempfile
 import typing
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import pydantic
 
@@ -378,6 +378,7 @@ class AzureProvider(schema.Base):
     )
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
+    resource_group_name: typing.Optional[str] = None
 
     @pydantic.validator("kubernetes_version")
     def _validate_kubernetes_version(cls, value):
@@ -618,6 +619,27 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
     @property
     def stage_prefix(self):
         return pathlib.Path("stages") / self.name / self.config.provider.value
+
+    def state_imports(self) -> List[Tuple[str, str]]:
+        if self.config.provider == schema.ProviderEnum.azure:
+            if self.config.azure.resource_group_name is None:
+                return []
+
+            subscription_id = os.environ["ARM_SUBSCRIPTION_ID"]
+            resource_group_name = construct_azure_resource_group_name(
+                project_name=self.config.project_name,
+                namespace=self.config.namespace,
+                base_resource_group_name=self.config.azure.resource_group_name,
+            )
+            resource_url = (
+                f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}"
+            )
+            return [
+                (
+                    "azurerm_resource_group.resource_group",
+                    resource_url,
+                )
+            ]
 
     def tf_objects(self) -> List[Dict]:
         if self.config.provider == schema.ProviderEnum.gcp:
