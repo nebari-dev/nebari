@@ -594,13 +594,13 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
     qmark = "  "
     disable_checks = os.environ.get("NEBARI_DISABLE_INIT_CHECKS", False)
 
+    if not guided_init:
+        return guided_init
+
     if pathlib.Path("nebari-config.yaml").exists():
         raise ValueError(
             "A nebari-config.yaml file already exists. Please move or delete it and try again."
         )
-
-    if not guided_init:
-        return guided_init
 
     try:
         rich.print(
