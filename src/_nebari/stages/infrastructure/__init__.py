@@ -406,8 +406,8 @@ class AmazonWebServicesProvider(schema.Base):
             instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
         ),
     }
-    existing_subnet_ids: typing.List[str] = None
-    existing_security_group_ids: str = None
+    existing_subnet_ids: typing.Optional[typing.List[str]] = None
+    existing_security_group_ids: typing.Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
 
     @field_validator("kubernetes_version")

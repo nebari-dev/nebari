@@ -70,7 +70,7 @@ def gen_gitlab_ci(config):
     )
 
     return GLCI(
-        __root__={
+        {
             "render-nebari": render_nebari,
         }
     )
