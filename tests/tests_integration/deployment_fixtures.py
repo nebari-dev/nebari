@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import shutil
 import string
 import uuid
 import warnings
@@ -21,13 +22,24 @@ from _nebari.destroy import destroy_configuration
 from _nebari.provider.cloud.amazon_web_services import aws_cleanup
 from _nebari.provider.cloud.digital_ocean import digital_ocean_cleanup
 from _nebari.render import render_template
-from _nebari.utils import set_do_environment, set_docker_image_tag
+from _nebari.utils import set_do_environment
+from nebari import schema
 from tests.common.config_mod_utils import add_gpu_config, add_preemptible_node_group
 from tests.tests_unit.utils import render_config_partial
 
+HERE = Path(__file__).parent.parent.absolute()
+
 DEPLOYMENT_DIR = "_test_deploy"
+DOMAIN = "ci-{cloud}.nebari.dev"
+DEFAULT_IMAGE_TAG = "main"
 
 logger = logging.getLogger(__name__)
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        "--cloud", action="store", help="Cloud to deploy on: aws/do/gcp/azure"
+    )
 
 
 def ignore_warnings():
@@ -83,13 +95,43 @@ def _create_nebari_user(config):
             logger.info(f"User already exists: {e.response_body}")
 
 
+def _cleanup_nebari(config):
+    # TODO: Add cleanup for GCP and Azure
+
+    cloud_provider = config.provider
+    project_name = config.project_name
+    namespace = config.namespace
+
+    if cloud_provider == schema.ProviderEnum.do.value.lower():
+        digital_ocean_cleanup(
+            name=project_name,
+            namespace=namespace,
+        )
+    elif cloud_provider == schema.ProviderEnum.aws.lower():
+        aws_cleanup(
+            name=project_name,
+            namespace=namespace,
+        )
+    elif cloud_provider == schema.ProviderEnum.gcp.lower():
+        pass
+    elif cloud_provider == schema.ProviderEnum.azure.lower():
+        pass
+
+
+def _delete_deployment_dir(deployment_dir: Path):
+    deployment_dir = HERE / deployment_dir
+    logger.info(f"Deleting deployment directory: {deployment_dir}")
+    if deployment_dir.name.startswith("pytest"):
+        shutil.rmtree(deployment_dir)
+
+
 @pytest.fixture(scope="session")
 def deploy(request):
-    """Deploy Nebari on the given cloud, currently only DigitalOcean"""
+    """Deploy Nebari on the given cloud."""
     ignore_warnings()
 
     # initialize
-    cloud = request.param
+    cloud = request.config.getoption("--cloud")
     region = None
     logger.info(f"Deploying: {cloud}")
     if cloud == "do":
@@ -105,7 +147,7 @@ def deploy(request):
     config = render_config_partial(
         project_name=deployment_dir.name,
         namespace="dev",
-        nebari_domain=f"ci-{cloud}.nebari.dev",
+        nebari_domain=DOMAIN.format(cloud=cloud),
         cloud_provider=cloud,
         region=region,
         ci_provider="github-actions",
@@ -133,13 +175,13 @@ def deploy(request):
     config.dns.provider = "cloudflare"
     config.dns.auto_provision = True
     config.default_images.jupyterhub = (
-        f"quay.io/nebari/nebari-jupyterhub:{set_docker_image_tag()}"
+        f"quay.io/nebari/nebari-jupyterhub:{DEFAULT_IMAGE_TAG}"
     )
     config.default_images.jupyterlab = (
-        f"quay.io/nebari/nebari-jupyterlab:{set_docker_image_tag()}"
+        f"quay.io/nebari/nebari-jupyterlab:{DEFAULT_IMAGE_TAG}"
     )
     config.default_images.dask_worker = (
-        f"quay.io/nebari/nebari-dask-worker:{set_docker_image_tag()}"
+        f"quay.io/nebari/nebari-dask-worker:{DEFAULT_IMAGE_TAG}"
     )
 
     if cloud in ["aws", "gcp"]:
@@ -156,7 +198,7 @@ def deploy(request):
         logger.info("*" * 100)
         logger.info(f"Deploying Nebari on {cloud}")
         logger.info("*" * 100)
-        deploy_config = deploy_configuration(
+        stage_outputs = deploy_configuration(
             config=config,
             stages=stages,
             disable_prompt=True,
@@ -164,13 +206,13 @@ def deploy(request):
         )
         _create_nebari_user(config)
         _set_nebari_creds_in_environment(config)
-        yield deploy_config
+        yield stage_outputs
     except Exception as e:
         failed = True
         logger.exception(e)
         logger.error(f"Deploy Failed, Exception: {e}")
 
-    pause = input("Press any key to continue...")
+    pause = input("\nPress any key to continue...\n")
     if pause:
         pass
 
@@ -189,38 +231,7 @@ def deploy(request):
         logger.info("Cleaning up any lingering resources")
         logger.info("*" * 100)
         _cleanup_nebari(config)
+        _delete_deployment_dir(deployment_dir)
 
     if failed:
         raise AssertionError("Deployment failed")
-
-
-def on_cloud(param=None):
-    """Decorator to run tests on a particular cloud or all cloud."""
-    clouds = ["aws", "do", "gcp", "azure"]
-    if param:
-        clouds = [param] if not isinstance(param, list) else param
-
-    def _create_pytest_param(cloud):
-        return pytest.param(cloud, marks=getattr(pytest.mark, cloud))
-
-    all_clouds_param = map(_create_pytest_param, clouds)
-    return pytest.mark.parametrize("deploy", all_clouds_param, indirect=True)
-
-
-def _cleanup_nebari(config):
-    # TODO: Add cleanup for GCP and Azure
-
-    cloud_provider = config.provider
-    project_name = config.project_name
-    namespace = config.namespace
-
-    if cloud_provider == "do":
-        digital_ocean_cleanup(
-            name=project_name,
-            namespace=namespace,
-        )
-    elif cloud_provider == "aws":
-        aws_cleanup(
-            name=project_name,
-            namespace=namespace,
-        )
