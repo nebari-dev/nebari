@@ -112,7 +112,7 @@ class JupyterLabProfile(schema.Base):
 
 class DaskWorkerProfile(schema.Base):
     worker_cores_limit: int
-    worker_cores: int
+    worker_cores: typing.Union[int, float]
     worker_memory_limit: str
     worker_memory: str
     worker_threads: int = 1

@@ -8,7 +8,7 @@ import typing
 from typing import Any, Dict, List, Optional
 
 import pydantic
-from pydantic import field_validator, model_validator
+from pydantic import field_validator, model_validator, FieldValidationInfo
 
 from _nebari import constants
 from _nebari.provider import terraform
@@ -331,21 +331,22 @@ class GoogleCloudPlatformProvider(schema.Base):
         typing.Union[GCPPrivateClusterConfig, None]
     ] = None
 
-    @model_validator(mode="after")
-    def _validate_kubernetes_version(self):
+    @field_validator("kubernetes_version")
+    @classmethod
+    def _validate_kubernetes_version(cls, value: typing.Optional[str], info: FieldValidationInfo) -> str:
         google_cloud.check_credentials()
 
-        available_kubernetes_versions = google_cloud.kubernetes_versions(self.region)
+        available_kubernetes_versions = google_cloud.kubernetes_versions(info.data["region"])
         if (
-            self.kubernetes_version is not None
-            and self.kubernetes_version not in available_kubernetes_versions
+            value is not None
+            and value not in available_kubernetes_versions
         ):
             raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {self.kubernetes_version}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+                f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
         else:
-            self.kubernetes_version = available_kubernetes_versions[-1]
-        return self
+            value = available_kubernetes_versions[-1]
+        return value
 
 
 class AzureNodeGroup(schema.Base):
