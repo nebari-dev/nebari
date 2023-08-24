@@ -14,13 +14,13 @@ SPACES_SECRET_ACCESS_KEY
 CLOUDFLARE_TOKEN
 ```
 
-Once those are set, you can run:
+Assuming you're in the `tests_integration` directory, run:
 
 ```bash
-pytest tests_integration -vvv -s -m do
+pytest -vvv -s --cloud do
 ```
 
-This will deploy on Nebari on Amazon Web Services, run tests on the deployment
+This will deploy on Nebari on Digital Ocean, run tests on the deployment
 and then teardown the cluster.
 
 ## Amazon Web Services
@@ -32,10 +32,10 @@ AWS_DEFAULT_REGION
 CLOUDFLARE_TOKEN
 ```
 
-Once those are set, you can run:
+Assuming you're in the `tests_integration` directory, run:
 
 ```bash
-pytest tests_integration -vvv -s -m aws
+pytest -vvv -s --cloud aws
 ```
 
 This will deploy on Nebari on Amazon Web Services, run tests on the deployment
@@ -52,6 +52,11 @@ ARM_CLIENT_SECRET
 CLOUDFLARE_TOKEN
 ```
 
+Assuming you're in the `tests_integration` directory, run:
+
 ```bash
-pytest tests_integration -vvv -s -m azure
+pytest -vvv -s --cloud azure
 ```
+
+This will deploy on Nebari on Azure, run tests on the deployment
+and then teardown the cluster.
