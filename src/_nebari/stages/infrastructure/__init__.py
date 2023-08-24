@@ -2,10 +2,11 @@ import contextlib
 import inspect
 import os
 import pathlib
+import re
 import sys
 import tempfile
 import typing
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import pydantic
 from pydantic import field_validator, model_validator, FieldValidationInfo
@@ -20,7 +21,12 @@ from _nebari.provider.cloud import (
 )
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariTerraformState
-from _nebari.utils import modified_environ, random_secure_string
+from _nebari.utils import (
+    AZURE_NODE_RESOURCE_GROUP_SUFFIX,
+    construct_azure_resource_group_name,
+    modified_environ,
+    random_secure_string,
+)
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -356,6 +362,7 @@ class AzureNodeGroup(schema.Base):
 
 
 class AzureProvider(schema.Base):
+    resource_group_name: str = None
     region: str = "Central US"
     kubernetes_version: typing.Optional[str] = None
     node_groups: typing.Dict[str, AzureNodeGroup] = {
@@ -368,6 +375,7 @@ class AzureProvider(schema.Base):
     )
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
+    resource_group_name: typing.Optional[str] = None
 
     @field_validator("kubernetes_version")
     @classmethod
@@ -381,6 +389,24 @@ class AzureProvider(schema.Base):
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
+        return value
+
+    @pydantic.validator("resource_group_name")
+    def _validate_resource_group_name(cls, value):
+        if value is None:
+            return value
+        length = len(value) + len(AZURE_NODE_RESOURCE_GROUP_SUFFIX)
+        if length < 1 or length > 90:
+            raise ValueError(
+                f"Azure Resource Group name must be between 1 and 90 characters long, when combined with the suffix `{AZURE_NODE_RESOURCE_GROUP_SUFFIX}`."
+            )
+        if not re.match(r"^[\w\-\.\(\)]+$", value):
+            raise ValueError(
+                "Azure Resource Group name can only contain alphanumerics, underscores, parentheses, hyphens, and periods."
+            )
+        if value[-1] == ".":
+            raise ValueError("Azure Resource Group name can't end with a period.")
+
         return value
 
 
@@ -590,6 +616,27 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
     def stage_prefix(self):
         return pathlib.Path("stages") / self.name / self.config.provider.value
 
+    def state_imports(self) -> List[Tuple[str, str]]:
+        if self.config.provider == schema.ProviderEnum.azure:
+            if self.config.azure.resource_group_name is None:
+                return []
+
+            subscription_id = os.environ["ARM_SUBSCRIPTION_ID"]
+            resource_group_name = construct_azure_resource_group_name(
+                project_name=self.config.project_name,
+                namespace=self.config.namespace,
+                base_resource_group_name=self.config.azure.resource_group_name,
+            )
+            resource_url = (
+                f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}"
+            )
+            return [
+                (
+                    "azurerm_resource_group.resource_group",
+                    resource_url,
+                )
+            ]
+
     def tf_objects(self) -> List[Dict]:
         if self.config.provider == schema.ProviderEnum.gcp:
             return [
@@ -677,8 +724,17 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                     )
                     for name, node_group in self.config.azure.node_groups.items()
                 },
-                resource_group_name=f"{self.config.project_name}-{self.config.namespace}",
-                node_resource_group_name=f"{self.config.project_name}-{self.config.namespace}-node-resource-group",
+                resource_group_name=construct_azure_resource_group_name(
+                    project_name=self.config.project_name,
+                    namespace=self.config.namespace,
+                    base_resource_group_name=self.config.azure.resource_group_name,
+                ),
+                node_resource_group_name=construct_azure_resource_group_name(
+                    project_name=self.config.project_name,
+                    namespace=self.config.namespace,
+                    base_resource_group_name=self.config.azure.resource_group_name,
+                    suffix=AZURE_NODE_RESOURCE_GROUP_SUFFIX,
+                ),
                 vnet_subnet_id=self.config.azure.vnet_subnet_id,
                 private_cluster_enabled=self.config.azure.private_cluster_enabled,
             ).dict()
