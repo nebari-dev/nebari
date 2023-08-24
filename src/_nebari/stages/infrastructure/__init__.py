@@ -7,9 +7,7 @@ import sys
 import tempfile
 import typing
 from typing import Any, Dict, List, Optional, Tuple
-
-import pydantic
-from pydantic import field_validator, model_validator, FieldValidationInfo
+from pydantic import field_validator, model_validator, FieldValidationInfo, Field
 
 from _nebari import constants
 from _nebari.provider import terraform
@@ -30,6 +28,11 @@ from _nebari.utils import (
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
+if sys.version_info >= (3, 9):
+    from typing import Annotated
+else:
+    from typing_extensions import Annotated
+
 
 def get_kubeconfig_filename():
     return str(pathlib.Path(tempfile.gettempdir()) / "NEBARI_KUBECONFIG")
@@ -37,7 +40,7 @@ def get_kubeconfig_filename():
 
 class LocalInputVars(schema.Base):
     kubeconfig_filename: str = get_kubeconfig_filename()
-    kube_context: Optional[str]
+    kube_context: Optional[str] = None
 
 
 class ExistingInputVars(schema.Base):
@@ -205,8 +208,8 @@ class DigitalOceanNodeGroup(schema.Base):
     """
 
     instance: str
-    min_nodes: pydantic.conint(ge=1) = 1
-    max_nodes: pydantic.conint(ge=1) = 1
+    min_nodes: Annotated[int, Field(ge=1)] = 1
+    max_nodes: Annotated[int, Field(ge=1)] = 1
 
 
 class DigitalOceanProvider(schema.Base):
@@ -226,7 +229,7 @@ class DigitalOceanProvider(schema.Base):
     }
     tags: typing.Optional[typing.List[str]] = []
 
-    @pydantic.field_validator("region")
+    @field_validator("region")
     @classmethod
     def _validate_region(cls, value: str) -> str:
         digital_ocean.check_credentials()
@@ -238,7 +241,7 @@ class DigitalOceanProvider(schema.Base):
             )
         return value
 
-    @pydantic.field_validator("node_groups")
+    @field_validator("node_groups")
     @classmethod
     def _validate_node_group(
         cls, value: typing.Dict[str, DigitalOceanNodeGroup]
@@ -300,20 +303,20 @@ class GCPGuestAccelerator(schema.Base):
     """
 
     name: str
-    count: pydantic.conint(ge=1) = 1
+    count: Annotated[int, Field(ge=1)] = 1
 
 
 class GCPNodeGroup(schema.Base):
     instance: str
-    min_nodes: pydantic.conint(ge=0) = 0
-    max_nodes: pydantic.conint(ge=1) = 1
+    min_nodes: Annotated[int, Field(ge=0)] = 0
+    max_nodes: Annotated[int, Field(ge=1)] = 1
     preemptible: bool = False
     labels: typing.Dict[str, str] = {}
     guest_accelerators: typing.List[GCPGuestAccelerator] = []
 
 
 class GoogleCloudPlatformProvider(schema.Base):
-    project: str = pydantic.Field(default_factory=lambda: os.environ["PROJECT_ID"])
+    project: str = Field(default_factory=lambda: os.environ["PROJECT_ID"])
     region: str = "us-central1"
     availability_zones: typing.Optional[typing.List[str]] = []
     kubernetes_version: typing.Optional[str] = None
@@ -370,7 +373,7 @@ class AzureProvider(schema.Base):
         "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
         "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     }
-    storage_account_postfix: str = pydantic.Field(
+    storage_account_postfix: str = Field(
         default_factory=lambda: random_secure_string(length=4)
     )
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
@@ -391,7 +394,8 @@ class AzureProvider(schema.Base):
             )
         return value
 
-    @pydantic.validator("resource_group_name")
+    @field_validator("resource_group_name")
+    @classmethod
     def _validate_resource_group_name(cls, value):
         if value is None:
             return value
@@ -419,7 +423,7 @@ class AWSNodeGroup(schema.Base):
 
 
 class AmazonWebServicesProvider(schema.Base):
-    region: str = pydantic.Field(
+    region: str = Field(
         default_factory=lambda: os.environ.get("AWS_DEFAULT_REGION", "us-west-2")
     )
     availability_zones: typing.Optional[typing.List[str]] = None
