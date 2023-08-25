@@ -183,7 +183,9 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             ],
         ).dict()
 
-    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
+    def check(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_check: bool = False
+    ):
         from keycloak import KeycloakAdmin
         from keycloak.exceptions import KeycloakError
 
@@ -242,8 +244,10 @@ class KubernetesKeycloakStage(NebariTerraformStage):
         print("Keycloak service successfully started")
 
     @contextlib.contextmanager
-    def deploy(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        with super().deploy(stage_outputs):
+    def deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
+        with super().deploy(stage_outputs, disable_prompt):
             with keycloak_provider_context(
                 stage_outputs["stages/" + self.name]["keycloak_credentials"]["value"]
             ):

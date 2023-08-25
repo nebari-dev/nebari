@@ -41,7 +41,9 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
 
         return input_vars.dict()
 
-    def check(self, stage_outputs: Dict[str, Dict[str, Any]]):
+    def check(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
         directory = "stages/05-kubernetes-keycloak"
 
         from keycloak import KeycloakAdmin
