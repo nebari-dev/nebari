@@ -149,10 +149,10 @@ def test_all_init_happy_path(
         azure_cloud, "kubernetes_versions", lambda: MOCK_KUBERNETES_VERSIONS
     )
     monkeypatch.setattr(
-        digital_ocean, "kubernetes_versions", lambda : MOCK_KUBERNETES_VERSIONS
+        digital_ocean, "kubernetes_versions", lambda: MOCK_KUBERNETES_VERSIONS
     )
     monkeypatch.setattr(
-        google_cloud, "kubernetes_versions", lambda : MOCK_KUBERNETES_VERSIONS
+        google_cloud, "kubernetes_versions", lambda: MOCK_KUBERNETES_VERSIONS
     )
 
     app = create_cli()
