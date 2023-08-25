@@ -222,25 +222,21 @@ def assert_nebari_init_args(
         print(f"\n>>>> Using tmp file {tmp_file}")
         assert tmp_file.exists() is False
 
-        # print(f"\n>>>> Testing nebari {args} -- input {input}")
+        print(f"\n>>>> Testing nebari {args} -- input {input}")
 
         result = runner.invoke(
             app, args + ["--output", tmp_file.resolve()], input=input, env=MOCK_ENV
         )
-        # print(f"\n>>> runner.stdout == {result.stdout}")
+        print(f"\n>>> runner.stdout == {result.stdout}")
 
-        if result.exception:
-            print(f"\n>>> runner.exception == {result.exception}")
-            print(f"\n>>>> Testing nebari {args} -- input {input}")
+        assert not result.exception
+        assert 0 == result.exit_code
+        assert tmp_file.exists() is True
 
-        # assert not result.exception
-        # assert 0 == result.exit_code
-        # assert tmp_file.exists() is True
-
-        # with open(tmp_file.resolve(), "r") as config_yaml:
-        #     config = flatten_dict(yaml.safe_load(config_yaml))
-        #     expected = flatten_dict(yaml.safe_load(expected_yaml))
-        #     assert expected.items() <= config.items()
+        with open(tmp_file.resolve(), "r") as config_yaml:
+            config = flatten_dict(yaml.safe_load(config_yaml))
+            expected = flatten_dict(yaml.safe_load(expected_yaml))
+            assert expected.items() <= config.items()
 
 
 def pytest_generate_tests(metafunc):
