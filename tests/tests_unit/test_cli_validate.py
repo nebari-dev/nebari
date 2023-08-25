@@ -55,6 +55,12 @@ def test_validate_stdout(args: List[str], exit_code: int, content: List[str]):
 
 
 def generate_test_data_test_validate_local_happy_path():
+    """
+    Search the cli_validate folder for happy path test cases
+    and add them to the parameterized list of inputs for
+    test_validate_local_happy_path
+    """
+
     test_data = []
     for f in TEST_DATA_DIR.iterdir():
         if f.is_file() and re.match(r"^\w*\.happy\.yaml$", f.name):  # sample.happy.yaml
@@ -77,6 +83,14 @@ def test_validate_local_happy_path(config_yaml: str):
 
 
 def generate_test_data_test_validate_error():
+    """
+    Search the cli_validate folder for unhappy path test cases
+    and add them to the parameterized list of inputs for
+    test_validate_error. Optionally parse an expected
+    error message from the file name to assert is present
+    in the validate output
+    """
+
     test_data = []
     for f in TEST_DATA_DIR.iterdir():
         if f.is_file():
