@@ -359,7 +359,9 @@ class JupyterhubInputVars(schema.Base):
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
     jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
-    jupyterhub_shared_endpoint: Optional[str] = Field(alias="jupyterhub-shared-endpoint", default=None)
+    jupyterhub_shared_endpoint: Optional[str] = Field(
+        alias="jupyterhub-shared-endpoint", default=None
+    )
     jupyterhub_profiles: List[JupyterLabProfile] = Field(alias="jupyterlab-profiles")
     jupyterhub_image: ImageNameTag = Field(alias="jupyterhub-image")
     jupyterhub_hub_extraEnv: str = Field(alias="jupyterhub-hub-extraEnv")
