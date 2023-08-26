@@ -91,7 +91,11 @@ def delete_resource_group(resource_group_name: str):
     """Delete resource group and all resources within it."""
 
     client = initiate_resource_management_client()
-    client.resource_groups.begin_delete(resource_group_name)
+    try:
+        client.resource_groups.begin_delete(resource_group_name)
+    except ResourceNotFoundError:
+        logger.info(f"Resource group `{resource_group_name}` deleted successfully.")
+        return
 
     retries = 0
     while retries < RETRIES:

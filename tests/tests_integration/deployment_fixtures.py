@@ -30,12 +30,6 @@ DEFAULT_IMAGE_TAG = "main"
 logger = logging.getLogger(__name__)
 
 
-def pytest_addoption(parser):
-    parser.addoption(
-        "--cloud", action="store", help="Cloud to deploy on: aws/do/gcp/azure"
-    )
-
-
 def ignore_warnings():
     # Ignore this for now, as test is failing due to a
     # DeprecationWarning and InsecureRequestWarning
@@ -119,10 +113,10 @@ def _cleanup_nebari(config: schema.Main):
 def deploy(request):
     """Deploy Nebari on the given cloud."""
     ignore_warnings()
+    cloud = request.config.getoption("--cloud")
+    disable_prompt = request.config.getoption("--disable-prompt")
 
     # initialize
-    cloud = request.config.getoption("--cloud")
-
     if cloud == "do":
         set_do_environment()
 
@@ -194,9 +188,7 @@ def deploy(request):
         logger.exception(e)
         logger.error(f"Deploy Failed, Exception: {e}")
 
-    pause = input("\nPress any key to continue...\n")
-    if pause:
-        pass
+    disable_prompt or input("\nPress any key to continue...\n")
 
     # destroy
     try:
@@ -212,7 +204,13 @@ def deploy(request):
         logger.info("*" * 100)
         logger.info("Cleaning up any lingering resources")
         logger.info("*" * 100)
-        _cleanup_nebari(config)
+        try:
+            _cleanup_nebari(config)
+        except Exception as e:
+            logger.exception(e)
+            logger.error(
+                "Cleanup failed, please check if there are any lingering resources!"
+            )
         _delete_deployment_directory(deployment_dir_abs)
 
     if failed:
