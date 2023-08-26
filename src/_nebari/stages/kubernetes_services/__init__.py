@@ -112,7 +112,7 @@ class JupyterLabProfile(schema.Base):
 
 class DaskWorkerProfile(schema.Base):
     worker_cores_limit: int
-    worker_cores: typing.Union[int, float]
+    worker_cores: float
     worker_memory_limit: str
     worker_memory: str
     worker_threads: int = 1
@@ -147,7 +147,7 @@ class Profiles(schema.Base):
     dask_worker: typing.Dict[str, DaskWorkerProfile] = {
         "Small Worker": DaskWorkerProfile(
             worker_cores_limit=2,
-            worker_cores=1,
+            worker_cores=1.5,
             worker_memory_limit="8G",
             worker_memory="5G",
             worker_threads=2,
