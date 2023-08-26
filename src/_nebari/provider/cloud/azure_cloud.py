@@ -1,38 +1,69 @@
 import functools
 import logging
 import os
+import time
 
+from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.containerservice import ContainerServiceClient
+from azure.mgmt.resource import ResourceManagementClient
 
 from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari.utils import (
+    AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
+    construct_azure_resource_group_name,
+)
+from nebari import schema
 
 logger = logging.getLogger("azure")
 logger.setLevel(logging.ERROR)
 
+DURATION = 10
+RETRIES = 10
+
 
 def check_credentials():
-    for variable in {
-        "ARM_CLIENT_ID",
-        "ARM_CLIENT_SECRET",
-        "ARM_SUBSCRIPTION_ID",
-        "ARM_TENANT_ID",
-    }:
-        if variable not in os.environ:
-            raise ValueError(
-                f"""Missing the following required environment variable: {variable}\n
-                Please see the documentation for more information: {constants.AZURE_ENV_DOCS}"""
-            )
+    """Check if credentials are valid."""
+
+    required_variables = {
+        "ARM_CLIENT_ID": os.environ.get("ARM_CLIENT_ID", None),
+        "ARM_SUBSCRIPTION_ID": os.environ.get("ARM_SUBSCRIPTION_ID", None),
+        "ARM_TENANT_ID": os.environ.get("ARM_TENANT_ID", None),
+    }
+    arm_client_secret = os.environ.get("ARM_CLIENT_SECRET", None)
+
+    if not all(required_variables.values()):
+        raise ValueError(
+            f"""Missing the following required environment variables: {required_variables}\n
+            Please see the documentation for more information: {constants.AZURE_ENV_DOCS}"""
+        )
+
+    if arm_client_secret:
+        logger.info("Authenticating as a service principal.")
+        return DefaultAzureCredential()
+    else:
+        logger.info("No ARM_CLIENT_SECRET environment variable found.")
+        logger.info("Allowing Azure SDK to authenticate using OIDC or other methods.")
+        return DefaultAzureCredential()
 
 
 @functools.lru_cache()
 def initiate_container_service_client():
     subscription_id = os.environ.get("ARM_SUBSCRIPTION_ID", None)
-
-    credentials = DefaultAzureCredential()
+    credentials = check_credentials()
 
     return ContainerServiceClient(
+        credential=credentials, subscription_id=subscription_id
+    )
+
+
+@functools.lru_cache()
+def initiate_resource_management_client():
+    subscription_id = os.environ.get("ARM_SUBSCRIPTION_ID", None)
+    credentials = check_credentials()
+
+    return ResourceManagementClient(
         credential=credentials, subscription_id=subscription_id
     )
 
@@ -54,3 +85,44 @@ def kubernetes_versions(region="Central US"):
 
     supported_kubernetes_versions = sorted(supported_kubernetes_versions)
     return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
+
+
+def delete_resource_group(resource_group_name: str):
+    """Delete resource group and all resources within it."""
+
+    client = initiate_resource_management_client()
+    client.resource_groups.begin_delete(resource_group_name)
+
+    retries = 0
+    while retries < RETRIES:
+        try:
+            client.resource_groups.get(resource_group_name)
+        except ResourceNotFoundError:
+            logger.info(f"Resource group `{resource_group_name}` deleted successfully.")
+            break
+        logger.info(
+            f"Waiting for resource group `{resource_group_name}` to be deleted..."
+        )
+        time.sleep(DURATION)
+        retries += 1
+
+
+def azure_cleanup(config: schema.Main):
+    """Delete all resources on Azure created by Nebari"""
+
+    # deleting this resource group automatically deletes the associated node resource group
+    aks_resource_group = construct_azure_resource_group_name(
+        project_name=config.project_name,
+        namespace=config.namespace,
+        base_resource_group_name=config.azure.resource_group_name,
+    )
+
+    state_resource_group = construct_azure_resource_group_name(
+        project_name=config.project_name,
+        namespace=config.namespace,
+        base_resource_group_name=config.azure.resource_group_name,
+        suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
+    )
+
+    delete_resource_group(aks_resource_group)
+    delete_resource_group(state_resource_group)

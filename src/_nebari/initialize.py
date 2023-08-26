@@ -7,6 +7,7 @@ from pathlib import Path
 import pydantic
 import requests
 
+from _nebari import constants
 from _nebari.provider import git
 from _nebari.provider.cicd import github
 from _nebari.provider.oauth.auth0 import create_client
@@ -90,7 +91,7 @@ def render_config(
     if cloud_provider == ProviderEnum.do:
         config["digital_ocean"] = {
             "kubernetes_version": kubernetes_version,
-            "region": region,
+            "region": region or constants.DO_DEFAULT_REGION,
         }
 
         config["theme"]["jupyterhub"][
@@ -100,7 +101,7 @@ def render_config(
     elif cloud_provider == ProviderEnum.gcp:
         config["google_cloud_platform"] = {
             "kubernetes_version": kubernetes_version,
-            "region": region,
+            "region": region or constants.GCP_DEFAULT_REGION,
         }
 
         config["theme"]["jupyterhub"][
@@ -116,7 +117,7 @@ def render_config(
     elif cloud_provider == ProviderEnum.azure:
         config["azure"] = {
             "kubernetes_version": kubernetes_version,
-            "region": region,
+            "region": region or constants.AZURE_DEFAULT_REGION,
         }
 
         config["theme"]["jupyterhub"][
@@ -126,7 +127,7 @@ def render_config(
     elif cloud_provider == ProviderEnum.aws:
         config["amazon_web_services"] = {
             "kubernetes_version": kubernetes_version,
-            "region": region,
+            "region": region or constants.AWS_DEFAULT_REGION,
         }
 
         config["theme"]["jupyterhub"][

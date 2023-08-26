@@ -11,15 +11,10 @@ import pytest
 from urllib3.exceptions import InsecureRequestWarning
 
 from _nebari.config import read_configuration, write_configuration
-from _nebari.constants import (
-    AWS_DEFAULT_REGION,
-    AZURE_DEFAULT_REGION,
-    DO_DEFAULT_REGION,
-    GCP_DEFAULT_REGION,
-)
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
 from _nebari.provider.cloud.amazon_web_services import aws_cleanup
+from _nebari.provider.cloud.azure_cloud import azure_cleanup
 from _nebari.provider.cloud.digital_ocean import digital_ocean_cleanup
 from _nebari.render import render_template
 from _nebari.utils import set_do_environment
@@ -27,9 +22,8 @@ from nebari import schema
 from tests.common.config_mod_utils import add_gpu_config, add_preemptible_node_group
 from tests.tests_unit.utils import render_config_partial
 
-HERE = Path(__file__).parent.parent.absolute()
-
 DEPLOYMENT_DIR = "_test_deploy"
+CONFIG_FILENAME = "nebari-config.yaml"
 DOMAIN = "ci-{cloud}.nebari.dev"
 DEFAULT_IMAGE_TAG = "main"
 
@@ -73,6 +67,14 @@ def _get_or_create_deployment_directory(cloud):
     return deployment_dir
 
 
+def _delete_deployment_directory(deployment_dir: Path):
+    """Delete the deployment directory if it exists."""
+    config = list(deployment_dir.glob(CONFIG_FILENAME))
+    if len(config) == 1:
+        logger.info(f"Deleting deployment directory: {deployment_dir}")
+        shutil.rmtree(deployment_dir)
+
+
 def _set_nebari_creds_in_environment(config):
     os.environ["NEBARI_FULL_URL"] = f"https://{config.domain}/"
     os.environ["KEYCLOAK_USERNAME"] = "pytest"
@@ -95,34 +97,22 @@ def _create_nebari_user(config):
             logger.info(f"User already exists: {e.response_body}")
 
 
-def _cleanup_nebari(config):
-    # TODO: Add cleanup for GCP and Azure
+def _cleanup_nebari(config: schema.Main):
+    # TODO: Add cleanup for GCP
 
     cloud_provider = config.provider
-    project_name = config.project_name
-    namespace = config.namespace
 
     if cloud_provider == schema.ProviderEnum.do.value.lower():
-        digital_ocean_cleanup(
-            name=project_name,
-            namespace=namespace,
-        )
+        logger.info("Forcefully clean up Digital Ocean resources")
+        digital_ocean_cleanup(config)
     elif cloud_provider == schema.ProviderEnum.aws.lower():
-        aws_cleanup(
-            name=project_name,
-            namespace=namespace,
-        )
+        logger.info("Forcefully clean up AWS resources")
+        aws_cleanup(config)
     elif cloud_provider == schema.ProviderEnum.gcp.lower():
         pass
     elif cloud_provider == schema.ProviderEnum.azure.lower():
-        pass
-
-
-def _delete_deployment_dir(deployment_dir: Path):
-    deployment_dir = HERE / deployment_dir
-    logger.info(f"Deleting deployment directory: {deployment_dir}")
-    if deployment_dir.name.startswith("pytest"):
-        shutil.rmtree(deployment_dir)
+        logger.info("Forcefully clean up Azure resources")
+        azure_cleanup(config)
 
 
 @pytest.fixture(scope="session")
@@ -132,24 +122,16 @@ def deploy(request):
 
     # initialize
     cloud = request.config.getoption("--cloud")
-    region = None
-    logger.info(f"Deploying: {cloud}")
+
     if cloud == "do":
         set_do_environment()
-        region = DO_DEFAULT_REGION
-    elif cloud == "aws":
-        region = os.environ.get("AWS_DEFAULT_REGION", AWS_DEFAULT_REGION)
-    elif cloud == "gcp":
-        region = GCP_DEFAULT_REGION
-    elif cloud == "azure":
-        region = AZURE_DEFAULT_REGION
+
     deployment_dir = _get_or_create_deployment_directory(cloud)
     config = render_config_partial(
         project_name=deployment_dir.name,
         namespace="dev",
         nebari_domain=DOMAIN.format(cloud=cloud),
         cloud_provider=cloud,
-        region=region,
         ci_provider="github-actions",
         auth_provider="password",
     )
@@ -157,7 +139,7 @@ def deploy(request):
     deployment_dir_abs = deployment_dir.absolute()
     os.chdir(deployment_dir)
     logger.info(f"Temporary directory: {deployment_dir}")
-    config_path = Path("nebari-config.yaml")
+    config_path = Path(CONFIG_FILENAME)
 
     write_configuration(config_path, config)
 
@@ -193,7 +175,7 @@ def deploy(request):
 
     failed = False
 
-    # deploy
+    deploy
     try:
         logger.info("*" * 100)
         logger.info(f"Deploying Nebari on {cloud}")
@@ -222,7 +204,7 @@ def deploy(request):
         logger.info("Tearing down")
         logger.info("*" * 100)
         destroy_configuration(config, stages)
-    except:
+    except Exception as e:
         logger.exception(e)
         logger.error("Destroy failed!")
         raise
@@ -231,7 +213,7 @@ def deploy(request):
         logger.info("Cleaning up any lingering resources")
         logger.info("*" * 100)
         _cleanup_nebari(config)
-        _delete_deployment_dir(deployment_dir)
+        _delete_deployment_directory(deployment_dir_abs)
 
     if failed:
         raise AssertionError("Deployment failed")

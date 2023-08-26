@@ -9,6 +9,7 @@ from botocore.exceptions import ClientError
 
 from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from nebari import schema
 
 MAX_RETRIES = 5
 DELAY = 5
@@ -858,7 +859,12 @@ def aws_delete_cluster(name: str, namespace: str):
     )
 
 
-def aws_cleanup(name: str, namespace: str):
+def aws_cleanup(config: schema.Main):
+    """Delete all Amazon Web Services resources created by Nebari"""
+
+    name = config.project_name
+    namespace = config.namespace
+
     aws_delete_node_groups(name, namespace)
     aws_delete_cluster(name, namespace)
 

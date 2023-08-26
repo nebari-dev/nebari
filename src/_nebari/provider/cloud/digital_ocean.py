@@ -4,12 +4,13 @@ import tempfile
 import typing
 
 import requests
-from kubernetes import client, config
+from kubernetes import client
 
 from _nebari import constants
 from _nebari.provider.cloud.amazon_web_services import aws_delete_s3_bucket
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 from _nebari.utils import set_do_environment
+from nebari import schema
 
 
 def check_credentials():
@@ -107,7 +108,12 @@ def digital_ocean_delete_kubernetes_cluster(cluster_name: str):
     digital_ocean_request(f"kubernetes/clusters/{cluster_id}", method="DELETE")
 
 
-def digital_ocean_cleanup(name: str, namespace: str):
+def digital_ocean_cleanup(config: schema.Main):
+    """Delete all Digital Ocean resources created by Nebari."""
+
+    name = config.project_name
+    namespace = config.namespace
+
     cluster_name = f"{name}-{namespace}"
     tf_state_bucket = f"{cluster_name}-terraform-state"
     do_spaces_endpoint = "https://nyc3.digitaloceanspaces.com"

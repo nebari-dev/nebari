@@ -391,8 +391,6 @@ class AzureProvider(schema.Base):
 
     @pydantic.validator("kubernetes_version")
     def _validate_kubernetes_version(cls, value):
-        azure_cloud.check_credentials()
-
         available_kubernetes_versions = azure_cloud.kubernetes_versions()
         if value is None:
             value = available_kubernetes_versions[-1]
