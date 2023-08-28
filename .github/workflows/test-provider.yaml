@@ -1,28 +1,30 @@
-name: "Test Nebari Provider"
+name: "Kubernetes Tests"
 
 on:
   pull_request:
     paths:
-      - ".github/workflows/test-provider.yaml"
+      - ".github/workflows/kubernetes_test.yaml"
       - "tests/**"
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "nebari/**"
+      - "src/**"
       - "pyproject.toml"
+      - "pytest.ini"
   push:
     branches:
       - main
       - develop
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
-      - ".github/workflows/test-provider.yaml"
+      - ".github/workflows/kubernetes_test.yaml"
       - "tests/**"
       - "tests_deployment/**"
       - "tests_e2e/**"
       - "scripts/**"
-      - "nebari/**"
+      - "src/**"
       - "pyproject.toml"
+      - "pytest.ini"
   workflow_call:
     inputs:
       pr_number:
@@ -30,106 +32,168 @@ on:
         type: string
 
 jobs:
-  test-render-providers:
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
-    name: "Test Nebari Provider"
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-      pull-requests: write
-    strategy:
-      matrix:
-        provider:
-          - aws
-          - azure
-          - do
-          - gcp
-          - local
-          - existing
-        cicd:
-          - none
-          - github-actions
-          - gitlab-ci
+  test-kubernetes:
+    name: "Kubernetes Tests"
+    runs-on: "cirun-runner--${{ github.run_id }}"
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
-      - name: "Checkout Infrastructure"
-        uses: actions/checkout@v3
+
+      - name: "Set NEBARI_IMAGE_TAG=main"
+        run: |
+          echo "NEBARI_IMAGE_TAG=main" >> "$GITHUB_ENV"
+          echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
+          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
+          echo "GITHUB_REF: ${GITHUB_REF}"
+
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@main
 
       - name: Checkout the branch from the PR that triggered the job
         if: ${{ github.event_name == 'issue_comment' }}
-        run: hub pr checkout ${{ inputs.pr_number }}
+        run: |
+          hub version
+          hub pr checkout ${{ inputs.pr_number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: conda-incubator/setup-miniconda@v2
+        env:
+          CONDA: /home/runnerx/miniconda3
         with:
           python-version: 3.8
-
-      - name: Retrieve secret from Vault
-        uses: hashicorp/vault-action@v2.5.0
-        with:
-          method: jwt
-          url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"
-          namespace: "admin/quansight"
-          role: "repository-nebari-dev-nebari-role"
-          secrets: |
-            kv/data/repository/nebari-dev/nebari/amazon_web_services/nebari-dev-ci role_name | AWS_ROLE_ARN;
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci project_id | PROJECT_ID;
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci workload_identity_provider | GCP_WORKFLOW_PROVIDER;
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci service_account_name | GCP_SERVICE_ACCOUNT;
-            kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci client_id | ARM_CLIENT_ID;
-            kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci tenant_id | ARM_TENANT_ID;
-            kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci subscription_id | ARM_SUBSCRIPTION_ID;
-            kv/data/repository/nebari-dev/nebari/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
-
-      - name: 'Authenticate to GCP'
-        if: ${{ matrix.provider == 'gcp' }}
-        uses: 'google-github-actions/auth@v1'
-        with:
-          token_format: access_token
-          create_credentials_file: 'true'
-          workload_identity_provider: ${{ env.GCP_WORKFLOW_PROVIDER }}
-          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
-
-      - name: Set required environment variables
-        if: ${{ matrix.provider == 'gcp' }}
-        run: |
-          echo "GOOGLE_CREDENTIALS=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}" >> $GITHUB_ENV
-
-      - name: 'Authenticate to AWS'
-        if: ${{ matrix.provider == 'aws' }}
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          role-session-name: github-action
-          aws-region: us-east-1
-
-      - name: 'Azure login'
-        if: ${{ matrix.provider == 'azure' }}
-        uses: azure/login@v1
-        with:
-          client-id: ${{ env.ARM_CLIENT_ID }}
-          tenant-id: ${{ env.ARM_TENANT_ID }}
-          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
-
+          miniconda-version: "latest"
       - name: Install Nebari
         run: |
-          pip install --upgrade pip
+          conda install --quiet --yes -c anaconda pip
           pip install .[dev]
-
-      - name: Nebari Initialize
+          playwright install
+      - name: Download and Install Kubectl
         run: |
-          nebari init "${{ matrix.provider }}" --project "TestProvider" --domain "${{ matrix.provider }}.nebari.dev" --auth-provider github --disable-prompt --ci-provider ${{ matrix.cicd }}
-          cat "nebari-config.yaml"
+          mkdir -p bin
+          pushd bin
 
-      - name: Nebari Render
+          curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
+          chmod +x kubectl
+
+          echo "$PWD" >> $GITHUB_PATH
+          popd
+      - name: Enable docker permissions for user
         run: |
-          nebari render -c "nebari-config.yaml" -o "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
-          cp "nebari-config.yaml" "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment/nebari-config.yaml"
+          sudo docker ps
+          sudo usermod -aG docker $USER && newgrp docker
 
-      - name: Nebari Render Artifact
-        uses: actions/upload-artifact@master
+          docker info
+          docker ps
+      - name: Get routing table for docker pods
+        run: |
+          ip route
+      - name: Initialize Nebari Cloud
+        run: |
+          mkdir -p local-deployment
+          cd local-deployment
+          nebari init local --project=thisisatest --domain github-actions.nebari.dev --auth-provider=password
+
+          # Need smaller profiles on Local Kind
+          sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
+          sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
+
+          cat nebari-config.yaml
+      - name: Deploy Nebari
+        run: |
+          cd local-deployment
+          nebari deploy --config nebari-config.yaml --disable-prompt
+      - name: Basic kubectl checks after deployment
+        if: always()
+        run: |
+          kubectl get all,cm,secret,ing -A
+      - name: Check github-actions.nebari.dev resolves
+        run: |
+          nslookup github-actions.nebari.dev
+      - name: Curl jupyterhub login page
+        run: |
+          curl -k https://github-actions.nebari.dev/hub/home -i
+
+      ### CYPRESS TESTS
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          name: "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-artifact"
-          path: "nebari-${{ matrix.provider }}-${{ matrix.cicd }}-deployment"
+          node-version: '16'
+      - name: npm version
+        run: |
+          npm --version
+      - name: Install Cypress dependencies
+        run: |
+          sudo apt-get -y update
+          sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+
+      - name: Get nebari-config.yaml full path
+        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
+
+      - name: Create example-user
+        run: |
+          export CYPRESS_EXAMPLE_USER_NAME=example-user
+          export CYPRESS_EXAMPLE_USER_PASSWORD=P@sswo3d
+
+          echo "CYPRESS_EXAMPLE_USER_NAME=${CYPRESS_EXAMPLE_USER_NAME}" >> $GITHUB_ENV
+          echo "CYPRESS_EXAMPLE_USER_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}" >> $GITHUB_ENV
+
+          nebari keycloak adduser --user "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}" --config "${NEBARI_CONFIG_PATH}"
+          nebari keycloak listusers --config "${NEBARI_CONFIG_PATH}"
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
+        env:
+          CYPRESS_BASE_URL: https://github-actions.nebari.dev/
+        with:
+          working-directory: tests_e2e
+
+      - name: Playwright Tests
+        env:
+          KEYCLOAK_USERNAME: ${{ env.CYPRESS_EXAMPLE_USER_NAME }}
+          KEYCLOAK_PASSWORD: ${{ env.CYPRESS_EXAMPLE_USER_PASSWORD }}
+          NEBARI_FULL_URL: https://github-actions.nebari.dev/
+        working-directory: tests_e2e/playwright
+        run: |
+          # create environment file
+          envsubst < .env.tpl > .env
+          # run playwright pytest tests in headed mode with the chromium browser
+          xvfb-run pytest --browser chromium
+
+      - name: Save Cypress screenshots and videos
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-cypress
+          path: |
+            ./tests_e2e/cypress/screenshots/
+            ./tests_e2e/cypress/videos/
+            ./tests_e2e/playwright/videos/
+
+      - name: Deployment Pytests
+        run: |
+          export KEYCLOAK_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
+          export KEYCLOAK_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
+          pytest tests_deployment/ -v -s
+
+      - name: JupyterHub Notebook Tests
+        # run jhub-client after pytest since jhubctl can cleanup
+        # the running server
+        run: |
+          sleep 60
+          export JUPYTERHUB_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
+          export JUPYTERHUB_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
+          jhubctl --verbose run --hub=https://github-actions.nebari.dev \
+                                --auth-type=keycloak \
+                                --validate --no-verify-ssl \
+                                --kernel python3 \
+                                --stop-server \
+                                --notebook tests_deployment/assets/notebook/simple.ipynb \
+
+      ### CLEANUP AFTER TESTS
+      - name: Cleanup nebari deployment
+        run: |
+          cd local-deployment
+          nebari destroy --config nebari-config.yaml --disable-prompt

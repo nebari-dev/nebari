@@ -6,9 +6,9 @@ on:
       - ".github/workflows/test.yaml"
       - "tests/**"
       - "tests_deployment/**"
-      - "tests_e2e/**"
+      - "tests_e2e/cypress/**"
       - "scripts/**"
-      - "nebari/**"
+      - "src/**"
       - "pyproject.toml"
       - "pytest.ini"
   push:
@@ -20,9 +20,9 @@ on:
       - ".github/workflows/test.yaml"
       - "tests/**"
       - "tests_deployment/**"
-      - "tests_e2e/**"
+      - "tests_e2e/cypress/**"
       - "scripts/**"
-      - "nebari/**"
+      - "src/**"
       - "pyproject.toml"
       - "pytest.ini"
 
@@ -37,6 +37,7 @@ jobs:
           - "3.9"
           - "3.10"
           - "3.11"
+      fail-fast: false
     steps:
       - name: "Checkout Infrastructure"
         uses: actions/checkout@v3
@@ -55,4 +56,4 @@ jobs:
       - name: Test Nebari
         run: |
           pytest --version
-          pytest --ignore=tests_deployment
+          pytest --ignore=tests_deployment --ignore=tests_e2e/playwright
