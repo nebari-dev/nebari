@@ -191,24 +191,22 @@ class Navigator:
         logout_button = self.page.get_by_text("Logout", exact=True)
         logout_button.wait_for(state="attached", timeout=90000)
 
+        # if the server is already running
+        start_locator = self.page.get_by_role("button", name="My Server", exact=True)
+        if start_locator.is_visible():
+            start_locator.click()
+
         # if server is not yet running
         start_locator = self.page.get_by_role("button", name="Start My Server")
         if start_locator.is_visible():
             start_locator.click()
 
+        server_options = self.page.get_by_role("heading", name="Server Options")
+        if server_options.is_visible():
             # select instance type (this will fail if this instance type is not
             # available)
             self.page.locator(f"#profile-item-{self.instance_name}").click()
             self.page.get_by_role("button", name="Start").click()
-
-        else:
-            # if the server is already running
-            start_locator = self.page.get_by_role(
-                "button",
-                name="My Server",
-                exact=True,
-            )
-            start_locator.click()
 
         # wait for server spinup
         self.page.wait_for_url(

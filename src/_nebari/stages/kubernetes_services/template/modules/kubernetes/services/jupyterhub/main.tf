@@ -17,7 +17,7 @@ resource "helm_release" "jupyterhub" {
 
   repository = "https://jupyterhub.github.io/helm-chart/"
   chart      = "jupyterhub"
-  version    = "1.2.0"
+  version    = "2.0.0"
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -36,8 +36,6 @@ resource "helm_release" "jupyterhub" {
         conda-store-mount             = var.conda-store-mount
         default-conda-store-namespace = var.default-conda-store-namespace
         conda-store-service-name      = var.conda-store-service-name
-        conda-store-cdsdashboards     = var.conda-store-cdsdashboard-token
-        conda-store-jupyter-scheduler = var.conda-store-argo-workflows-jupyter-scheduler-token
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace

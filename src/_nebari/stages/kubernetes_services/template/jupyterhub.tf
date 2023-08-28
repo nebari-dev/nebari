@@ -1,12 +1,3 @@
-variable "cdsdashboards" {
-  description = "Enable CDS Dashboards"
-  type = object({
-    enabled                         = bool
-    cds_hide_user_named_servers     = bool
-    cds_hide_user_dashboard_servers = bool
-  })
-}
-
 variable "jupyterhub-theme" {
   description = "JupyterHub theme"
   type        = map(any)
@@ -106,7 +97,6 @@ module "jupyterhub" {
   conda-store-environments                           = var.conda-store-environments
   default-conda-store-namespace                      = var.conda-store-default-namespace
   argo-workflows-enabled                             = var.argo-workflows-enabled
-  conda-store-cdsdashboard-token                     = module.kubernetes-conda-store-server.service-tokens.cdsdashboards
   conda-store-argo-workflows-jupyter-scheduler-token = module.kubernetes-conda-store-server.service-tokens.argo-workflows-jupyter-scheduler
   conda-store-service-name                           = module.kubernetes-conda-store-server.service_name
 
@@ -131,8 +121,6 @@ module "jupyterhub" {
 
   jupyterhub-image = var.jupyterhub-image
   jupyterlab-image = var.jupyterlab-image
-
-  cdsdashboards = var.cdsdashboards
 
   theme    = var.jupyterhub-theme
   profiles = var.jupyterlab-profiles
