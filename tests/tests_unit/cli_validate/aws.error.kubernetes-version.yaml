@@ -1,0 +1,3 @@
+project_name: test
+amazon_web_services:
+  kubernetes_version: '1.0'
