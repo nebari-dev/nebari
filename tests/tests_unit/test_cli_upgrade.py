@@ -180,6 +180,43 @@ profiles:
                 assert profile["kubespawner_override"]["image"].endswith(start_version)
 
 
+def test_upgrade_fail_on_missing_file():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
+        assert tmp_file.exists() is False
+
+        app = create_cli()
+
+        result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
+
+        assert 1 == result.exit_code
+        assert result.exception
+
+
+def test_upgrade_fail_invalid_file():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
+        assert tmp_file.exists() is False
+
+        nebari_config = yaml.safe_load(
+            """
+project_name: test
+provider: fake
+        """
+        )
+
+        with open(tmp_file.resolve(), "w") as f:
+            yaml.dump(nebari_config, f)
+
+        assert tmp_file.exists() is True
+        app = create_cli()
+
+        result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
+
+        assert 1 == result.exit_code
+        assert result.exception
+
+
 def test_upgrade_fail_on_downgrade(monkeypatch: pytest.MonkeyPatch):
     start_version = "2023.7.2"
     end_version = "2023.5.1"  # downgrade
