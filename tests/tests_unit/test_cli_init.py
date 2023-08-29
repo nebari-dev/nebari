@@ -9,16 +9,11 @@ from typer import Typer
 from typer.testing import CliRunner
 
 from _nebari.cli import create_cli
-from _nebari.provider.cloud import (
-    amazon_web_services,
-    azure_cloud,
-    digital_ocean,
-    google_cloud,
-)
 
 runner = CliRunner()
 
-MOCK_KUBERNETES_VERSIONS = ["1.24"]
+TEST_KUBERNETES_VERSION = {"default": "1.20", "do": "1.20.2-do.0"}
+
 MOCK_ENV = {
     k: "test"
     for k in [
@@ -95,9 +90,11 @@ def generate_test_data_test_all_init_happy_path():
                             for ci_provider in ["none", "github-actions", "gitlab-ci"]:
                                 for terraform_state in ["local", "remote", "existing"]:
                                     for email in ["noreply@example.com"]:
-                                        for (
-                                            kubernetes_version
-                                        ) in MOCK_KUBERNETES_VERSIONS + ["latest"]:
+                                        for kubernetes_version in [
+                                            TEST_KUBERNETES_VERSION[provider]
+                                            if provider in TEST_KUBERNETES_VERSION
+                                            else TEST_KUBERNETES_VERSION["default"]
+                                        ] + ["latest"]:
                                             test_data.append(
                                                 (
                                                     provider,
@@ -129,7 +126,6 @@ def generate_test_data_test_all_init_happy_path():
 
 
 def test_all_init_happy_path(
-    monkeypatch,
     provider: str,
     project_name: str,
     domain_name: str,
@@ -141,20 +137,6 @@ def test_all_init_happy_path(
     email: str,
     kubernetes_version: str,
 ):
-    # the kubernetes-version parameter can trigger calls out to AWS, Azure, etc... to validate, mocking
-    monkeypatch.setattr(
-        amazon_web_services, "kubernetes_versions", lambda: MOCK_KUBERNETES_VERSIONS
-    )
-    monkeypatch.setattr(
-        azure_cloud, "kubernetes_versions", lambda: MOCK_KUBERNETES_VERSIONS
-    )
-    monkeypatch.setattr(
-        digital_ocean, "kubernetes_versions", lambda: MOCK_KUBERNETES_VERSIONS
-    )
-    monkeypatch.setattr(
-        google_cloud, "kubernetes_versions", lambda _: MOCK_KUBERNETES_VERSIONS
-    )
-
     app = create_cli()
     args = [
         "init",
