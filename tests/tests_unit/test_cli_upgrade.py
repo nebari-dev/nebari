@@ -217,11 +217,48 @@ provider: fake
         assert result.exception
 
 
-def test_upgrade_fail_on_downgrade(monkeypatch: pytest.MonkeyPatch):
-    start_version = "2023.7.2"
-    end_version = "2023.5.1"  # downgrade
+def test_upgrade_fail_on_downgrade():
+    start_version = "9999.9.9"  # way in the future
+    end_version = _nebari.upgrade.__version__
 
-    monkeypatch.setattr(_nebari.upgrade, "__version__", end_version)
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
+        assert tmp_file.exists() is False
+
+        nebari_config = yaml.safe_load(
+            f"""
+project_name: test
+provider: local
+domain: test.example.com
+namespace: dev
+nebari_version: {start_version}
+        """
+        )
+
+        with open(tmp_file.resolve(), "w") as f:
+            yaml.dump(nebari_config, f)
+
+        assert tmp_file.exists() is True
+        app = create_cli()
+
+        result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
+
+        assert 1 == result.exit_code
+        assert result.exception
+        assert (
+            f"already belongs to a later version ({start_version}) than the installed version of Nebari ({end_version})"
+            in str(result.exception)
+        )
+
+        # make sure the file is unaltered
+        with open(tmp_file.resolve(), "r") as c:
+            assert yaml.safe_load(c) == nebari_config
+
+
+def test_upgrade_does_nothing_on_same_version():
+    # this test only seems to work against the actual current version, any
+    # mocked earlier versions trigger an actual update
+    start_version = _nebari.upgrade.__version__
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
