@@ -120,9 +120,10 @@ def test_validate_error(config_yaml: str, expected_message: str):
     assert "ERROR validating configuration" in result.stdout
     if expected_message:
         # since this will usually come from a parsed filename, assume spacing/hyphenation/case is optional
-        assert (expected_message in result.stdout.lower()) or (
+        actual_message = result.stdout.lower().replace("\n", "")
+        assert (expected_message in actual_message) or (
             expected_message.replace("-", " ").replace("_", " ")
-            in result.stdout.lower()
+            in actual_message
         )
 
 
