@@ -249,11 +249,11 @@ class UpgradeStep(ABC):
 
         # update profiles.dask_worker images
         for k, v in config.get("profiles", {}).get("dask_worker", {}).items():
-            current_image = v.get("kubespawner_override", {}).get("image", None)
+            current_image = v.get("image", None)
             if current_image:
                 config = update_image_tag(
                     config,
-                    f"profiles.dask_worker.{k}.kubespawner_override.image",
+                    f"profiles.dask_worker.{k}.image",
                     current_image,
                     __rounded_finish_version__,
                 )

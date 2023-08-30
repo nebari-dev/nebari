@@ -162,8 +162,7 @@ profiles:
       image: quay.io/nebari/leave-me-alone:{start_version}
   dask_worker:
     test:
-      kubespawner_override:
-        image: quay.io/nebari/nebari-dask-worker:{start_version}
+      image: quay.io/nebari/nebari-dask-worker:{start_version}
 """
         ),
     )
@@ -180,7 +179,7 @@ profiles:
             assert profile["kubespawner_override"]["image"].endswith(start_version)
 
     for _, profile in upgraded["profiles"]["dask_worker"].items():
-        assert profile["kubespawner_override"]["image"].endswith(end_version)
+        assert profile["image"].endswith(end_version)
 
 
 def test_upgrade_fail_on_missing_file():
