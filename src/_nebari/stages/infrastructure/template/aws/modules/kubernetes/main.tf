@@ -1,3 +1,5 @@
+data "aws_partition" "current" {}
+
 resource "aws_eks_cluster" "main" {
   name     = var.name
   role_arn = aws_iam_role.cluster.arn
@@ -69,4 +71,19 @@ resource "aws_eks_addon" "aws-ebs-csi-driver" {
     aws_eks_cluster.main,
     aws_eks_node_group.main,
   ]
+}
+
+data "tls_certificate" "this" {
+  url = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "oidc_provider" {
+  client_id_list  = ["sts.${data.aws_partition.current.dns_suffix}"]
+  thumbprint_list = data.tls_certificate.this.certificates[*].sha1_fingerprint
+  url             = aws_eks_cluster.main.identity[0].oidc[0].issuer
+
+  tags = merge(
+    { Name = "${var.name}-eks-irsa" },
+    var.tags
+  )
 }

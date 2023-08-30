@@ -19,11 +19,6 @@ variable "region" {
   type        = string
 }
 
-variable "partition" {
-  description = "AWS partition for EKS cluster"
-  type        = string
-}
-
 variable "kubernetes_version" {
   description = "AWS kubernetes version for EKS cluster"
   type        = string

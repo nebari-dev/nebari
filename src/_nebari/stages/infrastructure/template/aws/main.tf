@@ -81,7 +81,6 @@ module "kubernetes" {
   name               = local.cluster_name
   tags               = local.additional_tags
   region             = var.region
-  partition          = local.partition
   kubernetes_version = var.kubernetes_version
 
   cluster_subnets         = local.subnet_ids
