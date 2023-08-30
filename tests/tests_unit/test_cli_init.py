@@ -26,6 +26,7 @@ MOCK_CLOUD_REGIONS = {
     "do": ["nyc3"],
 }
 
+
 MOCK_ENV = {
     k: "test"
     for k in [
@@ -150,7 +151,6 @@ def generate_test_data_test_all_init_happy_path():
 
 
 def test_all_init_happy_path(
-    # monkeypatch,
     provider: str,
     region: str,
     project_name: str,
