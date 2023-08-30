@@ -1,11 +1,10 @@
-import pytest
 import re
 import tempfile
-import yaml
-
 from pathlib import Path
 from typing import Any, Dict, List
 
+import pytest
+import yaml
 from typer.testing import CliRunner
 
 from _nebari.cli import create_cli
@@ -13,6 +12,7 @@ from _nebari.cli import create_cli
 TEST_DATA_DIR = Path(__file__).resolve().parent / "cli_validate"
 
 runner = CliRunner()
+
 
 @pytest.mark.parametrize(
     "args, exit_code, content",
@@ -66,15 +66,23 @@ def test_validate_local_happy_path(config_yaml: str):
     assert 0 == result.exit_code
     assert "Successfully validated configuration" in result.stdout
 
+
 @pytest.mark.parametrize(
     "key, value, provider, expected_message",
     [
         ("NEBARI_SECRET__project_name", "123invalid", "local", "validation error"),
         ("NEBARI_SECRET__this_is_an_error", "true", "local", "object has no field"),
-        ("NEBARI_SECRET__amazon_web_services__kubernetes_version", "1.0", "aws", "validation error"),
+        (
+            "NEBARI_SECRET__amazon_web_services__kubernetes_version",
+            "1.0",
+            "aws",
+            "validation error",
+        ),
     ],
 )
-def test_validate_error_from_env(key: str, value: str, provider: str, expected_message: str):
+def test_validate_error_from_env(
+    key: str, value: str, provider: str, expected_message: str
+):
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
@@ -99,9 +107,9 @@ project_name: test
 
         # run validate again with environment variables that are expected to trigger
         # validation errors
-        result = runner.invoke(app, ["validate", "--config", tmp_file.resolve()], env = {
-            key: value
-        })
+        result = runner.invoke(
+            app, ["validate", "--config", tmp_file.resolve()], env={key: value}
+        )
 
         assert 1 == result.exit_code
         assert result.exception
@@ -112,14 +120,16 @@ project_name: test
     "provider, addl_config",
     [
         ("aws", {}),
-         # azure credentials are only checked if a kubernetes_version is specified
-        ("azure", { "azure": { "kubernetes_version": "1.0" } }),
-         # gcp credentials are only checked if a kubernetes_version is specified
-        ("gcp", { "google_cloud_platform": { "kubernetes_version": "1.0" } }),
+        # azure credentials are only checked if a kubernetes_version is specified
+        ("azure", {"azure": {"kubernetes_version": "1.0"}}),
+        # gcp credentials are only checked if a kubernetes_version is specified
+        ("gcp", {"google_cloud_platform": {"kubernetes_version": "1.0"}}),
         ("do", {}),
     ],
 )
-def test_validate_error_missing_cloud_env(monkeypatch: pytest.MonkeyPatch, provider: str, addl_config: Dict[str, Any]):
+def test_validate_error_missing_cloud_env(
+    monkeypatch: pytest.MonkeyPatch, provider: str, addl_config: Dict[str, Any]
+):
     # cloud methods are all globally mocked, need to reset so the env variables will be checked
     monkeypatch.undo()
     for e in [
@@ -138,17 +148,20 @@ def test_validate_error_missing_cloud_env(monkeypatch: pytest.MonkeyPatch, provi
             monkeypatch.delenv(e)
         except Exception:
             pass
-        
+
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
 
-        nebari_config = { **yaml.safe_load(
-            f"""
+        nebari_config = {
+            **yaml.safe_load(
+                f"""
 provider: {provider}
 project_name: test
         """
-        ), **addl_config }
+            ),
+            **addl_config,
+        }
 
         with open(tmp_file.resolve(), "w") as f:
             yaml.dump(nebari_config, f)
