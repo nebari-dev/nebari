@@ -14,30 +14,6 @@ runner = CliRunner()
 
 TEST_KUBERNETES_VERSION = {"default": "1.20", "do": "1.20.2-do.0"}
 
-MOCK_ENV = {
-    k: "test"
-    for k in [
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",  # aws
-        "GOOGLE_CREDENTIALS",
-        "PROJECT_ID",  # gcp
-        "ARM_SUBSCRIPTION_ID",
-        "ARM_TENANT_ID",
-        "ARM_CLIENT_ID",
-        "ARM_CLIENT_SECRET",  # azure
-        "DIGITALOCEAN_TOKEN",
-        "SPACES_ACCESS_KEY_ID",
-        "SPACES_SECRET_ACCESS_KEY",  # digital ocean
-        "GITHUB_CLIENT_ID",
-        "GITHUB_CLIENT_SECRET",
-        "GITHUB_USERNAME",
-        "GITHUB_TOKEN",  # github
-        "AUTH0_CLIENT_ID",
-        "AUTH0_CLIENT_SECRET",
-        "AUTH0_DOMAIN",  # auth0
-    ]
-}
-
 
 @pytest.mark.parametrize(
     "args, exit_code, content",
@@ -207,7 +183,7 @@ def assert_nebari_init_args(
         print(f"\n>>>> Testing nebari {args} -- input {input}")
 
         result = runner.invoke(
-            app, args + ["--output", tmp_file.resolve()], input=input, env=MOCK_ENV
+            app, args + ["--output", tmp_file.resolve()], input=input
         )
         print(f"\n>>> runner.stdout == {result.stdout}")
 
