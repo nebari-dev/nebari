@@ -73,7 +73,7 @@ def test_validate_from_env():
         assert tmp_file.exists() is False
 
         nebari_config = yaml.safe_load(
-            f"""
+            """
 provider: aws
 project_name: test
         """
@@ -86,15 +86,19 @@ project_name: test
         app = create_cli()
 
         valid_result = runner.invoke(
-            app, ["validate", "--config", tmp_file.resolve()], env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.20"}
+            app,
+            ["validate", "--config", tmp_file.resolve()],
+            env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.20"},
         )
 
         assert 0 == valid_result.exit_code
         assert not valid_result.exception
         assert "Successfully validated configuration" in valid_result.stdout
-        
+
         invalid_result = runner.invoke(
-            app, ["validate", "--config", tmp_file.resolve()], env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.0"}
+            app,
+            ["validate", "--config", tmp_file.resolve()],
+            env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.0"},
         )
 
         assert 1 == invalid_result.exit_code
