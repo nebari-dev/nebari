@@ -161,24 +161,26 @@ profiles:
     kubespawner_override:
       image: quay.io/nebari/leave-me-alone:{start_version}
   dask_worker:
-  - display_name: dask-worker
-    kubespawner_override:
-      image: quay.io/nebari/nebari-dask-worker:{start_version}
+    test:
+      kubespawner_override:
+        image: quay.io/nebari/nebari-dask-worker:{start_version}
 """
         ),
     )
 
     for _, v in upgraded["default_images"].items():
         assert v.endswith(end_version)
-    for _, v in upgraded["profiles"].items():
-        for profile in v:
-            if profile["display_name"] != "leave-me-alone":
-                # assume all other images should have been upgraded to the end_version
-                assert profile["kubespawner_override"]["image"].endswith(end_version)
-            else:
-                # this one was selected not to match the regex for nebari images, should have been left alone
-                assert profile["kubespawner_override"]["image"].endswith(start_version)
 
+    for profile in upgraded["profiles"]["jupyterlab"]:
+        if profile["display_name"] != "leave-me-alone":
+            # assume all other images should have been upgraded to the end_version
+            assert profile["kubespawner_override"]["image"].endswith(end_version)
+        else:
+            # this one was selected not to match the regex for nebari images, should have been left alone
+            assert profile["kubespawner_override"]["image"].endswith(start_version)
+    
+    for _, profile in upgraded["profiles"]["dask_worker"].items():
+        assert profile["kubespawner_override"]["image"].endswith(end_version)
 
 def test_upgrade_fail_on_missing_file():
     with tempfile.TemporaryDirectory() as tmp:
@@ -191,6 +193,7 @@ def test_upgrade_fail_on_missing_file():
 
         assert 1 == result.exit_code
         assert result.exception
+        assert f"passed in configuration filename={tmp_file.resolve()} must exist" in str(result.exception)
 
 
 def test_upgrade_fail_invalid_file():
@@ -215,6 +218,7 @@ provider: fake
 
         assert 1 == result.exit_code
         assert result.exception
+        assert "provider" in str(result.exception)
 
 
 def test_upgrade_fail_on_downgrade():
@@ -285,7 +289,7 @@ nebari_version: {start_version}
         # feels like this should return a non-zero exit code if the upgrade is not happening
         assert 0 == result.exit_code
         assert not result.exception
-        assert "appears to be already up-to-date" in result.stdout
+        assert "up-to-date" in result.stdout
 
         # make sure the file is unaltered
         with open(tmp_file.resolve(), "r") as c:
@@ -328,7 +332,7 @@ nebari_version: {start_version}
         app = create_cli()
 
         if inputs is not None and len(inputs) > 0:
-            inputs += ""  # trailing newline for last input
+            inputs.append("")  # trailing newline for last input
 
         # run nebari upgrade -c tmp/nebari-config.yaml
         result = runner.invoke(
