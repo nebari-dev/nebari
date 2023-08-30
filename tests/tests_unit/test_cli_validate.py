@@ -67,6 +67,41 @@ def test_validate_local_happy_path(config_yaml: str):
     assert "Successfully validated configuration" in result.stdout
 
 
+def test_validate_from_env():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
+        assert tmp_file.exists() is False
+
+        nebari_config = yaml.safe_load(
+            f"""
+provider: aws
+project_name: test
+        """
+        )
+
+        with open(tmp_file.resolve(), "w") as f:
+            yaml.dump(nebari_config, f)
+
+        assert tmp_file.exists() is True
+        app = create_cli()
+
+        valid_result = runner.invoke(
+            app, ["validate", "--config", tmp_file.resolve()], env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.20"}
+        )
+
+        assert 0 == valid_result.exit_code
+        assert not valid_result.exception
+        assert "Successfully validated configuration" in valid_result.stdout
+        
+        invalid_result = runner.invoke(
+            app, ["validate", "--config", tmp_file.resolve()], env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.0"}
+        )
+
+        assert 1 == invalid_result.exit_code
+        assert invalid_result.exception
+        assert "Invalid `kubernetes-version`" in invalid_result.stdout
+
+
 @pytest.mark.parametrize(
     "key, value, provider, expected_message",
     [
