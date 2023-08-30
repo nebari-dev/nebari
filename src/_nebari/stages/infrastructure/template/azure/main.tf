@@ -1,6 +1,7 @@
 resource "azurerm_resource_group" "resource_group" {
   name     = var.resource_group_name
   location = var.region
+  tags     = var.tags
 }
 
 
@@ -10,6 +11,7 @@ module "registry" {
   name                = "${var.name}${var.environment}"
   location            = var.region
   resource_group_name = azurerm_resource_group.resource_group.name
+  tags                = var.tags
 }
 
 
@@ -24,6 +26,7 @@ module "kubernetes" {
   # the provisioning of the Kubernetes Service will fail.
   node_resource_group_name = var.node_resource_group_name
   kubernetes_version       = var.kubernetes_version
+  tags                     = var.tags
 
   node_groups = [
     for name, config in var.node_groups : {

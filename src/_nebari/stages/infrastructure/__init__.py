@@ -116,6 +116,7 @@ class AzureInputVars(schema.Base):
     node_resource_group_name: str
     vnet_subnet_id: str = None
     private_cluster_enabled: bool
+    tags: Dict[str, str] = {}
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -379,6 +380,7 @@ class AzureProvider(schema.Base):
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
     resource_group_name: typing.Optional[str] = None
+    tags: typing.Optional[typing.Dict[str, str]] = {}
 
     @pydantic.validator("kubernetes_version")
     def _validate_kubernetes_version(cls, value):
@@ -410,6 +412,30 @@ class AzureProvider(schema.Base):
             raise ValueError("Azure Resource Group name can't end with a period.")
 
         return value
+
+    @pydantic.validator("tags")
+    def validate_tags(cls, tags):
+        max_name_length = 512
+        max_value_length = 256
+        invalid_chars = "<>%&\\?/"
+
+        for tag_name, tag_value in tags.items():
+            if any(char in tag_name for char in invalid_chars):
+                raise ValueError(
+                    f"Tag name '{tag_name}' contains invalid characters. Invalid characters are: `{invalid_chars}`"
+                )
+
+            if len(tag_name) > max_name_length:
+                raise ValueError(
+                    f"Tag name '{tag_name}' exceeds maximum length of {max_name_length} characters."
+                )
+
+            if len(tag_value) > max_value_length:
+                raise ValueError(
+                    f"Tag value '{tag_value}' for tag '{tag_name}' exceeds maximum length of {max_value_length} characters."
+                )
+
+        return tags
 
 
 class AWSNodeGroup(schema.Base):
@@ -741,6 +767,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 ),
                 vnet_subnet_id=self.config.azure.vnet_subnet_id,
                 private_cluster_enabled=self.config.azure.private_cluster_enabled,
+                tags=self.config.azure.tags,
             ).dict()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
