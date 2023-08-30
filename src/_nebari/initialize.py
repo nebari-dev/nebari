@@ -10,12 +10,18 @@ import requests
 from _nebari import constants
 from _nebari.provider import git
 from _nebari.provider.cicd import github
+from _nebari.provider.cloud import (
+    amazon_web_services,
+    azure_cloud,
+    digital_ocean,
+    google_cloud,
+)
 from _nebari.provider.oauth.auth0 import create_client
 from _nebari.stages.bootstrap import CiEnum
 from _nebari.stages.kubernetes_ingress import CertificateEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
-from _nebari.utils import random_secure_string
+from _nebari.utils import get_latest_kubernetes_version, random_secure_string
 from _nebari.version import __version__
 from nebari.schema import ProviderEnum
 
@@ -89,9 +95,13 @@ def render_config(
             }
 
     if cloud_provider == ProviderEnum.do:
+        do_region = region or constants.DO_DEFAULT_REGION
+        do_kubernetes_versions = kubernetes_version or get_latest_kubernetes_version(
+            digital_ocean.kubernetes_versions(do_region)
+        )
         config["digital_ocean"] = {
-            "kubernetes_version": kubernetes_version,
-            "region": region or constants.DO_DEFAULT_REGION,
+            "kubernetes_version": do_kubernetes_versions,
+            "region": do_region,
         }
 
         config["theme"]["jupyterhub"][
@@ -99,9 +109,13 @@ def render_config(
         ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
 
     elif cloud_provider == ProviderEnum.gcp:
+        gcp_region = region or constants.GCP_DEFAULT_REGION
+        gcp_kubernetes_version = kubernetes_version or get_latest_kubernetes_version(
+            google_cloud.kubernetes_versions(gcp_region)
+        )
         config["google_cloud_platform"] = {
-            "kubernetes_version": kubernetes_version,
-            "region": region or constants.GCP_DEFAULT_REGION,
+            "kubernetes_version": gcp_kubernetes_version,
+            "region": gcp_region,
         }
 
         config["theme"]["jupyterhub"][
@@ -115,9 +129,13 @@ def render_config(
             )
 
     elif cloud_provider == ProviderEnum.azure:
+        azure_region = region or constants.AZURE_DEFAULT_REGION
+        azure_kubernetes_version = kubernetes_version or get_latest_kubernetes_version(
+            azure_cloud.kubernetes_versions(azure_region)
+        )
         config["azure"] = {
-            "kubernetes_version": kubernetes_version,
-            "region": region or constants.AZURE_DEFAULT_REGION,
+            "kubernetes_version": azure_kubernetes_version,
+            "region": azure_region,
         }
 
         config["theme"]["jupyterhub"][
@@ -125,11 +143,18 @@ def render_config(
         ] = f"{WELCOME_HEADER_TEXT} on Azure"
 
     elif cloud_provider == ProviderEnum.aws:
+        aws_region = (
+            region
+            or os.environ.get("AWS_DEFAULT_REGION")
+            or constants.AWS_DEFAULT_REGION
+        )
+        aws_kubernetes_version = kubernetes_version or get_latest_kubernetes_version(
+            amazon_web_services.kubernetes_versions()
+        )
         config["amazon_web_services"] = {
-            "kubernetes_version": kubernetes_version,
-            "region": region or constants.AWS_DEFAULT_REGION,
+            "kubernetes_version": aws_kubernetes_version,
+            "region": aws_region,
         }
-
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Amazon Web Services"

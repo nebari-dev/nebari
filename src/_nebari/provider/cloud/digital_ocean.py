@@ -3,8 +3,9 @@ import os
 import tempfile
 import typing
 
+import kubernetes.client
+import kubernetes.config
 import requests
-from kubernetes import client
 
 from _nebari import constants
 from _nebari.provider.cloud.amazon_web_services import aws_delete_s3_bucket
@@ -84,15 +85,10 @@ def digital_ocean_get_cluster_id(cluster_name):
             cluster_id = cluster["id"]
             break
 
-    if not cluster_id:
-        raise ValueError(f"Cluster {cluster_name} not found")
-
     return cluster_id
 
 
-def digital_ocean_get_kubeconfig(cluster_name: str):
-    cluster_id = digital_ocean_get_cluster_id(cluster_name)
-
+def digital_ocean_get_kubeconfig(cluster_id: str):
     kubeconfig_content = digital_ocean_request(
         f"kubernetes/clusters/{cluster_id}/kubeconfig"
     ).content
@@ -118,8 +114,12 @@ def digital_ocean_cleanup(config: schema.Main):
     tf_state_bucket = f"{cluster_name}-terraform-state"
     do_spaces_endpoint = "https://nyc3.digitaloceanspaces.com"
 
-    config.load_kube_config(digital_ocean_get_kubeconfig(cluster_name))
-    api = client.CoreV1Api()
+    cluster_id = digital_ocean_get_cluster_id(cluster_name)
+    if cluster_id is None:
+        return
+
+    kubernetes.config.load_kube_config(digital_ocean_get_kubeconfig(cluster_id))
+    api = kubernetes.client.CoreV1Api()
 
     labels = {"component": "singleuser-server", "app": "jupyterhub"}
 

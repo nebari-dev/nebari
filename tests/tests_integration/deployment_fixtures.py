@@ -164,12 +164,18 @@ def deploy(request):
         config = add_gpu_config(config, cloud=cloud)
         config = add_preemptible_node_group(config, cloud=cloud)
 
+    from pprint import pprint
+
+    print("*" * 100)
+    pprint(config.dict())
+    print("*" * 100)
+
     # render
     render_template(deployment_dir_abs, config, stages)
 
     failed = False
 
-    deploy
+    # deploy
     try:
         logger.info("*" * 100)
         logger.info(f"Deploying Nebari on {cloud}")
@@ -188,7 +194,7 @@ def deploy(request):
         logger.exception(e)
         logger.error(f"Deploy Failed, Exception: {e}")
 
-    disable_prompt or input("\nPress any key to continue...\n")
+    disable_prompt or input("\n[Press Enter] to continue...\n")
 
     # destroy
     try:

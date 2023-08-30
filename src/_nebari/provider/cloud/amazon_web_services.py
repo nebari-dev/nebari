@@ -271,12 +271,14 @@ def aws_delete_load_balancer(name: str, namespace: str):
         return
 
     load_balancer_name = aws_get_load_balancer_name(vpc_id)
+    if not load_balancer_name:
+        print("No load balancer found. Exiting...")
+        return
 
     session = aws_session()
     client = session.client("elb")
 
     try:
-        print("here")
         client.delete_load_balancer(LoadBalancerName=load_balancer_name)
         print(f"Initiated deletion for load balancer {load_balancer_name}")
     except ClientError as e:
@@ -289,7 +291,7 @@ def aws_delete_load_balancer(name: str, namespace: str):
     retries = 0
     while retries < MAX_RETRIES:
         try:
-            client.describe_load_balancers(LoadBalancerNames=load_balancer_name)
+            client.describe_load_balancers(LoadBalancerNames=[load_balancer_name])
             print(f"Waiting for load balancer {load_balancer_name} to be deleted...")
             sleep_time = DELAY * (2**retries)
             time.sleep(sleep_time)

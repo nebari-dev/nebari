@@ -10,7 +10,7 @@ from nebari.schema import ProviderEnum
 @pytest.mark.parametrize(
     "k8s_version, cloud_provider, expected",
     [
-        (None, ProviderEnum.aws, None),
+        (None, ProviderEnum.aws, "1.20"),
         ("1.19", ProviderEnum.aws, "1.19"),
     ],
 )
