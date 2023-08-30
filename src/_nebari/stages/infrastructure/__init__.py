@@ -414,7 +414,7 @@ class AzureProvider(schema.Base):
         return value
 
     @pydantic.validator("tags")
-    def validate_tags(cls, tags):
+    def _validate_tags(cls, tags):
         max_name_length = 512
         max_value_length = 256
         invalid_chars = "<>%&\\?/"

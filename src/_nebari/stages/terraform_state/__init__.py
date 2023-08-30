@@ -37,6 +37,7 @@ class AzureInputVars(schema.Base):
     region: str
     storage_account_postfix: str
     state_resource_group_name: str
+    tags: Dict[str, str] = {}
 
     @pydantic.validator("state_resource_group_name")
     def _validate_resource_group_name(cls, value):
@@ -55,6 +56,30 @@ class AzureInputVars(schema.Base):
             raise ValueError("Azure Resource Group name can't end with a period.")
 
         return value
+
+    @pydantic.validator("tags")
+    def _validate_tags(cls, tags):
+        max_name_length = 512
+        max_value_length = 256
+        invalid_chars = "<>%&\\?/"
+
+        for tag_name, tag_value in tags.items():
+            if any(char in tag_name for char in invalid_chars):
+                raise ValueError(
+                    f"Tag name '{tag_name}' contains invalid characters. Invalid characters are: `{invalid_chars}`"
+                )
+
+            if len(tag_name) > max_name_length:
+                raise ValueError(
+                    f"Tag name '{tag_name}' exceeds maximum length of {max_name_length} characters."
+                )
+
+            if len(tag_value) > max_value_length:
+                raise ValueError(
+                    f"Tag value '{tag_value}' for tag '{tag_name}' exceeds maximum length of {max_value_length} characters."
+                )
+
+        return tags
 
 
 class AWSInputVars(schema.Base):
@@ -193,6 +218,7 @@ class TerraformStateStage(NebariTerraformStage):
                     namespace=self.config.namespace,
                     base_resource_group_name=self.config.azure.resource_group_name,
                     suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
+                    tags=self.config.azure.tags,
                 ),
             ).dict()
         elif (
