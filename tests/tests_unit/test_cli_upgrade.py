@@ -178,9 +178,10 @@ profiles:
         else:
             # this one was selected not to match the regex for nebari images, should have been left alone
             assert profile["kubespawner_override"]["image"].endswith(start_version)
-    
+
     for _, profile in upgraded["profiles"]["dask_worker"].items():
         assert profile["kubespawner_override"]["image"].endswith(end_version)
+
 
 def test_upgrade_fail_on_missing_file():
     with tempfile.TemporaryDirectory() as tmp:
@@ -193,7 +194,10 @@ def test_upgrade_fail_on_missing_file():
 
         assert 1 == result.exit_code
         assert result.exception
-        assert f"passed in configuration filename={tmp_file.resolve()} must exist" in str(result.exception)
+        assert (
+            f"passed in configuration filename={tmp_file.resolve()} must exist"
+            in str(result.exception)
+        )
 
 
 def test_upgrade_fail_invalid_file():
