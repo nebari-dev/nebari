@@ -22,5 +22,4 @@ resource "azurerm_storage_container" "storage_container" {
   name                  = "${var.name}-state"
   storage_account_name  = azurerm_storage_account.terraform-state-storage-account.name
   container_access_type = "private"
-  tags                  = var.tags
 }
