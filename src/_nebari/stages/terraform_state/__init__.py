@@ -218,8 +218,8 @@ class TerraformStateStage(NebariTerraformStage):
                     namespace=self.config.namespace,
                     base_resource_group_name=self.config.azure.resource_group_name,
                     suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
-                    tags=self.config.azure.tags,
                 ),
+                tags=self.config.azure.tags,
             ).dict()
         elif (
             self.config.provider == schema.ProviderEnum.local
