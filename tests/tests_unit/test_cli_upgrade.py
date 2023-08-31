@@ -57,7 +57,7 @@ runner = CliRunner()
         ),
     ],
 )
-def test_upgrade_stdout(args: List[str], exit_code: int, content: List[str]):
+def test_cli_upgrade_stdout(args: List[str], exit_code: int, content: List[str]):
     app = create_cli()
     result = runner.invoke(app, ["upgrade"] + args)
     assert result.exit_code == exit_code
@@ -65,19 +65,19 @@ def test_upgrade_stdout(args: List[str], exit_code: int, content: List[str]):
         assert c in result.stdout
 
 
-def test_upgrade_2022_10_1_to_2022_11_1(monkeypatch: pytest.MonkeyPatch):
+def test_cli_upgrade_2022_10_1_to_2022_11_1(monkeypatch: pytest.MonkeyPatch):
     assert_nebari_upgrade_success(monkeypatch, "2022.10.1", "2022.11.1")
 
 
-def test_upgrade_2022_11_1_to_2023_1_1(monkeypatch: pytest.MonkeyPatch):
+def test_cli_upgrade_2022_11_1_to_2023_1_1(monkeypatch: pytest.MonkeyPatch):
     assert_nebari_upgrade_success(monkeypatch, "2022.11.1", "2023.1.1")
 
 
-def test_upgrade_2023_1_1_to_2023_4_1(monkeypatch: pytest.MonkeyPatch):
+def test_cli_upgrade_2023_1_1_to_2023_4_1(monkeypatch: pytest.MonkeyPatch):
     assert_nebari_upgrade_success(monkeypatch, "2023.1.1", "2023.4.1")
 
 
-def test_upgrade_2023_4_1_to_2023_5_1(monkeypatch: pytest.MonkeyPatch):
+def test_cli_upgrade_2023_4_1_to_2023_5_1(monkeypatch: pytest.MonkeyPatch):
     assert_nebari_upgrade_success(
         monkeypatch,
         "2023.4.1",
@@ -91,7 +91,7 @@ def test_upgrade_2023_4_1_to_2023_5_1(monkeypatch: pytest.MonkeyPatch):
     "workflows_enabled, workflow_controller_enabled",
     [(True, True), (True, False), (False, None), (None, None)],
 )
-def test_upgrade_2023_5_1_to_2023_7_2(
+def test_cli_upgrade_2023_5_1_to_2023_7_2(
     monkeypatch: pytest.MonkeyPatch,
     workflows_enabled: bool,
     workflow_controller_enabled: bool,
@@ -130,7 +130,7 @@ def test_upgrade_2023_5_1_to_2023_7_2(
         assert "argo_workflows" not in upgraded
 
 
-def test_upgrade_image_tags(monkeypatch: pytest.MonkeyPatch):
+def test_cli_upgrade_image_tags(monkeypatch: pytest.MonkeyPatch):
     start_version = "2023.5.1"
     end_version = "2023.7.2"
 
@@ -182,7 +182,7 @@ profiles:
         assert profile["image"].endswith(end_version)
 
 
-def test_upgrade_fail_on_missing_file():
+def test_cli_upgrade_fail_on_missing_file():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
@@ -199,7 +199,7 @@ def test_upgrade_fail_on_missing_file():
         )
 
 
-def test_upgrade_fail_invalid_file():
+def test_cli_upgrade_fail_invalid_file():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
@@ -224,7 +224,7 @@ provider: fake
         assert "provider" in str(result.exception)
 
 
-def test_upgrade_fail_on_downgrade():
+def test_cli_upgrade_fail_on_downgrade():
     start_version = "9999.9.9"  # way in the future
     end_version = _nebari.upgrade.__version__
 
@@ -262,7 +262,7 @@ nebari_version: {start_version}
             assert yaml.safe_load(c) == nebari_config
 
 
-def test_upgrade_does_nothing_on_same_version():
+def test_cli_upgrade_does_nothing_on_same_version():
     # this test only seems to work against the actual current version, any
     # mocked earlier versions trigger an actual update
     start_version = _nebari.upgrade.__version__

@@ -40,7 +40,7 @@ TEST_KUBERNETES_VERSION = {"default": "1.20", "do": "1.20.2-do.0"}
         (["-o"], 2, ["requires an argument"]),
     ],
 )
-def test_init_stdout(args: List[str], exit_code: int, content: List[str]):
+def test_cli_init_stdout(args: List[str], exit_code: int, content: List[str]):
     app = create_cli()
     result = runner.invoke(app, ["init"] + args)
     assert result.exit_code == exit_code
@@ -48,9 +48,9 @@ def test_init_stdout(args: List[str], exit_code: int, content: List[str]):
         assert c in result.stdout
 
 
-def generate_test_data_test_all_init_happy_path():
+def generate_test_data_test_cli_init_happy_path():
     """
-    Generate inputs to test_all_init_happy_path representing all valid combinations of options
+    Generate inputs to test_cli_init_happy_path representing all valid combinations of options
     available to nebari init
     """
 
@@ -101,7 +101,7 @@ def generate_test_data_test_all_init_happy_path():
     return {"keys": keys, "test_data": test_data}
 
 
-def test_all_init_happy_path(
+def test_cli_init_happy_path(
     provider: str,
     project_name: str,
     domain_name: str,

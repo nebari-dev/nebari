@@ -31,7 +31,7 @@ runner = CliRunner()
         ),  # https://github.com/nebari-dev/nebari/issues/1937
     ],
 )
-def test_validate_stdout(args: List[str], exit_code: int, content: List[str]):
+def test_cli_validate_stdout(args: List[str], exit_code: int, content: List[str]):
     app = create_cli()
     result = runner.invoke(app, ["validate"] + args)
     assert result.exit_code == exit_code
@@ -39,11 +39,11 @@ def test_validate_stdout(args: List[str], exit_code: int, content: List[str]):
         assert c in result.stdout
 
 
-def generate_test_data_test_validate_local_happy_path():
+def generate_test_data_test_cli_validate_local_happy_path():
     """
     Search the cli_validate folder for happy path test cases
     and add them to the parameterized list of inputs for
-    test_validate_local_happy_path
+    test_cli_validate_local_happy_path
     """
 
     test_data = []
@@ -56,7 +56,7 @@ def generate_test_data_test_validate_local_happy_path():
     return {"keys": keys, "test_data": test_data}
 
 
-def test_validate_local_happy_path(config_yaml: str):
+def test_cli_validate_local_happy_path(config_yaml: str):
     test_file = TEST_DATA_DIR / config_yaml
     assert test_file.exists() is True
 
@@ -67,7 +67,7 @@ def test_validate_local_happy_path(config_yaml: str):
     assert "Successfully validated configuration" in result.stdout
 
 
-def test_validate_from_env():
+def test_cli_validate_from_env():
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
@@ -119,7 +119,7 @@ project_name: test
         ),
     ],
 )
-def test_validate_error_from_env(
+def test_cli_validate_error_from_env(
     key: str, value: str, provider: str, expected_message: str
 ):
     with tempfile.TemporaryDirectory() as tmp:
@@ -166,7 +166,7 @@ project_name: test
         ("do", {}),
     ],
 )
-def test_validate_error_missing_cloud_env(
+def test_cli_validate_error_missing_cloud_env(
     monkeypatch: pytest.MonkeyPatch, provider: str, addl_config: Dict[str, Any]
 ):
     # cloud methods are all globally mocked, need to reset so the env variables will be checked
@@ -215,11 +215,11 @@ project_name: test
         assert "Missing the following required environment variable" in result.stdout
 
 
-def generate_test_data_test_validate_error():
+def generate_test_data_test_cli_validate_error():
     """
     Search the cli_validate folder for unhappy path test cases
     and add them to the parameterized list of inputs for
-    test_validate_error. Optionally parse an expected
+    test_cli_validate_error. Optionally parse an expected
     error message from the file name to assert is present
     in the validate output
     """
@@ -241,7 +241,7 @@ def generate_test_data_test_validate_error():
     return {"keys": keys, "test_data": test_data}
 
 
-def test_validate_error(config_yaml: str, expected_message: str):
+def test_cli_validate_error(config_yaml: str, expected_message: str):
     test_file = TEST_DATA_DIR / config_yaml
     assert test_file.exists() is True
 
