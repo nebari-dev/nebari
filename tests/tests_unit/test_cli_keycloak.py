@@ -18,8 +18,9 @@ TEST_KEYCLOAK_USERS = [
     {"id": "3", "username": "test-nogroup", "groups": []},
 ]
 
+TEST_DOMAIN = "nebari.example.com"
 MOCK_KEYCLOAK_ENV = {
-    "KEYCLOAK_SERVER_URL": "http://nebari.example.com/auth/",
+    "KEYCLOAK_SERVER_URL": f"https://{TEST_DOMAIN}/auth/",
     "KEYCLOAK_ADMIN_USERNAME": "root",
     "KEYCLOAK_ADMIN_PASSWORD": "super-secret-123!",
 }
@@ -65,8 +66,17 @@ def test_cli_keycloak_stdout(args: List[str], exit_code: int, content: List[str]
 
 
 @patch("keycloak.KeycloakAdmin")
-def test_cli_keycloak_adduser_happy_path(_mock_keycloak_admin):
-    result = run_cli_keycloak_adduser()
+def test_cli_keycloak_adduser_happy_path_from_env(_mock_keycloak_admin):
+    result = run_cli_keycloak_adduser(use_env=True)
+
+    assert 0 == result.exit_code
+    assert not result.exception
+    assert f"Created user={TEST_KEYCLOAK_USERS[0]['username']}" in result.stdout
+
+
+@patch("keycloak.KeycloakAdmin")
+def test_cli_keycloak_adduser_happy_path_from_config(_mock_keycloak_admin):
+    result = run_cli_keycloak_adduser(use_env=False)
 
     assert 0 == result.exit_code
     assert not result.exception
@@ -145,8 +155,47 @@ def test_cli_keycloak_adduser_keycloak_unhandled_error(_mock_keycloak_admin):
         ),
     ),
 )
-def test_cli_keycloak_listusers_happy_path(_mock_keycloak_admin):
-    result = run_cli_keycloak_listusers()
+def test_cli_keycloak_listusers_happy_path_from_env(_mock_keycloak_admin):
+    result = run_cli_keycloak_listusers(use_env=True)
+
+    assert 0 == result.exit_code
+    assert not result.exception
+
+    # output should start with the number of users found then
+    # display a table with their info
+    assert result.stdout.startswith(f"{len(TEST_KEYCLOAK_USERS)} Keycloak Users")
+    # user count + headers + separator + 3 user rows == 6
+    assert 6 == len(result.stdout.strip().split("\n"))
+    for u in TEST_KEYCLOAK_USERS:
+        assert u["username"] in result.stdout
+
+
+@patch(
+    "keycloak.KeycloakAdmin",
+    return_value=Mock(
+        users_count=Mock(side_effect=lambda: len(TEST_KEYCLOAK_USERS)),
+        get_users=Mock(
+            side_effect=lambda: [
+                {
+                    "id": u["id"],
+                    "username": u["username"],
+                    "email": f"{u['username']}@example.com",
+                }
+                for u in TEST_KEYCLOAK_USERS
+            ]
+        ),
+        get_user_groups=Mock(
+            side_effect=lambda user_id: [
+                {"name": g}
+                for u in TEST_KEYCLOAK_USERS
+                if u["id"] == user_id
+                for g in u["groups"]
+            ]
+        ),
+    ),
+)
+def test_cli_keycloak_listusers_happy_path_from_config(_mock_keycloak_admin):
+    result = run_cli_keycloak_listusers(use_env=False)
 
     assert 0 == result.exit_code
     assert not result.exception
@@ -253,10 +302,36 @@ def mock_api_request(
         TEST_ACCESS_TOKEN, method, url, headers, verify
     ),
 )
-def test_cli_keycloak_exportusers_happy_path(
+def test_cli_keycloak_exportusers_happy_path_from_env(
     _mock_requests_post, _mock_requests_request
 ):
     result = run_cli_keycloak_exportusers()
+
+    assert 0 == result.exit_code
+    assert not result.exception
+
+    r = json.loads(result.stdout)
+    assert "test-realm" == r["realm"]
+    assert 3 == len(r["users"])
+    assert "test-dev" == r["users"][0]["username"]
+
+
+@patch(
+    "_nebari.keycloak.requests.post",
+    side_effect=lambda url, headers, data, verify: mock_api_post(
+        MOCK_KEYCLOAK_ENV["KEYCLOAK_ADMIN_PASSWORD"], url, headers, data, verify
+    ),
+)
+@patch(
+    "_nebari.keycloak.requests.request",
+    side_effect=lambda method, url, headers, verify: mock_api_request(
+        TEST_ACCESS_TOKEN, method, url, headers, verify
+    ),
+)
+def test_cli_keycloak_exportusers_happy_path_from_config(
+    _mock_requests_post, _mock_requests_request
+):
+    result = run_cli_keycloak_exportusers(use_env=False)
 
     assert 0 == result.exit_code
     assert not result.exception
@@ -323,13 +398,28 @@ def test_cli_keycloak_exportusers_unhandled_error(_mock_requests_post):
     assert result.exception
 
 
-def run_cli_keycloak(command: str, extra_args: List[str]):
+def run_cli_keycloak(command: str, use_env: bool, extra_args: List[str] = []):
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
 
+        extra_config = (
+            {
+                "domain": TEST_DOMAIN,
+                "security": {
+                    "keycloak": {
+                        "initial_root_password": MOCK_KEYCLOAK_ENV[
+                            "KEYCLOAK_ADMIN_PASSWORD"
+                        ]
+                    }
+                },
+            }
+            if not use_env
+            else {}
+        )
+        config = {**{"project_name": "keycloak"}, **extra_config}
         with open(tmp_file.resolve(), "w") as f:
-            yaml.dump({"project_name": "keycloak"}, f)
+            yaml.dump(config, f)
 
         assert tmp_file.exists() is True
 
@@ -342,18 +432,20 @@ def run_cli_keycloak(command: str, extra_args: List[str]):
             tmp_file.resolve(),
         ] + extra_args
 
-        result = runner.invoke(app, args=args, env=MOCK_KEYCLOAK_ENV)
+        env = MOCK_KEYCLOAK_ENV if use_env else {}
+        result = runner.invoke(app, args=args, env=env)
 
         return result
 
 
-def run_cli_keycloak_adduser():
+def run_cli_keycloak_adduser(use_env: bool = True):
     username = TEST_KEYCLOAK_USERS[0]["username"]
     password = "test-password-123!"
 
     return run_cli_keycloak(
         "adduser",
-        [
+        use_env=use_env,
+        extra_args=[
             "--user",
             username,
             password,
@@ -361,14 +453,18 @@ def run_cli_keycloak_adduser():
     )
 
 
-def run_cli_keycloak_listusers():
-    return run_cli_keycloak("listusers", [])
+def run_cli_keycloak_listusers(use_env: bool = True):
+    return run_cli_keycloak(
+        "listusers",
+        use_env=use_env,
+    )
 
 
-def run_cli_keycloak_exportusers():
+def run_cli_keycloak_exportusers(use_env: bool = True):
     return run_cli_keycloak(
         "export-users",
-        [
+        use_env=use_env,
+        extra_args=[
             "--realm",
             "test-realm",
         ],
