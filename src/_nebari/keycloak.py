@@ -114,7 +114,9 @@ def get_keycloak_admin_from_config(config: schema.Main):
 
 def keycloak_rest_api_call(config: schema.Main = None, request: str = None):
     """Communicate directly with the Keycloak REST API by passing it a request"""
-    keycloak_server_url = f"https://{config.domain}/auth/"
+    keycloak_server_url = os.environ.get(
+        "KEYCLOAK_SERVER_URL", f"https://{config.domain}/auth/"
+    )
 
     keycloak_admin_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
     keycloak_admin_password = os.environ.get(

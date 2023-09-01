@@ -128,9 +128,6 @@ def test_cli_support_happy_path(
             ],
         )
 
-        # print(f"\n >>> result.stdout {result.stdout}")
-        # print(f"\n >>> result.exception {result.exception}")
-
         assert log_zip_file.exists() is True
 
         assert 0 == result.exit_code
