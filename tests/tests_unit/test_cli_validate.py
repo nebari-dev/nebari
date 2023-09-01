@@ -247,7 +247,7 @@ def test_cli_validate_error(config_yaml: str, expected_message: str):
 
     app = create_cli()
     result = runner.invoke(app, ["validate", "--config", test_file])
-    print(result.stdout)
+
     assert result.exception
     assert 1 == result.exit_code
     assert "ERROR validating configuration" in result.stdout

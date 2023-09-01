@@ -177,15 +177,11 @@ def assert_nebari_init_args(
     """
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        print(f"\n>>>> Using tmp file {tmp_file}")
         assert tmp_file.exists() is False
-
-        print(f"\n>>>> Testing nebari {args} -- input {input}")
 
         result = runner.invoke(
             app, args + ["--output", tmp_file.resolve()], input=input
         )
-        print(f"\n>>> runner.stdout == {result.stdout}")
 
         assert not result.exception
         assert 0 == result.exit_code
