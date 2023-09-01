@@ -154,6 +154,7 @@ class TerraformStateStage(NebariTerraformStage):
                 namespace=self.config.namespace,
                 base_resource_group_name=self.config.azure.resource_group_name,
                 suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
+                tags=self.config.azure.tags,
             )
             state_resource_name_prefix_safe = resource_name_prefix.replace("-", "")
             resource_group_url = f"/subscriptions/{subscription_id}/resourceGroups/{state_resource_group_name}"

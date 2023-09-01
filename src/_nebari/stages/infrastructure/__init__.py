@@ -24,7 +24,6 @@ from _nebari.utils import (
     AZURE_NODE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
     modified_environ,
-    random_secure_string,
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -374,13 +373,13 @@ class AzureProvider(schema.Base):
         "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
         "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     }
-    storage_account_postfix: str = pydantic.Field(
-        default_factory=lambda: random_secure_string(length=4)
-    )
+    storage_account_postfix: str
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
     resource_group_name: typing.Optional[str] = None
     tags: typing.Optional[typing.Dict[str, str]] = {}
+    network_profile: typing.Optional[typing.Dict[str, str]] = None
+    max_pods: typing.Optional[int] = None
 
     @pydantic.validator("kubernetes_version")
     def _validate_kubernetes_version(cls, value):
@@ -768,6 +767,8 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 vnet_subnet_id=self.config.azure.vnet_subnet_id,
                 private_cluster_enabled=self.config.azure.private_cluster_enabled,
                 tags=self.config.azure.tags,
+                network_profile=self.config.azure.network_profile,
+                max_pods=self.config.azure.max_pods,
             ).dict()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
