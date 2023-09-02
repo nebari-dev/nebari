@@ -1,5 +1,5 @@
 from importlib import import_module
-from importlib.util import spec_from_file_location, module_from_spec, LazyLoader
+from importlib.util import spec_from_file_location, module_from_spec
 import itertools
 import os
 import re
