@@ -46,17 +46,18 @@ def deploy_configuration(
             "The validation checks at the end of each stage have been disabled"
         )
 
+    cwd = pathlib.Path.cwd()
     with timer(logger, "deploying Nebari"):
         stage_outputs = {}
         with contextlib.ExitStack() as stack:
-            for stage in stages:
+            for stage_cls in stages:
+                stage = stage_cls(output_directory=cwd, config=config)
                 if isinstance(stage, BootstrapStage):
                     continue
-                s = stage(output_directory=pathlib.Path.cwd(), config=config)
-                stack.enter_context(s.deploy(stage_outputs, disable_prompt))
+                stack.enter_context(stage.deploy(stage_outputs, disable_prompt))
 
                 if not disable_checks:
-                    s.check(stage_outputs)
+                    stage.check(stage_outputs)
         print("Nebari deployed successfully")
 
         print("Services:")
