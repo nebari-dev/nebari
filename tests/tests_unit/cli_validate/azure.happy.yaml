@@ -25,3 +25,4 @@ certificate:
   acme_email: test@example.com
 azure:
   kubernetes_version: '1.20'
+  storage_account_postfix: abcd
