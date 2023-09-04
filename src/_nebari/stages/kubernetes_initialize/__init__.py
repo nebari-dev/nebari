@@ -1,6 +1,6 @@
 import sys
 import typing
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Type
 
 import pydantic
 
@@ -131,5 +131,5 @@ class KubernetesInitializeStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [KubernetesInitializeStage]
