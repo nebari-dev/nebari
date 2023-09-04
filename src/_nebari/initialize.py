@@ -136,6 +136,7 @@ def render_config(
         config["azure"] = {
             "kubernetes_version": azure_kubernetes_version,
             "region": azure_region,
+            "storage_account_postfix": random_secure_string(length=4),
         }
 
         config["theme"]["jupyterhub"][

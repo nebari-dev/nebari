@@ -24,7 +24,6 @@ from _nebari.utils import (
     AZURE_NODE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
     modified_environ,
-    random_secure_string,
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -382,9 +381,7 @@ class AzureProvider(schema.Base):
         "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
         "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     }
-    storage_account_postfix: str = pydantic.Field(
-        default_factory=lambda: random_secure_string(length=4)
-    )
+    storage_account_postfix: str
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
     resource_group_name: typing.Optional[str] = None
