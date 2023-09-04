@@ -27,31 +27,6 @@ MOCK_CLOUD_REGIONS = {
 }
 
 
-MOCK_ENV = {
-    k: "test"
-    for k in [
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",  # aws
-        "GOOGLE_CREDENTIALS",
-        "PROJECT_ID",  # gcp
-        "ARM_SUBSCRIPTION_ID",
-        "ARM_TENANT_ID",
-        "ARM_CLIENT_ID",
-        "ARM_CLIENT_SECRET",  # azure
-        "DIGITALOCEAN_TOKEN",
-        "SPACES_ACCESS_KEY_ID",
-        "SPACES_SECRET_ACCESS_KEY",  # digital ocean
-        "GITHUB_CLIENT_ID",
-        "GITHUB_CLIENT_SECRET",
-        "GITHUB_USERNAME",
-        "GITHUB_TOKEN",  # github
-        "AUTH0_CLIENT_ID",
-        "AUTH0_CLIENT_SECRET",
-        "AUTH0_DOMAIN",  # auth0
-    ]
-}
-
-
 @pytest.mark.parametrize(
     "args, exit_code, content",
     [
@@ -78,7 +53,7 @@ MOCK_ENV = {
         (["-o"], 2, ["requires an argument"]),
     ],
 )
-def test_init_stdout(args: List[str], exit_code: int, content: List[str]):
+def test_cli_init_stdout(args: List[str], exit_code: int, content: List[str]):
     app = create_cli()
     result = runner.invoke(app, ["init"] + args)
     assert result.exit_code == exit_code
@@ -86,9 +61,9 @@ def test_init_stdout(args: List[str], exit_code: int, content: List[str]):
         assert c in result.stdout
 
 
-def generate_test_data_test_all_init_happy_path():
+def generate_test_data_test_cli_init_happy_path():
     """
-    Generate inputs to test_all_init_happy_path representing all valid combinations of options
+    Generate inputs to test_cli_init_happy_path representing all valid combinations of options
     available to nebari init
     """
 
@@ -150,7 +125,7 @@ def generate_test_data_test_all_init_happy_path():
     return {"keys": keys, "test_data": test_data}
 
 
-def test_all_init_happy_path(
+def test_cli_init_happy_path(
     provider: str,
     region: str,
     project_name: str,
@@ -230,15 +205,11 @@ def assert_nebari_init_args(
     """
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        print(f"\n>>>> Using tmp file {tmp_file}")
         assert tmp_file.exists() is False
 
-        print(f"\n>>>> Testing nebari {args} -- input {input}")
-
         result = runner.invoke(
-            app, args + ["--output", tmp_file.resolve()], input=input, env=MOCK_ENV
+            app, args + ["--output", tmp_file.resolve()], input=input
         )
-        print(f"\n>>> runner.stdout == {result.stdout}")
 
         assert not result.exception
         assert 0 == result.exit_code

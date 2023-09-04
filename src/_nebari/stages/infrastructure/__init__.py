@@ -315,8 +315,8 @@ class GCPNodeGroup(schema.Base):
 
 
 class GoogleCloudPlatformProvider(schema.Base):
-    project: str = pydantic.Field(default_factory=lambda: os.environ["PROJECT_ID"])
-    region: str = constants.GCP_DEFAULT_REGION
+    project: str = pydantic.Field(default_factory=lambda: os.environ.get("PROJECT_ID"))
+    region: str = "us-central1"
     availability_zones: typing.Optional[typing.List[str]] = []
     kubernetes_version: typing.Optional[str]
     release_channel: str = constants.DEFAULT_GKE_RELEASE_CHANNEL

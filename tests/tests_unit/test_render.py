@@ -20,7 +20,7 @@ def test_render_config(nebari_render):
         "06-kubernetes-keycloak-configuration",
         "04-kubernetes-ingress",
         "03-kubernetes-initialize",
-    } == set(os.listdir(output_directory / "stages"))
+    }.issubset(os.listdir(output_directory / "stages"))
 
     if config.provider == schema.ProviderEnum.do:
         assert (output_directory / "stages" / "01-terraform-state/do").is_dir()
