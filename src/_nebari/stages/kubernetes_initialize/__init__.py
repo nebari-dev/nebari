@@ -1,6 +1,6 @@
 import sys
 import typing
-from typing import Any, Dict, List, Union, Type
+from typing import Any, Dict, List, Type, Union
 
 import pydantic
 
