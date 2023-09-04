@@ -67,8 +67,10 @@ GUIDED_INIT_MSG = (
     "It is an [i]alternative[/i] to passing the options listed below."
 )
 
+DEFAULT_REGION_MSG = "Defaulting to region:`{region}`."
+
 DEFAULT_KUBERNETES_VERSION_MSG = (
-    "Defaulting to latest `{kubernetes_version}` Kubernetes version available."
+    "Defaulting to highest supported Kubernetes version: `{kubernetes_version}`."
 )
 
 LATEST = "latest"
@@ -425,7 +427,7 @@ def check_cloud_provider_region(ctx: typer.Context, region: str):
         region = region or os.environ.get("AWS_DEFAULT_REGION")
         if not region:
             region = AWS_DEFAULT_REGION
-            rich.print(f"Defaulting to `{region}` region.")
+            rich.print(DEFAULT_REGION_MSG.format(region=region))
         if region not in amazon_web_services.regions():
             raise ValueError(
                 f"Invalid region `{region}`. Please refer to the AWS docs for a list of valid regions: {AWS_REGIONS}"
@@ -434,11 +436,11 @@ def check_cloud_provider_region(ctx: typer.Context, region: str):
         # TODO: Add a check for valid region for Azure
         if not region:
             region = AZURE_DEFAULT_REGION
-            rich.print(f"Defaulting to `{region}` region.")
+            rich.print(DEFAULT_REGION_MSG.format(region=region))
     elif cloud_provider == ProviderEnum.gcp.value.lower():
         if not region:
             region = GCP_DEFAULT_REGION
-            rich.print(f"Defaulting to `{region}` region.")
+            rich.print(DEFAULT_REGION_MSG.format(region=region))
         if region not in google_cloud.regions(os.environ["PROJECT_ID"]):
             raise ValueError(
                 f"Invalid region `{region}`. Please refer to the GCP docs for a list of valid regions: {GCP_REGIONS}"
@@ -446,7 +448,7 @@ def check_cloud_provider_region(ctx: typer.Context, region: str):
     elif cloud_provider == ProviderEnum.do.value.lower():
         if not region:
             region = DO_DEFAULT_REGION
-            rich.print(f"Defaulting to `{region}` region.")
+            rich.print(DEFAULT_REGION_MSG.format(region=region))
 
         if region not in set(_["slug"] for _ in digital_ocean.regions()):
             raise ValueError(
