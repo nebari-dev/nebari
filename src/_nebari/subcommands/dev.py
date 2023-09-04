@@ -50,6 +50,6 @@ def nebari_subcommand(cli: typer.Typer):
 
         config_schema = nebari_plugin_manager.config_schema
 
-        read_configuration(config_filename, config_schema=config_schema)
-        r = keycloak_rest_api_call(config_filename, request=request)
+        config = read_configuration(config_filename, config_schema=config_schema)
+        r = keycloak_rest_api_call(config, request=request)
         print(json.dumps(r, indent=4))
