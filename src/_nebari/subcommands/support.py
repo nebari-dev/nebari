@@ -2,6 +2,7 @@ import pathlib
 from zipfile import ZipFile
 
 import kubernetes.client
+import kubernetes.client.exceptions
 import kubernetes.config
 import typer
 
@@ -34,12 +35,12 @@ def nebari_subcommand(cli: typer.Typer):
         """
         from nebari.plugins import nebari_plugin_manager
 
+        config_schema = nebari_plugin_manager.config_schema
+        namespace = read_configuration(config_filename, config_schema).namespace
+
         kubernetes.config.kube_config.load_kube_config()
 
         v1 = kubernetes.client.CoreV1Api()
-
-        config_schema = nebari_plugin_manager.config_schema
-        namespace = read_configuration(config_filename, config_schema).namespace
 
         pods = v1.list_namespaced_pod(namespace=namespace)
 
@@ -72,9 +73,10 @@ def nebari_subcommand(cli: typer.Typer):
                                 namespace=namespace,
                                 container=container,
                             )
+                            + "\n"
                         )
 
-                except client.exceptions.ApiException as e:
+                except kubernetes.client.exceptions.ApiException as e:
                     file.write("%s not available" % pod.metadata.name)
                     raise e
 
