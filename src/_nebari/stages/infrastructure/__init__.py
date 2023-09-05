@@ -6,7 +6,7 @@ import re
 import sys
 import tempfile
 import typing
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import pydantic
 
@@ -315,7 +315,7 @@ class GCPNodeGroup(schema.Base):
 
 
 class GoogleCloudPlatformProvider(schema.Base):
-    project: str = pydantic.Field(default_factory=lambda: os.environ["PROJECT_ID"])
+    project: str = pydantic.Field(default_factory=lambda: os.environ.get("PROJECT_ID"))
     region: str = "us-central1"
     availability_zones: typing.Optional[typing.List[str]] = []
     kubernetes_version: typing.Optional[str]
@@ -825,5 +825,5 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [KubernetesInfrastructureStage]
