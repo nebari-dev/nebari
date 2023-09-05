@@ -47,9 +47,13 @@ jobs:
           channels: conda-forge
       - name: Install Nebari
         run: |
-          pip install .[dev]
+          pip install -e .[dev]
           conda install --quiet --yes conda-build
       - name: Test Nebari
         run: |
           pytest --version
-          pytest --ignore=tests/tests_deployment --ignore=tests/tests_e2e/playwright --ignore=tests/tests_integration
+          pytest --cov=src --cov-report=xml --cov-config=pyproject.toml tests/tests_unit
+
+      - name: Report Coverage
+        run: |
+          coverage report -m

@@ -1,6 +1,6 @@
 import sys
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.kubernetes_keycloak import Authentication
@@ -110,5 +110,5 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [KubernetesKeycloakConfigurationStage]

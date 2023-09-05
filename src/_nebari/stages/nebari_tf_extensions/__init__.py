@@ -1,5 +1,5 @@
 import typing
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -77,5 +77,5 @@ class NebariTFExtensionsStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [NebariTFExtensionsStage]

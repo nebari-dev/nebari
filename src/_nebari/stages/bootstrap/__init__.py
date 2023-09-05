@@ -3,7 +3,7 @@ import io
 import pathlib
 import typing
 from inspect import cleandoc
-from typing import Dict, List
+from typing import Dict, List, Type
 
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from _nebari.provider.cicd.gitlab import gen_gitlab_ci
@@ -108,5 +108,5 @@ class BootstrapStage(NebariStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [BootstrapStage]

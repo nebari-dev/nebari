@@ -4,7 +4,7 @@ import os
 import sys
 import time
 import typing
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 from urllib.parse import urlencode
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
@@ -588,5 +588,5 @@ class KubernetesServicesStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [KubernetesServicesStage]

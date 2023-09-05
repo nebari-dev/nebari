@@ -5,7 +5,7 @@ import os
 import pathlib
 import re
 import typing
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Type
 
 from pydantic import field_validator
 
@@ -244,5 +244,5 @@ class TerraformStateStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [TerraformStateStage]

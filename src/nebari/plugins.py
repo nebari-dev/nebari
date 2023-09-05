@@ -1,9 +1,10 @@
-import importlib
 import itertools
 import os
 import re
 import sys
 import typing
+from importlib import import_module
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 import pluggy
@@ -56,17 +57,21 @@ class NebariPluginManager:
     def load_plugins(self, plugins: typing.List[str]):
         def _import_module_from_filename(plugin: str):
             module_name = f"_nebari.stages._files.{plugin.replace(os.sep, '.')}"
-            spec = importlib.util.spec_from_file_location(module_name, plugin)
-            mod = importlib.util.module_from_spec(spec)
-            sys.modules[module_name] = mod
-            spec.loader.exec_module(mod)
-            return mod
+            spec = spec_from_file_location(module_name, plugin)
+            if spec is None:
+                raise ImportError(f"Can not find {plugin!r} plugin.")
+            if spec.loader is None:
+                raise ImportError(f"Can not load {plugin!r} plugin.")
+            module = module_from_spec(spec)
+            sys.modules[module_name] = module
+            spec.loader.exec_module(module)
+            return module
 
         for plugin in plugins:
             if plugin.endswith(".py"):
                 mod = _import_module_from_filename(plugin)
             else:
-                mod = importlib.import_module(plugin)
+                mod = import_module(plugin)
 
             try:
                 self.plugin_manager.register(mod, plugin)
