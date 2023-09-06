@@ -6,7 +6,6 @@ from tests.common.run_notebook import Notebook
 
 @navigator_parameterized(instance_name="small-instance")
 def test_dask_gateway(navigator):
-
     input_output = [
         ("from dask_gateway import Gateway", ""),
         ("gateway = Gateway(); gateway", re.compile(r"Gateway*")),
