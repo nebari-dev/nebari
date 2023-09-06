@@ -5,7 +5,7 @@ import time
 from typing import Dict, List
 
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, EndpointConnectionError
 
 from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
@@ -59,15 +59,28 @@ def aws_session(region: str = None, digitalocean_region: str = None) -> boto3.Se
 def regions(region: str) -> Dict[str, str]:
     """Return dict of enabled regions for the AWS account.
 
-    NOTE: Performing client.describe_regions() requires setting a region in the boto3 session.
-    Since this function is primarily used to valiate which regions are permissible in the nebari-config.yaml,
-    we use the default region (constants.AWS_DEFAULT_REGION) when calling this function. This works because
-    the list of regions returned is the same regardless of which region is set in the boto3 session.
+    NOTE: This function attempts to call the EC2 describe_regions() API.
+    If the API call fails, we catch the two most common exceptions:
+      - EndpointConnectionError: This is raised when the region specified is invalid.
+      - ClientError (AuthFailure): This is raised when the credentials are invalid or trying to specify a region in a non-standard partition (e.g. AWS GovCloud) or vice-versa.
     """
     session = aws_session(region=region)
-    client = session.client("ec2")
-    regions = client.describe_regions()["Regions"]
-    return {_["RegionName"]: _["RegionName"] for _ in regions}
+    try:
+        client = session.client("ec2")
+        regions = client.describe_regions()["Regions"]
+        return {_["RegionName"]: _["RegionName"] for _ in regions}
+    except EndpointConnectionError as e:
+        print("Please double-check that the region specified is valid.", e)
+        exit(1)
+    except ClientError as e:
+        if "AuthFailure" in str(e):
+            print(
+                "Please double-check that the AWS credentials are valid and have the correct permissions.",
+                "If you're deploying into a non-standard partition (e.g. AWS GovCloud), please ensure the region specified exists in that partition.",
+            )
+            exit(1)
+        else:
+            raise e
 
 
 @functools.lru_cache()
@@ -975,8 +988,7 @@ def aws_cleanup(config: schema.Main):
 
 def validate_region(region: str) -> str:
     """Validate that the region is one of the enabled AWS regions"""
-    # use constants.AWS_DEFAULT_REGION because we don't know if `region` is valid yet...
-    available_regions = regions(region=constants.AWS_DEFAULT_REGION)
+    available_regions = regions(region=region)
     if region not in available_regions:
         raise ValueError(
             f"Region {region} is not one of available regions {available_regions}"
