@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import Any, ClassVar, Dict, Optional, Type
 
 from pluggy import HookimplMarker, HookspecMarker
 from pydantic import BaseModel
@@ -15,8 +16,8 @@ hookimpl = HookimplMarker("nebari")
 class NebariStage(ABC):
     name: ClassVar[str]
     priority: ClassVar[int]
-    input_schema: ClassVar[Optional[BaseModel]] = None
-    output_schema: ClassVar[BaseModel]
+    input_schema: ClassVar[Optional[Type[BaseModel]]] = None
+    output_schema: ClassVar[Type[BaseModel]]
 
     def __init__(self, output_directory: Path, config: schema.Main):
         self.output_directory = output_directory
@@ -26,6 +27,23 @@ class NebariStage(ABC):
     def render(self):
         ...
 
+    @abstractmethod
+    def check(self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False):
+        ...
+
+    @abstractmethod
+    @contextmanager
+    def deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
+        ...
+
+    @abstractmethod
+    @contextmanager
+    def destroy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+    ):
+        ...
 
 @hookspec
 def nebari_stage():

@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 import enum
 import io
 import pathlib
@@ -105,6 +106,19 @@ class BootstrapStage(NebariStage):
 
         contents.update(gen_gitignore())
         return contents
+    
+    def check(self, stage_outputs: Dict[str, Dict[str, typing.Any]], disable_prompt: bool = False):
+        ...
+
+    def deploy(
+        self, stage_outputs: Dict[str, Dict[str, typing.Any]], disable_prompt: bool = False
+    ):
+        return nullcontext()
+    
+    def destroy(
+        self, stage_outputs: Dict[str, Dict[str, typing.Any]], status: Dict[str, bool]
+    ):
+        return nullcontext()
 
 
 @hookimpl

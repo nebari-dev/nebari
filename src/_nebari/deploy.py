@@ -4,7 +4,6 @@ import pathlib
 import textwrap
 from typing import List
 
-from _nebari.stages.bootstrap import BootstrapStage
 from _nebari.utils import timer
 from nebari import hookspecs, schema
 
@@ -52,8 +51,6 @@ def deploy_configuration(
         with contextlib.ExitStack() as stack:
             for stage_cls in stages:
                 stage = stage_cls(output_directory=cwd, config=config)
-                if isinstance(stage, BootstrapStage):
-                    continue
                 stack.enter_context(stage.deploy(stage_outputs, disable_prompt))
 
                 if not disable_checks:
