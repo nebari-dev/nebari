@@ -449,12 +449,11 @@ class AmazonWebServicesProvider(schema.Base):
     def validate_all(cls, values):
         region = values["region"]
 
-        print(values)
         # validate region
         amazon_web_services.validate_region(region)
 
         # validate kubernetes version
-        available_kubernetes_versions = amazon_web_services.kubernetes_versions()
+        available_kubernetes_versions = amazon_web_services.kubernetes_versions(region)
         if values["kubernetes_version"] is None:
             values["kubernetes_version"] = available_kubernetes_versions[-1]
         elif values["kubernetes_version"] not in available_kubernetes_versions:

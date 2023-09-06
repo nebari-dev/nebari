@@ -555,7 +555,6 @@ def nebari_subcommand(cli: typer.Typer):
         """
         inputs = InitInputs()
 
-        print("DISABLE PROMPT", disable_prompt)
         # validate inputs after they've been set so we can control the order they are validated
         inputs.cloud_provider = check_cloud_provider_creds(
             cloud_provider, disable_prompt
