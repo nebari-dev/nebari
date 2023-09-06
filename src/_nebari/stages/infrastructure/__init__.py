@@ -6,7 +6,7 @@ import re
 import sys
 import tempfile
 import typing
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import pydantic
 
@@ -818,5 +818,5 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [KubernetesInfrastructureStage]
