@@ -4,13 +4,16 @@ requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-include = ["nebari"]
+packages = [
+    "src/_nebari",
+    "src/nebari",
+]
 
 [tool.hatch.version]
 source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "nebari/_version.py"
+version-file = "src/_nebari/_version.py"
 local_scheme = "node-and-timestamp"
 
 
@@ -73,6 +76,7 @@ dev = [
     "black==22.3.0",
     "dask-gateway",
     "diagrams",
+    "python-dotenv",
     "escapism",
     "flake8==3.8.4",
     "importlib-metadata<5.0",
@@ -81,8 +85,10 @@ dev = [
     "pre-commit",
     "pytest",
     "pytest-timeout",
+    "pytest-playwright",
     "grayskull",
     "build",
+    "jinja2",
 ]
 
 [project.urls]
@@ -90,17 +96,21 @@ Documentation = "https://www.nebari.dev/docs"
 Source = "https://github.com/nebari-dev/nebari"
 
 [project.scripts]
-nebari = "nebari.cli.main:app"
+nebari = "_nebari.cli.main:app"
 
 [tool.ruff]
+select = [
+    "E",
+    "F",
+    "PTH",
+]
 ignore = [
     "E501", # Line too long
     "F821", # Undefined name
+    "PTH123", # open() should be replaced by Path.open()
 ]
 extend-exclude = [
-    "nebari/template",
-    "docs/source/conf.py",
-    "docs",
+    "src/_nebari/template",
     "home",
     "__pycache__"
 ]

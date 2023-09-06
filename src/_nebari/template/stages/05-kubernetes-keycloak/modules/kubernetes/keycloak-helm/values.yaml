@@ -1,0 +1,50 @@
+# https://github.com/codecentric/helm-charts/blob/keycloak-15.0.2/charts/keycloak/values.yaml
+ingress:
+  # Helm chart (14.0 anyway) will only define Ingress records, not IngressRoute as required by Traefik, so
+  # we will need to define our own IngressRoute elsewhere.
+  enabled: false
+
+imagePullSecrets:
+  - name: "extcrcreds"
+
+extraEnv: |
+  - name: PROXY_ADDRESS_FORWARDING
+    value: "true"
+
+startupScripts:
+  keycloak.cli: |
+    {{- .Files.Get "scripts/keycloak.cli" | nindent 2 }}
+
+  nebariadminuser.sh: |
+    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u root -p "{{ .Values.initial_root_password }}"
+    /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u nebari-bot -p "{{ .Values.nebari_bot_password }}"
+
+extraInitContainers: |
+  - command:
+    - sh
+    - -c
+    - |
+      wget https://github.com/aerogear/keycloak-metrics-spi/releases/download/2.5.3/keycloak-metrics-spi-2.5.3.jar -P /data/ &&
+      export SHA256SUM=9b3f52f842a66dadf5ff3cc3a729b8e49042d32f84510a5d73d41a2e39f29a96 &&
+      if ! (echo "$SHA256SUM  /data/keycloak-metrics-spi-2.5.3.jar" | sha256sum -c)
+        then
+          echo "Error: Checksum not verified" && exit 1
+        else
+          chown 1000:1000 /data/keycloak-metrics-spi-2.5.3.jar &&
+          chmod 777 /data/keycloak-metrics-spi-2.5.3.jar
+      fi
+    image: busybox:1.31
+    name: initialize-spi-metrics-jar
+    securityContext:
+      runAsUser: 0
+    volumeMounts:
+      - name: metrics-plugin
+        mountPath: /data
+
+extraVolumeMounts: |
+  - name: metrics-plugin
+    mountPath: /opt/jboss/keycloak/providers/
+
+extraVolumes: |
+  - name: metrics-plugin
+    emptyDir: {}
