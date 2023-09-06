@@ -1,8 +1,8 @@
-from contextlib import nullcontext
 import enum
 import io
 import pathlib
 import typing
+from contextlib import nullcontext
 from inspect import cleandoc
 from typing import Dict, List, Type
 
@@ -106,15 +106,21 @@ class BootstrapStage(NebariStage):
 
         contents.update(gen_gitignore())
         return contents
-    
-    def check(self, stage_outputs: Dict[str, Dict[str, typing.Any]], disable_prompt: bool = False):
+
+    def check(
+        self,
+        stage_outputs: Dict[str, Dict[str, typing.Any]],
+        disable_prompt: bool = False,
+    ):
         ...
 
     def deploy(
-        self, stage_outputs: Dict[str, Dict[str, typing.Any]], disable_prompt: bool = False
+        self,
+        stage_outputs: Dict[str, Dict[str, typing.Any]],
+        disable_prompt: bool = False,
     ):
         return nullcontext()
-    
+
     def destroy(
         self, stage_outputs: Dict[str, Dict[str, typing.Any]], status: Dict[str, bool]
     ):

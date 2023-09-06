@@ -28,7 +28,9 @@ class NebariStage(ABC):
         ...
 
     @abstractmethod
-    def check(self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False):
+    def check(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
         ...
 
     @abstractmethod
@@ -44,6 +46,7 @@ class NebariStage(ABC):
         self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
     ):
         ...
+
 
 @hookspec
 def nebari_stage():
