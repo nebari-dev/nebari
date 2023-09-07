@@ -88,7 +88,7 @@ def kubernetes_versions(region="Central US"):
     return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
 
 
-  def delete_resource_group(resource_group_name: str):
+def delete_resource_group(resource_group_name: str):
     """Delete resource group and all resources within it."""
 
     client = initiate_resource_management_client()
