@@ -209,7 +209,7 @@ class DigitalOceanNodeGroup(schema.Base):
 
 
 class DigitalOceanProvider(schema.Base):
-    region: str = constants.DO_DEFAULT_REGION
+    region: str
     kubernetes_version: typing.Optional[str]
     # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
     node_groups: typing.Dict[str, DigitalOceanNodeGroup] = {
@@ -315,8 +315,8 @@ class GCPNodeGroup(schema.Base):
 
 
 class GoogleCloudPlatformProvider(schema.Base):
-    project: str = pydantic.Field(default_factory=lambda: os.environ.get("PROJECT_ID"))
-    region: str = "us-central1"
+    region: str
+    project: str
     availability_zones: typing.Optional[typing.List[str]] = []
     kubernetes_version: typing.Optional[str]
     release_channel: str = constants.DEFAULT_GKE_RELEASE_CHANNEL
@@ -374,7 +374,7 @@ class AzureNodeGroup(schema.Base):
 
 
 class AzureProvider(schema.Base):
-    region: str = constants.AZURE_DEFAULT_REGION
+    region: str
     resource_group_name: str = None
     kubernetes_version: typing.Optional[str]
     node_groups: typing.Dict[str, AzureNodeGroup] = {
@@ -433,11 +433,7 @@ class AWSNodeGroup(schema.Base):
 
 
 class AmazonWebServicesProvider(schema.Base):
-    region: str = pydantic.Field(
-        default_factory=lambda: os.environ.get(
-            "AWS_DEFAULT_REGION", constants.AWS_DEFAULT_REGION
-        )
-    )
+    region: str
     availability_zones: typing.Optional[typing.List[str]]
     kubernetes_version: typing.Optional[str]
     node_groups: typing.Dict[str, AWSNodeGroup] = {
@@ -455,7 +451,11 @@ class AmazonWebServicesProvider(schema.Base):
 
     @pydantic.root_validator
     def validate_all(cls, values):
-        region = values["region"]
+        region = values.get("region")
+        if region is None:
+            raise pydantic.ValidationError(
+                "The `amazon_web_services.region` field is required."
+            )
 
         # validate region
         amazon_web_services.validate_region(region)
@@ -465,7 +465,7 @@ class AmazonWebServicesProvider(schema.Base):
         if values["kubernetes_version"] is None:
             values["kubernetes_version"] = available_kubernetes_versions[-1]
         elif values["kubernetes_version"] not in available_kubernetes_versions:
-            raise ValueError(
+            raise pydantic.ValidationError(
                 f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
 
@@ -474,7 +474,7 @@ class AmazonWebServicesProvider(schema.Base):
         available_instances = amazon_web_services.instances(region)
         for name, node_group in node_groups.items():
             if node_group.instance not in available_instances:
-                raise ValueError(
+                raise pydantic.ValidationError(
                     f"Instance {node_group.instance} not available out of available instances {available_instances.keys()}"
                 )
 
