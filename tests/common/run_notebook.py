@@ -99,7 +99,8 @@ class Notebook:
         self.run_in_last_cell(code)
         self._wait_for_commands_completion()
         outputs = self._get_outputs()
-        self.assert_match_output(expected_output, outputs[-1])
+        actual_output = outputs[-1] if len(outputs) > 0 else ""
+        self.assert_match_output(expected_output, actual_output)
 
     def run_in_last_cell(self, code):
         self._create_new_cell()
