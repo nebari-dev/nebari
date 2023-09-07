@@ -14,9 +14,8 @@ def test_dask_gateway(navigator):
     ]
 
     test_app = Notebook(navigator=navigator)
-    conda_env = "dask"
     test_app.create_notebook(
-        conda_env=f"conda-env-nebari-git-nebari-git-{conda_env}-py"
+        conda_env="conda-env-default-py"
     )
 
     for input, output in input_output:
