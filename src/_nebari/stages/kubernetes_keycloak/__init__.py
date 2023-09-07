@@ -7,7 +7,7 @@ import sys
 import time
 import typing
 from abc import ABC
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type
 
 import pydantic
 
@@ -265,5 +265,5 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [KubernetesKeycloakStage]

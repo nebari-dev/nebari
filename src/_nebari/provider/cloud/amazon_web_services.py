@@ -2,10 +2,10 @@ import functools
 import os
 import re
 import time
-from typing import List
+from typing import Dict, List
 
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, EndpointConnectionError
 
 from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
@@ -16,8 +16,8 @@ DELAY = 5
 
 
 def check_credentials():
+    """Check for AWS credentials are set in the environment."""
     for variable in {
-        "AWS_DEFAULT_REGION",
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
     }:
@@ -28,7 +28,8 @@ def check_credentials():
             )
 
 
-def aws_session(digitalocean_region: str = None):
+def aws_session(region: str = None, digitalocean_region: str = None) -> boto3.Session:
+    """Create a boto3 session."""
     if digitalocean_region:
         aws_access_key_id = os.environ["SPACES_ACCESS_KEY_ID"]
         aws_secret_access_key = os.environ["SPACES_SECRET_ACCESS_KEY"]
@@ -39,7 +40,12 @@ def aws_session(digitalocean_region: str = None):
         aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
         aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
         aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
-        region = os.environ["AWS_DEFAULT_REGION"]
+
+        if not region:
+            raise ValueError(
+                "Please specify `region` in the nebari-config.yaml or if initializing the nebari-config, set the region via the "
+                "`--region` flag or via the AWS_DEFAULT_REGION environment variable.\n"
+            )
 
     return boto3.Session(
         region_name=region,
@@ -50,16 +56,37 @@ def aws_session(digitalocean_region: str = None):
 
 
 @functools.lru_cache()
-def regions():
-    session = aws_session()
-    ec2_client = session.client("ec2")
-    regions = ec2_client.describe_regions()["Regions"]
-    return {_["RegionName"]: _["RegionName"] for _ in regions}
+def regions(region: str) -> Dict[str, str]:
+    """Return dict of enabled regions for the AWS account.
+
+    NOTE: This function attempts to call the EC2 describe_regions() API.
+    If the API call fails, we catch the two most common exceptions:
+      - EndpointConnectionError: This is raised when the region specified is invalid.
+      - ClientError (AuthFailure): This is raised when the credentials are invalid or trying to specify a region in a non-standard partition (e.g. AWS GovCloud) or vice-versa.
+    """
+    session = aws_session(region=region)
+    try:
+        client = session.client("ec2")
+        regions = client.describe_regions()["Regions"]
+        return {_["RegionName"]: _["RegionName"] for _ in regions}
+    except EndpointConnectionError as e:
+        print("Please double-check that the region specified is valid.", e)
+        exit(1)
+    except ClientError as e:
+        if "AuthFailure" in str(e):
+            print(
+                "Please double-check that the AWS credentials are valid and have the correct permissions.",
+                "If you're deploying into a non-standard partition (e.g. AWS GovCloud), please ensure the region specified exists in that partition.",
+            )
+            exit(1)
+        else:
+            raise e
 
 
 @functools.lru_cache()
-def zones():
-    session = aws_session()
+def zones(region: str) -> Dict[str, str]:
+    """Return dict of enabled availability zones for the AWS region."""
+    session = aws_session(region=region)
     client = session.client("ec2")
 
     response = client.describe_availability_zones()
@@ -67,10 +94,10 @@ def zones():
 
 
 @functools.lru_cache()
-def kubernetes_versions():
+def kubernetes_versions(region: str) -> List[str]:
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
     # AWS SDK (boto3) currently doesn't offer an intuitive way to list available kubernetes version. This implementation grabs kubernetes versions for specific EKS addons. It will therefore always be (at the very least) a subset of all kubernetes versions still supported by AWS.
-    session = aws_session()
+    session = aws_session(region=region)
     client = session.client("eks")
 
     supported_kubernetes_versions = list()
@@ -87,8 +114,9 @@ def kubernetes_versions():
 
 
 @functools.lru_cache()
-def instances():
-    session = aws_session()
+def instances(region: str) -> Dict[str, str]:
+    """Return dict of available instance types for the AWS region."""
+    session = aws_session(region=region)
     client = session.client("ec2")
     paginator = client.get_paginator("describe_instance_types")
     instance_types = sorted(
@@ -97,9 +125,10 @@ def instances():
     return {t: t for t in instance_types}
 
 
-def aws_get_vpc_id(name: str, namespace: str) -> str:
+def aws_get_vpc_id(name: str, namespace: str, region: str) -> str:
+    """Return VPC ID for the EKS cluster namedd `{name}-{namespace}`."""
     cluster_name = f"{name}-{namespace}"
-    session = aws_session()
+    session = aws_session(region=region)
     client = session.client("ec2")
     response = client.describe_vpcs()
 
@@ -110,8 +139,9 @@ def aws_get_vpc_id(name: str, namespace: str) -> str:
                 return vpc["VpcId"]
 
 
-def aws_get_subnet_ids(name: str, namespace: str) -> List[str]:
-    session = aws_session()
+def aws_get_subnet_ids(name: str, namespace: str, region: str) -> List[str]:
+    """Return list of subnet IDs for the EKS cluster named `{name}-{namespace}`."""
+    session = aws_session(region=region)
     client = session.client("ec2")
     response = client.describe_subnets()
 
@@ -134,9 +164,10 @@ def aws_get_subnet_ids(name: str, namespace: str) -> List[str]:
     return subnet_ids
 
 
-def aws_get_route_table_ids(name: str, namespace: str) -> List[str]:
+def aws_get_route_table_ids(name: str, namespace: str, region: str) -> List[str]:
+    """Return list of route table IDs for the EKS cluster named `{name}-{namespace}`."""
     cluster_name = f"{name}-{namespace}"
-    session = aws_session()
+    session = aws_session(region=region)
     client = session.client("ec2")
     response = client.describe_route_tables()
 
@@ -150,9 +181,10 @@ def aws_get_route_table_ids(name: str, namespace: str) -> List[str]:
     return routing_table_ids
 
 
-def aws_get_internet_gateway_ids(name: str, namespace: str) -> List[str]:
+def aws_get_internet_gateway_ids(name: str, namespace: str, region: str) -> List[str]:
+    """Return list of internet gateway IDs for the EKS cluster named `{name}-{namespace}`."""
     cluster_name = f"{name}-{namespace}"
-    session = aws_session()
+    session = aws_session(region=region)
     client = session.client("ec2")
     response = client.describe_internet_gateways()
 
@@ -166,9 +198,10 @@ def aws_get_internet_gateway_ids(name: str, namespace: str) -> List[str]:
     return internet_gateways
 
 
-def aws_get_security_group_ids(name: str, namespace: str) -> List[str]:
+def aws_get_security_group_ids(name: str, namespace: str, region: str) -> List[str]:
+    """Return list of security group IDs for the EKS cluster named `{name}-{namespace}`."""
     cluster_name = f"{name}-{namespace}"
-    session = aws_session()
+    session = aws_session(region=region)
     client = session.client("ec2")
     response = client.describe_security_groups()
 
@@ -182,12 +215,13 @@ def aws_get_security_group_ids(name: str, namespace: str) -> List[str]:
     return security_group_ids
 
 
-def aws_get_load_balancer_name(vpc_id: str) -> str:
+def aws_get_load_balancer_name(vpc_id: str, region: str) -> str:
+    """Return load balancer name for the VPC ID."""
     if not vpc_id:
         print("No VPC ID provided. Exiting...")
         return
 
-    session = aws_session()
+    session = aws_session(region=region)
     client = session.client("elb")
     response = client.describe_load_balancers()["LoadBalancerDescriptions"]
 
@@ -196,8 +230,9 @@ def aws_get_load_balancer_name(vpc_id: str) -> str:
             return load_balancer["LoadBalancerName"]
 
 
-def aws_get_efs_ids(name: str, namespace: str) -> List[str]:
-    session = aws_session()
+def aws_get_efs_ids(name: str, namespace: str, region: str) -> List[str]:
+    """Return list of EFS IDs for the EKS cluster named `{name}-{namespace}`."""
+    session = aws_session(region=region)
     client = session.client("efs")
     response = client.describe_file_systems()
 
@@ -220,12 +255,13 @@ def aws_get_efs_ids(name: str, namespace: str) -> List[str]:
     return efs_ids
 
 
-def aws_get_efs_mount_target_ids(efs_id: str) -> List[str]:
+def aws_get_efs_mount_target_ids(efs_id: str, region: str) -> List[str]:
+    """Return list of EFS mount target IDs for the EFS ID."""
     if not efs_id:
         print("No EFS ID provided. Exiting...")
         return
 
-    session = aws_session()
+    session = aws_session(region=region)
     client = session.client("efs")
     response = client.describe_mount_targets(FileSystemId=efs_id)
 
@@ -236,9 +272,10 @@ def aws_get_efs_mount_target_ids(efs_id: str) -> List[str]:
     return mount_target_ids
 
 
-def aws_get_ec2_volume_ids(name: str, namespace: str) -> List[str]:
+def aws_get_ec2_volume_ids(name: str, namespace: str, region: str) -> List[str]:
+    """Return list of EC2 volume IDs for the EKS cluster named `{name}-{namespace}`."""
     cluster_name = f"{name}-{namespace}"
-    session = aws_session()
+    session = aws_session(region=region)
     client = session.client("ec2")
     response = client.describe_volumes()
 
@@ -252,8 +289,9 @@ def aws_get_ec2_volume_ids(name: str, namespace: str) -> List[str]:
     return volume_ids
 
 
-def aws_get_iam_policy(name: str = None, pattern: str = None) -> str:
-    session = aws_session()
+def aws_get_iam_policy(region: str, name: str = None, pattern: str = None) -> str:
+    """Return IAM policy ARN for the policy name or pattern."""
+    session = aws_session(region=region)
     client = session.client("iam")
     response = client.list_policies(Scope="Local")
 
@@ -264,18 +302,19 @@ def aws_get_iam_policy(name: str = None, pattern: str = None) -> str:
             return policy["Arn"]
 
 
-def aws_delete_load_balancer(name: str, namespace: str):
-    vpc_id = aws_get_vpc_id(name, namespace)
+def aws_delete_load_balancer(name: str, namespace: str, region: str):
+    """Delete load balancer for the EKS cluster named `{name}-{namespace}`."""
+    vpc_id = aws_get_vpc_id(name, namespace, region=region)
     if not vpc_id:
         print("No VPC ID provided. Exiting...")
         return
 
-    load_balancer_name = aws_get_load_balancer_name(vpc_id)
+    load_balancer_name = aws_get_load_balancer_name(vpc_id, region=region)
     if not load_balancer_name:
         print("No load balancer found. Exiting...")
         return
 
-    session = aws_session()
+    session = aws_session(region=region)
     client = session.client("elb")
 
     try:
@@ -304,15 +343,16 @@ def aws_delete_load_balancer(name: str, namespace: str):
         retries += 1
 
 
-def aws_delete_efs_mount_targets(efs_id: str):
+def aws_delete_efs_mount_targets(efs_id: str, region: str):
+    """Delete all mount targets for the EFS ID."""
     if not efs_id:
         print("No EFS provided. Exiting...")
         return
 
-    session = aws_session()
+    session = aws_session(region=region)
     client = session.client("efs")
 
-    mount_target_ids = aws_get_efs_mount_target_ids(efs_id)
+    mount_target_ids = aws_get_efs_mount_target_ids(efs_id, region=region)
     for mount_target_id in mount_target_ids:
         try:
             client.delete_mount_target(MountTargetId=mount_target_id)
@@ -325,7 +365,7 @@ def aws_delete_efs_mount_targets(efs_id: str):
 
     retries = 0
     while retries < MAX_RETRIES:
-        mount_target_ids = aws_get_efs_mount_target_ids(efs_id)
+        mount_target_ids = aws_get_efs_mount_target_ids(efs_id, region=region)
         if len(mount_target_ids) == 0:
             print(f"All mount targets for EFS {efs_id} deleted successfully")
             return
@@ -336,12 +376,13 @@ def aws_delete_efs_mount_targets(efs_id: str):
         retries += 1
 
 
-def aws_delete_efs_file_system(efs_id: str):
+def aws_delete_efs_file_system(efs_id: str, region: str):
+    """Delete EFS file system for the EFS ID."""
     if not efs_id:
         print("No EFS provided. Exiting...")
         return
 
-    session = aws_session()
+    session = aws_session(region=region)
     client = session.client("efs")
 
     try:
@@ -370,19 +411,21 @@ def aws_delete_efs_file_system(efs_id: str):
         retries += 1
 
 
-def aws_delete_efs(name: str, namespace: str):
+def aws_delete_efs(name: str, namespace: str, region: str):
+    """Delete EFS resources for the EKS cluster named `{name}-{namespace}`."""
     efs_ids = aws_get_efs_ids(name, namespace)
     for efs_id in efs_ids:
-        aws_delete_efs_mount_targets(efs_id)
-        aws_delete_efs_file_system(efs_id)
+        aws_delete_efs_mount_targets(efs_id, region=region)
+        aws_delete_efs_file_system(efs_id, region=region)
 
 
-def aws_delete_subnets(name: str, namespace: str):
-    session = aws_session()
+def aws_delete_subnets(name: str, namespace: str, region: str):
+    """Delete all subnets for the EKS cluster named `{name}-{namespace}`."""
+    session = aws_session(region=region)
     client = session.client("ec2")
 
-    vpc_id = aws_get_vpc_id(name, namespace)
-    subnet_ids = aws_get_subnet_ids(name, namespace)
+    vpc_id = aws_get_vpc_id(name, namespace, region=region)
+    subnet_ids = aws_get_subnet_ids(name, namespace, region=region)
     for subnet_id in subnet_ids:
         try:
             client.delete_subnet(SubnetId=subnet_id)
@@ -395,7 +438,7 @@ def aws_delete_subnets(name: str, namespace: str):
 
     retries = 0
     while retries < MAX_RETRIES:
-        subnet_ids = aws_get_subnet_ids(name, namespace)
+        subnet_ids = aws_get_subnet_ids(name, namespace, region=region)
         if len(subnet_ids) == 0:
             print(f"All subnets for VPC {vpc_id} deleted successfully")
             return
@@ -406,12 +449,13 @@ def aws_delete_subnets(name: str, namespace: str):
         retries += 1
 
 
-def aws_delete_route_tables(name: str, namespace: str):
-    session = aws_session()
+def aws_delete_route_tables(name: str, namespace: str, region: str):
+    """Delete all route tables for the EKS cluster named `{name}-{namespace}`."""
+    session = aws_session(region=region)
     client = session.client("ec2")
 
-    vpc_id = aws_get_vpc_id(name, namespace)
-    route_table_ids = aws_get_route_table_ids(name, namespace)
+    vpc_id = aws_get_vpc_id(name, namespace, region=region)
+    route_table_ids = aws_get_route_table_ids(name, namespace, region=region)
     for route_table_id in route_table_ids:
         try:
             client.delete_route_table(RouteTableId=route_table_id)
@@ -424,7 +468,7 @@ def aws_delete_route_tables(name: str, namespace: str):
 
     retries = 0
     while retries < MAX_RETRIES:
-        route_table_ids = aws_get_route_table_ids(name, namespace)
+        route_table_ids = aws_get_route_table_ids(name, namespace, region=region)
         if len(route_table_ids) == 0:
             print(f"All route tables for VPC {vpc_id} deleted successfully")
             return
@@ -435,12 +479,13 @@ def aws_delete_route_tables(name: str, namespace: str):
         retries += 1
 
 
-def aws_delete_internet_gateways(name: str, namespace: str):
-    session = aws_session()
+def aws_delete_internet_gateways(name: str, namespace: str, region: str):
+    """Delete all internet gateways for the EKS cluster named `{name}-{namespace}`."""
+    session = aws_session(region=region)
     client = session.client("ec2")
 
-    vpc_id = aws_get_vpc_id(name, namespace)
-    internet_gateway_ids = aws_get_internet_gateway_ids(name, namespace)
+    vpc_id = aws_get_vpc_id(name, namespace, region=region)
+    internet_gateway_ids = aws_get_internet_gateway_ids(name, namespace, region=region)
     for internet_gateway_id in internet_gateway_ids:
         try:
             client.detach_internet_gateway(
@@ -458,7 +503,9 @@ def aws_delete_internet_gateways(name: str, namespace: str):
 
     retries = 0
     while retries < MAX_RETRIES:
-        internet_gateway_ids = aws_get_internet_gateway_ids(name, namespace)
+        internet_gateway_ids = aws_get_internet_gateway_ids(
+            name, namespace, region=region
+        )
         if len(internet_gateway_ids) == 0:
             print(f"All internet gateways for VPC {vpc_id} deleted successfully")
             return
@@ -469,12 +516,13 @@ def aws_delete_internet_gateways(name: str, namespace: str):
         retries += 1
 
 
-def aws_delete_security_groups(name: str, namespace: str):
-    session = aws_session()
+def aws_delete_security_groups(name: str, namespace: str, region: str):
+    """Delete all security groups for the EKS cluster named `{name}-{namespace}`."""
+    session = aws_session(region=region)
     client = session.client("ec2")
 
-    vpc_id = aws_get_vpc_id(name, namespace)
-    security_group_ids = aws_get_security_group_ids(name, namespace)
+    vpc_id = aws_get_vpc_id(name, namespace, region=region)
+    security_group_ids = aws_get_security_group_ids(name, namespace, region=region)
     for security_group_id in security_group_ids:
         try:
             client.delete_security_group(GroupId=security_group_id)
@@ -487,7 +535,7 @@ def aws_delete_security_groups(name: str, namespace: str):
 
     retries = 0
     while retries < MAX_RETRIES:
-        security_group_ids = aws_get_security_group_ids(name, namespace)
+        security_group_ids = aws_get_security_group_ids(name, namespace, region=region)
         if len(security_group_ids) == 0:
             print(f"All security groups for VPC {vpc_id} deleted successfully")
             return
@@ -498,11 +546,12 @@ def aws_delete_security_groups(name: str, namespace: str):
         retries += 1
 
 
-def aws_delete_vpc(name: str, namespace: str):
-    session = aws_session()
+def aws_delete_vpc(name: str, namespace: str, region: str):
+    """Delete VPC for the EKS cluster named `{name}-{namespace}`."""
+    session = aws_session(region=region)
     client = session.client("ec2")
 
-    vpc_id = aws_get_vpc_id(name, namespace)
+    vpc_id = aws_get_vpc_id(name, namespace, region=region)
     if vpc_id is None:
         print(f"No VPC {vpc_id} provided. Exiting...")
         return
@@ -518,7 +567,7 @@ def aws_delete_vpc(name: str, namespace: str):
 
     retries = 0
     while retries < MAX_RETRIES:
-        vpc_id = aws_get_vpc_id(name, namespace)
+        vpc_id = aws_get_vpc_id(name, namespace, region=region)
         if vpc_id is None:
             print(f"VPC {vpc_id} deleted successfully")
             return
@@ -529,8 +578,9 @@ def aws_delete_vpc(name: str, namespace: str):
         retries += 1
 
 
-def aws_delete_dynamodb_table(name: str):
-    session = aws_session()
+def aws_delete_dynamodb_table(name: str, region: str):
+    """Delete DynamoDB table."""
+    session = aws_session(region=region)
     client = session.client("dynamodb")
 
     try:
@@ -558,11 +608,12 @@ def aws_delete_dynamodb_table(name: str):
         retries += 1
 
 
-def aws_delete_ec2_volumes(name: str, namespace: str):
-    session = aws_session()
+def aws_delete_ec2_volumes(name: str, namespace: str, region: str):
+    """Delete all EC2 volumes for the EKS cluster named `{name}-{namespace}`."""
+    session = aws_session(region=region)
     client = session.client("ec2")
 
-    volume_ids = aws_get_ec2_volume_ids(name, namespace)
+    volume_ids = aws_get_ec2_volume_ids(name, namespace, region=region)
     for volume_id in volume_ids:
         try:
             client.delete_volume(VolumeId=volume_id)
@@ -575,7 +626,7 @@ def aws_delete_ec2_volumes(name: str, namespace: str):
 
     retries = 0
     while retries < MAX_RETRIES:
-        volume_ids = aws_get_ec2_volume_ids(name, namespace)
+        volume_ids = aws_get_ec2_volume_ids(name, namespace, region=region)
         if len(volume_ids) == 0:
             print("All volumes deleted successfully")
             return
@@ -589,9 +640,22 @@ def aws_delete_ec2_volumes(name: str, namespace: str):
 def aws_delete_s3_objects(
     bucket_name: str,
     endpoint: str = None,
+    region: str = None,
     digitalocean_region: str = None,
 ):
-    session = aws_session(digitalocean_region=digitalocean_region)
+    """
+    Delete all objects in the S3 bucket.
+
+    NOTE: This method is shared with Digital Ocean as their "Spaces" is S3 compatible and uses the same API.
+
+    Parameters:
+        bucket_name (str): S3 bucket name
+        endpoint (str): S3 endpoint URL (required for Digital Ocean spaces)
+        region (str): AWS region
+        digitalocean_region (str): Digital Ocean region
+
+    """
+    session = aws_session(region=region, digitalocean_region=digitalocean_region)
     s3 = session.client("s3", endpoint_url=endpoint)
 
     try:
@@ -643,11 +707,23 @@ def aws_delete_s3_objects(
 def aws_delete_s3_bucket(
     bucket_name: str,
     endpoint: str = None,
+    region: str = None,
     digitalocean_region: str = None,
 ):
-    aws_delete_s3_objects(bucket_name, endpoint, digitalocean_region)
+    """
+    Delete S3 bucket.
 
-    session = aws_session(digitalocean_region=digitalocean_region)
+    NOTE: This method is shared with Digital Ocean as their "Spaces" is S3 compatible and uses the same API.
+
+    Parameters:
+        bucket_name (str): S3 bucket name
+        endpoint (str): S3 endpoint URL (required for Digital Ocean spaces)
+        region (str): AWS region
+        digitalocean_region (str): Digital Ocean region
+    """
+    aws_delete_s3_objects(bucket_name, endpoint, region, digitalocean_region)
+
+    session = aws_session(region=region, digitalocean_region=digitalocean_region)
     s3 = session.client("s3", endpoint_url=endpoint)
 
     try:
@@ -678,8 +754,9 @@ def aws_delete_s3_bucket(
         retries += 1
 
 
-def aws_delete_iam_role_policies(role_name: str):
-    session = aws_session()
+def aws_delete_iam_role_policies(role_name: str, region: str):
+    """Delete all policies attached to the IAM role."""
+    session = aws_session(region=region)
     iam = session.client("iam")
 
     try:
@@ -694,8 +771,9 @@ def aws_delete_iam_role_policies(role_name: str):
             raise e
 
 
-def aws_delete_iam_policy(name: str):
-    session = aws_session()
+def aws_delete_iam_policy(name: str, region: str):
+    """Delete IAM policy."""
+    session = aws_session(region=region)
     iam = session.client("iam")
 
     try:
@@ -723,8 +801,9 @@ def aws_delete_iam_policy(name: str):
         retries += 1
 
 
-def aws_delete_iam_role(role_name: str):
-    session = aws_session()
+def aws_delete_iam_role(role_name: str, region: str):
+    """Delete IAM role."""
+    session = aws_session(region=region)
     iam = session.client("iam")
 
     try:
@@ -760,9 +839,10 @@ def aws_delete_iam_role(role_name: str):
     print(f"Deleted role {role_name}")
 
 
-def aws_delete_node_groups(name: str, namespace: str):
+def aws_delete_node_groups(name: str, namespace: str, region: str):
+    """Delete all node groups for the EKS cluster named `{name}-{namespace}`."""
     cluster_name = f"{name}-{namespace}"
-    session = aws_session()
+    session = aws_session(region=region)
     eks = session.client("eks")
     try:
         response = eks.list_nodegroups(clusterName=cluster_name)
@@ -818,9 +898,10 @@ def aws_delete_node_groups(name: str, namespace: str):
     print(f"Failed to confirm deletion of all node groups after {MAX_RETRIES} retries.")
 
 
-def aws_delete_cluster(name: str, namespace: str):
+def aws_delete_cluster(name: str, namespace: str, region: str):
+    """Delete EKS cluster named `{name}-{namespace}`."""
     cluster_name = f"{name}-{namespace}"
-    session = aws_session()
+    session = aws_session(region=region)
     eks = session.client("eks")
 
     try:
@@ -866,36 +947,60 @@ def aws_cleanup(config: schema.Main):
 
     name = config.project_name
     namespace = config.namespace
+    region = config.amazon_web_services.region
 
-    aws_delete_node_groups(name, namespace)
-    aws_delete_cluster(name, namespace)
+    aws_delete_node_groups(name, namespace, region)
+    aws_delete_cluster(name, namespace, region)
 
-    aws_delete_load_balancer(name, namespace)
+    aws_delete_load_balancer(name, namespace, region)
 
-    aws_delete_efs(name, namespace)
+    aws_delete_efs(name, namespace, region)
 
-    aws_delete_subnets(name, namespace)
-    aws_delete_route_tables(name, namespace)
-    aws_delete_internet_gateways(name, namespace)
-    aws_delete_security_groups(name, namespace)
-    aws_delete_vpc(name, namespace)
+    aws_delete_subnets(name, namespace, region)
+    aws_delete_route_tables(name, namespace, region)
+    aws_delete_internet_gateways(name, namespace, region)
+    aws_delete_security_groups(name, namespace, region)
+    aws_delete_vpc(name, namespace, region)
 
-    aws_delete_ec2_volumes(name, namespace)
+    aws_delete_ec2_volumes(name, namespace, region)
 
     dynamodb_table_name = f"{name}-{namespace}-terraform-state-lock"
-    aws_delete_dynamodb_table(dynamodb_table_name)
+    aws_delete_dynamodb_table(dynamodb_table_name, region)
 
     s3_bucket_name = f"{name}-{namespace}-terraform-state"
-    aws_delete_s3_bucket(s3_bucket_name)
+    aws_delete_s3_bucket(s3_bucket_name, region)
 
     iam_role_name = f"{name}-{namespace}-eks-cluster-role"
     iam_role_node_group_name = f"{name}-{namespace}-eks-node-group-role"
     iam_policy_name_regex = "^eks-worker-autoscaling-{name}-{namespace}(\\d+)$".format(
         name=name, namespace=namespace
     )
-    iam_policy = aws_get_iam_policy(pattern=iam_policy_name_regex)
+    iam_policy = aws_get_iam_policy(region, pattern=iam_policy_name_regex)
     if iam_policy:
-        aws_delete_iam_role_policies(iam_role_node_group_name)
-        aws_delete_iam_policy(iam_policy)
-    aws_delete_iam_role(iam_role_name)
-    aws_delete_iam_role(iam_role_node_group_name)
+        aws_delete_iam_role_policies(iam_role_node_group_name, region)
+        aws_delete_iam_policy(iam_policy, region)
+    aws_delete_iam_role(iam_role_name, region)
+    aws_delete_iam_role(iam_role_node_group_name, region)
+
+
+### PYDANTIC VALIDATORS ###
+
+
+def validate_region(region: str) -> str:
+    """Validate that the region is one of the enabled AWS regions"""
+    available_regions = regions(region=region)
+    if region not in available_regions:
+        raise ValueError(
+            f"Region {region} is not one of available regions {available_regions}"
+        )
+    return region
+
+
+def validate_kubernetes_versions(region: str, kubernetes_version: str) -> str:
+    """Validate that the Kubernetes version is available in the specified region"""
+    available_versions = kubernetes_versions(region=region)
+    if kubernetes_version not in available_versions:
+        raise ValueError(
+            f"Kubernetes version {kubernetes_version} is not one of available versions {available_versions}"
+        )
+    return kubernetes_version

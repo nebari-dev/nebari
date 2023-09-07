@@ -6,7 +6,7 @@ import re
 import sys
 import tempfile
 import typing
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 import pydantic
 
@@ -446,48 +446,34 @@ class AmazonWebServicesProvider(schema.Base):
     vpc_cidr_block: str = "10.10.0.0/16"
 
     @pydantic.root_validator
-    def _validate_kubernetes_version(cls, values):
-        amazon_web_services.check_credentials()
+    def validate_all(cls, values):
+        region = values["region"]
 
-        available_kubernetes_versions = amazon_web_services.kubernetes_versions()
+        # validate region
+        amazon_web_services.validate_region(region)
+
+        # validate kubernetes version
+        available_kubernetes_versions = amazon_web_services.kubernetes_versions(region)
         if values["kubernetes_version"] is None:
             values["kubernetes_version"] = available_kubernetes_versions[-1]
         elif values["kubernetes_version"] not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
-        return values
 
-    @pydantic.validator("node_groups")
-    def _validate_node_group(cls, value, values):
-        amazon_web_services.check_credentials()
-
-        available_instances = amazon_web_services.instances()
-        for name, node_group in value.items():
+        # validate node groups
+        node_groups = values["node_groups"]
+        available_instances = amazon_web_services.instances(region)
+        for name, node_group in node_groups.items():
             if node_group.instance not in available_instances:
                 raise ValueError(
                     f"Instance {node_group.instance} not available out of available instances {available_instances.keys()}"
                 )
-        return value
-
-    @pydantic.validator("region")
-    def _validate_region(cls, value):
-        amazon_web_services.check_credentials()
-
-        available_regions = amazon_web_services.regions()
-        if value not in available_regions:
-            raise ValueError(
-                f"Region {value} is not one of available regions {available_regions}"
-            )
-        return value
-
-    @pydantic.root_validator
-    def _validate_availability_zones(cls, values):
-        amazon_web_services.check_credentials()
 
         if values["availability_zones"] is None:
-            zones = amazon_web_services.zones()
+            zones = amazon_web_services.zones(region)
             values["availability_zones"] = list(sorted(zones))[:2]
+
         return values
 
 
@@ -831,5 +817,5 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [KubernetesInfrastructureStage]

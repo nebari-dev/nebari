@@ -249,13 +249,11 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     return auth_provider
 
 
-def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: ProviderEnum):
+def check_cloud_provider_creds(cloud_provider: ProviderEnum, disable_prompt: bool):
     """Validate that the necessary cloud credentials have been set as environment variables."""
 
-    if ctx.params.get("disable_prompt"):
+    if disable_prompt:
         return cloud_provider.lower()
-
-    cloud_provider = cloud_provider.lower()
 
     # AWS
     if cloud_provider == ProviderEnum.aws.value.lower() and (
@@ -356,13 +354,10 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: ProviderEnum)
 
 
 def check_cloud_provider_kubernetes_version(
-    ctx: typer.Context, kubernetes_version: str
+    kubernetes_version: str, cloud_provider: str, region: str
 ):
-    cloud_provider = ctx.params.get("cloud_provider")
-    region = ctx.params.get("region")
-
     if cloud_provider == ProviderEnum.aws.value.lower():
-        versions = amazon_web_services.kubernetes_versions()
+        versions = amazon_web_services.kubernetes_versions(region)
 
         if not kubernetes_version or kubernetes_version == LATEST:
             kubernetes_version = get_latest_kubernetes_version(versions)
@@ -421,17 +416,18 @@ def check_cloud_provider_kubernetes_version(
     return kubernetes_version
 
 
-def check_cloud_provider_region(ctx: typer.Context, region: str):
-    cloud_provider = ctx.params.get("cloud_provider")
+def check_cloud_provider_region(region: str, cloud_provider: str) -> str:
     if cloud_provider == ProviderEnum.aws.value.lower():
-        region = region or os.environ.get("AWS_DEFAULT_REGION")
         if not region:
-            region = AWS_DEFAULT_REGION
-            rich.print(DEFAULT_REGION_MSG.format(region=region))
-        if region not in amazon_web_services.regions():
-            raise ValueError(
-                f"Invalid region `{region}`. Please refer to the AWS docs for a list of valid regions: {AWS_REGIONS}"
-            )
+            region = os.environ.get("AWS_DEFAULT_REGION")
+            if not region:
+                region = AWS_DEFAULT_REGION
+                rich.print(f"Defaulting to `{region}` region.")
+            else:
+                rich.print(
+                    f"Falling back to the region found in the AWS_DEFAULT_REGION environment variable: `{region}`"
+                )
+        region = amazon_web_services.validate_region(region)
     elif cloud_provider == ProviderEnum.azure.value.lower():
         # TODO: Add a check for valid region for Azure
         if not region:
@@ -464,8 +460,6 @@ def nebari_subcommand(cli: typer.Typer):
         cloud_provider: ProviderEnum = typer.Argument(
             ProviderEnum.local,
             help=f"options: {enum_to_list(ProviderEnum)}",
-            callback=check_cloud_provider_creds,
-            is_eager=True,
         ),
         # Although this unused below, the functionality is contained in the callback. Thus,
         # this attribute cannot be removed.
@@ -498,6 +492,10 @@ def nebari_subcommand(cli: typer.Typer):
                 "Namespace must begin with a letter and consist of letters, numbers, dashes, or underscores.",
             ),
         ),
+        region: str = typer.Option(
+            None,
+            help="The region you want to deploy your Nebari cluster to (if deploying to the cloud)",
+        ),
         auth_provider: AuthenticationEnum = typer.Option(
             AuthenticationEnum.password,
             help=f"options: {enum_to_list(AuthenticationEnum)}",
@@ -524,13 +522,6 @@ def nebari_subcommand(cli: typer.Typer):
         kubernetes_version: str = typer.Option(
             LATEST,
             help="The Kubernetes version you want to deploy your Nebari cluster to, leave blank for latest version",
-            callback=check_cloud_provider_kubernetes_version,
-        ),
-        region: str = typer.Option(
-            None,
-            help="The region you want to deploy your Nebari cluster to (if deploying to the cloud)",
-            callback=check_cloud_provider_region,
-            is_eager=True,
         ),
         ssl_cert_email: str = typer.Option(
             None,
@@ -566,7 +557,16 @@ def nebari_subcommand(cli: typer.Typer):
         """
         inputs = InitInputs()
 
-        inputs.cloud_provider = cloud_provider
+        # validate inputs after they've been set so we can control the order they are validated
+        inputs.cloud_provider = check_cloud_provider_creds(
+            cloud_provider, disable_prompt
+        )
+        # inputs.cloud_provider = cloud_provider
+        inputs.region = check_cloud_provider_region(region, inputs.cloud_provider)
+        inputs.kubernetes_version = check_cloud_provider_kubernetes_version(
+            kubernetes_version, inputs.cloud_provider, inputs.region
+        )
+
         inputs.project_name = project_name
         inputs.domain_name = domain_name
         inputs.namespace = namespace
@@ -576,8 +576,6 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.repository_auto_provision = repository_auto_provision
         inputs.ci_provider = ci_provider
         inputs.terraform_state = terraform_state
-        inputs.kubernetes_version = kubernetes_version
-        inputs.region = region
         inputs.ssl_cert_email = ssl_cert_email
         inputs.disable_prompt = disable_prompt
         inputs.output = output
@@ -640,7 +638,10 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         ).unsafe_ask()
 
         if not disable_checks:
-            check_cloud_provider_creds(ctx, cloud_provider=inputs.cloud_provider)
+            check_cloud_provider_creds(
+                cloud_provider=inputs.cloud_provider,
+                disable_prompt=ctx.params["disable_prompt"],
+            )
 
         # specific context needed when `check_project_name` is called
         ctx.params["cloud_provider"] = inputs.cloud_provider
@@ -669,7 +670,9 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 ).unsafe_ask()
 
             if not disable_checks:
-                check_cloud_provider_region(ctx, region)
+                region = check_cloud_provider_region(
+                    region, cloud_provider=inputs.cloud_provider
+                )
 
             inputs.region = region
             ctx.params["region"] = region
@@ -861,7 +864,9 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             ).unsafe_ask()
             if not disable_checks:
                 check_cloud_provider_kubernetes_version(
-                    ctx, kubernetes_version=kubernetes_version
+                    kubernetes_version=kubernetes_version,
+                    cloud_provider=inputs.cloud_provider,
+                    region=inputs.region,
                 )
             inputs.kubernetes_version = kubernetes_version
 
