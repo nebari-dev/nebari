@@ -115,6 +115,7 @@ class AzureInputVars(schema.Base):
     node_resource_group_name: str
     vnet_subnet_id: str = None
     private_cluster_enabled: bool
+    tags: Dict[str, str] = {}
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -385,6 +386,9 @@ class AzureProvider(schema.Base):
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
     resource_group_name: typing.Optional[str] = None
+    tags: typing.Optional[typing.Dict[str, str]] = {}
+    network_profile: typing.Optional[typing.Dict[str, str]] = None
+    max_pods: typing.Optional[int] = None
 
     @pydantic.validator("kubernetes_version")
     def _validate_kubernetes_version(cls, value):
@@ -414,6 +418,10 @@ class AzureProvider(schema.Base):
             raise ValueError("Azure Resource Group name can't end with a period.")
 
         return value
+
+    @pydantic.validator("tags")
+    def _validate_tags(cls, tags):
+        return azure_cloud.validate_tags(tags)
 
 
 class AWSNodeGroup(schema.Base):
@@ -733,6 +741,9 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 ),
                 vnet_subnet_id=self.config.azure.vnet_subnet_id,
                 private_cluster_enabled=self.config.azure.private_cluster_enabled,
+                tags=self.config.azure.tags,
+                network_profile=self.config.azure.network_profile,
+                max_pods=self.config.azure.max_pods,
             ).dict()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(

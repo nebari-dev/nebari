@@ -2,6 +2,7 @@ import functools
 import logging
 import os
 import time
+from typing import Dict
 
 from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
@@ -87,7 +88,7 @@ def kubernetes_versions(region="Central US"):
     return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
 
 
-def delete_resource_group(resource_group_name: str):
+  def delete_resource_group(resource_group_name: str):
     """Delete resource group and all resources within it."""
 
     client = initiate_resource_management_client()
@@ -130,3 +131,30 @@ def azure_cleanup(config: schema.Main):
 
     delete_resource_group(aks_resource_group)
     delete_resource_group(state_resource_group)
+
+
+### PYDANTIC VALIDATORS ###
+
+
+def validate_tags(tags: Dict[str, str]) -> Dict[str, str]:
+    max_name_length = 512
+    max_value_length = 256
+    invalid_chars = "<>%&\\?/"
+
+    for tag_name, tag_value in tags.items():
+        if any(char in tag_name for char in invalid_chars):
+            raise ValueError(
+                f"Tag name '{tag_name}' contains invalid characters. Invalid characters are: `{invalid_chars}`"
+            )
+
+        if len(tag_name) > max_name_length:
+            raise ValueError(
+                f"Tag name '{tag_name}' exceeds maximum length of {max_name_length} characters."
+            )
+
+        if len(tag_value) > max_value_length:
+            raise ValueError(
+                f"Tag value '{tag_value}' for tag '{tag_name}' exceeds maximum length of {max_value_length} characters."
+            )
+
+    return tags

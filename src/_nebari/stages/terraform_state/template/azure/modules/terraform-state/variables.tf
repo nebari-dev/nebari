@@ -17,3 +17,9 @@ variable "storage_account_postfix" {
   description = "random characters appended to storage account name to facilitate global uniqueness"
   type        = string
 }
+
+variable "tags" {
+  description = "Tags to apply to all resources"
+  type        = map(string)
+  default     = {}
+}
