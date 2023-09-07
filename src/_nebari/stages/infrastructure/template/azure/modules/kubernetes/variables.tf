@@ -46,3 +46,27 @@ variable "private_cluster_enabled" {
   default     = false
   type        = bool
 }
+
+variable "tags" {
+  description = "Tags to apply to all resources"
+  type        = map(string)
+  default     = {}
+}
+
+variable "network_profile" {
+  description = "Network profile"
+  type = object({
+    network_plugin     = string
+    network_policy     = string
+    service_cidr       = string
+    dns_service_ip     = string
+    docker_bridge_cidr = string
+  })
+  default = null
+}
+
+variable "max_pods" {
+  description = "Maximum number of pods that can run on a node"
+  type        = number
+  default     = 60
+}

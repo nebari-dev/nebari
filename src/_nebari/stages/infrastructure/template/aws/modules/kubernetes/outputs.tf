@@ -13,6 +13,16 @@ output "node_groups_arn" {
   value = aws_eks_node_group.main[*].arn
 }
 
+output "cluster_oidc_issuer_url" {
+  description = "The URL on the EKS cluster for the OpenID Connect identity provider"
+  value       = aws_eks_cluster.main.identity[0].oidc[0].issuer
+}
+
+output "oidc_provider_arn" {
+  description = "The ARN of the OIDC Provider"
+  value       = aws_iam_openid_connect_provider.oidc_provider.arn
+}
+
 # https://github.com/terraform-aws-modules/terraform-aws-eks/blob/16f46db94b7158fd762d9133119206aaa7cf6d63/examples/self_managed_node_group/main.tf
 output "kubeconfig" {
   description = "Kubernetes connection configuration kubeconfig"
