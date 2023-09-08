@@ -1,6 +1,7 @@
 resource "azurerm_resource_group" "terraform-state-resource-group" {
   name     = var.resource_group_name
   location = var.location
+  tags     = var.tags
 }
 
 resource "azurerm_storage_account" "terraform-state-storage-account" {
@@ -10,6 +11,7 @@ resource "azurerm_storage_account" "terraform-state-storage-account" {
   location                 = azurerm_resource_group.terraform-state-resource-group.location
   account_tier             = "Standard"
   account_replication_type = "GRS"
+  tags                     = var.tags
 
   identity {
     type = "SystemAssigned"

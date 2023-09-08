@@ -1,6 +1,7 @@
 import functools
 import logging
 import os
+from typing import Dict
 
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.containerservice import ContainerServiceClient
@@ -54,3 +55,30 @@ def kubernetes_versions(region="Central US"):
 
     supported_kubernetes_versions = sorted(supported_kubernetes_versions)
     return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
+
+
+### PYDANTIC VALIDATORS ###
+
+
+def validate_tags(tags: Dict[str, str]) -> Dict[str, str]:
+    max_name_length = 512
+    max_value_length = 256
+    invalid_chars = "<>%&\\?/"
+
+    for tag_name, tag_value in tags.items():
+        if any(char in tag_name for char in invalid_chars):
+            raise ValueError(
+                f"Tag name '{tag_name}' contains invalid characters. Invalid characters are: `{invalid_chars}`"
+            )
+
+        if len(tag_name) > max_name_length:
+            raise ValueError(
+                f"Tag name '{tag_name}' exceeds maximum length of {max_name_length} characters."
+            )
+
+        if len(tag_value) > max_value_length:
+            raise ValueError(
+                f"Tag value '{tag_value}' for tag '{tag_name}' exceeds maximum length of {max_value_length} characters."
+            )
+
+    return tags
