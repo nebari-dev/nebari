@@ -12,6 +12,9 @@ proxy:
   secretToken: "<placeholder>"
   service:
     type: ClusterIP
+  chp:
+    networkPolicy:
+      enabled: false
 
 scheduling:
   userScheduler:
