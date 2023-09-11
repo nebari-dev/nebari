@@ -314,6 +314,9 @@ def configure_user(username, groups, uid=1000, gid=100):
 def profile_argo_token(groups):
     # TODO: create a more robust check user's Argo-Workflow role
 
+    if not z2jh.get_config("custom.argo-workflows-enabled"):
+        return {}
+
     domain = z2jh.get_config("custom.external-url")
     namespace = z2jh.get_config("custom.namespace")
 

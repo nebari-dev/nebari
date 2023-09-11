@@ -2,10 +2,9 @@ import pytest
 from kubernetes import client, config
 
 from tests.common.config_mod_utils import PREEMPTIBLE_NODE_GROUP_NAME
-from tests.tests_integration.deployment_fixtures import on_cloud
 
 
-@on_cloud()
+@pytest.mark.preemptible
 def test_preemptible(request, deploy):
     config.load_kube_config(
         config_file=deploy["stages/02-infrastructure"]["kubeconfig_filename"]["value"]
@@ -22,7 +21,6 @@ def test_preemptible(request, deploy):
         expected_value = "true"
     else:
         pytest.skip("Unsupported cloud for preemptible")
-        raise ValueError("Invalid cloud for testing preemptible")
 
     api_instance = client.CoreV1Api()
     nodes = api_instance.list_node()

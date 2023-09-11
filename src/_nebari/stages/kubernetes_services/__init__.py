@@ -1,6 +1,5 @@
 import enum
 import json
-import os
 import sys
 import time
 import typing
@@ -17,6 +16,7 @@ from _nebari.stages.tf_objects import (
     NebariKubernetesProvider,
     NebariTerraformState,
 )
+from _nebari.utils import set_docker_image_tag, set_nebari_dask_version
 from _nebari.version import __version__
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -24,16 +24,6 @@ from nebari.hookspecs import NebariStage, hookimpl
 # check and retry settings
 NUM_ATTEMPTS = 10
 TIMEOUT = 10  # seconds
-
-
-def set_docker_image_tag() -> str:
-    """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
-    return os.environ.get("NEBARI_IMAGE_TAG", constants.DEFAULT_NEBARI_IMAGE_TAG)
-
-
-def set_nebari_dask_version() -> str:
-    """Set version of `nebari-dask` meta package."""
-    return os.environ.get("NEBARI_DASK_VERSION", constants.DEFAULT_NEBARI_DASK_VERSION)
 
 
 @schema.yaml_object(schema.yaml)
@@ -371,6 +361,7 @@ class JupyterhubInputVars(schema.Base):
     jupyterhub_image: ImageNameTag = Field(alias="jupyterhub-image")
     jupyterhub_hub_extraEnv: str = Field(alias="jupyterhub-hub-extraEnv")
     idle_culler_settings: Dict[str, Any] = Field(alias="idle-culler-settings")
+    argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -508,6 +499,7 @@ class KubernetesServicesStage(NebariTerraformStage):
                 self.config.jupyterhub.overrides.get("hub", {}).get("extraEnv", [])
             ),
             idle_culler_settings=self.config.jupyterlab.idle_culler.dict(),
+            argo_workflows_enabled=self.config.argo_workflows.enabled,
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
