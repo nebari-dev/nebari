@@ -421,7 +421,9 @@ class AzureProvider(schema.Base):
 
     @field_validator("tags")
     @classmethod
-    def _validate_tags(cls, value: typing.Optional[typing.Dict[str, str]]) -> typing.Dict[str, str]:
+    def _validate_tags(
+        cls, value: typing.Optional[typing.Dict[str, str]]
+    ) -> typing.Dict[str, str]:
         return value if value is None else azure_cloud.validate_tags(value)
 
 
