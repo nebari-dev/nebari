@@ -1,8 +1,8 @@
 import subprocess
+import urllib
 from pathlib import Path
 
 import pytest
-import urllib3
 
 from _nebari.provider import terraform
 
@@ -74,9 +74,10 @@ def test_terraform_open_source_license():
         f"https://raw.githubusercontent.com/hashicorp/terraform/v{tf_version}/LICENSE"
     )
 
-    http = urllib3.PoolManager()
-    r = http.request("GET", license_url)
+    request = urllib.request.Request(license_url)
+    with urllib.request.urlopen(request) as response:
+        assert 200 == response.getcode()
 
-    assert 200 == r.status
-    assert "Mozilla Public License" in str(r.data)
-    assert "Business Source License" not in str(r.data)
+        license = str(response.read())
+        assert "Mozilla Public License" in license
+        assert "Business Source License" not in license
