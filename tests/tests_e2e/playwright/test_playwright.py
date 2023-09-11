@@ -4,7 +4,7 @@ from tests.common.playwright_fixtures import navigator_parameterized
 from tests.common.run_notebook import Notebook
 
 
-@pytest.xfail(strick=False, reason="This test is flaky")
+@pytest.xfail(strict=False, reason="This test is flaky")
 @navigator_parameterized(instance_name="small-instance")
 def test_notebook(navigator, test_data_root):
     test_app = Notebook(navigator=navigator)
