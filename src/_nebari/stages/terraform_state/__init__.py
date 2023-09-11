@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Tuple, Type
 
 from pydantic import field_validator
 
+from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
@@ -37,6 +38,7 @@ class AzureInputVars(schema.Base):
     region: str
     storage_account_postfix: str
     state_resource_group_name: str
+    tags: Dict[str, str] = {}
 
     @field_validator("state_resource_group_name")
     @classmethod
@@ -56,6 +58,10 @@ class AzureInputVars(schema.Base):
             raise ValueError("Azure Resource Group name can't end with a period.")
 
         return value
+
+    @pydantic.validator("tags")
+    def _validate_tags(cls, tags):
+        return azure_cloud.validate_tags(tags)
 
 
 class AWSInputVars(schema.Base):
@@ -195,6 +201,7 @@ class TerraformStateStage(NebariTerraformStage):
                     base_resource_group_name=self.config.azure.resource_group_name,
                     suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
                 ),
+                tags=self.config.azure.tags,
             ).dict()
         elif (
             self.config.provider == schema.ProviderEnum.local

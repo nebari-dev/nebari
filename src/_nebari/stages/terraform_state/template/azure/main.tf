@@ -23,6 +23,12 @@ variable "state_resource_group_name" {
   type        = string
 }
 
+variable "tags" {
+  description = "Tags to apply to all resources"
+  type        = map(string)
+  default     = {}
+}
+
 provider "azurerm" {
   features {}
 }
@@ -34,6 +40,7 @@ module "terraform-state" {
   resource_group_name     = var.state_resource_group_name
   location                = var.region
   storage_account_postfix = var.storage_account_postfix
+  tags                    = var.tags
 }
 
 terraform {
