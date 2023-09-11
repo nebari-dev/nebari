@@ -75,7 +75,7 @@ def generate_test_data_test_cli_init_happy_path():
                     for namespace in ["test-ns"]:
                         for auth_provider in [
                             "password"
-                        ]:  # ["password", "Auth0", "GitHub", "custom"] # Auth0, Github and custom failing as of 2023-08-23
+                        ]:  # ["password", "Auth0", "GitHub"] # Auth0, Github failing as of 2023-08-23
                             for repository in ["github.com", "gitlab.com"]:
                                 for ci_provider in [
                                     "none",
