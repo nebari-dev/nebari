@@ -38,7 +38,7 @@ class AzureInputVars(schema.Base):
     region: str
     storage_account_postfix: str
     state_resource_group_name: str
-    tags: Dict[str, str] = {}
+    tags: Dict[str, str]
 
     @field_validator("state_resource_group_name")
     @classmethod
@@ -59,9 +59,10 @@ class AzureInputVars(schema.Base):
 
         return value
 
-    @pydantic.validator("tags")
-    def _validate_tags(cls, tags):
-        return azure_cloud.validate_tags(tags)
+    @field_validator("tags")
+    @classmethod
+    def _validate_tags(cls, value: Dict[str, str]) -> Dict[str, str]:
+        return azure_cloud.validate_tags(value)
 
 
 class AWSInputVars(schema.Base):
