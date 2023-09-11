@@ -96,6 +96,7 @@ module "jupyterhub" {
   conda-store-mount                                  = "/home/conda"
   conda-store-environments                           = var.conda-store-environments
   default-conda-store-namespace                      = var.conda-store-default-namespace
+  argo-workflows-enabled                             = var.argo-workflows-enabled
   conda-store-argo-workflows-jupyter-scheduler-token = module.kubernetes-conda-store-server.service-tokens.argo-workflows-jupyter-scheduler
   conda-store-service-name                           = module.kubernetes-conda-store-server.service_name
 
