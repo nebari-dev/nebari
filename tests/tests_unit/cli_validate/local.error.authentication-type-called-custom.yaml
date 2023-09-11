@@ -1,0 +1,4 @@
+project_name: test
+security:
+  authentication:
+    type: custom
