@@ -382,7 +382,7 @@ class AzureProvider(schema.Base):
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
     resource_group_name: typing.Optional[str] = None
-    tags: typing.Optional[typing.Dict[str, str]] = {}
+    tags: typing.Optional[typing.Dict[str, str]] = None
     network_profile: typing.Optional[typing.Dict[str, str]] = None
     max_pods: typing.Optional[int] = None
 
@@ -419,9 +419,10 @@ class AzureProvider(schema.Base):
 
         return value
 
-    @pydantic.validator("tags")
-    def _validate_tags(cls, tags):
-        return azure_cloud.validate_tags(tags)
+    @field_validator("tags")
+    @classmethod
+    def _validate_tags(cls, value: typing.Optional[typing.Dict[str, str]]) -> typing.Dict[str, str]:
+        return value if value is None else azure_cloud.validate_tags(value)
 
 
 class AWSNodeGroup(schema.Base):
