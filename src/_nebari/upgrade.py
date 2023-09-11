@@ -286,6 +286,8 @@ class Upgrade_0_3_12(UpgradeStep):
             rich.print(
                 f"Adding default_images: conda_store image as [green]{newimage}[/green]"
             )
+            if "default_images" not in config:
+                config["default_images"] = {}
             config["default_images"]["conda_store"] = newimage
         return config
 
@@ -377,6 +379,9 @@ class Upgrade_0_4_0(UpgradeStep):
             rich.print(
                 "Removing terraform_modules field from config as it is no longer used.\n"
             )
+
+        if "default_images" not in config:
+            config["default_images"] = {}
 
         # Remove conda_store image from default_images
         if "conda_store" in config["default_images"]:
