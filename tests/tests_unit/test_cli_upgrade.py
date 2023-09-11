@@ -299,12 +299,98 @@ nebari_version: {start_version}
             assert yaml.safe_load(c) == nebari_config
 
 
+def test_cli_upgrade_0_3_12_to_0_4_0(monkeypatch: pytest.MonkeyPatch):
+    start_version = "0.3.12"
+    end_version = "0.4.0"
+
+    def callback(tmp_file: Path, _result: Any):
+        users_import_file = tmp_file.parent / "nebari-users-import.json"
+        assert users_import_file.exists()
+
+        return True  # continue with default assertions
+
+    # custom authenticators removed in 0.4.0, should be replaced by password
+    upgraded = assert_nebari_upgrade_success(
+        monkeypatch,
+        start_version,
+        end_version,
+        addl_args=["--attempt-fixes"],
+        addl_config=yaml.safe_load(
+            """
+security:
+  authentication:
+    type: custom
+    config:
+      oauth_callback_url: ""
+      scope: ""
+  users: {}
+  groups:
+    users: {}
+terraform_modules: []
+default_images:
+  conda_store: ""
+  dask_gateway: ""
+"""
+        ),
+        callback=callback,
+    )
+
+    assert "password" == upgraded["security"]["authentication"]["type"]
+    assert "" != upgraded["security"]["keycloak"]["initial_root_password"]
+    assert "users" not in upgraded["security"]
+    assert "groups" not in upgraded["security"]
+    assert "config" not in upgraded["security"]["authentication"]
+    assert True is upgraded["security"]["shared_users_group"]
+    assert "terraform_modules" not in upgraded
+    assert {} == upgraded["default_images"]
+    assert True is upgraded["prevent_deploy"]
+
+
+def test_cli_upgrade_to_0_4_0_fails_for_custom_auth_without_attempt_fixes():
+    start_version = "0.3.12"
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
+        assert tmp_file.exists() is False
+
+        nebari_config = yaml.safe_load(
+            f"""
+project_name: test
+provider: local
+domain: test.example.com
+namespace: dev
+nebari_version: {start_version}
+security:
+  authentication:
+    type: custom
+        """
+        )
+
+        with open(tmp_file.resolve(), "w") as f:
+            yaml.dump(nebari_config, f)
+
+        assert tmp_file.exists() is True
+        app = create_cli()
+
+        result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
+
+        assert 1 == result.exit_code
+        assert result.exception
+        assert "Custom Authenticators are no longer supported" in str(result.exception)
+
+        # make sure the file is unaltered
+        with open(tmp_file.resolve(), "r") as c:
+            assert yaml.safe_load(c) == nebari_config
+
+
 def assert_nebari_upgrade_success(
     monkeypatch: pytest.MonkeyPatch,
     start_version: str,
     end_version: str,
+    addl_args: List[str] = [],
     addl_config: Dict[str, Any] = {},
     inputs: List[str] = [],
+    callback: Any = None,
 ) -> Dict[str, Any]:
     monkeypatch.setattr(_nebari.upgrade, "__version__", end_version)
 
@@ -339,24 +425,34 @@ nebari_version: {start_version}
 
         # run nebari upgrade -c tmp/nebari-config.yaml
         result = runner.invoke(
-            app, ["upgrade", "--config", tmp_file.resolve()], input="\n".join(inputs)
+            app,
+            ["upgrade", "--config", tmp_file.resolve()] + addl_args,
+            input="\n".join(inputs),
         )
 
-        assert 0 == result.exit_code
-        assert not result.exception
-        assert "Saving new config file" in result.stdout
+        enable_default_assertions = True
 
-        # load the modified nebari-config.yaml and check the new version has changed
-        with open(tmp_file.resolve(), "r") as f:
-            upgraded = yaml.safe_load(f)
-            assert end_version == upgraded["nebari_version"]
+        if callback is not None:
+            enable_default_assertions = callback(tmp_file, result)
 
-        # check backup matches original
-        backup_file = Path(tmp).resolve() / f"nebari-config.yaml.{start_version}.backup"
-        assert backup_file.exists() is True
-        with open(backup_file.resolve(), "r") as b:
-            backup = yaml.safe_load(b)
-            assert backup == nebari_config
+        if enable_default_assertions:
+            assert 0 == result.exit_code
+            assert not result.exception
+            assert "Saving new config file" in result.stdout
+
+            # load the modified nebari-config.yaml and check the new version has changed
+            with open(tmp_file.resolve(), "r") as f:
+                upgraded = yaml.safe_load(f)
+                assert end_version == upgraded["nebari_version"]
+
+            # check backup matches original
+            backup_file = (
+                Path(tmp).resolve() / f"nebari-config.yaml.{start_version}.backup"
+            )
+            assert backup_file.exists() is True
+            with open(backup_file.resolve(), "r") as b:
+                backup = yaml.safe_load(b)
+                assert backup == nebari_config
 
         # pass the parsed nebari-config.yaml with upgrade mods back to caller for
         # additional assertions
