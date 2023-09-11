@@ -361,6 +361,7 @@ class JupyterhubInputVars(schema.Base):
     jupyterhub_image: ImageNameTag = Field(alias="jupyterhub-image")
     jupyterhub_hub_extraEnv: str = Field(alias="jupyterhub-hub-extraEnv")
     idle_culler_settings: Dict[str, Any] = Field(alias="idle-culler-settings")
+    argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -498,6 +499,7 @@ class KubernetesServicesStage(NebariTerraformStage):
                 self.config.jupyterhub.overrides.get("hub", {}).get("extraEnv", [])
             ),
             idle_culler_settings=self.config.jupyterlab.idle_culler.dict(),
+            argo_workflows_enabled=self.config.argo_workflows.enabled,
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
