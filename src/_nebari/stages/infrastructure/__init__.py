@@ -24,7 +24,6 @@ from _nebari.utils import (
     AZURE_NODE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
     modified_environ,
-    random_secure_string,
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -215,8 +214,8 @@ class DigitalOceanNodeGroup(schema.Base):
 
 
 class DigitalOceanProvider(schema.Base):
-    region: str = "nyc3"
-    kubernetes_version: typing.Optional[str] = None
+    region: str
+    kubernetes_version: str
     # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
     node_groups: typing.Dict[str, DigitalOceanNodeGroup] = {
         "general": DigitalOceanNodeGroup(
@@ -318,10 +317,10 @@ class GCPNodeGroup(schema.Base):
 
 
 class GoogleCloudPlatformProvider(schema.Base):
-    project: str = Field(default_factory=lambda: os.environ.get("PROJECT_ID"))
-    region: str = "us-central1"
+    region: str
+    project: str
+    kubernetes_version: str
     availability_zones: typing.Optional[typing.List[str]] = []
-    kubernetes_version: typing.Optional[str] = None
     release_channel: str = constants.DEFAULT_GKE_RELEASE_CHANNEL
     node_groups: typing.Dict[str, GCPNodeGroup] = {
         "general": GCPNodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
@@ -342,23 +341,30 @@ class GoogleCloudPlatformProvider(schema.Base):
         typing.Union[GCPPrivateClusterConfig, None]
     ] = None
 
-    @field_validator("kubernetes_version")
-    @classmethod
-    def _validate_kubernetes_version(
-        cls, value: typing.Optional[str], info: FieldValidationInfo
-    ) -> str:
-        google_cloud.check_credentials()
+    @pydantic.root_validator
+    def validate_all(cls, values):
+        region = values.get("region")
+        project_id = values.get("project")
 
-        available_kubernetes_versions = google_cloud.kubernetes_versions(
-            info.data["region"]
-        )
-        if value is not None and value not in available_kubernetes_versions:
+        if project_id is None:
+            raise ValueError("The `google_cloud_platform.project` field is required.")
+
+        if region is None:
+            raise ValueError("The `google_cloud_platform.region` field is required.")
+
+        # validate region
+        google_cloud.validate_region(project_id, region)
+
+        # validate kubernetes version
+        kubernetes_version = values.get("kubernetes_version")
+        available_kubernetes_versions = google_cloud.kubernetes_versions(region)
+        if kubernetes_version is None:
+            values["kubernetes_version"] = available_kubernetes_versions[-1]
+        elif kubernetes_version not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
-        else:
-            value = available_kubernetes_versions[-1]
-        return value
+        return values
 
 
 class AzureNodeGroup(schema.Base):
@@ -368,17 +374,15 @@ class AzureNodeGroup(schema.Base):
 
 
 class AzureProvider(schema.Base):
+    region: str
+    kubernetes_version: str
+    storage_account_postfix: str
     resource_group_name: str = None
-    region: str = "Central US"
-    kubernetes_version: typing.Optional[str] = None
     node_groups: typing.Dict[str, AzureNodeGroup] = {
         "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
         "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
         "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     }
-    storage_account_postfix: str = Field(
-        default_factory=lambda: random_secure_string(length=4)
-    )
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
     resource_group_name: typing.Optional[str] = None
@@ -390,7 +394,6 @@ class AzureProvider(schema.Base):
     @classmethod
     def _validate_kubernetes_version(cls, value: typing.Optional[str]) -> str:
         azure_cloud.check_credentials()
-
         available_kubernetes_versions = azure_cloud.kubernetes_versions()
         if value is None:
             value = available_kubernetes_versions[-1]
@@ -436,11 +439,9 @@ class AWSNodeGroup(schema.Base):
 
 
 class AmazonWebServicesProvider(schema.Base):
-    region: str = Field(
-        default_factory=lambda: os.environ.get("AWS_DEFAULT_REGION", "us-west-2")
-    )
-    availability_zones: typing.Optional[typing.List[str]] = None
-    kubernetes_version: typing.Optional[str] = None
+    region: str
+    kubernetes_version: str
+    availability_zones: typing.Optional[typing.List[str]]
     node_groups: typing.Dict[str, AWSNodeGroup] = {
         "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
         "user": AWSNodeGroup(
@@ -454,58 +455,38 @@ class AmazonWebServicesProvider(schema.Base):
     existing_security_group_ids: typing.Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
 
-    @field_validator("kubernetes_version")
-    @classmethod
-    def _validate_kubernetes_version(cls, value: typing.Optional[str]) -> str:
-        amazon_web_services.check_credentials()
+    @pydantic.root_validator
+    def validate_all(cls, values):
+        region = values.get("region")
+        if region is None:
+            raise ValueError("The `amazon_web_services.region` field is required.")
 
-        available_kubernetes_versions = amazon_web_services.kubernetes_versions()
-        if value is None:
-            value = available_kubernetes_versions[-1]
-        elif value not in available_kubernetes_versions:
+        # validate region
+        amazon_web_services.validate_region(region)
+
+        # validate kubernetes version
+        kubernetes_version = values.get("kubernetes_version")
+        available_kubernetes_versions = amazon_web_services.kubernetes_versions(region)
+        if kubernetes_version is None:
+            values["kubernetes_version"] = available_kubernetes_versions[-1]
+        elif kubernetes_version not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
-        return value
 
-    @field_validator("node_groups")
-    @classmethod
-    def _validate_node_group(
-        cls, value: typing.Dict[str, AWSNodeGroup]
-    ) -> typing.Dict[str, AWSNodeGroup]:
-        amazon_web_services.check_credentials()
-
-        available_instances = amazon_web_services.instances()
-        for _, node_group in value.items():
+        # validate node groups
+        node_groups = values["node_groups"]
+        available_instances = amazon_web_services.instances(region)
+        for name, node_group in node_groups.items():
             if node_group.instance not in available_instances:
                 raise ValueError(
                     f"Instance {node_group.instance} not available out of available instances {available_instances.keys()}"
                 )
-        return value
+        if values["availability_zones"] is None:
+            zones = amazon_web_services.zones(region)
+            values["availability_zones"] = list(sorted(zones))[:2]
 
-    @field_validator("region")
-    @classmethod
-    def _validate_region(cls, value: str) -> str:
-        amazon_web_services.check_credentials()
-
-        available_regions = amazon_web_services.regions()
-        if value not in available_regions:
-            raise ValueError(
-                f"Region {value} is not one of available regions {available_regions}"
-            )
-        return value
-
-    @field_validator("availability_zones")
-    @classmethod
-    def _validate_availability_zones(
-        cls, value: typing.Optional[typing.List[str]]
-    ) -> typing.List[str]:
-        amazon_web_services.check_credentials()
-
-        if value is None:
-            zones = amazon_web_services.zones()
-            value = list(sorted(zones))[:2]
-        return value
+        return values
 
 
 class LocalProvider(schema.Base):

@@ -48,9 +48,16 @@ def set_config_from_environment_variables(
         attrs = secret[len(keyword + separator) :].split(separator)
         try:
             set_nested_attribute(config, attrs, os.environ[secret])
+        except pydantic.ValidationError as e:
+            print(
+                f"ERROR: the provided environment variable {secret} causes the following pydantic validation error:\n\n",
+                e,
+            )
+            sys.exit(1)
         except Exception as e:
             print(
-                f"FAILED: setting secret from environment variable={secret} due to the following error\n {e}"
+                f"ERROR: the provided environment variable {secret} causes the following error:\n\n",
+                e,
             )
             sys.exit(1)
     return config

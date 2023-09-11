@@ -26,3 +26,4 @@ certificate:
 azure:
   kubernetes_version: '1.20'
   storage_account_postfix: abcd
+  region: Central US

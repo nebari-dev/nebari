@@ -10,10 +10,23 @@ import typer
 from pydantic import BaseModel
 
 from _nebari.config import write_configuration
+from _nebari.constants import (
+    AWS_DEFAULT_REGION,
+    AZURE_DEFAULT_REGION,
+    DO_DEFAULT_REGION,
+    GCP_DEFAULT_REGION,
+)
 from _nebari.initialize import render_config
+from _nebari.provider.cloud import (
+    amazon_web_services,
+    azure_cloud,
+    digital_ocean,
+    google_cloud,
+)
 from _nebari.stages.bootstrap import CiEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
+from _nebari.utils import get_latest_kubernetes_version
 from nebari import schema
 from nebari.hookspecs import hookimpl
 from nebari.schema import ProviderEnum
@@ -22,6 +35,7 @@ MISSING_CREDS_TEMPLATE = "Unable to locate your {provider} credentials, refer to
 LINKS_TO_DOCS_TEMPLATE = (
     "For more details, refer to the Nebari docs:\n\n\t[green]{link_to_docs}[/green]\n\n"
 )
+LINKS_TO_EXTERNAL_DOCS_TEMPLATE = "For more details, refer to the {provider} docs:\n\n\t[green]{link_to_docs}[/green]\n\n"
 
 # links to external docs
 CREATE_AWS_CREDS = (
@@ -36,6 +50,12 @@ CREATE_DO_CREDS = (
 CREATE_AZURE_CREDS = "https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret#creating-a-service-principal-in-the-azure-portal"
 CREATE_AUTH0_CREDS = "https://auth0.com/docs/get-started/auth0-overview/create-applications/machine-to-machine-apps"
 CREATE_GITHUB_OAUTH_CREDS = "https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app"
+AWS_REGIONS = "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions"
+GCP_REGIONS = "https://cloud.google.com/compute/docs/regions-zones"
+AZURE_REGIONS = "https://azure.microsoft.com/en-us/explore/global-infrastructure/geographies/#overview"
+DO_REGIONS = (
+    "https://docs.digitalocean.com/products/platform/availability-matrix/#regions"
+)
 
 # links to Nebari docs
 DOCS_HOME = "https://nebari.dev/docs/"
@@ -46,6 +66,12 @@ GUIDED_INIT_MSG = (
     "to generate your [purple]nebari-config.yaml[/purple]. "
     "It is an [i]alternative[/i] to passing the options listed below."
 )
+
+DEFAULT_KUBERNETES_VERSION_MSG = (
+    "Defaulting to latest `{kubernetes_version}` Kubernetes version available."
+)
+
+LATEST = "latest"
 
 
 class GitRepoEnum(str, enum.Enum):
@@ -65,6 +91,7 @@ class InitInputs(schema.Base):
     ci_provider: CiEnum = CiEnum.none
     terraform_state: TerraformStateEnum = TerraformStateEnum.remote
     kubernetes_version: typing.Union[str, None] = None
+    region: typing.Union[str, None] = None
     ssl_cert_email: typing.Union[schema.email_pydantic, None] = None
     disable_prompt: bool = False
     output: pathlib.Path = pathlib.Path("nebari-config.yaml")
@@ -72,6 +99,17 @@ class InitInputs(schema.Base):
 
 def enum_to_list(enum_cls):
     return [e.value for e in enum_cls]
+
+
+def get_region_docs(cloud_provider: str):
+    if cloud_provider == ProviderEnum.aws.value.lower():
+        return AWS_REGIONS
+    elif cloud_provider == ProviderEnum.gcp.value.lower():
+        return GCP_REGIONS
+    elif cloud_provider == ProviderEnum.azure.value.lower():
+        return AZURE_REGIONS
+    elif cloud_provider == ProviderEnum.do.value.lower():
+        return DO_REGIONS
 
 
 def handle_init(inputs: InitInputs, config_schema: BaseModel):
@@ -94,6 +132,7 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
         repository=inputs.repository,
         repository_auto_provision=inputs.repository_auto_provision,
         kubernetes_version=inputs.kubernetes_version,
+        region=inputs.region,
         terraform_state=inputs.terraform_state,
         ssl_cert_email=inputs.ssl_cert_email,
         disable_prompt=inputs.disable_prompt,
@@ -208,13 +247,11 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
     return auth_provider
 
 
-def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: ProviderEnum):
+def check_cloud_provider_creds(cloud_provider: ProviderEnum, disable_prompt: bool):
     """Validate that the necessary cloud credentials have been set as environment variables."""
 
-    if ctx.params.get("disable_prompt"):
+    if disable_prompt:
         return cloud_provider.lower()
-
-    cloud_provider = cloud_provider.lower()
 
     # AWS
     if cloud_provider == ProviderEnum.aws.value.lower() and (
@@ -314,6 +351,106 @@ def check_cloud_provider_creds(ctx: typer.Context, cloud_provider: ProviderEnum)
     return cloud_provider
 
 
+def check_cloud_provider_kubernetes_version(
+    kubernetes_version: str, cloud_provider: str, region: str
+):
+    if cloud_provider == ProviderEnum.aws.value.lower():
+        versions = amazon_web_services.kubernetes_versions(region)
+
+        if not kubernetes_version or kubernetes_version == LATEST:
+            kubernetes_version = get_latest_kubernetes_version(versions)
+            rich.print(
+                DEFAULT_KUBERNETES_VERSION_MSG.format(
+                    kubernetes_version=kubernetes_version
+                )
+            )
+        if kubernetes_version not in versions:
+            raise ValueError(
+                f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the AWS docs for a list of valid versions: {versions}"
+            )
+    elif cloud_provider == ProviderEnum.azure.value.lower():
+        versions = azure_cloud.kubernetes_versions(region)
+
+        if not kubernetes_version or kubernetes_version == LATEST:
+            kubernetes_version = get_latest_kubernetes_version(versions)
+            rich.print(
+                DEFAULT_KUBERNETES_VERSION_MSG.format(
+                    kubernetes_version=kubernetes_version
+                )
+            )
+        if kubernetes_version not in versions:
+            raise ValueError(
+                f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the Azure docs for a list of valid versions: {versions}"
+            )
+    elif cloud_provider == ProviderEnum.gcp.value.lower():
+        versions = google_cloud.kubernetes_versions(region)
+
+        if not kubernetes_version or kubernetes_version == LATEST:
+            kubernetes_version = get_latest_kubernetes_version(versions)
+            rich.print(
+                DEFAULT_KUBERNETES_VERSION_MSG.format(
+                    kubernetes_version=kubernetes_version
+                )
+            )
+        if kubernetes_version not in versions:
+            raise ValueError(
+                f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the GCP docs for a list of valid versions: {versions}"
+            )
+    elif cloud_provider == ProviderEnum.do.value.lower():
+        versions = digital_ocean.kubernetes_versions(region)
+
+        if not kubernetes_version or kubernetes_version == LATEST:
+            kubernetes_version = get_latest_kubernetes_version(versions)
+            rich.print(
+                DEFAULT_KUBERNETES_VERSION_MSG.format(
+                    kubernetes_version=kubernetes_version
+                )
+            )
+        if kubernetes_version not in versions:
+            raise ValueError(
+                f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the DO docs for a list of valid versions: {versions}"
+            )
+
+    return kubernetes_version
+
+
+def check_cloud_provider_region(region: str, cloud_provider: str) -> str:
+    if cloud_provider == ProviderEnum.aws.value.lower():
+        if not region:
+            region = os.environ.get("AWS_DEFAULT_REGION")
+            if not region:
+                region = AWS_DEFAULT_REGION
+                rich.print(f"Defaulting to `{region}` region.")
+            else:
+                rich.print(
+                    f"Falling back to the region found in the AWS_DEFAULT_REGION environment variable: `{region}`"
+                )
+        region = amazon_web_services.validate_region(region)
+    elif cloud_provider == ProviderEnum.azure.value.lower():
+        # TODO: Add a check for valid region for Azure
+        if not region:
+            region = AZURE_DEFAULT_REGION
+            rich.print(f"Defaulting to `{region}` region.")
+    elif cloud_provider == ProviderEnum.gcp.value.lower():
+        if not region:
+            region = GCP_DEFAULT_REGION
+            rich.print(f"Defaulting to `{region}` region.")
+        if region not in google_cloud.regions(os.environ["PROJECT_ID"]):
+            raise ValueError(
+                f"Invalid region `{region}`. Please refer to the GCP docs for a list of valid regions: {GCP_REGIONS}"
+            )
+    elif cloud_provider == ProviderEnum.do.value.lower():
+        if not region:
+            region = DO_DEFAULT_REGION
+            rich.print(f"Defaulting to `{region}` region.")
+
+        if region not in set(_["slug"] for _ in digital_ocean.regions()):
+            raise ValueError(
+                f"Invalid region `{region}`. Please refer to the DO docs for a list of valid regions: {DO_REGIONS}"
+            )
+    return region
+
+
 @hookimpl
 def nebari_subcommand(cli: typer.Typer):
     @cli.command()
@@ -321,8 +458,6 @@ def nebari_subcommand(cli: typer.Typer):
         cloud_provider: ProviderEnum = typer.Argument(
             ProviderEnum.local,
             help=f"options: {enum_to_list(ProviderEnum)}",
-            callback=check_cloud_provider_creds,
-            is_eager=True,
         ),
         # Although this unused below, the functionality is contained in the callback. Thus,
         # this attribute cannot be removed.
@@ -355,6 +490,10 @@ def nebari_subcommand(cli: typer.Typer):
                 "Namespace must begin with a letter and consist of letters, numbers, dashes, or underscores.",
             ),
         ),
+        region: str = typer.Option(
+            None,
+            help="The region you want to deploy your Nebari cluster to (if deploying to the cloud)",
+        ),
         auth_provider: AuthenticationEnum = typer.Option(
             AuthenticationEnum.password,
             help=f"options: {enum_to_list(AuthenticationEnum)}",
@@ -379,7 +518,8 @@ def nebari_subcommand(cli: typer.Typer):
             help=f"options: {enum_to_list(TerraformStateEnum)}",
         ),
         kubernetes_version: str = typer.Option(
-            "latest",
+            LATEST,
+            help="The Kubernetes version you want to deploy your Nebari cluster to, leave blank for latest version",
         ),
         ssl_cert_email: str = typer.Option(
             None,
@@ -415,7 +555,16 @@ def nebari_subcommand(cli: typer.Typer):
         """
         inputs = InitInputs()
 
-        inputs.cloud_provider = cloud_provider
+        # validate inputs after they've been set so we can control the order they are validated
+        # validations for --guided-init should be handled as a callbacks within the `guided_init_wizard`
+        inputs.cloud_provider = check_cloud_provider_creds(
+            cloud_provider, disable_prompt
+        )
+        inputs.region = check_cloud_provider_region(region, inputs.cloud_provider)
+        inputs.kubernetes_version = check_cloud_provider_kubernetes_version(
+            kubernetes_version, inputs.cloud_provider, inputs.region
+        )
+
         inputs.project_name = project_name
         inputs.domain_name = domain_name
         inputs.namespace = namespace
@@ -425,7 +574,6 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.repository_auto_provision = repository_auto_provision
         inputs.ci_provider = ci_provider
         inputs.terraform_state = terraform_state
-        inputs.kubernetes_version = kubernetes_version
         inputs.ssl_cert_email = ssl_cert_email
         inputs.disable_prompt = disable_prompt
         inputs.output = output
@@ -488,10 +636,44 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         ).unsafe_ask()
 
         if not disable_checks:
-            check_cloud_provider_creds(ctx, cloud_provider=inputs.cloud_provider)
+            check_cloud_provider_creds(
+                cloud_provider=inputs.cloud_provider,
+                disable_prompt=ctx.params["disable_prompt"],
+            )
 
         # specific context needed when `check_project_name` is called
         ctx.params["cloud_provider"] = inputs.cloud_provider
+
+        # cloud region
+        if (
+            inputs.cloud_provider != ProviderEnum.local.value.lower()
+            and inputs.cloud_provider != ProviderEnum.existing.value.lower()
+        ):
+            aws_region = os.environ.get("AWS_DEFAULT_REGION")
+            if inputs.cloud_provider == ProviderEnum.aws.value.lower() and aws_region:
+                region = aws_region
+            else:
+                region_docs = get_region_docs(inputs.cloud_provider)
+                rich.print(
+                    (
+                        "\n 🪴  Nebari clusters that run in the cloud require specifying which region to deploy to, "
+                        "please review the the cloud provider docs on the names and format these region take "
+                        f"{LINKS_TO_EXTERNAL_DOCS_TEMPLATE.format(provider=inputs.cloud_provider.value, link_to_docs=region_docs)}"
+                    )
+                )
+
+                region = questionary.text(
+                    "In which region would you like to deploy your Nebari cluster?",
+                    qmark=qmark,
+                ).unsafe_ask()
+
+            if not disable_checks:
+                region = check_cloud_provider_region(
+                    region, cloud_provider=inputs.cloud_provider
+                )
+
+            inputs.region = region
+            ctx.params["region"] = region
 
         name_guidelines = """
         The project name must adhere to the following requirements:
@@ -674,10 +856,17 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             ).unsafe_ask()
 
             # KUBERNETES VERSION
-            inputs.kubernetes_version = questionary.text(
+            kubernetes_version = questionary.text(
                 "Which Kubernetes version would you like to use (if none provided; latest version will be installed)?",
                 qmark=qmark,
             ).unsafe_ask()
+            if not disable_checks:
+                check_cloud_provider_kubernetes_version(
+                    kubernetes_version=kubernetes_version,
+                    cloud_provider=inputs.cloud_provider,
+                    region=inputs.region,
+                )
+            inputs.kubernetes_version = kubernetes_version
 
         from nebari.plugins import nebari_plugin_manager
 
