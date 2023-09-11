@@ -207,7 +207,7 @@ def get_secret_config_entries(config, config_idx=None, private_entries=None):
         sub_dict = get_sub_config(config, config_idx)
 
     for key, value in sub_dict.items():
-        if type(value) is dict:
+        if isinstance(value, dict):
             sub_dict_outputs = get_secret_config_entries(
                 config, [*config_idx, key], private_entries
             )
