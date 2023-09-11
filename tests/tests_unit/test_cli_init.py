@@ -9,10 +9,22 @@ from typer import Typer
 from typer.testing import CliRunner
 
 from _nebari.cli import create_cli
+from _nebari.constants import AZURE_DEFAULT_REGION
 
 runner = CliRunner()
 
-TEST_KUBERNETES_VERSION = {"default": "1.20", "do": "1.20.2-do.0"}
+MOCK_KUBERNETES_VERSIONS = {
+    "aws": ["1.20"],
+    "azure": ["1.20"],
+    "gcp": ["1.20"],
+    "do": ["1.21.5-do.0"],
+}
+MOCK_CLOUD_REGIONS = {
+    "aws": ["us-east-1"],
+    "azure": [AZURE_DEFAULT_REGION],
+    "gcp": ["us-central1"],
+    "do": ["nyc3"],
+}
 
 
 @pytest.mark.parametrize(
@@ -35,6 +47,7 @@ TEST_KUBERNETES_VERSION = {"default": "1.20", "do": "1.20.2-do.0"}
         (["--ci-provider"], 2, ["requires an argument"]),
         (["--terraform-state"], 2, ["requires an argument"]),
         (["--kubernetes-version"], 2, ["requires an argument"]),
+        (["--region"], 2, ["requires an argument"]),
         (["--ssl-cert-email"], 2, ["requires an argument"]),
         (["--output"], 2, ["requires an argument"]),
         (["-o"], 2, ["requires an argument"]),
@@ -56,38 +69,49 @@ def generate_test_data_test_cli_init_happy_path():
 
     test_data = []
     for provider in ["local", "aws", "azure", "gcp", "do", "existing"]:
-        for project_name in ["testproject"]:
-            for domain_name in [f"{project_name}.example.com"]:
-                for namespace in ["test-ns"]:
-                    for auth_provider in [
-                        "password"
-                    ]:  # ["password", "Auth0", "GitHub"] # Auth0, Github failing as of 2023-08-23
-                        for repository in ["github.com", "gitlab.com"]:
-                            for ci_provider in ["none", "github-actions", "gitlab-ci"]:
-                                for terraform_state in ["local", "remote", "existing"]:
-                                    for email in ["noreply@example.com"]:
-                                        for kubernetes_version in [
-                                            TEST_KUBERNETES_VERSION[provider]
-                                            if provider in TEST_KUBERNETES_VERSION
-                                            else TEST_KUBERNETES_VERSION["default"]
-                                        ] + ["latest"]:
-                                            test_data.append(
-                                                (
-                                                    provider,
-                                                    project_name,
-                                                    domain_name,
-                                                    namespace,
-                                                    auth_provider,
-                                                    repository,
-                                                    ci_provider,
-                                                    terraform_state,
-                                                    email,
-                                                    kubernetes_version,
+        for region in get_cloud_regions(provider):
+            for project_name in ["testproject"]:
+                for domain_name in [f"{project_name}.example.com"]:
+                    for namespace in ["test-ns"]:
+                        for auth_provider in [
+                            "password"
+                        ]:  # ["password", "Auth0", "GitHub"] # Auth0, Github failing as of 2023-08-23
+                            for repository in ["github.com", "gitlab.com"]:
+                                for ci_provider in [
+                                    "none",
+                                    "github-actions",
+                                    "gitlab-ci",
+                                ]:
+                                    for terraform_state in [
+                                        "local",
+                                        "remote",
+                                        "existing",
+                                    ]:
+                                        for email in ["noreply@example.com"]:
+                                            for (
+                                                kubernetes_version
+                                            ) in get_kubernetes_versions(provider) + [
+                                                "latest"
+                                            ]:
+                                                test_data.append(
+                                                    (
+                                                        provider,
+                                                        region,
+                                                        project_name,
+                                                        domain_name,
+                                                        namespace,
+                                                        auth_provider,
+                                                        repository,
+                                                        ci_provider,
+                                                        terraform_state,
+                                                        email,
+                                                        kubernetes_version,
+                                                    )
                                                 )
-                                            )
 
     keys = [
         "provider",
+        "region",
         "project_name",
         "domain_name",
         "namespace",
@@ -103,6 +127,7 @@ def generate_test_data_test_cli_init_happy_path():
 
 def test_cli_init_happy_path(
     provider: str,
+    region: str,
     project_name: str,
     domain_name: str,
     namespace: str,
@@ -139,6 +164,8 @@ def test_cli_init_happy_path(
         email,
         "--kubernetes-version",
         kubernetes_version,
+        "--region",
+        region,
     ]
 
     expected_yaml = f"""
@@ -163,6 +190,7 @@ def test_cli_init_happy_path(
         expected_yaml += f"""
     {provider_section}:
         kubernetes_version: '{kubernetes_version}'
+        region: '{region}'
     """
 
     assert_nebari_init_args(app, args, expected_yaml)
@@ -239,5 +267,31 @@ def get_provider_section_header(provider: str):
         return "azure"
     if provider == "do":
         return "digital_ocean"
+
+    return ""
+
+
+def get_cloud_regions(provider: str):
+    if provider == "aws":
+        return MOCK_CLOUD_REGIONS["aws"]
+    if provider == "gcp":
+        return MOCK_CLOUD_REGIONS["gcp"]
+    if provider == "azure":
+        return MOCK_CLOUD_REGIONS["azure"]
+    if provider == "do":
+        return MOCK_CLOUD_REGIONS["do"]
+
+    return ""
+
+
+def get_kubernetes_versions(provider: str):
+    if provider == "aws":
+        return MOCK_KUBERNETES_VERSIONS["aws"]
+    if provider == "gcp":
+        return MOCK_KUBERNETES_VERSIONS["gcp"]
+    if provider == "azure":
+        return MOCK_KUBERNETES_VERSIONS["azure"]
+    if provider == "do":
+        return MOCK_KUBERNETES_VERSIONS["do"]
 
     return ""

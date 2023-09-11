@@ -1,9 +1,14 @@
-import typing
 from unittest.mock import Mock
 
 import pytest
 
 from _nebari.config import write_configuration
+from _nebari.constants import (
+    AWS_DEFAULT_REGION,
+    AZURE_DEFAULT_REGION,
+    DO_DEFAULT_REGION,
+    GCP_DEFAULT_REGION,
+)
 from _nebari.initialize import render_config
 from _nebari.render import render_template
 from _nebari.stages.bootstrap import CiEnum
@@ -15,26 +20,9 @@ from nebari.plugins import nebari_plugin_manager
 
 @pytest.fixture(autouse=True)
 def mock_all_cloud_methods(monkeypatch):
-    def _mock_kubernetes_versions(
-        k8s_versions: typing.List[str] = ["1.18", "1.19", "1.20"],
-        grab_latest_version=False,
-    ):
-        # template for all `kubernetes_versions` calls
-        # monkeypatched to avoid making outbound API calls in CI
-        m = Mock()
-        m.return_value = k8s_versions
-        if grab_latest_version:
-            m.return_value = k8s_versions[-1]
-        return m
-
     def _mock_return_value(return_value):
         m = Mock()
         m.return_value = return_value
-        return m
-
-    def _mock_aws_availability_zones(region="us-west-2"):
-        m = Mock()
-        m.return_value = ["us-west-2a", "us-west-2b"]
         return m
 
     MOCK_VALUES = {
@@ -87,6 +75,10 @@ def mock_all_cloud_methods(monkeypatch):
             "1.20",
         ],
         "_nebari.provider.cloud.google_cloud.check_credentials": None,
+        "_nebari.provider.cloud.google_cloud.regions": [
+            "us-central1",
+            "us-east1",
+        ],
     }
 
     for attribute_path, return_value in MOCK_VALUES.items():
@@ -97,12 +89,13 @@ def mock_all_cloud_methods(monkeypatch):
 
 @pytest.fixture(
     params=[
-        # project, namespace, domain, cloud_provider, ci_provider, auth_provider
+        # project, namespace, domain, cloud_provider, region, ci_provider, auth_provider
         (
             "pytestdo",
             "dev",
             "do.nebari.dev",
             schema.ProviderEnum.do,
+            DO_DEFAULT_REGION,
             CiEnum.github_actions,
             AuthenticationEnum.password,
         ),
@@ -111,6 +104,7 @@ def mock_all_cloud_methods(monkeypatch):
             "dev",
             "aws.nebari.dev",
             schema.ProviderEnum.aws,
+            AWS_DEFAULT_REGION,
             CiEnum.github_actions,
             AuthenticationEnum.password,
         ),
@@ -119,6 +113,7 @@ def mock_all_cloud_methods(monkeypatch):
             "dev",
             "gcp.nebari.dev",
             schema.ProviderEnum.gcp,
+            GCP_DEFAULT_REGION,
             CiEnum.github_actions,
             AuthenticationEnum.password,
         ),
@@ -127,6 +122,7 @@ def mock_all_cloud_methods(monkeypatch):
             "dev",
             "azure.nebari.dev",
             schema.ProviderEnum.azure,
+            AZURE_DEFAULT_REGION,
             CiEnum.github_actions,
             AuthenticationEnum.password,
         ),
@@ -142,6 +138,7 @@ def nebari_config_options(request) -> schema.Main:
         namespace,
         domain,
         cloud_provider,
+        region,
         ci_provider,
         auth_provider,
     ) = request.param
@@ -151,6 +148,7 @@ def nebari_config_options(request) -> schema.Main:
         namespace=namespace,
         nebari_domain=domain,
         cloud_provider=cloud_provider,
+        region=region,
         ci_provider=ci_provider,
         auth_provider=auth_provider,
         repository=DEFAULT_GH_REPO,

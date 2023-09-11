@@ -76,6 +76,9 @@ def test_cli_validate_from_env():
             """
 provider: aws
 project_name: test
+amazon_web_services:
+  region: us-east-1
+  kubernetes_version: '1.19'
         """
         )
 
@@ -107,31 +110,44 @@ project_name: test
 
 
 @pytest.mark.parametrize(
-    "key, value, provider, expected_message",
+    "key, value, provider, expected_message, addl_config",
     [
-        ("NEBARI_SECRET__project_name", "123invalid", "local", "validation error"),
-        ("NEBARI_SECRET__this_is_an_error", "true", "local", "object has no field"),
+        ("NEBARI_SECRET__project_name", "123invalid", "local", "validation error", {}),
+        ("NEBARI_SECRET__this_is_an_error", "true", "local", "object has no field", {}),
         (
             "NEBARI_SECRET__amazon_web_services__kubernetes_version",
             "1.0",
             "aws",
             "validation error",
+            {
+                "amazon_web_services": {
+                    "region": "us-east-1",
+                    "kubernetes_version": "1.19",
+                }
+            },
         ),
     ],
 )
 def test_cli_validate_error_from_env(
-    key: str, value: str, provider: str, expected_message: str
+    key: str,
+    value: str,
+    provider: str,
+    expected_message: str,
+    addl_config: Dict[str, Any],
 ):
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
         assert tmp_file.exists() is False
 
-        nebari_config = yaml.safe_load(
-            f"""
+        nebari_config = {
+            **yaml.safe_load(
+                f"""
 provider: {provider}
 project_name: test
         """
-        )
+            ),
+            **addl_config,
+        }
 
         with open(tmp_file.resolve(), "w") as f:
             yaml.dump(nebari_config, f)
@@ -158,12 +174,27 @@ project_name: test
 @pytest.mark.parametrize(
     "provider, addl_config",
     [
-        ("aws", {}),
-        # azure credentials are only checked if a kubernetes_version is specified
-        ("azure", {"azure": {"kubernetes_version": "1.0"}}),
-        # gcp credentials are only checked if a kubernetes_version is specified
-        ("gcp", {"google_cloud_platform": {"kubernetes_version": "1.0"}}),
-        ("do", {}),
+        (
+            "aws",
+            {
+                "amazon_web_services": {
+                    "kubernetes_version": "1.20",
+                    "region": "us-east-1",
+                }
+            },
+        ),
+        ("azure", {"azure": {"kubernetes_version": "1.20", "region": "Central US"}}),
+        (
+            "gcp",
+            {
+                "google_cloud_platform": {
+                    "kubernetes_version": "1.20",
+                    "region": "us-east1",
+                    "project": "test",
+                }
+            },
+        ),
+        ("do", {"digital_ocean": {"kubernetes_version": "1.20", "region": "nyc3"}}),
     ],
 )
 def test_cli_validate_error_missing_cloud_env(
@@ -175,6 +206,7 @@ def test_cli_validate_error_missing_cloud_env(
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
         "GOOGLE_CREDENTIALS",
+        "PROJECT_ID",
         "ARM_SUBSCRIPTION_ID",
         "ARM_TENANT_ID",
         "ARM_CLIENT_ID",
