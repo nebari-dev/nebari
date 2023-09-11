@@ -252,7 +252,7 @@ class InputSchema(schema.Base):
                 "pandas=1.5.3",
                 {
                     "pip": [
-                        "kbatch==0.4.1",
+                        "kbatch==0.4.2",
                     ],
                 },
             ],
