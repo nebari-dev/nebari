@@ -1,5 +1,5 @@
-from pathlib import Path
 import typing
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest

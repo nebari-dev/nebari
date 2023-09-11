@@ -64,7 +64,6 @@ def nebari_subcommand(cli: typer.Typer):
         """
         from nebari.plugins import nebari_plugin_manager
 
-        
         if dns_provider or dns_auto_provision:
             from rich import print
 
