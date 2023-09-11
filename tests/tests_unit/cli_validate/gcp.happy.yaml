@@ -24,4 +24,6 @@ certificate:
   type: lets-encrypt
   acme_email: test@example.com
 google_cloud_platform:
+  project: pytest-project
+  region: us-central1
   kubernetes_version: '1.20'

@@ -25,3 +25,4 @@ certificate:
   acme_email: test@example.com
 digital_ocean:
   kubernetes_version: '1.20.2-do.0'
+  region: nyc3
