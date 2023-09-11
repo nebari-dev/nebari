@@ -57,6 +57,7 @@ dependencies = [
     "pluggy==1.0.0",
     "auth0-python==4.0.0",
     "azure-identity==1.12.0",
+    "azure-mgmt-resource==23.0.1",
     "azure-mgmt-containerservice==19.1.0",
     "bcrypt==3.2.2",
     "boto3==1.26.78",
@@ -87,6 +88,8 @@ dev = [
     "pytest",
     "pytest-timeout",
     "pytest-playwright",
+    "pytest-cov",
+    "coverage[toml]",
     "grayskull",
     "build",
     "jinja2",
@@ -119,3 +122,26 @@ extend-exclude = [
     "home",
     "__pycache__"
 ]
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_also = [
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+    ]
+ignore_errors = false

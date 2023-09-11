@@ -171,7 +171,7 @@ class UpgradeStep(ABC):
 
         def contains_image_and_tag(s: str) -> bool:
             # match on `quay.io/nebari/nebari-<...>:YYYY.MM.XX``
-            pattern = r"^quay\.io\/nebari\/nebari-(jupyterhub|jupyterlab|dask-worker):\d{4}\.\d+\.\d+$"
+            pattern = r"^quay\.io\/nebari\/nebari-(jupyterhub|jupyterlab|dask-worker)(-gpu)?:\d{4}\.\d+\.\d+$"
             return bool(re.match(pattern, s))
 
         def replace_image_tag_legacy(image, start_version, new_version):
@@ -249,11 +249,11 @@ class UpgradeStep(ABC):
 
         # update profiles.dask_worker images
         for k, v in config.get("profiles", {}).get("dask_worker", {}).items():
-            current_image = v.get("kubespawner_override", {}).get("image", None)
+            current_image = v.get("image", None)
             if current_image:
                 config = update_image_tag(
                     config,
-                    f"profiles.dask_worker.{k}.kubespawner_override.image",
+                    f"profiles.dask_worker.{k}.image",
                     current_image,
                     __rounded_finish_version__,
                 )
@@ -286,6 +286,8 @@ class Upgrade_0_3_12(UpgradeStep):
             rich.print(
                 f"Adding default_images: conda_store image as [green]{newimage}[/green]"
             )
+            if "default_images" not in config:
+                config["default_images"] = {}
             config["default_images"]["conda_store"] = newimage
         return config
 
@@ -377,6 +379,9 @@ class Upgrade_0_4_0(UpgradeStep):
             rich.print(
                 "Removing terraform_modules field from config as it is no longer used.\n"
             )
+
+        if "default_images" not in config:
+            config["default_images"] = {}
 
         # Remove conda_store image from default_images
         if "conda_store" in config["default_images"]:

@@ -1,10 +1,9 @@
 import enum
 import json
-import os
 import sys
 import time
 import typing
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Type
 from urllib.parse import urlencode
 
 import pydantic
@@ -17,6 +16,7 @@ from _nebari.stages.tf_objects import (
     NebariKubernetesProvider,
     NebariTerraformState,
 )
+from _nebari.utils import set_docker_image_tag, set_nebari_dask_version
 from _nebari.version import __version__
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -24,16 +24,6 @@ from nebari.hookspecs import NebariStage, hookimpl
 # check and retry settings
 NUM_ATTEMPTS = 10
 TIMEOUT = 10  # seconds
-
-
-def set_docker_image_tag() -> str:
-    """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
-    return os.environ.get("NEBARI_IMAGE_TAG", constants.DEFAULT_NEBARI_IMAGE_TAG)
-
-
-def set_nebari_dask_version() -> str:
-    """Set version of `nebari-dask` meta package."""
-    return os.environ.get("NEBARI_DASK_VERSION", constants.DEFAULT_NEBARI_DASK_VERSION)
 
 
 @schema.yaml_object(schema.yaml)
@@ -52,12 +42,6 @@ class Prefect(schema.Base):
     image: typing.Optional[str]
     overrides: typing.Dict = {}
     token: typing.Optional[str]
-
-
-class CDSDashboards(schema.Base):
-    enabled: bool = True
-    cds_hide_user_named_servers: bool = True
-    cds_hide_user_dashboard_servers: bool = False
 
 
 class DefaultImages(schema.Base):
@@ -246,7 +230,6 @@ class JupyterLab(schema.Base):
 
 class InputSchema(schema.Base):
     prefect: Prefect = Prefect()
-    cdsdashboards: CDSDashboards = CDSDashboards()
     default_images: DefaultImages = DefaultImages()
     storage: Storage = Storage()
     theme: Theme = Theme()
@@ -279,7 +262,6 @@ class InputSchema(schema.Base):
             channels=["conda-forge"],
             dependencies=[
                 "python=3.10",
-                "cdsdashboards-singleuser=0.6.3",
                 "cufflinks-py=0.17.3",
                 "dash=2.8.1",
                 "geopandas=0.12.2",
@@ -370,7 +352,6 @@ class CondaStoreInputVars(schema.Base):
 
 
 class JupyterhubInputVars(schema.Base):
-    cdsdashboards: Dict[str, Any]
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
@@ -380,6 +361,7 @@ class JupyterhubInputVars(schema.Base):
     jupyterhub_image: ImageNameTag = Field(alias="jupyterhub-image")
     jupyterhub_hub_extraEnv: str = Field(alias="jupyterhub-hub-extraEnv")
     idle_culler_settings: Dict[str, Any] = Field(alias="idle-culler-settings")
+    argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -449,12 +431,6 @@ class KubernetesServicesStage(NebariTerraformStage):
         ]["keycloak-read-only-user-credentials"]["value"]
 
         conda_store_token_scopes = {
-            "cdsdashboards": {
-                "primary_namespace": "cdsdashboards",
-                "role_bindings": {
-                    "*/*": ["viewer"],
-                },
-            },
             "dask-gateway": {
                 "primary_namespace": "",
                 "role_bindings": {
@@ -508,7 +484,6 @@ class KubernetesServicesStage(NebariTerraformStage):
         )
 
         jupyterhub_vars = JupyterhubInputVars(
-            cdsdashboards=self.config.cdsdashboards.dict(),
             jupyterhub_theme=jupyterhub_theme.dict(),
             jupyterlab_image=_split_docker_image_name(
                 self.config.default_images.jupyterlab
@@ -524,6 +499,7 @@ class KubernetesServicesStage(NebariTerraformStage):
                 self.config.jupyterhub.overrides.get("hub", {}).get("extraEnv", [])
             ),
             idle_culler_settings=self.config.jupyterlab.idle_culler.dict(),
+            argo_workflows_enabled=self.config.argo_workflows.enabled,
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
@@ -609,5 +585,5 @@ class KubernetesServicesStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [KubernetesServicesStage]

@@ -2,7 +2,7 @@ import contextlib
 import logging
 import pathlib
 import textwrap
-from typing import List
+from typing import Any, Dict, List
 
 from _nebari.utils import timer
 from nebari import hookspecs, schema
@@ -15,7 +15,7 @@ def deploy_configuration(
     stages: List[hookspecs.NebariStage],
     disable_prompt: bool = False,
     disable_checks: bool = False,
-):
+) -> Dict[str, Any]:
     if config.prevent_deploy:
         raise ValueError(
             textwrap.dedent(
@@ -73,3 +73,5 @@ def deploy_configuration(
         print(
             "Additional administration docs can be found at https://docs.nebari.dev/en/stable/source/admin_guide/"
         )
+
+    return stage_outputs

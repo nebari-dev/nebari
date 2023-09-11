@@ -1,0 +1,4 @@
+project_name: test
+amazon_web_services:
+  region: us-east-1
+  kubernetes_version: '1.0'

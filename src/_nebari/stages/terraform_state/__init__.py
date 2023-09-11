@@ -3,11 +3,19 @@ import enum
 import inspect
 import os
 import pathlib
+import re
 import typing
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Type
 
+import pydantic
+
+from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.utils import modified_environ
+from _nebari.utils import (
+    AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
+    construct_azure_resource_group_name,
+    modified_environ,
+)
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -30,6 +38,29 @@ class AzureInputVars(schema.Base):
     region: str
     storage_account_postfix: str
     state_resource_group_name: str
+    tags: Dict[str, str] = {}
+
+    @pydantic.validator("state_resource_group_name")
+    def _validate_resource_group_name(cls, value):
+        if value is None:
+            return value
+        length = len(value) + len(AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX)
+        if length < 1 or length > 90:
+            raise ValueError(
+                f"Azure Resource Group name must be between 1 and 90 characters long, when combined with the suffix `{AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX}`."
+            )
+        if not re.match(r"^[\w\-\.\(\)]+$", value):
+            raise ValueError(
+                "Azure Resource Group name can only contain alphanumerics, underscores, parentheses, hyphens, and periods."
+            )
+        if value[-1] == ".":
+            raise ValueError("Azure Resource Group name can't end with a period.")
+
+        return value
+
+    @pydantic.validator("tags")
+    def _validate_tags(cls, tags):
+        return azure_cloud.validate_tags(tags)
 
 
 class AWSInputVars(schema.Base):
@@ -99,7 +130,12 @@ class TerraformStateStage(NebariTerraformStage):
         elif self.config.provider == schema.ProviderEnum.azure:
             subscription_id = os.environ["ARM_SUBSCRIPTION_ID"]
             resource_name_prefix = f"{self.config.project_name}-{self.config.namespace}"
-            state_resource_group_name = f"{resource_name_prefix}-state"
+            state_resource_group_name = construct_azure_resource_group_name(
+                project_name=self.config.project_name,
+                namespace=self.config.namespace,
+                base_resource_group_name=self.config.azure.resource_group_name,
+                suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
+            )
             state_resource_name_prefix_safe = resource_name_prefix.replace("-", "")
             resource_group_url = f"/subscriptions/{subscription_id}/resourceGroups/{state_resource_group_name}"
 
@@ -158,7 +194,13 @@ class TerraformStateStage(NebariTerraformStage):
                 namespace=self.config.namespace,
                 region=self.config.azure.region,
                 storage_account_postfix=self.config.azure.storage_account_postfix,
-                state_resource_group_name=f"{self.config.project_name}-{self.config.namespace}-state",
+                state_resource_group_name=construct_azure_resource_group_name(
+                    project_name=self.config.project_name,
+                    namespace=self.config.namespace,
+                    base_resource_group_name=self.config.azure.resource_group_name,
+                    suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
+                ),
+                tags=self.config.azure.tags,
             ).dict()
         elif (
             self.config.provider == schema.ProviderEnum.local
@@ -208,5 +250,5 @@ class TerraformStateStage(NebariTerraformStage):
 
 
 @hookimpl
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage() -> List[Type[NebariStage]]:
     return [TerraformStateStage]

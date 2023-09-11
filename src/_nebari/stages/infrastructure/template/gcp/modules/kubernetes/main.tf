@@ -57,6 +57,9 @@ resource "google_container_cluster" "main" {
     }
   }
 
+  cost_management_config {
+    enabled = true
+  }
 
   lifecycle {
     ignore_changes = [
@@ -96,7 +99,7 @@ resource "google_container_node_pool" "main" {
     metadata = {
       disable-legacy-endpoints = "true"
     }
-    labels = local.merged_node_groups[count.index].labels
+    labels = merge(local.merged_node_groups[count.index].labels, var.labels)
     dynamic "guest_accelerator" {
       for_each = local.merged_node_groups[count.index].guest_accelerators
 
@@ -105,5 +108,12 @@ resource "google_container_node_pool" "main" {
         count = guest_accelerator.value.count
       }
     }
+    tags = var.tags
+  }
+
+  lifecycle {
+    ignore_changes = [
+      node_config[0].taint
+    ]
   }
 }
