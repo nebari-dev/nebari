@@ -25,7 +25,9 @@ repos:
     rev: v4.4.0
     hooks:
       - id: end-of-file-fixer
+        exclude: "^docs-sphinx/cli.html"
       - id: trailing-whitespace
+        exclude: "^docs-sphinx/cli.html"
       - id: check-json
       - id: check-yaml
         # jinja2 templates for helm charts
