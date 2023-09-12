@@ -1,10 +1,7 @@
-import pytest
-
 from tests.common.playwright_fixtures import navigator_parameterized
 from tests.common.run_notebook import Notebook
 
 
-@pytest.mark.xfail(strict=False, reason="This test is flaky")
 @navigator_parameterized(instance_name="small-instance")
 def test_notebook(navigator, test_data_root):
     test_app = Notebook(navigator=navigator)
@@ -17,5 +14,5 @@ def test_notebook(navigator, test_data_root):
         path=notebook_name,
         expected_outputs=["success: 6"],
         conda_env="conda-env-default-py",
-        runtime=60000,
+        runtime=90000,
     )
