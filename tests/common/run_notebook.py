@@ -121,11 +121,17 @@ class Notebook:
             logger.debug("Path to notebook is invalid")
             raise RuntimeError("Path to notebook is invalid")
 
-    def assert_code_output(self, code: str, expected_output: List[re.Pattern, str], timeout: float = 1000, complition_wait_time: float = 2):
+    def assert_code_output(
+        self,
+        code: str,
+        expected_output: List[re.Pattern, str],
+        timeout: float = 1000,
+        complition_wait_time: float = 2,
+    ):
         """
         Run code in last cell and check for expected output text anywhere on
         the page.
-        
+
 
         Parameters
         ----------
@@ -168,10 +174,12 @@ class Notebook:
                 return cell
         raise ValueError("Unable to get last cell")
 
-    def _wait_for_commands_completion(self, timeout: float, complition_wait_time: float):
+    def _wait_for_commands_completion(
+        self, timeout: float, complition_wait_time: float
+    ):
         """
         Wait for commands to finish running
-        
+
         Parameters
         ----------
         timeout: float
