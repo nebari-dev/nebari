@@ -42,7 +42,7 @@ variable "jupyterhub-sftp-image" {
   })
   default = {
     name = "quay.io/jupyterhub-ssh/sftp"
-    tag  = "0.0.1-0.dev.git.136.ha610981"
+    tag  = "0.0.1-0.dev.git.142.h402a3d6"
   }
 }
 
