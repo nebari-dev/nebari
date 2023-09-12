@@ -1,17 +1,9 @@
 name: "Integration Tests"
 
 on:
-  # schedule:
-  #   - cron: "0 0 * * MON"
-  # workflow_dispatch:
-  pull_request:
-    paths:
-      - ".github/workflows/test.yaml"
-      - "tests/**"
-      - "scripts/**"
-      - "src/**"
-      - "pyproject.toml"
-      - "pytest.ini"
+  schedule:
+    - cron: "0 0 * * MON"
+  workflow_dispatch:
 
 jobs:
   test-integration:
