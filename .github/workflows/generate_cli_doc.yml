@@ -9,6 +9,9 @@ on:
 
 jobs:
   update_api:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     defaults:
       run:
