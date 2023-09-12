@@ -558,10 +558,10 @@ def nebari_subcommand(cli: typer.Typer):
         inputs = InitInputs()
 
         # validate inputs after they've been set so we can control the order they are validated
+        # validations for --guided-init should be handled as a callbacks within the `guided_init_wizard`
         inputs.cloud_provider = check_cloud_provider_creds(
             cloud_provider, disable_prompt
         )
-        # inputs.cloud_provider = cloud_provider
         inputs.region = check_cloud_provider_region(region, inputs.cloud_provider)
         inputs.kubernetes_version = check_cloud_provider_kubernetes_version(
             kubernetes_version, inputs.cloud_provider, inputs.region

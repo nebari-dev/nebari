@@ -28,6 +28,7 @@ def check_credentials():
             )
 
 
+@functools.lru_cache()
 def aws_session(region: str = None, digitalocean_region: str = None) -> boto3.Session:
     """Create a boto3 session."""
     if digitalocean_region:

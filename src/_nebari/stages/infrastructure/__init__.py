@@ -115,6 +115,7 @@ class AzureInputVars(schema.Base):
     node_resource_group_name: str
     vnet_subnet_id: str = None
     private_cluster_enabled: bool
+    tags: Dict[str, str] = {}
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -208,8 +209,8 @@ class DigitalOceanNodeGroup(schema.Base):
 
 
 class DigitalOceanProvider(schema.Base):
-    region: str = constants.DO_DEFAULT_REGION
-    kubernetes_version: typing.Optional[str]
+    region: str
+    kubernetes_version: str
     # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
     node_groups: typing.Dict[str, DigitalOceanNodeGroup] = {
         "general": DigitalOceanNodeGroup(
@@ -314,10 +315,10 @@ class GCPNodeGroup(schema.Base):
 
 
 class GoogleCloudPlatformProvider(schema.Base):
-    project: str = pydantic.Field(default_factory=lambda: os.environ.get("PROJECT_ID"))
-    region: str = "us-central1"
+    region: str
+    project: str
+    kubernetes_version: str
     availability_zones: typing.Optional[typing.List[str]] = []
-    kubernetes_version: typing.Optional[str]
     release_channel: str = constants.DEFAULT_GKE_RELEASE_CHANNEL
     node_groups: typing.Dict[str, GCPNodeGroup] = {
         "general": GCPNodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
@@ -339,21 +340,29 @@ class GoogleCloudPlatformProvider(schema.Base):
     ] = None
 
     @pydantic.root_validator
-    def _validate_kubernetes_version(cls, values):
-        google_cloud.check_credentials()
+    def validate_all(cls, values):
+        region = values.get("region")
+        project_id = values.get("project")
 
-        available_kubernetes_versions = google_cloud.kubernetes_versions(
-            values["region"]
-        )
-        if (
-            values["kubernetes_version"] is not None
-            and values["kubernetes_version"] not in available_kubernetes_versions
-        ):
+        if project_id is None:
+            raise ValueError("The `google_cloud_platform.project` field is required.")
+
+        if region is None:
+            raise ValueError("The `google_cloud_platform.region` field is required.")
+
+        # validate region
+        google_cloud.validate_region(project_id, region)
+
+        # validate kubernetes version
+        kubernetes_version = values.get("kubernetes_version")
+        available_kubernetes_versions = google_cloud.kubernetes_versions(region)
+        if kubernetes_version is None:
+            values["kubernetes_version"] = available_kubernetes_versions[-1]
+        elif kubernetes_version not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
-        else:
-            values["kubernetes_version"] = available_kubernetes_versions[-1]
+
         return values
 
     @pydantic.validator("region")
@@ -373,9 +382,10 @@ class AzureNodeGroup(schema.Base):
 
 
 class AzureProvider(schema.Base):
-    region: str = constants.AZURE_DEFAULT_REGION
+    region: str
+    kubernetes_version: str
+    storage_account_postfix: str
     resource_group_name: str = None
-    kubernetes_version: typing.Optional[str]
     node_groups: typing.Dict[str, AzureNodeGroup] = {
         "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
         "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
@@ -385,6 +395,9 @@ class AzureProvider(schema.Base):
     vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
     private_cluster_enabled: bool = False
     resource_group_name: typing.Optional[str] = None
+    tags: typing.Optional[typing.Dict[str, str]] = {}
+    network_profile: typing.Optional[typing.Dict[str, str]] = None
+    max_pods: typing.Optional[int] = None
 
     @pydantic.validator("kubernetes_version")
     def _validate_kubernetes_version(cls, value):
@@ -415,6 +428,10 @@ class AzureProvider(schema.Base):
 
         return value
 
+    @pydantic.validator("tags")
+    def _validate_tags(cls, tags):
+        return azure_cloud.validate_tags(tags)
+
 
 class AWSNodeGroup(schema.Base):
     instance: str
@@ -425,13 +442,9 @@ class AWSNodeGroup(schema.Base):
 
 
 class AmazonWebServicesProvider(schema.Base):
-    region: str = pydantic.Field(
-        default_factory=lambda: os.environ.get(
-            "AWS_DEFAULT_REGION", constants.AWS_DEFAULT_REGION
-        )
-    )
+    region: str
+    kubernetes_version: str
     availability_zones: typing.Optional[typing.List[str]]
-    kubernetes_version: typing.Optional[str]
     node_groups: typing.Dict[str, AWSNodeGroup] = {
         "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
         "user": AWSNodeGroup(
@@ -447,16 +460,19 @@ class AmazonWebServicesProvider(schema.Base):
 
     @pydantic.root_validator
     def validate_all(cls, values):
-        region = values["region"]
+        region = values.get("region")
+        if region is None:
+            raise ValueError("The `amazon_web_services.region` field is required.")
 
         # validate region
         amazon_web_services.validate_region(region)
 
         # validate kubernetes version
+        kubernetes_version = values.get("kubernetes_version")
         available_kubernetes_versions = amazon_web_services.kubernetes_versions(region)
-        if values["kubernetes_version"] is None:
+        if kubernetes_version is None:
             values["kubernetes_version"] = available_kubernetes_versions[-1]
-        elif values["kubernetes_version"] not in available_kubernetes_versions:
+        elif kubernetes_version not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
@@ -733,6 +749,9 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 ),
                 vnet_subnet_id=self.config.azure.vnet_subnet_id,
                 private_cluster_enabled=self.config.azure.private_cluster_enabled,
+                tags=self.config.azure.tags,
+                network_profile=self.config.azure.network_profile,
+                max_pods=self.config.azure.max_pods,
             ).dict()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(

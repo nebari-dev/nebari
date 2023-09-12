@@ -1,9 +1,4 @@
 # ======================= VARIABLES ======================
-variable "argo-workflows-enabled" {
-  description = "Argo Workflows enabled"
-  type        = bool
-}
-
 variable "argo-workflows-overrides" {
   description = "Argo Workflows helm chart overrides"
   type        = list(string)
