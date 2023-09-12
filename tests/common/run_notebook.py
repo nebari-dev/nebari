@@ -124,7 +124,7 @@ class Notebook:
     def assert_code_output(
         self,
         code: str,
-        expected_output: List[re.Pattern, str],
+        expected_output: List[Union[re.Pattern, str]],
         timeout: float = 1000,
         complition_wait_time: float = 2,
     ):
