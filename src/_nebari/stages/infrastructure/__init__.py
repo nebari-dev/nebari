@@ -365,15 +365,6 @@ class GoogleCloudPlatformProvider(schema.Base):
 
         return values
 
-    @pydantic.validator("region")
-    def _validate_region(cls, value):
-        available_regions = google_cloud.regions(os.environ["PROJECT_ID"])
-        if value not in available_regions:
-            raise ValueError(
-                f"Google Cloud Platform region={value} is not one of {available_regions}"
-            )
-        return value
-
 
 class AzureNodeGroup(schema.Base):
     instance: str
