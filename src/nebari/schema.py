@@ -7,8 +7,12 @@ from _nebari.utils import escape_string, yaml
 from _nebari.version import __version__, rounded_ver_parse
 
 # Regex for suitable project names
-namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
-letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
+project_name_regex = r"^[A-Za-z][A-Za-z0-9\-_]{1,30}[A-Za-z]$"
+project_name_pydantic = pydantic.constr(regex=project_name_regex)
+
+# Regex for suitable namespaces
+namespace_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
+namespace_pydantic = pydantic.constr(regex=namespace_regex)
 
 email_regex = "^[^ @]+@[^ @]+\\.[^ @]+$"
 email_pydantic = pydantic.constr(regex=email_regex)
@@ -38,8 +42,8 @@ class ProviderEnum(str, enum.Enum):
 
 
 class Main(Base):
-    project_name: letter_dash_underscore_pydantic
-    namespace: letter_dash_underscore_pydantic = "dev"
+    project_name: project_name_pydantic
+    namespace: namespace_pydantic = "dev"
     provider: ProviderEnum = ProviderEnum.local
     # In nebari_version only use major.minor.patch version - drop any pre/post/dev suffixes
     nebari_version: str = __version__
