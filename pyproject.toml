@@ -96,6 +96,10 @@ dev = [
     "jinja2",
     "setuptools==63.4.3",
 ]
+docs = [
+    "sphinx",
+    "sphinx_click",
+]
 
 [project.urls]
 Documentation = "https://www.nebari.dev/docs"
