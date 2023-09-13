@@ -33,8 +33,8 @@ on:
 
 env:
   AWS_DEFAULT_REGION: "us-west-2"
-  NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || develop }}
-  NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || main }}
+  NEBARI_GH_BRANCH: ${{ github.event.inputs.branch }}
+  NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag }}
   TF_LOG: ${{ github.event.inputs.tf-log-level }}
 
 
