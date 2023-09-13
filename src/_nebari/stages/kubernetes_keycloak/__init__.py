@@ -65,11 +65,42 @@ class GitHubConfig(schema.Base):
     client_id: str = pydantic.Field(default_factory=lambda: os.environ.get("GITHUB_CLIENT_ID"))
     client_secret: str = pydantic.Field(default_factory=lambda: os.environ.get("GITHUB_CLIENT_SECRET"))
 
+    @pydantic.root_validator(allow_reuse=True)
+    def validate_required(cls, values):
+        missing = []
+        for k, v in {
+            "client_id": "GITHUB_CLIENT_ID",
+            "client_secret": "GITHUB_CLIENT_SECRET",
+        }.items():
+            if not values.get(k):
+                missing.append(v)
+
+        if len(missing) > 0:
+            raise ValueError(f"Missing the following required environment variable(s): {', '.join(missing)}")
+        
+        return values
+
 
 class Auth0Config(schema.Base):
     client_id: str = pydantic.Field(default_factory=lambda: os.environ.get("AUTH0_CLIENT_ID"))
     client_secret: str = pydantic.Field(default_factory=lambda: os.environ.get("AUTH0_CLIENT_SECRET"))
     auth0_subdomain: str = pydantic.Field(default_factory=lambda: os.environ.get("AUTH0_DOMAIN"))
+
+    @pydantic.root_validator(allow_reuse=True)
+    def validate_required(cls, values):
+        missing = []
+        for k, v in {
+            "client_id": "AUTH0_CLIENT_ID",
+            "client_secret": "AUTH0_CLIENT_SECRET",
+            "auth0_subdomain": "AUTH0_DOMAIN",
+        }.items():
+            if not values.get(k):
+                missing.append(v)
+
+        if len(missing) > 0:
+            raise ValueError(f"Missing the following required environment variable(s): {', '.join(missing)}")
+        
+        return values
 
 
 class Authentication(schema.Base, ABC):
@@ -118,12 +149,12 @@ class PasswordAuthentication(Authentication):
 
 class Auth0Authentication(Authentication):
     _typ = AuthenticationEnum.auth0
-    config: Auth0Config = Auth0Config()
+    config: Auth0Config = pydantic.Field(default_factory=lambda: Auth0Config())
 
 
 class GitHubAuthentication(Authentication):
     _typ = AuthenticationEnum.github
-    config: GitHubConfig = GitHubConfig()
+    config: GitHubConfig = pydantic.Field(default_factory=lambda: GitHubConfig())
 
 
 class Keycloak(schema.Base):
