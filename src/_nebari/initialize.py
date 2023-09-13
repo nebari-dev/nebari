@@ -77,7 +77,7 @@ def render_config(
     ] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
 
     config["security"]["authentication"] = {"type": auth_provider}
-    
+
     if auth_provider == AuthenticationEnum.github:
         config["security"]["authentication"]["config"] = {
             "client_id": os.environ.get("GITHUB_CLIENT_ID", ""),
@@ -175,7 +175,7 @@ def render_config(
 
     try:
         config_model = nebari_plugin_manager.config_schema.parse_obj(config)
-    except pydantic.ValidationError as e:
+    except pydantic.ValidationError:
         pass
         # print(str(e))
 

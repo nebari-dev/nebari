@@ -195,8 +195,16 @@ project_name: test
             },
         ),
         ("do", {"digital_ocean": {"kubernetes_version": "1.20", "region": "nyc3"}}),
-        pytest.param("local", {"security": {"authentication": {"type": "Auth0"}}}, id="auth-provider-auth0"),
-        pytest.param("local", {"security": {"authentication": {"type": "GitHub"}}}, id="auth-provider-github"),
+        pytest.param(
+            "local",
+            {"security": {"authentication": {"type": "Auth0"}}},
+            id="auth-provider-auth0",
+        ),
+        pytest.param(
+            "local",
+            {"security": {"authentication": {"type": "GitHub"}}},
+            id="auth-provider-github",
+        ),
     ],
 )
 def test_cli_validate_error_missing_cloud_env(

@@ -62,8 +62,12 @@ class AuthenticationEnum(str, enum.Enum):
 
 
 class GitHubConfig(schema.Base):
-    client_id: str = pydantic.Field(default_factory=lambda: os.environ.get("GITHUB_CLIENT_ID"))
-    client_secret: str = pydantic.Field(default_factory=lambda: os.environ.get("GITHUB_CLIENT_SECRET"))
+    client_id: str = pydantic.Field(
+        default_factory=lambda: os.environ.get("GITHUB_CLIENT_ID")
+    )
+    client_secret: str = pydantic.Field(
+        default_factory=lambda: os.environ.get("GITHUB_CLIENT_SECRET")
+    )
 
     @pydantic.root_validator(allow_reuse=True)
     def validate_required(cls, values):
@@ -76,15 +80,23 @@ class GitHubConfig(schema.Base):
                 missing.append(v)
 
         if len(missing) > 0:
-            raise ValueError(f"Missing the following required environment variable(s): {', '.join(missing)}")
-        
+            raise ValueError(
+                f"Missing the following required environment variable(s): {', '.join(missing)}"
+            )
+
         return values
 
 
 class Auth0Config(schema.Base):
-    client_id: str = pydantic.Field(default_factory=lambda: os.environ.get("AUTH0_CLIENT_ID"))
-    client_secret: str = pydantic.Field(default_factory=lambda: os.environ.get("AUTH0_CLIENT_SECRET"))
-    auth0_subdomain: str = pydantic.Field(default_factory=lambda: os.environ.get("AUTH0_DOMAIN"))
+    client_id: str = pydantic.Field(
+        default_factory=lambda: os.environ.get("AUTH0_CLIENT_ID")
+    )
+    client_secret: str = pydantic.Field(
+        default_factory=lambda: os.environ.get("AUTH0_CLIENT_SECRET")
+    )
+    auth0_subdomain: str = pydantic.Field(
+        default_factory=lambda: os.environ.get("AUTH0_DOMAIN")
+    )
 
     @pydantic.root_validator(allow_reuse=True)
     def validate_required(cls, values):
@@ -98,8 +110,10 @@ class Auth0Config(schema.Base):
                 missing.append(v)
 
         if len(missing) > 0:
-            raise ValueError(f"Missing the following required environment variable(s): {', '.join(missing)}")
-        
+            raise ValueError(
+                f"Missing the following required environment variable(s): {', '.join(missing)}"
+            )
+
         return values
 
 
