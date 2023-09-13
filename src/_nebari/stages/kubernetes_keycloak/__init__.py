@@ -1,6 +1,7 @@
 import contextlib
 import enum
 import json
+import os
 import secrets
 import string
 import sys
@@ -62,14 +63,14 @@ class AuthenticationEnum(str, enum.Enum):
 
 
 class GitHubConfig(schema.Base):
-    client_id: str
-    client_secret: str
+    client_id: str = pydantic.Field(default_factory=lambda: os.environ.get("GITHUB_CLIENT_ID"))
+    client_secret: str = pydantic.Field(default_factory=lambda: os.environ.get("GITHUB_CLIENT_SECRET"))
 
 
 class Auth0Config(schema.Base):
-    client_id: str
-    client_secret: str
-    auth0_subdomain: str
+    client_id: str = pydantic.Field(default_factory=lambda: os.environ.get("AUTH0_CLIENT_ID"))
+    client_secret: str = pydantic.Field(default_factory=lambda: os.environ.get("AUTH0_CLIENT_SECRET"))
+    auth0_subdomain: str = pydantic.Field(default_factory=lambda: os.environ.get("AUTH0_DOMAIN"))
 
 
 class Authentication(schema.Base, ABC):
@@ -118,12 +119,12 @@ class PasswordAuthentication(Authentication):
 
 class Auth0Authentication(Authentication):
     _typ = AuthenticationEnum.auth0
-    config: Auth0Config
+    config: Auth0Config = Auth0Config()
 
 
 class GitHubAuthentication(Authentication):
     _typ = AuthenticationEnum.github
-    config: GitHubConfig
+    config: GitHubConfig = GitHubConfig()
 
 
 class Keycloak(schema.Base):
