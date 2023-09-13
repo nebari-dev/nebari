@@ -94,6 +94,10 @@ dev = [
     "build",
     "jinja2",
 ]
+docs = [
+    "sphinx",
+    "sphinx_click",
+]
 
 [project.urls]
 Documentation = "https://www.nebari.dev/docs"
