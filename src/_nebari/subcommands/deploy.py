@@ -1,6 +1,7 @@
 import pathlib
 from typing import Optional
 
+import rich
 import typer
 
 from _nebari.config import read_configuration
@@ -65,10 +66,8 @@ def nebari_subcommand(cli: typer.Typer):
         from nebari.plugins import nebari_plugin_manager
 
         if dns_provider or dns_auto_provision:
-            from rich import print
-
             msg = "The [green]`--dns-provider`[/green] and [green]`--dns-auto-provision`[/green] flags have been removed in favor of configuring DNS via nebari-config.yaml"
-            print(msg)
+            rich.print(msg)
             raise typer.Abort()
 
         stages = nebari_plugin_manager.ordered_stages
@@ -83,7 +82,7 @@ def nebari_subcommand(cli: typer.Typer):
             for stage in stages:
                 if stage.name == TERRAFORM_STATE_STAGE_NAME:
                     stages.remove(stage)
-            print("Skipping remote state provision")
+            rich.print("Skipping remote state provision")
 
         deploy_configuration(
             config,
