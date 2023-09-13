@@ -175,9 +175,8 @@ def render_config(
 
     try:
         config_model = nebari_plugin_manager.config_schema.parse_obj(config)
-    except pydantic.ValidationError:
-        pass
-        # print(str(e))
+    except pydantic.ValidationError as e:
+        print(str(e))
 
     if repository_auto_provision:
         GITHUB_REGEX = "(https://)?github.com/([^/]+)/([^/]+)/?"
