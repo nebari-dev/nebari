@@ -11,7 +11,14 @@ resource "kubernetes_config_map" "jupyterhub-ssh" {
   }
 
   data = {
-    "values.yaml" = "hubUrl: ${var.jupyterhub_api_url}"
+    "values.yaml" = <<-EOT
+      hubUrl: ${var.jupyterhub_api_url}
+      ssh:
+        config:
+          JupyterHubSSH:
+            debug: true
+            host_key_path: /etc/jupyterhub-ssh/secrets/jupyterhub-ssh.host-key
+    EOT
   }
 }
 

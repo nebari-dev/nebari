@@ -55,7 +55,6 @@ class AuthenticationEnum(str, enum.Enum):
     password = "password"
     github = "GitHub"
     auth0 = "Auth0"
-    custom = "custom"
 
     @classmethod
     def to_yaml(cls, representer, node):

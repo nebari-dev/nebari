@@ -1,4 +1,5 @@
 import pathlib
+from typing import Optional
 
 import typer
 
@@ -27,8 +28,8 @@ def nebari_subcommand(cli: typer.Typer):
             "--output",
             help="output directory",
         ),
-        dns_provider: str = typer.Option(
-            False,
+        dns_provider: Optional[str] = typer.Option(
+            None,
             "--dns-provider",
             help="dns provider to use for registering domain name mapping ⚠️ moved to `dns.provider` in nebari-config.yaml",
         ),
@@ -63,6 +64,13 @@ def nebari_subcommand(cli: typer.Typer):
         """
         from nebari.plugins import nebari_plugin_manager
 
+        if dns_provider or dns_auto_provision:
+            from rich import print
+
+            msg = "The [green]`--dns-provider`[/green] and [green]`--dns-auto-provision`[/green] flags have been removed in favor of configuring DNS via nebari-config.yaml"
+            print(msg)
+            raise typer.Abort()
+
         stages = nebari_plugin_manager.ordered_stages
         config_schema = nebari_plugin_manager.config_schema
 
@@ -76,13 +84,6 @@ def nebari_subcommand(cli: typer.Typer):
                 if stage.name == TERRAFORM_STATE_STAGE_NAME:
                     stages.remove(stage)
             print("Skipping remote state provision")
-
-        if dns_provider and dns_auto_provision:
-            # TODO: Add deprecation warning and update docs on how to configure DNS via nebari-config.yaml
-            print(
-                "Please add a `dns.provider` and `dns.auto_privision` to your nebari-config.yaml file to enable DNS auto-provisioning."
-            )
-            exit(1)
 
         deploy_configuration(
             config,
