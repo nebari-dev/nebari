@@ -7,7 +7,7 @@ from _nebari.utils import escape_string, yaml
 from _nebari.version import __version__, rounded_ver_parse
 
 # Regex for suitable project names
-project_name_regex = r"^[A-Za-z][A-Za-z0-9\-_]{1,30}[A-Za-z]$"
+project_name_regex = r"^[A-Za-z][A-Za-z0-9\-_]{1,30}[A-Za-z0-9]$"
 project_name_pydantic = pydantic.constr(regex=project_name_regex)
 
 # Regex for suitable namespaces

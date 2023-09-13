@@ -681,11 +681,6 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         - Length from 3 to 32 characters
         - Begin and end with a letter
         """
-                
-        #if inputs.cloud_provider == ProviderEnum.aws.value.lower():
-        #    name_guidelines += "- Should NOT start with the string `aws`\n"
-        #elif inputs.cloud_provider == ProviderEnum.azure.value.lower():
-        #    name_guidelines += "- Should NOT contain `-`\n"
 
         # PROJECT NAME
         rich.print(
