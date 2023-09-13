@@ -79,44 +79,19 @@ def render_config(
     config["security"]["authentication"] = {"type": auth_provider}
     
     if auth_provider == AuthenticationEnum.github:
-        github_client_id = os.environ.get("GITHUB_CLIENT_ID", None)
-        github_client_secret = os.environ.get("GITHUB_CLIENT_SECRET", None)
-
-        if not disable_prompt:
-            if not github_client_id:
-                github_client_id = input("Github client_id: ")
-
-            if not github_client_secret:
-                github_client_secret = input("Github client_secret: ")
-
         config["security"]["authentication"]["config"] = {
-            "client_id": github_client_id,
-            "client_secret": github_client_secret,
+            "client_id": os.environ.get("GITHUB_CLIENT_ID", ""),
+            "client_secret": os.environ.get("GITHUB_CLIENT_SECRET", ""),
         }
-
     elif auth_provider == AuthenticationEnum.auth0:
         if auth_auto_provision:
             auth0_config = create_client(config.domain, config.project_name)
             config["security"]["authentication"]["config"] = auth0_config
         else:
-            auth0_client_id = os.environ.get("AUTH0_CLIENT_ID", None)
-            auth0_client_secret = os.environ.get("AUTH0_CLIENT_SECRET", None)
-            auth0_domain = os.environ.get("AUTH0_DOMAIN", None)
-
-            if not disable_prompt:
-                if not auth0_client_id:
-                    auth0_client_id = input("Auth0 client_id: ")
-
-                if not auth0_client_secret:
-                    auth0_client_secret = input("Auth0 client_secret: ")
-
-                if not auth0_domain:
-                    auth0_domain = input("Auth0 subdomain: ")
-
             config["security"]["authentication"]["config"] = {
-                "client_id": auth0_client_id,
-                "client_secret": auth0_client_secret,
-                "auth0_subdomain": auth0_domain,
+                "client_id": os.environ.get("AUTH0_CLIENT_ID", ""),
+                "client_secret": os.environ.get("AUTH0_CLIENT_SECRET", ""),
+                "auth0_subdomain": os.environ.get("AUTH0_DOMAIN", ""),
             }
 
     if cloud_provider == ProviderEnum.do:
@@ -201,7 +176,8 @@ def render_config(
     try:
         config_model = nebari_plugin_manager.config_schema.parse_obj(config)
     except pydantic.ValidationError as e:
-        print(str(e))
+        pass
+        # print(str(e))
 
     if repository_auto_provision:
         GITHUB_REGEX = "(https://)?github.com/([^/]+)/([^/]+)/?"
