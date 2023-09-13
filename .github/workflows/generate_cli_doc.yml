@@ -2,13 +2,22 @@ name: Update API docs
 
 on:
   pull_request:
+    paths:
+    - "src/_nebari/subcommands/**"
+    - "src/_nebari/cli.py"
   push:
     branches:
       - main
+    paths:
+    - "src/_nebari/subcommands/**"
+    - "src/_nebari/cli.py"
   workflow_dispatch:
 
 jobs:
   update_api:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -46,7 +55,7 @@ jobs:
       - name: Create Pull Request in code repo
         id: create_pull_request
         uses: peter-evans/create-pull-request@v4
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: steps.verify-changed-files.outputs.files_changed == 'true' && github.event_name != 'pull_request'
         with:
           token: ${{ secrets.NEBARI_SENSEI_API_DOCS_PR_OPENER }}
           commit-message: Update api docs
