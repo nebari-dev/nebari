@@ -84,7 +84,7 @@ jobs:
         run: |
           pytest --version
           pytest tests/tests_integration/ -vvv -s --cloud aws
-        with:
+        with: |
           NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__dask_worker: "quay.io/nebari/nebari-dask-worker:${{ env.NEBARI_IMAGE_TAG }}"
