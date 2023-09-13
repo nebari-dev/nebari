@@ -29,8 +29,8 @@ variable "jupyterhub-ssh-image" {
     tag  = string
   })
   default = {
-    name = "yuvipanda/jupyterhub-ssh-ssh"
-    tag  = "0.0.1-n026.hf136ec7"
+    name = "quay.io/jupyterhub-ssh/ssh"
+    tag  = "0.0.1-0.dev.git.136.ha610981"
   }
 }
 
@@ -41,8 +41,8 @@ variable "jupyterhub-sftp-image" {
     tag  = string
   })
   default = {
-    name = "yuvipanda/jupyterhub-ssh-sftp"
-    tag  = "0.0.1-n026.hf136ec7"
+    name = "quay.io/jupyterhub-ssh/sftp"
+    tag  = "0.0.1-0.dev.git.142.h402a3d6"
   }
 }
 
