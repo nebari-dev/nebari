@@ -54,23 +54,24 @@ classifiers = [
 ]
 
 dependencies = [
-    "pluggy==1.0.0",
-    "auth0-python==4.0.0",
+    "auth0-python==4.4.2",
     "azure-identity==1.12.0",
+    "azure-mgmt-containerservice==26.0.0",
     "azure-mgmt-resource==23.0.1",
-    "azure-mgmt-containerservice==19.1.0",
-    "bcrypt==3.2.2",
-    "boto3==1.26.78",
-    "cloudflare==2.11.1",
-    "kubernetes==26.1.0",
-    "pydantic==1.10.5",
+    "bcrypt==4.0.1",
+    "boto3==1.28.40",
+    "cloudflare==2.11.7",
+    "kubernetes==27.2.0",
+    "pluggy==1.3.0",
+    "prompt-toolkit==3.0.36",
+    "pydantic==1.10.12",
     "pynacl==1.5.0",
-    "python-keycloak==2.12.0",
-    "questionary==1.10.0",
-    "rich==12.6.0",
-    "ruamel.yaml==0.17.21",
-    "typer==0.7.0",
-    "requests-toolbelt==0.9.1",
+    "python-keycloak==3.3.0",
+    "questionary==2.0.0",
+    "requests-toolbelt==1.0.0",
+    "rich==13.5.1",
+    "ruamel.yaml==0.17.32",
+    "typer==0.9.0",
 ]
 
 [project.optional-dependencies]
@@ -93,6 +94,7 @@ dev = [
     "grayskull",
     "build",
     "jinja2",
+    "setuptools==63.4.3",
 ]
 docs = [
     "sphinx",
