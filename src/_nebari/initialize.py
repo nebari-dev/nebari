@@ -23,7 +23,7 @@ from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
 from _nebari.utils import get_latest_kubernetes_version, random_secure_string
 from _nebari.version import __version__
-from nebari.schema import ProviderEnum
+from nebari.schema import ProviderEnum, github_url_regex
 
 logger = logging.getLogger(__name__)
 
@@ -179,9 +179,8 @@ def render_config(
         print(str(e))
 
     if repository_auto_provision:
-        GITHUB_REGEX = "(https://)?github.com/([^/]+)/([^/]+)/?"
-        if re.search(GITHUB_REGEX, repository):
-            match = re.search(GITHUB_REGEX, repository)
+        match = re.search(github_url_regex, repository)
+        if match:
             git_repository = github_auto_provision(
                 config_model, match.group(2), match.group(3)
             )

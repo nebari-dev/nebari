@@ -13,6 +13,9 @@ letter_dash_underscore_pydantic = pydantic.constr(regex=namestr_regex)
 email_regex = "^[^ @]+@[^ @]+\\.[^ @]+$"
 email_pydantic = pydantic.constr(regex=email_regex)
 
+github_url_regex = "^(https://)?github.com/([^/]+)/([^/]+)/?$"
+github_url_pydantic = pydantic.constr(regex=github_url_regex)
+
 
 class Base(pydantic.BaseModel):
     ...
