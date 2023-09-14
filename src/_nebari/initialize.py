@@ -80,8 +80,8 @@ def render_config(
 
     if auth_provider == AuthenticationEnum.github:
         config["security"]["authentication"]["config"] = {
-            "client_id": os.environ.get("GITHUB_CLIENT_ID", ""),
-            "client_secret": os.environ.get("GITHUB_CLIENT_SECRET", ""),
+            "client_id": os.environ.get("GITHUB_CLIENT_ID", "<enter client id or remove to use GITHUB_CLIENT_ID environment variable (preferred)>"),
+            "client_secret": os.environ.get("GITHUB_CLIENT_SECRET", "<enter client secret or remove to use GITHUB_CLIENT_SECRET environment variable (preferred)>"),
         }
     elif auth_provider == AuthenticationEnum.auth0:
         if auth_auto_provision:
@@ -89,9 +89,9 @@ def render_config(
             config["security"]["authentication"]["config"] = auth0_config
         else:
             config["security"]["authentication"]["config"] = {
-                "client_id": os.environ.get("AUTH0_CLIENT_ID", ""),
-                "client_secret": os.environ.get("AUTH0_CLIENT_SECRET", ""),
-                "auth0_subdomain": os.environ.get("AUTH0_DOMAIN", ""),
+                "client_id": os.environ.get("AUTH0_CLIENT_ID", "<enter client id or remove to use AUTH0_CLIENT_ID environment variable (preferred)>"),
+                "client_secret": os.environ.get("AUTH0_CLIENT_SECRET", "<enter client secret or remove to use AUTH0_CLIENT_SECRET environment variable (preferred)>"),
+                "auth0_subdomain": os.environ.get("AUTH0_DOMAIN", "<enter subdomain (without .auth0.com) or remove to use AUTH0_DOMAIN environment variable>"),
             }
 
     if cloud_provider == ProviderEnum.do:
