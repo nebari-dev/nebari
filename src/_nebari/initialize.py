@@ -214,7 +214,7 @@ def github_auto_provision(config: pydantic.BaseModel, owner: str, repo: str):
                 f"Unable to create GitHub repo https://github.com/{owner}/{repo} - error message from GitHub is: {he}"
             )
     else:
-        logger.warn(f"GitHub repo https://github.com/{owner}/{repo} already exists")
+        logger.warning(f"GitHub repo https://github.com/{owner}/{repo} already exists")
 
     try:
         # Secrets
