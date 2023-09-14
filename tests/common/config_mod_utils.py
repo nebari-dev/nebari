@@ -101,6 +101,9 @@ def add_gpu_config(config, cloud="aws"):
                 gpu_config.node_selector: gpu_config.node_selector_val,
             },
         )
+    else:
+        gpu_node_group = None
+        kubespawner_overrides = None
 
     jupyterlab_profile = JupyterLabProfile(
         display_name="GPU Instance",
