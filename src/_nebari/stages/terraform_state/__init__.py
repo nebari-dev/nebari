@@ -169,18 +169,18 @@ class TerraformStateStage(NebariTerraformStage):
             return []
 
     def tf_objects(self) -> List[Dict]:
-        if self.config.provider == schema.ProviderEnum.aws:
-            return [
-                terraform.Provider(
-                    "aws", region=self.config.amazon_web_services.region
-                ),
-            ]
-        elif self.config.provider == schema.ProviderEnum.gcp:
+        if self.config.provider == schema.ProviderEnum.gcp:
             return [
                 terraform.Provider(
                     "google",
                     project=self.config.google_cloud_platform.project,
                     region=self.config.google_cloud_platform.region,
+                ),
+            ]
+        elif self.config.provider == schema.ProviderEnum.aws:
+            return [
+                terraform.Provider(
+                    "aws", region=self.config.amazon_web_services.region
                 ),
             ]
         else:
