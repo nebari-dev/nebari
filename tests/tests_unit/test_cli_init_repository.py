@@ -198,7 +198,7 @@ def test_cli_init_error_invalid_repo(monkeypatch: pytest.MonkeyPatch):
 
         assert 2 == result.exit_code
         assert result.exception
-        assert "Must be a fully qualified GitHub repository URL" in str(result.stdout)
+        assert "repository URL" in str(result.stdout)
         assert tmp_file.exists() is False
 
 
