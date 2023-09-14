@@ -21,8 +21,10 @@ def check_credentials():
 def projects() -> Dict[str, str]:
     """Return a dict of available projects."""
     check_credentials()
-    output = subprocess.check_output(["gcloud", "projects", "list", "--format=json"])
-    data = json.loads(output.decode("utf-8"))
+    output = subprocess.check_output(
+        ["gcloud", "projects", "list", "--format=json(name,projectId)"]
+    )
+    data = json.loads(output)
     return {_["name"]: _["projectId"] for _ in data}
 
 
