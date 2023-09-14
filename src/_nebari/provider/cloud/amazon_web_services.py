@@ -414,7 +414,7 @@ def aws_delete_efs_file_system(efs_id: str, region: str):
 
 def aws_delete_efs(name: str, namespace: str, region: str):
     """Delete EFS resources for the EKS cluster named `{name}-{namespace}`."""
-    efs_ids = aws_get_efs_ids(name, namespace)
+    efs_ids = aws_get_efs_ids(name, namespace, region=region)
     for efs_id in efs_ids:
         aws_delete_efs_mount_targets(efs_id, region=region)
         aws_delete_efs_file_system(efs_id, region=region)
