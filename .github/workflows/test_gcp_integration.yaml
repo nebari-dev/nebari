@@ -1,0 +1,104 @@
+name: test-gcp-integration
+
+on:
+  schedule:
+    - cron: "0 0 * * MON"
+  ##### ONLY FOR TESTING - REMOVE AFTER TESTING #####
+  # pull_request:
+  #####
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Nebari branch to deploy, test, destroy'
+        required: true
+        default: develop
+        type: string
+      image-tag:
+        description: 'Nebari image tag created by the nebari-docker-images repo'
+        required: true
+        default: main
+        type: string
+      tf-log-level:
+        description: 'Change Terraform log levels'
+        required: false
+        default: info
+        type: choice
+        options:
+        - info
+        - warn
+        - debug
+        - trace
+        - error
+
+
+env:
+  ##### ONLY FOR TESTING - REVERT TO 'develop' #####
+  NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'it_gcp' }}
+  #####
+  NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
+  TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
+
+
+jobs:
+  test-gcp-integration:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.NEBARI_GH_BRANCH }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install Nebari
+        run: |
+          pip install .[dev]
+          conda install --quiet --yes conda-build
+          playwright install
+
+          method: jwt
+          url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"
+          namespace: "admin/quansight"
+          role: "repository-quansight-qhub-integration-test-role"
+          secrets: |
+            kv/data/repository/Quansight/qhub-integration-test/google_cloud_platform/nebari-dev-ci/github project_id | PROJECT_ID;
+            kv/data/repository/Quansight/qhub-integration-test/google_cloud_platform/nebari-dev-ci/github workload_identity_provider | GCP_WORKFLOW_PROVIDER;
+            kv/data/repository/Quansight/qhub-integration-test/google_cloud_platform/nebari-dev-ci/github service_account_name | GCP_SERVICE_ACCOUNT;
+            kv/data/repository/Quansight/qhub-integration-test/cloudflare/internal-devops@quansight.com/github-quansight-qhub-integration-test token | CLOUDFLARE_TOKEN;
+
+      - name: 'Authenticate to GCP'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          # token_format: access_token
+          create_credentials_file: 'true'
+          workload_identity_provider: ${{ env.GCP_WORKFLOW_PROVIDER }}
+          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      # needed for gsutil auth
+      # https://github.com/google-github-actions/auth#configuring-gcloud
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          service_account_key: ${{ env.GCLOUD_CREDENTIALS }}
+          export_default_credentials: true
+
+      - name: Mapping Environment Variables
+        run: |
+          echo "GOOGLE_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}" >> $GITHUB_ENV
+
+      - name: Integration Tests
+        run: |
+          pytest --version
+          pytest tests/tests_integration/ -vvv -s --cloud gcp
+        env:
+          NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
+          NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
+          NEBARI_SECRET__default_images__dask_worker: "quay.io/nebari/nebari-dask-worker:${{ env.NEBARI_IMAGE_TAG }}"
