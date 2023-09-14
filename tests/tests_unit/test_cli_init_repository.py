@@ -174,6 +174,34 @@ def test_cli_init_error_repository_missing_env(monkeypatch: pytest.MonkeyPatch):
         assert tmp_file.exists() is False
 
 
+def test_cli_init_error_invalid_repo(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("GITHUB_USERNAME", TEST_GITHUB_USERNAME)
+    monkeypatch.setenv("GITHUB_TOKEN", TEST_GITHUB_TOKEN)
+
+    app = create_cli()
+
+    args = [
+        "init",
+        "local",
+        "--project-name",
+        "test",
+        "--repository-auto-provision",
+        "--repository",
+        "https://notgithub.com",
+    ]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
+        assert tmp_file.exists() is False
+
+        result = runner.invoke(app, args + ["--output", tmp_file.resolve()])
+
+        assert 2 == result.exit_code
+        assert result.exception
+        assert "Must be a fully qualified GitHub repository URL" in str(result.stdout)
+        assert tmp_file.exists() is False
+
+
 def mock_api_request(
     method: str,
     url: str,
