@@ -83,9 +83,9 @@ class GitRepoEnum(str, enum.Enum):
 
 class InitInputs(schema.Base):
     cloud_provider: ProviderEnum = ProviderEnum.local
-    project_name: schema.letter_dash_underscore_pydantic = ""
+    project_name: schema.project_name_pydantic = ""
     domain_name: typing.Optional[str] = None
-    namespace: typing.Optional[schema.letter_dash_underscore_pydantic] = "dev"
+    namespace: typing.Optional[schema.namespace_pydantic] = "dev"
     auth_provider: AuthenticationEnum = AuthenticationEnum.password
     auth_auto_provision: bool = False
     repository: typing.Union[str, None] = None
@@ -475,8 +475,8 @@ def nebari_subcommand(cli: typer.Typer):
             "--project",
             "-p",
             callback=typer_validate_regex(
-                schema.namestr_regex,
-                "Project name must begin with a letter and consist of letters, numbers, dashes, or underscores.",
+                schema.project_name_regex,
+                "Project name must (1) consist of only letters, numbers, hyphens, and underscores, (2) begin and end with a letter, and (3) contain between 3 and 32 characters.",
             ),
         ),
         domain_name: typing.Optional[str] = typer.Option(
@@ -488,8 +488,8 @@ def nebari_subcommand(cli: typer.Typer):
         namespace: str = typer.Option(
             "dev",
             callback=typer_validate_regex(
-                schema.namestr_regex,
-                "Namespace must begin with a letter and consist of letters, numbers, dashes, or underscores.",
+                schema.namespace_regex,
+                "Namespace must begin and end with a letter and consist of letters, dashes, or underscores.",
             ),
         ),
         region: str = typer.Option(
@@ -679,13 +679,10 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
         name_guidelines = """
         The project name must adhere to the following requirements:
-        - Letters from A to Z (upper and lower case) and numbers
-        - Maximum accepted length of the name string is 16 characters
+        - Letters from A to Z (upper and lower case), numbers, hyphens, and dashes
+        - Length from 3 to 32 characters
+        - Begin and end with a letter
         """
-        if inputs.cloud_provider == ProviderEnum.aws.value.lower():
-            name_guidelines += "- Should NOT start with the string `aws`\n"
-        elif inputs.cloud_provider == ProviderEnum.azure.value.lower():
-            name_guidelines += "- Should NOT contain `-`\n"
 
         # PROJECT NAME
         rich.print(
@@ -696,7 +693,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         inputs.project_name = questionary.text(
             "What project name would you like to use?",
             qmark=qmark,
-            validate=questionary_validate_regex(schema.namestr_regex),
+            validate=questionary_validate_regex(schema.project_name_regex),
         ).unsafe_ask()
 
         # DOMAIN NAME
