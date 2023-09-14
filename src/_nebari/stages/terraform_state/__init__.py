@@ -175,6 +175,8 @@ class TerraformStateStage(NebariTerraformStage):
                     "aws", region=self.config.amazon_web_services.region
                 ),
             ]
+        else:
+            return []
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         if self.config.provider == schema.ProviderEnum.do:
