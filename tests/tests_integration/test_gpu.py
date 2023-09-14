@@ -1,3 +1,5 @@
+# 2023-09-14: This test is currently timing out on CI, so we're disabling it for now.
+
 # import re
 
 # import pytest
