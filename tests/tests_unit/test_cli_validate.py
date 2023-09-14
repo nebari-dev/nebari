@@ -48,7 +48,9 @@ def generate_test_data_test_cli_validate_local_happy_path():
 
     test_data = []
     for f in TEST_DATA_DIR.iterdir():
-        if f.is_file() and re.match(r"^\w*\.happy\.yaml$", f.name):  # sample.happy.yaml
+        if f.is_file() and re.match(
+            r"^\w*\.happy.*\.yaml$", f.name
+        ):  # sample.happy.optional-description.yaml
             test_data.append((f.name))
     keys = [
         "config_yaml",
@@ -274,9 +276,9 @@ def generate_test_data_test_cli_validate_error():
     test_data = []
     for f in TEST_DATA_DIR.iterdir():
         if f.is_file():
-            m = re.match(
-                r"^\w*\.error\.([\w-]*)\.yaml$", f.name
-            )  # sample.error.message.yaml
+            m = re.match(r"^\w*\.error\.([\w-]*)\.yaml$", f.name) or re.match(
+                r"^\w*\.error\.([\w-]*)\.[\w-]*\.yaml$", f.name
+            )  # sample.error.assert-message.optional-description.yaml
             if m:
                 test_data.append((f.name, m.groups()[0]))
             elif re.match(r"^\w*\.error\.yaml$", f.name):  # sample.error.yaml
