@@ -3,9 +3,6 @@ name: test-aws-integration
 on:
   schedule:
     - cron: "0 0 * * MON"
-  ##### ONLY FOR TESTING - REMOVE AFTER TESTING #####
-  pull_request:
-  #####
   workflow_dispatch:
     inputs:
       branch:
@@ -33,9 +30,7 @@ on:
 
 env:
   AWS_DEFAULT_REGION: "us-west-2"
-  ##### ONLY FOR TESTING - REVERT TO 'develop' #####
-  NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'it_aws' }}
-  #####
+  NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'develop' }}
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
