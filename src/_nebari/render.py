@@ -166,7 +166,7 @@ def inspect_files(
         if source_files[prevalent_file] != output_files[prevalent_file]:
             updated_files.add(prevalent_file)
 
-    return new_files, untracted_files, updated_files, deleted_paths
+    return new_files, untracted_files, updated_files, deleted_files
 
 
 def hash_file(file_path: str):

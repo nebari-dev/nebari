@@ -3,6 +3,7 @@ import typing
 
 from _nebari.stages.infrastructure import AWSNodeGroup, GCPNodeGroup
 from _nebari.stages.kubernetes_services import (
+    AccessEnum,
     CondaEnvironment,
     JupyterLabProfile,
     KubeSpawner,
@@ -100,12 +101,15 @@ def add_gpu_config(config, cloud="aws"):
                 gpu_config.node_selector: gpu_config.node_selector_val,
             },
         )
+    else:
+        gpu_node_group = None
+        kubespawner_overrides = None
 
     jupyterlab_profile = JupyterLabProfile(
         display_name="GPU Instance",
         description="4 CPU / 16GB RAM / 1 NVIDIA T4 GPU (16 GB GPU RAM)",
-        access="yaml",
-        groups=["gpu-access"],
+        access=AccessEnum.all,
+        groups=None,
         kubespawner_override=kubespawner_overrides,
     )
 
