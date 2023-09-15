@@ -1,5 +1,6 @@
 import logging
 import os
+import pprint
 import random
 import shutil
 import string
@@ -114,7 +115,6 @@ def deploy(request):
     """Deploy Nebari on the given cloud."""
     ignore_warnings()
     cloud = request.config.getoption("--cloud")
-    disable_prompt = request.config.getoption("--disable-prompt")
 
     # initialize
     if cloud == "do":
@@ -164,10 +164,8 @@ def deploy(request):
         config = add_gpu_config(config, cloud=cloud)
         config = add_preemptible_node_group(config, cloud=cloud)
 
-    from pprint import pprint
-
     print("*" * 100)
-    pprint(config.dict())
+    pprint.pprint(config.dict())
     print("*" * 100)
 
     # render
@@ -193,8 +191,6 @@ def deploy(request):
         failed = True
         logger.exception(e)
         logger.error(f"Deploy Failed, Exception: {e}")
-
-    disable_prompt or input("\n[Press Enter] to continue...\n")
 
     # destroy
     try:
