@@ -113,11 +113,12 @@ def cluster_exists(cluster_name: str, project_id: str, region: str) -> bool:
 def bucket_exists(bucket_name: str, project_id: str) -> bool:
     """Check if a storage bucket exists."""
     try:
+        print(f"Checking if bucket {bucket_name} exists in project {project_id}.")
         subprocess.check_output(
             [
                 "gsutil",
                 "ls",
-                f"gs://{bucket_name}",
+                f"gs://{bucket_name}/",
                 "-p",
                 project_id,
             ]
