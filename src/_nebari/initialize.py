@@ -165,7 +165,7 @@ def render_config(
             or constants.AWS_DEFAULT_REGION
         )
         aws_kubernetes_version = kubernetes_version or get_latest_kubernetes_version(
-            amazon_web_services.kubernetes_versions()
+            amazon_web_services.kubernetes_versions(aws_region)
         )
         config["amazon_web_services"] = {
             "kubernetes_version": aws_kubernetes_version,

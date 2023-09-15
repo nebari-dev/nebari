@@ -53,7 +53,7 @@ def deploy_configuration(
                 stack.enter_context(s.deploy(stage_outputs, disable_prompt))
 
                 if not disable_checks:
-                    s.check(stage_outputs)
+                    s.check(stage_outputs, disable_prompt)
         print("Nebari deployed successfully")
 
         print("Services:")
