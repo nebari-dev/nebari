@@ -80,7 +80,7 @@ jobs:
         uses: 'google-github-actions/auth@v1'
         with:
           token_format: access_token
-          create_credentials_file: 'true'
+          create_credentials_file: true
           workload_identity_provider: ${{ env.GCP_WORKFLOW_PROVIDER }}
           service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
 
@@ -90,8 +90,6 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ env.PROJECT_ID }}
-          service_account_key: ${{ env.GCLOUD_CREDENTIALS }}
-          export_default_credentials: true
 
       - name: Mapping Environment Variables
         run: |
