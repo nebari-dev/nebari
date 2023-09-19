@@ -506,6 +506,33 @@ class Upgrade_2023_7_2(UpgradeStep):
 
         return config
 
+class Upgrade_2023_9_1(UpgradeStep):
+    version = "2023.9.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        # It is not safe to immediately redeploy without backing up data ready to restore data
+        # since a new cluster will be created for the new version.
+        # Setting the following flag will prevent deployment and display guidance to the user
+        # which they can override if they are happy they understand the situation.
+        config["prevent_deploy"] = True
+        
+        
+        # Nebari version 2023.9.1 upgrades JupyterHub to 3.1.  CDS Dashboards are only compatible with
+        # JupyterHub versions 1.X and so will be removed during upgrade.
+        rich.print("\n ⚠️ Deprecation Warning ⚠️")
+        rich.print(
+            f"-> CDS dashboards are no longer supported in Nebari version [green]{self.version}[/green] and will be uninstalled."
+        )
+        if config.get("cdsdashboards"):
+            rich.print(
+                f"-> Removing cdsdashboards from config file."
+            )
+            del config["cdsdashboards"]
+
+        return config
+
 
 __rounded_version__ = ".".join([str(c) for c in rounded_ver_parse(__version__)])
 

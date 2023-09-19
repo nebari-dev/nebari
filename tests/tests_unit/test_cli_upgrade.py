@@ -382,6 +382,32 @@ security:
         with open(tmp_file.resolve(), "r") as c:
             assert yaml.safe_load(c) == nebari_config
 
+def test_cli_upgrade_to_2023_9_1_cdsdashboard_removed(monkeypatch: pytest.MonkeyPatch):
+    start_version = "2023.5.2"
+    end_version = "2023.9.1"
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
+        assert tmp_file.exists() is False
+
+        addl_config = yaml.safe_load(
+            f"""
+cdsdashboards:
+  enabled: true
+  cds_hide_user_named_servers: true
+  cds_hide_user_dashboard_servers: false
+        """
+        )
+
+        upgraded = assert_nebari_upgrade_success(
+            monkeypatch,
+            start_version,
+            end_version,
+            addl_args=["--attempt-fixes"],
+            addl_config=addl_config
+        )
+      
+        assert not upgraded.get("cdsdashboards")
 
 def assert_nebari_upgrade_success(
     monkeypatch: pytest.MonkeyPatch,
