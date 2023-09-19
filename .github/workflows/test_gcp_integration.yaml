@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "0 0 * * MON"
   ##### ONLY FOR TESTING - REMOVE AFTER TESTING #####
-  # pull_request:
+  pull_request:
   #####
   workflow_dispatch:
     inputs:
