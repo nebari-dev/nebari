@@ -88,7 +88,7 @@ class InitInputs(schema.Base):
     namespace: typing.Optional[schema.namespace_pydantic] = "dev"
     auth_provider: AuthenticationEnum = AuthenticationEnum.password
     auth_auto_provision: bool = False
-    repository: typing.Union[str, None] = None
+    repository: typing.Optional[schema.github_url_pydantic] = None
     repository_auto_provision: bool = False
     ci_provider: CiEnum = CiEnum.none
     terraform_state: TerraformStateEnum = TerraformStateEnum.remote
@@ -512,12 +512,17 @@ def nebari_subcommand(cli: typer.Typer):
         auth_auto_provision: bool = typer.Option(
             False,
         ),
-        repository: GitRepoEnum = typer.Option(
+        repository: str = typer.Option(
             None,
-            help=f"options: {enum_to_list(GitRepoEnum)}",
+            help="Github repository URL to be initialized with --repository-auto-provision",
+            callback=typer_validate_regex(
+                schema.github_url_regex,
+                "Must be a fully qualified GitHub repository URL.",
+            ),
         ),
         repository_auto_provision: bool = typer.Option(
             False,
+            help="Initialize the GitHub repository provided by --repository (GitHub credentials required)",
         ),
         ci_provider: CiEnum = typer.Option(
             CiEnum.none,
