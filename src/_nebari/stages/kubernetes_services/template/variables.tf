@@ -38,3 +38,9 @@ variable "conda-store-default-namespace" {
   description = "Default conda-store namespace name"
   type        = string
 }
+
+
+variable "argo-workflows-enabled" {
+  description = "Enable Argo Workflows"
+  type        = bool
+}

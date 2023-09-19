@@ -24,4 +24,5 @@ certificate:
   type: lets-encrypt
   acme_email: test@example.com
 amazon_web_services:
+  region: us-east-1
   kubernetes_version: '1.20'

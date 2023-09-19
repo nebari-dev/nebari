@@ -143,3 +143,8 @@ variable "idle-culler-settings" {
     terminal_cull_interval              = number
   })
 }
+
+variable "argo-workflows-enabled" {
+  description = "Enable Argo Workflows"
+  type        = bool
+}
