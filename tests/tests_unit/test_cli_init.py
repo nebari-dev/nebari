@@ -74,38 +74,36 @@ def generate_test_data_test_cli_init_happy_path():
                 for domain_name in [f"{project_name}.example.com"]:
                     for namespace in ["test-ns"]:
                         for auth_provider in ["password", "Auth0", "GitHub"]:
-                            for repository in ["github.com", "gitlab.com"]:
-                                for ci_provider in [
-                                    "none",
-                                    "github-actions",
-                                    "gitlab-ci",
+                            for ci_provider in [
+                                "none",
+                                "github-actions",
+                                "gitlab-ci",
+                            ]:
+                                for terraform_state in [
+                                    "local",
+                                    "remote",
+                                    "existing",
                                 ]:
-                                    for terraform_state in [
-                                        "local",
-                                        "remote",
-                                        "existing",
-                                    ]:
-                                        for email in ["noreply@example.com"]:
-                                            for (
-                                                kubernetes_version
-                                            ) in get_kubernetes_versions(provider) + [
-                                                "latest"
-                                            ]:
-                                                test_data.append(
-                                                    (
-                                                        provider,
-                                                        region,
-                                                        project_name,
-                                                        domain_name,
-                                                        namespace,
-                                                        auth_provider,
-                                                        repository,
-                                                        ci_provider,
-                                                        terraform_state,
-                                                        email,
-                                                        kubernetes_version,
-                                                    )
+                                    for email in ["noreply@example.com"]:
+                                        for (
+                                            kubernetes_version
+                                        ) in get_kubernetes_versions(provider) + [
+                                            "latest"
+                                        ]:
+                                            test_data.append(
+                                                (
+                                                    provider,
+                                                    region,
+                                                    project_name,
+                                                    domain_name,
+                                                    namespace,
+                                                    auth_provider,
+                                                    ci_provider,
+                                                    terraform_state,
+                                                    email,
+                                                    kubernetes_version,
                                                 )
+                                            )
 
     keys = [
         "provider",
@@ -114,7 +112,6 @@ def generate_test_data_test_cli_init_happy_path():
         "domain_name",
         "namespace",
         "auth_provider",
-        "repository",
         "ci_provider",
         "terraform_state",
         "email",
@@ -130,7 +127,6 @@ def test_cli_init_happy_path(
     domain_name: str,
     namespace: str,
     auth_provider: str,
-    repository: str,
     ci_provider: str,
     terraform_state: str,
     email: str,
@@ -152,8 +148,6 @@ def test_cli_init_happy_path(
         namespace,
         "--auth-provider",
         auth_provider,
-        "--repository",
-        repository,  # TODO: doesn't show up in the output anywhere, how do I verify this?
         "--ci-provider",
         ci_provider,
         "--terraform-state",
