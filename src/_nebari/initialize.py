@@ -77,21 +77,36 @@ def render_config(
     ] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
 
     config["security"]["authentication"] = {"type": auth_provider}
+
     if auth_provider == AuthenticationEnum.github:
-        if not disable_prompt:
-            config["security"]["authentication"]["config"] = {
-                "client_id": input("Github client_id: "),
-                "client_secret": input("Github client_secret: "),
-            }
+        config["security"]["authentication"]["config"] = {
+            "client_id": os.environ.get(
+                "GITHUB_CLIENT_ID",
+                "<enter client id or remove to use GITHUB_CLIENT_ID environment variable (preferred)>",
+            ),
+            "client_secret": os.environ.get(
+                "GITHUB_CLIENT_SECRET",
+                "<enter client secret or remove to use GITHUB_CLIENT_SECRET environment variable (preferred)>",
+            ),
+        }
     elif auth_provider == AuthenticationEnum.auth0:
         if auth_auto_provision:
             auth0_config = create_client(config.domain, config.project_name)
             config["security"]["authentication"]["config"] = auth0_config
         else:
             config["security"]["authentication"]["config"] = {
-                "client_id": input("Auth0 client_id: "),
-                "client_secret": input("Auth0 client_secret: "),
-                "auth0_subdomain": input("Auth0 subdomain: "),
+                "client_id": os.environ.get(
+                    "AUTH0_CLIENT_ID",
+                    "<enter client id or remove to use AUTH0_CLIENT_ID environment variable (preferred)>",
+                ),
+                "client_secret": os.environ.get(
+                    "AUTH0_CLIENT_SECRET",
+                    "<enter client secret or remove to use AUTH0_CLIENT_SECRET environment variable (preferred)>",
+                ),
+                "auth0_subdomain": os.environ.get(
+                    "AUTH0_DOMAIN",
+                    "<enter subdomain (without .auth0.com) or remove to use AUTH0_DOMAIN environment variable>",
+                ),
             }
 
     if cloud_provider == ProviderEnum.do:

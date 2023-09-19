@@ -213,18 +213,23 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
             )
         )
 
-        os.environ["AUTH0_CLIENT_ID"] = typer.prompt(
-            "Paste your AUTH0_CLIENT_ID",
-            hide_input=True,
-        )
-        os.environ["AUTH0_CLIENT_SECRET"] = typer.prompt(
-            "Paste your AUTH0_CLIENT_SECRET",
-            hide_input=True,
-        )
-        os.environ["AUTH0_DOMAIN"] = typer.prompt(
-            "Paste your AUTH0_DOMAIN",
-            hide_input=True,
-        )
+        if not os.environ.get("AUTH0_CLIENT_ID"):
+            os.environ["AUTH0_CLIENT_ID"] = typer.prompt(
+                "Paste your AUTH0_CLIENT_ID",
+                hide_input=True,
+            )
+
+        if not os.environ.get("AUTH0_CLIENT_SECRET"):
+            os.environ["AUTH0_CLIENT_SECRET"] = typer.prompt(
+                "Paste your AUTH0_CLIENT_SECRET",
+                hide_input=True,
+            )
+
+        if not os.environ.get("AUTH0_DOMAIN"):
+            os.environ["AUTH0_DOMAIN"] = typer.prompt(
+                "Paste your AUTH0_DOMAIN",
+                hide_input=True,
+            )
 
     # GitHub
     elif auth_provider == AuthenticationEnum.github.value.lower() and (
@@ -237,14 +242,17 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
             )
         )
 
-        os.environ["GITHUB_CLIENT_ID"] = typer.prompt(
-            "Paste your GITHUB_CLIENT_ID",
-            hide_input=True,
-        )
-        os.environ["GITHUB_CLIENT_SECRET"] = typer.prompt(
-            "Paste your GITHUB_CLIENT_SECRET",
-            hide_input=True,
-        )
+        if not os.environ.get("GITHUB_CLIENT_ID"):
+            os.environ["GITHUB_CLIENT_ID"] = typer.prompt(
+                "Paste your GITHUB_CLIENT_ID",
+                hide_input=True,
+            )
+
+        if not os.environ.get("GITHUB_CLIENT_SECRET"):
+            os.environ["GITHUB_CLIENT_SECRET"] = typer.prompt(
+                "Paste your GITHUB_CLIENT_SECRET",
+                hide_input=True,
+            )
 
     return auth_provider
 
