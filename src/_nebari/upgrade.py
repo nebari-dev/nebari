@@ -11,8 +11,14 @@ from pydantic.error_wrappers import ValidationError
 from rich.prompt import Prompt
 
 from _nebari.config import backup_configuration
-from _nebari.utils import load_yaml, yaml
+from _nebari.utils import load_yaml, get_latest_kubernetes_version, yaml
 from _nebari.version import __version__, rounded_ver_parse
+from _nebari.provider.cloud import (
+    amazon_web_services,
+    azure_cloud,
+    digital_ocean,
+    google_cloud,
+)
 from nebari import schema
 
 logger = logging.getLogger(__name__)
@@ -512,8 +518,15 @@ class Upgrade_2023_9_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        # It is not safe to immediately redeploy without backing up data ready to restore data
-        # since a new cluster will be created for the new version.
+        # Upgrading to 2023.9.1 is considered high-risk because it includes a major refacto
+        # to introduce the extension mechanism system.
+        rich.print("\n ⚠️ Warning ⚠️")
+        rich.print(
+            f"-> Nebari version [green]{self.version}[/green] includes a major refactor to introduce an extension mechanism that supports the development of third-party plugins."
+        )        
+        rich.print("-> Data should be backed up before performing this upgrade.  The 'prevent_deploy' flag has been set in your config file and must be manually removed to deploy."
+        )        
+        
         # Setting the following flag will prevent deployment and display guidance to the user
         # which they can override if they are happy they understand the situation.
         config["prevent_deploy"] = True
@@ -531,6 +544,68 @@ class Upgrade_2023_9_1(UpgradeStep):
             )
             del config["cdsdashboards"]
 
+        # Kubernetes version check.  JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)  
+        match config["provider"]:
+            case "aws":
+                current_version = float(config["amazon_web_services"]["kubernetes_version"])
+                available_version = get_latest_kubernetes_version(amazon_web_services.kubernetes_versions(config["region"]))
+                
+                if current_version < 1.23:
+                    rich.print(
+                        f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.23 or greater.  Your configured Kubernetes version is [red]{current_version}[/red]."
+                    )
+                    rich.print(
+                        f"-> Please upgrade your EKS cluster outside of Nebari following Amazon Web Services guide: https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html.  We recommend upgrading to the latest available version in your region, which is [red]{available_version}[/red]"
+                    )
+                    rich.print(
+                        f"-> Once you have completed the upgrade, update the value of amazon_web_services.kubernetes_version in your config file to match and run the update command again."
+                    )
+                    exit()
+             
+            case "azure":
+                current_version = float(config["azure_cloud"]["kubernetes_version"])
+                available_version = get_latest_kubernetes_version(azure_cloud.kubernetes_versions(config["region"]))
+                
+                if current_version < 1.23:
+                    rich.print(
+                        f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.23 or greater.  Your configured Kubernetes version is [red]{current_version}[/red]."
+                    )
+                    rich.print(
+                        f"-> Please upgrade your AKS cluster outside of Nebari following Azure Cloud's guide: https://learn.microsoft.com/en-us/azure/aks/upgrade-cluster.  We recommend upgrading to the latest available version in your region, which is [red]{available_version}[/red]"
+                    )
+                    rich.print(
+                        f"-> Once you have completed the upgrade, update the value of azure_cloud.kubernetes_version in your config file to match and run the update command again."
+                    )
+                    exit()
+            
+            case "gcp":
+                current_version = float(config["google_cloud"]["kubernetes_version"])
+                available_version = get_latest_kubernetes_version(google_cloud.kubernetes_versions(config["region"]))
+                
+                if current_version < 1.23:
+                    rich.print(
+                        f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.23 or greater.  Your configured Kubernetes version is [red]{current_version}[/red]."
+                    )
+                    rich.print(
+                        f"-> Please upgrade your GKE cluster outside of Nebari following Azure Cloud's guide: https://cloud.google.com/kubernetes-engine/docs/how-to/upgrading-a-cluster.  We recommend upgrading to the latest available version in your region, which is [red]{available_version}[/red]"
+                    )
+                    rich.print(
+                        f"-> Once you have completed the upgrade, update the value of google_cloud.kubernetes_version in your config file to match and run the update command again."
+                    )
+                    exit()
+            
+            case "do":
+                # TODO: DO kubernetes_version strings are not floats.  Need to confirm if truncating (e.g. '1.21.5-do.0' to '1.21') is valid.
+                pass
+            
+            case "local":
+                # TODO: Are K8S versions set in config for local deployments?
+                pass
+            
+            case "existing":
+                # TODO: Are K8S versions set in config for existing deployments?
+                pass
+        
         return config
 
 
