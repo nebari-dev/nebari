@@ -28,6 +28,7 @@ resource "helm_release" "jupyterhub" {
         external-url                  = var.external-url
         theme                         = var.theme
         profiles                      = var.profiles
+        argo-workflows-enabled        = var.argo-workflows-enabled
         home-pvc                      = var.home-pvc
         shared-pvc                    = var.shared-pvc
         conda-store-pvc               = var.conda-store-pvc

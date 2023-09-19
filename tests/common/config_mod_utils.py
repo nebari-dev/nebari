@@ -2,7 +2,12 @@ import dataclasses
 import typing
 
 from _nebari.stages.infrastructure import AWSNodeGroup, GCPNodeGroup
-from _nebari.stages.kubernetes_services import JupyterLabProfile, KubeSpawner
+from _nebari.stages.kubernetes_services import (
+    AccessEnum,
+    CondaEnvironment,
+    JupyterLabProfile,
+    KubeSpawner,
+)
 
 PREEMPTIBLE_NODE_GROUP_NAME = "preemptible-node-group"
 
@@ -56,10 +61,10 @@ GPU_CONFIG = {
 
 
 def _create_gpu_environment():
-    return {
-        "name": "gpu",
-        "channels": ["pytorch", "nvidia", "conda-forge"],
-        "dependencies": [
+    return CondaEnvironment(
+        name="gpu",
+        channels=["pytorch", "nvidia", "conda-forge"],
+        dependencies=[
             "python=3.10.8",
             "ipykernel=6.21.0",
             "ipywidgets==7.7.1",
@@ -69,11 +74,10 @@ def _create_gpu_environment():
             "pytorch-cuda=11.7",
             "pytorch::pytorch",
         ],
-    }
+    )
 
 
 def add_gpu_config(config, cloud="aws"):
-    # TODO: do we still need GPU_CONFIG here?
     gpu_config = GPU_CONFIG.get(cloud)
     if not gpu_config:
         raise ValueError(f"GPU not supported/tested on {cloud}")
@@ -97,12 +101,15 @@ def add_gpu_config(config, cloud="aws"):
                 gpu_config.node_selector: gpu_config.node_selector_val,
             },
         )
+    else:
+        gpu_node_group = None
+        kubespawner_overrides = None
 
     jupyterlab_profile = JupyterLabProfile(
         display_name="GPU Instance",
         description="4 CPU / 16GB RAM / 1 NVIDIA T4 GPU (16 GB GPU RAM)",
-        access="yaml",
-        groups=["gpu-access"],
+        access=AccessEnum.all,
+        groups=None,
         kubespawner_override=kubespawner_overrides,
     )
 

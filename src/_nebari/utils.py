@@ -15,6 +15,8 @@ from typing import Dict, List
 
 from ruamel.yaml import YAML
 
+from _nebari import constants
+
 # environment variable overrides
 NEBARI_GH_BRANCH = os.getenv("NEBARI_GH_BRANCH", None)
 
@@ -281,6 +283,20 @@ def is_relative_to(self: Path, other: Path, /) -> bool:
 def set_do_environment():
     os.environ["AWS_ACCESS_KEY_ID"] = os.environ["SPACES_ACCESS_KEY_ID"]
     os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
+
+
+def set_docker_image_tag() -> str:
+    """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
+    return os.environ.get("NEBARI_IMAGE_TAG", constants.DEFAULT_NEBARI_IMAGE_TAG)
+
+
+def set_nebari_dask_version() -> str:
+    """Set version of `nebari-dask` meta package."""
+    return os.environ.get("NEBARI_DASK_VERSION", constants.DEFAULT_NEBARI_DASK_VERSION)
+
+
+def get_latest_kubernetes_version(versions: List[str]) -> str:
+    return sorted(versions)[-1]
 
 
 def construct_azure_resource_group_name(

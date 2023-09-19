@@ -25,7 +25,9 @@ repos:
     rev: v4.4.0
     hooks:
       - id: end-of-file-fixer
+        exclude: "^docs-sphinx/cli.html"
       - id: trailing-whitespace
+        exclude: "^docs-sphinx/cli.html"
       - id: check-json
       - id: check-yaml
         # jinja2 templates for helm charts
@@ -57,7 +59,7 @@ repos:
         args: ["--line-length=88", "--exclude=/src/_nebari/template/"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.281
+    rev: v0.0.287
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -73,7 +75,7 @@ repos:
 
   # terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.81.0
+    rev: v1.83.2
     hooks:
       - id: terraform_fmt
         args:

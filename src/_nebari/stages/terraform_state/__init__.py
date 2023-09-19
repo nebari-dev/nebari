@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Tuple, Type
 
 import pydantic
 
+from _nebari.provider import terraform
+from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
@@ -37,6 +39,7 @@ class AzureInputVars(schema.Base):
     region: str
     storage_account_postfix: str
     state_resource_group_name: str
+    tags: Dict[str, str] = {}
 
     @pydantic.validator("state_resource_group_name")
     def _validate_resource_group_name(cls, value):
@@ -55,6 +58,10 @@ class AzureInputVars(schema.Base):
             raise ValueError("Azure Resource Group name can't end with a period.")
 
         return value
+
+    @pydantic.validator("tags")
+    def _validate_tags(cls, tags):
+        return azure_cloud.validate_tags(tags)
 
 
 class AWSInputVars(schema.Base):
@@ -162,7 +169,22 @@ class TerraformStateStage(NebariTerraformStage):
             return []
 
     def tf_objects(self) -> List[Dict]:
-        return []
+        if self.config.provider == schema.ProviderEnum.gcp:
+            return [
+                terraform.Provider(
+                    "google",
+                    project=self.config.google_cloud_platform.project,
+                    region=self.config.google_cloud_platform.region,
+                ),
+            ]
+        elif self.config.provider == schema.ProviderEnum.aws:
+            return [
+                terraform.Provider(
+                    "aws", region=self.config.amazon_web_services.region
+                ),
+            ]
+        else:
+            return []
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         if self.config.provider == schema.ProviderEnum.do:
@@ -194,6 +216,7 @@ class TerraformStateStage(NebariTerraformStage):
                     base_resource_group_name=self.config.azure.resource_group_name,
                     suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
                 ),
+                tags=self.config.azure.tags,
             ).dict()
         elif (
             self.config.provider == schema.ProviderEnum.local
