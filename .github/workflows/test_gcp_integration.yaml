@@ -69,7 +69,7 @@ jobs:
           method: jwt
           url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"
           namespace: "admin/quansight"
-          role: "repository-quansight-qhub-integration-test-role"
+          role: "repository-nebari-dev-nebari-role"
           secrets: |
             kv/data/repository/Quansight/qhub-integration-test/google_cloud_platform/nebari-dev-ci/github project_id | PROJECT_ID;
             kv/data/repository/Quansight/qhub-integration-test/google_cloud_platform/nebari-dev-ci/github workload_identity_provider | GCP_WORKFLOW_PROVIDER;
