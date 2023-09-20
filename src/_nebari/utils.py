@@ -315,14 +315,15 @@ def construct_azure_resource_group_name(
         return f"{base_resource_group_name}{suffix}"
     return f"{project_name}-{namespace}{suffix}"
 
+
 def get_do_k8s_version_prefix(do_k8s_version):
     # Split the input string by the first decimal point
-    parts = do_k8s_version.split('.', 1)
+    parts = do_k8s_version.split(".", 1)
 
     if len(parts) == 2:
         # Extract the part before the second decimal point
-        before_second_decimal = parts[0] + '.' + parts[1].split('.')[0]
-        
+        before_second_decimal = parts[0] + "." + parts[1].split(".")[0]
+
         try:
             # Convert the extracted part to a float
             result = float(before_second_decimal)
@@ -334,13 +335,13 @@ def get_do_k8s_version_prefix(do_k8s_version):
         # Handle the case where there is no second decimal point
         return None
 
-def get_provider_config_block_name(provider):
 
+def get_provider_config_block_name(provider):
     PROVIDER_CONFIG_NAMES = {
         "aws": "amazon_web_services",
         "azure": "azure_cloud",
         "do": "digital_ocean",
-        "gcp": "google_cloud"
+        "gcp": "google_cloud",
     }
 
     if provider in PROVIDER_CONFIG_NAMES.keys():

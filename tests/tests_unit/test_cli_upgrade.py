@@ -8,10 +8,9 @@ from typer.testing import CliRunner
 
 import _nebari.upgrade
 import _nebari.version
-from _nebari.utils import get_provider_config_block_name
 from _nebari.cli import create_cli
 from _nebari.constants import AZURE_DEFAULT_REGION
-
+from _nebari.utils import get_provider_config_block_name
 
 MOCK_KUBERNETES_VERSIONS = {
     "aws": ["1.20"],
@@ -25,6 +24,7 @@ MOCK_CLOUD_REGIONS = {
     "gcp": ["us-central1"],
     "do": ["nyc3"],
 }
+
 
 # can't upgrade to a previous version that doesn't have a corresponding
 # UpgradeStep derived class. without these dummy classes, the rendered
@@ -397,12 +397,13 @@ security:
         with open(tmp_file.resolve(), "r") as c:
             assert yaml.safe_load(c) == nebari_config
 
+
 def test_cli_upgrade_to_2023_9_1_cdsdashboard_removed(monkeypatch: pytest.MonkeyPatch):
     start_version = "2023.7.2"
     end_version = "2023.9.1"
 
     addl_config = yaml.safe_load(
-        f"""
+        """
 cdsdashboards:
   enabled: true
   cds_hide_user_named_servers: true
@@ -415,31 +416,33 @@ cdsdashboards:
         start_version,
         end_version,
         addl_args=["--attempt-fixes"],
-        addl_config=addl_config
+        addl_config=addl_config,
     )
-      
+
     assert not upgraded.get("cdsdashboards")
     assert upgraded.get("prevent_deploy")
 
-@pytest.mark.parametrize(
-    ("provider","k8s_status"),
-    [
-    ("aws", "compatible"),
-    ("aws", "incompatible"),
-    ("aws", "invalid"),
-    ("azure", "compatible"),
-    ("azure", "incompatible"),
-    ("azure", "invalid"),
-    ("do", "compatible"),
-    ("do", "incompatible"),
-    ("do", "invalid"),
-    ("gcp", "compatible"),
-    ("gcp", "incompatible"),
-    ("gcp", "invalid"),
-    ]
-)
 
-def test_cli_upgrade_to_2023_9_1_kubernetes_validations(monkeypatch: pytest.MonkeyPatch, provider: str, k8s_status: str):
+@pytest.mark.parametrize(
+    ("provider", "k8s_status"),
+    [
+        ("aws", "compatible"),
+        ("aws", "incompatible"),
+        ("aws", "invalid"),
+        ("azure", "compatible"),
+        ("azure", "incompatible"),
+        ("azure", "invalid"),
+        ("do", "compatible"),
+        ("do", "incompatible"),
+        ("do", "invalid"),
+        ("gcp", "compatible"),
+        ("gcp", "incompatible"),
+        ("gcp", "invalid"),
+    ],
+)
+def test_cli_upgrade_to_2023_9_1_kubernetes_validations(
+    monkeypatch: pytest.MonkeyPatch, provider: str, k8s_status: str
+):
     start_version = "2023.7.2"
     end_version = "2023.9.1"
     monkeypatch.setattr(_nebari.upgrade, "__version__", end_version)
@@ -447,7 +450,11 @@ def test_cli_upgrade_to_2023_9_1_kubernetes_validations(monkeypatch: pytest.Monk
     kubernetes_configs = {
         "aws": {"incompatible": "1.19", "compatible": "1.26", "invalid": "badname"},
         "azure": {"incompatible": "1.23", "compatible": "1.26", "invalid": "badname"},
-        "do": {"incompatible": "1.19.2-do.3", "compatible": "1.26.0-do.custom", "invalid": "badname"},
+        "do": {
+            "incompatible": "1.19.2-do.3",
+            "compatible": "1.26.0-do.custom",
+            "invalid": "badname",
+        },
         "gcp": {"incompatible": "1.23", "compatible": "1.26", "invalid": "badname"},
     }
 
@@ -456,7 +463,7 @@ def test_cli_upgrade_to_2023_9_1_kubernetes_validations(monkeypatch: pytest.Monk
         "aws": "Please upgrade your EKS cluster outside of Nebari following Amazon Web Services guide",
         "azure": "Please upgrade your AKS cluster outside of Nebari following Azure Cloud's guide",
         "gcp": "Please upgrade your GKE cluster outside of Nebari following Google Cloud Platform's guide",
-        "do": "Please upgrade your DOKS cluster outside of Nebari following Digital Ocean's guide"
+        "do": "Please upgrade your DOKS cluster outside of Nebari following Digital Ocean's guide",
     }
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -464,7 +471,7 @@ def test_cli_upgrade_to_2023_9_1_kubernetes_validations(monkeypatch: pytest.Monk
         assert tmp_file.exists() is False
 
         nebari_config = yaml.safe_load(
-        f"""
+            f"""
 project_name: test
 provider: {provider}
 domain: test.example.com
@@ -478,19 +485,19 @@ cdsdashboards:
     region: {MOCK_CLOUD_REGIONS.get(provider, {})[0]}
     kubernetes_version: {kubernetes_configs[provider][k8s_status]}
         """
-    )
+        )
         with open(tmp_file.resolve(), "w") as f:
-            yaml.dump(nebari_config, f)        
- 
+            yaml.dump(nebari_config, f)
+
             assert tmp_file.exists() is True
             app = create_cli()
 
             result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
-            
+
             if k8s_status == "incompatible":
                 assert 1 == result.exit_code
                 assert result.exception
-                assert upgrade_messages[provider] in result.stdout.replace("\n","")
+                assert upgrade_messages[provider] in result.stdout.replace("\n", "")
 
             if k8s_status == "compatible":
                 assert 0 == result.exit_code
@@ -505,7 +512,13 @@ cdsdashboards:
             if k8s_status == "invalid":
                 assert 1 == result.exit_code
                 assert result.exception
-                assert "Unable to detect Kubernetes version for provider {}".format(provider) in result.stdout
+                assert (
+                    "Unable to detect Kubernetes version for provider {}".format(
+                        provider
+                    )
+                    in result.stdout
+                )
+
 
 def assert_nebari_upgrade_success(
     monkeypatch: pytest.MonkeyPatch,
