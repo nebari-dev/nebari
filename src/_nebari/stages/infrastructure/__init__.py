@@ -59,7 +59,7 @@ class DigitalOceanInputVars(schema.Base):
 
 
 class GCPGuestAccelerators(schema.Base):
-    type: str
+    name: str
     count: int
 
 
