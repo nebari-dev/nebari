@@ -576,7 +576,7 @@ class Upgrade_2023_9_1(UpgradeStep):
                 rich.print(
                    f"-> Unable to detect Kubernetes version for provider {provider}.  Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26 or greater.  Please confirm your Kubernetes version is configured before upgrading."
                 )
-                exit()        
+                exit(1)        
 
             # Kubernetes version less than required minimum
             if current_version < 1.26:
@@ -590,7 +590,7 @@ class Upgrade_2023_9_1(UpgradeStep):
                     rich.print(
                         f"-> Once you have completed the upgrade, update the value of {provider_config_block}.kubernetes_version in your config file to match and run the upgrade command again."
                     )
-                    exit()
+                    exit(1)
 
         else:
             rich.print("\n ⚠️ Warning ⚠️")
