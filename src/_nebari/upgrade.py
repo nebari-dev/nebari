@@ -11,14 +11,8 @@ from pydantic.error_wrappers import ValidationError
 from rich.prompt import Prompt
 
 from _nebari.config import backup_configuration
-from _nebari.utils import load_yaml, get_latest_kubernetes_version, yaml
+from _nebari.utils import load_yaml, get_latest_kubernetes_version, get_do_k8s_version_prefix, get_provider_config_block_name, yaml
 from _nebari.version import __version__, rounded_ver_parse
-from _nebari.provider.cloud import (
-    amazon_web_services,
-    azure_cloud,
-    digital_ocean,
-    google_cloud,
-)
 from nebari import schema
 
 logger = logging.getLogger(__name__)
@@ -544,68 +538,68 @@ class Upgrade_2023_9_1(UpgradeStep):
             )
             del config["cdsdashboards"]
 
-        # Kubernetes version check.  JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)  
-        match config["provider"]:
-            case "aws":
-                current_version = float(config["amazon_web_services"]["kubernetes_version"])
-                available_version = get_latest_kubernetes_version(amazon_web_services.kubernetes_versions(config["region"]))
-                
-                if current_version < 1.23:
-                    rich.print(
-                        f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.23 or greater.  Your configured Kubernetes version is [red]{current_version}[/red]."
-                    )
-                    rich.print(
-                        f"-> Please upgrade your EKS cluster outside of Nebari following Amazon Web Services guide: https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html.  We recommend upgrading to the latest available version in your region, which is [red]{available_version}[/red]"
-                    )
-                    rich.print(
-                        f"-> Once you have completed the upgrade, update the value of amazon_web_services.kubernetes_version in your config file to match and run the update command again."
-                    )
-                    exit()
-             
-            case "azure":
-                current_version = float(config["azure_cloud"]["kubernetes_version"])
-                available_version = get_latest_kubernetes_version(azure_cloud.kubernetes_versions(config["region"]))
-                
-                if current_version < 1.23:
-                    rich.print(
-                        f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.23 or greater.  Your configured Kubernetes version is [red]{current_version}[/red]."
-                    )
-                    rich.print(
-                        f"-> Please upgrade your AKS cluster outside of Nebari following Azure Cloud's guide: https://learn.microsoft.com/en-us/azure/aks/upgrade-cluster.  We recommend upgrading to the latest available version in your region, which is [red]{available_version}[/red]"
-                    )
-                    rich.print(
-                        f"-> Once you have completed the upgrade, update the value of azure_cloud.kubernetes_version in your config file to match and run the update command again."
-                    )
-                    exit()
-            
-            case "gcp":
-                current_version = float(config["google_cloud"]["kubernetes_version"])
-                available_version = get_latest_kubernetes_version(google_cloud.kubernetes_versions(config["region"]))
-                
-                if current_version < 1.23:
-                    rich.print(
-                        f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.23 or greater.  Your configured Kubernetes version is [red]{current_version}[/red]."
-                    )
-                    rich.print(
-                        f"-> Please upgrade your GKE cluster outside of Nebari following Azure Cloud's guide: https://cloud.google.com/kubernetes-engine/docs/how-to/upgrading-a-cluster.  We recommend upgrading to the latest available version in your region, which is [red]{available_version}[/red]"
-                    )
-                    rich.print(
-                        f"-> Once you have completed the upgrade, update the value of google_cloud.kubernetes_version in your config file to match and run the update command again."
-                    )
-                    exit()
-            
-            case "do":
-                # TODO: DO kubernetes_version strings are not floats.  Need to confirm if truncating (e.g. '1.21.5-do.0' to '1.21') is valid.
-                pass
-            
-            case "local":
-                # TODO: Are K8S versions set in config for local deployments?
-                pass
-            
-            case "existing":
-                # TODO: Are K8S versions set in config for existing deployments?
-                pass
+        # Kubernetes version check.  Minimum Kubernetes version is 1.26
+        # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
         
+        # Upgrade instructions for various providers
+        upgrade_messages = {
+            "aws": "Please upgrade your EKS cluster outside of Nebari following Amazon Web Services guide: https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html.",
+            "azure": "Please upgrade your AKS cluster outside of Nebari following Azure Cloud's guide: https://learn.microsoft.com/en-us/azure/aks/upgrade-cluster.",
+            "gcp": "Please upgrade your GKE cluster outside of Nebari following Google Cloud Platform's guide: https://cloud.google.com/kubernetes-engine/docs/how-to/upgrading-a-cluster.",
+            "do": "Please upgrade your DOKS cluster outside of Nebari following Digital Ocean's guide: https://docs.digitalocean.com/products/kubernetes/how-to/upgrade-cluster/"
+        }
+
+        provider = config["provider"]
+        provider_config_block = get_provider_config_block_name(provider)
+
+        # Get current Kubernetes version if available in config.
+        current_version = config.get(provider_config_block, {}).get("kubernetes_version", "NA")
+
+        # Convert to decimal prefix if provider is Digital Ocean
+        if provider == "do":
+            current_version = get_do_k8s_version_prefix(current_version)
+            rich.print(current_version)
+
+        # Try to convert known Kubernetes versions to float.
+        if not current_version == "NA":
+            try:
+                current_version = float(current_version)
+            except:
+                current_version = "NA"            
+
+        # Handle checks for when Kubernetes version should be detectable
+        if provider in ["aws","azure","gcp","do"]:
+            
+            # Kubernetes version not found in provider block
+            if current_version == "NA":
+                rich.print("\n ⚠️ Warning ⚠️")
+                rich.print(
+                   f"-> Unable to detect Kubernetes version for provider {provider}.  Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26 or greater.  Please confirm your Kubernetes version is configured before upgrading."
+                )
+                exit()        
+
+            # Kubernetes version less than required minimum
+            if current_version < 1.26:
+                    rich.print("\n ⚠️ Warning ⚠️")
+                    rich.print(
+                        f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26 or greater.  Your configured Kubernetes version is [red]{current_version}[/red]."
+                    )
+                    rich.print(
+                        upgrade_messages[provider]
+                    )
+                    rich.print(
+                        f"-> Once you have completed the upgrade, update the value of {provider_config_block}.kubernetes_version in your config file to match and run the upgrade command again."
+                    )
+                    exit()
+
+        else:
+            rich.print("\n ⚠️ Warning ⚠️")
+            rich.print(
+                f"-> Unable to detect Kubernetes version for provider {provider}.  Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26 or greater."
+            )           
+            rich.print(
+                f"-> Please ensure your Kubernetes version is up-to-date before proceeding."
+            )        
         return config
 
 

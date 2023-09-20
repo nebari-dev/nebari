@@ -8,8 +8,23 @@ from typer.testing import CliRunner
 
 import _nebari.upgrade
 import _nebari.version
+from _nebari.utils import get_provider_config_block_name
 from _nebari.cli import create_cli
+from _nebari.constants import AZURE_DEFAULT_REGION
 
+
+MOCK_KUBERNETES_VERSIONS = {
+    "aws": ["1.20"],
+    "azure": ["1.20"],
+    "gcp": ["1.20"],
+    "do": ["1.21.5-do.0"],
+}
+MOCK_CLOUD_REGIONS = {
+    "aws": ["us-east-1"],
+    "azure": [AZURE_DEFAULT_REGION],
+    "gcp": ["us-central1"],
+    "do": ["nyc3"],
+}
 
 # can't upgrade to a previous version that doesn't have a corresponding
 # UpgradeStep derived class. without these dummy classes, the rendered
@@ -386,28 +401,70 @@ def test_cli_upgrade_to_2023_9_1_cdsdashboard_removed(monkeypatch: pytest.Monkey
     start_version = "2023.5.2"
     end_version = "2023.9.1"
 
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        assert tmp_file.exists() is False
-
-        addl_config = yaml.safe_load(
-            f"""
+    addl_config = yaml.safe_load(
+        f"""
 cdsdashboards:
   enabled: true
   cds_hide_user_named_servers: true
   cds_hide_user_dashboard_servers: false
         """
-        )
+    )
 
-        upgraded = assert_nebari_upgrade_success(
-            monkeypatch,
-            start_version,
-            end_version,
-            addl_args=["--attempt-fixes"],
-            addl_config=addl_config
-        )
+    upgraded = assert_nebari_upgrade_success(
+        monkeypatch,
+        start_version,
+        end_version,
+        addl_args=["--attempt-fixes"],
+        addl_config=addl_config
+    )
       
-        assert not upgraded.get("cdsdashboards")
+    assert not upgraded.get("cdsdashboards")
+    assert upgraded.get("prevent_deploy")
+
+#def test_cli_upgrade_to_2023_9_1_kubernetes_validations(monkeypatch: pytest.MonkeyPatch):
+#    start_version = "2023.7.2"
+#    monkeypatch.setattr(_nebari.upgrade, "__version__", "2023.9.1")
+#
+#    kubernetes_configs = {
+#        "aws": {"incompatible": "1.19", "compatible": "1.26", "invalid": "badname"},
+#        "azure": {"incompatible": "1.23", "compatible": "1.26", "invalid": "badname"},
+#        "do": {"incompatible": "1.19.2-do.3", "compatible": "1.26.0-do.custom", "invalid": "badname"},
+#        "gcp": {"incompatible": "1.23", "compatible": "1.26", "invalid": "badname"},
+#    }
+#
+#    # Incompatible provider tests
+#    for provider in kubernetes_configs.keys():
+#
+#        with tempfile.TemporaryDirectory() as tmp:
+#            tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
+#            assert tmp_file.exists() is False
+#    
+#            nebari_config = yaml.safe_load(
+#            f"""
+#project_name: test
+#provider: {provider}
+#domain: test.example.com
+#namespace: dev
+#nebari_version: {start_version}
+#cdsdashboards:
+#  enabled: true
+#  cds_hide_user_named_servers: true
+#  cds_hide_user_dashboard_servers: false
+#{get_provider_config_block_name(provider)}:
+##    region: {MOCK_CLOUD_REGIONS.get(provider, {})[0]}
+#    kubernetes_version: {kubernetes_configs[provider]["incompatible"]}
+#        """
+#        )
+#
+#            with open(tmp_file.resolve(), "w") as f:
+#                yaml.dump(nebari_config, f)        
+#
+#            assert tmp_file.exists() is True
+#            app = create_cli()
+#
+#            result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
+#
+#            assert "AWS" in result.stdout
 
 def assert_nebari_upgrade_success(
     monkeypatch: pytest.MonkeyPatch,
