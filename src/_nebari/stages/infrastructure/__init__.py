@@ -59,7 +59,7 @@ class DigitalOceanInputVars(schema.Base):
 
 
 class GCPGuestAccelerators(schema.Base):
-    type: str
+    name: str
     count: int
 
 
@@ -116,6 +116,8 @@ class AzureInputVars(schema.Base):
     vnet_subnet_id: str = None
     private_cluster_enabled: bool
     tags: Dict[str, str] = {}
+    max_pods: int = None
+    network_profile: Dict[str, str] = None
 
 
 class AWSNodeGroupInputVars(schema.Base):
