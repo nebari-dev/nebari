@@ -171,7 +171,7 @@ def assert_match_output(
 
     ----------
     Parameters
-    
+
     expected_output: str
         The expected output text to find in the actual output.
     actual_output: str
@@ -181,7 +181,7 @@ def assert_match_output(
         exactly. Otherwise, the expected_output must be found somewhere in
         the actual_output.
     """
-    regex = re.compile(fr"{actual_output}")
+    regex = re.compile(rf"{actual_output}")
     if exact_match:
         assert regex.fullmatch(expected_output) is not None
     else:
