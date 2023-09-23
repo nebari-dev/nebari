@@ -203,7 +203,7 @@ def assert_match_all_outputs(
     Parameters
 
     expected_outputs: List[str]
-        A list of expected output text or regular expression to find in 
+        A list of expected output text or regular expression to find in
         the actual output.
     actual_outputs: List[str]
         A list of actual output text to search for the expected output.
