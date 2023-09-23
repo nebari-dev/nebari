@@ -171,9 +171,10 @@ def assert_match_output(
 
     ----------
     Parameters
-    
+
     expected_output: str
-        The expected output text to find in the actual output.
+        The expected output text or regular expression to find in the
+        actual output.
     actual_output: str
         The actual output text to search for the expected output.
     exact_match: bool
@@ -181,11 +182,15 @@ def assert_match_output(
         exactly. Otherwise, the expected_output must be found somewhere in
         the actual_output.
     """
-    regex = re.compile(fr"{actual_output}")
-    if exact_match:
-        assert regex.fullmatch(expected_output) is not None
-    else:
-        assert regex.search(expected_output) is not None
+    regex = re.compile(rf"{actual_output}")
+    match = (
+        regex.fullmatch(expected_output)
+        if exact_match
+        else regex.search(expected_output)
+    )
+    assert (
+        match is not None
+    ), f"Expected output: {expected_output} not found in actual output: {actual_output}"
 
 
 def assert_match_all_outputs(
@@ -198,7 +203,8 @@ def assert_match_all_outputs(
     Parameters
 
     expected_outputs: List[str]
-        A list of expected output text to find in the actual output.
+        A list of expected output text or regular expression to find in 
+        the actual output.
     actual_outputs: List[str]
         A list of actual output text to search for the expected output.
     exact_match: bool

@@ -26,5 +26,6 @@ def test_output_match(expected, actual, exact):
     ],
 )
 def test_output_not_match(expected, actual, exact):
-    with pytest.raises(AssertionError):
+    msg = f"Expected output: {expected} not found in actual output: {actual}"
+    with pytest.raises(AssertionError, match=msg):
         assert_match_output(expected, actual, exact_match=exact)
