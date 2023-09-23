@@ -316,7 +316,9 @@ def construct_azure_resource_group_name(
     return f"{project_name}-{namespace}{suffix}"
 
 
-def get_do_k8s_version_prefix(do_k8s_version):
+def get_k8s_version_prefix(do_k8s_version: str) -> str:
+    """Return the major.minor version of the k8s version string."""
+
     # Split the input string by the first decimal point
     parts = do_k8s_version.split(".", 1)
 
@@ -341,7 +343,7 @@ def get_provider_config_block_name(provider):
         "aws": "amazon_web_services",
         "azure": "azure_cloud",
         "do": "digital_ocean",
-        "gcp": "google_cloud",
+        "gcp": "google_cloud_platform",
     }
 
     if provider in PROVIDER_CONFIG_NAMES.keys():

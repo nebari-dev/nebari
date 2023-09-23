@@ -12,7 +12,7 @@ from rich.prompt import Prompt
 
 from _nebari.config import backup_configuration
 from _nebari.utils import (
-    get_do_k8s_version_prefix,
+    get_k8s_version_prefix,
     get_provider_config_block_name,
     load_yaml,
     yaml,
@@ -527,6 +527,9 @@ class Upgrade_2023_9_1(UpgradeStep):
         rich.print(
             "-> Data should be backed up before performing this upgrade.  The 'prevent_deploy' flag has been set in your config file and must be manually removed to deploy."
         )
+        rich.print(
+            "-> Please also run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
+        )
 
         # Setting the following flag will prevent deployment and display guidance to the user
         # which they can override if they are happy they understand the situation.
@@ -562,9 +565,8 @@ class Upgrade_2023_9_1(UpgradeStep):
         )
 
         # Convert to decimal prefix if provider is Digital Ocean
-        if provider == "do":
-            current_version = get_do_k8s_version_prefix(current_version)
-            rich.print(current_version)
+        if provider == "do" or provider == "gcp":
+            current_version = get_k8s_version_prefix(current_version)
 
         # Try to convert known Kubernetes versions to float.
         if not current_version == "NA":
@@ -581,7 +583,6 @@ class Upgrade_2023_9_1(UpgradeStep):
                 rich.print(
                     f"-> Unable to detect Kubernetes version for provider {provider}.  Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26 or greater.  Please confirm your Kubernetes version is configured before upgrading."
                 )
-                exit(1)
 
             # Kubernetes version less than required minimum
             if current_version < 1.26:
@@ -590,10 +591,14 @@ class Upgrade_2023_9_1(UpgradeStep):
                     f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26 or greater.  Your configured Kubernetes version is [red]{current_version}[/red]."
                 )
                 rich.print(upgrade_messages[provider])
+                version_diff = round(1.26 - current_version, 2)
+                if version_diff > 0.01:
+                    rich.print(
+                        "-> The Kubernetes version is multiple minor versions behind the minimum required version. You will need to perform the upgrade one minor version at a time.  For example, if your current version is 1.23, you will need to upgrade to 1.24, then 1.25, and finally 1.26."
+                    )
                 rich.print(
-                    f"-> Once you have completed the upgrade, update the value of {provider_config_block}.kubernetes_version in your config file to match and run the upgrade command again."
+                    f"-> Once you have completed the upgrade, update the value of [green]{provider_config_block}.kubernetes_version[/green] in your config file to match and run the upgrade command again."
                 )
-                exit(1)
 
         else:
             rich.print("\n ⚠️ Warning ⚠️")
