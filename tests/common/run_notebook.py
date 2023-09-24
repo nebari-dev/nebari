@@ -2,7 +2,7 @@ import logging
 import re
 import time
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from tests.common.navigator import Navigator
 
@@ -194,7 +194,9 @@ def assert_match_output(
 
 
 def assert_match_all_outputs(
-    expected_outputs: List[str], actual_outputs: List[str], exact_match: bool
+    expected_outputs: List[str],
+    actual_outputs: List[str],
+    exact_matches: Union[bool, List[bool]],
 ) -> None:
     """Assert that the expected_outputs are found in the actual_outputs.
     The expected_outputs and actual_outputs must be the same length.
@@ -207,10 +209,16 @@ def assert_match_all_outputs(
         the actual output.
     actual_outputs: List[str]
         A list of actual output text to search for the expected output.
-    exact_match: bool
+    exact_matches: Union[bool, List[bool]]
         If True, then the expected_output must match the actual_output
         exactly. Otherwise, the expected_output must be found somewhere in
-        the actual_output.
+        the actual_output. If a list is provided, then it must be the same
+        length as expected_outputs and actual_outputs.
     """
-    for exact, actual in zip(expected_outputs, actual_outputs):
-        assert_match_output(exact, actual, exact_match)
+    if isinstance(exact_matches, bool):
+        exact_matches = [exact_matches] * len(expected_outputs)
+
+    for exact_output, actual_output, exact in zip(
+        expected_outputs, actual_outputs, exact_matches
+    ):
+        assert_match_output(exact_output, actual_output, exact)
