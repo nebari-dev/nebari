@@ -564,9 +564,11 @@ class Upgrade_2023_9_1(UpgradeStep):
             "kubernetes_version", "NA"
         )
 
-        # Convert to decimal prefix if provider is Digital Ocean
-        if provider == "do" or provider == "gcp":
+        # Convert to decimal prefix
+        if provider in ["do", "gcp", "azure"]:
             current_version = get_k8s_version_prefix(current_version)
+        elif provider == "aws":
+            current_version = float(current_version)
 
         # Try to convert known Kubernetes versions to float.
         if not current_version == "NA":
@@ -588,7 +590,7 @@ class Upgrade_2023_9_1(UpgradeStep):
             if current_version < 1.26:
                 rich.print("\n ⚠️ Warning ⚠️")
                 rich.print(
-                    f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26 or greater.  Your configured Kubernetes version is [red]{current_version}[/red]."
+                    f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26.  Your configured Kubernetes version is [red]{current_version}[/red]."
                 )
                 rich.print(upgrade_messages[provider])
                 version_diff = round(1.26 - current_version, 2)

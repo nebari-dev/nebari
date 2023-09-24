@@ -325,7 +325,6 @@ def get_k8s_version_prefix(do_k8s_version: str) -> str:
     if len(parts) == 2:
         # Extract the part before the second decimal point
         before_second_decimal = parts[0] + "." + parts[1].split(".")[0]
-
         try:
             # Convert the extracted part to a float
             result = float(before_second_decimal)
@@ -341,7 +340,7 @@ def get_k8s_version_prefix(do_k8s_version: str) -> str:
 def get_provider_config_block_name(provider):
     PROVIDER_CONFIG_NAMES = {
         "aws": "amazon_web_services",
-        "azure": "azure_cloud",
+        "azure": "azure",
         "do": "digital_ocean",
         "gcp": "google_cloud_platform",
     }
