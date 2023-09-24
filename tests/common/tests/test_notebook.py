@@ -7,9 +7,12 @@ from tests.common.run_notebook import assert_match_output
     "expected, actual, exact",
     [
         ("success: 6", "success: 6", True),
-        ("success: 6", "success", False),
+        ("success", "success: 6", False),
         ("6", "6", True),
-        ("abcde", "cde", False),
+        ("cde", "abcde", False),
+        ("12.*5", "12345", True),
+        (".*5", "12345", True),
+        ("ab.*ef", "123abcdef123", False),
     ],
 )
 def test_output_match(expected, actual, exact):
@@ -23,6 +26,7 @@ def test_output_match(expected, actual, exact):
         ("success: 6", "success", True),
         ("60", "6", True),
         ("abcde", "cde", True),
+        ("ab.*ef", "123abcdef123", True),
     ],
 )
 def test_output_not_match(expected, actual, exact):
