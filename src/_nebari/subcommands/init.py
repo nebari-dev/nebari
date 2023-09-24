@@ -67,8 +67,10 @@ GUIDED_INIT_MSG = (
     "It is an [i]alternative[/i] to passing the options listed below."
 )
 
+DEFAULT_REGION_MSG = "Defaulting to region:`{region}`."
+
 DEFAULT_KUBERNETES_VERSION_MSG = (
-    "Defaulting to latest `{kubernetes_version}` Kubernetes version available."
+    "Defaulting to highest supported Kubernetes version: `{kubernetes_version}`."
 )
 
 LATEST = "latest"
@@ -81,12 +83,12 @@ class GitRepoEnum(str, enum.Enum):
 
 class InitInputs(schema.Base):
     cloud_provider: ProviderEnum = ProviderEnum.local
-    project_name: schema.letter_dash_underscore_pydantic = ""
+    project_name: schema.project_name_pydantic = ""
     domain_name: typing.Optional[str] = None
-    namespace: typing.Optional[schema.letter_dash_underscore_pydantic] = "dev"
+    namespace: typing.Optional[schema.namespace_pydantic] = "dev"
     auth_provider: AuthenticationEnum = AuthenticationEnum.password
     auth_auto_provision: bool = False
-    repository: typing.Union[str, None] = None
+    repository: typing.Optional[schema.github_url_pydantic] = None
     repository_auto_provision: bool = False
     ci_provider: CiEnum = CiEnum.none
     terraform_state: TerraformStateEnum = TerraformStateEnum.remote
@@ -211,18 +213,23 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
             )
         )
 
-        os.environ["AUTH0_CLIENT_ID"] = typer.prompt(
-            "Paste your AUTH0_CLIENT_ID",
-            hide_input=True,
-        )
-        os.environ["AUTH0_CLIENT_SECRET"] = typer.prompt(
-            "Paste your AUTH0_CLIENT_SECRET",
-            hide_input=True,
-        )
-        os.environ["AUTH0_DOMAIN"] = typer.prompt(
-            "Paste your AUTH0_DOMAIN",
-            hide_input=True,
-        )
+        if not os.environ.get("AUTH0_CLIENT_ID"):
+            os.environ["AUTH0_CLIENT_ID"] = typer.prompt(
+                "Paste your AUTH0_CLIENT_ID",
+                hide_input=True,
+            )
+
+        if not os.environ.get("AUTH0_CLIENT_SECRET"):
+            os.environ["AUTH0_CLIENT_SECRET"] = typer.prompt(
+                "Paste your AUTH0_CLIENT_SECRET",
+                hide_input=True,
+            )
+
+        if not os.environ.get("AUTH0_DOMAIN"):
+            os.environ["AUTH0_DOMAIN"] = typer.prompt(
+                "Paste your AUTH0_DOMAIN",
+                hide_input=True,
+            )
 
     # GitHub
     elif auth_provider == AuthenticationEnum.github.value.lower() and (
@@ -235,14 +242,17 @@ def check_auth_provider_creds(ctx: typer.Context, auth_provider: str):
             )
         )
 
-        os.environ["GITHUB_CLIENT_ID"] = typer.prompt(
-            "Paste your GITHUB_CLIENT_ID",
-            hide_input=True,
-        )
-        os.environ["GITHUB_CLIENT_SECRET"] = typer.prompt(
-            "Paste your GITHUB_CLIENT_SECRET",
-            hide_input=True,
-        )
+        if not os.environ.get("GITHUB_CLIENT_ID"):
+            os.environ["GITHUB_CLIENT_ID"] = typer.prompt(
+                "Paste your GITHUB_CLIENT_ID",
+                hide_input=True,
+            )
+
+        if not os.environ.get("GITHUB_CLIENT_SECRET"):
+            os.environ["GITHUB_CLIENT_SECRET"] = typer.prompt(
+                "Paste your GITHUB_CLIENT_SECRET",
+                hide_input=True,
+            )
 
     return auth_provider
 
@@ -430,11 +440,11 @@ def check_cloud_provider_region(region: str, cloud_provider: str) -> str:
         # TODO: Add a check for valid region for Azure
         if not region:
             region = AZURE_DEFAULT_REGION
-            rich.print(f"Defaulting to `{region}` region.")
+            rich.print(DEFAULT_REGION_MSG.format(region=region))
     elif cloud_provider == ProviderEnum.gcp.value.lower():
         if not region:
             region = GCP_DEFAULT_REGION
-            rich.print(f"Defaulting to `{region}` region.")
+            rich.print(DEFAULT_REGION_MSG.format(region=region))
         if region not in google_cloud.regions(os.environ["PROJECT_ID"]):
             raise ValueError(
                 f"Invalid region `{region}`. Please refer to the GCP docs for a list of valid regions: {GCP_REGIONS}"
@@ -442,7 +452,7 @@ def check_cloud_provider_region(region: str, cloud_provider: str) -> str:
     elif cloud_provider == ProviderEnum.do.value.lower():
         if not region:
             region = DO_DEFAULT_REGION
-            rich.print(f"Defaulting to `{region}` region.")
+            rich.print(DEFAULT_REGION_MSG.format(region=region))
 
         if region not in set(_["slug"] for _ in digital_ocean.regions()):
             raise ValueError(
@@ -473,8 +483,8 @@ def nebari_subcommand(cli: typer.Typer):
             "--project",
             "-p",
             callback=typer_validate_regex(
-                schema.namestr_regex,
-                "Project name must begin with a letter and consist of letters, numbers, dashes, or underscores.",
+                schema.project_name_regex,
+                "Project name must (1) consist of only letters, numbers, hyphens, and underscores, (2) begin and end with a letter, and (3) contain between 3 and 32 characters.",
             ),
         ),
         domain_name: typing.Optional[str] = typer.Option(
@@ -486,8 +496,8 @@ def nebari_subcommand(cli: typer.Typer):
         namespace: str = typer.Option(
             "dev",
             callback=typer_validate_regex(
-                schema.namestr_regex,
-                "Namespace must begin with a letter and consist of letters, numbers, dashes, or underscores.",
+                schema.namespace_regex,
+                "Namespace must begin and end with a letter and consist of letters, dashes, or underscores.",
             ),
         ),
         region: str = typer.Option(
@@ -502,12 +512,17 @@ def nebari_subcommand(cli: typer.Typer):
         auth_auto_provision: bool = typer.Option(
             False,
         ),
-        repository: GitRepoEnum = typer.Option(
+        repository: str = typer.Option(
             None,
-            help=f"options: {enum_to_list(GitRepoEnum)}",
+            help="Github repository URL to be initialized with --repository-auto-provision",
+            callback=typer_validate_regex(
+                schema.github_url_regex,
+                "Must be a fully qualified GitHub repository URL.",
+            ),
         ),
         repository_auto_provision: bool = typer.Option(
             False,
+            help="Initialize the GitHub repository provided by --repository (GitHub credentials required)",
         ),
         ci_provider: CiEnum = typer.Option(
             CiEnum.none,
@@ -638,7 +653,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         if not disable_checks:
             check_cloud_provider_creds(
                 cloud_provider=inputs.cloud_provider,
-                disable_prompt=ctx.params["disable_prompt"],
+                disable_prompt=ctx.params.get("disable_prompt"),
             )
 
         # specific context needed when `check_project_name` is called
@@ -677,13 +692,10 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
 
         name_guidelines = """
         The project name must adhere to the following requirements:
-        - Letters from A to Z (upper and lower case) and numbers
-        - Maximum accepted length of the name string is 16 characters
+        - Letters from A to Z (upper and lower case), numbers, hyphens, and dashes
+        - Length from 3 to 32 characters
+        - Begin and end with a letter
         """
-        if inputs.cloud_provider == ProviderEnum.aws.value.lower():
-            name_guidelines += "- Should NOT start with the string `aws`\n"
-        elif inputs.cloud_provider == ProviderEnum.azure.value.lower():
-            name_guidelines += "- Should NOT contain `-`\n"
 
         # PROJECT NAME
         rich.print(
@@ -694,7 +706,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         inputs.project_name = questionary.text(
             "What project name would you like to use?",
             qmark=qmark,
-            validate=questionary_validate_regex(schema.namestr_regex),
+            validate=questionary_validate_regex(schema.project_name_regex),
         ).unsafe_ask()
 
         # DOMAIN NAME

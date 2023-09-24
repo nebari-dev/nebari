@@ -9,9 +9,3 @@ def pytest_addoption(parser):
     parser.addoption(
         "--cloud", action="store", help="Cloud to deploy on: aws/do/gcp/azure"
     )
-    parser.addoption(
-        "--disable-prompt",
-        action="store_true",
-        help="Disable prompt for confirmation to start cluster teardown",
-        default=False,
-    )

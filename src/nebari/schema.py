@@ -15,13 +15,22 @@ else:
 
 
 # Regex for suitable project names
-namestr_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
-letter_dash_underscore_pydantic = Annotated[
-    str, StringConstraints(pattern=namestr_regex)
+project_name_regex = r"^[A-Za-z][A-Za-z0-9\-_]{1,30}[A-Za-z0-9]$"
+project_name_pydantic = Annotated[
+    str, StringConstraints(pattern=project_name_regex)
+]
+
+# Regex for suitable namespaces
+namespace_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
+namespace_pydantic = Annotated[
+    str, StringConstraints(pattern=namespace_regex)
 ]
 
 email_regex = "^[^ @]+@[^ @]+\\.[^ @]+$"
 email_pydantic = Annotated[str, StringConstraints(pattern=email_regex)]
+
+github_url_regex = "^(https://)?github.com/([^/]+)/([^/]+)/?$"
+github_url_pydantic = pydantic.constr(regex=github_url_regex)
 
 
 class Base(pydantic.BaseModel):
@@ -45,8 +54,8 @@ class ProviderEnum(str, enum.Enum):
 
 
 class Main(Base):
-    project_name: letter_dash_underscore_pydantic = "project-name"
-    namespace: letter_dash_underscore_pydantic = "dev"
+    project_name: project_name_pydantic
+    namespace: namespace_pydantic = "dev"
     provider: ProviderEnum = ProviderEnum.local
     # In nebari_version only use major.minor.patch version - drop any pre/post/dev suffixes
     nebari_version: Annotated[str, Field(validate_default=True)] = __version__

@@ -48,7 +48,9 @@ def generate_test_data_test_cli_validate_local_happy_path():
 
     test_data = []
     for f in TEST_DATA_DIR.iterdir():
-        if f.is_file() and re.match(r"^\w*\.happy\.yaml$", f.name):  # sample.happy.yaml
+        if f.is_file() and re.match(
+            r"^\w*\.happy.*\.yaml$", f.name
+        ):  # sample.happy.optional-description.yaml
             test_data.append((f.name))
     keys = [
         "config_yaml",
@@ -195,6 +197,16 @@ project_name: test
             },
         ),
         ("do", {"digital_ocean": {"kubernetes_version": "1.20", "region": "nyc3"}}),
+        pytest.param(
+            "local",
+            {"security": {"authentication": {"type": "Auth0"}}},
+            id="auth-provider-auth0",
+        ),
+        pytest.param(
+            "local",
+            {"security": {"authentication": {"type": "GitHub"}}},
+            id="auth-provider-github",
+        ),
     ],
 )
 def test_cli_validate_error_missing_cloud_env(
@@ -214,6 +226,11 @@ def test_cli_validate_error_missing_cloud_env(
         "DIGITALOCEAN_TOKEN",
         "SPACES_ACCESS_KEY_ID",
         "SPACES_SECRET_ACCESS_KEY",
+        "AUTH0_CLIENT_ID",
+        "AUTH0_CLIENT_SECRET",
+        "AUTH0_DOMAIN",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
     ]:
         try:
             monkeypatch.delenv(e)
@@ -259,9 +276,9 @@ def generate_test_data_test_cli_validate_error():
     test_data = []
     for f in TEST_DATA_DIR.iterdir():
         if f.is_file():
-            m = re.match(
-                r"^\w*\.error\.([\w-]*)\.yaml$", f.name
-            )  # sample.error.message.yaml
+            m = re.match(r"^\w*\.error\.([\w-]*)\.yaml$", f.name) or re.match(
+                r"^\w*\.error\.([\w-]*)\.[\w-]*\.yaml$", f.name
+            )  # sample.error.assert-message.optional-description.yaml
             if m:
                 test_data.append((f.name, m.groups()[0]))
             elif re.match(r"^\w*\.error\.yaml$", f.name):  # sample.error.yaml

@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -16,6 +17,16 @@ from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
 from nebari import schema
 from nebari.plugins import nebari_plugin_manager
+
+
+@pytest.fixture
+def config_path():
+    return Path(__file__).parent / "cli_validate"
+
+
+@pytest.fixture
+def config_gcp(config_path):
+    return config_path / "gcp.happy.yaml"
 
 
 @pytest.fixture(autouse=True)

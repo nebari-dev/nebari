@@ -245,7 +245,7 @@ class InputSchema(schema.Base):
                 "pandas=1.5.3",
                 {
                     "pip": [
-                        "kbatch==0.4.1",
+                        "kbatch==0.4.2",
                     ],
                 },
             ],
@@ -470,7 +470,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             },
             conda_store_default_namespace=self.config.conda_store.default_namespace,
             conda_store_filesystem_storage=self.config.storage.conda_store,
-            conda_store_object_storage=self.config.conda_store.object_storage,
+            conda_store_object_storage=self.config.storage.conda_store,
             conda_store_service_token_scopes=conda_store_token_scopes,
             conda_store_extra_settings=self.config.conda_store.extra_settings,
             conda_store_extra_config=self.config.conda_store.extra_config,

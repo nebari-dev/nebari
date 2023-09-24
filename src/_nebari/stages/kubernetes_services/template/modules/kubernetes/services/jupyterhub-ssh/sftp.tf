@@ -90,7 +90,8 @@ resource "kubernetes_deployment" "jupyterhub-sftp" {
         volume {
           name = "secrets"
           secret {
-            secret_name = kubernetes_secret.jupyterhub-sftp.metadata.0.name
+            secret_name  = kubernetes_secret.jupyterhub-sftp.metadata.0.name
+            default_mode = "0600"
           }
         }
 
