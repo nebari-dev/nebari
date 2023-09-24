@@ -582,9 +582,8 @@ class Upgrade_2023_9_1(UpgradeStep):
             if isinstance(current_version, float) and current_version < 1.26:
                 rich.print("\n ⚠️ Warning ⚠️")
                 rich.print(
-                    f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26.  Your configured Kubernetes version is [red]{current_version}[/red]."
+                    f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26.  Your configured Kubernetes version is [red]{current_version}[/red]. {UPGRADE_KUBERNETES_MESSAGE}"
                 )
-                rich.print(UPGRADE_KUBERNETES_MESSAGE)
                 version_diff = round(1.26 - current_version, 2)
                 if version_diff > 0.01:
                     rich.print(
