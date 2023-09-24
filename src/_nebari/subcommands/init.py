@@ -653,7 +653,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         if not disable_checks:
             check_cloud_provider_creds(
                 cloud_provider=inputs.cloud_provider,
-                disable_prompt=ctx.params["disable_prompt"],
+                disable_prompt=ctx.params.get("disable_prompt"),
             )
 
         # specific context needed when `check_project_name` is called
