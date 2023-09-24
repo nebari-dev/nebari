@@ -184,9 +184,7 @@ def assert_match_output(
     """
     regex = re.compile(rf"{expected_output}")
     match = (
-        regex.fullmatch(actual_output)
-        if exact_match
-        else regex.search(actual_output)
+        regex.fullmatch(actual_output) if exact_match else regex.search(actual_output)
     )
     assert (
         match is not None
