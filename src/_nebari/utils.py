@@ -316,11 +316,12 @@ def construct_azure_resource_group_name(
     return f"{project_name}-{namespace}{suffix}"
 
 
-def get_k8s_version_prefix(do_k8s_version: str) -> str:
+def get_k8s_version_prefix(k8s_version: str) -> str:
     """Return the major.minor version of the k8s version string."""
 
+    k8s_version = str(k8s_version)
     # Split the input string by the first decimal point
-    parts = do_k8s_version.split(".", 1)
+    parts = k8s_version.split(".", 1)
 
     if len(parts) == 2:
         # Extract the part before the second decimal point

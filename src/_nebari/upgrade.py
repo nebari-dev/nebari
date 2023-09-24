@@ -27,6 +27,8 @@ NEBARI_WORKFLOW_CONTROLLER_DOCS = (
 )
 ARGO_JUPYTER_SCHEDULER_REPO = "https://github.com/nebari-dev/argo-jupyter-scheduler"
 
+UPGRADE_KUBERNETES_MESSAGE = "Please see the [green][link=https://www.nebari.dev/docs/how-tos/kubernetes-version-upgrade]Kubernetes upgrade docs[/link][/green] for more information."
+
 
 def do_upgrade(config_filename, attempt_fixes=False):
     config = load_yaml(config_filename)
@@ -548,14 +550,6 @@ class Upgrade_2023_9_1(UpgradeStep):
         # Kubernetes version check.  Minimum Kubernetes version is 1.26
         # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
 
-        # Upgrade instructions for various providers
-        upgrade_messages = {
-            "aws": "Please upgrade your EKS cluster outside of Nebari following Amazon Web Services guide: https://docs.aws.amazon.com/eks/latest/userguide/update-cluster.html.",
-            "azure": "Please upgrade your AKS cluster outside of Nebari following Azure Cloud's guide: https://learn.microsoft.com/en-us/azure/aks/upgrade-cluster.",
-            "gcp": "Please upgrade your GKE cluster outside of Nebari following Google Cloud Platform's guide: https://cloud.google.com/kubernetes-engine/docs/how-to/upgrading-a-cluster.",
-            "do": "Please upgrade your DOKS cluster outside of Nebari following Digital Ocean's guide: https://docs.digitalocean.com/products/kubernetes/how-to/upgrade-cluster/",
-        }
-
         provider = config["provider"]
         provider_config_block = get_provider_config_block_name(provider)
 
@@ -565,16 +559,14 @@ class Upgrade_2023_9_1(UpgradeStep):
         )
 
         # Convert to decimal prefix
-        if provider in ["do", "gcp", "azure"]:
+        if provider in ["aws", "azure", "gcp", "do"]:
             current_version = get_k8s_version_prefix(current_version)
-        elif provider == "aws":
-            current_version = float(current_version)
 
         # Try to convert known Kubernetes versions to float.
         if not current_version == "NA":
             try:
                 current_version = float(current_version)
-            except ValueError:
+            except TypeError:
                 current_version = "NA"
 
         # Handle checks for when Kubernetes version should be detectable
@@ -583,16 +575,16 @@ class Upgrade_2023_9_1(UpgradeStep):
             if current_version == "NA":
                 rich.print("\n ⚠️ Warning ⚠️")
                 rich.print(
-                    f"-> Unable to detect Kubernetes version for provider {provider}.  Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26 or greater.  Please confirm your Kubernetes version is configured before upgrading."
+                    f"-> Unable to detect Kubernetes version for provider {provider}.  Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26.  Please confirm your Kubernetes version is configured before upgrading."
                 )
 
             # Kubernetes version less than required minimum
-            if current_version < 1.26:
+            if isinstance(current_version, float) and current_version < 1.26:
                 rich.print("\n ⚠️ Warning ⚠️")
                 rich.print(
                     f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26.  Your configured Kubernetes version is [red]{current_version}[/red]."
                 )
-                rich.print(upgrade_messages[provider])
+                rich.print(UPGRADE_KUBERNETES_MESSAGE)
                 version_diff = round(1.26 - current_version, 2)
                 if version_diff > 0.01:
                     rich.print(
