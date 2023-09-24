@@ -16,15 +16,11 @@ else:
 
 # Regex for suitable project names
 project_name_regex = r"^[A-Za-z][A-Za-z0-9\-_]{1,30}[A-Za-z0-9]$"
-project_name_pydantic = Annotated[
-    str, StringConstraints(pattern=project_name_regex)
-]
+project_name_pydantic = Annotated[str, StringConstraints(pattern=project_name_regex)]
 
 # Regex for suitable namespaces
 namespace_regex = r"^[A-Za-z][A-Za-z\-_]*[A-Za-z]$"
-namespace_pydantic = Annotated[
-    str, StringConstraints(pattern=namespace_regex)
-]
+namespace_pydantic = Annotated[str, StringConstraints(pattern=namespace_regex)]
 
 email_regex = "^[^ @]+@[^ @]+\\.[^ @]+$"
 email_pydantic = Annotated[str, StringConstraints(pattern=email_regex)]
