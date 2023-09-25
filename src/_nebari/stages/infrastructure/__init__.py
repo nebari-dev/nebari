@@ -217,7 +217,7 @@ class DigitalOceanNodeGroup(schema.Base):
 
 class DigitalOceanProvider(schema.Base):
     region: str
-    kubernetes_version: str
+    kubernetes_version: Optional[str] = None
     # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
     node_groups: typing.Dict[str, DigitalOceanNodeGroup] = {
         "general": DigitalOceanNodeGroup(
@@ -233,45 +233,37 @@ class DigitalOceanProvider(schema.Base):
     tags: typing.Optional[typing.List[str]] = []
 
     @model_validator(mode="before")
-    def _check_credentials(self):
+    @classmethod
+    def _check_input(self, data: Any) -> Any:
         digital_ocean.check_credentials()
 
-    @field_validator("region")
-    @classmethod
-    def _validate_region(cls, value: str) -> str:
+        # check if region is valid
         available_regions = set(_["slug"] for _ in digital_ocean.regions())
-        if value not in available_regions:
+        if data["region"] not in available_regions:
             raise ValueError(
-                f"Digital Ocean region={value} is not one of {available_regions}"
+                f"Digital Ocean region={data['region']} is not one of {available_regions}"
             )
-        return value
 
-    @field_validator("node_groups")
-    @classmethod
-    def _validate_node_group(
-        cls, value: typing.Dict[str, DigitalOceanNodeGroup]
-    ) -> typing.Dict[str, DigitalOceanNodeGroup]:
+        # check if kubernetes version is valid
+        available_kubernetes_versions = digital_ocean.kubernetes_versions()
+        if len(available_kubernetes_versions) == 0:
+            raise ValueError(
+                "Request to Digital Ocean for available Kubernetes versions failed."
+            )
+        if data["kubernetes_version"] is None:
+            data["kubernetes_version"] = available_kubernetes_versions[-1]
+        elif data["kubernetes_version"] not in available_kubernetes_versions:
+            raise ValueError(
+                f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+            )
+
         available_instances = {_["slug"] for _ in digital_ocean.instances()}
-        for _, node_group in value.items():
+        for _, node_group in data["node_groups"].items():
             if node_group.instance not in available_instances:
                 raise ValueError(
                     f"Digital Ocean instance {node_group.instance} not one of available instance types={available_instances}"
                 )
-
-        return value
-
-    @field_validator("kubernetes_version")
-    @classmethod
-    def _validate_kubernetes_version(cls, value: typing.Optional[str]) -> str:
-        available_kubernetes_versions = digital_ocean.kubernetes_versions()
-        assert available_kubernetes_versions
-        if value is not None and value not in available_kubernetes_versions:
-            raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
-            )
-        else:
-            value = available_kubernetes_versions[-1]
-        return value
+        return data
 
 
 class GCPIPAllocationPolicy(schema.Base):
@@ -342,32 +334,21 @@ class GoogleCloudPlatformProvider(schema.Base):
     ] = None
 
     @model_validator(mode="before")
-    def _check_credentials(self):
+    @classmethod
+    def _check_input(cls, data: Any) -> Any:
         google_cloud.check_credentials()
-
-    @field_validator("region")
-    @classmethod
-    def _validate_region(cls, value: str, info: FieldValidationInfo) -> str:
-        available_regions = google_cloud.regions(info.data["project"])
-        if value not in available_regions:
+        avaliable_regions = google_cloud.regions(data["project"])
+        if data["region"] not in avaliable_regions:
             raise ValueError(
-                f"Google Cloud region={value} is not one of {available_regions}"
+                f"Google Cloud region={data['region']} is not one of {avaliable_regions}"
             )
-        return value
 
-    @field_validator("kubernetes_version")
-    @classmethod
-    def _validate_kubernetes_version(cls, value: str, info: FieldValidationInfo) -> str:
-        available_kubernetes_versions = google_cloud.kubernetes_versions(
-            info.data["region"]
-        )
-        if value not in available_kubernetes_versions:
+        available_kubernetes_versions = google_cloud.kubernetes_versions(data["region"])
+        if data["kubernetes_version"] not in available_kubernetes_versions:
             raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+                f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
-        else:
-            value = available_kubernetes_versions[-1]
-        return value
+        return data
 
 
 class AzureNodeGroup(schema.Base):
@@ -378,7 +359,7 @@ class AzureNodeGroup(schema.Base):
 
 class AzureProvider(schema.Base):
     region: str
-    kubernetes_version: str
+    kubernetes_version: Optional[str] = None
     storage_account_postfix: str
     resource_group_name: str = None
     node_groups: typing.Dict[str, AzureNodeGroup] = {
@@ -395,8 +376,10 @@ class AzureProvider(schema.Base):
     max_pods: typing.Optional[int] = None
 
     @model_validator(mode="before")
-    def _check_credentials(self):
+    @classmethod
+    def _check_credentials(cls, data: Any) -> Any:
         azure_cloud.check_credentials()
+        return data
 
     @field_validator("kubernetes_version")
     @classmethod
@@ -447,8 +430,8 @@ class AWSNodeGroup(schema.Base):
 
 class AmazonWebServicesProvider(schema.Base):
     region: str
-    kubernetes_version: str
-    availability_zones: typing.Optional[typing.List[str]]
+    kubernetes_version: Optional[str] = None
+    availability_zones: Optional[List[str]] = None
     node_groups: typing.Dict[str, AWSNodeGroup] = {
         "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
         "user": AWSNodeGroup(
@@ -463,54 +446,49 @@ class AmazonWebServicesProvider(schema.Base):
     vpc_cidr_block: str = "10.10.0.0/16"
 
     @model_validator(mode="before")
-    def _check_credentials(self):
+    @classmethod
+    def _check_input(cls, data: Any) -> Any:
         amazon_web_services.check_credentials()
 
-    @field_validator("region")
-    @classmethod
-    def _validate_region(cls, value: str, info: FieldValidationInfo) -> str:
-        available_regions = amazon_web_services.regions(info.data["region"])
-        if value not in available_regions:
+        # check if region is valid
+        available_regions = amazon_web_services.regions(data["region"])
+        if data["region"] not in available_regions:
             raise ValueError(
-                f"Amazon Web Services region={value} is not one of {available_regions}"
+                f"Amazon Web Services region={data['region']} is not one of {available_regions}"
             )
-        return value
 
-    @field_validator("kubernetes_version")
-    @classmethod
-    def _validate_kubernetes_version(cls, value: str, info: FieldValidationInfo) -> str:
+        # check if kubernetes version is valid
         available_kubernetes_versions = amazon_web_services.kubernetes_versions(
-            info.data["region"]
+            data["region"]
         )
-        if value not in available_kubernetes_versions:
+        if len(available_kubernetes_versions) == 0:
+            raise ValueError("Request to AWS for available Kubernetes versions failed.")
+        if data["kubernetes_version"] is None:
+            data["kubernetes_version"] = available_kubernetes_versions[-1]
+        elif data["kubernetes_version"] not in available_kubernetes_versions:
             raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+                f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
+
+        # check if availability zones are valid
+        available_zones = amazon_web_services.zones(data["region"])
+        if data["availability_zones"] is None:
+            data["availability_zones"] = available_zones
         else:
-            value = available_kubernetes_versions[-1]
-        return value
+            for zone in data["availability_zones"]:
+                if zone not in available_zones:
+                    raise ValueError(
+                        f"Amazon Web Services availability zone={zone} is not one of {available_zones}"
+                    )
 
-    @field_validator("availability_zones")
-    @classmethod
-    def _validate_availability_zones(
-        cls, value: Optional[List[str]], info: FieldValidationInfo
-    ) -> typing.List[str]:
-        if value is None:
-            value = amazon_web_services.zones(info.data["region"])
-        return value
-
-    @field_validator("node_groups")
-    @classmethod
-    def _validate_node_groups(
-        cls, value: typing.Dict[str, AWSNodeGroup], info: FieldValidationInfo
-    ) -> typing.Dict[str, AWSNodeGroup]:
-        available_instances = amazon_web_services.instances(info.data["region"])
-        for _, node_group in value.items():
+        # check if instances are valid
+        available_instances = amazon_web_services.instances(data["region"])
+        for _, node_group in data["node_groups"].items():
             if node_group.instance not in available_instances:
                 raise ValueError(
                     f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
                 )
-        return value
+        return data
 
 
 class LocalProvider(schema.Base):
