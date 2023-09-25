@@ -230,7 +230,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_check: bool = False
-    ):
+    ) -> None:
         from keycloak import KeycloakAdmin
         from keycloak.exceptions import KeycloakError
 
@@ -281,11 +281,9 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             ],
             verify=False,
         ):
-            print(
-                f"ERROR: unable to connect to keycloak master realm at url={keycloak_url} with root credentials"
+            raise RuntimeError(
+                f"Unable to connect to keycloak master realm at url={keycloak_url} with root credentials"
             )
-            sys.exit(1)
-
         print("Keycloak service successfully started")
 
     @contextlib.contextmanager

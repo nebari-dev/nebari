@@ -264,6 +264,11 @@ class TerraformStateStage(NebariTerraformStage):
             with modified_environ(**env_mapping):
                 yield
 
+    def check(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ) -> None:
+        ...
+
 
 @hookimpl
 def nebari_stage() -> List[Type[NebariStage]]:

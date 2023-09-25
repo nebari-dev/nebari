@@ -75,6 +75,11 @@ class NebariTFExtensionsStage(NebariTerraformStage):
             "helm_extensions": [_.dict() for _ in self.config.helm_extensions],
         }
 
+    def check(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_check: bool = False
+    ) -> None:
+        ...
+
 
 @hookimpl
 def nebari_stage() -> List[Type[NebariStage]]:

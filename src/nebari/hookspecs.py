@@ -30,7 +30,7 @@ class NebariStage(ABC):
     @abstractmethod
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
-    ):
+    ) -> None:
         ...
 
     @abstractmethod

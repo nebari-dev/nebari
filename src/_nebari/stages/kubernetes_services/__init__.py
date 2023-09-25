@@ -552,7 +552,7 @@ class KubernetesServicesStage(NebariTerraformStage):
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
-    ):
+    ) -> None:
         directory = "stages/07-kubernetes-services"
         import requests
 
@@ -578,10 +578,9 @@ class KubernetesServicesStage(NebariTerraformStage):
         for service_name, service in services.items():
             service_url = service["health_url"]
             if service_url and not _attempt_connect_url(service_url):
-                print(
-                    f"ERROR: Service {service_name} DOWN when checking url={service_url}"
+                raise RuntimeError(
+                    f"Service {service_name} DOWN when checking url={service_url}"
                 )
-                sys.exit(1)
 
 
 @hookimpl

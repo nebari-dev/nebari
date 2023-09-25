@@ -43,7 +43,7 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
-    ):
+    ) -> None:
         directory = "stages/05-kubernetes-keycloak"
 
         from keycloak import KeycloakAdmin
@@ -100,11 +100,9 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
             ]["value"],
             verify=False,
         ):
-            print(
-                "ERROR: unable to connect to keycloak master realm and ensure that nebari realm exists"
+            raise RuntimeError(
+                f"Unable to connect to keycloak master realm at url={keycloak_url} with root credentials"
             )
-            sys.exit(1)
-
         print("Keycloak service successfully started with nebari realm")
 
 

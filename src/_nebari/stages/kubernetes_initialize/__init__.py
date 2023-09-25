@@ -101,7 +101,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
-    ):
+    ) -> None:
         from kubernetes import client, config
         from kubernetes.client.rest import ApiException
 
@@ -114,19 +114,16 @@ class KubernetesInitializeStage(NebariTerraformStage):
         try:
             api_instance = client.CoreV1Api()
             result = api_instance.list_namespace()
-        except ApiException:
-            print(
-                f"ERROR: After stage={self.name} unable to connect to kubernetes cluster"
-            )
-            sys.exit(1)
+        except ApiException as exc:
+            raise RuntimeError(
+                f"After stage={self.name} unable to connect to kubernetes cluster"
+            ) from exc
 
         namespaces = {_.metadata.name for _ in result.items}
         if self.config.namespace not in namespaces:
-            print(
-                f"ERROR: After stage={self.name} namespace={self.config.namespace} not provisioned within kubernetes cluster"
+            raise RuntimeError(
+                f"After stage={self.name} unable to find namespace={self.config.namespace} in kubernetes cluster"
             )
-            sys.exit(1)
-
         print(f"After stage={self.name} kubernetes initialized successfully")
 
 
