@@ -26,7 +26,7 @@ email_regex = "^[^ @]+@[^ @]+\\.[^ @]+$"
 email_pydantic = Annotated[str, StringConstraints(pattern=email_regex)]
 
 github_url_regex = "^(https://)?github.com/([^/]+)/([^/]+)/?$"
-github_url_pydantic = pydantic.constr(regex=github_url_regex)
+github_url_pydantic = Annotated[str, StringConstraints(pattern=github_url_regex)]
 
 
 class Base(pydantic.BaseModel):

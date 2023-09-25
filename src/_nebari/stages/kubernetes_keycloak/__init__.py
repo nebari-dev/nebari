@@ -7,9 +7,9 @@ import string
 import sys
 import time
 import typing
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Type, Optional
 
-import pydantic
+from pydantic import Field, FieldValidationInfo, field_validator
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -61,59 +61,56 @@ class AuthenticationEnum(str, enum.Enum):
 
 
 class GitHubConfig(schema.Base):
-    client_id: str = pydantic.Field(
-        default_factory=lambda: os.environ.get("GITHUB_CLIENT_ID")
+    client_id: str = Field(
+        default_factory=lambda: os.environ.get("GITHUB_CLIENT_ID"),
+        validate_default=True,
     )
-    client_secret: str = pydantic.Field(
-        default_factory=lambda: os.environ.get("GITHUB_CLIENT_SECRET")
+    client_secret: str = Field(
+        default_factory=lambda: os.environ.get("GITHUB_CLIENT_SECRET"),
+        validate_default=True,
     )
 
-    @pydantic.root_validator(allow_reuse=True)
-    def validate_required(cls, values):
-        missing = []
-        for k, v in {
+    @field_validator("client_id", "client_secret", mode="before")
+    @classmethod
+    def validate_credentials(cls, value: Optional[str], info: FieldValidationInfo) -> str:
+        variable_mapping = {
             "client_id": "GITHUB_CLIENT_ID",
             "client_secret": "GITHUB_CLIENT_SECRET",
-        }.items():
-            if not values.get(k):
-                missing.append(v)
-
-        if len(missing) > 0:
+        }
+        if value is None:
             raise ValueError(
-                f"Missing the following required environment variable(s): {', '.join(missing)}"
+                f"{variable_mapping[info.field_name]} is not set in the environment"
             )
-
-        return values
+        return value
 
 
 class Auth0Config(schema.Base):
-    client_id: str = pydantic.Field(
-        default_factory=lambda: os.environ.get("AUTH0_CLIENT_ID")
+    client_id: str = Field(
+        default_factory=lambda: os.environ.get("AUTH0_CLIENT_ID"),
+        validate_default=True,
     )
-    client_secret: str = pydantic.Field(
-        default_factory=lambda: os.environ.get("AUTH0_CLIENT_SECRET")
+    client_secret: str = Field(
+        default_factory=lambda: os.environ.get("AUTH0_CLIENT_SECRET"),
+        validate_default=True,
     )
-    auth0_subdomain: str = pydantic.Field(
-        default_factory=lambda: os.environ.get("AUTH0_DOMAIN")
+    auth0_subdomain: str = Field(
+        default_factory=lambda: os.environ.get("AUTH0_DOMAIN"),
+        validate_default=True,
     )
 
-    @pydantic.root_validator(allow_reuse=True)
-    def validate_required(cls, values):
-        missing = []
-        for k, v in {
+    @field_validator("client_id", "client_secret", "auth0_subdomain", mode="before")
+    @classmethod
+    def validate_credentials(cls, value: Optional[str], info: FieldValidationInfo) -> str:
+        variable_mapping = {
             "client_id": "AUTH0_CLIENT_ID",
             "client_secret": "AUTH0_CLIENT_SECRET",
             "auth0_subdomain": "AUTH0_DOMAIN",
-        }.items():
-            if not values.get(k):
-                missing.append(v)
-
-        if len(missing) > 0:
+        }
+        if value is None:
             raise ValueError(
-                f"Missing the following required environment variable(s): {', '.join(missing)}"
+                f"{variable_mapping[info.field_name]} is not set in the environment"
             )
-
-        return values
+        return value
 
 
 class BaseAuthentication(schema.Base):
@@ -126,12 +123,12 @@ class PasswordAuthentication(BaseAuthentication):
 
 class Auth0Authentication(BaseAuthentication):
     type: AuthenticationEnum = AuthenticationEnum.auth0
-    config: Auth0Config
+    config: Auth0Config = Field(default_factory=lambda: Auth0Config())
 
 
 class GitHubAuthentication(BaseAuthentication):
     type: AuthenticationEnum = AuthenticationEnum.github
-    config: GitHubConfig
+    config: GitHubConfig = Field(default_factory=lambda: GitHubConfig())
 
 
 Authentication = typing.Union[
@@ -145,22 +142,8 @@ def random_secure_string(
     return "".join(secrets.choice(chars) for i in range(length))
 
 
-class PasswordAuthentication(Authentication):
-    _typ = AuthenticationEnum.password
-
-
-class Auth0Authentication(Authentication):
-    _typ = AuthenticationEnum.auth0
-    config: Auth0Config = pydantic.Field(default_factory=lambda: Auth0Config())
-
-
-class GitHubAuthentication(Authentication):
-    _typ = AuthenticationEnum.github
-    config: GitHubConfig = pydantic.Field(default_factory=lambda: GitHubConfig())
-
-
 class Keycloak(schema.Base):
-    initial_root_password: str = pydantic.Field(default_factory=random_secure_string)
+    initial_root_password: str = Field(default_factory=random_secure_string)
     overrides: typing.Dict = {}
     realm_display_name: str = "Nebari"
 
