@@ -587,10 +587,10 @@ class Upgrade_2023_9_1(UpgradeStep):
                 version_diff = round(1.26 - current_version, 2)
                 if version_diff > 0.01:
                     rich.print(
-                        "-> The Kubernetes version is multiple minor versions behind the minimum required version. You will need to perform the upgrade one minor version at a time.  For example, if your current version is 1.23, you will need to upgrade to 1.24, then 1.25, and finally 1.26."
+                        "-> The Kubernetes version is multiple minor versions behind the minimum required version. You will need to perform the upgrade one minor version at a time.  For example, if your current version is 1.24, you will need to upgrade to 1.25, and then 1.26."
                     )
                 rich.print(
-                    f"-> Once you have completed the upgrade, update the value of [green]{provider_config_block}.kubernetes_version[/green] in your config file to match and run the upgrade command again."
+                    f"-> Update the value of [green]{provider_config_block}.kubernetes_version[/green] in your config file to a newer version of Kubernetes and redeploy."
                 )
 
         else:
