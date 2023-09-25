@@ -1,5 +1,6 @@
 import logging
 import os
+import pprint
 import random
 import shutil
 import string
@@ -16,6 +17,7 @@ from _nebari.destroy import destroy_configuration
 from _nebari.provider.cloud.amazon_web_services import aws_cleanup
 from _nebari.provider.cloud.azure_cloud import azure_cleanup
 from _nebari.provider.cloud.digital_ocean import digital_ocean_cleanup
+from _nebari.provider.cloud.google_cloud import gcp_cleanup
 from _nebari.render import render_template
 from _nebari.utils import set_do_environment
 from nebari import schema
@@ -92,7 +94,7 @@ def _create_nebari_user(config):
 
 
 def _cleanup_nebari(config: schema.Main):
-    # TODO: Add cleanup for GCP
+    """Forcefully clean up any lingering resources."""
 
     cloud_provider = config.provider
 
@@ -103,7 +105,8 @@ def _cleanup_nebari(config: schema.Main):
         logger.info("Forcefully clean up AWS resources")
         aws_cleanup(config)
     elif cloud_provider == schema.ProviderEnum.gcp.lower():
-        pass
+        logger.info("Forcefully clean up GCP resources")
+        gcp_cleanup(config)
     elif cloud_provider == schema.ProviderEnum.azure.lower():
         logger.info("Forcefully clean up Azure resources")
         azure_cleanup(config)
@@ -114,7 +117,6 @@ def deploy(request):
     """Deploy Nebari on the given cloud."""
     ignore_warnings()
     cloud = request.config.getoption("--cloud")
-    disable_prompt = request.config.getoption("--disable-prompt")
 
     # initialize
     if cloud == "do":
@@ -160,14 +162,12 @@ def deploy(request):
         f"quay.io/nebari/nebari-dask-worker:{DEFAULT_IMAGE_TAG}"
     )
 
-    if cloud in ["aws", "gcp"]:
+    if cloud in ["aws"]:
         config = add_gpu_config(config, cloud=cloud)
         config = add_preemptible_node_group(config, cloud=cloud)
 
-    from pprint import pprint
-
     print("*" * 100)
-    pprint(config.dict())
+    pprint.pprint(config.dict())
     print("*" * 100)
 
     # render
@@ -193,8 +193,6 @@ def deploy(request):
         failed = True
         logger.exception(e)
         logger.error(f"Deploy Failed, Exception: {e}")
-
-    disable_prompt or input("\n[Press Enter] to continue...\n")
 
     # destroy
     try:

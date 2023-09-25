@@ -1,0 +1,9 @@
+provider: local
+project_name: foobar
+security:
+  authentication:
+    type: Auth0
+    config:
+      client_id: test_client
+      client_secret: test_secret
+      auth0_subdomain: test_subdomain

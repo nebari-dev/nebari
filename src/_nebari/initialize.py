@@ -23,7 +23,7 @@ from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
 from _nebari.utils import get_latest_kubernetes_version, random_secure_string
 from _nebari.version import __version__
-from nebari.schema import ProviderEnum
+from nebari.schema import ProviderEnum, github_url_regex
 
 logger = logging.getLogger(__name__)
 
@@ -77,21 +77,36 @@ def render_config(
     ] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
 
     config["security"]["authentication"] = {"type": auth_provider}
+
     if auth_provider == AuthenticationEnum.github:
-        if not disable_prompt:
-            config["security"]["authentication"]["config"] = {
-                "client_id": input("Github client_id: "),
-                "client_secret": input("Github client_secret: "),
-            }
+        config["security"]["authentication"]["config"] = {
+            "client_id": os.environ.get(
+                "GITHUB_CLIENT_ID",
+                "<enter client id or remove to use GITHUB_CLIENT_ID environment variable (preferred)>",
+            ),
+            "client_secret": os.environ.get(
+                "GITHUB_CLIENT_SECRET",
+                "<enter client secret or remove to use GITHUB_CLIENT_SECRET environment variable (preferred)>",
+            ),
+        }
     elif auth_provider == AuthenticationEnum.auth0:
         if auth_auto_provision:
             auth0_config = create_client(config.domain, config.project_name)
             config["security"]["authentication"]["config"] = auth0_config
         else:
             config["security"]["authentication"]["config"] = {
-                "client_id": input("Auth0 client_id: "),
-                "client_secret": input("Auth0 client_secret: "),
-                "auth0_subdomain": input("Auth0 subdomain: "),
+                "client_id": os.environ.get(
+                    "AUTH0_CLIENT_ID",
+                    "<enter client id or remove to use AUTH0_CLIENT_ID environment variable (preferred)>",
+                ),
+                "client_secret": os.environ.get(
+                    "AUTH0_CLIENT_SECRET",
+                    "<enter client secret or remove to use AUTH0_CLIENT_SECRET environment variable (preferred)>",
+                ),
+                "auth0_subdomain": os.environ.get(
+                    "AUTH0_DOMAIN",
+                    "<enter subdomain (without .auth0.com) or remove to use AUTH0_DOMAIN environment variable>",
+                ),
             }
 
     if cloud_provider == ProviderEnum.do:
@@ -150,7 +165,7 @@ def render_config(
             or constants.AWS_DEFAULT_REGION
         )
         aws_kubernetes_version = kubernetes_version or get_latest_kubernetes_version(
-            amazon_web_services.kubernetes_versions()
+            amazon_web_services.kubernetes_versions(aws_region)
         )
         config["amazon_web_services"] = {
             "kubernetes_version": aws_kubernetes_version,
@@ -179,9 +194,8 @@ def render_config(
         print(str(e))
 
     if repository_auto_provision:
-        GITHUB_REGEX = "(https://)?github.com/([^/]+)/([^/]+)/?"
-        if re.search(GITHUB_REGEX, repository):
-            match = re.search(GITHUB_REGEX, repository)
+        match = re.search(github_url_regex, repository)
+        if match:
             git_repository = github_auto_provision(
                 config_model, match.group(2), match.group(3)
             )
@@ -215,7 +229,7 @@ def github_auto_provision(config: pydantic.BaseModel, owner: str, repo: str):
                 f"Unable to create GitHub repo https://github.com/{owner}/{repo} - error message from GitHub is: {he}"
             )
     else:
-        logger.warn(f"GitHub repo https://github.com/{owner}/{repo} already exists")
+        logger.warning(f"GitHub repo https://github.com/{owner}/{repo} already exists")
 
     try:
         # Secrets
