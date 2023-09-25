@@ -400,6 +400,10 @@ security:
             assert yaml.safe_load(c) == nebari_config
 
 
+@pytest.mark.skipif(
+    _nebari.upgrade.__version__ < "2023.9.1",
+    reason="This test is only valid for versions <= 2023.9.1",
+)
 def test_cli_upgrade_to_2023_9_1_cdsdashboard_removed(monkeypatch: pytest.MonkeyPatch):
     start_version = "2023.7.2"
     end_version = "2023.9.1"
