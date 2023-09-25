@@ -501,7 +501,7 @@ cdsdashboards:
                 )
 
             if k8s_status == "compatible":
-                # assert 0 == result.exit_code
+                assert 0 == result.exit_code
                 assert not result.exception
                 assert "Saving new config file" in result.stdout
 
