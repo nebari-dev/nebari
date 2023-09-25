@@ -8,7 +8,7 @@ import tempfile
 import typing
 from typing import Any, Dict, List, Optional, Tuple, Type
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator, FieldValidationInfo
 
 from _nebari import constants
 from _nebari.provider import terraform
@@ -232,11 +232,13 @@ class DigitalOceanProvider(schema.Base):
     }
     tags: typing.Optional[typing.List[str]] = []
 
+    @model_validator(mode="before")
+    def _check_credentials(self):
+        digital_ocean.check_credentials()
+
     @field_validator("region")
     @classmethod
     def _validate_region(cls, value: str) -> str:
-        digital_ocean.check_credentials()
-
         available_regions = set(_["slug"] for _ in digital_ocean.regions())
         if value not in available_regions:
             raise ValueError(
@@ -249,8 +251,6 @@ class DigitalOceanProvider(schema.Base):
     def _validate_node_group(
         cls, value: typing.Dict[str, DigitalOceanNodeGroup]
     ) -> typing.Dict[str, DigitalOceanNodeGroup]:
-        digital_ocean.check_credentials()
-
         available_instances = {_["slug"] for _ in digital_ocean.instances()}
         for _, node_group in value.items():
             if node_group.instance not in available_instances:
@@ -263,8 +263,6 @@ class DigitalOceanProvider(schema.Base):
     @field_validator("kubernetes_version")
     @classmethod
     def _validate_kubernetes_version(cls, value: typing.Optional[str]) -> str:
-        digital_ocean.check_credentials()
-
         available_kubernetes_versions = digital_ocean.kubernetes_versions()
         assert available_kubernetes_versions
         if value is not None and value not in available_kubernetes_versions:
@@ -343,30 +341,33 @@ class GoogleCloudPlatformProvider(schema.Base):
         typing.Union[GCPPrivateClusterConfig, None]
     ] = None
 
-    @pydantic.root_validator
-    def validate_all(cls, values):
-        region = values.get("region")
-        project_id = values.get("project")
+    @model_validator(mode="before")
+    def _check_credentials(self):
+        google_cloud.check_credentials()
 
-        if project_id is None:
-            raise ValueError("The `google_cloud_platform.project` field is required.")
+    @field_validator("region")
+    @classmethod
+    def _validate_region(cls, value: str, info: FieldValidationInfo) -> str:
+        available_regions = google_cloud.regions(info.data["project"])
+        if value not in available_regions:
+            raise ValueError(
+                f"Google Cloud region={value} is not one of {available_regions}"
+            )
+        return value
 
-        if region is None:
-            raise ValueError("The `google_cloud_platform.region` field is required.")
-
-        # validate region
-        google_cloud.validate_region(project_id, region)
-
-        # validate kubernetes version
-        kubernetes_version = values.get("kubernetes_version")
-        available_kubernetes_versions = google_cloud.kubernetes_versions(region)
-        if kubernetes_version is None:
-            values["kubernetes_version"] = available_kubernetes_versions[-1]
-        elif kubernetes_version not in available_kubernetes_versions:
+    @field_validator("kubernetes_version")
+    @classmethod
+    def _validate_kubernetes_version(cls, value: str, info: FieldValidationInfo) -> str:
+        available_kubernetes_versions = google_cloud.kubernetes_versions(
+            info.data["region"]
+        )
+        if value not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
-        return values
+        else:
+            value = available_kubernetes_versions[-1]
+        return value
 
 
 class AzureNodeGroup(schema.Base):
@@ -393,10 +394,13 @@ class AzureProvider(schema.Base):
     network_profile: typing.Optional[typing.Dict[str, str]] = None
     max_pods: typing.Optional[int] = None
 
+    @model_validator(mode="before")
+    def _check_credentials(self):
+        azure_cloud.check_credentials()
+
     @field_validator("kubernetes_version")
     @classmethod
     def _validate_kubernetes_version(cls, value: typing.Optional[str]) -> str:
-        azure_cloud.check_credentials()
         available_kubernetes_versions = azure_cloud.kubernetes_versions()
         if value is None:
             value = available_kubernetes_versions[-1]
@@ -458,38 +462,55 @@ class AmazonWebServicesProvider(schema.Base):
     existing_security_group_ids: typing.Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
 
-    @pydantic.root_validator
-    def validate_all(cls, values):
-        region = values.get("region")
-        if region is None:
-            raise ValueError("The `amazon_web_services.region` field is required.")
+    @model_validator(mode="before")
+    def _check_credentials(self):
+        amazon_web_services.check_credentials()
 
-        # validate region
-        amazon_web_services.validate_region(region)
+    @field_validator("region")
+    @classmethod
+    def _validate_region(cls, value: str, info: FieldValidationInfo) -> str:
+        available_regions = amazon_web_services.regions(info.data["region"])
+        if value not in available_regions:
+            raise ValueError(
+                f"Amazon Web Services region={value} is not one of {available_regions}"
+            )
+        return value
 
-        # validate kubernetes version
-        kubernetes_version = values.get("kubernetes_version")
-        available_kubernetes_versions = amazon_web_services.kubernetes_versions(region)
-        if kubernetes_version is None:
-            values["kubernetes_version"] = available_kubernetes_versions[-1]
-        elif kubernetes_version not in available_kubernetes_versions:
+    @field_validator("kubernetes_version")
+    @classmethod
+    def _validate_kubernetes_version(cls, value: str, info: FieldValidationInfo) -> str:
+        available_kubernetes_versions = amazon_web_services.kubernetes_versions(
+            info.data["region"]
+        )
+        if value not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {value}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
+        else:
+            value = available_kubernetes_versions[-1]
+        return value
 
-        # validate node groups
-        node_groups = values["node_groups"]
-        available_instances = amazon_web_services.instances(region)
-        for name, node_group in node_groups.items():
+    @field_validator("availability_zones")
+    @classmethod
+    def _validate_availability_zones(
+        cls, value: Optional[List[str]], info: FieldValidationInfo
+    ) -> typing.List[str]:
+        if value is None:
+            value = amazon_web_services.zones(info.data["region"])
+        return value
+
+    @field_validator("node_groups")
+    @classmethod
+    def _validate_node_groups(
+        cls, value: typing.Dict[str, AWSNodeGroup], info: FieldValidationInfo
+    ) -> typing.Dict[str, AWSNodeGroup]:
+        available_instances = amazon_web_services.instances(info.data["region"])
+        for _, node_group in value.items():
             if node_group.instance not in available_instances:
                 raise ValueError(
-                    f"Instance {node_group.instance} not available out of available instances {available_instances.keys()}"
+                    f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
                 )
-        if values["availability_zones"] is None:
-            zones = amazon_web_services.zones(region)
-            values["availability_zones"] = list(sorted(zones))[:2]
-
-        return values
+        return value
 
 
 class LocalProvider(schema.Base):
