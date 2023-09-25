@@ -3,7 +3,6 @@ import inspect
 import os
 import pathlib
 import re
-import sys
 import tempfile
 import typing
 from typing import Any, Dict, List, Optional, Tuple, Type

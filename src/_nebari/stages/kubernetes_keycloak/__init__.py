@@ -4,7 +4,6 @@ import json
 import os
 import secrets
 import string
-import sys
 import time
 import typing
 from abc import ABC
