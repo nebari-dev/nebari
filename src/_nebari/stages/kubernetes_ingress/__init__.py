@@ -123,7 +123,7 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
         attempt += 1
         if attempt == 5:
             raise RuntimeError(
-                f"After stage={directory} unable to poll DNS domain={domain_name} ip={ip}"
+                f"After stage directory={directory} DNS domain={domain_name} does not point to ip={ip}"
             )
 
 
@@ -286,7 +286,7 @@ class KubernetesIngressStage(NebariTerraformStage):
         for port in tcp_ports:
             if not _attempt_tcp_connect(host, port):
                 raise RuntimeError(
-                    f"After stage={self.name} unable to connect to tcp://{host}:{port}"
+                    f"After stage={self.name} unable to connect to ingress host={host} port={port}"
                 )
 
         print(
