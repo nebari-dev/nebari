@@ -2,7 +2,7 @@ import functools
 import json
 import os
 import subprocess
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
@@ -87,6 +87,22 @@ def instances(project: str) -> Dict[str, str]:
     )
     data = json.loads(output.decode("utf-8"))
     return {_["description"]: _["name"] for _ in data}
+
+
+def activated_services() -> Set[str]:
+    """Return a list of activated services."""
+    check_credentials()
+    output = subprocess.check_output(
+        [
+            "gcloud",
+            "services",
+            "list",
+            "--enabled",
+            "--format=json(config.title)",
+        ]
+    )
+    data = json.loads(output)
+    return {service["config"]["title"] for service in data}
 
 
 def cluster_exists(cluster_name: str, project_id: str, region: str) -> bool:
@@ -248,6 +264,26 @@ def gcp_cleanup(config: schema.Main):
     delete_cluster(cluster_name, project_id, region)
     delete_storage_bucket(bucket_name, project_id)
     delete_service_account(service_account_name, project_id)
+
+
+def check_missing_service() -> None:
+    """Check if all required services are activated."""
+    required = {
+        "Compute Engine API",
+        "Kubernetes Engine API",
+        "Cloud Monitoring API",
+        "Cloud Autoscaling API",
+        "Identity and Access Management (IAM) API",
+        "Cloud Resource Manager API"
+    }
+    activated = activated_services()
+    common = required.intersection(activated)
+    missing = required.difference(common)
+    if missing:
+        raise ValueError(
+            f"""Missing required services: {missing}\n
+            Please see the documentation for more information: {constants.GCP_ENV_DOCS}"""
+        )
 
 
 # Getting pricing data could come from here
