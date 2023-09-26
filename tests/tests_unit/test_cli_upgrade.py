@@ -105,10 +105,27 @@ def test_cli_upgrade_2023_4_1_to_2023_5_1(monkeypatch: pytest.MonkeyPatch):
 
 
 @pytest.mark.parametrize(
+    "provider",
+    ["aws", "azure", "do", "gcp"],
+)
+def test_cli_upgrade_2023_5_1_to_2023_7_1(
+    monkeypatch: pytest.MonkeyPatch, provider: str
+):
+    config = assert_nebari_upgrade_success(
+        monkeypatch, "2023.5.1", "2023.7.1", provider=provider
+    )
+    prevent_deploy = config.get("prevent_deploy")
+    if provider == "aws":
+        assert prevent_deploy
+    else:
+        assert not prevent_deploy
+
+
+@pytest.mark.parametrize(
     "workflows_enabled, workflow_controller_enabled",
     [(True, True), (True, False), (False, None), (None, None)],
 )
-def test_cli_upgrade_2023_5_1_to_2023_7_2(
+def test_cli_upgrade_2023_7_1_to_2023_7_2(
     monkeypatch: pytest.MonkeyPatch,
     workflows_enabled: bool,
     workflow_controller_enabled: bool,
@@ -123,7 +140,7 @@ def test_cli_upgrade_2023_5_1_to_2023_7_2(
 
     upgraded = assert_nebari_upgrade_success(
         monkeypatch,
-        "2023.5.1",
+        "2023.7.1",
         "2023.7.2",
         addl_config=addl_config,
         # Do you want to enable the Nebari Workflow Controller?
@@ -149,7 +166,7 @@ def test_cli_upgrade_2023_5_1_to_2023_7_2(
 
 def test_cli_upgrade_image_tags(monkeypatch: pytest.MonkeyPatch):
     start_version = "2023.5.1"
-    end_version = "2023.7.2"
+    end_version = "2023.7.1"
 
     upgraded = assert_nebari_upgrade_success(
         monkeypatch,
@@ -527,6 +544,7 @@ def assert_nebari_upgrade_success(
     monkeypatch: pytest.MonkeyPatch,
     start_version: str,
     end_version: str,
+    provider: str = "local",
     addl_args: List[str] = [],
     addl_config: Dict[str, Any] = {},
     inputs: List[str] = [],
@@ -544,7 +562,7 @@ def assert_nebari_upgrade_success(
             **yaml.safe_load(
                 f"""
 project_name: test
-provider: local
+provider: {provider}
 domain: test.example.com
 namespace: dev
 nebari_version: {start_version}
