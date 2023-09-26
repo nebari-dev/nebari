@@ -274,7 +274,7 @@ def check_missing_service() -> None:
         "Cloud Monitoring API",
         "Cloud Autoscaling API",
         "Identity and Access Management (IAM) API",
-        "Cloud Resource Manager API"
+        "Cloud Resource Manager API",
     }
     activated = activated_services()
     common = required.intersection(activated)
