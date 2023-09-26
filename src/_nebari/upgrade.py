@@ -494,6 +494,7 @@ class Upgrade_2023_7_2(UpgradeStep):
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         argo = config.get("argo_workflows", {})
+        provider = config["provider"]
         if argo.get("enabled"):
             response = Prompt.ask(
                 f"\nDo you want to enable the [green][link={NEBARI_WORKFLOW_CONTROLLER_DOCS}]Nebari Workflow Controller[/link][/green], required for [green][link={ARGO_JUPYTER_SCHEDULER_REPO}]Argo-Jupyter-Scheduler[/link][green]? [Y/n] ",
@@ -506,6 +507,12 @@ class Upgrade_2023_7_2(UpgradeStep):
         rich.print(
             f"-> [green]{self.version}[/green] is the last Nebari version that supports CDS Dashboards"
         )
+
+        if provider == "aws":
+            rich.print("\n ⚠️  DANGER ⚠️")
+            rich.print(
+                "-> This version upgrade will result in your cluster being completely torn down and redeployed.  Please ensure you have backed up any data you wish to keep before proceeding!!!"
+            )
 
         return config
 
