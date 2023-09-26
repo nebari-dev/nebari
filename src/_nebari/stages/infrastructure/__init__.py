@@ -793,7 +793,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
         if len(result.items) == 0:
             raise RuntimeError(
-                f"ERROR: After stage={self.name} no namespaces found in kubernetes cluster"
+                f"After stage={self.name} no namespaces found in kubernetes cluster"
             )
         print(f"After stage={self.name} kubernetes cluster successfully provisioned")
 
