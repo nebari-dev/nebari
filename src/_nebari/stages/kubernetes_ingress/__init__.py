@@ -1,7 +1,6 @@
 import enum
 import logging
 import socket
-import sys
 import time
 import typing
 from typing import Any, Dict, List, Type

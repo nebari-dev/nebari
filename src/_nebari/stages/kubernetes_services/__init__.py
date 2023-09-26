@@ -1,6 +1,5 @@
 import enum
 import json
-import sys
 import time
 import typing
 from typing import Any, Dict, List, Type
