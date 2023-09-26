@@ -55,7 +55,6 @@ def do_upgrade(config_filename, attempt_fixes=False):
             raise e
 
     start_version = config.get("nebari_version", "")
-    print("start_version: ", start_version)
 
     UpgradeStep.upgrade(
         config, start_version, __version__, config_filename, attempt_fixes
@@ -105,7 +104,6 @@ class UpgradeStep(ABC):
         """
         starting_ver = rounded_ver_parse(start_version or "0.0.0")
         finish_ver = rounded_ver_parse(finish_version)
-        print("finish_ver: ", finish_ver)
 
         if finish_ver < starting_ver:
             raise ValueError(
@@ -122,8 +120,6 @@ class UpgradeStep(ABC):
             ],
             key=rounded_ver_parse,
         )
-
-        print("step_versions: ", step_versions)
 
         current_start_version = start_version
         for stepcls in [cls._steps[str(v)] for v in step_versions]:
@@ -522,12 +518,12 @@ class Upgrade_2023_9_1(UpgradeStep):
     ):
         # Upgrading to 2023.9.1 is considered high-risk because it includes a major refacto
         # to introduce the extension mechanism system.
-        rich.print("\n ⚠️ Warning ⚠️")
+        rich.print("\n ⚠️  Warning ⚠️")
         rich.print(
             f"-> Nebari version [green]{self.version}[/green] includes a major refactor to introduce an extension mechanism that supports the development of third-party plugins."
         )
         rich.print(
-            "-> Data should be backed up before performing this upgrade.  The 'prevent_deploy' flag has been set in your config file and must be manually removed to deploy."
+            "-> Data should be backed up before performing this upgrade ([green][link=https://www.nebari.dev/docs/how-tos/manual-backup]see docs[/link][/green])  The 'prevent_deploy' flag has been set in your config file and must be manually removed to deploy."
         )
         rich.print(
             "-> Please also run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
@@ -539,7 +535,7 @@ class Upgrade_2023_9_1(UpgradeStep):
 
         # Nebari version 2023.9.1 upgrades JupyterHub to 3.1.  CDS Dashboards are only compatible with
         # JupyterHub versions 1.X and so will be removed during upgrade.
-        rich.print("\n ⚠️ Deprecation Warning ⚠️")
+        rich.print("\n ⚠️  Deprecation Warning ⚠️")
         rich.print(
             f"-> CDS dashboards are no longer supported in Nebari version [green]{self.version}[/green] and will be uninstalled."
         )
@@ -573,14 +569,14 @@ class Upgrade_2023_9_1(UpgradeStep):
         if provider in ["aws", "azure", "gcp", "do"]:
             # Kubernetes version not found in provider block
             if current_version == "NA":
-                rich.print("\n ⚠️ Warning ⚠️")
+                rich.print("\n ⚠️  Warning ⚠️")
                 rich.print(
                     f"-> Unable to detect Kubernetes version for provider {provider}.  Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26.  Please confirm your Kubernetes version is configured before upgrading."
                 )
 
             # Kubernetes version less than required minimum
             if isinstance(current_version, float) and current_version < 1.26:
-                rich.print("\n ⚠️ Warning ⚠️")
+                rich.print("\n ⚠️  Warning ⚠️")
                 rich.print(
                     f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26.  Your configured Kubernetes version is [red]{current_version}[/red]. {UPGRADE_KUBERNETES_MESSAGE}"
                 )
@@ -594,13 +590,20 @@ class Upgrade_2023_9_1(UpgradeStep):
                 )
 
         else:
-            rich.print("\n ⚠️ Warning ⚠️")
+            rich.print("\n ⚠️  Warning ⚠️")
             rich.print(
                 f"-> Unable to detect Kubernetes version for provider {provider}.  Nebari version [green]{self.version}[/green] requires Kubernetes version 1.26 or greater."
             )
             rich.print(
                 "-> Please ensure your Kubernetes version is up-to-date before proceeding."
             )
+
+        if provider == "aws":
+            rich.print("\n ⚠️  DANGER ⚠️")
+            rich.print(
+                "-> This version upgrade will result in your cluster being completely torn down and redeployed.  Please ensure you have backed up any data you wish to keep before proceeding!!!"
+            )
+
         return config
 
 
