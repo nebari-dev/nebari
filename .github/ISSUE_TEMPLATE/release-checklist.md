@@ -55,12 +55,16 @@ Release captain responsible - <@gh_username>
 
 ## Cut the official release
 
+_We bundle a handful of other packages alongside Nebari that need to be released prior to the core Nebari release_
+- [ ] [Update and cut release for `nebari-dask` meta package on Conda-Forge.](https://github.com/conda-forge/nebari-dask-feedstock)
+- [ ] [Cut PyPI release for `nebari-workflow-controller`](https://github.com/nebari-dev/nebari-workflow-controller)
+- [ ] [Cut PyPI release for `argo-jupyter-scheduler`](https://github.com/nebari-dev/argo-jupyter-scheduler)
+
 _These steps must be actioned in the order they appear in this checklist._
 
 - [ ] [Tag, build and push docker images](https://github.com/nebari-dev/nebari-docker-images/releases/new)
-- [ ] [Update and cut release for `nebari-dask` meta package on Conda-Forge.](https://github.com/conda-forge/nebari-dask-feedstock)
 - [ ] [Cut PyPI release via GHA release workflow.](https://github.com/nebari-dev/nebari/releases/new)
   - Avoid appending `v` to tag.
     - Copy release notes from `RELEASE.md`.
-- [ ] Merge release branch into `main`
 - [ ] [Merge automated release PR for `nebari` on Conda-Forge.](https://github.com/conda-forge/nebari-feedstock)
+- [ ] Merge release branch into `main`
