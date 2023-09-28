@@ -8,8 +8,7 @@ import boto3
 from botocore.exceptions import ClientError, EndpointConnectionError
 
 from _nebari import constants
-from _nebari.provider.cloud.commons import \
-    filter_by_highest_supported_k8s_version
+from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 from nebari import schema
 
 MAX_RETRIES = 5

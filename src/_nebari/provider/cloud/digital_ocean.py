@@ -9,8 +9,7 @@ import requests
 
 from _nebari import constants
 from _nebari.provider.cloud.amazon_web_services import aws_delete_s3_bucket
-from _nebari.provider.cloud.commons import \
-    filter_by_highest_supported_k8s_version
+from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 from _nebari.utils import set_do_environment
 from nebari import schema
 
