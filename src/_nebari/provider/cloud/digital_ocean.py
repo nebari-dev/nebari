@@ -130,6 +130,6 @@ def digital_ocean_cleanup(config: schema.Main):
 
     set_do_environment()
     aws_delete_s3_bucket(
-        tf_state_bucket, endpoint=do_spaces_endpoint, digitalocean_region=True
+        tf_state_bucket, digitalocean=True, endpoint=do_spaces_endpoint
     )
     digital_ocean_delete_kubernetes_cluster(cluster_name)
