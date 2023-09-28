@@ -484,7 +484,7 @@ def nebari_subcommand(cli: typer.Typer):
             "-p",
             callback=typer_validate_regex(
                 schema.project_name_regex,
-                "Project name must (1) consist of only letters, numbers, hyphens, and underscores, (2) begin and end with a letter, and (3) contain between 3 and 32 characters.",
+                "Project name must (1) consist of only letters, numbers, hyphens, and underscores, (2) begin and end with a letter, and (3) contain between 3 and 16 characters.",
             ),
         ),
         domain_name: typing.Optional[str] = typer.Option(
