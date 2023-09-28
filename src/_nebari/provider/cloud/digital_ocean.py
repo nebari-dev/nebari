@@ -9,7 +9,8 @@ import requests
 
 from _nebari import constants
 from _nebari.provider.cloud.amazon_web_services import aws_delete_s3_bucket
-from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari.provider.cloud.commons import \
+    filter_by_highest_supported_k8s_version
 from _nebari.utils import set_do_environment
 from nebari import schema
 
@@ -130,6 +131,6 @@ def digital_ocean_cleanup(config: schema.Main):
 
     set_do_environment()
     aws_delete_s3_bucket(
-        tf_state_bucket, digitalocean=True, endpoint=do_spaces_endpoint
+        tf_state_bucket, endpoint=do_spaces_endpoint, digitalocean_region=True
     )
     digital_ocean_delete_kubernetes_cluster(cluster_name)

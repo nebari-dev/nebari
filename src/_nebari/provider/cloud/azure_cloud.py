@@ -10,11 +10,10 @@ from azure.mgmt.containerservice import ContainerServiceClient
 from azure.mgmt.resource import ResourceManagementClient
 
 from _nebari import constants
-from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
-from _nebari.utils import (
-    AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
-    construct_azure_resource_group_name,
-)
+from _nebari.provider.cloud.commons import \
+    filter_by_highest_supported_k8s_version
+from _nebari.utils import (AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
+                           construct_azure_resource_group_name)
 from nebari import schema
 
 logger = logging.getLogger("azure")

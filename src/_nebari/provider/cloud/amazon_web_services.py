@@ -2,13 +2,14 @@ import functools
 import os
 import re
 import time
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import boto3
 from botocore.exceptions import ClientError, EndpointConnectionError
 
 from _nebari import constants
-from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari.provider.cloud.commons import \
+    filter_by_highest_supported_k8s_version
 from nebari import schema
 
 MAX_RETRIES = 5
@@ -29,7 +30,9 @@ def check_credentials():
 
 
 @functools.lru_cache()
-def aws_session(region: str = None, digitalocean_region: str = None) -> boto3.Session:
+def aws_session(
+    region: Optional[str] = None, digitalocean_region: Optional[str] = None
+) -> boto3.Session:
     """Create a boto3 session."""
     if digitalocean_region:
         aws_access_key_id = os.environ["SPACES_ACCESS_KEY_ID"]
@@ -126,7 +129,7 @@ def instances(region: str) -> Dict[str, str]:
     return {t: t for t in instance_types}
 
 
-def aws_get_vpc_id(name: str, namespace: str, region: str) -> str:
+def aws_get_vpc_id(name: str, namespace: str, region: str) -> Optional[str]:
     """Return VPC ID for the EKS cluster namedd `{name}-{namespace}`."""
     cluster_name = f"{name}-{namespace}"
     session = aws_session(region=region)
@@ -138,6 +141,7 @@ def aws_get_vpc_id(name: str, namespace: str, region: str) -> str:
         for tag in tags:
             if tag["Key"] == "Name" and tag["Value"] == cluster_name:
                 return vpc["VpcId"]
+    return None
 
 
 def aws_get_subnet_ids(name: str, namespace: str, region: str) -> List[str]:
@@ -216,11 +220,11 @@ def aws_get_security_group_ids(name: str, namespace: str, region: str) -> List[s
     return security_group_ids
 
 
-def aws_get_load_balancer_name(vpc_id: str, region: str) -> str:
+def aws_get_load_balancer_name(vpc_id: str, region: str) -> Optional[str]:
     """Return load balancer name for the VPC ID."""
     if not vpc_id:
         print("No VPC ID provided. Exiting...")
-        return
+        return None
 
     session = aws_session(region=region)
     client = session.client("elb")
@@ -229,6 +233,7 @@ def aws_get_load_balancer_name(vpc_id: str, region: str) -> str:
     for load_balancer in response:
         if load_balancer["VPCId"] == vpc_id:
             return load_balancer["LoadBalancerName"]
+    return None
 
 
 def aws_get_efs_ids(name: str, namespace: str, region: str) -> List[str]:
@@ -260,7 +265,7 @@ def aws_get_efs_mount_target_ids(efs_id: str, region: str) -> List[str]:
     """Return list of EFS mount target IDs for the EFS ID."""
     if not efs_id:
         print("No EFS ID provided. Exiting...")
-        return
+        return []
 
     session = aws_session(region=region)
     client = session.client("efs")
@@ -290,7 +295,9 @@ def aws_get_ec2_volume_ids(name: str, namespace: str, region: str) -> List[str]:
     return volume_ids
 
 
-def aws_get_iam_policy(region: str, name: str = None, pattern: str = None) -> str:
+def aws_get_iam_policy(
+    region: Optional[str], name: Optional[str] = None, pattern: Optional[str] = None
+) -> Optional[str]:
     """Return IAM policy ARN for the policy name or pattern."""
     session = aws_session(region=region)
     client = session.client("iam")
@@ -301,6 +308,7 @@ def aws_get_iam_policy(region: str, name: str = None, pattern: str = None) -> st
             pattern and re.match(pattern, policy["PolicyName"])
         ):
             return policy["Arn"]
+    return None
 
 
 def aws_delete_load_balancer(name: str, namespace: str, region: str):
@@ -640,9 +648,9 @@ def aws_delete_ec2_volumes(name: str, namespace: str, region: str):
 
 def aws_delete_s3_objects(
     bucket_name: str,
-    endpoint: str = None,
-    region: str = None,
-    digitalocean_region: str = None,
+    endpoint: Optional[str] = None,
+    region: Optional[str] = None,
+    digitalocean_region: Optional[str] = None,
 ):
     """
     Delete all objects in the S3 bucket.
@@ -707,9 +715,9 @@ def aws_delete_s3_objects(
 
 def aws_delete_s3_bucket(
     bucket_name: str,
-    endpoint: str = None,
-    region: str = None,
-    digitalocean_region: str = None,
+    endpoint: Optional[str] = None,
+    region: Optional[str] = None,
+    digitalocean_region: Optional[str] = None,
 ):
     """
     Delete S3 bucket.
