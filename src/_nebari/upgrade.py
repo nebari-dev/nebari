@@ -18,7 +18,7 @@ from _nebari.utils import (
     yaml,
 )
 from _nebari.version import __version__, rounded_ver_parse
-from nebari.schema import is_version_accepted, ProviderEnum
+from nebari.schema import ProviderEnum, is_version_accepted
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,7 @@ ARGO_JUPYTER_SCHEDULER_REPO = "https://github.com/nebari-dev/argo-jupyter-schedu
 
 UPGRADE_KUBERNETES_MESSAGE = "Please see the [green][link=https://www.nebari.dev/docs/how-tos/kubernetes-version-upgrade]Kubernetes upgrade docs[/link][/green] for more information."
 DESTRUCTIVE_UPGRADE_WARNING = "-> This version upgrade will result in your cluster being completely torn down and redeployed.  Please ensure you have backed up any data you wish to keep before proceeding!!!"
+
 
 def do_upgrade(config_filename, attempt_fixes=False):
     config = load_yaml(config_filename)
@@ -580,7 +581,7 @@ class Upgrade_2023_9_1(UpgradeStep):
             current_version = get_k8s_version_prefix(current_version)
 
         # Try to convert known Kubernetes versions to float.
-        if not current_version == None:
+        if current_version is not None:
             try:
                 current_version = float(current_version)
             except ValueError:
@@ -589,14 +590,17 @@ class Upgrade_2023_9_1(UpgradeStep):
         # Handle checks for when Kubernetes version should be detectable
         if provider in ["aws", "azure", "gcp", "do"]:
             # Kubernetes version not found in provider block
-            if current_version == None:
+            if current_version is None:
                 rich.print("\n ⚠️  Warning ⚠️")
                 rich.print(
                     f"-> Unable to detect Kubernetes version for provider {provider}.  Nebari version [green]{self.version}[/green] requires Kubernetes version {str(self.min_k8s_version)}.  Please confirm your Kubernetes version is configured before upgrading."
                 )
 
             # Kubernetes version less than required minimum
-            if isinstance(current_version, float) and current_version < self.min_k8s_version:
+            if (
+                isinstance(current_version, float)
+                and current_version < self.min_k8s_version
+            ):
                 rich.print("\n ⚠️  Warning ⚠️")
                 rich.print(
                     f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version {str(self.min_k8s_version)}.  Your configured Kubernetes version is [red]{current_version}[/red]. {UPGRADE_KUBERNETES_MESSAGE}"
@@ -621,7 +625,7 @@ class Upgrade_2023_9_1(UpgradeStep):
 
         if provider == "aws":
             rich.print("\n ⚠️  DANGER ⚠️")
-            rich.print(DESTRUCTIVE_UPGRADE_WARNING)             
+            rich.print(DESTRUCTIVE_UPGRADE_WARNING)
 
         return config
 
