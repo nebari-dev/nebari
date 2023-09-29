@@ -17,7 +17,7 @@ class NebariStage(ABC):
     name: ClassVar[str]
     priority: ClassVar[int]
     input_schema: ClassVar[Optional[Type[BaseModel]]] = None
-    output_schema: ClassVar[Type[BaseModel]]
+    output_schema: ClassVar[Optional[Type[BaseModel]]] = None
 
     def __init__(self, output_directory: Path, config: schema.Main):
         self.output_directory = output_directory
@@ -43,7 +43,7 @@ class NebariStage(ABC):
     @abstractmethod
     @contextmanager
     def destroy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool], ignore_errors: bool
     ):
         ...
 

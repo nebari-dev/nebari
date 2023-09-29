@@ -297,9 +297,12 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
     @contextlib.contextmanager
     def destroy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        status: Dict[str, bool],
+        ignore_errors: bool = True,
     ):
-        with super().destroy(stage_outputs, status):
+        with super().destroy(stage_outputs, status, ignore_errors):
             with keycloak_provider_context(
                 stage_outputs["stages/" + self.name]["keycloak_credentials"]["value"]
             ):

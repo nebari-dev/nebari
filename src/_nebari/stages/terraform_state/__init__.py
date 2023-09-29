@@ -247,9 +247,12 @@ class TerraformStateStage(NebariTerraformStage):
 
     @contextlib.contextmanager
     def destroy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        status: Dict[str, bool],
+        ignore_errors: bool = True,
     ):
-        with super().destroy(stage_outputs, status):
+        with super().destroy(stage_outputs, status, ignore_errors):
             env_mapping = {}
             # DigitalOcean terraform remote state using Spaces Bucket
             # assumes aws credentials thus we set them to match spaces credentials
