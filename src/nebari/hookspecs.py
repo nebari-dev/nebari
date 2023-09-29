@@ -43,7 +43,10 @@ class NebariStage(ABC):
     @abstractmethod
     @contextmanager
     def destroy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool], ignore_errors: bool
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        status: Dict[str, bool],
+        ignore_errors: bool,
     ):
         ...
 
