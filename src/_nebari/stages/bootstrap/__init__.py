@@ -1,10 +1,9 @@
 import enum
 import io
-import pathlib
-import typing
 from contextlib import nullcontext
 from inspect import cleandoc
-from typing import Dict, List, Type
+from pathlib import Path
+from typing import Any, Dict, List, Type, Union
 
 from _nebari.provider.cicd.github import gen_nebari_linter, gen_nebari_ops
 from _nebari.provider.cicd.gitlab import gen_gitlab_ci
@@ -12,7 +11,7 @@ from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
 
-def gen_gitignore() -> Dict[pathlib.Path, str]:
+def gen_gitignore() -> Dict[Path, str]:
     """
     Generate `.gitignore` file.
     Add files as needed.
@@ -27,7 +26,7 @@ def gen_gitignore() -> Dict[pathlib.Path, str]:
         # python
         __pycache__
     """
-    return {pathlib.Path(".gitignore"): cleandoc(filestoignore)}
+    return {Path(".gitignore"): cleandoc(filestoignore)}
 
 
 def gen_cicd(config: schema.Main):
@@ -42,12 +41,12 @@ def gen_cicd(config: schema.Main):
     cicd_files = {}
 
     if config.ci_cd.type == CiEnum.github_actions:
-        gha_dir = pathlib.Path(".github/workflows/")
+        gha_dir = Path(".github/workflows/")
         cicd_files[gha_dir / "nebari-ops.yaml"] = gen_nebari_ops(config)
         cicd_files[gha_dir / "nebari-linter.yaml"] = gen_nebari_linter(config)
 
     elif config.ci_cd.type == CiEnum.gitlab_ci:
-        cicd_files[pathlib.Path(".gitlab-ci.yml")] = gen_gitlab_ci(config)
+        cicd_files[Path(".gitlab-ci.yml")] = gen_gitlab_ci(config)
 
     else:
         raise ValueError(
@@ -72,8 +71,8 @@ class CICD(schema.Base):
     type: CiEnum = CiEnum.none
     branch: str = "main"
     commit_render: bool = True
-    before_script: typing.List[typing.Union[str, typing.Dict]] = []
-    after_script: typing.List[typing.Union[str, typing.Dict]] = []
+    before_script: List[Union[str, Dict]] = []
+    after_script: List[Union[str, Dict]] = []
 
 
 class InputSchema(schema.Base):
@@ -91,7 +90,7 @@ class BootstrapStage(NebariStage):
     input_schema = InputSchema
     output_schema = OutputSchema
 
-    def render(self) -> Dict[pathlib.Path, str]:
+    def render(self) -> Dict[Path, str]:
         contents = {}
         if self.config.ci_cd.type != CiEnum.none:
             for fn, workflow in gen_cicd(self.config).items():
@@ -109,20 +108,23 @@ class BootstrapStage(NebariStage):
 
     def check(
         self,
-        stage_outputs: Dict[str, Dict[str, typing.Any]],
+        stage_outputs: Dict[str, Dict[str, Any]],
         disable_prompt: bool = False,
     ) -> None:
         ...
 
     def deploy(
         self,
-        stage_outputs: Dict[str, Dict[str, typing.Any]],
+        stage_outputs: Dict[str, Dict[str, Any]],
         disable_prompt: bool = False,
     ):
         return nullcontext()
 
     def destroy(
-        self, stage_outputs: Dict[str, Dict[str, typing.Any]], status: Dict[str, bool]
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        status: Dict[str, bool],
+        ignore_errors: bool,
     ):
         return nullcontext()
 
