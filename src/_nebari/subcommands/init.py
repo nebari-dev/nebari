@@ -484,7 +484,7 @@ def nebari_subcommand(cli: typer.Typer):
             "-p",
             callback=typer_validate_regex(
                 schema.project_name_regex,
-                "Project name must (1) consist of only letters, numbers, hyphens, and underscores, (2) begin and end with a letter, and (3) contain between 3 and 32 characters.",
+                "Project name must (1) consist of only letters, numbers, hyphens, and underscores, (2) begin and end with a letter, and (3) contain between 3 and 16 characters.",
             ),
         ),
         domain_name: typing.Optional[str] = typer.Option(
@@ -693,7 +693,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         name_guidelines = """
         The project name must adhere to the following requirements:
         - Letters from A to Z (upper and lower case), numbers, hyphens, and dashes
-        - Length from 3 to 32 characters
+        - Length from 3 to 16 characters
         - Begin and end with a letter
         """
 
@@ -773,7 +773,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             qmark=qmark,
             auto_enter=False,
         ).unsafe_ask():
-            repo_url = "http://{git_provider}/{org_name}/{repo_name}"
+            repo_url = "https://{git_provider}/{org_name}/{repo_name}"
 
             git_provider = questionary.select(
                 "Which git provider would you like to use?",
