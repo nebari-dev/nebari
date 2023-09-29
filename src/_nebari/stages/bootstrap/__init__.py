@@ -12,7 +12,7 @@ from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
 
-def gen_gitignore():
+def gen_gitignore() -> Dict[pathlib.Path, str]:
     """
     Generate `.gitignore` file.
     Add files as needed.
@@ -91,7 +91,7 @@ class BootstrapStage(NebariStage):
     input_schema = InputSchema
     output_schema = OutputSchema
 
-    def render(self) -> Dict[str, str]:
+    def render(self) -> Dict[pathlib.Path, str]:
         contents = {}
         if self.config.ci_cd.type != CiEnum.none:
             for fn, workflow in gen_cicd(self.config).items():
