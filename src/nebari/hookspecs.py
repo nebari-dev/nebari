@@ -17,7 +17,7 @@ class NebariStage(ABC):
     name: ClassVar[str]
     priority: ClassVar[int]
     input_schema: ClassVar[Optional[Type[BaseModel]]] = None
-    output_schema: ClassVar[Optional[Type[BaseModel]]] = None
+    output_schema: ClassVar[Type[BaseModel]]
 
     def __init__(self, output_directory: Path, config: schema.Main):
         self.output_directory = output_directory
