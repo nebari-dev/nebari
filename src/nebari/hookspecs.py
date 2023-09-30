@@ -24,7 +24,7 @@ class NebariStage(ABC):
         self.config = config
 
     @abstractmethod
-    def render(self) -> Dict[Path, str]:
+    def render(self):
         ...
 
     @abstractmethod
