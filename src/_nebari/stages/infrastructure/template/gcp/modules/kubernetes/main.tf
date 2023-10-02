@@ -57,10 +57,6 @@ resource "google_container_cluster" "main" {
     }
   }
 
-  cost_management_config {
-    enabled = true
-  }
-
   lifecycle {
     ignore_changes = [
       node_locations
