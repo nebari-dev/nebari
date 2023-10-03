@@ -1,26 +1,24 @@
 """a backport for the nebari version references."""
 
-import re
+from packaging.version import Version
 from importlib.metadata import distribution
 
 __version__ = distribution("nebari").version
 
 
-def rounded_ver_parse(versionstr):
+def rounded_ver_parse(version: str) -> Version:
     """
-    Take a package version string and return an int tuple of only (major,minor,patch),
-    ignoring and post/dev etc.
+    Rounds a version string to the nearest patch version.
 
-    So:
-    rounded_ver_parse("0.1.2") returns (0,1,2)
-    rounded_ver_parse("0.1.2.dev65+g2de53174") returns (0,1,2)
-    rounded_ver_parse("0.1") returns (0,1,0)
+    Parameters
+    ----------
+    version : str
+        A version string.
+
+    Returns
+    -------
+    packaging.version.Version
+        A version object.
     """
-    m = re.match(
-        "^(?P<major>[0-9]+)(\\.(?P<minor>[0-9]+)(\\.(?P<patch>[0-9]+))?)?", versionstr
-    )
-    assert m is not None
-    major = int(m.group("major") or 0)
-    minor = int(m.group("minor") or 0)
-    patch = int(m.group("patch") or 0)
-    return (major, minor, patch)
+    base_version = Version(version).base_version
+    return Version(base_version)
