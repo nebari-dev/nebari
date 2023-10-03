@@ -1,7 +1,8 @@
 """a backport for the nebari version references."""
 
-from packaging.version import Version
 from importlib.metadata import distribution
+
+from packaging.version import Version
 
 __version__ = distribution("nebari").version
 
