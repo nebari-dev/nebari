@@ -3,9 +3,6 @@ name: test-gcp-integration
 on:
   schedule:
     - cron: "0 0 * * MON"
-  pull_request:
-    branches:
-      - develop
   workflow_dispatch:
     inputs:
       branch:
@@ -31,7 +28,7 @@ on:
         - error
 
 env:
-#   NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'gcp-integration' }}
+  NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'develop' }}
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
@@ -47,7 +44,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-        #   ref: ${{ env.NEBARI_GH_BRANCH }}
+          ref: ${{ env.NEBARI_GH_BRANCH }}
           fetch-depth: 0
 
       - name: Set up Python
