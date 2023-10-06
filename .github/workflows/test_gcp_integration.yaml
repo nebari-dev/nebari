@@ -60,6 +60,7 @@ jobs:
           pip install .[dev]
           conda install --quiet --yes conda-build
           playwright install
+
       - name: Retrieve secret from Vault
         uses: hashicorp/vault-action@v2.5.0
         with:
@@ -71,13 +72,17 @@ jobs:
             kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci project_id | PROJECT_ID;
             kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci workload_identity_provider | GCP_WORKFLOW_PROVIDER;
             kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci service_account_name | GCP_SERVICE_ACCOUNT;
+
       - name: 'Authenticate to GCP'
         uses: 'google-github-actions/auth@v1'
         with:
             token_format: access_token
-            create_credentials_file: 'true'
             workload_identity_provider: ${{ env.GCP_WORKFLOW_PROVIDER }}
             service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set required environment variables
+        run: |
+          echo "GOOGLE_CREDENTIALS=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}" >> $GITHUB_ENV
 
       - name: Integration Tests
         run: |
