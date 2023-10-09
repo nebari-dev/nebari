@@ -81,7 +81,6 @@ dev = [
     "diagrams",
     "python-dotenv",
     "escapism",
-    "flake8==3.8.4",
     "importlib-metadata<5.0",
     "jhub-client",
     "paramiko",
