@@ -7,11 +7,23 @@ import pytest
 import yaml
 from typer.testing import CliRunner
 
+from _nebari._version import __version__
 from _nebari.cli import create_cli
 
 TEST_DATA_DIR = Path(__file__).resolve().parent / "cli_validate"
 
 runner = CliRunner()
+
+
+def _update_yaml_file(file_path: Path, key: str, value: Any):
+    """Utility function to update a yaml file with a new key/value pair."""
+    with open(file_path, "r") as f:
+        yaml_data = yaml.safe_load(f)
+
+    yaml_data[key] = value
+
+    with open(file_path, "w") as f:
+        yaml.safe_dump(yaml_data, f)
 
 
 @pytest.mark.parametrize(
@@ -61,6 +73,9 @@ def generate_test_data_test_cli_validate_local_happy_path():
 def test_cli_validate_local_happy_path(config_yaml: str):
     test_file = TEST_DATA_DIR / config_yaml
     assert test_file.exists() is True
+
+    # update the test file with the current version
+    _update_yaml_file(test_file, "nebari_version", __version__)
 
     app = create_cli()
     result = runner.invoke(app, ["validate", "--config", test_file])

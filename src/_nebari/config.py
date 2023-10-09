@@ -115,4 +115,3 @@ def backup_configuration(filename: pathlib.Path, extrasuffix: str = ""):
             i = i + 1
 
     filename.rename(backup_filename)
-    print(f"Backing up {filename} as {backup_filename}")

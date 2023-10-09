@@ -11,9 +11,14 @@ from pydantic import ValidationError
 from rich.prompt import Prompt
 
 from _nebari.config import backup_configuration
-from _nebari.utils import load_yaml, yaml
+from _nebari.utils import (
+    get_k8s_version_prefix,
+    get_provider_config_block_name,
+    load_yaml,
+    yaml,
+)
 from _nebari.version import __version__, rounded_ver_parse
-from nebari import schema
+from nebari.schema import ProviderEnum, is_version_accepted
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +26,9 @@ NEBARI_WORKFLOW_CONTROLLER_DOCS = (
     "https://www.nebari.dev/docs/how-tos/using-argo/#jupyterflow-override-beta"
 )
 ARGO_JUPYTER_SCHEDULER_REPO = "https://github.com/nebari-dev/argo-jupyter-scheduler"
+
+UPGRADE_KUBERNETES_MESSAGE = "Please see the [green][link=https://www.nebari.dev/docs/how-tos/kubernetes-version-upgrade]Kubernetes upgrade docs[/link][/green] for more information."
+DESTRUCTIVE_UPGRADE_WARNING = "-> This version upgrade will result in your cluster being completely torn down and redeployed.  Please ensure you have backed up any data you wish to keep before proceeding!!!"
 
 
 def do_upgrade(config_filename, attempt_fixes=False):
@@ -40,7 +48,7 @@ def do_upgrade(config_filename, attempt_fixes=False):
         )
         return
     except (ValidationError, ValueError) as e:
-        if schema.is_version_accepted(config.get("nebari_version", "")):
+        if is_version_accepted(config.get("nebari_version", "")):
             # There is an unrelated validation problem
             rich.print(
                 f"Your config file [purple]{config_filename}[/purple] appears to be already up-to-date for Nebari version [green]{__version__}[/green] but there is another validation error.\n"
@@ -48,7 +56,6 @@ def do_upgrade(config_filename, attempt_fixes=False):
             raise e
 
     start_version = config.get("nebari_version", "")
-    print("start_version: ", start_version)
 
     UpgradeStep.upgrade(
         config, start_version, __version__, config_filename, attempt_fixes
@@ -98,7 +105,6 @@ class UpgradeStep(ABC):
         """
         starting_ver = rounded_ver_parse(start_version or "0.0.0")
         finish_ver = rounded_ver_parse(finish_version)
-        print("finish_ver: ", finish_ver)
 
         if finish_ver < starting_ver:
             raise ValueError(
@@ -115,8 +121,6 @@ class UpgradeStep(ABC):
             ],
             key=rounded_ver_parse,
         )
-
-        print("step_versions: ", step_versions)
 
         current_start_version = start_version
         for stepcls in [cls._steps[str(v)] for v in step_versions]:
@@ -484,6 +488,24 @@ class Upgrade_2023_4_2(UpgradeStep):
         return config
 
 
+class Upgrade_2023_7_1(UpgradeStep):
+    version = "2023.7.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        provider = config["provider"]
+        if provider == ProviderEnum.aws.value:
+            rich.print("\n ⚠️  DANGER ⚠️")
+            rich.print(
+                DESTRUCTIVE_UPGRADE_WARNING,
+                "The 'prevent_deploy' flag has been set in your config file and must be manually removed to deploy.",
+            )
+            config["prevent_deploy"] = True
+
+        return config
+
+
 class Upgrade_2023_7_2(UpgradeStep):
     version = "2023.7.2"
 
@@ -503,6 +525,107 @@ class Upgrade_2023_7_2(UpgradeStep):
         rich.print(
             f"-> [green]{self.version}[/green] is the last Nebari version that supports CDS Dashboards"
         )
+
+        return config
+
+
+class Upgrade_2023_9_1(UpgradeStep):
+    version = "2023.9.1"
+    # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
+    # This released has been tested against 1.26
+    min_k8s_version = 1.26
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        # Upgrading to 2023.9.1 is considered high-risk because it includes a major refacto
+        # to introduce the extension mechanism system.
+        rich.print("\n ⚠️  Warning ⚠️")
+        rich.print(
+            f"-> Nebari version [green]{self.version}[/green] includes a major refactor to introduce an extension mechanism that supports the development of third-party plugins."
+        )
+        rich.print(
+            "-> Data should be backed up before performing this upgrade ([green][link=https://www.nebari.dev/docs/how-tos/manual-backup]see docs[/link][/green])  The 'prevent_deploy' flag has been set in your config file and must be manually removed to deploy."
+        )
+        rich.print(
+            "-> Please also run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
+        )
+
+        # Setting the following flag will prevent deployment and display guidance to the user
+        # which they can override if they are happy they understand the situation.
+        config["prevent_deploy"] = True
+
+        # Nebari version 2023.9.1 upgrades JupyterHub to 3.1.  CDS Dashboards are only compatible with
+        # JupyterHub versions 1.X and so will be removed during upgrade.
+        rich.print("\n ⚠️  Deprecation Warning ⚠️")
+        rich.print(
+            f"-> CDS dashboards are no longer supported in Nebari version [green]{self.version}[/green] and will be uninstalled."
+        )
+        if config.get("cdsdashboards"):
+            rich.print("-> Removing cdsdashboards from config file.")
+            del config["cdsdashboards"]
+
+        # Kubernetes version check
+        # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
+
+        provider = config["provider"]
+        provider_config_block = get_provider_config_block_name(provider)
+
+        # Get current Kubernetes version if available in config.
+        current_version = config.get(provider_config_block, {}).get(
+            "kubernetes_version", None
+        )
+
+        # Convert to decimal prefix
+        if provider in ["aws", "azure", "gcp", "do"]:
+            current_version = get_k8s_version_prefix(current_version)
+
+        # Try to convert known Kubernetes versions to float.
+        if current_version is not None:
+            try:
+                current_version = float(current_version)
+            except ValueError:
+                current_version = None
+
+        # Handle checks for when Kubernetes version should be detectable
+        if provider in ["aws", "azure", "gcp", "do"]:
+            # Kubernetes version not found in provider block
+            if current_version is None:
+                rich.print("\n ⚠️  Warning ⚠️")
+                rich.print(
+                    f"-> Unable to detect Kubernetes version for provider {provider}.  Nebari version [green]{self.version}[/green] requires Kubernetes version {str(self.min_k8s_version)}.  Please confirm your Kubernetes version is configured before upgrading."
+                )
+
+            # Kubernetes version less than required minimum
+            if (
+                isinstance(current_version, float)
+                and current_version < self.min_k8s_version
+            ):
+                rich.print("\n ⚠️  Warning ⚠️")
+                rich.print(
+                    f"-> Nebari version [green]{self.version}[/green] requires Kubernetes version {str(self.min_k8s_version)}.  Your configured Kubernetes version is [red]{current_version}[/red]. {UPGRADE_KUBERNETES_MESSAGE}"
+                )
+                version_diff = round(self.min_k8s_version - current_version, 2)
+                if version_diff > 0.01:
+                    rich.print(
+                        "-> The Kubernetes version is multiple minor versions behind the minimum required version. You will need to perform the upgrade one minor version at a time.  For example, if your current version is 1.24, you will need to upgrade to 1.25, and then 1.26."
+                    )
+                rich.print(
+                    f"-> Update the value of [green]{provider_config_block}.kubernetes_version[/green] in your config file to a newer version of Kubernetes and redeploy."
+                )
+
+        else:
+            rich.print("\n ⚠️  Warning ⚠️")
+            rich.print(
+                f"-> Unable to detect Kubernetes version for provider {provider}.  Nebari version [green]{self.version}[/green] requires Kubernetes version {str(self.min_k8s_version)} or greater."
+            )
+            rich.print(
+                "-> Please ensure your Kubernetes version is up-to-date before proceeding."
+            )
+
+        if provider == "aws":
+            rich.print("\n ⚠️  DANGER ⚠️")
+            rich.print(DESTRUCTIVE_UPGRADE_WARNING)
 
         return config
 
