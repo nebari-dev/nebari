@@ -1,3 +1,8 @@
+from contextlib import nullcontext
+
+from pydantic.error_wrappers import ValidationError
+import pytest
+
 from nebari import schema
 from nebari.plugins import nebari_plugin_manager
 
@@ -48,3 +53,33 @@ def test_render_schema(nebari_config):
     assert isinstance(nebari_config, schema.Main)
     assert nebari_config.project_name == f"pytest{nebari_config.provider.value}"
     assert nebari_config.namespace == "dev"
+
+
+@pytest.mark.parametrize(
+    "provider, exception",
+    [
+        (
+            "fake",
+            pytest.raises(
+                ValueError,
+                match="'fake' is not a valid enumeration member; permitted: local, existing, do, aws, gcp, azure",
+            ),
+        ),
+        ("aws", pytest.raises(ValidationError)),
+        ("gcp", pytest.raises(ValidationError)),
+        ("do", pytest.raises(ValidationError)),
+        ("azure", pytest.raises(ValidationError)),
+        ("existing", nullcontext()),
+        ("local", nullcontext()),
+    ],
+)
+def test_provider_validation(config_schema, provider, exception):
+    # TODO: for cloud providers, we are currently not testing the expected behaviours,
+    #       there should be no validation error for aws, gcp, do, azure.
+    config_dict = {
+        "project_name": "test",
+        "provider": f"{provider}",
+    }
+    with exception:
+        config = config_schema(**config_dict)
+        assert config.provider == provider
