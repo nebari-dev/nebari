@@ -518,10 +518,11 @@ class InputSchema(schema.Base):
         # so we need to check for it explicitly here, and set the `pre` to True
         # TODO: this is a workaround, check if there is a better way to do this in Pydantic v2
         # TODO: all the cloud providers are initialized without required fields, so they are not working here
-        if not hasattr(schema.ProviderEnum, values["provider"]):
-            provider = values["provider"]
+        provider = values.get("provider", schema.ProviderEnum.local.value)
+        if not hasattr(schema.ProviderEnum, provider):
             msg = f"'{provider}' is not a valid enumeration member; permitted: {', '.join(schema.ProviderEnum.__members__.keys())}"
             raise ValueError(msg)
+        values["provider"] = provider
 
         if (
             values["provider"] == schema.ProviderEnum.local
