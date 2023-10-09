@@ -514,7 +514,6 @@ class InputSchema(schema.Base):
 
     @pydantic.root_validator(pre=True)
     def check_provider(cls, values):
-
         # if the provider field is invalid, it won't be set when this validator is called
         # so we need to check for it explicitly here, and set the `pre` to True
         # TODO: this is a workaround, check if there is a better way to do this in Pydantic v2
