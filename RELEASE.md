@@ -18,7 +18,7 @@ This release includes a major refactor which introduces a Pluggy-based extension
 of the extension mechanism and we expect the interface to be refined overtime. If you're interested in developing your own stage plugin, please refer to [our documentation](https://www.nebari.dev/docs/how-tos/nebari-extension-system#developing-an-extension). When you're ready to upgrade, please download this version from either PyPI or Conda-Forge and run the `nebari upgrade -c nebari-config.yaml`
 command and follow the instructions
 
-> WARNING: This release deprecates support for CDS Dashboards and upgrading to this version will result in CDS Dashboards being uninstalled. A replacement dashboarding solution is currently in the works
+> WARNING: CDS Dashboards was removed in this release and upgrading to this version will result in CDS Dashboards being uninstalled. A replacement dashboarding solution is currently in the works
 > and will be integrated soon.
 
 > WARNING: Given the scope of changes in this release, we highly recommend backing up your system before upgrading. Please refer to our [Manual Backup](https://www.nebari.dev/docs/how-tos/manual-backup) documentation for more details.
@@ -32,7 +32,7 @@ command and follow the instructions
 ### Breaking Changes
 
 * While we have tried our best to avoid breaking changes when introducing the extension mechanism, the scope of the changes is too large for us to confidently say there won't be breaking changes.
-
+> WARNING: CDS Dashboards was removed in this release and upgrading to this version will result in CDS Dashboards being uninstalled. A replacement dashboarding solution is currently in the work and will be integrated soon.
 
 ### What's Changed
 * Spinup spot instance for CI with cirun by @aktech in https://github.com/nebari-dev/nebari/pull/1882
