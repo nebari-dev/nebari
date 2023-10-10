@@ -504,6 +504,34 @@ class ExistingProvider(schema.Base):
     }
 
 
+provider_enum_model_map = {
+    schema.ProviderEnum.local: LocalProvider,
+    schema.ProviderEnum.existing: ExistingProvider,
+    schema.ProviderEnum.gcp: GoogleCloudPlatformProvider,
+    schema.ProviderEnum.aws: AmazonWebServicesProvider,
+    schema.ProviderEnum.azure: AzureProvider,
+    schema.ProviderEnum.do: DigitalOceanProvider,
+}
+
+provider_enum_name_map: Dict[schema.ProviderEnum, str] = {
+    schema.ProviderEnum.local: "local",
+    schema.ProviderEnum.existing: "existing",
+    schema.ProviderEnum.gcp: "google_cloud_platform",
+    schema.ProviderEnum.aws: "amazon_web_services",
+    schema.ProviderEnum.azure: "azure",
+    schema.ProviderEnum.do: "digital_ocean",
+}
+
+provider_name_abbreviation_map: Dict[str, str] = {
+    "local": "local",
+    "existing": "existing",
+    "google_cloud_platform": "gcp",
+    "amazon_web_services": "aws",
+    "azure": "azure",
+    "digital_ocean": "do",
+}
+
+
 class InputSchema(schema.Base):
     local: typing.Optional[LocalProvider]
     existing: typing.Optional[ExistingProvider]
@@ -514,62 +542,34 @@ class InputSchema(schema.Base):
 
     @pydantic.root_validator(pre=True)
     def check_provider(cls, values):
-        # if the provider field is invalid, it won't be set when this validator is called
-        # so we need to check for it explicitly here, and set the `pre` to True
-        # TODO: this is a workaround, check if there is a better way to do this in Pydantic v2
-        # TODO: all the cloud providers are initialized without required fields, so they are not working here
-        provider = values.get("provider", schema.ProviderEnum.local.value)
-        if not hasattr(schema.ProviderEnum, provider):
-            msg = f"'{provider}' is not a valid enumeration member; permitted: {', '.join(schema.ProviderEnum.__members__.keys())}"
-            raise ValueError(msg)
-        values["provider"] = provider
+        if "provider" in values:
+            provider = values["provider"]
+            if hasattr(schema.ProviderEnum, provider):
+                if values[provider] is None:
+                    # TODO: all the cloud providers are initialized without required fields, so they are not working here
+                    values[provider_enum_name_map[provider]] = provider_enum_model_map[
+                        provider
+                    ]()
+            else:
+                # if the provider field is invalid, it won't be set when this validator is called
+                # so we need to check for it explicitly here, and set the `pre` to True
+                # TODO: this is a workaround, check if there is a better way to do this in Pydantic v2
+                raise ValueError(
+                    f"'{provider}' is not a valid enumeration member; permitted: local, existing, do, aws, gcp, azure"
+                )
+        else:
+            setted_providers = []
+            for provider in schema.ProviderEnum:
+                if provider_enum_name_map[provider] in values:
+                    setted_providers.append(provider_enum_name_map[provider])
 
-        if (
-            values["provider"] == schema.ProviderEnum.local
-            and values.get("local") is None
-        ):
-            values["local"] = LocalProvider()
-        elif (
-            values["provider"] == schema.ProviderEnum.existing
-            and values.get("existing") is None
-        ):
-            values["existing"] = ExistingProvider()
-        elif (
-            values["provider"] == schema.ProviderEnum.gcp
-            and values.get("google_cloud_platform") is None
-        ):
-            values["google_cloud_platform"] = GoogleCloudPlatformProvider()
-        elif (
-            values["provider"] == schema.ProviderEnum.aws
-            and values.get("amazon_web_services") is None
-        ):
-            values["amazon_web_services"] = AmazonWebServicesProvider()
-        elif (
-            values["provider"] == schema.ProviderEnum.azure
-            and values.get("azure") is None
-        ):
-            values["azure"] = AzureProvider()
-        elif (
-            values["provider"] == schema.ProviderEnum.do
-            and values.get("digital_ocean") is None
-        ):
-            values["digital_ocean"] = DigitalOceanProvider()
-
-        if (
-            sum(
-                (_ in values and values[_] is not None)
-                for _ in {
-                    "local",
-                    "existing",
-                    "google_cloud_platform",
-                    "amazon_web_services",
-                    "azure",
-                    "digital_ocean",
-                }
-            )
-            != 1
-        ):
-            raise ValueError("multiple providers set or wrong provider fields set")
+            num_providers = len(setted_providers)
+            if num_providers > 1:
+                raise ValueError(f"Multiple providers set: {setted_providers}")
+            elif num_providers == 1:
+                values["provider"] = provider_name_abbreviation_map[setted_providers[0]]
+            elif num_providers == 0:
+                values["provider"] = schema.ProviderEnum.local.value
         return values
 
 
