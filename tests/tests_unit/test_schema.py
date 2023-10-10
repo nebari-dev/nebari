@@ -84,15 +84,40 @@ def test_provider_validation(config_schema, provider, exception):
         config = config_schema(**config_dict)
         assert config.provider == provider
 
+
 @pytest.mark.parametrize(
     "provider, full_name, default_fields",
     [
         ("local", "local", {}),
         ("existing", "existing", {}),
-        ("aws", "amazon_web_services", {"region": "us-east-1", "kubernetes_version": "1.18"}),
-        ("gcp", "google_cloud_platform", {"region": "us-east1", "project": "test-project", "kubernetes_version": "1.18"}),
-        ("do", "digital_ocean", {"region": "nyc3", "kubernetes_version": "1.19.2-do.3"}),
-        ("azure", "azure", {"region": "eastus", "kubernetes_version": "1.18", "storage_account_postfix": "test"}),
+        (
+            "aws",
+            "amazon_web_services",
+            {"region": "us-east-1", "kubernetes_version": "1.18"},
+        ),
+        (
+            "gcp",
+            "google_cloud_platform",
+            {
+                "region": "us-east1",
+                "project": "test-project",
+                "kubernetes_version": "1.18",
+            },
+        ),
+        (
+            "do",
+            "digital_ocean",
+            {"region": "nyc3", "kubernetes_version": "1.19.2-do.3"},
+        ),
+        (
+            "azure",
+            "azure",
+            {
+                "region": "eastus",
+                "kubernetes_version": "1.18",
+                "storage_account_postfix": "test",
+            },
+        ),
     ],
 )
 def test_no_provider(config_schema, provider, full_name, default_fields):
