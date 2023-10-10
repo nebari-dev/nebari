@@ -545,11 +545,12 @@ class InputSchema(schema.Base):
         if "provider" in values:
             provider = values["provider"]
             if hasattr(schema.ProviderEnum, provider):
-                if values[provider] is None:
+                if values.get(provider) is None:
                     # TODO: all the cloud providers are initialized without required fields, so they are not working here
-                    values[provider_enum_name_map[provider]] = provider_enum_model_map[
-                        provider
-                    ]()
+                    # values[provider_enum_name_map[provider]] = provider_enum_model_map[
+                    #     provider
+                    # ]()
+                    ...
             else:
                 # if the provider field is invalid, it won't be set when this validator is called
                 # so we need to check for it explicitly here, and set the `pre` to True
