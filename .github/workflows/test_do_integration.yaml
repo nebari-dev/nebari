@@ -3,9 +3,6 @@ name: test-gcp-integration
 on:
   schedule:
     - cron: "0 0 * * MON"
-  pull_request:
-    branches:
-      - develop
   workflow_dispatch:
     inputs:
       branch:
