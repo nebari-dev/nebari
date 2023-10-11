@@ -1,4 +1,4 @@
-name: test-aws-integration
+name: test-azure-integration
 
 on:
   schedule:
@@ -36,7 +36,7 @@ env:
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
 jobs:
-  test-aws-integration:
+  test-azure-integration:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -68,15 +68,15 @@ jobs:
           role: "repository-nebari-dev-nebari-role"
           secrets: |
             kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci client_id | ARM_CLIENT_ID;
+            kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci client_secret | ARM_CLIENT_SECRET;
             kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci tenant_id | ARM_TENANT_ID;
             kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci subscription_id | ARM_SUBSCRIPTION_ID;
             kv/data/repository/nebari-dev/nebari/cloudflare/internal-devops@quansight.com/nebari-dev-ci token | CLOUDFLARE_TOKEN;
-      - name: 'Az CLI login'
+      - name: 'Azure login'
         uses: azure/login@v1
         with:
-          client-id: ${{ env.ARM_CLIENT_ID }}
-          tenant-id: ${{ env.ARM_TENANT_ID }}
-          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+          creds: '{"clientId":"${{ env.ARM_CLIENT_ID }}","clientSecret":"${{ env.ARM_CLIENT_SECRET }}","subscriptionId":"${{ env.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ env.ARM_TENANT_ID }}"}'
+
       - name: Integration Tests
         run: |
           pytest --version
