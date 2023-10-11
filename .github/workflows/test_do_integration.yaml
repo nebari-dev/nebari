@@ -1,0 +1,53 @@
+name: "Integration Tests"
+
+on:
+  schedule:
+    - cron: "0 0 * * MON"
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  test-integration:
+    name: "Pytest Integration"
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      fail-fast: false
+    steps:
+      - name: "Checkout Infrastructure"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install Nebari
+        run: |
+          pip install .[dev]
+          conda install --quiet --yes conda-build
+          playwright install
+      - name: Retrieve secret from Vault
+        uses: hashicorp/vault-action@v2.5.0
+        with:
+          method: jwt
+          url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"
+          namespace: "admin/quansight"
+          role: "repository-nebari-dev-nebari-role"
+          secrets: |
+            kv/data/repository/nebari-dev/nebari/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
+            kv/data/repository/nebari-dev/nebari/cloudflare/internal-devops@quansight.com/nebari-dev-ci token | CLOUDFLARE_TOKEN;
+
+      - name: Set Environment DO
+        run: |
+          echo "SPACES_ACCESS_KEY_ID=${{ secrets.SPACES_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "SPACES_SECRET_ACCESS_KEY=${{ secrets.SPACES_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "NEBARI_K8S_VERSION"=1.25.12-do.0 >> $GITHUB_ENV
+      - name: Integration Tests
+        run: |
+          pytest --version
+          pytest tests/tests_integration/ -vvv -s -m do
