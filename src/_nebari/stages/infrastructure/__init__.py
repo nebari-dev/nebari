@@ -523,12 +523,7 @@ provider_enum_name_map: Dict[schema.ProviderEnum, str] = {
 }
 
 provider_name_abbreviation_map: Dict[str, str] = {
-    "local": "local",
-    "existing": "existing",
-    "google_cloud_platform": "gcp",
-    "amazon_web_services": "aws",
-    "azure": "azure",
-    "digital_ocean": "do",
+    value: key.value for key, value in provider_enum_name_map.items()
 }
 
 
@@ -543,14 +538,11 @@ class InputSchema(schema.Base):
     @pydantic.root_validator(pre=True)
     def check_provider(cls, values):
         if "provider" in values:
-            provider = values["provider"]
+            provider: str = values["provider"]
             if hasattr(schema.ProviderEnum, provider):
-                if values.get(provider) is None:
-                    # TODO: all the cloud providers are initialized without required fields, so they are not working here
-                    if provider in ["local", "existing"]:
-                        values[
-                            provider_enum_name_map[provider]
-                        ] = provider_enum_model_map[provider]()
+                # TODO: all cloud providers has required fields, but local and existing don't.
+                if provider in ["local", "existing"]:
+                    values[provider] = provider_enum_model_map[provider]()
             else:
                 # if the provider field is invalid, it won't be set when this validator is called
                 # so we need to check for it explicitly here, and set the `pre` to True
@@ -559,11 +551,11 @@ class InputSchema(schema.Base):
                     f"'{provider}' is not a valid enumeration member; permitted: local, existing, do, aws, gcp, azure"
                 )
         else:
-            setted_providers = []
-            for provider in schema.ProviderEnum:
-                if provider_enum_name_map[provider] in values:
-                    setted_providers.append(provider_enum_name_map[provider])
-
+            setted_providers = [
+                provider
+                for provider in provider_name_abbreviation_map.keys()
+                if provider in values
+            ]
             num_providers = len(setted_providers)
             if num_providers > 1:
                 raise ValueError(f"Multiple providers set: {setted_providers}")
