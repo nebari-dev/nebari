@@ -74,8 +74,6 @@ def test_render_schema(nebari_config):
     ],
 )
 def test_provider_validation(config_schema, provider, exception):
-    # TODO: for cloud providers, we are currently not testing the expected behaviours,
-    #       there should be no validation error for aws, gcp, do, azure.
     config_dict = {
         "project_name": "test",
         "provider": f"{provider}",

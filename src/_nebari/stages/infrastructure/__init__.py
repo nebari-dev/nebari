@@ -541,6 +541,8 @@ class InputSchema(schema.Base):
             provider: str = values["provider"]
             if hasattr(schema.ProviderEnum, provider):
                 # TODO: all cloud providers has required fields, but local and existing don't.
+                #  And there is no way to initilize a model without user input here.
+                #  We preserve the original behavior here, but we should find a better way to do this.
                 if provider in ["local", "existing"]:
                     values[provider] = provider_enum_model_map[provider]()
             else:
