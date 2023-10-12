@@ -76,7 +76,7 @@ class NebariPluginManager:
             try:
                 self.plugin_manager.register(mod, plugin)
             except ValueError:
-                # Pluin already registered
+                # Plugin already registered
                 pass
 
     def get_available_stages(self):
