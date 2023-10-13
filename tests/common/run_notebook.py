@@ -17,11 +17,13 @@ class Notebook:
     def run(
         self,
         path,
-        expected_outputs,
-        conda_env,
-        runtime=30000,
-        retry=2,
-        exact_match=True,
+        expected_outputs: List[Union[re.Pattern, str]],
+        conda_env: str,
+        timeout: float = 1000,
+        complition_wait_time: float = 2,
+        retry: int = 2,
+        retry_wait_time: float = 5,
+        exact_match: bool = True,
     ):
         """Run jupyter notebook and check for expected output text anywhere on
         the page.
@@ -31,10 +33,33 @@ class Notebook:
 
         Conda environments may still be being built shortly after deployment.
 
+        Parameters
+        ----------
+        path: str
+            Path to notebook relative to the root of the jupyterlab instance.
+        expected_outputs: List[Union[re.Pattern, str]]
+            Text to look for in the output of the notebook. This can be a
+            substring of the actual output if exact_match is False.
         conda_env: str
             Name of conda environment. Python conda environments have the
             structure "conda-env-nebari-git-nebari-git-dashboard-py" where
             the actual name of the environment is "dashboard".
+        timeout: float
+            Time in seconds to wait for the expected output text to appear.
+            default: 1000
+        complition_wait_time: float
+            Time in seconds to wait between checking for expected output text.
+            default: 2
+        retry: int
+            Number of times to retry running the notebook.
+            default: 2
+        retry_wait_time: float
+            Time in seconds to wait between retries.
+            default: 5
+        exact_match: bool
+            If True, the expected output must match exactly. If False, the
+            expected output must be a substring of the actual output.
+            default: True
         """
         logger.debug(f">>> Running notebook: {path}")
         filename = Path(path).name
@@ -48,11 +73,11 @@ class Notebook:
         # make sure that this notebook is one currently selected
         self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
 
-        for i in range(retry):
+        for _ in range(retry):
             self._restart_run_all()
             # Wait for a couple of seconds to make sure it's re-started
-            time.sleep(2)
-            self._wait_for_commands_completion()
+            time.sleep(retry_wait_time)
+            self._wait_for_commands_completion(timeout, complition_wait_time)
             all_outputs = self._get_outputs()
             assert_match_all_outputs(expected_outputs, all_outputs, exact_match)
 
@@ -96,9 +121,32 @@ class Notebook:
             logger.debug("Path to notebook is invalid")
             raise RuntimeError("Path to notebook is invalid")
 
-    def assert_code_output(self, code, expected_output):
+    def assert_code_output(
+        self,
+        code: str,
+        expected_output: List[Union[re.Pattern, str]],
+        timeout: float = 1000,
+        complition_wait_time: float = 2,
+    ):
+        """
+        Run code in last cell and check for expected output text anywhere on
+        the page.
+
+
+        Parameters
+        ----------
+        code: str
+            Code to run in last cell.
+        expected_outputs: List[Union[re.Pattern, str]]
+            Text to look for in the output of the notebook.
+        timeout: float
+            Time in seconds to wait for the expected output text to appear.
+            default: 1000
+        complition_wait_time: float
+            Time in seconds to wait between checking for expected output text.
+        """
         self.run_in_last_cell(code)
-        self._wait_for_commands_completion()
+        self._wait_for_commands_completion(timeout, complition_wait_time)
         outputs = self._get_outputs()
         assert_match_output(expected_output, outputs[-1])
 
@@ -126,17 +174,29 @@ class Notebook:
                 return cell
         raise ValueError("Unable to get last cell")
 
-    def _wait_for_commands_completion(self, timeout=120):
+    def _wait_for_commands_completion(
+        self, timeout: float, complition_wait_time: float
+    ):
+        """
+        Wait for commands to finish running
+
+        Parameters
+        ----------
+        timeout: float
+            Time in seconds to wait for the expected output text to appear.
+        complition_wait_time: float
+        Time in seconds to wait between checking for expected output text.
+        """
         elapsed_time = 0
-        start_time = time.time()
         still_visible = True
+        start_time = time.time()
         while elapsed_time < timeout:
             running = self.nav.page.get_by_text("[*]").all()
             still_visible = any(list(map(lambda r: r.is_visible(), running)))
-            elapsed_time = time.time() - start_time
-            time.sleep(1)
             if not still_visible:
                 break
+            elapsed_time = time.time() - start_time
+            time.sleep(complition_wait_time)
         if still_visible:
             raise ValueError(
                 f"Timeout Waited for commands to finish, "
