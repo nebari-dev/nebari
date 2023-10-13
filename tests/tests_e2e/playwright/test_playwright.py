@@ -14,5 +14,5 @@ def test_notebook(navigator, test_data_root):
         path=notebook_name,
         expected_outputs=["success: 6"],
         conda_env="conda-env-default-py",
-        runtime=60000,
+        timeout=500,
     )
