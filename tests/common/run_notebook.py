@@ -188,7 +188,7 @@ class Notebook:
         complition_wait_time: float
         Time in seconds to wait between checking for expected output text.
         """
-        elapsed_time = 0.
+        elapsed_time = 0.0
         still_visible = True
         start_time = time.time()
         while elapsed_time < timeout:
