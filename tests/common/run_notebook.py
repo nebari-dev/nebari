@@ -17,7 +17,7 @@ class Notebook:
     def run(
         self,
         path,
-        expected_outputs: List[Union[re.Pattern, str]],
+        expected_outputs: List[str],
         conda_env: str,
         timeout: float = 1000,
         complition_wait_time: float = 2,
@@ -37,7 +37,7 @@ class Notebook:
         ----------
         path: str
             Path to notebook relative to the root of the jupyterlab instance.
-        expected_outputs: List[Union[re.Pattern, str]]
+        expected_outputs: List[str]
             Text to look for in the output of the notebook. This can be a
             substring of the actual output if exact_match is False.
         conda_env: str
@@ -124,9 +124,10 @@ class Notebook:
     def assert_code_output(
         self,
         code: str,
-        expected_output: List[Union[re.Pattern, str]],
+        expected_output: str,
         timeout: float = 1000,
         complition_wait_time: float = 2,
+        exact_match: bool = True,
     ):
         """
         Run code in last cell and check for expected output text anywhere on
@@ -148,7 +149,7 @@ class Notebook:
         self.run_in_last_cell(code)
         self._wait_for_commands_completion(timeout, complition_wait_time)
         outputs = self._get_outputs()
-        assert_match_output(expected_output, outputs[-1])
+        assert_match_output(expected_output, outputs[-1], exact_match)
 
     def run_in_last_cell(self, code):
         self._create_new_cell()
@@ -187,7 +188,7 @@ class Notebook:
         complition_wait_time: float
         Time in seconds to wait between checking for expected output text.
         """
-        elapsed_time = 0
+        elapsed_time = 0.
         still_visible = True
         start_time = time.time()
         while elapsed_time < timeout:
