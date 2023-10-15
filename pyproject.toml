@@ -108,6 +108,31 @@ Source = "https://github.com/nebari-dev/nebari"
 [project.scripts]
 nebari = "nebari.__main__:main"
 
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+exclude = [
+    "src/_nebari/stages/kubernetes_services/template" # skip traitlets configuration files
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "auth0.authentication",
+    "auth0.management",
+    "CloudFlare",
+    "kubernetes",
+    "kubernetes.client",
+    "kubernetes.config",
+    "kubernetes.client.rest",
+    "kubernetes.client.exceptions",
+    "keycloak",
+    "keycloak.exceptions",
+    "boto3",
+    "botocore.exceptions",
+]
+ignore_missing_imports = true
+
 [tool.ruff]
 select = [
     "E",
