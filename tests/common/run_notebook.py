@@ -149,7 +149,8 @@ class Notebook:
         self.run_in_last_cell(code)
         self._wait_for_commands_completion(timeout, complition_wait_time)
         outputs = self._get_outputs()
-        assert_match_output(expected_output, outputs[-1], exact_match)
+        actual_output = outputs[-1] if outputs else ""
+        assert_match_output(expected_output, actual_output, exact_match)
 
     def run_in_last_cell(self, code):
         self._create_new_cell()
@@ -204,7 +205,7 @@ class Notebook:
                 f"but couldn't finish in {timeout} sec"
             )
 
-    def _get_outputs(self):
+    def _get_outputs(self) -> List[str]:
         output_elements = self.nav.page.query_selector_all(".jp-OutputArea-output")
         text_content = [element.text_content().strip() for element in output_elements]
         return text_content
