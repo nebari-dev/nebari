@@ -48,7 +48,7 @@ jobs:
           channels: conda-forge
       - name: Install Nebari
         run: |
-          conda install --quiet --yes conda pip conda-build
+          conda install --quiet --yes conda pip
           pip install -e .[dev]
       - name: Test Nebari
         run: |
