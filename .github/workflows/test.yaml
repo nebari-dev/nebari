@@ -26,9 +26,9 @@ jobs:
   test-general:
     name: "Pytest"
     runs-on: ubuntu-latest
-    # defaults:
-    #   run:
-    #     shell: bash -el {0}
+    defaults:
+      run:
+        shell: bash -el {0}
     strategy:
       matrix:
         python-version:
@@ -36,10 +36,9 @@ jobs:
           - "3.9"
           - "3.10"
           - "3.11"
-          - "3.12"
       fail-fast: false
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.python-version }}
       cancel-in-progress: true
     steps:
       - name: "Checkout Infrastructure"
@@ -53,10 +52,9 @@ jobs:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           channels: conda-forge,defaults
-          # activate-environment: nebari-dev
+          activate-environment: nebari-dev
 
       - name: Install conda-build
-        # if: matrix.python-version != '3.12'
         run: |
           conda install --quiet --yes conda-build
 
