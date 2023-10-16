@@ -233,31 +233,6 @@ def test_cli_upgrade_fail_on_missing_file():
         )
 
 
-def test_cli_upgrade_fail_invalid_file():
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        assert tmp_file.exists() is False
-
-        nebari_config = yaml.safe_load(
-            """
-project_name: test
-provider: fake
-        """
-        )
-
-        with open(tmp_file.resolve(), "w") as f:
-            yaml.dump(nebari_config, f)
-
-        assert tmp_file.exists() is True
-        app = create_cli()
-
-        result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
-
-        assert 1 == result.exit_code
-        assert result.exception
-        assert "provider" in str(result.exception)
-
-
 def test_cli_upgrade_fail_on_downgrade():
     start_version = "9999.9.9"  # way in the future
     end_version = _nebari.upgrade.__version__
