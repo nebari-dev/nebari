@@ -38,6 +38,9 @@ jobs:
           - "3.11"
           - "3.12"
       fail-fast: false
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: "Checkout Infrastructure"
         uses: actions/checkout@v3
@@ -59,6 +62,7 @@ jobs:
 
       - name: Install Nebari
         run: |
+          python --version
           pip install -e .[dev]
 
       - name: Test Nebari
