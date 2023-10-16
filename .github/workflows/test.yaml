@@ -53,6 +53,7 @@ jobs:
           activate-environment: nebari-dev
 
       - name: Install conda-build
+        if: matrix.python-version != '3.12'
         run: |
           conda install --quiet --yes conda-build
 
