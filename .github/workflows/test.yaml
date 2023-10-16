@@ -26,9 +26,9 @@ jobs:
   test-general:
     name: "Pytest"
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -el {0}
+    # defaults:
+    #   run:
+    #     shell: bash -el {0}
     strategy:
       matrix:
         python-version:
@@ -50,10 +50,10 @@ jobs:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           channels: conda-forge,defaults
-          activate-environment: nebari-dev
+          # activate-environment: nebari-dev
 
       - name: Install conda-build
-        if: matrix.python-version != '3.12'
+        # if: matrix.python-version != '3.12'
         run: |
           conda install --quiet --yes conda-build
 
