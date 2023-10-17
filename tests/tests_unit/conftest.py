@@ -202,3 +202,8 @@ def new_upgrade_cls():
     assert not UpgradeStep._steps
     yield UpgradeStep
     UpgradeStep._steps = steps_cache
+
+
+@pytest.fixture
+def config_schema():
+    return nebari_plugin_manager.config_schema
