@@ -92,7 +92,6 @@ dev = [
     "pytest-playwright",
     "pytest-cov",
     "coverage[toml]",
-    "build",
     "jinja2",
     "setuptools==63.4.3",
 ]
