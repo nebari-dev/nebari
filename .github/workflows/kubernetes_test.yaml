@@ -1,5 +1,10 @@
 name: "Kubernetes Tests"
 
+env:
+  EXAMPLE_USER_NAME: example-user
+  EXAMPLE_USER_PASSWORD: P@sswo3d
+  TEST_DOMAIN: github-actions.nebari.dev
+
 on:
   pull_request:
     paths:
@@ -92,7 +97,7 @@ jobs:
         run: |
           mkdir -p local-deployment
           cd local-deployment
-          nebari init local --project=thisisatest --domain github-actions.nebari.dev --auth-provider=password
+          nebari init local --project=thisisatest --domain "${TEST_DOMAIN}" --auth-provider=password
 
           # Need smaller profiles on Local Kind
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
@@ -100,65 +105,33 @@ jobs:
 
           cat nebari-config.yaml
       - name: Deploy Nebari
+        working-directory: local-deployment
         run: |
-          cd local-deployment
           nebari deploy --config nebari-config.yaml --disable-prompt
+
       - name: Basic kubectl checks after deployment
         if: always()
         run: |
           kubectl get all,cm,secret,ing -A
+
       - name: Check github-actions.nebari.dev resolves
         run: |
-          nslookup github-actions.nebari.dev
+          nslookup ${TEST_DOMAIN}
+
       - name: Curl jupyterhub login page
         run: |
-          curl -k https://github-actions.nebari.dev/hub/home -i
-
-      ### CYPRESS TESTS
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-      - name: npm version
-        run: |
-          npm --version
-      - name: Install Cypress dependencies
-        run: |
-          sudo apt-get -y update
-          sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-
-      - name: Get nebari-config.yaml full path
-        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
+          curl -k https://${TEST_DOMAIN}/hub/home -i
 
       - name: Create example-user
+        working-directory: local-deployment
         run: |
-          export CYPRESS_EXAMPLE_USER_NAME=example-user
-          export CYPRESS_EXAMPLE_USER_PASSWORD=P@sswo3d
-
-          echo "CYPRESS_EXAMPLE_USER_NAME=${CYPRESS_EXAMPLE_USER_NAME}" >> $GITHUB_ENV
-          echo "CYPRESS_EXAMPLE_USER_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}" >> $GITHUB_ENV
-
-          nebari keycloak adduser --user "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}" --config "${NEBARI_CONFIG_PATH}"
-          nebari keycloak listusers --config "${NEBARI_CONFIG_PATH}"
-
-      - name: Cypress run
-        uses: cypress-io/github-action@v4
-        env:
-          CYPRESS_BASE_URL: https://github-actions.nebari.dev/
-        with:
-          working-directory: tests/tests_e2e
+          nebari keycloak adduser --user "${EXAMPLE_USER_NAME}" "${EXAMPLE_USER_PASSWORD}" --config nebari-config.yaml
+          nebari keycloak listusers --config nebari-config.yaml
 
       - name: Playwright Tests
-        env:
-          KEYCLOAK_USERNAME: ${{ env.CYPRESS_EXAMPLE_USER_NAME }}
-          KEYCLOAK_PASSWORD: ${{ env.CYPRESS_EXAMPLE_USER_PASSWORD }}
-          NEBARI_FULL_URL: https://github-actions.nebari.dev/
-        working-directory: tests/tests_e2e/playwright
         run: |
-          # create environment file
-          envsubst < .env.tpl > .env
-          # run playwright pytest tests in headed mode with the chromium browser
-          xvfb-run pytest --browser chromium
+          mkdir screenshots
+          xvfb-run pytest --browser chromium -m local
 
       - name: Save Cypress screenshots and videos
         if: always()
@@ -166,14 +139,12 @@ jobs:
         with:
           name: e2e-cypress
           path: |
-            ./tests/tests_e2e/cypress/screenshots/
-            ./tests/tests_e2e/cypress/videos/
-            ./tests/tests_e2e/playwright/videos/
+            ./screenshots/
 
       - name: Deployment Pytests
         run: |
-          export KEYCLOAK_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
-          export KEYCLOAK_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
+          export KEYCLOAK_USERNAME=${EXAMPLE_USER_NAME}
+          export KEYCLOAK_PASSWORD=${EXAMPLE_USER_PASSWORD}
           pytest tests/tests_deployment/ -v -s
 
       - name: JupyterHub Notebook Tests
@@ -182,9 +153,9 @@ jobs:
         # the running server
         run: |
           sleep 60
-          export JUPYTERHUB_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
-          export JUPYTERHUB_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
-          jhubctl --verbose run --hub=https://github-actions.nebari.dev \
+          export JUPYTERHUB_USERNAME=${EXAMPLE_USER_NAME}
+          export JUPYTERHUB_PASSWORD=${EXAMPLE_USER_PASSWORD}
+          jhubctl --verbose run --hub=https://${TEST_DOMAIN} \
                                 --auth-type=keycloak \
                                 --validate --no-verify-ssl \
                                 --kernel python3 \
