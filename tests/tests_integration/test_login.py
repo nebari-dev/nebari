@@ -1,5 +1,6 @@
-from playwright.sync_api import Page, expect
 import pytest
+from playwright.sync_api import Page, expect
+
 
 @pytest.mark.local
 def test_login(page: Page, local_test_credential):
