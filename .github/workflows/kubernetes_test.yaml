@@ -74,7 +74,7 @@ jobs:
         run: |
           conda install --quiet --yes -c anaconda pip
           pip install .[dev]
-          playwright install
+          playwright install --with-deps chromium
       - name: Download and Install Kubectl
         run: |
           mkdir -p bin
@@ -131,9 +131,13 @@ jobs:
           nebari keycloak listusers --config nebari-config.yaml
 
       - name: Playwright Tests
+        env:
+          KEYCLOAK_USERNAME: ${{ env.EXAMPLE_USER_NAME }}
+          KEYCLOAK_PASSWORD: ${{ env.EXAMPLE_USER_PASSWORD }}
+          NEBARI_FULL_URL: https://${{ env.TEST_DOMAIN }}/
         run: |
           mkdir screenshots
-          xvfb-run pytest -m local tests/tests_integration
+          xvfb-run pytest -m local --browser chromium tests/tests_integration
 
       - name: Save screenshots
         if: always()
@@ -144,19 +148,21 @@ jobs:
             ./screenshots/
 
       - name: Deployment Pytests
+        env:
+          KEYCLOAK_USERNAME: ${{ env.EXAMPLE_USER_NAME }}
+          KEYCLOAK_PASSWORD: ${{ env.EXAMPLE_USER_PASSWORD }}
         run: |
-          export KEYCLOAK_USERNAME=${EXAMPLE_USER_NAME}
-          export KEYCLOAK_PASSWORD=${EXAMPLE_USER_PASSWORD}
           pytest tests/tests_deployment/ -v -s
 
       - name: JupyterHub Notebook Tests
         timeout-minutes: 2
         # run jhub-client after pytest since jhubctl can cleanup
         # the running server
+        env:
+          JUPYTERHUB_USERNAME: ${{ env.EXAMPLE_USER_NAME }}
+          JUPYTERHUB_PASSWORD: ${{ env.EXAMPLE_USER_PASSWORD }}
         run: |
           sleep 60
-          export JUPYTERHUB_USERNAME=${EXAMPLE_USER_NAME}
-          export JUPYTERHUB_PASSWORD=${EXAMPLE_USER_PASSWORD}
           jhubctl --verbose run --hub=https://${TEST_DOMAIN} \
                                 --auth-type=keycloak \
                                 --validate --no-verify-ssl \
