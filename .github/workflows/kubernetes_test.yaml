@@ -41,8 +41,10 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+      cancel-in-progress: true
     steps:
-
       - name: "Set NEBARI_IMAGE_TAG=main"
         run: |
           echo "NEBARI_IMAGE_TAG=main" >> "$GITHUB_ENV"
@@ -131,13 +133,13 @@ jobs:
       - name: Playwright Tests
         run: |
           mkdir screenshots
-          xvfb-run pytest --browser chromium -m local
+          xvfb-run pytest -m local tests/tests_integration
 
-      - name: Save Cypress screenshots and videos
+      - name: Save screenshots
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: e2e-cypress
+          name: integration-playwright
           path: |
             ./screenshots/
 
