@@ -34,12 +34,13 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Install Nebari
+      - name: Install Nebari and type stubs
         run: |
           python --version
           pip install -e .[dev]
+          pip install types-Pygments types-requests types-six
 
       - name: Run MyPy
         continue-on-error: true
         run: |
-          mypy --install-types --non-interactive 
+          mypy
