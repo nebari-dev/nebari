@@ -1,10 +1,7 @@
-import pytest
-
 from tests.common.playwright_fixtures import navigator_parameterized
 from tests.common.run_notebook import Notebook
 
 
-@pytest.mark.local
 @navigator_parameterized(instance_name="small-instance")
 def test_notebook(navigator, test_data_root):
     test_app = Notebook(navigator=navigator)
