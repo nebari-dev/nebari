@@ -326,8 +326,11 @@ def check_cloud_provider_creds(cloud_provider: ProviderEnum, disable_prompt: boo
             "Paste your SPACES_SECRET_ACCESS_KEY",
             hide_input=True,
         )
+        # Set spaces credentials. Spaces are API compatible with s3
+        # Setting spaces credentials to AWS credentials allows us to
+        # reuse s3 code
         os.environ["AWS_ACCESS_KEY_ID"] = os.getenv("SPACES_ACCESS_KEY_ID")
-        os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("AWS_SECRET_ACCESS_KEY")
+        os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("SPACES_SECRET_ACCESS_KEY")
 
     # AZURE
     elif cloud_provider == ProviderEnum.azure.value.lower() and (

@@ -79,7 +79,7 @@ resource "kubernetes_deployment" "worker" {
         }
 
         annotations = {
-          # This lets us autorestart when the conifg changes!
+          # This lets us autorestart when the config changes!
           "checksum/config-map"         = sha256(jsonencode(kubernetes_config_map.conda-store-config.data))
           "checksum/secret"             = sha256(jsonencode(kubernetes_secret.conda-store-secret.data))
           "checksum/conda-environments" = sha256(jsonencode(kubernetes_config_map.conda-store-environments.data))

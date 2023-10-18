@@ -527,7 +527,7 @@ Enhancements for this release include:
 
 ### Bug fixes
 
-This release addresses several bugs with a slight emphasis on stablizing the core services while also improving the end user experience.
+This release addresses several bugs with a slight emphasis on stabilizing the core services while also improving the end user experience.
 
 ### What's Changed
 * [BUG] Adding back feature of limiting profiles for users and groups by @costrouc in [PR 1169](https://github.com/Quansight/qhub/pull/1169)
