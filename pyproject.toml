@@ -108,9 +108,12 @@ Source = "https://github.com/nebari-dev/nebari"
 nebari = "nebari.__main__:main"
 
 [tool.mypy]
-python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
+files = [
+    "src/_nebari",
+    "src/nebari",
+]
 exclude = [
     "src/_nebari/stages/kubernetes_services/template" # skip traitlets configuration files
 ]
