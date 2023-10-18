@@ -4,8 +4,6 @@ on:
   pull_request:
     paths:
       - ".github/workflows/typing.yaml"
-      - "tests/**"
-      - "scripts/**"
       - "src/**"
       - "pyproject.toml"
   push:
@@ -15,8 +13,6 @@ on:
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/typing.yaml"
-      - "tests/**"
-      - "scripts/**"
       - "src/**"
       - "pyproject.toml"
 
@@ -46,4 +42,4 @@ jobs:
       - name: Run MyPy
         continue-on-error: true
         run: |
-          mypy --install-types
+          mypy --install-types --non-interactive 
