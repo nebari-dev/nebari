@@ -46,7 +46,6 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
     "Intended Audience :: Developers",
     "Intended Audience :: Education",
     "Intended Audience :: Information Technology",
@@ -92,8 +91,6 @@ dev = [
     "pytest-playwright",
     "pytest-cov",
     "coverage[toml]",
-    "grayskull",
-    "build",
     "jinja2",
     "setuptools==63.4.3",
 ]
