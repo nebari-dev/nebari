@@ -1,5 +1,10 @@
 name: "Local Integration Tests"
 
+env:
+  TEST_USERNAME: "test-user"
+  TEST_PASSWORD: "P@sswo3d"
+  TEST_DOMAIN: "github-actions.nebari.dev"
+
 on:
   pull_request:
     paths:
@@ -83,7 +88,7 @@ jobs:
         run: |
           mkdir -p local-deployment
           cd local-deployment
-          nebari init local --project=thisisatest --domain github-actions.nebari.dev --auth-provider=password
+          nebari init local --project=thisisatest --domain "${TEST_DOMAIN}" --auth-provider=password
 
           # Need smaller profiles on Local Kind
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
@@ -103,11 +108,11 @@ jobs:
 
       - name: Check github-actions.nebari.dev resolves
         run: |
-          nslookup github-actions.nebari.dev
+          nslookup "${TEST_DOMAIN}"
 
       - name: Curl jupyterhub login page
         run: |
-          curl -k https://github-actions.nebari.dev/hub/home -i
+          curl -k https://${TEST_DOMAIN}/hub/home -i
 
       ### CYPRESS TESTS
       - name: Setup Node
@@ -127,27 +132,21 @@ jobs:
 
       - name: Create example-user
         run: |
-          export CYPRESS_EXAMPLE_USER_NAME=example-user
-          export CYPRESS_EXAMPLE_USER_PASSWORD=P@sswo3d
-
-          echo "CYPRESS_EXAMPLE_USER_NAME=${CYPRESS_EXAMPLE_USER_NAME}" >> $GITHUB_ENV
-          echo "CYPRESS_EXAMPLE_USER_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}" >> $GITHUB_ENV
-
-          nebari keycloak adduser --user "${CYPRESS_EXAMPLE_USER_NAME}" "${CYPRESS_EXAMPLE_USER_PASSWORD}" --config "${NEBARI_CONFIG_PATH}"
+          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config "${NEBARI_CONFIG_PATH}"
           nebari keycloak listusers --config "${NEBARI_CONFIG_PATH}"
 
       - name: Cypress run
         uses: cypress-io/github-action@v4
         env:
-          CYPRESS_BASE_URL: https://github-actions.nebari.dev/
+          CYPRESS_BASE_URL: https://${TEST_DOMAIN}/
         with:
           working-directory: tests/tests_e2e
 
       - name: Playwright Tests
         env:
-          KEYCLOAK_USERNAME: ${{ env.CYPRESS_EXAMPLE_USER_NAME }}
-          KEYCLOAK_PASSWORD: ${{ env.CYPRESS_EXAMPLE_USER_PASSWORD }}
-          NEBARI_FULL_URL: https://github-actions.nebari.dev/
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+          NEBARI_FULL_URL: http://${{ env.TEST_DOMAIN }}/
         working-directory: tests/tests_e2e/playwright
         run: |
           # create environment file
@@ -166,9 +165,10 @@ jobs:
             ./tests/tests_e2e/playwright/videos/
 
       - name: Deployment Pytests
+        env:
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
         run: |
-          export KEYCLOAK_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
-          export KEYCLOAK_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
           pytest tests/tests_deployment/ -v -s
 
       - name: JupyterHub Notebook Tests
@@ -177,9 +177,9 @@ jobs:
         # the running server
         run: |
           sleep 60
-          export JUPYTERHUB_USERNAME=${CYPRESS_EXAMPLE_USER_NAME}
-          export JUPYTERHUB_PASSWORD=${CYPRESS_EXAMPLE_USER_PASSWORD}
-          jhubctl --verbose run --hub=https://github-actions.nebari.dev \
+          export JUPYTERHUB_USERNAME=${TEST_USERNAME}
+          export JUPYTERHUB_PASSWORD=${TEST_PASSWORD}
+          jhubctl --verbose run --hub=https://${TEST_DOMAIN} \
                                 --auth-type=keycloak \
                                 --validate --no-verify-ssl \
                                 --kernel python3 \
