@@ -43,14 +43,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup miniconda
+      - name: Set up Python
         uses: conda-incubator/setup-miniconda@v2
+        env:
+          CONDA: /home/runnerx/miniconda3
         with:
-          miniconda-version: latest
-          auto-update-conda: true
-          python-version: 3.11
-          channels: conda-forge,defaults
-          activate-environment: nebari-dev
+          python-version: 3.8
+          miniconda-version: "latest"
 
       - name: Install Nebari and playwright
         run: |
