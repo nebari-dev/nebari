@@ -113,6 +113,12 @@ jobs:
           nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
           nebari keycloak listusers --config nebari-config.yaml
 
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+      - run: npm version
+
       - name: Cypress run
         uses: cypress-io/github-action@v6
         env:
