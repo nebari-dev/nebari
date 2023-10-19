@@ -58,7 +58,7 @@ jobs:
 
       - uses: azure/setup-kubectl@v3
         with:
-          version: v1.26.9
+          version: v1.19.16
 
       - name: Enable docker permissions for user
         run: |
