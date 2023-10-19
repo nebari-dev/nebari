@@ -12,7 +12,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 ## Upcoming Release
 
 
-## Release 2023.9.1 - September 28, 2023
+## Release 2023.10.1 - October 19, 2023
 
 This release includes a major refactor which introduces a Pluggy-based extension mechanism which allow developers to build new stages. This is the initial implementation
 of the extension mechanism and we expect the interface to be refined overtime. If you're interested in developing your own stage plugin, please refer to [our documentation](https://www.nebari.dev/docs/how-tos/nebari-extension-system#developing-an-extension). When you're ready to upgrade, please download this version from either PyPI or Conda-Forge and run the `nebari upgrade -c nebari-config.yaml`
@@ -86,6 +86,22 @@ command and follow the instructions
 * Add gcp_cleanup, minor changes by @iameskild in https://github.com/nebari-dev/nebari/pull/2010
 * Fix #2024 by @dcmcand in https://github.com/nebari-dev/nebari/pull/2025
 * Upgrade conda-store to 2023.9.2 by @iameskild in https://github.com/nebari-dev/nebari/pull/2028
+* Add upgrade steps, instructions for 2023.9.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2029
+* CI: add gcp integration test by @fangchenli in https://github.com/nebari-dev/nebari/pull/2049
+* CLN: remove flake8 from dependencies by @fangchenli in https://github.com/nebari-dev/nebari/pull/2044
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2047
+* fix typo in guided init for Digital Ocean by @dcmcand in https://github.com/nebari-dev/nebari/pull/2059
+* CI: add do integration by @fangchenli in https://github.com/nebari-dev/nebari/pull/2060
+* TYP: make all subfolders under kubernetes_services/template non-module by @fangchenli in https://github.com/nebari-dev/nebari/pull/2043
+* TYP: fix most typing errors in provider by @fangchenli in https://github.com/nebari-dev/nebari/pull/2038
+* Fix link to documentation on Nebari Deployment home page by @aktech in https://github.com/nebari-dev/nebari/pull/2063
+* TST: enable timeout config in playwright notebook test by @fangchenli in https://github.com/nebari-dev/nebari/pull/1996
+* DEPS: sync supported python version by @fangchenli in https://github.com/nebari-dev/nebari/pull/2065
+* Test support for Python 3.12 by @aktech in https://github.com/nebari-dev/nebari/pull/2046
+* BUG: fix validation error related to `provider` #2054 by @fangchenli in https://github.com/nebari-dev/nebari/pull/2056
+* CI: improve unit test workflow in CI, revert #2046 by @fangchenli in https://github.com/nebari-dev/nebari/pull/2071
+* TST: enable exact_match config in playwright notebook test by @fangchenli in https://github.com/nebari-dev/nebari/pull/2027
+* CI: move conda build test to separate job by @fangchenli in https://github.com/nebari-dev/nebari/pull/2073
 
 ### New Contributors
 * @kalpanachinnappan made their first contribution in https://github.com/nebari-dev/nebari/pull/1893
@@ -94,7 +110,7 @@ command and follow the instructions
 * @kenafoster made their first contribution in https://github.com/nebari-dev/nebari/pull/1933
 * @dcmcand made their first contribution in https://github.com/nebari-dev/nebari/pull/2025
 
-**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.7.2...2023.9.1
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.7.2...2023.10.1
 
 
 ## Release 2023.7.2 - August 3, 2023
