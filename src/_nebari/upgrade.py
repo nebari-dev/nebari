@@ -529,8 +529,8 @@ class Upgrade_2023_7_2(UpgradeStep):
         return config
 
 
-class Upgrade_2023_9_1(UpgradeStep):
-    version = "2023.9.1"
+class Upgrade_2023_10_1(UpgradeStep):
+    version = "2023.10.1"
     # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
     # This released has been tested against 1.26
     min_k8s_version = 1.26
@@ -538,7 +538,7 @@ class Upgrade_2023_9_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        # Upgrading to 2023.9.1 is considered high-risk because it includes a major refacto
+        # Upgrading to 2023.10.1 is considered high-risk because it includes a major refacto
         # to introduce the extension mechanism system.
         rich.print("\n ⚠️  Warning ⚠️")
         rich.print(
@@ -555,7 +555,7 @@ class Upgrade_2023_9_1(UpgradeStep):
         # which they can override if they are happy they understand the situation.
         config["prevent_deploy"] = True
 
-        # Nebari version 2023.9.1 upgrades JupyterHub to 3.1.  CDS Dashboards are only compatible with
+        # Nebari version 2023.10.1 upgrades JupyterHub to 3.1.  CDS Dashboards are only compatible with
         # JupyterHub versions 1.X and so will be removed during upgrade.
         rich.print("\n ⚠️  Deprecation Warning ⚠️")
         rich.print(
