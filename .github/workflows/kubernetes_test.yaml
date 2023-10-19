@@ -70,21 +70,17 @@ jobs:
         with:
           python-version: 3.8
           miniconda-version: "latest"
+          auto-update-conda: true
+
       - name: Install Nebari
         run: |
-          conda install --quiet --yes -c anaconda pip
           pip install .[dev]
           playwright install --with-deps chromium
-      - name: Download and Install Kubectl
-        run: |
-          mkdir -p bin
-          pushd bin
 
-          curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.0/bin/linux/amd64/kubectl
-          chmod +x kubectl
+      - uses: azure/setup-kubectl@v3
+        with:
+          version: 1.19.0
 
-          echo "$PWD" >> $GITHUB_PATH
-          popd
       - name: Enable docker permissions for user
         run: |
           sudo docker ps
@@ -134,10 +130,10 @@ jobs:
         env:
           KEYCLOAK_USERNAME: ${{ env.EXAMPLE_USER_NAME }}
           KEYCLOAK_PASSWORD: ${{ env.EXAMPLE_USER_PASSWORD }}
-          NEBARI_FULL_URL: https://${{ env.TEST_DOMAIN }}/
+          NEBARI_FULL_URL: http://${{ env.TEST_DOMAIN }}/
         run: |
           mkdir screenshots
-          xvfb-run pytest -m local --browser chromium tests/tests_integration
+          xvfb-run pytest -m local --browser chromium --headed tests/tests_integration
 
       - name: Save screenshots
         if: always()
