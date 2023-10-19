@@ -54,7 +54,6 @@ jobs:
       - name: Install Nebari
         run: |
             pip install .[dev]
-            conda install --quiet --yes conda-build
             playwright install
 
       - name: Retrieve secret from Vault

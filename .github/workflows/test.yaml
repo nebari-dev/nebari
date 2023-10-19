@@ -38,7 +38,7 @@ jobs:
           - "3.11"
       fail-fast: false
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.python-version }}
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-${{ matrix.python-version }}
       cancel-in-progress: true
     steps:
       - name: "Checkout Infrastructure"
@@ -53,10 +53,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           channels: conda-forge,defaults
           activate-environment: nebari-dev
-
-      - name: Install conda-build
-        run: |
-          conda install --quiet --yes conda-build
 
       - name: Install Nebari
         run: |
