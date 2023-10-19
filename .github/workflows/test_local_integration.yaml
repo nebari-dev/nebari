@@ -131,6 +131,8 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v4
         env:
+          CYPRESS_EXAMPLE_USER_NAME: ${{ env.TEST_USERNAME }}
+          CYPRESS_EXAMPLE_USER_PASSWORD: ${{ env.TEST_PASSWORD }}
           CYPRESS_BASE_URL: https://github-actions.nebari.dev/
         with:
           working-directory: tests/tests_e2e
@@ -139,7 +141,7 @@ jobs:
         env:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-          NEBARI_FULL_URL: http://github-actions.nebari.dev/
+          NEBARI_FULL_URL: https://github-actions.nebari.dev/
         working-directory: tests/tests_e2e/playwright
         run: |
           # create environment file
