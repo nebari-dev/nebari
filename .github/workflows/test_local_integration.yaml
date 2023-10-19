@@ -34,7 +34,7 @@ jobs:
     runs-on: "cirun-runner--${{ github.run_id }}"
     defaults:
       run:
-        shell: bash -el {0}
+        shell: bash -l {0}
     concurrency:
       group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
     steps:
