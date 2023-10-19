@@ -3,7 +3,6 @@ name: "Local Integration Tests"
 env:
   TEST_USERNAME: "test-user"
   TEST_PASSWORD: "P@sswo3d"
-  TEST_DOMAIN: "github-actions.nebari.dev"
   NEBARI_IMAGE_TAG: "main"
 
 on:
@@ -82,7 +81,7 @@ jobs:
         run: |
           mkdir -p local-deployment
           cd local-deployment
-          nebari init local --project=thisisatest --domain "${TEST_DOMAIN}" --auth-provider=password
+          nebari init local --project=thisisatest --domain github-actions.nebari.dev --auth-provider=password
 
           # Need smaller profiles on Local Kind
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
@@ -102,11 +101,11 @@ jobs:
 
       - name: Check github-actions.nebari.dev resolves
         run: |
-          nslookup "${TEST_DOMAIN}"
+          nslookup github-actions.nebari.dev
 
       - name: Curl jupyterhub login page
         run: |
-          curl -k https://${TEST_DOMAIN}/hub/home -i
+          curl -k https://github-actions.nebari.dev/hub/home -i
 
       ### CYPRESS TESTS
       - name: Setup Node
@@ -132,7 +131,7 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v4
         env:
-          CYPRESS_BASE_URL: https://${{ env.TEST_DOMAIN }}/
+          CYPRESS_BASE_URL: https://github-actions.nebari.dev/
         with:
           working-directory: tests/tests_e2e
 
@@ -140,7 +139,7 @@ jobs:
         env:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-          NEBARI_FULL_URL: http://${{ env.TEST_DOMAIN }}/
+          NEBARI_FULL_URL: http://github-actions.nebari.dev/
         working-directory: tests/tests_e2e/playwright
         run: |
           # create environment file
@@ -174,7 +173,7 @@ jobs:
           JUPYTERHUB_PASSWORD: ${{ env.TEST_PASSWORD }}
         run: |
           sleep 60
-          jhubctl --verbose run --hub=https://$TEST_DOMAIN \
+          jhubctl --verbose run --hub=https://github-actions.nebari.dev\
                                 --auth-type=keycloak \
                                 --validate --no-verify-ssl \
                                 --kernel python3 \
