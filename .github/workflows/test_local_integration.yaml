@@ -38,13 +38,6 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
     steps:
-      - name: "Set NEBARI_IMAGE_TAG=main"
-        run: |
-          echo "NEBARI_IMAGE_TAG=main" >> "$GITHUB_ENV"
-          echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
-          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
-          echo "GITHUB_REF: ${GITHUB_REF}"
-
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
         with:
