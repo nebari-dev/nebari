@@ -1,4 +1,4 @@
-name: test-aws-integration
+name: test-gcp-integration
 
 on:
   schedule:
@@ -27,20 +27,19 @@ on:
         - trace
         - error
 
-
 env:
-  AWS_DEFAULT_REGION: "us-west-2"
   NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'develop' }}
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
 
 jobs:
-  test-aws-integration:
+  test-gcp-integration:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -66,20 +65,26 @@ jobs:
           namespace: "admin/quansight"
           role: "repository-nebari-dev-nebari-role"
           secrets: |
-            kv/data/repository/nebari-dev/nebari/amazon_web_services/nebari-dev-ci role_name | AWS_ROLE_ARN;
+            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci project_id | PROJECT_ID;
+            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci workload_identity_provider | GCP_WORKFLOW_PROVIDER;
+            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci service_account_name | GCP_SERVICE_ACCOUNT;
             kv/data/repository/nebari-dev/nebari/cloudflare/internal-devops@quansight.com/nebari-dev-ci token | CLOUDFLARE_TOKEN;
 
-      - name: Authenticate to AWS
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: 'Authenticate to GCP'
+        uses: 'google-github-actions/auth@v1'
         with:
-          role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          role-session-name: github-action
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+            token_format: access_token
+            workload_identity_provider: ${{ env.GCP_WORKFLOW_PROVIDER }}
+            service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set required environment variables
+        run: |
+          echo "GOOGLE_CREDENTIALS=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}" >> $GITHUB_ENV
 
       - name: Integration Tests
         run: |
           pytest --version
-          pytest tests/tests_integration/ -vvv -s --cloud aws
+          pytest tests/tests_integration/ -vvv -s --cloud gcp
         env:
           NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
