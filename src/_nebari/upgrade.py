@@ -568,7 +568,7 @@ class Upgrade_2023_10_1(UpgradeStep):
         # Deprecation Warning - ClearML, Prefect, kbatch
         rich.print("\n ⚠️  Deprecation Warning ⚠️")
         rich.print(
-            f"-> We will be removing and ending support for ClearML, Prefect and kbatch in the next release. The kbatch has been functionally replaced by Argo-Jupyter-Scheduler. We have seen little interest in ClearML and Prefect in recent years, and removing makes sense at this point. However if you wish to continue using them with Nebari we encourage you to [green][link=https://www.nebari.dev/docs/how-tos/nebari-extension-system/#developing-an-extension]write your own Nebari extension[/link][/green]."
+            "-> We will be removing and ending support for ClearML, Prefect and kbatch in the next release. The kbatch has been functionally replaced by Argo-Jupyter-Scheduler. We have seen little interest in ClearML and Prefect in recent years, and removing makes sense at this point. However if you wish to continue using them with Nebari we encourage you to [green][link=https://www.nebari.dev/docs/how-tos/nebari-extension-system/#developing-an-extension]write your own Nebari extension[/link][/green]."
         )
 
         # Kubernetes version check
