@@ -140,6 +140,7 @@ class AWSInputVars(schema.Base):
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
+    permissions_boundary: Optional[str] = None
     kubeconfig_filename: str = get_kubeconfig_filename()
 
 
@@ -450,6 +451,7 @@ class AmazonWebServicesProvider(schema.Base):
     existing_subnet_ids: typing.List[str] = None
     existing_security_group_ids: str = None
     vpc_cidr_block: str = "10.10.0.0/16"
+    permissions_boundary: Optional[str] = None
 
     @pydantic.root_validator
     def validate_all(cls, values):
@@ -773,6 +775,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 ],
                 availability_zones=self.config.amazon_web_services.availability_zones,
                 vpc_cidr_block=self.config.amazon_web_services.vpc_cidr_block,
+                permissions_boundary=self.config.amazon_web_services.permissions_boundary,
             ).dict()
         else:
             raise ValueError(f"Unknown provider: {self.config.provider}")
