@@ -116,7 +116,9 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - run: npm version
+ 
+      - name: Get nebari-config.yaml full path
+        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
 
       - name: Cypress run
         uses: cypress-io/github-action@v6
