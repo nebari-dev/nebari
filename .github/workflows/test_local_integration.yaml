@@ -48,6 +48,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Checkout the branch from the PR that triggered the job
+        if: ${{ github.event_name == 'issue_comment' }}
+        run: |
+          hub version
+          hub pr checkout ${{ inputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Python
         uses: conda-incubator/setup-miniconda@v2
         env:
@@ -116,7 +124,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
- 
+
       - name: Get nebari-config.yaml full path
         run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
 
@@ -176,6 +184,7 @@ jobs:
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
+        if: always()
+        working-directory: local-deployment
         run: |
-          cd local-deployment
           nebari destroy --config nebari-config.yaml --disable-prompt
