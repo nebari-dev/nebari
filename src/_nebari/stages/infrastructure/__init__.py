@@ -128,6 +128,7 @@ class AWSNodeGroupInputVars(schema.Base):
     desired_size: int
     max_size: int
     single_subnet: bool
+    permissions_boundary: Optional[str] = None
 
 
 class AWSInputVars(schema.Base):
@@ -770,6 +771,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         desired_size=node_group.min_nodes,
                         max_size=node_group.max_nodes,
                         single_subnet=node_group.single_subnet,
+                        permissions_boundary=node_group.permissions_boundary,
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()
                 ],
