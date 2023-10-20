@@ -61,6 +61,7 @@ jobs:
         env:
           CONDA: /home/runnerx/miniconda3
         with:
+          auto-update-conda: true
           python-version: 3.8
           miniconda-version: "latest"
 
