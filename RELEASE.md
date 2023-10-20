@@ -12,7 +12,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 ## Upcoming Release
 
 
-## Release 2023.10.1 - October 19, 2023
+## Release 2023.10.1 - October 20, 2023
 
 This release includes a major refactor which introduces a Pluggy-based extension mechanism which allow developers to build new stages. This is the initial implementation
 of the extension mechanism and we expect the interface to be refined overtime. If you're interested in developing your own stage plugin, please refer to [our documentation](https://www.nebari.dev/docs/how-tos/nebari-extension-system#developing-an-extension). When you're ready to upgrade, please download this version from either PyPI or Conda-Forge and run the `nebari upgrade -c nebari-config.yaml`
@@ -32,7 +32,10 @@ command and follow the instructions
 ### Breaking Changes
 
 * While we have tried our best to avoid breaking changes when introducing the extension mechanism, the scope of the changes is too large for us to confidently say there won't be breaking changes.
+
 > WARNING: CDS Dashboards was removed in this release and upgrading to this version will result in CDS Dashboards being uninstalled. A replacement dashboarding solution is currently in the work and will be integrated soon.
+
+> WARNING: We will be removing and ending support for ClearML, Prefect and kbatch in the next release. The kbatch has been functionally replaced by Argo-Jupyter-Scheduler. We have seen little interest in ClearML and Prefect in recent years, and removing makes sense at this point. However if you wish to continue using them with Nebari we encourage you to [write your own Nebari extension](https://www.nebari.dev/docs/how-tos/nebari-extension-system#developing-an-extension).
 
 ### What's Changed
 * Spinup spot instance for CI with cirun by @aktech in https://github.com/nebari-dev/nebari/pull/1882
