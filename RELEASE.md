@@ -105,6 +105,10 @@ command and follow the instructions
 * CI: improve unit test workflow in CI, revert #2046 by @fangchenli in https://github.com/nebari-dev/nebari/pull/2071
 * TST: enable exact_match config in playwright notebook test by @fangchenli in https://github.com/nebari-dev/nebari/pull/2027
 * CI: move conda build test to separate job by @fangchenli in https://github.com/nebari-dev/nebari/pull/2073
+* Revert conda-store to v0.4.14, #2028 by @iameskild in https://github.com/nebari-dev/nebari/pull/2074
+* ENH/CI: add mypy config, and CI workflow by @fangchenli in https://github.com/nebari-dev/nebari/pull/2066
+* Update upgrade for 2023.10.1 by @kenfoster in https://github.com/nebari-dev/nebari/pull/2080
+* Update RELEASE notes, minor fixes by @iameskild in https://github.com/nebari-dev/nebari/pull/2039
 
 ### New Contributors
 * @kalpanachinnappan made their first contribution in https://github.com/nebari-dev/nebari/pull/1893
