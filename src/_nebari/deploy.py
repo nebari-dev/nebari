@@ -72,7 +72,7 @@ def deploy_configuration(
             print(f"Kubecloak master realm username={username} password={password}")
 
         print(
-            "Additional administration docs can be found at https://docs.nebari.dev/en/stable/source/admin_guide/"
+            "Additional administration docs can be found at https://www.nebari.dev/docs/how-tos/configuring-keycloak"
         )
 
     return stage_outputs

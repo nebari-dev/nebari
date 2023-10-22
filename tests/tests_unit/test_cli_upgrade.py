@@ -8,11 +8,11 @@ import yaml
 from typer.testing import CliRunner
 
 import _nebari.upgrade
-import _nebari.version
 from _nebari.cli import create_cli
 from _nebari.constants import AZURE_DEFAULT_REGION
 from _nebari.upgrade import UPGRADE_KUBERNETES_MESSAGE
 from _nebari.utils import get_provider_config_block_name
+from _nebari.version import rounded_ver_parse
 
 MOCK_KUBERNETES_VERSIONS = {
     "aws": ["1.20"],
@@ -393,12 +393,12 @@ security:
 
 
 @pytest.mark.skipif(
-    _nebari.upgrade.__version__ < "2023.9.1",
-    reason="This test is only valid for versions <= 2023.9.1",
+    rounded_ver_parse(_nebari.upgrade.__version__) < rounded_ver_parse("2023.10.1"),
+    reason="This test is only valid for versions >= 2023.10.1",
 )
-def test_cli_upgrade_to_2023_9_1_cdsdashboard_removed(monkeypatch: pytest.MonkeyPatch):
+def test_cli_upgrade_to_2023_10_1_cdsdashboard_removed(monkeypatch: pytest.MonkeyPatch):
     start_version = "2023.7.2"
-    end_version = "2023.9.1"
+    end_version = "2023.10.1"
 
     addl_config = yaml.safe_load(
         """
@@ -422,8 +422,8 @@ cdsdashboards:
 
 
 @pytest.mark.skipif(
-    _nebari.upgrade.__version__ < "2023.9.1",
-    reason="This test is only valid for versions <= 2023.9.1",
+    rounded_ver_parse(_nebari.upgrade.__version__) < rounded_ver_parse("2023.10.1"),
+    reason="This test is only valid for versions >= 2023.10.1",
 )
 @pytest.mark.parametrize(
     ("provider", "k8s_status"),
@@ -442,11 +442,11 @@ cdsdashboards:
         ("gcp", "invalid"),
     ],
 )
-def test_cli_upgrade_to_2023_9_1_kubernetes_validations(
+def test_cli_upgrade_to_2023_10_1_kubernetes_validations(
     monkeypatch: pytest.MonkeyPatch, provider: str, k8s_status: str
 ):
     start_version = "2023.7.2"
-    end_version = "2023.9.1"
+    end_version = "2023.10.1"
     monkeypatch.setattr(_nebari.upgrade, "__version__", end_version)
 
     kubernetes_configs = {
