@@ -3,7 +3,7 @@ import json
 import os
 import subprocess
 from typing import Dict, List
-
+from google.cloud import resourcemanager , compute
 from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 from nebari import schema
@@ -22,22 +22,22 @@ def check_credentials():
 def projects() -> Dict[str, str]:
     """Return a dict of available projects."""
     check_credentials()
-    output = subprocess.check_output(
-        ["gcloud", "projects", "list", "--format=json(name,projectId)"]
-    )
-    data = json.loads(output)
-    return {_["name"]: _["projectId"] for _ in data}
+    client = resourcemanager.Client()
+    projects = client.list_projects()
+    project_dict = {project.name: project.project_id for project in projects}
+
+    return project_dict
+
 
 
 @functools.lru_cache()
 def regions(project: str) -> Dict[str, str]:
     """Return a dict of available regions."""
-    check_credentials()
-    output = subprocess.check_output(
-        ["gcloud", "compute", "regions", "list", "--project", project, "--format=json"]
-    )
-    data = json.loads(output.decode("utf-8"))
-    return {_["description"]: _["name"] for _ in data}
+    client = compute.Client()
+    regions = client.list_regions(project=project)
+    region_dict = {region.description: region.name for region in regions}
+
+    return region_dict
 
 
 @functools.lru_cache()
