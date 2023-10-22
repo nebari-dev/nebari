@@ -3,7 +3,9 @@ import json
 import os
 import subprocess
 from typing import Dict, List
-from google.cloud import resourcemanager , compute
+
+from google.cloud import compute, resourcemanager
+
 from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 from nebari import schema
@@ -27,7 +29,6 @@ def projects() -> Dict[str, str]:
     project_dict = {project.name: project.project_id for project in projects}
 
     return project_dict
-
 
 
 @functools.lru_cache()
