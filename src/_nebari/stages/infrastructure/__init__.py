@@ -434,6 +434,7 @@ class AWSNodeGroup(schema.Base):
     max_nodes: int
     gpu: bool = False
     single_subnet: bool = False
+    permissions_boundary: Optional[str] = None
 
 
 class AmazonWebServicesProvider(schema.Base):
