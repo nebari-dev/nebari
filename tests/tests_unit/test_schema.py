@@ -5,7 +5,6 @@ from pydantic.error_wrappers import ValidationError
 
 from nebari import schema
 from nebari.plugins import nebari_plugin_manager
-from _nebari.provider.terraform import deploy
 
 
 def test_minimal_schema():
