@@ -1,6 +1,8 @@
 import logging
 import os
+import pprint
 import random
+import shutil
 import string
 import uuid
 import warnings
@@ -9,14 +11,23 @@ from pathlib import Path
 import pytest
 from urllib3.exceptions import InsecureRequestWarning
 
+from _nebari.config import read_configuration, write_configuration
 from _nebari.deploy import deploy_configuration
 from _nebari.destroy import destroy_configuration
+from _nebari.provider.cloud.amazon_web_services import aws_cleanup
+from _nebari.provider.cloud.azure_cloud import azure_cleanup
+from _nebari.provider.cloud.digital_ocean import digital_ocean_cleanup
+from _nebari.provider.cloud.google_cloud import gcp_cleanup
 from _nebari.render import render_template
-from _nebari.utils import yaml
+from _nebari.utils import set_do_environment
+from nebari import schema
 from tests.common.config_mod_utils import add_gpu_config, add_preemptible_node_group
 from tests.tests_unit.utils import render_config_partial
 
 DEPLOYMENT_DIR = "_test_deploy"
+CONFIG_FILENAME = "nebari-config.yaml"
+DOMAIN = "ci-{cloud}.nebari.dev"
+DEFAULT_IMAGE_TAG = "main"
 
 logger = logging.getLogger(__name__)
 
@@ -52,13 +63,16 @@ def _get_or_create_deployment_directory(cloud):
     return deployment_dir
 
 
-def _set_do_environment():
-    os.environ["AWS_ACCESS_KEY_ID"] = os.environ["SPACES_ACCESS_KEY_ID"]
-    os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
+def _delete_deployment_directory(deployment_dir: Path):
+    """Delete the deployment directory if it exists."""
+    config = list(deployment_dir.glob(CONFIG_FILENAME))
+    if len(config) == 1:
+        logger.info(f"Deleting deployment directory: {deployment_dir}")
+        shutil.rmtree(deployment_dir)
 
 
 def _set_nebari_creds_in_environment(config):
-    os.environ["NEBARI_FULL_URL"] = f"https://{config['domain']}/"
+    os.environ["NEBARI_FULL_URL"] = f"https://{config.domain}/"
     os.environ["KEYCLOAK_USERNAME"] = "pytest"
     os.environ["KEYCLOAK_PASSWORD"] = os.environ.get(
         "PYTEST_KEYCLOAK_PASSWORD", uuid.uuid4().hex
@@ -79,93 +93,129 @@ def _create_nebari_user(config):
             logger.info(f"User already exists: {e.response_body}")
 
 
+def _cleanup_nebari(config: schema.Main):
+    """Forcefully clean up any lingering resources."""
+
+    cloud_provider = config.provider
+
+    if cloud_provider == schema.ProviderEnum.do.value.lower():
+        logger.info("Forcefully clean up Digital Ocean resources")
+        digital_ocean_cleanup(config)
+    elif cloud_provider == schema.ProviderEnum.aws.lower():
+        logger.info("Forcefully clean up AWS resources")
+        aws_cleanup(config)
+    elif cloud_provider == schema.ProviderEnum.gcp.lower():
+        logger.info("Forcefully clean up GCP resources")
+        gcp_cleanup(config)
+    elif cloud_provider == schema.ProviderEnum.azure.lower():
+        logger.info("Forcefully clean up Azure resources")
+        azure_cleanup(config)
+
+
 @pytest.fixture(scope="session")
 def deploy(request):
-    """Deploy Nebari on the given cloud, currently only DigitalOcean"""
+    """Deploy Nebari on the given cloud."""
     ignore_warnings()
-    cloud = request.param
-    logger.info(f"Deploying: {cloud}")
+    cloud = request.config.getoption("--cloud")
+
+    # initialize
     if cloud == "do":
-        _set_do_environment()
+        set_do_environment()
+
     deployment_dir = _get_or_create_deployment_directory(cloud)
     config = render_config_partial(
         project_name=deployment_dir.name,
         namespace="dev",
-        nebari_domain=f"ci-{cloud}.nebari.dev",
+        nebari_domain=DOMAIN.format(cloud=cloud),
         cloud_provider=cloud,
         ci_provider="github-actions",
-        auth_provider="github",
+        auth_provider="password",
     )
-    # Generate certificate as well
-    config["certificate"] = {
-        "type": "lets-encrypt",
-        "acme_email": "internal-devops@quansight.com",
-        "acme_server": "https://acme-v02.api.letsencrypt.org/directory",
-    }
-    if cloud in ["aws", "gcp"]:
-        config = add_gpu_config(config, cloud=cloud)
-        config = add_preemptible_node_group(config, cloud=cloud)
 
     deployment_dir_abs = deployment_dir.absolute()
     os.chdir(deployment_dir)
     logger.info(f"Temporary directory: {deployment_dir}")
-    config_path = Path("nebari-config.yaml")
+    config_path = Path(CONFIG_FILENAME)
 
-    if config_path.exists():
-        with open(config_path) as f:
-            current_config = yaml.load(f)
+    write_configuration(config_path, config)
 
-            config["security"]["keycloak"]["initial_root_password"] = current_config[
-                "security"
-            ]["keycloak"]["initial_root_password"]
+    from nebari.plugins import nebari_plugin_manager
 
-    with open(config_path, "w") as f:
-        yaml.dump(config, f)
-    render_template(deployment_dir_abs, Path("nebari-config.yaml"))
+    stages = nebari_plugin_manager.ordered_stages
+    config_schema = nebari_plugin_manager.config_schema
+
+    config = read_configuration(config_path, config_schema)
+
+    # Modify config
+    config.certificate.type = "lets-encrypt"
+    config.certificate.acme_email = "internal-devops@quansight.com"
+    config.certificate.acme_server = "https://acme-v02.api.letsencrypt.org/directory"
+    config.dns.provider = "cloudflare"
+    config.dns.auto_provision = True
+    config.default_images.jupyterhub = (
+        f"quay.io/nebari/nebari-jupyterhub:{DEFAULT_IMAGE_TAG}"
+    )
+    config.default_images.jupyterlab = (
+        f"quay.io/nebari/nebari-jupyterlab:{DEFAULT_IMAGE_TAG}"
+    )
+    config.default_images.dask_worker = (
+        f"quay.io/nebari/nebari-dask-worker:{DEFAULT_IMAGE_TAG}"
+    )
+
+    if cloud in ["aws"]:
+        config = add_gpu_config(config, cloud=cloud)
+        config = add_preemptible_node_group(config, cloud=cloud)
+
+    print("*" * 100)
+    pprint.pprint(config.dict())
+    print("*" * 100)
+
+    # render
+    render_template(deployment_dir_abs, config, stages)
+
     failed = False
+
+    # deploy
     try:
         logger.info("*" * 100)
         logger.info(f"Deploying Nebari on {cloud}")
         logger.info("*" * 100)
-        deploy_config = deploy_configuration(
+        stage_outputs = deploy_configuration(
             config=config,
-            dns_provider="cloudflare",
-            dns_auto_provision=True,
+            stages=stages,
             disable_prompt=True,
             disable_checks=False,
-            skip_remote_state_provision=False,
         )
         _create_nebari_user(config)
         _set_nebari_creds_in_environment(config)
-        yield deploy_config
+        yield stage_outputs
     except Exception as e:
         failed = True
-        logger.error(f"Deploy Failed, Exception: {e}")
         logger.exception(e)
-    logger.info("*" * 100)
-    logger.info("Tearing down")
-    _destroy(config)
-    if failed:
-        raise AssertionError("Deployment failed")
+        logger.error(f"Deploy Failed, Exception: {e}")
 
-
-def _destroy(config):
+    # destroy
     try:
-        return destroy_configuration(config)
+        logger.info("*" * 100)
+        logger.info("Tearing down")
+        logger.info("*" * 100)
+        destroy_configuration(config, stages)
     except Exception as e:
         logger.exception(e)
-        logger.info("Destroy failed!")
+        logger.error("Destroy failed!")
         raise
+    finally:
+        logger.info("*" * 100)
+        logger.info("Cleaning up any lingering resources")
+        logger.info("*" * 100)
+        try:
+            _cleanup_nebari(config)
+        except Exception as e:
+            logger.exception(e)
+            logger.error(
+                "Cleanup failed, please check if there are any lingering resources!"
+            )
+        _delete_deployment_directory(deployment_dir_abs)
 
-
-def on_cloud(param=None):
-    """Decorator to run tests on a particular cloud or all cloud."""
-    clouds = ["aws", "do", "gcp"]
-    if param:
-        clouds = [param] if not isinstance(param, list) else param
-
-    def _create_pytest_param(cloud):
-        return pytest.param(cloud, marks=getattr(pytest.mark, cloud))
-
-    all_clouds_param = map(_create_pytest_param, clouds)
-    return pytest.mark.parametrize("deploy", all_clouds_param, indirect=True)
+    if failed:
+        raise AssertionError("Deployment failed")

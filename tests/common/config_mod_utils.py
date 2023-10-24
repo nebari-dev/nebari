@@ -1,6 +1,14 @@
 import dataclasses
 import typing
 
+from _nebari.stages.infrastructure import AWSNodeGroup, GCPNodeGroup
+from _nebari.stages.kubernetes_services import (
+    AccessEnum,
+    CondaEnvironment,
+    JupyterLabProfile,
+    KubeSpawner,
+)
+
 PREEMPTIBLE_NODE_GROUP_NAME = "preemptible-node-group"
 
 
@@ -53,10 +61,10 @@ GPU_CONFIG = {
 
 
 def _create_gpu_environment():
-    return {
-        "name": "gpu",
-        "channels": ["pytorch", "nvidia", "conda-forge"],
-        "dependencies": [
+    return CondaEnvironment(
+        name="gpu",
+        channels=["pytorch", "nvidia", "conda-forge"],
+        dependencies=[
             "python=3.10.8",
             "ipykernel=6.21.0",
             "ipywidgets==7.7.1",
@@ -66,7 +74,7 @@ def _create_gpu_environment():
             "pytorch-cuda=11.7",
             "pytorch::pytorch",
         ],
-    }
+    )
 
 
 def add_gpu_config(config, cloud="aws"):
@@ -74,44 +82,69 @@ def add_gpu_config(config, cloud="aws"):
     if not gpu_config:
         raise ValueError(f"GPU not supported/tested on {cloud}")
 
-    gpu_node = gpu_config.node()
-    gpu_docker_image = gpu_config.docker_image
-    jupyterlab_profile = {
-        "display_name": "GPU Instance",
-        "description": "4 CPU / 16GB RAM / 1 NVIDIA T4 GPU (16 GB GPU RAM)",
-        "groups": ["gpu-access"],
-        "kubespawner_override": {
-            "image": gpu_docker_image,
-            "cpu_limit": 4,
-            "cpu_guarantee": 3,
-            "mem_limit": "16G",
-            "mem_guarantee": "10G",
-            "extra_resource_limits": {"nvidia.com/gpu": 1},
-            "node_selector": {
+    if cloud == "aws":
+        gpu_node_group = AWSNodeGroup(
+            instance=gpu_config.gpu_name,
+            min_nodes=gpu_config.min_nodes,
+            max_nodes=gpu_config.max_nodes,
+            single_subnet=gpu_config.extra_config["single_subnet"],
+            gpu=gpu_config.extra_config["gpu"],
+        )
+        kubespawner_overrides = KubeSpawner(
+            image=gpu_config.docker_image,
+            cpu_limit=4,
+            cpu_guarantee=3,
+            mem_limit="16G",
+            mem_guarantee="10G",
+            extra_resource_limits={"nvidia.com/gpu": 1},
+            node_selector={
                 gpu_config.node_selector: gpu_config.node_selector_val,
             },
-        },
-    }
-    config[gpu_config.cloud]["node_groups"][gpu_config.node_group_name] = gpu_node
-    config["profiles"]["jupyterlab"].append(jupyterlab_profile)
-    config["environments"]["environment-gpu.yaml"] = _create_gpu_environment()
+        )
+    else:
+        gpu_node_group = None
+        kubespawner_overrides = None
+
+    jupyterlab_profile = JupyterLabProfile(
+        display_name="GPU Instance",
+        description="4 CPU / 16GB RAM / 1 NVIDIA T4 GPU (16 GB GPU RAM)",
+        access=AccessEnum.all,
+        groups=None,
+        kubespawner_override=kubespawner_overrides,
+    )
+
+    cloud_section = getattr(config, gpu_config.cloud, None)
+    cloud_section.node_groups[gpu_config.node_group_name] = gpu_node_group
+    config.profiles.jupyterlab.append(jupyterlab_profile)
+    config.environments["environment-gpu.yaml"] = _create_gpu_environment()
+
     return config
 
 
 def add_preemptible_node_group(config, cloud="aws"):
+    node_group = None
     if cloud == "aws":
         cloud_name = "amazon_web_services"
-        instance_name = "m5.xlarge"
+        # TODO: how to make preemptible?
+        node_group = AWSNodeGroup(
+            instance="m5.xlarge",
+            min_nodes=1,
+            max_nodes=5,
+            single_subnet=False,
+        )
     elif cloud == "gcp":
         cloud_name = "google_cloud_platform"
-        instance_name = "n1-standard-8"
+        node_group = GCPNodeGroup(
+            instance="n1-standard-8",
+            min_nodes=1,
+            max_nodes=5,
+            preemptible=True,
+        )
     else:
         raise ValueError("Invalid cloud for preemptible config")
-    config[cloud_name]["node_groups"][PREEMPTIBLE_NODE_GROUP_NAME] = {
-        "instance": instance_name,
-        "min_nodes": 1,
-        "max_nodes": 5,
-        "single_subnet": False,
-        "preemptible": True,
-    }
+
+    cloud_section = getattr(config, cloud_name, None)
+    if node_group:
+        cloud_section.node_groups[PREEMPTIBLE_NODE_GROUP_NAME] = node_group
+
     return config

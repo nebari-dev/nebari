@@ -1,0 +1,29 @@
+provider: azure
+namespace: dev
+nebari_version: 2023.7.2.dev23+g53d17964.d20230824
+project_name: test
+domain: test.example.com
+ci_cd:
+  type: none
+terraform_state:
+  type: local
+security:
+  keycloak:
+    initial_root_password: m1s25vc4k43dxbk5jaxubxcq39n4vmjq
+  authentication:
+    type: password
+theme:
+  jupyterhub:
+    hub_title: Nebari - test
+    welcome: Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the
+      documentation</a>. If you have any questions or feedback, reach the team on
+      <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support
+      forums</a>.
+    hub_subtitle: Your open source data science platform, hosted on Azure
+certificate:
+  type: lets-encrypt
+  acme_email: test@example.com
+azure:
+  kubernetes_version: '1.20'
+  storage_account_postfix: abcd
+  region: Central US

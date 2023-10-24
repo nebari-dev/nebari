@@ -1,0 +1,691 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Nebari CLI &#8212; Nebari CLI documentation  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to Nebari API documentation’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="nebari-cli">
+<h1>Nebari CLI<a class="headerlink" href="#nebari-cli" title="Permalink to this heading">¶</a></h1>
+<section id="nebari">
+<h2>nebari<a class="headerlink" href="#nebari" title="Permalink to this heading">¶</a></h2>
+<p>Nebari CLI 🪴</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>ARGS<span class="o">]</span>...
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-V">
+<span id="cmdoption-nebari-v"></span><span id="cmdoption-nebari-version"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-V" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nebari version number</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-import-plugin">
+<span class="sig-name descname"><span class="pre">--import-plugin</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;plugins&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-import-plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import nebari plugin</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-exclude-stage">
+<span class="sig-name descname"><span class="pre">--exclude-stage</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;excluded_stages&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-exclude-stage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exclude nebari stage(s) by name or regex</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-exclude-default-stages">
+<span class="sig-name descname"><span class="pre">--exclude-default-stages</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-exclude-default-stages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exclude default nebari included stages</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="nebari-deploy">
+<h3>deploy<a class="headerlink" href="#nebari-deploy" title="Permalink to this heading">¶</a></h3>
+<p>Deploy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>deploy<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-deploy-c">
+<span id="cmdoption-nebari-deploy-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config_filename&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-deploy-c" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> nebari configuration yaml file path</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-deploy-o">
+<span id="cmdoption-nebari-deploy-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_directory&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-deploy-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>output directory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">./</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-deploy-dns-provider">
+<span class="sig-name descname"><span class="pre">--dns-provider</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;dns_provider&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-deploy-dns-provider" title="Permalink to this definition">¶</a></dt>
+<dd><p>dns provider to use for registering domain name mapping ⚠️ moved to <cite>dns.provider</cite> in nebari-config.yaml</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-deploy-dns-auto-provision">
+<span class="sig-name descname"><span class="pre">--dns-auto-provision</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-deploy-dns-auto-provision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to automatically provision DNS, currently only available for <cite>cloudflare</cite> ⚠️ moved to <cite>dns.auto_provision</cite> in nebari-config.yaml</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-deploy-disable-prompt">
+<span class="sig-name descname"><span class="pre">--disable-prompt</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-deploy-disable-prompt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable human intervention</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-deploy-disable-render">
+<span class="sig-name descname"><span class="pre">--disable-render</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-deploy-disable-render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable auto-rendering in deploy stage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-deploy-disable-checks">
+<span class="sig-name descname"><span class="pre">--disable-checks</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-deploy-disable-checks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable the checks performed after each stage</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-deploy-skip-remote-state-provision">
+<span class="sig-name descname"><span class="pre">--skip-remote-state-provision</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-deploy-skip-remote-state-provision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Skip terraform state deployment which is often required in CI once the terraform remote state bootstrapping phase is complete</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="nebari-destroy">
+<h3>destroy<a class="headerlink" href="#nebari-destroy" title="Permalink to this heading">¶</a></h3>
+<p>Destroy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>destroy<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-destroy-c">
+<span id="cmdoption-nebari-destroy-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config_filename&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-destroy-c" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> nebari configuration file path</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-destroy-o">
+<span id="cmdoption-nebari-destroy-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_directory&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-destroy-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>output directory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">./</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-destroy-disable-render">
+<span class="sig-name descname"><span class="pre">--disable-render</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-destroy-disable-render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable auto-rendering before destroy</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-destroy-disable-prompt">
+<span class="sig-name descname"><span class="pre">--disable-prompt</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-destroy-disable-prompt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destroy entire Nebari cluster without confirmation request. Suggested for CI use.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="nebari-dev">
+<h3>dev<a class="headerlink" href="#nebari-dev" title="Permalink to this heading">¶</a></h3>
+<p>Development tools and advanced features.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>dev<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>ARGS<span class="o">]</span>...
+</pre></div>
+</div>
+<section id="nebari-dev-keycloak-api">
+<h4>keycloak-api<a class="headerlink" href="#nebari-dev-keycloak-api" title="Permalink to this heading">¶</a></h4>
+<p>Interact with the Keycloak REST API directly.</p>
+<p>This is an advanced tool which can have potentially destructive consequences.
+Please use this at your own risk.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>dev<span class="w"> </span>keycloak-api<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-dev-keycloak-api-c">
+<span id="cmdoption-nebari-dev-keycloak-api-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config_filename&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-dev-keycloak-api-c" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> nebari configuration file path</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-dev-keycloak-api-r">
+<span id="cmdoption-nebari-dev-keycloak-api-request"></span><span class="sig-name descname"><span class="pre">-r</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--request</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;request&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-dev-keycloak-api-r" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Send a REST API request, valid requests follow patterns found here: [green]keycloak.org/docs-api/15.0/rest-api[/green]</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="nebari-info">
+<h3>info<a class="headerlink" href="#nebari-info" title="Permalink to this heading">¶</a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>info<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+</section>
+<section id="nebari-init">
+<h3>init<a class="headerlink" href="#nebari-init" title="Permalink to this heading">¶</a></h3>
+<p>Create and initialize your [purple]nebari-config.yaml[/purple] file.</p>
+<p>This command will create and initialize your [purple]nebari-config.yaml[/purple] :sparkles:</p>
+<p>This file contains all your Nebari cluster configuration details and,
+is used as input to later commands such as [green]nebari render[/green], [green]nebari deploy[/green], etc.</p>
+<p>If you’re new to Nebari, we recommend you use the Guided Init wizard.
+To get started simply run:</p>
+<blockquote>
+<div><p>[green]nebari init –guided-init[/green]</p>
+</div></blockquote>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>init<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span><span class="o">[</span>CLOUD_PROVIDER<span class="o">]</span>:<span class="o">[</span>local<span class="p">|</span>existing<span class="p">|</span><span class="k">do</span><span class="p">|</span>aws<span class="p">|</span>gcp<span class="p">|</span>azure<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-guided-init">
+<span id="cmdoption-nebari-init-no-guided-init"></span><span class="sig-name descname"><span class="pre">--guided-init</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-guided-init</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-init-guided-init" title="Permalink to this definition">¶</a></dt>
+<dd><p>[bold green]START HERE[/bold green] - this will guide you step-by-step to generate your [purple]nebari-config.yaml[/purple]. It is an [i]alternative[/i] to passing the options listed below.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-p">
+<span id="cmdoption-nebari-init-project-name"></span><span id="cmdoption-nebari-init-project"></span><span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--project-name</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--project</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;project_name&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-init-p" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-d">
+<span id="cmdoption-nebari-init-domain-name"></span><span id="cmdoption-nebari-init-domain"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--domain-name</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--domain</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;domain_name&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-init-d" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-namespace">
+<span class="sig-name descname"><span class="pre">--namespace</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;namespace&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-init-namespace" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">dev</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-auth-provider">
+<span class="sig-name descname"><span class="pre">--auth-provider</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;auth_provider&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-init-auth-provider" title="Permalink to this definition">¶</a></dt>
+<dd><p>options: [‘password’, ‘GitHub’, ‘Auth0’, ‘custom’]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">AuthenticationEnum.password</span></code></p>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><p>password | GitHub | Auth0 | custom</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-auth-auto-provision">
+<span id="cmdoption-nebari-init-no-auth-auto-provision"></span><span class="sig-name descname"><span class="pre">--auth-auto-provision</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-auth-auto-provision</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-init-auth-auto-provision" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-repository">
+<span class="sig-name descname"><span class="pre">--repository</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;repository&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-init-repository" title="Permalink to this definition">¶</a></dt>
+<dd><p>options: [‘github.com’, ‘gitlab.com’]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Options<span class="colon">:</span></dt>
+<dd class="field-odd"><p>github.com | gitlab.com</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-repository-auto-provision">
+<span id="cmdoption-nebari-init-no-repository-auto-provision"></span><span class="sig-name descname"><span class="pre">--repository-auto-provision</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-repository-auto-provision</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-init-repository-auto-provision" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-ci-provider">
+<span class="sig-name descname"><span class="pre">--ci-provider</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ci_provider&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-init-ci-provider" title="Permalink to this definition">¶</a></dt>
+<dd><p>options: [‘github-actions’, ‘gitlab-ci’, ‘none’]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">CiEnum.none</span></code></p>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><p>github-actions | gitlab-ci | none</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-terraform-state">
+<span class="sig-name descname"><span class="pre">--terraform-state</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;terraform_state&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-init-terraform-state" title="Permalink to this definition">¶</a></dt>
+<dd><p>options: [‘remote’, ‘local’, ‘existing’]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">TerraformStateEnum.remote</span></code></p>
+</dd>
+<dt class="field-even">Options<span class="colon">:</span></dt>
+<dd class="field-even"><p>remote | local | existing</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-kubernetes-version">
+<span class="sig-name descname"><span class="pre">--kubernetes-version</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;kubernetes_version&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-init-kubernetes-version" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">latest</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-ssl-cert-email">
+<span class="sig-name descname"><span class="pre">--ssl-cert-email</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ssl_cert_email&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-init-ssl-cert-email" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-disable-prompt">
+<span id="cmdoption-nebari-init-no-disable-prompt"></span><span class="sig-name descname"><span class="pre">--disable-prompt</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--no-disable-prompt</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-init-disable-prompt" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-o">
+<span id="cmdoption-nebari-init-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-init-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>Output file path for the rendered config file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">nebari-config.yaml</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Arguments</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-init-arg-CLOUD_PROVIDER">
+<span id="cmdoption-nebari-init-arg-cloud-provider"></span><span class="sig-name descname"><span class="pre">CLOUD_PROVIDER</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-init-arg-CLOUD_PROVIDER" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional argument</p>
+</dd></dl>
+
+</section>
+<section id="nebari-keycloak">
+<h3>keycloak<a class="headerlink" href="#nebari-keycloak" title="Permalink to this heading">¶</a></h3>
+<p>Interact with the Nebari Keycloak identity and access management tool.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>keycloak<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>ARGS<span class="o">]</span>...
+</pre></div>
+</div>
+<section id="nebari-keycloak-adduser">
+<h4>adduser<a class="headerlink" href="#nebari-keycloak-adduser" title="Permalink to this heading">¶</a></h4>
+<p>Add a user to Keycloak. User will be automatically added to the [italic]analyst[/italic] group.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>keycloak<span class="w"> </span>adduser<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-keycloak-adduser-user">
+<span class="sig-name descname"><span class="pre">--user</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;add_users&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-keycloak-adduser-user" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> Provide both: &lt;username&gt; &lt;password&gt;</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-keycloak-adduser-c">
+<span id="cmdoption-nebari-keycloak-adduser-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config_filename&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-keycloak-adduser-c" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> nebari configuration file path</p>
+</dd></dl>
+
+</section>
+<section id="nebari-keycloak-export-users">
+<h4>export-users<a class="headerlink" href="#nebari-keycloak-export-users" title="Permalink to this heading">¶</a></h4>
+<p>Export the users in Keycloak.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>keycloak<span class="w"> </span>export-users<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-keycloak-export-users-c">
+<span id="cmdoption-nebari-keycloak-export-users-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config_filename&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-keycloak-export-users-c" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> nebari configuration file path</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-keycloak-export-users-realm">
+<span class="sig-name descname"><span class="pre">--realm</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;realm&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-keycloak-export-users-realm" title="Permalink to this definition">¶</a></dt>
+<dd><p>realm from which users are to be exported</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">nebari</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="nebari-keycloak-listusers">
+<h4>listusers<a class="headerlink" href="#nebari-keycloak-listusers" title="Permalink to this heading">¶</a></h4>
+<p>List the users in Keycloak.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>keycloak<span class="w"> </span>listusers<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-keycloak-listusers-c">
+<span id="cmdoption-nebari-keycloak-listusers-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config_filename&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-keycloak-listusers-c" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> nebari configuration file path</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="nebari-render">
+<h3>render<a class="headerlink" href="#nebari-render" title="Permalink to this heading">¶</a></h3>
+<p>Dynamically render the Terraform scripts and other files from your [purple]nebari-config.yaml[/purple] file.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>render<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-render-o">
+<span id="cmdoption-nebari-render-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output_directory&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-render-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>output directory</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">./</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-render-c">
+<span id="cmdoption-nebari-render-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config_filename&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-render-c" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> nebari configuration yaml file path</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-render-dry-run">
+<span class="sig-name descname"><span class="pre">--dry-run</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-render-dry-run" title="Permalink to this definition">¶</a></dt>
+<dd><p>simulate rendering files without actually writing or updating any files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="nebari-support">
+<h3>support<a class="headerlink" href="#nebari-support" title="Permalink to this heading">¶</a></h3>
+<p>Support tool to write all Kubernetes logs locally and compress them into a zip file.</p>
+<p>The Nebari team recommends k9s to manage and inspect the state of the cluster.
+However, this command occasionally helpful for debugging purposes should the logs need to be shared.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>support<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-support-c">
+<span id="cmdoption-nebari-support-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config_filename&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-support-c" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> nebari configuration file path</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-support-o">
+<span id="cmdoption-nebari-support-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-support-o" title="Permalink to this definition">¶</a></dt>
+<dd><p>output filename</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">./nebari-support-logs.zip</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="nebari-upgrade">
+<h3>upgrade<a class="headerlink" href="#nebari-upgrade" title="Permalink to this heading">¶</a></h3>
+<p>Upgrade your [purple]nebari-config.yaml[/purple].</p>
+<p>Upgrade your [purple]nebari-config.yaml[/purple] after an nebari upgrade. If necessary, prompts users to perform manual upgrade steps required for the deploy process.</p>
+<p>See the project [green]RELEASE.md[/green] for details.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>upgrade<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-upgrade-c">
+<span id="cmdoption-nebari-upgrade-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config_filename&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-upgrade-c" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> nebari configuration file path</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-upgrade-attempt-fixes">
+<span class="sig-name descname"><span class="pre">--attempt-fixes</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-upgrade-attempt-fixes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to fix the config for any incompatibilities between your old and new Nebari versions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="nebari-validate">
+<h3>validate<a class="headerlink" href="#nebari-validate" title="Permalink to this heading">¶</a></h3>
+<p>Validate the values in the [purple]nebari-config.yaml[/purple] file are acceptable.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nebari<span class="w"> </span>validate<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span>
+</pre></div>
+</div>
+<p class="rubric">Options</p>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-validate-c">
+<span id="cmdoption-nebari-validate-config"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--config</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;config_filename&gt;</span></span><a class="headerlink" href="#cmdoption-nebari-validate-c" title="Permalink to this definition">¶</a></dt>
+<dd><p><strong>Required</strong> nebari configuration yaml file path, please pass in as -c/–config flag</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nebari-validate-enable-commenting">
+<span class="sig-name descname"><span class="pre">--enable-commenting</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nebari-validate-enable-commenting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggle PR commenting on GitHub Actions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Default<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Nebari CLI documentation</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Nebari CLI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#nebari">nebari</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nebari-deploy">deploy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nebari-destroy">destroy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nebari-dev">dev</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nebari-dev-keycloak-api">keycloak-api</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nebari-info">info</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nebari-init">init</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nebari-keycloak">keycloak</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nebari-keycloak-adduser">adduser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nebari-keycloak-export-users">export-users</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nebari-keycloak-listusers">listusers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nebari-render">render</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nebari-support">support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nebari-upgrade">upgrade</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nebari-validate">validate</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to Nebari API documentation’s documentation!</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Nebari.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.1.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/cli.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

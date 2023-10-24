@@ -1,0 +1,83 @@
+name: test-gcp-integration
+
+on:
+  schedule:
+    - cron: "0 0 * * MON"
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Nebari branch to deploy, test, destroy'
+        required: true
+        default: develop
+        type: string
+      image-tag:
+        description: 'Nebari image tag created by the nebari-docker-images repo'
+        required: true
+        default: main
+        type: string
+      tf-log-level:
+        description: 'Change Terraform log levels'
+        required: false
+        default: info
+        type: choice
+        options:
+        - info
+        - warn
+        - debug
+        - trace
+        - error
+
+env:
+  NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'develop' }}
+  NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
+  TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
+
+
+jobs:
+  test-do-integration:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.NEBARI_GH_BRANCH }}
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+            python-version: 3.11
+
+      - name: Install Nebari
+        run: |
+            pip install .[dev]
+            playwright install
+
+      - name: Retrieve secret from Vault
+        uses: hashicorp/vault-action@v2.5.0
+        with:
+          method: jwt
+          url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"
+          namespace: "admin/quansight"
+          role: "repository-nebari-dev-nebari-role"
+          secrets: |
+            kv/data/repository/nebari-dev/nebari/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
+            kv/data/repository/nebari-dev/nebari/cloudflare/internal-devops@quansight.com/nebari-dev-ci token | CLOUDFLARE_TOKEN;
+
+      - name: Set Environment DO
+        run: |
+          echo "SPACES_ACCESS_KEY_ID=${{ secrets.SPACES_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "SPACES_SECRET_ACCESS_KEY=${{ secrets.SPACES_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "NEBARI_K8S_VERSION"=1.25.12-do.0 >> $GITHUB_ENV
+
+      - name: Integration Tests
+        run: |
+          pytest --version
+          pytest tests/tests_integration/ -vvv -s --cloud do
+        env:
+            NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
+            NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
+            NEBARI_SECRET__default_images__dask_worker: "quay.io/nebari/nebari-dask-worker:${{ env.NEBARI_IMAGE_TAG }}"

@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 from _nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
 from _nebari.provider.cicd.common import pip_install_nebari
+from nebari import schema
 
 GITHUB_BASE_URL = "https://api.github.com/"
 
@@ -15,11 +16,14 @@ GITHUB_BASE_URL = "https://api.github.com/"
 def github_request(url, method="GET", json=None, authenticate=True):
     auth = None
     if authenticate:
+        missing = []
         for name in ("GITHUB_USERNAME", "GITHUB_TOKEN"):
             if os.environ.get(name) is None:
-                raise ValueError(
-                    f"Environment variable={name} is required for GitHub automation"
-                )
+                missing.append(name)
+        if len(missing) > 0:
+            raise ValueError(
+                f"Environment variable(s) required for GitHub automation - {', '.join(missing)}"
+            )
         auth = requests.auth.HTTPBasicAuth(
             os.environ["GITHUB_USERNAME"], os.environ["GITHUB_TOKEN"]
         )
@@ -96,7 +100,7 @@ def create_repository(owner, repo, description, homepage, private=True):
     return f"git@github.com:{owner}/{repo}.git"
 
 
-def gha_env_vars(config):
+def gha_env_vars(config: schema.Main):
     env_vars = {
         "GITHUB_TOKEN": "${{ secrets.GITHUB_TOKEN }}",
     }
@@ -105,29 +109,30 @@ def gha_env_vars(config):
         env_vars["NEBARI_GH_BRANCH"] = "${{ secrets.NEBARI_GH_BRANCH }}"
 
     # This assumes that the user is using the omitting sensitive values configuration for the token.
-    if config.get("prefect", {}).get("enabled", False):
+    if config.prefect.enabled:
         env_vars[
             "NEBARI_SECRET_prefect_token"
         ] = "${{ secrets.NEBARI_SECRET_PREFECT_TOKEN }}"
 
-    if config["provider"] == "aws":
+    if config.provider == schema.ProviderEnum.aws:
         env_vars["AWS_ACCESS_KEY_ID"] = "${{ secrets.AWS_ACCESS_KEY_ID }}"
         env_vars["AWS_SECRET_ACCESS_KEY"] = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
         env_vars["AWS_DEFAULT_REGION"] = "${{ secrets.AWS_DEFAULT_REGION }}"
-    elif config["provider"] == "azure":
+    elif config.provider == schema.ProviderEnum.azure:
         env_vars["ARM_CLIENT_ID"] = "${{ secrets.ARM_CLIENT_ID }}"
         env_vars["ARM_CLIENT_SECRET"] = "${{ secrets.ARM_CLIENT_SECRET }}"
         env_vars["ARM_SUBSCRIPTION_ID"] = "${{ secrets.ARM_SUBSCRIPTION_ID }}"
         env_vars["ARM_TENANT_ID"] = "${{ secrets.ARM_TENANT_ID }}"
-    elif config["provider"] == "do":
+    elif config.provider == schema.ProviderEnum.do:
         env_vars["AWS_ACCESS_KEY_ID"] = "${{ secrets.AWS_ACCESS_KEY_ID }}"
         env_vars["AWS_SECRET_ACCESS_KEY"] = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
         env_vars["SPACES_ACCESS_KEY_ID"] = "${{ secrets.SPACES_ACCESS_KEY_ID }}"
         env_vars["SPACES_SECRET_ACCESS_KEY"] = "${{ secrets.SPACES_SECRET_ACCESS_KEY }}"
         env_vars["DIGITALOCEAN_TOKEN"] = "${{ secrets.DIGITALOCEAN_TOKEN }}"
-    elif config["provider"] == "gcp":
+    elif config.provider == schema.ProviderEnum.gcp:
         env_vars["GOOGLE_CREDENTIALS"] = "${{ secrets.GOOGLE_CREDENTIALS }}"
-    elif config["provider"] in ["local", "existing"]:
+        env_vars["PROJECT_ID"] = "${{ secrets.PROJECT_ID }}"
+    elif config.provider in [schema.ProviderEnum.local, schema.ProviderEnum.existing]:
         # create mechanism to allow for extra env vars?
         pass
     else:
@@ -225,25 +230,35 @@ def setup_python_step():
     )
 
 
+def setup_gcloud():
+    return GHA_job_step(
+        name="Setup gcloud",
+        uses="google-github-actions/auth@v1",
+        with_={
+            "credentials_json": "${{ secrets.GOOGLE_CREDENTIALS }}",
+        },
+    )
+
+
 def install_nebari_step(nebari_version):
     return GHA_job_step(name="Install Nebari", run=pip_install_nebari(nebari_version))
 
 
 def gen_nebari_ops(config):
     env_vars = gha_env_vars(config)
-    branch = config["ci_cd"]["branch"]
-    commit_render = config["ci_cd"].get("commit_render", True)
-    nebari_version = config["nebari_version"]
 
-    push = GHA_on_extras(branches=[branch], paths=["nebari-config.yaml"])
+    push = GHA_on_extras(branches=[config.ci_cd.branch], paths=["nebari-config.yaml"])
     on = GHA_on(__root__={"push": push})
 
     step1 = checkout_image_step()
     step2 = setup_python_step()
-    step3 = install_nebari_step(nebari_version)
+    step3 = install_nebari_step(config.nebari_version)
     gha_steps = [step1, step2, step3]
 
-    for step in config["ci_cd"].get("before_script", []):
+    if config.provider == schema.ProviderEnum.gcp:
+        gha_steps.append(setup_gcloud())
+
+    for step in config.ci_cd.before_script:
         gha_steps.append(GHA_job_step(**step))
 
     step4 = GHA_job_step(
@@ -259,7 +274,7 @@ def gen_nebari_ops(config):
             "git config user.name 'github action' ; "
             "git add ./.gitignore ./.github ./stages; "
             "git diff --quiet && git diff --staged --quiet || (git commit -m '${{ env.COMMIT_MSG }}') ; "
-            f"git push origin {branch}"
+            f"git push origin {config.ci_cd.branch}"
         ),
         env={
             "COMMIT_MSG": GHA_job_steps_extras(
@@ -267,10 +282,10 @@ def gen_nebari_ops(config):
             )
         },
     )
-    if commit_render:
+    if config.ci_cd.commit_render:
         gha_steps.append(step5)
 
-    for step in config["ci_cd"].get("after_script", []):
+    for step in config.ci_cd.after_script:
         gha_steps.append(GHA_job_step(**step))
 
     job1 = GHA_job_id(
@@ -300,15 +315,14 @@ def gen_nebari_linter(config):
     else:
         env_vars = None
 
-    branch = config["ci_cd"]["branch"]
-    nebari_version = config["nebari_version"]
-
-    pull_request = GHA_on_extras(branches=[branch], paths=["nebari-config.yaml"])
+    pull_request = GHA_on_extras(
+        branches=[config.ci_cd.branch], paths=["nebari-config.yaml"]
+    )
     on = GHA_on(__root__={"pull_request": pull_request})
 
     step1 = checkout_image_step()
     step2 = setup_python_step()
-    step3 = install_nebari_step(nebari_version)
+    step3 = install_nebari_step(config.nebari_version)
 
     step4_envs = {
         "PR_NUMBER": GHA_job_steps_extras(__root__="${{ github.event.number }}"),
