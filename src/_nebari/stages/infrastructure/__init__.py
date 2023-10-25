@@ -547,7 +547,7 @@ class InputSchema(schema.Base):
                 # TODO: all cloud providers has required fields, but local and existing don't.
                 #  And there is no way to initialize a model without user input here.
                 #  We preserve the original behavior here, but we should find a better way to do this.
-                if provider in ["local", "existing"]:
+                if provider in ["local", "existing"] and provider not in values:
                     values[provider] = provider_enum_model_map[provider]()
             else:
                 # if the provider field is invalid, it won't be set when this validator is called
