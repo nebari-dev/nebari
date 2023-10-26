@@ -445,7 +445,7 @@ class AmazonWebServicesProvider(schema.Base):
         ),
     }
     existing_subnet_ids: List[str] = None
-    existing_security_group_ids: str = None
+    existing_security_group_id: str = None
     vpc_cidr_block: str = "10.10.0.0/16"
     permissions_boundary: Optional[str] = None
     tags: Optional[Dict[str, str]] = {}
@@ -755,7 +755,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
-                existing_security_group_id=self.config.amazon_web_services.existing_security_group_ids,
+                existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
                 region=self.config.amazon_web_services.region,
                 kubernetes_version=self.config.amazon_web_services.kubernetes_version,
                 node_groups=[
