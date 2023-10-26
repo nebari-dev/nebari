@@ -28,8 +28,8 @@ def deploy(
     terraform_import: bool = False,
     terraform_apply: bool = True,
     terraform_destroy: bool = False,
-    input_vars: Dict[str, Any] = None,
-    state_imports: List = None,
+    input_vars: Dict[str, Any] = {},
+    state_imports: List[Any] = [],
 ):
     """Execute a given terraform directory.
 
@@ -52,9 +52,6 @@ def deploy(
       state_imports: (addr, id) pairs for iterate through and attempt
         to terraform import
     """
-    input_vars = input_vars or {}
-    state_imports = state_imports or []
-
     with tempfile.NamedTemporaryFile(
         mode="w", encoding="utf-8", suffix=".tfvars.json"
     ) as f:

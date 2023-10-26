@@ -1,425 +1,141 @@
 import logging
 import os
-import random
 import re
-import secrets
-import string
 import tempfile
 from pathlib import Path
 
+import pydantic
 import requests
 
+from _nebari import constants
 from _nebari.provider import git
 from _nebari.provider.cicd import github
-from _nebari.provider.oauth.auth0 import create_client
-from _nebari.utils import (
-    check_cloud_credentials,
-    namestr_regex,
-    set_docker_image_tag,
-    set_kubernetes_version,
-    set_nebari_dask_version,
+from _nebari.provider.cloud import (
+    amazon_web_services,
+    azure_cloud,
+    digital_ocean,
+    google_cloud,
 )
-
-from .version import __version__
+from _nebari.provider.oauth.auth0 import create_client
+from _nebari.stages.bootstrap import CiEnum
+from _nebari.stages.kubernetes_ingress import CertificateEnum
+from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
+from _nebari.stages.terraform_state import TerraformStateEnum
+from _nebari.utils import get_latest_kubernetes_version, random_secure_string
+from _nebari.version import __version__
+from nebari.schema import ProviderEnum, github_url_regex
 
 logger = logging.getLogger(__name__)
 
 WELCOME_HEADER_TEXT = "Your open source data science platform, hosted"
 
 
-def base_configuration():
-    nebari_image_tag = set_docker_image_tag()
-    return {
-        "project_name": None,
-        "provider": None,
-        "domain": None,
-        "certificate": {
-            "type": "self-signed",
-        },
-        "security": {
-            "authentication": None,
-        },
-        "default_images": {
-            "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{nebari_image_tag}",
-            "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{nebari_image_tag}",
-            "dask_worker": f"quay.io/nebari/nebari-dask-worker:{nebari_image_tag}",
-        },
-        "storage": {"conda_store": "200Gi", "shared_filesystem": "200Gi"},
-        "theme": {
-            "jupyterhub": {
-                "hub_title": None,
-                "hub_subtitle": None,
-                "welcome": None,
-                "logo": "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg",
-                "display_version": True,
-            }
-        },
-        "helm_extensions": [],
-        "monitoring": {
-            "enabled": True,
-        },
-        "argo_workflows": {
-            "enabled": True,
-        },
-        "kbatch": {
-            "enabled": True,
-        },
-        "cdsdashboards": {
-            "enabled": True,
-            "cds_hide_user_named_servers": True,
-            "cds_hide_user_dashboard_servers": False,
-        },
-    }
-
-
-def default_environments():
-    nebari_dask_version = set_nebari_dask_version()
-    return {
-        "environment-dask.yaml": {
-            "name": "dask",
-            "channels": ["conda-forge"],
-            "dependencies": [
-                "python=3.10.8",
-                "ipykernel=6.21.0",
-                "ipywidgets==7.7.1",
-                f"nebari-dask =={nebari_dask_version}",
-                "python-graphviz=0.20.1",
-                "pyarrow=10.0.1",
-                "s3fs=2023.1.0",
-                "gcsfs=2023.1.0",
-                "numpy=1.23.5",
-                "numba=0.56.4",
-                "pandas=1.5.3",
-                {
-                    "pip": [
-                        "kbatch==0.4.1",
-                    ],
-                },
-            ],
-        },
-        "environment-dashboard.yaml": {
-            "name": "dashboard",
-            "channels": ["conda-forge"],
-            "dependencies": [
-                "python=3.10",
-                "cdsdashboards-singleuser=0.6.3",
-                "cufflinks-py=0.17.3",
-                "dash=2.8.1",
-                "geopandas=0.12.2",
-                "geopy=2.3.0",
-                "geoviews=1.9.6",
-                "gunicorn=20.1.0",
-                "holoviews=1.15.4",
-                "ipykernel=6.21.2",
-                "ipywidgets=8.0.4",
-                "jupyter=1.0.0",
-                "jupyterlab=3.6.1",
-                "jupyter_bokeh=3.0.5",
-                "matplotlib=3.7.0",
-                f"nebari-dask=={nebari_dask_version}",
-                "nodejs=18.12.1",
-                "numpy",
-                "openpyxl=3.1.1",
-                "pandas=1.5.3",
-                "panel=0.14.3",
-                "param=1.12.3",
-                "plotly=5.13.0",
-                "python-graphviz=0.20.1",
-                "rich=13.3.1",
-                "streamlit=1.9.0",
-                "sympy=1.11.1",
-                "voila=0.4.0",
-                "pip=23.0",
-                {
-                    "pip": [
-                        "streamlit-image-comparison==0.0.3",
-                        "noaa-coops==0.2.1",
-                        "dash_core_components==2.0.0",
-                        "dash_html_components==2.0.0",
-                    ],
-                },
-            ],
-        },
-    }
-
-
-def __getattr__(name):
-    if name == "nebari_image_tag":
-        return set_docker_image_tag()
-    elif name == "nebari_dask_version":
-        return set_nebari_dask_version()
-    elif name == "BASE_CONFIGURATION":
-        return base_configuration()
-    elif name == "DEFAULT_ENVIRONMENTS":
-        return default_environments()
-
-
-CICD_CONFIGURATION = {
-    "type": "PLACEHOLDER",
-    "branch": "main",
-    "commit_render": True,
-}
-
-AUTH_PASSWORD = {
-    "type": "password",
-}
-
-AUTH_OAUTH_GITHUB = {
-    "type": "GitHub",
-    "config": {
-        "client_id": "PLACEHOLDER",
-        "client_secret": "PLACEHOLDER",
-    },
-}
-
-AUTH_OAUTH_AUTH0 = {
-    "type": "Auth0",
-    "config": {
-        "client_id": "PLACEHOLDER",
-        "client_secret": "PLACEHOLDER",
-        "auth0_subdomain": "PLACEHOLDER",
-    },
-}
-
-LOCAL = {
-    "node_selectors": {
-        "general": {
-            "key": "kubernetes.io/os",
-            "value": "linux",
-        },
-        "user": {
-            "key": "kubernetes.io/os",
-            "value": "linux",
-        },
-        "worker": {
-            "key": "kubernetes.io/os",
-            "value": "linux",
-        },
-    }
-}
-
-EXISTING = {
-    "node_selectors": {
-        "general": {
-            "key": "kubernetes.io/os",
-            "value": "linux",
-        },
-        "user": {
-            "key": "kubernetes.io/os",
-            "value": "linux",
-        },
-        "worker": {
-            "key": "kubernetes.io/os",
-            "value": "linux",
-        },
-    }
-}
-
-DIGITAL_OCEAN = {
-    "region": "nyc3",
-    "kubernetes_version": "PLACEHOLDER",
-    "node_groups": {
-        "general": {"instance": "g-8vcpu-32gb", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "g-4vcpu-16gb", "min_nodes": 1, "max_nodes": 5},
-        "worker": {"instance": "g-4vcpu-16gb", "min_nodes": 1, "max_nodes": 5},
-    },
-}
-# Digital Ocean image slugs are listed here https://slugs.do-api.dev/
-
-GOOGLE_PLATFORM = {
-    "project": "PLACEHOLDER",
-    "region": "us-central1",
-    "kubernetes_version": "PLACEHOLDER",
-    "node_groups": {
-        "general": {"instance": "n1-standard-8", "min_nodes": 1, "max_nodes": 1},
-        "user": {"instance": "n1-standard-4", "min_nodes": 0, "max_nodes": 5},
-        "worker": {"instance": "n1-standard-4", "min_nodes": 0, "max_nodes": 5},
-    },
-}
-
-AZURE = {
-    "region": "Central US",
-    "kubernetes_version": "PLACEHOLDER",
-    "node_groups": {
-        "general": {
-            "instance": "Standard_D8_v3",
-            "min_nodes": 1,
-            "max_nodes": 1,
-        },
-        "user": {"instance": "Standard_D4_v3", "min_nodes": 0, "max_nodes": 5},
-        "worker": {
-            "instance": "Standard_D4_v3",
-            "min_nodes": 0,
-            "max_nodes": 5,
-        },
-    },
-    "storage_account_postfix": "".join(
-        random.choices("abcdefghijklmnopqrstuvwxyz0123456789", k=8)
-    ),
-}
-
-AMAZON_WEB_SERVICES = {
-    "region": "us-west-2",
-    "kubernetes_version": "PLACEHOLDER",
-    "node_groups": {
-        "general": {"instance": "m5.2xlarge", "min_nodes": 1, "max_nodes": 1},
-        "user": {
-            "instance": "m5.xlarge",
-            "min_nodes": 1,
-            "max_nodes": 5,
-            "single_subnet": False,
-        },
-        "worker": {
-            "instance": "m5.xlarge",
-            "min_nodes": 1,
-            "max_nodes": 5,
-            "single_subnet": False,
-        },
-    },
-}
-
-DEFAULT_PROFILES = {
-    "jupyterlab": [
-        {
-            "display_name": "Small Instance",
-            "description": "Stable environment with 2 cpu / 8 GB ram",
-            "default": True,
-            "kubespawner_override": {
-                "cpu_limit": 2,
-                "cpu_guarantee": 1.5,
-                "mem_limit": "8G",
-                "mem_guarantee": "5G",
-            },
-        },
-        {
-            "display_name": "Medium Instance",
-            "description": "Stable environment with 4 cpu / 16 GB ram",
-            "kubespawner_override": {
-                "cpu_limit": 4,
-                "cpu_guarantee": 3,
-                "mem_limit": "16G",
-                "mem_guarantee": "10G",
-            },
-        },
-    ],
-    "dask_worker": {
-        "Small Worker": {
-            "worker_cores_limit": 2,
-            "worker_cores": 1.5,
-            "worker_memory_limit": "8G",
-            "worker_memory": "5G",
-            "worker_threads": 2,
-        },
-        "Medium Worker": {
-            "worker_cores_limit": 4,
-            "worker_cores": 3,
-            "worker_memory_limit": "16G",
-            "worker_memory": "10G",
-            "worker_threads": 4,
-        },
-    },
-}
-
-
 def render_config(
-    project_name,
-    nebari_domain,
-    cloud_provider,
-    ci_provider,
-    repository,
-    auth_provider,
-    namespace=None,
-    repository_auto_provision=False,
-    auth_auto_provision=False,
-    terraform_state=None,
-    kubernetes_version=None,
-    disable_prompt=False,
-    ssl_cert_email=None,
+    project_name: str,
+    nebari_domain: str = None,
+    cloud_provider: ProviderEnum = ProviderEnum.local,
+    ci_provider: CiEnum = CiEnum.none,
+    repository: str = None,
+    auth_provider: AuthenticationEnum = AuthenticationEnum.password,
+    namespace: str = "dev",
+    repository_auto_provision: bool = False,
+    auth_auto_provision: bool = False,
+    terraform_state: TerraformStateEnum = TerraformStateEnum.remote,
+    kubernetes_version: str = None,
+    region: str = None,
+    disable_prompt: bool = False,
+    ssl_cert_email: str = None,
 ):
-    config = base_configuration().copy()
-    config["provider"] = cloud_provider
-
-    if ci_provider is not None and ci_provider != "none":
-        config["ci_cd"] = CICD_CONFIGURATION.copy()
-        config["ci_cd"]["type"] = ci_provider
-
-    if terraform_state is not None:
-        config["terraform_state"] = {"type": terraform_state}
+    config = {
+        "provider": cloud_provider.value,
+        "namespace": namespace,
+        "nebari_version": __version__,
+    }
 
     if project_name is None and not disable_prompt:
         project_name = input("Provide project name: ")
     config["project_name"] = project_name
 
-    if not re.match(namestr_regex, project_name):
-        raise ValueError(
-            "project name should contain only letters and hyphens/underscores (but not at the start or end)"
-        )
+    if nebari_domain is not None:
+        config["domain"] = nebari_domain
 
-    if namespace is not None:
-        config["namespace"] = namespace
-
-    if not re.match(namestr_regex, namespace):
-        raise ValueError(
-            "namespace should contain only letters and hyphens/underscores (but not at the start or end)"
-        )
-
-    if nebari_domain is None and not disable_prompt:
-        nebari_domain = input("Provide domain: ")
-    config["domain"] = nebari_domain
-
-    # In nebari_version only use major.minor.patch version - drop any pre/post/dev suffixes
-    config["nebari_version"] = __version__
-
-    # Generate default password for Keycloak root user and also example-user if using password auth
-    default_password = "".join(
-        secrets.choice(string.ascii_letters + string.digits) for i in range(16)
-    )
+    config["ci_cd"] = {"type": ci_provider}
+    config["terraform_state"] = {"type": terraform_state}
 
     # Save default password to file
     default_password_filename = Path(tempfile.gettempdir()) / "NEBARI_DEFAULT_PASSWORD"
-    with open(default_password_filename, "w") as f:
-        f.write(default_password)
+    config["security"] = {
+        "keycloak": {"initial_root_password": random_secure_string(length=32)}
+    }
+    with default_password_filename.open("w") as f:
+        f.write(config["security"]["keycloak"]["initial_root_password"])
     default_password_filename.chmod(0o700)
 
-    config["theme"]["jupyterhub"]["hub_title"] = f"Nebari - { project_name }"
+    config["theme"] = {"jupyterhub": {"hub_title": f"Nebari - { project_name }"}}
     config["theme"]["jupyterhub"][
         "welcome"
-    ] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
+    ] = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs/welcome">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
 
-    if auth_provider == "github":
-        config["security"]["authentication"] = AUTH_OAUTH_GITHUB.copy()
-        if not disable_prompt:
-            config["security"]["authentication"]["config"]["client_id"] = input(
-                "Github client_id: "
-            )
-            config["security"]["authentication"]["config"]["client_secret"] = input(
-                "Github client_secret: "
-            )
-    elif auth_provider == "auth0":
-        config["security"]["authentication"] = AUTH_OAUTH_AUTH0.copy()
+    config["security"]["authentication"] = {"type": auth_provider}
 
-    elif auth_provider == "password":
-        config["security"]["authentication"] = AUTH_PASSWORD.copy()
+    if auth_provider == AuthenticationEnum.github:
+        config["security"]["authentication"]["config"] = {
+            "client_id": os.environ.get(
+                "GITHUB_CLIENT_ID",
+                "<enter client id or remove to use GITHUB_CLIENT_ID environment variable (preferred)>",
+            ),
+            "client_secret": os.environ.get(
+                "GITHUB_CLIENT_SECRET",
+                "<enter client secret or remove to use GITHUB_CLIENT_SECRET environment variable (preferred)>",
+            ),
+        }
+    elif auth_provider == AuthenticationEnum.auth0:
+        if auth_auto_provision:
+            auth0_config = create_client(config.domain, config.project_name)
+            config["security"]["authentication"]["config"] = auth0_config
+        else:
+            config["security"]["authentication"]["config"] = {
+                "client_id": os.environ.get(
+                    "AUTH0_CLIENT_ID",
+                    "<enter client id or remove to use AUTH0_CLIENT_ID environment variable (preferred)>",
+                ),
+                "client_secret": os.environ.get(
+                    "AUTH0_CLIENT_SECRET",
+                    "<enter client secret or remove to use AUTH0_CLIENT_SECRET environment variable (preferred)>",
+                ),
+                "auth0_subdomain": os.environ.get(
+                    "AUTH0_DOMAIN",
+                    "<enter subdomain (without .auth0.com) or remove to use AUTH0_DOMAIN environment variable>",
+                ),
+            }
 
-    # Always use default password for keycloak root
-    config["security"].setdefault("keycloak", {})[
-        "initial_root_password"
-    ] = default_password
+    if cloud_provider == ProviderEnum.do:
+        do_region = region or constants.DO_DEFAULT_REGION
+        do_kubernetes_versions = kubernetes_version or get_latest_kubernetes_version(
+            digital_ocean.kubernetes_versions(do_region)
+        )
+        config["digital_ocean"] = {
+            "kubernetes_version": do_kubernetes_versions,
+            "region": do_region,
+        }
 
-    if cloud_provider == "do":
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
-        config["digital_ocean"] = DIGITAL_OCEAN.copy()
-        set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
-    elif cloud_provider == "gcp":
+    elif cloud_provider == ProviderEnum.gcp:
+        gcp_region = region or constants.GCP_DEFAULT_REGION
+        gcp_kubernetes_version = kubernetes_version or get_latest_kubernetes_version(
+            google_cloud.kubernetes_versions(gcp_region)
+        )
+        config["google_cloud_platform"] = {
+            "kubernetes_version": gcp_kubernetes_version,
+            "region": gcp_region,
+        }
+
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Google Cloud Platform"
-        config["google_cloud_platform"] = GOOGLE_PLATFORM.copy()
-        set_kubernetes_version(config, kubernetes_version, cloud_provider)
-
         if "PROJECT_ID" in os.environ:
             config["google_cloud_platform"]["project"] = os.environ["PROJECT_ID"]
         elif not disable_prompt:
@@ -427,50 +143,61 @@ def render_config(
                 "Enter Google Cloud Platform Project ID: "
             )
 
-    elif cloud_provider == "azure":
+    elif cloud_provider == ProviderEnum.azure:
+        azure_region = region or constants.AZURE_DEFAULT_REGION
+        azure_kubernetes_version = kubernetes_version or get_latest_kubernetes_version(
+            azure_cloud.kubernetes_versions(azure_region)
+        )
+        config["azure"] = {
+            "kubernetes_version": azure_kubernetes_version,
+            "region": azure_region,
+            "storage_account_postfix": random_secure_string(length=4),
+        }
+
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Azure"
-        config["azure"] = AZURE.copy()
-        set_kubernetes_version(config, kubernetes_version, cloud_provider)
 
-    elif cloud_provider == "aws":
+    elif cloud_provider == ProviderEnum.aws:
+        aws_region = (
+            region
+            or os.environ.get("AWS_DEFAULT_REGION")
+            or constants.AWS_DEFAULT_REGION
+        )
+        aws_kubernetes_version = kubernetes_version or get_latest_kubernetes_version(
+            amazon_web_services.kubernetes_versions(aws_region)
+        )
+        config["amazon_web_services"] = {
+            "kubernetes_version": aws_kubernetes_version,
+            "region": aws_region,
+        }
         config["theme"]["jupyterhub"][
             "hub_subtitle"
         ] = f"{WELCOME_HEADER_TEXT} on Amazon Web Services"
-        config["amazon_web_services"] = AMAZON_WEB_SERVICES.copy()
-        set_kubernetes_version(config, kubernetes_version, cloud_provider)
-        if "AWS_DEFAULT_REGION" in os.environ:
-            config["amazon_web_services"]["region"] = os.environ["AWS_DEFAULT_REGION"]
 
-    elif cloud_provider == "existing":
+    elif cloud_provider == ProviderEnum.existing:
         config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
-        config["existing"] = EXISTING.copy()
 
-    elif cloud_provider == "local":
+    elif cloud_provider == ProviderEnum.local:
         config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
-        config["local"] = LOCAL.copy()
 
-    config["profiles"] = DEFAULT_PROFILES.copy()
-    config["environments"] = default_environments().copy()
+    if ssl_cert_email:
+        config["certificate"] = {"type": CertificateEnum.letsencrypt.value}
+        config["certificate"]["acme_email"] = ssl_cert_email
 
-    if ssl_cert_email is not None:
-        config["certificate"] = {
-            "type": "lets-encrypt",
-            "acme_email": ssl_cert_email,
-            "acme_server": "https://acme-v02.api.letsencrypt.org/directory",
-        }
+    # validate configuration and convert to model
+    from nebari.plugins import nebari_plugin_manager
 
-    if auth_auto_provision:
-        if auth_provider == "auth0":
-            auth0_auto_provision(config)
+    try:
+        config_model = nebari_plugin_manager.config_schema.parse_obj(config)
+    except pydantic.ValidationError as e:
+        print(str(e))
 
     if repository_auto_provision:
-        GITHUB_REGEX = "(https://)?github.com/([^/]+)/([^/]+)/?"
-        if re.search(GITHUB_REGEX, repository):
-            match = re.search(GITHUB_REGEX, repository)
+        match = re.search(github_url_regex, repository)
+        if match:
             git_repository = github_auto_provision(
-                config, match.group(2), match.group(3)
+                config_model, match.group(2), match.group(3)
             )
             git_repository_initialize(git_repository)
         else:
@@ -481,11 +208,7 @@ def render_config(
     return config
 
 
-def github_auto_provision(config, owner, repo):
-    check_cloud_credentials(
-        config
-    )  # We may need env vars such as AWS_ACCESS_KEY_ID depending on provider
-
+def github_auto_provision(config: pydantic.BaseModel, owner: str, repo: str):
     already_exists = True
     try:
         github.get_repository(owner, repo)
@@ -498,19 +221,19 @@ def github_auto_provision(config, owner, repo):
             github.create_repository(
                 owner,
                 repo,
-                description=f'Nebari {config["project_name"]}-{config["provider"]}',
-                homepage=f'https://{config["domain"]}',
+                description=f"Nebari {config.project_name}-{config.provider}",
+                homepage=f"https://{config.domain}",
             )
         except requests.exceptions.HTTPError as he:
             raise ValueError(
                 f"Unable to create GitHub repo https://github.com/{owner}/{repo} - error message from GitHub is: {he}"
             )
     else:
-        logger.warn(f"GitHub repo https://github.com/{owner}/{repo} already exists")
+        logger.warning(f"GitHub repo https://github.com/{owner}/{repo} already exists")
 
     try:
         # Secrets
-        if config["provider"] == "do":
+        if config.provider == ProviderEnum.do:
             for name in {
                 "AWS_ACCESS_KEY_ID",
                 "AWS_SECRET_ACCESS_KEY",
@@ -519,17 +242,17 @@ def github_auto_provision(config, owner, repo):
                 "DIGITALOCEAN_TOKEN",
             }:
                 github.update_secret(owner, repo, name, os.environ[name])
-        elif config["provider"] == "aws":
+        elif config.provider == ProviderEnum.aws:
             for name in {
                 "AWS_ACCESS_KEY_ID",
                 "AWS_SECRET_ACCESS_KEY",
             }:
                 github.update_secret(owner, repo, name, os.environ[name])
-        elif config["provider"] == "gcp":
+        elif config.provider == ProviderEnum.gcp:
             github.update_secret(owner, repo, "PROJECT_ID", os.environ["PROJECT_ID"])
             with open(os.environ["GOOGLE_CREDENTIALS"]) as f:
                 github.update_secret(owner, repo, "GOOGLE_CREDENTIALS", f.read())
-        elif config["provider"] == "azure":
+        elif config.provider == ProviderEnum.azure:
             for name in {
                 "ARM_CLIENT_ID",
                 "ARM_CLIENT_SECRET",
@@ -552,16 +275,3 @@ def git_repository_initialize(git_repository):
     if not git.is_git_repo(Path.cwd()):
         git.initialize_git(Path.cwd())
     git.add_git_remote(git_repository, path=Path.cwd(), remote_name="origin")
-
-
-def auth0_auto_provision(config):
-    auth0_config = create_client(config["domain"], config["project_name"])
-    config["security"]["authentication"]["config"]["client_id"] = auth0_config[
-        "client_id"
-    ]
-    config["security"]["authentication"]["config"]["client_secret"] = auth0_config[
-        "client_secret"
-    ]
-    config["security"]["authentication"]["config"]["auth0_subdomain"] = auth0_config[
-        "auth0_subdomain"
-    ]

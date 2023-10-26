@@ -2,8 +2,8 @@ import subprocess
 
 import pytest
 
-from _nebari.schema import InitInputs
-from _nebari.utils import load_yaml
+from _nebari.subcommands.init import InitInputs
+from nebari.plugins import nebari_plugin_manager
 
 PROJECT_NAME = "clitest"
 DOMAIN_NAME = "clitest.dev"
@@ -13,7 +13,7 @@ DOMAIN_NAME = "clitest.dev"
     "namespace, auth_provider, ci_provider, ssl_cert_email",
     (
         [None, None, None, None],
-        ["prod", "github", "github-actions", "it@acme.org"],
+        ["prod", "password", "github-actions", "it@acme.org"],
     ),
 )
 def test_nebari_init(tmp_path, namespace, auth_provider, ci_provider, ssl_cert_email):
@@ -48,34 +48,20 @@ def test_nebari_init(tmp_path, namespace, auth_provider, ci_provider, ssl_cert_e
 
     subprocess.run(command, cwd=tmp_path, check=True)
 
-    config = load_yaml(tmp_path / "nebari-config.yaml")
+    config = nebari_plugin_manager.read_config(tmp_path / "nebari-config.yaml")
 
-    assert config.get("namespace") == namespace
-    assert (
-        config.get("security", {}).get("authentication", {}).get("type").lower()
-        == auth_provider
-    )
-    ci_cd = config.get("ci_cd", None)
-    if ci_cd:
-        assert ci_cd.get("type", {}) == ci_provider
-    else:
-        assert ci_cd == ci_provider
-    acme_email = config.get("certificate", None)
-    if acme_email:
-        assert acme_email.get("acme_email") == ssl_cert_email
-    else:
-        assert acme_email == ssl_cert_email
+    assert config.namespace == namespace
+    assert config.security.authentication.type.lower() == auth_provider
+    assert config.ci_cd.type == ci_provider
+    assert config.certificate.acme_email == ssl_cert_email
 
 
-def test_python_invocation():
-    def run(command):
-        return subprocess.run(
-            command, check=True, capture_output=True, text=True
-        ).stdout.strip()
-
-    command = ["nebari", "--version"]
-
-    actual = run(["python", "-m", *command])
-    expected = run(command)
-
-    assert actual == expected
+@pytest.mark.parametrize(
+    "command",
+    (
+        ["nebari", "--version"],
+        ["nebari", "info"],
+    ),
+)
+def test_nebari_commands_no_args(command):
+    subprocess.run(command, check=True, capture_output=True, text=True).stdout.strip()
