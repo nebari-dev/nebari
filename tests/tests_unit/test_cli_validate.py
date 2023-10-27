@@ -1,4 +1,5 @@
 import re
+import shutil
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List
@@ -74,14 +75,17 @@ def test_cli_validate_local_happy_path(config_yaml: str):
     test_file = TEST_DATA_DIR / config_yaml
     assert test_file.exists() is True
 
-    # update the test file with the current version
-    _update_yaml_file(test_file, "nebari_version", __version__)
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        temp_test_file = shutil.copy(test_file, tmpdirname)
 
-    app = create_cli()
-    result = runner.invoke(app, ["validate", "--config", test_file])
-    assert not result.exception
-    assert 0 == result.exit_code
-    assert "Successfully validated configuration" in result.stdout
+        # update the copied test file with the current version if necessary
+        _update_yaml_file(temp_test_file, "nebari_version", __version__)
+
+        app = create_cli()
+        result = runner.invoke(app, ["validate", "--config", temp_test_file])
+        assert not result.exception
+        assert 0 == result.exit_code
+        assert "Successfully validated configuration" in result.stdout
 
 
 def test_cli_validate_from_env():

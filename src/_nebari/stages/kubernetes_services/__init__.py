@@ -106,7 +106,6 @@ class DaskWorkerProfile(schema.Base):
     worker_memory_limit: str
     worker_memory: str
     worker_threads: int = 1
-    image: str = f"quay.io/nebari/nebari-dask-worker:{set_docker_image_tag()}"
     model_config = ConfigDict(extra="allow")
 
 

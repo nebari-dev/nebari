@@ -133,6 +133,7 @@ class AWSNodeGroupInputVars(schema.Base):
     desired_size: int
     max_size: int
     single_subnet: bool
+    permissions_boundary: Optional[str] = None
 
 
 class AWSInputVars(schema.Base):
@@ -145,6 +146,7 @@ class AWSInputVars(schema.Base):
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
+    permissions_boundary: Optional[str] = None
     kubeconfig_filename: str = get_kubeconfig_filename()
 
 
@@ -426,6 +428,7 @@ class AWSNodeGroup(schema.Base):
     max_nodes: int
     gpu: bool = False
     single_subnet: bool = False
+    permissions_boundary: Optional[str] = None
 
 
 class AmazonWebServicesProvider(schema.Base):
@@ -444,6 +447,7 @@ class AmazonWebServicesProvider(schema.Base):
     existing_subnet_ids: typing.Optional[typing.List[str]] = None
     existing_security_group_ids: typing.Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
+    permissions_boundary: Optional[str] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -509,53 +513,68 @@ class ExistingProvider(schema.Base):
     }
 
 
+provider_enum_model_map = {
+    schema.ProviderEnum.local: LocalProvider,
+    schema.ProviderEnum.existing: ExistingProvider,
+    schema.ProviderEnum.gcp: GoogleCloudPlatformProvider,
+    schema.ProviderEnum.aws: AmazonWebServicesProvider,
+    schema.ProviderEnum.azure: AzureProvider,
+    schema.ProviderEnum.do: DigitalOceanProvider,
+}
+
+provider_enum_name_map: Dict[schema.ProviderEnum, str] = {
+    schema.ProviderEnum.local: "local",
+    schema.ProviderEnum.existing: "existing",
+    schema.ProviderEnum.gcp: "google_cloud_platform",
+    schema.ProviderEnum.aws: "amazon_web_services",
+    schema.ProviderEnum.azure: "azure",
+    schema.ProviderEnum.do: "digital_ocean",
+}
+
+provider_name_abbreviation_map: Dict[str, str] = {
+    value: key.value for key, value in provider_enum_name_map.items()
+}
+
+
 class InputSchema(schema.Base):
-    local: typing.Optional[LocalProvider] = None
-    existing: typing.Optional[ExistingProvider] = None
-    google_cloud_platform: typing.Optional[GoogleCloudPlatformProvider] = None
-    amazon_web_services: typing.Optional[AmazonWebServicesProvider] = None
-    azure: typing.Optional[AzureProvider] = None
-    digital_ocean: typing.Optional[DigitalOceanProvider] = None
+    local: typing.Optional[LocalProvider]
+    existing: typing.Optional[ExistingProvider]
+    google_cloud_platform: typing.Optional[GoogleCloudPlatformProvider]
+    amazon_web_services: typing.Optional[AmazonWebServicesProvider]
+    azure: typing.Optional[AzureProvider]
+    digital_ocean: typing.Optional[DigitalOceanProvider]
 
-    @model_validator(mode="after")
-    def check_provider(self):
-        if self.provider == schema.ProviderEnum.local and self.local is None:
-            self.local = LocalProvider()
-        elif self.provider == schema.ProviderEnum.existing and self.existing is None:
-            self.existing = ExistingProvider()
-        elif (
-            self.provider == schema.ProviderEnum.gcp
-            and self.google_cloud_platform is None
-        ):
-            self.google_cloud_platform = GoogleCloudPlatformProvider()
-        elif (
-            self.provider == schema.ProviderEnum.aws
-            and self.amazon_web_services is None
-        ):
-            self.amazon_web_services = AmazonWebServicesProvider()
-        elif self.provider == schema.ProviderEnum.azure and self.azure is None:
-            self.azure = AzureProvider()
-        elif self.provider == schema.ProviderEnum.do and self.digital_ocean is None:
-            self.digital_ocean = DigitalOceanProvider()
-
-        if (
-            sum(
-                (
-                    getattr(self, _) is not None
-                    for _ in {
-                        "local",
-                        "existing",
-                        "google_cloud_platform",
-                        "amazon_web_services",
-                        "azure",
-                        "digital_ocean",
-                    }
+    @pydantic.root_validator(pre=True)
+    def check_provider(cls, values):
+        if "provider" in values:
+            provider: str = values["provider"]
+            if hasattr(schema.ProviderEnum, provider):
+                # TODO: all cloud providers has required fields, but local and existing don't.
+                #  And there is no way to initialize a model without user input here.
+                #  We preserve the original behavior here, but we should find a better way to do this.
+                if provider in ["local", "existing"] and provider not in values:
+                    values[provider] = provider_enum_model_map[provider]()
+            else:
+                # if the provider field is invalid, it won't be set when this validator is called
+                # so we need to check for it explicitly here, and set the `pre` to True
+                # TODO: this is a workaround, check if there is a better way to do this in Pydantic v2
+                raise ValueError(
+                    f"'{provider}' is not a valid enumeration member; permitted: local, existing, do, aws, gcp, azure"
                 )
-            )
-            != 1
-        ):
-            raise ValueError("multiple providers set or wrong provider fields set")
-        return self
+        else:
+            setted_providers = [
+                provider
+                for provider in provider_name_abbreviation_map.keys()
+                if provider in values
+            ]
+            num_providers = len(setted_providers)
+            if num_providers > 1:
+                raise ValueError(f"Multiple providers set: {setted_providers}")
+            elif num_providers == 1:
+                values["provider"] = provider_name_abbreviation_map[setted_providers[0]]
+            elif num_providers == 0:
+                values["provider"] = schema.ProviderEnum.local.value
+        return values
 
 
 class NodeSelectorKeyValue(schema.Base):
@@ -758,11 +777,13 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         desired_size=node_group.min_nodes,
                         max_size=node_group.max_nodes,
                         single_subnet=node_group.single_subnet,
+                        permissions_boundary=node_group.permissions_boundary,
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()
                 ],
                 availability_zones=self.config.amazon_web_services.availability_zones,
                 vpc_cidr_block=self.config.amazon_web_services.vpc_cidr_block,
+                permissions_boundary=self.config.amazon_web_services.permissions_boundary,
             ).dict()
         else:
             raise ValueError(f"Unknown provider: {self.config.provider}")

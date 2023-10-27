@@ -92,9 +92,6 @@ class Main(Base):
         if self.provider == ProviderEnum.aws and project_name.startswith("aws"):
             project_name = "a" + project_name
 
-        if len(project_name) > 16:
-            project_name = project_name[:16]
-
         return project_name
 
 
