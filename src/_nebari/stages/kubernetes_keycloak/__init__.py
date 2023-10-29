@@ -9,7 +9,7 @@ import time
 import typing
 from typing import Any, Dict, List, Optional, Type
 
-from pydantic import Field, field_validator, ValidationInfo
+from pydantic import Field, ValidationInfo, field_validator
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -72,9 +72,7 @@ class GitHubConfig(schema.Base):
 
     @field_validator("client_id", "client_secret", mode="before")
     @classmethod
-    def validate_credentials(
-        cls, value: Optional[str], info: ValidationInfo
-    ) -> str:
+    def validate_credentials(cls, value: Optional[str], info: ValidationInfo) -> str:
         variable_mapping = {
             "client_id": "GITHUB_CLIENT_ID",
             "client_secret": "GITHUB_CLIENT_SECRET",
@@ -102,9 +100,7 @@ class Auth0Config(schema.Base):
 
     @field_validator("client_id", "client_secret", "auth0_subdomain", mode="before")
     @classmethod
-    def validate_credentials(
-        cls, value: Optional[str], info: ValidationInfo
-    ) -> str:
+    def validate_credentials(cls, value: Optional[str], info: ValidationInfo) -> str:
         variable_mapping = {
             "client_id": "AUTH0_CLIENT_ID",
             "client_secret": "AUTH0_CLIENT_SECRET",
