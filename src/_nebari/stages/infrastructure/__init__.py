@@ -544,16 +544,17 @@ class InputSchema(schema.Base):
     azure: typing.Optional[AzureProvider]
     digital_ocean: typing.Optional[DigitalOceanProvider]
 
-    @pydantic.root_validator(pre=True)
-    def check_provider(cls, values):
-        if "provider" in values:
-            provider: str = values["provider"]
+    @model_validator(mode="before")
+    @classmethod
+    def check_provider(cls, data: Any) -> Any:
+        if "provider" in data:
+            provider: str = data["provider"]
             if hasattr(schema.ProviderEnum, provider):
                 # TODO: all cloud providers has required fields, but local and existing don't.
                 #  And there is no way to initialize a model without user input here.
                 #  We preserve the original behavior here, but we should find a better way to do this.
-                if provider in ["local", "existing"] and provider not in values:
-                    values[provider] = provider_enum_model_map[provider]()
+                if provider in ["local", "existing"] and provider not in data:
+                    data[provider] = provider_enum_model_map[provider]()
             else:
                 # if the provider field is invalid, it won't be set when this validator is called
                 # so we need to check for it explicitly here, and set the `pre` to True
@@ -565,16 +566,16 @@ class InputSchema(schema.Base):
             setted_providers = [
                 provider
                 for provider in provider_name_abbreviation_map.keys()
-                if provider in values
+                if provider in data
             ]
             num_providers = len(setted_providers)
             if num_providers > 1:
                 raise ValueError(f"Multiple providers set: {setted_providers}")
             elif num_providers == 1:
-                values["provider"] = provider_name_abbreviation_map[setted_providers[0]]
+                data["provider"] = provider_name_abbreviation_map[setted_providers[0]]
             elif num_providers == 0:
-                values["provider"] = schema.ProviderEnum.local.value
-        return values
+                data["provider"] = schema.ProviderEnum.local.value
+        return data
 
 
 class NodeSelectorKeyValue(schema.Base):
