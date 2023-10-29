@@ -1,7 +1,7 @@
 from contextlib import nullcontext
 
 import pytest
-from pydantic.error_wrappers import ValidationError
+from pydantic import ValidationError
 
 from nebari import schema
 from nebari.plugins import nebari_plugin_manager
