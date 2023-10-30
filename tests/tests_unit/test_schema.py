@@ -187,7 +187,11 @@ def test_kubernetes_version(config_schema):
     config_dict = {
         "project_name": "test",
         "provider": "gcp",
-        "google_cloud_platform": {"project": "test", "region": "us-east1" ,"kubernetes_version": "1.23"},
+        "google_cloud_platform": {
+            "project": "test",
+            "region": "us-east1",
+            "kubernetes_version": "1.23",
+        },
     }
     config = config_schema(**config_dict)
     assert config.provider == "gcp"

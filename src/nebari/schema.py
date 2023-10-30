@@ -65,7 +65,9 @@ class Main(Base):
     @field_validator("nebari_version")
     @classmethod
     def check_default(cls, value):
-        assert cls.is_version_accepted(value), f"nebari_version={value} is not an accepted version, it must be equivalent to {__version__}.\nInstall a different version of nebari or run nebari upgrade to ensure your config file is compatible."
+        assert cls.is_version_accepted(
+            value
+        ), f"nebari_version={value} is not an accepted version, it must be equivalent to {__version__}.\nInstall a different version of nebari or run nebari upgrade to ensure your config file is compatible."
         return value
 
     @classmethod

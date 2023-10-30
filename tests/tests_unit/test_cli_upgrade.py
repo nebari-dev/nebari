@@ -469,7 +469,10 @@ cdsdashboards:
                     assert end_version == upgraded["nebari_version"]
 
             if k8s_status == "invalid":
-                assert f"Unable to detect Kubernetes version for provider {provider}" in result.stdout
+                assert (
+                    f"Unable to detect Kubernetes version for provider {provider}"
+                    in result.stdout
+                )
 
 
 def assert_nebari_upgrade_success(
