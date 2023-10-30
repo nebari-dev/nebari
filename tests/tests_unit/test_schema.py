@@ -125,7 +125,7 @@ def test_no_provider(config_schema, provider, full_name, default_fields):
     }
     config = config_schema(**config_dict)
     assert config.provider == provider
-    assert full_name in config.dict()
+    assert full_name in config.model_dump()
 
 
 def test_multiple_providers(config_schema):
@@ -164,6 +164,31 @@ def test_setted_provider(config_schema, provider):
     }
     config = config_schema(**config_dict)
     assert config.provider == provider
-    result_config_dict = config.dict()
+    result_config_dict = config.model_dump()
     assert provider in result_config_dict
     assert result_config_dict[provider]["kube_context"] == "some_context"
+
+
+def test_invalid_nebari_version(config_schema):
+    nebari_version = "9999.99.9"
+    config_dict = {
+        "project_name": "test",
+        "provider": "local",
+        "nebari_version": f"{nebari_version}",
+    }
+    with pytest.raises(
+        ValidationError,
+        match=rf".* Assertion failed, nebari_version={nebari_version} is not an accepted version.*",
+    ):
+        config_schema(**config_dict)
+
+
+def test_kubernetes_version(config_schema):
+    config_dict = {
+        "project_name": "test",
+        "provider": "gcp",
+        "google_cloud_platform": {"project": "test", "region": "us-east1" ,"kubernetes_version": "1.23"},
+    }
+    config = config_schema(**config_dict)
+    assert config.provider == "gcp"
+    assert config.google_cloud_platform.kubernetes_version == "1.23"

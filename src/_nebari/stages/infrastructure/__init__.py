@@ -221,7 +221,7 @@ class DigitalOceanProvider(schema.Base):
     region: str
     kubernetes_version: Optional[str] = None
     # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
-    node_groups: typing.Dict[str, DigitalOceanNodeGroup] = {
+    node_groups: Dict[str, DigitalOceanNodeGroup] = {
         "general": DigitalOceanNodeGroup(
             instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1
         ),
@@ -232,7 +232,7 @@ class DigitalOceanProvider(schema.Base):
             instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5
         ),
     }
-    tags: typing.Optional[typing.List[str]] = []
+    tags: Optional[List[str]] = []
 
     @model_validator(mode="before")
     @classmethod
@@ -260,11 +260,12 @@ class DigitalOceanProvider(schema.Base):
             )
 
         available_instances = {_["slug"] for _ in digital_ocean.instances()}
-        for _, node_group in data["node_groups"].items():
-            if node_group.instance not in available_instances:
-                raise ValueError(
-                    f"Digital Ocean instance {node_group.instance} not one of available instance types={available_instances}"
-                )
+        if "node_groups" in data:
+            for _, node_group in data["node_groups"].items():
+                if node_group["instance"] not in available_instances:
+                    raise ValueError(
+                        f"Digital Ocean instance {node_group.instance} not one of available instance types={available_instances}"
+                    )
         return data
 
 
@@ -340,12 +341,14 @@ class GoogleCloudPlatformProvider(schema.Base):
     def _check_input(cls, data: Any) -> Any:
         google_cloud.check_credentials()
         avaliable_regions = google_cloud.regions(data["project"])
+        print(avaliable_regions)
         if data["region"] not in avaliable_regions:
             raise ValueError(
                 f"Google Cloud region={data['region']} is not one of {avaliable_regions}"
             )
 
         available_kubernetes_versions = google_cloud.kubernetes_versions(data["region"])
+        print(available_kubernetes_versions)
         if data["kubernetes_version"] not in available_kubernetes_versions:
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
@@ -433,9 +436,8 @@ class AWSNodeGroup(schema.Base):
 
 class AmazonWebServicesProvider(schema.Base):
     region: str
-    kubernetes_version: Optional[str] = None
-    availability_zones: Optional[List[str]] = None
-    node_groups: typing.Dict[str, AWSNodeGroup] = {
+    vpc_cidr_block: str = "10.10.0.0/16"
+    node_groups: Dict[str, AWSNodeGroup] = {
         "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
         "user": AWSNodeGroup(
             instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
@@ -444,9 +446,10 @@ class AmazonWebServicesProvider(schema.Base):
             instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
         ),
     }
-    existing_subnet_ids: typing.Optional[typing.List[str]] = None
-    existing_security_group_ids: typing.Optional[str] = None
-    vpc_cidr_block: str = "10.10.0.0/16"
+    kubernetes_version: Optional[str] = None
+    availability_zones: Optional[List[str]] = None
+    existing_subnet_ids: Optional[List[str]] = None
+    existing_security_group_ids: Optional[str] = None
     permissions_boundary: Optional[str] = None
 
     @model_validator(mode="before")
@@ -476,7 +479,7 @@ class AmazonWebServicesProvider(schema.Base):
 
         # check if availability zones are valid
         available_zones = amazon_web_services.zones(data["region"])
-        if data["availability_zones"] is None:
+        if "availability_zones" not in data:
             data["availability_zones"] = available_zones
         else:
             for zone in data["availability_zones"]:
@@ -487,11 +490,12 @@ class AmazonWebServicesProvider(schema.Base):
 
         # check if instances are valid
         available_instances = amazon_web_services.instances(data["region"])
-        for _, node_group in data["node_groups"].items():
-            if node_group.instance not in available_instances:
-                raise ValueError(
-                    f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
-                )
+        if "node_groups" in data:
+            for _, node_group in data["node_groups"].items():
+                if node_group.instance not in available_instances:
+                    raise ValueError(
+                        f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
+                    )
         return data
 
 
@@ -537,12 +541,12 @@ provider_name_abbreviation_map: Dict[str, str] = {
 
 
 class InputSchema(schema.Base):
-    local: typing.Optional[LocalProvider]
-    existing: typing.Optional[ExistingProvider]
-    google_cloud_platform: typing.Optional[GoogleCloudPlatformProvider]
-    amazon_web_services: typing.Optional[AmazonWebServicesProvider]
-    azure: typing.Optional[AzureProvider]
-    digital_ocean: typing.Optional[DigitalOceanProvider]
+    local: Optional[LocalProvider] = None
+    existing: Optional[ExistingProvider] = None
+    google_cloud_platform: Optional[GoogleCloudPlatformProvider] = None
+    amazon_web_services: Optional[AmazonWebServicesProvider] = None
+    azure: Optional[AzureProvider] = None
+    digital_ocean: Optional[DigitalOceanProvider] = None
 
     @model_validator(mode="before")
     @classmethod

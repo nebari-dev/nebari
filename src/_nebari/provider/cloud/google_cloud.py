@@ -10,12 +10,15 @@ from nebari import schema
 
 
 def check_credentials():
+    print("Checking credentials")
     for variable in {"GOOGLE_CREDENTIALS", "PROJECT_ID"}:
         if variable not in os.environ:
             raise ValueError(
                 f"""Missing the following required environment variable: {variable}\n
                 Please see the documentation for more information: {constants.GCP_ENV_DOCS}"""
             )
+        else:
+            print(f"Found environment variable: {variable}, {os.environ[variable]}")
 
 
 @functools.lru_cache()

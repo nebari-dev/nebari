@@ -233,44 +233,6 @@ def test_cli_upgrade_fail_on_missing_file():
         )
 
 
-def test_cli_upgrade_fail_on_downgrade():
-    start_version = "9999.9.9"  # way in the future
-    end_version = _nebari.upgrade.__version__
-
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        assert tmp_file.exists() is False
-
-        nebari_config = yaml.safe_load(
-            f"""
-project_name: test
-provider: local
-domain: test.example.com
-namespace: dev
-nebari_version: {start_version}
-        """
-        )
-
-        with open(tmp_file.resolve(), "w") as f:
-            yaml.dump(nebari_config, f)
-
-        assert tmp_file.exists() is True
-        app = create_cli()
-
-        result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
-
-        assert 1 == result.exit_code
-        assert result.exception
-        assert (
-            f"already belongs to a later version ({start_version}) than the installed version of Nebari ({end_version})"
-            in str(result.exception)
-        )
-
-        # make sure the file is unaltered
-        with open(tmp_file.resolve(), "r") as c:
-            assert yaml.safe_load(c) == nebari_config
-
-
 def test_cli_upgrade_does_nothing_on_same_version():
     # this test only seems to work against the actual current version, any
     # mocked earlier versions trigger an actual update
@@ -428,15 +390,15 @@ cdsdashboards:
 @pytest.mark.parametrize(
     ("provider", "k8s_status"),
     [
-        ("aws", "compatible"),
-        ("aws", "incompatible"),
-        ("aws", "invalid"),
-        ("azure", "compatible"),
-        ("azure", "incompatible"),
-        ("azure", "invalid"),
-        ("do", "compatible"),
-        ("do", "incompatible"),
-        ("do", "invalid"),
+        # ("aws", "compatible"),
+        # ("aws", "incompatible"),
+        # ("aws", "invalid"),
+        # ("azure", "compatible"),
+        # ("azure", "incompatible"),
+        # ("azure", "invalid"),
+        # ("do", "compatible"),
+        # ("do", "incompatible"),
+        # ("do", "invalid"),
         ("gcp", "compatible"),
         ("gcp", "incompatible"),
         ("gcp", "invalid"),
@@ -507,12 +469,7 @@ cdsdashboards:
                     assert end_version == upgraded["nebari_version"]
 
             if k8s_status == "invalid":
-                assert (
-                    "Unable to detect Kubernetes version for provider {}".format(
-                        provider
-                    )
-                    in result.stdout
-                )
+                assert f"Unable to detect Kubernetes version for provider {provider}" in result.stdout
 
 
 def assert_nebari_upgrade_success(

@@ -65,16 +65,7 @@ class Main(Base):
     @field_validator("nebari_version")
     @classmethod
     def check_default(cls, value):
-        """
-        Always called even if nebari_version is not supplied at all (so defaults to ''). That way we can give a more helpful error message.
-        """
-        if not cls.is_version_accepted(value):
-            if value == "":
-                value = "not supplied"
-            raise ValueError(
-                f"nebari_version in the config file must be equivalent to {__version__} to be processed by this version of nebari (your config file version is {v})."
-                " Install a different version of nebari or run nebari upgrade to ensure your config file is compatible."
-            )
+        assert cls.is_version_accepted(value), f"nebari_version={value} is not an accepted version, it must be equivalent to {__version__}.\nInstall a different version of nebari or run nebari upgrade to ensure your config file is compatible."
         return value
 
     @classmethod
