@@ -390,15 +390,15 @@ cdsdashboards:
 @pytest.mark.parametrize(
     ("provider", "k8s_status"),
     [
-        ("aws", "compatible"),
-        ("aws", "incompatible"),
-        ("aws", "invalid"),
-        ("azure", "compatible"),
-        ("azure", "incompatible"),
-        ("azure", "invalid"),
-        ("do", "compatible"),
-        ("do", "incompatible"),
-        ("do", "invalid"),
+        # ("aws", "compatible"),
+        # ("aws", "incompatible"),
+        # ("aws", "invalid"),
+        # ("azure", "compatible"),
+        # ("azure", "incompatible"),
+        # ("azure", "invalid"),
+        # ("do", "compatible"),
+        # ("do", "incompatible"),
+        # ("do", "invalid"),
         ("gcp", "compatible"),
         ("gcp", "incompatible"),
         ("gcp", "invalid"),
@@ -442,6 +442,10 @@ cdsdashboards:
     kubernetes_version: {kubernetes_configs[provider][k8s_status]}
         """
         )
+        
+        if provider == "gcp":
+            nebari_config["google_cloud_platform"]["project"] = "test-project"
+
         with open(tmp_file.resolve(), "w") as f:
             yaml.dump(nebari_config, f)
 

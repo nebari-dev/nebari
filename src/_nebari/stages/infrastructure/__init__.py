@@ -492,7 +492,7 @@ class AmazonWebServicesProvider(schema.Base):
         available_instances = amazon_web_services.instances(data["region"])
         if "node_groups" in data:
             for _, node_group in data["node_groups"].items():
-                if node_group.instance not in available_instances:
+                if node_group["instance"] not in available_instances:
                     raise ValueError(
                         f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
                     )

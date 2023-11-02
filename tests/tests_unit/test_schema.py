@@ -183,16 +183,17 @@ def test_invalid_nebari_version(config_schema):
         config_schema(**config_dict)
 
 
-def test_kubernetes_version(config_schema):
+def test_unsupported_kubernetes_version(config_schema):
+    # the mocked available kubernetes versions are 1.18, 1.19, 1.20
+    unsupported_version = "1.23"
     config_dict = {
         "project_name": "test",
         "provider": "gcp",
         "google_cloud_platform": {
             "project": "test",
             "region": "us-east1",
-            "kubernetes_version": "1.23",
+            "kubernetes_version": f"{unsupported_version}",
         },
     }
-    config = config_schema(**config_dict)
-    assert config.provider == "gcp"
-    assert config.google_cloud_platform.kubernetes_version == "1.23"
+    with pytest.raises(ValidationError, match=rf"Invalid `kubernetes-version` provided: {unsupported_version}..*"):
+        config_schema(**config_dict)
