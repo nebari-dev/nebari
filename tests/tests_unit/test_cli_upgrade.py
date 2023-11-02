@@ -442,7 +442,7 @@ cdsdashboards:
     kubernetes_version: {kubernetes_configs[provider][k8s_status]}
         """
         )
-        
+
         if provider == "gcp":
             nebari_config["google_cloud_platform"]["project"] = "test-project"
 

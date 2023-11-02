@@ -21,8 +21,12 @@ def test_render_config(nebari_render):
         "03-kubernetes-initialize",
     }.issubset(os.listdir(output_directory / "stages"))
 
-    assert (output_directory / "stages" / f"01-terraform-state/{config.provider}").is_dir()
-    assert (output_directory / "stages" / f"02-infrastructure/{config.provider}").is_dir()
+    assert (
+        output_directory / "stages" / f"01-terraform-state/{config.provider}"
+    ).is_dir()
+    assert (
+        output_directory / "stages" / f"02-infrastructure/{config.provider}"
+    ).is_dir()
 
     if config.ci_cd.type == CiEnum.github_actions:
         assert (output_directory / ".github/workflows/").is_dir()

@@ -195,5 +195,8 @@ def test_unsupported_kubernetes_version(config_schema):
             "kubernetes_version": f"{unsupported_version}",
         },
     }
-    with pytest.raises(ValidationError, match=rf"Invalid `kubernetes-version` provided: {unsupported_version}..*"):
+    with pytest.raises(
+        ValidationError,
+        match=rf"Invalid `kubernetes-version` provided: {unsupported_version}..*",
+    ):
         config_schema(**config_dict)
