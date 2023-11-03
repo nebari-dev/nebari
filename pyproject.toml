@@ -78,7 +78,7 @@ dependencies = [
     "google-cloud-storage==2.13.0",
     "google-cloud-container==2.32.0",
     "google-cloud-iam-credentials== 1.4.1",
-    
+
 ]
 
 [project.optional-dependencies]

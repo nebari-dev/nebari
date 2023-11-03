@@ -1,8 +1,15 @@
 import functools
-import json
 import os
 from typing import Dict, List
-from google.cloud import resourcemanager , compute_v1 , container_v1 , storage , iam_credentials_v1
+
+from google.cloud import (
+    compute_v1,
+    container_v1,
+    iam_credentials_v1,
+    resourcemanager,
+    storage,
+)
+
 from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 from nebari import schema
@@ -32,7 +39,9 @@ def projects() -> Dict[str, str]:
 def regions(project: str) -> Dict[str, str]:
     """Return a dict of available regions."""
     client = compute_v1.RegionClient()
-    request = compute_v1.ListRegionsRequest(project="project_value",)
+    request = compute_v1.ListRegionsRequest(
+        project="project_value",
+    )
     regions = client.list(request=request)
     region_dict = {region.description: region.name for region in regions}
 
@@ -44,9 +53,13 @@ def zones(project: str, region: str) -> Dict[str, str]:
     """Return a dict of available zones."""
     check_credentials()
     client = compute_v1.ZonesClient()
-    request = compute_v1.ListZonesRequest(project="project_value",)
+    request = compute_v1.ListZonesRequest(
+        project="project_value",
+    )
     zones = client.list(request=request)
-    zone_dict = {zone.description: zone.name for zone in zones if zone.name.startswith(region)}
+    zone_dict = {
+        zone.description: zone.name for zone in zones if zone.name.startswith(region)
+    }
     return zone_dict
 
 
@@ -58,17 +71,21 @@ def kubernetes_versions(region: str) -> List[str]:
     request = container_v1.GetServerConfigRequest()
     response = client.get_server_config(request=request)
     supported_kubernetes_versions = sorted(response.valid_master_versions)
-    filtered_versions = filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
+    filtered_versions = filter_by_highest_supported_k8s_version(
+        supported_kubernetes_versions
+    )
     return filtered_versions
 
 
-
 @functools.lru_cache()
-def instances(project: str , zone: str) -> Dict[str, str]:
+def instances(project: str, zone: str) -> Dict[str, str]:
     """Return a dict of available instances of a particular zone."""
     check_credentials()
     client = compute_v1.InstancesClient()
-    request = compute_v1.ListInstancesRequest(project="project",zone="zone",)
+    request = compute_v1.ListInstancesRequest(
+        project="project",
+        zone="zone",
+    )
     instances = client.list(request=request)
     instance_dict = {instances.description: instances.name for instance in instances}
     return instance_dict
@@ -78,9 +95,10 @@ def cluster_exists(cluster_name: str, project_id: str, zone: str) -> bool:
     """Check if a GKE cluster exists."""
     client = container_v1.ClusterManagerClient()
     request = container_v1.GetClusterRequest()
-    response = client.get_cluster(request=request, project_id= project_id, zone=zone)
+    response = client.get_cluster(request=request, project_id=project_id, zone=zone)
 
     return response is not None
+
 
 def bucket_exists(bucket_name: str, project_id: str) -> bool:
     """Check if a storage bucket exists."""
@@ -92,7 +110,7 @@ def bucket_exists(bucket_name: str, project_id: str) -> bool:
 def service_account_exists(service_account_name: str, project_id: str) -> bool:
     """Check if a service account exists."""
     client = iam_credentials_v1.IAMCredentialsClient()
-    service_acc = client.service_account_path(project_id , service_account_name)
+    service_acc = client.service_account_path(project_id, service_account_name)
     return service_acc is not None
 
 
@@ -109,12 +127,13 @@ def delete_cluster(cluster_name: str, project_id: str, region: str):
     client = container_v1.ClusterManagerClient()
     request = client.DeleteClusterRequest()
     try:
-        operation = client.delete_cluster(request=request)
+        client.delete_cluster(request=request)
     except google.api_core.exceptions.GoogleAPICallError as e:
-      if e.status_code == 200:
-          print("Cluster deleted successfully!") 
-      else: 
-          print("error deleting cluster!")
+        if e.status_code == 200:
+            print("Cluster deleted successfully!")
+        else:
+            print("error deleting cluster!")
+
 
 def delete_storage_bucket(bucket_name: str, project_id: str):
     """Delete a storage bucket if it exists."""
@@ -134,6 +153,7 @@ def delete_storage_bucket(bucket_name: str, project_id: str):
     except storage.exceptions.BucketNotFoundError as e:
         print(f"Failed to delete bucket {bucket_name}. Error: {e}")
 
+
 def delete_service_account(service_account_name: str, project_id: str):
     """Delete a service account if it exists."""
     check_credentials()
@@ -144,13 +164,12 @@ def delete_service_account(service_account_name: str, project_id: str):
         )
         return
     client = iam_credentials_v1.IAMCredentialsClient()
-    service_acc = client.service_account_path(project_id , service_account_name)
+    client.service_account_path(project_id, service_account_name)
     try:
         client.delete_service_account(service_account_name)
         print(f"Successfully deleted service account {service_account_name}.")
     except iam_credentials_v1.exceptions.IamServiceAccountNotFoundError as e:
         print(f"Failed to delete service account {service_account_name}. Error: {e}")
-    
 
 
 def gcp_cleanup(config: schema.Main):
