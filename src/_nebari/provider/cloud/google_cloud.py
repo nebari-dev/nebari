@@ -1,11 +1,8 @@
 import functools
 import json
 import os
-import subprocess
 from typing import Dict, List
-
-from google.cloud import compute, resourcemanager
-
+from google.cloud import resourcemanager , compute_v1 , container_v1 , storage , iam_credentials_v1
 from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 from nebari import schema
@@ -34,8 +31,9 @@ def projects() -> Dict[str, str]:
 @functools.lru_cache()
 def regions(project: str) -> Dict[str, str]:
     """Return a dict of available regions."""
-    client = compute.Client()
-    regions = client.list_regions(project=project)
+    client = compute_v1.RegionClient()
+    request = compute_v1.ListRegionsRequest(project="project_value",)
+    regions = client.list(request=request)
     region_dict = {region.description: region.name for region in regions}
 
     return region_dict
@@ -45,107 +43,57 @@ def regions(project: str) -> Dict[str, str]:
 def zones(project: str, region: str) -> Dict[str, str]:
     """Return a dict of available zones."""
     check_credentials()
-    output = subprocess.check_output(
-        ["gcloud", "compute", "zones", "list", "--project", project, "--format=json"]
-    )
-    data = json.loads(output.decode("utf-8"))
-    return {_["description"]: _["name"] for _ in data if _["name"].startswith(region)}
+    client = compute_v1.ZonesClient()
+    request = compute_v1.ListZonesRequest(project="project_value",)
+    zones = client.list(request=request)
+    zone_dict = {zone.description: zone.name for zone in zones if zone.name.startswith(region)}
+    return zone_dict
 
 
 @functools.lru_cache()
 def kubernetes_versions(region: str) -> List[str]:
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
     check_credentials()
-    output = subprocess.check_output(
-        [
-            "gcloud",
-            "container",
-            "get-server-config",
-            "--region",
-            region,
-            "--format=json",
-        ]
-    )
-    data = json.loads(output.decode("utf-8"))
-    supported_kubernetes_versions = sorted([_ for _ in data["validMasterVersions"]])
-    return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
+    client = container_v1.ClusterManagerClient()
+    request = container_v1.GetServerConfigRequest()
+    response = client.get_server_config(request=request)
+    supported_kubernetes_versions = sorted(response.valid_master_versions)
+    filtered_versions = filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
+    return filtered_versions
+
 
 
 @functools.lru_cache()
-def instances(project: str) -> Dict[str, str]:
-    """Return a dict of available instances."""
+def instances(project: str , zone: str) -> Dict[str, str]:
+    """Return a dict of available instances of a particular zone."""
     check_credentials()
-    output = subprocess.check_output(
-        [
-            "gcloud",
-            "compute",
-            "machine-types",
-            "list",
-            "--project",
-            project,
-            "--format=json",
-        ]
-    )
-    data = json.loads(output.decode("utf-8"))
-    return {_["description"]: _["name"] for _ in data}
+    client = compute_v1.InstancesClient()
+    request = compute_v1.ListInstancesRequest(project="project",zone="zone",)
+    instances = client.list(request=request)
+    instance_dict = {instances.description: instances.name for instance in instances}
+    return instance_dict
 
 
-def cluster_exists(cluster_name: str, project_id: str, region: str) -> bool:
+def cluster_exists(cluster_name: str, project_id: str, zone: str) -> bool:
     """Check if a GKE cluster exists."""
-    try:
-        subprocess.check_output(
-            [
-                "gcloud",
-                "container",
-                "clusters",
-                "describe",
-                cluster_name,
-                "--project",
-                project_id,
-                "--region",
-                region,
-            ]
-        )
-        return True
-    except subprocess.CalledProcessError:
-        return False
+    client = container_v1.ClusterManagerClient()
+    request = container_v1.GetClusterRequest()
+    response = client.get_cluster(request=request, project_id= project_id, zone=zone)
 
+    return response is not None
 
 def bucket_exists(bucket_name: str, project_id: str) -> bool:
     """Check if a storage bucket exists."""
-    try:
-        print(f"Checking if bucket {bucket_name} exists in project {project_id}.")
-        subprocess.check_output(
-            [
-                "gsutil",
-                "ls",
-                f"gs://{bucket_name}/",
-                "-p",
-                project_id,
-            ]
-        )
-        return True
-    except subprocess.CalledProcessError:
-        return False
+    client = storage.Client(project=project_id)
+    bucket = client.get_bucket(bucket_name)
+    return bucket is not None
 
 
 def service_account_exists(service_account_name: str, project_id: str) -> bool:
     """Check if a service account exists."""
-    try:
-        subprocess.check_output(
-            [
-                "gcloud",
-                "iam",
-                "service-accounts",
-                "describe",
-                service_account_name,
-                "--project",
-                project_id,
-            ]
-        )
-        return True
-    except subprocess.CalledProcessError:
-        return False
+    client = iam_credentials_v1.IAMCredentialsClient()
+    service_acc = client.service_account_path(project_id , service_account_name)
+    return service_acc is not None
 
 
 def delete_cluster(cluster_name: str, project_id: str, region: str):
@@ -158,25 +106,15 @@ def delete_cluster(cluster_name: str, project_id: str, region: str):
         )
         return
 
+    client = container_v1.ClusterManagerClient()
+    request = client.DeleteClusterRequest()
     try:
-        subprocess.check_call(
-            [
-                "gcloud",
-                "container",
-                "clusters",
-                "delete",
-                cluster_name,
-                "--project",
-                project_id,
-                "--region",
-                region,
-                "--quiet",
-            ]
-        )
-        print(f"Successfully deleted cluster {cluster_name}.")
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to delete cluster {cluster_name}. Error: {e}")
-
+        operation = client.delete_cluster(request=request)
+    except google.api_core.exceptions.GoogleAPICallError as e:
+      if e.status_code == 200:
+          print("Cluster deleted successfully!") 
+      else: 
+          print("error deleting cluster!")
 
 def delete_storage_bucket(bucket_name: str, project_id: str):
     """Delete a storage bucket if it exists."""
@@ -188,22 +126,13 @@ def delete_storage_bucket(bucket_name: str, project_id: str):
         )
         return
 
+    client = storage.Client(project=project_id)
+    bucket = client.get_bucket(bucket_name)
     try:
-        subprocess.check_call(
-            [
-                "gsutil",
-                "-m",
-                "rm",
-                "-r",
-                f"gs://{bucket_name}",
-                "-p",
-                project_id,
-            ]
-        )
+        bucket.delete()
         print(f"Successfully deleted bucket {bucket_name}.")
-    except subprocess.CalledProcessError as e:
+    except storage.exceptions.BucketNotFoundError as e:
         print(f"Failed to delete bucket {bucket_name}. Error: {e}")
-
 
 def delete_service_account(service_account_name: str, project_id: str):
     """Delete a service account if it exists."""
@@ -214,23 +143,14 @@ def delete_service_account(service_account_name: str, project_id: str):
             f"Service account {service_account_name} does not exist in project {project_id}. Exiting gracefully."
         )
         return
-
+    client = iam_credentials_v1.IAMCredentialsClient()
+    service_acc = client.service_account_path(project_id , service_account_name)
     try:
-        subprocess.check_call(
-            [
-                "gcloud",
-                "iam",
-                "service-accounts",
-                "delete",
-                service_account_name,
-                "--quiet",
-                "--project",
-                project_id,
-            ]
-        )
+        client.delete_service_account(service_account_name)
         print(f"Successfully deleted service account {service_account_name}.")
-    except subprocess.CalledProcessError as e:
+    except iam_credentials_v1.exceptions.IamServiceAccountNotFoundError as e:
         print(f"Failed to delete service account {service_account_name}. Error: {e}")
+    
 
 
 def gcp_cleanup(config: schema.Main):
