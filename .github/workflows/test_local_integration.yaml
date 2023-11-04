@@ -1,14 +1,14 @@
-name: "Kubernetes Tests"
+name: "Local Integration Tests"
 
 env:
-  EXAMPLE_USER_NAME: example-user
-  EXAMPLE_USER_PASSWORD: P@sswo3d
-  TEST_DOMAIN: github-actions.nebari.dev
+  TEST_USERNAME: "test-user"
+  TEST_PASSWORD: "P@sswo3d"
+  NEBARI_IMAGE_TAG: "main"
 
 on:
   pull_request:
     paths:
-      - ".github/workflows/kubernetes_test.yaml"
+      - ".github/workflows/test_local_integration.yaml"
       - "tests/**"
       - "scripts/**"
       - "src/**"
@@ -21,7 +21,7 @@ on:
       - develop
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
-      - ".github/workflows/kubernetes_test.yaml"
+      - ".github/workflows/test_local_integration.yaml"
       - "tests/**"
       - "scripts/**"
       - "src/**"
@@ -35,25 +35,18 @@ on:
         type: string
 
 jobs:
-  test-kubernetes:
-    name: "Kubernetes Tests"
+  test-local-integration:
     runs-on: "cirun-runner--${{ github.run_id }}"
     defaults:
       run:
         shell: bash -l {0}
     concurrency:
       group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-      cancel-in-progress: true
     steps:
-      - name: "Set NEBARI_IMAGE_TAG=main"
-        run: |
-          echo "NEBARI_IMAGE_TAG=main" >> "$GITHUB_ENV"
-          echo "GITHUB_BASE_REF: ${GITHUB_BASE_REF}"
-          echo "GITHUB_HEAD_REF: ${GITHUB_HEAD_REF}"
-          echo "GITHUB_REF: ${GITHUB_REF}"
-
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
+        with:
+          fetch-depth: 0
 
       - name: Checkout the branch from the PR that triggered the job
         if: ${{ github.event_name == 'issue_comment' }}
@@ -68,18 +61,18 @@ jobs:
         env:
           CONDA: /home/runnerx/miniconda3
         with:
+          auto-update-conda: true
           python-version: 3.8
           miniconda-version: "latest"
-          auto-update-conda: true
 
-      - name: Install Nebari
+      - name: Install Nebari and playwright
         run: |
           pip install .[dev]
-          playwright install --with-deps chromium
+          playwright install
 
       - uses: azure/setup-kubectl@v3
         with:
-          version: v1.26.9
+          version: v1.19.16
 
       - name: Enable docker permissions for user
         run: |
@@ -88,20 +81,23 @@ jobs:
 
           docker info
           docker ps
+
       - name: Get routing table for docker pods
         run: |
           ip route
+
       - name: Initialize Nebari Cloud
         run: |
           mkdir -p local-deployment
           cd local-deployment
-          nebari init local --project=thisisatest --domain "${TEST_DOMAIN}" --auth-provider=password
+          nebari init local --project=thisisatest --domain github-actions.nebari.dev --auth-provider=password
 
           # Need smaller profiles on Local Kind
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
           sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
 
           cat nebari-config.yaml
+
       - name: Deploy Nebari
         working-directory: local-deployment
         run: |
@@ -114,39 +110,60 @@ jobs:
 
       - name: Check github-actions.nebari.dev resolves
         run: |
-          nslookup ${TEST_DOMAIN}
+          nslookup github-actions.nebari.dev
 
       - name: Curl jupyterhub login page
         run: |
-          curl -k https://${TEST_DOMAIN}/hub/home -i
+          curl -k https://github-actions.nebari.dev/hub/home -i
 
       - name: Create example-user
         working-directory: local-deployment
         run: |
-          nebari keycloak adduser --user "${EXAMPLE_USER_NAME}" "${EXAMPLE_USER_PASSWORD}" --config nebari-config.yaml
+          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
           nebari keycloak listusers --config nebari-config.yaml
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Get nebari-config.yaml full path
+        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        env:
+          CYPRESS_EXAMPLE_USER_NAME: ${{ env.TEST_USERNAME }}
+          CYPRESS_EXAMPLE_USER_PASSWORD: ${{ env.TEST_PASSWORD }}
+          CYPRESS_BASE_URL: https://github-actions.nebari.dev/
+        with:
+          working-directory: tests/tests_e2e
 
       - name: Playwright Tests
         env:
-          KEYCLOAK_USERNAME: ${{ env.EXAMPLE_USER_NAME }}
-          KEYCLOAK_PASSWORD: ${{ env.EXAMPLE_USER_PASSWORD }}
-          NEBARI_FULL_URL: http://${{ env.TEST_DOMAIN }}/
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+          NEBARI_FULL_URL: https://github-actions.nebari.dev/
+        working-directory: tests/tests_e2e/playwright
         run: |
-          mkdir screenshots
-          xvfb-run pytest -m local --browser chromium --headed tests/tests_integration
+          # create environment file
+          envsubst < .env.tpl > .env
+          # run playwright pytest tests in headed mode with the chromium browser
+          xvfb-run pytest --browser chromium
 
-      - name: Save screenshots
+      - name: Save Cypress screenshots and videos
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: integration-playwright
+          name: e2e-cypress
           path: |
-            ./screenshots/
+            ./tests/tests_e2e/cypress/screenshots/
+            ./tests/tests_e2e/cypress/videos/
+            ./tests/tests_e2e/playwright/videos/
 
       - name: Deployment Pytests
         env:
-          KEYCLOAK_USERNAME: ${{ env.EXAMPLE_USER_NAME }}
-          KEYCLOAK_PASSWORD: ${{ env.EXAMPLE_USER_PASSWORD }}
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
         run: |
           pytest tests/tests_deployment/ -v -s
 
@@ -155,11 +172,11 @@ jobs:
         # run jhub-client after pytest since jhubctl can cleanup
         # the running server
         env:
-          JUPYTERHUB_USERNAME: ${{ env.EXAMPLE_USER_NAME }}
-          JUPYTERHUB_PASSWORD: ${{ env.EXAMPLE_USER_PASSWORD }}
+          JUPYTERHUB_USERNAME: ${{ env.TEST_USERNAME }}
+          JUPYTERHUB_PASSWORD: ${{ env.TEST_PASSWORD }}
         run: |
           sleep 60
-          jhubctl --verbose run --hub=https://${TEST_DOMAIN} \
+          jhubctl --verbose run --hub=https://github-actions.nebari.dev\
                                 --auth-type=keycloak \
                                 --validate --no-verify-ssl \
                                 --kernel python3 \
@@ -168,6 +185,7 @@ jobs:
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
+        if: always()
+        working-directory: local-deployment
         run: |
-          cd local-deployment
           nebari destroy --config nebari-config.yaml --disable-prompt
