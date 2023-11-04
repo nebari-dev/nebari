@@ -130,11 +130,8 @@ jobs:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
           NEBARI_FULL_URL: https://github-actions.nebari.dev/
-        working-directory: tests/tests_e2e/playwright
+        working-directory: tests/tests_integration
         run: |
-          # create environment file
-          envsubst < .env.tpl > .env
-          # run playwright pytest tests in headed mode with the chromium browser
           xvfb-run pytest --browser chromium
 
       - name: Deployment Pytests
