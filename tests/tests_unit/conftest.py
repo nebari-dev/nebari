@@ -13,8 +13,6 @@ from _nebari.constants import (
 from _nebari.initialize import render_config
 from _nebari.render import render_template
 from _nebari.stages.bootstrap import CiEnum
-from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
-from _nebari.stages.terraform_state import TerraformStateEnum
 from nebari import schema
 from nebari.plugins import nebari_plugin_manager
 
@@ -100,81 +98,42 @@ def mock_all_cloud_methods(monkeypatch):
 
 @pytest.fixture(
     params=[
-        # project, namespace, domain, cloud_provider, region, ci_provider, auth_provider
+        # cloud_provider, region
         (
-            "pytestdo",
-            "dev",
-            "do.nebari.dev",
             schema.ProviderEnum.do,
             DO_DEFAULT_REGION,
-            CiEnum.github_actions,
-            AuthenticationEnum.password,
         ),
         (
-            "pytestaws",
-            "dev",
-            "aws.nebari.dev",
             schema.ProviderEnum.aws,
             AWS_DEFAULT_REGION,
-            CiEnum.github_actions,
-            AuthenticationEnum.password,
         ),
         (
-            "pytestgcp",
-            "dev",
-            "gcp.nebari.dev",
             schema.ProviderEnum.gcp,
             GCP_DEFAULT_REGION,
-            CiEnum.github_actions,
-            AuthenticationEnum.password,
         ),
         (
-            "pytestazure",
-            "dev",
-            "azure.nebari.dev",
             schema.ProviderEnum.azure,
             AZURE_DEFAULT_REGION,
-            CiEnum.github_actions,
-            AuthenticationEnum.password,
         ),
     ]
 )
-def nebari_config_options(request) -> schema.Main:
+def nebari_config_options(request):
     """This fixtures creates a set of nebari configurations for tests"""
-    DEFAULT_GH_REPO = "github.com/test/test"
-    DEFAULT_TERRAFORM_STATE = TerraformStateEnum.remote
-
-    (
-        project,
-        namespace,
-        domain,
-        cloud_provider,
-        region,
-        ci_provider,
-        auth_provider,
-    ) = request.param
-
-    return dict(
-        project_name=project,
-        namespace=namespace,
-        nebari_domain=domain,
-        cloud_provider=cloud_provider,
-        region=region,
-        ci_provider=ci_provider,
-        auth_provider=auth_provider,
-        repository=DEFAULT_GH_REPO,
-        repository_auto_provision=False,
-        auth_auto_provision=False,
-        terraform_state=DEFAULT_TERRAFORM_STATE,
-        disable_prompt=True,
-    )
+    cloud_provider, region = request.param
+    return {
+        "project_name": "test-project",
+        "nebari_domain": "test.nebari.dev",
+        "cloud_provider": cloud_provider,
+        "region": region,
+        "ci_provider": CiEnum.github_actions,
+        "repository": "github.com/test/test",
+        "disable_prompt": True,
+    }
 
 
 @pytest.fixture
-def nebari_config(nebari_config_options):
-    return nebari_plugin_manager.config_schema.model_validate(
-        render_config(**nebari_config_options)
-    )
+def nebari_config(nebari_config_options, config_schema):
+    return config_schema.model_validate(render_config(**nebari_config_options))
 
 
 @pytest.fixture

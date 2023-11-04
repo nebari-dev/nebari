@@ -77,7 +77,8 @@ def read_configuration(
         )
 
     with filename.open() as f:
-        config = config_schema(**yaml.load(f.read()))
+        config_dict = yaml.load(f)
+        config = config_schema(**config_dict)
 
     if read_environment:
         config = set_config_from_environment_variables(config)

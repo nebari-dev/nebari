@@ -15,16 +15,16 @@ from nebari import schema
 
 
 def check_credentials():
-    for variable in {
-        "SPACES_ACCESS_KEY_ID",
-        "SPACES_SECRET_ACCESS_KEY",
-        "DIGITALOCEAN_TOKEN",
-    }:
-        if variable not in os.environ:
-            raise ValueError(
-                f"""Missing the following required environment variable: {variable}\n
-                Please see the documentation for more information: {constants.DO_ENV_DOCS}"""
-            )
+    required_variables = {
+        "DIGITALOCEAN_TOKEN": os.environ.get("DIGITALOCEAN_TOKEN", None),
+        "SPACES_ACCESS_KEY_ID": os.environ.get("SPACES_ACCESS_KEY_ID", None),
+        "SPACES_SECRET_ACCESS_KEY": os.environ.get("SPACES_SECRET_ACCESS_KEY", None),
+    }
+    if not all(required_variables.values()):
+        raise ValueError(
+            f"""Missing the following required environment variables: {required_variables}\n
+            Please see the documentation for more information: {constants.DO_ENV_DOCS}"""
+        )
 
 
 def digital_ocean_request(url, method="GET", json=None):

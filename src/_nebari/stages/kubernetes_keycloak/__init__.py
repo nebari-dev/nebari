@@ -148,10 +148,49 @@ class Keycloak(schema.Base):
     realm_display_name: str = "Nebari"
 
 
+auth_enum_to_model = {
+    AuthenticationEnum.password: PasswordAuthentication,
+    AuthenticationEnum.auth0: Auth0Authentication,
+    AuthenticationEnum.github: GitHubAuthentication,
+}
+
+auth_enum_to_config = {
+    AuthenticationEnum.auth0: Auth0Config,
+    AuthenticationEnum.github: GitHubConfig,
+}
+
+
 class Security(schema.Base):
     authentication: Authentication = PasswordAuthentication()
     shared_users_group: bool = True
     keycloak: Keycloak = Keycloak()
+
+    @field_validator("authentication", mode="before")
+    @classmethod
+    def validate_authentication(cls, value: Optional[Dict]) -> Authentication:
+        if value is None:
+            return PasswordAuthentication()
+        if "type" not in value:
+            raise ValueError(
+                "Authentication type must be specified if authentication is set"
+            )
+        auth_type = value["type"] if hasattr(value, "__getitem__") else value.type
+        if auth_type in auth_enum_to_model:
+            if auth_type == AuthenticationEnum.password:
+                return auth_enum_to_model[auth_type]()
+            else:
+                if "config" in value:
+                    config_dict = (
+                        value["config"]
+                        if hasattr(value, "__getitem__")
+                        else value.config
+                    )
+                    config = auth_enum_to_config[auth_type](**config_dict)
+                else:
+                    config = auth_enum_to_config[auth_type]()
+                return auth_enum_to_model[auth_type](config=config)
+        else:
+            raise ValueError(f"Unsupported authentication type {auth_type}")
 
 
 class InputSchema(schema.Base):

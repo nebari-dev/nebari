@@ -1,7 +1,10 @@
 import os
 import pathlib
+from typing import Optional
 
 import pytest
+from pydantic import BaseModel
+import yaml
 
 from _nebari.config import (
     backup_configuration,
@@ -10,6 +13,23 @@ from _nebari.config import (
     set_nested_attribute,
     write_configuration,
 )
+
+
+def test_parse_env_config(monkeypatch):
+    keyword = "NEBARI_SECRET__amazon_web_services__kubernetes_version"
+    value = "1.20"
+    monkeypatch.setenv(keyword, value)
+
+    class DummyAWSModel(BaseModel):
+        kubernetes_version: Optional[str] = None
+
+    class DummmyModel(BaseModel):
+        amazon_web_services: DummyAWSModel = DummyAWSModel()
+
+    model = DummmyModel()
+
+    model_updated = set_config_from_environment_variables(model)
+    assert model_updated.amazon_web_services.kubernetes_version == value
 
 
 def test_set_nested_attribute():
@@ -60,6 +80,27 @@ def test_set_config_from_environment_variables(nebari_config):
 
     del os.environ[secret_key]
     del os.environ[secret_key_nested]
+
+
+def test_set_config_from_env(monkeypatch, tmp_path, config_schema):
+    keyword = "NEBARI_SECRET__amazon_web_services__kubernetes_version"
+    value = "1.20"
+    monkeypatch.setenv(keyword, value)
+
+    config_dict = {
+        "provider": "aws",
+        "project_name": "test",
+        "amazon_web_services": {"region": "us-east-1", "kubernetes_version": "1.19"},
+    }
+
+    config_file = tmp_path / "nebari-config.yaml"
+    with config_file.open("w") as f:
+        yaml.dump(config_dict, f)
+
+    from _nebari.config import read_configuration
+
+    config = read_configuration(config_file, config_schema)
+    assert config.amazon_web_services.kubernetes_version == value
 
 
 def test_set_config_from_environment_invalid_secret(nebari_config):

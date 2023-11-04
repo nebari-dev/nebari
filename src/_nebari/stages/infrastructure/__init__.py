@@ -366,19 +366,17 @@ class AzureProvider(schema.Base):
     region: str
     kubernetes_version: Optional[str] = None
     storage_account_postfix: str
-    resource_group_name: str = None
-    node_groups: typing.Dict[str, AzureNodeGroup] = {
+    node_groups: Dict[str, AzureNodeGroup] = {
         "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
         "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
         "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     }
-    storage_account_postfix: str
-    vnet_subnet_id: typing.Optional[typing.Union[str, None]] = None
+    vnet_subnet_id: Optional[str] = None
     private_cluster_enabled: bool = False
-    resource_group_name: typing.Optional[str] = None
-    tags: typing.Optional[typing.Dict[str, str]] = None
-    network_profile: typing.Optional[typing.Dict[str, str]] = None
-    max_pods: typing.Optional[int] = None
+    resource_group_name: Optional[str] = None
+    tags: Optional[Dict[str, str]] = None
+    network_profile: Optional[Dict[str, str]] = None
+    max_pods: Optional[int] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -388,7 +386,7 @@ class AzureProvider(schema.Base):
 
     @field_validator("kubernetes_version")
     @classmethod
-    def _validate_kubernetes_version(cls, value: typing.Optional[str]) -> str:
+    def _validate_kubernetes_version(cls, value: Optional[str]) -> str:
         available_kubernetes_versions = azure_cloud.kubernetes_versions()
         if value is None:
             value = available_kubernetes_versions[-1]
@@ -492,7 +490,12 @@ class AmazonWebServicesProvider(schema.Base):
         available_instances = amazon_web_services.instances(data["region"])
         if "node_groups" in data:
             for _, node_group in data["node_groups"].items():
-                if node_group["instance"] not in available_instances:
+                instance = (
+                    node_group["instance"]
+                    if hasattr(node_group, "__getitem__")
+                    else node_group.instance
+                )
+                if instance not in available_instances:
                     raise ValueError(
                         f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
                     )

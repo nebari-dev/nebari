@@ -167,6 +167,44 @@ def test_cli_upgrade_2023_7_1_to_2023_7_2(
 def test_cli_upgrade_image_tags(monkeypatch: pytest.MonkeyPatch):
     start_version = "2023.5.1"
     end_version = "2023.7.1"
+    addl_config = {
+        "default_images": {
+            "jupyterhub": f"quay.io/nebari/nebari-jupyterhub:{end_version}",
+            "jupyterlab": f"quay.io/nebari/nebari-jupyterlab:{end_version}",
+            "dask_worker": f"quay.io/nebari/nebari-dask-worker:{end_version}",
+        },
+        "profiles": {
+            "jupyterlab": [
+                {
+                    "display_name": "base",
+                    "kubespawner_override": {
+                        "image": f"quay.io/nebari/nebari-jupyterlab:{end_version}"
+                    },
+                },
+                {
+                    "display_name": "gpu",
+                    "kubespawner_override": {
+                        "image": f"quay.io/nebari/nebari-jupyterlab-gpu:{end_version}"
+                    },
+                },
+                {
+                    "display_name": "any-other-version",
+                    "kubespawner_override": {
+                        "image": "quay.io/nebari/nebari-jupyterlab:1955.11.5"
+                    },
+                },
+                {
+                    "display_name": "leave-me-alone",
+                    "kubespawner_override": {
+                        "image": f"quay.io/nebari/leave-me-alone:{start_version}"
+                    },
+                },
+            ],
+            "dask_worker": {
+                "test": {"image": f"quay.io/nebari/nebari-dask-worker:{end_version}"}
+            },
+        },
+    }
 
     upgraded = assert_nebari_upgrade_success(
         monkeypatch,
@@ -174,31 +212,7 @@ def test_cli_upgrade_image_tags(monkeypatch: pytest.MonkeyPatch):
         end_version,
         # # number of "y" inputs directly corresponds to how many matching images are found in yaml
         inputs=["y", "y", "y", "y", "y", "y", "y"],
-        addl_config=yaml.safe_load(
-            f"""
-default_images:
-  jupyterhub: quay.io/nebari/nebari-jupyterhub:{start_version}
-  jupyterlab: quay.io/nebari/nebari-jupyterlab:{start_version}
-  dask_worker: quay.io/nebari/nebari-dask-worker:{start_version}
-profiles:
-  jupyterlab:
-  - display_name: base
-    kubespawner_override:
-      image: quay.io/nebari/nebari-jupyterlab:{start_version}
-  - display_name: gpu
-    kubespawner_override:
-      image: quay.io/nebari/nebari-jupyterlab-gpu:{start_version}
-  - display_name: any-other-version
-    kubespawner_override:
-      image: quay.io/nebari/nebari-jupyterlab:1955.11.5
-  - display_name: leave-me-alone
-    kubespawner_override:
-      image: quay.io/nebari/leave-me-alone:{start_version}
-  dask_worker:
-    test:
-      image: quay.io/nebari/nebari-dask-worker:{start_version}
-"""
-        ),
+        addl_config=addl_config,
     )
 
     for _, v in upgraded["default_images"].items():
@@ -216,63 +230,74 @@ profiles:
         assert profile["image"].endswith(end_version)
 
 
-def test_cli_upgrade_fail_on_missing_file():
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        assert tmp_file.exists() is False
+def test_cli_upgrade_fail_on_missing_file(tmp_path):
+    tmp_file = tmp_path / "nebari-config.yaml"
 
-        app = create_cli()
+    app = create_cli()
 
-        result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
+    result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
 
-        assert 1 == result.exit_code
-        assert result.exception
-        assert (
-            f"passed in configuration filename={tmp_file.resolve()} must exist"
-            in str(result.exception)
-        )
+    assert 1 == result.exit_code
+    assert result.exception
+    assert f"passed in configuration filename={tmp_file.resolve()} must exist" in str(
+        result.exception
+    )
 
 
-def test_cli_upgrade_does_nothing_on_same_version():
+def test_cli_upgrade_does_nothing_on_same_version(tmp_path):
     # this test only seems to work against the actual current version, any
     # mocked earlier versions trigger an actual update
     start_version = _nebari.upgrade.__version__
+    tmp_file = tmp_path / "nebari-config.yaml"
+    nebari_config = {
+        "project_name": "test",
+        "provider": "local",
+        "domain": "test.example.com",
+        "namespace": "dev",
+        "nebari_version": start_version,
+    }
 
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        assert tmp_file.exists() is False
+    with tmp_file.open("w") as f:
+        yaml.dump(nebari_config, f)
 
-        nebari_config = yaml.safe_load(
-            f"""
-project_name: test
-provider: local
-domain: test.example.com
-namespace: dev
-nebari_version: {start_version}
-        """
-        )
+    assert tmp_file.exists()
+    app = create_cli()
 
-        with open(tmp_file.resolve(), "w") as f:
-            yaml.dump(nebari_config, f)
+    result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
 
-        assert tmp_file.exists() is True
-        app = create_cli()
+    # feels like this should return a non-zero exit code if the upgrade is not happening
+    assert 0 == result.exit_code
+    assert not result.exception
+    assert "up-to-date" in result.stdout
 
-        result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
-
-        # feels like this should return a non-zero exit code if the upgrade is not happening
-        assert 0 == result.exit_code
-        assert not result.exception
-        assert "up-to-date" in result.stdout
-
-        # make sure the file is unaltered
-        with open(tmp_file.resolve(), "r") as c:
-            assert yaml.safe_load(c) == nebari_config
+    # make sure the file is unaltered
+    with tmp_file.open() as f:
+        assert yaml.safe_load(f) == nebari_config
 
 
 def test_cli_upgrade_0_3_12_to_0_4_0(monkeypatch: pytest.MonkeyPatch):
     start_version = "0.3.12"
     end_version = "0.4.0"
+    addl_config = {
+        "security": {
+            "authentication": {
+                "type": "custom",
+                "config": {
+                    "oauth_callback_url": "",
+                    "scope": "",
+                },
+            },
+            "users": {},
+            "groups": {
+                "users": {},
+            },
+        },
+        "terraform_modules": [],
+        "default_images": {
+            "conda_store": "",
+            "dask_gateway": "",
+        },
+    }
 
     def callback(tmp_file: Path, _result: Any):
         users_import_file = tmp_file.parent / "nebari-users-import.json"
@@ -286,23 +311,7 @@ def test_cli_upgrade_0_3_12_to_0_4_0(monkeypatch: pytest.MonkeyPatch):
         start_version,
         end_version,
         addl_args=["--attempt-fixes"],
-        addl_config=yaml.safe_load(
-            """
-security:
-  authentication:
-    type: custom
-    config:
-      oauth_callback_url: ""
-      scope: ""
-  users: {}
-  groups:
-    users: {}
-terraform_modules: []
-default_images:
-  conda_store: ""
-  dask_gateway: ""
-"""
-        ),
+        addl_config=addl_config,
         callback=callback,
     )
 
@@ -317,41 +326,37 @@ default_images:
     assert True is upgraded["prevent_deploy"]
 
 
-def test_cli_upgrade_to_0_4_0_fails_for_custom_auth_without_attempt_fixes():
+def test_cli_upgrade_to_0_4_0_fails_for_custom_auth_without_attempt_fixes(tmp_path):
     start_version = "0.3.12"
+    tmp_file = tmp_path / "nebari-config.yaml"
+    nebari_config = {
+        "project_name": "test",
+        "provider": "local",
+        "domain": "test.example.com",
+        "namespace": "dev",
+        "nebari_version": start_version,
+        "security": {
+            "authentication": {
+                "type": "custom",
+            },
+        },
+    }
 
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        assert tmp_file.exists() is False
+    with tmp_file.open("w") as f:
+        yaml.dump(nebari_config, f)
 
-        nebari_config = yaml.safe_load(
-            f"""
-project_name: test
-provider: local
-domain: test.example.com
-namespace: dev
-nebari_version: {start_version}
-security:
-  authentication:
-    type: custom
-        """
-        )
+    assert tmp_file.exists() is True
+    app = create_cli()
 
-        with open(tmp_file.resolve(), "w") as f:
-            yaml.dump(nebari_config, f)
+    result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
 
-        assert tmp_file.exists() is True
-        app = create_cli()
+    assert 1 == result.exit_code
+    assert result.exception
+    assert "Custom Authenticators are no longer supported" in str(result.exception)
 
-        result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
-
-        assert 1 == result.exit_code
-        assert result.exception
-        assert "Custom Authenticators are no longer supported" in str(result.exception)
-
-        # make sure the file is unaltered
-        with open(tmp_file.resolve(), "r") as c:
-            assert yaml.safe_load(c) == nebari_config
+    # make sure the file is unaltered
+    with tmp_file.open() as f:
+        assert yaml.safe_load(f) == nebari_config
 
 
 @pytest.mark.skipif(
@@ -362,14 +367,13 @@ def test_cli_upgrade_to_2023_10_1_cdsdashboard_removed(monkeypatch: pytest.Monke
     start_version = "2023.7.2"
     end_version = "2023.10.1"
 
-    addl_config = yaml.safe_load(
-        """
-cdsdashboards:
-  enabled: true
-  cds_hide_user_named_servers: true
-  cds_hide_user_dashboard_servers: false
-        """
-    )
+    addl_config = {
+        "cdsdashboards": {
+            "enabled": True,
+            "cds_hide_user_named_servers": True,
+            "cds_hide_user_dashboard_servers": False,
+        }
+    }
 
     upgraded = assert_nebari_upgrade_success(
         monkeypatch,
@@ -390,22 +394,22 @@ cdsdashboards:
 @pytest.mark.parametrize(
     ("provider", "k8s_status"),
     [
-        # ("aws", "compatible"),
-        # ("aws", "incompatible"),
-        # ("aws", "invalid"),
-        # ("azure", "compatible"),
-        # ("azure", "incompatible"),
-        # ("azure", "invalid"),
-        # ("do", "compatible"),
-        # ("do", "incompatible"),
-        # ("do", "invalid"),
+        ("aws", "compatible"),
+        ("aws", "incompatible"),
+        ("aws", "invalid"),
+        ("azure", "compatible"),
+        ("azure", "incompatible"),
+        ("azure", "invalid"),
+        ("do", "compatible"),
+        ("do", "incompatible"),
+        ("do", "invalid"),
         ("gcp", "compatible"),
         ("gcp", "incompatible"),
         ("gcp", "invalid"),
     ],
 )
 def test_cli_upgrade_to_2023_10_1_kubernetes_validations(
-    monkeypatch: pytest.MonkeyPatch, provider: str, k8s_status: str
+    monkeypatch, provider, k8s_status, tmp_path
 ):
     start_version = "2023.7.2"
     end_version = "2023.10.1"
@@ -422,61 +426,56 @@ def test_cli_upgrade_to_2023_10_1_kubernetes_validations(
         "gcp": {"incompatible": "1.23", "compatible": "1.26", "invalid": "badname"},
     }
 
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        assert tmp_file.exists() is False
+    tmp_file = tmp_path / "nebari-config.yaml"
 
-        nebari_config = yaml.safe_load(
-            f"""
-project_name: test
-provider: {provider}
-domain: test.example.com
-namespace: dev
-nebari_version: {start_version}
-cdsdashboards:
-  enabled: true
-  cds_hide_user_named_servers: true
-  cds_hide_user_dashboard_servers: false
-{get_provider_config_block_name(provider)}:
-    region: {MOCK_CLOUD_REGIONS.get(provider, {})[0]}
-    kubernetes_version: {kubernetes_configs[provider][k8s_status]}
-        """
+    nebari_config = {
+        "project_name": "test",
+        "provider": provider,
+        "domain": "test.example.com",
+        "namespace": "dev",
+        "nebari_version": start_version,
+        "cdsdashboards": {
+            "enabled": True,
+            "cds_hide_user_named_servers": True,
+            "cds_hide_user_dashboard_servers": False,
+        },
+        get_provider_config_block_name(provider): {
+            "region": MOCK_CLOUD_REGIONS.get(provider, {})[0],
+            "kubernetes_version": kubernetes_configs[provider][k8s_status],
+        },
+    }
+
+    if provider == "gcp":
+        nebari_config["google_cloud_platform"]["project"] = "test-project"
+
+    with tmp_file.open("w") as f:
+        yaml.dump(nebari_config, f)
+
+    app = create_cli()
+
+    result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
+
+    if k8s_status == "incompatible":
+        UPGRADE_KUBERNETES_MESSAGE_WO_BRACKETS = re.sub(
+            r"\[.*?\]", "", UPGRADE_KUBERNETES_MESSAGE
         )
+        assert UPGRADE_KUBERNETES_MESSAGE_WO_BRACKETS in result.stdout.replace("\n", "")
 
-        if provider == "gcp":
-            nebari_config["google_cloud_platform"]["project"] = "test-project"
+    if k8s_status == "compatible":
+        assert 0 == result.exit_code
+        assert not result.exception
+        assert "Saving new config file" in result.stdout
 
-        with open(tmp_file.resolve(), "w") as f:
-            yaml.dump(nebari_config, f)
+        # load the modified nebari-config.yaml and check the new version has changed
+        with tmp_file.open() as f:
+            upgraded = yaml.safe_load(f)
+            assert end_version == upgraded["nebari_version"]
 
-            assert tmp_file.exists() is True
-            app = create_cli()
-
-            result = runner.invoke(app, ["upgrade", "--config", tmp_file.resolve()])
-
-            if k8s_status == "incompatible":
-                UPGRADE_KUBERNETES_MESSAGE_WO_BRACKETS = re.sub(
-                    r"\[.*?\]", "", UPGRADE_KUBERNETES_MESSAGE
-                )
-                assert UPGRADE_KUBERNETES_MESSAGE_WO_BRACKETS in result.stdout.replace(
-                    "\n", ""
-                )
-
-            if k8s_status == "compatible":
-                assert 0 == result.exit_code
-                assert not result.exception
-                assert "Saving new config file" in result.stdout
-
-                # load the modified nebari-config.yaml and check the new version has changed
-                with open(tmp_file.resolve(), "r") as f:
-                    upgraded = yaml.safe_load(f)
-                    assert end_version == upgraded["nebari_version"]
-
-            if k8s_status == "invalid":
-                assert (
-                    f"Unable to detect Kubernetes version for provider {provider}"
-                    in result.stdout
-                )
+    if k8s_status == "invalid":
+        assert (
+            f"Unable to detect Kubernetes version for provider {provider}"
+            in result.stdout
+        )
 
 
 def assert_nebari_upgrade_success(
@@ -493,25 +492,22 @@ def assert_nebari_upgrade_success(
 
     # create a tmp dir and clean up when done
     with tempfile.TemporaryDirectory() as tmp:
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
+        tmp_path = Path(tmp)
+        tmp_file = tmp_path / "nebari-config.yaml"
         assert tmp_file.exists() is False
 
         # merge basic config with any test case specific values provided
         nebari_config = {
-            **yaml.safe_load(
-                f"""
-project_name: test
-provider: {provider}
-domain: test.example.com
-namespace: dev
-nebari_version: {start_version}
-        """
-            ),
+            "project_name": "test",
+            "provider": provider,
+            "domain": "test.example.com",
+            "namespace": "dev",
+            "nebari_version": start_version,
             **addl_config,
         }
 
         # write the test nebari-config.yaml file to tmp location
-        with open(tmp_file.resolve(), "w") as f:
+        with tmp_file.open("w") as f:
             yaml.dump(nebari_config, f)
 
         assert tmp_file.exists() is True
@@ -538,16 +534,14 @@ nebari_version: {start_version}
             assert "Saving new config file" in result.stdout
 
             # load the modified nebari-config.yaml and check the new version has changed
-            with open(tmp_file.resolve(), "r") as f:
+            with tmp_file.open() as f:
                 upgraded = yaml.safe_load(f)
                 assert end_version == upgraded["nebari_version"]
 
             # check backup matches original
-            backup_file = (
-                Path(tmp).resolve() / f"nebari-config.yaml.{start_version}.backup"
-            )
-            assert backup_file.exists() is True
-            with open(backup_file.resolve(), "r") as b:
+            backup_file = tmp_path / f"nebari-config.yaml.{start_version}.backup"
+            assert backup_file.exists()
+            with backup_file.open() as b:
                 backup = yaml.safe_load(b)
                 assert backup == nebari_config
 

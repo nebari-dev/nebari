@@ -17,15 +17,15 @@ DELAY = 5
 
 def check_credentials():
     """Check for AWS credentials are set in the environment."""
-    for variable in {
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-    }:
-        if variable not in os.environ:
-            raise ValueError(
-                f"""Missing the following required environment variable: {variable}\n
-                Please see the documentation for more information: {constants.AWS_ENV_DOCS}"""
-            )
+    required_variables = {
+        "AWS_ACCESS_KEY_ID": os.environ.get("AWS_ACCESS_KEY_ID", None),
+        "AWS_SECRET_ACCESS_KEY": os.environ.get("AWS_SECRET_ACCESS_KEY", None),
+    }
+    if not all(required_variables.values()):
+        raise ValueError(
+            f"""Missing the following required environment variables: {required_variables}\n
+            Please see the documentation for more information: {constants.AWS_ENV_DOCS}"""
+        )
 
 
 @functools.lru_cache()
