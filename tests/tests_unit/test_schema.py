@@ -3,7 +3,6 @@ from contextlib import nullcontext
 import pytest
 from pydantic import ValidationError
 
-from nebari import schema
 from nebari.plugins import nebari_plugin_manager
 
 

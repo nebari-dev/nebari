@@ -3,8 +3,8 @@ import pathlib
 from typing import Optional
 
 import pytest
-from pydantic import BaseModel
 import yaml
+from pydantic import BaseModel
 
 from _nebari.config import (
     backup_configuration,
