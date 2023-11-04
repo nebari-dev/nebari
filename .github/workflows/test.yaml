@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/test.yaml"
-      - "tests/**"
+      - "tests/tests_unit/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"
@@ -16,7 +16,7 @@ on:
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test.yaml"
-      - "tests/**"
+      - "tests/tests_unit/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"

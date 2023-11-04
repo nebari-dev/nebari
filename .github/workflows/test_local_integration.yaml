@@ -9,7 +9,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/test_local_integration.yaml"
-      - "tests/**"
+      - "tests/tests_integration/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"
@@ -22,7 +22,7 @@ on:
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test_local_integration.yaml"
-      - "tests/**"
+      - "tests/tests_integration/**"
       - "scripts/**"
       - "src/**"
       - "pyproject.toml"
