@@ -22,10 +22,10 @@ def test_render_config(nebari_render):
     }.issubset(os.listdir(output_directory / "stages"))
 
     assert (
-        output_directory / "stages" / f"01-terraform-state/{config.provider}"
+        output_directory / "stages" / f"01-terraform-state/{config.provider.value}"
     ).is_dir()
     assert (
-        output_directory / "stages" / f"02-infrastructure/{config.provider}"
+        output_directory / "stages" / f"02-infrastructure/{config.provider.value}"
     ).is_dir()
 
     if config.ci_cd.type == CiEnum.github_actions:
