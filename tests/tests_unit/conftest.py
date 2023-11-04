@@ -121,7 +121,7 @@ def nebari_config_options(request):
     """This fixtures creates a set of nebari configurations for tests"""
     cloud_provider, region = request.param
     return {
-        "project_name": "test-project",
+        "project_name": "testproject",
         "nebari_domain": "test.nebari.dev",
         "cloud_provider": cloud_provider,
         "region": region,
