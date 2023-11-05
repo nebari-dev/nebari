@@ -66,7 +66,9 @@ def set_config_from_environment_variables(
 def dump_nested_model(model_dict: Dict[str, Union[pydantic.BaseModel, str]]):
     result = {}
     for key, value in model_dict.items():
-        result[key] = value.model_dump() if isinstance(value, pydantic.BaseModel) else value
+        result[key] = (
+            value.model_dump() if isinstance(value, pydantic.BaseModel) else value
+        )
     return result
 
 

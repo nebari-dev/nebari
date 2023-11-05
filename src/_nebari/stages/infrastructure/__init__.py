@@ -694,7 +694,9 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         if self.config.provider == schema.ProviderEnum.local:
-            return LocalInputVars(kube_context=self.config.local.kube_context).model_dump()
+            return LocalInputVars(
+                kube_context=self.config.local.kube_context
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.existing:
             return ExistingInputVars(
                 kube_context=self.config.existing.kube_context
