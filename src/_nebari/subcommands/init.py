@@ -3,6 +3,7 @@ import os
 import pathlib
 import re
 import typing
+from typing import Optional
 
 import questionary
 import rich
@@ -84,17 +85,17 @@ class GitRepoEnum(str, enum.Enum):
 class InitInputs(schema.Base):
     cloud_provider: ProviderEnum = ProviderEnum.local
     project_name: schema.project_name_pydantic = ""
-    domain_name: typing.Optional[str] = None
-    namespace: typing.Optional[schema.namespace_pydantic] = "dev"
+    domain_name: Optional[str] = None
+    namespace: Optional[schema.namespace_pydantic] = "dev"
     auth_provider: AuthenticationEnum = AuthenticationEnum.password
     auth_auto_provision: bool = False
-    repository: typing.Optional[schema.github_url_pydantic] = None
+    repository: Optional[schema.github_url_pydantic] = None
     repository_auto_provision: bool = False
     ci_provider: CiEnum = CiEnum.none
     terraform_state: TerraformStateEnum = TerraformStateEnum.remote
-    kubernetes_version: typing.Union[str, None] = None
-    region: typing.Union[str, None] = None
-    ssl_cert_email: typing.Union[schema.email_pydantic, None] = None
+    kubernetes_version: Optional[str] = None
+    region: Optional[str] = None
+    ssl_cert_email: Optional[schema.email_pydantic] = None
     disable_prompt: bool = False
     output: pathlib.Path = pathlib.Path("nebari-config.yaml")
 

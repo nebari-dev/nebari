@@ -503,8 +503,8 @@ class AmazonWebServicesProvider(schema.Base):
 
 
 class LocalProvider(schema.Base):
-    kube_context: typing.Optional[str] = None
-    node_selectors: typing.Dict[str, KeyValueDict] = {
+    kube_context: Optional[str] = None
+    node_selectors: Dict[str, KeyValueDict] = {
         "general": KeyValueDict(key="kubernetes.io/os", value="linux"),
         "user": KeyValueDict(key="kubernetes.io/os", value="linux"),
         "worker": KeyValueDict(key="kubernetes.io/os", value="linux"),
@@ -512,8 +512,8 @@ class LocalProvider(schema.Base):
 
 
 class ExistingProvider(schema.Base):
-    kube_context: typing.Optional[str] = None
-    node_selectors: typing.Dict[str, KeyValueDict] = {
+    kube_context: Optional[str] = None
+    node_selectors: Dict[str, KeyValueDict] = {
         "general": KeyValueDict(key="kubernetes.io/os", value="linux"),
         "user": KeyValueDict(key="kubernetes.io/os", value="linux"),
         "worker": KeyValueDict(key="kubernetes.io/os", value="linux"),
@@ -694,7 +694,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         if self.config.provider == schema.ProviderEnum.local:
-            return LocalInputVars(kube_context=self.config.local.kube_context).dict()
+            return LocalInputVars(kube_context=self.config.local.kube_context).model_dump()
         elif self.config.provider == schema.ProviderEnum.existing:
             return ExistingInputVars(
                 kube_context=self.config.existing.kube_context
