@@ -130,6 +130,9 @@ jobs:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
           NEBARI_FULL_URL: https://github-actions.nebari.dev/
+          EXAMPLE_USER_NAME: ${{ env.TEST_USERNAME }}
+          EXAMPLE_USER_PASSWORD: ${{ env.TEST_PASSWORD }}
+          TEST_DOMAIN: github-actions.nebari.dev
         working-directory: tests/tests_integration
         run: |
           xvfb-run pytest --browser chromium
