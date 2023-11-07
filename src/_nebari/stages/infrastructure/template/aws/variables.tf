@@ -65,3 +65,9 @@ variable "eks_public_access_cidrs" {
   type    = list(string)
   default = ["0.0.0.0/0"]
 }
+
+variable "permissions_boundary" {
+  description = "ARN of the policy that is used to set the permissions boundary for the role"
+  type        = string
+  default     = null
+}
