@@ -39,6 +39,8 @@ Release captain responsible - <@gh_username>
   - [Do we need to update the `dask` versions in the `nebari-dask`?](https://github.com/conda-forge/nebari-dask-feedstock/blob/main/recipe/meta.yaml#L13-L16)
   - Will there be an accompanying blog post?
 - [ ] Prepare for the release.
+  - [ ] Update the [`nebari upgrade`](https://github.com/nebari-dev/nebari/blob/develop/src/_nebari/upgrade.py) for this release
+    - [ ] Add upgrade messaging including deprecation warnings, version specific warnings and so on.
   - [ ] Announce build freeze.
   - [ ] Release Candidate (RC) cycle.
     - Is this a hotfix?
