@@ -5,6 +5,7 @@ import secrets
 import string
 from abc import ABC
 from pathlib import Path
+from typing import Any, ClassVar, Dict
 
 import rich
 from pydantic import ValidationError
@@ -80,16 +81,28 @@ def do_upgrade(config_filename, attempt_fixes=False):
 
 
 class UpgradeStep(ABC):
-    _steps = {}
-
-    version = ""  # Each subclass must have a version - these should be full release versions (not dev/prerelease)
+    _steps: ClassVar[Dict[str, Any]] = {}
+    version: ClassVar[str] = ""
 
     def __init_subclass__(cls):
-        assert cls.version != ""
+        try:
+            parsed_version = Version(cls.version)
+        except ValueError as exc:
+            raise ValueError(f"Invalid version string {cls.version}") from exc
+
+        cls.parsed_version = parsed_version
+        assert (
+            rounded_ver_parse(cls.version) == parsed_version
+        ), f"Invalid version {cls.version}: must be a full release version, not a dev/prerelease/postrelease version"
         assert (
             cls.version not in cls._steps
-        )  # Would mean multiple upgrades for the same step
+        ), f"Duplicate UpgradeStep version {cls.version}"
         cls._steps[cls.version] = cls
+
+    @classmethod
+    def clear_steps_registry(cls):
+        """Clears the steps registry. Useful for testing."""
+        cls._steps.clear()
 
     @classmethod
     def has_step(cls, version):
@@ -157,9 +170,7 @@ class UpgradeStep(ABC):
         for any actions that are only required for the particular upgrade you are creating.
         """
         finish_version = self.get_version()
-        __rounded_finish_version__ = ".".join(
-            [str(c) for c in rounded_ver_parse(finish_version)]
-        )
+        __rounded_finish_version__ = str(rounded_ver_parse(finish_version))
         rich.print(
             f"\n---> Starting upgrade from [green]{start_version or 'old version'}[/green] to [green]{finish_version}[/green]\n"
         )
@@ -636,7 +647,7 @@ class Upgrade_2023_10_1(UpgradeStep):
         return config
 
 
-__rounded_version__ = ".".join([str(c) for c in rounded_ver_parse(__version__)])
+__rounded_version__ = str(rounded_ver_parse(__version__))
 
 # Manually-added upgrade steps must go above this line
 if not UpgradeStep.has_step(__rounded_version__):
