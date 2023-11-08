@@ -355,7 +355,7 @@ class GoogleCloudPlatformProvider(schema.Base):
             raise ValueError("The `google_cloud_platform.region` field is required.")
 
         # validate region
-        google_cloud.validate_region(project_id, region)
+        google_cloud.validate_region(region)
 
         # validate kubernetes version
         kubernetes_version = values.get("kubernetes_version")

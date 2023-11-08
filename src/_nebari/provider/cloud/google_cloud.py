@@ -30,14 +30,14 @@ def projects() -> Dict[str, str]:
 
 
 @functools.lru_cache()
-def regions(project: str) -> Dict[str, str]:
-    """Return a dict of available regions."""
+def regions() -> Set[str]:
+    """Return a set of available regions."""
     check_credentials()
     output = subprocess.check_output(
-        ["gcloud", "compute", "regions", "list", "--project", project, "--format=json"]
+        ["gcloud", "compute", "regions", "list", "--format=json(name)"]
     )
-    data = json.loads(output.decode("utf-8"))
-    return {_["description"]: _["name"] for _ in data}
+    data = json.loads(output)
+    return {_["name"] for _ in data}
 
 
 @functools.lru_cache()
@@ -293,9 +293,9 @@ def check_missing_service() -> None:
 ### PYDANTIC VALIDATORS ###
 
 
-def validate_region(project_id: str, region: str) -> str:
+def validate_region(region: str) -> str:
     """Validate the GCP region is valid."""
-    available_regions = regions(project_id)
+    available_regions = regions()
     if region not in available_regions:
         raise ValueError(
             f"Region {region} is not one of available regions {available_regions}"
