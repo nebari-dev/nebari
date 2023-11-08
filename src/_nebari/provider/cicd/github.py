@@ -108,12 +108,6 @@ def gha_env_vars(config: schema.Main):
     if os.environ.get("NEBARI_GH_BRANCH"):
         env_vars["NEBARI_GH_BRANCH"] = "${{ secrets.NEBARI_GH_BRANCH }}"
 
-    # This assumes that the user is using the omitting sensitive values configuration for the token.
-    if config.prefect.enabled:
-        env_vars[
-            "NEBARI_SECRET_prefect_token"
-        ] = "${{ secrets.NEBARI_SECRET_PREFECT_TOKEN }}"
-
     if config.provider == schema.ProviderEnum.aws:
         env_vars["AWS_ACCESS_KEY_ID"] = "${{ secrets.AWS_ACCESS_KEY_ID }}"
         env_vars["AWS_SECRET_ACCESS_KEY"] = "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
