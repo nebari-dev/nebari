@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, ClassVar, Dict
 
 import rich
+from packaging.version import Version
 from pydantic import ValidationError
 from rich.prompt import Prompt
 
