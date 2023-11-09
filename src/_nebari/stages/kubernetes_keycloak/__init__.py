@@ -6,8 +6,7 @@ import secrets
 import string
 import sys
 import time
-import typing
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import Field, ValidationInfo, field_validator
 
@@ -131,7 +130,7 @@ class GitHubAuthentication(BaseAuthentication):
     config: GitHubConfig = Field(default_factory=lambda: GitHubConfig())
 
 
-Authentication = typing.Union[
+Authentication = Union[
     PasswordAuthentication, Auth0Authentication, GitHubAuthentication
 ]
 
@@ -144,7 +143,7 @@ def random_secure_string(
 
 class Keycloak(schema.Base):
     initial_root_password: str = Field(default_factory=random_secure_string)
-    overrides: typing.Dict = {}
+    overrides: Dict = {}
     realm_display_name: str = "Nebari"
 
 

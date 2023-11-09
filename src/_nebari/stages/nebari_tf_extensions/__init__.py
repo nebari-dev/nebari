@@ -1,5 +1,4 @@
-import typing
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Optional, Type
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -25,8 +24,8 @@ class NebariExtension(schema.Base):
     keycloakadmin: bool = False
     jwt: bool = False
     nebariconfigyaml: bool = False
-    logout: typing.Optional[str] = None
-    envs: typing.Optional[typing.List[NebariExtensionEnv]] = None
+    logout: Optional[str] = None
+    envs: Optional[List[NebariExtensionEnv]] = None
 
 
 class HelmExtension(schema.Base):
@@ -34,12 +33,12 @@ class HelmExtension(schema.Base):
     repository: str
     chart: str
     version: str
-    overrides: typing.Dict = {}
+    overrides: Dict = {}
 
 
 class InputSchema(schema.Base):
-    helm_extensions: typing.List[HelmExtension] = []
-    tf_extensions: typing.List[NebariExtension] = []
+    helm_extensions: List[HelmExtension] = []
+    tf_extensions: List[NebariExtension] = []
 
 
 class OutputSchema(schema.Base):

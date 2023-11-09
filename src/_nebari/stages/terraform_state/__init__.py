@@ -4,8 +4,7 @@ import inspect
 import os
 import pathlib
 import re
-import typing
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
 from pydantic import field_validator
 
@@ -84,8 +83,8 @@ class TerraformStateEnum(str, enum.Enum):
 
 class TerraformState(schema.Base):
     type: TerraformStateEnum = TerraformStateEnum.remote
-    backend: typing.Optional[str] = None
-    config: typing.Dict[str, str] = {}
+    backend: Optional[str] = None
+    config: Dict[str, str] = {}
 
 
 class InputSchema(schema.Base):

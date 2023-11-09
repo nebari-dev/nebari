@@ -1,6 +1,5 @@
 import sys
-import typing
-from typing import Any, Dict, List, Type, Union
+from typing import Any, Dict, List, Optional, Type
 
 from pydantic import model_validator
 
@@ -16,10 +15,10 @@ from nebari.hookspecs import NebariStage, hookimpl
 
 class ExtContainerReg(schema.Base):
     enabled: bool = False
-    access_key_id: typing.Optional[str] = None
-    secret_access_key: typing.Optional[str] = None
-    extcr_account: typing.Optional[str] = None
-    extcr_region: typing.Optional[str] = None
+    access_key_id: Optional[str] = None
+    secret_access_key: Optional[str] = None
+    extcr_account: Optional[str] = None
+    extcr_region: Optional[str] = None
 
     @model_validator(mode="after")
     def enabled_must_have_fields(self):
@@ -42,8 +41,8 @@ class InputVars(schema.Base):
     name: str
     environment: str
     cloud_provider: str
-    aws_region: Union[str, None] = None
-    external_container_reg: Union[ExtContainerReg, None] = None
+    aws_region: Optional[str] = None
+    external_container_reg: Optional[ExtContainerReg] = None
     gpu_enabled: bool = False
     gpu_node_group_names: List[str] = []
 

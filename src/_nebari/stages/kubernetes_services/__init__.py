@@ -2,8 +2,7 @@ import enum
 import json
 import sys
 import time
-import typing
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 from urllib.parse import urlencode
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
@@ -38,9 +37,9 @@ class AccessEnum(str, enum.Enum):
 
 class Prefect(schema.Base):
     enabled: bool = False
-    image: typing.Optional[str] = None
-    overrides: typing.Dict = {}
-    token: typing.Optional[str] = None
+    image: Optional[str] = None
+    overrides: Dict = {}
+    token: Optional[str] = None
 
 
 class DefaultImages(schema.Base):
@@ -86,9 +85,9 @@ class JupyterLabProfile(schema.Base):
     display_name: str
     description: str
     default: bool = False
-    users: typing.Optional[typing.List[str]] = None
-    groups: typing.Optional[typing.List[str]] = None
-    kubespawner_override: typing.Optional[KubeSpawner] = None
+    users: Optional[List[str]] = None
+    groups: Optional[List[str]] = None
+    kubespawner_override: Optional[KubeSpawner] = None
 
     @model_validator(mode="after")
     def only_yaml_can_have_groups_and_users(self):
@@ -110,7 +109,7 @@ class DaskWorkerProfile(schema.Base):
 
 
 class Profiles(schema.Base):
-    jupyterlab: typing.List[JupyterLabProfile] = [
+    jupyterlab: List[JupyterLabProfile] = [
         JupyterLabProfile(
             display_name="Small Instance",
             description="Stable environment with 2 cpu / 8 GB ram",
@@ -133,7 +132,7 @@ class Profiles(schema.Base):
             ),
         ),
     ]
-    dask_worker: typing.Dict[str, DaskWorkerProfile] = {
+    dask_worker: Dict[str, DaskWorkerProfile] = {
         "Small Worker": DaskWorkerProfile(
             worker_cores_limit=2,
             worker_cores=1.5,
@@ -164,12 +163,12 @@ class Profiles(schema.Base):
 
 class CondaEnvironment(schema.Base):
     name: str
-    channels: typing.Optional[typing.List[str]] = None
-    dependencies: typing.List[typing.Union[str, typing.Dict[str, typing.List[str]]]]
+    channels: Optional[List[str]] = None
+    dependencies: List[Union[str, Dict[str, List[str]]]]
 
 
 class CondaStore(schema.Base):
-    extra_settings: typing.Dict[str, typing.Any] = {}
+    extra_settings: Dict[str, Any] = {}
     extra_config: str = ""
     image: str = "quansight/conda-store-server"
     image_tag: str = constants.DEFAULT_CONDA_STORE_IMAGE_TAG
@@ -184,7 +183,7 @@ class NebariWorkflowController(schema.Base):
 
 class ArgoWorkflows(schema.Base):
     enabled: bool = True
-    overrides: typing.Dict = {}
+    overrides: Dict = {}
     nebari_workflow_controller: NebariWorkflowController = NebariWorkflowController()
 
 
@@ -199,11 +198,11 @@ class Monitoring(schema.Base):
 class ClearML(schema.Base):
     enabled: bool = False
     enable_forward_auth: bool = False
-    overrides: typing.Dict = {}
+    overrides: Dict = {}
 
 
 class JupyterHub(schema.Base):
-    overrides: typing.Dict = {}
+    overrides: Dict = {}
 
 
 class IdleCuller(schema.Base):
@@ -226,7 +225,7 @@ class InputSchema(schema.Base):
     storage: Storage = Storage()
     theme: Theme = Theme()
     profiles: Profiles = Profiles()
-    environments: typing.Dict[str, CondaEnvironment] = {
+    environments: Dict[str, CondaEnvironment] = {
         "environment-dask.yaml": CondaEnvironment(
             name="dask",
             channels=["conda-forge"],
