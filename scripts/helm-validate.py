@@ -214,7 +214,7 @@ def add_workflow_job_summary(chart_index: dict):
 
 if __name__ == "__main__":
     # charts = generate_index_of_helm_charts()
-    STAGES_DIR = "nebari/template/stages"
+    STAGES_DIR = "src/_nebari/stages"
     SKIP_CHARTS = ["prefect", "clearml", "helm-extensions"]
 
     charts = HelmChartIndexer(
