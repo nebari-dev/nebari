@@ -15,7 +15,7 @@ else:
 
 
 # Regex for suitable project names
-project_name_regex = r"^[A-Za-z][A-Za-z0-9\-_]{1,30}[A-Za-z0-9]$"
+project_name_regex = r"^[A-Za-z][A-Za-z0-9\-_]{1,14}[A-Za-z0-9]$"
 project_name_pydantic = Annotated[str, StringConstraints(pattern=project_name_regex)]
 
 # Regex for suitable namespaces
