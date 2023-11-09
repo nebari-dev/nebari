@@ -1,7 +1,6 @@
 import re
 import shutil
 from pathlib import Path
-from typing import Any, Dict, List
 
 import pytest
 import yaml
@@ -15,7 +14,7 @@ TEST_DATA_DIR = Path(__file__).resolve().parent / "cli_validate"
 runner = CliRunner()
 
 
-def _update_yaml_file(file_path: Path, key: str, value: Any):
+def _update_yaml_file(file_path, key, value):
     """Utility function to update a yaml file with a new key/value pair."""
     with open(file_path, "r") as f:
         yaml_data = yaml.safe_load(f)
@@ -43,7 +42,7 @@ def _update_yaml_file(file_path: Path, key: str, value: Any):
         ),  # https://github.com/nebari-dev/nebari/issues/1937
     ],
 )
-def test_cli_validate_stdout(args: List[str], exit_code: int, content: List[str]):
+def test_cli_validate_stdout(args, exit_code, content):
     app = create_cli()
     result = runner.invoke(app, ["validate"] + args)
     assert result.exit_code == exit_code
@@ -148,11 +147,11 @@ def test_cli_validate_from_env(tmp_path):
     ],
 )
 def test_cli_validate_error_from_env(
-    key: str,
-    value: str,
-    provider: str,
-    expected_message: str,
-    addl_config: Dict[str, Any],
+    key,
+    value,
+    provider,
+    expected_message,
+    addl_config,
     tmp_path,
 ):
     tmp_file = tmp_path / "nebari-config.yaml"
@@ -211,7 +210,7 @@ def generate_test_data_test_cli_validate_error():
     return {"keys": keys, "test_data": test_data}
 
 
-def test_cli_validate_error(config_yaml: str, expected_message: str):
+def test_cli_validate_error(config_yaml, expected_message):
     test_file = TEST_DATA_DIR / config_yaml
     assert test_file.exists() is True
 

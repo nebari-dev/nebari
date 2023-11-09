@@ -74,7 +74,7 @@ runner = CliRunner()
         ),
     ],
 )
-def test_cli_upgrade_stdout(args: List[str], exit_code: int, content: List[str]):
+def test_cli_upgrade_stdout(args, exit_code, content):
     app = create_cli()
     result = runner.invoke(app, ["upgrade"] + args)
     assert result.exit_code == exit_code
@@ -82,19 +82,19 @@ def test_cli_upgrade_stdout(args: List[str], exit_code: int, content: List[str])
         assert c in result.stdout
 
 
-def test_cli_upgrade_2022_10_1_to_2022_11_1(monkeypatch: pytest.MonkeyPatch):
+def test_cli_upgrade_2022_10_1_to_2022_11_1(monkeypatch):
     assert_nebari_upgrade_success(monkeypatch, "2022.10.1", "2022.11.1")
 
 
-def test_cli_upgrade_2022_11_1_to_2023_1_1(monkeypatch: pytest.MonkeyPatch):
+def test_cli_upgrade_2022_11_1_to_2023_1_1(monkeypatch):
     assert_nebari_upgrade_success(monkeypatch, "2022.11.1", "2023.1.1")
 
 
-def test_cli_upgrade_2023_1_1_to_2023_4_1(monkeypatch: pytest.MonkeyPatch):
+def test_cli_upgrade_2023_1_1_to_2023_4_1(monkeypatch):
     assert_nebari_upgrade_success(monkeypatch, "2023.1.1", "2023.4.1")
 
 
-def test_cli_upgrade_2023_4_1_to_2023_5_1(monkeypatch: pytest.MonkeyPatch):
+def test_cli_upgrade_2023_4_1_to_2023_5_1(monkeypatch):
     assert_nebari_upgrade_success(
         monkeypatch,
         "2023.4.1",
@@ -109,7 +109,7 @@ def test_cli_upgrade_2023_4_1_to_2023_5_1(monkeypatch: pytest.MonkeyPatch):
     ["aws", "azure", "do", "gcp"],
 )
 def test_cli_upgrade_2023_5_1_to_2023_7_1(
-    monkeypatch: pytest.MonkeyPatch, provider: str
+    monkeypatch, provider
 ):
     config = assert_nebari_upgrade_success(
         monkeypatch, "2023.5.1", "2023.7.1", provider=provider
@@ -126,9 +126,9 @@ def test_cli_upgrade_2023_5_1_to_2023_7_1(
     [(True, True), (True, False), (False, None), (None, None)],
 )
 def test_cli_upgrade_2023_7_1_to_2023_7_2(
-    monkeypatch: pytest.MonkeyPatch,
-    workflows_enabled: bool,
-    workflow_controller_enabled: bool,
+    monkeypatch,
+    workflows_enabled,
+    workflow_controller_enabled,
 ):
     addl_config = {}
     inputs = []
@@ -164,7 +164,7 @@ def test_cli_upgrade_2023_7_1_to_2023_7_2(
         assert "argo_workflows" not in upgraded
 
 
-def test_cli_upgrade_image_tags(monkeypatch: pytest.MonkeyPatch):
+def test_cli_upgrade_image_tags(monkeypatch):
     start_version = "2023.5.1"
     end_version = "2023.7.1"
     addl_config = {

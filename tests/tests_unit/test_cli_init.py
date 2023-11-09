@@ -121,16 +121,16 @@ def generate_test_data_test_cli_init_happy_path():
 
 
 def test_cli_init_happy_path(
-    provider: str,
-    region: str,
-    project_name: str,
-    domain_name: str,
-    namespace: str,
-    auth_provider: str,
-    ci_provider: str,
-    terraform_state: str,
-    email: str,
-    kubernetes_version: str,
+    provider,
+    region,
+    project_name,
+    domain_name,
+    namespace,
+    auth_provider,
+    ci_provider,
+    terraform_state,
+    email,
+    kubernetes_version,
 ):
     app = create_cli()
     args = [
