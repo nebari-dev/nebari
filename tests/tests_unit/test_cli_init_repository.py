@@ -11,7 +11,6 @@ from typer.testing import CliRunner
 from _nebari.cli import create_cli
 from _nebari.provider.cicd.github import GITHUB_BASE_URL
 
-
 runner = CliRunner()
 
 TEST_GITHUB_USERNAME = "test-nebari-github-user"
