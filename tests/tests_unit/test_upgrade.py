@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from pathlib import Path
 
 import pytest
@@ -76,7 +77,7 @@ def test_upgrade_4_0(
     assert not hasattr(config.security, "users")
     assert not hasattr(config.security, "groups")
 
-    __rounded_version__ = ".".join([str(c) for c in rounded_ver_parse(__version__)])
+    __rounded_version__ = rounded_ver_parse(__version__)
 
     # Check image versions have been bumped up
     assert (
@@ -99,3 +100,49 @@ def test_upgrade_4_0(
     tmp_qhub_config_backup = Path(tmp_path, f"{old_qhub_config_path.name}.old.backup")
 
     assert orig_contents == tmp_qhub_config_backup.read_text()
+
+
+@pytest.mark.parametrize(
+    "version_str, exception",
+    [
+        ("1.0.0", nullcontext()),
+        ("1.cool.0", pytest.raises(ValueError, match=r"Invalid version string .*")),
+        ("0,1.0", pytest.raises(ValueError, match=r"Invalid version string .*")),
+        ("", pytest.raises(ValueError, match=r"Invalid version string .*")),
+        (
+            "1.0.0-rc1",
+            pytest.raises(
+                AssertionError,
+                match=r"Invalid version .*: must be a full release version, not a dev/prerelease/postrelease version",
+            ),
+        ),
+        (
+            "1.0.0dev1",
+            pytest.raises(
+                AssertionError,
+                match=r"Invalid version .*: must be a full release version, not a dev/prerelease/postrelease version",
+            ),
+        ),
+    ],
+)
+def test_version_string(new_upgrade_cls, version_str, exception):
+    with exception:
+
+        class DummyUpgrade(new_upgrade_cls):
+            version = version_str
+
+
+def test_duplicated_version(new_upgrade_cls):
+    duplicated_version = "1.2.3"
+    with pytest.raises(
+        AssertionError, match=rf"Duplicate UpgradeStep version {duplicated_version}"
+    ):
+
+        class DummyUpgrade(new_upgrade_cls):
+            version = duplicated_version
+
+        class DummyUpgrade2(new_upgrade_cls):
+            version = duplicated_version
+
+        class DummyUpgrade3(new_upgrade_cls):
+            version = "1.2.4"
