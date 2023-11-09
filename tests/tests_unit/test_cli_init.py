@@ -5,7 +5,6 @@ import yaml
 
 from _nebari.constants import AZURE_DEFAULT_REGION
 
-
 MOCK_KUBERNETES_VERSIONS = {
     "aws": ["1.20"],
     "azure": ["1.20"],

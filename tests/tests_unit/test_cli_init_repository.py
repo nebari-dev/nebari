@@ -6,7 +6,6 @@ import requests.exceptions
 
 from _nebari.provider.cicd.github import GITHUB_BASE_URL
 
-
 TEST_GITHUB_USERNAME = "test-nebari-github-user"
 TEST_GITHUB_TOKEN = "nebari-super-secret"
 

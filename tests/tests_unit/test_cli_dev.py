@@ -6,7 +6,6 @@ import pytest
 import requests.exceptions
 import yaml
 
-
 TEST_KEYCLOAKAPI_REQUEST = "GET /"  # get list of realms
 
 TEST_DOMAIN = "nebari.example.com"
