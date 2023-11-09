@@ -2,7 +2,9 @@ from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
+from typer.testing import CliRunner
 
+from _nebari.cli import create_cli
 from _nebari.config import write_configuration
 from _nebari.constants import (
     AWS_DEFAULT_REGION,
@@ -166,3 +168,13 @@ def new_upgrade_cls():
 @pytest.fixture
 def config_schema():
     return nebari_plugin_manager.config_schema
+
+
+@pytest.fixture
+def cli():
+    return create_cli()
+
+
+@pytest.fixture(scope="session")
+def runner():
+    return CliRunner()

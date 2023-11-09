@@ -4,14 +4,10 @@ from pathlib import Path
 
 import pytest
 import yaml
-from typer.testing import CliRunner
 
 from _nebari._version import __version__
-from _nebari.cli import create_cli
 
 TEST_DATA_DIR = Path(__file__).resolve().parent / "cli_validate"
-
-runner = CliRunner()
 
 
 def _update_yaml_file(file_path, key, value):
@@ -42,9 +38,8 @@ def _update_yaml_file(file_path, key, value):
         ),  # https://github.com/nebari-dev/nebari/issues/1937
     ],
 )
-def test_cli_validate_stdout(args, exit_code, content):
-    app = create_cli()
-    result = runner.invoke(app, ["validate"] + args)
+def test_cli_validate_stdout(runner, cli, args, exit_code, content):
+    result = runner.invoke(cli, ["validate"] + args)
     assert result.exit_code == exit_code
     for c in content:
         assert c in result.stdout
@@ -69,8 +64,8 @@ def generate_test_data_test_cli_validate_local_happy_path():
     return {"keys": keys, "test_data": test_data}
 
 
-def test_cli_validate_local_happy_path(config_yaml, tmp_path):
-    test_file = TEST_DATA_DIR / config_yaml
+def test_cli_validate_local_happy_path(runner, cli, config_yaml, config_path, tmp_path):
+    test_file = config_path / config_yaml
     assert test_file.exists() is True
 
     temp_test_file = shutil.copy(test_file, tmp_path)
@@ -78,14 +73,13 @@ def test_cli_validate_local_happy_path(config_yaml, tmp_path):
     # update the copied test file with the current version if necessary
     _update_yaml_file(temp_test_file, "nebari_version", __version__)
 
-    app = create_cli()
-    result = runner.invoke(app, ["validate", "--config", temp_test_file])
+    result = runner.invoke(cli, ["validate", "--config", temp_test_file])
     assert not result.exception
     assert 0 == result.exit_code
     assert "Successfully validated configuration" in result.stdout
 
 
-def test_cli_validate_from_env(tmp_path):
+def test_cli_validate_from_env(runner, cli, tmp_path):
     tmp_file = tmp_path / "nebari-config.yaml"
 
     nebari_config = {
@@ -100,10 +94,8 @@ def test_cli_validate_from_env(tmp_path):
     with tmp_file.open("w") as f:
         yaml.dump(nebari_config, f)
 
-    app = create_cli()
-
     valid_result = runner.invoke(
-        app,
+        cli,
         ["validate", "--config", tmp_file.resolve()],
         env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.18"},
     )
@@ -112,7 +104,7 @@ def test_cli_validate_from_env(tmp_path):
     assert "Successfully validated configuration" in valid_result.stdout
 
     invalid_result = runner.invoke(
-        app,
+        cli,
         ["validate", "--config", tmp_file.resolve()],
         env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.0"},
     )
@@ -147,6 +139,8 @@ def test_cli_validate_from_env(tmp_path):
     ],
 )
 def test_cli_validate_error_from_env(
+    runner,
+    cli,
     key,
     value,
     provider,
@@ -166,17 +160,16 @@ def test_cli_validate_error_from_env(
         yaml.dump(nebari_config, f)
 
     assert tmp_file.exists()
-    app = create_cli()
 
     # confirm the file is otherwise valid without environment variable overrides
-    pre = runner.invoke(app, ["validate", "--config", tmp_file.resolve()])
+    pre = runner.invoke(cli, ["validate", "--config", tmp_file.resolve()])
     assert 0 == pre.exit_code
     assert not pre.exception
 
     # run validate again with environment variables that are expected to trigger
     # validation errors
     result = runner.invoke(
-        app, ["validate", "--config", tmp_file.resolve()], env={key: value}
+        cli, ["validate", "--config", tmp_file.resolve()], env={key: value}
     )
 
     assert 1 == result.exit_code
@@ -210,12 +203,11 @@ def generate_test_data_test_cli_validate_error():
     return {"keys": keys, "test_data": test_data}
 
 
-def test_cli_validate_error(config_yaml, expected_message):
-    test_file = TEST_DATA_DIR / config_yaml
+def test_cli_validate_error(runner, cli, config_yaml, config_path, expected_message):
+    test_file = config_path / config_yaml
     assert test_file.exists() is True
 
-    app = create_cli()
-    result = runner.invoke(app, ["validate", "--config", test_file])
+    result = runner.invoke(cli, ["validate", "--config", test_file])
 
     assert result.exception
     assert 1 == result.exit_code
