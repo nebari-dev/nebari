@@ -108,9 +108,7 @@ def test_cli_upgrade_2023_4_1_to_2023_5_1(monkeypatch):
     "provider",
     ["aws", "azure", "do", "gcp"],
 )
-def test_cli_upgrade_2023_5_1_to_2023_7_1(
-    monkeypatch, provider
-):
+def test_cli_upgrade_2023_5_1_to_2023_7_1(monkeypatch, provider):
     config = assert_nebari_upgrade_success(
         monkeypatch, "2023.5.1", "2023.7.1", provider=provider
     )
