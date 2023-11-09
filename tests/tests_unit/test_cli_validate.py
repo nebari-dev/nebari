@@ -81,10 +81,9 @@ def test_cli_validate_local_happy_path(config_yaml, tmp_path):
 
     app = create_cli()
     result = runner.invoke(app, ["validate", "--config", temp_test_file])
-    print(result.stdout)
-    # assert not result.exception
-    # assert 0 == result.exit_code
-    # assert "Successfully validated configuration" in result.stdout
+    assert not result.exception
+    assert 0 == result.exit_code
+    assert "Successfully validated configuration" in result.stdout
 
 
 def test_cli_validate_from_env(tmp_path):
