@@ -132,12 +132,13 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             namespaces.add(group_name)
             role_bindings[f"{group_name}/*"] = roles
 
-        conda_store = get_conda_store(request)
-        for namespace in namespaces:
-            _namespace = api.get_namespace(conda_store.db, name=namespace)
-            if _namespace is None:
-                conda_store.db.add(orm.Namespace(name=namespace))
-                conda_store.db.commit()
+        conda_store = await get_conda_store(request)
+        with conda_store.session_factory() as db:
+            for namespace in namespaces:
+                _namespace = api.get_namespace(db, name=namespace)
+                if _namespace is None:
+                    db.add(orm.Namespace(name=namespace))
+                    db.commit()
 
         return schema.AuthenticationToken(
             primary_namespace=username,
