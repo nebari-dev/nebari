@@ -2,7 +2,6 @@ import enum
 import os
 import pathlib
 import re
-import typing
 from typing import Optional
 
 import questionary
@@ -491,7 +490,7 @@ def nebari_subcommand(cli: typer.Typer):
                 "Project name must (1) consist of only letters, numbers, hyphens, and underscores, (2) begin and end with a letter, and (3) contain between 3 and 16 characters.",
             ),
         ),
-        domain_name: typing.Optional[str] = typer.Option(
+        domain_name: Optional[str] = typer.Option(
             None,
             "--domain-name",
             "--domain",
