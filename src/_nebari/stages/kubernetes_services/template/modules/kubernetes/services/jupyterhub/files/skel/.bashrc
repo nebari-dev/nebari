@@ -149,4 +149,9 @@ RESET=$(tput sgr0)
 
 NAME=`whoami | cut -d'@' -f1`
 
-PS1="\[$CYAN\]$NAME:\w\[$RESET\]\$(parse_git_branch) \n\[$GREEN\]\A \$ \[$RESET\]"
+# PS1 (Prompt String)
+if [ "$ENABLE_COLORS" = true ]; then
+    PS1="\[$CYAN\]$NAME:\w\[$RESET\]\$(parse_git_branch) \n\[$GREEN\]\A \$ \[$RESET\]"
+else
+    PS1="$NAME:\w\$(parse_git_branch) \n\A \$ "
+fi
