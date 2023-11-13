@@ -7,24 +7,20 @@ import kubernetes.client
 import kubernetes.config
 import requests
 
-from _nebari import constants
+from _nebari.constants import DO_ENV_DOCS
 from _nebari.provider.cloud.amazon_web_services import aws_delete_s3_bucket
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
-from _nebari.utils import set_do_environment
+from _nebari.utils import set_do_environment, check_environment_variables
 from nebari import schema
 
 
-def check_credentials():
+def check_credentials() -> None:
     required_variables = {
-        "DIGITALOCEAN_TOKEN": os.environ.get("DIGITALOCEAN_TOKEN", None),
-        "SPACES_ACCESS_KEY_ID": os.environ.get("SPACES_ACCESS_KEY_ID", None),
-        "SPACES_SECRET_ACCESS_KEY": os.environ.get("SPACES_SECRET_ACCESS_KEY", None),
+        "DIGITALOCEAN_TOKEN",
+        "SPACES_ACCESS_KEY_ID",
+        "SPACES_SECRET_ACCESS_KEY",
     }
-    if not all(required_variables.values()):
-        raise ValueError(
-            f"""Missing the following required environment variables: {required_variables}\n
-            Please see the documentation for more information: {constants.DO_ENV_DOCS}"""
-        )
+    check_environment_variables(required_variables, DO_ENV_DOCS)
 
 
 def digital_ocean_request(url, method="GET", json=None):

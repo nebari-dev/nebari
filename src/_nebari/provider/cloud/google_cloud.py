@@ -1,24 +1,17 @@
 import functools
 import json
-import os
 import subprocess
 from typing import Dict, List, Set
 
-from _nebari import constants
+from _nebari.constants import GCP_ENV_DOCS
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari.utils import check_environment_variables
 from nebari import schema
 
 
-def check_credentials():
-    required_variables = {
-        "GOOGLE_CREDENTIALS": os.environ.get("GOOGLE_CREDENTIALS", None),
-        "PROJECT_ID": os.environ.get("PROJECT_ID", None),
-    }
-    if not all(required_variables.values()):
-        raise ValueError(
-            f"""Missing the following required environment variables: {required_variables}\n
-            Please see the documentation for more information: {constants.GCP_ENV_DOCS}"""
-        )
+def check_credentials() -> None:
+    required_variables = {"GOOGLE_APPLICATION_CREDENTIALS", "GOOGLE_PROJECT"}
+    check_environment_variables(required_variables, GCP_ENV_DOCS)
 
 
 @functools.lru_cache()
@@ -285,7 +278,7 @@ def check_missing_service() -> None:
     if missing:
         raise ValueError(
             f"""Missing required services: {missing}\n
-            Please see the documentation for more information: {constants.GCP_ENV_DOCS}"""
+            Please see the documentation for more information: {GCP_ENV_DOCS}"""
         )
 
 
