@@ -37,13 +37,6 @@ class AccessEnum(str, enum.Enum):
         return representer.represent_str(node.value)
 
 
-class Prefect(schema.Base):
-    enabled: bool = False
-    image: typing.Optional[str]
-    overrides: typing.Dict = {}
-    token: typing.Optional[str]
-
-
 class DefaultImages(schema.Base):
     jupyterhub: str = f"quay.io/nebari/nebari-jupyterhub:{set_docker_image_tag()}"
     jupyterlab: str = f"quay.io/nebari/nebari-jupyterlab:{set_docker_image_tag()}"
@@ -195,18 +188,8 @@ class ArgoWorkflows(schema.Base):
     nebari_workflow_controller: NebariWorkflowController = NebariWorkflowController()
 
 
-class KBatch(schema.Base):
-    enabled: bool = True
-
-
 class Monitoring(schema.Base):
     enabled: bool = True
-
-
-class ClearML(schema.Base):
-    enabled: bool = False
-    enable_forward_auth: bool = False
-    overrides: typing.Dict = {}
 
 
 class JupyterHub(schema.Base):
@@ -228,7 +211,6 @@ class JupyterLab(schema.Base):
 
 
 class InputSchema(schema.Base):
-    prefect: Prefect = Prefect()
     default_images: DefaultImages = DefaultImages()
     storage: Storage = Storage()
     theme: Theme = Theme()
@@ -249,11 +231,6 @@ class InputSchema(schema.Base):
                 "numpy=1.23.5",
                 "numba=0.56.4",
                 "pandas=1.5.3",
-                {
-                    "pip": [
-                        "kbatch==0.4.2",
-                    ],
-                },
             ],
         ),
         "environment-dashboard.yaml": CondaEnvironment(
@@ -301,9 +278,7 @@ class InputSchema(schema.Base):
     }
     conda_store: CondaStore = CondaStore()
     argo_workflows: ArgoWorkflows = ArgoWorkflows()
-    kbatch: KBatch = KBatch()
     monitoring: Monitoring = Monitoring()
-    clearml: ClearML = ClearML()
     jupyterhub: JupyterHub = JupyterHub()
     jupyterlab: JupyterLab = JupyterLab()
 
@@ -380,23 +355,6 @@ class ArgoWorkflowsInputVars(schema.Base):
     keycloak_read_only_user_credentials: Dict[str, Any] = Field(
         alias="keycloak-read-only-user-credentials"
     )
-
-
-class KBatchInputVars(schema.Base):
-    kbatch_enabled: bool = Field(alias="kbatch-enabled")
-
-
-class PrefectInputVars(schema.Base):
-    prefect_enabled: bool = Field(alias="prefect-enabled")
-    prefect_token: str = Field(None, alias="prefect-token")
-    prefect_image: str = Field(None, alias="prefect-image")
-    prefect_overrides: Dict = Field(alias="prefect-overrides")
-
-
-class ClearMLInputVars(schema.Base):
-    clearml_enabled: bool = Field(alias="clearml-enabled")
-    clearml_enable_forwardauth: bool = Field(alias="clearml-enable-forwardauth")
-    clearml_overrides: List[str] = Field(alias="clearml-overrides")
 
 
 class KubernetesServicesStage(NebariTerraformStage):
@@ -520,23 +478,6 @@ class KubernetesServicesStage(NebariTerraformStage):
             keycloak_read_only_user_credentials=keycloak_read_only_user_credentials,
         )
 
-        kbatch_vars = KBatchInputVars(
-            kbatch_enabled=self.config.kbatch.enabled,
-        )
-
-        prefect_vars = PrefectInputVars(
-            prefect_enabled=self.config.prefect.enabled,
-            prefect_token=self.config.prefect.token,
-            prefect_image=self.config.prefect.image,
-            prefect_overrides=self.config.prefect.overrides,
-        )
-
-        clearml_vars = ClearMLInputVars(
-            clearml_enabled=self.config.clearml.enabled,
-            clearml_enable_forwardauth=self.config.clearml.enable_forward_auth,
-            clearml_overrides=[json.dumps(self.config.clearml.overrides)],
-        )
-
         return {
             **kubernetes_services_vars.dict(by_alias=True),
             **conda_store_vars.dict(by_alias=True),
@@ -544,9 +485,6 @@ class KubernetesServicesStage(NebariTerraformStage):
             **dask_gateway_vars.dict(by_alias=True),
             **monitoring_vars.dict(by_alias=True),
             **argo_workflows_vars.dict(by_alias=True),
-            **kbatch_vars.dict(by_alias=True),
-            **prefect_vars.dict(by_alias=True),
-            **clearml_vars.dict(by_alias=True),
         }
 
     def check(
