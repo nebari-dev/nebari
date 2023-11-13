@@ -30,8 +30,6 @@ repos:
         exclude: "^docs-sphinx/cli.html"
       - id: check-json
       - id: check-yaml
-        # jinja2 templates for helm charts
-        exclude: "src/_nebari/stages/kubernetes_services/template/modules/kubernetes/services/(clearml/chart/templates/.*|prefect/chart/templates/.*)"
         args: [--allow-multiple-documents]
       - id: check-toml
       # Lint: Checks that non-binary executables have a proper shebang.
