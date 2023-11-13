@@ -17,6 +17,11 @@ resource "local_file" "jupyter_server_config_py" {
   filename = "${path.module}/files/jupyter/jupyter_server_config.py"
 }
 
+resource "local_file" "jupyter_jupyterlab_pioneer_config_py" {
+  filename = "${path.module}/files/jupyter/jupyter_jupyterlab_pioneer_config.py"
+  content = file("${path.module}/files/jupyter/jupyter_jupyterlab_pioneer_config.py")
+}
+
 
 resource "kubernetes_config_map" "etc-ipython" {
   metadata {
@@ -33,7 +38,8 @@ resource "kubernetes_config_map" "etc-ipython" {
 
 resource "kubernetes_config_map" "etc-jupyter" {
   depends_on = [
-    local_file.jupyter_server_config_py
+    local_file.jupyter_server_config_py,
+    local_file.jupyter_jupyterlab_pioneer_config_py
   ]
 
   metadata {
@@ -42,7 +48,9 @@ resource "kubernetes_config_map" "etc-jupyter" {
   }
 
   data = {
-    "jupyter_server_config.py" : local_file.jupyter_server_config_py.content
+    "jupyter_server_config.py" = local_file.jupyter_server_config_py.content,
+    "jupyter_jupyterlab_pioneer_config.py" = local_file.jupyter_jupyterlab_pioneer_config_py.content,
+    "jupyter_foo.py" = "sample",
   }
 }
 
