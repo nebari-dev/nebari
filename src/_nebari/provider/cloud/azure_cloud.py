@@ -13,8 +13,8 @@ from _nebari.constants import AZURE_ENV_DOCS
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
-    construct_azure_resource_group_name,
     check_environment_variables,
+    construct_azure_resource_group_name,
 )
 from nebari import schema
 
