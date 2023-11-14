@@ -47,7 +47,7 @@ def render_config(
     ssl_cert_email: str = None,
 ):
     config = {
-        "provider": cloud_provider.value,
+        "provider": cloud_provider,
         "namespace": namespace,
         "nebari_version": __version__,
     }
