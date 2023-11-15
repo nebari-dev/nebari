@@ -65,6 +65,7 @@ _These steps must be actioned in the order they appear in this checklist._
 
 - [ ] [Tag, build and push docker images](https://github.com/nebari-dev/nebari-docker-images/releases/new)
 - [ ] [Update and cut release for `nebari-dask` meta package on Conda-Forge.](https://github.com/conda-forge/nebari-dask-feedstock)
+- [ ] Update `CURRENT_RELEASE` (and any other tags) in the [`constants.py`](https://github.com/nebari-dev/nebari/blob/develop/src/_nebari/constants.py#L1)
 - [ ] [Cut PyPI release via GHA release workflow.](https://github.com/nebari-dev/nebari/releases/new)
   - Avoid appending `v` to tag.
     - Copy release notes from `RELEASE.md`.
