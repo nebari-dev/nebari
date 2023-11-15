@@ -12,6 +12,39 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 ## Upcoming Release
 
 
+## Release 2023.11.1 - November 15, 2023
+
+### Feature changes and enhancements
+
+* Upgrade conda-store to latest version 2023  .10.1
+* Minor improvements and bug fixes
+
+### Breaking Changes
+
+> WARNING: Prefect, ClearML and kbatch were removed in this release and upgrading to this version will result in all of them being uninstalled.
+
+### What's Changed
+* BUG: fix incorrect config override #2086 by @fangchenli in https://github.com/nebari-dev/nebari/pull/2087
+* ENH: add AWS IAM permissions_boundary option #2078 by @fangchenli in https://github.com/nebari-dev/nebari/pull/2082
+* CI: cleanup local integration workflow by @fangchenli in https://github.com/nebari-dev/nebari/pull/2079
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2099
+* ENH: check missing GCP services by @fangchenli in https://github.com/nebari-dev/nebari/pull/2036
+* ENH: use packaging for version parsing, add unit tests by @fangchenli in https://github.com/nebari-dev/nebari/pull/2048
+* ENH: specify required field when retrieving available gcp regions by @fangchenli in https://github.com/nebari-dev/nebari/pull/2033
+* Upgrade conda-store to 2023.10.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2092
+* Add upgrade command for 2023.11.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2103
+* CLN: cleanup typing and typing import in init by @fangchenli in https://github.com/nebari-dev/nebari/pull/2107
+* Remove kbatch, prefect and clearml by @iameskild in https://github.com/nebari-dev/nebari/pull/2101
+* Fix integration tests, helm-validate script by @iameskild in https://github.com/nebari-dev/nebari/pull/2102
+* Re-enable AWS tags support by @iameskild in https://github.com/nebari-dev/nebari/pull/2096
+* Update upgrade instructions for 2023.11.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2112
+* Update nebari-git env pins by by @iameskild in https://github.com/nebari-dev/nebari/pull/2113
+* Update release notes for 2023.11.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2114
+
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.10.1...2023.11.1
+
+
 ## Release 2023.10.1 - October 20, 2023
 
 This release includes a major refactor which introduces a Pluggy-based extension mechanism which allow developers to build new stages. This is the initial implementation

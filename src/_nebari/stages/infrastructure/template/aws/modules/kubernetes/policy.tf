@@ -21,8 +21,8 @@ resource "aws_iam_role" "cluster" {
     }]
     Version = "2012-10-17"
   })
-
-  tags = var.tags
+  permissions_boundary = var.permissions_boundary
+  tags                 = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "cluster-policy" {
@@ -50,8 +50,8 @@ resource "aws_iam_role" "node-group" {
     }]
     Version = "2012-10-17"
   })
-
-  tags = var.tags
+  permissions_boundary = var.permissions_boundary
+  tags                 = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "node-group-policy" {

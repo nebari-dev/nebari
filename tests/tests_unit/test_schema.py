@@ -137,3 +137,33 @@ def test_multiple_providers(config_schema):
     msg = r"Multiple providers set: \['local', 'existing'\]"
     with pytest.raises(ValidationError, match=msg):
         config_schema(**config_dict)
+
+
+def test_aws_premissions_boundary(config_schema):
+    permissions_boundary = "arn:aws:iam::123456789012:policy/MyBoundaryPolicy"
+    config_dict = {
+        "project_name": "test",
+        "provider": "aws",
+        "amazon_web_services": {
+            "region": "us-east-1",
+            "kubernetes_version": "1.19",
+            "permissions_boundary": f"{permissions_boundary}",
+        },
+    }
+    config = config_schema(**config_dict)
+    assert config.provider == "aws"
+    assert config.amazon_web_services.permissions_boundary == permissions_boundary
+
+
+@pytest.mark.parametrize("provider", ["local", "existing"])
+def test_setted_provider(config_schema, provider):
+    config_dict = {
+        "project_name": "test",
+        "provider": provider,
+        f"{provider}": {"kube_context": "some_context"},
+    }
+    config = config_schema(**config_dict)
+    assert config.provider == provider
+    result_config_dict = config.dict()
+    assert provider in result_config_dict
+    assert result_config_dict[provider]["kube_context"] == "some_context"
