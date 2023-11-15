@@ -231,6 +231,7 @@ class InputSchema(schema.Base):
                 "numpy=1.26.0",
                 "numba=0.58.1",
                 "pandas=2.1.3",
+                "xarray==2023.10.1",
             ],
         ),
         "environment-dashboard.yaml": CondaEnvironment(
@@ -263,6 +264,7 @@ class InputSchema(schema.Base):
                 "streamlit==1.28.1",
                 "sympy==1.12",
                 "voila==0.5.5",
+                "xarray==2023.10.1",
                 "pip==23.3.1",
                 {
                     "pip": [
