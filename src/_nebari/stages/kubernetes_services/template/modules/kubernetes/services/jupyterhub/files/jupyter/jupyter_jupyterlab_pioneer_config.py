@@ -1,11 +1,22 @@
-# Add JupyterLabPioneer
+import logging
+import json
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)9s %(lineno)4s %(module)s: %(message)s"
+)
+
+logger = logging.getLogger(__name__)
+
+CUSTOM_EXPORTER_NAME = "MyCustomExporter"
+
 
 def my_custom_exporter(args):
-    # write your own exporter logic here
-    import json
-    print(json.dumps(args.get("data")))
+    """Custom exporter to log JupyterLab events to command line."""
+    logger.info(json.dumps(args.get("data")))
     return {
-        "exporter":  "MyCustomExporter",
+        "exporter": CUSTOM_EXPORTER_NAME,
         "message": ""
     }
 
@@ -15,22 +26,18 @@ c.JupyterLabPioneerApp.exporters = [
         # sends telemetry data to the browser console
         "type": "console_exporter",
     },
-    # {
-    #     # sends telemetry data to the python console jupyter is running on
-    #     "type": "command_line_exporter",
-    # },
-    # sends telemetry data (json) to the python console jupyter is running on
     {
+        # sends telemetry data (json) to the python console jupyter is running on
         "type": "custom_exporter",
         "args": {
-            "id": "MyCustomExporter"
+            "id": CUSTOM_EXPORTER_NAME
             # add additional args for your exporter function here
         },
     }
 ]
 
 c.JupyterLabPioneerApp.custom_exporter = {
-    'MyCustomExporter': my_custom_exporter,
+    CUSTOM_EXPORTER_NAME: my_custom_exporter,
 }
 
 c.JupyterLabPioneerApp.activeEvents = [
