@@ -25,7 +25,7 @@ resource "local_file" "jupyter_server_config_py" {
 }
 
 resource "local_file" "jupyter_jupyterlab_pioneer_config_py" {
-  content = local.jupyter-pioneer-config-py-template
+  content  = local.jupyter-pioneer-config-py-template
   filename = "${path.module}/files/jupyter/jupyter_jupyterlab_pioneer_config.py"
 }
 
