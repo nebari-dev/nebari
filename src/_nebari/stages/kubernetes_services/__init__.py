@@ -360,7 +360,7 @@ class MonitoringInputVars(schema.Base):
 
 class TelemetryInputVars(schema.Base):
     jupyterlab_pioneer_enabled: bool = Field(alias="jupyterlab-pioneer-enabled")
-    jupyterlab_pioneer_log_format: bool = Field(alias="jupyterlab-pioneer-log-format")
+    jupyterlab_pioneer_log_format: str = Field(alias="jupyterlab-pioneer-log-format")
 
 
 class ArgoWorkflowsInputVars(schema.Base):
