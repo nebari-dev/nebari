@@ -39,6 +39,8 @@ Release captain responsible - <@gh_username>
   - [Do we need to update the `dask` versions in the `nebari-dask`?](https://github.com/conda-forge/nebari-dask-feedstock/blob/main/recipe/meta.yaml#L13-L16)
   - Will there be an accompanying blog post?
 - [ ] Prepare for the release.
+  - [ ] Update the [`nebari upgrade`](https://github.com/nebari-dev/nebari/blob/develop/src/_nebari/upgrade.py) for this release
+    - [ ] Add upgrade messaging including deprecation warnings, version specific warnings and so on.
   - [ ] Announce build freeze.
   - [ ] Release Candidate (RC) cycle.
     - Is this a hotfix?
@@ -63,6 +65,7 @@ _These steps must be actioned in the order they appear in this checklist._
 
 - [ ] [Tag, build and push docker images](https://github.com/nebari-dev/nebari-docker-images/releases/new)
 - [ ] [Update and cut release for `nebari-dask` meta package on Conda-Forge.](https://github.com/conda-forge/nebari-dask-feedstock)
+- [ ] Update `CURRENT_RELEASE` (and any other tags) in the [`constants.py`](https://github.com/nebari-dev/nebari/blob/develop/src/_nebari/constants.py#L1)
 - [ ] [Cut PyPI release via GHA release workflow.](https://github.com/nebari-dev/nebari/releases/new)
   - Avoid appending `v` to tag.
     - Copy release notes from `RELEASE.md`.
