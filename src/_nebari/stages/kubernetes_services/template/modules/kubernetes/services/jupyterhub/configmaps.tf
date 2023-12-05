@@ -49,7 +49,9 @@ locals {
       "jupyter_server_config.py" = local_file.jupyter_server_config_py.content,
     },
     var.jupyterlab-pioneer-enabled ? {
-      jupyter_jupyterlab_pioneer_config.py = local_file.jupyter_jupyterlab_pioneer_config_py.content
+      # quotes are must here, as terraform would otherwise think py is a property of
+      # a defined resource jupyter_jupyterlab_pioneer_config
+      "jupyter_jupyterlab_pioneer_config.py" = local_file.jupyter_jupyterlab_pioneer_config_py.content
     } : {}
   )
 }
