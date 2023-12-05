@@ -13,7 +13,7 @@ locals {
 
 locals {
   jupyter-pioneer-config-py-template = templatefile("${path.module}/files/jupyter/jupyter_jupyterlab_pioneer_config.py.tpl", {
-    log_format = var.jupyterlab-pioneer-log-format
+    log_format = var.jupyterlab-pioneer-log-format != null ? var.jupyterlab-pioneer-log-format : ""
     }
   )
 }
