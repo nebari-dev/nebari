@@ -1,11 +1,15 @@
 resource "helm_release" "loki-grafana" {
-  name       = "nebari"
+  name       = "loki-grafana"
   namespace  = var.namespace
   repository = "https://grafana.github.io/helm-charts"
-  chart      = "grafana/loki"
+  chart      = "loki"
   version    = var.loki-helm-chart-version
 
-  values = file("${path.module}/values.yaml")
+  values = concat([
+    file("${path.module}/values.yaml"),
+    jsonencode({
+    })
+  ], var.overrides)
 }
 
 resource "kubernetes_manifest" "grafana-ingress-route" {

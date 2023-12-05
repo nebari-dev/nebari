@@ -6,11 +6,5 @@ loki:
       chunks: chunks
       ruler: ruler
       admin: admin
-    type: s3
-    s3:
-      endpoint: <endpoint>
-      region: <AWS region>
-      secretAccessKey: <AWS secret access key>
-      accessKeyId: <AWS access key ID>
-      s3ForcePathStyle: false
-      insecure: false
+minio:
+  enabled: true
