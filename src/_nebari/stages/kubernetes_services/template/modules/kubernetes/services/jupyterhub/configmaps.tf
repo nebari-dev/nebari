@@ -11,6 +11,13 @@ locals {
   )
 }
 
+locals {
+  jupyter-pioneer-config-py-template = templatefile("${path.module}/files/jupyter/jupyter_jupyterlab_pioneer_config.py.tpl", {
+    log_format = var.jupyterlab-pioneer-log-format
+    }
+  )
+}
+
 
 resource "local_file" "jupyter_server_config_py" {
   content  = local.jupyter-notebook-config-py-template
@@ -18,8 +25,8 @@ resource "local_file" "jupyter_server_config_py" {
 }
 
 resource "local_file" "jupyter_jupyterlab_pioneer_config_py" {
+  content = local.jupyter-pioneer-config-py-template
   filename = "${path.module}/files/jupyter/jupyter_jupyterlab_pioneer_config.py"
-  content = file("${path.module}/files/jupyter/jupyter_jupyterlab_pioneer_config.py")
 }
 
 
@@ -36,6 +43,17 @@ resource "kubernetes_config_map" "etc-ipython" {
 }
 
 
+locals {
+  etc-jupyter-config-data = merge(
+    {
+      "jupyter_server_config.py" = local_file.jupyter_server_config_py.content,
+    },
+    var.jupyterlab-pioneer-enabled ? {
+      jupyter_jupyterlab_pioneer_config.py = local_file.jupyter_jupyterlab_pioneer_config_py.content
+    } : {}
+  )
+}
+
 resource "kubernetes_config_map" "etc-jupyter" {
   depends_on = [
     local_file.jupyter_server_config_py,
@@ -47,11 +65,7 @@ resource "kubernetes_config_map" "etc-jupyter" {
     namespace = var.namespace
   }
 
-  data = {
-    "jupyter_server_config.py" = local_file.jupyter_server_config_py.content,
-    "jupyter_jupyterlab_pioneer_config.py" = local_file.jupyter_jupyterlab_pioneer_config_py.content,
-    "jupyter_foo.py" = "sample",
-  }
+  data = local.etc-jupyter-config-data
 }
 
 

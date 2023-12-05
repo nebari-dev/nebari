@@ -192,6 +192,15 @@ class Monitoring(schema.Base):
     enabled: bool = True
 
 
+class JupyterLabPioneer(schema.Base):
+    enabled: bool = False
+    log_format: typing.Optional[str] = None
+
+
+class Telemetry(schema.Base):
+    jupyterlab_pioneer: typing.Optional[JupyterLabPioneer] = None
+
+
 class JupyterHub(schema.Base):
     overrides: typing.Dict = {}
 
@@ -280,6 +289,7 @@ class InputSchema(schema.Base):
     conda_store: CondaStore = CondaStore()
     argo_workflows: ArgoWorkflows = ArgoWorkflows()
     monitoring: Monitoring = Monitoring()
+    telemetry: Telemetry = Telemetry()
     jupyterhub: JupyterHub = JupyterHub()
     jupyterlab: JupyterLab = JupyterLab()
 
@@ -346,6 +356,11 @@ class DaskGatewayInputVars(schema.Base):
 
 class MonitoringInputVars(schema.Base):
     monitoring_enabled: bool = Field(alias="monitoring-enabled")
+
+
+class TelemetryInputVars(schema.Base):
+    jupyterlab_pioneer_enabled: bool = Field(alias="jupyterlab-pioneer-enabled")
+    jupyterlab_pioneer_log_format: bool = Field(alias="jupyterlab-pioneer-log-format")
 
 
 class ArgoWorkflowsInputVars(schema.Base):
@@ -471,6 +486,11 @@ class KubernetesServicesStage(NebariTerraformStage):
             monitoring_enabled=self.config.monitoring.enabled,
         )
 
+        telemetry_vars = TelemetryInputVars(
+            jupyterlab_pioneer_enabled=self.config.telemetry.jupyterlab_pioneer.enabled,
+            jupyterlab_pioneer_log_format=self.config.telemetry.jupyterlab_pioneer.log_format,
+        )
+
         argo_workflows_vars = ArgoWorkflowsInputVars(
             argo_workflows_enabled=self.config.argo_workflows.enabled,
             argo_workflows_overrides=[json.dumps(self.config.argo_workflows.overrides)],
@@ -486,6 +506,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             **dask_gateway_vars.dict(by_alias=True),
             **monitoring_vars.dict(by_alias=True),
             **argo_workflows_vars.dict(by_alias=True),
+            **telemetry_vars.dict(by_alias=True),
         }
 
     def check(
