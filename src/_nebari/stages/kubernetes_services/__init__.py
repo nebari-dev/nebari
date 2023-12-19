@@ -198,7 +198,7 @@ class JupyterLabPioneer(schema.Base):
 
 
 class Telemetry(schema.Base):
-    jupyterlab_pioneer: typing.Optional[JupyterLabPioneer] = None
+    jupyterlab_pioneer: JupyterLabPioneer = JupyterLabPioneer()
 
 
 class JupyterHub(schema.Base):
