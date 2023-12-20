@@ -665,6 +665,7 @@ class Upgrade_2023_11_1(UpgradeStep):
 
         return config
 
+
 class Upgrade_2023_12_1(UpgradeStep):
     version = "2023.12.1"
 
@@ -677,10 +678,10 @@ class Upgrade_2023_12_1(UpgradeStep):
         )
         rich.print("\n ⚠️  Deprecation Warning ⚠️")
         f"-> [green]{self.version}[/green] is the last Nebari version that supports the jupyterlab-videochat extension"
-        rich.print(
-        )
+        rich.print()
 
         return config
+
 
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
