@@ -677,7 +677,9 @@ class Upgrade_2023_12_1(UpgradeStep):
             "-> Please run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
         )
         rich.print("\n ⚠️  Deprecation Warning ⚠️")
-        f"-> [green]{self.version}[/green] is the last Nebari version that supports the jupyterlab-videochat extension"
+        rich.print(
+            f"-> [green]{self.version}[/green] is the last Nebari version that supports the jupyterlab-videochat extension."
+        )
         rich.print()
 
         return config
