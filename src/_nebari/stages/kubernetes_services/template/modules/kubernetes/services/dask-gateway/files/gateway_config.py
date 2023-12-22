@@ -191,6 +191,7 @@ def base_conda_store_mounts(namespace, name):
         "scheduler_cmd": "/opt/conda-run-scheduler",
         "environment": {
             "CONDA_ENVIRONMENT": str(conda_store_mount / namespace / "envs" / name),
+            "BOKEH_RESOURCES": "cdn",
         },
     }
 
