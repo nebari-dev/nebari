@@ -438,10 +438,10 @@ class AmazonWebServicesProvider(schema.Base):
     node_groups: Dict[str, AWSNodeGroup] = {
         "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
         "user": AWSNodeGroup(
-            instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
+            instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
         ),
         "worker": AWSNodeGroup(
-            instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
+            instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
         ),
     }
     existing_subnet_ids: List[str] = None
