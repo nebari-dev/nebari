@@ -1,4 +1,4 @@
-CURRENT_RELEASE = "2023.11.1"
+CURRENT_RELEASE = "2023.12.1"
 
 # NOTE: Terraform cannot be upgraded further due to Hashicorp licensing changes
 # implemented in August 2023.
