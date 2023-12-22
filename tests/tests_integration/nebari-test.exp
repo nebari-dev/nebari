@@ -1,0 +1,86 @@
+#!/usr/bin/expect
+
+# Example: script.exp
+
+# spawn nebari init --guided-init
+# expect -exact "Where would you like to deploy your Nebari cluster? (Use arrow keys)"
+# # Send the escape sequence for the down arrow key (3 times)
+# send -- "\033\[B"
+# send -- "\033\[B"
+# # send -- "\033\[B"
+
+# # Optionally, send a newline to confirm the selection (if needed)
+# send "\n"
+# expect -exact "In which region would you like to deploy your Nebari cluster?"
+# send "nyc3"
+# send "\n"
+# expect -exact "What project name would you like to use?"
+# send "nebari-test"
+# send "\n"
+# expect -exact "What domain name would you like to use?"
+# send ""
+# send "\n"
+# expect -exact "What authentication provider would you like? (Use arrow keys)"
+# send "password"
+# send "\n"
+# expect -exact "Would you like to adopt a GitOps approach to managing Nebari? (y/N)"
+# send "N"
+# send "\n"
+# expect -exact "Would you like to make advanced configuration changes? (y/N)"
+# send "N"
+# send "\n"
+
+# expect eof
+# # Wait for a moment if needed before exiting
+# # after 1000
+
+# # Exit the expect script
+# # exit
+
+# set file_path "./nebari-config.yaml"
+
+# if {[file exists $file_path]} {
+#     puts "nebar-config.yaml file exist at $file_path."
+#     # Perform actions when the file exists
+# } else {
+#     puts "The file does not exist at $file_path."
+#     # Perform actions when the file does not exist
+# }
+set shell_script "./filetest.sh"
+spawn bash $shell_script
+expect eof
+# set provider_key "provider"
+# set yq_command "yq eval '.[$provider_key]' $file_path"
+# spawn [list sh -c $yq_command]
+# spawn sh -c "yq eval '.[$provider_key]' $file_path"
+# spawn "yq eval '.[$provider_key]' $file_path"
+# expect {
+#     # Pattern to match if the parameter exists
+#     -re "$provider_key: (.*)" {
+#         puts "Parameter '$provider_key' exists in the YAML file."
+#         # Perform actions when the parameter exists
+#     }
+#     # Pattern to match if the parameter does not exist
+#     default {
+#         puts "Parameter '$provider_key' does not exist in the YAML file."
+#         # Perform actions when the parameter does not exist
+#     }
+# }
+
+# Wait for the spawned process to finish
+# expect eof
+
+# if yq eval '.your_parameter_key' your_file.yaml > /dev/null 2>&1; then
+#     echo "Parameter 'your_parameter_key' exists in the YAML file."
+# else
+#     echo "Parameter 'your_parameter_key' does not exist in the YAML file."
+# fi
+
+
+# set yq_command "yq e '.[]' $file_path"
+# puts "Keys and Values in the YAML file:"
+# exec sh -c $yq_command
+
+
+
+
