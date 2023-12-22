@@ -46,7 +46,7 @@
 #     puts "The file does not exist at $file_path."
 #     # Perform actions when the file does not exist
 # }
-set shell_script "./filetest.sh"
+set shell_script "./file test.sh"
 spawn bash $shell_script
 expect eof
 # set provider_key "provider"
@@ -80,7 +80,3 @@ expect eof
 # set yq_command "yq e '.[]' $file_path"
 # puts "Keys and Values in the YAML file:"
 # exec sh -c $yq_command
-
-
-
-

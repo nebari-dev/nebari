@@ -24,7 +24,7 @@ for parameter_name in "${!expected_values[@]}"; do
     if yq eval ".${parameter_name}" "$yaml_file" > /dev/null 2>&1; then
         actual_value=$(yq eval ".${parameter_name}" "$yaml_file")
         expected_value="${expected_values[${parameter_name}]}"
-        
+
         if [ "$actual_value" == "$expected_value" ]; then
             echo "Parameter '$parameter_name' has the expected value: $expected_value"
         else
