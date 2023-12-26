@@ -23,17 +23,6 @@ NUM_ATTEMPTS = 10
 TIMEOUT = 10  # seconds
 
 
-def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
-    dns_records = [
-        f"app.clearml.{record_name}",
-        f"api.clearml.{record_name}",
-        f"files.clearml.{record_name}",
-    ]
-
-    for dns_record in dns_records:
-        update_record(zone_name, dns_record, record_type, ip_or_hostname)
-
-
 def provision_ingress_dns(
     stage_outputs: Dict[str, Dict[str, Any]],
     config: schema.Main,
@@ -59,13 +48,9 @@ def provision_ingress_dns(
             schema.ProviderEnum.azure,
         }:
             update_record(zone_name, record_name, "A", ip_or_hostname)
-            if config.clearml.enabled:
-                add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
 
         elif config.provider == schema.ProviderEnum.aws:
             update_record(zone_name, record_name, "CNAME", ip_or_hostname)
-            if config.clearml.enabled:
-                add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
         else:
             logger.info(
                 f"Couldn't update the DNS record for cloud provider: {config.provider}"

@@ -654,10 +654,33 @@ class Upgrade_2023_11_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
+        rich.print("\n ⚠️  Warning ⚠️")
+        rich.print(
+            "-> Please run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
+        )
         rich.print("\n ⚠️  Deprecation Warning ⚠️")
         rich.print(
             f"-> ClearML, Prefect and kbatch are no longer supported in Nebari version [green]{self.version}[/green] and will be uninstalled."
         )
+
+        return config
+
+
+class Upgrade_2023_12_1(UpgradeStep):
+    version = "2023.12.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("\n ⚠️  Warning ⚠️")
+        rich.print(
+            "-> Please run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
+        )
+        rich.print("\n ⚠️  Deprecation Warning ⚠️")
+        rich.print(
+            f"-> [green]{self.version}[/green] is the last Nebari version that supports the jupyterlab-videochat extension."
+        )
+        rich.print()
 
         return config
 

@@ -5,8 +5,7 @@ import pathlib
 import re
 import sys
 import tempfile
-import typing
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from pydantic import Field, field_validator, model_validator
 
@@ -57,9 +56,9 @@ class DigitalOceanInputVars(schema.Base):
     name: str
     environment: str
     region: str
-    tags: typing.List[str]
+    tags: List[str]
     kubernetes_version: str
-    node_groups: typing.Dict[str, DigitalOceanNodeGroup]
+    node_groups: Dict[str, DigitalOceanNodeGroup]
     kubeconfig_filename: str = get_kubeconfig_filename()
 
 
@@ -148,6 +147,7 @@ class AWSInputVars(schema.Base):
     vpc_cidr_block: str
     permissions_boundary: Optional[str] = None
     kubeconfig_filename: str = get_kubeconfig_filename()
+    tags: Dict[str, str] = {}
 
 
 def _calculate_node_groups(config: schema.Main):
@@ -282,7 +282,7 @@ class GCPCIDRBlock(schema.Base):
 
 
 class GCPMasterAuthorizedNetworksConfig(schema.Base):
-    cidr_blocks: typing.List[GCPCIDRBlock]
+    cidr_blocks: List[GCPCIDRBlock]
 
 
 class GCPPrivateClusterConfig(schema.Base):
@@ -307,34 +307,28 @@ class GCPNodeGroup(schema.Base):
     min_nodes: Annotated[int, Field(ge=0)] = 0
     max_nodes: Annotated[int, Field(ge=1)] = 1
     preemptible: bool = False
-    labels: typing.Dict[str, str] = {}
-    guest_accelerators: typing.List[GCPGuestAccelerator] = []
+    labels: Dict[str, str] = {}
+    guest_accelerators: List[GCPGuestAccelerator] = []
 
 
 class GoogleCloudPlatformProvider(schema.Base):
     region: str
     project: str
     kubernetes_version: str
-    availability_zones: typing.Optional[typing.List[str]] = []
+    availability_zones: Optional[List[str]] = []
     release_channel: str = constants.DEFAULT_GKE_RELEASE_CHANNEL
-    node_groups: typing.Dict[str, GCPNodeGroup] = {
+    node_groups: Dict[str, GCPNodeGroup] = {
         "general": GCPNodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
         "user": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
         "worker": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
     }
-    tags: typing.Optional[typing.List[str]] = []
+    tags: Optional[List[str]] = []
     networking_mode: str = "ROUTE"
     network: str = "default"
-    subnetwork: typing.Optional[typing.Union[str, None]] = None
-    ip_allocation_policy: typing.Optional[
-        typing.Union[GCPIPAllocationPolicy, None]
-    ] = None
-    master_authorized_networks_config: typing.Optional[
-        typing.Union[GCPCIDRBlock, None]
-    ] = None
-    private_cluster_config: typing.Optional[
-        typing.Union[GCPPrivateClusterConfig, None]
-    ] = None
+    subnetwork: Optional[Union[str, None]] = None
+    ip_allocation_policy: Optional[Union[GCPIPAllocationPolicy, None]] = None
+    master_authorized_networks_config: Optional[Union[GCPCIDRBlock, None]] = None
+    private_cluster_config: Optional[Union[GCPPrivateClusterConfig, None]] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -366,15 +360,17 @@ class AzureProvider(schema.Base):
     region: str
     kubernetes_version: Optional[str] = None
     storage_account_postfix: str
+    resource_group_name: Optional[str] = None
     node_groups: Dict[str, AzureNodeGroup] = {
         "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
         "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
         "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     }
+    storage_account_postfix: str
     vnet_subnet_id: Optional[str] = None
     private_cluster_enabled: bool = False
     resource_group_name: Optional[str] = None
-    tags: Optional[Dict[str, str]] = None
+    tags: Optional[Dict[str, str]] = {}
     network_profile: Optional[Dict[str, str]] = None
     max_pods: Optional[int] = None
 
@@ -434,7 +430,8 @@ class AWSNodeGroup(schema.Base):
 
 class AmazonWebServicesProvider(schema.Base):
     region: str
-    vpc_cidr_block: str = "10.10.0.0/16"
+    kubernetes_version: str
+    availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = {
         "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
         "user": AWSNodeGroup(
@@ -444,11 +441,11 @@ class AmazonWebServicesProvider(schema.Base):
             instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
         ),
     }
-    kubernetes_version: Optional[str] = None
-    availability_zones: Optional[List[str]] = None
     existing_subnet_ids: Optional[List[str]] = None
-    existing_security_group_ids: Optional[str] = None
+    existing_security_group_id: Optional[str] = None
+    vpc_cidr_block: str = "10.10.0.0/16"
     permissions_boundary: Optional[str] = None
+    tags: Optional[Dict[str, str]] = {}
 
     @model_validator(mode="before")
     @classmethod
@@ -593,20 +590,20 @@ class NodeSelectorKeyValue(schema.Base):
 class KubernetesCredentials(schema.Base):
     host: str
     cluster_ca_certifiate: str
-    token: typing.Optional[str] = None
-    username: typing.Optional[str] = None
-    password: typing.Optional[str] = None
-    client_certificate: typing.Optional[str] = None
-    client_key: typing.Optional[str] = None
-    config_path: typing.Optional[str] = None
-    config_context: typing.Optional[str] = None
+    token: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    client_certificate: Optional[str] = None
+    client_key: Optional[str] = None
+    config_path: Optional[str] = None
+    config_context: Optional[str] = None
 
 
 class OutputSchema(schema.Base):
     node_selectors: Dict[str, NodeSelectorKeyValue]
     kubernetes_credentials: KubernetesCredentials
     kubeconfig_filename: str
-    nfs_endpoint: typing.Optional[str] = None
+    nfs_endpoint: Optional[str] = None
 
 
 class KubernetesInfrastructureStage(NebariTerraformStage):
@@ -775,7 +772,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
-                existing_security_group_id=self.config.amazon_web_services.existing_security_group_ids,
+                existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
                 region=self.config.amazon_web_services.region,
                 kubernetes_version=self.config.amazon_web_services.kubernetes_version,
                 node_groups=[
@@ -794,6 +791,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 availability_zones=self.config.amazon_web_services.availability_zones,
                 vpc_cidr_block=self.config.amazon_web_services.vpc_cidr_block,
                 permissions_boundary=self.config.amazon_web_services.permissions_boundary,
+                tags=self.config.amazon_web_services.tags,
             ).dict()
         else:
             raise ValueError(f"Unknown provider: {self.config.provider}")

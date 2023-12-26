@@ -35,13 +35,6 @@ class AccessEnum(str, enum.Enum):
         return representer.represent_str(node.value)
 
 
-class Prefect(schema.Base):
-    enabled: bool = False
-    image: Optional[str] = None
-    overrides: Dict = {}
-    token: Optional[str] = None
-
-
 class DefaultImages(schema.Base):
     jupyterhub: str = f"quay.io/nebari/nebari-jupyterhub:{set_docker_image_tag()}"
     jupyterlab: str = f"quay.io/nebari/nebari-jupyterlab:{set_docker_image_tag()}"
@@ -187,18 +180,8 @@ class ArgoWorkflows(schema.Base):
     nebari_workflow_controller: NebariWorkflowController = NebariWorkflowController()
 
 
-class KBatch(schema.Base):
-    enabled: bool = True
-
-
 class Monitoring(schema.Base):
     enabled: bool = True
-
-
-class ClearML(schema.Base):
-    enabled: bool = False
-    enable_forward_auth: bool = False
-    overrides: Dict = {}
 
 
 class JupyterHub(schema.Base):
@@ -220,7 +203,6 @@ class JupyterLab(schema.Base):
 
 
 class InputSchema(schema.Base):
-    prefect: Prefect = Prefect()
     default_images: DefaultImages = DefaultImages()
     storage: Storage = Storage()
     theme: Theme = Theme()
@@ -230,60 +212,56 @@ class InputSchema(schema.Base):
             name="dask",
             channels=["conda-forge"],
             dependencies=[
-                "python=3.10.8",
-                "ipykernel=6.21.0",
-                "ipywidgets==7.7.1",
-                f"nebari-dask =={set_nebari_dask_version()}",
-                "python-graphviz=0.20.1",
-                "pyarrow=10.0.1",
-                "s3fs=2023.1.0",
-                "gcsfs=2023.1.0",
-                "numpy=1.23.5",
-                "numba=0.56.4",
-                "pandas=1.5.3",
-                {
-                    "pip": [
-                        "kbatch==0.4.2",
-                    ],
-                },
+                "python==3.11.6",
+                "ipykernel==6.26.0",
+                "ipywidgets==8.1.1",
+                f"nebari-dask=={set_nebari_dask_version()}",
+                "python-graphviz==0.20.1",
+                "pyarrow==14.0.1",
+                "s3fs==2023.10.0",
+                "gcsfs==2023.10.0",
+                "numpy=1.26.0",
+                "numba=0.58.1",
+                "pandas=2.1.3",
+                "xarray==2023.10.1",
             ],
         ),
         "environment-dashboard.yaml": CondaEnvironment(
             name="dashboard",
             channels=["conda-forge"],
             dependencies=[
-                "python=3.10",
-                "cufflinks-py=0.17.3",
-                "dash=2.8.1",
-                "geopandas=0.12.2",
-                "geopy=2.3.0",
-                "geoviews=1.9.6",
-                "gunicorn=20.1.0",
-                "holoviews=1.15.4",
-                "ipykernel=6.21.2",
-                "ipywidgets=8.0.4",
-                "jupyter=1.0.0",
-                "jupyterlab=3.6.1",
-                "jupyter_bokeh=3.0.5",
-                "matplotlib=3.7.0",
+                "python==3.11.6",
+                "cufflinks-py==0.17.3",
+                "dash==2.14.1",
+                "geopandas==0.14.1",
+                "geopy==2.4.0",
+                "geoviews==1.11.0",
+                "gunicorn==21.2.0",
+                "holoviews==1.18.1",
+                "ipykernel==6.26.0",
+                "ipywidgets==8.1.1",
+                "jupyter==1.0.0",
+                "jupyter_bokeh==3.0.7",
+                "matplotlib==3.8.1",
                 f"nebari-dask=={set_nebari_dask_version()}",
-                "nodejs=18.12.1",
-                "numpy",
-                "openpyxl=3.1.1",
-                "pandas=1.5.3",
-                "panel=0.14.3",
-                "param=1.12.3",
-                "plotly=5.13.0",
-                "python-graphviz=0.20.1",
-                "rich=13.3.1",
-                "streamlit=1.9.0",
-                "sympy=1.11.1",
-                "voila=0.4.0",
-                "pip=23.0",
+                "nodejs=20.8.1",
+                "numpy==1.26.0",
+                "openpyxl==3.1.2",
+                "pandas==2.1.3",
+                "panel==1.3.1",
+                "param==2.0.1",
+                "plotly==5.18.0",
+                "python-graphviz==0.20.1",
+                "rich==13.6.0",
+                "streamlit==1.28.1",
+                "sympy==1.12",
+                "voila==0.5.5",
+                "xarray==2023.10.1",
+                "pip==23.3.1",
                 {
                     "pip": [
-                        "streamlit-image-comparison==0.0.3",
-                        "noaa-coops==0.2.1",
+                        "streamlit-image-comparison==0.0.4",
+                        "noaa-coops==0.1.9",
                         "dash_core_components==2.0.0",
                         "dash_html_components==2.0.0",
                     ],
@@ -293,9 +271,7 @@ class InputSchema(schema.Base):
     }
     conda_store: CondaStore = CondaStore()
     argo_workflows: ArgoWorkflows = ArgoWorkflows()
-    kbatch: KBatch = KBatch()
     monitoring: Monitoring = Monitoring()
-    clearml: ClearML = ClearML()
     jupyterhub: JupyterHub = JupyterHub()
     jupyterlab: JupyterLab = JupyterLab()
 
@@ -374,23 +350,6 @@ class ArgoWorkflowsInputVars(schema.Base):
     keycloak_read_only_user_credentials: Dict[str, Any] = Field(
         alias="keycloak-read-only-user-credentials"
     )
-
-
-class KBatchInputVars(schema.Base):
-    kbatch_enabled: bool = Field(alias="kbatch-enabled")
-
-
-class PrefectInputVars(schema.Base):
-    prefect_enabled: bool = Field(alias="prefect-enabled")
-    prefect_token: Optional[str] = Field(alias="prefect-token", default=None)
-    prefect_image: Optional[str] = Field(alias="prefect-image", default=None)
-    prefect_overrides: Dict = Field(alias="prefect-overrides")
-
-
-class ClearMLInputVars(schema.Base):
-    clearml_enabled: bool = Field(alias="clearml-enabled")
-    clearml_enable_forwardauth: bool = Field(alias="clearml-enable-forwardauth")
-    clearml_overrides: List[str] = Field(alias="clearml-overrides")
 
 
 class KubernetesServicesStage(NebariTerraformStage):
@@ -514,23 +473,6 @@ class KubernetesServicesStage(NebariTerraformStage):
             keycloak_read_only_user_credentials=keycloak_read_only_user_credentials,
         )
 
-        kbatch_vars = KBatchInputVars(
-            kbatch_enabled=self.config.kbatch.enabled,
-        )
-
-        prefect_vars = PrefectInputVars(
-            prefect_enabled=self.config.prefect.enabled,
-            prefect_token=self.config.prefect.token,
-            prefect_image=self.config.prefect.image,
-            prefect_overrides=self.config.prefect.overrides,
-        )
-
-        clearml_vars = ClearMLInputVars(
-            clearml_enabled=self.config.clearml.enabled,
-            clearml_enable_forwardauth=self.config.clearml.enable_forward_auth,
-            clearml_overrides=[json.dumps(self.config.clearml.overrides)],
-        )
-
         return {
             **kubernetes_services_vars.dict(by_alias=True),
             **conda_store_vars.dict(by_alias=True),
@@ -538,9 +480,6 @@ class KubernetesServicesStage(NebariTerraformStage):
             **dask_gateway_vars.dict(by_alias=True),
             **monitoring_vars.dict(by_alias=True),
             **argo_workflows_vars.dict(by_alias=True),
-            **kbatch_vars.dict(by_alias=True),
-            **prefect_vars.dict(by_alias=True),
-            **clearml_vars.dict(by_alias=True),
         }
 
     def check(
