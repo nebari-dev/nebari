@@ -112,8 +112,6 @@ module "jupyterhub" {
     "dask-gateway"
     ],
     (var.monitoring-enabled ? ["monitoring"] : []),
-    (var.prefect-enabled ? ["prefect"] : []),
-    (var.kbatch-enabled ? ["kbatch"] : [])
   )
 
   general-node-group = var.node_groups.general

@@ -71,3 +71,9 @@ variable "permissions_boundary" {
   type        = string
   default     = null
 }
+
+variable "tags" {
+  description = "Additional tags to add to resources"
+  type        = map(string)
+  default     = {}
+}
