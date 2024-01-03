@@ -67,23 +67,23 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
     directory = "stages/04-kubernetes-ingress"
 
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
-    ip = socket.gethostbyname(ip_or_name["hostname"] or ip_or_name["ip"])
+    _, _, ips = socket.gethostbyname_ex(ip_or_name["hostname"] or ip_or_name["ip"])
     domain_name = stage_outputs[directory]["domain"]
 
     def _attempt_dns_lookup(
-        domain_name, ip, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
+        domain_name, ips, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
     ):
         for i in range(num_attempts):
             try:
-                _, _, ipaddrlist = socket.gethostbyname_ex(domain_name)
-                if ip in ipaddrlist:
+                _, _, resolved_ips = socket.gethostbyname_ex(domain_name)
+                if set(resolved_ips) == set(ips):
                     print(
-                        f"DNS configured domain={domain_name} matches ingress ip={ip}"
+                        f"DNS configured domain={domain_name} matches ingress ips={ips}"
                     )
                     return True
                 else:
                     print(
-                        f"Attempt {i+1} polling DNS domain={domain_name} does not match ip={ip} instead got {ipaddrlist}"
+                        f"Attempt {i+1} polling DNS domain={domain_name} does not match ip={ips} instead got {resolved_ips}"
                     )
             except socket.gaierror:
                 print(
@@ -93,7 +93,7 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
         return False
 
     attempt = 0
-    while not _attempt_dns_lookup(domain_name, ip):
+    while not _attempt_dns_lookup(domain_name, ips):
         sleeptime = 60 * (2**attempt)
         if not disable_prompt:
             input(
