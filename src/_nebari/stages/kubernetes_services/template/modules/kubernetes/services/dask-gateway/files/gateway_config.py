@@ -115,7 +115,7 @@ def list_dask_environments():
 
 def base_node_group(options):
     default_node_group = {
-        config["worker-node-group"]["key"]: config["worker-node-group"]["value"]
+        "dedicated": config["worker-node-group"]["value"]
     }
 
     # check `worker_extra_pod_config` first
