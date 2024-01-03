@@ -134,6 +134,7 @@ resource "helm_release" "jupyterhub" {
       singleuser = {
         image = var.jupyterlab-image
         nodeSelector = {
+          "${var.user-node-group.key}" = var.user-node-group.value
           "dedicated" = var.user-node-group.value
         }
       }
@@ -141,6 +142,7 @@ resource "helm_release" "jupyterhub" {
       scheduling = {
         userScheduler = {
           nodeSelector = {
+            "${var.general-node-group.key}" = var.general-node-group.value
             "dedicated" = var.general-node-group.value
           }
         }
