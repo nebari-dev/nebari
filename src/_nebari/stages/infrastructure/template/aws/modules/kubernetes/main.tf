@@ -57,7 +57,7 @@ resource "aws_eks_node_group" "main" {
   ]
 
   tags = merge({
-    "kubernetes.io/cluster/${var.name}" = "shared"
+    "kubernetes.io/cluster/${var.name}"                       = "shared"
     "k8s.io/cluster-autoscaler/node-template/label/dedicated" = var.node_groups[count.index].name
     propagate_at_launch = true
   }, var.tags)
@@ -71,8 +71,8 @@ resource "aws_autoscaling_group_tag" "dedicated_user" {
   )
   autoscaling_group_name = each.value
   tag {
-    key   = "k8s.io/cluster-autoscaler/node-template/label/dedicated"
-    value = var.node_groups[1].name
+    key                 = "k8s.io/cluster-autoscaler/node-template/label/dedicated"
+    value               = var.node_groups[1].name
     propagate_at_launch = true
   }
 }
@@ -85,8 +85,8 @@ resource "aws_autoscaling_group_tag" "dedicated_worker" {
   )
   autoscaling_group_name = each.value
   tag {
-    key   = "k8s.io/cluster-autoscaler/node-template/label/dedicated"
-    value = var.node_groups[2].name
+    key                 = "k8s.io/cluster-autoscaler/node-template/label/dedicated"
+    value               = var.node_groups[2].name
     propagate_at_launch = true
   }
 }
