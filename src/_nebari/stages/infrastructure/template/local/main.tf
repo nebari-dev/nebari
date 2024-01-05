@@ -12,10 +12,6 @@ terraform {
       source  = "gavinbunney/kubectl"
       version = ">= 1.7.0"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.12.0"
-    }
   }
 }
 
