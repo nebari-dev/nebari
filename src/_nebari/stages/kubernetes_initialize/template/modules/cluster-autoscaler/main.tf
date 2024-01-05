@@ -34,6 +34,7 @@ resource "aws_autoscaling_group_tag" "dedicated_user" {
       [for resources in data.aws_eks_node_group.user.resources : resources.autoscaling_groups]
     ) : asg.name]
   )
+
   autoscaling_group_name = each.value
   tag {
     key                 = "k8s.io/cluster-autoscaler/node-template/label/dedicated"
