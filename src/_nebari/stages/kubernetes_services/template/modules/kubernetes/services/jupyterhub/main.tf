@@ -134,14 +134,14 @@ resource "helm_release" "jupyterhub" {
       singleuser = {
         image = var.jupyterlab-image
         nodeSelector = {
-          "dedicated"                  = var.user-node-group.value
+          "dedicated" = var.user-node-group.value
         }
       }
 
       scheduling = {
         userScheduler = {
           nodeSelector = {
-            "dedicated"                     = var.general-node-group.value
+            "dedicated" = var.general-node-group.value
           }
         }
       }
