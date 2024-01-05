@@ -63,33 +63,6 @@ resource "aws_eks_node_group" "main" {
   }, var.tags)
 }
 
-resource "aws_autoscaling_group_tag" "dedicated_user" {
-  for_each = toset(
-    [for asg in flatten(
-      [for resources in aws_eks_node_group.main[1].resources : resources.autoscaling_groups]
-    ) : asg.name]
-  )
-  autoscaling_group_name = each.value
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/node-template/label/dedicated"
-    value               = var.node_groups[1].name
-    propagate_at_launch = true
-  }
-}
-
-resource "aws_autoscaling_group_tag" "dedicated_worker" {
-  for_each = toset(
-    [for asg in flatten(
-      [for resources in aws_eks_node_group.main[2].resources : resources.autoscaling_groups]
-    ) : asg.name]
-  )
-  autoscaling_group_name = each.value
-  tag {
-    key                 = "k8s.io/cluster-autoscaler/node-template/label/dedicated"
-    value               = var.node_groups[2].name
-    propagate_at_launch = true
-  }
-}
 
 
 data "aws_eks_cluster_auth" "main" {
