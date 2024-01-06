@@ -1,3 +1,7 @@
+provider "aws" {
+  region = var.aws_region
+}
+
 resource "helm_release" "autoscaler" {
   name      = "cluster-autoscaler"
   namespace = var.namespace
