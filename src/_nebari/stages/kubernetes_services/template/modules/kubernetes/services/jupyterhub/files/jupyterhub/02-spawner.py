@@ -51,72 +51,72 @@ c.Spawner.debug = True
 c.JupyterHub.template_paths = theme_template_paths
 c.JupyterHub.services.extend(
     [
-        {
-            "name": "JuypterLab",
-            "url": hub_url,
-            "display": True,
-            "info": {
-                "name": "JupyterLab",
-                "url": "/user/[USER]/lab",
-                "external": True,
-            },
-            "oauth_no_confirm": True,
-        },
-        {
-            "name": "Argo",
-            "url": hub_url,
-            "display": True,
-            "info": {
-                "name": "Argo Workflows",
-                "url": "/hub/argo",
-                "external": True,
-            },
-            "oauth_no_confirm": True,
-        },
-        {
-            "name": "Users",
-            "url": hub_url,
-            "display": True,
-            "info": {
-                "name": "User Management",
-                "url": "/auth/admin/nebari/console/",
-                "external": True,
-            },
-            "oauth_no_confirm": True,
-        },
-        {
-            "name": "Environments",
-            "url": hub_url,
-            "display": True,
-            "info": {
-                "name": "Environments",
-                "url": "/hub/conda-store",
-                "external": True,
-            },
-            "oauth_no_confirm": True,
-        },
-        {
-            "name": "Monitoring",
-            "url": hub_url,
-            "display": True,
-            "info": {
-                "name": "Monitoring",
-                "url": "/hub/monitoring",
-                "external": True,
-            },
-            "oauth_no_confirm": True,
-        },
-        {
-            "name": "MLflow",
-            "url": "http://mlflow.mlflow:5000",
-            "display": True,
-            "info": {
-                "name": "MLflow",
-                "url": "http://mlflow.mlflow:5000",
-                "external": True,
-            },
-            "oauth_no_confirm": True,
-        },
+        # {
+        #     "name": "JuypterLab",
+        #     "url": hub_url,
+        #     "display": True,
+        #     "info": {
+        #         "name": "JupyterLab",
+        #         "url": "/user/[USER]/lab",
+        #         "external": True,
+        #     },
+        #     "oauth_no_confirm": True,
+        # },
+        # {
+        #     "name": "Argo",
+        #     "url": hub_url,
+        #     "display": True,
+        #     "info": {
+        #         "name": "Argo Workflows",
+        #         "url": "/hub/argo",
+        #         "external": True,
+        #     },
+        #     "oauth_no_confirm": True,
+        # },
+        # {
+        #     "name": "Users",
+        #     "url": hub_url,
+        #     "display": True,
+        #     "info": {
+        #         "name": "User Management",
+        #         "url": "/auth/admin/nebari/console/",
+        #         "external": True,
+        #     },
+        #     "oauth_no_confirm": True,
+        # },
+        # {
+        #     "name": "Environments",
+        #     "url": hub_url,
+        #     "display": True,
+        #     "info": {
+        #         "name": "Environments",
+        #         "url": "/hub/conda-store",
+        #         "external": True,
+        #     },
+        #     "oauth_no_confirm": True,
+        # },
+        # {
+        #     "name": "Monitoring",
+        #     "url": hub_url,
+        #     "display": True,
+        #     "info": {
+        #         "name": "Monitoring",
+        #         "url": "/hub/monitoring",
+        #         "external": True,
+        #     },
+        #     "oauth_no_confirm": True,
+        # },
+        # {
+        #     "name": "MLflow",
+        #     "url": "http://mlflow.mlflow:5000",
+        #     "display": True,
+        #     "info": {
+        #         "name": "MLflow",
+        #         "url": "http://mlflow.mlflow:5000",
+        #         "external": True,
+        #     },
+        #     "oauth_no_confirm": True,
+        # },
     ]
 )
 
