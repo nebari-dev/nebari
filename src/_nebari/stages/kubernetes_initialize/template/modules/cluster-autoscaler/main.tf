@@ -26,4 +26,3 @@ resource "helm_release" "autoscaler" {
     })
   ], var.overrides)
 }
-
