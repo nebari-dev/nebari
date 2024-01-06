@@ -29,7 +29,7 @@ c.Spawner.pre_spawn_hook = get_username_hook
 
 c.JupyterHub.allow_named_servers = False
 c.JupyterHub.spawner_class = KubeSpawner
-hub_url = "https://jamit.quansight.dev/"
+hub_url = "https://ja.quansight.dev/"
 c.JupyterHub.bind_url = hub_url
 # c.JAppsConfig.python_exec = "/home/conda/aktech/envs/aktech-japps/bin/python"
 c.JAppsConfig.conda_envs = [
