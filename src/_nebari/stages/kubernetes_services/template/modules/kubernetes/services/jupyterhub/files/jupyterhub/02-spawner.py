@@ -1,3 +1,6 @@
+import os
+import uuid
+
 import kubernetes.client.models
 from tornado import gen
 
@@ -37,6 +40,7 @@ c.JAppsConfig.conda_envs = [
 
 c.JAppsConfig.jupyterhub_config_path = "/usr/local/etc/jupyterhub/jupyterhub_config.py"
 
+os.environ["JWT_SECRET_KEY"] = uuid.uuid4().hex
 c = install_jhub_apps(c, spawner_to_subclass=KubeSpawner)
 c.JupyterHub.log_level = 10
 c.JupyterHub.log_level = "DEBUG"
