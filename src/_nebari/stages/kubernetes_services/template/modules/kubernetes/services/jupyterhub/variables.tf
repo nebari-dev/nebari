@@ -102,6 +102,11 @@ variable "conda-store-service-name" {
   type        = string
 }
 
+variable "conda-store-jhub-apps-token" {
+  description = "Token for conda-store to be used by jhub apps for fetching conda environments dynamically."
+  type        = string
+}
+
 variable "conda-store-environments" {
   description = "conda environments from conda-store in filesystem namespace"
   type        = any

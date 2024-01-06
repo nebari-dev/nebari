@@ -24,6 +24,27 @@ def get_username_hook(spawner):
         }
     )
 
+def get_conda_store_environments(query_package: str = ""):
+    external_url = z2jh.get_config("custom.conda-store-service-name")
+    token = z2jh.get_config("custom.conda-store-cdsdashboards")
+    endpoint = "conda-store/api/v1/environment"
+
+    url = yarl.URL(f"http://{external_url}/{endpoint}/")
+
+    if query_package:
+        url = url % {"packages": query_package}
+
+    http = urllib3.PoolManager()
+    response = http.request(
+        "GET", str(url), headers={"Authorization": f"Bearer {token}"}
+    )
+
+    # parse response
+    j = json.loads(response.data.decode("UTF-8"))
+    return [
+        f"{env['namespace']['name']}-{env['name']}" for env in j.get("data", [])
+    ]
+
 
 c.Spawner.pre_spawn_hook = get_username_hook
 

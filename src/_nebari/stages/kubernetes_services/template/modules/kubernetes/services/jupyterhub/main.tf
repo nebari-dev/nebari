@@ -35,6 +35,7 @@ resource "helm_release" "jupyterhub" {
         conda-store-mount             = var.conda-store-mount
         default-conda-store-namespace = var.default-conda-store-namespace
         conda-store-service-name      = var.conda-store-service-name
+        conda-store-jhub-apps-token    = var.conda-store-jhub-apps-token
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace
