@@ -80,12 +80,12 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
             "oauth_no_confirm": True,
         }
 
-    # c.JupyterHub.services.extend([
-        # service_for_jhub_apps(name="JupyterLab", url="/user/[USER]/lab"),
-        # service_for_jhub_apps(name="Argo", url="/hub/argo"),
-        # service_for_jhub_apps(name="Users", url="/auth/admin/nebari/console/"),
-        # service_for_jhub_apps(name="Environments", url="/hub/conda-store"),
-        # service_for_jhub_apps(name="Monitoring", url="/hub/monitoring"),
-    # ])
+    c.JupyterHub.services.extend([
+        service_for_jhub_apps(name="JupyterLab", url="/user/[USER]/lab"),
+        service_for_jhub_apps(name="Argo", url="/hub/argo"),
+        service_for_jhub_apps(name="Users", url="/auth/admin/nebari/console/"),
+        service_for_jhub_apps(name="Environments", url="/hub/conda-store"),
+        service_for_jhub_apps(name="Monitoring", url="/hub/monitoring"),
+    ])
     c.JupyterHub.template_paths = theme_template_paths
     c = install_jhub_apps(c, spawner_to_subclass=KubeSpawner)
