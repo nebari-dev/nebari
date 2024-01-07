@@ -25,8 +25,10 @@ def get_username_hook(spawner):
     )
 
 def get_conda_store_environments(query_package: str = ""):
+    import yarl
+    import urllib3
     external_url = z2jh.get_config("custom.conda-store-service-name")
-    token = z2jh.get_config("custom.conda-store-cdsdashboards")
+    token = z2jh.get_config("custom.conda-store-jhub-apps-token")
     endpoint = "conda-store/api/v1/environment"
 
     url = yarl.URL(f"http://{external_url}/{endpoint}/")
