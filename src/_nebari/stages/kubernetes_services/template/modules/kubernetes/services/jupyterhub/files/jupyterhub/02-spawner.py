@@ -9,8 +9,6 @@ kubernetes.client.models.V1EndpointPort = (
 )  # noqa: E402
 
 from kubespawner import KubeSpawner  # noqa: E402
-from jhub_apps.configuration import install_jhub_apps
-from jhub_apps import theme_template_paths
 
 
 @gen.coroutine
@@ -52,109 +50,42 @@ c.Spawner.pre_spawn_hook = get_username_hook
 
 c.JupyterHub.allow_named_servers = False
 c.JupyterHub.spawner_class = KubeSpawner
-domain = z2jh.get_config("custom.external-url")
-hub_url = f"https://{domain}"
-c.JupyterHub.bind_url = hub_url
-c.JAppsConfig.python_exec = "/home/conda/aktech/envs/aktech-aktech-japps/bin/python"
-c.JAppsConfig.conda_envs = get_conda_store_environments
 
+if z2jh.get_config("custom.jhub-apps-enabled"):
+    from jhub_apps.configuration import install_jhub_apps
+    from jhub_apps import theme_template_paths
 
-c.JAppsConfig.jupyterhub_config_path = "/usr/local/etc/jupyterhub/jupyterhub_config.py"
+    domain = z2jh.get_config("custom.external-url")
+    hub_url = f"https://{domain}"
+    c.JupyterHub.bind_url = hub_url
+    c.JupyterHub.log_level = 10
+    c.JupyterHub.log_level = "DEBUG"
+    c.Spawner.debug = True
 
-c.JAppsConfig.hub_host = "hub"
-c = install_jhub_apps(c, spawner_to_subclass=KubeSpawner)
-c.JupyterHub.log_level = 10
-c.JupyterHub.log_level = "DEBUG"
-c.Spawner.debug = True
+    c.JAppsConfig.conda_envs = get_conda_store_environments
+    c.JAppsConfig.python_exec = "/home/conda/aktech/envs/aktech-aktech-japps/bin/python"
+    c.JAppsConfig.jupyterhub_config_path = "/usr/local/etc/jupyterhub/jupyterhub_config.py"
+    c.JAppsConfig.hub_host = "hub"
 
-c.JupyterHub.template_paths = theme_template_paths
-# c.JupyterHub.services.extend(
-#     [
-    #     {
-    #         "name": "JuypterLab",
-    #         "url": hub_url,
-    #         "display": True,
-    #         "info": {
-    #             "name": "JupyterLab",
-    #             "url": "/user/[USER]/lab",
-    #             "external": True,
-    #         },
-    #         "oauth_no_confirm": True,
-    #     },
-    #     {
-    #         "name": "Argo",
-    #         "url": hub_url,
-    #         "display": True,
-    #         "info": {
-    #             "name": "Argo Workflows",
-    #             "url": "/hub/argo",
-    #             "external": True,
-    #         },
-    #         "oauth_no_confirm": True,
-    #     },
-    #     {
-    #         "name": "Users",
-    #         "url": hub_url,
-    #         "display": True,
-    #         "info": {
-    #             "name": "User Management",
-    #             "url": "/auth/admin/nebari/console/",
-    #             "external": True,
-    #         },
-    #         "oauth_no_confirm": True,
-    #     },
-    #     {
-    #         "name": "Environments",
-    #         "url": hub_url,
-    #         "display": True,
-    #         "info": {
-    #             "name": "Environments",
-    #             "url": "/hub/conda-store",
-    #             "external": True,
-    #         },
-    #         "oauth_no_confirm": True,
-    #     },
-    #     {
-    #         "name": "Monitoring",
-    #         "url": hub_url,
-    #         "display": True,
-    #         "info": {
-    #             "name": "Monitoring",
-    #             "url": "/hub/monitoring",
-    #             "external": True,
-    #         },
-    #         "oauth_no_confirm": True,
-    #     },
-    #     {
-    #         "name": "MLflow",
-    #         "url": "http://mlflow.mlflow:5000",
-    #         "display": True,
-    #         "info": {
-    #             "name": "MLflow",
-    #             "url": "http://mlflow.mlflow:5000",
-    #             "external": True,
-    #         },
-    #         "oauth_no_confirm": True,
-    #     },
-    # ]
-# )
+    def service_for_jhub_apps(name, url):
+        return {
+            "name": name,
+            "url": hub_url,
+            "display": True,
+            "info": {
+                "name": name,
+                "url": url,
+                "external": True,
+            },
+            "oauth_no_confirm": True,
+        }
 
-# nebari will control these as ways to customize the template
-c.JupyterHub.template_vars = {
-    "hub_title": "Welcome to Nebari",
-    "hub_subtitle": "your open source data science platform",
-    "welcome": "Running in dev mode",
-    "logo": "/services/japps/static/img/Nebari-Logo-Horizontal-Lockup-White-text.svg",
-    "primary_color": "#C316E9",
-    "primary_color_dark": "#79158a",
-    "secondary_color": "#18817A",
-    "secondary_color_dark": "#12635E",
-    "accent_color": "#eda61d",
-    "accent_color_dark": "#a16d14",
-    "text_color": "#1c1d26",
-    "h1_color": "#0f1015",
-    "h2_color": "#0f1015",
-    "navbar_text_color": "#ffffff",
-    "navbar_hover_color": "#20b1a8",
-    "navbar_color": "#1c1d26",
-}
+    # c.JupyterHub.services.extend([
+        # service_for_jhub_apps(name="JupyterLab", url="/user/[USER]/lab"),
+        # service_for_jhub_apps(name="Argo", url="/hub/argo"),
+        # service_for_jhub_apps(name="Users", url="/auth/admin/nebari/console/"),
+        # service_for_jhub_apps(name="Environments", url="/hub/conda-store"),
+        # service_for_jhub_apps(name="Monitoring", url="/hub/monitoring"),
+    # ])
+    c.JupyterHub.template_paths = theme_template_paths
+    c = install_jhub_apps(c, spawner_to_subclass=KubeSpawner)

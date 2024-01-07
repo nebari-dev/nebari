@@ -113,6 +113,10 @@ variable "conda-store-environments" {
   default     = {}
 }
 
+variable "jhub-apps-enabled" {
+  description = "Enable/Disable JupyterHub Apps extension to spin up apps, dashboards, etc"
+  type        = bool
+}
 
 variable "conda-store-argo-workflows-jupyter-scheduler-token" {
   description = "Token for argo-workflows-jupyter-schedule to use conda-store"
