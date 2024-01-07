@@ -67,7 +67,7 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
     directory = "stages/04-kubernetes-ingress"
 
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
-    _, ip = socket.gethostbyname(ip_or_name["hostname"] or ip_or_name["ip"])
+    ip = socket.gethostbyname(ip_or_name["hostname"] or ip_or_name["ip"])
     domain_name = stage_outputs[directory]["domain"]
 
     def _attempt_dns_lookup(
