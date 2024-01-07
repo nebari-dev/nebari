@@ -52,20 +52,14 @@ c.Spawner.pre_spawn_hook = get_username_hook
 
 c.JupyterHub.allow_named_servers = False
 c.JupyterHub.spawner_class = KubeSpawner
-hub_url = "https://ja.quansight.dev/"
+hub_url = "https://ja.quansight.dev"
 c.JupyterHub.bind_url = hub_url
-# c.JAppsConfig.python_exec = "/home/conda/aktech/envs/aktech-japps/bin/python"
-c.JAppsConfig.conda_envs = [
-    "aktech-japps",
-    "nebari-git-dashboard",
-    "nebari-git-dask",
-    "base",
-    "default",
-]
+c.JAppsConfig.python_exec = "/home/conda/aktech/envs/aktech-aktech-japps/bin/python"
+c.JAppsConfig.conda_envs = get_conda_store_environments
+
 
 c.JAppsConfig.jupyterhub_config_path = "/usr/local/etc/jupyterhub/jupyterhub_config.py"
 
-os.environ["JWT_SECRET_KEY"] = uuid.uuid4().hex
 c.JAppsConfig.hub_host = "hub"
 c = install_jhub_apps(c, spawner_to_subclass=KubeSpawner)
 c.JupyterHub.log_level = 10
@@ -73,76 +67,76 @@ c.JupyterHub.log_level = "DEBUG"
 c.Spawner.debug = True
 
 c.JupyterHub.template_paths = theme_template_paths
-c.JupyterHub.services.extend(
-    [
-        # {
-        #     "name": "JuypterLab",
-        #     "url": hub_url,
-        #     "display": True,
-        #     "info": {
-        #         "name": "JupyterLab",
-        #         "url": "/user/[USER]/lab",
-        #         "external": True,
-        #     },
-        #     "oauth_no_confirm": True,
-        # },
-        # {
-        #     "name": "Argo",
-        #     "url": hub_url,
-        #     "display": True,
-        #     "info": {
-        #         "name": "Argo Workflows",
-        #         "url": "/hub/argo",
-        #         "external": True,
-        #     },
-        #     "oauth_no_confirm": True,
-        # },
-        # {
-        #     "name": "Users",
-        #     "url": hub_url,
-        #     "display": True,
-        #     "info": {
-        #         "name": "User Management",
-        #         "url": "/auth/admin/nebari/console/",
-        #         "external": True,
-        #     },
-        #     "oauth_no_confirm": True,
-        # },
-        # {
-        #     "name": "Environments",
-        #     "url": hub_url,
-        #     "display": True,
-        #     "info": {
-        #         "name": "Environments",
-        #         "url": "/hub/conda-store",
-        #         "external": True,
-        #     },
-        #     "oauth_no_confirm": True,
-        # },
-        # {
-        #     "name": "Monitoring",
-        #     "url": hub_url,
-        #     "display": True,
-        #     "info": {
-        #         "name": "Monitoring",
-        #         "url": "/hub/monitoring",
-        #         "external": True,
-        #     },
-        #     "oauth_no_confirm": True,
-        # },
-        # {
-        #     "name": "MLflow",
-        #     "url": "http://mlflow.mlflow:5000",
-        #     "display": True,
-        #     "info": {
-        #         "name": "MLflow",
-        #         "url": "http://mlflow.mlflow:5000",
-        #         "external": True,
-        #     },
-        #     "oauth_no_confirm": True,
-        # },
-    ]
-)
+# c.JupyterHub.services.extend(
+#     [
+    #     {
+    #         "name": "JuypterLab",
+    #         "url": hub_url,
+    #         "display": True,
+    #         "info": {
+    #             "name": "JupyterLab",
+    #             "url": "/user/[USER]/lab",
+    #             "external": True,
+    #         },
+    #         "oauth_no_confirm": True,
+    #     },
+    #     {
+    #         "name": "Argo",
+    #         "url": hub_url,
+    #         "display": True,
+    #         "info": {
+    #             "name": "Argo Workflows",
+    #             "url": "/hub/argo",
+    #             "external": True,
+    #         },
+    #         "oauth_no_confirm": True,
+    #     },
+    #     {
+    #         "name": "Users",
+    #         "url": hub_url,
+    #         "display": True,
+    #         "info": {
+    #             "name": "User Management",
+    #             "url": "/auth/admin/nebari/console/",
+    #             "external": True,
+    #         },
+    #         "oauth_no_confirm": True,
+    #     },
+    #     {
+    #         "name": "Environments",
+    #         "url": hub_url,
+    #         "display": True,
+    #         "info": {
+    #             "name": "Environments",
+    #             "url": "/hub/conda-store",
+    #             "external": True,
+    #         },
+    #         "oauth_no_confirm": True,
+    #     },
+    #     {
+    #         "name": "Monitoring",
+    #         "url": hub_url,
+    #         "display": True,
+    #         "info": {
+    #             "name": "Monitoring",
+    #             "url": "/hub/monitoring",
+    #             "external": True,
+    #         },
+    #         "oauth_no_confirm": True,
+    #     },
+    #     {
+    #         "name": "MLflow",
+    #         "url": "http://mlflow.mlflow:5000",
+    #         "display": True,
+    #         "info": {
+    #             "name": "MLflow",
+    #             "url": "http://mlflow.mlflow:5000",
+    #             "external": True,
+    #         },
+    #         "oauth_no_confirm": True,
+    #     },
+    # ]
+# )
 
 # nebari will control these as ways to customize the template
 c.JupyterHub.template_vars = {
