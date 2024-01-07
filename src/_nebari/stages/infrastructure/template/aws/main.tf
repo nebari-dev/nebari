@@ -117,7 +117,7 @@ resource "aws_autoscaling_group_tag" "dedicated_user" {
 }
 
 data "aws_eks_node_group" "worker" {
-  cluster_name    = var.cluster-name
+  cluster_name    = local.cluster_name
   node_group_name = "worker"
 }
 
