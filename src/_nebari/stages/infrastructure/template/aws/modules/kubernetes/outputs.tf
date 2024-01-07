@@ -23,6 +23,11 @@ output "oidc_provider_arn" {
   value       = aws_iam_openid_connect_provider.oidc_provider.arn
 }
 
+output "cluster_name" {
+  description = "Name cluster"
+  value       = aws_eks_cluster.main.name
+}
+
 # https://github.com/terraform-aws-modules/terraform-aws-eks/blob/16f46db94b7158fd762d9133119206aaa7cf6d63/examples/self_managed_node_group/main.tf
 output "kubeconfig" {
   description = "Kubernetes connection configuration kubeconfig"
