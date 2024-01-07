@@ -95,4 +95,3 @@ module "kubernetes" {
   endpoint_private_access = var.eks_endpoint_private_access
   public_access_cidrs     = var.eks_public_access_cidrs
 }
-
