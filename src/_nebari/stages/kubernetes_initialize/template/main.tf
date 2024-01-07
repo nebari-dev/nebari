@@ -29,3 +29,9 @@ module "nvidia-driver-installer" {
   gpu_enabled          = var.gpu_enabled
   gpu_node_group_names = var.gpu_node_group_names
 }
+
+module "tagging" {
+  count = var.cloud_provider == "aws" ? 1 : 0
+  source = "./modules/tagging"
+  cluster_name = local.cluster_name
+}
