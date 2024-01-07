@@ -52,7 +52,8 @@ c.Spawner.pre_spawn_hook = get_username_hook
 
 c.JupyterHub.allow_named_servers = False
 c.JupyterHub.spawner_class = KubeSpawner
-hub_url = "https://ja.quansight.dev"
+domain = z2jh.get_config("custom.external-url")
+hub_url = f"https://{domain}"
 c.JupyterHub.bind_url = hub_url
 c.JAppsConfig.python_exec = "/home/conda/aktech/envs/aktech-aktech-japps/bin/python"
 c.JAppsConfig.conda_envs = get_conda_store_environments
