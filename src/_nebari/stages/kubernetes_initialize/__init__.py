@@ -78,6 +78,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
             name=self.config.project_name,
             environment=self.config.namespace,
             cloud_provider=self.config.provider.value,
+            aws_region=self.config.provider.region.value,
             external_container_reg=self.config.external_container_reg.dict(),
         )
 
