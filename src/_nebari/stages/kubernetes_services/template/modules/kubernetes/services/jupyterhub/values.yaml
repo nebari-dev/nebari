@@ -5,14 +5,11 @@ hub:
     pvc:
       storage: 1Gi
   baseUrl: "/"
-#  networkPolicy:
-#    enabled: false
 
   networkPolicy:
     ingress:
       - ports:
           - port: 10202
-          - port: 5000
         from:
           - podSelector:
               matchLabels:
@@ -20,13 +17,9 @@ hub:
 
   service:
     extraPorts:
-      - port: 5000
-        targetPort: 5000
-        name: launcher
-
       - port: 10202
         targetPort: 10202
-        name: japps
+        name: jhub-apps
 
 proxy:
   secretToken: "<placeholder>"
@@ -48,15 +41,9 @@ proxy:
             protocol: TCP
           - port: 10202
             protocol: TCP
-          - port: 5000
-            protocol: TCP
         - to:
           - ipBlock:
               cidr: 0.0.0.0/0
-#          - podSelector:
-#                matchLabels:
-#                  app: jupyterhub
-#                  component: hub
 
 scheduling:
   userScheduler:
