@@ -3,6 +3,11 @@ data "aws_eks_node_group" "user" {
   node_group_name = "user"
 }
 
+provider "aws" {
+  region = var.aws_region
+
+}
+
 resource "aws_autoscaling_group_tag" "dedicated_user" {
   for_each = toset(
     [for asg in flatten(
