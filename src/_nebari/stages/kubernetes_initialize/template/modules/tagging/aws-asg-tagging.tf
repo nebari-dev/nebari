@@ -9,7 +9,6 @@ resource "aws_autoscaling_group_tag" "dedicated_user" {
     [for asg in flatten(
       [for resources in data.aws_eks_node_group.user.resources : resources.autoscaling_groups]
     ) : asg.name
-      if var.cloud_provider == "aws" ? 1 : 0
     ]
   )
   autoscaling_group_name = each.value
@@ -34,7 +33,6 @@ resource "aws_autoscaling_group_tag" "dedicated_worker" {
     [for asg in flatten(
       [for resources in data.aws_eks_node_group.worker.resources : resources.autoscaling_groups]
     ) : asg.name
-      if var.cloud_provider == "aws" ? 1 : 0
     ]
   )
   autoscaling_group_name = each.value
