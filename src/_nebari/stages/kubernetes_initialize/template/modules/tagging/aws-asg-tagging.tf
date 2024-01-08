@@ -1,4 +1,5 @@
 data "aws_eks_node_group" "user" {
+  count = var.cloud_provider == "aws" ? 1 : 0
   cluster_name    = var.cluster_name
   node_group_name = "user"
 }
@@ -7,7 +8,9 @@ resource "aws_autoscaling_group_tag" "dedicated_user" {
   for_each = toset(
     [for asg in flatten(
       [for resources in data.aws_eks_node_group.user.resources : resources.autoscaling_groups]
-    ) : asg.name]
+    ) : asg.name
+      if var.cloud_provider == "aws" ? 1 : 0
+    ]
   )
   autoscaling_group_name = each.value
   tag {
@@ -21,6 +24,7 @@ resource "aws_autoscaling_group_tag" "dedicated_user" {
 }
 
 data "aws_eks_node_group" "worker" {
+  count = var.cloud_provider == "aws" ? 1 : 0
   cluster_name    = var.cluster_name
   node_group_name = "worker"
 }
@@ -29,7 +33,9 @@ resource "aws_autoscaling_group_tag" "dedicated_worker" {
   for_each = toset(
     [for asg in flatten(
       [for resources in data.aws_eks_node_group.worker.resources : resources.autoscaling_groups]
-    ) : asg.name]
+    ) : asg.name
+      if var.cloud_provider == "aws" ? 1 : 0
+    ]
   )
   autoscaling_group_name = each.value
   tag {

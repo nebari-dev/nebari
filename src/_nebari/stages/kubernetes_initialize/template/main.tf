@@ -25,7 +25,6 @@ module "nvidia-driver-installer" {
 }
 
 module "tagging" {
-  count          = var.cloud_provider == "aws" ? 1 : 0
   source         = "./modules/tagging"
   cluster_name   = local.cluster_name
   cloud_provider = var.cloud_provider
