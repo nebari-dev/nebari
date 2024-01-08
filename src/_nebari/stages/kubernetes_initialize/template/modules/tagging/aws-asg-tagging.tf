@@ -1,5 +1,5 @@
 data "aws_eks_node_group" "user" {
-  count = var.cloud_provider == "aws" ? 1 : 0
+  count           = var.cloud_provider == "aws" ? 1 : 0
   cluster_name    = var.cluster_name
   node_group_name = "user"
 }
@@ -26,7 +26,7 @@ resource "aws_autoscaling_group_tag" "dedicated_user" {
 }
 
 data "aws_eks_node_group" "worker" {
-  count = var.cloud_provider == "aws" ? 1 : 0
+  count =         var.cloud_provider == "aws" ? 1 : 0
   cluster_name    = var.cluster_name
   node_group_name = "worker"
 }
