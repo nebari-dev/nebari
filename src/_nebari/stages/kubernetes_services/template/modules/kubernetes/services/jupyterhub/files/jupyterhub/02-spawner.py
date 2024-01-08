@@ -60,7 +60,6 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
     c.Spawner.debug = True
 
     c.JAppsConfig.conda_envs = get_conda_store_environments
-    c.JAppsConfig.python_exec = "/home/conda/aktech/envs/aktech-aktech-japps/bin/python"
     c.JAppsConfig.jupyterhub_config_path = (
         "/usr/local/etc/jupyterhub/jupyterhub_config.py"
     )
