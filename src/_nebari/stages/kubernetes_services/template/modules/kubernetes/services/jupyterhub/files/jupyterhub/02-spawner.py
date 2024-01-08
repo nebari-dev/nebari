@@ -55,6 +55,7 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
     domain = z2jh.get_config("custom.external-url")
     hub_url = f"https://{domain}"
     c.JupyterHub.bind_url = hub_url
+    c.JupyterHub.default_url = "/hub/home"
     c.Spawner.debug = True
 
     c.JAppsConfig.conda_envs = get_conda_store_environments

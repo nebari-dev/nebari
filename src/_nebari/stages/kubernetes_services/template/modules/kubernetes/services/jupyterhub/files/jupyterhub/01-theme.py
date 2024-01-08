@@ -10,3 +10,10 @@ jupyterhub_theme = z2jh.get_config("custom.theme")
 c.JupyterHub.template_vars = {
     **jupyterhub_theme,
 }
+
+if z2jh.get_config("custom.jhub-apps-enabled"):
+    from jhub_apps import themes
+    c.JupyterHub.template_vars = {
+        **jupyterhub_theme,
+        **themes.DEFAULT_THEME
+    }
