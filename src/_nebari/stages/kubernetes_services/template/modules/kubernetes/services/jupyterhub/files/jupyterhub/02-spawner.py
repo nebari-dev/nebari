@@ -67,7 +67,6 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
     def service_for_jhub_apps(name, url):
         return {
             "name": name,
-            "url": hub_url,
             "display": True,
             "info": {
                 "name": name,
