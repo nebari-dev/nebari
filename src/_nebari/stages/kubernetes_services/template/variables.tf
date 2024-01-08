@@ -44,3 +44,8 @@ variable "argo-workflows-enabled" {
   description = "Enable Argo Workflows"
   type        = bool
 }
+
+variable "jhub-apps-enabled" {
+  description = "Enable JupyterHub Apps"
+  type        = bool
+}

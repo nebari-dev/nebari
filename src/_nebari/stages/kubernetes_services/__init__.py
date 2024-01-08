@@ -188,6 +188,10 @@ class ArgoWorkflows(schema.Base):
     nebari_workflow_controller: NebariWorkflowController = NebariWorkflowController()
 
 
+class JHubApps(schema.Base):
+    enabled: bool = False
+
+
 class Monitoring(schema.Base):
     enabled: bool = True
 
@@ -282,6 +286,7 @@ class InputSchema(schema.Base):
     monitoring: Monitoring = Monitoring()
     jupyterhub: JupyterHub = JupyterHub()
     jupyterlab: JupyterLab = JupyterLab()
+    jhub_apps: JHubApps = JHubApps()
 
 
 class OutputSchema(schema.Base):
@@ -337,6 +342,7 @@ class JupyterhubInputVars(schema.Base):
     jupyterhub_hub_extraEnv: str = Field(alias="jupyterhub-hub-extraEnv")
     idle_culler_settings: Dict[str, Any] = Field(alias="idle-culler-settings")
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
+    jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -401,6 +407,12 @@ class KubernetesServicesStage(NebariTerraformStage):
                     "*/*": ["viewer"],
                 },
             },
+            "jhub-apps": {
+                "primary_namespace": "",
+                "role_bindings": {
+                    "*/*": ["viewer"],
+                },
+            },
         }
 
         # Compound any logout URLs from extensions so they are are logged out in succession
@@ -458,6 +470,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             ),
             idle_culler_settings=self.config.jupyterlab.idle_culler.dict(),
             argo_workflows_enabled=self.config.argo_workflows.enabled,
+            jhub_apps_enabled=self.config.jhub_apps.enabled,
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
