@@ -7,7 +7,7 @@ resource "aws_autoscaling_group_tag" "dedicated_user" {
   for_each = toset(
     [for asg in flatten(
       [
-        for resources in data.aws_eks_node_group.user[0].resources :
+        for resources in data.aws_eks_node_group.user.resources :
         resources.autoscaling_groups
       ]
       ) : asg.name
@@ -20,7 +20,7 @@ resource "aws_autoscaling_group_tag" "dedicated_user" {
     propagate_at_launch = true
   }
   depends_on = [
-    data.aws_eks_node_group.user[0]
+    data.aws_eks_node_group.user
   ]
 }
 
@@ -33,7 +33,7 @@ resource "aws_autoscaling_group_tag" "dedicated_worker" {
   for_each = toset(
     [for asg in flatten(
       [
-        for resources in data.aws_eks_node_group.worker[0].resources :
+        for resources in data.aws_eks_node_group.worker.resources :
         resources.autoscaling_groups
       ]
       ) : asg.name
@@ -46,6 +46,6 @@ resource "aws_autoscaling_group_tag" "dedicated_worker" {
     propagate_at_launch = true
   }
   depends_on = [
-    data.aws_eks_node_group.worker[0],
+    data.aws_eks_node_group.worker,
   ]
 }
