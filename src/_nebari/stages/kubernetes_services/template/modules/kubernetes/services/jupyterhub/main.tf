@@ -27,7 +27,7 @@ resource "kubernetes_secret" "jhub_apps_secrets" {
   }
 
   data = {
-    jwt_secret_key  = random_password.jhub_apps_jwt_secret.result
+    jwt_secret_key = random_password.jhub_apps_jwt_secret.result
   }
 
   type = "Opaque"
@@ -193,7 +193,7 @@ resource "helm_release" "jupyterhub" {
             name  = "OAUTH_LOGOUT_REDIRECT_URL",
             value = format("%s?redirect_uri=%s", "https://${var.external-url}/auth/realms/${var.realm_id}/protocol/openid-connect/logout", urlencode(var.jupyterhub-logout-redirect-url))
           },
-        ],
+          ],
           concat(local.jupyterhub_env_vars, jsondecode(var.jupyterhub-hub-extraEnv))
         )
       }
