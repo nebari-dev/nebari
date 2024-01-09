@@ -22,7 +22,7 @@ config = conda_store_config()
 #      conda-store settings
 # ==================================
 c.CondaStore.storage_class = S3Storage
-c.CondaStore.store_directory = "/home/conda/"
+c.CondaStore.store_directory = "/opt/conda/"
 c.CondaStore.database_url = f"postgresql+psycopg2://{config['postgres-username']}:{config['postgres-password']}@{config['postgres-service']}/conda-store"
 c.CondaStore.redis_url = (
     f"redis://:{config['redis-password']}@{config['redis-service']}:6379/0"
