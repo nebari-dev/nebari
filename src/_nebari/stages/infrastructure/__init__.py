@@ -145,6 +145,16 @@ class AWSInputVars(schema.Base):
     tags: Dict[str, str] = {}
 
 
+def _calculate_asg_node_group_map(config: schema.Main):
+    if config.provider == schema.ProviderEnum.aws:
+        return amazon_web_services.aws_get_asg_node_group_mapping(
+            config.project_name,
+            config.namespace,
+            config.amazon_web_services.region,
+        )
+    else:
+        return {}
+
 def _calculate_node_groups(config: schema.Main):
     if config.provider == schema.ProviderEnum.aws:
         return {
@@ -571,6 +581,10 @@ class NodeSelectorKeyValue(schema.Base):
     key: str
     value: str
 
+class AsgNodeGroupMap(schema.Base):
+    key: str
+    value: str
+
 
 class KubernetesCredentials(schema.Base):
     host: str
@@ -589,6 +603,7 @@ class OutputSchema(schema.Base):
     kubernetes_credentials: KubernetesCredentials
     kubeconfig_filename: str
     nfs_endpoint: Optional[str]
+    asg_node_group_map: Optional[AsgNodeGroupMap]
 
 
 class KubernetesInfrastructureStage(NebariTerraformStage):
@@ -812,6 +827,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         self, stage_outputs: Dict[str, Dict[str, Any]], outputs: Dict[str, Any]
     ):
         outputs["node_selectors"] = _calculate_node_groups(self.config)
+        outputs["asg_node_group_map"] = _calculate_asg_node_group_map(self.config)
         super().set_outputs(stage_outputs, outputs)
 
     @contextlib.contextmanager

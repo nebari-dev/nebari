@@ -30,3 +30,8 @@ variable "gpu_enabled" {
 variable "gpu_node_group_names" {
   description = "Names of node groups with GPU"
 }
+
+variable "asg_node_group_map" {
+  description = "Mapping between asg name and node group name."
+  type = map(string)
+}

@@ -25,8 +25,6 @@ module "nvidia-driver-installer" {
 }
 
 module "tagging" {
-  source         = "./modules/tagging"
-  cluster_name   = local.cluster_name
-  aws_region     = var.aws_region
-  cloud_provider = var.cloud_provider
+  source             = "./modules/tagging"
+  asg_node_group_map = var.asg_node_group_map
 }

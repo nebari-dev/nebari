@@ -143,6 +143,27 @@ def aws_get_vpc_id(name: str, namespace: str, region: str) -> Optional[str]:
     return None
 
 
+def aws_get_asg_node_group_mapping(name: str, namespace: str, region: str) -> Dict[str, str]:
+    """Return a dictionary of autoscaling groups and their associated node groups."""
+    asg_node_group_mapping = {}
+    session = aws_session(region=region)
+    eks = session.client("eks")
+    node_groups_response = eks.list_nodegroups(
+        clusterName=f"{name}-{namespace}",
+    )
+    node_groups = node_groups_response.get("nodegroups", [])
+    for nodegroup in node_groups:
+        response = eks.describe_nodegroup(
+            clusterName=f"{name}-{namespace}",
+            nodegroupName=nodegroup
+        )
+        node_group_name = response["nodegroup"]["nodegroupName"]
+        auto_scaling_groups = response["nodegroup"]["resources"]["autoScalingGroups"]
+        for auto_scaling_group in auto_scaling_groups:
+            asg_node_group_mapping[auto_scaling_group["name"]] = node_group_name
+    return asg_node_group_mapping
+
+
 def aws_get_subnet_ids(name: str, namespace: str, region: str) -> List[str]:
     """Return list of subnet IDs for the EKS cluster named `{name}-{namespace}`."""
     session = aws_session(region=region)

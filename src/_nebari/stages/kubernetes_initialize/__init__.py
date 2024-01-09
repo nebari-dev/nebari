@@ -49,6 +49,7 @@ class InputVars(schema.Base):
     external_container_reg: Union[ExtContainerReg, None] = None
     gpu_enabled: bool = False
     gpu_node_group_names: List[str] = []
+    asg_node_group_map: Dict[str, str] = {}
 
 
 class InputSchema(schema.Base):
