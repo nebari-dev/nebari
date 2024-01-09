@@ -155,6 +155,7 @@ def _calculate_asg_node_group_map(config: schema.Main):
     else:
         return {}
 
+
 def _calculate_node_groups(config: schema.Main):
     if config.provider == schema.ProviderEnum.aws:
         return {
@@ -580,6 +581,7 @@ class InputSchema(schema.Base):
 class NodeSelectorKeyValue(schema.Base):
     key: str
     value: str
+
 
 class AsgNodeGroupMap(schema.Base):
     key: str

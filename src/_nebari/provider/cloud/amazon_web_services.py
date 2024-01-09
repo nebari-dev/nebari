@@ -143,7 +143,9 @@ def aws_get_vpc_id(name: str, namespace: str, region: str) -> Optional[str]:
     return None
 
 
-def aws_get_asg_node_group_mapping(name: str, namespace: str, region: str) -> Dict[str, str]:
+def aws_get_asg_node_group_mapping(
+    name: str, namespace: str, region: str
+) -> Dict[str, str]:
     """Return a dictionary of autoscaling groups and their associated node groups."""
     asg_node_group_mapping = {}
     session = aws_session(region=region)
@@ -154,8 +156,7 @@ def aws_get_asg_node_group_mapping(name: str, namespace: str, region: str) -> Di
     node_groups = node_groups_response.get("nodegroups", [])
     for nodegroup in node_groups:
         response = eks.describe_nodegroup(
-            clusterName=f"{name}-{namespace}",
-            nodegroupName=nodegroup
+            clusterName=f"{name}-{namespace}", nodegroupName=nodegroup
         )
         node_group_name = response["nodegroup"]["nodegroupName"]
         auto_scaling_groups = response["nodegroup"]["resources"]["autoScalingGroups"]
