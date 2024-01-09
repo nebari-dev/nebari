@@ -65,6 +65,7 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
         "/usr/local/etc/jupyterhub/jupyterhub_config.py"
     )
     c.JAppsConfig.hub_host = "hub"
+    c.JAppsConfig.service_workers = 4
 
     def service_for_jhub_apps(name, url):
         return {
