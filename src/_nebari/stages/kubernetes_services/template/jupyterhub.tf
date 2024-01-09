@@ -99,6 +99,8 @@ module "jupyterhub" {
   argo-workflows-enabled                             = var.argo-workflows-enabled
   conda-store-argo-workflows-jupyter-scheduler-token = module.kubernetes-conda-store-server.service-tokens.argo-workflows-jupyter-scheduler
   conda-store-service-name                           = module.kubernetes-conda-store-server.service_name
+  conda-store-jhub-apps-token                        = module.kubernetes-conda-store-server.service-tokens.jhub-apps
+  jhub-apps-enabled                                  = var.jhub-apps-enabled
 
   extra-mounts = {
     "/etc/dask" = {

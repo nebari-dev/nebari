@@ -53,3 +53,7 @@ variable "jupyterlab-pioneer-log-format" {
   description = "Logging format for JupyterLab Pioneer"
   type        = string
 }
+variable "jhub-apps-enabled" {
+  description = "Enable JupyterHub Apps"
+  type        = bool
+}
