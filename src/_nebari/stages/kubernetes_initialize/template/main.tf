@@ -25,7 +25,7 @@ module "nvidia-driver-installer" {
 }
 
 module "tagging" {
-  count              = length(var.asg_node_group_map) > 0 ? 1 : 0
+  count              = var.cloud_provider == "aws" ? 1 : 0
   source             = "./modules/tagging"
   asg_node_group_map = var.asg_node_group_map
 }
