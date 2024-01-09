@@ -10,6 +10,43 @@ resource "random_password" "proxy_secret_token" {
   special = false
 }
 
+resource "random_password" "jhub_apps_jwt_secret" {
+  length  = 32
+  special = false
+}
+
+locals {
+  jhub_apps_secrets_name = "jhub-apps-secrets"
+  jhub_apps_env_var_name = "JHUB_APP_JWT_SECRET_KEY"
+}
+
+resource "kubernetes_secret" "jhub_apps_secrets" {
+  metadata {
+    name      = local.jhub_apps_secrets_name
+    namespace = var.namespace
+  }
+
+  data = {
+    jwt_secret_key = random_password.jhub_apps_jwt_secret.result
+  }
+
+  type = "Opaque"
+}
+
+locals {
+  jupyterhub_env_vars = [
+    {
+      name = local.jhub_apps_env_var_name,
+      valueFrom : {
+        secretKeyRef : {
+          name : local.jhub_apps_secrets_name
+          key : "jwt_secret_key"
+        }
+      }
+    }
+  ]
+}
+
 
 resource "helm_release" "jupyterhub" {
   name      = "jupyterhub-${var.namespace}"
@@ -17,7 +54,7 @@ resource "helm_release" "jupyterhub" {
 
   repository = "https://jupyterhub.github.io/helm-chart/"
   chart      = "jupyterhub"
-  version    = "2.0.0"
+  version    = "3.2.1"
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -35,6 +72,8 @@ resource "helm_release" "jupyterhub" {
         conda-store-mount             = var.conda-store-mount
         default-conda-store-namespace = var.default-conda-store-namespace
         conda-store-service-name      = var.conda-store-service-name
+        conda-store-jhub-apps-token   = var.conda-store-jhub-apps-token
+        jhub-apps-enabled             = var.jhub-apps-enabled
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace
@@ -153,8 +192,10 @@ resource "helm_release" "jupyterhub" {
           {
             name  = "OAUTH_LOGOUT_REDIRECT_URL",
             value = format("%s?redirect_uri=%s", "https://${var.external-url}/auth/realms/${var.realm_id}/protocol/openid-connect/logout", urlencode(var.jupyterhub-logout-redirect-url))
-          }],
-        jsondecode(var.jupyterhub-hub-extraEnv))
+          },
+          ],
+          concat(local.jupyterhub_env_vars, jsondecode(var.jupyterhub-hub-extraEnv))
+        )
       }
     })]
   )
