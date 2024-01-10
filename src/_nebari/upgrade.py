@@ -697,7 +697,7 @@ class Upgrade_2024_1_1(UpgradeStep):
         )
         rich.print("\n ⚠️  Deprecation Warning ⚠️")
         rich.print(
-            "-> jupyterlab-videochat, retrolab, jupyter-tensorboard and jupyter-nvdashboard",
+            "-> jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store and jupyter-nvdashboard",
             f"are no longer supported in Nebari version [green]{self.version}[/green] and will be uninstalled.",
         )
         rich.print()
