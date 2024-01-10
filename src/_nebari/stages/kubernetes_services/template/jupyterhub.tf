@@ -130,4 +130,6 @@ module "jupyterhub" {
 
   idle-culler-settings = var.idle-culler-settings
 
+  jupyterlab-pioneer-enabled    = var.jupyterlab-pioneer-enabled
+  jupyterlab-pioneer-log-format = var.jupyterlab-pioneer-log-format
 }

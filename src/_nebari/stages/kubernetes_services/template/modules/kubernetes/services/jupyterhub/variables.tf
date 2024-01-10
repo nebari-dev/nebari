@@ -157,3 +157,13 @@ variable "argo-workflows-enabled" {
   description = "Enable Argo Workflows"
   type        = bool
 }
+
+variable "jupyterlab-pioneer-enabled" {
+  description = "Enable JupyterLab Pioneer for telemetry"
+  type        = bool
+}
+
+variable "jupyterlab-pioneer-log-format" {
+  description = "Logging format for JupyterLab Pioneer"
+  type        = string
+}
