@@ -685,6 +685,25 @@ class Upgrade_2023_12_1(UpgradeStep):
         return config
 
 
+class Upgrade_2024_1_1(UpgradeStep):
+    version = "2024.1.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("\n ⚠️  Warning ⚠️")
+        rich.print(
+            "-> Please run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
+        )
+        rich.print("\n ⚠️  Deprecation Warning ⚠️")
+        rich.print(
+            f"-> jupyterlab-videochat, retrolab, jupyter-tensorboard and jupyter-nvdashboard",
+            f"are no longer supported in Nebari version [green]{self.version}[/green] and will be uninstalled."
+        )
+        rich.print()
+
+        return config
+
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
 # Manually-added upgrade steps must go above this line
