@@ -31,7 +31,7 @@ module "tagging" {
   lifecycle {
     precondition {
       condition = var.cloud_provider == "aws"
-      error_message = "Cloud_provider ${var.cloud_provider} shoule not be aws."
+      error_message = "Cloud_provider ${var.cloud_provider} should not be aws."
     }
   }
 }
