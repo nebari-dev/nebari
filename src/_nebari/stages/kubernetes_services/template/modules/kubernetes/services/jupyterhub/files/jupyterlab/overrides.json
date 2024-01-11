@@ -9,6 +9,7 @@
         "authToken": ""
     },
     "@jupyterlab/apputils-extension:notification": {
+        "checkForUpdates": false,
         "fetchNews": "false"
     },
     "@jupyterlab/mainmenu-extension:plugin": {
