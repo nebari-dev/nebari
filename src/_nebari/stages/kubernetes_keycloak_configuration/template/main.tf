@@ -63,9 +63,9 @@ resource "keycloak_realm" "main" {
       otp_policy,
       default_default_client_scopes,
       default_optional_client_scopes,
-    ]  
+    ]
   }
-  
+
 }
 
 resource "keycloak_group" "groups" {
