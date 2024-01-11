@@ -99,8 +99,8 @@ jobs:
           cat nebari-config.yaml
 
       - name: Deploy Nebari
-        env:
-          TF_LOG: TRACE
+        # env:
+        #   TF_LOG: TRACE
         working-directory: local-deployment
         run: |
           nebari deploy --config nebari-config.yaml --disable-prompt
