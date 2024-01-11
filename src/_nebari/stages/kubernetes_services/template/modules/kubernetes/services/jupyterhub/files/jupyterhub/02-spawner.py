@@ -20,7 +20,7 @@ def get_username_hook(spawner):
     )
 
 
-def get_conda_store_environments(query_package: str = ""):
+def get_conda_store_environments(user_info: dict):
     import urllib3
     import yarl
 
@@ -30,9 +30,6 @@ def get_conda_store_environments(query_package: str = ""):
 
     url = yarl.URL(f"http://{external_url}/{endpoint}/")
 
-    if query_package:
-        url = url % {"packages": query_package}
-
     http = urllib3.PoolManager()
     response = http.request(
         "GET", str(url), headers={"Authorization": f"Bearer {token}"}
@@ -40,7 +37,12 @@ def get_conda_store_environments(query_package: str = ""):
 
     # parse response
     j = json.loads(response.data.decode("UTF-8"))
-    return [f"{env['namespace']['name']}-{env['name']}" for env in j.get("data", [])]
+    # Filter and return conda environments for the user
+    return [
+        f"{env['namespace']['name']}-{env['name']}"
+        for env in j.get("data", [])
+        if env["namespace"]["name"] == user_info.get("name")
+    ]
 
 
 c.Spawner.pre_spawn_hook = get_username_hook
@@ -63,6 +65,7 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
         "/usr/local/etc/jupyterhub/jupyterhub_config.py"
     )
     c.JAppsConfig.hub_host = "hub"
+    c.JAppsConfig.service_workers = 4
 
     def service_for_jhub_apps(name, url):
         return {
