@@ -28,10 +28,4 @@ module "tagging" {
   count              = var.cloud_provider == "aws" ? 1 : 0
   source             = "./modules/tagging"
   asg_node_group_map = var.asg_node_group_map
-  lifecycle {
-    precondition {
-      condition     = var.cloud_provider == "aws"
-      error_message = "Cloud_provider ${var.cloud_provider} should not be aws."
-    }
-  }
 }
