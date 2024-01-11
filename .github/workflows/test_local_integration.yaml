@@ -98,7 +98,7 @@ jobs:
 
           cat nebari-config.yaml
 
-      - name Terrafrom version check
+      - name: Terrafrom version check
         run: |
           terraform --version
 
