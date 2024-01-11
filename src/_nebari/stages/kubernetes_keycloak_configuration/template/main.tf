@@ -24,6 +24,48 @@ resource "keycloak_realm" "main" {
   web_authn_passwordless_policy {
   }
 
+  lifecycle {
+    ignore_changes = [
+      # We want user to have control over attributes we are not managing
+      # If attribute is added above remove it from this list
+      # https://registry.terraform.io/providers/mrparkers/keycloak/latest/docs/resources/realm
+      attributes,
+      registration_allowed,
+      registration_email_as_username,
+      edit_username_allowed,
+      reset_password_allowed,
+      remember_me,
+      verify_email,
+      login_with_email_allowed,
+      login_theme,
+      account_theme,
+      admin_theme,
+      email_theme,
+      sso_session_idle_timeout,
+      sso_session_max_lifespan,
+      sso_session_idle_timeout_remember_me,
+      sso_session_max_lifespan_remember_me,
+      offline_session_idle_timeout,
+      offline_session_max_lifespan,
+      access_token_lifespan,
+      access_token_lifespan_for_implicit_flow,
+      access_code_lifespan,
+      access_code_lifespan_login,
+      access_code_lifespan_user_action,
+      action_token_generated_by_user_lifespan,
+      action_token_generated_by_admin_lifespan,
+      oauth2_device_code_lifespan,
+      oauth2_device_polling_interval,
+      smtp_server,
+      internationalization,
+      security_defenses,
+      password_policy,
+      otp_policy,
+      default_default_client_scopes,
+      default_optional_client_scopes,
+    ]
+  }
+
 }
 
 resource "keycloak_group" "groups" {
