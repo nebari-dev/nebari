@@ -98,10 +98,6 @@ jobs:
 
           cat nebari-config.yaml
 
-      - name: Terrafrom version check
-        run: |
-          terraform --version
-
       - name: Deploy Nebari
         env:
           TF_LOG: TRACE
