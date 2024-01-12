@@ -9,6 +9,59 @@
         "authToken": ""
     },
     "@jupyterlab/apputils-extension:notification": {
+        "checkForUpdates": false,
         "fetchNews": "false"
+    },
+    "@jupyterlab/mainmenu-extension:plugin": {
+        "menus": [
+            {
+                "id": "jp-mainmenu-nebari",
+                "disabled": false,
+                "label": "Nebari",
+                "rank": 1001,
+                "items": [
+                    {
+                        "command": "hub:control-panel",
+                        "rank": 0
+                    },
+                    {
+                        "command": "help:open",
+                        "rank": 1,
+                        "args": {
+                            "url": "/conda-store",
+                            "text": "Environment Management",
+                            "newBrowserTab": true
+                        }
+                    },
+                    {
+                        "command": "help:open",
+                        "rank": 2,
+                        "args": {
+                            "url": "/auth/admin/nebari/console",
+                            "text": "User Management",
+                            "newBrowserTab": true
+                        }
+                    },
+                    {
+                        "command": "help:open",
+                        "rank": 3,
+                        "args": {
+                            "url": "/monitoring",
+                            "text": "Monitoring",
+                            "newBrowserTab": true
+                        }
+                    },
+                    {
+                        "command": "help:open",
+                        "rank": 4,
+                        "args": {
+                            "url": "/argo",
+                            "text": "Argo Workflows",
+                            "newBrowserTab": true
+                        }
+                    }
+                ]
+            }
+        ]
     }
 }
