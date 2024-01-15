@@ -167,3 +167,8 @@ variable "jupyterlab-pioneer-log-format" {
   description = "Logging format for JupyterLab Pioneer"
   type        = string
 }
+
+variable "git-repos-provision-pvc" {
+  description = "Map of folder location and git repo url to clone"
+  type        = map(string)
+}

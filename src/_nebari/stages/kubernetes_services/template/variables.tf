@@ -44,6 +44,11 @@ variable "argo-workflows-enabled" {
   type        = bool
 }
 
+variable "jupyterlab-prepopulated-repositories" {
+  description = "Map of folder location and git repo url to clone"
+  type        = map(string)
+}
+
 variable "jupyterlab-pioneer-enabled" {
   description = "Enable JupyterLab Pioneer for telemetry"
   type        = bool

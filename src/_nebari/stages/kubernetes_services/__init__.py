@@ -221,6 +221,7 @@ class IdleCuller(schema.Base):
 
 class JupyterLab(schema.Base):
     idle_culler: IdleCuller = IdleCuller()
+    prepopulated_repositories: typing.Dict[str, str] = {}
 
 
 class InputSchema(schema.Base):
@@ -344,6 +345,9 @@ class CondaStoreInputVars(schema.Base):
 class JupyterhubInputVars(schema.Base):
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
+    jupyterlab_prepopulated_repositories: typing.Optional[
+        typing.Dict[str, str]
+    ] = Field(alias="prepopulated-repositories")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
     jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
     jupyterhub_shared_endpoint: str = Field(None, alias="jupyterhub-shared-endpoint")
@@ -353,6 +357,19 @@ class JupyterhubInputVars(schema.Base):
     idle_culler_settings: Dict[str, Any] = Field(alias="idle-culler-settings")
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
+
+    @pydantic.validator("jupyterlab_prepopulated_repositories")
+    def check_prepopulated_repositories(cls, v, values):
+        if v is not None:
+            for k, v in v.items():
+                if not k.startswith("/") or not k.endswith(".git"):
+                    raise ValueError(
+                        f"Prepopulated repositories must be in the format /path/to/repo.git, got {k}"
+                    )
+                if not v.startswith("https://"):
+                    raise ValueError(
+                        f"Prepopulated repositories must be https urls, got {v}"
+                    )
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -488,6 +505,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             idle_culler_settings=self.config.jupyterlab.idle_culler.dict(),
             argo_workflows_enabled=self.config.argo_workflows.enabled,
             jhub_apps_enabled=self.config.jhub_apps.enabled,
+            jupyterlab_prepopulated_repositories=self.config.jupyterlab.prepopulated_repositories,
         )
 
         dask_gateway_vars = DaskGatewayInputVars(

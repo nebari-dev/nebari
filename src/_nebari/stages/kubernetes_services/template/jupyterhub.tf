@@ -101,6 +101,7 @@ module "jupyterhub" {
   conda-store-service-name                           = module.kubernetes-conda-store-server.service_name
   conda-store-jhub-apps-token                        = module.kubernetes-conda-store-server.service-tokens.jhub-apps
   jhub-apps-enabled                                  = var.jhub-apps-enabled
+  git-repos-provision-pvc                            = var.jupyterlab-prepopulated-repositories
 
   extra-mounts = {
     "/etc/dask" = {

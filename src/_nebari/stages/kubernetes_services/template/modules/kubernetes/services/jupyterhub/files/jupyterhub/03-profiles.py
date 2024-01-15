@@ -232,6 +232,75 @@ def base_profile_extra_mounts():
     }
 
 
+def configure_user_provisioned_repositories(username):
+    pvc_home_mount_path = "home/{username}"
+    pod_home_mount_path = "/home/{username}"
+    git_repos_provision_pvc = z2jh.get_config("custom.git-repos-provision-pvc")
+
+    extra_pod_config = {
+        "volumes": [
+            {
+                "name": "provisioned_repositories_script",
+                "persistentVolumeClaim": {
+                    "claimName": git_repos_provision_pvc,
+                },
+            }
+        ]
+    }
+
+    extra_container_config = {
+        "volumeMounts": [
+            {
+                "mountPath": pod_home_mount_path.format(username=username),
+                "name": "home",
+                "subPath": pvc_home_mount_path.format(username=username),
+            },
+            {
+                "mountPath": "/mnt/provisioned_repositories_script",
+                "name": "provisioned_repositories_script",
+                "subPath": "git_clone_update.sh",
+            },
+        ]
+    }
+
+    # Build a list of commands
+    commands = [
+        f"chmod +x /mnt/provisioned_repositories_script/git_clone_update.sh",
+        "./git_clone_update.sh",
+    ]
+
+    # Add each git clone/update command to the list of commands
+    for local_path, remote_url in git_repos_provision_pvc.items():
+        commands.append(
+            f"'{pvc_home_mount_path.format(username=username)}/{local_path} {remote_url}'"
+        )
+
+    # Join the commands with '&&' and create the final command string
+    final_command = " && ".join(commands)
+
+    init_containers = [
+        {
+            "name": "initialize-conda-store-mounts",
+            "image": "busybox:1.31",
+            "command": ["./git_clone_update.sh"],
+            "securityContext": {"runAsUser": 0},
+            "volumeMounts": [
+                {
+                    "mountPath": f"/mnt/{pvc_home_mount_path.format(username=username)}",
+                    "name": "home",
+                    "subPath": pvc_home_mount_path.format(username=username),
+                },
+            ],
+        }
+    ]
+
+    return {
+        "extra_pod_config": extra_pod_config,
+        "extra_container_config": extra_container_config,
+        "init_containers": init_containers,
+    }
+
+
 def configure_user(username, groups, uid=1000, gid=100):
     environment = {
         # nss_wrapper
