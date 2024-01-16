@@ -221,7 +221,7 @@ class IdleCuller(schema.Base):
 
 class JupyterLab(schema.Base):
     idle_culler: IdleCuller = IdleCuller()
-    prepopulated_repositories: typing.List[typing.Dict[str, str]] = [{}]
+    pre_populate_repositories: typing.List[typing.Dict[str, str]] = []
 
 
 class InputSchema(schema.Base):
@@ -345,9 +345,7 @@ class CondaStoreInputVars(schema.Base):
 class JupyterhubInputVars(schema.Base):
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
-    jupyterlab_prepopulated_repositories: typing.List[typing.Dict[str, str]] = Field(
-        alias="jupyterlab-prepopulated-repositories"
-    )
+    pre_populate_repositories: str = Field(alias="pre-populate-repositories")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
     jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
     jupyterhub_shared_endpoint: str = Field(None, alias="jupyterhub-shared-endpoint")
@@ -358,23 +356,23 @@ class JupyterhubInputVars(schema.Base):
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
 
-    @pydantic.validator("jupyterlab_prepopulated_repositories")
-    def check_prepopulated_repositories(cls, v, values):
-        if v is not None:
-            for pairs in v:
-                for _path, _repo in pairs.items():
-                    if not isinstance(_path, str) or not isinstance(_repo, str):
-                        raise ValueError(
-                            f"Prepopulated repositories must be strings, got {type(_path)} and {type(_repo)}"
-                        )
-                    if _path.startswith("/") or _path.endswith("/"):
-                        raise ValueError(
-                            f"Prepopulated repositories must be in the format path/to/repo without leading or trailing slashes, got {_path}"
-                        )
-                    if not _repo.startswith("https://") or not _repo.endswith(".git"):
-                        raise ValueError(
-                            f"Prepopulated repositories must be https urls, got {_repo}"
-                        )
+    # @pydantic.validator("pre_populate_repositories")
+    # def check_prepopulated_repositories(cls, v, values):
+    #     if v is not None:
+    #         for pairs in v:
+    #             for _path, _repo in pairs.items():
+    #                 if not isinstance(_path, str) or not isinstance(_repo, str):
+    #                     raise ValueError(
+    #                         f"Prepopulated repositories must be strings, got {type(_path)} and {type(_repo)}"
+    #                     )
+    #                 if _path.startswith("/") or _path.endswith("/"):
+    #                     raise ValueError(
+    #                         f"Prepopulated repositories must be in the format path/to/repo without leading or trailing slashes, got {_path}"
+    #                     )
+    #                 if not _repo.startswith("https://") or not _repo.endswith(".git"):
+    #                     raise ValueError(
+    #                         f"Prepopulated repositories must be https urls, got {_repo}"
+    # )
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -492,6 +490,10 @@ class KubernetesServicesStage(NebariTerraformStage):
             conda_store_image_tag=self.config.conda_store.image_tag,
         )
 
+        print(
+            f"Pre populating repositories: {self.config.jupyterlab.pre_populate_repositories} \n"
+        )
+
         jupyterhub_vars = JupyterhubInputVars(
             jupyterhub_theme=jupyterhub_theme.dict(),
             jupyterlab_image=_split_docker_image_name(
@@ -510,7 +512,9 @@ class KubernetesServicesStage(NebariTerraformStage):
             idle_culler_settings=self.config.jupyterlab.idle_culler.dict(),
             argo_workflows_enabled=self.config.argo_workflows.enabled,
             jhub_apps_enabled=self.config.jhub_apps.enabled,
-            jupyterlab_prepopulated_repositories=self.config.jupyterlab.prepopulated_repositories,
+            pre_populate_repositories=str(
+                self.config.jupyterlab.pre_populate_repositories
+            ),
         )
 
         dask_gateway_vars = DaskGatewayInputVars(

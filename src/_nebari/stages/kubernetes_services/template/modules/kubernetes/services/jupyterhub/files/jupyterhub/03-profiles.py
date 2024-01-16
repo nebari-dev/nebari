@@ -1,3 +1,4 @@
+import ast
 import copy
 import functools
 import json
@@ -233,72 +234,83 @@ def base_profile_extra_mounts():
 
 
 def configure_user_provisioned_repositories(username):
-    pvc_home_mount_path = "home/{username}"
-    pod_home_mount_path = "/home/{username}"
-    git_repos_provision_pvc = z2jh.get_config("custom.git-repos-provision-pvc")  # list
+    # Define paths and configurations
+    pvc_home_mount_path = f"home/{username}"
+
+    git_repos_provision_pvc = z2jh.get_config("custom.pre-populate-repositories")
+    git_clone_update_config = {
+        "name": "git-clone-update",
+        "configMap": {"name": "git-clone-update"},
+    }
+
+    # Convert the string configuration to a list of dictionaries
+    def string_to_objects(input_string):
+        try:
+            result = ast.literal_eval(input_string)
+            if isinstance(result, list) and all(
+                isinstance(item, dict) for item in result
+            ):
+                return result
+            else:
+                raise ValueError(
+                    "Input string does not contain a list of dictionaries."
+                )
+        except (ValueError, SyntaxError):
+            raise ValueError("Invalid input string format.")
+
+    git_repos_provision_pvc = string_to_objects(git_repos_provision_pvc)
 
     if not git_repos_provision_pvc:
         return {}
 
+    # Define the extra pod configuration for the volumes
     extra_pod_config = {
-        "volumes": [
-            {
-                "name": "extras",
-                "configMap": {"name": "git_clone_update"},
-            }
-        ]
+        "volumes": [{"name": "git-clone-update", **git_clone_update_config}]
     }
 
-    extra_container_config = {
-        "volumeMounts": [
-            {
-                "mountPath": pod_home_mount_path.format(username=username),
-                "name": "home",
-                "subPath": pvc_home_mount_path.format(username=username),
-            },
-            {
-                "mountPath": "/mnt/extras",
-                "name": "extras",
-                "subPath": "git_clone_update.sh",
-            },
-        ]
-    }
-
-    # Build a list of commands
+    # Build a list of commands to execute
     commands = [
-        f"chmod +x /mnt/extras/git_clone_update.sh",
-        "/mnt/extras/git_clone_update.sh",
+        f"mkdir -p /{pvc_home_mount_path}/.extras",
+        f"cp /mnt/extras/git-clone-update.sh /{pvc_home_mount_path}/.extras/git-clone-update.sh",
+        f"chmod 777 /{pvc_home_mount_path}/.extras/git-clone-update.sh",
+        f"ln -sfn /{pvc_home_mount_path}/.extras/git-clone-update.sh /usr/local/bin/git-clone-update",
     ]
 
-    # Add each git clone/update command to the list of commands
+    # Add git clone/update commands for each repository
+    args = ""
     for local_repo_pair in git_repos_provision_pvc:
         for path, remote_url in local_repo_pair.items():
-            commands.append(
-                f"'{pvc_home_mount_path.format(username=username)}/{path} {remote_url}'"
-            )
+            args += f" '/{pvc_home_mount_path}/{path}' '{remote_url}'"
 
-    # Join the commands with '&&' and create the final command string
+    commands.append("git-clone-update" + args)
+
+    # Add a final command to remove the git-clone-update.sh script
+    commands.append(f"rm -f /{pvc_home_mount_path}/.extras/git-clone-update.sh")
+    commands.append("rm -f /usr/local/bin/git-clone-update")
+
+    # Join the commands with '&&' to create the final command string
     final_command = " && ".join(commands)
 
+    # Define init containers configuration
     init_containers = [
         {
             "name": "pre-populate-git-repos",
             "image": "busybox:1.31",
-            "command": final_command,
+            "command": ["sh", "-c", final_command],
             "securityContext": {"runAsUser": 0},
             "volumeMounts": [
                 {
-                    "mountPath": f"/mnt/{pvc_home_mount_path.format(username=username)}",
+                    "mountPath": f"/mnt/{pvc_home_mount_path}",
                     "name": "home",
-                    "subPath": pvc_home_mount_path.format(username=username),
+                    "subPath": pvc_home_mount_path,
                 },
+                {"mountPath": "/mnt/extras", "name": "git-clone-update"},
             ],
         }
     ]
 
     return {
         "extra_pod_config": extra_pod_config,
-        "extra_container_config": extra_container_config,
         "init_containers": init_containers,
     }
 

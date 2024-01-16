@@ -168,7 +168,7 @@ variable "jupyterlab-pioneer-log-format" {
   type        = string
 }
 
-variable "git-repos-provision-pvc" {
+variable "pre-populate-repositories" {
   description = "Map of folder location and git repo url to clone"
-  type        = list(any)
+  type        = string
 }

@@ -39,6 +39,11 @@ variable "jupyterlab-profiles" {
   description = "JupyterHub profiles to expose to user"
 }
 
+variable "pre-populate-repositories" {
+  description = "Map of folder location and git repo url to clone"
+  type        = string
+}
+
 variable "jupyterhub-hub-extraEnv" {
   description = "Extracted overrides to merge with jupyterhub.hub.extraEnv"
   type        = string
@@ -101,7 +106,6 @@ module "jupyterhub" {
   conda-store-service-name                           = module.kubernetes-conda-store-server.service_name
   conda-store-jhub-apps-token                        = module.kubernetes-conda-store-server.service-tokens.jhub-apps
   jhub-apps-enabled                                  = var.jhub-apps-enabled
-  git-repos-provision-pvc                            = var.jupyterlab-prepopulated-repositories
 
   extra-mounts = {
     "/etc/dask" = {
@@ -129,7 +133,8 @@ module "jupyterhub" {
   jupyterhub-logout-redirect-url = var.jupyterhub-logout-redirect-url
   jupyterhub-hub-extraEnv        = var.jupyterhub-hub-extraEnv
 
-  idle-culler-settings = var.idle-culler-settings
+  idle-culler-settings      = var.idle-culler-settings
+  pre-populate-repositories = var.pre-populate-repositories
 
   jupyterlab-pioneer-enabled    = var.jupyterlab-pioneer-enabled
   jupyterlab-pioneer-log-format = var.jupyterlab-pioneer-log-format
