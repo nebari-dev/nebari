@@ -46,7 +46,7 @@ variable "argo-workflows-enabled" {
 
 variable "jupyterlab-prepopulated-repositories" {
   description = "Map of folder location and git repo url to clone"
-  type        = map(string)
+  type        = list(any)
 }
 
 variable "jupyterlab-pioneer-enabled" {

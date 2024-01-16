@@ -235,15 +235,16 @@ def base_profile_extra_mounts():
 def configure_user_provisioned_repositories(username):
     pvc_home_mount_path = "home/{username}"
     pod_home_mount_path = "/home/{username}"
-    git_repos_provision_pvc = z2jh.get_config("custom.git-repos-provision-pvc")
+    git_repos_provision_pvc = z2jh.get_config("custom.git-repos-provision-pvc")  # list
+
+    if not git_repos_provision_pvc:
+        return {}
 
     extra_pod_config = {
         "volumes": [
             {
-                "name": "provisioned_repositories_script",
-                "persistentVolumeClaim": {
-                    "claimName": git_repos_provision_pvc,
-                },
+                "name": "extras",
+                "configMap": {"name": "git_clone_update"},
             }
         ]
     }
@@ -256,8 +257,8 @@ def configure_user_provisioned_repositories(username):
                 "subPath": pvc_home_mount_path.format(username=username),
             },
             {
-                "mountPath": "/mnt/provisioned_repositories_script",
-                "name": "provisioned_repositories_script",
+                "mountPath": "/mnt/extras",
+                "name": "extras",
                 "subPath": "git_clone_update.sh",
             },
         ]
@@ -265,24 +266,25 @@ def configure_user_provisioned_repositories(username):
 
     # Build a list of commands
     commands = [
-        f"chmod +x /mnt/provisioned_repositories_script/git_clone_update.sh",
-        "./git_clone_update.sh",
+        f"chmod +x /mnt/extras/git_clone_update.sh",
+        "/mnt/extras/git_clone_update.sh",
     ]
 
     # Add each git clone/update command to the list of commands
-    for local_path, remote_url in git_repos_provision_pvc.items():
-        commands.append(
-            f"'{pvc_home_mount_path.format(username=username)}/{local_path} {remote_url}'"
-        )
+    for local_repo_pair in git_repos_provision_pvc:
+        for path, remote_url in local_repo_pair.items():
+            commands.append(
+                f"'{pvc_home_mount_path.format(username=username)}/{path} {remote_url}'"
+            )
 
     # Join the commands with '&&' and create the final command string
     final_command = " && ".join(commands)
 
     init_containers = [
         {
-            "name": "initialize-conda-store-mounts",
+            "name": "pre-populate-git-repos",
             "image": "busybox:1.31",
-            "command": ["./git_clone_update.sh"],
+            "command": final_command,
             "securityContext": {"runAsUser": 0},
             "volumeMounts": [
                 {
@@ -483,6 +485,7 @@ def render_profile(profile, username, groups, keycloak_profilenames):
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
             configure_user(username, groups),
+            configure_user_provisioned_repositories(username),
             profile_kubespawner_override,
         ],
         {},

@@ -103,6 +103,6 @@ resource "kubernetes_config_map" "git_clone_update" {
   }
 
   data = {
-    "git-clone-update.sh" = "${file("${path.module}/files/extras/git-clone-update.sh")}"
+    "git-clone-update.sh" = "${file("${path.module}/files/extras/git_clone_update.sh")}"
   }
 }

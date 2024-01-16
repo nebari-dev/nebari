@@ -221,7 +221,7 @@ class IdleCuller(schema.Base):
 
 class JupyterLab(schema.Base):
     idle_culler: IdleCuller = IdleCuller()
-    prepopulated_repositories: typing.Dict[str, str] = {}
+    prepopulated_repositories: typing.List[typing.Dict[str, str]] = [{}]
 
 
 class InputSchema(schema.Base):
@@ -345,9 +345,9 @@ class CondaStoreInputVars(schema.Base):
 class JupyterhubInputVars(schema.Base):
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
-    jupyterlab_prepopulated_repositories: typing.Optional[
-        typing.Dict[str, str]
-    ] = Field(alias="prepopulated-repositories")
+    jupyterlab_prepopulated_repositories: typing.List[typing.Dict[str, str]] = Field(
+        alias="jupyterlab-prepopulated-repositories"
+    )
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
     jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
     jupyterhub_shared_endpoint: str = Field(None, alias="jupyterhub-shared-endpoint")
@@ -361,15 +361,20 @@ class JupyterhubInputVars(schema.Base):
     @pydantic.validator("jupyterlab_prepopulated_repositories")
     def check_prepopulated_repositories(cls, v, values):
         if v is not None:
-            for k, v in v.items():
-                if not k.startswith("/") or not k.endswith(".git"):
-                    raise ValueError(
-                        f"Prepopulated repositories must be in the format /path/to/repo.git, got {k}"
-                    )
-                if not v.startswith("https://"):
-                    raise ValueError(
-                        f"Prepopulated repositories must be https urls, got {v}"
-                    )
+            for pairs in v:
+                for _path, _repo in pairs.items():
+                    if not isinstance(_path, str) or not isinstance(_repo, str):
+                        raise ValueError(
+                            f"Prepopulated repositories must be strings, got {type(_path)} and {type(_repo)}"
+                        )
+                    if _path.startswith("/") or _path.endswith("/"):
+                        raise ValueError(
+                            f"Prepopulated repositories must be in the format path/to/repo without leading or trailing slashes, got {_path}"
+                        )
+                    if not _repo.startswith("https://") or not _repo.endswith(".git"):
+                        raise ValueError(
+                            f"Prepopulated repositories must be https urls, got {_repo}"
+                        )
 
 
 class DaskGatewayInputVars(schema.Base):
