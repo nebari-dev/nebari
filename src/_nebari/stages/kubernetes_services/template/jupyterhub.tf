@@ -39,7 +39,7 @@ variable "jupyterlab-profiles" {
   description = "JupyterHub profiles to expose to user"
 }
 
-variable "pre-populate-repositories" {
+variable "initial-repositories" {
   description = "Map of folder location and git repo url to clone"
   type        = string
 }
@@ -134,7 +134,7 @@ module "jupyterhub" {
   jupyterhub-hub-extraEnv        = var.jupyterhub-hub-extraEnv
 
   idle-culler-settings      = var.idle-culler-settings
-  pre-populate-repositories = var.pre-populate-repositories
+  initial-repositories      = var.initial-repositories
 
   jupyterlab-pioneer-enabled    = var.jupyterlab-pioneer-enabled
   jupyterlab-pioneer-log-format = var.jupyterlab-pioneer-log-format

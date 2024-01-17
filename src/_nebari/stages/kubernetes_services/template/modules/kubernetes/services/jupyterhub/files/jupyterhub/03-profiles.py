@@ -237,7 +237,7 @@ def configure_user_provisioned_repositories(username):
     # Define paths and configurations
     pvc_home_mount_path = f"home/{username}"
 
-    git_repos_provision_pvc = z2jh.get_config("custom.pre-populate-repositories")
+    git_repos_provision_pvc = z2jh.get_config("custom.initial-repositories")
     git_clone_update_config = {
         "name": "git-clone-update",
         "configMap": {"name": "git-clone-update", "defaultMode": 511},
