@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/sh
 
 ################################################################################
 # Git Clone and/or Update Script
@@ -21,9 +21,6 @@ NC='\033[0m' # No Color
 
 # Error log file
 ERROR_LOG=".git-sync-errors.txt"
-
-# Initialize error log
-echo -n "" > "$ERROR_LOG"
 
 echo -e "${GREEN}Starting execution...${NC}"
 
@@ -66,6 +63,7 @@ clone_update_repository() {
   fi
 }
 
+
 # Iterate through pairs and run in parallel
 for pair in "$@"; do
   # Split the pair into folder_path and git_repo_url using space as the delimiter
@@ -73,9 +71,11 @@ for pair in "$@"; do
   git_repo_url=$(echo "$pair" | cut -d ' ' -f2-)
 
   if [ -z "$folder_path" ] || [ -z "$git_repo_url" ]; then
-    echo -e "${RED}Invalid argument format: \"${pair}\". Please provide folder path and Git repository URL in the correct order.${NC}"
+    # Initialize error log
+    echo -e "${RED}Invalid argument format: \"${pair}\". Please provide folder path and Git repository URL in the correct order.${NC}" >> "$ERROR_LOG"
   else
     clone_update_repository "$folder_path" "$git_repo_url" || echo -e "${RED}Error executing for ${folder_path}.${NC}" >> "$ERROR_LOG"
+    chown -R 1000:100 "$folder_path" # User permissions for JupyterLab user
   fi
 done
 
@@ -85,6 +85,7 @@ wait
 # Check if there were errors
 if [ -s "$ERROR_LOG" ]; then
   echo -e "${RED}Some operations failed. See errors in '${ERROR_LOG}'.${NC}"
+  chown 1000:100 "$ERROR_LOG" # User permissions for JupyterLab user
 else
   echo -e "${GREEN}All operations completed successfully. ✅${NC}"
 fi

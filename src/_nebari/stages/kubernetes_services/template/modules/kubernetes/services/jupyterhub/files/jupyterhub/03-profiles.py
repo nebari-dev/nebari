@@ -291,7 +291,7 @@ def configure_user_provisioned_repositories(username):
     init_containers = [
         {
             "name": "pre-populate-git-repos",
-            "image": "busybox:1.31",
+            "image": "bitnami/git",
             "command": ["sh", "-c", EXEC_OWNERSHIP_CHANGE],
             "securityContext": {"runAsUser": 0},
             "volumeMounts": [
