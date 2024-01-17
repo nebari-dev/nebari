@@ -38,11 +38,7 @@ def get_conda_store_environments(user_info: dict):
     # parse response
     j = json.loads(response.data.decode("UTF-8"))
     # Filter and return conda environments for the user
-    return [
-        f"{env['namespace']['name']}-{env['name']}"
-        for env in j.get("data", [])
-        if env["namespace"]["name"] == user_info.get("name")
-    ]
+    return [f"{env['namespace']['name']}-{env['name']}" for env in j.get("data", [])]
 
 
 c.Spawner.pre_spawn_hook = get_username_hook
