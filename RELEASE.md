@@ -11,12 +11,40 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ## Upcoming Release
 
+## Release 2024.1.1 - January 17, 2024
+
+### Feature changes and enhancements
+
+* Upgrade conda-store to latest version 2024.1.1
+* Add Jhub-Apps
+* Add Jupyterlab-pioneer
+* Minor improvements and bug fixes
+
+### Breaking Changes
+
+> WARNING: jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store and jupyter-nvdashboard are no longer supported in Nebari version and will be uninstalled.",
+
+### What's Changed
+
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in #2176
+* Fix logic for dns lookup. by @pt247 in #2166
+* Integrate JupyterHub App Launcher into Nebari by @aktech in #2185
+* Pass in permissions boundary to k8s module by @aktech in #2153
+* Add jupyterlab-pioneer by @aktech in #2127
+* JHub Apps: Filter conda envs by user by @aktech in #2187
+* update upgrade command by @dcmcand in #2198
+* Remove JupyterLab from services list by @aktech in #2189
+* Adding fields to ignore within keycloak_realm by @costrouc in #2200
+* Add Nebari menu item configuration. by @marcelovilla in #2196
+* Disable "Newer update available" popup as default setting by @viniciusdc in #2192
+
+
 
 ## Release 2023.12.1 - December 15, 2023
 
 ### Feature changes and enhancements
 
-* Upgrade conda-store to latest version 2023  .10.1
+* Upgrade conda-store to latest version 2023.10.1
 * Minor improvements and bug fixes
 
 ### Breaking Changes
