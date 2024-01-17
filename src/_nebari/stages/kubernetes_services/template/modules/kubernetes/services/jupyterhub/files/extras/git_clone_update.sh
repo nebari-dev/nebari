@@ -68,7 +68,9 @@ clone_update_repository() {
 
 # Iterate through pairs and run in parallel
 for pair in "$@"; do
-  read -r folder_path git_repo_url <<< "$pair"
+  # Split the pair into folder_path and git_repo_url using space as the delimiter
+  folder_path=$(echo "$pair" | cut -d ' ' -f1)
+  git_repo_url=$(echo "$pair" | cut -d ' ' -f2-)
 
   if [ -z "$folder_path" ] || [ -z "$git_repo_url" ]; then
     echo -e "${RED}Invalid argument format: \"${pair}\". Please provide folder path and Git repository URL in the correct order.${NC}"
