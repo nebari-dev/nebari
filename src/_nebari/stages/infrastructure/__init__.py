@@ -832,9 +832,10 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         outputs["asg_node_group_map"] = _calculate_asg_node_group_map(self.config)
         super().set_outputs(stage_outputs, outputs)
 
-
     @contextlib.contextmanager
-    def post_deploy(self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False):
+    def post_deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
         asg_node_group_map = _calculate_asg_node_group_map(self.config)
         if asg_node_group_map:
             amazon_web_services.set_asg_tags(
