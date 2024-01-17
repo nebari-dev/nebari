@@ -283,12 +283,12 @@ def configure_user_provisioned_repositories(username):
     ]
 
     # Add git clone/update commands for each repository
-    args = f""
+    args = ""
     for local_repo_pair in git_repos_provision_pvc:
         for path, remote_url in local_repo_pair.items():
             args += f" '{path}' '{remote_url}'"
 
-    commands.append(f"./git-clone-update.sh" + args)
+    commands.append("./git-clone-update.sh" + args)
 
     # Add a final command to remove the git-clone-update.sh script
     commands.append(f"rm -f {extras_git_clone_cp_path}")
