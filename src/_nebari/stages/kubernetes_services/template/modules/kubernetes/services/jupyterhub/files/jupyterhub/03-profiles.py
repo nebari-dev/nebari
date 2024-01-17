@@ -268,25 +268,30 @@ def configure_user_provisioned_repositories(username):
         "volumes": [{"name": "git-clone-update", **git_clone_update_config}]
     }
 
+    extras_git_clone_cp_path = f"/mnt/{pvc_home_mount_path}/git-clone-update.sh"
+
     # Build a list of commands to execute
     commands = [
-        f"mkdir -p /{pvc_home_mount_path}/.extras",
-        f"cp /mnt/extras/git-clone-update.sh /{pvc_home_mount_path}/.extras/git-clone-update.sh",
-        f"chmod 777 /{pvc_home_mount_path}/.extras/git-clone-update.sh",
-        f"ln -sfn /{pvc_home_mount_path}/.extras/git-clone-update.sh /usr/local/bin/git-clone-update",
+        f"echo copying git-clone-update.sh to {extras_git_clone_cp_path}",
+        f"cp /mnt/extras/git-clone-update.sh {extras_git_clone_cp_path}",
+        f"echo chmod 777 {extras_git_clone_cp_path}"
+        f"chmod 777 {extras_git_clone_cp_path}",
+        "echo changing ownership of git-clone-update.sh"
+        f"cd /mnt/{pvc_home_mount_path}",
+        "chown -R 1000:100 git-clone-update.sh",
+        "echo running git-clone-update.sh",
     ]
 
     # Add git clone/update commands for each repository
-    args = ""
+    args = f""
     for local_repo_pair in git_repos_provision_pvc:
         for path, remote_url in local_repo_pair.items():
-            args += f" '/{pvc_home_mount_path}/{path}' '{remote_url}'"
+            args += f" '{path}' '{remote_url}'"
 
-    commands.append("git-clone-update" + args)
+    commands.append(f"./git-clone-update.sh" + args)
 
     # Add a final command to remove the git-clone-update.sh script
-    commands.append(f"rm -f /{pvc_home_mount_path}/.extras/git-clone-update.sh")
-    commands.append("rm -f /usr/local/bin/git-clone-update")
+    commands.append(f"rm -f {extras_git_clone_cp_path}")
 
     # Join the commands with '&&' to create the final command string
     final_command = " && ".join(commands)
@@ -296,7 +301,7 @@ def configure_user_provisioned_repositories(username):
         {
             "name": "pre-populate-git-repos",
             "image": "busybox:1.31",
-            "command": ["sh", "-c", final_command],
+            "command": [final_command],  # ["sleep", "120"],
             "securityContext": {"runAsUser": 0},
             "volumeMounts": [
                 {
