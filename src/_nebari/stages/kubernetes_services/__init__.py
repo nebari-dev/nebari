@@ -356,7 +356,7 @@ class JupyterhubInputVars(schema.Base):
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
 
-    @pydantic.validator("initial-repositories")
+    @pydantic.validator("initial_repositories")
     def check_prepopulated_repositories(cls, v, values):
         if v is not None:
             for pairs in v:
@@ -491,7 +491,7 @@ class KubernetesServicesStage(NebariTerraformStage):
         )
 
         print(
-            f"Pre populating repositories: {self.config.jupyterlab.initial-repositories} \n"
+            f"Pre populating repositories: {self.config.jupyterlab.initial_repositories} \n"
         )
 
         jupyterhub_vars = JupyterhubInputVars(
