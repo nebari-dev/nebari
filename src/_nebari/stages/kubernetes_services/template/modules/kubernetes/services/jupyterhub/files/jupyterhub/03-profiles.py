@@ -270,7 +270,7 @@ def configure_user_provisioned_repositories(username):
 
     extras_git_clone_cp_path = f"/mnt/{pvc_home_mount_path}/.git-clone-update.sh"
 
-    BASH_EXECUTION = f"./.git-clone-update.sh"
+    BASH_EXECUTION = "./.git-clone-update.sh"
 
     for local_repo_pair in git_repos_provision_pvc:
         for path, remote_url in local_repo_pair.items():
