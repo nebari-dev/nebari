@@ -161,7 +161,9 @@ def set_asg_tags(asg_node_group_map: Dict[str, str], region: str) -> None:
     autoscaling_client.create_or_update_tags(Tags=tags)
 
 
-def aws_get_asg_node_group_mapping(name: str, namespace: str, region: str) -> Dict[str, str]:
+def aws_get_asg_node_group_mapping(
+    name: str, namespace: str, region: str
+) -> Dict[str, str]:
     """Return a dictionary of autoscaling groups and their associated node groups."""
     asg_node_group_mapping = {}
     session = aws_session(region=region)
