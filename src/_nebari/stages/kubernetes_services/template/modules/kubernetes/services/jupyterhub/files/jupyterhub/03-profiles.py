@@ -240,7 +240,7 @@ def configure_user_provisioned_repositories(username):
     git_repos_provision_pvc = z2jh.get_config("custom.pre-populate-repositories")
     git_clone_update_config = {
         "name": "git-clone-update",
-        "configMap": {"name": "git-clone-update"},
+        "configMap": {"name": "git-clone-update", "defaultMode": 511},
     }
 
     # Convert the string configuration to a list of dictionaries
@@ -268,40 +268,31 @@ def configure_user_provisioned_repositories(username):
         "volumes": [{"name": "git-clone-update", **git_clone_update_config}]
     }
 
-    extras_git_clone_cp_path = f"/mnt/{pvc_home_mount_path}/git-clone-update.sh"
+    extras_git_clone_cp_path = f"/mnt/{pvc_home_mount_path}/.git-clone-update.sh"
 
-    # Build a list of commands to execute
-    commands = [
-        f"echo copying git-clone-update.sh to {extras_git_clone_cp_path}",
-        f"cp /mnt/extras/git-clone-update.sh {extras_git_clone_cp_path}",
-        f"echo chmod 777 {extras_git_clone_cp_path}"
-        f"chmod 777 {extras_git_clone_cp_path}",
-        "echo changing ownership of git-clone-update.sh"
-        f"cd /mnt/{pvc_home_mount_path}",
-        "chown -R 1000:100 git-clone-update.sh",
-        "echo running git-clone-update.sh",
-    ]
+    BASH_EXECUTION = f"./.git-clone-update.sh"
 
-    # Add git clone/update commands for each repository
-    args = f""
     for local_repo_pair in git_repos_provision_pvc:
         for path, remote_url in local_repo_pair.items():
-            args += f" '{path}' '{remote_url}'"
+            BASH_EXECUTION += f" '{path} {remote_url}'"
 
-    commands.append(f"./git-clone-update.sh" + args)
-
-    # Add a final command to remove the git-clone-update.sh script
-    commands.append(f"rm -f {extras_git_clone_cp_path}")
-
-    # Join the commands with '&&' to create the final command string
-    final_command = " && ".join(commands)
+    EXEC_OWNERSHIP_CHANGE = " && ".join(
+        [
+            f"cp /mnt/extras/git-clone-update.sh {extras_git_clone_cp_path}",
+            f"chmod 777 {extras_git_clone_cp_path}",
+            f"chown -R 1000:100 {extras_git_clone_cp_path}",
+            f"cd /mnt/{pvc_home_mount_path}",
+            BASH_EXECUTION,
+            f"rm -f {extras_git_clone_cp_path}",
+        ]
+    )
 
     # Define init containers configuration
     init_containers = [
         {
             "name": "pre-populate-git-repos",
             "image": "busybox:1.31",
-            "command": [final_command],  # ["sleep", "120"],
+            "command": ["sh", "-c", EXEC_OWNERSHIP_CHANGE],
             "securityContext": {"runAsUser": 0},
             "volumeMounts": [
                 {
