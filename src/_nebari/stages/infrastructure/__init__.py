@@ -583,11 +583,6 @@ class NodeSelectorKeyValue(schema.Base):
     value: str
 
 
-class AsgNodeGroupMap(schema.Base):
-    key: str
-    value: str
-
-
 class KubernetesCredentials(schema.Base):
     host: str
     cluster_ca_certifiate: str
@@ -605,7 +600,6 @@ class OutputSchema(schema.Base):
     kubernetes_credentials: KubernetesCredentials
     kubeconfig_filename: str
     nfs_endpoint: Optional[str]
-    asg_node_group_map: Optional[AsgNodeGroupMap]
 
 
 class KubernetesInfrastructureStage(NebariTerraformStage):
@@ -829,7 +823,6 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         self, stage_outputs: Dict[str, Dict[str, Any]], outputs: Dict[str, Any]
     ):
         outputs["node_selectors"] = _calculate_node_groups(self.config)
-        outputs["asg_node_group_map"] = _calculate_asg_node_group_map(self.config)
         super().set_outputs(stage_outputs, outputs)
 
     @contextlib.contextmanager

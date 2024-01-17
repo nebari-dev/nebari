@@ -63,8 +63,6 @@ resource "aws_eks_node_group" "main" {
   }, var.tags)
 }
 
-
-
 data "aws_eks_cluster_auth" "main" {
   name = aws_eks_cluster.main.name
 }

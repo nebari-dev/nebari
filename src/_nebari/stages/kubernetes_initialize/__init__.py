@@ -49,7 +49,6 @@ class InputVars(schema.Base):
     external_container_reg: Union[ExtContainerReg, None] = None
     gpu_enabled: bool = False
     gpu_node_group_names: List[str] = []
-    asg_node_group_map: Dict[str, str] = {}
 
 
 class InputSchema(schema.Base):
@@ -97,9 +96,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
                 group for group in self.config.amazon_web_services.node_groups.keys()
             ]
             input_vars.aws_region = self.config.amazon_web_services.region
-            input_vars.asg_node_group_map = stage_outputs["stages/02-infrastructure"][
-                "asg_node_group_map"
-            ]
+
         return input_vars.dict()
 
     def check(
