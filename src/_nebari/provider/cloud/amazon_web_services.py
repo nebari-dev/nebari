@@ -143,9 +143,25 @@ def aws_get_vpc_id(name: str, namespace: str, region: str) -> Optional[str]:
     return None
 
 
-def aws_get_asg_node_group_mapping(
-    name: str, namespace: str, region: str
-) -> Dict[str, str]:
+def set_asg_tags(asg_node_group_map: Dict[str, str], region: str) -> None:
+    """Set tags for AWS node scaling from zero to work."""
+    session = aws_session(region=region)
+    autoscaling_client = session.client("autoscaling")
+    tags = []
+    for asg_name, node_group in asg_node_group_map.items():
+        tags.append(
+            {
+                "Key": "k8s.io/cluster-autoscaler/node-template/label/dedicated",
+                "Value": node_group,
+                "ResourceId": asg_name,
+                "ResourceType": "auto-scaling-group",
+                "PropagateAtLaunch": True,
+            }
+        )
+    autoscaling_client.create_or_update_tags(Tags=tags)
+
+
+def aws_get_asg_node_group_mapping(name: str, namespace: str, region: str) -> Dict[str, str]:
     """Return a dictionary of autoscaling groups and their associated node groups."""
     asg_node_group_mapping = {}
     session = aws_session(region=region)

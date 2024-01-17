@@ -24,8 +24,8 @@ module "nvidia-driver-installer" {
   gpu_node_group_names = var.gpu_node_group_names
 }
 
-module "tagging" {
-  count              = var.cloud_provider == "aws" ? 1 : 0
-  source             = "./modules/tagging"
-  asg_node_group_map = var.cloud_provider == "aws" ? var.asg_node_group_map : {}
-}
+#module "tagging" {
+#  count              = var.cloud_provider == "aws" ? 1 : 0
+#  source             = "./modules/tagging"
+#  asg_node_group_map = var.cloud_provider == "aws" ? var.asg_node_group_map : {}
+#}
