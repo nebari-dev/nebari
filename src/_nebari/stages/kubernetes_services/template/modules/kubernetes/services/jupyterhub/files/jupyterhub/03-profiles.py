@@ -256,7 +256,8 @@ def configure_user_provisioned_repositories(username):
                     "Input string does not contain a list of dictionaries."
                 )
         except (ValueError, SyntaxError):
-            raise ValueError("Invalid input string format.")
+            # Return an error message if the input string is not a list of dictionaries
+            raise ValueError(f"Invalid input string format: {input_string}")
 
     git_repos_provision_pvc = string_to_objects(git_repos_provision_pvc)
 

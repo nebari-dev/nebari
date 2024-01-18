@@ -171,4 +171,5 @@ variable "jupyterlab-pioneer-log-format" {
 variable "initial-repositories" {
   description = "Map of folder location and git repo url to clone"
   type        = string
+  default     = "[]"
 }

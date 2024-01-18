@@ -356,24 +356,6 @@ class JupyterhubInputVars(schema.Base):
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
 
-    @pydantic.validator("initial_repositories")
-    def check_prepopulated_repositories(cls, v, values):
-        if v is not None:
-            for pairs in v:
-                for _path, _repo in pairs.items():
-                    if not (isinstance(_path, str) or isinstance(_repo, str)):
-                        raise ValueError(
-                            f"Prepopulated repositories must be strings, got {type(_path)} and {type(_repo)}"
-                        )
-                    if _path.startswith("/") or _path.endswith("/"):
-                        raise ValueError(
-                            f"Prepopulated repositories must be in the format path/to/repo without leading or trailing slashes, got {_path}"
-                        )
-                    if not (_repo.startswith("https://") or _repo.endswith(".git")):
-                        raise ValueError(
-                            f"Prepopulated repositories must be https urls, got {_repo}"
-                        )
-
 
 class DaskGatewayInputVars(schema.Base):
     dask_worker_image: ImageNameTag = Field(alias="dask-worker-image")
@@ -493,6 +475,7 @@ class KubernetesServicesStage(NebariTerraformStage):
         print(
             f"Pre populating repositories: {self.config.jupyterlab.initial_repositories} \n"
         )
+        print(f"JupyterLab settings {self.config.jupyterlab.dict()} \n")
 
         jupyterhub_vars = JupyterhubInputVars(
             jupyterhub_theme=jupyterhub_theme.dict(),
