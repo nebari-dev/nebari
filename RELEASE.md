@@ -22,7 +22,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ### Breaking Changes
 
-> WARNING: jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store and jupyter-nvdashboard are no longer supported in Nebari version and will be uninstalled.",
+> WARNING: jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store and jupyter-nvdashboard are no longer supported in Nebari version and will be uninstalled."
 
 ### What's Changed
 
@@ -73,7 +73,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Update release notes for 2023.11.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2114
 
 
-**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.10.1...2023.11.1
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.11.1...2023.12.1
 
 ## Release 2023.11.1 - November 15, 2023
 
