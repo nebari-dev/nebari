@@ -472,11 +472,6 @@ class KubernetesServicesStage(NebariTerraformStage):
             conda_store_image_tag=self.config.conda_store.image_tag,
         )
 
-        print(
-            f"Pre populating repositories: {self.config.jupyterlab.initial_repositories} \n"
-        )
-        print(f"JupyterLab settings {self.config.jupyterlab.dict()} \n")
-
         jupyterhub_vars = JupyterhubInputVars(
             jupyterhub_theme=jupyterhub_theme.dict(),
             jupyterlab_image=_split_docker_image_name(
