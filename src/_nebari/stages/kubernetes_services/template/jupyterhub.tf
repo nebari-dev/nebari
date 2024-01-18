@@ -133,8 +133,8 @@ module "jupyterhub" {
   jupyterhub-logout-redirect-url = var.jupyterhub-logout-redirect-url
   jupyterhub-hub-extraEnv        = var.jupyterhub-hub-extraEnv
 
-  idle-culler-settings      = var.idle-culler-settings
-  initial-repositories      = var.initial-repositories
+  idle-culler-settings = var.idle-culler-settings
+  initial-repositories = var.initial-repositories
 
   jupyterlab-pioneer-enabled    = var.jupyterlab-pioneer-enabled
   jupyterlab-pioneer-log-format = var.jupyterlab-pioneer-log-format
