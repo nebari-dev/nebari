@@ -7,8 +7,6 @@ from typing import Any, Dict, List, Type
 from urllib.parse import urlencode
 
 import pydantic
-from pydantic import Field
-
 from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -20,6 +18,7 @@ from _nebari.utils import set_docker_image_tag, set_nebari_dask_version
 from _nebari.version import __version__
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
+from pydantic import Field
 
 # check and retry settings
 NUM_ATTEMPTS = 10
@@ -353,6 +352,7 @@ class JupyterhubInputVars(schema.Base):
     idle_culler_settings: Dict[str, Any] = Field(alias="idle-culler-settings")
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
+    cloud_provider: str = Field(alias="cloud-provider")
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -402,6 +402,7 @@ class KubernetesServicesStage(NebariTerraformStage):
         realm_id = stage_outputs["stages/06-kubernetes-keycloak-configuration"][
             "realm_id"
         ]["value"]
+        cloud_provider = self.config.provider.value
         jupyterhub_shared_endpoint = (
             stage_outputs["stages/02-infrastructure"]
             .get("nfs_endpoint", {})
@@ -477,6 +478,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             ),
             jupyterhub_stared_storage=self.config.storage.shared_filesystem,
             jupyterhub_shared_endpoint=jupyterhub_shared_endpoint,
+            cloud_provider=cloud_provider,
             jupyterhub_profiles=self.config.profiles.dict()["jupyterlab"],
             jupyterhub_image=_split_docker_image_name(
                 self.config.default_images.jupyterhub

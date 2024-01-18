@@ -167,3 +167,8 @@ variable "jupyterlab-pioneer-log-format" {
   description = "Logging format for JupyterLab Pioneer"
   type        = string
 }
+
+variable "cloud-provider" {
+  description = "Name of cloud provider."
+  type        = string
+}

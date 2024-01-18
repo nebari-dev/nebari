@@ -50,6 +50,10 @@ variable "idle-culler-settings" {
   type        = any
 }
 
+variable "cloud-provider" {
+  description = "Name of cloud provider."
+  type        = string
+}
 
 module "kubernetes-nfs-server" {
   count = var.jupyterhub-shared-endpoint == null ? 1 : 0
@@ -82,6 +86,8 @@ module "jupyterhub" {
 
   name      = var.name
   namespace = var.environment
+
+  cloud-provider = var.cloud-provider
 
   external-url = var.endpoint
   realm_id     = var.realm_id
