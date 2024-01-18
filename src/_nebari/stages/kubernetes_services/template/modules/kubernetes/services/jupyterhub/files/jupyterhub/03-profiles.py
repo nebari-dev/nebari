@@ -1,3 +1,4 @@
+import ast
 import copy
 import functools
 import json
@@ -232,6 +233,85 @@ def base_profile_extra_mounts():
     }
 
 
+def configure_user_provisioned_repositories(username):
+    # Define paths and configurations
+    pvc_home_mount_path = f"home/{username}"
+
+    git_repos_provision_pvc = z2jh.get_config("custom.initial-repositories")
+    git_clone_update_config = {
+        "name": "git-clone-update",
+        "configMap": {"name": "git-clone-update", "defaultMode": 511},
+    }
+
+    # Convert the string configuration to a list of dictionaries
+    def string_to_objects(input_string):
+        try:
+            result = ast.literal_eval(input_string)
+            if isinstance(result, list) and all(
+                isinstance(item, dict) for item in result
+            ):
+                return result
+            else:
+                raise ValueError(
+                    "Input string does not contain a list of dictionaries."
+                )
+        except (ValueError, SyntaxError):
+            # Return an error message if the input string is not a list of dictionaries
+            raise ValueError(f"Invalid input string format: {input_string}")
+
+    git_repos_provision_pvc = string_to_objects(git_repos_provision_pvc)
+
+    if not git_repos_provision_pvc:
+        return {}
+
+    # Define the extra pod configuration for the volumes
+    extra_pod_config = {
+        "volumes": [{"name": "git-clone-update", **git_clone_update_config}]
+    }
+
+    extras_git_clone_cp_path = f"/mnt/{pvc_home_mount_path}/.git-clone-update.sh"
+
+    BASH_EXECUTION = "./.git-clone-update.sh"
+
+    for local_repo_pair in git_repos_provision_pvc:
+        for path, remote_url in local_repo_pair.items():
+            BASH_EXECUTION += f" '{path} {remote_url}'"
+
+    EXEC_OWNERSHIP_CHANGE = " && ".join(
+        [
+            f"cp /mnt/extras/git-clone-update.sh {extras_git_clone_cp_path}",
+            f"chmod 777 {extras_git_clone_cp_path}",
+            f"chown -R 1000:100 {extras_git_clone_cp_path}",
+            f"cd /mnt/{pvc_home_mount_path}",
+            BASH_EXECUTION,
+            f"rm -f {extras_git_clone_cp_path}",
+        ]
+    )
+
+    # Define init containers configuration
+    init_containers = [
+        {
+            "name": "pre-populate-git-repos",
+            "image": "bitnami/git",
+            "command": ["sh", "-c", EXEC_OWNERSHIP_CHANGE],
+            "securityContext": {"runAsUser": 0},
+            "volumeMounts": [
+                {
+                    "mountPath": f"/mnt/{pvc_home_mount_path}",
+                    "name": "home",
+                    "subPath": pvc_home_mount_path,
+                },
+                {"mountPath": "/mnt/extras", "name": "git-clone-update"},
+            ],
+        }
+    ]
+
+    return {
+        "extra_pod_config": extra_pod_config,
+        "init_containers": init_containers,
+    }
+
+
 def configure_user(username, groups, uid=1000, gid=100):
     environment = {
         # nss_wrapper
@@ -416,6 +496,7 @@ def render_profile(profile, username, groups, keycloak_profilenames):
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
             configure_user(username, groups),
+            configure_user_provisioned_repositories(username),
             profile_kubespawner_override,
         ],
         {},
