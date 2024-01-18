@@ -221,6 +221,7 @@ class IdleCuller(schema.Base):
 
 class JupyterLab(schema.Base):
     idle_culler: IdleCuller = IdleCuller()
+    initial_repositories: typing.List[typing.Dict[str, str]] = []
 
 
 class InputSchema(schema.Base):
@@ -344,6 +345,7 @@ class CondaStoreInputVars(schema.Base):
 class JupyterhubInputVars(schema.Base):
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
+    initial_repositories: str = Field(alias="initial-repositories")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
     jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
     jupyterhub_shared_endpoint: str = Field(None, alias="jupyterhub-shared-endpoint")
@@ -488,6 +490,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             idle_culler_settings=self.config.jupyterlab.idle_culler.dict(),
             argo_workflows_enabled=self.config.argo_workflows.enabled,
             jhub_apps_enabled=self.config.jhub_apps.enabled,
+            initial_repositories=str(self.config.jupyterlab.initial_repositories),
         )
 
         dask_gateway_vars = DaskGatewayInputVars(

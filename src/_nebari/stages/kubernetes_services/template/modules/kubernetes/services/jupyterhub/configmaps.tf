@@ -95,3 +95,14 @@ resource "kubernetes_config_map" "jupyterlab-settings" {
     filename => file("${path.module}/files/jupyterlab/${filename}")
   }
 }
+
+resource "kubernetes_config_map" "git_clone_update" {
+  metadata {
+    name      = "git-clone-update"
+    namespace = var.namespace
+  }
+
+  data = {
+    "git-clone-update.sh" = "${file("${path.module}/files/extras/git_clone_update.sh")}"
+  }
+}
