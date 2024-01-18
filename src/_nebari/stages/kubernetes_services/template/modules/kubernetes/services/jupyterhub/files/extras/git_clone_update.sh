@@ -17,9 +17,8 @@
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[0;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Error log file
 ERROR_LOG=".git-sync-errors.txt"
 
 echo -e "${GREEN}Starting execution...${NC}"
@@ -41,7 +40,6 @@ clone_update_repository() {
 
   local firstrun_file="$folder_path/.firstrun"
 
-  # Check if the .firstrun file exists
   if [ -f "$firstrun_file" ]; then
     echo -e "The script has already been run for ${folder_path}. Skipping. ${GREEN}✅${NC}"
   else
@@ -49,13 +47,12 @@ clone_update_repository() {
       mkdir -p "$folder_path"
     fi
 
-    # Perform Git clone or update
     if [ -d "$folder_path/.git" ]; then
       echo -e "Updating Git repository in ${folder_path}..."
-      (cd "$folder_path" && git pull)  # Wrap git pull command output in parentheses
+      (cd "$folder_path" && git pull)
     else
       echo -e "Cloning Git repository to ${folder_path}..."
-      (git clone "$git_repo_url" "$folder_path")  # Wrap git clone command output in parentheses
+      (git clone "$git_repo_url" "$folder_path")
     fi
 
     touch "$firstrun_file"
@@ -79,13 +76,11 @@ for pair in "$@"; do
   fi
 done
 
-# Wait for all background processes to complete
 wait
 
-# Check if there were errors
 if [ -s "$ERROR_LOG" ]; then
   echo -e "${RED}Some operations failed. See errors in '${ERROR_LOG}'.${NC}"
-  chown 1000:100 "$ERROR_LOG" # User permissions for JupyterLab user
+  chown 1000:100 "$ERROR_LOG"
 else
   echo -e "${GREEN}All operations completed successfully. ✅${NC}"
 fi
