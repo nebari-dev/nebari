@@ -172,3 +172,9 @@ variable "cloud-provider" {
   description = "Name of cloud provider."
   type        = string
 }
+
+variable "initial-repositories" {
+  description = "Map of folder location and git repo url to clone"
+  type        = string
+  default     = "[]"
+}
