@@ -7,6 +7,8 @@ from typing import Any, Dict, List, Type
 from urllib.parse import urlencode
 
 import pydantic
+from pydantic import Field
+
 from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -18,7 +20,6 @@ from _nebari.utils import set_docker_image_tag, set_nebari_dask_version
 from _nebari.version import __version__
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
-from pydantic import Field
 
 # check and retry settings
 NUM_ATTEMPTS = 10
