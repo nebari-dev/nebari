@@ -160,7 +160,7 @@ resource "kubernetes_deployment" "server" {
           volume_mount {
             name       = "home-volume"
             mount_path = "/home/conda"
-          }          
+          }
         }
 
         volume {
@@ -182,7 +182,7 @@ resource "kubernetes_deployment" "server" {
           empty_dir {
             size_limit = "1Mi"
           }
-        }        
+        }
       }
     }
   }
