@@ -182,7 +182,7 @@ resource "helm_release" "jupyterhub" {
         userScheduler = {
           nodeSelector = {
             # "dedicated" = var.general-node-group.value
-            "${var.general-node-group.key}" = var.user-node-group.value
+            "${var.user-node-group.key}" = var.user-node-group.value
           }
         }
       }
