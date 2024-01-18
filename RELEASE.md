@@ -26,7 +26,6 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ### What's Changed
 
-* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in #2176
 * Fix logic for dns lookup. by @pt247 in #2166
 * Integrate JupyterHub App Launcher into Nebari by @aktech in #2185
 * Pass in permissions boundary to k8s module by @aktech in #2153
@@ -37,6 +36,11 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Adding fields to ignore within keycloak_realm by @costrouc in #2200
 * Add Nebari menu item configuration. by @marcelovilla in #2196
 * Disable "Newer update available" popup as default setting by @viniciusdc in #2192
+* Block usage of pip inside jupyterlab  by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2191
+* Return all environments instead of just those under the user's namespace for jhub-apps by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2206
+* Adding a temporary writable directory for conda-store server /home/conda by @costrouc in https://github.com/nebari-dev/nebari/pull/2209
+* Add demo repositories mechanism to populate user's space by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2207
+* update nebari_workflow_controller and conda_store tags to test rc by @dcmcand in https://github.com/nebari-dev/nebari/pull/2210
 
 
 
