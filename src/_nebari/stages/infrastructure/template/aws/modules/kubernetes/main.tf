@@ -63,9 +63,34 @@ data "aws_eks_cluster_auth" "main" {
 
 resource "aws_eks_addon" "aws-ebs-csi-driver" {
   # required for Kubernetes v1.23+ on AWS
-  addon_name        = "aws-ebs-csi-driver"
-  cluster_name      = aws_eks_cluster.main.name
-  resolve_conflicts = "OVERWRITE"
+  addon_name   = "aws-ebs-csi-driver"
+  cluster_name = aws_eks_cluster.main.name
+
+  configuration_values = jsonencode({
+    controller = {
+      nodeSelector = {
+        "eks.amazonaws.com/nodegroup" = "general"
+      }
+    }
+  })
+
+  # Ensure cluster and node groups are created
+  depends_on = [
+    aws_eks_cluster.main,
+    aws_eks_node_group.main,
+  ]
+}
+
+resource "aws_eks_addon" "coredns" {
+  addon_name   = "coredns"
+  cluster_name = aws_eks_cluster.main.name
+
+  configuration_values = jsonencode({
+    nodeSelector = {
+      "eks.amazonaws.com/nodegroup" = "general"
+    }
+  })
+
   # Ensure cluster and node groups are created
   depends_on = [
     aws_eks_cluster.main,
