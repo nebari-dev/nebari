@@ -14,4 +14,4 @@ c.JupyterHub.template_vars = {
 if z2jh.get_config("custom.jhub-apps-enabled"):
     from jhub_apps import themes
 
-    c.JupyterHub.template_vars = {**jupyterhub_theme, **themes.DEFAULT_THEME}
+    c.JupyterHub.template_vars = {**themes.DEFAULT_THEME, **jupyterhub_theme}
