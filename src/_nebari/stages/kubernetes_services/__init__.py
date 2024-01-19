@@ -54,12 +54,18 @@ class JupyterHubTheme(schema.Base):
     welcome: str = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
     logo: str = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg"
     primary_color: str = "#4f4173"
+    primary_color_dark: str = "#4f4173"
     secondary_color: str = "#957da6"
+    secondary_color_dark: str = "#957da6"
     accent_color: str = "#32C574"
+    accent_color_dark: str = "#32C574"
     text_color: str = "#111111"
     h1_color: str = "#652e8e"
     h2_color: str = "#652e8e"
     version: str = f"v{__version__}"
+    navbar_color: str = "#1c1d26"
+    navbar_text_color: str = "#f1f1f6"
+    navbar_hover_color: str = "#db96f3"
     display_version: str = "True"  # limitation of theme everything is a str
 
 
