@@ -30,6 +30,11 @@ _Put a `x` in the boxes that apply_
 - [ ] Did you test the pull request locally?
 - [ ] Did you add new tests?
 
+## How to test
+
+<!-- Steps to take to test the new feature, verify the bug is fixed, etc. Please do not just include steps for the happy path, but failure modes too. -->
+
+
 ## Any other comments?
 
 <!--
