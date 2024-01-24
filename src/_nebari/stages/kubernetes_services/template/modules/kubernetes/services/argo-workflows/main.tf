@@ -564,9 +564,9 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
                   {
                     matchExpressions = [
                       {
-                        key      = "eks.amazonaws.com/nodegroup"
+                        key      = var.node-group.key
                         operator = "In"
-                        values   = ["general"]
+                        values   = [var.node-group.value]
                       }
                     ]
                   }
