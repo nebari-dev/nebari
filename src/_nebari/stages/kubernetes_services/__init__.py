@@ -54,12 +54,18 @@ class JupyterHubTheme(schema.Base):
     welcome: str = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
     logo: str = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg"
     primary_color: str = "#4f4173"
+    primary_color_dark: str = "#4f4173"
     secondary_color: str = "#957da6"
+    secondary_color_dark: str = "#957da6"
     accent_color: str = "#32C574"
+    accent_color_dark: str = "#32C574"
     text_color: str = "#111111"
     h1_color: str = "#652e8e"
     h2_color: str = "#652e8e"
     version: str = f"v{__version__}"
+    navbar_color: str = "#1c1d26"
+    navbar_text_color: str = "#f1f1f6"
+    navbar_hover_color: str = "#db96f3"
     display_version: str = "True"  # limitation of theme everything is a str
 
 
@@ -188,8 +194,21 @@ class ArgoWorkflows(schema.Base):
     nebari_workflow_controller: NebariWorkflowController = NebariWorkflowController()
 
 
+class JHubApps(schema.Base):
+    enabled: bool = False
+
+
 class Monitoring(schema.Base):
     enabled: bool = True
+
+
+class JupyterLabPioneer(schema.Base):
+    enabled: bool = False
+    log_format: typing.Optional[str] = None
+
+
+class Telemetry(schema.Base):
+    jupyterlab_pioneer: JupyterLabPioneer = JupyterLabPioneer()
 
 
 class JupyterHub(schema.Base):
@@ -208,6 +227,7 @@ class IdleCuller(schema.Base):
 
 class JupyterLab(schema.Base):
     idle_culler: IdleCuller = IdleCuller()
+    initial_repositories: typing.List[typing.Dict[str, str]] = []
 
 
 class InputSchema(schema.Base):
@@ -280,8 +300,10 @@ class InputSchema(schema.Base):
     conda_store: CondaStore = CondaStore()
     argo_workflows: ArgoWorkflows = ArgoWorkflows()
     monitoring: Monitoring = Monitoring()
+    telemetry: Telemetry = Telemetry()
     jupyterhub: JupyterHub = JupyterHub()
     jupyterlab: JupyterLab = JupyterLab()
+    jhub_apps: JHubApps = JHubApps()
 
 
 class OutputSchema(schema.Base):
@@ -329,6 +351,7 @@ class CondaStoreInputVars(schema.Base):
 class JupyterhubInputVars(schema.Base):
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
+    initial_repositories: str = Field(alias="initial-repositories")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
     jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
     jupyterhub_shared_endpoint: str = Field(None, alias="jupyterhub-shared-endpoint")
@@ -337,6 +360,7 @@ class JupyterhubInputVars(schema.Base):
     jupyterhub_hub_extraEnv: str = Field(alias="jupyterhub-hub-extraEnv")
     idle_culler_settings: Dict[str, Any] = Field(alias="idle-culler-settings")
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
+    jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -346,6 +370,13 @@ class DaskGatewayInputVars(schema.Base):
 
 class MonitoringInputVars(schema.Base):
     monitoring_enabled: bool = Field(alias="monitoring-enabled")
+
+
+class TelemetryInputVars(schema.Base):
+    jupyterlab_pioneer_enabled: bool = Field(alias="jupyterlab-pioneer-enabled")
+    jupyterlab_pioneer_log_format: typing.Optional[str] = Field(
+        alias="jupyterlab-pioneer-log-format"
+    )
 
 
 class ArgoWorkflowsInputVars(schema.Base):
@@ -396,6 +427,12 @@ class KubernetesServicesStage(NebariTerraformStage):
                 },
             },
             "argo-workflows-jupyter-scheduler": {
+                "primary_namespace": "",
+                "role_bindings": {
+                    "*/*": ["viewer"],
+                },
+            },
+            "jhub-apps": {
                 "primary_namespace": "",
                 "role_bindings": {
                     "*/*": ["viewer"],
@@ -458,6 +495,8 @@ class KubernetesServicesStage(NebariTerraformStage):
             ),
             idle_culler_settings=self.config.jupyterlab.idle_culler.dict(),
             argo_workflows_enabled=self.config.argo_workflows.enabled,
+            jhub_apps_enabled=self.config.jhub_apps.enabled,
+            initial_repositories=str(self.config.jupyterlab.initial_repositories),
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
@@ -469,6 +508,11 @@ class KubernetesServicesStage(NebariTerraformStage):
 
         monitoring_vars = MonitoringInputVars(
             monitoring_enabled=self.config.monitoring.enabled,
+        )
+
+        telemetry_vars = TelemetryInputVars(
+            jupyterlab_pioneer_enabled=self.config.telemetry.jupyterlab_pioneer.enabled,
+            jupyterlab_pioneer_log_format=self.config.telemetry.jupyterlab_pioneer.log_format,
         )
 
         argo_workflows_vars = ArgoWorkflowsInputVars(
@@ -486,6 +530,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             **dask_gateway_vars.dict(by_alias=True),
             **monitoring_vars.dict(by_alias=True),
             **argo_workflows_vars.dict(by_alias=True),
+            **telemetry_vars.dict(by_alias=True),
         }
 
     def check(

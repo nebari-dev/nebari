@@ -39,6 +39,11 @@ variable "jupyterlab-profiles" {
   description = "JupyterHub profiles to expose to user"
 }
 
+variable "initial-repositories" {
+  description = "Map of folder location and git repo url to clone"
+  type        = string
+}
+
 variable "jupyterhub-hub-extraEnv" {
   description = "Extracted overrides to merge with jupyterhub.hub.extraEnv"
   type        = string
@@ -99,6 +104,8 @@ module "jupyterhub" {
   argo-workflows-enabled                             = var.argo-workflows-enabled
   conda-store-argo-workflows-jupyter-scheduler-token = module.kubernetes-conda-store-server.service-tokens.argo-workflows-jupyter-scheduler
   conda-store-service-name                           = module.kubernetes-conda-store-server.service_name
+  conda-store-jhub-apps-token                        = module.kubernetes-conda-store-server.service-tokens.jhub-apps
+  jhub-apps-enabled                                  = var.jhub-apps-enabled
 
   extra-mounts = {
     "/etc/dask" = {
@@ -127,5 +134,8 @@ module "jupyterhub" {
   jupyterhub-hub-extraEnv        = var.jupyterhub-hub-extraEnv
 
   idle-culler-settings = var.idle-culler-settings
+  initial-repositories = var.initial-repositories
 
+  jupyterlab-pioneer-enabled    = var.jupyterlab-pioneer-enabled
+  jupyterlab-pioneer-log-format = var.jupyterlab-pioneer-log-format
 }
