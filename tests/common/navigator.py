@@ -320,15 +320,13 @@ class Navigator:
             # failure here indicates that the environment doesn't exist either
             # because of incorrect naming syntax or because the env is still
             # being built
-            self.page.get_by_role("combobox").nth(1).select_option(
-                f'{{"name":"{kernel}"}}'
-            )
+            self.page.get_by_role("combobox").nth(1).select_option(kernel)
             # click Select to close popup (deal with the two formats of this dialog)
             try:
-                self.page.get_by_role("button", name="Select", exact=True).click()
+                self.page.get_by_role("button", name="Select Kernel").click()
             except Exception:
                 self.page.locator("div").filter(has_text="No KernelSelect").get_by_role(
-                    "button", name="Select"
+                    "button", name="Select Kernel"
                 ).click()
 
     def set_environment(self, kernel):
@@ -360,10 +358,8 @@ class Navigator:
         self._set_environment_via_popup(kernel)
 
         # wait for the jupyter UI to catch up before moving forward
-        # extract conda env name
-        conda_env_label = re.search("conda-env-(.*)-py", kernel).group(1)
         # see if the jupyter notebook label for the conda env is visible
-        kernel_label_loc = self.page.get_by_role("button", name=conda_env_label)
+        kernel_label_loc = self.page.get_by_role("button", name=kernel)
         if not kernel_label_loc.is_visible():
             kernel_label_loc.wait_for(state="attached")
 
