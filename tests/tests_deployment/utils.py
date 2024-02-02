@@ -38,7 +38,7 @@ def get_jupyterhub_token(note="jupyterhub-tests-deployment"):
         headers=headers,
         json=data,
     )
-    print(xsrf_token, note, r.json())
+
     return r.json()["token"]
 
 
