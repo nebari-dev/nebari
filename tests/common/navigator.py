@@ -407,3 +407,20 @@ class Navigator:
         self.run_terminal_command(f"ls {filepath}")
         logger.debug(f"time to complete {dt.datetime.now() - start}")
         time.sleep(2)
+
+    def stop_server(self) -> None:
+        """Stops the JupyterHub server by navigating to the Hub Control Panel."""
+        self.page.get_by_text("File", exact=True).click()
+
+        with self.context.expect_page() as page_info:
+            self.page.get_by_role(
+                "menuitem", name="Hub Control Panel", exact=True
+            ).click()
+
+        home_page = page_info.value
+        home_page.wait_for_load_state()
+        stop_button = home_page.get_by_role("button", name="Stop My Server")
+        if not stop_button.is_visible():
+            stop_button.wait_for(state="visible")
+        stop_button.click()
+        stop_button.wait_for(state="hidden")
