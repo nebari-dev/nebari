@@ -208,12 +208,14 @@ def base_profile_extra_mounts():
 
     extra_pod_config = {
         "volumes": [
-            {
-                "name": volume["name"],
-                "persistentVolumeClaim": {"claimName": volume["name"]},
-            }
-            if volume["kind"] == "persistentvolumeclaim"
-            else {"name": volume["name"], "configMap": {"name": volume["name"]}}
+            (
+                {
+                    "name": volume["name"],
+                    "persistentVolumeClaim": {"claimName": volume["name"]},
+                }
+                if volume["kind"] == "persistentvolumeclaim"
+                else {"name": volume["name"], "configMap": {"name": volume["name"]}}
+            )
             for mount_path, volume in extra_mounts.items()
         ]
     }
@@ -367,9 +369,11 @@ def configure_user(username, groups, uid=1000, gid=100):
             # mount the shared directories for user only if there are
             # shared folders (groups) that the user is a member of
             # else ensure that the `shared` folder symlink does not exist
-            f"ln -sfn /shared /home/{username}/shared"
-            if groups
-            else f"rm -f /home/{username}/shared",
+            (
+                f"ln -sfn /shared /home/{username}/shared"
+                if groups
+                else f"rm -f /home/{username}/shared"
+            ),
             # conda-store environment configuration
             f"printf '{condarc}' > /home/{username}/.condarc",
             # jupyter configuration
