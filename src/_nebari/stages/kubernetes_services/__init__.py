@@ -53,6 +53,7 @@ class JupyterHubTheme(schema.Base):
     hub_subtitle: str = "Your open source data science platform"
     welcome: str = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
     logo: str = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg"
+    favicon: str = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/symbol/favicon.ico"
     primary_color: str = "#4f4173"
     primary_color_dark: str = "#4f4173"
     secondary_color: str = "#957da6"
