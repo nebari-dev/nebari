@@ -220,7 +220,7 @@ class Notebook:
         # Restart dialog appears most, but not all of the time (e.g. set
         # No Kernel, then Restart Run All)
         restart_dialog_button = self.nav.page.get_by_role(
-            "button", name="Restart", exact=True
+            "button", name="Confirm Kernel Restart"
         )
         if restart_dialog_button.is_visible():
             restart_dialog_button.click()

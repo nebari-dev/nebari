@@ -13,6 +13,6 @@ def test_notebook(navigator, test_data_root):
     test_app.run(
         path=notebook_name,
         expected_outputs=["success: 6"],
-        conda_env="conda-env-default-py",
+        conda_env="default *",
         timeout=500,
     )
