@@ -320,15 +320,13 @@ class Navigator:
             # failure here indicates that the environment doesn't exist either
             # because of incorrect naming syntax or because the env is still
             # being built
-            self.page.get_by_role("combobox").nth(1).select_option(
-                f'{{"name":"{kernel}"}}'
-            )
+            self.page.get_by_role("combobox").nth(1).select_option(kernel)
             # click Select to close popup (deal with the two formats of this dialog)
             try:
-                self.page.get_by_role("button", name="Select", exact=True).click()
+                self.page.get_by_role("button", name="Select Kernel").click()
             except Exception:
                 self.page.locator("div").filter(has_text="No KernelSelect").get_by_role(
-                    "button", name="Select"
+                    "button", name="Select Kernel"
                 ).click()
 
     def set_environment(self, kernel):
@@ -360,10 +358,8 @@ class Navigator:
         self._set_environment_via_popup(kernel)
 
         # wait for the jupyter UI to catch up before moving forward
-        # extract conda env name
-        conda_env_label = re.search("conda-env-(.*)-py", kernel).group(1)
         # see if the jupyter notebook label for the conda env is visible
-        kernel_label_loc = self.page.get_by_role("button", name=conda_env_label)
+        kernel_label_loc = self.page.get_by_role("button", name=kernel)
         if not kernel_label_loc.is_visible():
             kernel_label_loc.wait_for(state="attached")
 
@@ -411,3 +407,20 @@ class Navigator:
         self.run_terminal_command(f"ls {filepath}")
         logger.debug(f"time to complete {dt.datetime.now() - start}")
         time.sleep(2)
+
+    def stop_server(self) -> None:
+        """Stops the JupyterHub server by navigating to the Hub Control Panel."""
+        self.page.get_by_text("File", exact=True).click()
+
+        with self.context.expect_page() as page_info:
+            self.page.get_by_role(
+                "menuitem", name="Hub Control Panel", exact=True
+            ).click()
+
+        home_page = page_info.value
+        home_page.wait_for_load_state()
+        stop_button = home_page.get_by_role("button", name="Stop My Server")
+        if not stop_button.is_visible():
+            stop_button.wait_for(state="visible")
+        stop_button.click()
+        stop_button.wait_for(state="hidden")
