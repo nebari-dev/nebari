@@ -105,7 +105,7 @@ resource "kubernetes_config_map" "etc-skel" {
 
 resource "kubernetes_config_map" "jupyterlab-settings" {
   depends_on = [
-    jupyterlab-overrides-json-template
+    local_file.overrides_json
   ]
 
   metadata {
