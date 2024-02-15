@@ -12,7 +12,7 @@ locals {
 }
 
 locals {
-  jupyterlab-overrides-json-template = merge(
+  jupyterlab-overrides-json-object = merge(
     jsondecode(file("${path.module}/files/jupyterlab/overrides.json")),
     var.jupyterlab-default-settings
   )
@@ -38,7 +38,7 @@ resource "local_file" "jupyter_jupyterlab_pioneer_config_py" {
 
 
 resource "local_file" "overrides_json" {
-  content  = local.jupyterlab-overrides-json-template
+  content  = jsonencode(local.jupyterlab-overrides-json-object)
   filename = "${path.module}/files/jupyterlab/overrides.json"
 }
 
