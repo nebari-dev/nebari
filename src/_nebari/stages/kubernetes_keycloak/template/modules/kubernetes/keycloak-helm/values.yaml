@@ -4,8 +4,8 @@ ingress:
   # we will need to define our own IngressRoute elsewhere.
   enabled: false
 
-imagePullSecrets:
-  - name: "extcrcreds"
+imagePullSecrets: []
+  # - name: "extcrcreds"
 
 extraEnv: |
   - name: PROXY_ADDRESS_FORWARDING

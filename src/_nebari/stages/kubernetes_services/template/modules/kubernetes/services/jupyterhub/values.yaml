@@ -25,37 +25,37 @@ proxy:
   secretToken: "<placeholder>"
   service:
     type: ClusterIP
-  chp:
-    networkPolicy:
-      egressAllowRules:
-        cloudMetadataServer: false
-        dnsPortsPrivateIPs: false
-        nonPrivateIPs: false
-        privateIPs: false
+  chp: {}
+    # networkPolicy:
+    #   egressAllowRules:
+    #     cloudMetadataServer: false
+    #     dnsPortsPrivateIPs: false
+    #     nonPrivateIPs: false
+    #     privateIPs: false
 
-      egress:
-        - ports:
-          - port: 53
-            protocol: UDP
-          - port: 53
-            protocol: TCP
-          - port: 10202
-            protocol: TCP
-        - to:
-          - ipBlock:
-              cidr: 0.0.0.0/0
+    #   egress:
+    #     - ports:
+    #       - port: 53
+    #         protocol: UDP
+    #       - port: 53
+    #         protocol: TCP
+    #       - port: 10202
+    #         protocol: TCP
+    #     - to:
+    #       - ipBlock:
+    #           cidr: 0.0.0.0/0
 
 scheduling:
   userScheduler:
-    enabled: true
+    enabled: false
   podPriority:
     enabled: true
   userPlaceholder:
     enabled: false
     replicas: 1
 
-imagePullSecrets:
-  - extcrcreds
+imagePullSecrets: []
+  # - extcrcreds
 
 singleuser:
   defaultUrl: "/lab"
