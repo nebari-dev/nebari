@@ -1,5 +1,6 @@
 import os
 
+from _nebari.stages.bootstrap import CiEnum
 from nebari.plugins import nebari_plugin_manager
 
 
@@ -26,3 +27,8 @@ def test_render_config(nebari_render):
     assert (
         output_directory / "stages" / f"02-infrastructure/{config.provider.value}"
     ).is_dir()
+
+    if config.ci_cd.type == CiEnum.github_actions:
+        assert (output_directory / ".github/workflows/").is_dir()
+    elif config.ci_cd.type == CiEnum.gitlab_ci:
+        assert (output_directory / ".gitlab-ci.yml").is_file()
