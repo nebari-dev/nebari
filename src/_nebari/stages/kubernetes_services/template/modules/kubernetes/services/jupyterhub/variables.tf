@@ -158,6 +158,11 @@ variable "argo-workflows-enabled" {
   type        = bool
 }
 
+variable "jupyterlab-default-settings" {
+  description = "Default settings for JupyterLab to be placed in overrides.json"
+  type        = map(any)
+}
+
 variable "jupyterlab-pioneer-enabled" {
   description = "Enable JupyterLab Pioneer for telemetry"
   type        = bool
