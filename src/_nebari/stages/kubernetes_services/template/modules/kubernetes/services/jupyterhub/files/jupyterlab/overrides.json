@@ -15,10 +15,10 @@
     "@jupyterlab/mainmenu-extension:plugin": {
         "menus": [
             {
-                "id": "jp-mainmenu-nebari",
+                "id": "jp-mainmenu-services",
                 "disabled": false,
-                "label": "Nebari",
-                "rank": 1001,
+                "label": "Services",
+                "rank": 999,
                 "items": [
                     {
                         "command": "hub:control-panel",
