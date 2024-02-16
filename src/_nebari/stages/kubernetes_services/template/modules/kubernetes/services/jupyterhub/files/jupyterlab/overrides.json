@@ -21,10 +21,6 @@
                 "rank": 999,
                 "items": [
                     {
-                        "command": "hub:control-panel",
-                        "rank": 0
-                    },
-                    {
                         "command": "help:open",
                         "rank": 1,
                         "args": {
@@ -57,6 +53,20 @@
                         "args": {
                             "url": "/argo",
                             "text": "Argo Workflows",
+                            "newBrowserTab": true
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "jp-mainmenu-help",
+                "items": [
+                    {
+                        "command": "help:open",
+                        "rank": 1001,
+                        "args": {
+                            "url": "https://www.nebari.dev/docs/welcome",
+                            "text": "Nebari documentation",
                             "newBrowserTab": true
                         }
                     }
