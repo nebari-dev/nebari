@@ -18,21 +18,28 @@
                 "id": "jp-mainmenu-file",
                 "items": [
                     {
+                        "command": "help:open",
+                        "rank": 0,
+                        "args": {
+                            "url": "/hub/home",
+                            "text": "Home",
+                            "newBrowserTab": true
+                        }
+                    },
+                    {
+                        "type": "submenu",
+                        "submenu": {
+                            "id": "jp-mainmenu-file-new"
+                        },
+                        "rank": 0.5
+                    },
+                    {
                         "command": "hub:control-panel",
                         "disabled": true
                     },
                     {
                         "command": "hub:logout",
                         "disabled": true
-                    },
-                    {
-                        "command": "help:open",
-                        "rank": 101,
-                        "args": {
-                            "url": "/hub/home",
-                            "text": "Home",
-                            "newBrowserTab": true
-                        }
                     }
                 ]
             },
