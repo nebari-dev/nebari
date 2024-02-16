@@ -47,7 +47,7 @@
                 "id": "jp-mainmenu-services",
                 "disabled": false,
                 "label": "Services",
-                "rank": 999,
+                "rank": 1000,
                 "items": [
                     {
                         "command": "help:open",
@@ -89,6 +89,7 @@
             },
             {
                 "id": "jp-mainmenu-help",
+                "rank": 1001,
                 "items": [
                     {
                         "command": "help:open",
