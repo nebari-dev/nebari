@@ -31,6 +31,22 @@ if [ "$#" -lt 1 ] || [ "$1" = "--help" ]; then
   [ "$1" = "--help" ] && exit 0 || exit 1
 fi
 
+fix_parent_dir_permissions() {
+  # Fix parent directory permissions to allow the JupyterLab user to access the cloned repository
+
+  local folder_path="$1"
+
+  # Retrieve the very first parent directory
+  local parent_dir=$(echo "$folder_path" | cut -d '/' -f1)
+
+  # Check if the parent directory has the correct permissions
+  if [ "$(stat -c "%u:%g" "$parent_dir")" != "1000:100" ]; then
+    echo "Fixing permissions for parent directory: $parent_dir"
+    chown -R 1000:100 "$parent_dir" || { echo "Error: Unable to set ownership for $parent_dir"; return 1; }
+    chmod -R 755 "$parent_dir" || { echo "Error: Unable to set permissions for $parent_dir"; return 1; }
+  fi
+}
+
 clone_update_repository() {
   # Clone or update a Git repository into a specified folder,
   # and create a `.firstrun` file to mark the script's execution.
@@ -46,6 +62,9 @@ clone_update_repository() {
     if [ ! -d "$folder_path" ]; then
       mkdir -p "$folder_path"
     fi
+
+    # Fix parent directory permissions
+    fix_parent_dir_permissions "$folder_path" || return 1
 
     if [ -d "$folder_path/.git" ]; then
       echo -e "Updating Git repository in ${folder_path}..."
@@ -72,7 +91,7 @@ for pair in "$@"; do
     echo -e "${RED}Invalid argument format: \"${pair}\". Please provide folder path and Git repository URL in the correct order.${NC}" >> "$ERROR_LOG"
   else
     clone_update_repository "$folder_path" "$git_repo_url" || echo -e "${RED}Error executing for ${folder_path}.${NC}" >> "$ERROR_LOG"
-    chown -R 1000:100 "$folder_path" # User permissions for JupyterLab user
+    # chown -R 1000:100 "$folder_path" # User permissions for JupyterLab user
   fi
 done
 
