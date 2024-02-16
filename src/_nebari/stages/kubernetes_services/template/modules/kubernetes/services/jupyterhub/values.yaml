@@ -6,14 +6,14 @@ hub:
       storage: 1Gi
   baseUrl: "/"
 
-  networkPolicy:
-    ingress:
-      - ports:
-          - port: 10202
-        from:
-          - podSelector:
-              matchLabels:
-                hub.jupyter.org/network-access-hub: "true"
+  networkPolicy: {}
+    # ingress:
+    #   - ports:
+    #       - port: 10202
+    #     from:
+    #       - podSelector:
+    #           matchLabels:
+    #             hub.jupyter.org/network-access-hub: "true"
 
   service:
     extraPorts:
