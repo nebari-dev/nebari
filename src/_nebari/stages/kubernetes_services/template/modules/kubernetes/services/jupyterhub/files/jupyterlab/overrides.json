@@ -15,6 +15,28 @@
     "@jupyterlab/mainmenu-extension:plugin": {
         "menus": [
             {
+                "id": "jp-mainmenu-file",
+                "items": [
+                    {
+                        "command": "hub:control-panel",
+                        "disabled": true
+                    },
+                    {
+                        "command": "hub:logout",
+                        "disabled": true
+                    },
+                    {
+                        "command": "help:open",
+                        "rank": 101,
+                        "args": {
+                            "url": "/hub/home",
+                            "text": "Home",
+                            "newBrowserTab": true
+                        }
+                    }
+                ]
+            },
+            {
                 "id": "jp-mainmenu-services",
                 "disabled": false,
                 "label": "Services",
