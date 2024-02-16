@@ -63,7 +63,6 @@ clone_update_repository() {
       mkdir -p "$folder_path"
     fi
 
-    # Fix parent directory permissions
     fix_parent_dir_permissions "$folder_path" || return 1
 
     if [ -d "$folder_path/.git" ]; then
