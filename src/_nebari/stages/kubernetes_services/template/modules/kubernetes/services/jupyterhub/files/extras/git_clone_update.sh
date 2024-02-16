@@ -74,7 +74,13 @@ clone_update_repository() {
       (git clone "$git_repo_url" "$folder_path")
     fi
 
+    echo -e "Creating .firstrun file in ${folder_path}..."
     touch "$firstrun_file"
+
+    # User permissions for JupyterLab user to newly created git folders
+    echo -e "Setting permissions for ${folder_path}..."
+    chown -R 1000:100 "$folder_path" || { echo "Error: Unable to set ownership for $folder_path"; return 1; }
+
     echo -e "Execution for ${folder_path} completed. ${GREEN}✅${NC}"
   fi
 }
@@ -91,7 +97,6 @@ for pair in "$@"; do
     echo -e "${RED}Invalid argument format: \"${pair}\". Please provide folder path and Git repository URL in the correct order.${NC}" >> "$ERROR_LOG"
   else
     clone_update_repository "$folder_path" "$git_repo_url" || echo -e "${RED}Error executing for ${folder_path}.${NC}" >> "$ERROR_LOG"
-    # chown -R 1000:100 "$folder_path" # User permissions for JupyterLab user
   fi
 done
 
