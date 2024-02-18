@@ -413,9 +413,7 @@ class Navigator:
         self.page.get_by_text("File", exact=True).click()
 
         with self.context.expect_page() as page_info:
-            self.page.get_by_role(
-                "menuitem", name="Hub Control Panel", exact=True
-            ).click()
+            self.page.get_by_role("menuitem", name="Home", exact=True).click()
 
         home_page = page_info.value
         home_page.wait_for_load_state()
