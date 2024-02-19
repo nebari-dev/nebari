@@ -7,6 +7,7 @@ locals {
     kernel_cull_connected               = var.idle-culler-settings.kernel_cull_connected ? "True" : "False" # for Python compatible boolean values
     kernel_cull_busy                    = var.idle-culler-settings.kernel_cull_busy ? "True" : "False"      # for Python compatible boolean values
     server_shutdown_no_activity_timeout = var.idle-culler-settings.server_shutdown_no_activity_timeout
+    jupyterlab_preferred_dir            = var.jupyterlab-preferred-dir != null ? var.jupyterlab-preferred-dir : ""
     }
   )
 }

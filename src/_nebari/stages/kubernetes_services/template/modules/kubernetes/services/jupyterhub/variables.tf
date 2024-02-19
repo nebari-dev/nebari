@@ -168,6 +168,11 @@ variable "jupyterlab-pioneer-log-format" {
   type        = string
 }
 
+variable "jupyterlab-preferred-dir" {
+  description = "Directory in which the JupyterLab should open the file browser"
+  type        = string
+}
+
 variable "cloud-provider" {
   description = "Name of cloud provider."
   type        = string
