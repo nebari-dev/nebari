@@ -49,6 +49,11 @@ variable "initial-repositories" {
   type        = string
 }
 
+variable "jupyterlab-default-settings" {
+  description = "Default settings for JupyterLab to be placed in overrides.json"
+  type        = map(any)
+}
+
 variable "jupyterhub-hub-extraEnv" {
   description = "Extracted overrides to merge with jupyterhub.hub.extraEnv"
   type        = string
@@ -146,6 +151,8 @@ module "jupyterhub" {
 
   idle-culler-settings = var.idle-culler-settings
   initial-repositories = var.initial-repositories
+
+  jupyterlab-default-settings = var.jupyterlab-default-settings
 
   jupyterlab-pioneer-enabled    = var.jupyterlab-pioneer-enabled
   jupyterlab-pioneer-log-format = var.jupyterlab-pioneer-log-format

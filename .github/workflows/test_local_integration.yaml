@@ -96,6 +96,15 @@ jobs:
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
           sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
 
+
+          # Change default JupyterLab theme
+          cat >> nebari-config.yaml <<- EOM
+          jupyterlab:
+            default_settings:
+              "@jupyterlab/apputils-extension:themes":
+                theme: JupyterLab Dark
+          EOM
+
           cat nebari-config.yaml
 
       - name: Deploy Nebari

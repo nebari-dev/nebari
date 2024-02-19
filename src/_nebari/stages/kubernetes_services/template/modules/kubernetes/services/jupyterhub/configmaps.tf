@@ -13,6 +13,13 @@ locals {
 }
 
 locals {
+  jupyterlab-overrides-json-object = merge(
+    jsondecode(file("${path.module}/files/jupyterlab/overrides.json")),
+    var.jupyterlab-default-settings
+  )
+}
+
+locals {
   jupyter-pioneer-config-py-template = templatefile("${path.module}/files/jupyter/jupyter_jupyterlab_pioneer_config.py.tpl", {
     log_format = var.jupyterlab-pioneer-log-format != null ? var.jupyterlab-pioneer-log-format : ""
     }
@@ -28,6 +35,12 @@ resource "local_file" "jupyter_server_config_py" {
 resource "local_file" "jupyter_jupyterlab_pioneer_config_py" {
   content  = local.jupyter-pioneer-config-py-template
   filename = "${path.module}/files/jupyter/jupyter_jupyterlab_pioneer_config.py"
+}
+
+
+resource "local_file" "overrides_json" {
+  content  = jsonencode(local.jupyterlab-overrides-json-object)
+  filename = "${path.module}/files/jupyterlab/overrides.json"
 }
 
 
@@ -55,6 +68,12 @@ locals {
       "jupyter_jupyterlab_pioneer_config.py" = local_file.jupyter_jupyterlab_pioneer_config_py.content
     } : {}
   )
+}
+
+locals {
+  etc-jupyterlab-settings = {
+    "overrides.json" = local_file.overrides_json.content
+  }
 }
 
 resource "kubernetes_config_map" "etc-jupyter" {
@@ -86,15 +105,16 @@ resource "kubernetes_config_map" "etc-skel" {
 
 
 resource "kubernetes_config_map" "jupyterlab-settings" {
+  depends_on = [
+    local_file.overrides_json
+  ]
+
   metadata {
     name      = "jupyterlab-settings"
     namespace = var.namespace
   }
 
-  data = {
-    for filename in fileset("${path.module}/files/jupyterlab", "*") :
-    filename => file("${path.module}/files/jupyterlab/${filename}")
-  }
+  data = local.etc-jupyterlab-settings
 }
 
 resource "kubernetes_config_map" "git_clone_update" {

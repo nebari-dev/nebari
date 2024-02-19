@@ -61,6 +61,9 @@ describe('First Test', () => {
       // Click VS Code Launcher exists
       cy.get('div.jp-LauncherCard[title="VS Code [↗]"]').should('exist');
 
+      // Should reflect theme set by default_settings
+      cy.get('body[data-jp-theme-name="JupyterLab Dark"]').should('exist');
+
       // Stop my Jupyter server - must do this so PVC can be destroyed on Minikube
       cy.visit('/hub/home');
 
