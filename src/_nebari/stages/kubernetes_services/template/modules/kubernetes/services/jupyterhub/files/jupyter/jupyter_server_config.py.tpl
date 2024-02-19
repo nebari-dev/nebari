@@ -9,6 +9,10 @@
 c.ContentsManager.allow_hidden = True
 c.FileContentsManager.allow_hidden = True
 
+# Set the preferred path for the frontend to start in
+preferred_dir = ${jupyterlab_preferred_dir}
+c.FileContentsManager.preferred_dir = preferred_dir if preferred_dir else None
+
 # Timeout (in seconds) in which a terminal has been inactive and ready to
 # be culled.
 c.TerminalManager.cull_inactive_timeout = ${terminal_cull_inactive_timeout} * 60

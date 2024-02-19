@@ -230,6 +230,7 @@ class JupyterLab(schema.Base):
     default_settings: typing.Dict[str, typing.Any] = {}
     idle_culler: IdleCuller = IdleCuller()
     initial_repositories: typing.List[typing.Dict[str, str]] = []
+    preferred_dir: typing.Optional[str] = None
 
 
 class InputSchema(schema.Base):
@@ -367,6 +368,9 @@ class JupyterhubInputVars(schema.Base):
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
     cloud_provider: str = Field(alias="cloud-provider")
+    jupyterlab_preferred_dir: typing.Optional[str] = Field(
+        alias="jupyterlab-preferred-dir"
+    )
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -506,6 +510,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             jhub_apps_enabled=self.config.jhub_apps.enabled,
             initial_repositories=str(self.config.jupyterlab.initial_repositories),
             jupyterlab_default_settings=self.config.jupyterlab.default_settings,
+            jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
