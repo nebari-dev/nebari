@@ -95,7 +95,7 @@
                         "command": "help:open",
                         "rank": 1001,
                         "args": {
-                            "url": "https://www.nebari.dev/docs/welcome",
+                            "url": "https://www.nebari.dev/docs/welcome/",
                             "text": "Nebari documentation",
                             "newBrowserTab": true
                         }
