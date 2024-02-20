@@ -115,12 +115,9 @@ def list_dask_environments():
 
 def base_node_group(options):
     key = config["worker-node-group"]["key"]
-    if config.provider.value == "aws":
+    if config.get("provider", "") == "aws":
         key = "dedicated"
-    default_node_group = {
-        key: config["worker-node-group"]["value"],
-        # config["worker-node-group"]["key"]: config["worker-node-group"]["value"],
-    }
+    default_node_group = {key: config["worker-node-group"]["value"]}
 
     # check `worker_extra_pod_config` first
     worker_node_group = (

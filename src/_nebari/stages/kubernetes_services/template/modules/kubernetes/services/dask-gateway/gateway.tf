@@ -24,6 +24,7 @@ resource "kubernetes_secret" "gateway" {
       conda-store-api-token                = var.conda-store-api-token
       conda-store-service-name             = var.conda-store-service-name
       conda-store-namespace                = var.namespace
+      provider                             = var.cloud-provider
     })
   }
 }
