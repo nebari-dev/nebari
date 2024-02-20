@@ -158,6 +158,11 @@ variable "argo-workflows-enabled" {
   type        = bool
 }
 
+variable "jupyterlab-default-settings" {
+  description = "Default settings for JupyterLab to be placed in overrides.json"
+  type        = map(any)
+}
+
 variable "jupyterlab-pioneer-enabled" {
   description = "Enable JupyterLab Pioneer for telemetry"
   type        = bool
@@ -165,6 +170,11 @@ variable "jupyterlab-pioneer-enabled" {
 
 variable "jupyterlab-pioneer-log-format" {
   description = "Logging format for JupyterLab Pioneer"
+  type        = string
+}
+
+variable "jupyterlab-preferred-dir" {
+  description = "Directory in which the JupyterLab should open the file browser"
   type        = string
 }
 

@@ -39,9 +39,19 @@ variable "jupyterlab-profiles" {
   description = "JupyterHub profiles to expose to user"
 }
 
+variable "jupyterlab-preferred-dir" {
+  description = "Directory in which the JupyterLab should open the file browser"
+  type        = string
+}
+
 variable "initial-repositories" {
   description = "Map of folder location and git repo url to clone"
   type        = string
+}
+
+variable "jupyterlab-default-settings" {
+  description = "Default settings for JupyterLab to be placed in overrides.json"
+  type        = map(any)
 }
 
 variable "jupyterhub-hub-extraEnv" {
@@ -142,6 +152,10 @@ module "jupyterhub" {
   idle-culler-settings = var.idle-culler-settings
   initial-repositories = var.initial-repositories
 
+  jupyterlab-default-settings = var.jupyterlab-default-settings
+
   jupyterlab-pioneer-enabled    = var.jupyterlab-pioneer-enabled
   jupyterlab-pioneer-log-format = var.jupyterlab-pioneer-log-format
+
+  jupyterlab-preferred-dir = var.jupyterlab-preferred-dir
 }
