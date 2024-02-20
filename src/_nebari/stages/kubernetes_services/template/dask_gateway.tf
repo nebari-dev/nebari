@@ -11,12 +11,6 @@ variable "dask-gateway-profiles" {
   description = "Dask Gateway profiles to expose to user"
 }
 
-variable "cloud-provider" {
-  description = "Name of cloud provider."
-  type        = string
-}
-
-
 # =================== RESOURCES =====================
 module "dask-gateway" {
   source = "./modules/kubernetes/services/dask-gateway"
