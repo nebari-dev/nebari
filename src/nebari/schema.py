@@ -17,8 +17,8 @@ namespace_pydantic = pydantic.constr(regex=namespace_regex)
 email_regex = "^[^ @]+@[^ @]+\\.[^ @]+$"
 email_pydantic = pydantic.constr(regex=email_regex)
 
-github_url_regex = "^(https://)?(github.com|gitlab.com)/([^/]+)/([^/]+)/?$"
-github_url_pydantic = pydantic.constr(regex=github_url_regex)
+git_url_regex = "^(https://)?(git)(hub|lab)(.com)/([^/]+)/([^/]+)/?$"
+git_url_pydantic = pydantic.constr(regex=git_url_regex)
 
 
 class Base(pydantic.BaseModel):
