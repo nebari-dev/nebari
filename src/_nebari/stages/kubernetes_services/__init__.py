@@ -376,6 +376,7 @@ class JupyterhubInputVars(schema.Base):
 class DaskGatewayInputVars(schema.Base):
     dask_worker_image: ImageNameTag = Field(alias="dask-worker-image")
     dask_gateway_profiles: Dict[str, Any] = Field(alias="dask-gateway-profiles")
+    cloud_provider: str = Field(alias="cloud-provider")
 
 
 class MonitoringInputVars(schema.Base):
@@ -518,6 +519,7 @@ class KubernetesServicesStage(NebariTerraformStage):
                 self.config.default_images.dask_worker
             ),
             dask_gateway_profiles=self.config.profiles.dict()["dask_worker"],
+            cloud_provider=cloud_provider,
         )
 
         monitoring_vars = MonitoringInputVars(
