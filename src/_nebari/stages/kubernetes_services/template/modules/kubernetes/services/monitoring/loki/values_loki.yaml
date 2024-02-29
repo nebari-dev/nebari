@@ -1,4 +1,3 @@
-# https://grafana.com/docs/loki/latest/setup/install/helm/reference/
 # https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml
 
 loki:
