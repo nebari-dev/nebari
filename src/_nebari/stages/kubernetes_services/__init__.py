@@ -532,8 +532,8 @@ class KubernetesServicesStage(NebariTerraformStage):
 
         monitoring_vars = MonitoringInputVars(
             monitoring_enabled=self.config.monitoring.enabled,
-            grafana_loki_overrides=self.config.monitoring.overrides.loki,
-            grafana_promtail_overrides=self.config.monitoring.overrides.promtail
+            grafana_loki_overrides=[json.dumps(self.config.monitoring.overrides.loki)],
+            grafana_promtail_overrides=[json.dumps(self.config.monitoring.overrides.promtail)]
         )
 
         telemetry_vars = TelemetryInputVars(
