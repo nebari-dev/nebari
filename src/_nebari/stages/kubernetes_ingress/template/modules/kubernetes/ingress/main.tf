@@ -171,6 +171,39 @@ resource "kubernetes_service" "traefik_internal" {
   }
 }
 
+resource "kubernetes_service" "loki_internal" {
+  wait_for_load_balancer = true
+
+  metadata {
+    name      = "${var.name}-loki-internal"
+    namespace = var.namespace
+#    annotations = {
+#      "prometheus.io/scrape" = "true"
+#      "prometheus.io/path"   = "/metrics"
+#      "prometheus.io/port"   = 9000
+#    }
+    labels = {
+      "app.kubernetes.io/component" = "traefik-loki-internal-service"
+      "app.kubernetes.io/part-of"   = "traefik-ingress"
+    }
+  }
+
+  spec {
+    selector = {
+      "app.kubernetes.io/component" = "traefik-ingress"
+    }
+
+    port {
+      name        = "http"
+      protocol    = "TCP"
+      port        = 3100
+      target_port = 3100
+    }
+
+    type = "ClusterIP"
+  }
+}
+
 resource "kubernetes_deployment" "main" {
   metadata {
     name      = "${var.name}-traefik-ingress"
