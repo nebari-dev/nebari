@@ -15,10 +15,8 @@ module "monitoring" {
   node-group = var.node_groups.general
 }
 
-
 module "grafana-loki" {
   count = var.monitoring-enabled ? 1 : 0
   source               = "./modules/kubernetes/services/monitoring/loki"
   namespace            = var.environment
-  external-url         = var.endpoint
 }

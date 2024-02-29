@@ -9,7 +9,7 @@ resource "helm_release" "grafana-loki" {
     file("${path.module}/values_loki.yaml"),
     jsonencode({
     })
-  ], var.overrides)
+  ], var.grafana-loki-overrides)
 }
 
 
@@ -24,5 +24,5 @@ resource "helm_release" "grafana-promtail" {
     file("${path.module}/values_promtail.yaml"),
     jsonencode({
     })
-  ], var.overrides)
+  ], var.grafana-promtail-overrides)
 }
