@@ -199,8 +199,14 @@ class JHubApps(schema.Base):
     enabled: bool = False
 
 
+class MonitoringOverrides(schema.Base):
+    loki: typing.Dict = {}
+    promtail: typing.Dict = {}
+
+
 class Monitoring(schema.Base):
     enabled: bool = True
+    overrides: MonitoringOverrides = MonitoringOverrides()
 
 
 class JupyterLabPioneer(schema.Base):
@@ -381,6 +387,8 @@ class DaskGatewayInputVars(schema.Base):
 
 class MonitoringInputVars(schema.Base):
     monitoring_enabled: bool = Field(alias="monitoring-enabled")
+    grafana_loki_overrides: Dict[str, Any] = Field(alias="grafana-loki-overrides")
+    grafana_promtail_overrides: Dict[str, Any] = Field(alias="grafana-promtail-overrides")
 
 
 class TelemetryInputVars(schema.Base):
@@ -524,6 +532,8 @@ class KubernetesServicesStage(NebariTerraformStage):
 
         monitoring_vars = MonitoringInputVars(
             monitoring_enabled=self.config.monitoring.enabled,
+            grafana_loki_overrides=self.config.monitoring.overrides.loki,
+            grafana_promtail_overrides=self.config.monitoring.overrides.promtail
         )
 
         telemetry_vars = TelemetryInputVars(
