@@ -387,8 +387,8 @@ class DaskGatewayInputVars(schema.Base):
 
 class MonitoringInputVars(schema.Base):
     monitoring_enabled: bool = Field(alias="monitoring-enabled")
-    grafana_loki_overrides: Dict[str, Any] = Field(alias="grafana-loki-overrides")
-    grafana_promtail_overrides: Dict[str, Any] = Field(alias="grafana-promtail-overrides")
+    grafana_loki_overrides: List[str] = Field(alias="grafana-loki-overrides")
+    grafana_promtail_overrides: List[str] = Field(alias="grafana-promtail-overrides")
 
 
 class TelemetryInputVars(schema.Base):

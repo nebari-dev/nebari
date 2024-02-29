@@ -66,10 +66,12 @@ variable "cloud-provider" {
 
 variable grafana-loki-overrides {
   description = "Helm chart overrides for loki"
-  type        = string
+  type        = list(string)
+  default     = []
 }
 
 variable "grafana-promtail-overrides" {
   description = "Helm chart overrides for promtail"
-  type        = string
+  type        = list(string)
+  default     = []
 }
