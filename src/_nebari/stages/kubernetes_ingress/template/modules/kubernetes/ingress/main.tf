@@ -177,11 +177,6 @@ resource "kubernetes_service" "loki_internal" {
   metadata {
     name      = "${var.name}-loki-internal"
     namespace = var.namespace
-#    annotations = {
-#      "prometheus.io/scrape" = "true"
-#      "prometheus.io/path"   = "/metrics"
-#      "prometheus.io/port"   = 9000
-#    }
     labels = {
       "app.kubernetes.io/component" = "traefik-loki-internal-service"
       "app.kubernetes.io/part-of"   = "traefik-ingress"
