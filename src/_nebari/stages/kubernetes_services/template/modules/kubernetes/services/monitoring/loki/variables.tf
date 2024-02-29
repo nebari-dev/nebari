@@ -12,7 +12,7 @@ variable "external-url" {
 variable "loki-helm-chart-version" {
   description = "version to deploy for the loki helm chart"
   type        = string
-  default     = "5.39.0"
+  default     = "5.43.3"
 }
 
 variable "overrides" {

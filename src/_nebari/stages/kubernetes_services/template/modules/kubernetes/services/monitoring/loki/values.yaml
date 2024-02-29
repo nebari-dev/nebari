@@ -1,4 +1,5 @@
 # https://grafana.com/docs/loki/latest/setup/install/helm/reference/
+# https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml
 
 loki:
   storage:
@@ -6,5 +7,6 @@ loki:
       chunks: chunks
       ruler: ruler
       admin: admin
+  auth_enabled: false
 minio:
   enabled: true
