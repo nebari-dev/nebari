@@ -1,3 +1,18 @@
+resource "helm_release" "loki-minio" {
+  name       = "grafana-loki-minio"
+  namespace  = var.namespace
+  repository = "https://charts.min.io/"
+  chart      = "minio"
+  version    = var.minio-helm-chart-version
+
+  values = concat([
+    file("${path.module}/values_minio.yaml"),
+    jsonencode({
+    })
+  ], var.grafana-loki-minio-overrides)
+}
+
+
 resource "helm_release" "grafana-loki" {
   name       = "grafana-loki"
   namespace  = var.namespace
@@ -10,8 +25,9 @@ resource "helm_release" "grafana-loki" {
     jsonencode({
     })
   ], var.grafana-loki-overrides)
-}
 
+  depends_on = [helm_release.loki-minio]
+}
 
 resource "helm_release" "grafana-promtail" {
   name       = "grafana-promtail"
@@ -25,4 +41,6 @@ resource "helm_release" "grafana-promtail" {
     jsonencode({
     })
   ], var.grafana-promtail-overrides)
+
+  depends_on = [helm_release.grafana-loki]
 }

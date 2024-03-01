@@ -16,6 +16,12 @@ variable "promtail-helm-chart-version" {
   default     = "6.15.5"
 }
 
+variable "minio-helm-chart-version" {
+  description = "version to deploy for the minio helm chart"
+  type        = string
+  default     = "5.0.15"
+}
+
 variable "grafana-loki-overrides" {
   description = "Grafana Loki helm chart overrides"
   type        = list(string)
@@ -24,6 +30,12 @@ variable "grafana-loki-overrides" {
 
 variable "grafana-promtail-overrides" {
   description = "Grafana Promtail helm chart overrides"
+  type        = list(string)
+  default     = []
+}
+
+variable "grafana-loki-minio-overrides" {
+  description = "Grafana Loki minio helm chart overrides"
   type        = list(string)
   default     = []
 }

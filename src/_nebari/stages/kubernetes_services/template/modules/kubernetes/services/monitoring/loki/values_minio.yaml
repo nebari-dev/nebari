@@ -1,0 +1,21 @@
+# https://github.com/minio/minio/blob/master/helm/minio/values.yaml
+buckets:
+  - name: chunks
+    policy: none
+    purge: false
+  - name: ruler
+    policy: none
+    purge: false
+  - name: admin
+    policy: none
+    purge: false
+  - name: loki
+    policy: none
+    purge: false
+
+rootUser: "enterprise-logs"
+rootPassword: "supersecret"
+replicas: 1
+
+persistence:
+  size: 50Gi

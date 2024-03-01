@@ -77,17 +77,8 @@ backend:
   replicas: 1
 
 minio:
-  enabled: true
-  buckets:
-    - name: chunks
-      policy: none
-      purge: false
-    - name: ruler
-      policy: none
-      purge: false
-    - name: admin
-      policy: none
-      purge: false
-    - name: loki
-      policy: none
-      purge: false
+  enabled: false
+
+monitoring:
+  selfMonitoring:
+    enabled: false
