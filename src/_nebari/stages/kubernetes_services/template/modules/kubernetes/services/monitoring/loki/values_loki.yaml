@@ -1,11 +1,30 @@
 # https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml
 
 loki:
+  commonConfig:
+    replication_factor: 1
   storage:
     bucketNames:
       chunks: chunks
       ruler: ruler
       admin: admin
   auth_enabled: false
+
+# Configuration for the write pod(s)
+write:
+  # -- Number of replicas for the write
+  # Keeping cost of running Nebari in mind
+  # We don't need so many replicas, if people need it
+  # they can always override from nebari-config.yaml
+  replicas: 1
+
+read:
+  # -- Number of replicas for the read
+  replicas: 1
+
+backend:
+  # -- Number of replicas for the backend
+  replicas: 1
+
 minio:
   enabled: true
