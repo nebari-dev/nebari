@@ -1,14 +1,64 @@
 # https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml
 
 loki:
-  commonConfig:
-    replication_factor: 1
   storage:
     bucketNames:
       chunks: chunks
       ruler: ruler
       admin: admin
+    type: s3
+  commonConfig:
+    replication_factor: 1
+  # Not required as it is inside cluster and not exposed to the public network
   auth_enabled: false
+
+  # The Compactor deduplicates index entries and also apply granular retention.
+  compactor:
+    # is the directory where marked chunks and temporary tables will be saved.
+    working_directory: /var/loki/compactor/data/retention
+    # minio s3
+    shared_store: s3
+    # how often compaction will happen
+    compaction_interval: 1m
+    # should delete old logs after rentention delete delay
+    # ideally we would want to do storage based rentention, but this is not
+    # currently implemented in loki, that's why we're doing time based retention.
+    retention_enabled: true
+    # is the delay after which the Compactor will delete marked chunks.
+    retention_delete_delay: 1m
+    # specifies the maximum quantity of goroutine workers instantiated to delete chunks.
+    retention_delete_worker_count: 150
+
+  limits_config:
+    # The minimum retention period is 24h.
+    retention_period: 60d
+
+  schema_config:
+    configs:
+      # list of period_configs
+      # The date of the first day that index buckets should be created.
+      - from: "2024-02-29"
+        index:
+            period: 24h
+            prefix: loki_index_
+        object_store: s3
+        schema: v11
+        store: boltdb-shipper
+  storage_config:
+    boltdb_shipper:
+        # Directory where ingesters would write index files which would then be
+        # uploaded by shipper to configured storage
+        active_index_directory: /var/loki/compactor/data/index
+        # Cache location for restoring index files from storage for queries
+        cache_location: /var/loki/compactor/data/boltdb-cache
+        # Shared store for keeping index files
+        shared_store: s3
+    # We configure MinIO by using the AWS config because MinIO implements the S3 API
+    aws:
+      # Extra dot after minio to follow aws format of specifying region
+      # which is going to be empty in this case.
+      s3: http://enterprise-logs:supersecret@grafana-loki-minio.:9000
+      s3forcepathstyle: true
 
 # Configuration for the write pod(s)
 write:
@@ -28,3 +78,16 @@ backend:
 
 minio:
   enabled: true
+  buckets:
+    - name: chunks
+      policy: none
+      purge: false
+    - name: ruler
+      policy: none
+      purge: false
+    - name: admin
+      policy: none
+      purge: false
+    - name: loki
+      policy: none
+      purge: false
