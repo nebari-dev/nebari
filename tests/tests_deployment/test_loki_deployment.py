@@ -10,10 +10,21 @@ from kubernetes.client.api import core_v1_api
 from kubernetes.stream import portforward
 
 
-def kubernetes_port_forward(pod_name, port, namespace):
+LOKI_BACKEND_PORT = 3100
+
+
+def kubernetes_port_forward(pod_labels, port, namespace="dev"):
     config.load_kube_config()
     Configuration.set_default(Configuration.get_default_copy())
     core_v1 = core_v1_api.CoreV1Api()
+
+    pods = core_v1.list_namespaced_pod(
+        namespace=namespace,
+        label_selector=pod_labels
+    )
+    assert pods.items
+    pod = pods.items[0]
+    pod_name = pod.metadata.name
 
     def kubernetes_create_connection(address, *args, **kwargs):
         pf = portforward(
@@ -23,14 +34,14 @@ def kubernetes_port_forward(pod_name, port, namespace):
         return pf.socket(port)
 
     socket.create_connection = kubernetes_create_connection
+    return pod
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture
 def port_forward():
     return kubernetes_port_forward(
-        pod_name="loki-backend-0",
-        port=3100,
-        namespace="dev"
+        pod_labels="app.kubernetes.io/instance=nebari-loki,app.kubernetes.io/component=backend",
+        port=LOKI_BACKEND_PORT
     )
 
 
@@ -44,8 +55,9 @@ def port_forward():
             "log_level",
     ),
 )
-def test_loki_endpoint(endpoint_path):
-    url = f'http://loki-backend-0.pod.dev.kubernetes:3100/{endpoint_path}'
+def test_loki_endpoint(endpoint_path, port_forward):
+    pod_name = port_forward.metadata.name
+    url = f'http://{pod_name}.pod.dev.kubernetes:{LOKI_BACKEND_PORT}/{endpoint_path}'
     response = urllib_request.urlopen(url)
     response.read().decode('utf-8')
     assert response.code == 200
