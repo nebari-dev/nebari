@@ -13,8 +13,6 @@ buckets:
     policy: none
     purge: false
 
-rootUser: "enterprise-logs"
-rootPassword: "supersecret"
 replicas: 1
 
 persistence:

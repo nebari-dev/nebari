@@ -7,8 +7,6 @@ loki:
       ruler: ruler
       admin: admin
     type: s3
-    s3:
-      endpoint: http://enterprise-logs:supersecret@grafana-loki-minio:9000
   commonConfig:
     replication_factor: 1
   # Not required as it is inside cluster and not exposed to the public network
@@ -55,12 +53,7 @@ loki:
         cache_location: /var/loki/compactor/data/boltdb-cache
         # Shared store for keeping index files
         shared_store: s3
-    # We configure MinIO by using the AWS config because MinIO implements the S3 API
-    aws:
-      # Extra dot after minio to follow aws format of specifying region
-      # which is going to be empty in this case.
-      s3: http://enterprise-logs:supersecret@grafana-loki-minio:9000
-      s3forcepathstyle: true
+
 
 # Configuration for the write pod(s)
 write:

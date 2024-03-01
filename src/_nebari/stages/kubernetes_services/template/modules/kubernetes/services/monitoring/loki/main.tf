@@ -1,5 +1,11 @@
+resource "random_password" "minio_root_password" {
+  length  = 32
+  special = false
+}
+
+
 resource "helm_release" "loki-minio" {
-  name       = "grafana-loki-minio"
+  name       = "nebari-loki-minio"
   namespace  = var.namespace
   repository = "https://charts.min.io/"
   chart      = "minio"
@@ -8,13 +14,15 @@ resource "helm_release" "loki-minio" {
   values = concat([
     file("${path.module}/values_minio.yaml"),
     jsonencode({
+      rootUser: "admin",
+      rootPassword: random_password.minio_root_password.result,
     })
   ], var.grafana-loki-minio-overrides)
 }
 
 
 resource "helm_release" "grafana-loki" {
-  name       = "grafana-loki"
+  name       = "nebari-loki"
   namespace  = var.namespace
   repository = "https://grafana.github.io/helm-charts"
   chart      = "loki"
@@ -23,6 +31,20 @@ resource "helm_release" "grafana-loki" {
   values = concat([
     file("${path.module}/values_loki.yaml"),
     jsonencode({
+      loki: {
+        storage: {
+          s3: {
+            endpoint: "http://admin:${random_password.minio_root_password.result}@grafana-loki-minio:9000"
+          }
+        }
+      }
+      storageConfig: {
+        # We configure MinIO by using the AWS config because MinIO implements the S3 API
+        aws: {
+          s3: "http://admin:${random_password.minio_root_password.result}@grafana-loki-minio:9000"
+          s3forcepathstyle: true
+        }
+      }
     })
   ], var.grafana-loki-overrides)
 
@@ -30,7 +52,7 @@ resource "helm_release" "grafana-loki" {
 }
 
 resource "helm_release" "grafana-promtail" {
-  name       = "grafana-promtail"
+  name       = "nebari-promtail"
   namespace  = var.namespace
   repository = "https://grafana.github.io/helm-charts"
   chart      = "promtail"
