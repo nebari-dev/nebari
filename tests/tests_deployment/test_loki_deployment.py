@@ -11,9 +11,16 @@ from kubernetes.stream import portforward
 
 
 LOKI_BACKEND_PORT = 3100
+LOKI_BACKEND_POD_LABELS = {
+    "app.kubernetes.io/instance": "nebari-loki",
+    "app.kubernetes.io/component": "backend"
+}
 
 
 def kubernetes_port_forward(pod_labels, port, namespace="dev"):
+    """Given pod labels and port, finds the pod name and port forwards to
+    the given port.
+    """
     config.load_kube_config()
     Configuration.set_default(Configuration.get_default_copy())
     core_v1 = core_v1_api.CoreV1Api()
@@ -37,10 +44,11 @@ def kubernetes_port_forward(pod_labels, port, namespace="dev"):
     return pod
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def port_forward():
+    labels = [f"{k}={v}" for k, v in LOKI_BACKEND_POD_LABELS.items()]
     return kubernetes_port_forward(
-        pod_labels="app.kubernetes.io/instance=nebari-loki,app.kubernetes.io/component=backend",
+        pod_labels=",".join(labels),
         port=LOKI_BACKEND_PORT
     )
 
