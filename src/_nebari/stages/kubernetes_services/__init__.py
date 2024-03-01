@@ -202,6 +202,7 @@ class JHubApps(schema.Base):
 class MonitoringOverrides(schema.Base):
     loki: typing.Dict = {}
     promtail: typing.Dict = {}
+    minio: typing.Dict = {}
 
 
 class Monitoring(schema.Base):
@@ -389,6 +390,7 @@ class MonitoringInputVars(schema.Base):
     monitoring_enabled: bool = Field(alias="monitoring-enabled")
     grafana_loki_overrides: List[str] = Field(alias="grafana-loki-overrides")
     grafana_promtail_overrides: List[str] = Field(alias="grafana-promtail-overrides")
+    grafana_loki_minio_overrides: List[str] = Field(alias="grafana-loki-minio-overrides")
 
 
 class TelemetryInputVars(schema.Base):
@@ -533,7 +535,8 @@ class KubernetesServicesStage(NebariTerraformStage):
         monitoring_vars = MonitoringInputVars(
             monitoring_enabled=self.config.monitoring.enabled,
             grafana_loki_overrides=[json.dumps(self.config.monitoring.overrides.loki)],
-            grafana_promtail_overrides=[json.dumps(self.config.monitoring.overrides.promtail)]
+            grafana_promtail_overrides=[json.dumps(self.config.monitoring.overrides.promtail)],
+            grafana_loki_minio_overrides=[json.dumps(self.config.monitoring.overrides.minio)]
         )
 
         telemetry_vars = TelemetryInputVars(

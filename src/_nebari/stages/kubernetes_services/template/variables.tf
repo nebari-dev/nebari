@@ -75,3 +75,9 @@ variable "grafana-promtail-overrides" {
   type        = list(string)
   default     = []
 }
+
+variable "grafana-loki-minio-overrides" {
+  description = "Grafana Loki minio helm chart overrides"
+  type        = list(string)
+  default     = []
+}
