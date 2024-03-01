@@ -19,18 +19,20 @@ loki:
     # minio s3
     shared_store: s3
     # how often compaction will happen
-    compaction_interval: 1m
+    compaction_interval: 1h
     # should delete old logs after rentention delete delay
     # ideally we would want to do storage based rentention, but this is not
     # currently implemented in loki, that's why we're doing time based retention.
     retention_enabled: true
     # is the delay after which the Compactor will delete marked chunks.
-    retention_delete_delay: 1m
+    retention_delete_delay: 1h
     # specifies the maximum quantity of goroutine workers instantiated to delete chunks.
     retention_delete_worker_count: 150
 
   limits_config:
     # The minimum retention period is 24h.
+    # This is reasonable in most cases, but if people would like to retain logs for longer
+    # then they can override this variable from nebari-config.yaml
     retention_period: 60d
 
   schema_config:
@@ -53,7 +55,6 @@ loki:
         cache_location: /var/loki/compactor/data/boltdb-cache
         # Shared store for keeping index files
         shared_store: s3
-
 
 # Configuration for the write pod(s)
 write:
