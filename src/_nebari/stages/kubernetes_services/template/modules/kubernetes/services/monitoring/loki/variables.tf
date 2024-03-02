@@ -39,3 +39,15 @@ variable "grafana-loki-minio-overrides" {
   type        = list(string)
   default     = []
 }
+
+variable "minio-release-name" {
+  description = "Grafana Loki minio release name"
+  type        = string
+  default     = "nebari-loki-minio"
+}
+
+variable "minio-port" {
+  description = "Grafana Loki minio port"
+  type        = number
+  default     = 9000
+}

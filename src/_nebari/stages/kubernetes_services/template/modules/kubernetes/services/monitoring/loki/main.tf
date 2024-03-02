@@ -3,9 +3,12 @@ resource "random_password" "minio_root_password" {
   special = false
 }
 
+locals {
+  minio-url = "http://admin:${random_password.minio_root_password.result}@${var.minio-release-name}:${var.minio-port}"
+}
 
 resource "helm_release" "loki-minio" {
-  name       = "nebari-loki-minio"
+  name       = var.minio-release-name
   namespace  = var.namespace
   repository = "https://charts.min.io/"
   chart      = "minio"
@@ -34,14 +37,14 @@ resource "helm_release" "grafana-loki" {
       loki: {
         storage: {
           s3: {
-            endpoint: "http://admin:${random_password.minio_root_password.result}@grafana-loki-minio:9000"
+            endpoint: local.minio-url
           }
         }
       }
       storageConfig: {
         # We configure MinIO by using the AWS config because MinIO implements the S3 API
         aws: {
-          s3: "http://admin:${random_password.minio_root_password.result}@grafana-loki-minio:9000"
+          s3: local.minio-url
           s3forcepathstyle: true
         }
       }
