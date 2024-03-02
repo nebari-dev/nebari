@@ -16,8 +16,8 @@ loki:
     shared_store: s3
     # how often compaction will happen
     compaction_interval: 1h
-    # should delete old logs after rentention delete delay
-    # ideally we would want to do storage based rentention, but this is not
+    # should delete old logs after retention delete delay
+    # ideally we would want to do storage based retention, but this is not
     # currently implemented in loki, that's why we're doing time based retention.
     retention_enabled: true
     # is the delay after which the Compactor will delete marked chunks.
