@@ -23,6 +23,7 @@ def port_forward():
     )
 
 
+@pytest.mark.filterwarnings("ignore:HTTPResponse.getheaders()")
 @pytest.mark.parametrize(
     "endpoint_path",
     (

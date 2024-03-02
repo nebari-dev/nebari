@@ -21,12 +21,12 @@ def kubernetes_port_forward(
     config.load_kube_config()
     Configuration.set_default(Configuration.get_default_copy())
     core_v1 = core_v1_api.CoreV1Api()
-
+    label_selector = ','.join([
+        f"{k}={v}" for k, v in pod_labels.items()
+    ])
     pods = core_v1.list_namespaced_pod(
         namespace=namespace,
-        label_selector=[
-            f"{k}={v}" for k, v in pod_labels.items()
-        ]
+        label_selector=label_selector
     )
     assert pods.items
     pod = pods.items[0]
