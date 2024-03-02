@@ -26,7 +26,6 @@ def port_forward():
 def test_minio_accessible(port_forward: V1Pod):
     """This will hit liveness endpoint of minio  API and verify that we
     get a 200 status code, to make sure minio is up and running.
-    :param endpoint_path: a loki api endpoint path
     :param port_forward: pytest fixture to port forward.
     :return:
     """
