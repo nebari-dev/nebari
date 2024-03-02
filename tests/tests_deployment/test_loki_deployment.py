@@ -54,7 +54,7 @@ def test_loki_endpoint(endpoint_path: str, port_forward_fixture: V1Pod):
     """This will hit some endpoints in the loki API and verify that we
     get a 200 status code, to make sure Loki is working properly.
     :param endpoint_path: a loki api endpoint path
-    :param port_forward: pytest fixture to port forward.
+    :param port_forward_fixture: pytest fixture to port forward.
     :return:
     """
     pod_name = port_forward_fixture.metadata.name
@@ -69,7 +69,7 @@ def test_loki_endpoint(endpoint_path: str, port_forward_fixture: V1Pod):
 def test_minio_accessible(port_forward_fixture: V1Pod):
     """This will hit liveness endpoint of minio  API and verify that we
     get a 200 status code, to make sure minio is up and running.
-    :param port_forward: pytest fixture to port forward.
+    :param port_forward_fixture: pytest fixture to port forward.
     :return:
     """
     pod_name = port_forward_fixture.metadata.name
