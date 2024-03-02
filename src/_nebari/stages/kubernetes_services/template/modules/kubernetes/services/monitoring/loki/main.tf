@@ -77,6 +77,7 @@ resource "helm_release" "grafana-loki" {
 }
 
 resource "helm_release" "grafana-promtail" {
+  # Promtail ships the contents of logs to Loki instance
   name       = "nebari-promtail"
   namespace  = var.namespace
   repository = "https://grafana.github.io/helm-charts"

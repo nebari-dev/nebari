@@ -1,4 +1,4 @@
-# https://github.com/grafana/loki/blob/main/production/helm/loki/values.yaml
+# https://github.com/grafana/loki/blob/4cae003ecedd474e4c15feab4ea2ef435afff83f/production/helm/loki/values.yaml
 
 loki:
   storage:
@@ -35,7 +35,7 @@ loki:
     configs:
       # list of period_configs
       # The date of the first day that index buckets should be created.
-      - from: "2024-02-29"
+      - from: "2024-03-01"
         index:
             period: 24h
             prefix: loki_index_
