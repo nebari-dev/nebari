@@ -2,7 +2,6 @@ import socket
 import typing
 
 from kubernetes import config
-from kubernetes.client import Configuration
 from kubernetes.client.api import core_v1_api
 from kubernetes.client.models import V1Pod
 from kubernetes.stream import portforward
@@ -19,7 +18,6 @@ def kubernetes_port_forward(
     :return: kubernetes pod object
     """
     config.load_kube_config()
-    Configuration.set_default(Configuration.get_default_copy())
     core_v1 = core_v1_api.CoreV1Api()
     label_selector = ','.join([
         f"{k}={v}" for k, v in pod_labels.items()
