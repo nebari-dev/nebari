@@ -1,14 +1,22 @@
 import socket
+import typing
 
 from kubernetes import config
 from kubernetes.client import Configuration
 from kubernetes.client.api import core_v1_api
+from kubernetes.client.models import V1Pod
 from kubernetes.stream import portforward
 
 
-def kubernetes_port_forward(pod_labels, port, namespace="dev"):
+def kubernetes_port_forward(
+        pod_labels: typing.Dict[str, str], port: int, namespace: str = "dev"
+) -> V1Pod:
     """Given pod labels and port, finds the pod name and port forwards to
     the given port.
+    :param pod_labels: dict of labels, by which to search the pod
+    :param port: port number to forward
+    :param namespace: kubernetes namespace name
+    :return: kubernetes pod object
     """
     config.load_kube_config()
     Configuration.set_default(Configuration.get_default_copy())
@@ -16,7 +24,9 @@ def kubernetes_port_forward(pod_labels, port, namespace="dev"):
 
     pods = core_v1.list_namespaced_pod(
         namespace=namespace,
-        label_selector=pod_labels
+        label_selector=[
+            f"{k}={v}" for k, v in pod_labels.items()
+        ]
     )
     assert pods.items
     pod = pods.items[0]
