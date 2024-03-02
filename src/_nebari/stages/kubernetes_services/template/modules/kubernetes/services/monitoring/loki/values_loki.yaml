@@ -2,10 +2,6 @@
 
 loki:
   storage:
-    bucketNames:
-      chunks: chunks
-      ruler: ruler
-      admin: admin
     type: s3
   commonConfig:
     replication_factor: 1

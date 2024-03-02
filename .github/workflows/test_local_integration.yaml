@@ -127,6 +127,9 @@ jobs:
         run: |
           kubectl get all,cm,secret,ing -A
 
+      - name: Debugging with tmate
+        uses: mxschmitt/action-tmate@v3.17
+
       - name: Check github-actions.nebari.dev resolves
         run: |
           nslookup github-actions.nebari.dev
