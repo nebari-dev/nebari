@@ -23,6 +23,7 @@ def port_forward():
     )
 
 
+# https://github.com/kubernetes-client/python/issues/2024
 @pytest.mark.filterwarnings("ignore:HTTPResponse.getheaders()")
 @pytest.mark.parametrize(
     "endpoint_path",
