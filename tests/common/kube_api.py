@@ -8,7 +8,7 @@ from kubernetes.stream import portforward
 
 
 def kubernetes_port_forward(
-        pod_labels: typing.Dict[str, str], port: int, namespace: str = "dev"
+    pod_labels: typing.Dict[str, str], port: int, namespace: str = "dev"
 ) -> V1Pod:
     """Given pod labels and port, finds the pod name and port forwards to
     the given port.
@@ -19,12 +19,9 @@ def kubernetes_port_forward(
     """
     config.load_kube_config()
     core_v1 = core_v1_api.CoreV1Api()
-    label_selector = ','.join([
-        f"{k}={v}" for k, v in pod_labels.items()
-    ])
+    label_selector = ",".join([f"{k}={v}" for k, v in pod_labels.items()])
     pods = core_v1.list_namespaced_pod(
-        namespace=namespace,
-        label_selector=label_selector
+        namespace=namespace, label_selector=label_selector
     )
     assert pods.items
     pod = pods.items[0]
@@ -33,7 +30,9 @@ def kubernetes_port_forward(
     def kubernetes_create_connection(address, *args, **kwargs):
         pf = portforward(
             core_v1.connect_get_namespaced_pod_portforward,
-            pod_name, namespace, ports=str(port)
+            pod_name,
+            namespace,
+            ports=str(port),
         )
         return pf.socket(port)
 

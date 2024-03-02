@@ -1,9 +1,8 @@
-import pytest
 import json
-
 import urllib.parse
 import urllib.request as urllib_request
 
+import pytest
 from kubernetes.client import V1Pod
 
 from tests.common.kube_api import kubernetes_port_forward
@@ -11,19 +10,19 @@ from tests.common.kube_api import kubernetes_port_forward
 LOKI_BACKEND_PORT = 3100
 LOKI_BACKEND_POD_LABELS = {
     "app.kubernetes.io/instance": "nebari-loki",
-    "app.kubernetes.io/component": "backend"
+    "app.kubernetes.io/component": "backend",
 }
 
 MINIO_PORT = 9000
 MINIO_POD_LABELS = {
     "app.kubernetes.io/instance": "nebari-loki-minio",
-    "app.kubernetes.io/name": "minio"
+    "app.kubernetes.io/name": "minio",
 }
 
 LOKI_GATEWAY_PORT = 8080
 LOKI_GATEWAY_POD_LABELS = {
     "app.kubernetes.io/instance": "nebari-loki",
-    "app.kubernetes.io/component": "gateway"
+    "app.kubernetes.io/component": "gateway",
 }
 
 
@@ -33,27 +32,23 @@ def port_forward_fixture(request):
     on localhost so that we can run some tests on it.
     """
     return kubernetes_port_forward(
-        pod_labels=request.param["labels"],
-        port=request.param["port"]
+        pod_labels=request.param["labels"], port=request.param["port"]
     )
 
 
 def port_forward(labels, port):
-    params = {
-        "labels": labels,
-        "port": port
-    }
+    params = {"labels": labels, "port": port}
     return pytest.mark.parametrize("port_forward_fixture", [params], indirect=True)
 
 
 @pytest.mark.parametrize(
     "endpoint_path",
     (
-            "metrics",
-            "services",
-            "config",
-            "ready",
-            "log_level",
+        "metrics",
+        "services",
+        "config",
+        "ready",
+        "log_level",
     ),
 )
 @port_forward(labels=LOKI_BACKEND_POD_LABELS, port=LOKI_BACKEND_PORT)
@@ -65,9 +60,9 @@ def test_loki_endpoint(endpoint_path: str, port_forward_fixture: V1Pod):
     :return:
     """
     pod_name = port_forward_fixture.metadata.name
-    url = f'http://{pod_name}.pod.dev.kubernetes:{LOKI_BACKEND_PORT}/{endpoint_path}'
+    url = f"http://{pod_name}.pod.dev.kubernetes:{LOKI_BACKEND_PORT}/{endpoint_path}"
     response = urllib_request.urlopen(url)
-    response.read().decode('utf-8')
+    response.read().decode("utf-8")
     assert response.code == 200
     response.close()
 
@@ -80,9 +75,9 @@ def test_minio_accessible(port_forward_fixture: V1Pod):
     :return:
     """
     pod_name = port_forward_fixture.metadata.name
-    url = f'http://{pod_name}.pod.dev.kubernetes:{MINIO_PORT}/minio/health/live'
+    url = f"http://{pod_name}.pod.dev.kubernetes:{MINIO_PORT}/minio/health/live"
     response = urllib_request.urlopen(url)
-    response.read().decode('utf-8')
+    response.read().decode("utf-8")
     assert response.code == 200
     response.close()
 
@@ -95,9 +90,9 @@ def test_loki_gateway(port_forward_fixture: V1Pod):
     :return:
     """
     pod_name = port_forward_fixture.metadata.name
-    url = f'http://{pod_name}.pod.dev.kubernetes:{LOKI_BACKEND_PORT}/loki/api/v1/labels'
+    url = f"http://{pod_name}.pod.dev.kubernetes:{LOKI_BACKEND_PORT}/loki/api/v1/labels"
     response = urllib_request.urlopen(url)
-    response_content = response.read().decode('utf-8')
+    response_content = response.read().decode("utf-8")
     response_json = json.loads(response_content)
     assert response.code == 200
     assert response_json["status"] == "success"
@@ -115,17 +110,17 @@ def test_loki_gateway_fetch_logs(port_forward_fixture: V1Pod):
     query_params = {
         "limit": "5",
         # Fetch logs for jupyterhub app
-        "query": '{app="jupyterhub"}'
+        "query": '{app="jupyterhub"}',
     }
 
     encoded_params = urllib.parse.urlencode(query_params)
     path = f"/loki/api/v1/query_range?{encoded_params}"
-    url = f'http://{pod_name}.pod.dev.kubernetes:{LOKI_BACKEND_PORT}/{path}'
+    url = f"http://{pod_name}.pod.dev.kubernetes:{LOKI_BACKEND_PORT}/{path}"
     response = urllib_request.urlopen(url)
-    response_content = response.read().decode('utf-8')
+    response_content = response.read().decode("utf-8")
     response_json = json.loads(response_content)
     assert response.code == 200
     assert response_json["status"] == "success"
     # Make sure log lines received
-    assert len(response_json['data']['result'][0]["values"]) > 0
+    assert len(response_json["data"]["result"][0]["values"]) > 0
     response.close()
