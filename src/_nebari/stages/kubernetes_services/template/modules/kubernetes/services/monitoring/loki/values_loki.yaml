@@ -69,6 +69,7 @@ backend:
   replicas: 1
 
 minio:
+  # We are deploying minio from bitnami chart separately
   enabled: false
 
 monitoring:
