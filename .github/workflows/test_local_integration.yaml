@@ -125,7 +125,7 @@ jobs:
       - name: Basic kubectl checks after deployment
         if: always()
         run: |
-          kubectl get all,cm,secret,ing -A
+          kubectl get all,cm,secret,pv,pvc,ing -A
 
       - name: Check github-actions.nebari.dev resolves
         run: |
