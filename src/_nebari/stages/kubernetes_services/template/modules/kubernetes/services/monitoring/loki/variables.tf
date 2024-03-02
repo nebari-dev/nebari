@@ -19,7 +19,7 @@ variable "promtail-helm-chart-version" {
 variable "minio-helm-chart-version" {
   description = "version to deploy for the minio helm chart"
   type        = string
-  default     = "5.0.15"
+  default     = "6.7.4"
 }
 
 variable "grafana-loki-overrides" {
@@ -50,4 +50,21 @@ variable "minio-port" {
   description = "Grafana Loki minio port"
   type        = number
   default     = 9000
+}
+
+variable "buckets" {
+  description = "Minio buckets"
+  type = list(string)
+  default = [
+    "chunks",
+    "ruler",
+    "admin",
+    "loki"
+  ]
+}
+
+variable "minio-storage" {
+  description = "Minio storage"
+  type = string
+  default = "50Gi"
 }

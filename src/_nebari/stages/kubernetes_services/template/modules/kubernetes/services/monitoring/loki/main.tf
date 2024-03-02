@@ -4,21 +4,40 @@ resource "random_password" "minio_root_password" {
 }
 
 locals {
-  minio-url = "http://admin:${random_password.minio_root_password.result}@${var.minio-release-name}:${var.minio-port}"
+  minio-url = "http://${var.minio-release-name}:${var.minio-port}"
 }
 
 resource "helm_release" "loki-minio" {
-  name       = var.minio-release-name
-  namespace  = var.namespace
-  repository = "https://charts.min.io/"
+  name      = var.minio-release-name
+  namespace = var.namespace
+  repository = "https://raw.githubusercontent.com/bitnami/charts/defb094c658024e4aa8245622dab202874880cbc/bitnami"
   chart      = "minio"
-  version    = var.minio-helm-chart-version
+  # last release that was Apache-2.0
+  version = var.minio-helm-chart-version
+
+  set {
+    name  = "accessKey.password"
+    value = "admin"
+  }
+
+  set {
+    name  = "secretKey.password"
+    value = random_password.minio_root_password.result
+  }
+
+  set {
+    name  = "defaultBuckets"
+    value = join(" ", var.buckets)
+  }
+
+  set {
+    name  = "persistence.size"
+    value = var.minio-storage
+  }
 
   values = concat([
     file("${path.module}/values_minio.yaml"),
     jsonencode({
-      rootUser: "admin",
-      rootPassword: random_password.minio_root_password.result,
     })
   ], var.grafana-loki-minio-overrides)
 }
@@ -37,7 +56,10 @@ resource "helm_release" "grafana-loki" {
       loki: {
         storage: {
           s3: {
-            endpoint: local.minio-url
+            endpoint: local.minio-url,
+            accessKeyId: "admin"
+            secretAccessKey: random_password.minio_root_password.result,
+            s3ForcePathStyle: true
           }
         }
       }
@@ -45,7 +67,7 @@ resource "helm_release" "grafana-loki" {
         # We configure MinIO by using the AWS config because MinIO implements the S3 API
         aws: {
           s3: local.minio-url
-          s3forcepathstyle: true
+          s3ForcePathStyle: true
         }
       }
     })
