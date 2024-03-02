@@ -46,8 +46,6 @@ def port_forward(labels, port):
     return pytest.mark.parametrize("port_forward_fixture", [params], indirect=True)
 
 
-# https://github.com/kubernetes-client/python/issues/2024
-@pytest.mark.filterwarnings("ignore:HTTPResponse.getheaders()")
 @pytest.mark.parametrize(
     "endpoint_path",
     (
