@@ -1,9 +1,9 @@
-import json
-import urllib.parse
-
 import pytest
+import json
 
-import six.moves.urllib.request as urllib_request
+import urllib.parse
+import urllib.request as urllib_request
+
 from kubernetes.client import V1Pod
 
 from tests.common.kube_api import kubernetes_port_forward
