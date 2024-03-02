@@ -16,7 +16,7 @@ module "monitoring" {
 }
 
 module "grafana-loki" {
-  count = var.monitoring-enabled ? 1 : 0
+  count                        = var.monitoring-enabled ? 1 : 0
   source                       = "./modules/kubernetes/services/monitoring/loki"
   namespace                    = var.environment
   grafana-loki-overrides       = var.grafana-loki-overrides

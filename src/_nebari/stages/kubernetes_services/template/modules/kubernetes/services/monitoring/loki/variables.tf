@@ -54,7 +54,7 @@ variable "minio-port" {
 
 variable "buckets" {
   description = "Minio buckets"
-  type = list(string)
+  type        = list(string)
   default = [
     "chunks",
     "ruler",
@@ -65,6 +65,6 @@ variable "buckets" {
 
 variable "minio-storage" {
   description = "Minio storage"
-  type = string
-  default = "50Gi"
+  type        = string
+  default     = "50Gi"
 }
