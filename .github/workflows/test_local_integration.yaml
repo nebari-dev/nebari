@@ -97,13 +97,22 @@ jobs:
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
           sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
 
-
           # Change default JupyterLab theme
           cat >> nebari-config.yaml <<- EOM
           jupyterlab:
             default_settings:
               "@jupyterlab/apputils-extension:themes":
                 theme: JupyterLab Dark
+          EOM
+
+          # Change default value for minio persistence size
+          cat >> nebari-config.yaml <<- EOM
+          monitoring:
+            enabled: true
+            overrides:
+              minio:
+                persistence:
+                  size: 1Gi
           EOM
 
           cat nebari-config.yaml
