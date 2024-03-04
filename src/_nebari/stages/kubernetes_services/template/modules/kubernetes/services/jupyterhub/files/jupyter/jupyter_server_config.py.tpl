@@ -4,7 +4,7 @@
 
 # Extra config available at:
 # https://zero-to-jupyterhub.readthedocs.io/en/1.x/jupyterhub/customizing/user-management.html#culling-user-pods
-
+"""
 # Enable Show Hidden Files menu option in View menu
 c.ContentsManager.allow_hidden = True
 c.FileContentsManager.allow_hidden = True
@@ -28,6 +28,7 @@ c.MappingKernelManager.cull_idle_timeout = ${kernel_cull_idle_timeout} * 60
 # cull_interval: the interval (in seconds) on which to check for idle
 # kernels exceeding the cull timeout value
 c.MappingKernelManager.cull_interval = ${kernel_cull_interval} * 60
+"""
 
 # cull_connected: whether to consider culling kernels which have one
 # or more connections

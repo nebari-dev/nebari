@@ -1,4 +1,3 @@
-"""
 import logging
 import json
 
@@ -17,6 +16,7 @@ CUSTOM_EXPORTER_NAME = "MyCustomExporter"
 
 
 def my_custom_exporter(args):
+    """Custom exporter to log JupyterLab events to command line."""
     logger.info(json.dumps(args.get("data")))
     return {
         "exporter": CUSTOM_EXPORTER_NAME,
@@ -58,4 +58,3 @@ c.JupyterLabPioneerApp.activeEvents = [
     {"name": "NotebookScrollEvent", "logWholeNotebook": False},
     {"name": "NotebookVisibleEvent", "logWholeNotebook": False},
 ]
-"""
