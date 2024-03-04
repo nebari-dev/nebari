@@ -40,6 +40,11 @@ resource "local_file" "jupyter_server_config_py" {
 resource "local_file" "jupyter_jupyterlab_pioneer_config_py" {
   content  = local.jupyter-pioneer-config-py-template
   filename = "${path.module}/files/jupyter/jupyter_jupyterlab_pioneer_config.py"
+
+  provisioner "local-exec" {
+    # check the syntax of the config file without running it
+    command = "python -m py_compile ${self.filename}"
+  }
 }
 
 
