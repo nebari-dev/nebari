@@ -12,6 +12,7 @@ c.FileContentsManager.allow_hidden = True
 # Set the preferred path for the frontend to start in
 preferred_dir = "${jupyterlab_preferred_dir}"
 c.FileContentsManager.preferred_dir = preferred_dir if preferred_dir else None
+"""
 
 # Timeout (in seconds) in which a terminal has been inactive and ready to
 # be culled.
@@ -28,7 +29,6 @@ c.MappingKernelManager.cull_idle_timeout = ${kernel_cull_idle_timeout} * 60
 # cull_interval: the interval (in seconds) on which to check for idle
 # kernels exceeding the cull timeout value
 c.MappingKernelManager.cull_interval = ${kernel_cull_interval} * 60
-"""
 
 # cull_connected: whether to consider culling kernels which have one
 # or more connections
