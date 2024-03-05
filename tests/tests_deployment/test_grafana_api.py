@@ -11,5 +11,6 @@ def test_grafana_api_not_accessible_with_default_credentials():
     response = requests.get(
         f"https://{constants.NEBARI_HOSTNAME}/monitoring/api/datasources",
         headers={"Authorization": f"Basic {user_pass_b64_encoded}"},
+        verify=False
     )
     assert response.status_code == 401
