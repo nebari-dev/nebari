@@ -131,9 +131,9 @@ jobs:
           nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
           nebari keycloak listusers --config nebari-config.yaml
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
 
       - name: Get nebari-config.yaml full path
         run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
