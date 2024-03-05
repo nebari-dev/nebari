@@ -3,7 +3,6 @@ resource "random_password" "grafana_admin_password" {
   special = false
 }
 
-
 resource "helm_release" "prometheus-grafana" {
   name       = "nebari"
   namespace  = var.namespace
