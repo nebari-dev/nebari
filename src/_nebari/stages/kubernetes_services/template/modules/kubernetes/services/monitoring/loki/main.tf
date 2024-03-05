@@ -6,7 +6,7 @@ resource "random_password" "minio_root_password" {
 locals {
   minio-url = "http://${var.minio-release-name}:${var.minio-port}"
   node-selector = {
-    "${var.node-group.key}" = var.node-group.value
+    "${var.node-group.key}" = "${var.node-group.value}"
   }
 }
 
@@ -38,14 +38,10 @@ resource "helm_release" "loki-minio" {
     value = var.minio-storage
   }
 
-  set {
-    name  = "nodeSelector"
-    value = local.node-selector
-  }
-
   values = concat([
     file("${path.module}/values_minio.yaml"),
     jsonencode({
+      nodeSelector : local.node-selector
     })
   ], var.grafana-loki-minio-overrides)
 }
@@ -57,26 +53,6 @@ resource "helm_release" "grafana-loki" {
   repository = "https://grafana.github.io/helm-charts"
   chart      = "loki"
   version    = var.loki-helm-chart-version
-
-  set {
-    name  = "write.nodeSelector"
-    value = local.node-selector
-  }
-
-  set {
-    name  = "read.nodeSelector"
-    value = local.node-selector
-  }
-
-  set {
-    name  = "backend.nodeSelector"
-    value = local.node-selector
-  }
-
-  set {
-    name  = "gateway.nodeSelector"
-    value = local.node-selector
-  }
 
   values = concat([
     file("${path.module}/values_loki.yaml"),
@@ -98,6 +74,10 @@ resource "helm_release" "grafana-loki" {
           s3ForcePathStyle : true
         }
       }
+      write : { nodeSelector : local.node-selector }
+      read : { nodeSelector : local.node-selector }
+      backend : { nodeSelector : local.node-selector }
+      gateway : { nodeSelector : local.node-selector }
     })
   ], var.grafana-loki-overrides)
 
