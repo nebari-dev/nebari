@@ -182,7 +182,7 @@ resource "helm_release" "prometheus-grafana" {
         }
 
         # Avoid using the default password, as that's a security risk
-        adminPassword: random_password.grafana_admin_password.result
+        adminPassword : random_password.grafana_admin_password.result
 
         sidecar = {
           dashboards = {
