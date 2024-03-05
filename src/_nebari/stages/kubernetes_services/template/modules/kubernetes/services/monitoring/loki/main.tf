@@ -5,6 +5,9 @@ resource "random_password" "minio_root_password" {
 
 locals {
   minio-url = "http://${var.minio-release-name}:${var.minio-port}"
+  node-selector = {
+    "${var.node-group.key}" = var.node-group.value
+  }
 }
 
 resource "helm_release" "loki-minio" {
@@ -35,6 +38,11 @@ resource "helm_release" "loki-minio" {
     value = var.minio-storage
   }
 
+  set {
+    name  = "nodeSelector"
+    value = local.node-selector
+  }
+
   values = concat([
     file("${path.module}/values_minio.yaml"),
     jsonencode({
@@ -49,6 +57,26 @@ resource "helm_release" "grafana-loki" {
   repository = "https://grafana.github.io/helm-charts"
   chart      = "loki"
   version    = var.loki-helm-chart-version
+
+  set {
+    name  = "write.nodeSelector"
+    value = local.node-selector
+  }
+
+  set {
+    name  = "read.nodeSelector"
+    value = local.node-selector
+  }
+
+  set {
+    name  = "backend.nodeSelector"
+    value = local.node-selector
+  }
+
+  set {
+    name  = "gateway.nodeSelector"
+    value = local.node-selector
+  }
 
   values = concat([
     file("${path.module}/values_loki.yaml"),

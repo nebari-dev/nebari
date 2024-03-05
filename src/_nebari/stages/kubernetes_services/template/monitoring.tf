@@ -22,4 +22,5 @@ module "grafana-loki" {
   grafana-loki-overrides       = var.grafana-loki-overrides
   grafana-promtail-overrides   = var.grafana-promtail-overrides
   grafana-loki-minio-overrides = var.grafana-loki-minio-overrides
+  node-group                   = var.node_groups.general
 }

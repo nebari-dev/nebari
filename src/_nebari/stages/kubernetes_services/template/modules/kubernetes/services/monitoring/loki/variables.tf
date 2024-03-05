@@ -68,3 +68,11 @@ variable "minio-storage" {
   type        = string
   default     = "50Gi"
 }
+
+variable "node-group" {
+  description = "Node key value pair for bound resources"
+  type = object({
+    key   = string
+    value = string
+  })
+}
