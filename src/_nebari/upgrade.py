@@ -711,10 +711,7 @@ class Upgrade_2024_3_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        rich.print("\n ⚠️  Warning ⚠️")
-        rich.print(
-            "-> Please run [green]mv stages stages.old[/green] so that we can keep a backup of the original Terraform scripts and regenerate an updated set of them for your deployment."
-        )
+        rich.print("Ready to upgrade to Nebari version [green]2024.3.1[/green].")
 
         return config
 
