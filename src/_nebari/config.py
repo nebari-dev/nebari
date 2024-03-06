@@ -93,7 +93,9 @@ def write_configuration(
     """Write the nebari configuration file to disk"""
     with config_filename.open(mode) as f:
         if isinstance(config, pydantic.BaseModel):
-            yaml.dump(config.dict(), f)
+            config_dict = config.dict()
+            rev_config_dict = {k: config_dict[k] for k in reversed(config_dict)}
+            yaml.dump(rev_config_dict, f)
         else:
             yaml.dump(config, f)
 
