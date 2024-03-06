@@ -140,7 +140,7 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
         disable_prompt=inputs.disable_prompt,
     )
 
-    try:        
+    try:
         write_configuration(
             inputs.output,
             config_schema(**config),
