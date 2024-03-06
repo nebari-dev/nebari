@@ -118,6 +118,7 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
     """
     Take the inputs from the `nebari init` command, render the config and write it to a local yaml file.
     """
+    from nebari.plugins import nebari_plugin_manager
 
     # this will force the `set_kubernetes_version` to grab the latest version
     if inputs.kubernetes_version == "latest":
@@ -140,10 +141,11 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
         disable_prompt=inputs.disable_prompt,
     )
 
-    try:
+    try:        
+        config_schema = nebari_plugin_manager.config_schema(**config)
         write_configuration(
             inputs.output,
-            config,
+            config_schema,
             mode="x",
         )
     except FileExistsError:
