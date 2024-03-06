@@ -30,7 +30,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: 3.8
