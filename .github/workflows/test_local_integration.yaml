@@ -70,7 +70,7 @@ jobs:
           pip install .[dev]
           playwright install
 
-      - uses: azure/setup-kubectl@v4
+      - uses: azure/setup-kubectl@v4.0.0
         with:
           version: v1.19.16
 
