@@ -161,7 +161,7 @@ jobs:
 
       - name: Save Cypress screenshots and videos
         if: always()
-        uses: actions/upload-artifact@vv4.3.1
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: e2e-cypress
           path: |
