@@ -18,7 +18,7 @@ from _nebari.provider.cloud import (
 )
 from _nebari.provider.oauth.auth0 import create_client
 from _nebari.stages.bootstrap import CiEnum
-from _nebari.stages.kubernetes_ingress import CertificateEnum
+# from _nebari.stages.kubernetes_ingress import CertificateEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
 from _nebari.utils import get_latest_kubernetes_version, random_secure_string
@@ -182,7 +182,7 @@ def render_config(
         config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
 
     if ssl_cert_email:
-        config["certificate"] = {"type": CertificateEnum.letsencrypt.value}
+        # config["certificate"] = {"type": CertificateEnum.letsencrypt.value}
         config["certificate"]["acme_email"] = ssl_cert_email
 
     # validate configuration and convert to model
