@@ -124,22 +124,33 @@ class CertificateEnum(str, enum.Enum):
     def to_yaml(cls, representer, node):
         return representer.represent_str(node.value)
 
+
 class SelfSignedCertificate(schema.Base):
     type: str = CertificateEnum.selfsigned
+
 
 class LetsEncryptCertificate(schema.Base):
     type: str = CertificateEnum.letsencrypt
     acme_email: str
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
 
+
 class ExistingCertificate(schema.Base):
     type: str = CertificateEnum.existing
     secret_name: str
 
+
 class DisabledCertificate(schema.Base):
     type: str = CertificateEnum.disabled
 
-Certificate = typing.Union[SelfSignedCertificate, LetsEncryptCertificate, ExistingCertificate, DisabledCertificate]
+
+Certificate = typing.Union[
+    SelfSignedCertificate,
+    LetsEncryptCertificate,
+    ExistingCertificate,
+    DisabledCertificate,
+]
+
 
 class DnsProvider(schema.Base):
     provider: typing.Optional[str]
