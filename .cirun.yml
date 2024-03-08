@@ -4,8 +4,8 @@ runners:
   - name: run-k8s-tests
     # Cloud Provider: AWS
     cloud: aws
-    # Instance Type has 4 vcpu, 16 GiB memory, Up to 5 Gbps Network Performance
-    instance_type: t3a.xlarge
+    # Instance Type has 8 vcpu, 32 GiB memory, Up to 5 Gbps Network Performance
+    instance_type: t3a.2xlarge
     # Custom AMI with docker/cypress/hub pre-installed
     machine_image: ami-0a388df278199ff52
     # Region: Oregon
