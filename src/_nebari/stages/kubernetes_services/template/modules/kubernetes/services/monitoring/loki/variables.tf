@@ -69,6 +69,12 @@ variable "minio-storage" {
   default     = "50Gi"
 }
 
+variable "minio-enabled" {
+  description = "Deploy minio along with loki or not"
+  type        = bool
+  default     = true
+}
+
 variable "node-group" {
   description = "Node key value pair for bound resources"
   type = object({

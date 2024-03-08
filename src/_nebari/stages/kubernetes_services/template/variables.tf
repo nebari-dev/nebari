@@ -81,3 +81,9 @@ variable "grafana-loki-minio-overrides" {
   type        = list(string)
   default     = []
 }
+
+variable "minio-enabled" {
+  description = "Deploy minio along with loki or not"
+  type        = bool
+  default     = true
+}

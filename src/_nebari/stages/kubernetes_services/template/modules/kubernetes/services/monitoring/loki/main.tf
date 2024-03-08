@@ -11,6 +11,7 @@ locals {
 }
 
 resource "helm_release" "loki-minio" {
+  count      = var.minio-enabled ? 1 : 0
   name       = var.minio-release-name
   namespace  = var.namespace
   repository = "https://raw.githubusercontent.com/bitnami/charts/defb094c658024e4aa8245622dab202874880cbc/bitnami"

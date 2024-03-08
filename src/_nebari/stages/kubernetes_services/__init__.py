@@ -208,6 +208,7 @@ class MonitoringOverrides(schema.Base):
 class Monitoring(schema.Base):
     enabled: bool = True
     overrides: MonitoringOverrides = MonitoringOverrides()
+    minio_enabled: bool = True
 
 
 class JupyterLabPioneer(schema.Base):
@@ -388,6 +389,7 @@ class DaskGatewayInputVars(schema.Base):
 
 class MonitoringInputVars(schema.Base):
     monitoring_enabled: bool = Field(alias="monitoring-enabled")
+    minio_enabled: bool = Field(alias="minio-enabled")
     grafana_loki_overrides: List[str] = Field(alias="grafana-loki-overrides")
     grafana_promtail_overrides: List[str] = Field(alias="grafana-promtail-overrides")
     grafana_loki_minio_overrides: List[str] = Field(
@@ -536,6 +538,7 @@ class KubernetesServicesStage(NebariTerraformStage):
 
         monitoring_vars = MonitoringInputVars(
             monitoring_enabled=self.config.monitoring.enabled,
+            minio_enabled=self.config.monitoring.minio_enabled,
             grafana_loki_overrides=[json.dumps(self.config.monitoring.overrides.loki)],
             grafana_promtail_overrides=[
                 json.dumps(self.config.monitoring.overrides.promtail)
