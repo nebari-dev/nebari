@@ -545,6 +545,13 @@ class InputSchema(schema.Base):
     azure: Optional[AzureProvider]
     digital_ocean: Optional[DigitalOceanProvider]
 
+    def exclude_from_config(self):
+        exclude = set()
+        for provider in InputSchema.__fields__:
+            if getattr(self, provider) is None:
+                exclude.add(provider)
+        return exclude
+
     @pydantic.root_validator(pre=True)
     def check_provider(cls, values):
         if "provider" in values:
