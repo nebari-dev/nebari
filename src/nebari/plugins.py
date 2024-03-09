@@ -125,7 +125,9 @@ class NebariPluginManager:
 
     @property
     def ordered_schemas(self):
-        return [schema.Main] + [_.input_schema for _ in self.ordered_stages if _.input_schema is not None]
+        return [schema.Main] + [
+            _.input_schema for _ in self.ordered_stages if _.input_schema is not None
+        ]
 
     @property
     def config_schema(self):
@@ -139,14 +141,14 @@ class NebariPluginManager:
                     config_exclude = config_exclude.union(new_exclude)
             return self.dict(exclude=config_exclude)
 
-
         return type(
-            "ConfigSchema", 
-            tuple(ordered_schemas), 
+            "ConfigSchema",
+            tuple(ordered_schemas),
             {
                 "_ordered_schemas": ordered_schemas,
                 "write_config": write_config,
-            })
+            },
+        )
 
 
 nebari_plugin_manager = NebariPluginManager()
