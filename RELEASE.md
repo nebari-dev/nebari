@@ -11,6 +11,8 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ## Upcoming Release
 
+* Added Grafana Loki to aggregate, index and search logs
+
 ## Release 2024.1.1 - January 17, 2024
 
 ### Feature changes and enhancements
