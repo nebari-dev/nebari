@@ -53,6 +53,7 @@ class JupyterHubTheme(schema.Base):
     hub_subtitle: str = "Your open source data science platform"
     welcome: str = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
     logo: str = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg"
+    favicon: str = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/symbol/favicon.ico"
     primary_color: str = "#4f4173"
     primary_color_dark: str = "#4f4173"
     secondary_color: str = "#957da6"
@@ -198,8 +199,16 @@ class JHubApps(schema.Base):
     enabled: bool = False
 
 
+class MonitoringOverrides(schema.Base):
+    loki: typing.Dict = {}
+    promtail: typing.Dict = {}
+    minio: typing.Dict = {}
+
+
 class Monitoring(schema.Base):
     enabled: bool = True
+    overrides: MonitoringOverrides = MonitoringOverrides()
+    minio_enabled: bool = True
 
 
 class JupyterLabPioneer(schema.Base):
@@ -226,8 +235,10 @@ class IdleCuller(schema.Base):
 
 
 class JupyterLab(schema.Base):
+    default_settings: typing.Dict[str, typing.Any] = {}
     idle_culler: IdleCuller = IdleCuller()
     initial_repositories: typing.List[typing.Dict[str, str]] = []
+    preferred_dir: typing.Optional[str] = None
 
 
 class InputSchema(schema.Base):
@@ -351,6 +362,9 @@ class CondaStoreInputVars(schema.Base):
 class JupyterhubInputVars(schema.Base):
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
+    jupyterlab_default_settings: Dict[str, Any] = Field(
+        alias="jupyterlab-default-settings"
+    )
     initial_repositories: str = Field(alias="initial-repositories")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
     jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
@@ -361,15 +375,26 @@ class JupyterhubInputVars(schema.Base):
     idle_culler_settings: Dict[str, Any] = Field(alias="idle-culler-settings")
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
+    cloud_provider: str = Field(alias="cloud-provider")
+    jupyterlab_preferred_dir: typing.Optional[str] = Field(
+        alias="jupyterlab-preferred-dir"
+    )
 
 
 class DaskGatewayInputVars(schema.Base):
     dask_worker_image: ImageNameTag = Field(alias="dask-worker-image")
     dask_gateway_profiles: Dict[str, Any] = Field(alias="dask-gateway-profiles")
+    cloud_provider: str = Field(alias="cloud-provider")
 
 
 class MonitoringInputVars(schema.Base):
     monitoring_enabled: bool = Field(alias="monitoring-enabled")
+    minio_enabled: bool = Field(alias="minio-enabled")
+    grafana_loki_overrides: List[str] = Field(alias="grafana-loki-overrides")
+    grafana_promtail_overrides: List[str] = Field(alias="grafana-promtail-overrides")
+    grafana_loki_minio_overrides: List[str] = Field(
+        alias="grafana-loki-minio-overrides"
+    )
 
 
 class TelemetryInputVars(schema.Base):
@@ -410,6 +435,7 @@ class KubernetesServicesStage(NebariTerraformStage):
         realm_id = stage_outputs["stages/06-kubernetes-keycloak-configuration"][
             "realm_id"
         ]["value"]
+        cloud_provider = self.config.provider.value
         jupyterhub_shared_endpoint = (
             stage_outputs["stages/02-infrastructure"]
             .get("nfs_endpoint", {})
@@ -485,6 +511,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             ),
             jupyterhub_stared_storage=self.config.storage.shared_filesystem,
             jupyterhub_shared_endpoint=jupyterhub_shared_endpoint,
+            cloud_provider=cloud_provider,
             jupyterhub_profiles=self.config.profiles.dict()["jupyterlab"],
             jupyterhub_image=_split_docker_image_name(
                 self.config.default_images.jupyterhub
@@ -497,6 +524,8 @@ class KubernetesServicesStage(NebariTerraformStage):
             argo_workflows_enabled=self.config.argo_workflows.enabled,
             jhub_apps_enabled=self.config.jhub_apps.enabled,
             initial_repositories=str(self.config.jupyterlab.initial_repositories),
+            jupyterlab_default_settings=self.config.jupyterlab.default_settings,
+            jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
@@ -504,10 +533,19 @@ class KubernetesServicesStage(NebariTerraformStage):
                 self.config.default_images.dask_worker
             ),
             dask_gateway_profiles=self.config.profiles.dict()["dask_worker"],
+            cloud_provider=cloud_provider,
         )
 
         monitoring_vars = MonitoringInputVars(
             monitoring_enabled=self.config.monitoring.enabled,
+            minio_enabled=self.config.monitoring.minio_enabled,
+            grafana_loki_overrides=[json.dumps(self.config.monitoring.overrides.loki)],
+            grafana_promtail_overrides=[
+                json.dumps(self.config.monitoring.overrides.promtail)
+            ],
+            grafana_loki_minio_overrides=[
+                json.dumps(self.config.monitoring.overrides.minio)
+            ],
         )
 
         telemetry_vars = TelemetryInputVars(

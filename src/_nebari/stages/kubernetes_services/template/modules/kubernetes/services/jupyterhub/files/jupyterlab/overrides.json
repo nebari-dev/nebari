@@ -15,15 +15,40 @@
     "@jupyterlab/mainmenu-extension:plugin": {
         "menus": [
             {
-                "id": "jp-mainmenu-nebari",
-                "disabled": false,
-                "label": "Nebari",
-                "rank": 1001,
+                "id": "jp-mainmenu-file",
                 "items": [
                     {
-                        "command": "hub:control-panel",
-                        "rank": 0
+                        "command": "help:open",
+                        "rank": 0,
+                        "args": {
+                            "url": "/hub/home",
+                            "text": "Home",
+                            "newBrowserTab": true
+                        }
                     },
+                    {
+                        "type": "submenu",
+                        "submenu": {
+                            "id": "jp-mainmenu-file-new"
+                        },
+                        "rank": 0.5
+                    },
+                    {
+                        "command": "hub:control-panel",
+                        "disabled": true
+                    },
+                    {
+                        "command": "hub:logout",
+                        "disabled": true
+                    }
+                ]
+            },
+            {
+                "id": "jp-mainmenu-services",
+                "disabled": false,
+                "label": "Services",
+                "rank": 1000,
+                "items": [
                     {
                         "command": "help:open",
                         "rank": 1,
@@ -57,6 +82,28 @@
                         "args": {
                             "url": "/argo",
                             "text": "Argo Workflows",
+                            "newBrowserTab": true
+                        }
+                    },
+                    {
+                        "command": "nebari:open-proxy",
+                        "rank": 5,
+                        "args": {
+                            "name": "vscode"
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "jp-mainmenu-help",
+                "rank": 1001,
+                "items": [
+                    {
+                        "command": "help:open",
+                        "rank": 1001,
+                        "args": {
+                            "url": "https://www.nebari.dev/docs/welcome/",
+                            "text": "Nebari documentation",
                             "newBrowserTab": true
                         }
                     }

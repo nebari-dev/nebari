@@ -53,7 +53,37 @@ variable "jupyterlab-pioneer-log-format" {
   description = "Logging format for JupyterLab Pioneer"
   type        = string
 }
+
 variable "jhub-apps-enabled" {
   description = "Enable JupyterHub Apps"
   type        = bool
+}
+
+variable "cloud-provider" {
+  description = "Name of cloud provider."
+  type        = string
+}
+
+variable "grafana-loki-overrides" {
+  description = "Helm chart overrides for loki"
+  type        = list(string)
+  default     = []
+}
+
+variable "grafana-promtail-overrides" {
+  description = "Helm chart overrides for promtail"
+  type        = list(string)
+  default     = []
+}
+
+variable "grafana-loki-minio-overrides" {
+  description = "Grafana Loki minio helm chart overrides"
+  type        = list(string)
+  default     = []
+}
+
+variable "minio-enabled" {
+  description = "Deploy minio along with loki or not"
+  type        = bool
+  default     = true
 }
