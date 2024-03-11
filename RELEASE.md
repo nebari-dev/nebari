@@ -11,7 +11,28 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ## Upcoming Release
 
-* Added Grafana Loki to aggregate, index and search logs
+## Release 2024.3.1 - March 11, 2024
+
+### What's Changed
+* Modify Playwright test to account for changes in JupyterLab UI. by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2232
+* Add favicon to jupyterhub theme. by @jbouder in https://github.com/nebari-dev/nebari/pull/2222
+* Set min nodes to 0 for worker and user. by @pt247 in https://github.com/nebari-dev/nebari/pull/2168
+* Remove `jhub-client` from pyproject.toml by @pavithraes in https://github.com/nebari-dev/nebari/pull/2242
+* Include permission validation step to programmatically cloned repos by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2258
+* Expose jupyter's preferred dir as a config option by @krassowski in https://github.com/nebari-dev/nebari/pull/2251
+* Allow to configure default settings for JupyterLab (`overrides.json`) by @krassowski in https://github.com/nebari-dev/nebari/pull/2249
+* Feature/jlab menu customization by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2259
+* Add cloud provider to the dask config.json file by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2266
+* Fix syntax error in jupyter-server-config Python file by @krassowski in https://github.com/nebari-dev/nebari/pull/2286
+* Add "Open VS Code" entry in services by @krassowski in https://github.com/nebari-dev/nebari/pull/2267
+* Add Grafana Loki integration by @aktech in https://github.com/nebari-dev/nebari/pull/2156
+
+### New Contributors
+* @jbouder made their first contribution in https://github.com/nebari-dev/nebari/pull/2222
+* @krassowski made their first contribution in https://github.com/nebari-dev/nebari/pull/2251
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.1.1...2024.3.1
+
 
 ## Release 2024.1.1 - January 17, 2024
 
