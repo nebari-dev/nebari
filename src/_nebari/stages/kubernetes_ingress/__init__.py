@@ -165,7 +165,7 @@ class Ingress(schema.Base):
 
 class InputSchema(schema.Base):
     domain: typing.Optional[str]
-    certificate: typing.Optional[Certificate] = SelfSignedCertificate()
+    certificate: Certificate = SelfSignedCertificate()
     ingress: Ingress = Ingress()
     dns: DnsProvider = DnsProvider()
 
