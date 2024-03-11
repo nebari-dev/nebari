@@ -3,7 +3,7 @@ import json
 
 
 default_log_format = "%(asctime)s %(levelname)9s %(lineno)4s %(module)s: %(message)s"
-log_format = ${log_format}
+log_format = "${log_format}"
 
 logging.basicConfig(
     level=logging.INFO,

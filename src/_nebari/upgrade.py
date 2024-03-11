@@ -705,6 +705,17 @@ class Upgrade_2024_1_1(UpgradeStep):
         return config
 
 
+class Upgrade_2024_3_1(UpgradeStep):
+    version = "2024.3.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("Ready to upgrade to Nebari version [green]2024.3.1[/green].")
+
+        return config
+
+
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
 # Manually-added upgrade steps must go above this line
