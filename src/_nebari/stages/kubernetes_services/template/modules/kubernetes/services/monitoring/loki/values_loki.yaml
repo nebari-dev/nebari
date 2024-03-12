@@ -1,0 +1,78 @@
+# https://github.com/grafana/loki/blob/4cae003ecedd474e4c15feab4ea2ef435afff83f/production/helm/loki/values.yaml
+
+loki:
+  storage:
+    type: s3
+  commonConfig:
+    replication_factor: 1
+  # Not required as it is inside cluster and not exposed to the public network
+  auth_enabled: false
+
+  # The Compactor deduplicates index entries and also apply granular retention.
+  compactor:
+    # is the directory where marked chunks and temporary tables will be saved.
+    working_directory: /var/loki/compactor/data/retention
+    # minio s3
+    shared_store: s3
+    # how often compaction will happen
+    compaction_interval: 1h
+    # should delete old logs after retention delete delay
+    # ideally we would want to do storage based retention, but this is not
+    # currently implemented in loki, that's why we're doing time based retention.
+    retention_enabled: true
+    # is the delay after which the Compactor will delete marked chunks.
+    retention_delete_delay: 1h
+    # specifies the maximum quantity of goroutine workers instantiated to delete chunks.
+    retention_delete_worker_count: 150
+
+  limits_config:
+    # The minimum retention period is 24h.
+    # This is reasonable in most cases, but if people would like to retain logs for longer
+    # then they can override this variable from nebari-config.yaml
+    retention_period: 60d
+
+  schema_config:
+    configs:
+      # list of period_configs
+      # The date of the first day that index buckets should be created.
+      - from: "2024-03-01"
+        index:
+            period: 24h
+            prefix: loki_index_
+        object_store: s3
+        schema: v11
+        store: boltdb-shipper
+  storage_config:
+    boltdb_shipper:
+        # Directory where ingesters would write index files which would then be
+        # uploaded by shipper to configured storage
+        active_index_directory: /var/loki/compactor/data/index
+        # Cache location for restoring index files from storage for queries
+        cache_location: /var/loki/compactor/data/boltdb-cache
+        # Shared store for keeping index files
+        shared_store: s3
+
+# Configuration for the write pod(s)
+write:
+  # -- Number of replicas for the write
+  # Keeping cost of running Nebari in mind
+  # We don't need so many replicas, if people need it
+  # they can always override from nebari-config.yaml
+  replicas: 1
+
+read:
+  # -- Number of replicas for the read
+  replicas: 1
+
+backend:
+  # -- Number of replicas for the backend
+  replicas: 1
+
+minio:
+  # We are deploying minio from bitnami chart separately
+  enabled: false
+
+monitoring:
+  selfMonitoring:
+    grafanaAgent:
+      installOperator: false

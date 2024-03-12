@@ -84,6 +84,13 @@
                             "text": "Argo Workflows",
                             "newBrowserTab": true
                         }
+                    },
+                    {
+                        "command": "nebari:open-proxy",
+                        "rank": 5,
+                        "args": {
+                            "name": "vscode"
+                        }
                     }
                 ]
             },
