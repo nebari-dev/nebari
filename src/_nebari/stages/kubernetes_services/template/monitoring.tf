@@ -14,3 +14,14 @@ module "monitoring" {
 
   node-group = var.node_groups.general
 }
+
+module "grafana-loki" {
+  count                        = var.monitoring-enabled ? 1 : 0
+  source                       = "./modules/kubernetes/services/monitoring/loki"
+  namespace                    = var.environment
+  grafana-loki-overrides       = var.grafana-loki-overrides
+  grafana-promtail-overrides   = var.grafana-promtail-overrides
+  grafana-loki-minio-overrides = var.grafana-loki-minio-overrides
+  node-group                   = var.node_groups.general
+  minio-enabled                = var.minio-enabled
+}
