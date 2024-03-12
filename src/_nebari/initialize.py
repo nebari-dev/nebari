@@ -183,6 +183,7 @@ def render_config(
         config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
 
     if ssl_cert_email:
+        config["certificate"] = {}
         config["certificate"]["acme_email"] = ssl_cert_email
 
     # validate configuration and convert to model
