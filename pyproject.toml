@@ -55,7 +55,8 @@ classifiers = [
 ]
 
 dependencies = [
-    "auth0-python==4.7.1",
+    "auth0-python==4.7.1; python_version >= \"3.10\"",
+    "auth0-python==4.4.2; python_version < \"3.10\"",
     "azure-identity==1.12.0",
     "azure-mgmt-containerservice==26.0.0",
     "azure-mgmt-resource==23.0.1",
