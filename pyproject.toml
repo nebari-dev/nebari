@@ -72,7 +72,7 @@ dependencies = [
     "questionary==2.0.0",
     "requests-toolbelt==1.0.0",
     "rich==13.5.1",
-    "ruamel.yaml==0.17.32",
+    "ruamel.yaml>=0.18.0",
     "typer==0.9.0",
     "packaging==23.2",
 ]
