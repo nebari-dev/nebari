@@ -77,8 +77,7 @@ class NebariTFExtensionsStage(NebariTerraformStage):
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_check: bool = False
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 @hookimpl

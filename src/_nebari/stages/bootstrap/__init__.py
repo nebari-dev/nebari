@@ -110,8 +110,7 @@ class BootstrapStage(NebariStage):
         self,
         stage_outputs: Dict[str, Dict[str, Any]],
         disable_prompt: bool = False,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def deploy(
         self,

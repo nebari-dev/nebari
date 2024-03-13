@@ -24,21 +24,18 @@ class NebariStage(ABC):
         self.config = config
 
     @abstractmethod
-    def render(self) -> Dict[Path, str]:
-        ...
+    def render(self) -> Dict[Path, str]: ...
 
     @abstractmethod
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @abstractmethod
     @contextmanager
     def deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
-    ):
-        ...
+    ): ...
 
     @abstractmethod
     @contextmanager
@@ -47,8 +44,7 @@ class NebariStage(ABC):
         stage_outputs: Dict[str, Dict[str, Any]],
         status: Dict[str, bool],
         ignore_errors: bool,
-    ):
-        ...
+    ): ...
 
 
 @hookspec
