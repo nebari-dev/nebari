@@ -39,6 +39,21 @@ variable "jupyterlab-profiles" {
   description = "JupyterHub profiles to expose to user"
 }
 
+variable "jupyterlab-preferred-dir" {
+  description = "Directory in which the JupyterLab should open the file browser"
+  type        = string
+}
+
+variable "initial-repositories" {
+  description = "Map of folder location and git repo url to clone"
+  type        = string
+}
+
+variable "jupyterlab-default-settings" {
+  description = "Default settings for JupyterLab to be placed in overrides.json"
+  type        = map(any)
+}
+
 variable "jupyterhub-hub-extraEnv" {
   description = "Extracted overrides to merge with jupyterhub.hub.extraEnv"
   type        = string
@@ -49,7 +64,6 @@ variable "idle-culler-settings" {
   description = "Idle culler timeout settings (in minutes)"
   type        = any
 }
-
 
 module "kubernetes-nfs-server" {
   count = var.jupyterhub-shared-endpoint == null ? 1 : 0
@@ -83,6 +97,8 @@ module "jupyterhub" {
   name      = var.name
   namespace = var.environment
 
+  cloud-provider = var.cloud-provider
+
   external-url = var.endpoint
   realm_id     = var.realm_id
 
@@ -99,6 +115,8 @@ module "jupyterhub" {
   argo-workflows-enabled                             = var.argo-workflows-enabled
   conda-store-argo-workflows-jupyter-scheduler-token = module.kubernetes-conda-store-server.service-tokens.argo-workflows-jupyter-scheduler
   conda-store-service-name                           = module.kubernetes-conda-store-server.service_name
+  conda-store-jhub-apps-token                        = module.kubernetes-conda-store-server.service-tokens.jhub-apps
+  jhub-apps-enabled                                  = var.jhub-apps-enabled
 
   extra-mounts = {
     "/etc/dask" = {
@@ -112,8 +130,6 @@ module "jupyterhub" {
     "dask-gateway"
     ],
     (var.monitoring-enabled ? ["monitoring"] : []),
-    (var.prefect-enabled ? ["prefect"] : []),
-    (var.kbatch-enabled ? ["kbatch"] : [])
   )
 
   general-node-group = var.node_groups.general
@@ -129,5 +145,12 @@ module "jupyterhub" {
   jupyterhub-hub-extraEnv        = var.jupyterhub-hub-extraEnv
 
   idle-culler-settings = var.idle-culler-settings
+  initial-repositories = var.initial-repositories
 
+  jupyterlab-default-settings = var.jupyterlab-default-settings
+
+  jupyterlab-pioneer-enabled    = var.jupyterlab-pioneer-enabled
+  jupyterlab-pioneer-log-format = var.jupyterlab-pioneer-log-format
+
+  jupyterlab-preferred-dir = var.jupyterlab-preferred-dir
 }

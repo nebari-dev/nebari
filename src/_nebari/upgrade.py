@@ -5,8 +5,10 @@ import secrets
 import string
 from abc import ABC
 from pathlib import Path
+from typing import Any, ClassVar, Dict
 
 import rich
+from packaging.version import Version
 from pydantic.error_wrappers import ValidationError
 from rich.prompt import Prompt
 
@@ -80,16 +82,28 @@ def do_upgrade(config_filename, attempt_fixes=False):
 
 
 class UpgradeStep(ABC):
-    _steps = {}
-
-    version = ""  # Each subclass must have a version - these should be full release versions (not dev/prerelease)
+    _steps: ClassVar[Dict[str, Any]] = {}
+    version: ClassVar[str] = ""
 
     def __init_subclass__(cls):
-        assert cls.version != ""
+        try:
+            parsed_version = Version(cls.version)
+        except ValueError as exc:
+            raise ValueError(f"Invalid version string {cls.version}") from exc
+
+        cls.parsed_version = parsed_version
+        assert (
+            rounded_ver_parse(cls.version) == parsed_version
+        ), f"Invalid version {cls.version}: must be a full release version, not a dev/prerelease/postrelease version"
         assert (
             cls.version not in cls._steps
-        )  # Would mean multiple upgrades for the same step
+        ), f"Duplicate UpgradeStep version {cls.version}"
         cls._steps[cls.version] = cls
+
+    @classmethod
+    def clear_steps_registry(cls):
+        """Clears the steps registry. Useful for testing."""
+        cls._steps.clear()
 
     @classmethod
     def has_step(cls, version):
@@ -157,9 +171,7 @@ class UpgradeStep(ABC):
         for any actions that are only required for the particular upgrade you are creating.
         """
         finish_version = self.get_version()
-        __rounded_finish_version__ = ".".join(
-            [str(c) for c in rounded_ver_parse(finish_version)]
-        )
+        __rounded_finish_version__ = str(rounded_ver_parse(finish_version))
         rich.print(
             f"\n---> Starting upgrade from [green]{start_version or 'old version'}[/green] to [green]{finish_version}[/green]\n"
         )
@@ -529,8 +541,8 @@ class Upgrade_2023_7_2(UpgradeStep):
         return config
 
 
-class Upgrade_2023_9_1(UpgradeStep):
-    version = "2023.9.1"
+class Upgrade_2023_10_1(UpgradeStep):
+    version = "2023.10.1"
     # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
     # This released has been tested against 1.26
     min_k8s_version = 1.26
@@ -538,7 +550,7 @@ class Upgrade_2023_9_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        # Upgrading to 2023.9.1 is considered high-risk because it includes a major refacto
+        # Upgrading to 2023.10.1 is considered high-risk because it includes a major refacto
         # to introduce the extension mechanism system.
         rich.print("\n ⚠️  Warning ⚠️")
         rich.print(
@@ -555,7 +567,7 @@ class Upgrade_2023_9_1(UpgradeStep):
         # which they can override if they are happy they understand the situation.
         config["prevent_deploy"] = True
 
-        # Nebari version 2023.9.1 upgrades JupyterHub to 3.1.  CDS Dashboards are only compatible with
+        # Nebari version 2023.10.1 upgrades JupyterHub to 3.1.  CDS Dashboards are only compatible with
         # JupyterHub versions 1.X and so will be removed during upgrade.
         rich.print("\n ⚠️  Deprecation Warning ⚠️")
         rich.print(
@@ -564,6 +576,12 @@ class Upgrade_2023_9_1(UpgradeStep):
         if config.get("cdsdashboards"):
             rich.print("-> Removing cdsdashboards from config file.")
             del config["cdsdashboards"]
+
+        # Deprecation Warning - ClearML, Prefect, kbatch
+        rich.print("\n ⚠️  Deprecation Warning ⚠️")
+        rich.print(
+            "-> We will be removing and ending support for ClearML, Prefect and kbatch in the next release. The kbatch has been functionally replaced by Argo-Jupyter-Scheduler. We have seen little interest in ClearML and Prefect in recent years, and removing makes sense at this point. However if you wish to continue using them with Nebari we encourage you to [green][link=https://www.nebari.dev/docs/how-tos/nebari-extension-system/#developing-an-extension]write your own Nebari extension[/link][/green]."
+        )
 
         # Kubernetes version check
         # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
@@ -630,7 +648,75 @@ class Upgrade_2023_9_1(UpgradeStep):
         return config
 
 
-__rounded_version__ = ".".join([str(c) for c in rounded_ver_parse(__version__)])
+class Upgrade_2023_11_1(UpgradeStep):
+    version = "2023.11.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("\n ⚠️  Warning ⚠️")
+        rich.print(
+            "-> Please run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
+        )
+        rich.print("\n ⚠️  Deprecation Warning ⚠️")
+        rich.print(
+            f"-> ClearML, Prefect and kbatch are no longer supported in Nebari version [green]{self.version}[/green] and will be uninstalled."
+        )
+
+        return config
+
+
+class Upgrade_2023_12_1(UpgradeStep):
+    version = "2023.12.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("\n ⚠️  Warning ⚠️")
+        rich.print(
+            "-> Please run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
+        )
+        rich.print("\n ⚠️  Deprecation Warning ⚠️")
+        rich.print(
+            f"-> [green]{self.version}[/green] is the last Nebari version that supports the jupyterlab-videochat extension."
+        )
+        rich.print()
+
+        return config
+
+
+class Upgrade_2024_1_1(UpgradeStep):
+    version = "2024.1.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("\n ⚠️  Warning ⚠️")
+        rich.print(
+            "-> Please run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
+        )
+        rich.print("\n ⚠️  Deprecation Warning ⚠️")
+        rich.print(
+            "-> jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store and jupyter-nvdashboard",
+            f"are no longer supported in Nebari version [green]{self.version}[/green] and will be uninstalled.",
+        )
+        rich.print()
+
+        return config
+
+
+class Upgrade_2024_3_1(UpgradeStep):
+    version = "2024.3.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("Ready to upgrade to Nebari version [green]2024.3.1[/green].")
+
+        return config
+
+
+__rounded_version__ = str(rounded_ver_parse(__version__))
 
 # Manually-added upgrade steps must go above this line
 if not UpgradeStep.has_step(__rounded_version__):

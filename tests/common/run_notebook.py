@@ -17,7 +17,7 @@ class Notebook:
     def run(
         self,
         path,
-        expected_outputs: List[Union[re.Pattern, str]],
+        expected_outputs: List[str],
         conda_env: str,
         timeout: float = 1000,
         complition_wait_time: float = 2,
@@ -37,7 +37,7 @@ class Notebook:
         ----------
         path: str
             Path to notebook relative to the root of the jupyterlab instance.
-        expected_outputs: List[Union[re.Pattern, str]]
+        expected_outputs: List[str]
             Text to look for in the output of the notebook. This can be a
             substring of the actual output if exact_match is False.
         conda_env: str
@@ -79,7 +79,7 @@ class Notebook:
             time.sleep(retry_wait_time)
             self._wait_for_commands_completion(timeout, complition_wait_time)
             all_outputs = self._get_outputs()
-            self.assert_match_all_outputs(expected_outputs, all_outputs)
+            assert_match_all_outputs(expected_outputs, all_outputs, exact_match)
 
     def create_notebook(self, conda_env=None):
         file_locator = self.nav.page.get_by_text("File", exact=True)
@@ -124,9 +124,10 @@ class Notebook:
     def assert_code_output(
         self,
         code: str,
-        expected_output: List[Union[re.Pattern, str]],
+        expected_output: str,
         timeout: float = 1000,
         complition_wait_time: float = 2,
+        exact_match: bool = True,
     ):
         """
         Run code in last cell and check for expected output text anywhere on
@@ -148,7 +149,8 @@ class Notebook:
         self.run_in_last_cell(code)
         self._wait_for_commands_completion(timeout, complition_wait_time)
         outputs = self._get_outputs()
-        self.assert_match_output(expected_output, outputs[-1])
+        actual_output = outputs[-1] if outputs else ""
+        assert_match_output(expected_output, actual_output, exact_match)
 
     def run_in_last_cell(self, code):
         self._create_new_cell()
@@ -187,7 +189,7 @@ class Notebook:
         complition_wait_time: float
         Time in seconds to wait between checking for expected output text.
         """
-        elapsed_time = 0
+        elapsed_time = 0.0
         still_visible = True
         start_time = time.time()
         while elapsed_time < timeout:
@@ -203,20 +205,10 @@ class Notebook:
                 f"but couldn't finish in {timeout} sec"
             )
 
-    def _get_outputs(self):
+    def _get_outputs(self) -> List[str]:
         output_elements = self.nav.page.query_selector_all(".jp-OutputArea-output")
         text_content = [element.text_content().strip() for element in output_elements]
         return text_content
-
-    def assert_match_all_outputs(self, expected_outputs, actual_outputs):
-        for ex, act in zip(expected_outputs, actual_outputs):
-            self.assert_match_output(ex, act)
-
-    def assert_match_output(self, expected_output, actual_output):
-        if isinstance(expected_output, re.Pattern):
-            assert re.match(expected_output, actual_output)
-        else:
-            assert expected_output == actual_output
 
     def _restart_run_all(self):
         # restart run all cells
@@ -228,7 +220,65 @@ class Notebook:
         # Restart dialog appears most, but not all of the time (e.g. set
         # No Kernel, then Restart Run All)
         restart_dialog_button = self.nav.page.get_by_role(
-            "button", name="Restart", exact=True
+            "button", name="Confirm Kernel Restart"
         )
         if restart_dialog_button.is_visible():
             restart_dialog_button.click()
+
+
+def assert_match_output(
+    expected_output: str, actual_output: str, exact_match: bool
+) -> None:
+    """Assert that the expected_output is found in the actual_output.
+
+    ----------
+    Parameters
+
+    expected_output: str
+        The expected output text or regular expression to find in the
+        actual output.
+    actual_output: str
+        The actual output text to search for the expected output.
+    exact_match: bool
+        If True, then the expected_output must match the actual_output
+        exactly. Otherwise, the expected_output must be found somewhere in
+        the actual_output.
+    """
+    regex = re.compile(rf"{expected_output}")
+    match = (
+        regex.fullmatch(actual_output) if exact_match else regex.search(actual_output)
+    )
+    assert (
+        match is not None
+    ), f"Expected output: {expected_output} not found in actual output: {actual_output}"
+
+
+def assert_match_all_outputs(
+    expected_outputs: List[str],
+    actual_outputs: List[str],
+    exact_matches: Union[bool, List[bool]],
+) -> None:
+    """Assert that the expected_outputs are found in the actual_outputs.
+    The expected_outputs and actual_outputs must be the same length.
+
+    ----------
+    Parameters
+
+    expected_outputs: List[str]
+        A list of expected output text or regular expression to find in
+        the actual output.
+    actual_outputs: List[str]
+        A list of actual output text to search for the expected output.
+    exact_matches: Union[bool, List[bool]]
+        If True, then the expected_output must match the actual_output
+        exactly. Otherwise, the expected_output must be found somewhere in
+        the actual_output. If a list is provided, then it must be the same
+        length as expected_outputs and actual_outputs.
+    """
+    if isinstance(exact_matches, bool):
+        exact_matches = [exact_matches] * len(expected_outputs)
+
+    for exact_output, actual_output, exact in zip(
+        expected_outputs, actual_outputs, exact_matches
+    ):
+        assert_match_output(exact_output, actual_output, exact)

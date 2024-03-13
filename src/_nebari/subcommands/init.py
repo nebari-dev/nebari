@@ -2,7 +2,7 @@ import enum
 import os
 import pathlib
 import re
-import typing
+from typing import Optional
 
 import questionary
 import rich
@@ -84,17 +84,17 @@ class GitRepoEnum(str, enum.Enum):
 class InitInputs(schema.Base):
     cloud_provider: ProviderEnum = ProviderEnum.local
     project_name: schema.project_name_pydantic = ""
-    domain_name: typing.Optional[str] = None
-    namespace: typing.Optional[schema.namespace_pydantic] = "dev"
+    domain_name: Optional[str] = None
+    namespace: Optional[schema.namespace_pydantic] = "dev"
     auth_provider: AuthenticationEnum = AuthenticationEnum.password
     auth_auto_provision: bool = False
-    repository: typing.Optional[schema.github_url_pydantic] = None
+    repository: Optional[schema.github_url_pydantic] = None
     repository_auto_provision: bool = False
     ci_provider: CiEnum = CiEnum.none
     terraform_state: TerraformStateEnum = TerraformStateEnum.remote
-    kubernetes_version: typing.Union[str, None] = None
-    region: typing.Union[str, None] = None
-    ssl_cert_email: typing.Union[schema.email_pydantic, None] = None
+    kubernetes_version: Optional[str] = None
+    region: Optional[str] = None
+    ssl_cert_email: Optional[schema.email_pydantic] = None
     disable_prompt: bool = False
     output: pathlib.Path = pathlib.Path("nebari-config.yaml")
 
@@ -448,7 +448,7 @@ def check_cloud_provider_region(region: str, cloud_provider: str) -> str:
         if not region:
             region = GCP_DEFAULT_REGION
             rich.print(DEFAULT_REGION_MSG.format(region=region))
-        if region not in google_cloud.regions(os.environ["PROJECT_ID"]):
+        if region not in google_cloud.regions():
             raise ValueError(
                 f"Invalid region `{region}`. Please refer to the GCP docs for a list of valid regions: {GCP_REGIONS}"
             )
@@ -487,10 +487,10 @@ def nebari_subcommand(cli: typer.Typer):
             "-p",
             callback=typer_validate_regex(
                 schema.project_name_regex,
-                "Project name must (1) consist of only letters, numbers, hyphens, and underscores, (2) begin and end with a letter, and (3) contain between 3 and 32 characters.",
+                "Project name must (1) consist of only letters, numbers, hyphens, and underscores, (2) begin and end with a letter, and (3) contain between 3 and 16 characters.",
             ),
         ),
-        domain_name: typing.Optional[str] = typer.Option(
+        domain_name: Optional[str] = typer.Option(
             None,
             "--domain-name",
             "--domain",
@@ -696,7 +696,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         name_guidelines = """
         The project name must adhere to the following requirements:
         - Letters from A to Z (upper and lower case), numbers, hyphens, and dashes
-        - Length from 3 to 32 characters
+        - Length from 3 to 16 characters
         - Begin and end with a letter
         """
 
@@ -776,7 +776,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             qmark=qmark,
             auto_enter=False,
         ).unsafe_ask():
-            repo_url = "http://{git_provider}/{org_name}/{repo_name}"
+            repo_url = "https://{git_provider}/{org_name}/{repo_name}"
 
             git_provider = questionary.select(
                 "Which git provider would you like to use?",

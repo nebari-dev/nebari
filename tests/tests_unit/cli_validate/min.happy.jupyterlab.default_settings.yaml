@@ -1,0 +1,5 @@
+project_name: test
+jupyterlab:
+  default_settings:
+    "@jupyterlab/apputils-extension:themes":
+      theme: JupyterLab Dark

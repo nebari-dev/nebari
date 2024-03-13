@@ -24,17 +24,6 @@ NUM_ATTEMPTS = 10
 TIMEOUT = 10  # seconds
 
 
-def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
-    dns_records = [
-        f"app.clearml.{record_name}",
-        f"api.clearml.{record_name}",
-        f"files.clearml.{record_name}",
-    ]
-
-    for dns_record in dns_records:
-        update_record(zone_name, dns_record, record_type, ip_or_hostname)
-
-
 def provision_ingress_dns(
     stage_outputs: Dict[str, Dict[str, Any]],
     config: schema.Main,
@@ -60,13 +49,9 @@ def provision_ingress_dns(
             schema.ProviderEnum.azure,
         }:
             update_record(zone_name, record_name, "A", ip_or_hostname)
-            if config.clearml.enabled:
-                add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
 
         elif config.provider == schema.ProviderEnum.aws:
             update_record(zone_name, record_name, "CNAME", ip_or_hostname)
-            if config.clearml.enabled:
-                add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
         else:
             logger.info(
                 f"Couldn't update the DNS record for cloud provider: {config.provider}"
@@ -90,15 +75,15 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
     ):
         for i in range(num_attempts):
             try:
-                resolved_ip = socket.gethostbyname(domain_name)
-                if resolved_ip == ip:
+                _, _, resolved_ips = socket.gethostbyname_ex(domain_name)
+                if ip in resolved_ips:
                     print(
-                        f"DNS configured domain={domain_name} matches ingress ip={ip}"
+                        f"DNS configured domain={domain_name} matches ingress ips={ip}"
                     )
                     return True
                 else:
                     print(
-                        f"Attempt {i+1} polling DNS domain={domain_name} does not match ip={ip} instead got {resolved_ip}"
+                        f"Attempt {i+1} polling DNS domain={domain_name} does not match ip={ip} instead got {resolved_ips}"
                     )
             except socket.gaierror:
                 print(
@@ -196,9 +181,9 @@ class KubernetesIngressStage(NebariTerraformStage):
             cert_details["acme-email"] = self.config.certificate.acme_email
             cert_details["acme-server"] = self.config.certificate.acme_server
         elif cert_type == "existing":
-            cert_details[
-                "certificate-secret-name"
-            ] = self.config.certificate.secret_name
+            cert_details["certificate-secret-name"] = (
+                self.config.certificate.secret_name
+            )
 
         return {
             **{

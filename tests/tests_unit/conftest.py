@@ -190,3 +190,20 @@ def nebari_render(nebari_config, nebari_stages, tmp_path):
     write_configuration(config_filename, nebari_config)
     render_template(tmp_path, nebari_config, nebari_stages)
     return tmp_path, config_filename
+
+
+@pytest.fixture
+def new_upgrade_cls():
+    from _nebari.upgrade import UpgradeStep
+
+    assert UpgradeStep._steps
+    steps_cache = UpgradeStep._steps.copy()
+    UpgradeStep.clear_steps_registry()
+    assert not UpgradeStep._steps
+    yield UpgradeStep
+    UpgradeStep._steps = steps_cache
+
+
+@pytest.fixture
+def config_schema():
+    return nebari_plugin_manager.config_schema

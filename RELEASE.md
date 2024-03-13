@@ -11,6 +11,240 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ## Upcoming Release
 
+## Release 2024.3.1 - March 11, 2024
+
+### What's Changed
+* Modify Playwright test to account for changes in JupyterLab UI. by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2232
+* Add favicon to jupyterhub theme. by @jbouder in https://github.com/nebari-dev/nebari/pull/2222
+* Set min nodes to 0 for worker and user. by @pt247 in https://github.com/nebari-dev/nebari/pull/2168
+* Remove `jhub-client` from pyproject.toml by @pavithraes in https://github.com/nebari-dev/nebari/pull/2242
+* Include permission validation step to programmatically cloned repos by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2258
+* Expose jupyter's preferred dir as a config option by @krassowski in https://github.com/nebari-dev/nebari/pull/2251
+* Allow to configure default settings for JupyterLab (`overrides.json`) by @krassowski in https://github.com/nebari-dev/nebari/pull/2249
+* Feature/jlab menu customization by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2259
+* Add cloud provider to the dask config.json file by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2266
+* Fix syntax error in jupyter-server-config Python file by @krassowski in https://github.com/nebari-dev/nebari/pull/2286
+* Add "Open VS Code" entry in services by @krassowski in https://github.com/nebari-dev/nebari/pull/2267
+* Add Grafana Loki integration by @aktech in https://github.com/nebari-dev/nebari/pull/2156
+
+### New Contributors
+* @jbouder made their first contribution in https://github.com/nebari-dev/nebari/pull/2222
+* @krassowski made their first contribution in https://github.com/nebari-dev/nebari/pull/2251
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.1.1...2024.3.1
+
+
+## Release 2024.1.1 - January 17, 2024
+
+### Feature changes and enhancements
+
+* Upgrade conda-store to latest version 2024.1.1
+* Add Jhub-Apps
+* Add Jupyterlab-pioneer
+* Minor improvements and bug fixes
+
+### Breaking Changes
+
+> WARNING: jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store and jupyter-nvdashboard are no longer supported in Nebari version and will be uninstalled."
+
+### What's Changed
+
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2176
+* Fix logic for dns lookup. by @pt247 in https://github.com/nebari-dev/nebari/pull/2166
+* Integrate JupyterHub App Launcher into Nebari by @aktech in https://github.com/nebari-dev/nebari/pull/2185
+* Pass in permissions boundary to k8s module by @aktech in https://github.com/nebari-dev/nebari/pull/2153
+* Add jupyterlab-pioneer by @aktech in https://github.com/nebari-dev/nebari/pull/2127
+* JHub Apps: Filter conda envs by user by @aktech in https://github.com/nebari-dev/nebari/pull/2187
+* update upgrade command by @dcmcand in https://github.com/nebari-dev/nebari/pull/2198
+* Remove JupyterLab from services list by @aktech in https://github.com/nebari-dev/nebari/pull/2189
+* Adding fields to ignore within keycloak_realm by @costrouc in https://github.com/nebari-dev/nebari/pull/2200
+* Add Nebari menu item configuration. by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2196
+* Disable "Newer update available" popup as default setting by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2192
+* Block usage of pip inside jupyterlab  by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2191
+* Return all environments instead of just those under the user's namespace for jhub-apps by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2206
+* Adding a temporary writable directory for conda-store server /home/conda by @costrouc in https://github.com/nebari-dev/nebari/pull/2209
+* Add demo repositories mechanism to populate user's space by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2207
+* update nebari_workflow_controller and conda_store tags to test rc by @dcmcand in https://github.com/nebari-dev/nebari/pull/2210
+* 2023.12.1 release notes by @dcmcand in https://github.com/nebari-dev/nebari/pull/2211
+* Make it so that jhub-apps default theme doesn't override by @costrouc in https://github.com/nebari-dev/nebari/pull/2213
+* Adding additional theme variables to jupyterhub theme config by @costrouc in https://github.com/nebari-dev/nebari/pull/2215
+* updates Current Release to 2024.1.1 by @dcmcand in https://github.com/nebari-dev/nebari/pull/2227
+
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.12.1...2024.1.1
+
+## Release 2023.12.1 - December 15, 2023
+
+### Feature changes and enhancements
+
+* Upgrade conda-store to latest version 2023.10.1
+* Minor improvements and bug fixes
+
+### Breaking Changes
+
+> WARNING: Prefect, ClearML and kbatch were removed in this release and upgrading to this version will result in all of them being uninstalled.
+
+### What's Changed
+* BUG: fix incorrect config override #2086 by @fangchenli in https://github.com/nebari-dev/nebari/pull/2087
+* ENH: add AWS IAM permissions_boundary option #2078 by @fangchenli in https://github.com/nebari-dev/nebari/pull/2082
+* CI: cleanup local integration workflow by @fangchenli in https://github.com/nebari-dev/nebari/pull/2079
+* ENH: check missing GCP services by @fangchenli in https://github.com/nebari-dev/nebari/pull/2036
+* ENH: use packaging for version parsing, add unit tests by @fangchenli in https://github.com/nebari-dev/nebari/pull/2048
+* ENH: specify required field when retrieving available gcp regions by @fangchenli in https://github.com/nebari-dev/nebari/pull/2033
+* Upgrade conda-store to 2023.10.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2092
+* Add upgrade command for 2023.11.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2103
+* CLN: cleanup typing and typing import in init by @fangchenli in https://github.com/nebari-dev/nebari/pull/2107
+* Remove kbatch, prefect and clearml by @iameskild in https://github.com/nebari-dev/nebari/pull/2101
+* Fix integration tests, helm-validate script by @iameskild in https://github.com/nebari-dev/nebari/pull/2102
+* Re-enable AWS tags support by @iameskild in https://github.com/nebari-dev/nebari/pull/2096
+* Update upgrade instructions for 2023.11.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2112
+* Update nebari-git env pins by by @iameskild in https://github.com/nebari-dev/nebari/pull/2113
+* Update release notes for 2023.11.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2114
+
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.11.1...2023.12.1
+
+## Release 2023.11.1 - November 15, 2023
+
+### Feature changes and enhancements
+
+* Upgrade conda-store to latest version 2023  .10.1
+* Minor improvements and bug fixes
+
+### Breaking Changes
+
+> WARNING: Prefect, ClearML and kbatch were removed in this release and upgrading to this version will result in all of them being uninstalled.
+
+### What's Changed
+* BUG: fix incorrect config override #2086 by @fangchenli in https://github.com/nebari-dev/nebari/pull/2087
+* ENH: add AWS IAM permissions_boundary option #2078 by @fangchenli in https://github.com/nebari-dev/nebari/pull/2082
+* CI: cleanup local integration workflow by @fangchenli in https://github.com/nebari-dev/nebari/pull/2079
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2099
+* ENH: check missing GCP services by @fangchenli in https://github.com/nebari-dev/nebari/pull/2036
+* ENH: use packaging for version parsing, add unit tests by @fangchenli in https://github.com/nebari-dev/nebari/pull/2048
+* ENH: specify required field when retrieving available gcp regions by @fangchenli in https://github.com/nebari-dev/nebari/pull/2033
+* Upgrade conda-store to 2023.10.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2092
+* Add upgrade command for 2023.11.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2103
+* CLN: cleanup typing and typing import in init by @fangchenli in https://github.com/nebari-dev/nebari/pull/2107
+* Remove kbatch, prefect and clearml by @iameskild in https://github.com/nebari-dev/nebari/pull/2101
+* Fix integration tests, helm-validate script by @iameskild in https://github.com/nebari-dev/nebari/pull/2102
+* Re-enable AWS tags support by @iameskild in https://github.com/nebari-dev/nebari/pull/2096
+* Update upgrade instructions for 2023.11.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2112
+* Update nebari-git env pins by by @iameskild in https://github.com/nebari-dev/nebari/pull/2113
+* Update release notes for 2023.11.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2114
+
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.10.1...2023.11.1
+
+
+## Release 2023.10.1 - October 20, 2023
+
+This release includes a major refactor which introduces a Pluggy-based extension mechanism which allow developers to build new stages. This is the initial implementation
+of the extension mechanism and we expect the interface to be refined overtime. If you're interested in developing your own stage plugin, please refer to [our documentation](https://www.nebari.dev/docs/how-tos/nebari-extension-system#developing-an-extension). When you're ready to upgrade, please download this version from either PyPI or Conda-Forge and run the `nebari upgrade -c nebari-config.yaml`
+command and follow the instructions
+
+> WARNING: CDS Dashboards was removed in this release and upgrading to this version will result in CDS Dashboards being uninstalled. A replacement dashboarding solution is currently in the works
+> and will be integrated soon.
+
+> WARNING: Given the scope of changes in this release, we highly recommend backing up your system before upgrading. Please refer to our [Manual Backup](https://www.nebari.dev/docs/how-tos/manual-backup) documentation for more details.
+
+### Feature changes and enhancements
+
+* Extension Mechanism Implementation in [PR 1833](https://github.com/nebari-dev/nebari/pull/1833)
+  * This also includes much stricter schema validation.
+* JupyterHub upgraded to 3.1 in [PR 1856](https://github.com/nebari-dev/nebari/pull/1856)'
+
+### Breaking Changes
+
+* While we have tried our best to avoid breaking changes when introducing the extension mechanism, the scope of the changes is too large for us to confidently say there won't be breaking changes.
+
+> WARNING: CDS Dashboards was removed in this release and upgrading to this version will result in CDS Dashboards being uninstalled. A replacement dashboarding solution is currently in the work and will be integrated soon.
+
+> WARNING: We will be removing and ending support for ClearML, Prefect and kbatch in the next release. The kbatch has been functionally replaced by Argo-Jupyter-Scheduler. We have seen little interest in ClearML and Prefect in recent years, and removing makes sense at this point. However if you wish to continue using them with Nebari we encourage you to [write your own Nebari extension](https://www.nebari.dev/docs/how-tos/nebari-extension-system#developing-an-extension).
+
+### What's Changed
+* Spinup spot instance for CI with cirun by @aktech in https://github.com/nebari-dev/nebari/pull/1882
+* Fix argo-viewer service account reference by @iameskild in https://github.com/nebari-dev/nebari/pull/1881
+* Framework for Nebari deployment via pytest for extensive testing by @aktech in https://github.com/nebari-dev/nebari/pull/1867
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/1878
+* Test GCP/AWS Deployment with Pytest by @aktech in https://github.com/nebari-dev/nebari/pull/1871
+* Bump DigitalOcean provider to latest by @aktech in https://github.com/nebari-dev/nebari/pull/1891
+* Ensure path is Path object by @iameskild in https://github.com/nebari-dev/nebari/pull/1888
+* enabling viewing hidden files in jupyterlab file explorer by @kalpanachinnappan in https://github.com/nebari-dev/nebari/pull/1893
+* Extension Mechanism Implementation by @costrouc in https://github.com/nebari-dev/nebari/pull/1833
+* Fix import path in deployment tests & misc by @aktech in https://github.com/nebari-dev/nebari/pull/1908
+* pytest:ensure failure on warnings by @costrouc in https://github.com/nebari-dev/nebari/pull/1907
+* workaround for mixed string/posixpath error by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1915
+* ENH: Remove aws cli, use boto3 by @fangchenli in https://github.com/nebari-dev/nebari/pull/1920
+* paginator for boto3 ec2 instance types by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1923
+* Update README.md -- fix typo. by @teoliphant in https://github.com/nebari-dev/nebari/pull/1925
+* Add more unit tests, add cleanup step for Digital Ocean integration test by @iameskild in https://github.com/nebari-dev/nebari/pull/1910
+* Add cleanup step for AWS integration test, ensure diable_prompt is passed through by @iameskild in https://github.com/nebari-dev/nebari/pull/1921
+* K8s 1.25 + More Improvements by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1856
+* adding lifecycle ignore to eks node group by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1905
+* nebari init unit tests by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1931
+* Bug fix - JH singleuser environment getting overwritten by @kenafoster in https://github.com/nebari-dev/nebari/pull/1933
+* Allow users to specify the Azure RG to deploy into by @iameskild in https://github.com/nebari-dev/nebari/pull/1927
+* nebari validate unit tests by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1938
+* adding openid connect provider to enable irsa feature by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1903
+* nebari upgrade CLI tests by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1963
+* CI: Add test coverage by @fangchenli in https://github.com/nebari-dev/nebari/pull/1959
+* nebari cli environment variable handling, support, keycloak, dev tests by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1968
+* CI: remove empty notebook to fix pre-commit json check by @fangchenli in https://github.com/nebari-dev/nebari/pull/1976
+* TYP: fix typing error in plugins by @fangchenli in https://github.com/nebari-dev/nebari/pull/1973
+* TYP: fix return class type in hookimpl by @fangchenli in https://github.com/nebari-dev/nebari/pull/1975
+* Allow users to specify Azure tags by @iameskild in https://github.com/nebari-dev/nebari/pull/1967
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/1979
+* Do not try and add argo envs when disabled by @iameskild in https://github.com/nebari-dev/nebari/pull/1926
+* Handle region with care, updates to test suite by @iameskild in https://github.com/nebari-dev/nebari/pull/1930
+* remove custom auth from config schema by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1994
+* CLI: handle removed dns options in deploy command by @fangchenli in https://github.com/nebari-dev/nebari/pull/1992
+* Add API docs by @kcpevey in https://github.com/nebari-dev/nebari/pull/1634
+* Upgrade images for jupyterhub-ssh, kbatch by @iameskild in https://github.com/nebari-dev/nebari/pull/1997
+* Add permissions to generate_cli_docs workflow by @iameskild in https://github.com/nebari-dev/nebari/pull/2005
+* standardize regex and messaging for names by @kenafoster in https://github.com/nebari-dev/nebari/pull/2003
+* ENH: specify required fields when retrieving available gcp projects by @fangchenli in https://github.com/nebari-dev/nebari/pull/2008
+* Modify JupyterHub networkPolicy to match existing policy by @iameskild in https://github.com/nebari-dev/nebari/pull/1991
+* Update package dependencies by @iameskild in https://github.com/nebari-dev/nebari/pull/1986
+* CI: Add AWS integration test workflow, clean up   by @iameskild in https://github.com/nebari-dev/nebari/pull/1977
+* BUG: fix unboundlocalerror in integration test by @fangchenli in https://github.com/nebari-dev/nebari/pull/1999
+* Auth0/Github auth-provider config validation fix by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/2009
+* terraform upgrade to 1.5.7 by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1998
+* cli init repo auto provision fix by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/2012
+* Add gcp_cleanup, minor changes by @iameskild in https://github.com/nebari-dev/nebari/pull/2010
+* Fix #2024 by @dcmcand in https://github.com/nebari-dev/nebari/pull/2025
+* Upgrade conda-store to 2023.9.2 by @iameskild in https://github.com/nebari-dev/nebari/pull/2028
+* Add upgrade steps, instructions for 2023.9.1 by @iameskild in https://github.com/nebari-dev/nebari/pull/2029
+* CI: add gcp integration test by @fangchenli in https://github.com/nebari-dev/nebari/pull/2049
+* CLN: remove flake8 from dependencies by @fangchenli in https://github.com/nebari-dev/nebari/pull/2044
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2047
+* fix typo in guided init for Digital Ocean by @dcmcand in https://github.com/nebari-dev/nebari/pull/2059
+* CI: add do integration by @fangchenli in https://github.com/nebari-dev/nebari/pull/2060
+* TYP: make all subfolders under kubernetes_services/template non-module by @fangchenli in https://github.com/nebari-dev/nebari/pull/2043
+* TYP: fix most typing errors in provider by @fangchenli in https://github.com/nebari-dev/nebari/pull/2038
+* Fix link to documentation on Nebari Deployment home page by @aktech in https://github.com/nebari-dev/nebari/pull/2063
+* TST: enable timeout config in playwright notebook test by @fangchenli in https://github.com/nebari-dev/nebari/pull/1996
+* DEPS: sync supported python version by @fangchenli in https://github.com/nebari-dev/nebari/pull/2065
+* Test support for Python 3.12 by @aktech in https://github.com/nebari-dev/nebari/pull/2046
+* BUG: fix validation error related to `provider` #2054 by @fangchenli in https://github.com/nebari-dev/nebari/pull/2056
+* CI: improve unit test workflow in CI, revert #2046 by @fangchenli in https://github.com/nebari-dev/nebari/pull/2071
+* TST: enable exact_match config in playwright notebook test by @fangchenli in https://github.com/nebari-dev/nebari/pull/2027
+* CI: move conda build test to separate job by @fangchenli in https://github.com/nebari-dev/nebari/pull/2073
+* Revert conda-store to v0.4.14, #2028 by @iameskild in https://github.com/nebari-dev/nebari/pull/2074
+* ENH/CI: add mypy config, and CI workflow by @fangchenli in https://github.com/nebari-dev/nebari/pull/2066
+* Update upgrade for 2023.10.1 by @kenfoster in https://github.com/nebari-dev/nebari/pull/2080
+* Update RELEASE notes, minor fixes by @iameskild in https://github.com/nebari-dev/nebari/pull/2039
+
+### New Contributors
+* @kalpanachinnappan made their first contribution in https://github.com/nebari-dev/nebari/pull/1893
+* @fangchenli made their first contribution in https://github.com/nebari-dev/nebari/pull/1920
+* @teoliphant made their first contribution in https://github.com/nebari-dev/nebari/pull/1925
+* @kenafoster made their first contribution in https://github.com/nebari-dev/nebari/pull/1933
+* @dcmcand made their first contribution in https://github.com/nebari-dev/nebari/pull/2025
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2023.7.2...2023.10.1
+
+
 ## Release 2023.7.2 - August 3, 2023
 
 This is a hot-fix release that resolves an issue whereby users in the `analyst` group are unable to launch their JupyterLab server because the name of the viewer-specific `ARGO_TOKEN` was mislabeled; see [PR 1881](https://github.com/nebari-dev/nebari/pull/1881) for more details.

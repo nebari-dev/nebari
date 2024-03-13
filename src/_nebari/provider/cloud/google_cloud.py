@@ -2,7 +2,7 @@ import functools
 import json
 import os
 import subprocess
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
@@ -30,14 +30,14 @@ def projects() -> Dict[str, str]:
 
 
 @functools.lru_cache()
-def regions(project: str) -> Dict[str, str]:
-    """Return a dict of available regions."""
+def regions() -> Set[str]:
+    """Return a set of available regions."""
     check_credentials()
     output = subprocess.check_output(
-        ["gcloud", "compute", "regions", "list", "--project", project, "--format=json"]
+        ["gcloud", "compute", "regions", "list", "--format=json(name)"]
     )
-    data = json.loads(output.decode("utf-8"))
-    return {_["description"]: _["name"] for _ in data}
+    data = json.loads(output)
+    return {_["name"] for _ in data}
 
 
 @functools.lru_cache()
@@ -87,6 +87,22 @@ def instances(project: str) -> Dict[str, str]:
     )
     data = json.loads(output.decode("utf-8"))
     return {_["description"]: _["name"] for _ in data}
+
+
+def activated_services() -> Set[str]:
+    """Return a list of activated services."""
+    check_credentials()
+    output = subprocess.check_output(
+        [
+            "gcloud",
+            "services",
+            "list",
+            "--enabled",
+            "--format=json(config.title)",
+        ]
+    )
+    data = json.loads(output)
+    return {service["config"]["title"] for service in data}
 
 
 def cluster_exists(cluster_name: str, project_id: str, region: str) -> bool:
@@ -250,6 +266,26 @@ def gcp_cleanup(config: schema.Main):
     delete_service_account(service_account_name, project_id)
 
 
+def check_missing_service() -> None:
+    """Check if all required services are activated."""
+    required = {
+        "Compute Engine API",
+        "Kubernetes Engine API",
+        "Cloud Monitoring API",
+        "Cloud Autoscaling API",
+        "Identity and Access Management (IAM) API",
+        "Cloud Resource Manager API",
+    }
+    activated = activated_services()
+    common = required.intersection(activated)
+    missing = required.difference(common)
+    if missing:
+        raise ValueError(
+            f"""Missing required services: {missing}\n
+            Please see the documentation for more information: {constants.GCP_ENV_DOCS}"""
+        )
+
+
 # Getting pricing data could come from here
 # https://cloudpricingcalculator.appspot.com/static/data/pricelist.json
 
@@ -257,9 +293,9 @@ def gcp_cleanup(config: schema.Main):
 ### PYDANTIC VALIDATORS ###
 
 
-def validate_region(project_id: str, region: str) -> str:
+def validate_region(region: str) -> str:
     """Validate the GCP region is valid."""
-    available_regions = regions(project_id)
+    available_regions = regions()
     if region not in available_regions:
         raise ValueError(
             f"Region {region} is not one of available regions {available_regions}"
