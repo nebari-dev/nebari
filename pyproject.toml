@@ -84,7 +84,6 @@ dev = [
     "diagrams",
     "escapism",
     "importlib-metadata<5.0",
-    "jhub-client",
     "jinja2",
     "mypy==1.6.1",
     "paramiko",

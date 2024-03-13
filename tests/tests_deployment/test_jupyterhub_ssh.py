@@ -14,10 +14,14 @@ monkeypatch_ssl_context()
 TIMEOUT_SECS = 300
 
 
+@pytest.fixture(scope="session")
+def api_token():
+    return get_jupyterhub_token("jupyterhub-ssh")
+
+
 @pytest.fixture(scope="function")
-def paramiko_object():
+def paramiko_object(api_token):
     """Connects to JupyterHub ssh cluster from outside the cluster."""
-    api_token = get_jupyterhub_token("jupyterhub-ssh")
 
     try:
         client = paramiko.SSHClient()
