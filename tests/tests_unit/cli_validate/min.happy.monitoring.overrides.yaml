@@ -1,0 +1,10 @@
+project_name: test
+monitoring:
+  enabled: true
+  overrides:
+    loki:
+      loki: foobar
+    promtail:
+      promtail: foobar
+    minio:
+      minio: foobar

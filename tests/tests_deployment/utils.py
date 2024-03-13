@@ -28,16 +28,17 @@ def get_jupyterhub_session():
 
 def get_jupyterhub_token(note="jupyterhub-tests-deployment"):
     session = get_jupyterhub_session()
+    xsrf_token = session.cookies.get("_xsrf")
+    headers = {"Referer": f"https://{constants.NEBARI_HOSTNAME}/hub/token"}
+    if xsrf_token:
+        headers["X-XSRFToken"] = xsrf_token
+    data = {"note": note, "expires_in": None}
     r = session.post(
         f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
-        headers={
-            "Referer": f"https://{constants.NEBARI_HOSTNAME}/hub/token",
-        },
-        json={
-            "note": note,
-            "expires_in": None,
-        },
+        headers=headers,
+        json=data,
     )
+
     return r.json()["token"]
 
 

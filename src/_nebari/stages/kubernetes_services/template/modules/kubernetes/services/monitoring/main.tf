@@ -1,3 +1,8 @@
+resource "random_password" "grafana_admin_password" {
+  length  = 32
+  special = false
+}
+
 resource "helm_release" "prometheus-grafana" {
   name       = "nebari"
   namespace  = var.namespace
@@ -175,6 +180,9 @@ resource "helm_release" "prometheus-grafana" {
         nodeSelector = {
           "${var.node-group.key}" = var.node-group.value
         }
+
+        # Avoid using the default password, as that's a security risk
+        adminPassword : random_password.grafana_admin_password.result
 
         sidecar = {
           dashboards = {
