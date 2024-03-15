@@ -23,7 +23,7 @@ name = "nebari"
 dynamic = ["version"]
 description = "A Jupyter and Dask-powered open source data science platform."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = "BSD-3-Clause"
 authors = [
     { name = "Nebari development team", email = "internal-it@quansight.com" },
@@ -42,8 +42,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Build Tools",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Intended Audience :: Developers",

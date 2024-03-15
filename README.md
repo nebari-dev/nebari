@@ -79,7 +79,7 @@ Amazon [AWS](https://aws.amazon.com/), [GCP](https://cloud.google.com/ "Google C
 
 - Operating System: Currently, Nebari supports development on macOS and Linux operating systems. Windows is NOT supported.
   However, we would welcome contributions that add and improve support for Windows.
-- You need Python >= 3.8 on your local machine or virtual environment to work on Nebari.
+- You need Python >= 3.10 on your local machine or virtual environment to work on Nebari.
 - Adopting virtual environments ([`conda`](https://docs.conda.io/en/latest/), [`pipenv`](https://github.com/pypa/pipenv) or
   [`venv`](https://docs.python.org/3/library/venv.html)) is also encouraged.
 
