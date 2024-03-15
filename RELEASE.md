@@ -9,7 +9,18 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-## Upcoming Release
+
+## Release 2024.3.2 - March 14, 2024
+
+### What's Changed
+* update max k8s versions and remove depreciated api usage in local deploy by @dcmcand in https://github.com/nebari-dev/nebari/pull/2276
+* update keycloak image repo by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2312
+* Generate random password for Grafana by @aktech in https://github.com/nebari-dev/nebari/pull/2289
+* update conda store to 2024.3.1 by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2316
+* Switch PyPI release workflow to use trusted publishing by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2323
+
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.3.1...2024.3.2
 
 ## Release 2024.3.1 - March 11, 2024
 
