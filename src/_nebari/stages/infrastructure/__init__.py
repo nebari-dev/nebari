@@ -145,6 +145,17 @@ class AWSInputVars(schema.Base):
     tags: Dict[str, str] = {}
 
 
+def _calculate_asg_node_group_map(config: schema.Main):
+    if config.provider == schema.ProviderEnum.aws:
+        return amazon_web_services.aws_get_asg_node_group_mapping(
+            config.project_name,
+            config.namespace,
+            config.amazon_web_services.region,
+        )
+    else:
+        return {}
+
+
 def _calculate_node_groups(config: schema.Main):
     if config.provider == schema.ProviderEnum.aws:
         return {
@@ -438,10 +449,10 @@ class AmazonWebServicesProvider(schema.Base):
     node_groups: Dict[str, AWSNodeGroup] = {
         "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
         "user": AWSNodeGroup(
-            instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
+            instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
         ),
         "worker": AWSNodeGroup(
-            instance="m5.xlarge", min_nodes=1, max_nodes=5, single_subnet=False
+            instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
         ),
     }
     existing_subnet_ids: List[str] = None
@@ -813,6 +824,16 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
     ):
         outputs["node_selectors"] = _calculate_node_groups(self.config)
         super().set_outputs(stage_outputs, outputs)
+
+    @contextlib.contextmanager
+    def post_deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ):
+        asg_node_group_map = _calculate_asg_node_group_map(self.config)
+        if asg_node_group_map:
+            amazon_web_services.set_asg_tags(
+                asg_node_group_map, self.config.amazon_web_services.region
+            )
 
     @contextlib.contextmanager
     def deploy(

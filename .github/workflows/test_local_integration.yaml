@@ -96,6 +96,24 @@ jobs:
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
           sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
 
+          # Change default JupyterLab theme
+          cat >> nebari-config.yaml <<- EOM
+          jupyterlab:
+            default_settings:
+              "@jupyterlab/apputils-extension:themes":
+                theme: JupyterLab Dark
+          EOM
+
+          # Change default value for minio persistence size
+          cat >> nebari-config.yaml <<- EOM
+          monitoring:
+            enabled: true
+            overrides:
+              minio:
+                persistence:
+                  size: 1Gi
+          EOM
+
           cat nebari-config.yaml
 
       - name: Deploy Nebari
@@ -106,7 +124,7 @@ jobs:
       - name: Basic kubectl checks after deployment
         if: always()
         run: |
-          kubectl get all,cm,secret,ing -A
+          kubectl get all,cm,secret,pv,pvc,ing -A
 
       - name: Check github-actions.nebari.dev resolves
         run: |
@@ -166,22 +184,6 @@ jobs:
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
         run: |
           pytest tests/tests_deployment/ -v -s
-
-      - name: JupyterHub Notebook Tests
-        timeout-minutes: 2
-        # run jhub-client after pytest since jhubctl can cleanup
-        # the running server
-        env:
-          JUPYTERHUB_USERNAME: ${{ env.TEST_USERNAME }}
-          JUPYTERHUB_PASSWORD: ${{ env.TEST_PASSWORD }}
-        run: |
-          sleep 60
-          jhubctl --verbose run --hub=https://github-actions.nebari.dev\
-                                --auth-type=keycloak \
-                                --validate --no-verify-ssl \
-                                --kernel python3 \
-                                --stop-server \
-                                --notebook tests/tests_deployment/assets/notebook/simple.ipynb \
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment

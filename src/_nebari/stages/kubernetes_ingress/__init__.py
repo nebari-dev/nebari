@@ -75,15 +75,15 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
     ):
         for i in range(num_attempts):
             try:
-                resolved_ip = socket.gethostbyname(domain_name)
-                if resolved_ip == ip:
+                _, _, resolved_ips = socket.gethostbyname_ex(domain_name)
+                if ip in resolved_ips:
                     print(
-                        f"DNS configured domain={domain_name} matches ingress ip={ip}"
+                        f"DNS configured domain={domain_name} matches ingress ips={ip}"
                     )
                     return True
                 else:
                     print(
-                        f"Attempt {i+1} polling DNS domain={domain_name} does not match ip={ip} instead got {resolved_ip}"
+                        f"Attempt {i+1} polling DNS domain={domain_name} does not match ip={ip} instead got {resolved_ips}"
                     )
             except socket.gaierror:
                 print(
@@ -181,9 +181,9 @@ class KubernetesIngressStage(NebariTerraformStage):
             cert_details["acme-email"] = self.config.certificate.acme_email
             cert_details["acme-server"] = self.config.certificate.acme_server
         elif cert_type == "existing":
-            cert_details[
-                "certificate-secret-name"
-            ] = self.config.certificate.secret_name
+            cert_details["certificate-secret-name"] = (
+                self.config.certificate.secret_name
+            )
 
         return {
             **{

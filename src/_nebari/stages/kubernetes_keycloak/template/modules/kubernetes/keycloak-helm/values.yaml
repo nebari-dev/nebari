@@ -4,6 +4,9 @@ ingress:
   # we will need to define our own IngressRoute elsewhere.
   enabled: false
 
+image:
+  repository: quay.io/keycloak/keycloak
+
 imagePullSecrets:
   - name: "extcrcreds"
 
@@ -33,7 +36,7 @@ extraInitContainers: |
           chown 1000:1000 /data/keycloak-metrics-spi-2.5.3.jar &&
           chmod 777 /data/keycloak-metrics-spi-2.5.3.jar
       fi
-    image: busybox:1.31
+    image: busybox:1.36
     name: initialize-spi-metrics-jar
     securityContext:
       runAsUser: 0

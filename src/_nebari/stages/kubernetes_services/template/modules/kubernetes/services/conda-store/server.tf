@@ -156,6 +156,11 @@ resource "kubernetes_deployment" "server" {
             name       = "secret"
             mount_path = "/var/lib/conda-store/"
           }
+
+          volume_mount {
+            name       = "home-volume"
+            mount_path = "/home/conda"
+          }
         }
 
         volume {
@@ -169,6 +174,13 @@ resource "kubernetes_deployment" "server" {
           name = "secret"
           secret {
             secret_name = kubernetes_secret.conda-store-secret.metadata.0.name
+          }
+        }
+
+        volume {
+          name = "home-volume"
+          empty_dir {
+            size_limit = "1Mi"
           }
         }
       }
