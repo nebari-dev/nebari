@@ -179,6 +179,8 @@ resource "kubernetes_deployment" "main" {
 
   spec {
     replicas = 1
+    ## TODO: Check if we need 2
+    ## TODO: Check if we can we auto-scale this.
 
     selector {
       match_labels = {

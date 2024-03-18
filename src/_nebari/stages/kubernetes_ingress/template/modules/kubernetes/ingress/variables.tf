@@ -71,5 +71,11 @@ variable "certificate-service" {
 variable "additional-arguments" {
   description = "Additional command line arguments to supply to traefik ingress"
   type        = list(string)
-  default     = []
+#  default     = []
+  default     = [
+      "--serversTransport.insecureSkipVerify=true",
+      "--log.level=DEBUG"
+      ## TODO Change this to INFO
+  ]
+
 }
