@@ -4,7 +4,6 @@ import json
 import os
 import secrets
 import string
-import sys
 import time
 import typing
 from abc import ABC
@@ -230,7 +229,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_check: bool = False
-    ):
+    ) -> None:
         from keycloak import KeycloakAdmin
         from keycloak.exceptions import KeycloakError
 
@@ -281,11 +280,9 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             ],
             verify=False,
         ):
-            print(
-                f"ERROR: unable to connect to keycloak master realm at url={keycloak_url} with root credentials"
+            raise RuntimeError(
+                f"Unable to connect to keycloak master realm at url={keycloak_url} with root credentials"
             )
-            sys.exit(1)
-
         print("Keycloak service successfully started")
 
     @contextlib.contextmanager
@@ -300,9 +297,12 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
     @contextlib.contextmanager
     def destroy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        status: Dict[str, bool],
+        ignore_errors: bool = True,
     ):
-        with super().destroy(stage_outputs, status):
+        with super().destroy(stage_outputs, status, ignore_errors):
             with keycloak_provider_context(
                 stage_outputs["stages/" + self.name]["keycloak_credentials"]["value"]
             ):

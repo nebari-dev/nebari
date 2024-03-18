@@ -3,7 +3,6 @@ import inspect
 import os
 import pathlib
 import re
-import sys
 import tempfile
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
@@ -792,7 +791,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
-    ):
+    ) -> None:
         from kubernetes import client, config
         from kubernetes.client.rest import ApiException
 
@@ -805,18 +804,15 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         try:
             api_instance = client.CoreV1Api()
             result = api_instance.list_namespace()
-        except ApiException:
-            print(
-                f"ERROR: After stage={self.name} unable to connect to kubernetes cluster"
-            )
-            sys.exit(1)
+        except ApiException as exc:
+            raise RuntimeError(
+                f"After stage={self.name} unable to connect to kubernetes cluster"
+            ) from exc
 
-        if len(result.items) < 1:
-            print(
-                f"ERROR: After stage={self.name} no nodes provisioned within kubernetes cluster"
+        if len(result.items) == 0:
+            raise RuntimeError(
+                f"After stage={self.name} no namespaces found in kubernetes cluster"
             )
-            sys.exit(1)
-
         print(f"After stage={self.name} kubernetes cluster successfully provisioned")
 
     def set_outputs(
@@ -847,9 +843,12 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
     @contextlib.contextmanager
     def destroy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        status: Dict[str, bool],
+        ignore_errors: bool = True,
     ):
-        with super().destroy(stage_outputs, status):
+        with super().destroy(stage_outputs, status, ignore_errors):
             with kubernetes_provider_context(
                 stage_outputs["stages/" + self.name]["kubernetes_credentials"]["value"]
             ):

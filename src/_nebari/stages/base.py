@@ -78,11 +78,6 @@ class NebariTerraformStage(NebariStage):
     ):
         pass
 
-    def check(
-        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
-    ):
-        pass
-
     @contextlib.contextmanager
     def destroy(
         self,
