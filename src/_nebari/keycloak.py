@@ -7,7 +7,7 @@ import keycloak
 import requests
 import rich
 
-from _nebari.stages.kubernetes_ingress import CertificateEnum
+from _nebari.stages.kubernetes_ingress import SelfSignedCertificate
 from nebari import schema
 
 logger = logging.getLogger(__name__)
@@ -91,7 +91,7 @@ def get_keycloak_admin_from_config(config: schema.Main):
         "KEYCLOAK_ADMIN_PASSWORD", config.security.keycloak.initial_root_password
     )
 
-    should_verify_tls = config.certificate.type != CertificateEnum.selfsigned
+    should_verify_tls = not isinstance(config.certificate, SelfSignedCertificate)
 
     try:
         keycloak_admin = keycloak.KeycloakAdmin(

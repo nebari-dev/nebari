@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import enum
 import logging
 import socket
@@ -125,13 +127,31 @@ class CertificateEnum(str, enum.Enum):
         return representer.represent_str(node.value)
 
 
-class Certificate(schema.Base):
-    type: CertificateEnum = CertificateEnum.selfsigned
-    # existing
-    secret_name: typing.Optional[str]
-    # lets-encrypt
-    acme_email: typing.Optional[str]
+class SelfSignedCertificate(schema.Base):
+    type: str = CertificateEnum.selfsigned
+
+
+class LetsEncryptCertificate(schema.Base):
+    type: str = CertificateEnum.letsencrypt
+    acme_email: str
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
+
+
+class ExistingCertificate(schema.Base):
+    type: str = CertificateEnum.existing
+    secret_name: str
+
+
+class DisabledCertificate(schema.Base):
+    type: str = CertificateEnum.disabled
+
+
+Certificate = typing.Union[
+    SelfSignedCertificate,
+    LetsEncryptCertificate,
+    ExistingCertificate,
+    DisabledCertificate,
+]
 
 
 class DnsProvider(schema.Base):
@@ -145,7 +165,7 @@ class Ingress(schema.Base):
 
 class InputSchema(schema.Base):
     domain: typing.Optional[str]
-    certificate: Certificate = Certificate()
+    certificate: Certificate = SelfSignedCertificate()
     ingress: Ingress = Ingress()
     dns: DnsProvider = DnsProvider()
 

@@ -143,7 +143,7 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
     try:
         write_configuration(
             inputs.output,
-            config,
+            config_schema(**config),
             mode="x",
         )
     except FileExistsError:

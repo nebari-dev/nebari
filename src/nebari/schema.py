@@ -28,6 +28,7 @@ class Base(pydantic.BaseModel):
         extra = "forbid"
         validate_assignment = True
         allow_population_by_field_name = True
+        smart_union = True
 
 
 @yaml_object(yaml)
