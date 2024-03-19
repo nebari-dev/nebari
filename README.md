@@ -151,6 +151,75 @@ To install the latest developer version (unstable) use:
 pip install git+https://github.com/nebari-dev/nebari.git
 ```
 
+### ⚙️⚙️⚙️ Installing, Testing, and Packaging a Local Nebari Repo ⚙️⚙️⚙️
+Tested on Debian 12
+#### Prereqs:
+Docker: https://docs.docker.com/engine/install/debian/#install-using-the-repository
+```
+sudo usermod -aG docker $USER # add current user to docker group
+sudo systemctl start docker
+```
+
+conda: https://docs.anaconda.com/free/anaconda/install/linux/#installation
+
+git:
+```
+apt-get install git
+```
+
+#### Clone Nebari repo:                   
+```
+git clone git@github.com:nebari-dev/nebari.git
+cd nebari
+```
+
+#### Create a conda environment to build, deploy, and test Nebari:
+```
+conda create -n nebari0
+conda activate nebari0
+conda install python==3.12 pip # or python version of your choice
+```
+
+#### Test local Nebari repo:
+From within the local Nebari repo directory:
+```
+pip install -e .
+```
+
+Create a nebari-config.yaml that targets a local kind cluster
+```
+nebari init local --project local-dev --domain example.local --ssl-cert-email [your@email]
+```
+
+Add to hosts file specific resolutions for .local domains specified above  
+```
+echo -e "\n172.18.1.100 local-dev.example.local\n172.18.1.100" example.local\n | sudo tee -a /etc/hosts
+```
+
+Deploy Nebari locally (as specified in the yaml file)
+```
+nebari deploy -c nebari-config.yaml
+```
+
+Run tests against deployed Nebari
+```
+pip install python-dotenv # needed for tests
+pytest tests/tests_deployment
+```
+
+#### Build & package Nebari:
+use pip to install further dependencies within the above environment:
+```
+pip install pytest-playwright build grayskull
+playwright install
+```
+From within the local Nebari repo directory:
+```
+python -m build ./ --outdir ./build-temp/
+grayskull pypi --strict-conda-forge build-temp/*.tar.gz --output ./build-temp/
+conda build --channel=conda-forge ./build-temp/nebari
+```
+
 ### Questions? 🤔
 
 Have a look at our [Frequently Asked Questions (FAQ)][nebari-faqs] to see if your query has been answered.
