@@ -270,14 +270,7 @@ def random_secure_string(
 
 def is_relative_to(self: Path, other: Path, /) -> bool:
     """Compatibility function to bring ``Path.is_relative_to`` to Python 3.8"""
-    if sys.version_info[:2] >= (3, 9):
-        return self.is_relative_to(other)
-
-    try:
-        self.relative_to(other)
-        return True
-    except ValueError:
-        return False
+    return self.is_relative_to(other)
 
 
 def set_do_environment():
