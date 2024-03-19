@@ -52,3 +52,4 @@ jobs:
       - name: Build conda package
         run: |
           conda build nebari
+          nebari --version
