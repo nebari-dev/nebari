@@ -65,7 +65,7 @@ dependencies = [
     "prompt-toolkit==3.0.36",
     "pydantic==1.10.12",
     "pynacl==1.5.0",
-    "python-keycloak>=3.9.2",
+    "python-keycloak>=3.9.0",
     "questionary==2.0.0",
     "requests-toolbelt==1.0.0",
     "rich==13.5.1",
