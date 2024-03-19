@@ -4,6 +4,9 @@ ingress:
   # we will need to define our own IngressRoute elsewhere.
   enabled: false
 
+image:
+  repository: quay.io/keycloak/keycloak
+
 imagePullSecrets:
   - name: "extcrcreds"
 

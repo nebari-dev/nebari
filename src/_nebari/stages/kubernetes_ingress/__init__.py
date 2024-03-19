@@ -180,9 +180,9 @@ class KubernetesIngressStage(NebariTerraformStage):
             cert_details["acme-email"] = self.config.certificate.acme_email
             cert_details["acme-server"] = self.config.certificate.acme_server
         elif cert_type == "existing":
-            cert_details[
-                "certificate-secret-name"
-            ] = self.config.certificate.secret_name
+            cert_details["certificate-secret-name"] = (
+                self.config.certificate.secret_name
+            )
 
         return {
             **{
