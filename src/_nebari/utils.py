@@ -268,11 +268,6 @@ def random_secure_string(
     return "".join(secrets.choice(chars) for i in range(length))
 
 
-def is_relative_to(self: Path, other: Path, /) -> bool:
-    """Compatibility function to bring ``Path.is_relative_to`` to Python 3.8"""
-    return self.is_relative_to(other)
-
-
 def set_do_environment():
     os.environ["AWS_ACCESS_KEY_ID"] = os.environ["SPACES_ACCESS_KEY_ID"]
     os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
