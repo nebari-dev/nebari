@@ -52,4 +52,8 @@ jobs:
       - name: Build conda package
         run: |
           conda build nebari
-          nebari --version
+
+      - name: Test conda package
+        run: |
+          conda install --use-local nebari
+          python -c "import nebari; print(nebari.__version__)"
