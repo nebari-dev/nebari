@@ -62,7 +62,7 @@ jobs:
           CONDA: /home/runnerx/miniconda3
         with:
           auto-update-conda: true
-          python-version: 3.8
+          python-version: "3.11"
           miniconda-version: "latest"
 
       - name: Install Nebari and playwright
