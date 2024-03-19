@@ -151,7 +151,7 @@ To install the latest developer version (unstable) use:
 pip install git+https://github.com/nebari-dev/nebari.git
 ```
 
-### ⚙️⚙️⚙️ Installing, Testing, and Packaging a Local Nebari Repo ⚙️⚙️⚙️
+### ⚙️⚙️⚙️ Deploying, Testing, and Packaging a Local Nebari Repo ⚙️⚙️⚙️
 Tested on Debian 12
 #### Prereqs:
 Docker: https://docs.docker.com/engine/install/debian/#install-using-the-repository
