@@ -52,4 +52,7 @@ jobs:
       - name: Build conda package
         run: |
           conda build nebari
+      - name: Test nebari
+        run: |
+          conda install --use-local nebari
           nebari --version
