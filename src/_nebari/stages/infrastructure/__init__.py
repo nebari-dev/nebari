@@ -5,7 +5,7 @@ import pathlib
 import re
 import sys
 import tempfile
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Annotated, Any, Dict, List, Optional, Tuple, Type, Union
 
 from pydantic import Field, field_validator, model_validator
 
@@ -26,11 +26,6 @@ from _nebari.utils import (
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
 
 
 def get_kubeconfig_filename():
@@ -424,9 +419,7 @@ class AzureProvider(schema.Base):
 
     @field_validator("tags")
     @classmethod
-    def _validate_tags(
-        cls, value: typing.Optional[typing.Dict[str, str]]
-    ) -> typing.Dict[str, str]:
+    def _validate_tags(cls, value: Optional[Dict[str, str]]) -> Dict[str, str]:
         return value if value is None else azure_cloud.validate_tags(value)
 
 

@@ -1,5 +1,5 @@
 import enum
-import sys
+from typing import Annotated
 
 import pydantic
 from pydantic import ConfigDict, Field, StringConstraints, field_validator
@@ -7,12 +7,6 @@ from ruamel.yaml import yaml_object
 
 from _nebari.utils import escape_string, yaml
 from _nebari.version import __version__, rounded_ver_parse
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
-
 
 # Regex for suitable project names
 project_name_regex = r"^[A-Za-z][A-Za-z0-9\-_]{1,14}[A-Za-z0-9]$"

@@ -198,9 +198,9 @@ class JHubApps(schema.Base):
 
 
 class MonitoringOverrides(schema.Base):
-    loki: typing.Dict = {}
-    promtail: typing.Dict = {}
-    minio: typing.Dict = {}
+    loki: Dict = {}
+    promtail: Dict = {}
+    minio: Dict = {}
 
 
 class Monitoring(schema.Base):
@@ -211,7 +211,7 @@ class Monitoring(schema.Base):
 
 class JupyterLabPioneer(schema.Base):
     enabled: bool = False
-    log_format: typing.Optional[str] = None
+    log_format: Optional[str] = None
 
 
 class Telemetry(schema.Base):
@@ -233,10 +233,10 @@ class IdleCuller(schema.Base):
 
 
 class JupyterLab(schema.Base):
-    default_settings: typing.Dict[str, typing.Any] = {}
+    default_settings: Dict[str, Any] = {}
     idle_culler: IdleCuller = IdleCuller()
-    initial_repositories: typing.List[typing.Dict[str, str]] = []
-    preferred_dir: typing.Optional[str] = None
+    initial_repositories: List[Dict[str, str]] = []
+    preferred_dir: Optional[str] = None
 
 
 class InputSchema(schema.Base):
@@ -376,9 +376,7 @@ class JupyterhubInputVars(schema.Base):
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
     cloud_provider: str = Field(alias="cloud-provider")
-    jupyterlab_preferred_dir: typing.Optional[str] = Field(
-        alias="jupyterlab-preferred-dir"
-    )
+    jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -399,7 +397,7 @@ class MonitoringInputVars(schema.Base):
 
 class TelemetryInputVars(schema.Base):
     jupyterlab_pioneer_enabled: bool = Field(alias="jupyterlab-pioneer-enabled")
-    jupyterlab_pioneer_log_format: typing.Optional[str] = Field(
+    jupyterlab_pioneer_log_format: Optional[str] = Field(
         alias="jupyterlab-pioneer-log-format"
     )
 
