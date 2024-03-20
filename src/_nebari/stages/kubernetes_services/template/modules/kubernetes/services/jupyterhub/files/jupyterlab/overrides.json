@@ -51,7 +51,23 @@
                 "rank": 1000,
                 "items": [
                     {
-                        "command": "condastore:open",
+                        "command": "nebari:run-first-enabled",
+                        "args": {
+                            "commands": [
+                                {
+                                  "id": "condastore:open",
+                                  "label": "Environment Management"
+                                },
+                                {
+                                  "id": "help:open",
+                                  "args": {
+                                    "url": "/conda-store",
+                                    "text": "Environment Management",
+                                    "newBrowserTab": true
+                                  }
+                                }
+                            ]
+                        },
                         "rank": 1
                     },
                     {
