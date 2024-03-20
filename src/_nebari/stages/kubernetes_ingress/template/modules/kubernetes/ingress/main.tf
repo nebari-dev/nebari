@@ -29,12 +29,11 @@ resource "kubernetes_service_account" "main" {
 
 resource "kubernetes_persistent_volume_claim" "traefik_certs_pvc" {
   metadata {
-    name = "traefik-ingress-certs"
+    name      = "traefik-ingress-certs"
     namespace = var.namespace
   }
   spec {
     access_modes = ["ReadWriteOnce"]
-    storage_class_name="gp2"
     resources {
       requests = {
         storage = "5Gi"
@@ -232,9 +231,9 @@ resource "kubernetes_deployment" "main" {
           image = "${var.traefik-image.image}:${var.traefik-image.tag}"
           name  = var.name
 
-          volume_mount { 
+          volume_mount {
             mount_path = "/mnt/acme-certificates"
-            name = "acme-certificates"
+            name       = "acme-certificates"
           }
           security_context {
             capabilities {
@@ -347,9 +346,9 @@ resource "kubernetes_deployment" "main" {
             success_threshold     = 1
           }
         }
-        volume { 
+        volume {
           name = "acme-certificates"
-          persistent_volume_claim { 
+          persistent_volume_claim {
             claim_name = kubernetes_persistent_volume_claim.traefik_certs_pvc.metadata.0.name
           }
         }
