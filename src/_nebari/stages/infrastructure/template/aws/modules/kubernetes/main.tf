@@ -57,7 +57,6 @@ resource "aws_eks_node_group" "main" {
   ]
 
   tags = merge({
-    #    "kubernetes.io/cluster/${var.name}"                       = "shared"
     "k8s.io/cluster-autoscaler/node-template/label/dedicated" = var.node_groups[count.index].name
     propagate_at_launch                                       = true
   }, var.tags)
