@@ -68,10 +68,10 @@ data "aws_eks_cluster_auth" "main" {
 
 resource "aws_eks_addon" "aws-ebs-csi-driver" {
   # required for Kubernetes v1.23+ on AWS
-  addon_name                 = "aws-ebs-csi-driver"
-  cluster_name               = aws_eks_cluster.main.name
-  resolve_conficts_on_create = "OVERWRITE"
-  resolve_conficts_on_update = "OVERWRITE"
+  addon_name                  = "aws-ebs-csi-driver"
+  cluster_name                = aws_eks_cluster.main.name
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
 
   configuration_values = jsonencode({
     controller = {
