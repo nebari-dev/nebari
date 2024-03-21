@@ -4,7 +4,7 @@
 
 We support only the latest version, and we use [CalVer](https://calver.org/) for versioning.
 
-You should feel comfortable upgrading if you're using our documented public APIs and pay attention to `DeprecationWarnings`. Whenever there is a need to break compatibility, it is announced in the [Changelog](./CHANGELOG.md) and will raise a `DeprecationWarning` before it's finally really broken.
+You should feel comfortable upgrading if you're using our documented public APIs and pay attention to `DeprecationWarnings`. Whenever there is a need to break compatibility, it is announced in the [Changelog](https://www.nebari.dev/docs/references/RELEASE) and will raise a `DeprecationWarning` before it's finally really broken.
 
 ## Reporting a Vulnerability
 
