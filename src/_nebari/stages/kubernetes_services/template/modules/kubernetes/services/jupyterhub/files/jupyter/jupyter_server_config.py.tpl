@@ -4,6 +4,13 @@
 
 # Extra config available at:
 # https://zero-to-jupyterhub.readthedocs.io/en/1.x/jupyterhub/customizing/user-management.html#culling-user-pods
+
+# Refuse to serve content from handlers missing authentication guards, unless
+# the handler is explicitly allow-listed with `@allow_unauthenticated`; this
+# prevents accidental exposure of information by extensions installed in the
+# single-user server when their handlers are missing authentication guards.
+c.ServerApp.allow_unauthenticated_access = False
+
 # Enable Show Hidden Files menu option in View menu
 c.ContentsManager.allow_hidden = True
 c.FileContentsManager.allow_hidden = True
