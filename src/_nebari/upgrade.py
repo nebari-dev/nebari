@@ -726,6 +726,7 @@ class Upgrade_2024_3_2(UpgradeStep):
 
         return config
 
+
 class Upgrade_2024_3_3(UpgradeStep):
     version = "2024.3.3"
 
@@ -735,6 +736,7 @@ class Upgrade_2024_3_3(UpgradeStep):
         rich.print("Ready to upgrade to Nebari version [green]2024.3.3[/green].")
 
         return config
+
 
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
