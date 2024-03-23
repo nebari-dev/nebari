@@ -264,8 +264,9 @@ resource "kubernetes_secret" "argo-workflows-conda-store-token" {
   }
 
   data = {
-    "conda-store-api-token"    = var.conda-store-argo-workflows-jupyter-scheduler-token
-    "conda-store-service-name" = var.conda-store-service-name
+    "conda-store-api-token"         = var.conda-store-argo-workflows-jupyter-scheduler-token
+    "conda-store-service-name"      = var.conda-store-service-name
+    "conda-store-service-namespace" = var.namespace
   }
 
   type = "Opaque"

@@ -455,6 +455,14 @@ def profile_conda_store_viewer_token():
                 }
             }
         },
+        "CONDA_STORE_SERVICE_NAMESPACE": {
+            "valueFrom": {
+                "secretKeyRef": {
+                    "name": "argo-workflows-conda-store-token",
+                    "key": "conda-store-service-namespace",
+                }
+            }
+        },
     }
 
 
