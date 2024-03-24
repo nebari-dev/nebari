@@ -67,7 +67,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.8
+          python-version: "3.11"
 
       - name: Retrieve secret from Vault
         uses: hashicorp/vault-action@v2.5.0

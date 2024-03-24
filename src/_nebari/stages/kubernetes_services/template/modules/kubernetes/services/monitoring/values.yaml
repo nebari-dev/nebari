@@ -1,7 +1,1 @@
 # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
-
-grafana:
-  additionalDataSources:
-   - name: Loki
-     type: loki
-     url: http://loki-gateway.dev
