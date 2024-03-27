@@ -29,7 +29,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * @isumitjha made their first contribution in https://github.com/nebari-dev/nebari/pull/2291
 * @tylergraff made their first contribution in https://github.com/nebari-dev/nebari/pull/2314
 
-**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.3.2...2024.3.3rc1
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.3.2...2024.3.3
 
 ## Release 2024.3.2 - March 14, 2024
 
