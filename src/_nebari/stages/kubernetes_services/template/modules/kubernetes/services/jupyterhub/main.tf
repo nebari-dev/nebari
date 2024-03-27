@@ -157,11 +157,18 @@ resource "helm_release" "jupyterhub" {
             token_url          = module.jupyterhub-openid-client.config.token_url
             userdata_url       = module.jupyterhub-openid-client.config.userinfo_url
             login_service      = "Keycloak"
-            username_key       = "preferred_username"
-            claim_groups_key   = "roles"
+            username_claim     = "preferred_username"
+            claim_groups_key   = "groups"
             allowed_groups     = ["jupyterhub_admin", "jupyterhub_developer"]
             admin_groups       = ["jupyterhub_admin"]
+            manage_groups      = true
+            refresh_pre_spawn  = true
+            validate_server_cert = false
+
+            # deprecated, to be removed (replaced by validate_server_cert)
             tls_verify         = false
+            # deprecated, to be removed (replaced by username_claim)
+            username_key       = "preferred_username"
           }
         }
       }
