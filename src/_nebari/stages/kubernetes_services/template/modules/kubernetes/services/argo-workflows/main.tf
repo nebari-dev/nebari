@@ -557,23 +557,6 @@ resource "kubernetes_manifest" "deployment_admission_controller" {
               }
             },
           ]
-          affinity = {
-            nodeAffinity = {
-              requiredDuringSchedulingIgnoredDuringExecution = {
-                nodeSelectorTerms = [
-                  {
-                    matchExpressions = [
-                      {
-                        key      = var.node-group.key
-                        operator = "In"
-                        values   = [var.node-group.value]
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
         }
       }
     }

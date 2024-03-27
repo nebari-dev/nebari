@@ -25,21 +25,21 @@ jobs:
         cancel-in-progress: true
     steps:
       - name: "Checkout Infrastructure"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Setup miniconda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
-          python-version: "3.10"
+          python-version: 3.8
           channels: conda-forge
           activate-environment: nebari-dev
 
       - name: Install dependencies
         run: |
-          conda install build grayskull conda-build conda-verify
+          conda install build grayskull conda-build
 
       - name: Generate sdist
         run: |
@@ -52,8 +52,3 @@ jobs:
       - name: Build conda package
         run: |
           conda build nebari
-
-      - name: Test conda package
-        run: |
-          conda install --use-local nebari
-          nebari --version

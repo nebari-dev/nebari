@@ -8,6 +8,7 @@ from rich import print
 from rich.table import Table
 
 from _nebari.deprecate import DEPRECATED_FILE_PATHS
+from _nebari.utils import is_relative_to
 from nebari import hookspecs, schema
 
 
@@ -88,7 +89,7 @@ def render_template(
         for path in deleted:
             abs_path = (output_directory / path).resolve()
 
-            if not abs_path.is_relative_to(output_directory):
+            if not is_relative_to(abs_path, output_directory):
                 raise Exception(
                     f"[ERROR] SHOULD NOT HAPPEN filename was about to be deleted but path={abs_path} is outside of output_directory"
                 )

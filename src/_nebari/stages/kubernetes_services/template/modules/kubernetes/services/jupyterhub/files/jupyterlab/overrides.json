@@ -6,8 +6,7 @@
         "apiUrl": "/conda-store/",
         "authMethod": "cookie",
         "loginUrl": "/conda-store/login?next=",
-        "authToken": "",
-        "addMainMenuItem": false
+        "authToken": ""
     },
     "@jupyterlab/apputils-extension:notification": {
         "checkForUpdates": false,
@@ -51,24 +50,13 @@
                 "rank": 1000,
                 "items": [
                     {
-                        "command": "nebari:run-first-enabled",
+                        "command": "help:open",
+                        "rank": 1,
                         "args": {
-                            "commands": [
-                                {
-                                  "id": "condastore:open",
-                                  "label": "Environment Management"
-                                },
-                                {
-                                  "id": "help:open",
-                                  "args": {
-                                    "url": "/conda-store",
-                                    "text": "Environment Management",
-                                    "newBrowserTab": true
-                                  }
-                                }
-                            ]
-                        },
-                        "rank": 1
+                            "url": "/conda-store",
+                            "text": "Environment Management",
+                            "newBrowserTab": true
+                        }
                     },
                     {
                         "command": "help:open",
