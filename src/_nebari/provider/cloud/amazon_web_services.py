@@ -7,25 +7,18 @@ from typing import Dict, List, Optional
 import boto3
 from botocore.exceptions import ClientError, EndpointConnectionError
 
-from _nebari import constants
+from _nebari.constants import AWS_ENV_DOCS
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari.utils import check_environment_variables
 from nebari import schema
 
 MAX_RETRIES = 5
 DELAY = 5
 
 
-def check_credentials():
-    """Check for AWS credentials are set in the environment."""
-    for variable in {
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-    }:
-        if variable not in os.environ:
-            raise ValueError(
-                f"""Missing the following required environment variable: {variable}\n
-                Please see the documentation for more information: {constants.AWS_ENV_DOCS}"""
-            )
+def check_credentials() -> None:
+    required_variables = {"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"}
+    check_environment_variables(required_variables, AWS_ENV_DOCS)
 
 
 @functools.lru_cache()

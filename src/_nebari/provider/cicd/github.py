@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Union
 
 import requests
 from nacl import encoding, public
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 from _nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
 from _nebari.provider.cicd.common import pip_install_nebari
@@ -143,49 +143,34 @@ class GHA_on_extras(BaseModel):
     paths: List[str]
 
 
-class GHA_on(BaseModel):
-    # to allow for dynamic key names
-    __root__: Dict[str, GHA_on_extras]
-
-    # TODO: validate __root__ values
-    # `push`, `pull_request`, etc.
-
-
-class GHA_job_steps_extras(BaseModel):
-    # to allow for dynamic key names
-    __root__: Union[str, float, int]
+GHA_on = RootModel[Dict[str, GHA_on_extras]]
+GHA_job_steps_extras = RootModel[Union[str, float, int]]
 
 
 class GHA_job_step(BaseModel):
     name: str
-    uses: Optional[str]
-    with_: Optional[Dict[str, GHA_job_steps_extras]] = Field(alias="with")
-    run: Optional[str]
-    env: Optional[Dict[str, GHA_job_steps_extras]]
-
-    class Config:
-        allow_population_by_field_name = True
+    uses: Optional[str] = None
+    with_: Optional[Dict[str, GHA_job_steps_extras]] = Field(alias="with", default=None)
+    run: Optional[str] = None
+    env: Optional[Dict[str, GHA_job_steps_extras]] = None
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class GHA_job_id(BaseModel):
     name: str
     runs_on_: str = Field(alias="runs-on")
-    permissions: Optional[Dict[str, str]]
+    permissions: Optional[Dict[str, str]] = None
     steps: List[GHA_job_step]
-
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
-class GHA_jobs(BaseModel):
-    # to allow for dynamic key names
-    __root__: Dict[str, GHA_job_id]
+GHA_jobs = RootModel[Dict[str, GHA_job_id]]
 
 
 class GHA(BaseModel):
     name: str
     on: GHA_on
-    env: Optional[Dict[str, str]]
+    env: Optional[Dict[str, str]] = None
     jobs: GHA_jobs
 
 
@@ -204,11 +189,7 @@ def checkout_image_step():
     return GHA_job_step(
         name="Checkout Image",
         uses="actions/checkout@v3",
-        with_={
-            "token": GHA_job_steps_extras(
-                __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
-            )
-        },
+        with_={"token": GHA_job_steps_extras("${{ secrets.REPOSITORY_ACCESS_TOKEN }}")},
     )
 
 
@@ -216,11 +197,7 @@ def setup_python_step():
     return GHA_job_step(
         name="Set up Python",
         uses="actions/setup-python@v4",
-        with_={
-            "python-version": GHA_job_steps_extras(
-                __root__=LATEST_SUPPORTED_PYTHON_VERSION
-            )
-        },
+        with_={"python-version": GHA_job_steps_extras(LATEST_SUPPORTED_PYTHON_VERSION)},
     )
 
 
@@ -242,7 +219,7 @@ def gen_nebari_ops(config):
     env_vars = gha_env_vars(config)
 
     push = GHA_on_extras(branches=[config.ci_cd.branch], paths=["nebari-config.yaml"])
-    on = GHA_on(__root__={"push": push})
+    on = GHA_on({"push": push})
 
     step1 = checkout_image_step()
     step2 = setup_python_step()
@@ -272,7 +249,7 @@ def gen_nebari_ops(config):
         ),
         env={
             "COMMIT_MSG": GHA_job_steps_extras(
-                __root__="nebari-config.yaml automated commit: ${{ github.sha }}"
+                "nebari-config.yaml automated commit: ${{ github.sha }}"
             )
         },
     )
@@ -291,7 +268,7 @@ def gen_nebari_ops(config):
         },
         steps=gha_steps,
     )
-    jobs = GHA_jobs(__root__={"build": job1})
+    jobs = GHA_jobs({"build": job1})
 
     return NebariOps(
         name="nebari auto update",
@@ -312,18 +289,16 @@ def gen_nebari_linter(config):
     pull_request = GHA_on_extras(
         branches=[config.ci_cd.branch], paths=["nebari-config.yaml"]
     )
-    on = GHA_on(__root__={"pull_request": pull_request})
+    on = GHA_on({"pull_request": pull_request})
 
     step1 = checkout_image_step()
     step2 = setup_python_step()
     step3 = install_nebari_step(config.nebari_version)
 
     step4_envs = {
-        "PR_NUMBER": GHA_job_steps_extras(__root__="${{ github.event.number }}"),
-        "REPO_NAME": GHA_job_steps_extras(__root__="${{ github.repository }}"),
-        "GITHUB_TOKEN": GHA_job_steps_extras(
-            __root__="${{ secrets.REPOSITORY_ACCESS_TOKEN }}"
-        ),
+        "PR_NUMBER": GHA_job_steps_extras("${{ github.event.number }}"),
+        "REPO_NAME": GHA_job_steps_extras("${{ github.repository }}"),
+        "GITHUB_TOKEN": GHA_job_steps_extras("${{ secrets.REPOSITORY_ACCESS_TOKEN }}"),
     }
 
     step4 = GHA_job_step(
@@ -336,7 +311,7 @@ def gen_nebari_linter(config):
         name="nebari", runs_on_="ubuntu-latest", steps=[step1, step2, step3, step4]
     )
     jobs = GHA_jobs(
-        __root__={
+        {
             "nebari-validate": job1,
         }
     )

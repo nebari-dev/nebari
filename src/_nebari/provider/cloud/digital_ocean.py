@@ -7,24 +7,20 @@ import kubernetes.client
 import kubernetes.config
 import requests
 
-from _nebari import constants
+from _nebari.constants import DO_ENV_DOCS
 from _nebari.provider.cloud.amazon_web_services import aws_delete_s3_bucket
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
-from _nebari.utils import set_do_environment
+from _nebari.utils import check_environment_variables, set_do_environment
 from nebari import schema
 
 
-def check_credentials():
-    for variable in {
+def check_credentials() -> None:
+    required_variables = {
+        "DIGITALOCEAN_TOKEN",
         "SPACES_ACCESS_KEY_ID",
         "SPACES_SECRET_ACCESS_KEY",
-        "DIGITALOCEAN_TOKEN",
-    }:
-        if variable not in os.environ:
-            raise ValueError(
-                f"""Missing the following required environment variable: {variable}\n
-                Please see the documentation for more information: {constants.DO_ENV_DOCS}"""
-            )
+    }
+    check_environment_variables(required_variables, DO_ENV_DOCS)
 
 
 def digital_ocean_request(url, method="GET", json=None):
@@ -63,7 +59,7 @@ def regions():
     return _kubernetes_options()["options"]["regions"]
 
 
-def kubernetes_versions(region) -> typing.List[str]:
+def kubernetes_versions() -> typing.List[str]:
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
     supported_kubernetes_versions = sorted(
         [_["slug"].split("-")[0] for _ in _kubernetes_options()["options"]["versions"]]

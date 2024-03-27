@@ -3,6 +3,7 @@ import os
 import re
 import tempfile
 from pathlib import Path
+from typing import Any, Dict
 
 import pydantic
 import requests
@@ -45,7 +46,7 @@ def render_config(
     region: str = None,
     disable_prompt: bool = False,
     ssl_cert_email: str = None,
-):
+) -> Dict[str, Any]:
     config = {
         "provider": cloud_provider,
         "namespace": namespace,
@@ -189,7 +190,7 @@ def render_config(
     from nebari.plugins import nebari_plugin_manager
 
     try:
-        config_model = nebari_plugin_manager.config_schema.parse_obj(config)
+        config_model = nebari_plugin_manager.config_schema.model_validate(config)
     except pydantic.ValidationError as e:
         print(str(e))
 

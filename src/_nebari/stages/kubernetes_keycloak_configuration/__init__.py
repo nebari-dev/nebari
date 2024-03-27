@@ -3,6 +3,7 @@ import time
 from typing import Any, Dict, List, Type
 
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.kubernetes_keycloak import Authentication
 from _nebari.stages.tf_objects import NebariTerraformState
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -14,7 +15,7 @@ TIMEOUT = 10
 class InputVars(schema.Base):
     realm: str = "nebari"
     realm_display_name: str
-    authentication: Dict[str, Any]
+    authentication: Authentication
     keycloak_groups: List[str] = ["superadmin", "admin", "developer", "analyst"]
     default_groups: List[str] = ["analyst"]
 
@@ -39,7 +40,7 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
         input_vars.keycloak_groups += users_group
         input_vars.default_groups += users_group
 
-        return input_vars.dict()
+        return input_vars.model_dump()
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False

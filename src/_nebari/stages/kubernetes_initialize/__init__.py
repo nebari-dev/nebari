@@ -1,8 +1,7 @@
 import sys
-import typing
-from typing import Any, Dict, List, Type, Union
+from typing import Any, Dict, List, Optional, Type
 
-import pydantic
+from pydantic import model_validator
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -16,37 +15,34 @@ from nebari.hookspecs import NebariStage, hookimpl
 
 class ExtContainerReg(schema.Base):
     enabled: bool = False
-    access_key_id: typing.Optional[str]
-    secret_access_key: typing.Optional[str]
-    extcr_account: typing.Optional[str]
-    extcr_region: typing.Optional[str]
+    access_key_id: Optional[str] = None
+    secret_access_key: Optional[str] = None
+    extcr_account: Optional[str] = None
+    extcr_region: Optional[str] = None
 
-    @pydantic.root_validator
-    def enabled_must_have_fields(cls, values):
-        if values["enabled"]:
+    @model_validator(mode="after")
+    def enabled_must_have_fields(self):
+        if self.enabled:
             for fldname in (
                 "access_key_id",
                 "secret_access_key",
                 "extcr_account",
                 "extcr_region",
             ):
-                if (
-                    fldname not in values
-                    or values[fldname] is None
-                    or values[fldname].strip() == ""
-                ):
+                value = getattr(self, fldname)
+                if value is None or value.strip() == "":
                     raise ValueError(
                         f"external_container_reg must contain a non-blank {fldname} when enabled is true"
                     )
-        return values
+        return self
 
 
 class InputVars(schema.Base):
     name: str
     environment: str
     cloud_provider: str
-    aws_region: Union[str, None] = None
-    external_container_reg: Union[ExtContainerReg, None] = None
+    aws_region: Optional[str] = None
+    external_container_reg: Optional[ExtContainerReg] = None
     gpu_enabled: bool = False
     gpu_node_group_names: List[str] = []
 

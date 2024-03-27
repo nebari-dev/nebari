@@ -1,17 +1,9 @@
-import tempfile
 from collections.abc import MutableMapping
-from pathlib import Path
-from typing import List
 
 import pytest
 import yaml
-from typer import Typer
-from typer.testing import CliRunner
 
-from _nebari.cli import create_cli
 from _nebari.constants import AZURE_DEFAULT_REGION
-
-runner = CliRunner()
 
 MOCK_KUBERNETES_VERSIONS = {
     "aws": ["1.20"],
@@ -53,9 +45,8 @@ MOCK_CLOUD_REGIONS = {
         (["-o"], 2, ["requires an argument"]),
     ],
 )
-def test_cli_init_stdout(args: List[str], exit_code: int, content: List[str]):
-    app = create_cli()
-    result = runner.invoke(app, ["init"] + args)
+def test_cli_init_stdout(runner, cli, args, exit_code, content):
+    result = runner.invoke(cli, ["init"] + args)
     assert result.exit_code == exit_code
     for c in content:
         assert c in result.stdout
@@ -121,18 +112,20 @@ def generate_test_data_test_cli_init_happy_path():
 
 
 def test_cli_init_happy_path(
-    provider: str,
-    region: str,
-    project_name: str,
-    domain_name: str,
-    namespace: str,
-    auth_provider: str,
-    ci_provider: str,
-    terraform_state: str,
-    email: str,
-    kubernetes_version: str,
+    runner,
+    cli,
+    provider,
+    region,
+    project_name,
+    domain_name,
+    namespace,
+    auth_provider,
+    ci_provider,
+    terraform_state,
+    email,
+    kubernetes_version,
+    tmp_path,
 ):
-    app = create_cli()
     args = [
         "init",
         provider,
@@ -160,57 +153,39 @@ def test_cli_init_happy_path(
         region,
     ]
 
-    expected_yaml = f"""
-    provider: {provider}
-    namespace: {namespace}
-    project_name: {project_name}
-    domain: {domain_name}
-    ci_cd:
-        type: {ci_provider}
-    terraform_state:
-        type: {terraform_state}
-    security:
-        authentication:
-            type: {auth_provider}
-    certificate:
-        type: lets-encrypt
-        acme_email: {email}
-    """
+    expected = {
+        "provider": provider,
+        "namespace": namespace,
+        "project_name": project_name,
+        "domain": domain_name,
+        "ci_cd": {"type": ci_provider},
+        "terraform_state": {"type": terraform_state},
+        "security": {"authentication": {"type": auth_provider}},
+        "certificate": {
+            "type": "lets-encrypt",
+            "acme_email": email,
+        },
+    }
 
     provider_section = get_provider_section_header(provider)
     if provider_section != "" and kubernetes_version != "latest":
-        expected_yaml += f"""
-    {provider_section}:
-        kubernetes_version: '{kubernetes_version}'
-        region: '{region}'
-    """
+        expected[provider_section] = {
+            "kubernetes_version": kubernetes_version,
+            "region": region,
+        }
 
-    assert_nebari_init_args(app, args, expected_yaml)
+    tmp_file = tmp_path / "nebari-config.yaml"
+    assert not tmp_file.exists()
 
+    result = runner.invoke(cli, args + ["--output", tmp_file.resolve()])
+    assert not result.exception
+    assert 0 == result.exit_code
+    assert tmp_file.exists()
 
-def assert_nebari_init_args(
-    app: Typer, args: List[str], expected_yaml: str, input: str = None
-):
-    """
-    Run nebari init with happy path assertions and verify the generated yaml contains
-    all values in expected_yaml.
-    """
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        assert tmp_file.exists() is False
-
-        result = runner.invoke(
-            app, args + ["--output", tmp_file.resolve()], input=input
-        )
-
-        assert not result.exception
-        assert 0 == result.exit_code
-        assert tmp_file.exists() is True
-
-        with open(tmp_file.resolve(), "r") as config_yaml:
-            config = flatten_dict(yaml.safe_load(config_yaml))
-            expected = flatten_dict(yaml.safe_load(expected_yaml))
-            assert expected.items() <= config.items()
+    with tmp_file.open() as f:
+        config = flatten_dict(yaml.safe_load(f))
+        expected = flatten_dict(expected)
+        assert expected.items() <= config.items()
 
 
 def pytest_generate_tests(metafunc):
