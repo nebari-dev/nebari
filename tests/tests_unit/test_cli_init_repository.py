@@ -174,21 +174,45 @@ def test_cli_init_error_repository_missing_env(monkeypatch: pytest.MonkeyPatch):
         assert tmp_file.exists() is False
 
 
-def test_cli_init_error_invalid_repo(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setenv("GITHUB_USERNAME", TEST_GITHUB_USERNAME)
-    monkeypatch.setenv("GITHUB_TOKEN", TEST_GITHUB_TOKEN)
-
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://github.com/user/repository",
+        "https://gitlab.com/user/repository/",
+    ],
+)
+def test_cli_init_valid_repo(url):
     app = create_cli()
 
-    args = [
-        "init",
-        "local",
-        "--project-name",
-        "test",
-        "--repository-auto-provision",
-        "--repository",
-        "https://notgithub.com",
-    ]
+    args = ["init", "local", "--project-name", "test", "--repository", url]
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
+        assert tmp_file.exists() is False
+
+        result = runner.invoke(app, args + ["--output", tmp_file.resolve()])
+
+        assert 0 == result.exit_code
+        assert not result.exception
+        assert tmp_file.exists() is True
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://github.com",
+        "https://gitlab.com/user/",
+        "https://gitlab.com/user",
+        "http://github.com/user/",
+        "gitlab.com/user/",
+        "github.com",
+        "https://notgithub.com/user/repository",
+    ],
+)
+def test_cli_init_error_invalid_repo(url):
+    app = create_cli()
+
+    args = ["init", "local", "--project-name", "test", "--repository", url]
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
