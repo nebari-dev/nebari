@@ -18,7 +18,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Fix loki gateway url when deployed on non-dev namespace by @aktech in https://github.com/nebari-dev/nebari/pull/2327
 * Dmcandrew update ruamel.yaml by @dcmcand in https://github.com/nebari-dev/nebari/pull/2315
 * upgrade auth0-python version to ultimately resolve CVE-2024-26130 by @tylergraff in https://github.com/nebari-dev/nebari/pull/2314
-* remove depracated code paths by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2349
+* remove deprecated code paths by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2349
 * Create SECURITY.md by @dcmcand in https://github.com/nebari-dev/nebari/pull/2354
 * Set node affinity for more pods to ensure they run on general node pool by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2353
 * Deduplicate conda-store in JupyterLab main menu by @krassowski in https://github.com/nebari-dev/nebari/pull/2347
