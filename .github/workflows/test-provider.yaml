@@ -32,8 +32,12 @@ on:
 
 jobs:
   test-render-providers:
-    # avoid running on PRs coming from a fork
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
+    # Mechanism to prevent this test from running
+    # - on forks whose maintainers specify that provider credentials are absent (by setting a github variable NO_PROVIDER_CREDENTIALS)
+    # - on PRs coming from a fork (in which case github does not make the destination fork's credentials available)
+    if: |
+      vars.NO_PROVIDER_CREDENTIALS == '' &&
+      (github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request')
     name: "Test Nebari Provider"
     runs-on: ubuntu-latest
     permissions:
