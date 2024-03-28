@@ -59,9 +59,6 @@ jobs:
           - gitlab-ci
       fail-fast: false
     steps:
-      - name: "Debug Print NO_PROVIDER_CREDENTIALS"
-        run:  echo ${{ vars.NO_PROVIDER_CREDENTIALS }}
-
       - name: "Checkout Infrastructure"
         uses: actions/checkout@v4
 
@@ -70,7 +67,6 @@ jobs:
         run: hub pr checkout ${{ inputs.pr_number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          #NO_PROVIDER_CREDENTIALS: ${{ vars.NO_PROVIDER_CREDENTIALS }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
