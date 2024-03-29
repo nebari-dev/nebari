@@ -10,7 +10,7 @@ from nebari import schema
 
 
 def check_credentials() -> None:
-    required_variables = {"GOOGLE_APPLICATION_CREDENTIALS", "GOOGLE_PROJECT"}
+    required_variables = {"GOOGLE_CREDENTIALS", "PROJECT_ID"}
     check_environment_variables(required_variables, GCP_ENV_DOCS)
 
 
