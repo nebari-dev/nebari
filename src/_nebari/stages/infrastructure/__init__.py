@@ -340,8 +340,7 @@ class GoogleCloudPlatformProvider(schema.Base):
     @classmethod
     def _check_input(cls, data: Any) -> Any:
         google_cloud.check_credentials()
-        avaliable_regions = google_cloud.regions(data["project"])
-        print(avaliable_regions)
+        avaliable_regions = google_cloud.regions()
         if data["region"] not in avaliable_regions:
             raise ValueError(
                 f"Google Cloud region={data['region']} is not one of {avaliable_regions}"
