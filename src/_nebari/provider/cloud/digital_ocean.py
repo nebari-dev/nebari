@@ -59,7 +59,7 @@ def regions():
     return _kubernetes_options()["options"]["regions"]
 
 
-def kubernetes_versions() -> typing.List[str]:
+def kubernetes_versions(region) -> typing.List[str]:
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
     supported_kubernetes_versions = sorted(
         [_["slug"].split("-")[0] for _ in _kubernetes_options()["options"]["versions"]]
