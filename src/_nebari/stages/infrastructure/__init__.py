@@ -242,7 +242,7 @@ class DigitalOceanProvider(schema.Base):
 
     @model_validator(mode="before")
     @classmethod
-    def _check_input(self, data: Any) -> Any:
+    def _check_input(cls, data: Any) -> Any:
         digital_ocean.check_credentials()
 
         # check if region is valid
