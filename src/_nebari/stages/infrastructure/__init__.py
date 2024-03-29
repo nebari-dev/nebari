@@ -479,7 +479,7 @@ class AmazonWebServicesProvider(schema.Base):
         # check if availability zones are valid
         available_zones = amazon_web_services.zones(data["region"])
         if "availability_zones" not in data:
-            data["availability_zones"] = available_zones
+            data["availability_zones"] = list(sorted(available_zones))[:2]
         else:
             for zone in data["availability_zones"]:
                 if zone not in available_zones:
