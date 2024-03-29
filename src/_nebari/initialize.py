@@ -113,7 +113,7 @@ def render_config(
     if cloud_provider == ProviderEnum.do:
         do_region = region or constants.DO_DEFAULT_REGION
         do_kubernetes_versions = kubernetes_version or get_latest_kubernetes_version(
-            digital_ocean.kubernetes_versions(do_region)
+            digital_ocean.kubernetes_versions()
         )
         config["digital_ocean"] = {
             "kubernetes_version": do_kubernetes_versions,
