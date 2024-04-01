@@ -106,7 +106,7 @@ class JupyterLabProfile(schema.Base):
 
 
 class DaskWorkerProfile(schema.Base):
-    worker_cores_limit: int
+    worker_cores_limit: float
     worker_cores: float
     worker_memory_limit: str
     worker_memory: str
