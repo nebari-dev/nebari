@@ -79,7 +79,7 @@ class Theme(schema.Base):
 
 
 class KubeSpawner(schema.Base):
-    cpu_limit: int
+    cpu_limit: float
     cpu_guarantee: float
     mem_limit: str
     mem_guarantee: str
