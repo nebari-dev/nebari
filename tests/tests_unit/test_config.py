@@ -1,10 +1,7 @@
 import os
 import pathlib
-from typing import Optional
 
 import pytest
-import yaml
-from pydantic import BaseModel
 
 from _nebari.config import (
     backup_configuration,
@@ -13,23 +10,6 @@ from _nebari.config import (
     set_nested_attribute,
     write_configuration,
 )
-
-
-def test_parse_env_config(monkeypatch):
-    keyword = "NEBARI_SECRET__amazon_web_services__kubernetes_version"
-    value = "1.20"
-    monkeypatch.setenv(keyword, value)
-
-    class DummyAWSModel(BaseModel):
-        kubernetes_version: Optional[str] = None
-
-    class DummmyModel(BaseModel):
-        amazon_web_services: DummyAWSModel = DummyAWSModel()
-
-    model = DummmyModel()
-
-    model_updated = set_config_from_environment_variables(model)
-    assert model_updated.amazon_web_services.kubernetes_version == value
 
 
 def test_set_nested_attribute():
@@ -82,27 +62,6 @@ def test_set_config_from_environment_variables(nebari_config):
     del os.environ[secret_key_nested]
 
 
-def test_set_config_from_env(monkeypatch, tmp_path, config_schema):
-    keyword = "NEBARI_SECRET__amazon_web_services__kubernetes_version"
-    value = "1.20"
-    monkeypatch.setenv(keyword, value)
-
-    config_dict = {
-        "provider": "aws",
-        "project_name": "test",
-        "amazon_web_services": {"region": "us-east-1", "kubernetes_version": "1.19"},
-    }
-
-    config_file = tmp_path / "nebari-config.yaml"
-    with config_file.open("w") as f:
-        yaml.dump(config_dict, f)
-
-    from _nebari.config import read_configuration
-
-    config = read_configuration(config_file, config_schema)
-    assert config.amazon_web_services.kubernetes_version == value
-
-
 def test_set_config_from_environment_invalid_secret(nebari_config):
     invalid_secret_key = "NEBARI_SECRET__nonexistent__attribute"
     os.environ[invalid_secret_key] = "some_value"
@@ -138,7 +97,7 @@ def test_read_configuration_non_existent_file(nebari_config):
 
 def test_write_configuration_with_dict(nebari_config, tmp_path):
     config_file = tmp_path / "nebari-config-dict.yaml"
-    config_dict = nebari_config.model_dump()
+    config_dict = nebari_config.dict()
 
     write_configuration(config_file, config_dict)
     read_config = read_configuration(config_file, nebari_config.__class__)

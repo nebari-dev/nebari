@@ -1,10 +1,15 @@
 import json
+import tempfile
+from pathlib import Path
 from typing import Any, List
 from unittest.mock import Mock, patch
 
 import pytest
 import requests.exceptions
 import yaml
+from typer.testing import CliRunner
+
+from _nebari.cli import create_cli
 
 TEST_KEYCLOAKAPI_REQUEST = "GET /"  # get list of realms
 
@@ -21,6 +26,8 @@ TEST_REALMS = [
     {"id": "test-realm", "realm": "test-realm"},
     {"id": "master", "realm": "master"},
 ]
+
+runner = CliRunner()
 
 
 @pytest.mark.parametrize(
@@ -40,8 +47,9 @@ TEST_REALMS = [
         (["keycloak-api", "-r"], 2, ["requires an argument"]),
     ],
 )
-def test_cli_dev_stdout(runner, cli, args, exit_code, content):
-    result = runner.invoke(cli, ["dev"] + args)
+def test_cli_dev_stdout(args: List[str], exit_code: int, content: List[str]):
+    app = create_cli()
+    result = runner.invoke(app, ["dev"] + args)
     assert result.exit_code == exit_code
     for c in content:
         assert c in result.stdout
@@ -92,9 +100,9 @@ def mock_api_request(
     ),
 )
 def test_cli_dev_keycloakapi_happy_path_from_env(
-    _mock_requests_post, _mock_requests_request, runner, cli, tmp_path
+    _mock_requests_post, _mock_requests_request
 ):
-    result = run_cli_dev(runner, cli, tmp_path, use_env=True)
+    result = run_cli_dev(use_env=True)
 
     assert 0 == result.exit_code
     assert not result.exception
@@ -117,9 +125,9 @@ def test_cli_dev_keycloakapi_happy_path_from_env(
     ),
 )
 def test_cli_dev_keycloakapi_happy_path_from_config(
-    _mock_requests_post, _mock_requests_request, runner, cli, tmp_path
+    _mock_requests_post, _mock_requests_request
 ):
-    result = run_cli_dev(runner, cli, tmp_path, use_env=False)
+    result = run_cli_dev(use_env=False)
 
     assert 0 == result.exit_code
     assert not result.exception
@@ -135,10 +143,8 @@ def test_cli_dev_keycloakapi_happy_path_from_config(
         MOCK_KEYCLOAK_ENV["KEYCLOAK_ADMIN_PASSWORD"], url, headers, data, verify
     ),
 )
-def test_cli_dev_keycloakapi_error_bad_request(
-    _mock_requests_post, runner, cli, tmp_path
-):
-    result = run_cli_dev(runner, cli, tmp_path, request="malformed")
+def test_cli_dev_keycloakapi_error_bad_request(_mock_requests_post):
+    result = run_cli_dev(request="malformed")
 
     assert 1 == result.exit_code
     assert result.exception
@@ -151,10 +157,8 @@ def test_cli_dev_keycloakapi_error_bad_request(
         "invalid_admin_password", url, headers, data, verify
     ),
 )
-def test_cli_dev_keycloakapi_error_authentication(
-    _mock_requests_post, runner, cli, tmp_path
-):
-    result = run_cli_dev(runner, cli, tmp_path)
+def test_cli_dev_keycloakapi_error_authentication(_mock_requests_post):
+    result = run_cli_dev()
 
     assert 1 == result.exit_code
     assert result.exception
@@ -175,9 +179,9 @@ def test_cli_dev_keycloakapi_error_authentication(
     ),
 )
 def test_cli_dev_keycloakapi_error_authorization(
-    _mock_requests_post, _mock_requests_request, runner, cli, tmp_path
+    _mock_requests_post, _mock_requests_request
 ):
-    result = run_cli_dev(runner, cli, tmp_path)
+    result = run_cli_dev()
 
     assert 1 == result.exit_code
     assert result.exception
@@ -188,66 +192,62 @@ def test_cli_dev_keycloakapi_error_authorization(
 @patch(
     "_nebari.keycloak.requests.post", side_effect=requests.exceptions.RequestException()
 )
-def test_cli_dev_keycloakapi_request_exception(
-    _mock_requests_post, runner, cli, tmp_path
-):
-    result = run_cli_dev(runner, cli, tmp_path)
+def test_cli_dev_keycloakapi_request_exception(_mock_requests_post):
+    result = run_cli_dev()
 
     assert 1 == result.exit_code
     assert result.exception
 
 
 @patch("_nebari.keycloak.requests.post", side_effect=Exception())
-def test_cli_dev_keycloakapi_unhandled_error(
-    _mock_requests_post, runner, cli, tmp_path
-):
-    result = run_cli_dev(runner, cli, tmp_path)
+def test_cli_dev_keycloakapi_unhandled_error(_mock_requests_post):
+    result = run_cli_dev()
 
     assert 1 == result.exit_code
     assert result.exception
 
 
 def run_cli_dev(
-    runner,
-    cli,
-    tmp_path,
     request: str = TEST_KEYCLOAKAPI_REQUEST,
     use_env: bool = True,
     extra_args: List[str] = [],
 ):
-    tmp_file = tmp_path.resolve() / "nebari-config.yaml"
-    assert tmp_file.exists() is False
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
+        assert tmp_file.exists() is False
 
-    extra_config = (
-        {
-            "domain": TEST_DOMAIN,
-            "security": {
-                "keycloak": {
-                    "initial_root_password": MOCK_KEYCLOAK_ENV[
-                        "KEYCLOAK_ADMIN_PASSWORD"
-                    ]
-                }
-            },
-        }
-        if not use_env
-        else {}
-    )
-    config = {**{"project_name": "dev"}, **extra_config}
-    with tmp_file.open("w") as f:
-        yaml.dump(config, f)
+        extra_config = (
+            {
+                "domain": TEST_DOMAIN,
+                "security": {
+                    "keycloak": {
+                        "initial_root_password": MOCK_KEYCLOAK_ENV[
+                            "KEYCLOAK_ADMIN_PASSWORD"
+                        ]
+                    }
+                },
+            }
+            if not use_env
+            else {}
+        )
+        config = {**{"project_name": "dev"}, **extra_config}
+        with open(tmp_file.resolve(), "w") as f:
+            yaml.dump(config, f)
 
-    assert tmp_file.exists()
+        assert tmp_file.exists() is True
 
-    args = [
-        "dev",
-        "keycloak-api",
-        "--config",
-        tmp_file.resolve(),
-        "--request",
-        request,
-    ] + extra_args
+        app = create_cli()
 
-    env = MOCK_KEYCLOAK_ENV if use_env else {}
-    result = runner.invoke(cli, args=args, env=env)
+        args = [
+            "dev",
+            "keycloak-api",
+            "--config",
+            tmp_file.resolve(),
+            "--request",
+            request,
+        ] + extra_args
 
-    return result
+        env = MOCK_KEYCLOAK_ENV if use_env else {}
+        result = runner.invoke(app, args=args, env=env)
+
+        return result

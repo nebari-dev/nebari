@@ -1,6 +1,14 @@
-def test_dns_option(config_gcp, runner, cli):
+from typer.testing import CliRunner
+
+from _nebari.cli import create_cli
+
+runner = CliRunner()
+
+
+def test_dns_option(config_gcp):
+    app = create_cli()
     result = runner.invoke(
-        cli,
+        app,
         [
             "deploy",
             "-c",
