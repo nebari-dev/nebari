@@ -78,7 +78,7 @@ class GitHubConfig(schema.Base):
         }
         if value is None:
             raise ValueError(
-                f"{variable_mapping[info.field_name]} is not set in the environment"
+                f"Missing the following required environment variable: {variable_mapping[info.field_name]}"
             )
         return value
 
@@ -107,7 +107,7 @@ class Auth0Config(schema.Base):
         }
         if value is None:
             raise ValueError(
-                f"{variable_mapping[info.field_name]} is not set in the environment"
+                f"Missing the following required environment variable: {variable_mapping[info.field_name]} "
             )
         return value
 

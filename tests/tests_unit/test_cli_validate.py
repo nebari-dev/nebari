@@ -134,7 +134,13 @@ amazon_web_services:
     "key, value, provider, expected_message, addl_config",
     [
         ("NEBARI_SECRET__project_name", "123invalid", "local", "validation error", {}),
-        ("NEBARI_SECRET__this_is_an_error", "true", "local", "object has no field", {}),
+        (
+            "NEBARI_SECRET__this_is_an_error",
+            "true",
+            "local",
+            "Object has no attribute",
+            {},
+        ),
         (
             "NEBARI_SECRET__amazon_web_services__kubernetes_version",
             "1.0",
