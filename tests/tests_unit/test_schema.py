@@ -1,7 +1,7 @@
 from contextlib import nullcontext
 
 import pytest
-from pydantic.error_wrappers import ValidationError
+from pydantic import ValidationError
 
 from nebari import schema
 from nebari.plugins import nebari_plugin_manager
@@ -125,7 +125,7 @@ def test_no_provider(config_schema, provider, full_name, default_fields):
     }
     config = config_schema(**config_dict)
     assert config.provider == provider
-    assert full_name in config.dict()
+    assert full_name in config.model_dump()
 
 
 def test_multiple_providers(config_schema):
@@ -164,6 +164,6 @@ def test_setted_provider(config_schema, provider):
     }
     config = config_schema(**config_dict)
     assert config.provider == provider
-    result_config_dict = config.dict()
+    result_config_dict = config.model_dump()
     assert provider in result_config_dict
     assert result_config_dict[provider]["kube_context"] == "some_context"

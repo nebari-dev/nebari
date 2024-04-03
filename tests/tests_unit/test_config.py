@@ -97,7 +97,7 @@ def test_read_configuration_non_existent_file(nebari_config):
 
 def test_write_configuration_with_dict(nebari_config, tmp_path):
     config_file = tmp_path / "nebari-config-dict.yaml"
-    config_dict = nebari_config.dict()
+    config_dict = nebari_config.model_dump()
 
     write_configuration(config_file, config_dict)
     read_config = read_configuration(config_file, nebari_config.__class__)
