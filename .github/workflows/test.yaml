@@ -32,22 +32,21 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.8"
-          - "3.9"
           - "3.10"
           - "3.11"
+          - "3.12"
       fail-fast: false
     concurrency:
       group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-${{ matrix.python-version }}
       cancel-in-progress: true
     steps:
       - name: "Checkout Infrastructure"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup miniconda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
