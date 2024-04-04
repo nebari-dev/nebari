@@ -1,5 +1,3 @@
-import tempfile
-from pathlib import Path
 from typing import List
 from unittest.mock import Mock, patch
 from zipfile import ZipFile
@@ -8,11 +6,6 @@ import kubernetes.client
 import kubernetes.client.exceptions
 import pytest
 import yaml
-from typer.testing import CliRunner
-
-from _nebari.cli import create_cli
-
-runner = CliRunner()
 
 
 class MockPod:
@@ -63,9 +56,8 @@ def mock_read_namespaced_pod_log(name: str, namespace: str, container: str):
         (["-o"], 2, ["requires an argument"]),
     ],
 )
-def test_cli_support_stdout(args: List[str], exit_code: int, content: List[str]):
-    app = create_cli()
-    result = runner.invoke(app, ["support"] + args)
+def test_cli_support_stdout(runner, cli, args, exit_code, content):
+    result = runner.invoke(cli, ["support"] + args)
     assert result.exit_code == exit_code
     for c in content:
         assert c in result.stdout
@@ -96,59 +88,55 @@ def test_cli_support_stdout(args: List[str], exit_code: int, content: List[str])
     ),
 )
 def test_cli_support_happy_path(
-    _mock_k8s_corev1api, _mock_config, monkeypatch: pytest.MonkeyPatch
+    _mock_k8s_corev1api, _mock_config, runner, cli, monkeypatch, tmp_path
 ):
-    with tempfile.TemporaryDirectory() as tmp:
-        # NOTE: The support command leaves the ./log folder behind after running,
-        # relative to wherever the tests were run from.
-        # Changing context to the tmp dir so this will be cleaned up properly.
-        monkeypatch.chdir(Path(tmp).resolve())
+    # NOTE: The support command leaves the ./log folder behind after running,
+    # relative to wherever the tests were run from.
+    # Changing context to the tmp dir so this will be cleaned up properly.
+    monkeypatch.chdir(tmp_path)
 
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        assert tmp_file.exists() is False
+    tmp_file = tmp_path / "nebari-config.yaml"
+    assert not tmp_file.exists()
 
-        with open(tmp_file.resolve(), "w") as f:
-            yaml.dump({"project_name": "support", "namespace": "test-ns"}, f)
+    with tmp_file.open("w") as f:
+        yaml.dump({"project_name": "support", "namespace": "test-ns"}, f)
+    assert tmp_file.exists()
 
-        assert tmp_file.exists() is True
+    log_zip_file = tmp_path / "test-support.zip"
+    assert not log_zip_file.exists()
 
-        app = create_cli()
+    result = runner.invoke(
+        cli,
+        [
+            "support",
+            "--config",
+            tmp_file.resolve(),
+            "--output",
+            log_zip_file.resolve(),
+        ],
+    )
 
-        log_zip_file = Path(tmp).resolve() / "test-support.zip"
-        assert log_zip_file.exists() is False
+    assert log_zip_file.exists()
 
-        result = runner.invoke(
-            app,
-            [
-                "support",
-                "--config",
-                tmp_file.resolve(),
-                "--output",
-                log_zip_file.resolve(),
-            ],
-        )
+    assert 0 == result.exit_code
+    assert not result.exception
+    assert "log/test-ns" in result.stdout
 
-        assert log_zip_file.exists() is True
-
-        assert 0 == result.exit_code
-        assert not result.exception
-        assert "log/test-ns" in result.stdout
-
-        # open the zip and check a sample file for the expected formatting
-        with ZipFile(log_zip_file.resolve(), "r") as log_zip:
-            # expect 1 log file per pod
-            assert 2 == len(log_zip.namelist())
-            with log_zip.open("log/test-ns/pod-1.txt") as log_file:
-                content = str(log_file.read(), "UTF-8")
-                # expect formatted header + logs for each container
-                expected = """
+    # open the zip and check a sample file for the expected formatting
+    with ZipFile(log_zip_file.resolve(), "r") as log_zip:
+        # expect 1 log file per pod
+        assert 2 == len(log_zip.namelist())
+        with log_zip.open("log/test-ns/pod-1.txt") as log_file:
+            content = str(log_file.read(), "UTF-8")
+            # expect formatted header + logs for each container
+            expected = """
 10.0.0.1\ttest-ns\tpod-1
 Container: container-1-1
 Test log entry: pod-1 -- test-ns -- container-1-1
 Container: container-1-2
 Test log entry: pod-1 -- test-ns -- container-1-2
 """
-                assert expected.strip() == content.strip()
+            assert expected.strip() == content.strip()
 
 
 @patch("kubernetes.config.kube_config.load_kube_config", return_value=Mock())
@@ -161,50 +149,44 @@ Test log entry: pod-1 -- test-ns -- container-1-2
     ),
 )
 def test_cli_support_error_apiexception(
-    _mock_k8s_corev1api, _mock_config, monkeypatch: pytest.MonkeyPatch
+    _mock_k8s_corev1api, _mock_config, runner, cli, monkeypatch, tmp_path
 ):
-    with tempfile.TemporaryDirectory() as tmp:
-        monkeypatch.chdir(Path(tmp).resolve())
+    monkeypatch.chdir(tmp_path)
 
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        assert tmp_file.exists() is False
+    tmp_file = tmp_path / "nebari-config.yaml"
+    assert not tmp_file.exists()
 
-        with open(tmp_file.resolve(), "w") as f:
-            yaml.dump({"project_name": "support", "namespace": "test-ns"}, f)
+    with tmp_file.open("w") as f:
+        yaml.dump({"project_name": "support", "namespace": "test-ns"}, f)
 
-        assert tmp_file.exists() is True
+    assert tmp_file.exists() is True
 
-        app = create_cli()
+    log_zip_file = tmp_path / "test-support.zip"
 
-        log_zip_file = Path(tmp).resolve() / "test-support.zip"
+    result = runner.invoke(
+        cli,
+        [
+            "support",
+            "--config",
+            tmp_file.resolve(),
+            "--output",
+            log_zip_file.resolve(),
+        ],
+    )
 
-        result = runner.invoke(
-            app,
-            [
-                "support",
-                "--config",
-                tmp_file.resolve(),
-                "--output",
-                log_zip_file.resolve(),
-            ],
-        )
+    assert not log_zip_file.exists()
 
-        assert log_zip_file.exists() is False
-
-        assert 1 == result.exit_code
-        assert result.exception
-        assert "Reason: unit testing" in str(result.exception)
+    assert 1 == result.exit_code
+    assert result.exception
+    assert "Reason: unit testing" in str(result.exception)
 
 
-def test_cli_support_error_missing_config():
-    with tempfile.TemporaryDirectory() as tmp:
-        tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
-        assert tmp_file.exists() is False
+def test_cli_support_error_missing_config(runner, cli, tmp_path):
+    tmp_file = tmp_path / "nebari-config.yaml"
+    assert not tmp_file.exists()
 
-        app = create_cli()
+    result = runner.invoke(cli, ["support", "--config", tmp_file.resolve()])
 
-        result = runner.invoke(app, ["support", "--config", tmp_file.resolve()])
-
-        assert 1 == result.exit_code
-        assert result.exception
-        assert "nebari-config.yaml does not exist" in str(result.exception)
+    assert 1 == result.exit_code
+    assert result.exception
+    assert "nebari-config.yaml does not exist" in str(result.exception)

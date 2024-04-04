@@ -57,7 +57,7 @@ runner = CliRunner()
         (["listusers", "-c"], 2, ["requires an argument"]),
     ],
 )
-def test_cli_keycloak_stdout(args: List[str], exit_code: int, content: List[str]):
+def test_cli_keycloak_stdout(args, exit_code, content):
     app = create_cli()
     result = runner.invoke(app, ["keycloak"] + args)
     assert result.exit_code == exit_code
