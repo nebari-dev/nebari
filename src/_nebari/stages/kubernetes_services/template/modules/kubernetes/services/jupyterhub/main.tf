@@ -150,18 +150,25 @@ resource "helm_release" "jupyterhub" {
             enable_auth_state = true
           }
           GenericOAuthenticator = {
-            client_id          = module.jupyterhub-openid-client.config.client_id
-            client_secret      = module.jupyterhub-openid-client.config.client_secret
-            oauth_callback_url = "https://${var.external-url}/hub/oauth_callback"
-            authorize_url      = module.jupyterhub-openid-client.config.authentication_url
-            token_url          = module.jupyterhub-openid-client.config.token_url
-            userdata_url       = module.jupyterhub-openid-client.config.userinfo_url
-            login_service      = "Keycloak"
-            username_key       = "preferred_username"
-            claim_groups_key   = "roles"
-            allowed_groups     = ["jupyterhub_admin", "jupyterhub_developer"]
-            admin_groups       = ["jupyterhub_admin"]
-            tls_verify         = false
+            client_id            = module.jupyterhub-openid-client.config.client_id
+            client_secret        = module.jupyterhub-openid-client.config.client_secret
+            oauth_callback_url   = "https://${var.external-url}/hub/oauth_callback"
+            authorize_url        = module.jupyterhub-openid-client.config.authentication_url
+            token_url            = module.jupyterhub-openid-client.config.token_url
+            userdata_url         = module.jupyterhub-openid-client.config.userinfo_url
+            login_service        = "Keycloak"
+            username_claim       = "preferred_username"
+            claim_groups_key     = "groups"
+            allowed_groups       = ["/analyst", "/developer", "/admin"]
+            admin_groups         = ["/admin"]
+            manage_groups        = true
+            refresh_pre_spawn    = true
+            validate_server_cert = false
+
+            # deprecated, to be removed (replaced by validate_server_cert)
+            tls_verify = false
+            # deprecated, to be removed (replaced by username_claim)
+            username_key = "preferred_username"
           }
         }
       }
