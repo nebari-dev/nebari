@@ -490,7 +490,7 @@ class KubernetesServicesStage(NebariTerraformStage):
 
         conda_store_vars = CondaStoreInputVars(
             conda_store_environments={
-                k: v.dict() for k, v in self.config.environments.items()
+                k: v.model_dump() for k, v in self.config.environments.items()
             },
             conda_store_default_namespace=self.config.conda_store.default_namespace,
             conda_store_filesystem_storage=self.config.storage.conda_store,
@@ -503,14 +503,14 @@ class KubernetesServicesStage(NebariTerraformStage):
         )
 
         jupyterhub_vars = JupyterhubInputVars(
-            jupyterhub_theme=jupyterhub_theme.dict(),
+            jupyterhub_theme=jupyterhub_theme.model_dump(),
             jupyterlab_image=_split_docker_image_name(
                 self.config.default_images.jupyterlab
             ),
             jupyterhub_stared_storage=self.config.storage.shared_filesystem,
             jupyterhub_shared_endpoint=jupyterhub_shared_endpoint,
             cloud_provider=cloud_provider,
-            jupyterhub_profiles=self.config.profiles.dict()["jupyterlab"],
+            jupyterhub_profiles=self.config.profiles.model_dump()["jupyterlab"],
             jupyterhub_image=_split_docker_image_name(
                 self.config.default_images.jupyterhub
             ),
@@ -518,7 +518,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterhub_hub_extraEnv=json.dumps(
                 self.config.jupyterhub.overrides.get("hub", {}).get("extraEnv", [])
             ),
-            idle_culler_settings=self.config.jupyterlab.idle_culler.dict(),
+            idle_culler_settings=self.config.jupyterlab.idle_culler.model_dump(),
             argo_workflows_enabled=self.config.argo_workflows.enabled,
             jhub_apps_enabled=self.config.jhub_apps.enabled,
             initial_repositories=str(self.config.jupyterlab.initial_repositories),
@@ -530,7 +530,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             dask_worker_image=_split_docker_image_name(
                 self.config.default_images.dask_worker
             ),
-            dask_gateway_profiles=self.config.profiles.dict()["dask_worker"],
+            dask_gateway_profiles=self.config.profiles.model_dump()["dask_worker"],
             cloud_provider=cloud_provider,
         )
 
@@ -560,13 +560,13 @@ class KubernetesServicesStage(NebariTerraformStage):
         )
 
         return {
-            **kubernetes_services_vars.dict(by_alias=True),
-            **conda_store_vars.dict(by_alias=True),
-            **jupyterhub_vars.dict(by_alias=True),
-            **dask_gateway_vars.dict(by_alias=True),
-            **monitoring_vars.dict(by_alias=True),
-            **argo_workflows_vars.dict(by_alias=True),
-            **telemetry_vars.dict(by_alias=True),
+            **kubernetes_services_vars.model_dump(by_alias=True),
+            **conda_store_vars.model_dump(by_alias=True),
+            **jupyterhub_vars.model_dump(by_alias=True),
+            **dask_gateway_vars.model_dump(by_alias=True),
+            **monitoring_vars.model_dump(by_alias=True),
+            **argo_workflows_vars.model_dump(by_alias=True),
+            **telemetry_vars.model_dump(by_alias=True),
         }
 
     def check(

@@ -910,7 +910,11 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                     return b.format(key=key, value=value).replace("_", "-")
 
         cmds = " ".join(
-            [_ for _ in [if_used(_) for _ in inputs.dict().keys()] if _ is not None]
+            [
+                _
+                for _ in [if_used(_) for _ in inputs.model_dump().keys()]
+                if _ is not None
+            ]
         )
 
         rich.print(

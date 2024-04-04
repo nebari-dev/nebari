@@ -193,18 +193,18 @@ class TerraformStateStage(NebariTerraformStage):
                 name=self.config.project_name,
                 namespace=self.config.namespace,
                 region=self.config.digital_ocean.region,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.gcp:
             return GCPInputVars(
                 name=self.config.project_name,
                 namespace=self.config.namespace,
                 region=self.config.google_cloud_platform.region,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
                 name=self.config.project_name,
                 namespace=self.config.namespace,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.azure:
             return AzureInputVars(
                 name=self.config.project_name,
@@ -218,7 +218,7 @@ class TerraformStateStage(NebariTerraformStage):
                     suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
                 ),
                 tags=self.config.azure.tags,
-            ).dict()
+            ).model_dump()
         elif (
             self.config.provider == schema.ProviderEnum.local
             or self.config.provider == schema.ProviderEnum.existing

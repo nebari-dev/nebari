@@ -233,7 +233,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             node_group=stage_outputs["stages/02-infrastructure"]["node_selectors"][
                 "general"
             ],
-        ).dict()
+        ).model_dump()
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_check: bool = False

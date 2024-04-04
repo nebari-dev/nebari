@@ -74,7 +74,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
             name=self.config.project_name,
             environment=self.config.namespace,
             cloud_provider=self.config.provider.value,
-            external_container_reg=self.config.external_container_reg.dict(),
+            external_container_reg=self.config.external_container_reg.model_dump(),
         )
 
         if self.config.provider == schema.ProviderEnum.gcp:
@@ -93,7 +93,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
             ]
             input_vars.aws_region = self.config.amazon_web_services.region
 
-        return input_vars.dict()
+        return input_vars.model_dump()
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False

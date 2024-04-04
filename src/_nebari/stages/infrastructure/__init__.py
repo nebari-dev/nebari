@@ -180,7 +180,7 @@ def _calculate_node_groups(config: schema.Main):
     elif config.provider == schema.ProviderEnum.existing:
         return config.existing.node_selectors
     else:
-        return config.local.dict()["node_selectors"]
+        return config.local.model_dump()["node_selectors"]
 
 
 @contextlib.contextmanager
@@ -700,7 +700,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         elif self.config.provider == schema.ProviderEnum.existing:
             return ExistingInputVars(
                 kube_context=self.config.existing.kube_context
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.do:
             return DigitalOceanInputVars(
                 name=self.config.escaped_project_name,
@@ -709,7 +709,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 tags=self.config.digital_ocean.tags,
                 kubernetes_version=self.config.digital_ocean.kubernetes_version,
                 node_groups=self.config.digital_ocean.node_groups,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.gcp:
             return GCPInputVars(
                 name=self.config.escaped_project_name,
@@ -738,7 +738,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 ip_allocation_policy=self.config.google_cloud_platform.ip_allocation_policy,
                 master_authorized_networks_config=self.config.google_cloud_platform.master_authorized_networks_config,
                 private_cluster_config=self.config.google_cloud_platform.private_cluster_config,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.azure:
             return AzureInputVars(
                 name=self.config.escaped_project_name,
@@ -769,7 +769,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 tags=self.config.azure.tags,
                 network_profile=self.config.azure.network_profile,
                 max_pods=self.config.azure.max_pods,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
                 name=self.config.escaped_project_name,
@@ -795,7 +795,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 vpc_cidr_block=self.config.amazon_web_services.vpc_cidr_block,
                 permissions_boundary=self.config.amazon_web_services.permissions_boundary,
                 tags=self.config.amazon_web_services.tags,
-            ).dict()
+            ).model_dump()
         else:
             raise ValueError(f"Unknown provider: {self.config.provider}")
 
