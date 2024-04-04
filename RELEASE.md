@@ -9,6 +9,27 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+## Release 2024.3.3 - March 27, 2024
+
+### What's Changed
+* get default variable value when following a terraform variable by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2322
+* Upgrade Actions versions by @isumitjha in https://github.com/nebari-dev/nebari/pull/2291
+* Cleanup spawner logs by @krassowski in https://github.com/nebari-dev/nebari/pull/2328
+* Fix loki gateway url when deployed on non-dev namespace by @aktech in https://github.com/nebari-dev/nebari/pull/2327
+* Dmcandrew update ruamel.yaml by @dcmcand in https://github.com/nebari-dev/nebari/pull/2315
+* upgrade auth0-python version to ultimately resolve CVE-2024-26130 by @tylergraff in https://github.com/nebari-dev/nebari/pull/2314
+* remove deprecated code paths by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2349
+* Create SECURITY.md by @dcmcand in https://github.com/nebari-dev/nebari/pull/2354
+* Set node affinity for more pods to ensure they run on general node pool by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2353
+* Deduplicate conda-store in JupyterLab main menu by @krassowski in https://github.com/nebari-dev/nebari/pull/2347
+* Pass current namespace to argo via environment variable by @krassowski in https://github.com/nebari-dev/nebari/pull/2317
+* PVC for Traefik Ingress (prevent LetsEncrypt throttling) by @kenafoster in https://github.com/nebari-dev/nebari/pull/2352
+
+### New Contributors
+* @isumitjha made their first contribution in https://github.com/nebari-dev/nebari/pull/2291
+* @tylergraff made their first contribution in https://github.com/nebari-dev/nebari/pull/2314
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.3.2...2024.3.3
 
 ## Release 2024.3.2 - March 14, 2024
 
