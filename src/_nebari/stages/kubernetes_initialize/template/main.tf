@@ -31,6 +31,6 @@ module "nvidia-driver-installer" {
 }
 
 module "keda-installer" {
-  source = "./modules/keda"
+  source    = "./modules/keda"
   namespace = var.environment
 }
