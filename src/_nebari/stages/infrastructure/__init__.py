@@ -229,7 +229,7 @@ class DigitalOceanProvider(schema.Base):
     # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
     node_groups: Dict[str, DigitalOceanNodeGroup] = {
         "general": DigitalOceanNodeGroup(
-            instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1
+            instance="g-8vcpu-32gb", min_nodes=1, max_nodes=5
         ),
         "user": DigitalOceanNodeGroup(
             instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5
@@ -336,7 +336,7 @@ class GoogleCloudPlatformProvider(schema.Base):
     availability_zones: Optional[List[str]] = []
     release_channel: str = constants.DEFAULT_GKE_RELEASE_CHANNEL
     node_groups: Dict[str, GCPNodeGroup] = {
-        "general": GCPNodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
+        "general": GCPNodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=5),
         "user": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
         "worker": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
     }
@@ -387,7 +387,7 @@ class AzureProvider(schema.Base):
     storage_account_postfix: str
     resource_group_name: str = None
     node_groups: Dict[str, AzureNodeGroup] = {
-        "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
+        "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=5),
         "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
         "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     }
@@ -447,7 +447,7 @@ class AmazonWebServicesProvider(schema.Base):
     kubernetes_version: str
     availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = {
-        "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
+        "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=5),
         "user": AWSNodeGroup(
             instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
         ),
