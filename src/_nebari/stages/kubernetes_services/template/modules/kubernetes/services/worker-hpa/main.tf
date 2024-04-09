@@ -35,9 +35,9 @@ resource "kubernetes_manifest" "scaledobject" {
         kind = "Deployment"
         name = "nebari-conda-store-worker"
       }
-      minReplicaCount: 1 # Default: 0
-      pollingInterval: 5 # Default:  30 seconds
-      cooldownPeriod: 60 # Default: 300 seconds
+      minReplicaCount : 1 # Default: 0
+      pollingInterval : 5 # Default: 30 seconds
+      cooldownPeriod : 60 # Default: 300 seconds
       triggers = [
         {
           type = "postgresql"
