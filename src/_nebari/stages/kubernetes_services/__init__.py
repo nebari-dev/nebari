@@ -51,9 +51,15 @@ class Storage(schema.Base):
 class JupyterHubTheme(schema.Base):
     hub_title: str = "Nebari"
     hub_subtitle: str = "Your open source data science platform"
-    welcome: str = """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
-    logo: str = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg"
-    favicon: str = "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/symbol/favicon.ico"
+    welcome: str = (
+        """Welcome! Learn about Nebari's features and configurations in <a href="https://www.nebari.dev/docs">the documentation</a>. If you have any questions or feedback, reach the team on <a href="https://www.nebari.dev/docs/community#getting-support">Nebari's support forums</a>."""
+    )
+    logo: str = (
+        "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/logo-mark/horizontal/Nebari-Logo-Horizontal-Lockup-White-text.svg"
+    )
+    favicon: str = (
+        "https://raw.githubusercontent.com/nebari-dev/nebari-design/main/symbol/favicon.ico"
+    )
     primary_color: str = "#4f4173"
     primary_color_dark: str = "#4f4173"
     secondary_color: str = "#957da6"
@@ -199,8 +205,16 @@ class JHubApps(schema.Base):
     enabled: bool = False
 
 
+class MonitoringOverrides(schema.Base):
+    loki: typing.Dict = {}
+    promtail: typing.Dict = {}
+    minio: typing.Dict = {}
+
+
 class Monitoring(schema.Base):
     enabled: bool = True
+    overrides: MonitoringOverrides = MonitoringOverrides()
+    minio_enabled: bool = True
 
 
 class JupyterLabPioneer(schema.Base):
@@ -381,6 +395,12 @@ class DaskGatewayInputVars(schema.Base):
 
 class MonitoringInputVars(schema.Base):
     monitoring_enabled: bool = Field(alias="monitoring-enabled")
+    minio_enabled: bool = Field(alias="minio-enabled")
+    grafana_loki_overrides: List[str] = Field(alias="grafana-loki-overrides")
+    grafana_promtail_overrides: List[str] = Field(alias="grafana-promtail-overrides")
+    grafana_loki_minio_overrides: List[str] = Field(
+        alias="grafana-loki-minio-overrides"
+    )
 
 
 class TelemetryInputVars(schema.Base):
@@ -524,6 +544,14 @@ class KubernetesServicesStage(NebariTerraformStage):
 
         monitoring_vars = MonitoringInputVars(
             monitoring_enabled=self.config.monitoring.enabled,
+            minio_enabled=self.config.monitoring.minio_enabled,
+            grafana_loki_overrides=[json.dumps(self.config.monitoring.overrides.loki)],
+            grafana_promtail_overrides=[
+                json.dumps(self.config.monitoring.overrides.promtail)
+            ],
+            grafana_loki_minio_overrides=[
+                json.dumps(self.config.monitoring.overrides.minio)
+            ],
         )
 
         telemetry_vars = TelemetryInputVars(
