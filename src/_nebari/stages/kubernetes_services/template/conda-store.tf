@@ -76,11 +76,3 @@ module "conda-store-nfs-mount" {
   ]
 }
 
-module "conda-store-worker-hpa" {
-  source    = "./modules/kubernetes/services/worker-hpa"
-  namespace = var.environment
-
-  depends_on = [
-    module.kubernetes-conda-store-server
-  ]
-}

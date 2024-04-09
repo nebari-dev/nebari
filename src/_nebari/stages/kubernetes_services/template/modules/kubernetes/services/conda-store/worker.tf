@@ -223,6 +223,9 @@ resource "kubernetes_manifest" "triggerauthenticator" {
       ]
     }
   }
+  depends_on = [
+    kubernetes_deployment.worker
+  ]
 }
 
 resource "kubernetes_manifest" "scaledobject" {
@@ -263,4 +266,8 @@ resource "kubernetes_manifest" "scaledobject" {
       ]
     }
   }
+  depends_on = [
+    kubernetes_deployment.worker,
+    kubernetes_manifest.triggerauthenticator
+  ]
 }
