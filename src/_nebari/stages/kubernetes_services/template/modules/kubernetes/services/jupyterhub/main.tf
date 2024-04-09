@@ -238,6 +238,12 @@ resource "kubernetes_manifest" "jupyterhub" {
               port = 80
             }
           ]
+          middlewares = [
+            {
+              name      = kubernetes_manifest.jupyterhub-proxy-add-slash.manifest.metadata.name
+              namespace = var.namespace
+            }
+          ]
         },
         {
           kind  = "Rule"
