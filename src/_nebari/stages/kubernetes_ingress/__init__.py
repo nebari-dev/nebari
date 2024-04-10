@@ -1,7 +1,6 @@
 import enum
 import logging
 import socket
-import sys
 import time
 import typing
 from typing import Any, Dict, List, Type
@@ -107,10 +106,9 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
         time.sleep(sleeptime)
         attempt += 1
         if attempt == 5:
-            print(
-                f"ERROR: After stage directory={directory} DNS domain={domain_name} does not point to ip={ip}"
+            raise RuntimeError(
+                f"After stage directory={directory} DNS domain={domain_name} does not point to ip={ip}"
             )
-            sys.exit(1)
 
 
 @schema.yaml_object(schema.yaml)
@@ -229,7 +227,7 @@ class KubernetesIngressStage(NebariTerraformStage):
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
-    ):
+    ) -> None:
         def _attempt_tcp_connect(
             host, port, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
         ):
@@ -271,10 +269,9 @@ class KubernetesIngressStage(NebariTerraformStage):
 
         for port in tcp_ports:
             if not _attempt_tcp_connect(host, port):
-                print(
-                    f"ERROR: After stage={self.name} unable to connect to ingress host={host} port={port}"
+                raise RuntimeError(
+                    f"After stage={self.name} unable to connect to ingress host={host} port={port}"
                 )
-                sys.exit(1)
 
         print(
             f"After stage={self.name} kubernetes ingress available on tcp ports={tcp_ports}"

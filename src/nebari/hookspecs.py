@@ -1,10 +1,11 @@
-import contextlib
-import pathlib
-from typing import Any, Dict, List
+from abc import ABC, abstractmethod
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Any, ClassVar, Dict, Optional, Type
 
-import pydantic
-import typer
 from pluggy import HookimplMarker, HookspecMarker
+from pydantic import BaseModel
+from typer import Typer
 
 from nebari import schema
 
@@ -12,43 +13,45 @@ hookspec = HookspecMarker("nebari")
 hookimpl = HookimplMarker("nebari")
 
 
-class NebariStage:
-    name: str = None
-    priority: int = None
+class NebariStage(ABC):
+    name: ClassVar[str]
+    priority: ClassVar[int]
+    input_schema: ClassVar[Optional[Type[BaseModel]]] = None
+    output_schema: ClassVar[Type[BaseModel]]
 
-    input_schema: pydantic.BaseModel = None
-    output_schema: pydantic.BaseModel = None
-
-    def __init__(self, output_directory: pathlib.Path, config: schema.Main):
+    def __init__(self, output_directory: Path, config: schema.Main):
         self.output_directory = output_directory
         self.config = config
 
-    def render(self) -> Dict[str, str]:
-        return {}
+    @abstractmethod
+    def render(self) -> Dict[Path, str]: ...
 
-    @contextlib.contextmanager
-    def deploy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
-    ):
-        yield
-
+    @abstractmethod
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
-    ) -> bool:
-        pass
+    ) -> None: ...
 
-    @contextlib.contextmanager
+    @abstractmethod
+    @contextmanager
+    def deploy(
+        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+    ): ...
+
+    @abstractmethod
+    @contextmanager
     def destroy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], status: Dict[str, bool]
-    ):
-        yield
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        status: Dict[str, bool],
+        ignore_errors: bool,
+    ): ...
 
 
 @hookspec
-def nebari_stage() -> List[NebariStage]:
+def nebari_stage():
     """Registers stages in nebari"""
 
 
 @hookspec
-def nebari_subcommand(cli: typer.Typer):
+def nebari_subcommand(cli: Typer):
     """Register Typer subcommand in nebari"""
