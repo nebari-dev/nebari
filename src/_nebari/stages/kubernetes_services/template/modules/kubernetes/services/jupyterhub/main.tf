@@ -238,6 +238,28 @@ resource "kubernetes_manifest" "jupyterhub" {
               port = 80
             }
           ]
+          middlewares = [
+            {
+              name      = kubernetes_manifest.jupyterhub-proxy-add-slash.manifest.metadata.name
+              namespace = var.namespace
+            }
+          ]
+        },
+        {
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`) && (PathPrefix(`/home`) || PathPrefix(`/token`) || PathPrefix(`/admin`))"
+          middlewares = [
+            {
+              name      = kubernetes_manifest.jupyterhub-middleware-addprefix.manifest.metadata.name
+              namespace = var.namespace
+            }
+          ]
+          services = [
+            {
+              name = "proxy-public"
+              port = 80
+            }
+          ]
         }
       ]
     }
