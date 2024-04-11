@@ -33,3 +33,9 @@ variable "jupyterlab_profiles_mapper" {
   type        = bool
   default     = false
 }
+
+variable "daskworker_profiles_mapper" {
+  description = "Create a mapper for daskworker_profiles group/user attributes"
+  type        = bool
+  default     = false
+}

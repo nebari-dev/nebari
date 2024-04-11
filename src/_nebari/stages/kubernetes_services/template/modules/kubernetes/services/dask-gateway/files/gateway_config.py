@@ -277,6 +277,7 @@ def _filter_profiles(user, profiles):
             if not (has_group_access(profile) and has_user_access(profile)):
                 user_profiles.remove(name)
         elif access_type == "keycloak":
+            # Keycloak mapper should provide the 'daskworker_profiles' attribute from groups/user
             if name not in user.keycloak_profilenames:
                 user_profiles.remove(name)
 

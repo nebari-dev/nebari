@@ -283,6 +283,7 @@ module "jupyterhub-openid-client" {
     var.jupyterhub-logout-redirect-url
   ]
   jupyterlab_profiles_mapper = true
+  daskworker_profiles_mapper = true
 }
 
 

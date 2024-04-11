@@ -62,6 +62,23 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "jupyterlab_profiles" 
   aggregate_attributes = true
 }
 
+resource "keycloak_openid_user_attribute_protocol_mapper" "daskworker_profiles" {
+  count = var.daskworker_profiles_mapper ? 1 : 0
+
+  realm_id   = var.realm_id
+  client_id  = keycloak_openid_client.main.id
+  name       = "daskworker_profiles_mapper"
+  claim_name = "daskworker_profiles"
+
+  add_to_id_token     = true
+  add_to_access_token = true
+  add_to_userinfo     = true
+
+  user_attribute       = "daskworker_profiles"
+  multivalued          = true
+  aggregate_attributes = true
+}
+
 resource "keycloak_role" "main" {
   for_each = toset(flatten(values(var.role_mapping)))
 
