@@ -81,6 +81,8 @@ class NebariAuthentication(JupyterHubAuthenticator):
 
         user.admin = "dask_gateway_admin" in data["roles"]
         user.groups = [Path(group).name for group in data["groups"]]
+        user.keycloak_profile_names = data.get("dask_profiles", [])
+
         return user
 
 
@@ -227,19 +229,58 @@ def base_username_mount(username, uid=1000, gid=100):
     }
 
 
+def _sanitize_permissions(profile):
+    keys_to_remove = ["groups", "users", "access"]
+
+    for key in keys_to_remove:
+        profile.pop(key, None)
+
+    return profile
+
+
 def worker_profile(options, user):
     namespace, name = options.conda_environment.split("/")
+
     return functools.reduce(
         deep_merge,
         [
             base_node_group(options),
             base_conda_store_mounts(namespace, name),
             base_username_mount(user.name),
-            config["profiles"][options.profile],
+            _sanitize_permissions(config["profiles"][options.profile]),
             {"environment": {**options.environment_vars}},
         ],
         {},
     )
+
+
+def _filter_profiles(user, profiles):
+    """
+    Filter access to profiles based on user's groups and username
+    """
+
+    def has_group_access(profile):
+        return not profile.get("groups") or set(user.groups).intersection(
+            profile["groups"]
+        )
+
+    def has_user_access(profile):
+        return not profile.get("users") or user.name in profile["users"]
+
+    user_profiles = list(profiles.keys())
+
+    for name in list(user_profiles):
+        profile = profiles[name]
+        access_type = profile.get("access", "all")
+
+        if access_type == "yaml":
+            if not (has_group_access(profile) and has_user_access(profile)):
+                user_profiles.remove(name)
+        elif access_type == "keycloak":
+            if name not in user.keycloak_profilenames:
+                user_profiles.remove(name)
+
+    return user_profiles
 
 
 def user_options(user):
@@ -252,6 +293,8 @@ def user_options(user):
         if namespace not in allowed_namespaces:
             continue
         conda_environments.append(f"{namespace}/{namespace}-{name}")
+
+    user_profiles = _filter_profiles(user, config["profiles"])
 
     args = []
     if conda_environments:
@@ -267,8 +310,8 @@ def user_options(user):
         args += [
             Select(
                 "profile",
-                list(config["profiles"].keys()),
-                default=list(config["profiles"].keys())[0],
+                user_profiles,
+                default=user_profiles[0],
                 label="Cluster Profile",
             )
         ]
