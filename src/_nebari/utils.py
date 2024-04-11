@@ -11,7 +11,7 @@ import threading
 import time
 import warnings
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from ruamel.yaml import YAML
 
@@ -268,18 +268,6 @@ def random_secure_string(
     return "".join(secrets.choice(chars) for i in range(length))
 
 
-def is_relative_to(self: Path, other: Path, /) -> bool:
-    """Compatibility function to bring ``Path.is_relative_to`` to Python 3.8"""
-    if sys.version_info[:2] >= (3, 9):
-        return self.is_relative_to(other)
-
-    try:
-        self.relative_to(other)
-        return True
-    except ValueError:
-        return False
-
-
 def set_do_environment():
     os.environ["AWS_ACCESS_KEY_ID"] = os.environ["SPACES_ACCESS_KEY_ID"]
     os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
@@ -350,3 +338,18 @@ def get_provider_config_block_name(provider):
         return PROVIDER_CONFIG_NAMES[provider]
     else:
         return provider
+
+
+def check_environment_variables(variables: Set[str], reference: str) -> None:
+    """Check that environment variables are set."""
+    required_variables = {
+        variable: os.environ.get(variable, None) for variable in variables
+    }
+    missing_variables = {
+        variable for variable, value in required_variables.items() if value is None
+    }
+    if missing_variables:
+        raise ValueError(
+            f"""Missing the following required environment variables: {required_variables}\n
+            Please see the documentation for more information: {reference}"""
+        )

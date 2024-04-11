@@ -5,8 +5,7 @@ import logging
 import socket
 import sys
 import time
-import typing
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from _nebari import constants
 from _nebari.provider.dns.cloudflare import update_record
@@ -133,20 +132,20 @@ class SelfSignedCertificate(schema.Base):
 
 class LetsEncryptCertificate(schema.Base):
     type: str = CertificateEnum.letsencrypt
-    acme_email: str
+    acme_email: str = None
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
 
 
 class ExistingCertificate(schema.Base):
     type: str = CertificateEnum.existing
-    secret_name: str
+    secret_name: str = None
 
 
 class DisabledCertificate(schema.Base):
     type: str = CertificateEnum.disabled
 
 
-Certificate = typing.Union[
+Certificate = Union[
     SelfSignedCertificate,
     LetsEncryptCertificate,
     ExistingCertificate,
@@ -155,16 +154,16 @@ Certificate = typing.Union[
 
 
 class DnsProvider(schema.Base):
-    provider: typing.Optional[str]
-    auto_provision: typing.Optional[bool] = False
+    provider: Optional[str] = None
+    auto_provision: Optional[bool] = False
 
 
 class Ingress(schema.Base):
-    terraform_overrides: typing.Dict = {}
+    terraform_overrides: Dict = {}
 
 
 class InputSchema(schema.Base):
-    domain: typing.Optional[str]
+    domain: Optional[str]
     certificate: Certificate = SelfSignedCertificate()
     ingress: Ingress = Ingress()
     dns: DnsProvider = DnsProvider()
@@ -176,7 +175,7 @@ class IngressEndpoint(schema.Base):
 
 
 class OutputSchema(schema.Base):
-    load_balancer_address: typing.List[IngressEndpoint]
+    load_balancer_address: List[IngressEndpoint]
     domain: str
 
 
@@ -201,9 +200,9 @@ class KubernetesIngressStage(NebariTerraformStage):
             cert_details["acme-email"] = self.config.certificate.acme_email
             cert_details["acme-server"] = self.config.certificate.acme_server
         elif cert_type == "existing":
-            cert_details[
-                "certificate-secret-name"
-            ] = self.config.certificate.secret_name
+            cert_details["certificate-secret-name"] = (
+                self.config.certificate.secret_name
+            )
 
         return {
             **{

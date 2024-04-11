@@ -9,7 +9,7 @@ from typing import Any, ClassVar, Dict
 
 import rich
 from packaging.version import Version
-from pydantic.error_wrappers import ValidationError
+from pydantic import ValidationError
 from rich.prompt import Prompt
 
 from _nebari.config import backup_configuration
@@ -712,6 +712,28 @@ class Upgrade_2024_3_1(UpgradeStep):
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         rich.print("Ready to upgrade to Nebari version [green]2024.3.1[/green].")
+
+        return config
+
+
+class Upgrade_2024_3_2(UpgradeStep):
+    version = "2024.3.2"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("Ready to upgrade to Nebari version [green]2024.3.2[/green].")
+
+        return config
+
+
+class Upgrade_2024_3_3(UpgradeStep):
+    version = "2024.3.3"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("Ready to upgrade to Nebari version [green]2024.3.3[/green].")
 
         return config
 

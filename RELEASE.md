@@ -9,9 +9,62 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-## Upcoming Release
+## Release 2024.3.3 - March 27, 2024
 
-* Added Grafana Loki to aggregate, index and search logs
+### What's Changed
+* get default variable value when following a terraform variable by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2322
+* Upgrade Actions versions by @isumitjha in https://github.com/nebari-dev/nebari/pull/2291
+* Cleanup spawner logs by @krassowski in https://github.com/nebari-dev/nebari/pull/2328
+* Fix loki gateway url when deployed on non-dev namespace by @aktech in https://github.com/nebari-dev/nebari/pull/2327
+* Dmcandrew update ruamel.yaml by @dcmcand in https://github.com/nebari-dev/nebari/pull/2315
+* upgrade auth0-python version to ultimately resolve CVE-2024-26130 by @tylergraff in https://github.com/nebari-dev/nebari/pull/2314
+* remove deprecated code paths by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2349
+* Create SECURITY.md by @dcmcand in https://github.com/nebari-dev/nebari/pull/2354
+* Set node affinity for more pods to ensure they run on general node pool by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2353
+* Deduplicate conda-store in JupyterLab main menu by @krassowski in https://github.com/nebari-dev/nebari/pull/2347
+* Pass current namespace to argo via environment variable by @krassowski in https://github.com/nebari-dev/nebari/pull/2317
+* PVC for Traefik Ingress (prevent LetsEncrypt throttling) by @kenafoster in https://github.com/nebari-dev/nebari/pull/2352
+
+### New Contributors
+* @isumitjha made their first contribution in https://github.com/nebari-dev/nebari/pull/2291
+* @tylergraff made their first contribution in https://github.com/nebari-dev/nebari/pull/2314
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.3.2...2024.3.3
+
+## Release 2024.3.2 - March 14, 2024
+
+### What's Changed
+* update max k8s versions and remove depreciated api usage in local deploy by @dcmcand in https://github.com/nebari-dev/nebari/pull/2276
+* update keycloak image repo by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2312
+* Generate random password for Grafana by @aktech in https://github.com/nebari-dev/nebari/pull/2289
+* update conda store to 2024.3.1 by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2316
+* Switch PyPI release workflow to use trusted publishing by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2323
+
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.3.1...2024.3.2
+
+## Release 2024.3.1 - March 11, 2024
+
+### What's Changed
+* Modify Playwright test to account for changes in JupyterLab UI. by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2232
+* Add favicon to jupyterhub theme. by @jbouder in https://github.com/nebari-dev/nebari/pull/2222
+* Set min nodes to 0 for worker and user. by @pt247 in https://github.com/nebari-dev/nebari/pull/2168
+* Remove `jhub-client` from pyproject.toml by @pavithraes in https://github.com/nebari-dev/nebari/pull/2242
+* Include permission validation step to programmatically cloned repos by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2258
+* Expose jupyter's preferred dir as a config option by @krassowski in https://github.com/nebari-dev/nebari/pull/2251
+* Allow to configure default settings for JupyterLab (`overrides.json`) by @krassowski in https://github.com/nebari-dev/nebari/pull/2249
+* Feature/jlab menu customization by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2259
+* Add cloud provider to the dask config.json file by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2266
+* Fix syntax error in jupyter-server-config Python file by @krassowski in https://github.com/nebari-dev/nebari/pull/2286
+* Add "Open VS Code" entry in services by @krassowski in https://github.com/nebari-dev/nebari/pull/2267
+* Add Grafana Loki integration by @aktech in https://github.com/nebari-dev/nebari/pull/2156
+
+### New Contributors
+* @jbouder made their first contribution in https://github.com/nebari-dev/nebari/pull/2222
+* @krassowski made their first contribution in https://github.com/nebari-dev/nebari/pull/2251
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.1.1...2024.3.1
+
 
 ## Release 2024.1.1 - January 17, 2024
 

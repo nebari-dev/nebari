@@ -208,12 +208,14 @@ def base_profile_extra_mounts():
 
     extra_pod_config = {
         "volumes": [
-            {
-                "name": volume["name"],
-                "persistentVolumeClaim": {"claimName": volume["name"]},
-            }
-            if volume["kind"] == "persistentvolumeclaim"
-            else {"name": volume["name"], "configMap": {"name": volume["name"]}}
+            (
+                {
+                    "name": volume["name"],
+                    "persistentVolumeClaim": {"claimName": volume["name"]},
+                }
+                if volume["kind"] == "persistentvolumeclaim"
+                else {"name": volume["name"], "configMap": {"name": volume["name"]}}
+            )
             for mount_path, volume in extra_mounts.items()
         ]
     }
@@ -367,9 +369,11 @@ def configure_user(username, groups, uid=1000, gid=100):
             # mount the shared directories for user only if there are
             # shared folders (groups) that the user is a member of
             # else ensure that the `shared` folder symlink does not exist
-            f"ln -sfn /shared /home/{username}/shared"
-            if groups
-            else f"rm -f /home/{username}/shared",
+            (
+                f"ln -sfn /shared /home/{username}/shared"
+                if groups
+                else f"rm -f /home/{username}/shared"
+            ),
             # conda-store environment configuration
             f"printf '{condarc}' > /home/{username}/.condarc",
             # jupyter configuration
@@ -451,6 +455,14 @@ def profile_conda_store_viewer_token():
                 }
             }
         },
+        "CONDA_STORE_SERVICE_NAMESPACE": {
+            "valueFrom": {
+                "secretKeyRef": {
+                    "name": "argo-workflows-conda-store-token",
+                    "key": "conda-store-service-namespace",
+                }
+            }
+        },
     }
 
 
@@ -529,14 +541,13 @@ def render_profiles(spawner):
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
-    spawner.log.error(str(auth_state))
 
     username = auth_state["oauth_user"]["preferred_username"]
     # only return the lowest level group name
     # e.g. /projects/myproj -> myproj
     # and /developers -> developers
     groups = [Path(group).name for group in auth_state["oauth_user"]["groups"]]
-    spawner.log.error(f"user info: {username} {groups}")
+    spawner.log.info(f"user info: {username} {groups}")
 
     keycloak_profilenames = auth_state["oauth_user"].get("jupyterlab_profiles", [])
 

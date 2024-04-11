@@ -3,6 +3,7 @@ import os
 import re
 import tempfile
 from pathlib import Path
+from typing import Any, Dict
 
 import pydantic
 import requests
@@ -46,7 +47,7 @@ def render_config(
     region: str = None,
     disable_prompt: bool = False,
     ssl_cert_email: str = None,
-):
+) -> Dict[str, Any]:
     config = {
         "provider": cloud_provider,
         "namespace": namespace,
@@ -113,7 +114,7 @@ def render_config(
     if cloud_provider == ProviderEnum.do:
         do_region = region or constants.DO_DEFAULT_REGION
         do_kubernetes_versions = kubernetes_version or get_latest_kubernetes_version(
-            digital_ocean.kubernetes_versions(do_region)
+            digital_ocean.kubernetes_versions()
         )
         config["digital_ocean"] = {
             "kubernetes_version": do_kubernetes_versions,
@@ -190,7 +191,7 @@ def render_config(
     from nebari.plugins import nebari_plugin_manager
 
     try:
-        config_model = nebari_plugin_manager.config_schema.parse_obj(config)
+        config_model = nebari_plugin_manager.config_schema.model_validate(config)
     except pydantic.ValidationError as e:
         print(str(e))
 
