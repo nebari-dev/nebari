@@ -85,6 +85,17 @@ def read_configuration(
     return config
 
 
+def dump_nested_model(
+    model_dict: typing.Dict[str, typing.Union[pydantic.BaseModel, str]]
+):
+    result = {}
+    for key, value in model_dict.items():
+        result[key] = (
+            value.model_dump() if isinstance(value, pydantic.BaseModel) else value
+        )
+    return result
+
+
 def write_configuration(
     config_filename: pathlib.Path,
     config: typing.Union[pydantic.BaseModel, typing.Dict],
