@@ -106,7 +106,6 @@ def write_configuration(
         if isinstance(config, pydantic.BaseModel):
             yaml.dump(config.dict(), f)
         else:
-            config = dump_nested_model(config)
             yaml.dump(config, f)
 
 
