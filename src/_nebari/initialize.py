@@ -37,7 +37,7 @@ WELCOME_HEADER_TEXT = "Your open source data science platform, hosted"
 
 
 def _node_groups_to_dict(node_groups):
-    return {ng.name: ng.dict() for ng in node_groups}
+    return {ng_name: ng.dict() for ng_name, ng in node_groups.items()}
 
 
 def render_config(
