@@ -104,8 +104,7 @@ def write_configuration(
     with config_filename.open(mode) as f:
         if isinstance(config, pydantic.BaseModel):
             config_dict = config.write_config()
-            rev_config_dict = {k: config_dict[k] for k in reversed(config_dict)}
-            yaml.dump(rev_config_dict, f)
+            yaml.dump(config_dict, f)
         else:
             config = dump_nested_model(config)
             yaml.dump(config, f)

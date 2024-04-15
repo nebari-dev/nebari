@@ -139,16 +139,17 @@ class NebariPluginManager:
                 if hasattr(cls, "exclude_from_config"):
                     new_exclude = cls.exclude_from_config(self)
                     config_exclude = config_exclude.union(new_exclude)
-            return self.dict(exclude=config_exclude)
+            return self.model_dump(exclude=config_exclude)
 
-        return type(
+        ConfigSchema = type(
             "ConfigSchema",
-            tuple(ordered_schemas),
+            tuple(ordered_schemas[::-1]),
             {
                 "_ordered_schemas": ordered_schemas,
                 "write_config": write_config,
             },
         )
+        return ConfigSchema
 
 
 nebari_plugin_manager = NebariPluginManager()
