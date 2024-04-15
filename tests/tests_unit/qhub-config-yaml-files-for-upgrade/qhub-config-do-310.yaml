@@ -42,10 +42,6 @@ theme:
     text_color: '#111111'
     h1_color: '#652e8e'
     h2_color: '#652e8e'
-# cdsdashboards:
-#  enabled: true
-#  cds_hide_user_named_servers: true
-#  cds_hide_user_dashboard_servers: false
 terraform_state:
   type: remote
 namespace: dev
@@ -130,4 +126,3 @@ environments:
     - voila >=0.2.7
     - streamlit >=0.76
     - dash >=1.19
-    - cdsdashboards-singleuser >=0.5.6
