@@ -450,8 +450,8 @@ class AmazonWebServicesProvider(schema.Base):
     kubernetes_version: str
     availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
-    existing_subnet_ids: List[str] = None
-    existing_security_group_id: str = None
+    existing_subnet_ids: Optional[List[str]] = None
+    existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
     permissions_boundary: Optional[str] = None
     tags: Optional[Dict[str, str]] = {}
