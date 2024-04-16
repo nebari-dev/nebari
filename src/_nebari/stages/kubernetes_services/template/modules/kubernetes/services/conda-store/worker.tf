@@ -113,6 +113,13 @@ resource "kubernetes_deployment" "worker" {
             "/etc/conda-store/conda_store_config.py"
           ]
 
+          resources {
+            requests = {
+              cpu    = "250m"
+              memory = "1Gi"
+            }
+          }
+
           volume_mount {
             name       = "config"
             mount_path = "/etc/conda-store"
