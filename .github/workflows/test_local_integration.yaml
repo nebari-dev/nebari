@@ -57,12 +57,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         env:
           CONDA: /home/runnerx/miniconda3
         with:
           auto-update-conda: true
-          python-version: 3.8
+          python-version: "3.11"
           miniconda-version: "latest"
 
       - name: Install Nebari and playwright
@@ -70,7 +70,7 @@ jobs:
           pip install .[dev]
           playwright install
 
-      - uses: azure/setup-kubectl@v3
+      - uses: azure/setup-kubectl@v4.0.0
         with:
           version: v1.19.16
 
@@ -140,9 +140,9 @@ jobs:
           nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
           nebari keycloak listusers --config nebari-config.yaml
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
 
       - name: Get nebari-config.yaml full path
         run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
@@ -170,7 +170,7 @@ jobs:
 
       - name: Save Cypress screenshots and videos
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: e2e-cypress
           path: |

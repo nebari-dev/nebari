@@ -75,6 +75,15 @@ DEFAULT_KUBERNETES_VERSION_MSG = (
 
 LATEST = "latest"
 
+CLOUD_PROVIDER_FULL_NAME = {
+    "Local": ProviderEnum.local.name,
+    "Existing": ProviderEnum.existing.name,
+    "Digital Ocean": ProviderEnum.do.name,
+    "Amazon Web Services": ProviderEnum.aws.name,
+    "Google Cloud Platform": ProviderEnum.gcp.name,
+    "Microsoft Azure": ProviderEnum.azure.name,
+}
+
 
 class GitRepoEnum(str, enum.Enum):
     github = "github.com"
@@ -647,11 +656,13 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             )
         )
         # try:
-        inputs.cloud_provider = questionary.select(
+        cloud_provider: str = questionary.select(
             "Where would you like to deploy your Nebari cluster?",
-            choices=enum_to_list(ProviderEnum),
+            choices=CLOUD_PROVIDER_FULL_NAME.keys(),
             qmark=qmark,
         ).unsafe_ask()
+
+        inputs.cloud_provider = CLOUD_PROVIDER_FULL_NAME.get(cloud_provider)
 
         if not disable_checks:
             check_cloud_provider_creds(
