@@ -48,10 +48,6 @@ jobs:
           ref: ${{ env.NEBARI_GH_BRANCH }}
           fetch-depth: 0
 
-      # DELETE THIS STEP - For debugging purposes only
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -91,3 +87,9 @@ jobs:
           NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__dask_worker: "quay.io/nebari/nebari-dask-worker:${{ env.NEBARI_IMAGE_TAG }}"
+
+      # DELETE THIS STEP - For debugging purposes only
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
