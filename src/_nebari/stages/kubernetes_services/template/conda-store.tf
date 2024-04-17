@@ -58,9 +58,11 @@ module "kubernetes-conda-store-server" {
     for filename, environment in var.conda-store-environments :
     filename => yamlencode(environment)
   }
-  services       = var.conda-store-service-token-scopes
-  extra-settings = var.conda-store-extra-settings
-  extra-config   = var.conda-store-extra-config
+  services                     = var.conda-store-service-token-scopes
+  extra-settings               = var.conda-store-extra-settings
+  extra-config                 = var.conda-store-extra-config
+  conda-store-worker-resources = var.conda-store-worker-resources
+  max-worker-replica-count     = var.conda-store-max-workers
 }
 
 module "conda-store-nfs-mount" {

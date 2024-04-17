@@ -114,10 +114,7 @@ resource "kubernetes_deployment" "worker" {
           ]
 
           resources {
-            requests = {
-              cpu    = "250m"
-              memory = "1Gi"
-            }
+            requests = var.conda-store-worker-resources["requests"]
           }
 
           volume_mount {
@@ -250,7 +247,7 @@ resource "kubernetes_manifest" "scaledobject" {
         kind = "Deployment"
         name = "nebari-conda-store-worker"
       }
-      maxReplicaCount = 50
+      maxReplicaCount = var.max-worker-replica-count
       triggers = [
         {
           type = "postgresql"

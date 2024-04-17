@@ -39,6 +39,16 @@ variable "conda-store-default-namespace" {
   type        = string
 }
 
+variable "conda-store-max-workers" {
+  description = "Maximum concurrency of conda workers"
+  type        = number
+}
+
+variable "conda-store-worker-resources" {
+  description = "Default resource allocation for conda-store worker pods"
+  type        = map(any)
+}
+
 variable "argo-workflows-enabled" {
   description = "Enable Argo Workflows"
   type        = bool

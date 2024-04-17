@@ -76,3 +76,13 @@ variable "services" {
   description = "Map of services tokens and scopes for conda-store"
   type        = map(any)
 }
+
+variable "max-worker-replica-count" {
+  description = "Maximum concurrency of conda workers"
+  type        = number
+}
+
+variable "conda-store-worker-resources" {
+  description = "Default resource allocation for conda-store worker pods"
+  type        = map(any)
+}
