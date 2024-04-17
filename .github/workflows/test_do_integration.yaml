@@ -1,4 +1,4 @@
-name: test-do-integration
+name: Digital Ocean Deployment
 
 on:
   schedule:
