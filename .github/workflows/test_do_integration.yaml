@@ -1,4 +1,4 @@
-name: test-gcp-integration
+name: test-do-integration
 
 on:
   schedule:
