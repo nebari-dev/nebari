@@ -183,6 +183,10 @@ def _calculate_node_groups(config: schema.Main):
         return config.local.dict()["node_selectors"]
 
 
+def node_groups_to_dict(node_groups):
+    return {ng_name: ng.dict() for ng_name, ng in node_groups.items()}
+
+
 @contextlib.contextmanager
 def kubernetes_provider_context(kubernetes_credentials: Dict[str, str]):
     credential_mapping = {
@@ -540,6 +544,13 @@ provider_enum_name_map: Dict[schema.ProviderEnum, str] = {
 
 provider_name_abbreviation_map: Dict[str, str] = {
     value: key.value for key, value in provider_enum_name_map.items()
+}
+
+provider_enum_default_node_groups_map: Dict[schema.ProviderEnum, Any] = {
+    schema.ProviderEnum.gcp: node_groups_to_dict(DEFAULT_GCP_NODE_GROUPS),
+    schema.ProviderEnum.aws: node_groups_to_dict(DEFAULT_AWS_NODE_GROUPS),
+    schema.ProviderEnum.azure: node_groups_to_dict(DEFAULT_AZURE_NODE_GROUPS),
+    schema.ProviderEnum.do: node_groups_to_dict(DEFAULT_DO_NODE_GROUPS),
 }
 
 

@@ -13,6 +13,10 @@ from pydantic.error_wrappers import ValidationError
 from rich.prompt import Prompt
 
 from _nebari.config import backup_configuration
+from _nebari.stages.infrastructure import (
+    provider_enum_default_node_groups_map,
+    provider_enum_name_map,
+)
 from _nebari.utils import (
     get_k8s_version_prefix,
     get_provider_config_block_name,
@@ -23,6 +27,7 @@ from _nebari.version import __version__, rounded_ver_parse
 from nebari.schema import ProviderEnum, is_version_accepted
 
 logger = logging.getLogger(__name__)
+
 
 NEBARI_WORKFLOW_CONTROLLER_DOCS = (
     "https://www.nebari.dev/docs/how-tos/using-argo/#jupyterflow-override-beta"
@@ -744,7 +749,27 @@ class Upgrade_2024_4_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        rich.print("Ready to upgrade to Nebari version [green]2024.4.1[/green].")
+        # Default configuration for the node groups was added in this version. Therefore,
+        # users upgrading who don't have any specific node groups defined on their config
+        # file already, will be prompted and asked whether they want to include the default
+        if provider := config.get("provider", ""):
+            provider_full_name = provider_enum_name_map[provider]
+            if provider_full_name in config and "node_groups" not in config.get(
+                provider_full_name, {}
+            ):
+                try:
+                    default_node_groups = provider_enum_default_node_groups_map[
+                        provider
+                    ]
+                    continue_ = Prompt.ask(
+                        f"Would you like to include the default configuration for the node groups in [purple]{config_filename}[/purple]?",
+                        choices=["y", "N"],
+                        default="N",
+                    )
+                    if continue_ == "y":
+                        config[provider_full_name]["node_groups"] = default_node_groups
+                except KeyError:
+                    pass
 
         return config
 
