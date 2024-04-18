@@ -32,8 +32,13 @@ on:
 
 jobs:
   test-render-providers:
-    # avoid running on PRs coming from a fork
-    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request'
+    # Prevents the execution of this test under the following conditions:
+    # 1. When the 'NO_PROVIDER_CREDENTIALS' GitHub variable is set, indicating the absence of provider credentials.
+    # 2. For pull requests (PRs) originating from a fork, since GitHub does not provide the fork's credentials to the destination repository.
+    # ref. https://github.com/nebari-dev/nebari/issues/2379
+    if: |
+      vars.NO_PROVIDER_CREDENTIALS == '' &&
+      (github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request')
     name: "Test Nebari Provider"
     runs-on: ubuntu-latest
     permissions:
