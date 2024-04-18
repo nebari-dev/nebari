@@ -28,7 +28,6 @@ from nebari.schema import ProviderEnum, is_version_accepted
 
 logger = logging.getLogger(__name__)
 
-
 NEBARI_WORKFLOW_CONTROLLER_DOCS = (
     "https://www.nebari.dev/docs/how-tos/using-argo/#jupyterflow-override-beta"
 )
