@@ -9,7 +9,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-## Release 2024.4.1 - April 19, 2024
+## Release 2024.4.1 - April 20, 2024
 
 ### What's Changed
 * update azurerm version by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2370
