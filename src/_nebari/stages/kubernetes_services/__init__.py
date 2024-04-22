@@ -90,14 +90,10 @@ class KubeSpawner(schema.Base):
         extra = "allow"
 
 
-class JupyterLabProfile(schema.Base):
+class ProfileAccess(schema.Base):
     access: AccessEnum = AccessEnum.all
-    display_name: str
-    description: str
-    default: bool = False
     users: typing.Optional[typing.List[str]]
     groups: typing.Optional[typing.List[str]]
-    kubespawner_override: typing.Optional[KubeSpawner]
 
     @pydantic.root_validator
     def only_yaml_can_have_groups_and_users(cls, values):
@@ -112,7 +108,14 @@ class JupyterLabProfile(schema.Base):
         return values
 
 
-class DaskWorkerProfile(schema.Base):
+class JupyterLabProfile(ProfileAccess):
+    display_name: str
+    description: str
+    default: bool = False
+    kubespawner_override: typing.Optional[KubeSpawner]
+
+
+class DaskWorkerProfile(ProfileAccess):
     worker_cores_limit: int
     worker_cores: int
     worker_memory_limit: str
