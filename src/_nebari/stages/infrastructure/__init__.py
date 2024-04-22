@@ -184,7 +184,7 @@ def _calculate_node_groups(config: schema.Main):
 
 
 def node_groups_to_dict(node_groups):
-    return {ng_name: ng.dict() for ng_name, ng in node_groups.items()}
+    return {ng_name: ng.model_dump() for ng_name, ng in node_groups.items()}
 
 
 @contextlib.contextmanager
