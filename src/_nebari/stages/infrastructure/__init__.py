@@ -133,8 +133,8 @@ class AWSNodeGroupInputVars(schema.Base):
 class AWSInputVars(schema.Base):
     name: str
     environment: str
-    existing_security_group_id: str = None
-    existing_subnet_ids: List[str] = None
+    existing_security_group_id: Optional[str] = None
+    existing_subnet_ids: Optional[List[str]] = None
     region: str
     kubernetes_version: str
     node_groups: List[AWSNodeGroupInputVars]
