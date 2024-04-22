@@ -91,10 +91,10 @@ class GCPInputVars(schema.Base):
     release_channel: str
     networking_mode: str
     network: str
-    subnetwork: str = None
-    ip_allocation_policy: Dict[str, str] = None
-    master_authorized_networks_config: Dict[str, str] = None
-    private_cluster_config: GCPPrivateClusterConfig = None
+    subnetwork: Optional[str] = None
+    ip_allocation_policy: Optional[Dict[str, str]] = None
+    master_authorized_networks_config: Optional[Dict[str, str]] = None
+    private_cluster_config: Optional[GCPPrivateClusterConfig] = None
 
 
 class AzureNodeGroupInputVars(schema.Base):
@@ -112,11 +112,11 @@ class AzureInputVars(schema.Base):
     node_groups: Dict[str, AzureNodeGroupInputVars]
     resource_group_name: str
     node_resource_group_name: str
-    vnet_subnet_id: str = None
+    vnet_subnet_id: Optional[str] = None
     private_cluster_enabled: bool
     tags: Dict[str, str] = {}
-    max_pods: int = None
-    network_profile: Dict[str, str] = None
+    max_pods: Optional[int] = None
+    network_profile: Optional[Dict[str, str]] = None
 
 
 class AWSNodeGroupInputVars(schema.Base):
