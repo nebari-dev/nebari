@@ -6,9 +6,11 @@ import secrets
 import string
 import sys
 import time
-from typing import Any, Dict, List, Optional, Type, Union
+import typing
+from abc import ABC
+from typing import Any, Dict, List, Type
 
-from pydantic import Field, ValidationInfo, field_validator
+import pydantic
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -60,79 +62,93 @@ class AuthenticationEnum(str, enum.Enum):
 
 
 class GitHubConfig(schema.Base):
-    client_id: str = Field(
-        default_factory=lambda: os.environ.get("GITHUB_CLIENT_ID"),
-        validate_default=True,
+    client_id: str = pydantic.Field(
+        default_factory=lambda: os.environ.get("GITHUB_CLIENT_ID")
     )
-    client_secret: str = Field(
-        default_factory=lambda: os.environ.get("GITHUB_CLIENT_SECRET"),
-        validate_default=True,
+    client_secret: str = pydantic.Field(
+        default_factory=lambda: os.environ.get("GITHUB_CLIENT_SECRET")
     )
 
-    @field_validator("client_id", "client_secret", mode="before")
-    @classmethod
-    def validate_credentials(cls, value: Optional[str], info: ValidationInfo) -> str:
-        variable_mapping = {
+    @pydantic.root_validator(allow_reuse=True)
+    def validate_required(cls, values):
+        missing = []
+        for k, v in {
             "client_id": "GITHUB_CLIENT_ID",
             "client_secret": "GITHUB_CLIENT_SECRET",
-        }
-        if value is None:
+        }.items():
+            if not values.get(k):
+                missing.append(v)
+
+        if len(missing) > 0:
             raise ValueError(
-                f"Missing the following required environment variable: {variable_mapping[info.field_name]}"
+                f"Missing the following required environment variable(s): {', '.join(missing)}"
             )
-        return value
+
+        return values
 
 
 class Auth0Config(schema.Base):
-    client_id: str = Field(
-        default_factory=lambda: os.environ.get("AUTH0_CLIENT_ID"),
-        validate_default=True,
+    client_id: str = pydantic.Field(
+        default_factory=lambda: os.environ.get("AUTH0_CLIENT_ID")
     )
-    client_secret: str = Field(
-        default_factory=lambda: os.environ.get("AUTH0_CLIENT_SECRET"),
-        validate_default=True,
+    client_secret: str = pydantic.Field(
+        default_factory=lambda: os.environ.get("AUTH0_CLIENT_SECRET")
     )
-    auth0_subdomain: str = Field(
-        default_factory=lambda: os.environ.get("AUTH0_DOMAIN"),
-        validate_default=True,
+    auth0_subdomain: str = pydantic.Field(
+        default_factory=lambda: os.environ.get("AUTH0_DOMAIN")
     )
 
-    @field_validator("client_id", "client_secret", "auth0_subdomain", mode="before")
-    @classmethod
-    def validate_credentials(cls, value: Optional[str], info: ValidationInfo) -> str:
-        variable_mapping = {
+    @pydantic.root_validator(allow_reuse=True)
+    def validate_required(cls, values):
+        missing = []
+        for k, v in {
             "client_id": "AUTH0_CLIENT_ID",
             "client_secret": "AUTH0_CLIENT_SECRET",
             "auth0_subdomain": "AUTH0_DOMAIN",
-        }
-        if value is None:
+        }.items():
+            if not values.get(k):
+                missing.append(v)
+
+        if len(missing) > 0:
             raise ValueError(
-                f"Missing the following required environment variable: {variable_mapping[info.field_name]} "
+                f"Missing the following required environment variable(s): {', '.join(missing)}"
             )
-        return value
+
+        return values
 
 
-class BaseAuthentication(schema.Base):
+class Authentication(schema.Base, ABC):
+    _types: typing.Dict[str, type] = {}
+
     type: AuthenticationEnum
 
+    # Based on https://github.com/samuelcolvin/pydantic/issues/2177#issuecomment-739578307
 
-class PasswordAuthentication(BaseAuthentication):
-    type: AuthenticationEnum = AuthenticationEnum.password
+    # This allows type field to determine which subclass of Authentication should be used for validation.
 
+    # Used to register automatically all the submodels in `_types`.
+    def __init_subclass__(cls):
+        cls._types[cls._typ.value] = cls
 
-class Auth0Authentication(BaseAuthentication):
-    type: AuthenticationEnum = AuthenticationEnum.auth0
-    config: Auth0Config = Field(default_factory=lambda: Auth0Config())
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
 
+    @classmethod
+    def validate(cls, value: typing.Dict[str, typing.Any]) -> "Authentication":
+        if "type" not in value:
+            raise ValueError("type field is missing from security.authentication")
 
-class GitHubAuthentication(BaseAuthentication):
-    type: AuthenticationEnum = AuthenticationEnum.github
-    config: GitHubConfig = Field(default_factory=lambda: GitHubConfig())
+        specified_type = value.get("type")
+        sub_class = cls._types.get(specified_type, None)
 
+        if not sub_class:
+            raise ValueError(
+                f"No registered Authentication type called {specified_type}"
+            )
 
-Authentication = Union[
-    PasswordAuthentication, Auth0Authentication, GitHubAuthentication
-]
+        # init with right submodel
+        return sub_class(**value)
 
 
 def random_secure_string(
@@ -141,55 +157,32 @@ def random_secure_string(
     return "".join(secrets.choice(chars) for i in range(length))
 
 
+class PasswordAuthentication(Authentication):
+    _typ = AuthenticationEnum.password
+
+
+class Auth0Authentication(Authentication):
+    _typ = AuthenticationEnum.auth0
+    config: Auth0Config = pydantic.Field(default_factory=lambda: Auth0Config())
+
+
+class GitHubAuthentication(Authentication):
+    _typ = AuthenticationEnum.github
+    config: GitHubConfig = pydantic.Field(default_factory=lambda: GitHubConfig())
+
+
 class Keycloak(schema.Base):
-    initial_root_password: str = Field(default_factory=random_secure_string)
-    overrides: Dict = {}
+    initial_root_password: str = pydantic.Field(default_factory=random_secure_string)
+    overrides: typing.Dict = {}
     realm_display_name: str = "Nebari"
 
 
-auth_enum_to_model = {
-    AuthenticationEnum.password: PasswordAuthentication,
-    AuthenticationEnum.auth0: Auth0Authentication,
-    AuthenticationEnum.github: GitHubAuthentication,
-}
-
-auth_enum_to_config = {
-    AuthenticationEnum.auth0: Auth0Config,
-    AuthenticationEnum.github: GitHubConfig,
-}
-
-
 class Security(schema.Base):
-    authentication: Authentication = PasswordAuthentication()
+    authentication: Authentication = PasswordAuthentication(
+        type=AuthenticationEnum.password
+    )
     shared_users_group: bool = True
     keycloak: Keycloak = Keycloak()
-
-    @field_validator("authentication", mode="before")
-    @classmethod
-    def validate_authentication(cls, value: Optional[Dict]) -> Authentication:
-        if value is None:
-            return PasswordAuthentication()
-        if "type" not in value:
-            raise ValueError(
-                "Authentication type must be specified if authentication is set"
-            )
-        auth_type = value["type"] if hasattr(value, "__getitem__") else value.type
-        if auth_type in auth_enum_to_model:
-            if auth_type == AuthenticationEnum.password:
-                return auth_enum_to_model[auth_type]()
-            else:
-                if "config" in value:
-                    config_dict = (
-                        value["config"]
-                        if hasattr(value, "__getitem__")
-                        else value.config
-                    )
-                    config = auth_enum_to_config[auth_type](**config_dict)
-                else:
-                    config = auth_enum_to_config[auth_type]()
-                return auth_enum_to_model[auth_type](config=config)
-        else:
-            raise ValueError(f"Unsupported authentication type {auth_type}")
 
 
 class InputSchema(schema.Base):
@@ -233,7 +226,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             node_group=stage_outputs["stages/02-infrastructure"]["node_selectors"][
                 "general"
             ],
-        ).model_dump()
+        ).dict()
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_check: bool = False

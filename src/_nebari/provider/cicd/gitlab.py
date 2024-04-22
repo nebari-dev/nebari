@@ -1,34 +1,40 @@
 from typing import Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, RootModel
+from pydantic import BaseModel, Field
 
 from _nebari.constants import LATEST_SUPPORTED_PYTHON_VERSION
 from _nebari.provider.cicd.common import pip_install_nebari
 
-GLCI_extras = RootModel[Union[str, float, int]]
+
+class GLCI_extras(BaseModel):
+    # to allow for dynamic key names
+    __root__: Union[str, float, int]
 
 
 class GLCI_image(BaseModel):
     name: str
-    entrypoint: Optional[str] = None
+    entrypoint: Optional[str]
 
 
 class GLCI_rules(BaseModel):
     if_: Optional[str] = Field(alias="if")
-    changes: Optional[List[str]] = None
-    model_config = ConfigDict(populate_by_name=True)
+    changes: Optional[List[str]]
+
+    class Config:
+        allow_population_by_field_name = True
 
 
 class GLCI_job(BaseModel):
-    image: Optional[Union[str, GLCI_image]] = None
-    variables: Optional[Dict[str, str]] = None
-    before_script: Optional[List[str]] = None
-    after_script: Optional[List[str]] = None
+    image: Optional[Union[str, GLCI_image]]
+    variables: Optional[Dict[str, str]]
+    before_script: Optional[List[str]]
+    after_script: Optional[List[str]]
     script: List[str]
-    rules: Optional[List[GLCI_rules]] = None
+    rules: Optional[List[GLCI_rules]]
 
 
-GLCI = RootModel[Dict[str, GLCI_job]]
+class GLCI(BaseModel):
+    __root__: Dict[str, GLCI_job]
 
 
 def gen_gitlab_ci(config):
@@ -70,7 +76,7 @@ def gen_gitlab_ci(config):
     )
 
     return GLCI(
-        {
+        __root__={
             "render-nebari": render_nebari,
         }
     )

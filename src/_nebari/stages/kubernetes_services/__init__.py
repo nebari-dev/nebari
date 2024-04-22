@@ -2,10 +2,12 @@ import enum
 import json
 import sys
 import time
-from typing import Any, Dict, List, Optional, Type, Union
+import typing
+from typing import Any, Dict, List, Type
 from urllib.parse import urlencode
 
-from pydantic import ConfigDict, Field, field_validator, model_validator
+import pydantic
+from pydantic import Field
 
 from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
@@ -79,11 +81,13 @@ class Theme(schema.Base):
 
 
 class KubeSpawner(schema.Base):
-    cpu_limit: float
-    cpu_guarantee: float
+    cpu_limit: int
+    cpu_guarantee: int
     mem_limit: str
     mem_guarantee: str
-    model_config = ConfigDict(extra="allow")
+
+    class Config:
+        extra = "allow"
 
 
 class JupyterLabProfile(schema.Base):
@@ -91,31 +95,36 @@ class JupyterLabProfile(schema.Base):
     display_name: str
     description: str
     default: bool = False
-    users: Optional[List[str]] = None
-    groups: Optional[List[str]] = None
-    kubespawner_override: Optional[KubeSpawner] = None
+    users: typing.Optional[typing.List[str]]
+    groups: typing.Optional[typing.List[str]]
+    kubespawner_override: typing.Optional[KubeSpawner]
 
-    @model_validator(mode="after")
-    def only_yaml_can_have_groups_and_users(self):
-        if self.access != AccessEnum.yaml:
-            if self.users is not None or self.groups is not None:
+    @pydantic.root_validator
+    def only_yaml_can_have_groups_and_users(cls, values):
+        if values["access"] != AccessEnum.yaml:
+            if (
+                values.get("users", None) is not None
+                or values.get("groups", None) is not None
+            ):
                 raise ValueError(
                     "Profile must not contain groups or users fields unless access = yaml"
                 )
-        return self
+        return values
 
 
 class DaskWorkerProfile(schema.Base):
-    worker_cores_limit: float
-    worker_cores: float
+    worker_cores_limit: int
+    worker_cores: int
     worker_memory_limit: str
     worker_memory: str
     worker_threads: int = 1
-    model_config = ConfigDict(extra="allow")
+
+    class Config:
+        extra = "allow"
 
 
 class Profiles(schema.Base):
-    jupyterlab: List[JupyterLabProfile] = [
+    jupyterlab: typing.List[JupyterLabProfile] = [
         JupyterLabProfile(
             display_name="Small Instance",
             description="Stable environment with 2 cpu / 8 GB ram",
@@ -138,7 +147,7 @@ class Profiles(schema.Base):
             ),
         ),
     ]
-    dask_worker: Dict[str, DaskWorkerProfile] = {
+    dask_worker: typing.Dict[str, DaskWorkerProfile] = {
         "Small Worker": DaskWorkerProfile(
             worker_cores_limit=2,
             worker_cores=1.5,
@@ -155,26 +164,25 @@ class Profiles(schema.Base):
         ),
     }
 
-    @field_validator("jupyterlab")
-    @classmethod
-    def check_default(cls, value):
+    @pydantic.validator("jupyterlab")
+    def check_default(cls, v, values):
         """Check if only one default value is present."""
-        default = [attrs["default"] for attrs in value if "default" in attrs]
+        default = [attrs["default"] for attrs in v if "default" in attrs]
         if default.count(True) > 1:
             raise TypeError(
                 "Multiple default Jupyterlab profiles may cause unexpected problems."
             )
-        return value
+        return v
 
 
 class CondaEnvironment(schema.Base):
     name: str
-    channels: Optional[List[str]] = None
-    dependencies: List[Union[str, Dict[str, List[str]]]]
+    channels: typing.Optional[typing.List[str]]
+    dependencies: typing.List[typing.Union[str, typing.Dict[str, typing.List[str]]]]
 
 
 class CondaStore(schema.Base):
-    extra_settings: Dict[str, Any] = {}
+    extra_settings: typing.Dict[str, typing.Any] = {}
     extra_config: str = ""
     image: str = "quansight/conda-store-server"
     image_tag: str = constants.DEFAULT_CONDA_STORE_IMAGE_TAG
@@ -189,7 +197,7 @@ class NebariWorkflowController(schema.Base):
 
 class ArgoWorkflows(schema.Base):
     enabled: bool = True
-    overrides: Dict = {}
+    overrides: typing.Dict = {}
     nebari_workflow_controller: NebariWorkflowController = NebariWorkflowController()
 
 
@@ -198,9 +206,9 @@ class JHubApps(schema.Base):
 
 
 class MonitoringOverrides(schema.Base):
-    loki: Dict = {}
-    promtail: Dict = {}
-    minio: Dict = {}
+    loki: typing.Dict = {}
+    promtail: typing.Dict = {}
+    minio: typing.Dict = {}
 
 
 class Monitoring(schema.Base):
@@ -211,7 +219,7 @@ class Monitoring(schema.Base):
 
 class JupyterLabPioneer(schema.Base):
     enabled: bool = False
-    log_format: Optional[str] = None
+    log_format: typing.Optional[str] = None
 
 
 class Telemetry(schema.Base):
@@ -219,7 +227,7 @@ class Telemetry(schema.Base):
 
 
 class JupyterHub(schema.Base):
-    overrides: Dict = {}
+    overrides: typing.Dict = {}
 
 
 class IdleCuller(schema.Base):
@@ -233,10 +241,10 @@ class IdleCuller(schema.Base):
 
 
 class JupyterLab(schema.Base):
-    default_settings: Dict[str, Any] = {}
+    default_settings: typing.Dict[str, typing.Any] = {}
     idle_culler: IdleCuller = IdleCuller()
-    initial_repositories: List[Dict[str, str]] = []
-    preferred_dir: Optional[str] = None
+    initial_repositories: typing.List[typing.Dict[str, str]] = []
+    preferred_dir: typing.Optional[str] = None
 
 
 class InputSchema(schema.Base):
@@ -244,7 +252,7 @@ class InputSchema(schema.Base):
     storage: Storage = Storage()
     theme: Theme = Theme()
     profiles: Profiles = Profiles()
-    environments: Dict[str, CondaEnvironment] = {
+    environments: typing.Dict[str, CondaEnvironment] = {
         "environment-dask.yaml": CondaEnvironment(
             name="dask",
             channels=["conda-forge"],
@@ -366,9 +374,7 @@ class JupyterhubInputVars(schema.Base):
     initial_repositories: str = Field(alias="initial-repositories")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
     jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
-    jupyterhub_shared_endpoint: Optional[str] = Field(
-        alias="jupyterhub-shared-endpoint", default=None
-    )
+    jupyterhub_shared_endpoint: str = Field(None, alias="jupyterhub-shared-endpoint")
     jupyterhub_profiles: List[JupyterLabProfile] = Field(alias="jupyterlab-profiles")
     jupyterhub_image: ImageNameTag = Field(alias="jupyterhub-image")
     jupyterhub_hub_extraEnv: str = Field(alias="jupyterhub-hub-extraEnv")
@@ -376,7 +382,9 @@ class JupyterhubInputVars(schema.Base):
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
     cloud_provider: str = Field(alias="cloud-provider")
-    jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
+    jupyterlab_preferred_dir: typing.Optional[str] = Field(
+        alias="jupyterlab-preferred-dir"
+    )
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -397,7 +405,7 @@ class MonitoringInputVars(schema.Base):
 
 class TelemetryInputVars(schema.Base):
     jupyterlab_pioneer_enabled: bool = Field(alias="jupyterlab-pioneer-enabled")
-    jupyterlab_pioneer_log_format: Optional[str] = Field(
+    jupyterlab_pioneer_log_format: typing.Optional[str] = Field(
         alias="jupyterlab-pioneer-log-format"
     )
 
@@ -490,7 +498,7 @@ class KubernetesServicesStage(NebariTerraformStage):
 
         conda_store_vars = CondaStoreInputVars(
             conda_store_environments={
-                k: v.model_dump() for k, v in self.config.environments.items()
+                k: v.dict() for k, v in self.config.environments.items()
             },
             conda_store_default_namespace=self.config.conda_store.default_namespace,
             conda_store_filesystem_storage=self.config.storage.conda_store,
@@ -503,14 +511,14 @@ class KubernetesServicesStage(NebariTerraformStage):
         )
 
         jupyterhub_vars = JupyterhubInputVars(
-            jupyterhub_theme=jupyterhub_theme.model_dump(),
+            jupyterhub_theme=jupyterhub_theme.dict(),
             jupyterlab_image=_split_docker_image_name(
                 self.config.default_images.jupyterlab
             ),
             jupyterhub_stared_storage=self.config.storage.shared_filesystem,
             jupyterhub_shared_endpoint=jupyterhub_shared_endpoint,
             cloud_provider=cloud_provider,
-            jupyterhub_profiles=self.config.profiles.model_dump()["jupyterlab"],
+            jupyterhub_profiles=self.config.profiles.dict()["jupyterlab"],
             jupyterhub_image=_split_docker_image_name(
                 self.config.default_images.jupyterhub
             ),
@@ -518,7 +526,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterhub_hub_extraEnv=json.dumps(
                 self.config.jupyterhub.overrides.get("hub", {}).get("extraEnv", [])
             ),
-            idle_culler_settings=self.config.jupyterlab.idle_culler.model_dump(),
+            idle_culler_settings=self.config.jupyterlab.idle_culler.dict(),
             argo_workflows_enabled=self.config.argo_workflows.enabled,
             jhub_apps_enabled=self.config.jhub_apps.enabled,
             initial_repositories=str(self.config.jupyterlab.initial_repositories),
@@ -530,7 +538,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             dask_worker_image=_split_docker_image_name(
                 self.config.default_images.dask_worker
             ),
-            dask_gateway_profiles=self.config.profiles.model_dump()["dask_worker"],
+            dask_gateway_profiles=self.config.profiles.dict()["dask_worker"],
             cloud_provider=cloud_provider,
         )
 
@@ -560,13 +568,13 @@ class KubernetesServicesStage(NebariTerraformStage):
         )
 
         return {
-            **kubernetes_services_vars.model_dump(by_alias=True),
-            **conda_store_vars.model_dump(by_alias=True),
-            **jupyterhub_vars.model_dump(by_alias=True),
-            **dask_gateway_vars.model_dump(by_alias=True),
-            **monitoring_vars.model_dump(by_alias=True),
-            **argo_workflows_vars.model_dump(by_alias=True),
-            **telemetry_vars.model_dump(by_alias=True),
+            **kubernetes_services_vars.dict(by_alias=True),
+            **conda_store_vars.dict(by_alias=True),
+            **jupyterhub_vars.dict(by_alias=True),
+            **dask_gateway_vars.dict(by_alias=True),
+            **monitoring_vars.dict(by_alias=True),
+            **argo_workflows_vars.dict(by_alias=True),
+            **telemetry_vars.dict(by_alias=True),
         }
 
     def check(

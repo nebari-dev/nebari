@@ -167,7 +167,7 @@ def deploy(request):
         config = add_preemptible_node_group(config, cloud=cloud)
 
     print("*" * 100)
-    pprint.pprint(config.model_dump())
+    pprint.pprint(config.dict())
     print("*" * 100)
 
     # render

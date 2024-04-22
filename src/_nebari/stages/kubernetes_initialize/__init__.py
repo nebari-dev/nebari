@@ -1,7 +1,8 @@
 import sys
-from typing import Any, Dict, List, Optional, Type
+import typing
+from typing import Any, Dict, List, Type, Union
 
-from pydantic import model_validator
+import pydantic
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -15,34 +16,37 @@ from nebari.hookspecs import NebariStage, hookimpl
 
 class ExtContainerReg(schema.Base):
     enabled: bool = False
-    access_key_id: Optional[str] = None
-    secret_access_key: Optional[str] = None
-    extcr_account: Optional[str] = None
-    extcr_region: Optional[str] = None
+    access_key_id: typing.Optional[str]
+    secret_access_key: typing.Optional[str]
+    extcr_account: typing.Optional[str]
+    extcr_region: typing.Optional[str]
 
-    @model_validator(mode="after")
-    def enabled_must_have_fields(self):
-        if self.enabled:
+    @pydantic.root_validator
+    def enabled_must_have_fields(cls, values):
+        if values["enabled"]:
             for fldname in (
                 "access_key_id",
                 "secret_access_key",
                 "extcr_account",
                 "extcr_region",
             ):
-                value = getattr(self, fldname)
-                if value is None or value.strip() == "":
+                if (
+                    fldname not in values
+                    or values[fldname] is None
+                    or values[fldname].strip() == ""
+                ):
                     raise ValueError(
                         f"external_container_reg must contain a non-blank {fldname} when enabled is true"
                     )
-        return self
+        return values
 
 
 class InputVars(schema.Base):
     name: str
     environment: str
     cloud_provider: str
-    aws_region: Optional[str] = None
-    external_container_reg: Optional[ExtContainerReg] = None
+    aws_region: Union[str, None] = None
+    external_container_reg: Union[ExtContainerReg, None] = None
     gpu_enabled: bool = False
     gpu_node_group_names: List[str] = []
 
@@ -74,7 +78,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
             name=self.config.project_name,
             environment=self.config.namespace,
             cloud_provider=self.config.provider.value,
-            external_container_reg=self.config.external_container_reg.model_dump(),
+            external_container_reg=self.config.external_container_reg.dict(),
         )
 
         if self.config.provider == schema.ProviderEnum.gcp:
@@ -93,7 +97,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
             ]
             input_vars.aws_region = self.config.amazon_web_services.region
 
-        return input_vars.model_dump()
+        return input_vars.dict()
 
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False

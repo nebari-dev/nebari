@@ -96,7 +96,7 @@ class BootstrapStage(NebariStage):
             for fn, workflow in gen_cicd(self.config).items():
                 stream = io.StringIO()
                 schema.yaml.dump(
-                    workflow.model_dump(
+                    workflow.dict(
                         by_alias=True, exclude_unset=True, exclude_defaults=True
                     ),
                     stream,

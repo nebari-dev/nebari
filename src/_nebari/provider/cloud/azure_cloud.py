@@ -9,11 +9,10 @@ from azure.identity import DefaultAzureCredential
 from azure.mgmt.containerservice import ContainerServiceClient
 from azure.mgmt.resource import ResourceManagementClient
 
-from _nebari.constants import AZURE_ENV_DOCS
+from _nebari import constants
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
-    check_environment_variables,
     construct_azure_resource_group_name,
 )
 from nebari import schema
@@ -25,18 +24,29 @@ DURATION = 10
 RETRIES = 10
 
 
-def check_credentials() -> DefaultAzureCredential:
-    required_variables = {"ARM_CLIENT_ID", "ARM_SUBSCRIPTION_ID", "ARM_TENANT_ID"}
-    check_environment_variables(required_variables, AZURE_ENV_DOCS)
+def check_credentials():
+    """Check if credentials are valid."""
 
-    optional_variable = "ARM_CLIENT_SECRET"
-    arm_client_secret = os.environ.get(optional_variable, None)
+    required_variables = {
+        "ARM_CLIENT_ID": os.environ.get("ARM_CLIENT_ID", None),
+        "ARM_SUBSCRIPTION_ID": os.environ.get("ARM_SUBSCRIPTION_ID", None),
+        "ARM_TENANT_ID": os.environ.get("ARM_TENANT_ID", None),
+    }
+    arm_client_secret = os.environ.get("ARM_CLIENT_SECRET", None)
+
+    if not all(required_variables.values()):
+        raise ValueError(
+            f"""Missing the following required environment variables: {required_variables}\n
+            Please see the documentation for more information: {constants.AZURE_ENV_DOCS}"""
+        )
+
     if arm_client_secret:
         logger.info("Authenticating as a service principal.")
+        return DefaultAzureCredential()
     else:
-        logger.info(f"No {optional_variable} environment variable found.")
+        logger.info("No ARM_CLIENT_SECRET environment variable found.")
         logger.info("Allowing Azure SDK to authenticate using OIDC or other methods.")
-    return DefaultAzureCredential()
+        return DefaultAzureCredential()
 
 
 @functools.lru_cache()

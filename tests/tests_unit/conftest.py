@@ -172,7 +172,7 @@ def nebari_config_options(request) -> schema.Main:
 
 @pytest.fixture
 def nebari_config(nebari_config_options):
-    return nebari_plugin_manager.config_schema.model_validate(
+    return nebari_plugin_manager.config_schema.parse_obj(
         render_config(**nebari_config_options)
     )
 
