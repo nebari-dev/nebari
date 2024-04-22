@@ -3,8 +3,7 @@ import logging
 import socket
 import sys
 import time
-import typing
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Optional, Type
 
 from _nebari import constants
 from _nebari.provider.dns.cloudflare import update_record
@@ -128,23 +127,23 @@ class CertificateEnum(str, enum.Enum):
 class Certificate(schema.Base):
     type: CertificateEnum = CertificateEnum.selfsigned
     # existing
-    secret_name: typing.Optional[str]
+    secret_name: Optional[str] = None
     # lets-encrypt
-    acme_email: typing.Optional[str]
+    acme_email: Optional[str] = None
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
 
 
 class DnsProvider(schema.Base):
-    provider: typing.Optional[str]
-    auto_provision: typing.Optional[bool] = False
+    provider: Optional[str] = None
+    auto_provision: Optional[bool] = False
 
 
 class Ingress(schema.Base):
-    terraform_overrides: typing.Dict = {}
+    terraform_overrides: Dict = {}
 
 
 class InputSchema(schema.Base):
-    domain: typing.Optional[str]
+    domain: Optional[str] = None
     certificate: Certificate = Certificate()
     ingress: Ingress = Ingress()
     dns: DnsProvider = DnsProvider()
@@ -156,7 +155,7 @@ class IngressEndpoint(schema.Base):
 
 
 class OutputSchema(schema.Base):
-    load_balancer_address: typing.List[IngressEndpoint]
+    load_balancer_address: List[IngressEndpoint]
     domain: str
 
 

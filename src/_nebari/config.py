@@ -2,19 +2,19 @@ import os
 import pathlib
 import re
 import sys
-import typing
+from typing import Any, Dict, List, Union
 
 import pydantic
 
 from _nebari.utils import yaml
 
 
-def set_nested_attribute(data: typing.Any, attrs: typing.List[str], value: typing.Any):
+def set_nested_attribute(data: Any, attrs: List[str], value: Any):
     """Takes an arbitrary set of attributes and accesses the deep
     nested object config to set value
     """
 
-    def _get_attr(d: typing.Any, attr: str):
+    def _get_attr(d: Any, attr: str):
         if isinstance(d, list) and re.fullmatch(r"\d+", attr):
             return d[int(attr)]
         elif hasattr(d, "__getitem__"):
@@ -22,7 +22,7 @@ def set_nested_attribute(data: typing.Any, attrs: typing.List[str], value: typin
         else:
             return getattr(d, attr)
 
-    def _set_attr(d: typing.Any, attr: str, value: typing.Any):
+    def _set_attr(d: Any, attr: str, value: Any):
         if isinstance(d, list) and re.fullmatch(r"\d+", attr):
             d[int(attr)] = value
         elif hasattr(d, "__getitem__"):
@@ -63,6 +63,15 @@ def set_config_from_environment_variables(
     return config
 
 
+def dump_nested_model(model_dict: Dict[str, Union[pydantic.BaseModel, str]]):
+    result = {}
+    for key, value in model_dict.items():
+        result[key] = (
+            value.model_dump() if isinstance(value, pydantic.BaseModel) else value
+        )
+    return result
+
+
 def read_configuration(
     config_filename: pathlib.Path,
     config_schema: pydantic.BaseModel,
@@ -77,7 +86,8 @@ def read_configuration(
         )
 
     with filename.open() as f:
-        config = config_schema(**yaml.load(f.read()))
+        config_dict = yaml.load(f)
+        config = config_schema(**config_dict)
 
     if read_environment:
         config = set_config_from_environment_variables(config)
@@ -87,14 +97,15 @@ def read_configuration(
 
 def write_configuration(
     config_filename: pathlib.Path,
-    config: typing.Union[pydantic.BaseModel, typing.Dict],
+    config: Union[pydantic.BaseModel, Dict],
     mode: str = "w",
 ):
     """Write the nebari configuration file to disk"""
     with config_filename.open(mode) as f:
         if isinstance(config, pydantic.BaseModel):
-            yaml.dump(config.dict(), f)
+            yaml.dump(config.model_dump(), f)
         else:
+            config = dump_nested_model(config)
             yaml.dump(config, f)
 
 
