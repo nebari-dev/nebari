@@ -79,18 +79,25 @@ jobs:
           tenant-id: ${{ env.ARM_TENANT_ID }}
           subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
 
-      - name: Integration Tests
-        run: |
-          pytest --version
-          pytest tests/tests_integration/ -vvv -s --cloud azure
-        env:
-          NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
-          NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
-          NEBARI_SECRET__default_images__dask_worker: "quay.io/nebari/nebari-dask-worker:${{ env.NEBARI_IMAGE_TAG }}"
-      #   continue-on-error: true # DELETE THIS LINE - For debugging purposes only
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az account show
 
-      # # DELETE THIS STEP - For debugging purposes only
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-      #   with:
-      #     limit-access-to-actor: true
+      # - name: Integration Tests
+      #   run: |
+      #     pytest --version
+      #     pytest tests/tests_integration/ -vvv -s --cloud azure
+      #   env:
+      #     NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
+      #     NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
+      #     NEBARI_SECRET__default_images__dask_worker: "quay.io/nebari/nebari-dask-worker:${{ env.NEBARI_IMAGE_TAG }}"
+      # #   continue-on-error: true # DELETE THIS LINE - For debugging purposes only
+
+      # # # DELETE THIS STEP - For debugging purposes only
+      # # - name: Setup tmate session
+      # #   uses: mxschmitt/action-tmate@v3
+      # #   with:
+      # #     limit-access-to-actor: true
