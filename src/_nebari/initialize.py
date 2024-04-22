@@ -19,6 +19,13 @@ from _nebari.provider.cloud import (
 )
 from _nebari.provider.oauth.auth0 import create_client
 from _nebari.stages.bootstrap import CiEnum
+from _nebari.stages.infrastructure import (
+    DEFAULT_AWS_NODE_GROUPS,
+    DEFAULT_AZURE_NODE_GROUPS,
+    DEFAULT_DO_NODE_GROUPS,
+    DEFAULT_GCP_NODE_GROUPS,
+    node_groups_to_dict,
+)
 from _nebari.stages.kubernetes_ingress import CertificateEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
@@ -118,6 +125,7 @@ def render_config(
         config["digital_ocean"] = {
             "kubernetes_version": do_kubernetes_versions,
             "region": do_region,
+            "node_groups": node_groups_to_dict(DEFAULT_DO_NODE_GROUPS),
         }
 
         config["theme"]["jupyterhub"][
@@ -132,6 +140,7 @@ def render_config(
         config["google_cloud_platform"] = {
             "kubernetes_version": gcp_kubernetes_version,
             "region": gcp_region,
+            "node_groups": node_groups_to_dict(DEFAULT_GCP_NODE_GROUPS),
         }
 
         config["theme"]["jupyterhub"][
@@ -153,6 +162,7 @@ def render_config(
             "kubernetes_version": azure_kubernetes_version,
             "region": azure_region,
             "storage_account_postfix": random_secure_string(length=4),
+            "node_groups": node_groups_to_dict(DEFAULT_AZURE_NODE_GROUPS),
         }
 
         config["theme"]["jupyterhub"][
@@ -171,6 +181,7 @@ def render_config(
         config["amazon_web_services"] = {
             "kubernetes_version": aws_kubernetes_version,
             "region": aws_region,
+            "node_groups": node_groups_to_dict(DEFAULT_AWS_NODE_GROUPS),
         }
         config["theme"]["jupyterhub"][
             "hub_subtitle"

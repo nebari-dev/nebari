@@ -183,6 +183,10 @@ def _calculate_node_groups(config: schema.Main):
         return config.local.model_dump()["node_selectors"]
 
 
+def node_groups_to_dict(node_groups):
+    return {ng_name: ng.dict() for ng_name, ng in node_groups.items()}
+
+
 @contextlib.contextmanager
 def kubernetes_provider_context(kubernetes_credentials: Dict[str, str]):
     credential_mapping = {
@@ -223,21 +227,18 @@ class DigitalOceanNodeGroup(schema.Base):
     max_nodes: Annotated[int, Field(ge=1)] = 1
 
 
+DEFAULT_DO_NODE_GROUPS = {
+    "general": DigitalOceanNodeGroup(instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1),
+    "user": DigitalOceanNodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
+    "worker": DigitalOceanNodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
+}
+
+
 class DigitalOceanProvider(schema.Base):
     region: str
     kubernetes_version: Optional[str] = None
     # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
-    node_groups: Dict[str, DigitalOceanNodeGroup] = {
-        "general": DigitalOceanNodeGroup(
-            instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1
-        ),
-        "user": DigitalOceanNodeGroup(
-            instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5
-        ),
-        "worker": DigitalOceanNodeGroup(
-            instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5
-        ),
-    }
+    node_groups: Dict[str, DigitalOceanNodeGroup] = DEFAULT_DO_NODE_GROUPS
     tags: Optional[List[str]] = []
 
     @model_validator(mode="before")
@@ -317,17 +318,20 @@ class GCPNodeGroup(schema.Base):
     guest_accelerators: List[GCPGuestAccelerator] = []
 
 
+DEFAULT_GCP_NODE_GROUPS = {
+    "general": GCPNodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
+    "user": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
+    "worker": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
+}
+
+
 class GoogleCloudPlatformProvider(schema.Base):
     region: str
     project: str
     kubernetes_version: str
     availability_zones: Optional[List[str]] = []
     release_channel: str = constants.DEFAULT_GKE_RELEASE_CHANNEL
-    node_groups: Dict[str, GCPNodeGroup] = {
-        "general": GCPNodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
-        "user": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
-        "worker": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
-    }
+    node_groups: Dict[str, GCPNodeGroup] = DEFAULT_GCP_NODE_GROUPS
     tags: Optional[List[str]] = []
     networking_mode: str = "ROUTE"
     network: str = "default"
@@ -361,16 +365,19 @@ class AzureNodeGroup(schema.Base):
     max_nodes: int
 
 
+DEFAULT_AZURE_NODE_GROUPS = {
+    "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
+    "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
+    "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
+}
+
+
 class AzureProvider(schema.Base):
     region: str
     kubernetes_version: Optional[str] = None
     storage_account_postfix: str
     resource_group_name: Optional[str] = None
-    node_groups: Dict[str, AzureNodeGroup] = {
-        "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
-        "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
-        "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
-    }
+    node_groups: Dict[str, AzureNodeGroup] = DEFAULT_AZURE_NODE_GROUPS
     storage_account_postfix: str
     vnet_subnet_id: Optional[str] = None
     private_cluster_enabled: bool = False
@@ -431,19 +438,22 @@ class AWSNodeGroup(schema.Base):
     permissions_boundary: Optional[str] = None
 
 
+DEFAULT_AWS_NODE_GROUPS = {
+    "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
+    "user": AWSNodeGroup(
+        instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
+    ),
+    "worker": AWSNodeGroup(
+        instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
+    ),
+}
+
+
 class AmazonWebServicesProvider(schema.Base):
     region: str
     kubernetes_version: str
     availability_zones: Optional[List[str]]
-    node_groups: Dict[str, AWSNodeGroup] = {
-        "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
-        "user": AWSNodeGroup(
-            instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
-        ),
-        "worker": AWSNodeGroup(
-            instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
-        ),
-    }
+    node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -540,6 +550,13 @@ provider_enum_name_map: Dict[schema.ProviderEnum, str] = {
 
 provider_name_abbreviation_map: Dict[str, str] = {
     value: key.value for key, value in provider_enum_name_map.items()
+}
+
+provider_enum_default_node_groups_map: Dict[schema.ProviderEnum, Any] = {
+    schema.ProviderEnum.gcp: node_groups_to_dict(DEFAULT_GCP_NODE_GROUPS),
+    schema.ProviderEnum.aws: node_groups_to_dict(DEFAULT_AWS_NODE_GROUPS),
+    schema.ProviderEnum.azure: node_groups_to_dict(DEFAULT_AZURE_NODE_GROUPS),
+    schema.ProviderEnum.do: node_groups_to_dict(DEFAULT_DO_NODE_GROUPS),
 }
 
 
