@@ -1,5 +1,4 @@
-import typing
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Optional, Type
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
@@ -25,8 +24,8 @@ class NebariExtension(schema.Base):
     keycloakadmin: bool = False
     jwt: bool = False
     nebariconfigyaml: bool = False
-    logout: typing.Optional[str]
-    envs: typing.Optional[typing.List[NebariExtensionEnv]]
+    logout: Optional[str] = None
+    envs: Optional[List[NebariExtensionEnv]] = None
 
 
 class HelmExtension(schema.Base):
@@ -34,12 +33,12 @@ class HelmExtension(schema.Base):
     repository: str
     chart: str
     version: str
-    overrides: typing.Dict = {}
+    overrides: Dict = {}
 
 
 class InputSchema(schema.Base):
-    helm_extensions: typing.List[HelmExtension] = []
-    tf_extensions: typing.List[NebariExtension] = []
+    helm_extensions: List[HelmExtension] = []
+    tf_extensions: List[NebariExtension] = []
 
 
 class OutputSchema(schema.Base):
@@ -67,12 +66,12 @@ class NebariTFExtensionsStage(NebariTerraformStage):
             "realm_id": stage_outputs["stages/06-kubernetes-keycloak-configuration"][
                 "realm_id"
             ]["value"],
-            "tf_extensions": [_.dict() for _ in self.config.tf_extensions],
-            "nebari_config_yaml": self.config.dict(),
+            "tf_extensions": [_.model_dump() for _ in self.config.tf_extensions],
+            "nebari_config_yaml": self.config.model_dump(),
             "keycloak_nebari_bot_password": stage_outputs[
                 "stages/05-kubernetes-keycloak"
             ]["keycloak_nebari_bot_password"]["value"],
-            "helm_extensions": [_.dict() for _ in self.config.helm_extensions],
+            "helm_extensions": [_.model_dump() for _ in self.config.helm_extensions],
         }
 
 

@@ -9,7 +9,7 @@ from typing import Any, ClassVar, Dict
 
 import rich
 from packaging.version import Version
-from pydantic.error_wrappers import ValidationError
+from pydantic import ValidationError
 from rich.prompt import Prompt
 
 from _nebari.config import backup_configuration
