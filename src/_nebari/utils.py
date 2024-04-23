@@ -11,7 +11,7 @@ import threading
 import time
 import warnings
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from ruamel.yaml import YAML
 
@@ -338,3 +338,18 @@ def get_provider_config_block_name(provider):
         return PROVIDER_CONFIG_NAMES[provider]
     else:
         return provider
+
+
+def check_environment_variables(variables: Set[str], reference: str) -> None:
+    """Check that environment variables are set."""
+    required_variables = {
+        variable: os.environ.get(variable, None) for variable in variables
+    }
+    missing_variables = {
+        variable for variable, value in required_variables.items() if value is None
+    }
+    if missing_variables:
+        raise ValueError(
+            f"""Missing the following required environment variables: {required_variables}\n
+            Please see the documentation for more information: {reference}"""
+        )

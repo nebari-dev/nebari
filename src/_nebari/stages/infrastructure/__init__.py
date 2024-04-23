@@ -5,9 +5,9 @@ import pathlib
 import re
 import sys
 import tempfile
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Annotated, Any, Dict, List, Optional, Tuple, Type, Union
 
-import pydantic
+from pydantic import Field, field_validator, model_validator
 
 from _nebari import constants
 from _nebari.provider import terraform
@@ -34,7 +34,7 @@ def get_kubeconfig_filename():
 
 class LocalInputVars(schema.Base):
     kubeconfig_filename: str = get_kubeconfig_filename()
-    kube_context: Optional[str]
+    kube_context: Optional[str] = None
 
 
 class ExistingInputVars(schema.Base):
@@ -91,10 +91,10 @@ class GCPInputVars(schema.Base):
     release_channel: str
     networking_mode: str
     network: str
-    subnetwork: str = None
-    ip_allocation_policy: Dict[str, str] = None
-    master_authorized_networks_config: Dict[str, str] = None
-    private_cluster_config: GCPPrivateClusterConfig = None
+    subnetwork: Optional[str] = None
+    ip_allocation_policy: Optional[Dict[str, str]] = None
+    master_authorized_networks_config: Optional[Dict[str, str]] = None
+    private_cluster_config: Optional[GCPPrivateClusterConfig] = None
 
 
 class AzureNodeGroupInputVars(schema.Base):
@@ -112,11 +112,11 @@ class AzureInputVars(schema.Base):
     node_groups: Dict[str, AzureNodeGroupInputVars]
     resource_group_name: str
     node_resource_group_name: str
-    vnet_subnet_id: str = None
+    vnet_subnet_id: Optional[str] = None
     private_cluster_enabled: bool
     tags: Dict[str, str] = {}
-    max_pods: int = None
-    network_profile: Dict[str, str] = None
+    max_pods: Optional[int] = None
+    network_profile: Optional[Dict[str, str]] = None
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -133,8 +133,8 @@ class AWSNodeGroupInputVars(schema.Base):
 class AWSInputVars(schema.Base):
     name: str
     environment: str
-    existing_security_group_id: str = None
-    existing_subnet_ids: List[str] = None
+    existing_security_group_id: Optional[str] = None
+    existing_subnet_ids: Optional[List[str]] = None
     region: str
     kubernetes_version: str
     node_groups: List[AWSNodeGroupInputVars]
@@ -180,7 +180,11 @@ def _calculate_node_groups(config: schema.Main):
     elif config.provider == schema.ProviderEnum.existing:
         return config.existing.node_selectors
     else:
-        return config.local.dict()["node_selectors"]
+        return config.local.model_dump()["node_selectors"]
+
+
+def node_groups_to_dict(node_groups):
+    return {ng_name: ng.model_dump() for ng_name, ng in node_groups.items()}
 
 
 @contextlib.contextmanager
@@ -219,8 +223,8 @@ class DigitalOceanNodeGroup(schema.Base):
     """
 
     instance: str
-    min_nodes: pydantic.conint(ge=1) = 1
-    max_nodes: pydantic.conint(ge=1) = 1
+    min_nodes: Annotated[int, Field(ge=1)] = 1
+    max_nodes: Annotated[int, Field(ge=1)] = 1
 
 
 DEFAULT_DO_NODE_GROUPS = {
@@ -232,56 +236,44 @@ DEFAULT_DO_NODE_GROUPS = {
 
 class DigitalOceanProvider(schema.Base):
     region: str
-    kubernetes_version: str
+    kubernetes_version: Optional[str] = None
     # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
     node_groups: Dict[str, DigitalOceanNodeGroup] = DEFAULT_DO_NODE_GROUPS
     tags: Optional[List[str]] = []
 
-    @pydantic.validator("region")
-    def _validate_region(cls, value):
+    @model_validator(mode="before")
+    @classmethod
+    def _check_input(cls, data: Any) -> Any:
         digital_ocean.check_credentials()
 
+        # check if region is valid
         available_regions = set(_["slug"] for _ in digital_ocean.regions())
-        if value not in available_regions:
+        if data["region"] not in available_regions:
             raise ValueError(
-                f"Digital Ocean region={value} is not one of {available_regions}"
+                f"Digital Ocean region={data['region']} is not one of {available_regions}"
             )
-        return value
 
-    @pydantic.validator("node_groups")
-    def _validate_node_group(cls, value):
-        digital_ocean.check_credentials()
+        # check if kubernetes version is valid
+        available_kubernetes_versions = digital_ocean.kubernetes_versions()
+        if len(available_kubernetes_versions) == 0:
+            raise ValueError(
+                "Request to Digital Ocean for available Kubernetes versions failed."
+            )
+        if data["kubernetes_version"] is None:
+            data["kubernetes_version"] = available_kubernetes_versions[-1]
+        elif data["kubernetes_version"] not in available_kubernetes_versions:
+            raise ValueError(
+                f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+            )
 
         available_instances = {_["slug"] for _ in digital_ocean.instances()}
-        for name, node_group in value.items():
-            if node_group.instance not in available_instances:
-                raise ValueError(
-                    f"Digital Ocean instance {node_group.instance} not one of available instance types={available_instances}"
-                )
-
-        return value
-
-    @pydantic.root_validator
-    def _validate_kubernetes_version(cls, values):
-        digital_ocean.check_credentials()
-
-        if "region" not in values:
-            raise ValueError("Region required in order to set kubernetes_version")
-
-        available_kubernetes_versions = digital_ocean.kubernetes_versions(
-            values["region"]
-        )
-        assert available_kubernetes_versions
-        if (
-            values["kubernetes_version"] is not None
-            and values["kubernetes_version"] not in available_kubernetes_versions
-        ):
-            raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
-            )
-        else:
-            values["kubernetes_version"] = available_kubernetes_versions[-1]
-        return values
+        if "node_groups" in data:
+            for _, node_group in data["node_groups"].items():
+                if node_group["instance"] not in available_instances:
+                    raise ValueError(
+                        f"Digital Ocean instance {node_group.instance} not one of available instance types={available_instances}"
+                    )
+        return data
 
 
 class GCPIPAllocationPolicy(schema.Base):
@@ -314,13 +306,13 @@ class GCPGuestAccelerator(schema.Base):
     """
 
     name: str
-    count: pydantic.conint(ge=1) = 1
+    count: Annotated[int, Field(ge=1)] = 1
 
 
 class GCPNodeGroup(schema.Base):
     instance: str
-    min_nodes: pydantic.conint(ge=0) = 0
-    max_nodes: pydantic.conint(ge=1) = 1
+    min_nodes: Annotated[int, Field(ge=0)] = 0
+    max_nodes: Annotated[int, Field(ge=1)] = 1
     preemptible: bool = False
     labels: Dict[str, str] = {}
     guest_accelerators: List[GCPGuestAccelerator] = []
@@ -348,31 +340,23 @@ class GoogleCloudPlatformProvider(schema.Base):
     master_authorized_networks_config: Optional[Union[GCPCIDRBlock, None]] = None
     private_cluster_config: Optional[Union[GCPPrivateClusterConfig, None]] = None
 
-    @pydantic.root_validator
-    def validate_all(cls, values):
-        region = values.get("region")
-        project_id = values.get("project")
-
-        if project_id is None:
-            raise ValueError("The `google_cloud_platform.project` field is required.")
-
-        if region is None:
-            raise ValueError("The `google_cloud_platform.region` field is required.")
-
-        # validate region
-        google_cloud.validate_region(region)
-
-        # validate kubernetes version
-        kubernetes_version = values.get("kubernetes_version")
-        available_kubernetes_versions = google_cloud.kubernetes_versions(region)
-        if kubernetes_version is None:
-            values["kubernetes_version"] = available_kubernetes_versions[-1]
-        elif kubernetes_version not in available_kubernetes_versions:
+    @model_validator(mode="before")
+    @classmethod
+    def _check_input(cls, data: Any) -> Any:
+        google_cloud.check_credentials()
+        avaliable_regions = google_cloud.regions()
+        if data["region"] not in avaliable_regions:
             raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+                f"Google Cloud region={data['region']} is not one of {avaliable_regions}"
             )
 
-        return values
+        available_kubernetes_versions = google_cloud.kubernetes_versions(data["region"])
+        print(available_kubernetes_versions)
+        if data["kubernetes_version"] not in available_kubernetes_versions:
+            raise ValueError(
+                f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+            )
+        return data
 
 
 class AzureNodeGroup(schema.Base):
@@ -390,20 +374,27 @@ DEFAULT_AZURE_NODE_GROUPS = {
 
 class AzureProvider(schema.Base):
     region: str
-    kubernetes_version: str
+    kubernetes_version: Optional[str] = None
     storage_account_postfix: str
-    resource_group_name: str = None
+    resource_group_name: Optional[str] = None
     node_groups: Dict[str, AzureNodeGroup] = DEFAULT_AZURE_NODE_GROUPS
     storage_account_postfix: str
-    vnet_subnet_id: Optional[Union[str, None]] = None
+    vnet_subnet_id: Optional[str] = None
     private_cluster_enabled: bool = False
     resource_group_name: Optional[str] = None
     tags: Optional[Dict[str, str]] = {}
     network_profile: Optional[Dict[str, str]] = None
     max_pods: Optional[int] = None
 
-    @pydantic.validator("kubernetes_version")
-    def _validate_kubernetes_version(cls, value):
+    @model_validator(mode="before")
+    @classmethod
+    def _check_credentials(cls, data: Any) -> Any:
+        azure_cloud.check_credentials()
+        return data
+
+    @field_validator("kubernetes_version")
+    @classmethod
+    def _validate_kubernetes_version(cls, value: Optional[str]) -> str:
         available_kubernetes_versions = azure_cloud.kubernetes_versions()
         if value is None:
             value = available_kubernetes_versions[-1]
@@ -413,7 +404,8 @@ class AzureProvider(schema.Base):
             )
         return value
 
-    @pydantic.validator("resource_group_name")
+    @field_validator("resource_group_name")
+    @classmethod
     def _validate_resource_group_name(cls, value):
         if value is None:
             return value
@@ -431,9 +423,10 @@ class AzureProvider(schema.Base):
 
         return value
 
-    @pydantic.validator("tags")
-    def _validate_tags(cls, tags):
-        return azure_cloud.validate_tags(tags)
+    @field_validator("tags")
+    @classmethod
+    def _validate_tags(cls, value: Optional[Dict[str, str]]) -> Dict[str, str]:
+        return value if value is None else azure_cloud.validate_tags(value)
 
 
 class AWSNodeGroup(schema.Base):
@@ -461,49 +454,66 @@ class AmazonWebServicesProvider(schema.Base):
     kubernetes_version: str
     availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
-    existing_subnet_ids: List[str] = None
-    existing_security_group_id: str = None
+    existing_subnet_ids: Optional[List[str]] = None
+    existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
     permissions_boundary: Optional[str] = None
     tags: Optional[Dict[str, str]] = {}
 
-    @pydantic.root_validator
-    def validate_all(cls, values):
-        region = values.get("region")
-        if region is None:
-            raise ValueError("The `amazon_web_services.region` field is required.")
+    @model_validator(mode="before")
+    @classmethod
+    def _check_input(cls, data: Any) -> Any:
+        amazon_web_services.check_credentials()
 
-        # validate region
-        amazon_web_services.validate_region(region)
-
-        # validate kubernetes version
-        kubernetes_version = values.get("kubernetes_version")
-        available_kubernetes_versions = amazon_web_services.kubernetes_versions(region)
-        if kubernetes_version is None:
-            values["kubernetes_version"] = available_kubernetes_versions[-1]
-        elif kubernetes_version not in available_kubernetes_versions:
+        # check if region is valid
+        available_regions = amazon_web_services.regions(data["region"])
+        if data["region"] not in available_regions:
             raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {values['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+                f"Amazon Web Services region={data['region']} is not one of {available_regions}"
             )
 
-        # validate node groups
-        node_groups = values["node_groups"]
-        available_instances = amazon_web_services.instances(region)
-        for name, node_group in node_groups.items():
-            if node_group.instance not in available_instances:
-                raise ValueError(
-                    f"Instance {node_group.instance} not available out of available instances {available_instances.keys()}"
+        # check if kubernetes version is valid
+        available_kubernetes_versions = amazon_web_services.kubernetes_versions(
+            data["region"]
+        )
+        if len(available_kubernetes_versions) == 0:
+            raise ValueError("Request to AWS for available Kubernetes versions failed.")
+        if data["kubernetes_version"] is None:
+            data["kubernetes_version"] = available_kubernetes_versions[-1]
+        elif data["kubernetes_version"] not in available_kubernetes_versions:
+            raise ValueError(
+                f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
+            )
+
+        # check if availability zones are valid
+        available_zones = amazon_web_services.zones(data["region"])
+        if "availability_zones" not in data:
+            data["availability_zones"] = list(sorted(available_zones))[:2]
+        else:
+            for zone in data["availability_zones"]:
+                if zone not in available_zones:
+                    raise ValueError(
+                        f"Amazon Web Services availability zone={zone} is not one of {available_zones}"
+                    )
+
+        # check if instances are valid
+        available_instances = amazon_web_services.instances(data["region"])
+        if "node_groups" in data:
+            for _, node_group in data["node_groups"].items():
+                instance = (
+                    node_group["instance"]
+                    if hasattr(node_group, "__getitem__")
+                    else node_group.instance
                 )
-
-        if values["availability_zones"] is None:
-            zones = amazon_web_services.zones(region)
-            values["availability_zones"] = list(sorted(zones))[:2]
-
-        return values
+                if instance not in available_instances:
+                    raise ValueError(
+                        f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
+                    )
+        return data
 
 
 class LocalProvider(schema.Base):
-    kube_context: Optional[str]
+    kube_context: Optional[str] = None
     node_selectors: Dict[str, KeyValueDict] = {
         "general": KeyValueDict(key="kubernetes.io/os", value="linux"),
         "user": KeyValueDict(key="kubernetes.io/os", value="linux"),
@@ -512,7 +522,7 @@ class LocalProvider(schema.Base):
 
 
 class ExistingProvider(schema.Base):
-    kube_context: Optional[str]
+    kube_context: Optional[str] = None
     node_selectors: Dict[str, KeyValueDict] = {
         "general": KeyValueDict(key="kubernetes.io/os", value="linux"),
         "user": KeyValueDict(key="kubernetes.io/os", value="linux"),
@@ -542,25 +552,33 @@ provider_name_abbreviation_map: Dict[str, str] = {
     value: key.value for key, value in provider_enum_name_map.items()
 }
 
+provider_enum_default_node_groups_map: Dict[schema.ProviderEnum, Any] = {
+    schema.ProviderEnum.gcp: node_groups_to_dict(DEFAULT_GCP_NODE_GROUPS),
+    schema.ProviderEnum.aws: node_groups_to_dict(DEFAULT_AWS_NODE_GROUPS),
+    schema.ProviderEnum.azure: node_groups_to_dict(DEFAULT_AZURE_NODE_GROUPS),
+    schema.ProviderEnum.do: node_groups_to_dict(DEFAULT_DO_NODE_GROUPS),
+}
+
 
 class InputSchema(schema.Base):
-    local: Optional[LocalProvider]
-    existing: Optional[ExistingProvider]
-    google_cloud_platform: Optional[GoogleCloudPlatformProvider]
-    amazon_web_services: Optional[AmazonWebServicesProvider]
-    azure: Optional[AzureProvider]
-    digital_ocean: Optional[DigitalOceanProvider]
+    local: Optional[LocalProvider] = None
+    existing: Optional[ExistingProvider] = None
+    google_cloud_platform: Optional[GoogleCloudPlatformProvider] = None
+    amazon_web_services: Optional[AmazonWebServicesProvider] = None
+    azure: Optional[AzureProvider] = None
+    digital_ocean: Optional[DigitalOceanProvider] = None
 
-    @pydantic.root_validator(pre=True)
-    def check_provider(cls, values):
-        if "provider" in values:
-            provider: str = values["provider"]
+    @model_validator(mode="before")
+    @classmethod
+    def check_provider(cls, data: Any) -> Any:
+        if "provider" in data:
+            provider: str = data["provider"]
             if hasattr(schema.ProviderEnum, provider):
                 # TODO: all cloud providers has required fields, but local and existing don't.
                 #  And there is no way to initialize a model without user input here.
                 #  We preserve the original behavior here, but we should find a better way to do this.
-                if provider in ["local", "existing"] and provider not in values:
-                    values[provider] = provider_enum_model_map[provider]()
+                if provider in ["local", "existing"] and provider not in data:
+                    data[provider] = provider_enum_model_map[provider]()
             else:
                 # if the provider field is invalid, it won't be set when this validator is called
                 # so we need to check for it explicitly here, and set the `pre` to True
@@ -572,16 +590,16 @@ class InputSchema(schema.Base):
             setted_providers = [
                 provider
                 for provider in provider_name_abbreviation_map.keys()
-                if provider in values
+                if provider in data
             ]
             num_providers = len(setted_providers)
             if num_providers > 1:
                 raise ValueError(f"Multiple providers set: {setted_providers}")
             elif num_providers == 1:
-                values["provider"] = provider_name_abbreviation_map[setted_providers[0]]
+                data["provider"] = provider_name_abbreviation_map[setted_providers[0]]
             elif num_providers == 0:
-                values["provider"] = schema.ProviderEnum.local.value
-        return values
+                data["provider"] = schema.ProviderEnum.local.value
+        return data
 
 
 class NodeSelectorKeyValue(schema.Base):
@@ -592,20 +610,20 @@ class NodeSelectorKeyValue(schema.Base):
 class KubernetesCredentials(schema.Base):
     host: str
     cluster_ca_certifiate: str
-    token: Optional[str]
-    username: Optional[str]
-    password: Optional[str]
-    client_certificate: Optional[str]
-    client_key: Optional[str]
-    config_path: Optional[str]
-    config_context: Optional[str]
+    token: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    client_certificate: Optional[str] = None
+    client_key: Optional[str] = None
+    config_path: Optional[str] = None
+    config_context: Optional[str] = None
 
 
 class OutputSchema(schema.Base):
     node_selectors: Dict[str, NodeSelectorKeyValue]
     kubernetes_credentials: KubernetesCredentials
     kubeconfig_filename: str
-    nfs_endpoint: Optional[str]
+    nfs_endpoint: Optional[str] = None
 
 
 class KubernetesInfrastructureStage(NebariTerraformStage):
@@ -693,11 +711,13 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         if self.config.provider == schema.ProviderEnum.local:
-            return LocalInputVars(kube_context=self.config.local.kube_context).dict()
+            return LocalInputVars(
+                kube_context=self.config.local.kube_context
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.existing:
             return ExistingInputVars(
                 kube_context=self.config.existing.kube_context
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.do:
             return DigitalOceanInputVars(
                 name=self.config.escaped_project_name,
@@ -706,7 +726,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 tags=self.config.digital_ocean.tags,
                 kubernetes_version=self.config.digital_ocean.kubernetes_version,
                 node_groups=self.config.digital_ocean.node_groups,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.gcp:
             return GCPInputVars(
                 name=self.config.escaped_project_name,
@@ -735,7 +755,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 ip_allocation_policy=self.config.google_cloud_platform.ip_allocation_policy,
                 master_authorized_networks_config=self.config.google_cloud_platform.master_authorized_networks_config,
                 private_cluster_config=self.config.google_cloud_platform.private_cluster_config,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.azure:
             return AzureInputVars(
                 name=self.config.escaped_project_name,
@@ -766,7 +786,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 tags=self.config.azure.tags,
                 network_profile=self.config.azure.network_profile,
                 max_pods=self.config.azure.max_pods,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
                 name=self.config.escaped_project_name,
@@ -792,7 +812,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 vpc_cidr_block=self.config.amazon_web_services.vpc_cidr_block,
                 permissions_boundary=self.config.amazon_web_services.permissions_boundary,
                 tags=self.config.amazon_web_services.tags,
-            ).dict()
+            ).model_dump()
         else:
             raise ValueError(f"Unknown provider: {self.config.provider}")
 

@@ -9,6 +9,26 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+## Release 2024.4.1 - April 20, 2024
+
+### What's Changed
+* update azurerm version by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2370
+* Get JupyterHub `groups` from Keycloak, support `oauthenticator` 16.3+ by @krassowski in https://github.com/nebari-dev/nebari/pull/2361
+* add full names for cloud providers in guided init by @exitflynn in https://github.com/nebari-dev/nebari/pull/2375
+* Add middleware to prefix JupyterHub navbar items with /hub. by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2360
+* CLN: split #1928, refactor render test by @fangchenli in https://github.com/nebari-dev/nebari/pull/2246
+* add trailing slash for jupyterhub proxy paths by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2387
+* remove references to deprecated cdsdashboards by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2390
+* add default node groups to config by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2398
+* Update concurrency settings for Integration tests by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2393
+* Make CI/CD Cloud Provider Test Conditional by @tylergraff in https://github.com/nebari-dev/nebari/pull/2369
+
+### New Contributors
+* @exitflynn made their first contribution in https://github.com/nebari-dev/nebari/pull/2375
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.3.3...2024.4.1
+
+
 ## Release 2024.3.3 - March 27, 2024
 
 ### What's Changed
