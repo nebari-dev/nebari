@@ -90,9 +90,9 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
                 base_resource_group_name=nebari_config.azure.resource_group_name,
                 suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
             ),
-            # storage account must be globally unique
-            storage_account_name=f"{nebari_config.escaped_project_name}{nebari_config.namespace}{nebari_config.azure.storage_account_postfix}",
-            container_name=f"{nebari_config.escaped_project_name}-{nebari_config.namespace}-state",
+            # DELETEME: This is where we look up the storage account
+            storage_account_name=nebari_config.terraform_state.storage_account_name,
+            container_name=nebari_config.terraform_state.storage_container_name,
             key=f"terraform/{nebari_config.escaped_project_name}-{nebari_config.namespace}/{directory}",
         )
     elif nebari_config.provider == "existing":

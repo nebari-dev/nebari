@@ -104,7 +104,8 @@ class AzureNodeGroupInputVars(schema.Base):
 
 
 class AzureInputVars(schema.Base):
-    name: str
+    _name_regex = "a-zA-Z0-9"
+    name: Annotated[str, Field(pattern=rf"^[{_name_regex}]+$")]
     environment: str
     region: str
     kubeconfig_filename: str = get_kubeconfig_filename()
@@ -117,6 +118,12 @@ class AzureInputVars(schema.Base):
     tags: Dict[str, str] = {}
     max_pods: Optional[int] = None
     network_profile: Optional[Dict[str, str]] = None
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def _validate_name(cls, value):
+        value = re.sub(rf"[^{cls._name_regex}]", "", value)
+        return value
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -375,13 +382,10 @@ DEFAULT_AZURE_NODE_GROUPS = {
 class AzureProvider(schema.Base):
     region: str
     kubernetes_version: Optional[str] = None
-    storage_account_postfix: str
     resource_group_name: Optional[str] = None
     node_groups: Dict[str, AzureNodeGroup] = DEFAULT_AZURE_NODE_GROUPS
-    storage_account_postfix: str
     vnet_subnet_id: Optional[str] = None
     private_cluster_enabled: bool = False
-    resource_group_name: Optional[str] = None
     tags: Optional[Dict[str, str]] = {}
     network_profile: Optional[Dict[str, str]] = None
     max_pods: Optional[int] = None
@@ -758,7 +762,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.azure:
             return AzureInputVars(
-                name=self.config.escaped_project_name,
+                name=self.config.project_name,
                 environment=self.config.namespace,
                 region=self.config.azure.region,
                 kubernetes_version=self.config.azure.kubernetes_version,

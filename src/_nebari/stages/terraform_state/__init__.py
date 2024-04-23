@@ -4,9 +4,9 @@ import inspect
 import os
 import pathlib
 import re
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Annotated, Any, Dict, List, Optional, Tuple, Type, Union
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 
 from _nebari.provider import terraform
 from _nebari.provider.cloud import azure_cloud
@@ -36,7 +36,8 @@ class AzureInputVars(schema.Base):
     name: str
     namespace: str
     region: str
-    storage_account_postfix: str
+    storage_account_name: str
+    storage_container_name: str
     state_resource_group_name: str
     tags: Dict[str, str]
 
@@ -82,13 +83,49 @@ class TerraformStateEnum(str, enum.Enum):
 
 
 class TerraformState(schema.Base):
-    type: TerraformStateEnum = TerraformStateEnum.remote
+    type: TerraformStateEnum
+
+
+class ExistingTerraformState(TerraformState):
+    type: TerraformStateEnum = TerraformStateEnum.existing
     backend: Optional[str] = None
     config: Dict[str, str] = {}
 
 
+AZURE_MAX_STORAGE_ACCT_LEN = 24
+AZURE_MAX_STORAGE_CNTR_LEN = 63
+
+
+class AzureRMTerraformState(TerraformState):
+    type: TerraformStateEnum = TerraformStateEnum.remote
+    storage_account_name: Optional[
+        Annotated[
+            str,
+            Field(
+                min_length=3,
+                max_length=AZURE_MAX_STORAGE_ACCT_LEN,
+                pattern=r"^[a-z0-9]*$",
+            ),
+        ]
+    ] = None  # https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules
+    storage_container_name: Optional[
+        Annotated[
+            str,
+            Field(
+                min_length=3,
+                max_length=AZURE_MAX_STORAGE_CNTR_LEN,
+                pattern=r"^[-a-z0-9]*$",
+            ),
+        ]
+    ] = None  # https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules
+
+
+# TODO: Add other cloud providers
+TerraformStateClasses = Union[ExistingTerraformState, AzureRMTerraformState]
+
+
 class InputSchema(schema.Base):
-    terraform_state: TerraformState = TerraformState()
+    terraform_state: TerraformStateClasses
 
 
 class OutputSchema(schema.Base):
@@ -138,7 +175,6 @@ class TerraformStateStage(NebariTerraformStage):
                 base_resource_group_name=self.config.azure.resource_group_name,
                 suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
             )
-            state_resource_name_prefix_safe = resource_name_prefix.replace("-", "")
             resource_group_url = f"/subscriptions/{subscription_id}/resourceGroups/{state_resource_group_name}"
 
             return [
@@ -148,11 +184,11 @@ class TerraformStateStage(NebariTerraformStage):
                 ),
                 (
                     "module.terraform-state.azurerm_storage_account.terraform-state-storage-account",
-                    f"{resource_group_url}/providers/Microsoft.Storage/storageAccounts/{state_resource_name_prefix_safe}{self.config.azure.storage_account_postfix}",
+                    f"{resource_group_url}/providers/Microsoft.Storage/storageAccounts/{self.config.terraform_state.storage_account_name}",
                 ),
                 (
                     "module.terraform-state.azurerm_storage_container.storage_container",
-                    f"https://{state_resource_name_prefix_safe}{self.config.azure.storage_account_postfix}.blob.core.windows.net/{resource_name_prefix}-state",
+                    f"https://{self.config.terraform_state.storage_container_name}.blob.core.windows.net/{resource_name_prefix}-state",
                 ),
             ]
         elif self.config.provider == schema.ProviderEnum.aws:
@@ -210,13 +246,14 @@ class TerraformStateStage(NebariTerraformStage):
                 name=self.config.project_name,
                 namespace=self.config.namespace,
                 region=self.config.azure.region,
-                storage_account_postfix=self.config.azure.storage_account_postfix,
                 state_resource_group_name=construct_azure_resource_group_name(
                     project_name=self.config.project_name,
                     namespace=self.config.namespace,
                     base_resource_group_name=self.config.azure.resource_group_name,
                     suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
                 ),
+                storage_account_name=self.config.terraform_state.storage_account_name,
+                storage_container_name=self.config.terraform_state.storage_container_name,
                 tags=self.config.azure.tags,
             ).model_dump()
         elif (

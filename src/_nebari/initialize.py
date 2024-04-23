@@ -161,9 +161,21 @@ def render_config(
         config["azure"] = {
             "kubernetes_version": azure_kubernetes_version,
             "region": azure_region,
-            "storage_account_postfix": random_secure_string(length=4),
             "node_groups": node_groups_to_dict(DEFAULT_AZURE_NODE_GROUPS),
         }
+
+        if terraform_state == TerraformStateEnum.remote:
+            AZURE_MAX_STORAGE_ACCOUNT_NAME_LENGTH = 24
+            random_chars_length = 4
+            safe_project_name = re.sub(r"[^a-z0-9]", "", project_name.lower())[
+                : AZURE_MAX_STORAGE_ACCOUNT_NAME_LENGTH - random_chars_length
+            ]
+
+            # random string added to reduce chance of name collision. Azure storage account names must be globally unique.
+            config["terraform_state"]["storage_account_name"] = (
+                safe_project_name + random_secure_string(length=random_chars_length)
+            )
+            config["terraform_state"]["storage_container_name"] = safe_project_name
 
         config["theme"]["jupyterhub"][
             "hub_subtitle"
