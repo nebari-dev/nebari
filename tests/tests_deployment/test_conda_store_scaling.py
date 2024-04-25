@@ -154,12 +154,12 @@ class TestCondaStoreWorkerHPA(TestCase):
 
     def delete_conda_environments(self):
         existing_envs_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/?namespace=global"
-        response = requests.get(existing_envs_url, headers=self.headers)
+        response = requests.get(existing_envs_url, headers=self.headers, verify=False)
         for env in response.json()["data"]:
             env_name = env["name"]
             delete_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/global/{env_name}"
             self.log.info(f"Deleting {delete_url}")
-            requests.delete(delete_url, headers=self.headers)
+            requests.delete(delete_url, headers=self.headers, verify=False)
         self.log.info("All conda environments deleted.")
 
     @timeout(6 * 60)
@@ -170,12 +170,14 @@ class TestCondaStoreWorkerHPA(TestCase):
             response = requests.get(
                 f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/",
                 headers=self.headers,
+                verify=False,
             )
             for env in response.json().get("data"):
                 build_id = env["current_build_id"]
                 _res = requests.get(
                     f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/build/{build_id}",
                     headers=self.headers,
+                    verify=False,
                 )
                 status = _res.json().get("data")["status"]
                 if status == "COMPLETED":
@@ -224,7 +226,9 @@ class TestCondaStoreWorkerHPA(TestCase):
             "specification": f"dependencies:\n  - pandas\nvariables: {{}}\nchannels: "
             f"[]\n\ndescription: ''\nname: {name}\nprefix: null",
         }
-        response = requests.post(_url, json=request_json, headers=self.headers)
+        response = requests.post(
+            _url, json=request_json, headers=self.headers, verify=False
+        )
         self.log.debug(request_json)
         self.log.debug(self.headers)
         self.log.debug(response.json())
