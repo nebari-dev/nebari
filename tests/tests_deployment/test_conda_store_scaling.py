@@ -41,7 +41,8 @@ class TestCondaStoreWorkerHPA(TestCase):
     stream_handler = logging.StreamHandler(sys.stdout)
     log.addHandler(stream_handler)
 
-    def fetch_token(self):
+    @staticmethod
+    def fetch_token():
         v1 = client.CoreV1Api()
         secret = v1.read_namespaced_secret("conda-store-secret", "dev")
 
@@ -54,8 +55,8 @@ class TestCondaStoreWorkerHPA(TestCase):
         return token
 
     def read_namespaced_config_map(self):
-        with kubernetes.client.ApiClient(self.configuration) as api_client:
-            api_instance = kubernetes.client.CoreV1Api(api_client)
+        with kubernetes.client.ApiClient(self.configuration) as _client:
+            api_instance = kubernetes.client.CoreV1Api(_client)
         try:
             api_response = api_instance.read_namespaced_config_map(
                 "conda-store-config", "dev"
@@ -66,11 +67,11 @@ class TestCondaStoreWorkerHPA(TestCase):
                 "Exception when calling CoreV1Api->read_namespaced_config_map: %s\n" % e
             )
         finally:
-            api_client.close()
+            _client.close()
 
     def patch_namespaced_config_map(self, config_map):
-        with kubernetes.client.ApiClient(self.configuration) as api_client:
-            api_instance = kubernetes.client.CoreV1Api(api_client)
+        with kubernetes.client.ApiClient(self.configuration) as _client:
+            api_instance = kubernetes.client.CoreV1Api(_client)
         try:
             api_response = api_instance.patch_namespaced_config_map(
                 "conda-store-config", "dev", config_map
@@ -82,7 +83,7 @@ class TestCondaStoreWorkerHPA(TestCase):
                 % e
             )
         finally:
-            api_client.close()
+            _client.close()
 
     def setUp(self):
         """
@@ -158,8 +159,8 @@ class TestCondaStoreWorkerHPA(TestCase):
             env_name = env["name"]
             delete_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/global/{env_name}"
             self.log.info(f"Deleting {delete_url}")
-            response = requests.delete(delete_url, headers=self.headers)
-        self.log.info("All conda environments deleted.")
+            requests.delete(delete_url, headers=self.headers)
+        self.log.info(f"All conda environments deleted.")
 
     @timeout(6 * 60)
     def timed_wait_for_environment_creation(self, target_count):
@@ -182,7 +183,7 @@ class TestCondaStoreWorkerHPA(TestCase):
             self.log.info(f"{created_count}/{target_count} Environments created")
             time.sleep(5)
 
-        self.log.info("timed_wait_for_environment_creation finished successfully.")
+        self.log.info(f"timed_wait_for_environment_creation finished successfully.")
 
     @timeout(10)
     def build_n_environments(self, n):
@@ -196,12 +197,12 @@ class TestCondaStoreWorkerHPA(TestCase):
         self.log.info(
             f"Waiting for deployments to reach target value {target_deployment_count}  ..."
         )
-        client = dynamic.DynamicClient(
+        _client = dynamic.DynamicClient(
             api_client.ApiClient(configuration=self.configuration)
         )
         replica_count = -1
         while replica_count != target_deployment_count:
-            deployment_api = client.resources.get(
+            deployment_api = _client.resources.get(
                 api_version="apps/v1", kind="Deployment"
             )
             deployment = deployment_api.get(
@@ -220,7 +221,8 @@ class TestCondaStoreWorkerHPA(TestCase):
         name = str(uuid.uuid4())
         request_json = {
             "namespace": "global",
-            "specification": f"dependencies:\n  - pandas\nvariables: {{}}\nchannels: []\n\ndescription: ''\nname: {name}\nprefix: null",
+            "specification": f"dependencies:\n  - pandas\nvariables: {{}}\nchannels: "
+                             f"[]\n\ndescription: ''\nname: {name}\nprefix: null",
         }
         response = requests.post(_url, json=request_json, headers=self.headers)
         self.log.debug(request_json)

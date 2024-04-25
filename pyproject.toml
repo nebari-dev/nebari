@@ -94,6 +94,7 @@ dev = [
     "python-hcl2",
     "setuptools==63.4.3",
     "tqdm",
+    "timeout-function-decorator==2.0.0",
 ]
 docs = [
     "sphinx",
