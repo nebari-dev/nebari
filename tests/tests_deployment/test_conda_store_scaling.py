@@ -24,7 +24,7 @@ NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
 # NEBARI_HOSTNAME = "pt.quansight.dev" ## Override for local testing
 
 
-@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("error")
 class TestCondaStoreWorkerHPA(TestCase):
     """
