@@ -159,7 +159,7 @@ class TestCondaStoreWorkerHPA(TestCase):
             delete_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/global/{env_name}"
             self.log.info(f"Deleting {delete_url}")
             response = requests.delete(delete_url, headers=self.headers)
-        self.log.info(f"All conda environments deleted.")
+        self.log.info("All conda environments deleted.")
 
     @timeout(6 * 60)
     def timed_wait_for_environment_creation(self, target_count):
@@ -182,7 +182,7 @@ class TestCondaStoreWorkerHPA(TestCase):
             self.log.info(f"{created_count}/{target_count} Environments created")
             time.sleep(5)
 
-        self.log.info(f"timed_wait_for_environment_creation finished successfully.")
+        self.log.info("timed_wait_for_environment_creation finished successfully.")
 
     @timeout(10)
     def build_n_environments(self, n):
