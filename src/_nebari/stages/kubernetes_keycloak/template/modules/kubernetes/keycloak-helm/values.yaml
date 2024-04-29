@@ -22,6 +22,16 @@ startupScripts:
     /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u root -p "{{ .Values.initial_root_password }}"
     /opt/jboss/keycloak/bin/add-user-keycloak.sh -r master -u nebari-bot -p "{{ .Values.nebari_bot_password }}"
 
+  mv-custom-themes.sh: |
+    #!/bin/sh
+
+    if [ -d /opt/data/themes ]; then
+      echo 'Copying custom themes from /opt/data/themes to /opt/jboss/keycloak/themes'
+      cp -r /opt/data/themes/* /opt/jboss/keycloak/themes/
+    else
+      echo 'No custom themes found in /opt/data/themes'
+    fi
+
 extraInitContainers: |
   - command:
     - sh
@@ -43,11 +53,42 @@ extraInitContainers: |
     volumeMounts:
       - name: metrics-plugin
         mountPath: /data
+  - env:
+    - name: GIT_SYNC_REPO
+      value: {{ .Values.custom_themes_repo }}
+    - name: GIT_SYNC_BRANCH
+      value: {{ .Values.custom_themes_branch }}
+    - name: GIT_SYNC_ONE_TIME
+      value: "true"
+    - name: GIT_SYNC_GROUP_WRITE
+      value: "true"
+    - name: GIT_SYNC_ROOT
+      value: /opt/data/custom-themes
+    - name: GIT_SYNC_DEST
+      value: themes
+    - name: GIT_SYNC_SSH
+      value: "false"
+    image: k8s.gcr.io/git-sync:v3.1.5
+    imagePullPolicy: IfNotPresent
+    name: keycloak-git-sync
+    resources: {}
+    securityContext:
+      runAsGroup: 1000
+      runAsUser: 0
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /opt/data/custom-themes
+      name: custom-themes
 
 extraVolumeMounts: |
   - name: metrics-plugin
     mountPath: /opt/jboss/keycloak/providers/
+  - mountPath: /opt/data/custom-themes
+    name: custom-themes
 
 extraVolumes: |
   - name: metrics-plugin
+    emptyDir: {}
+  - name: custom-themes
     emptyDir: {}

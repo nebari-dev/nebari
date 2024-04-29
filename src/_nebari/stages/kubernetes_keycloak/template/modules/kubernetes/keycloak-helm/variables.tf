@@ -31,3 +31,14 @@ variable "node_group" {
     value = string
   })
 }
+
+variable "custom_themes_repo" {
+  description = "Custom themes repo for keycloak"
+  type        = string
+}
+
+variable "custom_themes_branch" {
+  description = "Custom themes branch for keycloak"
+  type        = string
+
+}
