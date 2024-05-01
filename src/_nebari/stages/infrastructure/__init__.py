@@ -57,11 +57,6 @@ class DigitalOceanInputVars(schema.Base):
     kubeconfig_filename: str = get_kubeconfig_filename()
 
 
-class GCPGuestAccelerators(schema.Base):
-    name: str
-    count: int
-
-
 class GCPNodeGroupInputVars(schema.Base):
     name: str
     instance_type: str
@@ -69,7 +64,7 @@ class GCPNodeGroupInputVars(schema.Base):
     max_size: int
     labels: Dict[str, str]
     preemptible: bool
-    guest_accelerators: List[GCPGuestAccelerators]
+    guest_accelerators: List["GCPGuestAccelerator"]
 
 
 class GCPPrivateClusterConfig(schema.Base):
