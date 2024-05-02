@@ -12,7 +12,7 @@ resource "helm_release" "argo-workflows" {
   namespace  = var.namespace
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-workflows"
-  version    = "0.22.9"
+  version    = "0.41.4"
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -34,12 +34,14 @@ resource "helm_release" "argo-workflows" {
 
       server = {
         # `sso` for OIDC/OAuth
-        extraArgs = ["--auth-mode=sso", "--auth-mode=client", "--insecure-skip-verify"]
+        extraArgs = ["--insecure-skip-verify"]
+        authModes = ["sso", "client"]
         # to enable TLS, `secure = true`
         secure   = false
         baseHref = "/${local.argo-workflows-prefix}/"
 
         sso = {
+          enabled            = true
           insecureSkipVerify = true
           issuer             = "https://${var.external-url}/auth/realms/${var.realm_id}"
           clientId = {
