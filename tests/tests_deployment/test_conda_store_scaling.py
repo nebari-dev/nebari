@@ -216,9 +216,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         _client = dynamic.DynamicClient(
             api_client.ApiClient(configuration=self.configuration)
         )
-        deployment_api = _client.resources.get(
-            api_version="apps/v1", kind="Deployment"
-        )
+        deployment_api = _client.resources.get(api_version="apps/v1", kind="Deployment")
         deployment = deployment_api.get(
             name="nebari-conda-store-worker", namespace="dev"
         )
