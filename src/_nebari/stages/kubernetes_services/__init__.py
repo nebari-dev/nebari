@@ -181,7 +181,7 @@ class CondaStore(schema.Base):
     default_namespace: str = "nebari-git"
     object_storage: str = "200Gi"
     max_workers: int = 50
-    worker_resources: dict = {"requests": {"cpu": "500m", "memory": "1Gi"}}
+    worker_resources: dict = {"requests": {"cpu": "500m", "memory": "2Gi"}}
 
 
 class NebariWorkflowController(schema.Base):
