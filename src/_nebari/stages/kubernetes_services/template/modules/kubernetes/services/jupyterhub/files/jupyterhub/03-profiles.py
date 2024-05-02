@@ -426,7 +426,8 @@ def profile_argo_token(groups):
         "ARGO_BASE_HREF": "/argo",
         "ARGO_SERVER": f"{domain}:443",
         "ARGO_NAMESPACE": namespace,
-        "ARGO_TOKEN": {
+        "ARGO_TOKEN": "Bearer $(HERA_TOKEN)",
+        "HERA_TOKEN": {
             "valueFrom": {
                 "secretKeyRef": {
                     "name": f"{argo_sa}.service-account-token",
