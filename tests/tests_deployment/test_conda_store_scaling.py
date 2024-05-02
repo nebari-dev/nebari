@@ -113,7 +113,9 @@ class TestCondaStoreWorkerHPA(TestCase):
         # Delete existing environments
         self.delete_conda_environments()
         self.log.info("Wait for existing conda-store-worker pods terminate.")
-        self.timed_wait_for_deployments(0)
+        # Query at this point.
+        self.initial_deployment_count = self.get_deployment_count()
+        self.timed_wait_for_deployments(self.initial_deployment_count)
         self.log.info("Ready to start tests.")
 
     def test_scale_up_and_down(self):
@@ -134,7 +136,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         )
         self.timed_wait_for_environment_creation(count)
         self.log.info("Wait till worker deployment scales down to 0")
-        self.timed_wait_for_deployments(0)
+        self.timed_wait_for_deployments(self.initial_deployment_count)
         self.log.info("Test passed.")
 
     def tearDown(self):
@@ -200,24 +202,28 @@ class TestCondaStoreWorkerHPA(TestCase):
         self.log.info(
             f"Waiting for deployments to reach target value {target_deployment_count}  ..."
         )
-        _client = dynamic.DynamicClient(
-            api_client.ApiClient(configuration=self.configuration)
-        )
-        replica_count = -1
+        replica_count = self.get_deployment_count()
         while replica_count != target_deployment_count:
-            deployment_api = _client.resources.get(
-                api_version="apps/v1", kind="Deployment"
-            )
-            deployment = deployment_api.get(
-                name="nebari-conda-store-worker", namespace="dev"
-            )
-            replica_count = deployment.spec.replicas
+            replica_count = self.get_deployment_count()
             direction = "up" if target_deployment_count > replica_count else "down"
             self.log.info(
                 f"Scaling {direction} deployments: {replica_count}/{target_deployment_count}"
             )
             time.sleep(5)
         self.log.info(f"Deployment count: {replica_count}")
+
+    def get_deployment_count(self):
+        _client = dynamic.DynamicClient(
+            api_client.ApiClient(configuration=self.configuration)
+        )
+        deployment_api = _client.resources.get(
+            api_version="apps/v1", kind="Deployment"
+        )
+        deployment = deployment_api.get(
+            name="nebari-conda-store-worker", namespace="dev"
+        )
+        replica_count = deployment.spec.replicas
+        return replica_count
 
     def create_conda_store_env(self):
         _url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/specification/"
