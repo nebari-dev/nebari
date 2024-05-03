@@ -181,7 +181,7 @@ class CondaStore(schema.Base):
     default_namespace: str = "nebari-git"
     object_storage: str = "200Gi"
     max_workers: int = 50
-    worker_resources: dict = {"requests": {"cpu": "250", "memory": "1Gi"}}
+    worker_resources: dict = {"requests": {"cpu": "1", "memory": "4Gi"}}
 
 
 class NebariWorkflowController(schema.Base):
@@ -505,7 +505,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             conda_store_image=self.config.conda_store.image,
             conda_store_image_tag=self.config.conda_store.image_tag,
             conda_store_max_workers=self.config.conda_store.max_workers,
-            # conda_store_worker_resources=self.config.conda_store.worker_resources,
+            conda_store_worker_resources=self.config.conda_store.worker_resources,
         )
 
         jupyterhub_vars = JupyterhubInputVars(
