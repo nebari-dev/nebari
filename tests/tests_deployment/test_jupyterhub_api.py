@@ -13,9 +13,10 @@ def api_token():
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_jupyterhub_loads_roles_from_keycloak(api_token):
     response = requests.get(
-        f"https://{constants.NEBARI_HOSTNAME}/hub/api/user/{constants.KEYCLOAK_USERNAME}",
+        f"https://{constants.NEBARI_HOSTNAME}/hub/api/users",
         headers={"Authorization": f"Bearer {api_token}"},
         verify=False,
     )
-    user = response.json()
-    assert user["roles"] == []
+    users = response.json()
+    print(users)
+    assert users[0]["roles"] == []
