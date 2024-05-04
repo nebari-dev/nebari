@@ -31,7 +31,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         auth_model = await super().update_auth_model(auth_model)
         user_info = auth_model["auth_state"][self.user_auth_state_key]
         user_roles = self._get_user_roles(user_info)
-        auth_model["roles"] = user_roles
+        auth_model["roles"] = [{"name": role_name} for role_name in user_roles]
         return auth_model
 
     async def load_managed_roles(self):
