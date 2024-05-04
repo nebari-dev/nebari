@@ -148,24 +148,24 @@ resource "helm_release" "jupyterhub" {
             enable_auth_state = true
           }
           KeyCloakOAuthenticator = {
-            client_id                      = module.jupyterhub-openid-client.config.client_id
-            client_secret                  = module.jupyterhub-openid-client.config.client_secret
-            oauth_callback_url             = "https://${var.external-url}/hub/oauth_callback"
-            authorize_url                  = module.jupyterhub-openid-client.config.authentication_url
-            token_url                      = module.jupyterhub-openid-client.config.token_url
-            realm_api_url                  = module.jupyterhub-openid-client.config.realm_api_url
-            service_account_user_id        = module.jupyterhub-openid-client.config.service_account_user_id
-            login_service                  = "Keycloak"
-            username_claim                 = "preferred_username"
-            claim_groups_key               = "groups"
-            claim_roles_key                = "roles"
-            allowed_groups                 = ["/analyst", "/developer", "/admin"]
-            admin_groups                   = ["/admin"]
-            manage_groups                  = true
-            manage_roles                   = true
-            reset_managed_roles_on_startup = true
-            refresh_pre_spawn              = true
-            validate_server_cert           = false
+            client_id            = module.jupyterhub-openid-client.config.client_id
+            client_secret        = module.jupyterhub-openid-client.config.client_secret
+            oauth_callback_url   = "https://${var.external-url}/hub/oauth_callback"
+            authorize_url        = module.jupyterhub-openid-client.config.authentication_url
+            token_url            = module.jupyterhub-openid-client.config.token_url
+            userdata_url         = module.jupyterhub-openid-client.config.userinfo_url
+            realm_api_url        = module.jupyterhub-openid-client.config.realm_api_url
+            service_account_id   = module.jupyterhub-openid-client.config.service_account_user_id
+            login_service        = "Keycloak"
+            username_claim       = "preferred_username"
+            claim_groups_key     = "groups"
+            claim_roles_key      = "roles"
+            allowed_groups       = ["/analyst", "/developer", "/admin"]
+            admin_groups         = ["/admin"]
+            manage_groups        = true
+            manage_roles         = true
+            refresh_pre_spawn    = true
+            validate_server_cert = false
 
             # deprecated, to be removed (replaced by validate_server_cert)
             tls_verify = false

@@ -5,7 +5,7 @@ from functools import reduce
 
 from jupyterhub.traitlets import Callable
 from oauthenticator.generic import GenericOAuthenticator
-from traitlets import Unicode, Union
+from traitlets import Bool, Unicode, Union
 
 
 class KeyCloakOAuthenticator(GenericOAuthenticator):
@@ -25,7 +25,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         config=True, help="""The keycloak REST API URL for the realm."""
     )
 
-    service_account_user_id = Unicode(config=True, help="""service_account_user_id.""")
+    reset_managed_roles_on_startup = Bool(True)
 
     async def update_auth_model(self, auth_model):
         auth_model = await super().update_auth_model(auth_model)
