@@ -234,7 +234,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         response = requests.post(
             _url, json=request_json, headers=self.headers, verify=False
         )
-        self.log.debug(request_json)
-        self.log.debug(self.headers)
-        self.log.debug(response.json())
+        self.log.info(request_json)
+        self.log.info(self.headers)
+        self.log.info(response.json())
         return response.json()["data"]["build_id"]
