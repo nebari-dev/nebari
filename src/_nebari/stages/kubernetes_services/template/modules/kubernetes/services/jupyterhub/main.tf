@@ -130,6 +130,7 @@ resource "helm_release" "jupyterhub" {
           "01-theme.py"    = file("${path.module}/files/jupyterhub/01-theme.py")
           "02-spawner.py"  = file("${path.module}/files/jupyterhub/02-spawner.py")
           "03-profiles.py" = file("${path.module}/files/jupyterhub/03-profiles.py")
+          "04-auth.py"     = file("${path.module}/files/jupyterhub/04-auth.py")
         }
 
         services = {
@@ -143,27 +144,28 @@ resource "helm_release" "jupyterhub" {
         # for simple key value configuration with jupyterhub traitlets
         # this hub.config property should be used
         config = {
-          JupyterHub = {
-            authenticator_class = "generic-oauth"
-          }
           Authenticator = {
             enable_auth_state = true
           }
-          GenericOAuthenticator = {
-            client_id            = module.jupyterhub-openid-client.config.client_id
-            client_secret        = module.jupyterhub-openid-client.config.client_secret
-            oauth_callback_url   = "https://${var.external-url}/hub/oauth_callback"
-            authorize_url        = module.jupyterhub-openid-client.config.authentication_url
-            token_url            = module.jupyterhub-openid-client.config.token_url
-            userdata_url         = module.jupyterhub-openid-client.config.userinfo_url
-            login_service        = "Keycloak"
-            username_claim       = "preferred_username"
-            claim_groups_key     = "groups"
-            allowed_groups       = ["/analyst", "/developer", "/admin"]
-            admin_groups         = ["/admin"]
-            manage_groups        = true
-            refresh_pre_spawn    = true
-            validate_server_cert = false
+          KeyCloakOAuthenticator = {
+            client_id                      = module.jupyterhub-openid-client.config.client_id
+            client_secret                  = module.jupyterhub-openid-client.config.client_secret
+            oauth_callback_url             = "https://${var.external-url}/hub/oauth_callback"
+            authorize_url                  = module.jupyterhub-openid-client.config.authentication_url
+            token_url                      = module.jupyterhub-openid-client.config.token_url
+            realm_api_url                  = module.jupyterhub-openid-client.config.realm_api_url
+            service_account_user_id        = module.jupyterhub-openid-client.config.service_account_user_id
+            login_service                  = "Keycloak"
+            username_claim                 = "preferred_username"
+            claim_groups_key               = "groups"
+            claim_roles_key                = "roles"
+            allowed_groups                 = ["/analyst", "/developer", "/admin"]
+            admin_groups                   = ["/admin"]
+            manage_groups                  = true
+            manage_roles                   = true
+            reset_managed_roles_on_startup = true
+            refresh_pre_spawn              = true
+            validate_server_cert           = false
 
             # deprecated, to be removed (replaced by validate_server_cert)
             tls_verify = false
@@ -283,6 +285,10 @@ module "jupyterhub-openid-client" {
     var.jupyterhub-logout-redirect-url
   ]
   jupyterlab_profiles_mapper = true
+  service-accounts-enabled   = true
+  service-account-roles = [
+    "view-realm", "view-users", "view-clients"
+  ]
 }
 
 
