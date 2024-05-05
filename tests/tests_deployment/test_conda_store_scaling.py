@@ -53,7 +53,6 @@ class TestCondaStoreWorkerHPA(TestCase):
                 "service-tokens"
             ].keys()
         ][0]
-        self.log.info(f"Authentication token: {token}")
         return token
 
     def read_namespaced_config_map(self):
