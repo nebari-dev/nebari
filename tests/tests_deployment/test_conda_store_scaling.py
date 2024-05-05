@@ -53,6 +53,7 @@ class TestCondaStoreWorkerHPA(TestCase):
                 "service-tokens"
             ].keys()
         ][0]
+        self.log.info(f"Authentication token: {token}")
         return token
 
     def read_namespaced_config_map(self):
@@ -95,7 +96,9 @@ class TestCondaStoreWorkerHPA(TestCase):
         self.configuration = config.load_kube_config()
         # Get token from pre-defined tokens.
         token = self.fetch_token()
+        self.log.info(f"Authentication token: {token}")
         self.headers = {"Authorization": f"Bearer {token}"}
+        self.log.info(f"Authentication headers: {self.headers}")
 
         # Read conda-store-config
         self.config_map = self.read_namespaced_config_map()
