@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import os
 import sys
 import time
 import uuid
@@ -71,6 +72,7 @@ class TestCondaStoreWorkerHPA(TestCase):
             _client.close()
 
     def patch_namespaced_config_map(self, config_map):
+        self.log(f"Conda store config patched: {config_map}")
         with kubernetes.client.ApiClient(self.configuration) as _client:
             api_instance = kubernetes.client.CoreV1Api(_client)
         try:
@@ -96,11 +98,13 @@ class TestCondaStoreWorkerHPA(TestCase):
         # Get token from pre-defined tokens.
         token = self.fetch_token()
         self.log.info(f"Authentication token: {token}")
+        token = os.getenv("CONDA_STORE_TOKEN")
         self.headers = {"Authorization": f"Bearer {token}"}
         self.log.info(f"Authentication headers: {self.headers}")
 
         # Read conda-store-config
         self.config_map = self.read_namespaced_config_map()
+        self.log(f"Conda store config read: {self.config_map}")
 
         # Patch conda-store-config
         self.config_map.data["conda_store_config.py"] = self.config_map.data[
@@ -108,7 +112,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         ].replace(
             '{default_namespace}/*": {"viewer"}', '{default_namespace}/*": {"admin"}'
         )
-        self.patch_namespaced_config_map(self.config_map)
+        # self.patch_namespaced_config_map(self.config_map)
 
         # Patch conda-store-config
 
@@ -153,7 +157,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         ].replace(
             '{default_namespace}/*": {"admin"}', '{default_namespace}/*": {"viewer"}'
         )
-        self.patch_namespaced_config_map(self.config_map)
+        # self.patch_namespaced_config_map(self.config_map)
         self.log.info("Teardown complete.")
         self.stream_handler.close()
 
