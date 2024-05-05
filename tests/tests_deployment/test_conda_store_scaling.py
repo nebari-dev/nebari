@@ -72,7 +72,7 @@ class TestCondaStoreWorkerHPA(TestCase):
             _client.close()
 
     def patch_namespaced_config_map(self, config_map):
-        self.log(f"Conda store config patched: {config_map}")
+        self.log.info(f"Conda store config patched: {config_map}")
         with kubernetes.client.ApiClient(self.configuration) as _client:
             api_instance = kubernetes.client.CoreV1Api(_client)
         try:
@@ -104,7 +104,7 @@ class TestCondaStoreWorkerHPA(TestCase):
 
         # Read conda-store-config
         self.config_map = self.read_namespaced_config_map()
-        self.log(f"Conda store config read: {self.config_map}")
+        self.log.info(f"Conda store config read: {self.config_map}")
 
         # Patch conda-store-config
         self.config_map.data["conda_store_config.py"] = self.config_map.data[
