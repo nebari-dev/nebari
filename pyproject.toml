@@ -102,7 +102,7 @@ docs = [
 ]
 
 [project.urls]
-Documentation = "https://www.nebari.dev/docs"
+Documentation = "https://www.nebari.dev/docs/welcome"
 Source = "https://github.com/nebari-dev/nebari"
 
 [project.scripts]
