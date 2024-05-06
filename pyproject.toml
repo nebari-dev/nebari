@@ -146,7 +146,7 @@ extend-exclude = [
 select = [
     "E",  # E: pycodestyle rules
     "F",  # F: pyflakes rules
-    "PTH",    # PTH: flake8-use-pathlib rules
+    "PTH",  # PTH: flake8-use-pathlib rules
 ]
 ignore = [
     "E501", # Line too long

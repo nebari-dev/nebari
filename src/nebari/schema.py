@@ -28,7 +28,6 @@ class Base(pydantic.BaseModel):
         extra="forbid",
         validate_assignment=True,
         populate_by_name=True,
-        validate_default=True,
     )
 
 
