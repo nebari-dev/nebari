@@ -14,7 +14,7 @@ def test_jupyterhub_loads_roles_from_keycloak():
         verify=False,
     )
     user = response.json()
-    assert user["roles"] == [
+    assert set(user["roles"]) == {
         "user",
         "manage-account",
         "jupyterhub_developer",
@@ -26,7 +26,7 @@ def test_jupyterhub_loads_roles_from_keycloak():
         "grafana_developer",
         "manage-account-links",
         "view-profile",
-    ]
+    }
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
@@ -39,4 +39,4 @@ def test_jupyterhub_loads_groups_from_keycloak():
         verify=False,
     )
     user = response.json()
-    assert user["groups"] == ["/analyst", "/developer", "/users"]
+    assert set(user["groups"]) == {"/analyst", "/developer", "/users"}
