@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import enum
 import logging
 import socket
 import sys
 import time
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Literal, Optional, Type, Union
 
 from pydantic import Field
 
@@ -116,35 +115,23 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
             sys.exit(1)
 
 
-@schema.yaml_object(schema.yaml)
-class CertificateEnum(str, enum.Enum):
-    letsencrypt = "lets-encrypt"
-    selfsigned = "self-signed"
-    existing = "existing"
-    disabled = "disabled"
-
-    @classmethod
-    def to_yaml(cls, representer, node):
-        return representer.represent_str(node.value)
-
-
 class SelfSignedCertificate(schema.Base):
-    type: str = Field(..., const=CertificateEnum.selfsigned)
+    type: Literal["self-signed"] = Field("self-signed", validate_default=True)
 
 
 class LetsEncryptCertificate(schema.Base):
-    type: str = CertificateEnum.letsencrypt
-    acme_email: str = None
+    type: Literal["lets-encrypt"] = Field("lets-encrypt", validate_default=True)
+    acme_email: str
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
 
 
 class ExistingCertificate(schema.Base):
-    type: str = CertificateEnum.existing
-    secret_name: str = None
+    type: Literal["existing"] = Field("existing", validate_default=True)
+    secret_name: str
 
 
 class DisabledCertificate(schema.Base):
-    type: str = CertificateEnum.disabled
+    type: Literal["disabled"] = Field("disabled", validate_default=True)
 
 
 Certificate = Union[

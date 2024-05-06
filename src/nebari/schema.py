@@ -25,7 +25,10 @@ github_url_pydantic = Annotated[str, StringConstraints(pattern=github_url_regex)
 
 class Base(pydantic.BaseModel):
     model_config = ConfigDict(
-        extra="forbid", validate_assignment=True, populate_by_name=True
+        extra="forbid",
+        validate_assignment=True,
+        populate_by_name=True,
+        validate_default=True,
     )
 
 
