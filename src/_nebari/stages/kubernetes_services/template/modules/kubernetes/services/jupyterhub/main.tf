@@ -159,8 +159,8 @@ resource "helm_release" "jupyterhub" {
             login_service        = "Keycloak"
             username_claim       = "preferred_username"
             claim_groups_key     = "groups"
-            allowed_groups       = ["/analyst", "/developer", "/admin"]
-            admin_groups         = ["/admin"]
+            allowed_groups       = ["/analyst", "/developer", "/admin", "jupyterhub_admin", "jupyterhub_developer"]
+            admin_groups         = ["/admin", "jupyterhub_admin"]
             manage_groups        = true
             refresh_pre_spawn    = true
             validate_server_cert = false
