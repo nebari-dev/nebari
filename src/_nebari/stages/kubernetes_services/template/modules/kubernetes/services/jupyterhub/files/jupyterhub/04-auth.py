@@ -32,6 +32,11 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         user_info = auth_model["auth_state"][self.user_auth_state_key]
         user_roles = self._get_user_roles(user_info)
         auth_model["roles"] = [{"name": role_name} for role_name in user_roles]
+        # note: because the roles check is comprehensive, we need to re-add the admin and user roles
+        if auth_model["admin"]:
+            auth_model["roles"].append({"name": "admin"})
+        if self.check_allowed(auth_model["name"], auth_model):
+            auth_model["roles"].append({"name": "user"})
         return auth_model
 
     async def load_managed_roles(self):
