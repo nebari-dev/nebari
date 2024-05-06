@@ -79,7 +79,7 @@ class TestCondaStoreWorkerHPA(TestCase):
             api_response = api_instance.patch_namespaced_config_map(
                 "conda-store-config", "dev", config_map
             )
-            self.log.debug(api_response)
+            self.log.info(api_response)
         except ApiException as e:
             self.log.exception(
                 "Exception when calling CoreV1Api->patch_namespaced_config_map: %s\n"
@@ -98,7 +98,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         # Get token from pre-defined tokens.
         token = self.fetch_token()
         self.log.info(f"Authentication token: {token}")
-        token = os.getenv("CONDA_STORE_TOKEN")
+        # token = os.getenv("CONDA_STORE_TOKEN")
         self.headers = {"Authorization": f"Bearer {token}"}
         self.log.info(f"Authentication headers: {self.headers}")
 
@@ -112,7 +112,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         ].replace(
             '{default_namespace}/*": {"viewer"}', '{default_namespace}/*": {"admin"}'
         )
-        # self.patch_namespaced_config_map(self.config_map)
+        self.patch_namespaced_config_map(self.config_map)
 
         # Patch conda-store-config
 
@@ -157,7 +157,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         ].replace(
             '{default_namespace}/*": {"admin"}', '{default_namespace}/*": {"viewer"}'
         )
-        # self.patch_namespaced_config_map(self.config_map)
+        self.patch_namespaced_config_map(self.config_map)
         self.log.info("Teardown complete.")
         self.stream_handler.close()
 
