@@ -71,7 +71,7 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
                 "name": name,
                 "url": url,
                 "external": True,
-            }
+            },
         }
 
     c.JupyterHub.services.extend(
