@@ -57,11 +57,6 @@ class DigitalOceanInputVars(schema.Base):
     kubeconfig_filename: str = get_kubeconfig_filename()
 
 
-class GCPGuestAccelerators(schema.Base):
-    name: str
-    count: int
-
-
 class GCPNodeGroupInputVars(schema.Base):
     name: str
     instance_type: str
@@ -69,7 +64,7 @@ class GCPNodeGroupInputVars(schema.Base):
     max_size: int
     labels: Dict[str, str]
     preemptible: bool
-    guest_accelerators: List[GCPGuestAccelerators]
+    guest_accelerators: List["GCPGuestAccelerator"]
 
 
 class GCPPrivateClusterConfig(schema.Base):
@@ -91,10 +86,10 @@ class GCPInputVars(schema.Base):
     release_channel: str
     networking_mode: str
     network: str
-    subnetwork: str = None
-    ip_allocation_policy: Dict[str, str] = None
-    master_authorized_networks_config: Dict[str, str] = None
-    private_cluster_config: GCPPrivateClusterConfig = None
+    subnetwork: Optional[str] = None
+    ip_allocation_policy: Optional[Dict[str, str]] = None
+    master_authorized_networks_config: Optional[Dict[str, str]] = None
+    private_cluster_config: Optional[GCPPrivateClusterConfig] = None
 
 
 class AzureNodeGroupInputVars(schema.Base):
@@ -112,11 +107,11 @@ class AzureInputVars(schema.Base):
     node_groups: Dict[str, AzureNodeGroupInputVars]
     resource_group_name: str
     node_resource_group_name: str
-    vnet_subnet_id: str = None
+    vnet_subnet_id: Optional[str] = None
     private_cluster_enabled: bool
     tags: Dict[str, str] = {}
-    max_pods: int = None
-    network_profile: Dict[str, str] = None
+    max_pods: Optional[int] = None
+    network_profile: Optional[Dict[str, str]] = None
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -133,8 +128,8 @@ class AWSNodeGroupInputVars(schema.Base):
 class AWSInputVars(schema.Base):
     name: str
     environment: str
-    existing_security_group_id: str = None
-    existing_subnet_ids: List[str] = None
+    existing_security_group_id: Optional[str] = None
+    existing_subnet_ids: Optional[List[str]] = None
     region: str
     kubernetes_version: str
     node_groups: List[AWSNodeGroupInputVars]
@@ -181,6 +176,10 @@ def _calculate_node_groups(config: schema.Main):
         return config.existing.node_selectors
     else:
         return config.local.model_dump()["node_selectors"]
+
+
+def node_groups_to_dict(node_groups):
+    return {ng_name: ng.model_dump() for ng_name, ng in node_groups.items()}
 
 
 @contextlib.contextmanager
@@ -372,7 +371,7 @@ class AzureProvider(schema.Base):
     region: str
     kubernetes_version: Optional[str] = None
     storage_account_postfix: str
-    resource_group_name: str = None
+    resource_group_name: Optional[str] = None
     node_groups: Dict[str, AzureNodeGroup] = DEFAULT_AZURE_NODE_GROUPS
     storage_account_postfix: str
     vnet_subnet_id: Optional[str] = None
@@ -546,6 +545,13 @@ provider_enum_name_map: Dict[schema.ProviderEnum, str] = {
 
 provider_name_abbreviation_map: Dict[str, str] = {
     value: key.value for key, value in provider_enum_name_map.items()
+}
+
+provider_enum_default_node_groups_map: Dict[schema.ProviderEnum, Any] = {
+    schema.ProviderEnum.gcp: node_groups_to_dict(DEFAULT_GCP_NODE_GROUPS),
+    schema.ProviderEnum.aws: node_groups_to_dict(DEFAULT_AWS_NODE_GROUPS),
+    schema.ProviderEnum.azure: node_groups_to_dict(DEFAULT_AZURE_NODE_GROUPS),
+    schema.ProviderEnum.do: node_groups_to_dict(DEFAULT_DO_NODE_GROUPS),
 }
 
 

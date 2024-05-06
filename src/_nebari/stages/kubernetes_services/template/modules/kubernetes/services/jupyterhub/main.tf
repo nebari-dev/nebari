@@ -19,8 +19,8 @@ locals {
   jhub_apps_secrets_name           = "jhub-apps-secrets"
   jhub_apps_env_var_name           = "JHUB_APP_JWT_SECRET_KEY"
   singleuser_nodeselector_key      = var.cloud-provider == "aws" ? "dedicated" : var.user-node-group.key
-  userscheduler_nodeselector_key   = var.cloud-provider == "aws" ? "dedicated" : var.user-node-group.key
-  userscheduler_nodeselector_value = var.cloud-provider == "aws" ? var.general-node-group.value : var.user-node-group.value
+  userscheduler_nodeselector_key   = var.cloud-provider == "aws" ? "dedicated" : var.general-node-group.key
+  userscheduler_nodeselector_value = var.general-node-group.value
 }
 
 resource "kubernetes_secret" "jhub_apps_secrets" {

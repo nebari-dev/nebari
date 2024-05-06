@@ -7,6 +7,8 @@ import sys
 import time
 from typing import Any, Dict, List, Optional, Type, Union
 
+from pydantic import Field
+
 from _nebari import constants
 from _nebari.provider.dns.cloudflare import update_record
 from _nebari.stages.base import NebariTerraformStage
@@ -127,7 +129,7 @@ class CertificateEnum(str, enum.Enum):
 
 
 class SelfSignedCertificate(schema.Base):
-    type: str = CertificateEnum.selfsigned
+    type: str = Field(..., const=CertificateEnum.selfsigned)
 
 
 class LetsEncryptCertificate(schema.Base):
