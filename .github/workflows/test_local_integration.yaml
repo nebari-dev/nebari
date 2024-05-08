@@ -183,6 +183,10 @@ jobs:
             ./tests/tests_e2e/cypress/videos/
             ./tests/tests_e2e/playwright/videos/
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
+
       - name: Deployment Pytests
         env:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
