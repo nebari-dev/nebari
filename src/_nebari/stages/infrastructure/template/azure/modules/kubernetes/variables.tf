@@ -71,7 +71,6 @@ variable "max_pods" {
   default     = 60
 }
 
-# variable for workload_identity_enabled
 variable "workload_identity_enabled" {
   description = "Enable Workload Identity"
   type        = bool
