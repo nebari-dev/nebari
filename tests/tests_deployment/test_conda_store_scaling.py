@@ -229,10 +229,10 @@ class TestCondaStoreWorkerHPA(TestCase):
     @timeout(6 * 60)
     def timed_wait_for_environment_creation(self, target_count):
         created_count = 0
-        while created_count != target_count:
+        while created_count <= target_count:
             created_count = 0
             response = requests.get(
-                f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/",
+                f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/?namespace=global",
                 headers=self.headers,
                 verify=False,
             )
