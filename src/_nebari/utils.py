@@ -45,7 +45,9 @@ def change_directory(directory):
 
 
 def run_subprocess_cmd(processargs, **kwargs):
-    """Runs subprocess command with realtime stdout logging with optional line prefix."""
+    """Runs subprocess command with realtime stdout logging with optional line prefix, and outputs to a file."""
+    output_file_path = kwargs.pop("output_file", None)
+
     if "prefix" in kwargs:
         line_prefix = f"[{kwargs['prefix']}]: ".encode("utf-8")
         kwargs.pop("prefix")
@@ -60,11 +62,12 @@ def run_subprocess_cmd(processargs, **kwargs):
 
     process = subprocess.Popen(
         processargs,
-        **kwargs,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         preexec_fn=os.setsid,
+        **kwargs,
     )
+
     # Set timeout thread
     timeout_timer = None
     if timeout > 0:
@@ -73,30 +76,38 @@ def run_subprocess_cmd(processargs, **kwargs):
             try:
                 os.killpg(process.pid, signal.SIGTERM)
             except ProcessLookupError:
-                pass  # Already finished
+                pass  # Process has already finished
 
         timeout_timer = threading.Timer(timeout, kill_process)
         timeout_timer.start()
 
-    for line in iter(lambda: process.stdout.readline(), b""):
-        full_line = line_prefix + line
-        if strip_errors:
-            full_line = full_line.decode("utf-8")
-            full_line = re.sub(
-                r"\x1b\[31m", "", full_line
-            )  # Remove red ANSI escape code
-            full_line = full_line.encode("utf-8")
+    output_file = open(output_file_path, "wb") if output_file_path else None
 
-        sys.stdout.buffer.write(full_line)
-        sys.stdout.flush()
+    try:
+        for line in iter(lambda: process.stdout.readline(), b""):
+            if output_file:
+                output_file.write(line)
+                output_file.flush()
 
-    if timeout_timer is not None:
-        timeout_timer.cancel()
+            full_line = line_prefix + line
+            if strip_errors:
+                full_line = full_line.decode("utf-8")
+                full_line = re.sub(
+                    r"\x1b\[31m", "", full_line
+                )  # Remove red ANSI escape code
+                full_line = full_line.encode("utf-8")
 
-    process.stdout.close()
-    return process.wait(
-        timeout=10
-    )  # Should already have finished because we have drained stdout
+            sys.stdout.buffer.write(full_line)
+            sys.stdout.flush()
+
+    finally:
+        if timeout_timer:
+            timeout_timer.cancel()
+        process.stdout.close()
+        if output_file:
+            output_file.close()
+
+    return process.wait(timeout=10)
 
 
 def load_yaml(config_filename: Path):

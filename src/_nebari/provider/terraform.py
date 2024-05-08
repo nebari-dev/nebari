@@ -148,7 +148,13 @@ def apply(directory=None, targets=None, var_files=None):
         + ["-var-file=" + _ for _ in var_files]
     )
     with timer(logger, "terraform apply"):
-        run_terraform_subprocess(command, cwd=directory, prefix="terraform")
+        _stage = directory.split("/")[-1]
+        run_terraform_subprocess(
+            command,
+            cwd=directory,
+            prefix="terraform",
+            output_file=f"terraform_apply_{_stage}.log",
+        )
 
 
 def output(directory=None):
@@ -208,7 +214,13 @@ def destroy(directory=None, targets=None, var_files=None):
     )
 
     with timer(logger, "terraform destroy"):
-        run_terraform_subprocess(command, cwd=directory, prefix="terraform")
+        _stage = directory.split("/")[-1]
+        run_terraform_subprocess(
+            command,
+            cwd=directory,
+            prefix="terraform",
+            output_file=f"terraform_destroy_{_stage}.log",
+        )
 
 
 def rm_local_state(directory=None):
