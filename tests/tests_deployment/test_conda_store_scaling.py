@@ -23,6 +23,72 @@ service_permissions = {"primary_namespace": "", "role_bindings": {"*/*": ["admin
 NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
 # NEBARI_HOSTNAME = "pt.quansight.dev" ## Override for local testing
 
+from contextlib import contextmanager
+from base64 import b64encode
+
+def b64encodestr(string):
+    return b64encode(string.encode("utf-8")).decode()
+
+@contextmanager
+def patched_secret_token(configuration):
+
+    try:
+        with kubernetes.client.ApiClient(configuration) as api_client:
+            # Create an instance of the API class
+            api_instance = kubernetes.client.CoreV1Api(api_client)
+            name = 'conda-store-secret'  # str | name of the Secret
+            namespace = 'dev'  # str | object name and auth scope, such as for teams and projects
+            elevated_token = str(uuid.uuid4())
+
+            try:
+                # Get secret
+                api_response = api_instance.read_namespaced_secret(name, namespace)
+                api_response_data = api_response.data
+                secret_data = api_response_data["config.json"]
+                secret_config = json.loads(base64.b64decode(secret_data))
+
+                # Update secret
+                permissions = {'primary_namespace': '', 'role_bindings': {'*/*': ['admin']}}
+                secret_config["service-tokens"][elevated_token] = permissions
+                api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
+                api_patch_response = api_instance.patch_namespaced_secret(name, namespace, api_response)
+
+                # Get pod name for conda-store
+                # Restart conda-store server pod
+                print(api_patch_response)
+                api_response = api_instance.list_namespaced_pod(namespace)
+                server_pod = [i for i in api_response.items if "nebari-conda-store-server-" in i.metadata.name][0]
+                api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
+                time.sleep(10)
+
+                yield elevated_token
+
+                # Get update secret
+                api_response = api_instance.read_namespaced_secret(name, namespace)
+                api_response_data = api_response.data
+                secret_data = api_response_data["config.json"]
+                secret_config = json.loads(base64.b64decode(secret_data))
+
+                # Update secret
+                secret_config["service-tokens"].pop(elevated_token)
+                api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
+                api_patch_response = api_instance.patch_namespaced_secret(name, namespace, api_response)
+
+                # Get pod name for conda-store
+                # Restart conda-store server pod
+                print(api_patch_response)
+                api_response = api_instance.list_namespaced_pod(namespace)
+                server_pod = [i for i in api_response.items if "nebari-conda-store-server-" in i.metadata.name][0]
+                api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
+
+            except ApiException as e:
+                print("Exception when calling CoreV1Api->read_namespaced_secret: %s\n" % e)
+    finally:
+        # api_response_data["config.json"]["service-tokens"].pop(elevated_token)
+        # api_response = api_instance.patch_namespaced_secret(name, namespace, api_response_data)
+        pass
+
+
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("error")
@@ -94,34 +160,6 @@ class TestCondaStoreWorkerHPA(TestCase):
         """
         self.log.info("Setting up the test case.")
         self.configuration = config.load_kube_config()
-        # Get token from pre-defined tokens.
-        token = self.fetch_token()
-        self.log.info(f"Authentication token: {token}")
-        # token = os.getenv("CONDA_STORE_TOKEN")
-        self.headers = {"Authorization": f"Bearer {token}"}
-        self.log.info(f"Authentication headers: {self.headers}")
-
-        # Read conda-store-config
-        self.config_map = self.read_namespaced_config_map()
-        self.log.info(f"Conda store config read: {self.config_map}")
-
-        # Patch conda-store-config
-        self.config_map.data["conda_store_config.py"] = self.config_map.data[
-            "conda_store_config.py"
-        ].replace(
-            '{default_namespace}/*": {"viewer"}', '{default_namespace}/*": {"admin"}'
-        )
-        self.patch_namespaced_config_map(self.config_map)
-
-        # Patch conda-store-config
-
-        # Delete existing environments
-        self.delete_conda_environments()
-        self.log.info("Wait for existing conda-store-worker pods terminate.")
-        # Query at this point.
-        self.initial_deployment_count = self.get_deployment_count()
-        self.timed_wait_for_deployments(self.initial_deployment_count)
-        self.log.info("Ready to start tests.")
 
     def test_scale_up_and_down(self):
         """
@@ -131,34 +169,28 @@ class TestCondaStoreWorkerHPA(TestCase):
         Wait till all the conda environments are created. (max 5 minutes)
         Fail if they don't scale down in another 5 minutes.
         """
-        # Crete 5 conda environments.
-        count = 5
-        self.build_n_environments(count)
-        self.log.info("Wait for 5 conda-store-worker pods to start.")
-        self.timed_wait_for_deployments(count)
-        self.log.info(
-            "Waiting (max 5 minutes) for all the conda environments to be created."
-        )
-        self.timed_wait_for_environment_creation(count)
-        self.log.info("Wait till worker deployment scales down to 0")
-        self.timed_wait_for_deployments(self.initial_deployment_count)
-        self.log.info("Test passed.")
+        with patched_secret_token(self.configuration) as token:
+            self.headers = {"Authorization": f"Bearer {token}"}
+            self.initial_deployment_count = self.get_deployment_count()
+            self.delete_conda_environments()
+            count = 5
+            self.build_n_environments(count)
+            self.log.info("Wait for 5 conda-store-worker pods to start.")
+            self.timed_wait_for_deployments(count)
+            self.log.info("Waiting (max 5 minutes) for all the conda environments to be created.")
+            self.timed_wait_for_environment_creation(count)
+            self.log.info("Wait till worker deployment scales down to 0")
+            self.timed_wait_for_deployments(self.initial_deployment_count)
+            self.log.info("Test passed.")
+            self.delete_conda_environments()
 
     def tearDown(self):
         """
         Delete all conda environments.
         """
-        self.delete_conda_environments()
-
-        # Revert conda-store-config
-        self.config_map.data["conda_store_config.py"] = self.config_map.data[
-            "conda_store_config.py"
-        ].replace(
-            '{default_namespace}/*": {"admin"}', '{default_namespace}/*": {"viewer"}'
-        )
-        self.patch_namespaced_config_map(self.config_map)
         self.log.info("Teardown complete.")
         self.stream_handler.close()
+        pass
 
     def delete_conda_environments(self):
         existing_envs_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/?namespace=global"
