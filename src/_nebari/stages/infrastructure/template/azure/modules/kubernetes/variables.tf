@@ -70,3 +70,10 @@ variable "max_pods" {
   type        = number
   default     = 60
 }
+
+# variable for workload_identity_enabled
+variable "workload_identity_enabled" {
+  description = "Enable Workload Identity"
+  type        = bool
+  default     = false
+}
