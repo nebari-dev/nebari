@@ -23,11 +23,13 @@ service_permissions = {"primary_namespace": "", "role_bindings": {"*/*": ["admin
 NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
 # NEBARI_HOSTNAME = "pt.quansight.dev" ## Override for local testing
 
-from contextlib import contextmanager
 from base64 import b64encode
+from contextlib import contextmanager
+
 
 def b64encodestr(string):
     return b64encode(string.encode("utf-8")).decode()
+
 
 @contextmanager
 def patched_secret_token(configuration):
@@ -36,8 +38,8 @@ def patched_secret_token(configuration):
         with kubernetes.client.ApiClient(configuration) as api_client:
             # Create an instance of the API class
             api_instance = kubernetes.client.CoreV1Api(api_client)
-            name = 'conda-store-secret'  # str | name of the Secret
-            namespace = 'dev'  # str | object name and auth scope, such as for teams and projects
+            name = "conda-store-secret"  # str | name of the Secret
+            namespace = "dev"  # str | object name and auth scope, such as for teams and projects
             elevated_token = str(uuid.uuid4())
 
             try:
@@ -48,16 +50,27 @@ def patched_secret_token(configuration):
                 secret_config = json.loads(base64.b64decode(secret_data))
 
                 # Update secret
-                permissions = {'primary_namespace': '', 'role_bindings': {'*/*': ['admin']}}
+                permissions = {
+                    "primary_namespace": "",
+                    "role_bindings": {"*/*": ["admin"]},
+                }
                 secret_config["service-tokens"][elevated_token] = permissions
-                api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
-                api_patch_response = api_instance.patch_namespaced_secret(name, namespace, api_response)
+                api_response.data = {
+                    "config.json": b64encodestr(json.dumps(secret_config))
+                }
+                api_patch_response = api_instance.patch_namespaced_secret(
+                    name, namespace, api_response
+                )
 
                 # Get pod name for conda-store
                 # Restart conda-store server pod
                 print(api_patch_response)
                 api_response = api_instance.list_namespaced_pod(namespace)
-                server_pod = [i for i in api_response.items if "nebari-conda-store-server-" in i.metadata.name][0]
+                server_pod = [
+                    i
+                    for i in api_response.items
+                    if "nebari-conda-store-server-" in i.metadata.name
+                ][0]
                 api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
                 time.sleep(10)
 
@@ -71,23 +84,32 @@ def patched_secret_token(configuration):
 
                 # Update secret
                 secret_config["service-tokens"].pop(elevated_token)
-                api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
-                api_patch_response = api_instance.patch_namespaced_secret(name, namespace, api_response)
+                api_response.data = {
+                    "config.json": b64encodestr(json.dumps(secret_config))
+                }
+                api_patch_response = api_instance.patch_namespaced_secret(
+                    name, namespace, api_response
+                )
 
                 # Get pod name for conda-store
                 # Restart conda-store server pod
                 print(api_patch_response)
                 api_response = api_instance.list_namespaced_pod(namespace)
-                server_pod = [i for i in api_response.items if "nebari-conda-store-server-" in i.metadata.name][0]
+                server_pod = [
+                    i
+                    for i in api_response.items
+                    if "nebari-conda-store-server-" in i.metadata.name
+                ][0]
                 api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
 
             except ApiException as e:
-                print("Exception when calling CoreV1Api->read_namespaced_secret: %s\n" % e)
+                print(
+                    "Exception when calling CoreV1Api->read_namespaced_secret: %s\n" % e
+                )
     finally:
         # api_response_data["config.json"]["service-tokens"].pop(elevated_token)
         # api_response = api_instance.patch_namespaced_secret(name, namespace, api_response_data)
         pass
-
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
@@ -177,7 +199,9 @@ class TestCondaStoreWorkerHPA(TestCase):
             self.build_n_environments(count)
             self.log.info("Wait for 5 conda-store-worker pods to start.")
             self.timed_wait_for_deployments(count)
-            self.log.info("Waiting (max 5 minutes) for all the conda environments to be created.")
+            self.log.info(
+                "Waiting (max 5 minutes) for all the conda environments to be created."
+            )
             self.timed_wait_for_environment_creation(count)
             self.log.info("Wait till worker deployment scales down to 0")
             self.timed_wait_for_deployments(self.initial_deployment_count)
