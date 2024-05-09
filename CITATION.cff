@@ -3,7 +3,7 @@ message: "If you use this software, please cite it as below."
 authors:
   - name: "Nebari Development Team"
 type: software
-title: "Nebari: Your open source data science platform"
+title: "Nebari"
 version: 2024.4.1
 date-released: 2024-04-20
 url: "https://www.nebari.dev"
