@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import os
 import sys
 import time
 import uuid
@@ -9,17 +10,13 @@ from unittest import TestCase
 import kubernetes.client
 import pytest
 import requests
-from kubernetes import client, config, dynamic
-from kubernetes.client import api_client
+from kubernetes import config, dynamic
 from kubernetes.client.rest import ApiException
 from timeout_function_decorator import timeout
 
 from tests.tests_deployment import constants
 
 CONDA_STORE_API_ENDPOINT = "conda-store/api/v1"
-
-service_permissions = {"primary_namespace": "", "role_bindings": {"*/*": ["admin"]}}
-
 NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
 # NEBARI_HOSTNAME = "pt.quansight.dev" ## Override for local testing
 
@@ -35,9 +32,9 @@ def b64encodestr(string):
 def patched_secret_token(configuration):
 
     try:
-        with kubernetes.client.ApiClient(configuration) as api_client:
+        with kubernetes.client.ApiClient(configuration) as _api_client:
             # Create an instance of the API class
-            api_instance = kubernetes.client.CoreV1Api(api_client)
+            api_instance = kubernetes.client.CoreV1Api(_api_client)
             name = "conda-store-secret"  # str | name of the Secret
             namespace = "dev"  # str | object name and auth scope, such as for teams and projects
             elevated_token = str(uuid.uuid4())
@@ -74,7 +71,7 @@ def patched_secret_token(configuration):
                 api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
                 time.sleep(10)
 
-                yield elevated_token
+                yield elevated_token, _api_client
 
                 # Get update secret
                 api_response = api_instance.read_namespaced_secret(name, namespace)
@@ -107,9 +104,7 @@ def patched_secret_token(configuration):
                     "Exception when calling CoreV1Api->read_namespaced_secret: %s\n" % e
                 )
     finally:
-        # api_response_data["config.json"]["service-tokens"].pop(elevated_token)
-        # api_response = api_instance.patch_namespaced_secret(name, namespace, api_response_data)
-        pass
+        _api_client.close()
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
@@ -130,51 +125,6 @@ class TestCondaStoreWorkerHPA(TestCase):
     stream_handler = logging.StreamHandler(sys.stdout)
     log.addHandler(stream_handler)
 
-    @staticmethod
-    def fetch_token():
-        v1 = client.CoreV1Api()
-        secret = v1.read_namespaced_secret("conda-store-secret", "dev")
-
-        token = [
-            k
-            for k in json.loads(base64.b64decode(secret.data["config.json"]))[
-                "service-tokens"
-            ].keys()
-        ][0]
-        return token
-
-    def read_namespaced_config_map(self):
-        with kubernetes.client.ApiClient(self.configuration) as _client:
-            api_instance = kubernetes.client.CoreV1Api(_client)
-        try:
-            api_response = api_instance.read_namespaced_config_map(
-                "conda-store-config", "dev"
-            )
-            return api_response
-        except ApiException as e:
-            self.log.exception(
-                "Exception when calling CoreV1Api->read_namespaced_config_map: %s\n" % e
-            )
-        finally:
-            _client.close()
-
-    def patch_namespaced_config_map(self, config_map):
-        self.log.info(f"Conda store config patched: {config_map}")
-        with kubernetes.client.ApiClient(self.configuration) as _client:
-            api_instance = kubernetes.client.CoreV1Api(_client)
-        try:
-            api_response = api_instance.patch_namespaced_config_map(
-                "conda-store-config", "dev", config_map
-            )
-            self.log.info(api_response)
-        except ApiException as e:
-            self.log.exception(
-                "Exception when calling CoreV1Api->patch_namespaced_config_map: %s\n"
-                % e
-            )
-        finally:
-            _client.close()
-
     def setUp(self):
         """
         Get token for conda API.
@@ -182,6 +132,9 @@ class TestCondaStoreWorkerHPA(TestCase):
         """
         self.log.info("Setting up the test case.")
         self.configuration = config.load_kube_config()
+        self.request_session = requests.Session()
+        self.builds = []
+        self.count = os.getenv("TEST_CONDASTORE_WOKER_COUNT", 5)
 
     def test_scale_up_and_down(self):
         """
@@ -191,26 +144,25 @@ class TestCondaStoreWorkerHPA(TestCase):
         Wait till all the conda environments are created. (max 5 minutes)
         Fail if they don't scale down in another 5 minutes.
         """
-        with patched_secret_token(self.configuration) as token:
-            self.headers = {"Authorization": f"Bearer {token}"}
-            _initial_deployment_count = self.get_deployment_count()
+        with patched_secret_token(self.configuration) as (token, _api_client):
+            self.request_session.headers.update({"Authorization": f"Bearer {token}"})
+            _initial_deployment_count = self.get_deployment_count(_api_client)
             self.log.info(
                 f"Deployments at the start of the test: {_initial_deployment_count}"
             )
             self.delete_conda_environments()
-            count = 5
-            self.builds = []
-            self.build_n_environments(count)
+            self.build_n_environments(self.count)
             self.log.info("Wait for 5 conda-store-worker pods to start.")
-            self.timed_wait_for_deployments(count + _initial_deployment_count)
+            self.timed_wait_for_deployments(self.count + _initial_deployment_count, _api_client)
             self.log.info(
                 "Waiting (max 5 minutes) for all the conda environments to be created."
             )
             self.timed_wait_for_environment_creation()
             self.log.info("Wait till worker deployment scales down to 0")
-            self.timed_wait_for_deployments(_initial_deployment_count)
+            self.timed_wait_for_deployments(_initial_deployment_count, _api_client)
             self.log.info("Test passed.")
             self.delete_conda_environments()
+        self.log.info("Test passed.")
 
     def tearDown(self):
         """
@@ -218,22 +170,23 @@ class TestCondaStoreWorkerHPA(TestCase):
         """
         self.log.info("Teardown complete.")
         self.stream_handler.close()
-        time.sleep(10)
+        self.request_session.close()
+        print("All done.")
+
 
     def delete_conda_environments(self):
         existing_envs_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/?namespace=global"
-        response = requests.get(existing_envs_url, headers=self.headers, verify=False)
+        response = self.request_session.get(existing_envs_url, verify=False)
         for env in response.json()["data"]:
             env_name = env["name"]
             delete_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/global/{env_name}"
             self.log.info(f"Deleting {delete_url}")
-            requests.delete(delete_url, headers=self.headers, verify=False)
+            self.request_session.delete(delete_url, verify=False)
         self.log.info("All conda environments deleted.")
 
     def get_build_status(self, build_id):
-        _res = requests.get(
+        _res = self.request_session.get(
             f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/build/{build_id}",
-            headers=self.headers,
             verify=False,
         )
         status = _res.json().get("data")["status"]
@@ -244,16 +197,14 @@ class TestCondaStoreWorkerHPA(TestCase):
         created_count = 0
         while created_count <= target_count:
             created_count = 0
-            response = requests.get(
+            response = self.request_session.get(
                 f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/?namespace=global",
-                headers=self.headers,
                 verify=False,
             )
             for env in response.json().get("data"):
                 build_id = env["current_build_id"]
-                _res = requests.get(
+                _res = self.request_session.get(
                     f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/build/{build_id}",
-                    headers=self.headers,
                     verify=False,
                 )
                 status = _res.json().get("data")["status"]
@@ -284,28 +235,24 @@ class TestCondaStoreWorkerHPA(TestCase):
             self.builds.append(self.create_conda_store_env())
 
     @timeout(15 * 60)
-    def timed_wait_for_deployments(self, target_deployment_count):
+    def timed_wait_for_deployments(self, target_deployment_count, client):
         self.log.info(
             f"Waiting for deployments to reach target value {target_deployment_count}  ..."
         )
-        replica_count = self.get_deployment_count()
+        replica_count = self.get_deployment_count(client)
         while replica_count != target_deployment_count:
-            replica_count = self.get_deployment_count()
+            replica_count = self.get_deployment_count(client)
             direction = "up" if target_deployment_count > replica_count else "down"
             self.log.info(
-                f"Scaling {direction} deployments: {replica_count}/{target_deployment_count}"
+                f"Scaling {direction} deployments: from {replica_count} to {target_deployment_count}"
             )
             time.sleep(5)
         self.log.info(f"Deployment count: {replica_count}")
 
-    def get_deployment_count(self):
-        _client = dynamic.DynamicClient(
-            api_client.ApiClient(configuration=self.configuration)
-        )
+    def get_deployment_count(self, client):
+        _client = dynamic.DynamicClient(client)
         deployment_api = _client.resources.get(api_version="apps/v1", kind="Deployment")
-        deployment = deployment_api.get(
-            name="nebari-conda-store-worker", namespace="dev"
-        )
+        deployment = deployment_api.get( name="nebari-conda-store-worker", namespace="dev" )
         replica_count = deployment.spec.replicas
         return replica_count
 
@@ -317,10 +264,9 @@ class TestCondaStoreWorkerHPA(TestCase):
             "specification": f"dependencies:\n  - pandas\nvariables: {{}}\nchannels: "
             f"[]\n\ndescription: ''\nname: {name}\nprefix: null",
         }
-        response = requests.post(
-            _url, json=request_json, headers=self.headers, verify=False
+        response = self.request_session.post(
+            _url, json=request_json, verify=False
         )
         self.log.info(request_json)
-        self.log.info(self.headers)
         self.log.info(response.json())
         return response.json()["data"]["build_id"]
