@@ -148,7 +148,7 @@ class TestCondaStoreWorkerHPA(TestCase):
                 "Waiting (max 5 minutes) for all the conda environments to be created."
             )
             self.timed_wait_for_environment_creation()
-            self.log.info("Wait till worker deployment scales down to 0")
+            self.log.info(f"Wait till worker deployment scales down to {_initial_deployment_count}")
             self.timed_wait_for_deployments(_initial_deployment_count, _api_client)
             self.log.info("Test passed.")
             self.delete_conda_environments()
