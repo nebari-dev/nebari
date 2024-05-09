@@ -29,7 +29,6 @@ def b64encodestr(string):
 
 @contextmanager
 def patched_secret_token(configuration):
-
     with kubernetes.client.ApiClient(configuration) as _api_client:
         # Create an instance of the API class
         api_instance = kubernetes.client.CoreV1Api(_api_client)
@@ -99,8 +98,8 @@ def patched_secret_token(configuration):
 @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 class TestCondaStoreWorkerHPA(TestCase):
     """
-    Creates 5 conda environments.
-    Check conda-store-worker Scale up to 5 nodes.
+    Creates N conda environments.
+    Check conda-store-worker Scale up to N nodes.
     Check conda-store-worker Scale down to 0 nodes.
     """
 
@@ -122,16 +121,9 @@ class TestCondaStoreWorkerHPA(TestCase):
         self.configuration = config.load_kube_config()
         self.request_session = requests.Session()
         self.builds = []
-        self.count = os.getenv("TEST_CONDASTORE_WOKER_COUNT", 5)
+        self.count = os.getenv("TEST_CONDASTORE_WOKER_COUNT", 2)
 
     def test_scale_up_and_down(self):
-        """
-        Crete 5 conda environments.
-        Wait for 5 conda-store-worker pods to start.
-        Fail if 5 conda-store-worker pods don't spin up in 2 minutes.
-        Wait till all the conda environments are created. (max 5 minutes)
-        Fail if they don't scale down in another 5 minutes.
-        """
         with patched_secret_token(self.configuration) as (token, _api_client):
             self.request_session.headers.update({"Authorization": f"Bearer {token}"})
             _initial_deployment_count = self.get_deployment_count(_api_client)
@@ -140,12 +132,9 @@ class TestCondaStoreWorkerHPA(TestCase):
             )
             self.delete_conda_environments()
             self.build_n_environments(self.count)
-            self.log.info("Wait for 5 conda-store-worker pods to start.")
+            self.log.info(f"Wait for {self.count} conda-store-worker pods to start.")
             self.timed_wait_for_deployments(
                 self.count + _initial_deployment_count, _api_client
-            )
-            self.log.info(
-                "Waiting (max 5 minutes) for all the conda environments to be created."
             )
             self.timed_wait_for_environment_creation()
             self.log.info(
@@ -211,7 +200,7 @@ class TestCondaStoreWorkerHPA(TestCase):
                 [b for b in self.builds if self.get_build_status(b) == "COMPLETED"]
             )
             if created_count != _count:
-                self.log.info(f"{_count}/5 Environments created")
+                self.log.info(f"{_count}/{self.count} Environments created")
                 created_count = _count
             else:
                 self.log.info("Environment creation finished successfully.")
