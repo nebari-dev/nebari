@@ -23,9 +23,8 @@ service_permissions = {"primary_namespace": "", "role_bindings": {"*/*": ["admin
 NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
 # NEBARI_HOSTNAME = "pt.quansight.dev" ## Override for local testing
 
-from base64 import b64encode
 from contextlib import contextmanager
-
+from base64 import b64encode
 
 def b64encodestr(string):
     return b64encode(string.encode("utf-8")).decode()
@@ -193,18 +192,18 @@ class TestCondaStoreWorkerHPA(TestCase):
         """
         with patched_secret_token(self.configuration) as token:
             self.headers = {"Authorization": f"Bearer {token}"}
-            self.initial_deployment_count = self.get_deployment_count()
+            _initial_deployment_count = self.get_deployment_count()
+            self.log.info(f"Deployments at the start of the test: {_initial_deployment_count}")
             self.delete_conda_environments()
             count = 5
+            self.builds = []
             self.build_n_environments(count)
             self.log.info("Wait for 5 conda-store-worker pods to start.")
-            self.timed_wait_for_deployments(count)
-            self.log.info(
-                "Waiting (max 5 minutes) for all the conda environments to be created."
-            )
-            self.timed_wait_for_environment_creation(count)
+            self.timed_wait_for_deployments(count + _initial_deployment_count)
+            self.log.info("Waiting (max 5 minutes) for all the conda environments to be created.")
+            self.timed_wait_for_environment_creation()
             self.log.info("Wait till worker deployment scales down to 0")
-            self.timed_wait_for_deployments(self.initial_deployment_count)
+            self.timed_wait_for_deployments(_initial_deployment_count)
             self.log.info("Test passed.")
             self.delete_conda_environments()
 
@@ -214,7 +213,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         """
         self.log.info("Teardown complete.")
         self.stream_handler.close()
-        pass
+        time.sleep(10)
 
     def delete_conda_environments(self):
         existing_envs_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/?namespace=global"
@@ -225,6 +224,15 @@ class TestCondaStoreWorkerHPA(TestCase):
             self.log.info(f"Deleting {delete_url}")
             requests.delete(delete_url, headers=self.headers, verify=False)
         self.log.info("All conda environments deleted.")
+
+    def get_build_status(self, build_id):
+        _res = requests.get(
+            f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/build/{build_id}",
+            headers=self.headers,
+            verify=False,
+        )
+        status = _res.json().get("data")["status"]
+        return status
 
     @timeout(6 * 60)
     def timed_wait_for_environment_creation(self, target_count):
@@ -249,14 +257,25 @@ class TestCondaStoreWorkerHPA(TestCase):
             self.log.info(f"{created_count}/{target_count} Environments created")
             time.sleep(5)
 
-        self.log.info("timed_wait_for_environment_creation finished successfully.")
+    @timeout(6 * 60)
+    def timed_wait_for_environment_creation(self):
+        created_count = 0
+        while True:
+            _count = len([b for b in self.builds if self.get_build_status(b) == "COMPLETED"])
+            if created_count != _count:
+                self.log.info(f"{_count}/5 Environments created")
+                created_count = _count
+            else:
+                self.log.info("Environment creation finished successfully.")
+                return
+
 
     @timeout(10)
     def build_n_environments(self, n):
         self.log.info(f"Building {n} conda environments...")
         for _ in range(n):
             time.sleep(1)
-            self.create_conda_store_env()
+            self.builds.append(self.create_conda_store_env())
 
     @timeout(15 * 60)
     def timed_wait_for_deployments(self, target_deployment_count):
