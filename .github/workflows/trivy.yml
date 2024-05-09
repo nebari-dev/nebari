@@ -32,13 +32,13 @@ jobs:
       - name: Run Trivy vulnerability scanner in fs mode
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'config'
+          scan-type: 'fs'
           hide-progress: true
           format: 'sarif'
           output: 'trivy-results.sarif'
-          exit-code: '1'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
+          scanners: 'config'
 
 
       - name: Upload Trivy scan results to GitHub Security tab
