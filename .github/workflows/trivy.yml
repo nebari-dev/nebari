@@ -7,7 +7,7 @@ name: trivy
 
 on:
   push:
-    branches: [ "add-trivy-to-ci", "develop", "main-DEPRECATED", "release/*" ]
+    branches: [ "develop", "main-DEPRECATED", "release/*" ]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "develop" ]
@@ -36,11 +36,12 @@ jobs:
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
           format: 'sarif'
-          output: 'trivy-results.sarif'
+          # output: 'trivy-results.sarif'
+          output: 'table'
           scanners: 'vuln, config, secrets'
 
 
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
+      # - name: Upload Trivy scan results to GitHub Security tab
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: 'trivy-results.sarif'
