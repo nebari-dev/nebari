@@ -11,7 +11,6 @@ import kubernetes.client
 import pytest
 import requests
 from kubernetes import config, dynamic
-from kubernetes.client.rest import ApiException
 from timeout_function_decorator import timeout
 
 from tests.tests_deployment import constants
@@ -31,76 +30,72 @@ def b64encodestr(string):
 @contextmanager
 def patched_secret_token(configuration):
 
-    try:
-        with kubernetes.client.ApiClient(configuration) as _api_client:
-            # Create an instance of the API class
-            api_instance = kubernetes.client.CoreV1Api(_api_client)
-            name = "conda-store-secret"  # str | name of the Secret
-            namespace = "dev"  # str | object name and auth scope, such as for teams and projects
-            elevated_token = str(uuid.uuid4())
+    with kubernetes.client.ApiClient(configuration) as _api_client:
+        # Create an instance of the API class
+        api_instance = kubernetes.client.CoreV1Api(_api_client)
+        name = "conda-store-secret"  # str | name of the Secret
+        namespace = "dev"  # str | object name and auth scope, such as for teams and projects
+        elevated_token = str(uuid.uuid4())
 
-            try:
-                # Get secret
-                api_response = api_instance.read_namespaced_secret(name, namespace)
-                api_response_data = api_response.data
-                secret_data = api_response_data["config.json"]
-                secret_config = json.loads(base64.b64decode(secret_data))
+        # Get secret
+        api_response = api_instance.read_namespaced_secret(name, namespace)
+        api_response_data = api_response.data
+        secret_data = api_response_data["config.json"]
+        secret_config = json.loads(base64.b64decode(secret_data))
 
-                # Update secret
-                permissions = {
-                    "primary_namespace": "",
-                    "role_bindings": {"*/*": ["admin"]},
-                }
-                secret_config["service-tokens"][elevated_token] = permissions
-                api_response.data = {
-                    "config.json": b64encodestr(json.dumps(secret_config))
-                }
-                api_patch_response = api_instance.patch_namespaced_secret(
-                    name, namespace, api_response
-                )
+        # Update secret
+        permissions = {
+            "primary_namespace": "",
+            "role_bindings": {"*/*": ["admin"]},
+        }
+        secret_config["service-tokens"][elevated_token] = permissions
+        api_response.data = {
+            "config.json": b64encodestr(json.dumps(secret_config))
+        }
+        api_patch_response = api_instance.patch_namespaced_secret(
+            name, namespace, api_response
+        )
 
-                # Get pod name for conda-store
-                # Restart conda-store server pod
-                print(api_patch_response)
-                api_response = api_instance.list_namespaced_pod(namespace)
-                server_pod = [
-                    i
-                    for i in api_response.items
-                    if "nebari-conda-store-server-" in i.metadata.name
-                ][0]
-                api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
-                time.sleep(10)
+        # Get pod name for conda-store
+        # Restart conda-store server pod
+        print(api_patch_response)
+        api_response = api_instance.list_namespaced_pod(namespace)
+        server_pod = [
+            i
+            for i in api_response.items
+            if "nebari-conda-store-server-" in i.metadata.name
+        ][0]
+        api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
+        time.sleep(10)
 
-                yield elevated_token, _api_client
+        yield elevated_token, _api_client
 
-                # Get update secret
-                api_response = api_instance.read_namespaced_secret(name, namespace)
-                api_response_data = api_response.data
-                secret_data = api_response_data["config.json"]
-                secret_config = json.loads(base64.b64decode(secret_data))
+        # Get update secret
+        api_response = api_instance.read_namespaced_secret(name, namespace)
+        api_response_data = api_response.data
+        secret_data = api_response_data["config.json"]
+        secret_config = json.loads(base64.b64decode(secret_data))
 
-                # Update secret
-                secret_config["service-tokens"].pop(elevated_token)
-                api_response.data = {
-                    "config.json": b64encodestr(json.dumps(secret_config))
-                }
-                api_patch_response = api_instance.patch_namespaced_secret(
-                    name, namespace, api_response
-                )
+        # Update secret
+        secret_config["service-tokens"].pop(elevated_token)
+        api_response.data = {
+            "config.json": b64encodestr(json.dumps(secret_config))
+        }
+        api_patch_response = api_instance.patch_namespaced_secret(
+            name, namespace, api_response
+        )
 
-                # Get pod name for conda-store
-                # Restart conda-store server pod
-                print(api_patch_response)
-                api_response = api_instance.list_namespaced_pod(namespace)
-                server_pod = [
-                    i
-                    for i in api_response.items
-                    if "nebari-conda-store-server-" in i.metadata.name
-                ][0]
-                api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
+        # Get pod name for conda-store
+        # Restart conda-store server pod
+        print(api_patch_response)
+        api_response = api_instance.list_namespaced_pod(namespace)
+        server_pod = [
+            i
+            for i in api_response.items
+            if "nebari-conda-store-server-" in i.metadata.name
+        ][0]
+        api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
 
-            except ApiException as e:
-                print(f"Exception when calling CoreV1Api->read_namespaced_secret: {e}")
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
