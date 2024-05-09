@@ -183,9 +183,6 @@ jobs:
 #            ./tests/tests_e2e/cypress/videos/
 #            ./tests/tests_e2e/playwright/videos/
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
 
       - name: Deployment Pytests
         env:
@@ -194,6 +191,10 @@ jobs:
           ## TODO Add another env variable.
         run: |
           pytest tests/tests_deployment/ -v -s
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
