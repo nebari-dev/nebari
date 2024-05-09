@@ -34,7 +34,9 @@ def patched_secret_token(configuration):
         # Create an instance of the API class
         api_instance = kubernetes.client.CoreV1Api(_api_client)
         name = "conda-store-secret"  # str | name of the Secret
-        namespace = "dev"  # str | object name and auth scope, such as for teams and projects
+        namespace = (
+            "dev"  # str | object name and auth scope, such as for teams and projects
+        )
         elevated_token = str(uuid.uuid4())
 
         # Get secret
@@ -49,9 +51,7 @@ def patched_secret_token(configuration):
             "role_bindings": {"*/*": ["admin"]},
         }
         secret_config["service-tokens"][elevated_token] = permissions
-        api_response.data = {
-            "config.json": b64encodestr(json.dumps(secret_config))
-        }
+        api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
         api_patch_response = api_instance.patch_namespaced_secret(
             name, namespace, api_response
         )
@@ -78,9 +78,7 @@ def patched_secret_token(configuration):
 
         # Update secret
         secret_config["service-tokens"].pop(elevated_token)
-        api_response.data = {
-            "config.json": b64encodestr(json.dumps(secret_config))
-        }
+        api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
         api_patch_response = api_instance.patch_namespaced_secret(
             name, namespace, api_response
         )
@@ -95,7 +93,6 @@ def patched_secret_token(configuration):
             if "nebari-conda-store-server-" in i.metadata.name
         ][0]
         api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
-
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
