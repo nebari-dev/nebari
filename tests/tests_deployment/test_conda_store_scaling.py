@@ -200,7 +200,6 @@ class TestCondaStoreWorkerHPA(TestCase):
                 if status == "COMPLETED":
                     created_count += 1
             self.log.info(f"{created_count}/{target_count} Environments created")
-            time.sleep(5)
 
     @timeout(6 * 60)
     def timed_wait_for_environment_creation(self):
