@@ -153,7 +153,9 @@ class TestCondaStoreWorkerHPA(TestCase):
             self.delete_conda_environments()
             self.build_n_environments(self.count)
             self.log.info("Wait for 5 conda-store-worker pods to start.")
-            self.timed_wait_for_deployments(self.count + _initial_deployment_count, _api_client)
+            self.timed_wait_for_deployments(
+                self.count + _initial_deployment_count, _api_client
+            )
             self.log.info(
                 "Waiting (max 5 minutes) for all the conda environments to be created."
             )
@@ -172,7 +174,6 @@ class TestCondaStoreWorkerHPA(TestCase):
         self.stream_handler.close()
         self.request_session.close()
         print("All done.")
-
 
     def delete_conda_environments(self):
         existing_envs_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/?namespace=global"
@@ -252,7 +253,9 @@ class TestCondaStoreWorkerHPA(TestCase):
     def get_deployment_count(self, client):
         _client = dynamic.DynamicClient(client)
         deployment_api = _client.resources.get(api_version="apps/v1", kind="Deployment")
-        deployment = deployment_api.get( name="nebari-conda-store-worker", namespace="dev" )
+        deployment = deployment_api.get(
+            name="nebari-conda-store-worker", namespace="dev"
+        )
         replica_count = deployment.spec.replicas
         return replica_count
 
@@ -264,9 +267,7 @@ class TestCondaStoreWorkerHPA(TestCase):
             "specification": f"dependencies:\n  - pandas\nvariables: {{}}\nchannels: "
             f"[]\n\ndescription: ''\nname: {name}\nprefix: null",
         }
-        response = self.request_session.post(
-            _url, json=request_json, verify=False
-        )
+        response = self.request_session.post(_url, json=request_json, verify=False)
         self.log.info(request_json)
         self.log.info(response.json())
         return response.json()["data"]["build_id"]
