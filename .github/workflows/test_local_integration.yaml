@@ -188,7 +188,6 @@ jobs:
         env:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-          ## TODO Add another env variable.
         run: |
           pytest tests/tests_deployment/ -v -s
 
