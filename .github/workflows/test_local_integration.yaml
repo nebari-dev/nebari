@@ -152,6 +152,13 @@ jobs:
       - name: Get nebari-config.yaml full path
         run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
 
+      - name: Deployment Pytests
+        env:
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+        run: |
+          pytest tests/tests_deployment/ -v -s
+
       - name: Cypress run
         uses: cypress-io/github-action@v6
         env:
@@ -182,14 +189,6 @@ jobs:
             ./tests/tests_e2e/cypress/screenshots/
             ./tests/tests_e2e/cypress/videos/
             ./tests/tests_e2e/playwright/videos/
-
-
-      - name: Deployment Pytests
-        env:
-          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
-          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-        run: |
-          pytest tests/tests_deployment/ -v -s
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
