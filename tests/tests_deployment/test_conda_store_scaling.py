@@ -100,11 +100,7 @@ def patched_secret_token(configuration):
                 api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
 
             except ApiException as e:
-                print(
-                    "Exception when calling CoreV1Api->read_namespaced_secret: %s\n" % e
-                )
-    finally:
-        _api_client.close()
+                print(f"Exception when calling CoreV1Api->read_namespaced_secret: {e}")
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
