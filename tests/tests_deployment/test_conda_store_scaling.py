@@ -23,8 +23,9 @@ service_permissions = {"primary_namespace": "", "role_bindings": {"*/*": ["admin
 NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
 # NEBARI_HOSTNAME = "pt.quansight.dev" ## Override for local testing
 
-from contextlib import contextmanager
 from base64 import b64encode
+from contextlib import contextmanager
+
 
 def b64encodestr(string):
     return b64encode(string.encode("utf-8")).decode()
@@ -193,14 +194,18 @@ class TestCondaStoreWorkerHPA(TestCase):
         with patched_secret_token(self.configuration) as token:
             self.headers = {"Authorization": f"Bearer {token}"}
             _initial_deployment_count = self.get_deployment_count()
-            self.log.info(f"Deployments at the start of the test: {_initial_deployment_count}")
+            self.log.info(
+                f"Deployments at the start of the test: {_initial_deployment_count}"
+            )
             self.delete_conda_environments()
             count = 5
             self.builds = []
             self.build_n_environments(count)
             self.log.info("Wait for 5 conda-store-worker pods to start.")
             self.timed_wait_for_deployments(count + _initial_deployment_count)
-            self.log.info("Waiting (max 5 minutes) for all the conda environments to be created.")
+            self.log.info(
+                "Waiting (max 5 minutes) for all the conda environments to be created."
+            )
             self.timed_wait_for_environment_creation()
             self.log.info("Wait till worker deployment scales down to 0")
             self.timed_wait_for_deployments(_initial_deployment_count)
@@ -261,14 +266,15 @@ class TestCondaStoreWorkerHPA(TestCase):
     def timed_wait_for_environment_creation(self):
         created_count = 0
         while True:
-            _count = len([b for b in self.builds if self.get_build_status(b) == "COMPLETED"])
+            _count = len(
+                [b for b in self.builds if self.get_build_status(b) == "COMPLETED"]
+            )
             if created_count != _count:
                 self.log.info(f"{_count}/5 Environments created")
                 created_count = _count
             else:
                 self.log.info("Environment creation finished successfully.")
                 return
-
 
     @timeout(10)
     def build_n_environments(self, n):
