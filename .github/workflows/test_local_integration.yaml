@@ -152,36 +152,36 @@ jobs:
       - name: Get nebari-config.yaml full path
         run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
 
-#      - name: Cypress run
-#        uses: cypress-io/github-action@v6
-#        env:
-#          CYPRESS_EXAMPLE_USER_NAME: ${{ env.TEST_USERNAME }}
-#          CYPRESS_EXAMPLE_USER_PASSWORD: ${{ env.TEST_PASSWORD }}
-#          CYPRESS_BASE_URL: https://github-actions.nebari.dev/
-#        with:
-#          working-directory: tests/tests_e2e
-#
-#      - name: Playwright Tests
-#        env:
-#          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
-#          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-#          NEBARI_FULL_URL: https://github-actions.nebari.dev/
-#        working-directory: tests/tests_e2e/playwright
-#        run: |
-#          # create environment file
-#          envsubst < .env.tpl > .env
-#          # run playwright pytest tests in headed mode with the chromium browser
-#          xvfb-run pytest --browser chromium
-#
-#      - name: Save Cypress screenshots and videos
-#        if: always()
-#        uses: actions/upload-artifact@v4.3.1
-#        with:
-#          name: e2e-cypress
-#          path: |
-#            ./tests/tests_e2e/cypress/screenshots/
-#            ./tests/tests_e2e/cypress/videos/
-#            ./tests/tests_e2e/playwright/videos/
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        env:
+          CYPRESS_EXAMPLE_USER_NAME: ${{ env.TEST_USERNAME }}
+          CYPRESS_EXAMPLE_USER_PASSWORD: ${{ env.TEST_PASSWORD }}
+          CYPRESS_BASE_URL: https://github-actions.nebari.dev/
+        with:
+          working-directory: tests/tests_e2e
+
+      - name: Playwright Tests
+        env:
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+          NEBARI_FULL_URL: https://github-actions.nebari.dev/
+        working-directory: tests/tests_e2e/playwright
+        run: |
+          # create environment file
+          envsubst < .env.tpl > .env
+          # run playwright pytest tests in headed mode with the chromium browser
+          xvfb-run pytest --browser chromium
+
+      - name: Save Cypress screenshots and videos
+        if: always()
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: e2e-cypress
+          path: |
+            ./tests/tests_e2e/cypress/screenshots/
+            ./tests/tests_e2e/cypress/videos/
+            ./tests/tests_e2e/playwright/videos/
 
 
       - name: Deployment Pytests
@@ -191,10 +191,6 @@ jobs:
           ## TODO Add another env variable.
         run: |
           pytest tests/tests_deployment/ -v -s
-
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
