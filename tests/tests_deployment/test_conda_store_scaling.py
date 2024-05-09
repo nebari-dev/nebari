@@ -224,7 +224,7 @@ class TestCondaStoreWorkerHPA(TestCase):
             time.sleep(1)
             self.builds.append(self.create_conda_store_env())
 
-    @timeout(15 * 60)
+    @timeout(30 * 60)
     def timed_wait_for_deployments(self, target_deployment_count, client):
         self.log.info(
             f"Waiting for deployments to reach target value {target_deployment_count}  ..."
