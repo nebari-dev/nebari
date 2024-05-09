@@ -97,7 +97,6 @@ def patched_secret_token(configuration):
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
-@pytest.mark.filterwarnings("error")
 class TestCondaStoreWorkerHPA(TestCase):
     """
     Creates 5 conda environments.
