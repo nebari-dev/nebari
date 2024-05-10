@@ -17,6 +17,7 @@ from tests.tests_deployment import constants
 CONDA_STORE_API_ENDPOINT = "conda-store/api/v1"
 NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
 # NEBARI_HOSTNAME = "pt.quansight.dev" ## Override for local testing
+TEST_CONDASTORE_WOKER_COUNT = os.getenv("TEST_CONDASTORE_WOKER_COUNT", 2)
 
 from base64 import b64encode
 from contextlib import contextmanager
@@ -122,7 +123,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         self.configuration = config.load_kube_config()
         self.request_session = requests.Session()
         self.builds = []
-        self.count = os.getenv("TEST_CONDASTORE_WOKER_COUNT", 2)
+        self.count = TEST_CONDASTORE_WOKER_COUNT
 
     def test_scale_up_and_down(self):
         with patched_secret_token(self.configuration) as (token, _api_client):
