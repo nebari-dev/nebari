@@ -39,10 +39,7 @@ def patched_secret_token(configuration):
         elevated_token = str(uuid.uuid4())
 
         # Get secret
-        api_response = api_instance.read_namespaced_secret(name, namespace)
-        api_response_data = api_response.data
-        secret_data = api_response_data["config.json"]
-        secret_config = json.loads(base64.b64decode(secret_data))
+        api_response, secret_config = get_conda_secret(api_instance, name, namespace)
 
         # Update secret
         permissions = {
@@ -70,10 +67,7 @@ def patched_secret_token(configuration):
         yield elevated_token, _api_client
 
         # Get update secret
-        api_response = api_instance.read_namespaced_secret(name, namespace)
-        api_response_data = api_response.data
-        secret_data = api_response_data["config.json"]
-        secret_config = json.loads(base64.b64decode(secret_data))
+        api_response, secret_config = get_conda_secret(api_instance, name, namespace)
 
         # Update secret
         secret_config["service-tokens"].pop(elevated_token)
@@ -92,6 +86,14 @@ def patched_secret_token(configuration):
             if "nebari-conda-store-server-" in i.metadata.name
         ][0]
         api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
+
+
+def get_conda_secret(api_instance, name, namespace):
+    api_response = api_instance.read_namespaced_secret(name, namespace)
+    api_response_data = api_response.data
+    secret_data = api_response_data["config.json"]
+    secret_config = json.loads(base64.b64decode(secret_data))
+    return api_response, secret_config
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
