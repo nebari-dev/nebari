@@ -5,7 +5,6 @@ runners:
     # Cloud Provider: AWS
     cloud: aws
     # Instance Type has 8 vcpu, 32 GiB memory, Up to 5 Gbps Network Performance
-    # https://aws.amazon.com/ec2/instance-types/
     instance_type: t3a.2xlarge
     # Custom AMI with docker/cypress/hub pre-installed
     machine_image: ami-0a388df278199ff52
