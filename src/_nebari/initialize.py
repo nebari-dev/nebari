@@ -26,7 +26,7 @@ from _nebari.stages.infrastructure import (
     DEFAULT_GCP_NODE_GROUPS,
     node_groups_to_dict,
 )
-from _nebari.stages.kubernetes_ingress import CertificateEnum
+from _nebari.stages.kubernetes_ingress import LetsEncryptCertificate
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
 from _nebari.utils import get_latest_kubernetes_version, random_secure_string
@@ -194,8 +194,7 @@ def render_config(
         config["theme"]["jupyterhub"]["hub_subtitle"] = WELCOME_HEADER_TEXT
 
     if ssl_cert_email:
-        config["certificate"] = {"type": CertificateEnum.letsencrypt.value}
-        config["certificate"]["acme_email"] = ssl_cert_email
+        config["certificate"] = LetsEncryptCertificate(acme_email=ssl_cert_email)
 
     # validate configuration and convert to model
     from nebari.plugins import nebari_plugin_manager

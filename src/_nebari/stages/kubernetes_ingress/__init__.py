@@ -1,9 +1,12 @@
-import enum
+from __future__ import annotations
+
 import logging
 import socket
 import sys
 import time
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Literal, Optional, Type, Union
+
+from pydantic import Field
 
 from _nebari import constants
 from _nebari.provider.dns.cloudflare import update_record
@@ -112,25 +115,31 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
             sys.exit(1)
 
 
-@schema.yaml_object(schema.yaml)
-class CertificateEnum(str, enum.Enum):
-    letsencrypt = "lets-encrypt"
-    selfsigned = "self-signed"
-    existing = "existing"
-    disabled = "disabled"
-
-    @classmethod
-    def to_yaml(cls, representer, node):
-        return representer.represent_str(node.value)
+class SelfSignedCertificate(schema.Base):
+    type: Literal["self-signed"] = Field("self-signed", validate_default=True)
 
 
-class Certificate(schema.Base):
-    type: CertificateEnum = CertificateEnum.selfsigned
-    # existing
-    secret_name: Optional[str] = None
-    # lets-encrypt
-    acme_email: Optional[str] = None
+class LetsEncryptCertificate(schema.Base):
+    type: Literal["lets-encrypt"] = Field("lets-encrypt", validate_default=True)
+    acme_email: str
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
+
+
+class ExistingCertificate(schema.Base):
+    type: Literal["existing"] = Field("existing", validate_default=True)
+    secret_name: str
+
+
+class DisabledCertificate(schema.Base):
+    type: Literal["disabled"] = Field("disabled", validate_default=True)
+
+
+Certificate = Union[
+    SelfSignedCertificate,
+    LetsEncryptCertificate,
+    ExistingCertificate,
+    DisabledCertificate,
+]
 
 
 class DnsProvider(schema.Base):
@@ -144,7 +153,7 @@ class Ingress(schema.Base):
 
 class InputSchema(schema.Base):
     domain: Optional[str] = None
-    certificate: Certificate = Certificate()
+    certificate: Certificate = SelfSignedCertificate()
     ingress: Ingress = Ingress()
     dns: DnsProvider = DnsProvider()
 

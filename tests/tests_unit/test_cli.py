@@ -53,7 +53,7 @@ def test_nebari_init(tmp_path, namespace, auth_provider, ci_provider, ssl_cert_e
     assert config.namespace == namespace
     assert config.security.authentication.type.lower() == auth_provider
     assert config.ci_cd.type == ci_provider
-    assert config.certificate.acme_email == ssl_cert_email
+    assert getattr(config.certificate, "acme_email", None) == ssl_cert_email
 
 
 @pytest.mark.parametrize(

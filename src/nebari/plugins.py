@@ -124,11 +124,32 @@ class NebariPluginManager:
         return self.get_available_stages()
 
     @property
-    def config_schema(self):
-        classes = [schema.Main] + [
+    def ordered_schemas(self):
+        return [schema.Main] + [
             _.input_schema for _ in self.ordered_stages if _.input_schema is not None
         ]
-        return type("ConfigSchema", tuple(classes), {})
+
+    @property
+    def config_schema(self):
+        ordered_schemas = self.ordered_schemas
+
+        def write_config(self):
+            config_exclude = set()
+            for cls in self._ordered_schemas:
+                if hasattr(cls, "exclude_from_config"):
+                    new_exclude = cls.exclude_from_config(self)
+                    config_exclude = config_exclude.union(new_exclude)
+            return self.model_dump(exclude=config_exclude)
+
+        ConfigSchema = type(
+            "ConfigSchema",
+            tuple(ordered_schemas[::-1]),
+            {
+                "_ordered_schemas": ordered_schemas,
+                "write_config": write_config,
+            },
+        )
+        return ConfigSchema
 
 
 nebari_plugin_manager = NebariPluginManager()

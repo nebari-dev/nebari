@@ -565,6 +565,13 @@ class InputSchema(schema.Base):
     azure: Optional[AzureProvider] = None
     digital_ocean: Optional[DigitalOceanProvider] = None
 
+    def exclude_from_config(self):
+        exclude = set()
+        for provider in InputSchema.model_fields:
+            if getattr(self, provider) is None:
+                exclude.add(provider)
+        return exclude
+
     @model_validator(mode="before")
     @classmethod
     def check_provider(cls, data: Any) -> Any:
