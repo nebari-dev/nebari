@@ -2,9 +2,6 @@
 .nox
 _build
 .env
-.venv
-nebari-aws
-nebari-local
 
 # setuptools scm
 src/_nebari/_version.py

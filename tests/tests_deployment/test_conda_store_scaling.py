@@ -11,7 +11,6 @@ import kubernetes.client
 import pytest
 import requests
 from kubernetes import config, dynamic
-from timeout_function_decorator import timeout
 
 from tests.tests_deployment import constants
 
@@ -174,7 +173,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         status = _res.json().get("data")["status"]
         return status
 
-    @timeout(6 * 60)
+    @pytest.mark.timeout(6 * 60)
     def timed_wait_for_environment_creation(self, target_count):
         created_count = 0
         while created_count <= target_count:
@@ -194,7 +193,7 @@ class TestCondaStoreWorkerHPA(TestCase):
                     created_count += 1
             self.log.info(f"{created_count}/{target_count} Environments created")
 
-    @timeout(6 * 60)
+    @pytest.mark.timeout(6 * 60)
     def timed_wait_for_environment_creation(self):
         created_count = 0
         while True:
@@ -208,14 +207,14 @@ class TestCondaStoreWorkerHPA(TestCase):
                 self.log.info("Environment creation finished successfully.")
                 return
 
-    @timeout(10)
+    @pytest.mark.timeout(10)
     def build_n_environments(self, n):
         self.log.info(f"Building {n} conda environments...")
         for _ in range(n):
             time.sleep(1)
             self.builds.append(self.create_conda_store_env())
 
-    @timeout(30 * 60)
+    @pytest.mark.timeout(30 * 60)
     def timed_wait_for_deployments(self, target_deployment_count, client):
         self.log.info(
             f"Waiting for deployments to reach target value {target_deployment_count}  ..."
