@@ -93,7 +93,9 @@ class KubernetesInitializeStage(NebariTerraformStage):
                 group for group in self.config.amazon_web_services.node_groups.keys()
             ]
             input_vars.aws_region = self.config.amazon_web_services.region
-        general_node_selector_kv_dict = getattr(self.config, self.config.provider.value).node_selectors['general']
+        general_node_selector_kv_dict = getattr(
+            self.config, self.config.provider.value
+        ).node_selectors["general"]
         input_vars.general_node_selector = general_node_selector_kv_dict.dict()
         return input_vars.model_dump()
 
