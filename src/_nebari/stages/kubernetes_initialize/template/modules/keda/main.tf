@@ -5,25 +5,12 @@ resource "helm_release" "keda" {
   chart         = "keda"
   version       = "2.13.2"
   wait_for_jobs = "true"
-  #   values = [
-  #     jsonencode({
-  #       affinity = {
-  #         nodeAffinity = {
-  #           requiredDuringSchedulingIgnoredDuringExecution = {
-  #             nodeSelectorTerms = [
-  #               {
-  #                 matchExpressions = [
-  #                   {
-  #                     key      = "eks.amazonaws.com/nodegroup"
-  #                     operator = "In"
-  #                     values   = ["general"]
-  #                   }
-  #                 ]
-  #               }
-  #             ]
-  #           }
-  #         }
-  #       }
-  #     })
-  #   ]
+  values = concat([
+    file("${path.module}/values.yaml"),
+    jsonencode({
+      nodeSelector = {
+        "${var.general_node_selector.key}" = var.general_node_selector.value
+      }
+    })
+  ])
 }

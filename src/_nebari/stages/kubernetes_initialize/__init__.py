@@ -45,6 +45,7 @@ class InputVars(schema.Base):
     external_container_reg: Optional[ExtContainerReg] = None
     gpu_enabled: bool = False
     gpu_node_group_names: List[str] = []
+    general_node_selector: Dict[str, str] = {}
 
 
 class InputSchema(schema.Base):
@@ -92,7 +93,8 @@ class KubernetesInitializeStage(NebariTerraformStage):
                 group for group in self.config.amazon_web_services.node_groups.keys()
             ]
             input_vars.aws_region = self.config.amazon_web_services.region
-
+        general_node_selector_kv_dict = getattr(self.config, self.config.provider.value).node_selectors['general']
+        input_vars.general_node_selector = general_node_selector_kv_dict.dict()
         return input_vars.model_dump()
 
     def check(

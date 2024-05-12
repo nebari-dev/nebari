@@ -30,3 +30,7 @@ variable "gpu_enabled" {
 variable "gpu_node_group_names" {
   description = "Names of node groups with GPU"
 }
+
+variable "general_node_selector" {
+  description = "General node group selector."
+}

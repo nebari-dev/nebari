@@ -3,6 +3,11 @@ variable "gpu_node_group_names" {
   default     = []
 }
 
+variable "general_node_selector" {
+  description = "Node selector for general node group."
+  default     = {}
+}
+
 variable "gpu_enabled" {
   description = "Enable GPU support"
   default     = false

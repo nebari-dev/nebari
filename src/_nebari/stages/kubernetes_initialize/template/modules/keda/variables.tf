@@ -3,3 +3,7 @@ variable "namespace" {
   type        = string
   default     = "dev"
 }
+
+variable "general_node_selector" {
+  description = "General node group selector."
+}
