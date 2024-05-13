@@ -21,7 +21,6 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * add HERA_TOKEN env var to user pods by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2438>
 * fix docs link by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2443>
 * Update allowed admin groups by @aktech in <https://github.com/nebari-dev/nebari/pull/2429>
-* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in <https://github.com/nebari-dev/nebari/pull/2450>
 
 **Full Changelog**: <https://github.com/nebari-dev/nebari/compare/2024.4.1...2024.5.1>
 
