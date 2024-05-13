@@ -244,7 +244,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         name = str(uuid.uuid4())
         request_json = {
             "namespace": "global",
-            "specification": f"dependencies:\n  - pandas\nvariables: {{}}\nchannels: "
+            "specification": f"dependencies:\n  - tqdm\nvariables: {{}}\nchannels: "
             f"[]\n\ndescription: ''\nname: {name}\nprefix: null",
         }
         response = self.request_session.post(_url, json=request_json, verify=False)
