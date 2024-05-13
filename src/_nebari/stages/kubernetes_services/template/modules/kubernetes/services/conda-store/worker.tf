@@ -248,7 +248,8 @@ resource "kubernetes_manifest" "scaledobject" {
         name = "nebari-conda-store-worker"
       }
       maxReplicaCount = var.max-worker-replica-count
-      cooldownPeriod  = 30
+      pollingInterval = 5
+      cooldownPeriod = 5
       triggers = [
         {
           type = "postgresql"
