@@ -25,14 +25,14 @@ module "nvidia-driver-installer" {
 
   source = "./modules/nvidia-installer"
 
-  cloud_provider       = var.cloud_provider
-  gpu_enabled          = var.gpu_enabled
-  gpu_node_group_names = var.gpu_node_group_names
+  cloud_provider        = var.cloud_provider
+  gpu_enabled           = var.gpu_enabled
+  gpu_node_group_names  = var.gpu_node_group_names
   general_node_selector = var.general_node_selector
 }
 
 module "keda-installer" {
-  source    = "./modules/keda"
-  namespace = var.environment
+  source                = "./modules/keda"
+  namespace             = var.environment
   general_node_selector = var.general_node_selector
 }

@@ -249,7 +249,7 @@ resource "kubernetes_manifest" "scaledobject" {
       }
       maxReplicaCount = var.max-worker-replica-count
       pollingInterval = 5
-      cooldownPeriod = 5
+      cooldownPeriod  = 5
       triggers = [
         {
           type = "postgresql"
