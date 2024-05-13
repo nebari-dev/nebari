@@ -179,7 +179,6 @@ jobs:
 #            ./tests/tests_e2e/playwright/videos/
 
       - name: Setup tmate session
-        if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
 
       - name: Deployment Pytests
