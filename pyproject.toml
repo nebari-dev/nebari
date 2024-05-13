@@ -65,7 +65,7 @@ dependencies = [
     "prompt-toolkit==3.0.36",
     "pydantic==2.4.2",
     "pynacl==1.5.0",
-    "python-keycloak>=3.9.0",
+    "python-keycloak>=3.9.0,<4.0.0",
     "questionary==2.0.0",
     "requests-toolbelt==1.0.0",
     "rich==13.5.1",
@@ -101,7 +101,7 @@ docs = [
 ]
 
 [project.urls]
-Documentation = "https://www.nebari.dev/docs"
+Documentation = "https://www.nebari.dev/docs/welcome"
 Source = "https://github.com/nebari-dev/nebari"
 
 [project.scripts]

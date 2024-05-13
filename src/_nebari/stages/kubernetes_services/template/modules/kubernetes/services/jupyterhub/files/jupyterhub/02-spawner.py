@@ -72,8 +72,6 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
                 "url": url,
                 "external": True,
             },
-            "oauth_no_confirm": True,
-            "oauth_redirect_uri": "/services/:name/oauth_callback",
         }
 
     c.JupyterHub.services.extend(

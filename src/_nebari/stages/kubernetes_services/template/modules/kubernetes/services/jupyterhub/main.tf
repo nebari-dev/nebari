@@ -159,8 +159,8 @@ resource "helm_release" "jupyterhub" {
             username_claim       = "preferred_username"
             claim_groups_key     = "groups"
             claim_roles_key      = "roles"
-            allowed_groups       = ["/analyst", "/developer", "/admin"]
-            admin_groups         = ["/admin"]
+            allowed_groups       = ["/analyst", "/developer", "/admin", "jupyterhub_admin", "jupyterhub_developer"]
+            admin_groups         = ["/admin", "jupyterhub_admin"]
             manage_groups        = true
             manage_roles         = true
             refresh_pre_spawn    = true
