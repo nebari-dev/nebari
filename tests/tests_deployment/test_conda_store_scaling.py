@@ -88,7 +88,7 @@ def b64encodestr(string):
     return b64encode(string.encode("utf-8")).decode()
 
 
-@pytest.mark.timeout(30 * 60)
+@pytest.mark.timeout(20 * 60)
 def timed_wait_for_deployments(target_deployment_count, client):
     log.info(
         f"Waiting for deployments to reach target value {target_deployment_count}  ..."
