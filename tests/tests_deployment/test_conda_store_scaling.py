@@ -1,6 +1,8 @@
 import base64
 import json
+import logging
 import os
+import sys
 import time
 import uuid
 
@@ -13,25 +15,13 @@ from tests.tests_deployment import constants
 
 CONDA_STORE_API_ENDPOINT = "conda-store/api/v1"
 NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
-# NEBARI_HOSTNAME = "pt.quansight.dev" ## Override for local testing
+NAMESPACE = os.getenv("CONDA_STORE_SERVICE_NAMESPACE")
+# NEBARI_HOSTNAME = "local.quansight.dev" ## Override for local testing
 TEST_CONDASTORE_WOKER_COUNT = os.getenv("TEST_CONDASTORE_WOKER_COUNT", 1)
 count = TEST_CONDASTORE_WOKER_COUNT
 
 from base64 import b64encode
 
-# @pytest.fixture(scope='module')
-# def log():
-#     log = logging.getLogger()
-#     logging.basicConfig(
-#         format="%(asctime)s %(module)s %(levelname)s: %(message)s",
-#         datefmt="%m/%d/%Y %I:%M:%S %p",
-#         level=logging.INFO,
-#     )
-#     stream_handler = logging.StreamHandler(sys.stdout)
-#     log.addHandler(stream_handler)
-#     yield log
-#     stream_handler.close()
-#
 
 log = logging.getLogger()
 logging.basicConfig(
@@ -75,7 +65,7 @@ def build_n_environments(n, builds, session):
 def get_deployment_count(client):
     _client = dynamic.DynamicClient(client)
     deployment_api = _client.resources.get(api_version="apps/v1", kind="Deployment")
-    deployment = deployment_api.get(name="nebari-conda-store-worker", namespace="dev")
+    deployment = deployment_api.get(name="nebari-conda-store-worker", namespace=NAMESPACE)
     replica_count = deployment.spec.replicas
     return replica_count
 
@@ -149,15 +139,13 @@ def api_client(kubernetes_config):
 @pytest.fixture
 def patched_secret_token(kubernetes_config, api_client):
     # Create an instance of the API class
+    log.info("Creating a admin token for the test.")
     api_instance = kubernetes.client.CoreV1Api(api_client)
     name = "conda-store-secret"  # str | name of the Secret
-    namespace = (
-        "dev"  # str | object name and auth scope, such as for teams and projects
-    )
     elevated_token = str(uuid.uuid4())
 
     # Get secret
-    api_response, secret_config = get_conda_secret(api_instance, name, namespace)
+    api_response, secret_config = get_conda_secret(api_instance, name, NAMESPACE)
 
     # Update secret
     permissions = {
@@ -166,17 +154,17 @@ def patched_secret_token(kubernetes_config, api_client):
     }
     secret_config["service-tokens"][elevated_token] = permissions
     api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
-    api_patch_response = api_instance.patch_namespaced_secret(
-        name, namespace, api_response
-    )
+    log.info(f"Patching secret: {name}.")
+    api_instance.patch_namespaced_secret(name, NAMESPACE, api_response)
 
     # Get pod name for conda-store
     # Restart conda-store server pod
-    api_response = api_instance.list_namespaced_pod(namespace)
+    api_response = api_instance.list_namespaced_pod(NAMESPACE)
     server_pod = [
         i for i in api_response.items if "nebari-conda-store-server-" in i.metadata.name
     ][0]
-    api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
+    log.info(f"Restarting conda-store-server pod: {server_pod.metadata.name}")
+    api_instance.delete_namespaced_pod(server_pod.metadata.name, NAMESPACE)
     time.sleep(10)
 
     yield elevated_token
