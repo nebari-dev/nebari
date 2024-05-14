@@ -159,7 +159,7 @@ def create_conda_store_env(session):
     request_json = {
         "namespace": "global",
         "specification": f"dependencies:\n  - tqdm\nvariables: {{}}\nchannels: "
-                         f"[]\n\ndescription: ''\nname: {name}\nprefix: null",
+        f"[]\n\ndescription: ''\nname: {name}\nprefix: null",
     }
     response = session.post(_url, json=request_json, verify=False)
     log.debug(request_json)
