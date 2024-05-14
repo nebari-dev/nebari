@@ -177,6 +177,7 @@ def build_n_environments(n, builds, session):
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_scale_up_and_down(patched_secret_token, api_client, requests_session):
     """
     Adds an admin token in conda-store-secret

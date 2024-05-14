@@ -5,6 +5,7 @@ from tests.tests_deployment.utils import get_jupyterhub_session
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+@pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_jupyterhub_loads_roles_from_keycloak():
     session = get_jupyterhub_session()
     xsrf_token = session.cookies.get("_xsrf")
