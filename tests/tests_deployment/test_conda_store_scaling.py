@@ -6,7 +6,6 @@ import sys
 import time
 import uuid
 
-
 import kubernetes.client
 import pytest
 import requests
