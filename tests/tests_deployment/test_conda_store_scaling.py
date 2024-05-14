@@ -169,7 +169,7 @@ def create_conda_store_env(session):
 
 @pytest.mark.timeout(10)
 def build_n_environments(n, builds, session):
-    log.info(f"Building {n} conda environments...")
+    log.info(f"Building {n} conda environments.")
     for _ in range(n):
         time.sleep(1)
         builds.append(create_conda_store_env(session))
