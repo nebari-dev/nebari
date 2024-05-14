@@ -6,6 +6,7 @@ import sys
 import time
 import uuid
 
+
 import kubernetes.client
 import pytest
 import requests
@@ -16,11 +17,9 @@ from tests.tests_deployment import constants
 CONDA_STORE_API_ENDPOINT = "conda-store/api/v1"
 NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
 NAMESPACE = os.getenv("CONDA_STORE_SERVICE_NAMESPACE")
-# NEBARI_HOSTNAME = "local.quansight.dev" ## Override for local testing
 TEST_CONDASTORE_WOKER_COUNT = os.getenv("TEST_CONDASTORE_WOKER_COUNT", 1)
-count = TEST_CONDASTORE_WOKER_COUNT
+# NEBARI_HOSTNAME = "local.quansight.dev" ## Override for local testing
 
-from base64 import b64encode
 
 log = logging.getLogger()
 logging.basicConfig(
@@ -86,7 +85,7 @@ def create_conda_store_env(session):
 
 
 def b64encodestr(string):
-    return b64encode(string.encode("utf-8")).decode()
+    return base64.b64encode(string.encode("utf-8")).decode()
 
 
 @pytest.mark.timeout(20 * 60)
@@ -159,7 +158,6 @@ def patched_secret_token(kubernetes_config, api_client):
     api_instance.patch_namespaced_secret(name, NAMESPACE, api_response)
 
     # Get pod name for conda-store
-    # Restart conda-store server pod
     api_response = api_instance.list_namespaced_pod(NAMESPACE)
     server_pod = [
         i for i in api_response.items if "nebari-conda-store-server-" in i.metadata.name
@@ -179,7 +177,6 @@ def get_conda_secret(api_instance, name, namespace):
     return api_response, secret_config
 
 
-# @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_scale_up_and_down(patched_secret_token, api_client, requests_session):
     builds = []
