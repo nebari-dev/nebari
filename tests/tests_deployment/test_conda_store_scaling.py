@@ -178,6 +178,14 @@ def build_n_environments(n, builds, session):
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_scale_up_and_down(patched_secret_token, api_client, requests_session):
+    """
+    Adds an admin token in conda-store-secret
+    Restarts conda-store-server.
+    Creates environment.
+    Validate pod scale-up.
+    Validate environment creation.
+    Validates pod scale-down.
+    """
     builds = []
     _initial_deployment_count = get_deployment_count(api_client)
     log.info(f"Deployments at the start of the test: {_initial_deployment_count}")
