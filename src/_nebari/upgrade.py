@@ -784,6 +784,53 @@ class Upgrade_2024_5_1(UpgradeStep):
         return config
 
 
+class Upgrade_2024_6_1(UpgradeStep):
+    version = "2024.6.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        if provider := config.get("provider", ""):
+            if provider == ProviderEnum.gcp.value:
+                provider_full_name = provider_enum_name_map[provider]
+                if not config.get(provider_full_name, {}).get("node_groups", {}):
+                    try:
+                        continue_ = Prompt.ask(
+                            f"""The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%.
+                            This change will affect your current deployment, and will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
+
+                            As always, make sure to [backup data](https://www.nebari.dev/docs/how-tos/manual-backup/) before upgrading.
+
+                            Would you like to upgrade to the cost effective node groups [purple]{config_filename}[/purple]?
+                            If not, select "N" and the old default node groups will be added to the nebari config file.
+                            """,
+                            choices=["y", "N"],
+                            default="y",
+                        )
+                        if continue_ == "N":
+                            config[provider_full_name]["node_groups"] = {
+                                "general": {
+                                    "instance": "n1-standard-8",
+                                    "min_nodes": 1,
+                                    "max_nodes": 1,
+                                },
+                                "user": {
+                                    "instance": "n1-standard-4",
+                                    "min_nodes": 0,
+                                    "max_nodes": 5,
+                                },
+                                "worker": {
+                                    "instance": "n1-standard-4",
+                                    "min_nodes": 0,
+                                    "max_nodes": 5,
+                                },
+                            }
+                    except KeyError:
+                        pass
+
+        return config
+
+
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
 # Manually-added upgrade steps must go above this line
