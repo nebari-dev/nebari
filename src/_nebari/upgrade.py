@@ -3,6 +3,7 @@ import logging
 import re
 import secrets
 import string
+import textwrap
 from abc import ABC
 from pathlib import Path
 from typing import Any, ClassVar, Dict
@@ -787,6 +788,10 @@ class Upgrade_2024_5_1(UpgradeStep):
 class Upgrade_2024_5_2(UpgradeStep):
     version = "2024.5.2"
 
+    @staticmethod
+    def _wrap(s):
+        return "\n".join("\n".join(textwrap.wrap(x)) for x in s.splitlines())
+
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -795,15 +800,18 @@ class Upgrade_2024_5_2(UpgradeStep):
                 provider_full_name = provider_enum_name_map[provider]
                 if not config.get(provider_full_name, {}).get("node_groups", {}):
                     try:
+                        text = f"""
+The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%. \
+This change will affect your current deployment, and will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
+
+As always, make sure to [link=https://www.nebari.dev/docs/how-tos/manual-backup]backup data[/link] before upgrading.
+
+Would you like to upgrade to the cost effective node groups [purple]{config_filename}[/purple]?
+If not, select "N" and the old default node groups will be added to the nebari config file.
+""".rstrip()
+                        wrapped_text = self._wrap(text)
                         continue_ = Prompt.ask(
-                            f"""The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%.
-                            This change will affect your current deployment, and will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
-
-                            As always, make sure to [backup data](https://www.nebari.dev/docs/how-tos/manual-backup/) before upgrading.
-
-                            Would you like to upgrade to the cost effective node groups [purple]{config_filename}[/purple]?
-                            If not, select "N" and the old default node groups will be added to the nebari config file.
-                            """,
+                            wrapped_text,
                             choices=["y", "N"],
                             default="y",
                         )
@@ -827,7 +835,22 @@ class Upgrade_2024_5_2(UpgradeStep):
                             }
                     except KeyError:
                         pass
+                else:
+                    text = f"""
+The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%.
+Consider upgrading your node group instance types to the new default configuration.
 
+Upgrading your general node will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
+
+As always, make sure to [link=https://www.nebari.dev/docs/how-tos/manual-backup]backup data[/link] before upgrading.
+
+The new default node groups instances are:
+{json.dumps({'general': {'instance': 'e2-highmem-4'}, 'user': {'instance': 'e2-standard-4'}, 'worker': {'instance': 'e2-standard-4'}}, indent=4)}
+
+Hit enter to continue
+""".rstrip()
+                    wrapped_text = self._wrap(text)
+                    Prompt.ask(wrapped_text)
         return config
 
 
