@@ -34,14 +34,19 @@ on:
         required: true
         type: string
 
+# When the cancel-in-progress: true option is specified, any concurrent jobs or workflows using the same
+# concurrency group will cancel both the pending and currently running jobs or workflows. This allows only
+# one job or workflow in the concurrency group to be in progress at a time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   test-local-integration:
     runs-on: "cirun-runner--${{ github.run_id }}"
     defaults:
       run:
         shell: bash -l {0}
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
@@ -182,6 +187,7 @@ jobs:
         env:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+          CONDA_STORE_SERVICE_NAMESPACE: ${{ env.CONDA_STORE_SERVICE_NAMESPACE }}
         run: |
           pytest tests/tests_deployment/ -v -s
 
