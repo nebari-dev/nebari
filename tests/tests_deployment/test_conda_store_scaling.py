@@ -18,52 +18,162 @@ CONDA_STORE_API_ENDPOINT = "conda-store/api/v1"
 NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
 # NEBARI_HOSTNAME = "pt.quansight.dev" ## Override for local testing
 TEST_CONDASTORE_WOKER_COUNT = os.getenv("TEST_CONDASTORE_WOKER_COUNT", 1)
+count = TEST_CONDASTORE_WOKER_COUNT
 
 from base64 import b64encode
-from contextlib import contextmanager
+
+# @pytest.fixture(scope='module')
+# def log():
+#     log = logging.getLogger()
+#     logging.basicConfig(
+#         format="%(asctime)s %(module)s %(levelname)s: %(message)s",
+#         datefmt="%m/%d/%Y %I:%M:%S %p",
+#         level=logging.INFO,
+#     )
+#     stream_handler = logging.StreamHandler(sys.stdout)
+#     log.addHandler(stream_handler)
+#     yield log
+#     stream_handler.close()
+#
+
+
+def get_build_status(build_id, session):
+    _res = session.get(
+        f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/build/{build_id}",
+        verify=False,
+    )
+    status = _res.json().get("data")["status"]
+    return status
+
+
+def delete_conda_environments(session):
+    existing_envs_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/?namespace=global"
+    response = session.get(existing_envs_url, verify=False)
+    for env in response.json()["data"]:
+        env_name = env["name"]
+        delete_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/global/{env_name}"
+        # log.info(f"Deleting {delete_url}")
+        session.delete(delete_url, verify=False)
+    # log.info("All conda environments deleted.")
+
+
+@pytest.mark.timeout(10)
+def build_n_environments(n, builds, session):
+    # log.info(f"Building {n} conda environments...")
+    for _ in range(n):
+        time.sleep(1)
+        builds.append(create_conda_store_env(session))
+    return builds
+
+
+def get_deployment_count(client):
+    _client = dynamic.DynamicClient(client)
+    deployment_api = _client.resources.get(api_version="apps/v1", kind="Deployment")
+    deployment = deployment_api.get(name="nebari-conda-store-worker", namespace="dev")
+    replica_count = deployment.spec.replicas
+    return replica_count
+
+
+def create_conda_store_env(session):
+    _url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/specification/"
+    name = str(uuid.uuid4())
+    request_json = {
+        "namespace": "global",
+        "specification": f"dependencies:\n  - tqdm\nvariables: {{}}\nchannels: "
+        f"[]\n\ndescription: ''\nname: {name}\nprefix: null",
+    }
+    response = session.post(_url, json=request_json, verify=False)
+    # log.info(request_json)
+    # log.info(response.json())
+    return response.json()["data"]["build_id"]
 
 
 def b64encodestr(string):
     return b64encode(string.encode("utf-8")).decode()
 
 
-@contextmanager
-def patched_secret_token(configuration):
-    with kubernetes.client.ApiClient(configuration) as _api_client:
-        # Create an instance of the API class
-        api_instance = kubernetes.client.CoreV1Api(_api_client)
-        name = "conda-store-secret"  # str | name of the Secret
-        namespace = (
-            "dev"  # str | object name and auth scope, such as for teams and projects
-        )
-        elevated_token = str(uuid.uuid4())
+@pytest.mark.timeout(30 * 60)
+def timed_wait_for_deployments(target_deployment_count, client):
+    # log.info(
+    #     f"Waiting for deployments to reach target value {target_deployment_count}  ..."
+    # )
+    replica_count = get_deployment_count(client)
+    while replica_count != target_deployment_count:
+        replica_count = get_deployment_count(client)
+        direction = "up" if target_deployment_count > replica_count else "down"
+        # log.info(
+        #     f"Scaling {direction} deployments: from {replica_count} to {target_deployment_count}"
+        # )
+        time.sleep(5)
+    # log.info(f"Deployment count: {replica_count}")
 
-        # Get secret
-        api_response, secret_config = get_conda_secret(api_instance, name, namespace)
 
-        # Update secret
-        permissions = {
-            "primary_namespace": "",
-            "role_bindings": {"*/*": ["admin"]},
-        }
-        secret_config["service-tokens"][elevated_token] = permissions
-        api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
-        api_patch_response = api_instance.patch_namespaced_secret(
-            name, namespace, api_response
-        )
+@pytest.mark.timeout(6 * 60)
+def timed_wait_for_environment_creation(builds, session):
+    created_count = 0
+    while True:
+        _count = len([b for b in builds if get_build_status(b, session) == "COMPLETED"])
+        if created_count != _count:
+            # log.info(f"{_count}/{self.count} Environments created")
+            created_count = _count
+        else:
+            # log.info("Environment creation finished successfully.")
+            return
 
-        # Get pod name for conda-store
-        # Restart conda-store server pod
-        api_response = api_instance.list_namespaced_pod(namespace)
-        server_pod = [
-            i
-            for i in api_response.items
-            if "nebari-conda-store-server-" in i.metadata.name
-        ][0]
-        api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
-        time.sleep(10)
 
-        yield elevated_token, _api_client
+@pytest.fixture
+def requests_session(patched_secret_token):
+    session = requests.Session()
+    session.headers.update({"Authorization": f"Bearer {patched_secret_token}"})
+    yield session
+    session.close()
+
+
+@pytest.fixture
+def kubernetes_config():
+    yield config.load_kube_config()
+
+
+@pytest.fixture
+def api_client(kubernetes_config):
+    with kubernetes.client.ApiClient(kubernetes_config) as _api_client:
+        yield _api_client
+
+
+@pytest.fixture
+def patched_secret_token(kubernetes_config, api_client):
+    # Create an instance of the API class
+    api_instance = kubernetes.client.CoreV1Api(api_client)
+    name = "conda-store-secret"  # str | name of the Secret
+    namespace = (
+        "dev"  # str | object name and auth scope, such as for teams and projects
+    )
+    elevated_token = str(uuid.uuid4())
+
+    # Get secret
+    api_response, secret_config = get_conda_secret(api_instance, name, namespace)
+
+    # Update secret
+    permissions = {
+        "primary_namespace": "",
+        "role_bindings": {"*/*": ["admin"]},
+    }
+    secret_config["service-tokens"][elevated_token] = permissions
+    api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
+    api_patch_response = api_instance.patch_namespaced_secret(
+        name, namespace, api_response
+    )
+
+    # Get pod name for conda-store
+    # Restart conda-store server pod
+    api_response = api_instance.list_namespaced_pod(namespace)
+    server_pod = [
+        i for i in api_response.items if "nebari-conda-store-server-" in i.metadata.name
+    ][0]
+    api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
+    time.sleep(10)
+
+    yield elevated_token
 
 
 def get_conda_secret(api_instance, name, namespace):
@@ -76,156 +186,23 @@ def get_conda_secret(api_instance, name, namespace):
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
-class TestCondaStoreWorkerHPA(TestCase):
-    """
-    Creates N conda environments.
-    Check conda-store-worker Scale up to N nodes.
-    Check conda-store-worker Scale down to 0 nodes.
-    """
-
-    log = logging.getLogger()
-    logging.basicConfig(
-        format="%(asctime)s %(module)s %(levelname)s: %(message)s",
-        datefmt="%m/%d/%Y %I:%M:%S %p",
-        level=logging.INFO,
+def test_scale_up_and_down(patched_secret_token, api_client, requests_session):
+    builds = []
+    _initial_deployment_count = get_deployment_count(api_client)
+    # log.info(
+    #     f"Deployments at the start of the test: {_initial_deployment_count}"
+    # )
+    delete_conda_environments(requests_session)
+    builds = build_n_environments(TEST_CONDASTORE_WOKER_COUNT, builds, requests_session)
+    # log.info(f"Wait for {TEST_CONDASTORE_WOKER_COUNT} conda-store-worker pods to start.")
+    timed_wait_for_deployments(
+        TEST_CONDASTORE_WOKER_COUNT + _initial_deployment_count, api_client
     )
-    stream_handler = logging.StreamHandler(sys.stdout)
-    log.addHandler(stream_handler)
-
-    def setUp(self):
-        """
-        Get token for conda API.
-        Create an API client.
-        """
-        self.log.info("Setting up the test case.")
-        self.configuration = config.load_kube_config()
-        self.request_session = requests.Session()
-        self.builds = []
-        self.count = TEST_CONDASTORE_WOKER_COUNT
-
-    # @pytest.mark.skip(reason="Skipping test to check if this effects other tests.")
-    def test_scale_up_and_down(self):
-        with patched_secret_token(self.configuration) as (token, _api_client):
-            self.request_session.headers.update({"Authorization": f"Bearer {token}"})
-            _initial_deployment_count = self.get_deployment_count(_api_client)
-            self.log.info(
-                f"Deployments at the start of the test: {_initial_deployment_count}"
-            )
-            self.delete_conda_environments()
-            self.build_n_environments(self.count)
-            self.log.info(f"Wait for {self.count} conda-store-worker pods to start.")
-            self.timed_wait_for_deployments(
-                self.count + _initial_deployment_count, _api_client
-            )
-            self.timed_wait_for_environment_creation()
-            self.log.info(
-                f"Wait till worker deployment scales down to {_initial_deployment_count}"
-            )
-            self.timed_wait_for_deployments(_initial_deployment_count, _api_client)
-            self.log.info("Test passed.")
-            self.delete_conda_environments()
-        self.log.info("Test passed.")
-
-    def tearDown(self):
-        """
-        Delete all conda environments.
-        """
-        self.log.info("Teardown complete.")
-        self.stream_handler.close()
-        self.request_session.close()
-
-    def delete_conda_environments(self):
-        existing_envs_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/?namespace=global"
-        response = self.request_session.get(existing_envs_url, verify=False)
-        for env in response.json()["data"]:
-            env_name = env["name"]
-            delete_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/global/{env_name}"
-            self.log.info(f"Deleting {delete_url}")
-            self.request_session.delete(delete_url, verify=False)
-        self.log.info("All conda environments deleted.")
-
-    def get_build_status(self, build_id):
-        _res = self.request_session.get(
-            f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/build/{build_id}",
-            verify=False,
-        )
-        status = _res.json().get("data")["status"]
-        return status
-
-    @pytest.mark.timeout(6 * 60)
-    def timed_wait_for_environment_creation(self, target_count):
-        created_count = 0
-        while created_count <= target_count:
-            created_count = 0
-            response = self.request_session.get(
-                f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/?namespace=global",
-                verify=False,
-            )
-            for env in response.json().get("data"):
-                build_id = env["current_build_id"]
-                _res = self.request_session.get(
-                    f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/build/{build_id}",
-                    verify=False,
-                )
-                status = _res.json().get("data")["status"]
-                if status == "COMPLETED":
-                    created_count += 1
-            self.log.info(f"{created_count}/{target_count} Environments created")
-
-    @pytest.mark.timeout(6 * 60)
-    def timed_wait_for_environment_creation(self):
-        created_count = 0
-        while True:
-            _count = len(
-                [b for b in self.builds if self.get_build_status(b) == "COMPLETED"]
-            )
-            if created_count != _count:
-                self.log.info(f"{_count}/{self.count} Environments created")
-                created_count = _count
-            else:
-                self.log.info("Environment creation finished successfully.")
-                return
-
-    @pytest.mark.timeout(10)
-    def build_n_environments(self, n):
-        self.log.info(f"Building {n} conda environments...")
-        for _ in range(n):
-            time.sleep(1)
-            self.builds.append(self.create_conda_store_env())
-
-    @pytest.mark.timeout(30 * 60)
-    def timed_wait_for_deployments(self, target_deployment_count, client):
-        self.log.info(
-            f"Waiting for deployments to reach target value {target_deployment_count}  ..."
-        )
-        replica_count = self.get_deployment_count(client)
-        while replica_count != target_deployment_count:
-            replica_count = self.get_deployment_count(client)
-            direction = "up" if target_deployment_count > replica_count else "down"
-            self.log.info(
-                f"Scaling {direction} deployments: from {replica_count} to {target_deployment_count}"
-            )
-            time.sleep(5)
-        self.log.info(f"Deployment count: {replica_count}")
-
-    def get_deployment_count(self, client):
-        _client = dynamic.DynamicClient(client)
-        deployment_api = _client.resources.get(api_version="apps/v1", kind="Deployment")
-        deployment = deployment_api.get(
-            name="nebari-conda-store-worker", namespace="dev"
-        )
-        replica_count = deployment.spec.replicas
-        return replica_count
-
-    def create_conda_store_env(self):
-        _url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/specification/"
-        name = str(uuid.uuid4())
-        request_json = {
-            "namespace": "global",
-            "specification": f"dependencies:\n  - tqdm\nvariables: {{}}\nchannels: "
-            f"[]\n\ndescription: ''\nname: {name}\nprefix: null",
-        }
-        response = self.request_session.post(_url, json=request_json, verify=False)
-        self.log.info(request_json)
-        self.log.info(response.json())
-        return response.json()["data"]["build_id"]
+    timed_wait_for_environment_creation(builds, requests_session)
+    # log.info(
+    #     f"Wait till worker deployment scales down to {_initial_deployment_count}"
+    # )
+    timed_wait_for_deployments(_initial_deployment_count, api_client)
+    # log.info("Test passed.")
+    delete_conda_environments(requests_session)
+    # log.info("Test passed.")
