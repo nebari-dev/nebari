@@ -804,7 +804,7 @@ class Upgrade_2024_5_2(UpgradeStep):
 The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%. \
 This change will affect your current deployment, and will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
 
-As always, make sure to [link=https://www.nebari.dev/docs/how-tos/manual-backup]backup data[/link] before upgrading.
+As always, make sure to backup data before upgrading.  See https://www.nebari.dev/docs/how-tos/manual-backup for more information.
 
 Would you like to upgrade to the cost effective node groups [purple]{config_filename}[/purple]?
 If not, select "N" and the old default node groups will be added to the nebari config file.
@@ -842,7 +842,7 @@ Consider upgrading your node group instance types to the new default configurati
 
 Upgrading your general node will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
 
-As always, make sure to [link=https://www.nebari.dev/docs/how-tos/manual-backup]backup data[/link] before upgrading.
+As always, make sure to backup data before upgrading.  See https://www.nebari.dev/docs/how-tos/manual-backup for more information.
 
 The new default node groups instances are:
 {json.dumps({'general': {'instance': 'e2-highmem-4'}, 'user': {'instance': 'e2-standard-4'}, 'worker': {'instance': 'e2-standard-4'}}, indent=4)}
