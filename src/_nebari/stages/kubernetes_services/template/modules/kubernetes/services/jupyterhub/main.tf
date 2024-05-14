@@ -130,6 +130,7 @@ resource "helm_release" "jupyterhub" {
           "01-theme.py"    = file("${path.module}/files/jupyterhub/01-theme.py")
           "02-spawner.py"  = file("${path.module}/files/jupyterhub/02-spawner.py")
           "03-profiles.py" = file("${path.module}/files/jupyterhub/03-profiles.py")
+          "04-auth.py"     = file("${path.module}/files/jupyterhub/04-auth.py")
         }
 
         services = {
@@ -143,25 +144,25 @@ resource "helm_release" "jupyterhub" {
         # for simple key value configuration with jupyterhub traitlets
         # this hub.config property should be used
         config = {
-          JupyterHub = {
-            authenticator_class = "generic-oauth"
-          }
           Authenticator = {
             enable_auth_state = true
           }
-          GenericOAuthenticator = {
+          KeyCloakOAuthenticator = {
             client_id            = module.jupyterhub-openid-client.config.client_id
             client_secret        = module.jupyterhub-openid-client.config.client_secret
             oauth_callback_url   = "https://${var.external-url}/hub/oauth_callback"
             authorize_url        = module.jupyterhub-openid-client.config.authentication_url
             token_url            = module.jupyterhub-openid-client.config.token_url
             userdata_url         = module.jupyterhub-openid-client.config.userinfo_url
+            realm_api_url        = module.jupyterhub-openid-client.config.realm_api_url
             login_service        = "Keycloak"
             username_claim       = "preferred_username"
             claim_groups_key     = "groups"
+            claim_roles_key      = "roles"
             allowed_groups       = ["/analyst", "/developer", "/admin", "jupyterhub_admin", "jupyterhub_developer"]
             admin_groups         = ["/admin", "jupyterhub_admin"]
             manage_groups        = true
+            manage_roles         = true
             refresh_pre_spawn    = true
             validate_server_cert = false
 
@@ -283,6 +284,10 @@ module "jupyterhub-openid-client" {
     var.jupyterhub-logout-redirect-url
   ]
   jupyterlab_profiles_mapper = true
+  service-accounts-enabled   = true
+  service-account-roles = [
+    "view-realm", "view-users", "view-clients"
+  ]
 }
 
 
