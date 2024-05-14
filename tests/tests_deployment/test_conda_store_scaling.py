@@ -120,7 +120,9 @@ def timed_wait_for_environment_creation(builds, session):
 def get_deployment_count(client):
     _client = dynamic.DynamicClient(client)
     deployment_api = _client.resources.get(api_version="apps/v1", kind="Deployment")
-    deployment = deployment_api.get(name="nebari-conda-store-worker", namespace=NAMESPACE)
+    deployment = deployment_api.get(
+        name="nebari-conda-store-worker", namespace=NAMESPACE
+    )
     replica_count = deployment.spec.replicas
     return replica_count
 
