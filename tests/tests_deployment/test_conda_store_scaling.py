@@ -22,7 +22,6 @@ count = TEST_CONDASTORE_WOKER_COUNT
 
 from base64 import b64encode
 
-
 log = logging.getLogger()
 logging.basicConfig(
     format="%(asctime)s %(module)s %(levelname)s: %(message)s",
@@ -65,7 +64,9 @@ def build_n_environments(n, builds, session):
 def get_deployment_count(client):
     _client = dynamic.DynamicClient(client)
     deployment_api = _client.resources.get(api_version="apps/v1", kind="Deployment")
-    deployment = deployment_api.get(name="nebari-conda-store-worker", namespace=NAMESPACE)
+    deployment = deployment_api.get(
+        name="nebari-conda-store-worker", namespace=NAMESPACE
+    )
     replica_count = deployment.spec.replicas
     return replica_count
 
