@@ -50,7 +50,8 @@ def api_client(kubernetes_config):
 
 
 def get_conda_secret(api_instance, name, namespace):
-    api_response = api_instance.read_namespaced_secret(name, namespace)
+    log.info(f"Getting conda secret {name}, from namespace {namespace}")
+    api_response = api_instance.read_namespaced_secret(name, 'dev')
     api_response_data = api_response.data
     secret_data = api_response_data["config.json"]
     secret_config = json.loads(base64.b64decode(secret_data))
@@ -70,7 +71,7 @@ def patched_secret_token(kubernetes_config, api_client):
     elevated_token = str(uuid.uuid4())
 
     # Get secret
-    api_response, secret_config = get_conda_secret(api_instance, name, NAMESPACE)
+    api_response, secret_config = get_conda_secret(api_instance, name, 'dev')
 
     # Update secret
     permissions = {
@@ -80,15 +81,15 @@ def patched_secret_token(kubernetes_config, api_client):
     secret_config["service-tokens"][elevated_token] = permissions
     api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
     log.info(f"Patching secret: {name}.")
-    api_instance.patch_namespaced_secret(name, NAMESPACE, api_response)
+    api_instance.patch_namespaced_secret(name, 'dev', api_response)
 
     # Get pod name for conda-store
-    api_response = api_instance.list_namespaced_pod(NAMESPACE)
+    api_response = api_instance.list_namespaced_pod('dev')
     server_pod = [
         i for i in api_response.items if "nebari-conda-store-server-" in i.metadata.name
     ][0]
     log.info(f"Restarting conda-store-server pod: {server_pod.metadata.name}")
-    api_instance.delete_namespaced_pod(server_pod.metadata.name, NAMESPACE)
+    api_instance.delete_namespaced_pod(server_pod.metadata.name, 'dev')
     time.sleep(10)
 
     yield elevated_token
@@ -120,7 +121,7 @@ def get_deployment_count(client):
     _client = dynamic.DynamicClient(client)
     deployment_api = _client.resources.get(api_version="apps/v1", kind="Deployment")
     deployment = deployment_api.get(
-        name="nebari-conda-store-worker", namespace=NAMESPACE
+        name="nebari-conda-store-worker", namespace='dev'
     )
     replica_count = deployment.spec.replicas
     return replica_count
