@@ -175,7 +175,7 @@ def build_n_environments(n, builds, session):
         builds.append(create_conda_store_env(session))
     return builds
 
-
+# TODO : remove filters 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_scale_up_and_down(patched_secret_token, api_client, requests_session):
