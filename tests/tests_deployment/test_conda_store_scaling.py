@@ -128,7 +128,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         self.builds = []
         self.count = TEST_CONDASTORE_WOKER_COUNT
 
-    # @pytest.mark.skip(reason="Skiping test to check if this effects other tests.")
+    # @pytest.mark.skip(reason="Skipping test to check if this effects other tests.")
     def test_scale_up_and_down(self):
         with patched_secret_token(self.configuration) as (token, _api_client):
             self.request_session.headers.update({"Authorization": f"Bearer {token}"})
