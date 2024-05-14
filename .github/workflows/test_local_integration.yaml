@@ -187,7 +187,7 @@ jobs:
         env:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-          CONDA_STORE_SERVICE_NAMESPACE: ${{ env.CONDA_STORE_SERVICE_NAMESPACE }}
+          CONDA_STORE_SERVICE_NAMESPACE: dev
         run: |
           pytest tests/tests_deployment/ -v -s
 
