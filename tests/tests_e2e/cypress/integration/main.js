@@ -52,8 +52,8 @@ describe('First Test', () => {
         cy.get('h1')
         .should('contain', 'Server Options');
 
-      cy.get('input.btn.btn-jupyter')
-        .should('have.attr', 'value', 'Start').click();
+      cy.get('button.btn.btn-jupyter')
+        .should('contain', 'Start').click();
 
       // Minimal check that JupyterLab has opened
       cy.get('div#jp-MainLogo', { timeout: 60000 }).should('exist').wait(4000);
