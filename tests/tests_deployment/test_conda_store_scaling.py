@@ -178,8 +178,8 @@ def get_conda_secret(api_instance, name, namespace):
     return api_response, secret_config
 
 
+# @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
-@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 def test_scale_up_and_down(patched_secret_token, api_client, requests_session):
     builds = []
     _initial_deployment_count = get_deployment_count(api_client)
