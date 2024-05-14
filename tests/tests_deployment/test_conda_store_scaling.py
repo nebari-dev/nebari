@@ -40,6 +40,7 @@ def patched_secret_token(configuration):
 
         # Get secret
         api_response, secret_config = get_conda_secret(api_instance, name, namespace)
+        print(f"Initial secret_config: {secret_config}")
 
         # Update secret
         permissions = {
@@ -47,6 +48,7 @@ def patched_secret_token(configuration):
             "role_bindings": {"*/*": ["admin"]},
         }
         secret_config["service-tokens"][elevated_token] = permissions
+        print(f"Updated secret_config: {secret_config}")
         api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
         api_patch_response = api_instance.patch_namespaced_secret(
             name, namespace, api_response
@@ -65,27 +67,28 @@ def patched_secret_token(configuration):
         time.sleep(10)
 
         yield elevated_token, _api_client
+        print("Skipping restarting conda-server.")
 
-        # Get update secret
-        api_response, secret_config = get_conda_secret(api_instance, name, namespace)
-
-        # Update secret
-        secret_config["service-tokens"].pop(elevated_token)
-        api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
-        api_patch_response = api_instance.patch_namespaced_secret(
-            name, namespace, api_response
-        )
-
-        # Get pod name for conda-store
-        # Restart conda-store server pod
-        print(api_patch_response)
-        api_response = api_instance.list_namespaced_pod(namespace)
-        server_pod = [
-            i
-            for i in api_response.items
-            if "nebari-conda-store-server-" in i.metadata.name
-        ][0]
-        api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
+        # # Get update secret
+        # api_response, secret_config = get_conda_secret(api_instance, name, namespace)
+        #
+        # # Update secret
+        # secret_config["service-tokens"].pop(elevated_token)
+        # api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
+        # api_patch_response = api_instance.patch_namespaced_secret(
+        #     name, namespace, api_response
+        # )
+        #
+        # # Get pod name for conda-store
+        # # Restart conda-store server pod
+        # print(api_patch_response)
+        # api_response = api_instance.list_namespaced_pod(namespace)
+        # server_pod = [
+        #     i
+        #     for i in api_response.items
+        #     if "nebari-conda-store-server-" in i.metadata.name
+        # ][0]
+        # api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
 
 
 def get_conda_secret(api_instance, name, namespace):
@@ -125,7 +128,7 @@ class TestCondaStoreWorkerHPA(TestCase):
         self.builds = []
         self.count = TEST_CONDASTORE_WOKER_COUNT
 
-    @pytest.mark.skip(reason="Skipping test to check if this effects other tests.")
+    # @pytest.mark.skip(reason="Skiping test to check if this effects other tests.")
     def test_scale_up_and_down(self):
         with patched_secret_token(self.configuration) as (token, _api_client):
             self.request_session.headers.update({"Authorization": f"Bearer {token}"})
