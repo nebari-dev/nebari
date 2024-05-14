@@ -40,7 +40,6 @@ def patched_secret_token(configuration):
 
         # Get secret
         api_response, secret_config = get_conda_secret(api_instance, name, namespace)
-        print(f"Initial secret_config: {secret_config}")
 
         # Update secret
         permissions = {
@@ -48,7 +47,6 @@ def patched_secret_token(configuration):
             "role_bindings": {"*/*": ["admin"]},
         }
         secret_config["service-tokens"][elevated_token] = permissions
-        print(f"Updated secret_config: {secret_config}")
         api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
         api_patch_response = api_instance.patch_namespaced_secret(
             name, namespace, api_response
@@ -56,7 +54,6 @@ def patched_secret_token(configuration):
 
         # Get pod name for conda-store
         # Restart conda-store server pod
-        print(api_patch_response)
         api_response = api_instance.list_namespaced_pod(namespace)
         server_pod = [
             i
@@ -67,7 +64,6 @@ def patched_secret_token(configuration):
         time.sleep(10)
 
         yield elevated_token, _api_client
-        print("Skipping restarting conda-server.")
 
 
 def get_conda_secret(api_instance, name, namespace):
@@ -137,7 +133,6 @@ class TestCondaStoreWorkerHPA(TestCase):
         self.log.info("Teardown complete.")
         self.stream_handler.close()
         self.request_session.close()
-        print("All done.")
 
     def delete_conda_environments(self):
         existing_envs_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/?namespace=global"
