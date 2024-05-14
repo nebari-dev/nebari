@@ -69,27 +69,6 @@ def patched_secret_token(configuration):
         yield elevated_token, _api_client
         print("Skipping restarting conda-server.")
 
-        # # Get update secret
-        # api_response, secret_config = get_conda_secret(api_instance, name, namespace)
-        #
-        # # Update secret
-        # secret_config["service-tokens"].pop(elevated_token)
-        # api_response.data = {"config.json": b64encodestr(json.dumps(secret_config))}
-        # api_patch_response = api_instance.patch_namespaced_secret(
-        #     name, namespace, api_response
-        # )
-        #
-        # # Get pod name for conda-store
-        # # Restart conda-store server pod
-        # print(api_patch_response)
-        # api_response = api_instance.list_namespaced_pod(namespace)
-        # server_pod = [
-        #     i
-        #     for i in api_response.items
-        #     if "nebari-conda-store-server-" in i.metadata.name
-        # ][0]
-        # api_instance.delete_namespaced_pod(server_pod.metadata.name, namespace)
-
 
 def get_conda_secret(api_instance, name, namespace):
     api_response = api_instance.read_namespaced_secret(name, namespace)
