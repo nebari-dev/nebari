@@ -33,6 +33,15 @@ from base64 import b64encode
 #     stream_handler.close()
 #
 
+log = logging.getLogger()
+logging.basicConfig(
+    format="%(asctime)s %(module)s %(levelname)s: %(message)s",
+    datefmt="%m/%d/%Y %I:%M:%S %p",
+    level=logging.INFO,
+)
+stream_handler = logging.StreamHandler(sys.stdout)
+log.addHandler(stream_handler)
+
 
 def get_build_status(build_id, session):
     _res = session.get(
@@ -49,14 +58,14 @@ def delete_conda_environments(session):
     for env in response.json()["data"]:
         env_name = env["name"]
         delete_url = f"https://{NEBARI_HOSTNAME}/{CONDA_STORE_API_ENDPOINT}/environment/global/{env_name}"
-        # log.info(f"Deleting {delete_url}")
+        log.info(f"Deleting {delete_url}")
         session.delete(delete_url, verify=False)
-    # log.info("All conda environments deleted.")
+    log.info("All conda environments deleted.")
 
 
 @pytest.mark.timeout(10)
 def build_n_environments(n, builds, session):
-    # log.info(f"Building {n} conda environments...")
+    log.info(f"Building {n} conda environments...")
     for _ in range(n):
         time.sleep(1)
         builds.append(create_conda_store_env(session))
@@ -80,8 +89,8 @@ def create_conda_store_env(session):
         f"[]\n\ndescription: ''\nname: {name}\nprefix: null",
     }
     response = session.post(_url, json=request_json, verify=False)
-    # log.info(request_json)
-    # log.info(response.json())
+    log.debug(request_json)
+    log.debug(response.json())
     return response.json()["data"]["build_id"]
 
 
@@ -91,18 +100,18 @@ def b64encodestr(string):
 
 @pytest.mark.timeout(30 * 60)
 def timed_wait_for_deployments(target_deployment_count, client):
-    # log.info(
-    #     f"Waiting for deployments to reach target value {target_deployment_count}  ..."
-    # )
+    log.info(
+        f"Waiting for deployments to reach target value {target_deployment_count}  ..."
+    )
     replica_count = get_deployment_count(client)
     while replica_count != target_deployment_count:
         replica_count = get_deployment_count(client)
         direction = "up" if target_deployment_count > replica_count else "down"
-        # log.info(
-        #     f"Scaling {direction} deployments: from {replica_count} to {target_deployment_count}"
-        # )
+        log.info(
+            f"Scaling {direction} deployments: from {replica_count} to {target_deployment_count}"
+        )
         time.sleep(5)
-    # log.info(f"Deployment count: {replica_count}")
+    log.info(f"Deployment count: {replica_count}")
 
 
 @pytest.mark.timeout(6 * 60)
@@ -111,10 +120,10 @@ def timed_wait_for_environment_creation(builds, session):
     while True:
         _count = len([b for b in builds if get_build_status(b, session) == "COMPLETED"])
         if created_count != _count:
-            # log.info(f"{_count}/{self.count} Environments created")
+            log.info(f"{_count}/{len(builds)} Environments created")
             created_count = _count
         else:
-            # log.info("Environment creation finished successfully.")
+            log.info("Environment creation finished successfully.")
             return
 
 
@@ -186,20 +195,18 @@ def get_conda_secret(api_instance, name, namespace):
 def test_scale_up_and_down(patched_secret_token, api_client, requests_session):
     builds = []
     _initial_deployment_count = get_deployment_count(api_client)
-    # log.info(
-    #     f"Deployments at the start of the test: {_initial_deployment_count}"
-    # )
+    log.info(f"Deployments at the start of the test: {_initial_deployment_count}")
     delete_conda_environments(requests_session)
     builds = build_n_environments(TEST_CONDASTORE_WOKER_COUNT, builds, requests_session)
-    # log.info(f"Wait for {TEST_CONDASTORE_WOKER_COUNT} conda-store-worker pods to start.")
+    log.info(
+        f"Wait for {TEST_CONDASTORE_WOKER_COUNT} conda-store-worker pods to start."
+    )
     timed_wait_for_deployments(
         TEST_CONDASTORE_WOKER_COUNT + _initial_deployment_count, api_client
     )
     timed_wait_for_environment_creation(builds, requests_session)
-    # log.info(
-    #     f"Wait till worker deployment scales down to {_initial_deployment_count}"
-    # )
+    log.info(f"Wait till worker deployment scales down to {_initial_deployment_count}")
     timed_wait_for_deployments(_initial_deployment_count, api_client)
-    # log.info("Test passed.")
+    log.info("Test passed.")
     delete_conda_environments(requests_session)
-    # log.info("Test passed.")
+    log.info("Test passed.")
