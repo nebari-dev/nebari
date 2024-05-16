@@ -57,11 +57,6 @@ class DigitalOceanInputVars(schema.Base):
     kubeconfig_filename: str = get_kubeconfig_filename()
 
 
-class GCPGuestAccelerators(schema.Base):
-    name: str
-    count: int
-
-
 class GCPNodeGroupInputVars(schema.Base):
     name: str
     instance_type: str
@@ -69,7 +64,7 @@ class GCPNodeGroupInputVars(schema.Base):
     max_size: int
     labels: Dict[str, str]
     preemptible: bool
-    guest_accelerators: List[GCPGuestAccelerators]
+    guest_accelerators: List["GCPGuestAccelerator"]
 
 
 class GCPPrivateClusterConfig(schema.Base):
@@ -319,9 +314,9 @@ class GCPNodeGroup(schema.Base):
 
 
 DEFAULT_GCP_NODE_GROUPS = {
-    "general": GCPNodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
-    "user": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
-    "worker": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
+    "general": GCPNodeGroup(instance="e2-highmem-4", min_nodes=1, max_nodes=1),
+    "user": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
+    "worker": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
 }
 
 
