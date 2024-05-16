@@ -166,6 +166,14 @@ class Profiles(schema.Base):
             )
         return value
 
+class DaskWorkerMounts(schema.Base):
+    # Both are required when one is present
+    volumes: List[Dict[str, str]] = []
+    volume_mounts: List[Dict[str, str]] = []
+
+class DaskWorker(schema.Base):
+    worker_images: Optional[Dict[str, str]] = None
+    extra_mounts: Optional[DaskWorkerMounts] = None
 
 class CondaEnvironment(schema.Base):
     name: str
