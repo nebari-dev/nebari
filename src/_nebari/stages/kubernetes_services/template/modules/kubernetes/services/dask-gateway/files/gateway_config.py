@@ -226,6 +226,7 @@ def base_username_mount(username, uid=1000, gid=100):
         },
     }
 
+
 def extra_worker_mount():
     extra_mounts = {}
     if config["extra-worker-mounts"]:
@@ -261,11 +262,13 @@ def worker_profile(options, user):
             config["profiles"][options.profile],
             {"environment": {**options.environment_vars}},
             {
-                "image": config["worker-images"][options.image]
-                if config["worker-images"]
-                else f"{config['cluster-image']['name']}:{config['cluster-image']['tag']}"
+                "image": (
+                    config["worker-images"][options.image]
+                    if config["worker-images"]
+                    else f"{config['cluster-image']['name']}:{config['cluster-image']['tag']}"
+                )
             },
-            extra_worker_mount()
+            extra_worker_mount(),
         ],
         {},
     )
