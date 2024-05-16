@@ -391,6 +391,8 @@ class DaskGatewayInputVars(schema.Base):
     dask_worker_image: ImageNameTag = Field(alias="dask-worker-image")
     dask_gateway_profiles: Dict[str, Any] = Field(alias="dask-gateway-profiles")
     cloud_provider: str = Field(alias="cloud-provider")
+    extra_worker_mounts: Optional[DaskWorkerMounts] = Field(alias="extra-worker-mounts")
+    worker_images: Optional[Dict[str, str]] = Field(alias="worker-images")
 
 
 class MonitoringInputVars(schema.Base):
@@ -540,6 +542,8 @@ class KubernetesServicesStage(NebariTerraformStage):
             ),
             dask_gateway_profiles=self.config.profiles.model_dump()["dask_worker"],
             cloud_provider=cloud_provider,
+            extra_worker_mounts=self.config.get("dask_worker", {}).get("extra_mounts"),
+            worker_images=self.config.get("dask_worker", {}).get("worker_images"),
         )
 
         monitoring_vars = MonitoringInputVars(

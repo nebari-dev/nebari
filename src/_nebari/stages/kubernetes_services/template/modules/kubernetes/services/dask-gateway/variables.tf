@@ -204,3 +204,18 @@ variable "cloud-provider" {
   description = "Name of the cloud provider to deploy to."
   type        = string
 }
+
+variable "worker-images" {
+  description = "Worker images list options to use for dask-gateway"
+  type        = map(string)
+  default     = {}
+}
+
+variable "extra-worker-mounts" {
+  description = "Extra volumes and volume mounts to add to worker pods"
+  type        = object({
+    volumes = list(any)
+    volume_mounts = list(any)
+  })
+  default = {}
+}

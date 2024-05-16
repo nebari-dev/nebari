@@ -11,6 +11,21 @@ variable "dask-gateway-profiles" {
   description = "Dask Gateway profiles to expose to user"
 }
 
+variable "worker-images" {
+  description = "Worker images list options to use for dask-gateway"
+  type        = map(string)
+  default     = {}
+}
+
+variable "extra-worker-mounts" {
+  description = "Extra volumes and volume mounts to add to worker pods"
+  type        = object({
+    volumes = list(any)
+    volume_mounts = list(any)
+  })
+  default = {}
+}
+
 # =================== RESOURCES =====================
 module "dask-gateway" {
   source = "./modules/kubernetes/services/dask-gateway"
@@ -28,6 +43,9 @@ module "dask-gateway" {
 
   # needs to match name in module.jupyterhub.extra-mounts
   dask-etc-configmap-name = "dask-etc"
+
+  worker-images = var.worker-images
+  extra-worker-mounts = var.extra-worker-mounts
 
   # environments
   conda-store-pvc               = module.conda-store-nfs-mount.persistent_volume_claim.name
