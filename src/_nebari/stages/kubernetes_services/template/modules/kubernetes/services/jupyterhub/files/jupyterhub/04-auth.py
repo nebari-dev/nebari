@@ -36,7 +36,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         # note: because the roles check is comprehensive, we need to re-add the admin and user roles
         if auth_model["admin"]:
             auth_model["roles"].append({"name": "admin"})
-        if self.check_allowed(auth_model["name"], auth_model):
+        if await self.check_allowed(auth_model["name"], auth_model):
             auth_model["roles"].append({"name": "user"})
         return auth_model
 
@@ -117,6 +117,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
     def validate_scopes(self, role_scopes):
         """Validate role scopes to sanity check user provided scopes from keycloak"""
+        self.log.info(f"Validating role scopes: {role_scopes}")
         try:
             # This is not a public function, but there isn't any alternative
             # method to verify scopes, and we do need to do this sanity check
