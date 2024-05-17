@@ -15,7 +15,8 @@ resource "keycloak_openid_client" "main" {
   access_type           = "CONFIDENTIAL"
   standard_flow_enabled = true
 
-  valid_redirect_uris = var.callback-url-paths
+  valid_redirect_uris      = var.callback-url-paths
+  service_accounts_enabled = var.service-accounts-enabled
 }
 
 
@@ -61,6 +62,33 @@ resource "keycloak_openid_user_attribute_protocol_mapper" "jupyterlab_profiles" 
   multivalued          = true
   aggregate_attributes = true
 }
+
+data "keycloak_realm" "master" {
+  realm = "nebari"
+}
+
+data "keycloak_openid_client" "realm_management" {
+  realm_id  = var.realm_id
+  client_id = "realm-management"
+}
+
+data "keycloak_role" "main-service" {
+  for_each = toset(var.service-account-roles)
+
+  realm_id  = data.keycloak_realm.master.id
+  client_id = data.keycloak_openid_client.realm_management.id
+  name      = each.key
+}
+
+resource "keycloak_openid_client_service_account_role" "main" {
+  for_each = toset(var.service-account-roles)
+
+  realm_id                = var.realm_id
+  service_account_user_id = keycloak_openid_client.main.service_account_user_id
+  client_id               = data.keycloak_openid_client.realm_management.id
+  role                    = data.keycloak_role.main-service[each.key].name
+}
+
 
 resource "keycloak_role" "main" {
   for_each = toset(flatten(values(var.role_mapping)))
