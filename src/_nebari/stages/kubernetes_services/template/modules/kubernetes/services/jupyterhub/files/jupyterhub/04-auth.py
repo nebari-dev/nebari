@@ -4,6 +4,7 @@ import urllib
 from functools import reduce
 
 from jupyterhub.traitlets import Callable
+from jupyterhub import scopes
 from oauthenticator.generic import GenericOAuthenticator
 from traitlets import Bool, Unicode, Union
 
@@ -58,11 +59,19 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         client_roles = await self._fetch_api(
             endpoint=f"clients/{jupyterhub_client_id}/roles", token=token
         )
+        client_roles_rich = await self._get_roles_with_attributes(client_roles, client_id=jupyterhub_client_id, token=token)
+        self.log.info(f"client roles rich: {client_roles_rich}")
         # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
         realm_roles = await self._fetch_api(endpoint="roles", token=token)
+        self.log.info(f"Realm roles: {realm_roles}")
+        self.log.info(f"Client roles: {client_roles}")
         roles = {
-            role["name"]: {"name": role["name"], "description": role["description"]}
-            for role in [*realm_roles, *client_roles]
+            role["name"]: {
+                "name": role["name"],
+                "description": role["description"],
+                "scopes": self._get_scope_from_role(role)
+            }
+            for role in [*realm_roles, *client_roles_rich]
         }
         # we could use either `name` (e.g. "developer") or `path` ("/developer");
         # since the default claim key returns `path`, it seems preferable.
@@ -90,7 +99,45 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             )
             role["users"] = [user["username"] for user in users]
 
+        self.log.info(f"Loading managed roles: {list(roles.values())}")
         return list(roles.values())
+
+    def _get_scope_from_role(self, role):
+        """Return scopes from role if the component is jupyterhub"""
+        self.log.info(f"Getting scopes from role: {role}")
+        role_scopes = role.get("attributes", {}).get("scopes", [])
+        component = role.get("attributes", {}).get("component")
+        self.log.info(f"Component: {component}, scopes: {role_scopes}")
+        # Attributes as returned as array
+        # See this: https://stackoverflow.com/questions/68954733/keycloak-client-role-attribute-array
+        if component == ["jupyterhub"] and role_scopes:
+            return self.validate_scopes(role_scopes[0].split(","))
+        else:
+            return []
+
+    def validate_scopes(self, role_scopes):
+        """Validate role scopes to sanity check user provided scopes from keycloak"""
+        try:
+            # This is not a public function, but there isn't any alternative
+            # method to verify scopes, and we do need to do this sanity check
+            # as a wrong scope could cause hub pod to fail
+            scopes._check_scopes_exist(role_scopes)
+        except scopes.ScopeNotFound as e:
+            self.log.error(f"Invalid scopes: {role_scopes}")
+        return []
+
+    async def _get_roles_with_attributes(self, roles, client_id, token):
+        """This fetches all roles by id to fetch there attributes."""
+        roles_rich = []
+        for role in roles:
+            # If this takes too much time, which isn't the case right now, we can
+            # also do multi-threaded requests
+            role_rich = await self._fetch_api(
+                endpoint=f"roles-by-id/{role['id']}?client={client_id}",
+                token=token
+            )
+            roles_rich.append(role_rich)
+        return roles_rich
 
     def _get_user_roles(self, user_info):
         if callable(self.claim_roles_key):
