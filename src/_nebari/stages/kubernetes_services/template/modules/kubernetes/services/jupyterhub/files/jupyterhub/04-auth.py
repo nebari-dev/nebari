@@ -3,8 +3,8 @@ import os
 import urllib
 from functools import reduce
 
-from jupyterhub.traitlets import Callable
 from jupyterhub import scopes
+from jupyterhub.traitlets import Callable
 from oauthenticator.generic import GenericOAuthenticator
 from traitlets import Bool, Unicode, Union
 
@@ -59,7 +59,9 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         client_roles = await self._fetch_api(
             endpoint=f"clients/{jupyterhub_client_id}/roles", token=token
         )
-        client_roles_rich = await self._get_roles_with_attributes(client_roles, client_id=jupyterhub_client_id, token=token)
+        client_roles_rich = await self._get_roles_with_attributes(
+            client_roles, client_id=jupyterhub_client_id, token=token
+        )
         self.log.info(f"client roles rich: {client_roles_rich}")
         # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
         realm_roles = await self._fetch_api(endpoint="roles", token=token)
@@ -69,7 +71,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             role["name"]: {
                 "name": role["name"],
                 "description": role["description"],
-                "scopes": self._get_scope_from_role(role)
+                "scopes": self._get_scope_from_role(role),
             }
             for role in [*realm_roles, *client_roles_rich]
         }
@@ -123,7 +125,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             # method to verify scopes, and we do need to do this sanity check
             # as a wrong scope could cause hub pod to fail
             scopes._check_scopes_exist(role_scopes)
-        except scopes.ScopeNotFound as e:
+        except scopes.ScopeNotFound:
             self.log.error(f"Invalid scopes: {role_scopes}")
         return []
 
@@ -134,8 +136,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             # If this takes too much time, which isn't the case right now, we can
             # also do multi-threaded requests
             role_rich = await self._fetch_api(
-                endpoint=f"roles-by-id/{role['id']}?client={client_id}",
-                token=token
+                endpoint=f"roles-by-id/{role['id']}?client={client_id}", token=token
             )
             roles_rich.append(role_rich)
         return roles_rich
