@@ -87,6 +87,10 @@ jobs:
       - name: Install tf-profile plugin
         run: pip install ./nebari-tf-profile-plugin
 
+      - name: List pluging and stages
+        run: |
+          nebari info
+
       - uses: azure/setup-kubectl@v4.0.0
         with:
           version: v1.19.16
