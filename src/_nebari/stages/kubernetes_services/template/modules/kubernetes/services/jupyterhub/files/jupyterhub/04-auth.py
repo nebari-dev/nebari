@@ -41,6 +41,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         return auth_model
 
     async def load_managed_roles(self):
+        self.log.info("Loading managed roles")
         if not self.manage_roles:
             raise ValueError(
                 "Managed roles can only be loaded when `manage_roles` is True"
