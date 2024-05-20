@@ -144,12 +144,12 @@ resource "kubernetes_manifest" "forwardauth-middleware" {
     apiVersion = "traefik.containo.us/v1alpha1"
     kind       = "Middleware"
     metadata = {
-      name      = "traefik-forward-auth"
+      name      = var.forwardauth_middleware_name
       namespace = var.namespace
     }
     spec = {
       forwardAuth = {
-        address = "http://forwardauth-service:4181"
+        address = "http://${kubernetes_service.forwardauth-service.metadata.0.name}:4181"
         authResponseHeaders = [
           "X-Forwarded-User"
         ]
@@ -175,7 +175,7 @@ resource "kubernetes_manifest" "forwardauth-ingressroute" {
 
           middlewares = [
             {
-              name      = "traefik-forward-auth"
+              name      = kubernetes_manifest.forwardauth-middleware.manifest.metadata.name
               namespace = var.namespace
             }
           ]

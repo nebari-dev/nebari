@@ -72,6 +72,9 @@ class NebariTFExtensionsStage(NebariTerraformStage):
                 "stages/05-kubernetes-keycloak"
             ]["keycloak_nebari_bot_password"]["value"],
             "helm_extensions": [_.model_dump() for _ in self.config.helm_extensions],
+            "forwardauth_middleware_name": stage_outputs[
+                "stages/07-kubernetes-services"
+            ]["forward-auth-middleware"]["value"]["name"],
         }
 
 
