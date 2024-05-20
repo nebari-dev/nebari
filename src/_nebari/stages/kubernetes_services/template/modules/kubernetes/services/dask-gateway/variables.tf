@@ -204,3 +204,7 @@ variable "cloud-provider" {
   description = "Name of the cloud provider to deploy to."
   type        = string
 }
+
+variable "forwardauth_middleware_name" {
+  type = string
+}

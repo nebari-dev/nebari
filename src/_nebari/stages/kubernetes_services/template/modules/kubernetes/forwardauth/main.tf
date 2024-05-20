@@ -149,7 +149,7 @@ resource "kubernetes_manifest" "forwardauth-middleware" {
     }
     spec = {
       forwardAuth = {
-        address = "http://forwardauth-service:4181"
+        address = "http://${kubernetes_service.forwardauth-service.metadata.0.name}:4181"
         authResponseHeaders = [
           "X-Forwarded-User"
         ]
