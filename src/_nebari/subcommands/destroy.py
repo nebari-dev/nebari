@@ -1,3 +1,4 @@
+import os
 import pathlib
 
 import typer
@@ -33,7 +34,7 @@ def nebari_subcommand(cli: typer.Typer):
             help="Destroy entire Nebari cluster without confirmation request. Suggested for CI use.",
         ),
         export_logfiles: bool = typer.Option(
-            False,
+            os.getenv("NEBARI_EXPORT_LOG_FILES", False),
             "--export-logfiles",
             help="Toggles the export of Terraform's stages logfiles",
         ),

@@ -1,3 +1,4 @@
+import os
 import pathlib
 from typing import Optional
 
@@ -60,7 +61,7 @@ def nebari_subcommand(cli: typer.Typer):
             help="Skip terraform state deployment which is often required in CI once the terraform remote state bootstrapping phase is complete",
         ),
         export_logfiles: bool = typer.Option(
-            False,
+            os.getenv("NEBARI_EXPORT_LOG_FILES", False),
             "--export-logfiles",
             help="Toggles the export of Terraform's stages logfiles",
         ),
