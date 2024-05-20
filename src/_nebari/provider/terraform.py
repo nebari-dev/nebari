@@ -1,7 +1,9 @@
 import contextlib
+import datetime
 import io
 import json
 import logging
+import os
 import platform
 import re
 import subprocess
@@ -28,6 +30,7 @@ def deploy(
     terraform_import: bool = False,
     terraform_apply: bool = True,
     terraform_destroy: bool = False,
+    terraform_logs_export: bool = False,
     input_vars: Dict[str, Any] = {},
     state_imports: List[Any] = [],
 ):
@@ -68,10 +71,18 @@ def deploy(
                 )
 
         if terraform_apply:
-            apply(directory, var_files=[f.name])
+            apply(
+                directory,
+                var_files=[f.name],
+                terraform_logs_export=terraform_logs_export,
+            )
 
         if terraform_destroy:
-            destroy(directory, var_files=[f.name])
+            destroy(
+                directory,
+                var_files=[f.name],
+                terraform_logs_export=terraform_logs_export,
+            )
 
         return output(directory)
 
@@ -137,9 +148,28 @@ def init(directory=None, upgrade=True):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
-def apply(directory=None, targets=None, var_files=None):
+def _gen_terraform_logfile_dest(prefix, suffix):
+    _root_log_dir = os.environ.get(
+        "NEBARI_EXPORT_LOG_FILES_PATH", Path.cwd().as_posix()
+    )
+    directory = Path(_root_log_dir) / datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory / f"{prefix}_{suffix}.log"
+
+
+def apply(
+    directory=None, targets=None, var_files=None, terraform_logs_export: bool = False
+):
     targets = targets or []
     var_files = var_files or []
+
+    if terraform_logs_export:
+        output_file = _gen_terraform_logfile_dest(
+            "terraform_apply", directory.split("/")[-1]
+        )
+        logger.info(f"terraform destroy logs will be exported to {output_file}")
+    else:
+        output_file = None
 
     logger.info(f"terraform apply directory={directory} targets={targets}")
     command = (
@@ -148,12 +178,11 @@ def apply(directory=None, targets=None, var_files=None):
         + ["-var-file=" + _ for _ in var_files]
     )
     with timer(logger, "terraform apply"):
-        _stage = directory.split("/")[-1]
         run_terraform_subprocess(
             command,
             cwd=directory,
             prefix="terraform",
-            output_file=f"terraform_apply_{_stage}.log",
+            output_file=output_file,
         )
 
 
@@ -199,11 +228,22 @@ def refresh(directory=None, var_files=None):
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
 
 
-def destroy(directory=None, targets=None, var_files=None):
+def destroy(
+    directory=None, targets=None, var_files=None, terraform_logs_export: bool = False
+):
     targets = targets or []
     var_files = var_files or []
 
     logger.info(f"terraform destroy directory={directory} targets={targets}")
+
+    if terraform_logs_export:
+        output_file = _gen_terraform_logfile_dest(
+            "terraform_destroy", directory.split("/")[-1]
+        )
+        logger.info(f"terraform destroy logs will be exported to {output_file}")
+    else:
+        output_file = None
+
     command = (
         [
             "destroy",
@@ -214,12 +254,11 @@ def destroy(directory=None, targets=None, var_files=None):
     )
 
     with timer(logger, "terraform destroy"):
-        _stage = directory.split("/")[-1]
         run_terraform_subprocess(
             command,
             cwd=directory,
             prefix="terraform",
-            output_file=f"terraform_destroy_{_stage}.log",
+            output_file=output_file,
         )
 
 
