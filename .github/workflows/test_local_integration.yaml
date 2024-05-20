@@ -4,6 +4,9 @@ env:
   TEST_USERNAME: "test-user"
   TEST_PASSWORD: "P@sswo3d"
   NEBARI_IMAGE_TAG: "main"
+  NEBARI_EXPORT_LOG_FILES: "true"
+  NEBARI_EXPORT_LOG_FILES_PATH: "terraform-logs"
+  NEBARI_TF_PROFILE_RESULTS_PATH: "tf-profile-results"
 
 on:
   pull_request:
@@ -74,6 +77,15 @@ jobs:
         run: |
           pip install .[dev]
           playwright install
+
+      - name: Clone nebari-tf-profile-plugin
+        uses: actions/checkout@v3
+        with:
+          repository: nebari-dev/nebari-tf-profile-plugin
+          path: nebari-tf-profile-plugin
+
+      - name: Install tf-profile plugin
+        run: pip install ./nebari-tf-profile-plugin
 
       - uses: azure/setup-kubectl@v4.0.0
         with:
@@ -196,3 +208,10 @@ jobs:
         working-directory: local-deployment
         run: |
           nebari destroy --config nebari-config.yaml --disable-prompt
+
+      - name: Save tf-profile results as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: tf-profile-logs
+          path: ${{ env.NEBARI_TF_PROFILE_RESULTS_PATH }}
