@@ -40,4 +40,6 @@ module "dask-gateway" {
   profiles = var.dask-gateway-profiles
 
   cloud-provider = var.cloud-provider
+
+  forwardauth_middleware_name = var.forwardauth_middleware_name
 }
