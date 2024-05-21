@@ -323,10 +323,10 @@ class Navigator:
 
             new_launcher_popup = self.page.locator(
                 ".jp-KernelSelector-Dialog .jp-NewLauncher-table table"
-            )
+            ).nth(0)
             if new_launcher_popup.is_visible():
                 # for when the jupyterlab-new-launcher extension is installed
-                new_launcher_popup.locator("td").nth(1).click()
+                new_launcher_popup.locator("td").nth(0).click()
             else:
                 # for when only the native launcher is available
                 self.page.get_by_role("combobox").nth(1).select_option(kernel)
