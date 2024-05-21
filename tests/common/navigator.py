@@ -256,7 +256,7 @@ class Navigator:
             self._set_environment_via_popup(kernel=None)
 
         # go to Kernel menu
-        kernel_menuitem = self.page.get_by_text("Kernel", exact=True)
+        kernel_menuitem = self.page.get_by_role("menuitem", name="Kernel", exact=True)
         kernel_menuitem.click()
         # shut down multiple running kernels
         with contextlib.suppress(Exception):
