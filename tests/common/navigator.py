@@ -320,14 +320,23 @@ class Navigator:
             # failure here indicates that the environment doesn't exist either
             # because of incorrect naming syntax or because the env is still
             # being built
-            self.page.get_by_role("combobox").nth(1).select_option(kernel)
-            # click Select to close popup (deal with the two formats of this dialog)
-            try:
-                self.page.get_by_role("button", name="Select Kernel").click()
-            except Exception:
-                self.page.locator("div").filter(has_text="No KernelSelect").get_by_role(
-                    "button", name="Select Kernel"
-                ).click()
+
+            new_launcher_popup = self.page.locator(
+                ".jp-KernelSelector-Dialog .jp-NewLauncher-table table"
+            )
+            if new_launcher_popup.is_visible():
+                # for when the jupyterlab-new-launcher extension is installed
+                new_launcher_popup.locator("td").nth(1).click()
+            else:
+                # for when only the native launcher is available
+                self.page.get_by_role("combobox").nth(1).select_option(kernel)
+                # click Select to close popup (deal with the two formats of this dialog)
+                try:
+                    self.page.get_by_role("button", name="Select Kernel").click()
+                except Exception:
+                    self.page.locator("div").filter(
+                        has_text="No KernelSelect"
+                    ).get_by_role("button", name="Select Kernel").click()
 
     def set_environment(self, kernel):
         """Set environment of a jupyter notebook.
