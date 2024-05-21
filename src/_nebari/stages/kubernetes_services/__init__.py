@@ -331,6 +331,7 @@ class KubernetesServicesInputVars(schema.Base):
     node_groups: Dict[str, Dict[str, str]]
     jupyterhub_logout_redirect_url: str = Field(alias="jupyterhub-logout-redirect-url")
     forwardauth_middleware_name: str = _forwardauth_middleware_name
+    cert_secret_name: Optional[str] = None
 
 
 def _split_docker_image_name(image_name):
@@ -491,6 +492,11 @@ class KubernetesServicesStage(NebariTerraformStage):
             realm_id=realm_id,
             node_groups=stage_outputs["stages/02-infrastructure"]["node_selectors"],
             jupyterhub_logout_redirect_url=final_logout_uri,
+            cert_secret_name=(
+                self.config.certificate.secret_name
+                if self.config.certificate.type == "existing"
+                else None
+            ),
         )
 
         conda_store_vars = CondaStoreInputVars(

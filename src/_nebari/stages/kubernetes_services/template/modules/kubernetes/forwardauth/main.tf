@@ -59,7 +59,19 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
         node_selector = {
           "${var.node-group.key}" = var.node-group.value
         }
-
+        dynamic "volume" {
+          for_each = var.cert_secret_name == null ? [] : [1]
+          content {
+            name = "cert-volume"
+            secret {
+              secret_name = var.cert_secret_name
+              items {
+                key  = "tls.crt"
+                path = "tls.crt"
+              }
+            }
+          }
+        }
         container {
           # image = "thomseddon/traefik-forward-auth:2.2.0"
           # Use PR #159 https://github.com/thomseddon/traefik-forward-auth/pull/159
@@ -125,10 +137,26 @@ resource "kubernetes_deployment" "forwardauth-deployment" {
             value = var.external-url
           }
 
+          dynamic "env" {
+            for_each = var.cert_secret_name == null ? [] : [1]
+            content {
+              name  = "SSL_CERT_FILE"
+              value = "/config/tls.crt"
+            }
+          }
+
           port {
             container_port = 4181
           }
 
+          dynamic "volume_mount" {
+            for_each = var.cert_secret_name == null ? [] : [1]
+            content {
+              name       = "cert-volume"
+              mount_path = "/config"
+              read_only  = true
+            }
+          }
         }
 
       }
