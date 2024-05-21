@@ -126,8 +126,9 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             # method to verify scopes, and we do need to do this sanity check
             # as a wrong scope could cause hub pod to fail
             scopes._check_scopes_exist(role_scopes)
+            return role_scopes
         except scopes.ScopeNotFound:
-            self.log.error(f"Invalid scopes: {role_scopes}")
+            self.log.error(f"Invalid scopes, skipping: {role_scopes}")
         return []
 
     async def _get_roles_with_attributes(self, roles, client_id, token):
