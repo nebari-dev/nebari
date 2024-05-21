@@ -350,7 +350,7 @@ class Navigator:
         popup = self._check_for_kernel_popup()
         # if there is not a kernel popup, make it appear
         if not popup:
-            self.page.get_by_text("Kernel", exact=True).click()
+            self.page.get_by_role("menuitem", name="Kernel", exact=True).click()
             self.page.get_by_role("menuitem", name="Change Kernel…").get_by_text(
                 "Change Kernel…"
             ).click()
