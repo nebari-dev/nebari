@@ -29,16 +29,66 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
     reset_managed_roles_on_startup = Bool(True)
 
     async def update_auth_model(self, auth_model):
+        """Updates and returns the auth_model dict.
+        This function is called everytime a user authenticates with JupyterHub, as in
+        everytime a user login to Nebari.
+
+        It will fetch the roles and their corresponding scopes from keycloak
+        and return updated auth model which will updates roles/scopes for the
+        user. When a user's roles/scopes are updated, they take in-affect only
+        after they log in to Nebari.
+        """
+        self.log.info("Updating auth model")
         auth_model = await super().update_auth_model(auth_model)
-        user_info = auth_model["auth_state"][self.user_auth_state_key]
-        user_roles = self._get_user_roles(user_info)
-        auth_model["roles"] = [{"name": role_name} for role_name in user_roles]
+        self.log.info(f"AUTH MODEL: {auth_model}")
+        user_id = auth_model["auth_state"]["oauth_user"]["sub"]
+        token = await self._get_token()
+
+        jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
+        user_roles = await self._get_client_roles_for_user(
+            user_id=user_id, client_id=jupyterhub_client_id, token=token
+        )
+        user_roles_rich = await self._get_roles_with_attributes(
+            roles=user_roles, client_id=jupyterhub_client_id, token=token
+        )
+
+        self.log.info(f"USER ROLES: {user_roles}")
+        auth_model["roles"] = [
+            {
+                "name": role["name"],
+                "description": role["description"],
+                "scopes": self._get_scope_from_role(role),
+            }
+            for role in user_roles_rich
+        ]
         # note: because the roles check is comprehensive, we need to re-add the admin and user roles
         if auth_model["admin"]:
             auth_model["roles"].append({"name": "admin"})
         if await self.check_allowed(auth_model["name"], auth_model):
             auth_model["roles"].append({"name": "user"})
         return auth_model
+
+    async def _get_jupyterhub_client_roles(self, jupyterhub_client_id, token):
+        """Get roles for the client named 'jupyterhub'."""
+        # Includes roles like "jupyterhub_admin", "jupyterhub_developer", "dask_gateway_developer"
+
+        client_roles = await self._fetch_api(
+            endpoint=f"clients/{jupyterhub_client_id}/roles", token=token
+        )
+        client_roles_rich = await self._get_roles_with_attributes(
+            client_roles, client_id=jupyterhub_client_id, token=token
+        )
+        return client_roles_rich
+
+    async def _get_jupyterhub_client_id(self, token):
+        # Get the clients list to find the "id" of "jupyterhub" client.
+        clients_data = await self._fetch_api(endpoint="clients/", token=token)
+        jupyterhub_clients = [
+            client for client in clients_data if client["clientId"] == "jupyterhub"
+        ]
+        assert len(jupyterhub_clients) == 1
+        jupyterhub_client_id = jupyterhub_clients[0]["id"]
+        return jupyterhub_client_id
 
     async def load_managed_roles(self):
         self.log.info("Loading managed roles")
@@ -47,27 +97,16 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 "Managed roles can only be loaded when `manage_roles` is True"
             )
         token = await self._get_token()
-
-        # Get the clients list to find the "id" of "jupyterhub" client.
-        clients_data = await self._fetch_api(endpoint="clients/", token=token)
-        jupyterhub_clients = [
-            client for client in clients_data if client["clientId"] == "jupyterhub"
-        ]
-        assert len(jupyterhub_clients) == 1
-        jupyterhub_client_id = jupyterhub_clients[0]["id"]
-
-        # Includes roles like "jupyterhub_admin", "jupyterhub_developer", "dask_gateway_developer"
-        client_roles = await self._fetch_api(
-            endpoint=f"clients/{jupyterhub_client_id}/roles", token=token
-        )
-        client_roles_rich = await self._get_roles_with_attributes(
-            client_roles, client_id=jupyterhub_client_id, token=token
+        # return []
+        jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
+        client_roles_rich = await self._get_jupyterhub_client_roles(
+            jupyterhub_client_id=jupyterhub_client_id, token=token
         )
         self.log.info(f"client roles rich: {client_roles_rich}")
         # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
         realm_roles = await self._fetch_api(endpoint="roles", token=token)
         self.log.info(f"Realm roles: {realm_roles}")
-        self.log.info(f"Client roles: {client_roles}")
+        self.log.info(f"Client roles: {client_roles_rich}")
         roles = {
             role["name"]: {
                 "name": role["name"],
@@ -88,7 +127,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             # fetch role assignments to users
             users = await self._fetch_api(f"roles/{role_name}/users", token=token)
             role["users"] = [user["username"] for user in users]
-        for client_role in client_roles:
+        for client_role in client_roles_rich:
             role_name = client_role["name"]
             role = roles[role_name]
             # fetch role assignments to groups
@@ -131,7 +170,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             self.log.error(f"Invalid scopes, skipping: {role_scopes}")
         return []
 
-    async def _get_roles_with_attributes(self, roles, client_id, token):
+    async def _get_roles_with_attributes(self, roles: dict, client_id: str, token: str):
         """This fetches all roles by id to fetch there attributes."""
         roles_rich = []
         for role in roles:
@@ -142,6 +181,12 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             )
             roles_rich.append(role_rich)
         return roles_rich
+
+    async def _get_client_roles_for_user(self, user_id, client_id, token):
+        user_roles = await self._fetch_api(
+            endpoint=f"users/{user_id}/role-mappings/clients/{client_id}/composite", token=token
+        )
+        return user_roles
 
     def _get_user_roles(self, user_info):
         if callable(self.claim_roles_key):
