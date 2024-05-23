@@ -256,7 +256,7 @@ class Navigator:
             self._set_environment_via_popup(kernel=None)
 
         # go to Kernel menu
-        kernel_menuitem = self.page.get_by_text("Kernel", exact=True)
+        kernel_menuitem = self.page.get_by_role("menuitem", name="Kernel", exact=True)
         kernel_menuitem.click()
         # shut down multiple running kernels
         with contextlib.suppress(Exception):
@@ -320,14 +320,23 @@ class Navigator:
             # failure here indicates that the environment doesn't exist either
             # because of incorrect naming syntax or because the env is still
             # being built
-            self.page.get_by_role("combobox").nth(1).select_option(kernel)
-            # click Select to close popup (deal with the two formats of this dialog)
-            try:
-                self.page.get_by_role("button", name="Select Kernel").click()
-            except Exception:
-                self.page.locator("div").filter(has_text="No KernelSelect").get_by_role(
-                    "button", name="Select Kernel"
-                ).click()
+
+            new_launcher_popup = self.page.locator(
+                ".jp-KernelSelector-Dialog .jp-NewLauncher-table table"
+            ).nth(0)
+            if new_launcher_popup.is_visible():
+                # for when the jupyterlab-new-launcher extension is installed
+                new_launcher_popup.locator("td").nth(0).click()
+            else:
+                # for when only the native launcher is available
+                self.page.get_by_role("combobox").nth(1).select_option(kernel)
+                # click Select to close popup (deal with the two formats of this dialog)
+                try:
+                    self.page.get_by_role("button", name="Select Kernel").click()
+                except Exception:
+                    self.page.locator("div").filter(
+                        has_text="No KernelSelect"
+                    ).get_by_role("button", name="Select Kernel").click()
 
     def set_environment(self, kernel):
         """Set environment of a jupyter notebook.
@@ -350,7 +359,7 @@ class Navigator:
         popup = self._check_for_kernel_popup()
         # if there is not a kernel popup, make it appear
         if not popup:
-            self.page.get_by_text("Kernel", exact=True).click()
+            self.page.get_by_role("menuitem", name="Kernel", exact=True).click()
             self.page.get_by_role("menuitem", name="Change Kernel…").get_by_text(
                 "Change Kernel…"
             ).click()
