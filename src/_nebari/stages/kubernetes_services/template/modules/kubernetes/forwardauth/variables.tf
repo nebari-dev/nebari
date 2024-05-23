@@ -26,3 +26,8 @@ variable "node-group" {
     value = string
   })
 }
+
+variable "forwardauth_middleware_name" {
+  description = "Name of the traefik forward auth middleware"
+  type        = string
+}

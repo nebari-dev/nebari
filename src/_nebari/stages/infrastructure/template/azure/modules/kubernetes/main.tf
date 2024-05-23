@@ -5,6 +5,10 @@ resource "azurerm_kubernetes_cluster" "main" {
   resource_group_name = var.resource_group_name
   tags                = var.tags
 
+  # To enable Azure AD Workload Identity oidc_issuer_enabled must be set to true.
+  oidc_issuer_enabled       = var.workload_identity_enabled
+  workload_identity_enabled = var.workload_identity_enabled
+
   # DNS prefix specified when creating the managed cluster. Changing this forces a new resource to be created.
   dns_prefix = "Nebari" # required
 
@@ -39,6 +43,9 @@ resource "azurerm_kubernetes_cluster" "main" {
       "azure-node-pool" = var.node_groups[0].name
     }
     tags = var.tags
+
+    # temparory_name_for_rotation must be <= 12 characters
+    temporary_name_for_rotation = "${substr(var.node_groups[0].name, 0, 9)}tmp"
   }
 
   sku_tier = "Free" # "Free" [Default] or "Paid"

@@ -17,3 +17,13 @@ output "kubeconfig" {
   sensitive   = true
   value       = azurerm_kubernetes_cluster.main.kube_config_raw
 }
+
+output "cluster_oidc_issuer_url" {
+  description = "The OpenID Connect issuer URL that is associated with the AKS cluster"
+  value       = azurerm_kubernetes_cluster.main.oidc_issuer_url
+}
+
+output "resource_group_name" {
+  description = "The name of the resource group in which the AKS cluster is created"
+  value       = azurerm_kubernetes_cluster.main.resource_group_name
+}
