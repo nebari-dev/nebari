@@ -31,3 +31,8 @@ variable "helm_extensions" {
 variable "keycloak_nebari_bot_password" {
   description = "Keycloak password for nebari-bot"
 }
+
+variable "forwardauth_middleware_name" {
+  description = "Name of the traefik forward auth middleware"
+  type        = string
+}
