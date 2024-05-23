@@ -788,7 +788,6 @@ class Upgrade_2024_5_1(UpgradeStep):
 class Upgrade_2024_5_2(UpgradeStep):
     version = "2024.5.2"
 
-
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
