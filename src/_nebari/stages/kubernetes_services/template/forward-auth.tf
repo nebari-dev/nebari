@@ -7,10 +7,16 @@ module "forwardauth" {
 
   node-group                  = var.node_groups.general
   forwardauth_middleware_name = var.forwardauth_middleware_name
+  cert_secret_name            = var.cert_secret_name
 }
 
 variable "forwardauth_middleware_name" {
   description = "Name of the traefik forward auth middleware"
+  type        = string
+}
+
+variable "cert_secret_name" {
+  description = "Name of the secret containing the certificate"
   type        = string
 }
 
