@@ -3,7 +3,7 @@ name: "Local Integration Tests"
 env:
   TEST_USERNAME: "test-user"
   TEST_PASSWORD: "P@sswo3d"
-  NEBARI_IMAGE_TAG: "main"
+  NEBARI_IMAGE_TAG: "2024.5.1"
 
 on:
   pull_request:
