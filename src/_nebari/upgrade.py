@@ -795,8 +795,9 @@ class Upgrade_2024_5_2(UpgradeStep):
             provider_full_name = provider_enum_name_map[provider]
             if not config.get(provider_full_name, {}).get("node_groups", {}):
                 try:
-                    text = f"""
-                        The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%. \
+                    text = textwrap.dedent(
+                        f"""
+                        The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%.
                         This change will affect your current deployment, and will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
 
                         As always, make sure to backup data before upgrading.  See https://www.nebari.dev/docs/how-tos/manual-backup for more information.
@@ -804,8 +805,9 @@ class Upgrade_2024_5_2(UpgradeStep):
                         Would you like to upgrade to the cost effective node groups [purple]{config_filename}[/purple]?
                         If not, select "N" and the old default node groups will be added to the nebari config file.
                     """
+                    )
                     continue_ = Prompt.ask(
-                        textwrap.dedent(text),
+                        text,
                         choices=["y", "N"],
                         default="y",
                     )
@@ -830,7 +832,8 @@ class Upgrade_2024_5_2(UpgradeStep):
                 except KeyError:
                     pass
             else:
-                text = f"""
+                text = textwrap.dedent(
+                    """
                     The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%.
                     Consider upgrading your node group instance types to the new default configuration.
 
@@ -839,11 +842,18 @@ class Upgrade_2024_5_2(UpgradeStep):
                     As always, make sure to backup data before upgrading.  See https://www.nebari.dev/docs/how-tos/manual-backup for more information.
 
                     The new default node groups instances are:
-                    {json.dumps({'general': {'instance': 'e2-highmem-4'}, 'user': {'instance': 'e2-standard-4'}, 'worker': {'instance': 'e2-standard-4'}}, indent=4)}
-
-                    Hit enter to continue
                 """
-                Prompt.ask(textwrap.dedent(text))
+                )
+                text += json.dumps(
+                    {
+                        "general": {"instance": "e2-highmem-4"},
+                        "user": {"instance": "e2-standard-4"},
+                        "worker": {"instance": "e2-standard-4"},
+                    },
+                    indent=4,
+                )
+                text += "\n\nHit enter to continue"
+                Prompt.ask(text)
         return config
 
 
