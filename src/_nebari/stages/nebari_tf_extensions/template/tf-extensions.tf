@@ -16,6 +16,7 @@ module "extension" {
   nebari-realm-id  = var.realm_id
 
   keycloak_nebari_bot_password = each.value.keycloakadmin ? var.keycloak_nebari_bot_password : ""
+  forwardauth_middleware_name  = var.forwardauth_middleware_name
 
   envs = lookup(each.value, "envs", [])
 }
