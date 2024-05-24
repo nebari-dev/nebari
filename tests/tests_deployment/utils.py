@@ -37,6 +37,7 @@ def get_jupyterhub_token(note="jupyterhub-tests-deployment"):
         f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
         headers=headers,
         json=data,
+        verify=False,
     )
 
     return r.json()["token"]
