@@ -38,16 +38,14 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         user. When a user's roles/scopes are updated, they take in-affect only
         after they log in to Nebari.
         """
-        self.log.info("Updating auth model")
+        self.log.info("Updating user auth model")
         auth_model = await super().update_auth_model(auth_model)
-        self.log.info(f"AUTH MODEL: {auth_model}")
         user_id = auth_model["auth_state"]["oauth_user"]["sub"]
         token = await self._get_token()
 
         jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
         user_info = auth_model["auth_state"][self.user_auth_state_key]
         user_roles_from_claims = self._get_user_roles(user_info=user_info)
-        self.log.info(f"user_roles_from_claims: {user_roles_from_claims}")
         user_roles = await self._get_client_roles_for_user(
             user_id=user_id, client_id=jupyterhub_client_id, token=token
         )
@@ -60,9 +58,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 "name": role['name']
             } for role in user_roles if role['name'] in (user_roles_from_claims - user_roles_rich_names)
         ]
-        self.log.info(f"user_roles_rich: {user_roles_rich}")
-
-        self.log.info(f"USER ROLES: {user_roles}")
         auth_model["roles"] = [
             {
                 "name": role["name"],
@@ -112,11 +107,8 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         client_roles_rich = await self._get_jupyterhub_client_roles(
             jupyterhub_client_id=jupyterhub_client_id, token=token
         )
-        self.log.info(f"client roles rich: {client_roles_rich}")
         # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
         realm_roles = await self._fetch_api(endpoint="roles", token=token)
-        self.log.info(f"Realm roles: {realm_roles}")
-        self.log.info(f"Client roles: {client_roles_rich}")
         roles = {
             role["name"]: {
                 "name": role["name"],
@@ -151,15 +143,12 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             )
             role["users"] = [user["username"] for user in users]
 
-        self.log.info(f"Loading managed roles: {list(roles.values())}")
         return list(roles.values())
 
     def _get_scope_from_role(self, role):
         """Return scopes from role if the component is jupyterhub"""
-        self.log.info(f"Getting scopes from role: {role}")
         role_scopes = role.get("attributes", {}).get("scopes", [])
         component = role.get("attributes", {}).get("component")
-        self.log.info(f"Component: {component}, scopes: {role_scopes}")
         # Attributes as returned as array
         # See this: https://stackoverflow.com/questions/68954733/keycloak-client-role-attribute-array
         if component == ["jupyterhub"] and role_scopes:
