@@ -30,8 +30,8 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
     async def update_auth_model(self, auth_model):
         """Updates and returns the auth_model dict.
-        This function is called everytime a user authenticates with JupyterHub, as in
-        everytime a user login to Nebari.
+        This function is called every time a user authenticates with JupyterHub, as in
+        every time a user login to Nebari.
 
         It will fetch the roles and their corresponding scopes from keycloak
         and return updated auth model which will updates roles/scopes for the
@@ -52,11 +52,11 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         user_roles_rich = await self._get_roles_with_attributes(
             roles=user_roles, client_id=jupyterhub_client_id, token=token
         )
-        user_roles_rich_names = {role['name'] for role in user_roles_rich}
+        user_roles_rich_names = {role["name"] for role in user_roles_rich}
         user_roles_non_jhub_client = [
-            {
-                "name": role['name']
-            } for role in user_roles if role['name'] in (user_roles_from_claims - user_roles_rich_names)
+            {"name": role["name"]}
+            for role in user_roles
+            if role["name"] in (user_roles_from_claims - user_roles_rich_names)
         ]
         auth_model["roles"] = [
             {
@@ -183,7 +183,8 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
     async def _get_client_roles_for_user(self, user_id, client_id, token):
         user_roles = await self._fetch_api(
-            endpoint=f"users/{user_id}/role-mappings/clients/{client_id}/composite", token=token
+            endpoint=f"users/{user_id}/role-mappings/clients/{client_id}/composite",
+            token=token,
         )
         return user_roles
 
