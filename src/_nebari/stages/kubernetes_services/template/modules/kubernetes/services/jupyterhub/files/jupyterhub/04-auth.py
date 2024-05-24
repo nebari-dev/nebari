@@ -45,21 +45,31 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         token = await self._get_token()
 
         jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
+        user_info = auth_model["auth_state"][self.user_auth_state_key]
+        user_roles_from_claims = self._get_user_roles(user_info=user_info)
+        self.log.info(f"user_roles_from_claims: {user_roles_from_claims}")
         user_roles = await self._get_client_roles_for_user(
             user_id=user_id, client_id=jupyterhub_client_id, token=token
         )
         user_roles_rich = await self._get_roles_with_attributes(
             roles=user_roles, client_id=jupyterhub_client_id, token=token
         )
+        user_roles_rich_names = {role['name'] for role in user_roles_rich}
+        user_roles_non_jhub_client = [
+            {
+                "name": role['name']
+            } for role in user_roles if role['name'] in (user_roles_from_claims - user_roles_rich_names)
+        ]
+        self.log.info(f"user_roles_rich: {user_roles_rich}")
 
         self.log.info(f"USER ROLES: {user_roles}")
         auth_model["roles"] = [
             {
                 "name": role["name"],
-                "description": role["description"],
+                "description": role.get("description"),
                 "scopes": self._get_scope_from_role(role),
             }
-            for role in user_roles_rich
+            for role in [*user_roles_rich, *user_roles_non_jhub_client]
         ]
         # note: because the roles check is comprehensive, we need to re-add the admin and user roles
         if auth_model["admin"]:
@@ -163,7 +173,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         try:
             # This is not a public function, but there isn't any alternative
             # method to verify scopes, and we do need to do this sanity check
-            # as a wrong scope could cause hub pod to fail
+            # as a invalid scopes could cause hub pod to fail
             scopes._check_scopes_exist(role_scopes)
             return role_scopes
         except scopes.ScopeNotFound:
