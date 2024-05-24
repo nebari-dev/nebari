@@ -102,7 +102,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 "Managed roles can only be loaded when `manage_roles` is True"
             )
         token = await self._get_token()
-        # return []
         jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
         client_roles_rich = await self._get_jupyterhub_client_roles(
             jupyterhub_client_id=jupyterhub_client_id, token=token
