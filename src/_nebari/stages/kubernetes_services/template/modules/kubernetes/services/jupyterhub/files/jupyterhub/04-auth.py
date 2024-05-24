@@ -54,9 +54,9 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         )
         user_roles_rich_names = {role["name"] for role in user_roles_rich}
         user_roles_non_jhub_client = [
-            {"name": role["name"]}
-            for role in user_roles
-            if role["name"] in (user_roles_from_claims - user_roles_rich_names)
+            {"name": role}
+            for role in user_roles_from_claims
+            if role in (user_roles_from_claims - user_roles_rich_names)
         ]
         auth_model["roles"] = [
             {
