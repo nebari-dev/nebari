@@ -4,10 +4,9 @@ import inspect
 import os
 import pathlib
 import re
-import typing
-from typing import Any, Dict, List, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 
-import pydantic
+from pydantic import field_validator
 
 from _nebari.provider import terraform
 from _nebari.provider.cloud import azure_cloud
@@ -39,10 +38,11 @@ class AzureInputVars(schema.Base):
     region: str
     storage_account_postfix: str
     state_resource_group_name: str
-    tags: Dict[str, str] = {}
+    tags: Dict[str, str]
 
-    @pydantic.validator("state_resource_group_name")
-    def _validate_resource_group_name(cls, value):
+    @field_validator("state_resource_group_name")
+    @classmethod
+    def _validate_resource_group_name(cls, value: str) -> str:
         if value is None:
             return value
         length = len(value) + len(AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX)
@@ -59,9 +59,10 @@ class AzureInputVars(schema.Base):
 
         return value
 
-    @pydantic.validator("tags")
-    def _validate_tags(cls, tags):
-        return azure_cloud.validate_tags(tags)
+    @field_validator("tags")
+    @classmethod
+    def _validate_tags(cls, value: Dict[str, str]) -> Dict[str, str]:
+        return azure_cloud.validate_tags(value)
 
 
 class AWSInputVars(schema.Base):
@@ -82,8 +83,8 @@ class TerraformStateEnum(str, enum.Enum):
 
 class TerraformState(schema.Base):
     type: TerraformStateEnum = TerraformStateEnum.remote
-    backend: typing.Optional[str]
-    config: typing.Dict[str, str] = {}
+    backend: Optional[str] = None
+    config: Dict[str, str] = {}
 
 
 class InputSchema(schema.Base):
@@ -192,18 +193,18 @@ class TerraformStateStage(NebariTerraformStage):
                 name=self.config.project_name,
                 namespace=self.config.namespace,
                 region=self.config.digital_ocean.region,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.gcp:
             return GCPInputVars(
                 name=self.config.project_name,
                 namespace=self.config.namespace,
                 region=self.config.google_cloud_platform.region,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
                 name=self.config.project_name,
                 namespace=self.config.namespace,
-            ).dict()
+            ).model_dump()
         elif self.config.provider == schema.ProviderEnum.azure:
             return AzureInputVars(
                 name=self.config.project_name,
@@ -217,7 +218,7 @@ class TerraformStateStage(NebariTerraformStage):
                     suffix=AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
                 ),
                 tags=self.config.azure.tags,
-            ).dict()
+            ).model_dump()
         elif (
             self.config.provider == schema.ProviderEnum.local
             or self.config.provider == schema.ProviderEnum.existing
