@@ -1,3 +1,6 @@
+import os
+import pathlib
+
 from _nebari.config import read_configuration
 from _nebari.keycloak import get_keycloak_admin_from_config
 from nebari.plugins import nebari_plugin_manager
@@ -29,7 +32,9 @@ def get_keycloak_role_details_by_name(roles, role_name):
 
 def get_keycloak_admin():
     config_schema = nebari_plugin_manager.config_schema
-    config = read_configuration("nebari-config.yaml", config_schema)
+    config_filepath = os.environ.get("NEBARI_CONFIG_PATH", "nebari-config.yaml")
+    assert pathlib.Path(config_filepath).exists()
+    config = read_configuration(config_filepath, config_schema)
     return get_keycloak_admin_from_config(config)
 
 
