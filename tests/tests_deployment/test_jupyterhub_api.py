@@ -1,4 +1,3 @@
-
 import pytest
 
 from tests.tests_deployment import constants
