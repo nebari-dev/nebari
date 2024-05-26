@@ -1,10 +1,12 @@
-import uuid
 
 import pytest
 
 from tests.tests_deployment import constants
-from tests.tests_deployment.utils import get_jupyterhub_session, get_jupyterhub_token, create_jupyterhub_token
-from tests.tests_deployment.keycloak_utils import create_keycloak_role, assign_keycloak_client_role_to_user
+from tests.tests_deployment.keycloak_utils import (
+    assign_keycloak_client_role_to_user,
+    create_keycloak_role,
+)
+from tests.tests_deployment.utils import create_jupyterhub_token, get_jupyterhub_session
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
@@ -35,48 +37,45 @@ def test_jupyterhub_loads_roles_from_keycloak():
 @pytest.mark.parametrize(
     "component,scopes,expected_scopes_difference",
     (
-            [
-                "jupyterhub",
-                "read:users:shares,read:groups:shares,users:shares",
-                {'read:groups:shares', 'users:shares', 'read:users:shares'}
-            ],
-            [
-                "invalid-component",
-                "read:users:shares,read:groups:shares,users:shares",
-                {}
-            ],
-            [
-                "invalid-component",
-                "admin:invalid-scope",
-                {}
-            ],
+        [
+            "jupyterhub",
+            "read:users:shares,read:groups:shares,users:shares",
+            {"read:groups:shares", "users:shares", "read:users:shares"},
+        ],
+        ["invalid-component", "read:users:shares,read:groups:shares,users:shares", {}],
+        ["invalid-component", "admin:invalid-scope", {}],
     ),
 )
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
-@pytest.mark.filterwarnings("ignore:.*auto_refresh_token is deprecated:DeprecationWarning")
+@pytest.mark.filterwarnings(
+    "ignore:.*auto_refresh_token is deprecated:DeprecationWarning"
+)
 def test_keycloak_roles_attributes_parsed_as_jhub_scopes(
-        component,
-        scopes,
-        expected_scopes_difference,
-        cleanup_keycloak_roles
+    component, scopes, expected_scopes_difference, cleanup_keycloak_roles
 ):
     # check token scopes before role creation and assignment
-    token_response_before = create_jupyterhub_token(note="before-role-creation-and-assignment")
-    token_scopes_before = set(token_response_before.json()['scopes'])
+    token_response_before = create_jupyterhub_token(
+        note="before-role-creation-and-assignment"
+    )
+    token_scopes_before = set(token_response_before.json()["scopes"])
     # create keycloak role with jupyterhub scopes in attributes
     role = create_keycloak_role(
         client_name="jupyterhub",
         # Note: we're clearing this role after every test case, and we're clearing
         # it by name, so it must start with test- to be deleted afterward
-        role_name=f"test-custom-role",
+        role_name="test-custom-role",
         scopes=scopes,
-        component=component
+        component=component,
     )
     assert role
     # assign created role to the user
-    assign_keycloak_client_role_to_user(constants.KEYCLOAK_USERNAME, client_name="jupyterhub", role=role)
-    token_response_after = create_jupyterhub_token(note="after-role-creation-and-assignment")
-    token_scopes_after = set(token_response_after.json()['scopes'])
+    assign_keycloak_client_role_to_user(
+        constants.KEYCLOAK_USERNAME, client_name="jupyterhub", role=role
+    )
+    token_response_after = create_jupyterhub_token(
+        note="after-role-creation-and-assignment"
+    )
+    token_scopes_after = set(token_response_after.json()["scopes"])
     # verify new scopes added/removed
     expected_scopes_difference = token_scopes_after - token_scopes_before
     # Comparing token scopes for the user before and after role assignment
