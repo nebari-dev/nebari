@@ -148,7 +148,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         """Return scopes from role if the component is jupyterhub"""
         role_scopes = role.get("attributes", {}).get("scopes", [])
         component = role.get("attributes", {}).get("component")
-        # Attributes as returned as array
+        # Attributes are returned as a single-element array, unless `##` delimiter is used in Keycloak
         # See this: https://stackoverflow.com/questions/68954733/keycloak-client-role-attribute-array
         if component == ["jupyterhub"] and role_scopes:
             return self.validate_scopes(role_scopes[0].split(","))
@@ -164,8 +164,8 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             # as a invalid scopes could cause hub pod to fail
             scopes._check_scopes_exist(role_scopes)
             return role_scopes
-        except scopes.ScopeNotFound:
-            self.log.error(f"Invalid scopes, skipping: {role_scopes}")
+        except scopes.ScopeNotFound as e:
+            self.log.error(f"Invalid scopes, skipping: {role_scopes} ({e})")
         return []
 
     async def _get_roles_with_attributes(self, roles: dict, client_id: str, token: str):
