@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import urllib
 from functools import reduce
 
@@ -38,6 +39,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         user. When a user's roles/scopes are updated, they take in-affect only
         after they log in to Nebari.
         """
+        start = time.time()
         self.log.info("Updating user auth model")
         auth_model = await super().update_auth_model(auth_model)
         user_id = auth_model["auth_state"]["oauth_user"]["sub"]
@@ -49,9 +51,11 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         user_roles = await self._get_client_roles_for_user(
             user_id=user_id, client_id=jupyterhub_client_id, token=token
         )
+        keycloak_api_call_start = time.time()
         user_roles_rich = await self._get_roles_with_attributes(
             roles=user_roles, client_id=jupyterhub_client_id, token=token
         )
+        keycloak_api_call_time_taken = time.time() - keycloak_api_call_start
         user_roles_rich_names = {role["name"] for role in user_roles_rich}
         user_roles_non_jhub_client = [
             {"name": role}
@@ -71,6 +75,12 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             auth_model["roles"].append({"name": "admin"})
         if await self.check_allowed(auth_model["name"], auth_model):
             auth_model["roles"].append({"name": "user"})
+        execution_time = time.time() - start
+        self.log.info(
+            f"Auth model update complete, time taken: {execution_time} "
+            f"time taken for keycloak api call: {keycloak_api_call_time_taken} "
+            f"delta between full execution and keycloak call: {execution_time - keycloak_api_call_time_taken}"
+        )
         return auth_model
 
     async def _get_jupyterhub_client_roles(self, jupyterhub_client_id, token):
