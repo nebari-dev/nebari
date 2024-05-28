@@ -192,7 +192,9 @@ jobs:
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
-        if: always()
+        # Since this is not critical for most pull requests and takes more than half of the time
+        # in the CI, it makes sense to only run on merge to main to speed up feedback cycle
+        if: github.event_name != 'pull_request'
         working-directory: local-deployment
         run: |
           nebari destroy --config nebari-config.yaml --disable-prompt
