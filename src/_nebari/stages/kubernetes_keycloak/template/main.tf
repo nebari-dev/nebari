@@ -18,7 +18,5 @@ module "kubernetes-keycloak-helm" {
 
   node_group = var.node_group
 
-  custom_themes_repo   = var.themes.repo
-  custom_themes_branch = var.themes.branch
-
+  themes = var.themes
 }

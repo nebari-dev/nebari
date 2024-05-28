@@ -20,6 +20,7 @@ resource "helm_release" "keycloak" {
           }
         }
       }
+      customThemes = var.themes
     })
   ], var.overrides)
 
@@ -33,15 +34,6 @@ resource "helm_release" "keycloak" {
     value = var.initial_root_password
   }
 
-  set {
-    name  = "custom_themes_repo"
-    value = var.custom_themes_repo
-  }
-
-  set {
-    name  = "custom_themes_branch"
-    value = var.custom_themes_branch
-  }
 }
 
 

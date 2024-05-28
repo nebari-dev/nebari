@@ -24,13 +24,18 @@ startupScripts:
 
   mv-custom-themes.sh: |
     #!/bin/sh
+    printf '=%.0s' {1..73}
+    echo "Start moving custom themes to /opt/jboss/keycloak/themes"
 
-    if [ -d /opt/data/themes ]; then
-      echo 'Copying custom themes from /opt/data/themes to /opt/jboss/keycloak/themes'
-      cp -r /opt/data/themes/* /opt/jboss/keycloak/themes/
+    if [ -d /opt/data/custom-themes/themes ]; then
+      echo 'Copying custom themes from /opt/data/custom-themes/themes to /opt/jboss/keycloak/themes'
+      cp -r /opt/data/custom-themes/themes/* /opt/jboss/keycloak/themes/
     else
-      echo 'No custom themes found in /opt/data/themes'
+      echo 'No custom themes found in /opt/data/custom-themes'
     fi
+
+    echo "Finished moving custom themes"
+    printf '=%.0s' {1..73}
 
 extraInitContainers: |
   - command:
@@ -53,11 +58,12 @@ extraInitContainers: |
     volumeMounts:
       - name: metrics-plugin
         mountPath: /data
+  {{- if .Values.customThemes.enabled }}
   - env:
     - name: GIT_SYNC_REPO
-      value: {{ .Values.custom_themes_repo }}
+      value: {{ .Values.customThemes.repository }}
     - name: GIT_SYNC_BRANCH
-      value: {{ .Values.custom_themes_branch }}
+      value: {{ .Values.customThemes.branch }}
     - name: GIT_SYNC_ONE_TIME
       value: "true"
     - name: GIT_SYNC_GROUP_WRITE
@@ -80,6 +86,7 @@ extraInitContainers: |
     volumeMounts:
     - mountPath: /opt/data/custom-themes
       name: custom-themes
+  {{- end }}
 
 extraVolumeMounts: |
   - name: metrics-plugin

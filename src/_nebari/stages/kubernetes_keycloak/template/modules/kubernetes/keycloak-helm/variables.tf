@@ -32,13 +32,16 @@ variable "node_group" {
   })
 }
 
-variable "custom_themes_repo" {
-  description = "Custom themes repo for keycloak"
-  type        = string
-}
-
-variable "custom_themes_branch" {
-  description = "Custom themes branch for keycloak"
-  type        = string
-
+variable "themes" {
+  description = "Custom themes configuration for keycloak"
+  type = object({
+    enabled    = bool
+    repository = string
+    branch     = string
+  })
+  default = {
+    enabled    = false
+    repository = ""
+    branch     = ""
+  }
 }
