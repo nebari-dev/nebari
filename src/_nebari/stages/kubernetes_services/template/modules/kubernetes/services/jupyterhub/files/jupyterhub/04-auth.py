@@ -48,10 +48,10 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
         user_info = auth_model["auth_state"][self.user_auth_state_key]
         user_roles_from_claims = self._get_user_roles(user_info=user_info)
+        keycloak_api_call_start = time.time()
         user_roles = await self._get_client_roles_for_user(
             user_id=user_id, client_id=jupyterhub_client_id, token=token
         )
-        keycloak_api_call_start = time.time()
         user_roles_rich = await self._get_roles_with_attributes(
             roles=user_roles, client_id=jupyterhub_client_id, token=token
         )
@@ -77,9 +77,9 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             auth_model["roles"].append({"name": "user"})
         execution_time = time.time() - start
         self.log.info(
-            f"Auth model update complete, time taken: {execution_time} "
-            f"time taken for keycloak api call: {keycloak_api_call_time_taken} "
-            f"delta between full execution and keycloak call: {execution_time - keycloak_api_call_time_taken}"
+            f"Auth model update complete, time taken: {execution_time}s "
+            f"time taken for keycloak api call: {keycloak_api_call_time_taken}s "
+            f"delta between full execution and keycloak call: {execution_time - keycloak_api_call_time_taken}s"
         )
         return auth_model
 
