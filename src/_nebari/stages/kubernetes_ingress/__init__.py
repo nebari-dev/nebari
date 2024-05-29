@@ -62,11 +62,21 @@ def provision_ingress_dns(
         )
 
 
-def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool):
+def get_ip(ip_or_hostname: str, port: int):
+    try:
+        addrinfo = socket.getaddrinfo(ip_or_hostname, port)
+        ip = addrinfo[0][4][0]
+        addrfam = addrinfo[0][0]
+        return ip, addrfam
+    except socket.error as e:
+        print(f"Could not get ip address from {ip_or_hostname}:{port} - {e}")
+    return None, None
+
+def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], port: int, disable_prompt: bool):
     directory = "stages/04-kubernetes-ingress"
 
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
-    ip = socket.gethostbyname(ip_or_name["hostname"] or ip_or_name["ip"])
+    ip, _ = get_ip(ip_or_name["hostname"] or ip_or_name["ip"], port)
     domain_name = stage_outputs[directory]["domain"]
 
     def _attempt_dns_lookup(
@@ -74,7 +84,8 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
     ):
         for i in range(num_attempts):
             try:
-                _, _, resolved_ips = socket.gethostbyname_ex(domain_name)
+                iplist = socket.getaddrinfo(domain_name, port)
+                resolved_ips = map(lambda iptup: iptup[4][0], iplist)
                 if ip in resolved_ips:
                     print(
                         f"DNS configured domain={domain_name} matches ingress ips={ip}"
@@ -233,10 +244,12 @@ class KubernetesIngressStage(NebariTerraformStage):
             host, port, num_attempts=NUM_ATTEMPTS, timeout=TIMEOUT
         ):
             for i in range(num_attempts):
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                # normalize hostname to ip address
+                ip, addrfam = get_ip(host, port)
+                if ip is None:
+                    return False
+                s = socket.socket(addrfam, socket.SOCK_STREAM)
                 try:
-                    # normalize hostname to ip address
-                    ip = socket.gethostbyname(host)
                     s.settimeout(5)
                     result = s.connect_ex((ip, port))
                     if result == 0:
@@ -245,8 +258,8 @@ class KubernetesIngressStage(NebariTerraformStage):
                         )
                         return True
                     print(f"Attempt {i+1} failed to connect to tcp tcp://{ip}:{port}")
-                except socket.gaierror:
-                    print(f"Attempt {i+1} failed to get IP for {host}...")
+                except socket.gaierror as e:
+                    print(f"Attempt {i+1} failed to get IP for {host}... {e}")
                 finally:
                     s.close()
 
@@ -279,7 +292,8 @@ class KubernetesIngressStage(NebariTerraformStage):
             f"After stage={self.name} kubernetes ingress available on tcp ports={tcp_ports}"
         )
 
-        check_ingress_dns(stage_outputs, disable_prompt=disable_prompt)
+        for port in tcp_ports:
+            check_ingress_dns(stage_outputs, port, disable_prompt=disable_prompt)
 
 
 @hookimpl
