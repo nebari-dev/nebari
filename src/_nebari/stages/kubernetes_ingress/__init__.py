@@ -72,7 +72,10 @@ def get_ip(ip_or_hostname: str, port: int):
         print(f"Could not get ip address from {ip_or_hostname}:{port} - {e}")
     return None, None
 
-def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], port: int, disable_prompt: bool):
+
+def check_ingress_dns(
+    stage_outputs: Dict[str, Dict[str, Any]], port: int, disable_prompt: bool
+):
     directory = "stages/04-kubernetes-ingress"
 
     ip_or_name = stage_outputs[directory]["load_balancer_address"]["value"]
