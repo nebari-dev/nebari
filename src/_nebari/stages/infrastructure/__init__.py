@@ -57,11 +57,6 @@ class DigitalOceanInputVars(schema.Base):
     kubeconfig_filename: str = get_kubeconfig_filename()
 
 
-class GCPGuestAccelerators(schema.Base):
-    name: str
-    count: int
-
-
 class GCPNodeGroupInputVars(schema.Base):
     name: str
     instance_type: str
@@ -69,7 +64,7 @@ class GCPNodeGroupInputVars(schema.Base):
     max_size: int
     labels: Dict[str, str]
     preemptible: bool
-    guest_accelerators: List[GCPGuestAccelerators]
+    guest_accelerators: List["GCPGuestAccelerator"]
 
 
 class GCPPrivateClusterConfig(schema.Base):
@@ -117,6 +112,7 @@ class AzureInputVars(schema.Base):
     tags: Dict[str, str] = {}
     max_pods: Optional[int] = None
     network_profile: Optional[Dict[str, str]] = None
+    workload_identity_enabled: bool = False
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -319,9 +315,9 @@ class GCPNodeGroup(schema.Base):
 
 
 DEFAULT_GCP_NODE_GROUPS = {
-    "general": GCPNodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
-    "user": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
-    "worker": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
+    "general": GCPNodeGroup(instance="e2-highmem-4", min_nodes=1, max_nodes=1),
+    "user": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
+    "worker": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
 }
 
 
@@ -385,6 +381,7 @@ class AzureProvider(schema.Base):
     tags: Optional[Dict[str, str]] = {}
     network_profile: Optional[Dict[str, str]] = None
     max_pods: Optional[int] = None
+    workload_identity_enabled: bool = False
 
     @model_validator(mode="before")
     @classmethod
@@ -786,6 +783,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 tags=self.config.azure.tags,
                 network_profile=self.config.azure.network_profile,
                 max_pods=self.config.azure.max_pods,
+                workload_identity_enabled=self.config.azure.workload_identity_enabled,
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
