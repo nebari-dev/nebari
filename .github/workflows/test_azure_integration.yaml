@@ -90,10 +90,14 @@ jobs:
           NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__dask_worker: "quay.io/nebari/nebari-dask-worker:${{ env.NEBARI_IMAGE_TAG }}"
-          # # not sure if these below are needed
-          # ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
-          # ARM_TENANT_ID: ${{ env.ARM_TENANT_ID }}
-          # ARM_SUBSCRIPTION_ID: ${{ env.ARM_SUBSCRIPTION_ID }}
+          # not sure if these below are needed
+          ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ env.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ env.ARM_SUBSCRIPTION_ID }}
+          CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}
+          AZURE_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ env.ARM_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ env.ARM_SUBSCRIPTION_ID }}
 
       #   continue-on-error: true # DELETE THIS LINE - For debugging purposes only
 
