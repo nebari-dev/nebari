@@ -136,20 +136,22 @@ module = [
 ignore_missing_imports = true
 
 [tool.ruff]
+extend-exclude = [
+    "src/_nebari/template",
+    "home",
+    "__pycache__"
+]
+
+[tool.ruff.lint]
 select = [
-    "E",
-    "F",
-    "PTH",
+    "E",  # E: pycodestyle rules
+    "F",  # F: pyflakes rules
+    "PTH",  # PTH: flake8-use-pathlib rules
 ]
 ignore = [
     "E501", # Line too long
     "F821", # Undefined name
     "PTH123", # open() should be replaced by Path.open()
-]
-extend-exclude = [
-    "src/_nebari/template",
-    "home",
-    "__pycache__"
 ]
 
 [tool.coverage.run]
