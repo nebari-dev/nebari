@@ -419,7 +419,7 @@ def check_cloud_provider_kubernetes_version(
                 f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the GCP docs for a list of valid versions: {versions}"
             )
     elif cloud_provider == ProviderEnum.do.value.lower():
-        versions = digital_ocean.kubernetes_versions(region)
+        versions = digital_ocean.kubernetes_versions()
 
         if not kubernetes_version or kubernetes_version == LATEST:
             kubernetes_version = get_latest_kubernetes_version(versions)
@@ -921,7 +921,11 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                     return b.format(key=key, value=value).replace("_", "-")
 
         cmds = " ".join(
-            [_ for _ in [if_used(_) for _ in inputs.dict().keys()] if _ is not None]
+            [
+                _
+                for _ in [if_used(_) for _ in inputs.model_dump().keys()]
+                if _ is not None
+            ]
         )
 
         rich.print(

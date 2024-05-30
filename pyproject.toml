@@ -63,9 +63,9 @@ dependencies = [
     "kubernetes==27.2.0",
     "pluggy==1.3.0",
     "prompt-toolkit==3.0.36",
-    "pydantic==1.10.12",
+    "pydantic==2.4.2",
     "pynacl==1.5.0",
-    "python-keycloak>=3.9.0",
+    "python-keycloak>=3.9.0,<4.0.0",
     "questionary==2.0.0",
     "requests-toolbelt==1.0.0",
     "rich==13.5.1",
@@ -101,7 +101,7 @@ docs = [
 ]
 
 [project.urls]
-Documentation = "https://www.nebari.dev/docs"
+Documentation = "https://www.nebari.dev/docs/welcome"
 Source = "https://github.com/nebari-dev/nebari"
 
 [project.scripts]
@@ -136,20 +136,22 @@ module = [
 ignore_missing_imports = true
 
 [tool.ruff]
+extend-exclude = [
+    "src/_nebari/template",
+    "home",
+    "__pycache__"
+]
+
+[tool.ruff.lint]
 select = [
-    "E",
-    "F",
-    "PTH",
+    "E",  # E: pycodestyle rules
+    "F",  # F: pyflakes rules
+    "PTH",  # PTH: flake8-use-pathlib rules
 ]
 ignore = [
     "E501", # Line too long
     "F821", # Undefined name
     "PTH123", # open() should be replaced by Path.open()
-]
-extend-exclude = [
-    "src/_nebari/template",
-    "home",
-    "__pycache__"
 ]
 
 [tool.coverage.run]
