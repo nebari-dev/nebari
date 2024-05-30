@@ -7,7 +7,8 @@ locals {
     lets-encrypt = [
       "--entrypoints.websecure.http.tls.certResolver=letsencrypt",
       "--entrypoints.minio.http.tls.certResolver=letsencrypt",
-      "--certificatesresolvers.letsencrypt.acme.tlschallenge",
+      "--certificatesresolvers.letsencrypt.acme.dnschallenge=true",
+      "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare",
       "--certificatesresolvers.letsencrypt.acme.email=${var.acme-email}",
       "--certificatesresolvers.letsencrypt.acme.storage=/mnt/acme-certificates/acme.json",
       "--certificatesresolvers.letsencrypt.acme.caserver=${var.acme-server}",
@@ -230,6 +231,15 @@ resource "kubernetes_deployment" "main" {
         container {
           image = "${var.traefik-image.image}:${var.traefik-image.tag}"
           name  = var.name
+          env {
+            name = "CLOUDFLARE_EMAIL"
+            value = "akumar@quansight.com"
+          }
+
+          env {
+            name = "CLOUDFLARE_DNS_API_TOKEN"
+            value = "YOUR-SECRET-TOKEN"
+          }
 
           volume_mount {
             mount_path = "/mnt/acme-certificates"
