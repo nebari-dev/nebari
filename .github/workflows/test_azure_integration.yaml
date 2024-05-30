@@ -81,11 +81,8 @@ jobs:
 
       - name: Integration Tests
         run: |
-          az group delete --name pytestazurekoxrl-dev-state --yes --no-wait
-          az group delete --name pytestazurekoxrl-dev --yes --no-wait
-          az group delete --name pytestazurekoxrl-dev-node-resource-group --yes --no-wait
-          # pytest --version
-          # pytest tests/tests_integration/ -vvv -s --cloud azure
+          pytest --version
+          pytest tests/tests_integration/ -vvv -s --cloud azure
         env:
           NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
