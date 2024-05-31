@@ -1,4 +1,4 @@
-name: test-aws-integration
+name: AWS Deployment
 
 on:
   schedule:
