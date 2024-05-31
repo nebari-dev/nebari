@@ -33,6 +33,7 @@ on:
       pr_number:
         required: true
         type: string
+  workflow_dispatch:
 
 # When the cancel-in-progress: true option is specified, any concurrent jobs or workflows using the same
 # concurrency group will cancel both the pending and currently running jobs or workflows. This allows only
@@ -193,8 +194,9 @@ jobs:
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
         # Since this is not critical for most pull requests and takes more than half of the time
-        # in the CI, it makes sense to only run on merge to main to speed up feedback cycle
-        if: github.event_name != 'pull_request'
+        # in the CI, it makes sense to only run on merge to main or workflow_dispatch to speed
+        # up feedback cycle
+        if: github.ref_name == 'develop' || github.event_name == 'workflow_dispatch'
         working-directory: local-deployment
         run: |
           nebari destroy --config nebari-config.yaml --disable-prompt
