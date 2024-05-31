@@ -26,21 +26,24 @@ def get_jupyterhub_session():
     return session
 
 
-def get_jupyterhub_token(note="jupyterhub-tests-deployment"):
+def create_jupyterhub_token(note):
     session = get_jupyterhub_session()
     xsrf_token = session.cookies.get("_xsrf")
     headers = {"Referer": f"https://{constants.NEBARI_HOSTNAME}/hub/token"}
     if xsrf_token:
         headers["X-XSRFToken"] = xsrf_token
     data = {"note": note, "expires_in": None}
-    r = session.post(
+    return session.post(
         f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
         headers=headers,
         json=data,
         verify=False,
     )
 
-    return r.json()["token"]
+
+def get_jupyterhub_token(note="jupyterhub-tests-deployment"):
+    response = create_jupyterhub_token(note=note)
+    return response.json()["token"]
 
 
 def monkeypatch_ssl_context():
