@@ -1,4 +1,4 @@
-name: test-gcp-integration
+name: Digital Ocean Deployment
 
 on:
   schedule:

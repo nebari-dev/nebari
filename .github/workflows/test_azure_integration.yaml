@@ -1,11 +1,8 @@
-name: test-azure-integration
+name: Azure Delpoyment
 
 on:
   schedule:
     - cron: "0 0 * * MON"
-  pull_request:
-    branches:
-      - develop
   workflow_dispatch:
     inputs:
       branch:
