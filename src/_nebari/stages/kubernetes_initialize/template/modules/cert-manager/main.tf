@@ -9,4 +9,3 @@ resource "helm_release" "cert-manager" {
     value = "true"
   }
 }
-

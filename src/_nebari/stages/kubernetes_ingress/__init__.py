@@ -198,7 +198,7 @@ class KubernetesIngressStage(NebariTerraformStage):
                 **self.config.ingress.terraform_overrides,
             },
             **cert_details,
-            "domain": self.config.domain
+            "domain": self.config.domain,
         }
 
     def set_outputs(
