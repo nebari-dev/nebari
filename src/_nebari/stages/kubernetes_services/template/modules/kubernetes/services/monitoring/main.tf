@@ -24,7 +24,7 @@ resource "helm_release" "prometheus-grafana" {
 
   values = concat([
     file("${path.module}/values.yaml"),
-    # https://github.com/prometheus-community/helm-charts/blob/kube-prometheus-stack-30.1.0/charts/kube-prometheus-stack/values.yaml
+    # https://github.com/prometheus-community/helm-charts/blob/kube-prometheus-stack-58.4.0/charts/kube-prometheus-stack/values.yaml
     jsonencode({
       alertmanager = {
         alertmanagerSpec = {
