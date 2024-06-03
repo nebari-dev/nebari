@@ -69,3 +69,9 @@ variable "additional-arguments" {
   type        = list(string)
   default     = []
 }
+
+variable "domain" {
+  description = "Domain name."
+  type        = string
+  default     = null
+}

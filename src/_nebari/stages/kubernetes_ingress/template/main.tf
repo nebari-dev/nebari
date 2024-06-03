@@ -14,4 +14,5 @@ module "kubernetes-ingress" {
   load-balancer-annotations = var.load-balancer-annotations
   load-balancer-ip          = var.load-balancer-ip
   additional-arguments      = var.additional-arguments
+  domain                    = var.domain
 }

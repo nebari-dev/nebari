@@ -374,3 +374,52 @@ resource "kubernetes_manifest" "tlsstore_default" {
     }
   }
 }
+
+resource "kubernetes_manifest" "clusterissuer" {
+  manifest = {
+    "apiVersion" = "cert-manager.io/v1"
+    "kind"       = "ClusterIssuer"
+    "metadata" = {
+      "name" = "cert-manager-cluster-issuer"
+    }
+    "spec" = {
+      "acme" : {
+        "server" = var.acme-server
+        "email"  = var.acme-email
+        "privateKeySecretRef" = {
+          "name" = "letsencrypt-prod"
+        }
+        "solvers" = [{
+          "http01" = {
+            "ingress" = {
+              "class" = "traefik"
+            }
+          }
+        }]
+      }
+    }
+  }
+}
+
+
+resource "kubernetes_manifest" "certificate_local_nebari_dev" {
+  manifest = {
+    "apiVersion" = "cert-manager.io/v1"
+    "kind"       = "Certificate"
+    "metadata" = {
+      "name"      = "nlb-lab-tls-cert"
+      "namespace" = var.namespace
+    }
+    "spec" = {
+      "commonName" = var.domain
+      "secretName" = "tls-ingress-http"
+      "issuerRef" = {
+        "name" = "cert-manager-cluster-issuer"
+        "kind" = "ClusterIssuer"
+      }
+      "dnsNames" = [
+        var.domain
+      ]
+    }
+  }
+}
