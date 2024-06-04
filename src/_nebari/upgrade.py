@@ -830,7 +830,8 @@ class Upgrade_2024_6_1(UpgradeStep):
 
             Prompt.ask("Hit enter to continue")
             continue_ = Prompt.ask(
-                "Have you backed up your custom dashboards (if necessary), deleted the prometheus-node-exporter daemonset and updated the kube-prometheus-stack CRDs? \[y/N] ",
+                "Have you backed up your custom dashboards (if necessary), deleted the prometheus-node-exporter daemonset and updated the kube-prometheus-stack CRDs?",
+                choices=["y", "N"],
                 default="N",
             )
             if not continue_ == "y":
