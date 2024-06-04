@@ -246,6 +246,7 @@ class JupyterLabGalleryExhibit(schema.Base):
 class JupyterLabGallerySettings(schema.Base):
     title: str = "Examples"
     destination: str = "examples"
+    exhibits_url: Optional[str] = None
     exhibits: List[JupyterLabGalleryExhibit] = []
 
 
