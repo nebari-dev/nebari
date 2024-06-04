@@ -106,7 +106,7 @@ class InitInputs(schema.Base):
     ssl_cert_email: Optional[schema.email_pydantic] = None
     disable_prompt: bool = False
     output: pathlib.Path = pathlib.Path("nebari-config.yaml")
-    verbose: bool = False
+    verbose: int = 0
 
 
 def enum_to_list(enum_cls):
@@ -566,10 +566,11 @@ def nebari_subcommand(cli: typer.Typer):
             "-o",
             help="Output file path for the rendered config file.",
         ),
-        verbose: bool = typer.Option(
+        verbose: int = typer.Option(
             False,
             "--verbose",
             "-v",
+            count=True,
             help="Write verbose nebari config file.",
         ),
     ):
