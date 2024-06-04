@@ -48,7 +48,9 @@ resource "local_file" "jupyter_jupyterlab_pioneer_config_py" {
 }
 
 resource "local_file" "jupyter_gallery_config_json" {
-  content  = jsonencode(var.jupyterlab-gallery-settings)
+  content = jsonencode({
+    "GalleryManager" = var.jupyterlab-gallery-settings
+  })
   filename = "${path.module}/files/jupyter/jupyter_gallery_config.json"
 }
 
@@ -75,7 +77,8 @@ resource "kubernetes_config_map" "etc-ipython" {
 locals {
   etc-jupyter-config-data = merge(
     {
-      "jupyter_server_config.py" = local_file.jupyter_server_config_py.content,
+      "jupyter_server_config.py"    = local_file.jupyter_server_config_py.content,
+      "jupyter_gallery_config.json" = local_file.jupyter_gallery_config_json.content,
     },
     var.jupyterlab-pioneer-enabled ? {
       # quotes are must here, as terraform would otherwise think py is a property of
