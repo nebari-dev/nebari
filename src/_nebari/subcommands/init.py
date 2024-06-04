@@ -567,7 +567,7 @@ def nebari_subcommand(cli: typer.Typer):
             help="Output file path for the rendered config file.",
         ),
         verbose: int = typer.Option(
-            False,
+            0,
             "--verbose",
             "-v",
             count=True,
