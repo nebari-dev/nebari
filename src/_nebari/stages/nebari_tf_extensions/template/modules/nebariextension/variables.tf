@@ -70,3 +70,8 @@ variable "keycloak_nebari_bot_password" {
   type        = string
   default     = ""
 }
+
+variable "forwardauth_middleware_name" {
+  description = "Name of the traefik forward auth middleware"
+  type        = string
+}

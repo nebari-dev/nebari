@@ -218,4 +218,7 @@ variable "extra-worker-mounts" {
     volume_mounts = list(any)
   })
   default = {}
+
+variable "forwardauth_middleware_name" {
+  type = string
 }
