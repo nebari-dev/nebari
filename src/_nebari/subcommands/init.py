@@ -571,7 +571,7 @@ def nebari_subcommand(cli: typer.Typer):
             "--verbose",
             "-v",
             count=True,
-            help="Write verbose nebari config file.",
+            help="Write verbose nebari config file (advanced users only).",
         ),
     ):
         """
