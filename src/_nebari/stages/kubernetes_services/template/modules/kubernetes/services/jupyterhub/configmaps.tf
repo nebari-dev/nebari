@@ -47,6 +47,11 @@ resource "local_file" "jupyter_jupyterlab_pioneer_config_py" {
   }
 }
 
+resource "local_file" "jupyter_gallery_config_json" {
+  content  = jsonencode(var.jupyterlab-gallery-settings)
+  filename = "${path.module}/files/jupyter/jupyter_gallery_config.json"
+}
+
 
 resource "local_file" "overrides_json" {
   content  = jsonencode(local.jupyterlab-overrides-json-object)
@@ -89,7 +94,8 @@ locals {
 resource "kubernetes_config_map" "etc-jupyter" {
   depends_on = [
     local_file.jupyter_server_config_py,
-    local_file.jupyter_jupyterlab_pioneer_config_py
+    local_file.jupyter_jupyterlab_pioneer_config_py,
+    local_file.jupyter_gallery_config_json
   ]
 
   metadata {

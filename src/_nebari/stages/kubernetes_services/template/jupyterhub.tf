@@ -54,6 +54,21 @@ variable "jupyterlab-default-settings" {
   type        = map(any)
 }
 
+variable "jupyterlab-gallery-settings" {
+  description = "Server-side settings for jupyterlab-gallery extension"
+  type = object({
+    title       = optional(string)
+    destination = optional(string)
+    exhibits = list(object({
+      git         = string
+      repository  = string
+      title       = string
+      description = string
+      icon        = optional(string)
+    }))
+  })
+}
+
 variable "jupyterhub-hub-extraEnv" {
   description = "Extracted overrides to merge with jupyterhub.hub.extraEnv"
   type        = string
@@ -148,6 +163,8 @@ module "jupyterhub" {
   initial-repositories = var.initial-repositories
 
   jupyterlab-default-settings = var.jupyterlab-default-settings
+
+  jupyterlab-gallery-settings = var.jupyterlab-gallery-settings
 
   jupyterlab-pioneer-enabled    = var.jupyterlab-pioneer-enabled
   jupyterlab-pioneer-log-format = var.jupyterlab-pioneer-log-format

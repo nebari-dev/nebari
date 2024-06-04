@@ -235,8 +235,23 @@ class IdleCuller(schema.Base):
     server_shutdown_no_activity_timeout: int = 15
 
 
+class JupyterLabGalleryExhibit(schema.Base):
+    git: str
+    repository: str
+    title: str
+    description: str
+    icon: Optional[str] = None
+
+
+class JupyterLabGallerySettings(schema.Base):
+    title: str = "Examples"
+    destination: str = "examples"
+    exhibits: List[JupyterLabGalleryExhibit] = []
+
+
 class JupyterLab(schema.Base):
     default_settings: Dict[str, Any] = {}
+    gallery_settings: JupyterLabGallerySettings = JupyterLabGallerySettings()
     idle_culler: IdleCuller = IdleCuller()
     initial_repositories: List[Dict[str, str]] = []
     preferred_dir: Optional[str] = None
@@ -367,6 +382,9 @@ class JupyterhubInputVars(schema.Base):
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
     jupyterlab_default_settings: Dict[str, Any] = Field(
         alias="jupyterlab-default-settings"
+    )
+    jupyterlab_gallery_settings: JupyterLabGallerySettings = Field(
+        alias="jupyterlab-gallery-settings"
     )
     initial_repositories: str = Field(alias="initial-repositories")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
@@ -534,6 +552,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             jhub_apps_enabled=self.config.jhub_apps.enabled,
             initial_repositories=str(self.config.jupyterlab.initial_repositories),
             jupyterlab_default_settings=self.config.jupyterlab.default_settings,
+            jupyterlab_gallery_settings=self.config.jupyterlab.gallery_settings,
             jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
         )
 
