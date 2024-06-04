@@ -9,6 +9,21 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+### Release 2024.5.1 - May 13, 2024
+
+## What's Changed
+
+* make userscheduler run on general node group by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2415>
+* Upgrade to Pydantic V2 by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2348>
+* Pydantic2 PR fix by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2421>
+* remove redundant pydantic class, fix bug by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2426>
+* Update `python-keycloak` version pins constraints by @viniciusdc in <https://github.com/nebari-dev/nebari/pull/2435>
+* add HERA_TOKEN env var to user pods by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2438>
+* fix docs link by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2443>
+* Update allowed admin groups by @aktech in <https://github.com/nebari-dev/nebari/pull/2429>
+
+**Full Changelog**: <https://github.com/nebari-dev/nebari/compare/2024.4.1...2024.5.1>
+
 ## Release 2024.4.1 - April 20, 2024
 
 ### What's Changed

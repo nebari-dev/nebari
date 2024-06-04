@@ -16,6 +16,19 @@ variable "external-url" {
 }
 
 
+variable "service-accounts-enabled" {
+  description = "Whether the client should have a service account created"
+  type        = bool
+  default     = false
+}
+
+variable "service-account-roles" {
+  description = "Roles to be granted to the service account. Requires setting service-accounts-enabled to true."
+  type        = list(string)
+  default     = []
+}
+
+
 variable "role_mapping" {
   description = "Group to role mapping to establish for client"
   type        = map(list(string))
