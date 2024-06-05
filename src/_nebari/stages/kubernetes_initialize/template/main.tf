@@ -5,6 +5,11 @@ module "kubernetes-initialization" {
   secrets   = []
 }
 
+module "cert-manager" {
+  source    = "./modules/cert-manager"
+  namespace = var.environment
+}
+
 module "kubernetes-autoscaling" {
   count = var.cloud_provider == "aws" ? 1 : 0
 
