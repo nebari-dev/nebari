@@ -87,7 +87,7 @@ describe('First Test', () => {
 
       cy.visit('/monitoring/dashboards');
 
-      cy.get('div.page-header h1', { timeout: 20000 }).should('contain', 'Dashboards');
+      cy.get('div#pageContent h1', { timeout: 20000 }).should('contain', 'Dashboards');
 
       // Visit Keycloak User Profile
 
