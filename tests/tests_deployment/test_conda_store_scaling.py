@@ -8,7 +8,7 @@ import uuid
 
 import pytest
 import requests
-from kubernetes import config, dynamic, client
+from kubernetes import client, config, dynamic
 
 from tests.tests_deployment import constants
 
@@ -123,29 +123,33 @@ def get_deployment_count(api_client):
         name="nebari-conda-store-worker", namespace=NAMESPACE
     )
     replica_count = deployment.spec.replicas
-    messages = "\n".join([c['message'] for c in deployment.status['conditions']])
-    log.info(
-        f"Deployment logs: {messages}"
-    )
+    messages = "\n".join([c["message"] for c in deployment.status["conditions"]])
+    log.info(f"Deployment logs: {messages}")
     pod_names = find_conda_store_worker_pod_names()
     if deployment.status.readyReplicas:
         pod_name_lookup = messages.split('"')[1]
         for n in pod_names:
             if pod_name_lookup in n:
                 pod_name = n
-        api_response = client.CoreV1Api().read_namespaced_pod_log(name=pod_name, namespace=NAMESPACE, container="conda-store-worker")
+        api_response = client.CoreV1Api().read_namespaced_pod_log(
+            name=pod_name, namespace=NAMESPACE, container="conda-store-worker"
+        )
         log.info(f"conda-store-worker logs: {api_response}")
     return replica_count
 
 
 def find_conda_store_worker_pod_names():
     """
-     find namespace pod msg
+    find namespace pod msg
     """
     k8s_api_obj = client.CoreV1Api()
     api_response = k8s_api_obj.list_namespaced_pod(NAMESPACE)
-    names = [i.metadata.name for i in api_response.items if
-     i.metadata.labels.get('role') and "nebari-conda-store-worker" in i.metadata.labels["role"]]
+    names = [
+        i.metadata.name
+        for i in api_response.items
+        if i.metadata.labels.get("role")
+        and "nebari-conda-store-worker" in i.metadata.labels["role"]
+    ]
     return names
 
 
