@@ -6,10 +6,9 @@ import sys
 import time
 import uuid
 
-import kubernetes.client
 import pytest
 import requests
-from kubernetes import config, dynamic
+from kubernetes import config, dynamic, client
 
 from tests.tests_deployment import constants
 
@@ -45,7 +44,7 @@ def kubernetes_config():
 
 @pytest.fixture
 def api_client(kubernetes_config):
-    with kubernetes.client.ApiClient(kubernetes_config) as _api_client:
+    with client.ApiClient(kubernetes_config) as _api_client:
         yield _api_client
 
 
@@ -66,7 +65,7 @@ def b64encodestr(string):
 def patched_secret_token(kubernetes_config, api_client):
     # Create an instance of the API class
     log.info("Creating a admin token for the test.")
-    api_instance = kubernetes.client.CoreV1Api(api_client)
+    api_instance = client.CoreV1Api(api_client)
     name = "conda-store-secret"  # str | name of the Secret
     elevated_token = str(uuid.uuid4())
 
@@ -117,24 +116,47 @@ def timed_wait_for_environment_creation(builds, session):
             return
 
 
-def get_deployment_count(client):
-    _client = dynamic.DynamicClient(client)
+def get_deployment_count(api_client):
+    _client = dynamic.DynamicClient(api_client)
     deployment_api = _client.resources.get(api_version="apps/v1", kind="Deployment")
     deployment = deployment_api.get(
         name="nebari-conda-store-worker", namespace=NAMESPACE
     )
     replica_count = deployment.spec.replicas
+    messages = "\n".join([c['message'] for c in deployment.status['conditions']])
+    log.info(
+        f"Deployment logs: {messages}"
+    )
+    pod_names = find_conda_store_worker_pod_names()
+    if deployment.status.readyReplicas:
+        pod_name_lookup = messages.split('"')[1]
+        for n in pod_names:
+            if pod_name_lookup in n:
+                pod_name = n
+        api_response = client.CoreV1Api().read_namespaced_pod_log(name=pod_name, namespace=NAMESPACE, container="conda-store-worker")
+        log.info(f"conda-store-worker logs: {api_response}")
     return replica_count
 
 
+def find_conda_store_worker_pod_names():
+    """
+     find namespace pod msg
+    """
+    k8s_api_obj = client.CoreV1Api()
+    api_response = k8s_api_obj.list_namespaced_pod(NAMESPACE)
+    names = [i.metadata.name for i in api_response.items if
+     i.metadata.labels.get('role') and "nebari-conda-store-worker" in i.metadata.labels["role"]]
+    return names
+
+
 @pytest.mark.timeout(20 * 60)
-def timed_wait_for_deployments(target_deployment_count, client):
+def timed_wait_for_deployments(target_deployment_count, api_client):
     log.info(
         f"Waiting for deployments to reach target value {target_deployment_count}  ..."
     )
-    replica_count = get_deployment_count(client)
+    replica_count = get_deployment_count(api_client)
     while replica_count != target_deployment_count:
-        replica_count = get_deployment_count(client)
+        replica_count = get_deployment_count(api_client)
         direction = "up" if target_deployment_count > replica_count else "down"
         log.info(
             f"Scaling {direction} deployments: from {replica_count} to {target_deployment_count}"
@@ -203,6 +225,6 @@ def test_scale_up_and_down(patched_secret_token, api_client, requests_session):
     timed_wait_for_environment_creation(builds, requests_session)
     log.info(f"Wait till worker deployment scales down to {_initial_deployment_count}")
     timed_wait_for_deployments(_initial_deployment_count, api_client)
-    log.info("Test passed.")
+    log.info("Deleting conda environments.")
     delete_conda_environments(requests_session)
     log.info("Test passed.")
