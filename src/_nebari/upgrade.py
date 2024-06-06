@@ -850,6 +850,9 @@ class Upgrade_2024_6_1(UpgradeStep):
                         The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%.
                         This change will affect your current deployment, and will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
 
+                        [red bold]Note: If upgrading to the new node types, the upgrade process will take longer than usual. For this upgrade only, you'll likely see a timeout \
+                        error and need to restart the deployment process afterwards in order to upgrade successfully.[/red bold]
+
                         As always, make sure to backup data before upgrading.  See https://www.nebari.dev/docs/how-tos/manual-backup for more information.
 
                         Would you like to upgrade to the cost effective node groups [purple]{config_filename}[/purple]?
