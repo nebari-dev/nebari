@@ -210,7 +210,7 @@ resource "kubernetes_deployment" "worker" {
 
 resource "kubernetes_secret" "keda-metric-api-secret" {
   metadata {
-    name = "keda-metric-api-secret"
+    name      = "keda-metric-api-secret"
     namespace = var.namespace
   }
   data = {
@@ -263,10 +263,10 @@ resource "kubernetes_manifest" "scaledobject" {
       cooldownPeriod  = 5
       advanced = {
         scalingModifiers = {
-          formula = "(trig_one + trig_two)" # "count([trig_one,trig_two])"
-          target: "1"
-          activationTarget: "1"
-          metricType: "AverageValue"
+          formula          = "(trig_one + trig_two)" # "count([trig_one,trig_two])"
+          target           = "1"
+          activationTarget = "1"
+          metricType       = "AverageValue"
         }
       }
       triggers = [
@@ -274,10 +274,9 @@ resource "kubernetes_manifest" "scaledobject" {
           type = "metrics-api"
           name = "trig_one"
           metadata = {
-            # targetValue = "1"
-            url: "http://nebari-conda-store-server.${var.namespace}.svc:5000/conda-store/api/v1/build/?status=QUEUED"
-            valueLocation: "count"
-            authMode = "bearer"
+            url           = "http://nebari-conda-store-server.${var.namespace}.svc:5000/conda-store/api/v1/build/?status=QUEUED"
+            valueLocation = "count"
+            authMode      = "bearer"
           }
           authenticationRef = {
             name = "keda-metric-api-cred"
@@ -288,9 +287,9 @@ resource "kubernetes_manifest" "scaledobject" {
           name = "trig_two"
           metadata = {
             # targetValue = "1"
-            url: "http://nebari-conda-store-server.${var.namespace}.svc:5000/conda-store/api/v1/build/?status=BUILDING"
-            valueLocation: "count"
-            authMode = "bearer"
+            url           = "http://nebari-conda-store-server.${var.namespace}.svc:5000/conda-store/api/v1/build/?status=BUILDING"
+            valueLocation = "count"
+            authMode      = "bearer"
           }
           authenticationRef = {
             name = "keda-metric-api-cred"
