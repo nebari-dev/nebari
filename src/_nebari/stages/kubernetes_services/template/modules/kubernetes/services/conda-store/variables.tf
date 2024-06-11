@@ -86,3 +86,8 @@ variable "conda-store-worker-resources" {
   description = "Default resource allocation for conda-store worker pods"
   type        = map(any)
 }
+
+variable "conda-store-keda-scaler-token" {
+  description = "Token for conda-store to be used by keda scaler for fetching conda environments dynamically."
+  type        = string
+}

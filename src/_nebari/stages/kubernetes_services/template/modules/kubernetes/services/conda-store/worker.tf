@@ -207,22 +207,33 @@ resource "kubernetes_deployment" "worker" {
   }
 }
 
+
+resource "kubernetes_secret" "keda-metric-api-secret" {
+  metadata {
+    name = "keda-metric-api-secret"
+    namespace = var.namespace
+  }
+  data = {
+    token = var.conda-store-keda-scaler-token
+  }
+}
+
 resource "kubernetes_manifest" "triggerauthenticator" {
   manifest = {
     apiVersion = "keda.sh/v1alpha1"
     kind       = "TriggerAuthentication"
 
     metadata = {
-      name      = "trigger-auth-postgres"
+      name      = "keda-metric-api-cred"
       namespace = var.namespace
     }
 
     spec = {
       secretTargetRef = [
         {
-          name      = "nebari-conda-store-postgresql"
-          parameter = "password"
-          key       = "postgresql-password"
+          parameter = "token"
+          name      = "keda-metric-api-secret"
+          key       = "token"
         }
       ]
     }
@@ -250,20 +261,39 @@ resource "kubernetes_manifest" "scaledobject" {
       maxReplicaCount = var.max-worker-replica-count
       pollingInterval = 5
       cooldownPeriod  = 5
+      advanced = {
+        scalingModifiers = {
+          formula = "(trig_one + trig_two)" # "count([trig_one,trig_two])"
+          target: "1"
+          activationTarget: "1"
+          metricType: "AverageValue"
+        }
+      }
       triggers = [
         {
-          type = "postgresql"
+          type = "metrics-api"
+          name = "trig_one"
           metadata = {
-            query            = "SELECT COUNT(*) FROM build WHERE status IN ('QUEUED', 'BUILDING');"
-            targetQueryValue = "1"
-            host             = "nebari-conda-store-postgresql"
-            userName         = "postgres"
-            port             = "5432"
-            dbName           = "conda-store"
-            sslmode          = "disable"
+            # targetValue = "1"
+            url: "http://nebari-conda-store-server.${var.namespace}.svc:5000/conda-store/api/v1/build/?status=QUEUED"
+            valueLocation: "count"
+            authMode = "bearer"
           }
           authenticationRef = {
-            name = "trigger-auth-postgres"
+            name = "keda-metric-api-cred"
+          }
+        },
+        {
+          type = "metrics-api"
+          name = "trig_two"
+          metadata = {
+            # targetValue = "1"
+            url: "http://nebari-conda-store-server.${var.namespace}.svc:5000/conda-store/api/v1/build/?status=BUILDING"
+            valueLocation: "count"
+            authMode = "bearer"
+          }
+          authenticationRef = {
+            name = "keda-metric-api-cred"
           }
         }
       ]

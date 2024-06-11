@@ -63,6 +63,7 @@ module "kubernetes-conda-store-server" {
   extra-config                 = var.conda-store-extra-config
   conda-store-worker-resources = var.conda-store-worker-resources
   max-worker-replica-count     = var.conda-store-max-workers
+  conda-store-keda-scaler-token  = module.kubernetes-conda-store-server.service-tokens.keda-scaler
 }
 
 module "conda-store-nfs-mount" {
