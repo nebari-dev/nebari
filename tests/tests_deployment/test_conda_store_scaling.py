@@ -15,7 +15,7 @@ from tests.tests_deployment import constants
 CONDA_STORE_API_ENDPOINT = "conda-store/api/v1"
 NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
 NAMESPACE = os.getenv("CONDA_STORE_SERVICE_NAMESPACE")
-TEST_CONDASTORE_WOKER_COUNT = os.getenv("TEST_CONDASTORE_WOKER_COUNT", 1)
+TEST_CONDASTORE_WORKER_COUNT = os.getenv("TEST_CONDASTORE_WORKER_COUNT", 1)
 
 
 log = logging.getLogger()
@@ -217,12 +217,12 @@ def test_scale_up_and_down(patched_secret_token, api_client, requests_session):
     _initial_deployment_count = get_deployment_count(api_client)
     log.info(f"Deployments at the start of the test: {_initial_deployment_count}")
     delete_conda_environments(requests_session)
-    builds = build_n_environments(TEST_CONDASTORE_WOKER_COUNT, builds, requests_session)
+    builds = build_n_environments(TEST_CONDASTORE_WORKER_COUNT, builds, requests_session)
     log.info(
-        f"Wait for {TEST_CONDASTORE_WOKER_COUNT} conda-store-worker pods to start."
+        f"Wait for {TEST_CONDASTORE_WORKER_COUNT} conda-store-worker pods to start."
     )
     timed_wait_for_deployments(
-        TEST_CONDASTORE_WOKER_COUNT + _initial_deployment_count, api_client
+        TEST_CONDASTORE_WORKER_COUNT + _initial_deployment_count, api_client
     )
     timed_wait_for_environment_creation(builds, requests_session)
     log.info(f"Wait till worker deployment scales down to {_initial_deployment_count}")
