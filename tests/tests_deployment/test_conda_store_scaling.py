@@ -16,7 +16,6 @@ CONDA_STORE_API_ENDPOINT = "conda-store/api/v1"
 NEBARI_HOSTNAME = constants.NEBARI_HOSTNAME
 NAMESPACE = os.getenv("CONDA_STORE_SERVICE_NAMESPACE")
 TEST_CONDASTORE_WOKER_COUNT = os.getenv("TEST_CONDASTORE_WOKER_COUNT", 1)
-# NEBARI_HOSTNAME = "local.quansight.dev" ## Override for local testing
 
 
 log = logging.getLogger()
@@ -203,7 +202,6 @@ def build_n_environments(n, builds, session):
     return builds
 
 
-# TODO : remove filters
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_scale_up_and_down(patched_secret_token, api_client, requests_session):
