@@ -51,7 +51,8 @@ resource "local_sensitive_file" "jupyter_gallery_config_json" {
   content = jsonencode({
     "GalleryManager" = var.jupyterlab-gallery-settings
   })
-  filename = "${path.module}/files/jupyter/jupyter_gallery_config.json"
+  filename        = "${path.module}/files/jupyter/jupyter_gallery_config.json"
+  file_permission = "0440"
 }
 
 
