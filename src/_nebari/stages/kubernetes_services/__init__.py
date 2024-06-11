@@ -183,7 +183,7 @@ class CondaStore(schema.Base):
     image_tag: str = constants.DEFAULT_CONDA_STORE_IMAGE_TAG
     default_namespace: str = "nebari-git"
     object_storage: str = "200Gi"
-    max_workers: int = 50
+    max_workers: int = 4
     worker_resources: dict = {"requests": {"cpu": "1", "memory": "4Gi"}}
 
 
