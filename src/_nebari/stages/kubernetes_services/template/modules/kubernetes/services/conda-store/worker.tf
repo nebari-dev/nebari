@@ -263,9 +263,9 @@ resource "kubernetes_manifest" "scaledobject" {
       cooldownPeriod  = 5
       advanced = {
         scalingModifiers = {
-          formula          = "(trig_one + trig_two)" # "count([trig_one,trig_two])"
-          target           = "1"
-          metricType       = "AverageValue"
+          formula    = "(trig_one + trig_two)"
+          target     = "1"
+          metricType = "AverageValue"
         }
       }
       triggers = [
