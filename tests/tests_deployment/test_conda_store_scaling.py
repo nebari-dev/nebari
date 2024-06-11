@@ -133,7 +133,7 @@ def get_deployment_count(api_client):
         api_response = client.CoreV1Api().read_namespaced_pod_log(
             name=pod_name, namespace=NAMESPACE, container="conda-store-worker"
         )
-        log.info(f"conda-store-worker logs: {api_response}")
+        log.debug(f"conda-store-worker logs: {api_response}")
     return replica_count
 
 
