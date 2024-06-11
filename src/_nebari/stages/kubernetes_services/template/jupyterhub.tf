@@ -62,10 +62,12 @@ variable "jupyterlab-gallery-settings" {
     exhibits_url = optional(string)
     exhibits = list(object({
       git         = string
-      repository  = string
       title       = string
-      description = string
+      homepage    = optional(string)
+      description = optional(string)
       icon        = optional(string)
+      account     = optional(string)
+      token       = optional(string)
     }))
   })
 }

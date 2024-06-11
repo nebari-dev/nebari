@@ -237,10 +237,12 @@ class IdleCuller(schema.Base):
 
 class JupyterLabGalleryExhibit(schema.Base):
     git: str
-    repository: str
     title: str
-    description: str
+    homepage: Optional[str] = None
+    description: Optional[str] = None
     icon: Optional[str] = None
+    account: Optional[str] = None
+    token: Optional[str] = None
 
 
 class JupyterLabGallerySettings(schema.Base):

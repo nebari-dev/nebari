@@ -6,5 +6,5 @@ jupyterlab:
     exhibits:
       - title: Nebari
         git: https://github.com/nebari-dev/nebari.git
-        repository: https://github.com/nebari-dev/nebari
+        homepage: https://github.com/nebari-dev/nebari
         description: 🪴 Nebari - your open source data science platform
