@@ -13,8 +13,13 @@ variable "region" {
   type        = string
 }
 
-variable "storage_account_postfix" {
-  description = "Prefix to assign to storage account to ensure it is unique"
+variable "storage_account_name" {
+  description = "Name for terraform state storage account, must be unique across Azure, 3-24 characters long and only include lowercase letters and numbers"
+  type        = string
+}
+
+variable "storage_container_name" {
+  description = "Name for terraform state storage container"
   type        = string
 }
 
@@ -36,11 +41,12 @@ provider "azurerm" {
 module "terraform-state" {
   source = "./modules/terraform-state"
 
-  name                    = "${var.name}-${var.namespace}"
-  resource_group_name     = var.state_resource_group_name
-  location                = var.region
-  storage_account_postfix = var.storage_account_postfix
-  tags                    = var.tags
+  name                   = "${var.name}-${var.namespace}"
+  resource_group_name    = var.state_resource_group_name
+  location               = var.region
+  tags                   = var.tags
+  storage_account_name   = var.storage_account_name
+  storage_container_name = var.storage_container_name
 }
 
 terraform {

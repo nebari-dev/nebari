@@ -13,8 +13,13 @@ variable "location" {
   type        = string
 }
 
-variable "storage_account_postfix" {
-  description = "random characters appended to storage account name to facilitate global uniqueness"
+variable "storage_account_name" {
+  description = "Name for terraform state storage account, must be unique across Azure, 3-24 characters long and only include lowercase letters and numbers"
+  type        = string
+}
+
+variable "storage_container_name" {
+  description = "Name for terraform state storage container"
   type        = string
 }
 
