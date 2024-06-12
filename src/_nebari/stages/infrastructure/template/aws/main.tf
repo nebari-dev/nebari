@@ -92,6 +92,7 @@ module "kubernetes" {
 
   node_groups = var.node_groups
 
+  endpoint_public_access  = var.eks_endpoint_public_access
   endpoint_private_access = var.eks_endpoint_private_access
   public_access_cidrs     = var.eks_public_access_cidrs
   permissions_boundary    = var.permissions_boundary

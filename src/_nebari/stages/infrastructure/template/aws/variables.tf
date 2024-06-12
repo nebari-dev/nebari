@@ -56,6 +56,11 @@ variable "kubeconfig_filename" {
   type        = string
 }
 
+variable "eks_endpoint_public_access" {
+  type    = bool
+  default = true
+}
+
 variable "eks_endpoint_private_access" {
   type    = bool
   default = false
