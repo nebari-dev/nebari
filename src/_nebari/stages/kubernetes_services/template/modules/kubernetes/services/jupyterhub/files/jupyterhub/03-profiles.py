@@ -235,6 +235,30 @@ def base_profile_extra_mounts():
     }
 
 
+def preserve_extra_files():
+    """Copy over configuration for `singleuser.extraFiles`
+
+    from `KubeSpawner.volumes` and `KubeSpawner.volume_mounts`
+    as these would be overshadowed by the values we set in
+    `kubespawner_override` otherwise.
+    """
+    extra_pod_config = {
+        "volumes": [
+            mount for mount in c.KubeSpawner.volumes if mount["name"] == "files"
+        ]
+    }
+
+    extra_container_config = {
+        "volumeMounts": [
+            mount for mount in c.KubeSpawner.volume_mounts if mount["name"] == "files"
+        ]
+    }
+    return {
+        "extra_pod_config": extra_pod_config,
+        "extra_container_config": extra_container_config,
+    }
+
+
 def configure_user_provisioned_repositories(username):
     # Define paths and configurations
     pvc_home_mount_path = f"home/{username}"
@@ -510,6 +534,7 @@ def render_profile(profile, username, groups, keycloak_profilenames):
             base_profile_shared_mounts(groups),
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
+            preserve_extra_files(),
             configure_user(username, groups),
             configure_user_provisioned_repositories(username),
             profile_kubespawner_override,
