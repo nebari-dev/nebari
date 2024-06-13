@@ -106,7 +106,7 @@ class InitInputs(schema.Base):
     ssl_cert_email: Optional[schema.email_pydantic] = None
     disable_prompt: bool = False
     output: pathlib.Path = pathlib.Path("nebari-config.yaml")
-    verbose: int = 0
+    explicit: int = 0
 
 
 def enum_to_list(enum_cls):
@@ -153,7 +153,7 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
     try:
         write_configuration(
             inputs.output,
-            config if not inputs.verbose else config_schema(**config),
+            config if not inputs.explicit else config_schema(**config),
             mode="x",
         )
     except FileExistsError:
@@ -566,12 +566,12 @@ def nebari_subcommand(cli: typer.Typer):
             "-o",
             help="Output file path for the rendered config file.",
         ),
-        verbose: int = typer.Option(
+        explicit: int = typer.Option(
             0,
-            "--verbose",
-            "-v",
+            "--explicit",
+            "-e",
             count=True,
-            help="Write verbose nebari config file (advanced users only).",
+            help="Write explicit nebari config file (advanced users only).",
         ),
     ):
         """
@@ -612,7 +612,7 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.ssl_cert_email = ssl_cert_email
         inputs.disable_prompt = disable_prompt
         inputs.output = output
-        inputs.verbose = verbose
+        inputs.explicit = explicit
 
         from nebari.plugins import nebari_plugin_manager
 
@@ -904,7 +904,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             inputs.kubernetes_version = kubernetes_version
 
             # VERBOSE
-            inputs.verbose = questionary.confirm(
+            inputs.explicit = questionary.confirm(
                 "Would you like the nebari config to show all available options? (recommended for advanced users only)",
                 default=False,
                 qmark=qmark,
