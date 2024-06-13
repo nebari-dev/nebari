@@ -903,7 +903,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 )
             inputs.kubernetes_version = kubernetes_version
 
-            # VERBOSE
+            # EXPLICIT CONFIG
             inputs.explicit = questionary.confirm(
                 "Would you like the nebari config to show all available options? (recommended for advanced users only)",
                 default=False,
