@@ -235,71 +235,6 @@ def base_profile_extra_mounts():
     }
 
 
-def preserve_extra_files():
-    """Copy over configuration for `singleuser.extraFiles`
-
-    from `KubeSpawner.volumes` and `KubeSpawner.volume_mounts`
-    as these would be overshadowed by the values we set in
-    `kubespawner_override` otherwise.
-
-    Also, because of a long-standing bug in k8s, setting
-    the mode to 0400 does not actually work so we need to use
-    a workaround as described in
-    https://github.com/kubernetes/kubernetes/issues/57923#issuecomment-713572886
-    """
-
-    secret_volumes = [
-        mount for mount in c.KubeSpawner.volumes if mount["name"] == "files"
-    ]
-
-    empty_dir_name = "empty-dir"
-
-    extra_pod_config = {"volumes": [{"name": empty_dir_name}, *secret_volumes]}
-
-    volume_mounts = [
-        {
-            **mount,
-            "mountPath": "/tmp/"
-            + mount["mountPath"].replace("/etc/jupyter", "").lstrip("/"),
-        }
-        for mount in c.KubeSpawner.volume_mounts
-        if mount["name"] == "files"
-    ]
-
-    extra_container_config = {
-        "volumeMounts": [
-            *volume_mounts,
-            {"name": empty_dir_name, "mountPath": "/etc/jupyter"},
-        ]
-    }
-
-    command = " && ".join(
-        [
-            f"cp /tmp/{path} /well/known/dir/{path} && chmod 0400 /well/known/dir/{path}"
-            for mount in c.KubeSpawner.volume_mounts
-            if mount["name"] == "files"
-            for path in [mount["mountPath"].replace("/etc/jupyter", "").lstrip("/")]
-        ]
-    )
-
-    init_containers = [
-        {
-            "name": "initialize-secret-file-mounts",
-            "image": "busybox:1.31",
-            "command": ["sh", "-c", command],
-            "volumeMounts": [
-                {"name": empty_dir_name, "mountPath": "/well/known/dir"},
-                *volume_mounts,
-            ],
-        }
-    ]
-    return {
-        "extra_pod_config": extra_pod_config,
-        "init_containers": init_containers,
-        "extra_container_config": extra_container_config,
-    }
-
-
 def configure_user_provisioned_repositories(username):
     # Define paths and configurations
     pvc_home_mount_path = f"home/{username}"
@@ -575,7 +510,6 @@ def render_profile(profile, username, groups, keycloak_profilenames):
             base_profile_shared_mounts(groups),
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
-            preserve_extra_files(),
             configure_user(username, groups),
             configure_user_provisioned_repositories(username),
             profile_kubespawner_override,

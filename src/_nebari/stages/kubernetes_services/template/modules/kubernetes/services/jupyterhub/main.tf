@@ -91,6 +91,12 @@ resource "helm_release" "jupyterhub" {
               kind      = "configmap"
             }
 
+            "/etc/jupyter" = {
+              name      = kubernetes_config_map.etc-jupyter.metadata.0.name
+              namespace = kubernetes_config_map.etc-jupyter.metadata.0.namespace
+              kind      = "configmap"
+            }
+
             "/opt/conda/envs/default/share/jupyter/lab/settings" = {
               name      = kubernetes_config_map.jupyterlab-settings.metadata.0.name
               namespace = kubernetes_config_map.jupyterlab-settings.metadata.0.namespace
@@ -180,13 +186,6 @@ resource "helm_release" "jupyterhub" {
         image = var.jupyterlab-image
         nodeSelector = {
           "${local.singleuser_nodeselector_key}" = var.user-node-group.value
-        },
-        extraFiles = {
-          for filename, content in kubernetes_config_map.etc-jupyter.data :
-          filename => {
-            mountPath  = "/etc/jupyter/${filename}",
-            stringData = content
-          }
         }
       }
 
