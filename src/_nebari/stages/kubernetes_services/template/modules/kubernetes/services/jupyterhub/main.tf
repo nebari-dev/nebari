@@ -185,8 +185,7 @@ resource "helm_release" "jupyterhub" {
           for filename, content in kubernetes_config_map.etc-jupyter.data :
           filename => {
             mountPath  = "/etc/jupyter/${filename}",
-            stringData = content,
-            mode       = 0400
+            stringData = content
           }
         }
       }
