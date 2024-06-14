@@ -1,3 +1,9 @@
+"""This file contains the upgrade logic for Nebari.
+
+This file contains the upgrade logic for Nebari.  Each release of Nebari requires an upgrade step class (which is a child class of UpgradeStep) to be created.  
+When a user runs `nebari upgrade  -c nebari-config.yaml`, then the do_upgrade function will then run through all required upgrade steps to bring the config file up to date with the current version of Nebari.
+"""
+
 import json
 import logging
 import re
