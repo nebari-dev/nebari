@@ -1,6 +1,6 @@
-"""This file contains the upgrade logic for Nebari.
-
-This file contains the upgrade logic for Nebari.  Each release of Nebari requires an upgrade step class (which is a child class of UpgradeStep) to be created.  
+"""
+This file contains the upgrade logic for Nebari.
+Each release of Nebari requires an upgrade step class (which is a child class of UpgradeStep) to be created.  
 When a user runs `nebari upgrade  -c nebari-config.yaml`, then the do_upgrade function will then run through all required upgrade steps to bring the config file up to date with the current version of Nebari.
 """
 
@@ -45,6 +45,20 @@ DESTRUCTIVE_UPGRADE_WARNING = "-> This version upgrade will result in your clust
 
 
 def do_upgrade(config_filename, attempt_fixes=False):
+    """
+    Perform an upgrade of the Nebari configuration file.
+
+    This function loads the YAML configuration file, checks for deprecated keys,
+    validates the current version, and if necessary, upgrades the configuration
+    to the latest version of Nebari.
+
+    Parameters:
+    config_filename (str): The path to the configuration file.
+    attempt_fixes (bool): Whether to attempt automatic fixes for validation errors.
+
+    Returns:
+    None
+    """
     config = load_yaml(config_filename)
     if config.get("qhub_version"):
         rich.print(
