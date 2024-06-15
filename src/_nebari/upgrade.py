@@ -380,6 +380,11 @@ class UpgradeStep(ABC):
 
 
 class Upgrade_0_3_12(UpgradeStep):
+    """
+    Upgrade step for Nebari version 0.3.12
+
+    This class handles the specific upgrade tasks required for transitioning to version 0.3.12
+    """
     version = "0.3.12"
 
     def _version_specific_upgrade(
@@ -400,13 +405,19 @@ class Upgrade_0_3_12(UpgradeStep):
 
 
 class Upgrade_0_4_0(UpgradeStep):
+    """
+    Upgrade step for Nebari version 0.4.0
+
+    This class handles the specific upgrade tasks required for transitioning to version 0.4.0
+    """
     version = "0.4.0"
 
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         """
-        Upgrade to Keycloak.
+        This version of Nebari introduces Keycloak for authentication, removes deprecated fields,
+        and generates a default password for the Keycloak root user.
         """
         security = config.get("security", {})
         users = security.get("users", {})
@@ -532,6 +543,11 @@ class Upgrade_0_4_0(UpgradeStep):
 
 
 class Upgrade_0_4_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 0.4.1
+
+    This class handles the specific upgrade tasks required for transitioning to version 0.4.1
+    """
     version = "0.4.1"
 
     def _version_specific_upgrade(
@@ -558,6 +574,11 @@ class Upgrade_0_4_1(UpgradeStep):
 
 
 class Upgrade_2023_4_2(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.4.2
+
+    This class handles the specific upgrade tasks required for transitioning to version 2023.4.2
+    """
     version = "2023.4.2"
 
     def _version_specific_upgrade(
@@ -592,6 +613,11 @@ class Upgrade_2023_4_2(UpgradeStep):
 
 
 class Upgrade_2023_7_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.7.1
+
+    This class handles the specific upgrade tasks required for transitioning to version 2023.7.1
+    """
     version = "2023.7.1"
 
     def _version_specific_upgrade(
@@ -610,6 +636,11 @@ class Upgrade_2023_7_1(UpgradeStep):
 
 
 class Upgrade_2023_7_2(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.7.2
+
+    This class handles the specific upgrade tasks required for transitioning to version 2023.7.2
+    """
     version = "2023.7.2"
 
     def _version_specific_upgrade(
@@ -633,6 +664,17 @@ class Upgrade_2023_7_2(UpgradeStep):
 
 
 class Upgrade_2023_10_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.10.1
+
+    This class handles the specific upgrade tasks required for transitioning to version 2023.10.1
+
+    Note:
+        Upgrading to 2023.10.1 is considered high-risk because it includes a major refactor
+        to introduce the extension mechanism system. This version introduces significant
+        changes, including the support for third-party plugins, upgrades JupyterHub to version 3.1,
+        and deprecates certain components such as CDS Dashboards, ClearML, Prefect, and kbatch.
+    """
     version = "2023.10.1"
     # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
     # This released has been tested against 1.26
@@ -740,6 +782,14 @@ class Upgrade_2023_10_1(UpgradeStep):
 
 
 class Upgrade_2023_11_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.11.1
+
+    This class handles the specific upgrade tasks required for transitioning to version 2023.11.1
+
+    Note:
+        - ClearML, Prefect, and kbatch are no longer supported in this version.
+    """
     version = "2023.11.1"
 
     def _version_specific_upgrade(
@@ -758,6 +808,14 @@ class Upgrade_2023_11_1(UpgradeStep):
 
 
 class Upgrade_2023_12_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.12.1
+
+    This class handles the specific upgrade tasks required for transitioning to version 2023.12.1
+
+    Note:
+        - This is the last version that supports the jupyterlab-videochat extension.
+    """
     version = "2023.12.1"
 
     def _version_specific_upgrade(
@@ -777,6 +835,14 @@ class Upgrade_2023_12_1(UpgradeStep):
 
 
 class Upgrade_2024_1_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.1.1
+
+    This class handles the specific upgrade tasks required for transitioning to version 2024.1.1
+
+    Note:
+        - jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store, and jupyter-nvdashboard are no longer supported.
+    """
     version = "2024.1.1"
 
     def _version_specific_upgrade(
@@ -797,6 +863,11 @@ class Upgrade_2024_1_1(UpgradeStep):
 
 
 class Upgrade_2024_3_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.3.1
+
+    This class handles the specific upgrade tasks required for transitioning to version 2024.3.1
+    """
     version = "2024.3.1"
 
     def _version_specific_upgrade(
@@ -808,6 +879,11 @@ class Upgrade_2024_3_1(UpgradeStep):
 
 
 class Upgrade_2024_3_2(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.3.2
+
+    This class handles the specific upgrade tasks required for transitioning to version 2024.3.2
+    """
     version = "2024.3.2"
 
     def _version_specific_upgrade(
@@ -819,6 +895,11 @@ class Upgrade_2024_3_2(UpgradeStep):
 
 
 class Upgrade_2024_3_3(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.3.3
+
+    This class handles the specific upgrade tasks required for transitioning to version 2024.3.3
+    """
     version = "2024.3.3"
 
     def _version_specific_upgrade(
@@ -830,6 +911,14 @@ class Upgrade_2024_3_3(UpgradeStep):
 
 
 class Upgrade_2024_4_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.4.1
+
+    This class handles the specific upgrade tasks required for transitioning to version 2024.4.1
+
+    Note:
+        - Adds default configuration for node groups if not already defined.
+    """
     version = "2024.4.1"
 
     def _version_specific_upgrade(
@@ -861,6 +950,11 @@ class Upgrade_2024_4_1(UpgradeStep):
 
 
 class Upgrade_2024_5_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.5.1
+
+    This class handles the specific upgrade tasks required for transitioning to version 2024.5.1
+    """
     version = "2024.5.1"
 
     def _version_specific_upgrade(
@@ -872,6 +966,13 @@ class Upgrade_2024_5_1(UpgradeStep):
 
 
 class Upgrade_2024_6_1(UpgradeStep):
+    """
+    Upgrade step for version 2024.6.1
+
+    This upgrade includes:
+    - Manual updates for kube-prometheus-stack CRDs if monitoring is enabled.
+    - Prompts to upgrade GCP node groups to more cost-efficient instances.
+    """
     version = "2024.6.1"
 
     def _version_specific_upgrade(
@@ -1003,4 +1104,10 @@ if not UpgradeStep.has_step(__rounded_version__):
     # Always have a way to upgrade to the latest full version number, even if no customizations
     # Don't let dev/prerelease versions cloud things
     class UpgradeLatest(UpgradeStep):
+        """
+        Upgrade step for the latest available version.
+
+        This class ensures there is always an upgrade path to the latest version,
+        even if no specific upgrade steps are defined for the current version.
+        """
         version = __rounded_version__
