@@ -107,10 +107,23 @@ def do_upgrade(config_filename, attempt_fixes=False):
 
 
 class UpgradeStep(ABC):
+    """
+    Abstract base class representing an upgrade step.
+
+    Attributes:
+        _steps (ClassVar[Dict[str, Any]]): Class variable holding registered upgrade steps.
+        version (ClassVar[str]): The version of the upgrade step.
+    """
     _steps: ClassVar[Dict[str, Any]] = {}
     version: ClassVar[str] = ""
 
     def __init_subclass__(cls):
+        """
+        Initializes a subclass of UpgradeStep.
+
+        This method validates the version string and registers the subclass
+        in the _steps dictionary.
+        """
         try:
             parsed_version = Version(cls.version)
         except ValueError as exc:
@@ -132,6 +145,15 @@ class UpgradeStep(ABC):
 
     @classmethod
     def has_step(cls, version):
+        """
+        Checks if there is an upgrade step for a given version.
+
+        Parameters:
+            version (str): The version to check.
+
+        Returns:
+            bool: True if the step exists, False otherwise.
+        """
         return version in cls._steps
 
     @classmethod
@@ -141,6 +163,16 @@ class UpgradeStep(ABC):
         """
         Runs through all required upgrade steps (i.e. relevant subclasses of UpgradeStep).
         Calls UpgradeStep.upgrade_step for each.
+        
+        Parameters:
+            config (dict): The current configuration dictionary.
+            start_version (str): The starting version of the configuration.
+            finish_version (str): The target version for the configuration.
+            config_filename (str): The path to the configuration file.
+            attempt_fixes (bool): Whether to attempt automatic fixes for validation errors.
+
+        Returns:
+            dict: The updated configuration dictionary.
         """
         starting_ver = rounded_ver_parse(start_version or "0.0.0")
         finish_ver = rounded_ver_parse(finish_version)
@@ -176,9 +208,21 @@ class UpgradeStep(ABC):
         return config
 
     def get_version(self):
+        """
+        Returns the version of the upgrade step.
+
+        Returns:
+            str: The version of the upgrade step.
+        """
         return self.version
 
     def requires_nebari_version_field(self):
+        """
+        Checks if the nebari_version field is required for this upgrade step.
+
+        Returns:
+            bool: True if the nebari_version field is required, False otherwise.
+        """
         return rounded_ver_parse(self.version) > rounded_ver_parse("0.3.13")
 
     def upgrade_step(self, config, start_version, config_filename, *args, **kwargs):
@@ -194,6 +238,14 @@ class UpgradeStep(ABC):
 
         It should normally be left as-is for all upgrades. Use _version_specific_upgrade below
         for any actions that are only required for the particular upgrade you are creating.
+        
+        Parameters:
+            config (dict): The current configuration dictionary.
+            start_version (str): The starting version of the configuration.
+            config_filename (str): The path to the configuration file.
+
+        Returns:
+            dict: The updated configuration dictionary.
         """
         finish_version = self.get_version()
         __rounded_finish_version__ = str(rounded_ver_parse(finish_version))
@@ -216,6 +268,7 @@ class UpgradeStep(ABC):
             return bool(re.match(pattern, s))
 
         def replace_image_tag_legacy(image, start_version, new_version):
+            """Replace legacy image tags with the new version."""
             start_version_regex = start_version.replace(".", "\\.")
             if not start_version:
                 start_version_regex = "0\\.[0-3]\\.[0-9]{1,2}"
@@ -230,6 +283,7 @@ class UpgradeStep(ABC):
             return None
 
         def replace_image_tag(s: str, new_version: str, config_path: str) -> str:
+            """Replace the image tag with the new version."""
             legacy_replacement = replace_image_tag_legacy(s, start_version, new_version)
             if legacy_replacement:
                 return legacy_replacement
@@ -250,6 +304,7 @@ class UpgradeStep(ABC):
                 return s
 
         def set_nested_item(config: dict, config_path: list, value: str):
+            """Set a nested item in the configuration dictionary."""
             config_path = config_path.split(".")
             for k in config_path[:-1]:
                 try:
@@ -264,6 +319,7 @@ class UpgradeStep(ABC):
             config[config_path[-1]] = value
 
         def update_image_tag(config, config_path, current_image, new_version):
+            """Update the image tag in the configuration."""
             new_image = replace_image_tag(current_image, new_version, config_path)
             if new_image != current_image:
                 set_nested_item(config, config_path, new_image)
@@ -308,7 +364,17 @@ class UpgradeStep(ABC):
         self, config, start_version, config_filename, *args, **kwargs
     ):
         """
+        Perform version-specific upgrade tasks.
+
         Override this method in subclasses if you need to do anything specific to your version.
+
+        Parameters:
+            config (dict): The current configuration dictionary.
+            start_version (str): The starting version of the configuration.
+            config_filename (str): The path to the configuration file.
+
+        Returns:
+            dict: The updated configuration dictionary.
         """
         return config
 
