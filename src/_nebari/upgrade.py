@@ -3,6 +3,7 @@ import logging
 import re
 import secrets
 import string
+import textwrap
 from abc import ABC
 from pathlib import Path
 from typing import Any, ClassVar, Dict
@@ -770,6 +771,142 @@ class Upgrade_2024_4_1(UpgradeStep):
                 except KeyError:
                     pass
 
+        return config
+
+
+class Upgrade_2024_5_1(UpgradeStep):
+    version = "2024.5.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("Ready to upgrade to Nebari version [green]2024.5.1[/green].")
+
+        return config
+
+
+class Upgrade_2024_6_1(UpgradeStep):
+    version = "2024.6.1"
+
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        # Prompt users to manually update kube-prometheus-stack CRDs if monitoring is enabled
+        if config.get("monitoring", {}).get("enabled", True):
+            rich.print(
+                "\n ⚠️  Warning ⚠️"
+                "\n-> [red bold]Nebari version 2024.6.1 comes with a new version of Grafana. Any custom dashboards that you created will be deleted after upgrading Nebari. Make sure to [link=https://grafana.com/docs/grafana/latest/dashboards/share-dashboards-panels/#export-a-dashboard-as-json]export them as JSON[/link] so you can [link=https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/#import-a-dashboard]import them[/link] again afterwards.[/red bold]"
+                "\n-> [red bold]Before upgrading, you need to manually delete the prometheus-node-exporter daemonset and update the kube-prometheus-stack CRDs. To do that, please run the following commands.[/red bold]"
+            )
+
+            # We're upgrading from version 30.1.0 to 58.4.0. This is a major upgrade and requires manual intervention.
+            # See https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/README.md#upgrading-chart
+            # for more information on why the following commands are necessary.
+            commands = textwrap.dedent(
+                f"""
+                [cyan bold]
+                kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
+                kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
+                kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+                kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
+                kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml
+                kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
+                kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+                kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml
+                kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+                kubectl apply --server-side --force-conflicts -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
+                kubectl delete daemonset -l app=prometheus-node-exporter --namespace {config['namespace']}
+                [/cyan bold]
+            """
+            )
+
+            # By default, rich wraps lines by splitting them into multiple lines. This is
+            # far from ideal, as users copy-pasting the commands will get errors when running them.
+            # To avoid this, we use a rich console with a larger width to print the entire commands
+            # and let the terminal wrap them if needed.
+            Prompt.ask("Hit enter to show the commands")
+            console = rich.console.Console(width=220)
+            console.print(commands)
+
+            Prompt.ask("Hit enter to continue")
+            continue_ = Prompt.ask(
+                "Have you backed up your custom dashboards (if necessary), deleted the prometheus-node-exporter daemonset and updated the kube-prometheus-stack CRDs?",
+                choices=["y", "N"],
+                default="N",
+            )
+            if not continue_ == "y":
+                rich.print(
+                    f"[red bold]You must back up your custom dashboards (if necessary), delete the prometheus-node-exporter daemonset and update the kube-prometheus-stack CRDs before upgrading to [green]{self.version}[/green] (or later).[/bold red]"
+                )
+                exit()
+
+        # Prompt users to upgrade to the new default node groups for GCP
+        if (provider := config.get("provider", "")) == ProviderEnum.gcp.value:
+            provider_full_name = provider_enum_name_map[provider]
+            if not config.get(provider_full_name, {}).get("node_groups", {}):
+                try:
+                    text = textwrap.dedent(
+                        f"""
+                        The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%.
+                        This change will affect your current deployment, and will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
+
+                        [red bold]Note: If upgrading to the new node types, the upgrade process will take longer than usual. For this upgrade only, you'll likely see a timeout \
+                        error and need to restart the deployment process afterwards in order to upgrade successfully.[/red bold]
+
+                        As always, make sure to backup data before upgrading.  See https://www.nebari.dev/docs/how-tos/manual-backup for more information.
+
+                        Would you like to upgrade to the cost effective node groups [purple]{config_filename}[/purple]?
+                        If not, select "N" and the old default node groups will be added to the nebari config file.
+                    """
+                    )
+                    continue_ = Prompt.ask(
+                        text,
+                        choices=["y", "N"],
+                        default="y",
+                    )
+                    if continue_ == "N":
+                        config[provider_full_name]["node_groups"] = {
+                            "general": {
+                                "instance": "n1-standard-8",
+                                "min_nodes": 1,
+                                "max_nodes": 1,
+                            },
+                            "user": {
+                                "instance": "n1-standard-4",
+                                "min_nodes": 0,
+                                "max_nodes": 5,
+                            },
+                            "worker": {
+                                "instance": "n1-standard-4",
+                                "min_nodes": 0,
+                                "max_nodes": 5,
+                            },
+                        }
+                except KeyError:
+                    pass
+            else:
+                text = textwrap.dedent(
+                    """
+                    The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%.
+                    Consider upgrading your node group instance types to the new default configuration.
+
+                    Upgrading your general node will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
+
+                    As always, make sure to backup data before upgrading.  See https://www.nebari.dev/docs/how-tos/manual-backup for more information.
+
+                    The new default node groups instances are:
+                """
+                )
+                text += json.dumps(
+                    {
+                        "general": {"instance": "e2-highmem-4"},
+                        "user": {"instance": "e2-standard-4"},
+                        "worker": {"instance": "e2-standard-4"},
+                    },
+                    indent=4,
+                )
+                text += "\n\nHit enter to continue"
+                Prompt.ask(text)
         return config
 
 

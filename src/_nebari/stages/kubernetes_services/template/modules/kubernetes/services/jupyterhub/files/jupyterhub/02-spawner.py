@@ -72,7 +72,6 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
                 "url": url,
                 "external": True,
             },
-            "oauth_no_confirm": True,
         }
 
     c.JupyterHub.services.extend(
@@ -81,7 +80,6 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
             service_for_jhub_apps(name="Users", url="/auth/admin/nebari/console/"),
             service_for_jhub_apps(name="Environments", url="/conda-store"),
             service_for_jhub_apps(name="Monitoring", url="/monitoring"),
-            service_for_jhub_apps(name="VSCode", url="/user/[USER]/vscode"),
         ]
     )
 
