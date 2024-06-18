@@ -58,7 +58,10 @@ class NebariTerraformStage(NebariStage):
 
     @contextlib.contextmanager
     def deploy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        disable_prompt: bool = False,
+        export_terraform_logs: bool = False,
     ):
         deploy_config = dict(
             directory=str(self.output_directory / self.stage_prefix),
@@ -68,6 +71,9 @@ class NebariTerraformStage(NebariStage):
         if state_imports:
             deploy_config["terraform_import"] = True
             deploy_config["state_imports"] = state_imports
+
+        if export_terraform_logs:
+            deploy_config["terraform_logs_export"] = True
 
         self.set_outputs(stage_outputs, terraform.deploy(**deploy_config))
         self.post_deploy(stage_outputs, disable_prompt)
@@ -89,6 +95,7 @@ class NebariTerraformStage(NebariStage):
         stage_outputs: Dict[str, Dict[str, Any]],
         status: Dict[str, bool],
         ignore_errors: bool = True,
+        export_terraform_logs: bool = False,
     ):
         self.set_outputs(
             stage_outputs,
@@ -99,6 +106,7 @@ class NebariTerraformStage(NebariStage):
                 terraform_import=True,
                 terraform_apply=False,
                 terraform_destroy=False,
+                terraform_logs_export=export_terraform_logs,
             ),
         )
         yield
@@ -110,6 +118,7 @@ class NebariTerraformStage(NebariStage):
                 terraform_import=True,
                 terraform_apply=False,
                 terraform_destroy=True,
+                terraform_logs_export=export_terraform_logs,
             )
             status["stages/" + self.name] = True
         except terraform.TerraformException as e:

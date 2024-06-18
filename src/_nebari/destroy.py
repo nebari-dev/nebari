@@ -9,7 +9,11 @@ from nebari import hookspecs, schema
 logger = logging.getLogger(__name__)
 
 
-def destroy_configuration(config: schema.Main, stages: List[hookspecs.NebariStage]):
+def destroy_configuration(
+    config: schema.Main,
+    stages: List[hookspecs.NebariStage],
+    export_logfiles: bool = False,
+):
     logger.info(
         """Removing all infrastructure, your local files will still remain,
     you can use 'nebari deploy' to re-install infrastructure using same config file\n"""

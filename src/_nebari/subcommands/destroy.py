@@ -1,3 +1,4 @@
+import os
 import pathlib
 
 import typer
@@ -32,6 +33,11 @@ def nebari_subcommand(cli: typer.Typer):
             "--disable-prompt",
             help="Destroy entire Nebari cluster without confirmation request. Suggested for CI use.",
         ),
+        export_logfiles: bool = typer.Option(
+            os.getenv("NEBARI_EXPORT_LOG_FILES", False),
+            "--export-logfiles",
+            help="Toggles the export of Terraform's stages logfiles",
+        ),
     ):
         """
         Destroy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
@@ -49,7 +55,7 @@ def nebari_subcommand(cli: typer.Typer):
             if not disable_render:
                 render_template(output_directory, config, stages)
 
-            destroy_configuration(config, stages)
+            destroy_configuration(config, stages, export_logfiles=export_logfiles)
 
         if disable_prompt:
             _run_destroy()
