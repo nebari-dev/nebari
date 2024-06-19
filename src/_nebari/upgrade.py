@@ -1,6 +1,6 @@
 """
 This file contains the upgrade logic for Nebari.
-Each release of Nebari requires an upgrade step class (which is a child class of UpgradeStep) to be created.
+Each release of Nebari requires an upgrade step class (which is a child class of UpgradeStep) to be created.  
 When a user runs `nebari upgrade  -c nebari-config.yaml`, then the do_upgrade function will then run through all required upgrade steps to bring the config file up to date with the current version of Nebari.
 """
 
@@ -12,7 +12,7 @@ import string
 import textwrap
 from abc import ABC
 from pathlib import Path
-from typing import Any, ClassVar, Dict
+from typing import Any, ClassVar, Dict, override
 
 import rich
 from packaging.version import Version
@@ -52,7 +52,7 @@ def do_upgrade(config_filename, attempt_fixes=False):
     validates the current version, and if necessary, upgrades the configuration
     to the latest version of Nebari.
 
-    Parameters:
+    Args:
     config_filename (str): The path to the configuration file.
     attempt_fixes (bool): Whether to attempt automatic fixes for validation errors.
 
@@ -114,7 +114,6 @@ class UpgradeStep(ABC):
         _steps (ClassVar[Dict[str, Any]]): Class variable holding registered upgrade steps.
         version (ClassVar[str]): The version of the upgrade step.
     """
-
     _steps: ClassVar[Dict[str, Any]] = {}
     version: ClassVar[str] = ""
 
@@ -149,7 +148,7 @@ class UpgradeStep(ABC):
         """
         Checks if there is an upgrade step for a given version.
 
-        Parameters:
+        Args:
             version (str): The version to check.
 
         Returns:
@@ -164,8 +163,8 @@ class UpgradeStep(ABC):
         """
         Runs through all required upgrade steps (i.e. relevant subclasses of UpgradeStep).
         Calls UpgradeStep.upgrade_step for each.
-
-        Parameters:
+        
+        Args:
             config (dict): The current configuration dictionary.
             start_version (str): The starting version of the configuration.
             finish_version (str): The target version for the configuration.
@@ -210,8 +209,6 @@ class UpgradeStep(ABC):
 
     def get_version(self):
         """
-        Returns the version of the upgrade step.
-
         Returns:
             str: The version of the upgrade step.
         """
@@ -239,8 +236,8 @@ class UpgradeStep(ABC):
 
         It should normally be left as-is for all upgrades. Use _version_specific_upgrade below
         for any actions that are only required for the particular upgrade you are creating.
-
-        Parameters:
+        
+        Args:
             config (dict): The current configuration dictionary.
             start_version (str): The starting version of the configuration.
             config_filename (str): The path to the configuration file.
@@ -369,7 +366,7 @@ class UpgradeStep(ABC):
 
         Override this method in subclasses if you need to do anything specific to your version.
 
-        Parameters:
+        Args:
             config (dict): The current configuration dictionary.
             start_version (str): The starting version of the configuration.
             config_filename (str): The path to the configuration file.
@@ -381,14 +378,9 @@ class UpgradeStep(ABC):
 
 
 class Upgrade_0_3_12(UpgradeStep):
-    """
-    Upgrade step for Nebari version 0.3.12
-
-    This class handles the specific upgrade tasks required for transitioning to version 0.3.12
-    """
-
     version = "0.3.12"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename, *args, **kwargs
     ):
@@ -407,14 +399,9 @@ class Upgrade_0_3_12(UpgradeStep):
 
 
 class Upgrade_0_4_0(UpgradeStep):
-    """
-    Upgrade step for Nebari version 0.4.0
-
-    This class handles the specific upgrade tasks required for transitioning to version 0.4.0
-    """
-
     version = "0.4.0"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -546,14 +533,9 @@ class Upgrade_0_4_0(UpgradeStep):
 
 
 class Upgrade_0_4_1(UpgradeStep):
-    """
-    Upgrade step for Nebari version 0.4.1
-
-    This class handles the specific upgrade tasks required for transitioning to version 0.4.1
-    """
-
     version = "0.4.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -578,14 +560,9 @@ class Upgrade_0_4_1(UpgradeStep):
 
 
 class Upgrade_2023_4_2(UpgradeStep):
-    """
-    Upgrade step for Nebari version 2023.4.2
-
-    This class handles the specific upgrade tasks required for transitioning to version 2023.4.2
-    """
-
     version = "2023.4.2"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -618,14 +595,9 @@ class Upgrade_2023_4_2(UpgradeStep):
 
 
 class Upgrade_2023_7_1(UpgradeStep):
-    """
-    Upgrade step for Nebari version 2023.7.1
-
-    This class handles the specific upgrade tasks required for transitioning to version 2023.7.1
-    """
-
     version = "2023.7.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -642,14 +614,9 @@ class Upgrade_2023_7_1(UpgradeStep):
 
 
 class Upgrade_2023_7_2(UpgradeStep):
-    """
-    Upgrade step for Nebari version 2023.7.2
-
-    This class handles the specific upgrade tasks required for transitioning to version 2023.7.2
-    """
-
     version = "2023.7.2"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -674,20 +641,18 @@ class Upgrade_2023_10_1(UpgradeStep):
     """
     Upgrade step for Nebari version 2023.10.1
 
-    This class handles the specific upgrade tasks required for transitioning to version 2023.10.1
-
     Note:
         Upgrading to 2023.10.1 is considered high-risk because it includes a major refactor
         to introduce the extension mechanism system. This version introduces significant
         changes, including the support for third-party plugins, upgrades JupyterHub to version 3.1,
         and deprecates certain components such as CDS Dashboards, ClearML, Prefect, and kbatch.
     """
-
     version = "2023.10.1"
     # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
     # This released has been tested against 1.26
     min_k8s_version = 1.26
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -793,14 +758,12 @@ class Upgrade_2023_11_1(UpgradeStep):
     """
     Upgrade step for Nebari version 2023.11.1
 
-    This class handles the specific upgrade tasks required for transitioning to version 2023.11.1
-
     Note:
         - ClearML, Prefect, and kbatch are no longer supported in this version.
     """
-
     version = "2023.11.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -820,14 +783,12 @@ class Upgrade_2023_12_1(UpgradeStep):
     """
     Upgrade step for Nebari version 2023.12.1
 
-    This class handles the specific upgrade tasks required for transitioning to version 2023.12.1
-
     Note:
         - This is the last version that supports the jupyterlab-videochat extension.
     """
-
     version = "2023.12.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -848,14 +809,12 @@ class Upgrade_2024_1_1(UpgradeStep):
     """
     Upgrade step for Nebari version 2024.1.1
 
-    This class handles the specific upgrade tasks required for transitioning to version 2024.1.1
-
     Note:
         - jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store, and jupyter-nvdashboard are no longer supported.
     """
-
     version = "2024.1.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -874,14 +833,9 @@ class Upgrade_2024_1_1(UpgradeStep):
 
 
 class Upgrade_2024_3_1(UpgradeStep):
-    """
-    Upgrade step for Nebari version 2024.3.1
-
-    This class handles the specific upgrade tasks required for transitioning to version 2024.3.1
-    """
-
     version = "2024.3.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -891,14 +845,9 @@ class Upgrade_2024_3_1(UpgradeStep):
 
 
 class Upgrade_2024_3_2(UpgradeStep):
-    """
-    Upgrade step for Nebari version 2024.3.2
-
-    This class handles the specific upgrade tasks required for transitioning to version 2024.3.2
-    """
-
     version = "2024.3.2"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -908,14 +857,9 @@ class Upgrade_2024_3_2(UpgradeStep):
 
 
 class Upgrade_2024_3_3(UpgradeStep):
-    """
-    Upgrade step for Nebari version 2024.3.3
-
-    This class handles the specific upgrade tasks required for transitioning to version 2024.3.3
-    """
-
     version = "2024.3.3"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -928,14 +872,12 @@ class Upgrade_2024_4_1(UpgradeStep):
     """
     Upgrade step for Nebari version 2024.4.1
 
-    This class handles the specific upgrade tasks required for transitioning to version 2024.4.1
-
     Note:
         - Adds default configuration for node groups if not already defined.
     """
-
     version = "2024.4.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -965,14 +907,9 @@ class Upgrade_2024_4_1(UpgradeStep):
 
 
 class Upgrade_2024_5_1(UpgradeStep):
-    """
-    Upgrade step for Nebari version 2024.5.1
-
-    This class handles the specific upgrade tasks required for transitioning to version 2024.5.1
-    """
-
     version = "2024.5.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -992,6 +929,7 @@ class Upgrade_2024_6_1(UpgradeStep):
 
     version = "2024.6.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
