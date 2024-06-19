@@ -1,6 +1,6 @@
 """
 This file contains the upgrade logic for Nebari.
-Each release of Nebari requires an upgrade step class (which is a child class of UpgradeStep) to be created.  
+Each release of Nebari requires an upgrade step class (which is a child class of UpgradeStep) to be created.
 When a user runs `nebari upgrade  -c nebari-config.yaml`, then the do_upgrade function will then run through all required upgrade steps to bring the config file up to date with the current version of Nebari.
 """
 
@@ -114,6 +114,7 @@ class UpgradeStep(ABC):
         _steps (ClassVar[Dict[str, Any]]): Class variable holding registered upgrade steps.
         version (ClassVar[str]): The version of the upgrade step.
     """
+
     _steps: ClassVar[Dict[str, Any]] = {}
     version: ClassVar[str] = ""
 
@@ -163,7 +164,7 @@ class UpgradeStep(ABC):
         """
         Runs through all required upgrade steps (i.e. relevant subclasses of UpgradeStep).
         Calls UpgradeStep.upgrade_step for each.
-        
+
         Args:
             config (dict): The current configuration dictionary.
             start_version (str): The starting version of the configuration.
@@ -236,7 +237,7 @@ class UpgradeStep(ABC):
 
         It should normally be left as-is for all upgrades. Use _version_specific_upgrade below
         for any actions that are only required for the particular upgrade you are creating.
-        
+
         Args:
             config (dict): The current configuration dictionary.
             start_version (str): The starting version of the configuration.
@@ -647,6 +648,7 @@ class Upgrade_2023_10_1(UpgradeStep):
         changes, including the support for third-party plugins, upgrades JupyterHub to version 3.1,
         and deprecates certain components such as CDS Dashboards, ClearML, Prefect, and kbatch.
     """
+
     version = "2023.10.1"
     # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
     # This released has been tested against 1.26
@@ -761,6 +763,7 @@ class Upgrade_2023_11_1(UpgradeStep):
     Note:
         - ClearML, Prefect, and kbatch are no longer supported in this version.
     """
+
     version = "2023.11.1"
 
     @override
@@ -786,6 +789,7 @@ class Upgrade_2023_12_1(UpgradeStep):
     Note:
         - This is the last version that supports the jupyterlab-videochat extension.
     """
+
     version = "2023.12.1"
 
     @override
@@ -812,6 +816,7 @@ class Upgrade_2024_1_1(UpgradeStep):
     Note:
         - jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store, and jupyter-nvdashboard are no longer supported.
     """
+
     version = "2024.1.1"
 
     @override
@@ -875,6 +880,7 @@ class Upgrade_2024_4_1(UpgradeStep):
     Note:
         - Adds default configuration for node groups if not already defined.
     """
+
     version = "2024.4.1"
 
     @override
