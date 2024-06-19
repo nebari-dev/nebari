@@ -262,12 +262,30 @@ class UpgradeStep(ABC):
             config["nebari_version"] = self.version
 
         def contains_image_and_tag(s: str) -> bool:
-            # match on `quay.io/nebari/nebari-<...>:YYYY.MM.XX``
+            """
+            Check if the string matches the Nebari image pattern.
+
+            Args:
+                s (str): The string to check.
+
+            Returns:
+                bool: True if the string matches the pattern, False otherwise.
+            """
             pattern = r"^quay\.io\/nebari\/nebari-(jupyterhub|jupyterlab|dask-worker)(-gpu)?:\d{4}\.\d+\.\d+$"
             return bool(re.match(pattern, s))
 
-        def replace_image_tag_legacy(image, start_version, new_version):
-            """Replace legacy image tags with the new version."""
+        def replace_image_tag_legacy(image: str, start_version: str, new_version: str) -> str:
+            """
+            Replace legacy image tags with the new version.
+
+            Args:
+                image (str): The current image string.
+                start_version (str): The starting version of the image.
+                new_version (str): The new version to replace with.
+
+            Returns:
+                str: The updated image string with the new version, or None if no match.
+            """
             start_version_regex = start_version.replace(".", "\\.")
             if not start_version:
                 start_version_regex = "0\\.[0-3]\\.[0-9]{1,2}"
@@ -282,7 +300,17 @@ class UpgradeStep(ABC):
             return None
 
         def replace_image_tag(s: str, new_version: str, config_path: str) -> str:
-            """Replace the image tag with the new version."""
+            """
+            Replace the image tag with the new version.
+
+            Args:
+                s (str): The current image string.
+                new_version (str): The new version to replace with.
+                config_path (str): The path to the configuration file.
+
+            Returns:
+                str: The updated image string with the new version, or the original string if no changes.
+            """
             legacy_replacement = replace_image_tag_legacy(s, start_version, new_version)
             if legacy_replacement:
                 return legacy_replacement
@@ -303,7 +331,17 @@ class UpgradeStep(ABC):
                 return s
 
         def set_nested_item(config: dict, config_path: list, value: str):
-            """Set a nested item in the configuration dictionary."""
+            """
+            Set a nested item in the configuration dictionary.
+
+            Args:
+                config (dict): The configuration dictionary.
+                config_path (list): The path to the item to set.
+                value (str): The value to set.
+
+            Returns:
+                None
+            """
             config_path = config_path.split(".")
             for k in config_path[:-1]:
                 try:
@@ -317,8 +355,19 @@ class UpgradeStep(ABC):
                 pass
             config[config_path[-1]] = value
 
-        def update_image_tag(config, config_path, current_image, new_version):
-            """Update the image tag in the configuration."""
+        def update_image_tag(config: dict, config_path: str, current_image: str, new_version: str) -> dict:
+            """
+            Update the image tag in the configuration.
+
+            Args:
+                config (dict): The configuration dictionary.
+                config_path (str): The path to the item to update.
+                current_image (str): The current image string.
+                new_version (str): The new version to replace with.
+
+            Returns:
+                dict: The updated configuration dictionary.
+            """
             new_image = replace_image_tag(current_image, new_version, config_path)
             if new_image != current_image:
                 set_nested_item(config, config_path, new_image)
