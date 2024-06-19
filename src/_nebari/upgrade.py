@@ -274,7 +274,9 @@ class UpgradeStep(ABC):
             pattern = r"^quay\.io\/nebari\/nebari-(jupyterhub|jupyterlab|dask-worker)(-gpu)?:\d{4}\.\d+\.\d+$"
             return bool(re.match(pattern, s))
 
-        def replace_image_tag_legacy(image: str, start_version: str, new_version: str) -> str:
+        def replace_image_tag_legacy(
+            image: str, start_version: str, new_version: str
+        ) -> str:
             """
             Replace legacy image tags with the new version.
 
@@ -355,7 +357,9 @@ class UpgradeStep(ABC):
                 pass
             config[config_path[-1]] = value
 
-        def update_image_tag(config: dict, config_path: str, current_image: str, new_version: str) -> dict:
+        def update_image_tag(
+            config: dict, config_path: str, current_image: str, new_version: str
+        ) -> dict:
             """
             Update the image tag in the configuration.
 
