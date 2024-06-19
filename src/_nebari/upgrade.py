@@ -1,3 +1,9 @@
+"""
+This file contains the upgrade logic for Nebari.
+Each release of Nebari requires an upgrade step class (which is a child class of UpgradeStep) to be created.
+When a user runs `nebari upgrade  -c nebari-config.yaml`, then the do_upgrade function will then run through all required upgrade steps to bring the config file up to date with the current version of Nebari.
+"""
+
 import json
 import logging
 import re
@@ -12,6 +18,7 @@ import rich
 from packaging.version import Version
 from pydantic import ValidationError
 from rich.prompt import Prompt
+from typing_extensions import override
 
 from _nebari.config import backup_configuration
 from _nebari.stages.infrastructure import (
@@ -39,6 +46,20 @@ DESTRUCTIVE_UPGRADE_WARNING = "-> This version upgrade will result in your clust
 
 
 def do_upgrade(config_filename, attempt_fixes=False):
+    """
+    Perform an upgrade of the Nebari configuration file.
+
+    This function loads the YAML configuration file, checks for deprecated keys,
+    validates the current version, and if necessary, upgrades the configuration
+    to the latest version of Nebari.
+
+    Args:
+    config_filename (str): The path to the configuration file.
+    attempt_fixes (bool): Whether to attempt automatic fixes for validation errors.
+
+    Returns:
+    None
+    """
     config = load_yaml(config_filename)
     if config.get("qhub_version"):
         rich.print(
@@ -87,10 +108,24 @@ def do_upgrade(config_filename, attempt_fixes=False):
 
 
 class UpgradeStep(ABC):
+    """
+    Abstract base class representing an upgrade step.
+
+    Attributes:
+        _steps (ClassVar[Dict[str, Any]]): Class variable holding registered upgrade steps.
+        version (ClassVar[str]): The version of the upgrade step.
+    """
+
     _steps: ClassVar[Dict[str, Any]] = {}
     version: ClassVar[str] = ""
 
     def __init_subclass__(cls):
+        """
+        Initializes a subclass of UpgradeStep.
+
+        This method validates the version string and registers the subclass
+        in the _steps dictionary.
+        """
         try:
             parsed_version = Version(cls.version)
         except ValueError as exc:
@@ -112,6 +147,15 @@ class UpgradeStep(ABC):
 
     @classmethod
     def has_step(cls, version):
+        """
+        Checks if there is an upgrade step for a given version.
+
+        Args:
+            version (str): The version to check.
+
+        Returns:
+            bool: True if the step exists, False otherwise.
+        """
         return version in cls._steps
 
     @classmethod
@@ -121,6 +165,16 @@ class UpgradeStep(ABC):
         """
         Runs through all required upgrade steps (i.e. relevant subclasses of UpgradeStep).
         Calls UpgradeStep.upgrade_step for each.
+
+        Args:
+            config (dict): The current configuration dictionary.
+            start_version (str): The starting version of the configuration.
+            finish_version (str): The target version for the configuration.
+            config_filename (str): The path to the configuration file.
+            attempt_fixes (bool): Whether to attempt automatic fixes for validation errors.
+
+        Returns:
+            dict: The updated configuration dictionary.
         """
         starting_ver = rounded_ver_parse(start_version or "0.0.0")
         finish_ver = rounded_ver_parse(finish_version)
@@ -156,9 +210,19 @@ class UpgradeStep(ABC):
         return config
 
     def get_version(self):
+        """
+        Returns:
+            str: The version of the upgrade step.
+        """
         return self.version
 
     def requires_nebari_version_field(self):
+        """
+        Checks if the nebari_version field is required for this upgrade step.
+
+        Returns:
+            bool: True if the nebari_version field is required, False otherwise.
+        """
         return rounded_ver_parse(self.version) > rounded_ver_parse("0.3.13")
 
     def upgrade_step(self, config, start_version, config_filename, *args, **kwargs):
@@ -174,6 +238,14 @@ class UpgradeStep(ABC):
 
         It should normally be left as-is for all upgrades. Use _version_specific_upgrade below
         for any actions that are only required for the particular upgrade you are creating.
+
+        Args:
+            config (dict): The current configuration dictionary.
+            start_version (str): The starting version of the configuration.
+            config_filename (str): The path to the configuration file.
+
+        Returns:
+            dict: The updated configuration dictionary.
         """
         finish_version = self.get_version()
         __rounded_finish_version__ = str(rounded_ver_parse(finish_version))
@@ -191,11 +263,32 @@ class UpgradeStep(ABC):
             config["nebari_version"] = self.version
 
         def contains_image_and_tag(s: str) -> bool:
-            # match on `quay.io/nebari/nebari-<...>:YYYY.MM.XX``
+            """
+            Check if the string matches the Nebari image pattern.
+
+            Args:
+                s (str): The string to check.
+
+            Returns:
+                bool: True if the string matches the pattern, False otherwise.
+            """
             pattern = r"^quay\.io\/nebari\/nebari-(jupyterhub|jupyterlab|dask-worker)(-gpu)?:\d{4}\.\d+\.\d+$"
             return bool(re.match(pattern, s))
 
-        def replace_image_tag_legacy(image, start_version, new_version):
+        def replace_image_tag_legacy(
+            image: str, start_version: str, new_version: str
+        ) -> str:
+            """
+            Replace legacy image tags with the new version.
+
+            Args:
+                image (str): The current image string.
+                start_version (str): The starting version of the image.
+                new_version (str): The new version to replace with.
+
+            Returns:
+                str: The updated image string with the new version, or None if no match.
+            """
             start_version_regex = start_version.replace(".", "\\.")
             if not start_version:
                 start_version_regex = "0\\.[0-3]\\.[0-9]{1,2}"
@@ -210,6 +303,17 @@ class UpgradeStep(ABC):
             return None
 
         def replace_image_tag(s: str, new_version: str, config_path: str) -> str:
+            """
+            Replace the image tag with the new version.
+
+            Args:
+                s (str): The current image string.
+                new_version (str): The new version to replace with.
+                config_path (str): The path to the configuration file.
+
+            Returns:
+                str: The updated image string with the new version, or the original string if no changes.
+            """
             legacy_replacement = replace_image_tag_legacy(s, start_version, new_version)
             if legacy_replacement:
                 return legacy_replacement
@@ -230,6 +334,17 @@ class UpgradeStep(ABC):
                 return s
 
         def set_nested_item(config: dict, config_path: list, value: str):
+            """
+            Set a nested item in the configuration dictionary.
+
+            Args:
+                config (dict): The configuration dictionary.
+                config_path (list): The path to the item to set.
+                value (str): The value to set.
+
+            Returns:
+                None
+            """
             config_path = config_path.split(".")
             for k in config_path[:-1]:
                 try:
@@ -243,7 +358,21 @@ class UpgradeStep(ABC):
                 pass
             config[config_path[-1]] = value
 
-        def update_image_tag(config, config_path, current_image, new_version):
+        def update_image_tag(
+            config: dict, config_path: str, current_image: str, new_version: str
+        ) -> dict:
+            """
+            Update the image tag in the configuration.
+
+            Args:
+                config (dict): The configuration dictionary.
+                config_path (str): The path to the item to update.
+                current_image (str): The current image string.
+                new_version (str): The new version to replace with.
+
+            Returns:
+                dict: The updated configuration dictionary.
+            """
             new_image = replace_image_tag(current_image, new_version, config_path)
             if new_image != current_image:
                 set_nested_item(config, config_path, new_image)
@@ -288,7 +417,17 @@ class UpgradeStep(ABC):
         self, config, start_version, config_filename, *args, **kwargs
     ):
         """
+        Perform version-specific upgrade tasks.
+
         Override this method in subclasses if you need to do anything specific to your version.
+
+        Args:
+            config (dict): The current configuration dictionary.
+            start_version (str): The starting version of the configuration.
+            config_filename (str): The path to the configuration file.
+
+        Returns:
+            dict: The updated configuration dictionary.
         """
         return config
 
@@ -296,6 +435,7 @@ class UpgradeStep(ABC):
 class Upgrade_0_3_12(UpgradeStep):
     version = "0.3.12"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename, *args, **kwargs
     ):
@@ -316,11 +456,13 @@ class Upgrade_0_3_12(UpgradeStep):
 class Upgrade_0_4_0(UpgradeStep):
     version = "0.4.0"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         """
-        Upgrade to Keycloak.
+        This version of Nebari introduces Keycloak for authentication, removes deprecated fields,
+        and generates a default password for the Keycloak root user.
         """
         security = config.get("security", {})
         users = security.get("users", {})
@@ -448,6 +590,7 @@ class Upgrade_0_4_0(UpgradeStep):
 class Upgrade_0_4_1(UpgradeStep):
     version = "0.4.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -474,6 +617,7 @@ class Upgrade_0_4_1(UpgradeStep):
 class Upgrade_2023_4_2(UpgradeStep):
     version = "2023.4.2"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -508,6 +652,7 @@ class Upgrade_2023_4_2(UpgradeStep):
 class Upgrade_2023_7_1(UpgradeStep):
     version = "2023.7.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -526,6 +671,7 @@ class Upgrade_2023_7_1(UpgradeStep):
 class Upgrade_2023_7_2(UpgradeStep):
     version = "2023.7.2"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -547,11 +693,22 @@ class Upgrade_2023_7_2(UpgradeStep):
 
 
 class Upgrade_2023_10_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.10.1
+
+    Note:
+        Upgrading to 2023.10.1 is considered high-risk because it includes a major refactor
+        to introduce the extension mechanism system. This version introduces significant
+        changes, including the support for third-party plugins, upgrades JupyterHub to version 3.1,
+        and deprecates certain components such as CDS Dashboards, ClearML, Prefect, and kbatch.
+    """
+
     version = "2023.10.1"
     # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
     # This released has been tested against 1.26
     min_k8s_version = 1.26
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -654,8 +811,16 @@ class Upgrade_2023_10_1(UpgradeStep):
 
 
 class Upgrade_2023_11_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.11.1
+
+    Note:
+        - ClearML, Prefect, and kbatch are no longer supported in this version.
+    """
+
     version = "2023.11.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -672,8 +837,16 @@ class Upgrade_2023_11_1(UpgradeStep):
 
 
 class Upgrade_2023_12_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.12.1
+
+    Note:
+        - This is the last version that supports the jupyterlab-videochat extension.
+    """
+
     version = "2023.12.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -691,8 +864,16 @@ class Upgrade_2023_12_1(UpgradeStep):
 
 
 class Upgrade_2024_1_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.1.1
+
+    Note:
+        - jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store, and jupyter-nvdashboard are no longer supported.
+    """
+
     version = "2024.1.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -713,6 +894,7 @@ class Upgrade_2024_1_1(UpgradeStep):
 class Upgrade_2024_3_1(UpgradeStep):
     version = "2024.3.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -724,6 +906,7 @@ class Upgrade_2024_3_1(UpgradeStep):
 class Upgrade_2024_3_2(UpgradeStep):
     version = "2024.3.2"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -735,6 +918,7 @@ class Upgrade_2024_3_2(UpgradeStep):
 class Upgrade_2024_3_3(UpgradeStep):
     version = "2024.3.3"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -744,8 +928,16 @@ class Upgrade_2024_3_3(UpgradeStep):
 
 
 class Upgrade_2024_4_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.4.1
+
+    Note:
+        - Adds default configuration for node groups if not already defined.
+    """
+
     version = "2024.4.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -777,6 +969,7 @@ class Upgrade_2024_4_1(UpgradeStep):
 class Upgrade_2024_5_1(UpgradeStep):
     version = "2024.5.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -786,8 +979,17 @@ class Upgrade_2024_5_1(UpgradeStep):
 
 
 class Upgrade_2024_6_1(UpgradeStep):
+    """
+    Upgrade step for version 2024.6.1
+
+    This upgrade includes:
+    - Manual updates for kube-prometheus-stack CRDs if monitoring is enabled.
+    - Prompts to upgrade GCP node groups to more cost-efficient instances.
+    """
+
     version = "2024.6.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -917,4 +1119,11 @@ if not UpgradeStep.has_step(__rounded_version__):
     # Always have a way to upgrade to the latest full version number, even if no customizations
     # Don't let dev/prerelease versions cloud things
     class UpgradeLatest(UpgradeStep):
+        """
+        Upgrade step for the latest available version.
+
+        This class ensures there is always an upgrade path to the latest version,
+        even if no specific upgrade steps are defined for the current version.
+        """
+
         version = __rounded_version__
