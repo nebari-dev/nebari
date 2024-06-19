@@ -12,12 +12,13 @@ import string
 import textwrap
 from abc import ABC
 from pathlib import Path
-from typing import Any, ClassVar, Dict, override
+from typing import Any, ClassVar, Dict
 
 import rich
 from packaging.version import Version
 from pydantic import ValidationError
 from rich.prompt import Prompt
+from typing_extensions import override
 
 from _nebari.config import backup_configuration
 from _nebari.stages.infrastructure import (
