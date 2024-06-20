@@ -1,6 +1,9 @@
 import json
 import logging
 import tempfile
+import urllib
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 import requests
@@ -16,7 +19,6 @@ def conda_store_config(path="/var/lib/conda-store/config.json"):
 
 
 config = conda_store_config()
-
 
 # ==================================
 #      conda-store settings
@@ -49,6 +51,7 @@ c.CondaStore.conda_indexed_channels = [
     "conda-forge",
     "https://repo.anaconda.com/pkgs/main",
 ]
+c.RBACAuthorizationBackend.role_mappings_version = 2
 
 # ==================================
 #        server settings
@@ -63,7 +66,6 @@ c.CondaStoreServer.port = 5000
 c.CondaStoreServer.behind_proxy = True
 # This MUST start with `/`
 c.CondaStoreServer.url_prefix = "/conda-store"
-
 
 # ==================================
 #         auth settings
@@ -85,9 +87,164 @@ c.GenericOAuthAuthentication.tls_verify = False
 
 
 class KeyCloakAuthentication(GenericOAuthAuthentication):
+    conda_store_api_url = f"https://{config['external-url']}/conda-store/api/v1"
+    access_token_url = config["openid-config"]["token_url"]
+    realm_api_url = config["realm_api_url"]
+    service_account_token = config["service-tokens-mapping"]["conda-store-service-account"]
+    conda_store_role_permissions_order = ["viewer", "developer", "admin"]
+
+    def _get_conda_store_client_id(self, token):
+        # Get the clients list to find the "id" of "conda-store" client.
+        self.log.info("Getting conda store client id")
+        clients_data = self._fetch_api(endpoint="clients/", token=token)
+        conda_store_clients = [
+            client for client in clients_data if client["clientId"] == "conda_store"
+        ]
+        self.log.info(f"conda store clients: {conda_store_clients}")
+        assert len(conda_store_clients) == 1
+        conda_store_client_id = conda_store_clients[0]["id"]
+        return conda_store_client_id
+
+    async def delete_conda_store_roles(self, request, namespace, username):
+        self.log.info(f"Delete all conda-store roles on namespace: {namespace} for user: {username}")
+        conda_store = await get_conda_store(request)
+        with conda_store.session_factory() as db:
+            api.delete_namespace_role(db, namespace, other=username)
+            db.commit()
+
+    async def create_conda_store_role(self, request, namespace, username, role):
+        self.log.info(f"Creating conda-store roles on namespace: {namespace} for user: {username}")
+        conda_store = await get_conda_store(request)
+        with conda_store.session_factory() as db:
+            api.create_namespace_role(db, namespace, username, role)
+            db.commit()
+
+    def _get_token(self) -> str:
+        body = urllib.parse.urlencode(
+            {
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "grant_type": "client_credentials",
+            }
+        )
+        # urllib
+        req = urllib.request.Request(
+            self.access_token_url,
+            data=body.encode()
+        )
+        response = urllib.request.urlopen(req)
+        data = json.loads(response.read())
+        return data["access_token"]  # type: ignore[no-any-return]
+
+    def _fetch_api(self, endpoint: str, token: str):
+        req = urllib.request.Request(
+            f"{self.realm_api_url}/{endpoint}",
+            method="GET",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read())
+        return data
+
+    async def apply_roles_from_keycloak(self, request, user_data):
+        token = self._get_token()
+        self.log.info(f"Token: {token}")
+        conda_store_client_id = self._get_conda_store_client_id(token)
+        conda_store_client_roles = self.get_conda_store_client_roles_for_user(
+            user_data["sub"],
+            conda_store_client_id,
+            token
+        )
+        self.log.info(f"conda store client roles: {conda_store_client_roles}")
+        await self._apply_conda_store_roles_from_keycloak(
+            request, conda_store_client_roles, user_data["preferred_username"]
+        )
+
+    def filter_duplicate_namespace_roles_with_max_permissions(self, keycloak_roles):
+        """Filter duplicate roles in keycloak such that to apply only the one with the highest
+        permissions.
+
+        Example:
+            role 1: namespace: foo, role: viewer
+            role 2: namespace: foo, role: admin
+        We need to apply only the role 2 as that one has higher permissions.
+        """
+        self.log.info("Filtering duplicate roles for same namespace")
+        namespace_role_mapping = {}
+        for keycloak_role in keycloak_roles:
+            role_attributes = keycloak_role["attributes"]
+            namespace = role_attributes.get("namespace")
+            # returns a list with a value ["viewer"]
+            conda_store_role = role_attributes.get("role")
+
+            if conda_store_role and (conda_store_role[0] not in self.conda_store_role_permissions_order):
+                self.log.info(f"role {conda_store_role[0]} not in {self.conda_store_role_permissions_order}")
+                continue
+
+            if not namespace or (not conda_store_role):
+                continue
+
+            role_priority = self.conda_store_role_permissions_order.index(conda_store_role[0])
+            role_attributes_added = namespace_role_mapping.get(namespace[0])
+            if namespace and not role_attributes_added:
+                # Add if not already added
+                namespace_role_mapping[namespace[0]] = keycloak_role
+            else:
+                # Only add if the permissions of this role is higher
+                existing_role = role_attributes_added.get("role")
+                existing_role_priority = self.conda_store_role_permissions_order.index(existing_role[0])
+                if role_priority > existing_role_priority:
+                    namespace_role_mapping[namespace[0]] = keycloak_role
+        return list(namespace_role_mapping.values())
+
+    async def _apply_conda_store_roles_from_keycloak(self, request, conda_store_client_roles, username):
+        self.log.info(f"Apply conda store roles from keycloak roles: {conda_store_client_roles}, user: {username}")
+        filtered_roles = self.filter_duplicate_namespace_roles_with_max_permissions(conda_store_client_roles)
+        self.log.info(f"Final roles to apply: {filtered_roles}")
+        for role in filtered_roles:
+            role_attributes = role["attributes"]
+            role = role_attributes.get("role")
+            namespace = role_attributes.get("namespace")
+            if namespace and (namespace[0].lower() == username.lower()):
+                self.log.info("Role for given user's namespace, skipping")
+                continue
+            if role and namespace:
+                await self.delete_conda_store_roles(request, namespace[0], username)
+                await self.create_conda_store_role(request, namespace[0], username, role[0])
+
+    def _get_roles_with_attributes(self, roles: dict, client_id: str, token: str):
+        """This fetches all roles by id to fetch their attributes."""
+        roles_rich = []
+        for role in roles:
+            # If this takes too much time, which isn't the case right now, we can
+            # also do multi-threaded requests
+            role_rich = self._fetch_api(
+                endpoint=f"roles-by-id/{role['id']}?client={client_id}", token=token
+            )
+            roles_rich.append(role_rich)
+        return roles_rich
+
+    def get_conda_store_client_roles_for_user(self, user_id, conda_store_client_id, token):
+        """Get roles for the client named 'jupyterhub'."""
+        # Includes roles like "jupyterhub_admin", "jupyterhub_developer", "dask_gateway_developer"
+        self.log.info(f"get conda store client roles for user: {user_id}, conda_store_client_id: {conda_store_client_id}")
+        user_roles = self._fetch_api(
+            endpoint=f"users/{user_id}/role-mappings/clients/{conda_store_client_id}/composite",
+            token=token,
+        )
+        client_roles_rich = self._get_roles_with_attributes(
+            user_roles, client_id=conda_store_client_id, token=token
+        )
+        self.log.info(f"conda store client roles: {client_roles_rich}")
+        return client_roles_rich
+
     async def authenticate(self, request):
-        # 1. using the callback_url code and state in request
+        # self.log.info("Authentication")
+        self.log.info("*" * 100)
+        self.log.info(f"self.service_account_token: {self.service_account_token}")
+        self.log.info("*" * 100)
         oauth_access_token = self._get_oauth_token(request)
+        # self.log.info(f"oauth_access_token: {oauth_access_token}")
         if oauth_access_token is None:
             return None  # authentication failed
 
@@ -98,8 +255,10 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         )
         response.raise_for_status()
         user_data = response.json()
+        self.log.info(f"user_data: {user_data}")
 
         username = user_data["preferred_username"]
+        await self.apply_roles_from_keycloak(request, user_data=user_data)
 
         # superadmin gets access to everything
         if "conda_store_superadmin" in user_data.get("roles", []):
@@ -119,7 +278,9 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             if role in role_mappings
         }
         default_namespace = config["default-namespace"]
+        self.log.info(f"default_namespace: {default_namespace}")
         namespaces = {username, "global", default_namespace}
+        self.log.info(f"namespaces: {namespaces}")
         role_bindings = {
             f"{username}/*": {"admin"},
             f"{default_namespace}/*": {"viewer"},

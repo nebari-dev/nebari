@@ -26,8 +26,13 @@ resource "kubernetes_secret" "conda-store-secret" {
       extra-settings    = var.extra-settings
       extra-config      = var.extra-config
       default-namespace = var.default-namespace-name
+      realm_api_url     = "https://${var.external-url}/auth/admin/realms/${var.realm_id}"
       service-tokens = {
         for service, value in var.services : base64encode(random_password.conda_store_service_token[service].result) => value
+      }
+      # So that the mapping can be used in conda-store config itself
+      service-tokens-mapping = {
+        for service, _ in var.services : service => base64encode(random_password.conda_store_service_token[service].result)
       }
       extra-settings = var.extra-settings
       extra-config   = var.extra-config
@@ -62,6 +67,10 @@ module "conda-store-openid-client" {
   }
   callback-url-paths = [
     "https://${var.external-url}/conda-store/oauth_callback"
+  ]
+  service-accounts-enabled = true
+  service-account-roles = [
+    "view-realm", "view-users", "view-clients"
   ]
 }
 
