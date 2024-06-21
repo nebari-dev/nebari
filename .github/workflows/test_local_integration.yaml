@@ -191,6 +191,10 @@ jobs:
         run: |
           pytest tests/tests_deployment/ -v -s
 
+      - name: Debugging with tmate
+        if: always()
+        uses: mxschmitt/action-tmate@v3.18
+
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
         # Since this is not critical for most pull requests and takes more than half of the time
