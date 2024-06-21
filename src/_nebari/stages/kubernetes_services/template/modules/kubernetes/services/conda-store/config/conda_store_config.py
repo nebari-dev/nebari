@@ -8,7 +8,7 @@ from pathlib import Path
 
 import requests
 from conda_store_server import api, orm, schema
-from conda_store_server.server.auth import GenericOAuthAuthentication, RBACAuthorizationBackend
+from conda_store_server.server.auth import GenericOAuthAuthentication
 from conda_store_server.server.dependencies import get_conda_store
 from conda_store_server.storage import S3Storage
 
@@ -159,7 +159,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         entity_bindings = self.get_current_entity_bindings(username)
         self.log.info("Remove current role bindings for the user")
         for entity, role in entity_bindings.items():
-            if entity not in {'default/*', 'filesystem/*'}:
+            if entity not in {"default/*", "filesystem/*"}:
                 namespace = entity.split("/")[0]
                 self.log.info(
                     f"Removing current role {role} on namespace {namespace} "
@@ -180,7 +180,9 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         )
 
     def is_valid_conda_store_role(self, keycloak_role):
-        conda_store_role, namespace = self._get_role_namespace_from_keycloak_role(keycloak_role)
+        conda_store_role, namespace = self._get_role_namespace_from_keycloak_role(
+            keycloak_role
+        )
         if conda_store_role not in self.conda_store_role_permissions_order:
             self.log.info(
                 f"role {conda_store_role} not valid as not one of {self.conda_store_role_permissions_order}"
@@ -205,7 +207,9 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         for keycloak_role in keycloak_roles:
             if not self.is_valid_conda_store_role(keycloak_role):
                 continue
-            conda_store_role, namespace = self._get_role_namespace_from_keycloak_role(keycloak_role)
+            conda_store_role, namespace = self._get_role_namespace_from_keycloak_role(
+                keycloak_role
+            )
             role_attributes_added = namespace_role_mapping.get(namespace)
             if not role_attributes_added:
                 # Add if not already added
@@ -213,8 +217,12 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             else:
                 # Only add if the permissions of this role is higher than existing
                 existing_role = role_attributes_added.get("role")
-                role_priority = self.conda_store_role_permissions_order.index(conda_store_role)
-                existing_role_priority = self.conda_store_role_permissions_order.index(existing_role)
+                role_priority = self.conda_store_role_permissions_order.index(
+                    conda_store_role
+                )
+                existing_role_priority = self.conda_store_role_permissions_order.index(
+                    existing_role
+                )
                 if role_priority > existing_role_priority:
                     namespace_role_mapping[namespace] = keycloak_role
         return list(namespace_role_mapping.values())
@@ -244,9 +252,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
                 continue
             if role and namespace:
                 await self.delete_conda_store_roles(request, namespace, username)
-                await self.create_conda_store_role(
-                    request, namespace, username, role
-                )
+                await self.create_conda_store_role(request, namespace, username, role)
 
     def _get_roles_with_attributes(self, roles: dict, client_id: str, token: str):
         """This fetches all roles by id to fetch their attributes."""
@@ -280,8 +286,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
     def get_current_entity_bindings(self, username):
         entity = schema.AuthenticationToken(
-            primary_namespace=username,
-            role_bindings={}
+            primary_namespace=username, role_bindings={}
         )
         self.log.info(f"entity: {entity}")
         entity_bindings = self.authorization.get_entity_bindings(entity)
