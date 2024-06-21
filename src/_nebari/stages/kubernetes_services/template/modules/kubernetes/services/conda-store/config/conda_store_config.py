@@ -8,7 +8,7 @@ from pathlib import Path
 
 import requests
 from conda_store_server import api, orm, schema
-from conda_store_server.server.auth import GenericOAuthAuthentication
+from conda_store_server.server.auth import GenericOAuthAuthentication, RBACAuthorizationBackend
 from conda_store_server.server.dependencies import get_conda_store
 from conda_store_server.storage import S3Storage
 
@@ -149,6 +149,24 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             data = json.loads(response.read())
         return data
 
+    async def remove_current_bindings(self, request, username):
+        """Remove current roles for the user to make sure only the roles defined in
+        keycloak are applied:
+        - to avoid inconsistency in user roles
+        - single source of truth
+        - roles that are added in keycloak and then later removed from keycloak are actually removed from conda-store.
+        """
+        entity_bindings = self.get_current_entity_bindings(username)
+        self.log.info("Remove current role bindings for the user")
+        for entity, role in entity_bindings.items():
+            if entity not in {'default/*', 'filesystem/*'}:
+                namespace = entity.split("/")[0]
+                self.log.info(
+                    f"Removing current role {role} on namespace {namespace} "
+                    f"for user {username}"
+                )
+                await self.delete_conda_store_roles(request, namespace, username)
+
     async def apply_roles_from_keycloak(self, request, user_data):
         token = self._get_token()
         self.log.info(f"Token: {token}")
@@ -156,10 +174,22 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         conda_store_client_roles = self.get_conda_store_client_roles_for_user(
             user_data["sub"], conda_store_client_id, token
         )
-        self.log.info(f"conda store client roles: {conda_store_client_roles}")
+        await self.remove_current_bindings(request, user_data["preferred_username"])
         await self._apply_conda_store_roles_from_keycloak(
             request, conda_store_client_roles, user_data["preferred_username"]
         )
+
+    def is_valid_conda_store_role(self, keycloak_role):
+        conda_store_role, namespace = self._get_role_namespace_from_keycloak_role(keycloak_role)
+        if conda_store_role not in self.conda_store_role_permissions_order:
+            self.log.info(
+                f"role {conda_store_role} not valid as not one of {self.conda_store_role_permissions_order}"
+            )
+            return False
+        if not namespace or (not conda_store_role):
+            self.log(f"Not a valid conda store role: {conda_store_role}")
+            return False
+        return True
 
     def filter_duplicate_namespace_roles_with_max_permissions(self, keycloak_roles):
         """Filter duplicate roles in keycloak such that to apply only the one with the highest
@@ -173,38 +203,29 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         self.log.info("Filtering duplicate roles for same namespace")
         namespace_role_mapping = {}
         for keycloak_role in keycloak_roles:
-            role_attributes = keycloak_role["attributes"]
-            namespace = role_attributes.get("namespace")
-            # returns a list with a value ["viewer"]
-            conda_store_role = role_attributes.get("role")
-
-            if conda_store_role and (
-                conda_store_role[0] not in self.conda_store_role_permissions_order
-            ):
-                self.log.info(
-                    f"role {conda_store_role[0]} not in {self.conda_store_role_permissions_order}"
-                )
+            if not self.is_valid_conda_store_role(keycloak_role):
                 continue
-
-            if not namespace or (not conda_store_role):
-                continue
-
-            role_priority = self.conda_store_role_permissions_order.index(
-                conda_store_role[0]
-            )
-            role_attributes_added = namespace_role_mapping.get(namespace[0])
-            if namespace and not role_attributes_added:
+            conda_store_role, namespace = self._get_role_namespace_from_keycloak_role(keycloak_role)
+            role_attributes_added = namespace_role_mapping.get(namespace)
+            if not role_attributes_added:
                 # Add if not already added
-                namespace_role_mapping[namespace[0]] = keycloak_role
+                namespace_role_mapping[namespace] = keycloak_role
             else:
-                # Only add if the permissions of this role is higher
+                # Only add if the permissions of this role is higher than existing
                 existing_role = role_attributes_added.get("role")
-                existing_role_priority = self.conda_store_role_permissions_order.index(
-                    existing_role[0]
-                )
+                role_priority = self.conda_store_role_permissions_order.index(conda_store_role)
+                existing_role_priority = self.conda_store_role_permissions_order.index(existing_role)
                 if role_priority > existing_role_priority:
-                    namespace_role_mapping[namespace[0]] = keycloak_role
+                    namespace_role_mapping[namespace] = keycloak_role
         return list(namespace_role_mapping.values())
+
+    def _get_role_namespace_from_keycloak_role(self, keycloak_role):
+        role_attributes = keycloak_role["attributes"]
+        # namespace returns a list with a value say ["user-awesome"]
+        role = role_attributes.get("role", [None])[0]
+        # role returns a list with a value say ["viewer"]
+        namespace = role_attributes.get("namespace", [None])[0]
+        return role, namespace
 
     async def _apply_conda_store_roles_from_keycloak(
         self, request, conda_store_client_roles, username
@@ -216,17 +237,15 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             conda_store_client_roles
         )
         self.log.info(f"Final roles to apply: {filtered_roles}")
-        for role in filtered_roles:
-            role_attributes = role["attributes"]
-            role = role_attributes.get("role")
-            namespace = role_attributes.get("namespace")
-            if namespace and (namespace[0].lower() == username.lower()):
+        for keycloak_role in filtered_roles:
+            role, namespace = self._get_role_namespace_from_keycloak_role(keycloak_role)
+            if namespace and (namespace.lower() == username.lower()):
                 self.log.info("Role for given user's namespace, skipping")
                 continue
             if role and namespace:
-                await self.delete_conda_store_roles(request, namespace[0], username)
+                await self.delete_conda_store_roles(request, namespace, username)
                 await self.create_conda_store_role(
-                    request, namespace[0], username, role[0]
+                    request, namespace, username, role
                 )
 
     def _get_roles_with_attributes(self, roles: dict, client_id: str, token: str):
@@ -259,6 +278,16 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         self.log.info(f"conda store client roles: {client_roles_rich}")
         return client_roles_rich
 
+    def get_current_entity_bindings(self, username):
+        entity = schema.AuthenticationToken(
+            primary_namespace=username,
+            role_bindings={}
+        )
+        self.log.info(f"entity: {entity}")
+        entity_bindings = self.authorization.get_entity_bindings(entity)
+        self.log.info(f"current entity_bindings: {entity_bindings}")
+        return entity_bindings
+
     async def authenticate(self, request):
         # self.log.info("Authentication")
         self.log.info("*" * 100)
@@ -288,6 +317,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
                 role_bindings={"*/*": {"admin"}},
             )
 
+        # Remove this after next release (2026.7.1), keeping it for now for backwards compatibility
         role_mappings = {
             "conda_store_admin": "admin",
             "conda_store_developer": "developer",
