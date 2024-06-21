@@ -95,6 +95,13 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
     ]
     conda_store_role_permissions_order = ["viewer", "developer", "admin"]
 
+    def disable_ssl_verify_ctx(self):
+        import ssl
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        return ctx
+
     def _get_conda_store_client_id(self, token):
         # Get the clients list to find the "id" of "conda-store" client.
         self.log.info("Getting conda store client id")
@@ -135,7 +142,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         )
         # urllib
         req = urllib.request.Request(self.access_token_url, data=body.encode())
-        response = urllib.request.urlopen(req)
+        response = urllib.request.urlopen(req, context=self.disable_ssl_verify_ctx())
         data = json.loads(response.read())
         return data["access_token"]  # type: ignore[no-any-return]
 
@@ -145,7 +152,12 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             method="GET",
             headers={"Authorization": f"Bearer {token}"},
         )
-        with urllib.request.urlopen(req) as response:
+        import ssl
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+
+        with urllib.request.urlopen(req, context=self.disable_ssl_verify_ctx()) as response:
             data = json.loads(response.read())
         return data
 
