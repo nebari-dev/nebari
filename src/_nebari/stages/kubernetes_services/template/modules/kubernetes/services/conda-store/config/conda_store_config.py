@@ -97,6 +97,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
     def disable_ssl_verify_ctx(self):
         import ssl
+
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
@@ -153,11 +154,14 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             headers={"Authorization": f"Bearer {token}"},
         )
         import ssl
+
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
 
-        with urllib.request.urlopen(req, context=self.disable_ssl_verify_ctx()) as response:
+        with urllib.request.urlopen(
+            req, context=self.disable_ssl_verify_ctx()
+        ) as response:
             data = json.loads(response.read())
         return data
 
