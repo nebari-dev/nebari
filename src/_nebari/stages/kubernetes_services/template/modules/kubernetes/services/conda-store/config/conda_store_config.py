@@ -186,7 +186,6 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
     async def apply_roles_from_keycloak(self, request, user_data):
         token = self._get_token()
-        self.log.info(f"Token: {token}")
         conda_store_client_id = self._get_conda_store_client_id(token)
         conda_store_client_roles = self.get_conda_store_client_roles_for_user(
             user_data["sub"], conda_store_client_id, token
@@ -364,10 +363,6 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
     async def authenticate(self, request):
         self._override_logger()
-        # self.log.info("Authentication")
-        self.log.info("*" * 100)
-        self.log.info(f"self.service_account_token: {self.service_account_token}")
-        self.log.info("*" * 100)
         oauth_access_token = self._get_oauth_token(request)
         # self.log.info(f"oauth_access_token: {oauth_access_token}")
         if oauth_access_token is None:
@@ -380,8 +375,6 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         )
         response.raise_for_status()
         user_data = response.json()
-        self.log.info(f"user_data: {user_data}")
-
         username = user_data["preferred_username"]
 
         try:
