@@ -19,6 +19,11 @@ from tests.tests_deployment.keycloak_utils import (
             "admin!namespace=analyst,developer!namespace=invalid-namespace",
             {"analyst/*": ["admin"]},
         ],
+        [
+            # duplicate namespace role, chose highest permissions
+            "admin!namespace=analyst,developer!namespace=analyst",
+            {"analyst/*": ["admin"]},
+        ],
         ["invalid-role!namespace=analyst", {}],
     ),
 )

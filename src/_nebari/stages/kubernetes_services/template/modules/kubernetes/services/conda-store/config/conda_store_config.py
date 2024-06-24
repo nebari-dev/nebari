@@ -390,7 +390,6 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
                 role_bindings={"*/*": {"admin"}},
             )
 
-        # Remove this after next release (2026.7.1), keeping it for now for backwards compatibility
         role_mappings = {
             "conda_store_admin": "admin",
             "conda_store_developer": "developer",
