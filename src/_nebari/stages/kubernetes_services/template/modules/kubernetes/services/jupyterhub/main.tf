@@ -275,9 +275,9 @@ module "jupyterhub-openid-client" {
   client_id    = "jupyterhub"
   external-url = var.external-url
   role_mapping = {
-    "admin"     = ["jupyterhub_admin", "dask_gateway_admin"]
-    "developer" = ["jupyterhub_developer", "dask_gateway_developer"]
-    "analyst"   = ["jupyterhub_developer"]
+    "admin"     = ["jupyterhub_admin", "dask_gateway_admin", "create-shared-directory-role"]
+    "developer" = ["jupyterhub_developer", "dask_gateway_developer", "create-shared-directory-role"]
+    "analyst"   = ["jupyterhub_developer", "create-shared-directory-role"]
   }
   callback-url-paths = [
     "https://${var.external-url}/hub/oauth_callback",

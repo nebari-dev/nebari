@@ -9,7 +9,7 @@ resource "keycloak_openid_client" "main" {
   client_id     = var.client_id
   client_secret = random_password.client_secret.result
 
-  name    = "grafana"
+  name    = var.client_id
   enabled = true
 
   access_type           = "CONFIDENTIAL"
@@ -97,6 +97,7 @@ resource "keycloak_role" "main" {
   client_id   = keycloak_openid_client.main.id
   name        = each.key
   description = each.key
+  attributes  = each.value != null ? each.value : {}
 }
 
 
