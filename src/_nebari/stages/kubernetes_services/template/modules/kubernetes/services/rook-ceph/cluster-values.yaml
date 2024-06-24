@@ -37,7 +37,7 @@ cephClusterSpec:
       - name: rook
         enabled: true
   dashboard:
-    enabled: true  # "tCX!F_\}jSnmQ\W(n3>
+    enabled: true
     ssl: false
   crashCollector:
     disable: false
