@@ -69,7 +69,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "user_node_group" {
   name                  = var.node_groups[1].name
   kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
   vm_size               = var.node_groups[1].instance_type
-  node_count            = 0
   enable_auto_scaling   = "true"
   mode                  = "User" # "System" or "User", only "User" nodes can scale down to 0
   min_count             = var.node_groups[1].min_size
@@ -87,7 +86,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "worker_node_group" {
   name                  = var.node_groups[2].name
   kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
   vm_size               = var.node_groups[2].instance_type
-  node_count            = 0
   enable_auto_scaling   = "true"
   mode                  = "User" # "System" or "User", only "User" nodes can scale down to 0
   min_count             = var.node_groups[2].min_size
