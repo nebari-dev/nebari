@@ -31,6 +31,7 @@ from tests.tests_deployment.keycloak_utils import (
 @pytest.mark.filterwarnings(
     "ignore:.*auto_refresh_token is deprecated:DeprecationWarning"
 )
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_conda_store_roles_loaded_from_keycloak(
     scopes: str, changed_scopes: dict, cleanup_keycloak_roles
 ):
