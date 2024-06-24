@@ -88,6 +88,8 @@ c.GenericOAuthAuthentication.access_scope = "profile"
 c.GenericOAuthAuthentication.user_data_key = "preferred_username"
 c.GenericOAuthAuthentication.tls_verify = False
 
+CONDA_STORE_ROLE_PERMISSIONS_ORDER = ["viewer", "developer", "admin"]
+
 
 @dataclasses.dataclass
 class CondaStoreNamespaceRole:
@@ -100,6 +102,11 @@ class KeycloakCondaStoreRoleScopes:
     scopes: str
     log: logging.Logger
 
+    def _validate_role(self, role):
+        valid = role in CONDA_STORE_ROLE_PERMISSIONS_ORDER
+        self.log.info(f"role: {role} is valid={valid}")
+        return valid
+
     def parse_role_and_namespace(
         self, text
     ) -> typing.Optional[CondaStoreNamespaceRole]:
@@ -110,7 +117,7 @@ class KeycloakCondaStoreRoleScopes:
         match = re.search(pattern, text)
 
         # Extract the permission and namespace if there is a match
-        if match:
+        if match and self._validate_role(match.group(1)):
             return CondaStoreNamespaceRole(
                 namespace=match.group(2), role=match.group(1)
             )
@@ -147,9 +154,11 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
     service_account_token = config["service-tokens-mapping"][
         "conda-store-service-account"
     ]
-    conda_store_role_permissions_order = ["viewer", "developer", "admin"]
 
-    def disable_ssl_verify_ctx(self):
+    def _disable_ssl_verify_ctx(self):
+        """This is useful for deployments without certs, otherwise conda-store login would
+        not work.
+        """
         import ssl
 
         ctx = ssl.create_default_context()
@@ -157,7 +166,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         ctx.verify_mode = ssl.CERT_NONE
         return ctx
 
-    def _get_conda_store_client_id(self, token):
+    def _get_conda_store_client_id(self, token: str) -> str:
         # Get the clients list to find the "id" of "conda-store" client.
         self.log.info("Getting conda store client id")
         clients_data = self._fetch_api(endpoint="clients/", token=token)
@@ -169,7 +178,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         conda_store_client_id = conda_store_clients[0]["id"]
         return conda_store_client_id
 
-    async def delete_conda_store_roles(self, request, namespace, username):
+    async def _delete_conda_store_roles(self, request, namespace: str, username: str):
         self.log.info(
             f"Delete all conda-store roles on namespace: {namespace} for user: {username}"
         )
@@ -178,16 +187,20 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             api.delete_namespace_role(db, namespace, other=username)
             db.commit()
 
-    async def create_conda_store_role(self, request, namespace, username, role):
+    async def _create_conda_store_role(
+        self, request, namespace_role: CondaStoreNamespaceRole, username: str
+    ):
         self.log.info(
-            f"Creating conda-store roles on namespace: {namespace} for user: {username}"
+            f"Creating conda-store roles on namespace: {namespace_role.namespace} for user: {username}"
         )
         conda_store = await get_conda_store(request)
         with conda_store.session_factory() as db:
-            api.create_namespace_role(db, namespace, username, role)
+            api.create_namespace_role(
+                db, namespace_role.namespace, username, namespace_role.role
+            )
             db.commit()
 
-    def _get_token(self) -> str:
+    def _get_keycloak_token(self) -> str:
         body = urllib.parse.urlencode(
             {
                 "client_id": self.client_id,
@@ -195,9 +208,8 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
                 "grant_type": "client_credentials",
             }
         )
-        # urllib
         req = urllib.request.Request(self.access_token_url, data=body.encode())
-        response = urllib.request.urlopen(req, context=self.disable_ssl_verify_ctx())
+        response = urllib.request.urlopen(req, context=self._disable_ssl_verify_ctx())
         data = json.loads(response.read())
         return data["access_token"]  # type: ignore[no-any-return]
 
@@ -207,26 +219,20 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             method="GET",
             headers={"Authorization": f"Bearer {token}"},
         )
-        import ssl
-
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-
         with urllib.request.urlopen(
-            req, context=self.disable_ssl_verify_ctx()
+            req, context=self._disable_ssl_verify_ctx()
         ) as response:
             data = json.loads(response.read())
         return data
 
-    async def remove_current_bindings(self, request, username):
+    async def _remove_current_bindings(self, request, username):
         """Remove current roles for the user to make sure only the roles defined in
         keycloak are applied:
         - to avoid inconsistency in user roles
         - single source of truth
         - roles that are added in keycloak and then later removed from keycloak are actually removed from conda-store.
         """
-        entity_bindings = self.get_current_entity_bindings(username)
+        entity_bindings = self._get_current_entity_bindings(username)
         self.log.info("Remove current role bindings for the user")
         for entity, role in entity_bindings.items():
             if entity not in {"default/*", "filesystem/*"}:
@@ -235,20 +241,20 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
                     f"Removing current role {role} on namespace {namespace} "
                     f"for user {username}"
                 )
-                await self.delete_conda_store_roles(request, namespace, username)
+                await self._delete_conda_store_roles(request, namespace, username)
 
-    async def apply_roles_from_keycloak(self, request, user_data):
-        token = self._get_token()
+    async def _apply_roles_from_keycloak(self, request, user_data):
+        token = self._get_keycloak_token()
         conda_store_client_id = self._get_conda_store_client_id(token)
-        conda_store_client_roles = self.get_conda_store_client_roles_for_user(
+        conda_store_client_roles = self._get_conda_store_client_roles_for_user(
             user_data["sub"], conda_store_client_id, token
         )
-        await self.remove_current_bindings(request, user_data["preferred_username"])
+        await self._remove_current_bindings(request, user_data["preferred_username"])
         await self._apply_conda_store_roles_from_keycloak(
             request, conda_store_client_roles, user_data["preferred_username"]
         )
 
-    def filter_duplicate_namespace_roles_with_max_permissions(
+    def _filter_duplicate_namespace_roles_with_max_permissions(
         self, namespace_roles: typing.List[CondaStoreNamespaceRole]
     ):
         """Filter duplicate roles in keycloak such that to apply only the one with the highest
@@ -273,10 +279,8 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
                 namespace_role_mapping[namespace] = namespace_role
             else:
                 # Only add if the permissions of this role is higher than existing
-                new_role_priority = self.conda_store_role_permissions_order.index(
-                    new_role
-                )
-                existing_role_priority = self.conda_store_role_permissions_order.index(
+                new_role_priority = CONDA_STORE_ROLE_PERMISSIONS_ORDER.index(new_role)
+                existing_role_priority = CONDA_STORE_ROLE_PERMISSIONS_ORDER.index(
                     existing_role.role
                 )
                 if new_role_priority > existing_role_priority:
@@ -307,7 +311,9 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
         self.log.info("Filtering duplicate namespace role for max permissions")
         filtered_namespace_role: typing.List[CondaStoreNamespaceRole] = (
-            self.filter_duplicate_namespace_roles_with_max_permissions(role_permissions)
+            self._filter_duplicate_namespace_roles_with_max_permissions(
+                role_permissions
+            )
         )
         self.log.info(f"Final role permissions to apply: {filtered_namespace_role}")
         for namespace_role in filtered_namespace_role:
@@ -315,19 +321,19 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
                 self.log.info("Role for given user's namespace, skipping")
                 continue
             try:
-                await self.delete_conda_store_roles(
+                await self._delete_conda_store_roles(
                     request, namespace_role.namespace, username
                 )
-                await self.create_conda_store_role(
-                    request, namespace_role.namespace, username, namespace_role.role
-                )
+                await self._create_conda_store_role(request, namespace_role, username)
             except ValueError as e:
                 self.log.error(
                     f"Failed to add permissions for namespace: {namespace_role.namespace} to user: {username}"
                 )
                 self.log.exception(e)
 
-    def _get_roles_with_attributes(self, roles: dict, client_id: str, token: str):
+    def _get_keycloak_conda_store_roles_with_attributes(
+        self, roles: dict, client_id: str, token: str
+    ):
         """This fetches all roles by id to fetch their attributes."""
         roles_rich = []
         for role in roles:
@@ -339,25 +345,24 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             roles_rich.append(role_rich)
         return roles_rich
 
-    def get_conda_store_client_roles_for_user(
+    def _get_conda_store_client_roles_for_user(
         self, user_id, conda_store_client_id, token
     ):
-        """Get roles for the client named 'jupyterhub'."""
-        # Includes roles like "jupyterhub_admin", "jupyterhub_developer", "dask_gateway_developer"
+        """Get roles for the client named 'conda-store' for the given user_id."""
         self.log.info(
-            f"get conda store client roles for user: {user_id}, conda_store_client_id: {conda_store_client_id}"
+            f"Get conda store client roles for user: {user_id}, conda_store_client_id: {conda_store_client_id}"
         )
         user_roles = self._fetch_api(
             endpoint=f"users/{user_id}/role-mappings/clients/{conda_store_client_id}/composite",
             token=token,
         )
-        client_roles_rich = self._get_roles_with_attributes(
+        client_roles_rich = self._get_keycloak_conda_store_roles_with_attributes(
             user_roles, client_id=conda_store_client_id, token=token
         )
         self.log.info(f"conda store client roles: {client_roles_rich}")
         return client_roles_rich
 
-    def get_current_entity_bindings(self, username):
+    def _get_current_entity_bindings(self, username):
         entity = schema.AuthenticationToken(
             primary_namespace=username, role_bindings={}
         )
@@ -391,7 +396,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         username = user_data["preferred_username"]
 
         try:
-            await self.apply_roles_from_keycloak(request, user_data=user_data)
+            await self._apply_roles_from_keycloak(request, user_data=user_data)
         except Exception as e:
             self.log.error("Adding roles from keycloak failed")
             self.log.exception(e)
