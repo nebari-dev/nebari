@@ -45,12 +45,21 @@ resource "azurerm_kubernetes_cluster" "main" {
 
     # temparory_name_for_rotation must be <= 12 characters
     temporary_name_for_rotation = "${substr(var.node_groups[0].name, 0, 9)}tmp"
+
   }
 
   sku_tier = "Free" # "Free" [Default] or "Paid"
 
   identity {
     type = "SystemAssigned" # "UserAssigned" or "SystemAssigned".  SystemAssigned identity lifecycles are tied to the AKS Cluster.
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # We ignore changes since otherwise, the AKS cluster unsets this default value every time you deploy.
+      # https://github.com/hashicorp/terraform-provider-azurerm/issues/24020#issuecomment-1887670287
+      default_node_pool[0].upgrade_settings,
+    ]
   }
 
 }
