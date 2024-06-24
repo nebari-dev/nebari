@@ -340,12 +340,22 @@ def get_provider_config_block_name(provider):
         return provider
 
 
+def mask_value(value: str, show_last: int = 4) -> str:
+    """Mask all but the last few characters of a string."""
+    if len(value) <= show_last:
+        return '*' * len(value)
+    return '*' * (len(value) - show_last) + value[-show_last:]
+
 def check_environment_variables(variables: Set[str], reference: str) -> None:
-    """Check that environment variables are set."""
+    """Check that environment variables are set and mask their values if set."""
     missing_variables = {variable for variable in variables if os.environ.get(variable) is None}
     
     if missing_variables:
+        masked_variables = {
+            variable: mask_value(os.environ[variable]) for variable in variables if os.environ.get(variable) is not None
+        }
         raise ValueError(
-            f"""Missing the following required environment variables: {missing_variables}\n
+            f"""Set environment variables are: {masked_variables}\n
+            Missing the following required environment variables: {missing_variables}\n
             Please see the documentation for more information: {reference}"""
         )
