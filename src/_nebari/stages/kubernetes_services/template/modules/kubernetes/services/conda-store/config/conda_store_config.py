@@ -243,7 +243,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
 
     def parse_role_and_namespace(self, text):
         # The regex pattern
-        pattern = r"^(\w+)!namespace=(\w+)$"
+        pattern = r"^(\w+)!namespace=([^!]+)$"
 
         # Perform the regex search
         match = re.search(pattern, text)
