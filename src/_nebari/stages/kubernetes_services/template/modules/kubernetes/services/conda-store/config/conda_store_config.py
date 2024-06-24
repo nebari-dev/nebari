@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import tempfile
 import urllib
 import urllib.parse
@@ -196,7 +197,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         )
 
     def is_valid_conda_store_role(self, keycloak_role):
-        conda_store_role, namespace = self._get_role_namespace_from_keycloak_role(
+        conda_store_role, namespace = self._get_permissions_from_keycloak_role(
             keycloak_role
         )
         if conda_store_role not in self.conda_store_role_permissions_order:
@@ -209,7 +210,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             return False
         return True
 
-    def filter_duplicate_namespace_roles_with_max_permissions(self, keycloak_roles):
+    def filter_duplicate_namespace_roles_with_max_permissions(self, role_permissions):
         """Filter duplicate roles in keycloak such that to apply only the one with the highest
         permissions.
 
@@ -220,36 +221,69 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         """
         self.log.info("Filtering duplicate roles for same namespace")
         namespace_role_mapping = {}
-        for keycloak_role in keycloak_roles:
-            if not self.is_valid_conda_store_role(keycloak_role):
-                continue
-            conda_store_role, namespace = self._get_role_namespace_from_keycloak_role(
-                keycloak_role
-            )
-            role_attributes_added = namespace_role_mapping.get(namespace)
-            if not role_attributes_added:
+        for role_permission in role_permissions:
+            namespace = role_permission.get("namespace")
+            new_role = role_permission.get("role")
+
+            existing_role = namespace_role_mapping.get(namespace)
+            if not existing_role:
                 # Add if not already added
-                namespace_role_mapping[namespace] = keycloak_role
+                namespace_role_mapping[namespace] = new_role
             else:
                 # Only add if the permissions of this role is higher than existing
-                existing_role = role_attributes_added.get("role")
-                role_priority = self.conda_store_role_permissions_order.index(
-                    conda_store_role
+                new_role_priority = self.conda_store_role_permissions_order.index(
+                    new_role
                 )
                 existing_role_priority = self.conda_store_role_permissions_order.index(
                     existing_role
                 )
-                if role_priority > existing_role_priority:
-                    namespace_role_mapping[namespace] = keycloak_role
-        return list(namespace_role_mapping.values())
+                if new_role_priority > existing_role_priority:
+                    namespace_role_mapping[namespace] = new_role
+        return namespace_role_mapping
 
-    def _get_role_namespace_from_keycloak_role(self, keycloak_role):
+    def parse_role_and_namespace(self, text):
+        # The regex pattern
+        pattern = r"^(\w+)!namespace=(\w+)$"
+
+        # Perform the regex search
+        match = re.search(pattern, text)
+
+        # Extract the permission and namespace if there is a match
+        if match:
+            role = match.group(1)
+            namespace = match.group(2)
+            return {"role": role, "namespace": namespace}
+        else:
+            return None
+
+    def _parse_scope(self, scopes):
+        """Parsed scopes from keycloak role's attribute and returns a list of role/namespace
+        if scopes' syntax is valid otherwise return []
+
+        Example:
+            Given scopes as "viewer!namespace=scipy,admin!namespace=pycon", the function will
+            return [{"role": "viewer", "namespace": "scipy"}, {"role": "admin", "namespace": "pycon"}]
+        """
+        if not scopes:
+            self.log.info(f"No scope found: {scopes}, skipping role")
+            return []
+        scope_list = scopes.split(",")
+        parsed_scopes = []
+        self.log.info(f"Scopes to parse: {scope_list}")
+        for scope_text in scope_list:
+            parsed_scope = self.parse_role_and_namespace(scope_text)
+            parsed_scopes.append(parsed_scope)
+            if not parsed_scope:
+                self.log.info(f"Unable to parse: {scope_text}, skipping keycloak role")
+                return []
+        return parsed_scopes
+
+    def _get_permissions_from_keycloak_role(self, keycloak_role):
+        self.log.info(f"Getting permissions from keycloak role: {keycloak_role}")
         role_attributes = keycloak_role["attributes"]
-        # namespace returns a list with a value say ["user-awesome"]
-        role = role_attributes.get("role", [None])[0]
-        # role returns a list with a value say ["viewer"]
-        namespace = role_attributes.get("namespace", [None])[0]
-        return role, namespace
+        # scopes returns a list with a value say ["viewer!namespace=pycon,developer!namespace=scipy"]
+        scopes = role_attributes.get("scopes", [""])[0]
+        return self._parse_scope(scopes)
 
     async def _apply_conda_store_roles_from_keycloak(
         self, request, conda_store_client_roles, username
@@ -257,18 +291,29 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         self.log.info(
             f"Apply conda store roles from keycloak roles: {conda_store_client_roles}, user: {username}"
         )
-        filtered_roles = self.filter_duplicate_namespace_roles_with_max_permissions(
-            conda_store_client_roles
+        role_permissions = []
+        for conda_store_client_role in conda_store_client_roles:
+            role_permissions += self._get_permissions_from_keycloak_role(
+                conda_store_client_role
+            )
+
+        self.log.info("Filtering duplicate namespace role for max permissions")
+        filtered_role_permissions = (
+            self.filter_duplicate_namespace_roles_with_max_permissions(role_permissions)
         )
-        self.log.info(f"Final roles to apply: {filtered_roles}")
-        for keycloak_role in filtered_roles:
-            role, namespace = self._get_role_namespace_from_keycloak_role(keycloak_role)
-            if namespace and (namespace.lower() == username.lower()):
+        self.log.info(f"Final role permissions to apply: {filtered_role_permissions}")
+        for namespace, role in filtered_role_permissions.items():
+            if namespace.lower() == username.lower():
                 self.log.info("Role for given user's namespace, skipping")
                 continue
-            if role and namespace:
+            try:
                 await self.delete_conda_store_roles(request, namespace, username)
                 await self.create_conda_store_role(request, namespace, username, role)
+            except ValueError as e:
+                self.log.error(
+                    f"Failed to add permissions for namespace: {namespace} to user: {username}"
+                )
+                self.log.exception(e)
 
     def _get_roles_with_attributes(self, roles: dict, client_id: str, token: str):
         """This fetches all roles by id to fetch their attributes."""
@@ -309,7 +354,16 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         self.log.info(f"current entity_bindings: {entity_bindings}")
         return entity_bindings
 
+    def _override_logger(self):
+        """The default logger is not very useful, and it doesn't have any formatting"""
+        formatter = logging.Formatter(
+            "%(asctime)s %(levelname)9s %(name)s:%(lineno)4s: %(message)s"
+        )
+        for handler in self.log.handlers:
+            handler.setFormatter(formatter)
+
     async def authenticate(self, request):
+        self._override_logger()
         # self.log.info("Authentication")
         self.log.info("*" * 100)
         self.log.info(f"self.service_account_token: {self.service_account_token}")
@@ -329,7 +383,12 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         self.log.info(f"user_data: {user_data}")
 
         username = user_data["preferred_username"]
-        await self.apply_roles_from_keycloak(request, user_data=user_data)
+
+        try:
+            await self.apply_roles_from_keycloak(request, user_data=user_data)
+        except Exception as e:
+            self.log.error("Adding roles from keycloak failed")
+            self.log.exception(e)
 
         # superadmin gets access to everything
         if "conda_store_superadmin" in user_data.get("roles", []):
