@@ -350,6 +350,6 @@ def check_environment_variables(variables: Set[str], reference: str) -> None:
     }
     if missing_variables:
         raise ValueError(
-            f"""Missing the following required environment variables: {required_variables}\n
+            f"""Missing the following required environment variables: {missing_variables}\n
             Please see the documentation for more information: {reference}"""
         )
