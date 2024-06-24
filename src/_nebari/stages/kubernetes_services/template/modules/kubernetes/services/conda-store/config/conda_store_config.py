@@ -1,7 +1,9 @@
+import dataclasses
 import json
 import logging
 import re
 import tempfile
+import typing
 import urllib
 import urllib.parse
 import urllib.request
@@ -85,6 +87,57 @@ c.GenericOAuthAuthentication.client_secret = config["openid-config"]["client_sec
 c.GenericOAuthAuthentication.access_scope = "profile"
 c.GenericOAuthAuthentication.user_data_key = "preferred_username"
 c.GenericOAuthAuthentication.tls_verify = False
+
+
+@dataclasses.dataclass
+class CondaStoreNamespaceRole:
+    namespace: str
+    role: str
+
+
+@dataclasses.dataclass
+class KeycloakCondaStoreRoleScopes:
+    scopes: str
+    log: logging.Logger
+
+    def parse_role_and_namespace(
+        self, text
+    ) -> typing.Optional[CondaStoreNamespaceRole]:
+        # The regex pattern
+        pattern = r"^(\w+)!namespace=([^!]+)$"
+
+        # Perform the regex search
+        match = re.search(pattern, text)
+
+        # Extract the permission and namespace if there is a match
+        if match:
+            return CondaStoreNamespaceRole(
+                namespace=match.group(2), role=match.group(1)
+            )
+        else:
+            return None
+
+    def parse_scope(self) -> typing.List[CondaStoreNamespaceRole]:
+        """Parsed scopes from keycloak role's attribute and returns a list of role/namespace
+        if scopes' syntax is valid otherwise return []
+
+        Example:
+            Given scopes as "viewer!namespace=scipy,admin!namespace=pycon", the function will
+            return [{"role": "viewer", "namespace": "scipy"}, {"role": "admin", "namespace": "pycon"}]
+        """
+        if not self.scopes:
+            self.log.info(f"No scope found: {self.scopes}, skipping role")
+            return []
+        scope_list = self.scopes.split(",")
+        parsed_scopes = []
+        self.log.info(f"Scopes to parse: {scope_list}")
+        for scope_text in scope_list:
+            parsed_scope = self.parse_role_and_namespace(scope_text)
+            parsed_scopes.append(parsed_scope)
+            if not parsed_scope:
+                self.log.info(f"Unable to parse: {scope_text}, skipping keycloak role")
+                return []
+        return parsed_scopes
 
 
 class KeyCloakAuthentication(GenericOAuthAuthentication):
@@ -195,21 +248,9 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             request, conda_store_client_roles, user_data["preferred_username"]
         )
 
-    def is_valid_conda_store_role(self, keycloak_role):
-        conda_store_role, namespace = self._get_permissions_from_keycloak_role(
-            keycloak_role
-        )
-        if conda_store_role not in self.conda_store_role_permissions_order:
-            self.log.info(
-                f"role {conda_store_role} not valid as not one of {self.conda_store_role_permissions_order}"
-            )
-            return False
-        if not namespace or (not conda_store_role):
-            self.log(f"Not a valid conda store role: {conda_store_role}")
-            return False
-        return True
-
-    def filter_duplicate_namespace_roles_with_max_permissions(self, role_permissions):
+    def filter_duplicate_namespace_roles_with_max_permissions(
+        self, namespace_roles: typing.List[CondaStoreNamespaceRole]
+    ):
         """Filter duplicate roles in keycloak such that to apply only the one with the highest
         permissions.
 
@@ -219,70 +260,38 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         We need to apply only the role 2 as that one has higher permissions.
         """
         self.log.info("Filtering duplicate roles for same namespace")
-        namespace_role_mapping = {}
-        for role_permission in role_permissions:
-            namespace = role_permission.get("namespace")
-            new_role = role_permission.get("role")
+        namespace_role_mapping: typing.Dict[str:CondaStoreNamespaceRole] = {}
+        for namespace_role in namespace_roles:
+            namespace = namespace_role.namespace
+            new_role = namespace_role.role
 
-            existing_role = namespace_role_mapping.get(namespace)
+            existing_role: CondaStoreNamespaceRole = namespace_role_mapping.get(
+                namespace
+            )
             if not existing_role:
                 # Add if not already added
-                namespace_role_mapping[namespace] = new_role
+                namespace_role_mapping[namespace] = namespace_role
             else:
                 # Only add if the permissions of this role is higher than existing
                 new_role_priority = self.conda_store_role_permissions_order.index(
                     new_role
                 )
                 existing_role_priority = self.conda_store_role_permissions_order.index(
-                    existing_role
+                    existing_role.role
                 )
                 if new_role_priority > existing_role_priority:
                     namespace_role_mapping[namespace] = new_role
-        return namespace_role_mapping
+        return list(namespace_role_mapping.values())
 
-    def parse_role_and_namespace(self, text):
-        # The regex pattern
-        pattern = r"^(\w+)!namespace=([^!]+)$"
-
-        # Perform the regex search
-        match = re.search(pattern, text)
-
-        # Extract the permission and namespace if there is a match
-        if match:
-            role = match.group(1)
-            namespace = match.group(2)
-            return {"role": role, "namespace": namespace}
-        else:
-            return None
-
-    def _parse_scope(self, scopes):
-        """Parsed scopes from keycloak role's attribute and returns a list of role/namespace
-        if scopes' syntax is valid otherwise return []
-
-        Example:
-            Given scopes as "viewer!namespace=scipy,admin!namespace=pycon", the function will
-            return [{"role": "viewer", "namespace": "scipy"}, {"role": "admin", "namespace": "pycon"}]
-        """
-        if not scopes:
-            self.log.info(f"No scope found: {scopes}, skipping role")
-            return []
-        scope_list = scopes.split(",")
-        parsed_scopes = []
-        self.log.info(f"Scopes to parse: {scope_list}")
-        for scope_text in scope_list:
-            parsed_scope = self.parse_role_and_namespace(scope_text)
-            parsed_scopes.append(parsed_scope)
-            if not parsed_scope:
-                self.log.info(f"Unable to parse: {scope_text}, skipping keycloak role")
-                return []
-        return parsed_scopes
-
-    def _get_permissions_from_keycloak_role(self, keycloak_role):
+    def _get_permissions_from_keycloak_role(
+        self, keycloak_role
+    ) -> typing.List[CondaStoreNamespaceRole]:
         self.log.info(f"Getting permissions from keycloak role: {keycloak_role}")
         role_attributes = keycloak_role["attributes"]
         # scopes returns a list with a value say ["viewer!namespace=pycon,developer!namespace=scipy"]
         scopes = role_attributes.get("scopes", [""])[0]
-        return self._parse_scope(scopes)
+        k_cstore_scopes = KeycloakCondaStoreRoleScopes(scopes=scopes, log=self.log)
+        return k_cstore_scopes.parse_scope()
 
     async def _apply_conda_store_roles_from_keycloak(
         self, request, conda_store_client_roles, username
@@ -290,27 +299,31 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         self.log.info(
             f"Apply conda store roles from keycloak roles: {conda_store_client_roles}, user: {username}"
         )
-        role_permissions = []
+        role_permissions: typing.List[CondaStoreNamespaceRole] = []
         for conda_store_client_role in conda_store_client_roles:
             role_permissions += self._get_permissions_from_keycloak_role(
                 conda_store_client_role
             )
 
         self.log.info("Filtering duplicate namespace role for max permissions")
-        filtered_role_permissions = (
+        filtered_namespace_role: typing.List[CondaStoreNamespaceRole] = (
             self.filter_duplicate_namespace_roles_with_max_permissions(role_permissions)
         )
-        self.log.info(f"Final role permissions to apply: {filtered_role_permissions}")
-        for namespace, role in filtered_role_permissions.items():
-            if namespace.lower() == username.lower():
+        self.log.info(f"Final role permissions to apply: {filtered_namespace_role}")
+        for namespace_role in filtered_namespace_role:
+            if namespace_role.namespace.lower() == username.lower():
                 self.log.info("Role for given user's namespace, skipping")
                 continue
             try:
-                await self.delete_conda_store_roles(request, namespace, username)
-                await self.create_conda_store_role(request, namespace, username, role)
+                await self.delete_conda_store_roles(
+                    request, namespace_role.namespace, username
+                )
+                await self.create_conda_store_role(
+                    request, namespace_role.namespace, username, namespace_role.role
+                )
             except ValueError as e:
                 self.log.error(
-                    f"Failed to add permissions for namespace: {namespace} to user: {username}"
+                    f"Failed to add permissions for namespace: {namespace_role.namespace} to user: {username}"
                 )
                 self.log.exception(e)
 
