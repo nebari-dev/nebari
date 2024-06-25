@@ -36,6 +36,7 @@ DEFAULT_STAGES_PLUGINS = [
     "_nebari.stages.kubernetes_keycloak_configuration",
     "_nebari.stages.kubernetes_services",
     "_nebari.stages.nebari_tf_extensions",
+    "_nebari.stages.kubernetes_test",
 ]
 
 
