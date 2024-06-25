@@ -1,4 +1,5 @@
 import contextlib
+import enum
 import inspect
 import os
 import pathlib
@@ -41,10 +42,36 @@ class ExistingInputVars(schema.Base):
     kube_context: str
 
 
-class DigitalOceanNodeGroup(schema.Base):
+# TODO: Make sure the taint is actually applied to the nodes for each provider
+class taintEffectEnum(str, enum.Enum):
+    NoSchedule: str = "NoSchedule"
+    PreferNoSchedule: str = "PreferNoSchedule"
+    NoExecute: str = "NoExecute"
+
+
+class Taint(schema.Base):
+    key: str
+    value: str
+    effect: taintEffectEnum
+
+
+class NodeGroup(schema.Base):
     instance: str
-    min_nodes: int
-    max_nodes: int
+    min_nodes: Annotated[int, Field(ge=0)] = 0
+    max_nodes: Annotated[int, Field(ge=1)] = 1
+    taints: Optional[List[Taint]] = []
+
+    @field_validator("taints", mode="before")
+    def validate_taint_strings(cls, value: List[str]):
+        TAINT_STR_REGEX = re.compile(r"(\w+)=(\w+):(\w+)")
+        parsed_taints = []
+        for taint in value:
+            match = TAINT_STR_REGEX.match(taint)
+            if not match:
+                raise ValueError(f"Invalid taint string: {taint}")
+            key, value, effect = match.groups()
+            parsed_taints.append(Taint(key=key, value=value, effect=effect))
+        return parsed_taints
 
 
 class DigitalOceanInputVars(schema.Base):
@@ -53,7 +80,7 @@ class DigitalOceanInputVars(schema.Base):
     region: str
     tags: List[str]
     kubernetes_version: str
-    node_groups: Dict[str, DigitalOceanNodeGroup]
+    node_groups: Dict[str, "DigitalOceanNodeGroup"]
     kubeconfig_filename: str = get_kubeconfig_filename()
 
 
@@ -153,25 +180,25 @@ def _calculate_asg_node_group_map(config: schema.Main):
 
 
 def _calculate_node_groups(config: schema.Main):
+    node_groups = ["general", "user", "worker", "storage"]
     if config.provider == schema.ProviderEnum.aws:
         return {
             group: {"key": "eks.amazonaws.com/nodegroup", "value": group}
-            for group in ["general", "user", "worker"]
+            for group in node_groups
         }
     elif config.provider == schema.ProviderEnum.gcp:
         return {
             group: {"key": "cloud.google.com/gke-nodepool", "value": group}
-            for group in ["general", "user", "worker"]
+            for group in node_groups
         }
     elif config.provider == schema.ProviderEnum.azure:
         return {
-            group: {"key": "azure-node-pool", "value": group}
-            for group in ["general", "user", "worker"]
+            group: {"key": "azure-node-pool", "value": group} for group in node_groups
         }
     elif config.provider == schema.ProviderEnum.do:
         return {
             group: {"key": "doks.digitalocean.com/node-pool", "value": group}
-            for group in ["general", "user", "worker"]
+            for group in node_groups
         }
     elif config.provider == schema.ProviderEnum.existing:
         return config.existing.node_selectors
@@ -211,22 +238,21 @@ class KeyValueDict(schema.Base):
     value: str
 
 
-class DigitalOceanNodeGroup(schema.Base):
+class DigitalOceanNodeGroup(NodeGroup):
     """Representation of a node group with Digital Ocean
 
     - Kubernetes limits: https://docs.digitalocean.com/products/kubernetes/details/limits/
     - Available instance types: https://slugs.do-api.dev/
     """
 
-    instance: str
-    min_nodes: Annotated[int, Field(ge=1)] = 1
-    max_nodes: Annotated[int, Field(ge=1)] = 1
+    pass
 
 
 DEFAULT_DO_NODE_GROUPS = {
-    "general": DigitalOceanNodeGroup(instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1),
+    "general": DigitalOceanNodeGroup(instance="g-8vcpu-32gb", min_nodes=1, max_nodes=5),
     "user": DigitalOceanNodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
     "worker": DigitalOceanNodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
+    "storage": DigitalOceanNodeGroup(instance="g-4vcpu-16gb", min_nodes=3, max_nodes=3),
 }
 
 
@@ -305,19 +331,17 @@ class GCPGuestAccelerator(schema.Base):
     count: Annotated[int, Field(ge=1)] = 1
 
 
-class GCPNodeGroup(schema.Base):
-    instance: str
-    min_nodes: Annotated[int, Field(ge=0)] = 0
-    max_nodes: Annotated[int, Field(ge=1)] = 1
+class GCPNodeGroup(NodeGroup):
     preemptible: bool = False
     labels: Dict[str, str] = {}
     guest_accelerators: List[GCPGuestAccelerator] = []
 
 
 DEFAULT_GCP_NODE_GROUPS = {
-    "general": GCPNodeGroup(instance="e2-highmem-4", min_nodes=1, max_nodes=1),
+    "general": GCPNodeGroup(instance="e2-highmem-4", min_nodes=1, max_nodes=5),
     "user": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
     "worker": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
+    "storage": GCPNodeGroup(instance="e2-standard-4", min_nodes=3, max_nodes=5),
 }
 
 
@@ -355,16 +379,15 @@ class GoogleCloudPlatformProvider(schema.Base):
         return data
 
 
-class AzureNodeGroup(schema.Base):
-    instance: str
-    min_nodes: int
-    max_nodes: int
+class AzureNodeGroup(NodeGroup):
+    pass
 
 
 DEFAULT_AZURE_NODE_GROUPS = {
     "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
     "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
+    "storage": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=3, max_nodes=3),
 }
 
 
@@ -426,22 +449,22 @@ class AzureProvider(schema.Base):
         return value if value is None else azure_cloud.validate_tags(value)
 
 
-class AWSNodeGroup(schema.Base):
-    instance: str
-    min_nodes: int = 0
-    max_nodes: int
+class AWSNodeGroup(NodeGroup):
     gpu: bool = False
     single_subnet: bool = False
     permissions_boundary: Optional[str] = None
 
 
 DEFAULT_AWS_NODE_GROUPS = {
-    "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
+    "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=5),
     "user": AWSNodeGroup(
         instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
     ),
     "worker": AWSNodeGroup(
         instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
+    ),
+    "storage": AWSNodeGroup(
+        instance="m5.xlarge", min_nodes=3, max_nodes=3, single_subnet=False
     ),
 }
 
@@ -515,6 +538,7 @@ class LocalProvider(schema.Base):
         "general": KeyValueDict(key="kubernetes.io/os", value="linux"),
         "user": KeyValueDict(key="kubernetes.io/os", value="linux"),
         "worker": KeyValueDict(key="kubernetes.io/os", value="linux"),
+        "storage": KeyValueDict(key="kubernetes.io/os", value="linux"),
     }
 
 
@@ -524,6 +548,7 @@ class ExistingProvider(schema.Base):
         "general": KeyValueDict(key="kubernetes.io/os", value="linux"),
         "user": KeyValueDict(key="kubernetes.io/os", value="linux"),
         "worker": KeyValueDict(key="kubernetes.io/os", value="linux"),
+        "storage": KeyValueDict(key="kubernetes.io/os", value="linux"),
     }
 
 

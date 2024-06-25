@@ -69,6 +69,14 @@ cephClusterSpec:
         # as soon as you have more than one OSD per node. The topology spread constraints will
         # give us an even spread on K8s 1.18 or newer.
         placement:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: azure-node-pool  # TODO: update this label for all cloud providers, use a taint/toleration instead
+                      operator: In
+                      values:
+                        - storage
           topologySpreadConstraints:
             - maxSkew: 1
               topologyKey: kubernetes.io/hostname

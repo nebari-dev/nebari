@@ -65,36 +65,76 @@ resource "azurerm_kubernetes_cluster" "main" {
 }
 
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
-resource "azurerm_kubernetes_cluster_node_pool" "user_node_group" {
-  name                  = var.node_groups[1].name
+# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
+resource "azurerm_kubernetes_cluster_node_pool" "node_group" {
+  for_each = { for i, group in var.node_groups : i => group if i != 0 }
+
+  name                  = each.value.name
   kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
-  vm_size               = var.node_groups[1].instance_type
+  vm_size               = each.value.instance_type
   enable_auto_scaling   = "true"
   mode                  = "User" # "System" or "User", only "User" nodes can scale down to 0
-  min_count             = var.node_groups[1].min_size
-  max_count             = var.node_groups[1].max_size
+  min_count             = each.value.min_size
+  max_count             = each.value.max_size
   max_pods              = var.max_pods
   node_labels = {
-    "azure-node-pool" = var.node_groups[1].name
+    "azure-node-pool" = each.value.name
   }
   orchestrator_version = var.kubernetes_version
   tags                 = var.tags
   vnet_subnet_id       = var.vnet_subnet_id
+
+  # TODO: Get node taints working
+  node_taints = [
+    "dedicated=${each.value.name}:NoSchedule"
+  ]
+  # node_taints = [
+  #   for taint in each.value.taints :
+  #     "${taint.key}=${taint.value}:${taint.effect}"
+  # ]
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "worker_node_group" {
-  name                  = var.node_groups[2].name
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
-  vm_size               = var.node_groups[2].instance_type
-  enable_auto_scaling   = "true"
-  mode                  = "User" # "System" or "User", only "User" nodes can scale down to 0
-  min_count             = var.node_groups[2].min_size
-  max_count             = var.node_groups[2].max_size
-  max_pods              = var.max_pods
-  node_labels = {
-    "azure-node-pool" = var.node_groups[2].name
-  }
-  orchestrator_version = var.kubernetes_version
-  tags                 = var.tags
-  vnet_subnet_id       = var.vnet_subnet_id
-}
+# resource "azurerm_kubernetes_cluster_node_pool" "user_node_group" {
+#   name                  = var.node_groups[1].name
+#   kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
+#   vm_size               = var.node_groups[1].instance_type
+#   enable_auto_scaling   = "true"
+#   mode                  = "User" # "System" or "User", only "User" nodes can scale down to 0
+#   min_count             = var.node_groups[1].min_size
+#   max_count             = var.node_groups[1].max_size
+#   max_pods              = var.max_pods
+#   node_labels = {
+#     "azure-node-pool" = var.node_groups[1].name
+#   }
+#   orchestrator_version = var.kubernetes_version
+#   tags                 = var.tags
+#   vnet_subnet_id       = var.vnet_subnet_id
+
+#   node_taints = [{
+#     effect = "NoSchedule"
+#     key    = "dedicated"
+#     value  = var.node_groups[1].name
+#   }]
+# }
+
+# resource "azurerm_kubernetes_cluster_node_pool" "worker_node_group" {
+#   name                  = var.node_groups[2].name
+#   kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
+#   vm_size               = var.node_groups[2].instance_type
+#   enable_auto_scaling   = "true"
+#   mode                  = "User" # "System" or "User", only "User" nodes can scale down to 0
+#   min_count             = var.node_groups[2].min_size
+#   max_count             = var.node_groups[2].max_size
+#   max_pods              = var.max_pods
+#   node_labels = {
+#     "azure-node-pool" = var.node_groups[2].name
+#   }
+#   orchestrator_version = var.kubernetes_version
+#   tags                 = var.tags
+#   vnet_subnet_id       = var.vnet_subnet_id
+#   node_taints = [{
+#     effect = "NoSchedule"
+#     key    = "dedicated"
+#     value  = var.node_groups[2].name
+#   }]
+# }

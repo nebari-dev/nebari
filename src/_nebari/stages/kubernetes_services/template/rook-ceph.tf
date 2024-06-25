@@ -31,7 +31,7 @@ module "rook-ceph" {
   # realm_id     = var.realm_id
 
   # node-group                          = var.node_groups.general
-  overrides = var.argo-workflows-overrides
+  # overrides = var.rook-ceph-overrides
   # keycloak-read-only-user-credentials = var.keycloak-read-only-user-credentials
   # workflow-controller-image-tag       = var.workflow-controller-image-tag
   # nebari-workflow-controller          = var.nebari-workflow-controller
