@@ -7,6 +7,12 @@ locals {
   # viewer    = "argo-viewer"
 }
 
+resource "kubernetes_namespace" "rook-ceph" {
+  metadata {
+    name = "rook-ceph" # TODO: Make this a variable
+  }
+}
+
 resource "helm_release" "rook-ceph" {
   name       = "rook-ceph"
   namespace  = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
@@ -67,6 +73,8 @@ resource "helm_release" "rook-ceph" {
 
     })
   ], var.overrides)
+
+  depends_on = [kubernetes_namespace.rook-ceph]
 }
 
 resource "helm_release" "rook-ceph-cluster" {
@@ -83,6 +91,8 @@ resource "helm_release" "rook-ceph-cluster" {
       operatorNamespace = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
     })
   ], var.overrides)
+
+  depends_on = [helm_release.rook-ceph]
 }
 
 
