@@ -9,4 +9,4 @@ tolerations:
     effect: NoSchedule
 
 monitoring:
-  enabled: true
+  enabled: false  # TODO: Enable monitoring when nebari-config.yaml has it enabled
