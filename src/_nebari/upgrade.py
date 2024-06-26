@@ -1040,7 +1040,13 @@ class Upgrade_2024_6_1(UpgradeStep):
             # and let the terminal wrap them if needed.
             console = rich.console.Console(width=220)
             if run_commands == "y":
-                kubernetes.config.load_kube_config()
+                try:
+                    kubernetes.config.load_kube_config()
+                except kubernetes.config.config_exception.ConfigException:
+                    rich.print(
+                        "[red bold]No default kube configuration file was found. Make sure to have one pointing to your Nebari cluster before upgrading.[/red bold]"
+                    )
+                    exit()
                 current_kube_context = kubernetes.config.list_kube_config_contexts()[1]
                 cluster_name = current_kube_context["context"]["cluster"]
                 rich.print(
