@@ -9,6 +9,45 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+### Release 2024.6.1 - June 26, 2024
+
+> NOTE: This release includes an upgrade to the `kube-prometheus-stack` Helm chart, resulting in a newer version of Grafana. When upgrading your Nebari cluster, you will be prompted to have Nebari update some CRDs and delete a DaemonSet on your behalf. If you prefer, you can also run the commands yourself, which will be shown to you. If you have any custom dashboards, you'll also need to back them up by [exporting them as JSON](https://grafana.com/docs/grafana/latest/dashboards/share-dashboards-panels/#export-a-dashboard-as-json), so you can [import them](https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/#import-a-dashboard) after upgrading.
+
+### What's Changed
+* Fetch JupyterHub roles from Keycloak by @krassowski in https://github.com/nebari-dev/nebari/pull/2447
+* Update selector for Start server button to use button tag by @krassowski in https://github.com/nebari-dev/nebari/pull/2464
+* Reduce GCP Fixed Costs by 50% by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2453
+* Restore JupyterHub updates from PR-2427 by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2465
+* Workload identity by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2460
+* Fix test using a non-specific selector by @krassowski in https://github.com/nebari-dev/nebari/pull/2475
+* add verify=false since we use self signed cert in tests by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2481
+* fix forward auth when using custom cert by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2479
+* Upgrade to JupyterHub 5.0.0b2 by @krassowski in https://github.com/nebari-dev/nebari/pull/2468
+* upgrade instructions for PR 2453 by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2466
+* Use Helm Chart for JupyterHub 5.0.0 final by @krassowski in https://github.com/nebari-dev/nebari/pull/2484
+* Parse and insert keycloak roles scopes into JupyterHub by @aktech in https://github.com/nebari-dev/nebari/pull/2471
+* Add CITATION file by @pavithraes in https://github.com/nebari-dev/nebari/pull/2455
+* CI: add azure integration by @fangchenli in https://github.com/nebari-dev/nebari/pull/2061
+* Create trivy.yml by @dcmcand in https://github.com/nebari-dev/nebari/pull/2458
+* don't run azure deployment on PRs, only on schedule and manual trigger by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2498
+* add cloud provider deployment status badges to README.md by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2407
+* Upgrade kube-prometheus-stack helm chart by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2472
+* upgrade note by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2502
+* Remove VSCode from jhub_apps default services by @jbouder in https://github.com/nebari-dev/nebari/pull/2503
+* Explicit config by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2294
+* fix general node scaling bug for azure by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2517
+* Skip running cleanup on pull requests by @aktech in https://github.com/nebari-dev/nebari/pull/2488
+* 1792 Add docstrings to `upgrade.py` by @arjxn-py in https://github.com/nebari-dev/nebari/pull/2512
+* set's min TLS version for azure storage account to TLS 1.2 by @dcmcand in https://github.com/nebari-dev/nebari/pull/2522
+* Fix conda-store and Traefik Grafana Dashboards by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2540
+* Implement support for jupyterlab-gallery config by @krassowski in https://github.com/nebari-dev/nebari/pull/2501
+* Add option to run CRDs updates and DaemonSet deletion on user's behalf. by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2544
+
+### New Contributors
+* @arjxn-py made their first contribution in https://github.com/nebari-dev/nebari/pull/2512
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.5.1...2024.6.1
+
 ### Release 2024.5.1 - May 13, 2024
 
 ## What's Changed
