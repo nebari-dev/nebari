@@ -21,6 +21,58 @@ resource "aws_eks_cluster" "main" {
   tags = merge({ Name = var.name }, var.tags)
 }
 
+###################################################################################################
+#########################################BEGIN TEST BLOCK##########################################
+###https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-basics###
+###################################################################################################
+
+resource "aws_launch_template" "main" {
+  count = var.extra_ssl_certificates == null ? 0 : length(var.node_groups)
+  #count = length(var.node_groups)
+
+  ##image_id                      = "ami-0975997637ebecdc2"
+  #instance_type                 = var.node_groups[count.index].instance_type
+  #key_name                      = var.key_name
+  #key_name                      = "windows_rdp_keypair"
+  name                          = var.node_groups[count.index].name
+
+  vpc_security_group_ids = var.cluster_security_groups
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+
+    ebs {
+      volume_size = 50
+      volume_type = "gp2"
+    }
+  }
+  ## https://stackoverflow.com/questions/68894525/how-to-pass-kubelet-extra-args-to-aws-eks-node-group-created-by-terraform-aws ##
+  user_data                     = base64encode(<<-EOF
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="//"
+
+--//
+Content-Type: text/x-shellscript; charset="us-ascii"
+#!/bin/bash
+cat <<-EOT >> /etc/pki/ca-trust/source/anchors/client.pem
+${var.extra_ssl_certificates}
+EOT
+sudo update-ca-trust extract
+## If using a Custom AMI, then the following bootstrap cmds and args must be included/modified, otherwise the /etc/eks/bootstrap.sh cmd is appended automatically
+#set -ex
+#B64_CLUSTER_CA=${aws_eks_cluster.main.certificate_authority[0].data}
+#API_SERVER_URL=${aws_eks_cluster.main.endpoint}
+#K8S_CLUSTER_DNS_IP=172.20.0.10
+#/etc/eks/bootstrap.sh ${aws_eks_cluster.main.name} --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup-image=ami-0c7e1dd70292cb6c6,dedicated=${var.node_groups[count.index].name},eks.amazonaws.com/capacityType=ON_DEMAND,eks.amazonaws.com/nodegroup=${var.node_groups[count.index].name} --max-pods=58' --b64-cluster-ca $B64_CLUSTER_CA --apiserver-endpoint $API_SERVER_URL --dns-cluster-ip $K8S_CLUSTER_DNS_IP --use-max-pods false
+
+--//--\
+  EOF
+  )
+}
+
+###################################################################################################
+##########################################END TEST BLOCK###########################################
+###################################################################################################
 
 resource "aws_eks_node_group" "main" {
   count = length(var.node_groups)
@@ -32,7 +84,8 @@ resource "aws_eks_node_group" "main" {
 
   instance_types = [var.node_groups[count.index].instance_type]
   ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" : "AL2_x86_64"
-  disk_size      = 50
+  disk_size      = var.extra_ssl_certificates == null ? 50 : null 
+  #disk_size      = 50
 
   scaling_config {
     min_size     = var.node_groups[count.index].min_size
@@ -49,6 +102,25 @@ resource "aws_eks_node_group" "main" {
       scaling_config[0].desired_size,
     ]
   }
+  ###################################################################################################
+  #########################################BEGIN TEST BLOCK##########################################
+  ###################################################################################################
+  dynamic "launch_template" {
+    for_each = var.extra_ssl_certificates == null ? [] : [1]
+    content {
+      id = aws_launch_template.main[count.index].id
+      #version = aws_launch_template.main[count.index].default_version
+      version = aws_launch_template.main[count.index].latest_version
+    }
+  }
+  #launch_template { 
+  #    id = aws_launch_template.main[count.index].id 
+  #    #version = aws_launch_template.main[count.index].default_version
+  #    version = aws_launch_template.main[count.index].latest_version   
+  #}
+  ###################################################################################################
+  ##########################################END TEST BLOCK###########################################
+  ###################################################################################################
 
   # Ensure that IAM Role permissions are created before and deleted
   # after EKS Node Group handling.  Otherwise, EKS will not be able to

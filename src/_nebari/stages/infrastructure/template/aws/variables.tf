@@ -56,6 +56,12 @@ variable "kubeconfig_filename" {
   type        = string
 }
 
+variable "extra_ssl_certificates" {
+  description = "Text extract of .pem cert file to include in updating ca trust on EKS nodes"
+  type    = string
+  default = null
+}
+
 variable "eks_endpoint_public_access" {
   type    = bool
   default = true

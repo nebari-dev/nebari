@@ -60,6 +60,12 @@ variable "node_group_instance_type" {
   default     = "m5.large"
 }
 
+variable "extra_ssl_certificates" {
+  description = "Text extract of .pem cert file to include in updating ca trust on EKS nodes"
+  type    = string
+  default = null
+}
+
 variable "endpoint_public_access" {
   type    = bool
   default = true
