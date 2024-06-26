@@ -38,7 +38,6 @@ from _nebari.version import __version__, rounded_ver_parse
 from nebari.schema import ProviderEnum, is_version_accepted
 
 logger = logging.getLogger(__name__)
-kubernetes.config.load_kube_config()
 
 NEBARI_WORKFLOW_CONTROLLER_DOCS = (
     "https://www.nebari.dev/docs/how-tos/using-argo/#jupyterflow-override-beta"
@@ -1041,6 +1040,7 @@ class Upgrade_2024_6_1(UpgradeStep):
             # and let the terminal wrap them if needed.
             console = rich.console.Console(width=220)
             if run_commands == "y":
+                kubernetes.config.load_kube_config()
                 current_kube_context = kubernetes.config.list_kube_config_contexts()[1]
                 cluster_name = current_kube_context["context"]["cluster"]
                 rich.print(
