@@ -10,6 +10,20 @@ from oauthenticator.generic import GenericOAuthenticator
 from traitlets import Bool, Unicode, Union
 
 
+# A set of roles to create automatically to help with basic permissions
+DEFAULT_ROLES = [
+    {
+        "name": "allow-app-sharing-role",
+        "description": "Allow app sharing for apps created via JupyterHub App Launcher (jhub-apps)",
+        # grants permissions to share user's server
+        # grants permissions to read other user's names
+        # grants permissions to read other groups' names
+        # The later two are required for sharing with a group or user
+        "scopes": "shares!user,read:users:name,read:groups:name",
+    }
+]
+
+
 class KeyCloakOAuthenticator(GenericOAuthenticator):
     """
     Since `oauthenticator` 16.3 `GenericOAuthenticator` supports group management.
@@ -105,6 +119,14 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         jupyterhub_client_id = jupyterhub_clients[0]["id"]
         return jupyterhub_client_id
 
+    def _get_default_roles_which_does_not_exists(self, managed_roles):
+        """Add default roles which_does_not_exists already"""
+        default_roles_to_add = [
+            role for role in DEFAULT_ROLES
+            if role["name"] not in managed_roles
+        ]
+        return default_roles_to_add
+
     async def load_managed_roles(self):
         self.log.info("Loading managed roles")
         if not self.manage_roles:
@@ -152,7 +174,8 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             )
             role["users"] = [user["username"] for user in users]
 
-        return list(roles.values())
+        default_roles = self._get_default_roles_which_does_not_exists(roles)
+        return list(roles.values()) + default_roles
 
     def _get_scope_from_role(self, role):
         """Return scopes from role if the component is jupyterhub"""
