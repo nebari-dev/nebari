@@ -21,19 +21,11 @@ resource "aws_eks_cluster" "main" {
   tags = merge({ Name = var.name }, var.tags)
 }
 
-###################################################################################################
-#########################################BEGIN TEST BLOCK##########################################
-###https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-basics###
-###################################################################################################
-
 resource "aws_launch_template" "main" {
+  # Invoke launch_template only if var.extra_ssl_certificates is not null
   count = var.extra_ssl_certificates == null ? 0 : length(var.node_groups)
-  #count = length(var.node_groups)
 
-  ##image_id                      = "ami-0975997637ebecdc2"
-  #instance_type                 = var.node_groups[count.index].instance_type
   #key_name                      = var.key_name
-  #key_name                      = "windows_rdp_keypair"
   name                          = var.node_groups[count.index].name
 
   vpc_security_group_ids = var.cluster_security_groups
@@ -46,6 +38,7 @@ resource "aws_launch_template" "main" {
       volume_type = "gp2"
     }
   }
+  ## https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-basics ##
   ## https://stackoverflow.com/questions/68894525/how-to-pass-kubelet-extra-args-to-aws-eks-node-group-created-by-terraform-aws ##
   user_data                     = base64encode(<<-EOF
 MIME-Version: 1.0
@@ -58,7 +51,8 @@ cat <<-EOT >> /etc/pki/ca-trust/source/anchors/client.pem
 ${var.extra_ssl_certificates}
 EOT
 sudo update-ca-trust extract
-## If using a Custom AMI, then the following bootstrap cmds and args must be included/modified, otherwise the /etc/eks/bootstrap.sh cmd is appended automatically
+## If using a Custom AMI, then the following bootstrap cmds and args must be included/modified,
+## otherwise, on AWS EKS Node AMI, the /etc/eks/bootstrap.sh cmd is appended automatically
 #set -ex
 #B64_CLUSTER_CA=${aws_eks_cluster.main.certificate_authority[0].data}
 #API_SERVER_URL=${aws_eks_cluster.main.endpoint}
@@ -70,10 +64,6 @@ sudo update-ca-trust extract
   )
 }
 
-###################################################################################################
-##########################################END TEST BLOCK###########################################
-###################################################################################################
-
 resource "aws_eks_node_group" "main" {
   count = length(var.node_groups)
 
@@ -84,8 +74,7 @@ resource "aws_eks_node_group" "main" {
 
   instance_types = [var.node_groups[count.index].instance_type]
   ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" : "AL2_x86_64"
-  disk_size      = var.extra_ssl_certificates == null ? 50 : null 
-  #disk_size      = 50
+  disk_size      = var.extra_ssl_certificates == null ? 50 : null
 
   scaling_config {
     min_size     = var.node_groups[count.index].min_size
@@ -102,9 +91,7 @@ resource "aws_eks_node_group" "main" {
       scaling_config[0].desired_size,
     ]
   }
-  ###################################################################################################
-  #########################################BEGIN TEST BLOCK##########################################
-  ###################################################################################################
+  # Invoke launch_template only if var.extra_ssl_certificates is not null
   dynamic "launch_template" {
     for_each = var.extra_ssl_certificates == null ? [] : [1]
     content {
@@ -113,14 +100,6 @@ resource "aws_eks_node_group" "main" {
       version = aws_launch_template.main[count.index].latest_version
     }
   }
-  #launch_template { 
-  #    id = aws_launch_template.main[count.index].id 
-  #    #version = aws_launch_template.main[count.index].default_version
-  #    version = aws_launch_template.main[count.index].latest_version   
-  #}
-  ###################################################################################################
-  ##########################################END TEST BLOCK###########################################
-  ###################################################################################################
 
   # Ensure that IAM Role permissions are created before and deleted
   # after EKS Node Group handling.  Otherwise, EKS will not be able to
