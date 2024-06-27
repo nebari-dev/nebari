@@ -1,14 +1,13 @@
 import contextlib
-import json
 import pathlib
 import sys
 from typing import Any, Dict, List, Type
 
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
-from kubernetes.utils import FailToCreateError, create_from_yaml
 
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.kubernetes_test.apply_from_yaml import create_from_yaml
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -60,7 +59,8 @@ class KubernetesTestStage(NebariTerraformStage):
         if self.failed_to_create:
             print(
                 f"ERROR: After stage={self.name} "
-                f"failed to create kubernetes resources with error: {self.error_message}"
+                f"failed to create kubernetes resources"
+                f"with error: {self.error_message}"
             )
             sys.exit(1)
 
@@ -87,18 +87,10 @@ class KubernetesTestStage(NebariTerraformStage):
         # apply each manifest to the kubernetes cluster
         for manifest in manifests:
             try:
-                create_from_yaml(kubernetes_client, manifest)
-            except FailToCreateError as e:
-                for error in e.api_exceptions:
-                    body = json.loads(error.body)
-                    if body.get("reason", "") == "AlreadyExists":
-                        print(f"WARNING: {body.get('message')}")
-                    else:
-                        self.failed_to_create = True
-                        self.error_message = e
-                        raise RuntimeError(
-                            f"Failed to create {manifest} with error {e}"
-                        )
+                create_from_yaml(kubernetes_client, manifest, apply=True)
+            except ApiException as e:
+                self.failed_to_create = True
+                self.error_message = str(e)
         yield
 
 
