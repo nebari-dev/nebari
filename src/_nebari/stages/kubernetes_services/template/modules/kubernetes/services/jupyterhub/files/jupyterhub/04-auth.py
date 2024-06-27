@@ -9,7 +9,6 @@ from jupyterhub.traitlets import Callable
 from oauthenticator.generic import GenericOAuthenticator
 from traitlets import Bool, Unicode, Union
 
-
 # A set of roles to create automatically to help with basic permissions
 DEFAULT_ROLES = [
     {
@@ -122,8 +121,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
     def _get_default_roles_which_does_not_exists(self, managed_roles):
         """Add default roles which_does_not_exists already"""
         default_roles_to_add = [
-            role for role in DEFAULT_ROLES
-            if role["name"] not in managed_roles
+            role for role in DEFAULT_ROLES if role["name"] not in managed_roles
         ]
         return default_roles_to_add
 
