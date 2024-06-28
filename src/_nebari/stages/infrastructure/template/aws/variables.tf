@@ -56,10 +56,16 @@ variable "kubeconfig_filename" {
   type        = string
 }
 
+variable "ec2_keypair_name" {
+  description = "Name of AWS Ec2 Key Pair for enabling ssh remote access to EKS nodes"
+  type        = string
+  default     = null
+}
+
 variable "extra_ssl_certificates" {
   description = "Text extract of .pem cert file to include in updating ca trust on EKS nodes"
-  type    = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "eks_endpoint_public_access" {

@@ -92,6 +92,7 @@ module "kubernetes" {
 
   node_groups = var.node_groups
 
+  ec2_keypair_name        = var.ec2_keypair_name
   extra_ssl_certificates  = var.extra_ssl_certificates
   endpoint_public_access  = var.eks_endpoint_public_access
   endpoint_private_access = var.eks_endpoint_private_access

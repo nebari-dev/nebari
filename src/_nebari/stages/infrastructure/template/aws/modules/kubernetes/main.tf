@@ -25,8 +25,8 @@ resource "aws_launch_template" "main" {
   # Invoke launch_template only if var.extra_ssl_certificates is not null
   count = var.extra_ssl_certificates == null ? 0 : length(var.node_groups)
 
-  #key_name                      = var.key_name
-  name                          = var.node_groups[count.index].name
+  key_name  = var.ec2_keypair_name == null ? null : var.ec2_keypair_name
+  name      = var.node_groups[count.index].name
 
   vpc_security_group_ids = var.cluster_security_groups
 
@@ -71,6 +71,14 @@ resource "aws_eks_node_group" "main" {
   node_group_name = var.node_groups[count.index].name
   node_role_arn   = aws_iam_role.node-group.arn
   subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, 0)] : var.cluster_subnets
+
+  dynamic remote_access {
+    for_each = var.ec2_keypair_name != null && var.extra_ssl_certificates == null ? [] : [1]
+    content {
+      ec2_ssh_key = var.ec2_keypair_name
+      source_security_group_ids = var.cluster_security_groups
+    }
+  }
 
   instance_types = [var.node_groups[count.index].instance_type]
   ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" : "AL2_x86_64"
