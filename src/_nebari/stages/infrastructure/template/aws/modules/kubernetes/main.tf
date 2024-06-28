@@ -73,7 +73,7 @@ resource "aws_eks_node_group" "main" {
   subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, 0)] : var.cluster_subnets
 
   dynamic remote_access {
-    for_each = var.ec2_keypair_name != null && var.extra_ssl_certificates == null ? [] : [1]
+    for_each = var.ec2_keypair_name != null && var.extra_ssl_certificates == null ? [1] : []
     content {
       ec2_ssh_key = var.ec2_keypair_name
       source_security_group_ids = var.cluster_security_groups
