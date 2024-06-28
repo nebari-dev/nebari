@@ -10,3 +10,6 @@ tolerations:
 
 monitoring:
   enabled: false  # TODO: Enable monitoring when nebari-config.yaml has it enabled
+
+csi:
+  enableRbdDriver: false  # necessary to provision block storage, but saves some cpu and memory if not needed

@@ -95,23 +95,27 @@ resource "helm_release" "rook-ceph-cluster" {
   depends_on = [helm_release.rook-ceph]
 }
 
+locals {
+  storage-class           = data.kubernetes_storage_class.rook-ceph-fs-delete-sc
+  storage-class-base-name = "ceph-filesystem"
+}
+
 data "kubernetes_storage_class" "rook-ceph-fs-delete-sc" {
   metadata {
-    name = "ceph-filesystem" # TODO: Make sure we get this right
+    name = local.storage-class-base-name # TODO: Make sure we get this right
   }
+  depends_on = [helm_release.rook-ceph-cluster]
 }
 
-locals {
-  storage-class = data.kubernetes_storage_class.rook-ceph-fs-delete-sc
-}
-
-resource "kubernetes_storage_class" "ceph-retain_sc" {
+resource "kubernetes_storage_class" "ceph-retain-sc" {
   metadata {
-    name = "${data.kubernetes_storage_class.rook-ceph-fs-delete-sc.metadata[0].name}-retain" # "ceph-filesystem-retain"  # TODO: Make sure we get this right
+    name = "${local.storage-class-base-name}-retain" # "ceph-filesystem-retain"  # TODO: Make sure we get this right
   }
   storage_provisioner    = local.storage-class.storage_provisioner # "rook-ceph.cephfs.csi.ceph.com"
   reclaim_policy         = "Retain"
   volume_binding_mode    = local.storage-class.volume_binding_mode
   allow_volume_expansion = local.storage-class.allow_volume_expansion
   parameters             = local.storage-class.parameters
+
+  depends_on = [data.kubernetes_storage_class.rook-ceph-fs-delete-sc]
 }

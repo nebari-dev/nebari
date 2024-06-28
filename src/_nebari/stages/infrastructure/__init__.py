@@ -387,7 +387,7 @@ DEFAULT_AZURE_NODE_GROUPS = {
     "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
     "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
     "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
-    "storage": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=3, max_nodes=3),
+    "storage": AzureNodeGroup(instance="Standard_D2_v3", min_nodes=3, max_nodes=3),
 }
 
 
