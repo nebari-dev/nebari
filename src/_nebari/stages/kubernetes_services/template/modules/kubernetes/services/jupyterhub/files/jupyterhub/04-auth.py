@@ -19,7 +19,15 @@ DEFAULT_ROLES = [
         # grants permissions to read other user's names
         # grants permissions to read other groups' names
         # The later two are required for sharing with a group or user
-        "scopes": "shares!user,read:users:name,read:groups:name",
+        "scopes": ["shares!user,read:users:name,read:groups:name"],
+    },
+    {
+        "name": "allow-read-access-to-services-role",
+        "description": "Allow read access to services, such that they are visible on the home page e.g. conda-store",
+        # grants permissions to read services
+        "scopes": ["read:services"],
+        # Adding it to analyst group such that it's applied to every user.
+        "groups": ["/analyst"]
     }
 ]
 
@@ -135,8 +143,12 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             )
         token = await self._get_token()
         jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
+
         client_roles_rich = await self._get_jupyterhub_client_roles(
             jupyterhub_client_id=jupyterhub_client_id, token=token
+        )
+        await self._create_non_existing_keycloak_client_roles(
+            DEFAULT_ROLES, client_roles_rich, jupyterhub_client_id, token
         )
         # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
         realm_roles = await self._fetch_api(endpoint="roles", token=token)
@@ -213,10 +225,74 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             roles_rich.append(role_rich)
         return roles_rich
 
+    async def _create_non_existing_keycloak_client_roles(
+            self, roles, existing_roles, client_id, token
+    ):
+        for role in roles:
+
+            import subprocess
+            import sys
+            import os
+
+            def install_ipdb_in_tmp():
+                try:
+                    # Define the installation directory
+                    install_dir = '/tmp/python_packages'
+
+                    # Ensure the directory exists
+                    os.makedirs(install_dir, exist_ok=True)
+
+                    # Run pip to install ipdb in the specified directory
+                    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--target', install_dir, 'ipdb'])
+
+                    # Add the installation directory to the PYTHONPATH
+                    sys.path.append(install_dir)
+
+                    # Set HOME environment variable to /tmp
+                    os.environ['HOME'] = '/tmp'
+
+                    print("ipdb has been installed successfully in /tmp.")
+
+                    # Verify installation by importing ipdb
+                    import ipdb
+                    print("ipdb has been imported successfully.")
+
+                except subprocess.CalledProcessError as e:
+                    print(f"Failed to install ipdb: {e}")
+                except ImportError as e:
+                    print(f"Failed to import ipdb after installation: {e}")
+
+            install_ipdb_in_tmp()
+
+
+            import ipdb; ipdb.set_trace()
+            self.log.info(f"Creating keycloak client role: {role}")
+            body = urllib.parse.urlencode(
+                {
+                    "name": role.get("name"),
+                    "description": role.get("description"),
+                    "attributes": {
+                        "scopes": role.get("scopes")
+                    }
+                }
+            )
+            response = await self._fetch_api(
+                endpoint=f"clients/{client_id}/roles",
+                token=token,
+                method="POST",
+                body=body
+            )
+            self.log.info(f"Keycloak client role creation response: {response}")
+
+    async def _assign_keycloak_client_role(self):
+        "/{realm}/users/{id}/role-mappings/clients/{client}"
+
     async def _get_client_roles_for_user(self, user_id, client_id, token):
         user_roles = await self._fetch_api(
             endpoint=f"users/{user_id}/role-mappings/clients/{client_id}/composite",
             token=token,
+            method="POST",
+
         )
         return user_roles
 
@@ -249,11 +325,12 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         data = json.loads(response.body)
         return data["access_token"]  # type: ignore[no-any-return]
 
-    async def _fetch_api(self, endpoint: str, token: str):
+    async def _fetch_api(self, endpoint: str, token: str, method: str = "GET", **kwargs):
         response = await self.http_client.fetch(
             f"{self.realm_api_url}/{endpoint}",
-            method="GET",
+            method=method,
             headers={"Authorization": f"Bearer {token}"},
+            **kwargs
         )
         return json.loads(response.body)
 
