@@ -13,20 +13,21 @@ resource "kubernetes_secret" "conda-store-secret" {
 
   data = {
     "config.json" = jsonencode({
-      external-url      = var.external-url
-      minio-username    = module.minio.root_username
-      minio-password    = module.minio.root_password
-      minio-service     = module.minio.service
-      redis-password    = module.redis.root_password
-      redis-service     = module.redis.service
-      postgres-username = module.postgresql.root_username
-      postgres-password = module.postgresql.root_password
-      postgres-service  = module.postgresql.service
-      openid-config     = module.conda-store-openid-client.config
-      extra-settings    = var.extra-settings
-      extra-config      = var.extra-config
-      default-namespace = var.default-namespace-name
-      realm_api_url     = "https://${var.external-url}/auth/admin/realms/${var.realm_id}"
+      external-url           = var.external-url
+      minio-username         = module.minio.root_username
+      minio-password         = module.minio.root_password
+      minio-service          = module.minio.service
+      redis-password         = module.redis.root_password
+      redis-service          = module.redis.service
+      postgres-username      = module.postgresql.root_username
+      postgres-password      = module.postgresql.root_password
+      postgres-service       = module.postgresql.service
+      openid-config          = module.conda-store-openid-client.config
+      extra-settings         = var.extra-settings
+      extra-config           = var.extra-config
+      default-namespace      = var.default-namespace-name
+      token_url_internal     = "http://keycloak-http.${var.namespace}.svc/auth/realms/${var.realm_id}/protocol/openid-connect/token"
+      realm_api_url_internal = "http://keycloak-http.${var.namespace}.svc/auth/admin/realms/${var.realm_id}"
       service-tokens = {
         for service, value in var.services : base64encode(random_password.conda_store_service_token[service].result) => value
       }

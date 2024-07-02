@@ -60,6 +60,9 @@ c.RBACAuthorizationBackend.role_mappings_version = 2
 #        server settings
 # ==================================
 c.CondaStoreServer.log_level = logging.INFO
+c.CondaStoreServer.log_format = (
+    "%(asctime)s %(levelname)9s %(name)s:%(lineno)4s: %(message)s"
+)
 c.CondaStoreServer.enable_ui = True
 c.CondaStoreServer.enable_api = True
 c.CondaStoreServer.enable_registry = True
@@ -98,13 +101,13 @@ class CondaStoreNamespaceRole:
 
 
 @dataclasses.dataclass
-class KeycloakCondaStoreRoleScopes:
+class KeyCloakCondaStoreRoleScopes:
     scopes: str
     log: logging.Logger
 
     def _validate_role(self, role):
         valid = role in CONDA_STORE_ROLE_PERMISSIONS_ORDER
-        self.log.info(f"role: {role} is valid={valid}")
+        self.log.info(f"role: {role} is {'valid' if valid else 'invalid'}")
         return valid
 
     def parse_role_and_namespace(
@@ -149,22 +152,11 @@ class KeycloakCondaStoreRoleScopes:
 
 class KeyCloakAuthentication(GenericOAuthAuthentication):
     conda_store_api_url = f"https://{config['external-url']}/conda-store/api/v1"
-    access_token_url = config["openid-config"]["token_url"]
-    realm_api_url = config["realm_api_url"]
+    access_token_url = config["token_url_internal"]
+    realm_api_url = config["realm_api_url_internal"]
     service_account_token = config["service-tokens-mapping"][
         "conda-store-service-account"
     ]
-
-    def _disable_ssl_verify_ctx(self):
-        """This is useful for deployments without certs, otherwise conda-store login would
-        not work.
-        """
-        import ssl
-
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-        return ctx
 
     def _get_conda_store_client_id(self, token: str) -> str:
         # Get the clients list to find the "id" of "conda-store" client.
@@ -208,20 +200,21 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
                 "grant_type": "client_credentials",
             }
         )
+        self.log.info(f"Getting token from access token url: {self.access_token_url}")
         req = urllib.request.Request(self.access_token_url, data=body.encode())
-        response = urllib.request.urlopen(req, context=self._disable_ssl_verify_ctx())
+        response = urllib.request.urlopen(req)
         data = json.loads(response.read())
         return data["access_token"]  # type: ignore[no-any-return]
 
     def _fetch_api(self, endpoint: str, token: str):
+        request_url = f"{self.realm_api_url}/{endpoint}"
         req = urllib.request.Request(
-            f"{self.realm_api_url}/{endpoint}",
+            request_url,
             method="GET",
             headers={"Authorization": f"Bearer {token}"},
         )
-        with urllib.request.urlopen(
-            req, context=self._disable_ssl_verify_ctx()
-        ) as response:
+        self.log.info(f"Making request to: {request_url}")
+        with urllib.request.urlopen(req) as response:
             data = json.loads(response.read())
         return data
 
@@ -294,7 +287,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         role_attributes = keycloak_role["attributes"]
         # scopes returns a list with a value say ["viewer!namespace=pycon,developer!namespace=scipy"]
         scopes = role_attributes.get("scopes", [""])[0]
-        k_cstore_scopes = KeycloakCondaStoreRoleScopes(scopes=scopes, log=self.log)
+        k_cstore_scopes = KeyCloakCondaStoreRoleScopes(scopes=scopes, log=self.log)
         return k_cstore_scopes.parse_scope()
 
     async def _apply_conda_store_roles_from_keycloak(
@@ -371,18 +364,8 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
         self.log.info(f"current entity_bindings: {entity_bindings}")
         return entity_bindings
 
-    def _override_logger(self):
-        """The default logger is not very useful, and it doesn't have any formatting"""
-        formatter = logging.Formatter(
-            "%(asctime)s %(levelname)9s %(name)s:%(lineno)4s: %(message)s"
-        )
-        for handler in self.log.handlers:
-            handler.setFormatter(formatter)
-
     async def authenticate(self, request):
-        self._override_logger()
         oauth_access_token = self._get_oauth_token(request)
-        # self.log.info(f"oauth_access_token: {oauth_access_token}")
         if oauth_access_token is None:
             return None  # authentication failed
 
