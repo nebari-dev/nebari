@@ -341,15 +341,13 @@ def get_provider_config_block_name(provider):
 
 
 def check_environment_variables(variables: Set[str], reference: str) -> None:
-    """Check that environment variables are set."""
-    required_variables = {
-        variable: os.environ.get(variable, None) for variable in variables
-    }
+    """Check that environment variables are set and mask their values if set."""
     missing_variables = {
-        variable for variable, value in required_variables.items() if value is None
+        variable for variable in variables if os.environ.get(variable) is None
     }
+
     if missing_variables:
         raise ValueError(
-            f"""Missing the following required environment variables: {required_variables}\n
+            f"""Missing the following required environment variables: {missing_variables}\n
             Please see the documentation for more information: {reference}"""
         )
