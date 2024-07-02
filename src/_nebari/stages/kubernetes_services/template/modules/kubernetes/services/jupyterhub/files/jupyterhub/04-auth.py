@@ -1,7 +1,9 @@
 import json
 import os
 import time
+import typing
 import urllib
+from collections import defaultdict
 from functools import reduce
 
 from jupyterhub import scopes
@@ -9,18 +11,25 @@ from jupyterhub.traitlets import Callable
 from oauthenticator.generic import GenericOAuthenticator
 from traitlets import Bool, Unicode, Union
 
-
 # A set of roles to create automatically to help with basic permissions
 DEFAULT_ROLES = [
     {
         "name": "allow-app-sharing-role",
         "description": "Allow app sharing for apps created via JupyterHub App Launcher (jhub-apps)",
-        # grants permissions to share user's server
+        # grants permissions to share server
         # grants permissions to read other user's names
         # grants permissions to read other groups' names
         # The later two are required for sharing with a group or user
-        "scopes": "shares!user,read:users:name,read:groups:name",
-    }
+        "scopes": ["shares,read:users:name,read:groups:name"],
+    },
+    {
+        "name": "allow-read-access-to-services-role",
+        "description": "Allow read access to services, such that they are visible on the home page e.g. conda-store",
+        # grants permissions to read services
+        "scopes": ["read:services"],
+        # Adding it to analyst group such that it's applied to every user.
+        "groups": ["/analyst"],
+    },
 ]
 
 
@@ -119,14 +128,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         jupyterhub_client_id = jupyterhub_clients[0]["id"]
         return jupyterhub_client_id
 
-    def _get_default_roles_which_does_not_exists(self, managed_roles):
-        """Add default roles which_does_not_exists already"""
-        default_roles_to_add = [
-            role for role in DEFAULT_ROLES
-            if role["name"] not in managed_roles
-        ]
-        return default_roles_to_add
-
     async def load_managed_roles(self):
         self.log.info("Loading managed roles")
         if not self.manage_roles:
@@ -135,9 +136,17 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             )
         token = await self._get_token()
         jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
+
         client_roles_rich = await self._get_jupyterhub_client_roles(
             jupyterhub_client_id=jupyterhub_client_id, token=token
         )
+        try:
+            await self._create_default_keycloak_client_roles(
+                DEFAULT_ROLES, client_roles_rich, jupyterhub_client_id, token
+            )
+        except Exception as e:
+            self.log.error("Unable to create default roles")
+            self.log.exception(e)
         # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
         realm_roles = await self._fetch_api(endpoint="roles", token=token)
         roles = {
@@ -173,9 +182,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 f"clients/{jupyterhub_client_id}/roles/{role_name}/users", token=token
             )
             role["users"] = [user["username"] for user in users]
-
-        default_roles = self._get_default_roles_which_does_not_exists(roles)
-        return list(roles.values()) + default_roles
+        return list(roles.values())
 
     def _get_scope_from_role(self, role):
         """Return scopes from role if the component is jupyterhub"""
@@ -202,16 +209,119 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         return []
 
     async def _get_roles_with_attributes(self, roles: dict, client_id: str, token: str):
-        """This fetches all roles by id to fetch there attributes."""
+        """This fetches all roles by id to fetch their attributes."""
         roles_rich = []
         for role in roles:
             # If this takes too much time, which isn't the case right now, we can
-            # also do multi-threaded requests
+            # also do multithreaded requests
             role_rich = await self._fetch_api(
                 endpoint=f"roles-by-id/{role['id']}?client={client_id}", token=token
             )
             roles_rich.append(role_rich)
         return roles_rich
+
+    async def _create_default_keycloak_client_roles(
+        self,
+        roles: typing.List[dict],
+        existing_roles: typing.List[dict],
+        client_id: str,
+        token: str,
+    ):
+        """Create default roles for jupyterhub keycloak client"""
+        self.log.info("Creating default roles, which does not exits already")
+        self.log.info(
+            f"Roles to create: {roles}, existing roles: {existing_roles}, client_id: {client_id}"
+        )
+        existing_role_name_mapping = {role["name"]: role for role in existing_roles}
+
+        for role in roles:
+            self.log.info(f"Creating role: {role}")
+            if role["name"] in existing_role_name_mapping:
+                self.log.info(f"role: {role} exists skipping")
+                continue
+
+            self.log.info(f"Creating keycloak client role: {role}")
+            body = json.dumps(
+                {
+                    "name": role.get("name"),
+                    "description": role.get("description"),
+                    "attributes": {"scopes": role.get("scopes")},
+                }
+            )
+            response = await self._fetch_api(
+                endpoint=f"clients/{client_id}/roles",
+                token=token,
+                method="POST",
+                body=body,
+                extra_headers={"Content-Type": "application/json"},
+            )
+            self.log.info(f"Keycloak client role creation response: {response}")
+
+        role_name_mapping = await self._get_keycloak_roles(
+            token=token, client_id=client_id
+        )
+        groups = await self._get_keycloak_groups(token)
+        for role in roles:
+            keycloak_role = role_name_mapping[role["name"]]
+            if len(keycloak_role) != 1:
+                self.log.error(
+                    f"Multiple roles with same name: {keycloak_role}, skipping"
+                )
+                continue
+            if not role.get("groups"):
+                self.log.info(
+                    f"No groups assigned for the role {keycloak_role}, not attaching to any group"
+                )
+                continue
+            for group_path in role.get("groups"):
+                keycloak_group = groups[group_path][0]
+                keycloak_group_id = keycloak_group["id"]
+                self.log.info(
+                    f"Assigning role: {keycloak_role[0]['name']} to group: {keycloak_group['name']}, client: {client_id}"
+                )
+                response_content = await self._assign_keycloak_client_role(
+                    client_id=client_id,
+                    group_id=keycloak_group_id,
+                    token=token,
+                    role=keycloak_role[0],
+                )
+                self.log.info(f"Role assignment response_content: {response_content}")
+
+    async def _get_keycloak_groups(self, token: str) -> typing.DefaultDict[str, list]:
+        self.log.info("Getting keycloak groups")
+        rjson = await self._fetch_api(endpoint="groups", token=token)
+        self.log.info(f"Keycloak groups: {rjson}")
+        group_name_mapping = defaultdict(list)
+        for group in rjson:
+            group_name_mapping[group["path"]].append(group)
+        self.log.info(f"Keycloak groups name mapping: {group_name_mapping}")
+        return group_name_mapping
+
+    async def _get_keycloak_roles(
+        self, token: str, client_id: str
+    ) -> typing.DefaultDict[str, list]:
+        self.log.info(f"getting keycloak roles for client: {client_id}")
+        rjson = await self._fetch_api(
+            endpoint=f"clients/{client_id}/roles", token=token
+        )
+        role_name_mapping = defaultdict(list)
+        for role in rjson:
+            role_name_mapping[role["name"]].append(role)
+        self.log.info(f"keycloak roles name mapping: {role_name_mapping}")
+        return role_name_mapping
+
+    async def _assign_keycloak_client_role(
+        self, client_id: str, group_id: str, token: str, role: dict
+    ):
+        response_content = await self._fetch_api(
+            endpoint=f"groups/{group_id}/role-mappings/clients/{client_id}",
+            token=token,
+            method="POST",
+            body=json.dumps([role]),
+            extra_headers={"Content-Type": "application/json"},
+        )
+        self.log.info(f"role assignment response: {response_content}")
+        return response_content
 
     async def _get_client_roles_for_user(self, user_id, client_id, token):
         user_roles = await self._fetch_api(
@@ -241,6 +351,9 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 "grant_type": "client_credentials",
             }
         )
+        self.log.info(
+            f"getting token client_id: {self.client_id}, client_secret: {self.client_secret} token: {self.token_url}"
+        )
         response = await http.fetch(
             self.token_url,
             method="POST",
@@ -249,13 +362,25 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         data = json.loads(response.body)
         return data["access_token"]  # type: ignore[no-any-return]
 
-    async def _fetch_api(self, endpoint: str, token: str):
+    async def _fetch_api(
+        self,
+        endpoint: str,
+        token: str,
+        method: str = "GET",
+        extra_headers=None,
+        **kwargs,
+    ):
+        append_headers = extra_headers if extra_headers else {}
         response = await self.http_client.fetch(
             f"{self.realm_api_url}/{endpoint}",
-            method="GET",
-            headers={"Authorization": f"Bearer {token}"},
+            method=method,
+            headers={"Authorization": f"Bearer {token}", **append_headers},
+            **kwargs,
         )
-        return json.loads(response.body)
+        try:
+            return json.loads(response.body)
+        except json.decoder.JSONDecodeError:
+            return response.body
 
 
 c.JupyterHub.authenticator_class = KeyCloakOAuthenticator

@@ -286,7 +286,7 @@ module "jupyterhub-openid-client" {
   jupyterlab_profiles_mapper = true
   service-accounts-enabled   = true
   service-account-roles = [
-    "view-realm", "view-users", "view-clients"
+    "view-realm", "view-users", "view-clients", "manage-clients", "manage-users"
   ]
 }
 
