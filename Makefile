@@ -16,9 +16,9 @@ clean:
 pre-init-checks:
 	@echo Checking prerequsits
 	# @ping $(HOST) | head -1 | grep '172.18.1.100'
-	kind --version
+
 	docker --version
-	if [ "$(uname -s)" = "Darwin" ]; then brew services info chipmk/tap/docker-mac-net-connect; else sudo usermod -aG docker $USER && newgrp docker; fi
+	if [ "$(uname -s)" = "Darwin" ]; then brew services info chipmk/tap/docker-mac-net-connect; kind --version; else sudo usermod -aG docker $USER && newgrp docker; fi
 	@echo "Check $(HOST) resolves"
 
 install:
