@@ -489,6 +489,12 @@ class KubernetesServicesStage(NebariTerraformStage):
                     "*/*": ["viewer"],
                 },
             },
+            "conda-store-service-account": {
+                "primary_namespace": "",
+                "role_bindings": {
+                    "*/*": ["admin"],
+                },
+            },
         }
 
         # Compound any logout URLs from extensions so they are are logged out in succession
