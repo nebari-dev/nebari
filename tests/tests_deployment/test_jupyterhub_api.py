@@ -14,9 +14,9 @@ def test_jupyterhub_loads_roles_from_keycloak():
     session = get_jupyterhub_session()
     try:
         xsrf_token = session.cookies.get("_xsrf")
-    except CookieConflictError as cce:
-        xsrf_token = session.cookies.get("_xsrf", path='/hub/')
-        
+    except CookieConflictError:
+        xsrf_token = session.cookies.get("_xsrf", path="/hub/")
+
     response = session.get(
         f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}",
         headers={"X-XSRFToken": xsrf_token},
@@ -91,8 +91,8 @@ def test_jupyterhub_loads_groups_from_keycloak():
     session = get_jupyterhub_session()
     try:
         xsrf_token = session.cookies.get("_xsrf")
-    except CookieConflictError as cce:
-        xsrf_token = session.cookies.get("_xsrf", path='/hub/')
+    except CookieConflictError:
+        xsrf_token = session.cookies.get("_xsrf", path="/hub/")
     response = session.get(
         f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}",
         headers={"X-XSRFToken": xsrf_token},

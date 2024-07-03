@@ -108,5 +108,4 @@ pytest:
 
 
 
-test: playwright-tests pytest # SKIPPED test-cypress-run 
-
+test: playwright-tests pytest # SKIPPED test-cypress-run
