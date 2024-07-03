@@ -73,7 +73,7 @@ jobs:
 
       - name: Install Nebari and playwright and initialize Nebari
         run: |
-          make init
+          make init HOST=github-actions.nebari.dev
 
       - uses: azure/setup-kubectl@v4.0.0
         with:
@@ -81,28 +81,20 @@ jobs:
 
 
       - name: Deploy Nebari
-        working-directory: local-deployment
         run: |
-          make deploy
+          make deploy HOST=github-actions.nebari.dev
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Playwright Tests
-        env:
-          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
-          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-          NEBARI_FULL_URL: https://github-actions.nebari.dev/
         run: |
-          make playwright-test
+          make playwright-test HOST=github-actions.nebari.dev
 
       - name: Deployment Pytests
-        env:
-          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
-          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
         run: |
-          make pytest
+          make pytest HOST=github-actions.nebari.dev
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
@@ -110,6 +102,5 @@ jobs:
         # in the CI, it makes sense to only run on merge to main or workflow_dispatch to speed
         # up feedback cycle
         if: github.ref_name == 'develop' || github.event_name == 'workflow_dispatch'
-        working-directory: local-deployment
         run: |
-          make clean
+          make clean HOST=github-actions.nebari.dev
