@@ -18,7 +18,7 @@ pre-init-checks:
 	@ping $(HOST) | head -1 | grep '172.18.1.100'
 	kind --version
 	docker --version
-	brew services info chipmk/tap/docker-mac-net-connect
+	if [ "$(uname -s)" = "Darwin" ]; then brew services info chipmk/tap/docker-mac-net-connect; fi
 	@echo "Check $(HOST) resolves"
 
 install:
