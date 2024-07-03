@@ -1,4 +1,5 @@
 import pytest
+from requests.cookies import CookieConflictError
 
 from tests.tests_deployment import constants
 from tests.tests_deployment.keycloak_utils import (
@@ -11,7 +12,11 @@ from tests.tests_deployment.utils import create_jupyterhub_token, get_jupyterhub
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_jupyterhub_loads_roles_from_keycloak():
     session = get_jupyterhub_session()
-    xsrf_token = session.cookies.get("_xsrf")
+    try:
+        xsrf_token = session.cookies.get("_xsrf")
+    except CookieConflictError as cce:
+        xsrf_token = session.cookies.get("_xsrf", path='/hub/')
+        
     response = session.get(
         f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}",
         headers={"X-XSRFToken": xsrf_token},
@@ -84,7 +89,10 @@ def test_keycloak_roles_attributes_parsed_as_jhub_scopes(
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_jupyterhub_loads_groups_from_keycloak():
     session = get_jupyterhub_session()
-    xsrf_token = session.cookies.get("_xsrf")
+    try:
+        xsrf_token = session.cookies.get("_xsrf")
+    except CookieConflictError as cce:
+        xsrf_token = session.cookies.get("_xsrf", path='/hub/')
     response = session.get(
         f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}",
         headers={"X-XSRFToken": xsrf_token},
