@@ -71,8 +71,6 @@ jobs:
           python-version: "3.11"
           miniconda-version: "latest"
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
 
       - name: Install Nebari and playwright and initialize Nebari
         run: |

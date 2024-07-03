@@ -10,6 +10,7 @@ from tests.tests_deployment.utils import create_jupyterhub_token, get_jupyterhub
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_jupyterhub_loads_roles_from_keycloak():
     session = get_jupyterhub_session()
     try:

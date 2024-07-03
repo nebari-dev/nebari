@@ -18,7 +18,7 @@ pre-init-checks:
 	# @ping $(HOST) | head -1 | grep '172.18.1.100'
 
 	docker --version
-	if [ "$(uname -s)" = "Darwin" ]; then brew services info chipmk/tap/docker-mac-net-connect; kind --version; else sudo usermod -aG docker $USER && newgrp docker; fi
+	#if [ "$(uname -s)" = "Darwin" ]; then brew services info chipmk/tap/docker-mac-net-connect; kind --version; else sudo usermod -aG docker $USER && newgrp docker; fi
 	@echo "Check $(HOST) resolves"
 
 install:
@@ -104,7 +104,7 @@ pytest:
 	KEYCLOAK_PASSWORD=${TEST_PASSWORD} \
 	NEBARI_HOSTNAME=${HOST} \
 	NEBARI_CONFIG_PATH=/Users/prashant/work/nebari/local-deployment/nebari-config.yaml \
-	pytest tests/tests_deployment/test_jupyterhub_ssh.py -v -s
+	pytest tests/tests_deployment/ -v -s
 
 
 
