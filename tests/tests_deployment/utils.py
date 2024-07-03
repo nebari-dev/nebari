@@ -28,17 +28,33 @@ def get_jupyterhub_session():
 
 def create_jupyterhub_token(note):
     session = get_jupyterhub_session()
-    xsrf_token = session.cookies.get("_xsrf")
+    try:
+        xsrf_token = session.cookies.get("_xsrf")
+    except requests.cookies.CookieConflictError as cce:
+        xsrf_token = session.cookies.get("_xsrf", path='/hub/')
+        
     headers = {"Referer": f"https://{constants.NEBARI_HOSTNAME}/hub/token"}
     if xsrf_token:
         headers["X-XSRFToken"] = xsrf_token
+        print(f"xsrf_token: {xsrf_token}")
     data = {"note": note, "expires_in": None}
-    return session.post(
+    response = session.post(
         f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
         headers=headers,
         json=data,
         verify=False,
     )
+    if response.status_code == 403:
+        xsrf_token = response.cookies.get("_xsrf")
+        headers["X-XSRFToken"] = xsrf_token
+        response = session.post(
+            f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
+            headers=headers,
+            json=data,
+            verify=False,
+        )
+    
+    return response
 
 
 def get_jupyterhub_token(note="jupyterhub-tests-deployment"):
