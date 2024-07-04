@@ -95,7 +95,7 @@ playwright-tests:
 	KEYCLOAK_USERNAME=${TEST_USERNAME} \
 	KEYCLOAK_PASSWORD=${TEST_PASSWORD} \
 	NEBARI_FULL_URL=https://$(HOST) \
-	pytest --browser chromium --headed
+	pytest --browser chromium # --headed
 
 pytest:
 	KEYCLOAK_USERNAME=${TEST_USERNAME} \
