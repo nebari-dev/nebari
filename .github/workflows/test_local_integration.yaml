@@ -76,9 +76,9 @@ jobs:
         run: |
           make init HOST=github-actions.nebari.dev
 
-      - name: Setup tmate session
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+      #      - name: Setup tmate session
+      #        if: ${{ failure() }}
+      #        uses: mxschmitt/action-tmate@v3
 
       - uses: azure/setup-kubectl@v4.0.0
         with:
