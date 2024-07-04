@@ -96,6 +96,14 @@ jobs:
         run: |
           make playwright-tests HOST=github-actions.nebari.dev
 
+      - name: Save playwright videos
+        if: always()
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: playwright-cypress
+          path: |
+            ./tests/tests_e2e/playwright/videos/
+
       - name: Deployment Pytests
         run: |
           make pytest HOST=github-actions.nebari.dev
