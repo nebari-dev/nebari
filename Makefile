@@ -30,6 +30,7 @@ pre-init-checks:
 	@$(IS_MAC) && ping $(HOST) | head -1 | grep '172.18.1.100'
 	@$(IS_MAC) && brew services info chipmk/tap/docker-mac-net-connect
 	@$(IS_MAC) && kind --version
+	@echo $(SHELL)
 	@$(IS_MAC) || sudo usermod -aG docker $USER newgrp docker
 
 install:
