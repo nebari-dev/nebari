@@ -68,6 +68,8 @@ init: pre-init-checks install
 deploy:
 	cd local-deployment && nebari deploy -c nebari-config.yaml
 	@echo "Create example-user"
+	@pwd
+	@ls
 	./scripts/create_test_user.sh $(TEST_USERNAME) $(TEST_PASSWORD) $(NEBARI_CONFIG_PATH)
 	@echo "Basic kubectl checks after deployment"
 	kubectl get all,cm,secret,pv,pvc,ing -A
