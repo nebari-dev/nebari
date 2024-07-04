@@ -1,6 +1,7 @@
 all:  init deploy test
 build: init deploy
 
+SHELL = /bin/bash
 TARGET := local-deployment/nebari-config.yaml
 HOST := local-deployment.nebari.dev
 TEST_USERNAME := "test-user"
@@ -21,17 +22,17 @@ nebari-destroy:
 	rm $(TARGET)
 
 delete-cluster:
-	@$(IS_MAC) && kind delete clusters test-cluster
+	-@$(IS_MAC) && kind delete clusters test-cluster
 	rm -rf local-deployment/stages
 
 pre-init-checks:
 	@echo Checking prerequsits
 	@docker --version
-	@$(IS_MAC) && ping $(HOST) | head -1 | grep '172.18.1.100'
-	@$(IS_MAC) && brew services info chipmk/tap/docker-mac-net-connect
-	@$(IS_MAC) && kind --version
-	@echo $(SHELL)
-	@$(IS_MAC) || sudo usermod -aG docker $USER newgrp docker
+	-@$(IS_MAC) && ping $(HOST) | head -1 | grep '172.18.1.100'
+	-@$(IS_MAC) && brew services info chipmk/tap/docker-mac-net-connect
+	-@$(IS_MAC) && kind --version
+	-@echo $(SHELL)
+	-@$(IS_MAC) || sudo usermod -aG docker $USER newgrp docker
 
 install:
 	pip install .[dev]
@@ -56,12 +57,12 @@ init: pre-init-checks install
 	@echo "    minio:" >> $(TARGET)
 	@echo "      persistence:" >> $(TARGET)
 	@echo "        size: 1Gi" >> $(TARGET)
-	@$(IS_MAC) && echo "conda_store:" >> $(TARGET)
-	@$(IS_MAC) && echo "  image: quay.io/aktech/conda-store-server" >> $(TARGET)
-	@$(IS_MAC) && echo "  image_tag: sha-558beb8" >> $(TARGET)
-	@$(IS_MAC) && awk -v n=13 -v s='    overrides:' 'NR == n {print s} {print}' $(TARGET) > tmp && mv tmp $(TARGET)
-	@$(IS_MAC) && awk -v n=14 -v s='      image:' 'NR == n {print s} {print}' $(TARGET) > tmp && mv tmp $(TARGET)
-	@$(IS_MAC) && awk -v n=15 -v s='        repository: quay.io/aktech/keycloak' 'NR == n {print s} {print}' $(TARGET) > tmp && mv tmp $(TARGET)
+	-@$(IS_MAC) && echo "conda_store:" >> $(TARGET)
+	-@$(IS_MAC) && echo "  image: quay.io/aktech/conda-store-server" >> $(TARGET)
+	-@$(IS_MAC) && echo "  image_tag: sha-558beb8" >> $(TARGET)
+	-@$(IS_MAC) && awk -v n=13 -v s='    overrides:' 'NR == n {print s} {print}' $(TARGET) > tmp && mv tmp $(TARGET)
+	-@$(IS_MAC) && awk -v n=14 -v s='      image:' 'NR == n {print s} {print}' $(TARGET) > tmp && mv tmp $(TARGET)
+	-@$(IS_MAC) && awk -v n=15 -v s='        repository: quay.io/aktech/keycloak' 'NR == n {print s} {print}' $(TARGET) > tmp && mv tmp $(TARGET)
 	@cat local-deployment/nebari-config.yaml
 
 deploy:
