@@ -85,7 +85,7 @@ test-cypress-run:
 	CYPRESS_EXAMPLE_USER_NAME=$(TEST_USERNAME) \
 	CYPRESS_EXAMPLE_USER_PASSWORD=$(TEST_PASSWORD) \
 	CYPRESS_BASE_URL=https://$(HOST) \
-	NEBARI_CONFIG_PATH=/Users/prashant/work/nebari/local-deployment/nebari-config.yaml \
+	NEBARI_CONFIG_PATH=$(NEBARI_CONFIG_PATH) \
 	npx cypress run # --headed
 
 playwright-tests:
@@ -101,7 +101,7 @@ pytest:
 	KEYCLOAK_USERNAME=${TEST_USERNAME} \
 	KEYCLOAK_PASSWORD=${TEST_PASSWORD} \
 	NEBARI_HOSTNAME=${HOST} \
-	NEBARI_CONFIG_PATH=/Users/prashant/work/nebari/local-deployment/nebari-config.yaml \
+	NEBARI_CONFIG_PATH=$(NEBARI_CONFIG_PATH) \
 	pytest tests/tests_deployment/ -v -s
 
 test: playwright-tests pytest # SKIPPED test-cypress-run
