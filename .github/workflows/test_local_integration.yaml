@@ -88,6 +88,10 @@ jobs:
         with:
           node-version: 20
 
+      - name: Deployment Pytests
+        run: |
+          make pytest
+
       - name: Playwright Tests
         run: |
           make playwright-tests
@@ -99,10 +103,6 @@ jobs:
           name: e2e-playwright
           path: |
             ./tests/tests_e2e/playwright/videos/
-
-      - name: Deployment Pytests
-        run: |
-          make pytest
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
