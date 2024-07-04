@@ -94,7 +94,7 @@ jobs:
 
       - name: Playwright Tests
         run: |
-          make playwright-test HOST=github-actions.nebari.dev
+          make playwright-tests HOST=github-actions.nebari.dev
 
       - name: Deployment Pytests
         run: |
