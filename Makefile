@@ -3,7 +3,6 @@ build: init deploy
 
 SHELL = /bin/bash
 TARGET := local-deployment/nebari-config.yaml
-HOST := local-deployment.nebari.dev
 TEST_USERNAME := "test-user"
 TEST_PASSWORD := "P@sswo3d"
 NEBARI_CONFIG_PATH = `realpath ./local-deployment/nebari-config.yaml`
@@ -11,8 +10,10 @@ UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Darwin)
     IS_MAC := true
+	HOST := local-deployment.nebari.dev
 else
     IS_MAC := false
+	HOST := github-actions.nebari.dev
 endif
 
 clean: nebari-destroy delete-cluster
@@ -78,7 +79,7 @@ deploy:
 	@echo "Get nebari-config.yaml full path"
 	@echo "NEBARI_CONFIG_PATH = $(NEBARI_CONFIG_PATH)"
 
-test-cypress-run:
+cypress-run:
 	@echo "CYPRESS_EXAMPLE_USER_NAME=$(TEST_USERNAME) CYPRESS_EXAMPLE_USER_PASSWORD=$(TEST_PASSWORD) CYPRESS_BASE_URL=https://$(HOST)/"
 	cd tests/tests_e2e/ && \
 	npm install && \
@@ -104,4 +105,4 @@ pytest:
 	NEBARI_CONFIG_PATH=$(NEBARI_CONFIG_PATH) \
 	pytest tests/tests_deployment/ -v -s
 
-test: playwright-tests pytest # SKIPPED test-cypress-run
+test: playwright-tests pytest # SKIPPED cypress-run
