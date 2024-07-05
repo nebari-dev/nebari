@@ -66,7 +66,12 @@ class Notebook:
 
         # navigate to specific notebook
         self.open_notebook(path)
-        # make sure the focus is on the dashboard tab we want to run
+
+        logger.info(f">>> make sure the focus is on the dashboard tab we want to run")
+        time.sleep(retry_wait_time)
+        dialog = self.nav.page.get_by_role("dialog")
+        if dialog.is_visible():
+            dialog.get_by_role("button", name="No Kernel").click()
         self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
         self.nav.set_environment(kernel=conda_env)
 
