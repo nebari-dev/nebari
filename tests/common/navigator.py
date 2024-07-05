@@ -294,7 +294,9 @@ class Navigator:
         time.sleep(2)
         if self.page.get_by_text("Save your work", exact=True).is_visible():
             logger.info("popup to save your work found. Discarding change ...")
-            self.page.get_by_role("button", name="Discard changes to file", exact=True).click()
+            self.page.get_by_role(
+                "button", name="Discard changes to file", exact=True
+            ).click()
 
         # wait to ensure that the Launcher is showing
         self.page.get_by_text("VS Code [↗]", exact=True).wait_for(

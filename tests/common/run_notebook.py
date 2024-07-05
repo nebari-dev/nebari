@@ -67,7 +67,7 @@ class Notebook:
         # navigate to specific notebook
         self.open_notebook(path)
 
-        logger.info(f">>> make sure the focus is on the dashboard tab we want to run")
+        logger.info(">>> make sure the focus is on the dashboard tab we want to run")
         time.sleep(retry_wait_time)
         dialog = self.nav.page.get_by_role("dialog")
         if dialog.is_visible():
