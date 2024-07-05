@@ -293,7 +293,6 @@ class Navigator:
             "path"
         ).click()
 
-
         logger.info("go to File menu")
         self.page.get_by_text("File", exact=True).click()
         logger.info("close all tabs")

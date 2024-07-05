@@ -64,7 +64,7 @@ class Notebook:
         logger.info(f">>> Running notebook: {path}")
         filename = Path(path).name
 
-        logger.info(f">>> navigate to specific notebook")
+        logger.info(">>> navigate to specific notebook")
         self.open_notebook(path)
 
         logger.info(">>> make sure the focus is on the dashboard tab we want to run")
@@ -73,12 +73,12 @@ class Notebook:
         if dialog.is_visible():
             dialog.get_by_role("button", name="No Kernel").click()
         self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
-        logger.info(f">>> set_environment")
+        logger.info(">>> set_environment")
         self.nav.set_environment(kernel=conda_env)
 
-        logger.info(f">>> make sure that this notebook is one currently selected")
+        logger.info(">>> make sure that this notebook is one currently selected")
         self.nav.page.get_by_role("tab", name=filename).get_by_text(filename).click()
-        logger.info(f">>> Ensure restart")
+        logger.info(">>> Ensure restart")
 
         for _ in range(retry):
             self._restart_run_all()
@@ -87,7 +87,7 @@ class Notebook:
             self._wait_for_commands_completion(timeout, complition_wait_time)
             all_outputs = self._get_outputs()
             assert_match_all_outputs(expected_outputs, all_outputs, exact_match)
-        logger.info(f">>> run over.")
+        logger.info(">>> run over.")
 
     def create_notebook(self, conda_env=None):
         file_locator = self.nav.page.get_by_text("File", exact=True)
