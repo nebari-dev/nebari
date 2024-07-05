@@ -195,7 +195,7 @@ class Navigator:
         they aren't visible, we check for an existing server start option.
         """
         logger.info("wait for the page to load")
-        logout_button = self.page.get_by_text("Logout", exact=True)
+        self.page.get_by_text("Logout", exact=True)
         logger.info("waiting for logout button.")
         file_menu = self.page.get_by_text("File", exact=True)
         if file_menu.is_visible():
