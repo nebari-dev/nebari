@@ -15,6 +15,7 @@ def deploy_configuration(
     stages: List[hookspecs.NebariStage],
     disable_prompt: bool = False,
     disable_checks: bool = False,
+    export_logfiles: bool = False,
 ) -> Dict[str, Any]:
     if config.prevent_deploy:
         raise ValueError(
@@ -50,7 +51,13 @@ def deploy_configuration(
         with contextlib.ExitStack() as stack:
             for stage in stages:
                 s = stage(output_directory=pathlib.Path.cwd(), config=config)
-                stack.enter_context(s.deploy(stage_outputs, disable_prompt))
+                stack.enter_context(
+                    s.deploy(
+                        stage_outputs,
+                        disable_prompt,
+                        export_terraform_logs=export_logfiles,
+                    )
+                )
 
                 if not disable_checks:
                     s.check(stage_outputs, disable_prompt)

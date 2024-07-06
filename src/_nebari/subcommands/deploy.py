@@ -1,3 +1,4 @@
+import os
 import pathlib
 from typing import Optional
 
@@ -59,6 +60,11 @@ def nebari_subcommand(cli: typer.Typer):
             "--skip-remote-state-provision",
             help="Skip terraform state deployment which is often required in CI once the terraform remote state bootstrapping phase is complete",
         ),
+        export_logfiles: bool = typer.Option(
+            os.getenv("NEBARI_EXPORT_LOG_FILES", False),
+            "--export-logfiles",
+            help="Toggles the export of Terraform's stages logfiles",
+        ),
     ):
         """
         Deploy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
@@ -89,4 +95,5 @@ def nebari_subcommand(cli: typer.Typer):
             stages,
             disable_prompt=disable_prompt,
             disable_checks=disable_checks,
+            export_logfiles=export_logfiles,
         )
