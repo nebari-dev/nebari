@@ -67,7 +67,6 @@ class Navigator:
         instance_name="small-instance",
         video_dir=None,
     ):
-        logger.info(">>> Navigator init")
         self.nebari_url = nebari_url
         self.username = username
         self.password = password
@@ -85,19 +84,16 @@ class Navigator:
             slow_mo=self.slow_mo,
         )
         self.wait_for_server_spinup = 300_000  # 5 * 60 * 1_000  # 5 minutes in ms
-        logger.info(">>> Navigator initialized.")
 
     @property
     def initialize(self):
         """Ensure that the Navigator is setup and ready for testing."""
-        logger.info(">>> Ensure that the Navigator is setup and ready for testing.")
         if not self.initialized:
             self.setup(
                 browser=self.browser,
                 headless=self.headless,
                 slow_mo=self.slow_mo,
             )
-        logger.info(">>> Navigator is setup and ready for testing.")
 
     def setup(self, browser, headless, slow_mo):
         """Initial setup for running playwright. Starts playwright, creates
@@ -115,7 +111,7 @@ class Navigator:
             creating the effect of running the tests in slow motion so they are
             easier for humans to follow.
         """
-        logger.info(">>> Setting up browser for Playwright")
+        logger.debug(">>> Setting up browser for Playwright")
 
         self.playwright = sync_playwright().start()
         try:
@@ -137,11 +133,10 @@ class Navigator:
         self.context.close()
         self.browser.close()  # Make sure to close, so that videos are saved.
         self.playwright.stop()
-        logger.info(">>> Teardown complete.")
+        logger.debug(">>> Teardown complete.")
 
     def login(self) -> None:
         """Login to nebari deployment using the auth method on the class."""
-        logger.info("Login to nebari deployment using the auth method on the class.")
         try:
             return {
                 "google": self.login_google,
@@ -152,7 +147,7 @@ class Navigator:
 
     def login_google(self) -> None:
         """Go to a nebari deployment, login via Google"""
-        logger.info(">>> Sign in via Google and start the server")
+        logger.debug(">>> Sign in via Google and start the server")
         self.page.goto(self.nebari_url)
         expect(self.page).to_have_url(re.compile(f"{self.nebari_url}*"))
 
@@ -172,7 +167,7 @@ class Navigator:
         """Go to a nebari deployment, login via Username/Password, and start
         a new server.
         """
-        logger.info(">>> Sign in via Username/Password")
+        logger.debug(">>> Sign in via Username/Password")
         self.page.goto(self.nebari_url)
         expect(self.page).to_have_url(re.compile(f"{self.nebari_url}*"))
 
@@ -183,8 +178,6 @@ class Navigator:
         self.page.get_by_role("button", name="Sign In").click()
 
         # let the page load
-        logger.info(">>> let the page load")
-        logger.info(">>> wait_for_load_state")
         self.page.wait_for_load_state("networkidle")
 
     def start_server(self) -> None:
@@ -194,12 +187,10 @@ class Navigator:
         we look for html elements that exist when no server is running, if
         they aren't visible, we check for an existing server start option.
         """
-        logger.info("wait for the page to load")
         self.page.get_by_text("Logout", exact=True)
-        logger.info("waiting for logout button.")
         file_menu = self.page.get_by_text("File", exact=True)
         if file_menu.is_visible():
-            logger.info("Server is already up!")
+            logger.debug("Server is already up!")
             return
 
         # if the server is already running
@@ -207,7 +198,7 @@ class Navigator:
         if start_locator.is_visible():
             start_locator.click()
 
-        logger.info("if server is not yet running")
+        # if server is not yet running
         start_locator = self.page.get_by_role("button", name="Start My Server")
         if start_locator.is_visible():
             start_locator.click()
@@ -219,7 +210,7 @@ class Navigator:
             self.page.locator(f"#profile-item-{self.instance_name}").click()
             self.page.get_by_role("button", name="Start").click()
 
-        logger.info("wait for server spinup")
+        # wait for server spinup
         self.page.wait_for_url(
             urllib.parse.urljoin(self.nebari_url, f"user/{self.username}/*"),
             wait_until="networkidle",
@@ -229,14 +220,13 @@ class Navigator:
         # the jupyter page loads independent of network activity so here
         # we wait for the File menu to be available on the page, a proxy for
         # the jupyterlab page being loaded.
-        logger.info(">>> the jupyterlab page being loaded.")
         file_locator = self.page.get_by_text("File", exact=True)
         file_locator.wait_for(
             timeout=self.wait_for_server_spinup,
             state="attached",
         )
 
-        logger.info(">>> Sign in complete.")
+        logger.debug(">>> Sign in complete.")
 
     def _check_for_kernel_popup(self):
         """Is the kernel popup currently open?
@@ -263,17 +253,16 @@ class Navigator:
         # server is already running and there is no popup
         popup = self._check_for_kernel_popup()
 
-        logger.info(">>> server is on running and there is a popup")
+        # server is on running and there is a popup
         if popup:
             self._set_environment_via_popup(kernel=None)
 
-        logger.info(">>> go to Kernel menu")
         dialog = self.page.get_by_role("dialog")
         if dialog.is_visible():
             dialog.get_by_role("button", name="No Kernel").click()
         kernel_menuitem = self.page.get_by_role("menuitem", name="Kernel", exact=True)
         kernel_menuitem.click()
-        logger.info(">>> shut down multiple running kernels")
+        # shut down multiple running kernels
         with contextlib.suppress(Exception):
             shut_down_all = self.page.get_by_text(
                 "Shut Down All Kernels...", exact=True
@@ -281,36 +270,34 @@ class Navigator:
             shut_down_all.wait_for(timeout=300, state="attached")
             shut_down_all.click()
 
-        logger.info(">>> shut down kernel if only one notebook is running")
+        # shut down kernel if only one notebook is running
         kernel_menuitem.click()
         with contextlib.suppress(Exception):
             shut_down_current = self.page.get_by_text("Shut Down Kernel", exact=True)
             shut_down_current.wait_for(timeout=300, state="attached")
             shut_down_current.click()
 
-        logger.info(">>> go back to root folder")
+        # go back to root folder
         self.page.get_by_title(f"/home/{self.username}", exact=True).locator(
             "path"
         ).click()
 
-        logger.info("go to File menu")
+        # go to File menu
         self.page.get_by_text("File", exact=True).click()
-        logger.info("close all tabs")
+        # close all tabs
         self.page.get_by_role("menuitem", name="Close All Tabs", exact=True).click()
 
-        logger.info("there may be a popup to save your work, don't save")
+        # there may be a popup to save your work, don't save
         time.sleep(2)
         if self.page.get_by_text("Save your work", exact=True).is_visible():
-            logger.info("popup to save your work found. Discarding change ...")
             self.page.get_by_role(
                 "button", name="Discard changes to file", exact=True
             ).click()
 
-        logger.info("wait to ensure that the Launcher is showing")
+        # wait to ensure that the Launcher is showing
         self.page.get_by_text("VS Code [↗]", exact=True).wait_for(
             timeout=3000, state="attached"
         )
-        logger.info("Launcher is showing")
 
     def _set_environment_via_popup(self, kernel=None):
         """Set the environment kernel on a jupyter notebook via the popup
@@ -428,13 +415,13 @@ class Navigator:
             text to write to that file.
         """
         start = dt.datetime.now()
-        logger.info(f"Writing notebook to {filepath}")
+        logger.debug(f"Writing notebook to {filepath}")
         self.open_terminal()
         self.run_terminal_command(f"cat <<EOF >{filepath}")
         self.run_terminal_command(content)
         self.run_terminal_command("EOF")
         self.run_terminal_command(f"ls {filepath}")
-        logger.info(f"time to complete {dt.datetime.now() - start}")
+        logger.debug(f"time to complete {dt.datetime.now() - start}")
         time.sleep(2)
 
     def stop_server(self) -> None:
