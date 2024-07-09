@@ -243,6 +243,8 @@ class JupyterLabGalleryExhibit(schema.Base):
     icon: Optional[str] = None
     account: Optional[str] = None
     token: Optional[str] = None
+    branch: Optional[str] = None
+    depth: Optional[int] = None
 
 
 class JupyterLabGallerySettings(schema.Base):

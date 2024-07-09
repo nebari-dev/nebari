@@ -176,6 +176,8 @@ variable "jupyterlab-gallery-settings" {
       icon        = optional(string)
       account     = optional(string)
       token       = optional(string)
+      branch      = optional(string)
+      depth       = optional(number)
     }))
   })
 }
