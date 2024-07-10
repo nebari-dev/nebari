@@ -1,12 +1,12 @@
 # https://github.com/rook/rook/blob/v1.14.7/deploy/charts/rook-ceph/values.yaml
 nodeSelector:
-  azure-node-pool: storage
+  azure-node-pool: general
 
-tolerations:
-  - key: dedicated
-    operator: Equal
-    value: storage
-    effect: NoSchedule
+# tolerations:
+#   - key: dedicated
+#     operator: Equal
+#     value: storage
+#     effect: NoSchedule
 
 monitoring:
   enabled: false  # TODO: Enable monitoring when nebari-config.yaml has it enabled
