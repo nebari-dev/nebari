@@ -165,7 +165,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         self.log.info(f"Roles: {roles}")
 
         for role in roles:
-            role_name = roles["name"]
+            role_name = role["name"]
             # fetch role assignments to groups
             base_url = url.format(role_name=role_name)
             groups = await self._fetch_api(f"{base_url}/groups", token=token)
