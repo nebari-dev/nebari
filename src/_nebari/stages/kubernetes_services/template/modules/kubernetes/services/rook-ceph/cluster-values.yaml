@@ -11,25 +11,23 @@ cephClusterSpec:
       bdev_flock_retry: "20"
       bluefs_buffered_io: "false"
       mon_data_avail_warn: "10"
-  placement:
-    additionalProperties:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: azure-node-pool  # TODO: update this label for all cloud providers, use a taint/toleration instead
-                  operator: In
-                  values:
-                    - storage
+  # placement:
+  #   additionalProperties:
+  #     nodeAffinity:
+  #       requiredDuringSchedulingIgnoredDuringExecution:
+  #         nodeSelectorTerms:
+  #           - matchExpressions:
+  #               - key: azure-node-pool  # TODO: update this label for all cloud providers, use a taint/toleration instead
+  #                 operator: In
+  #                 values:
+  #                   - storage
   # values from https://raw.githubusercontent.com/rook/rook/release-1.14/deploy/examples/cluster-on-pvc.yaml
   dataDirHostPath: /var/lib/rook
   mon:
     # Set the number of mons to be started. Generally recommended to be 3.
     # For highest availability, an odd number of mons should be specified.
     count: 1
-    # The mons should be on unique nodes. For production, at least 3 nodes are recommended for this reason.
-    # Mons should only be allowed on the same node for test environments where data loss is acceptable.
-    allowMultiplePerNode: false
+    allowMultiplePerNode: true
     # A volume claim template can be specified in which case new monitors (and
     # monitors created during fail over) will construct a PVC based on the
     # template for the monitor's primary storage. Changes to the template do not
@@ -38,18 +36,18 @@ cephClusterSpec:
     # size appropriate for monitor data will be used.
     volumeClaimTemplate:
       spec:
-        storageClassName: managed # managed-premium # gp2  # TODO: need to make this a variable
+        storageClassName: managed # managed-premium # TODO: need to make this a variable
         resources:
           requests:
             storage: 10Gi
   cephVersion:
     image: quay.io/ceph/ceph:v18.2.2
     allowUnsupported: false
-  skipUpgradeChecks: false
-  continueUpgradeAfterChecksEvenIfNotHealthy: false
+  # skipUpgradeChecks: false
+  # continueUpgradeAfterChecksEvenIfNotHealthy: false
   mgr:
     count: 1
-    allowMultiplePerNode: false
+    allowMultiplePerNode: true
     modules:
       - name: rook
         enabled: true
@@ -57,7 +55,7 @@ cephClusterSpec:
     enabled: true
     ssl: false
   crashCollector:
-    disable: false
+    disable: true # false
   logCollector:
     enabled: true
     periodicity: daily # one of: hourly, daily, weekly, monthly
@@ -67,86 +65,24 @@ cephClusterSpec:
       - name: set1
         # The number of OSDs to create from this device set
         count: 1
-        # IMPORTANT: If volumes specified by the storageClassName are not portable across nodes
-        # this needs to be set to false. For example, if using the local storage provisioner
-        # this should be false.
         portable: true
-        # Certain storage class in the Cloud are slow
-        # Rook can configure the OSD running on PVC to accommodate that by tuning some of the Ceph internal
-        # Currently, "gp2" has been identified as such
         tuneDeviceClass: true
-        # Certain storage class in the Cloud are fast
-        # Rook can configure the OSD running on PVC to accommodate that by tuning some of the Ceph internal
-        # Currently, "managed-premium" has been identified as such
-        tuneFastDeviceClass: false
+        tuneFastDeviceClass: true
         # whether to encrypt the deviceSet or not
         encrypted: false
         # Since the OSDs could end up on any node, an effort needs to be made to spread the OSDs
         # across nodes as much as possible. Unfortunately the pod anti-affinity breaks down
         # as soon as you have more than one OSD per node. The topology spread constraints will
         # give us an even spread on K8s 1.18 or newer.
-        placement:
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-                - matchExpressions:
-                    - key: azure-node-pool  # TODO: update this label for all cloud providers, use a taint/toleration instead
-                      operator: In
-                      values:
-                        - storage
-          topologySpreadConstraints:
-            - maxSkew: 1
-              topologyKey: kubernetes.io/hostname
-              whenUnsatisfiable: ScheduleAnyway
-              labelSelector:
-                matchExpressions:
-                  - key: app
-                    operator: In
-                    values:
-                      - rook-ceph-osd
-        preparePlacement:
-          # TODO: Fix this part
-          # podAffinity:
-          #   preferredDuringSchedulingIgnoredDuringExecution:
-          #     - weight: 100
-          #       podAffinityTerm:
-          #         labelSelector:
-          #           matchExpressions:
-          #             - key: app
-          #               operator: In
-          #               values:
-          #                 - rook-ceph-osd
-          #             - key:
-          #               operator: In
-          #               values:
-          #                 - rook-ceph-osd-prepare
-          #         topologyKey: kubernetes.io/hostname
-          podAntiAffinity:
-            preferredDuringSchedulingIgnoredDuringExecution:
-              - weight: 100
-                podAffinityTerm:
-                  labelSelector:
-                    matchExpressions:
-                      - key: app
-                        operator: In
-                        values:
-                          - rook-ceph-osd
-                      - key: app
-                        operator: In
-                        values:
-                          - rook-ceph-osd-prepare
-                  topologyKey: kubernetes.io/hostname
-          topologySpreadConstraints:
-            - maxSkew: 1
-              # IMPORTANT: If you don't have zone labels, change this to another key such as kubernetes.io/hostname
-              topologyKey: topology.kubernetes.io/zone
-              whenUnsatisfiable: DoNotSchedule
-              labelSelector:
-                matchExpressions:
-                  - key: app
-                    operator: In
-                    values:
-                      - rook-ceph-osd-prepare
+        # placement:
+        #   nodeAffinity:
+        #     requiredDuringSchedulingIgnoredDuringExecution:
+        #       nodeSelectorTerms:
+        #         - matchExpressions:
+        #             - key: azure-node-pool  # TODO: update this label for all cloud providers, use a taint/toleration instead
+        #               operator: In
+        #               values:
+        #                 - storage
         resources:
         # These are the OSD daemon limits. For OSD prepare limits, see the separate section below for "prepareosd" resources
         #   limits:
@@ -239,3 +175,52 @@ cephClusterSpec:
 # Also, do not forget to replace both:
 #   * ROOK_TOKEN_CHANGE_ME: with a base64 encoded value of the token to use
 #   * VAULT_ADDR_CHANGE_ME: with the Vault address
+
+cephFileSystems:
+  - name: ceph-filesystem
+    # see https://github.com/rook/rook/blob/master/Documentation/CRDs/Shared-Filesystem/ceph-filesystem-crd.md#filesystem-settings for available configuration
+    spec:
+      metadataPool:
+        replicated:
+          size: 1
+      dataPools:
+        - failureDomain: host
+          replicated:
+            size: 1
+          # Optional and highly recommended, 'data0' by default, see https://github.com/rook/rook/blob/master/Documentation/CRDs/Shared-Filesystem/ceph-filesystem-crd.md#pools
+          name: data0
+      metadataServer:
+        activeCount: 1
+        activeStandby: true
+        resources:
+          limits:
+            memory: "4Gi"
+          requests:
+            cpu: "1000m"
+            memory: "4Gi"
+        priorityClassName: system-cluster-critical
+    storageClass:
+      enabled: true
+      isDefault: false
+      name: ceph-filesystem
+      # (Optional) specify a data pool to use, must be the name of one of the data pools above, 'data0' by default
+      pool: data0
+      reclaimPolicy: Delete
+      allowVolumeExpansion: true
+      volumeBindingMode: "Immediate"
+      annotations: { }
+      labels: { }
+      mountOptions: []
+      # see https://github.com/rook/rook/blob/master/Documentation/Storage-Configuration/Shared-Filesystem-CephFS/filesystem-storage.md#provision-storage for available configuration
+      parameters:
+        # The secrets contain Ceph admin credentials.
+        csi.storage.k8s.io/provisioner-secret-name: rook-csi-cephfs-provisioner
+        csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/controller-expand-secret-name: rook-csi-cephfs-provisioner
+        csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+        csi.storage.k8s.io/node-stage-secret-name: rook-csi-cephfs-node
+        csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
+        # Specify the filesystem type of the volume. If not specified, csi-provisioner
+        # will set default as `ext4`. Note that `xfs` is not recommended due to potential deadlock
+        # in hyperconverged settings where the volume is mounted on the same node as the osds.
+        csi.storage.k8s.io/fstype: ext4
