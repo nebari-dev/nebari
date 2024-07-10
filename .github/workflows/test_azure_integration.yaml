@@ -41,7 +41,7 @@ jobs:
       contents: read
 
     outputs:
-      provider_credentials: ${{ steps.flag-check.outputs.provider_credentials_azure }}
+      provider_credentials_azure: ${{ steps.flag-check.outputs.provider_credentials_azure }}
     
     steps:
 
