@@ -4,13 +4,6 @@ monitoring:
 cephBlockPools: []
 cephObjectStores: []
 cephClusterSpec:
-  cephConfig:
-    global:
-      osd_pool_default_size: "1"
-      mon_warn_on_pool_no_redundancy: "false"
-      bdev_flock_retry: "20"
-      bluefs_buffered_io: "false"
-      mon_data_avail_warn: "10"
   placement:
     additionalProperties:
       nodeAffinity:
@@ -26,7 +19,7 @@ cephClusterSpec:
   mon:
     # Set the number of mons to be started. Generally recommended to be 3.
     # For highest availability, an odd number of mons should be specified.
-    count: 1
+    count: 3
     # The mons should be on unique nodes. For production, at least 3 nodes are recommended for this reason.
     # Mons should only be allowed on the same node for test environments where data loss is acceptable.
     allowMultiplePerNode: false
@@ -48,7 +41,7 @@ cephClusterSpec:
   skipUpgradeChecks: false
   continueUpgradeAfterChecksEvenIfNotHealthy: false
   mgr:
-    count: 1
+    count: 2
     allowMultiplePerNode: false
     modules:
       - name: rook
@@ -66,7 +59,7 @@ cephClusterSpec:
     storageClassDeviceSets:
       - name: set1
         # The number of OSDs to create from this device set
-        count: 1
+        count: 3
         # IMPORTANT: If volumes specified by the storageClassName are not portable across nodes
         # this needs to be set to false. For example, if using the local storage provisioner
         # this should be false.
@@ -163,7 +156,7 @@ cephClusterSpec:
             spec:
               resources:
                 requests:
-                  storage: 400Gi  # TODO: need to make this a variable  # TODO: Look into auto resizing these as needed
+                  storage: 133Gi  # TODO: need to make this a variable  # TODO: Look into auto resizing these as needed
               # IMPORTANT: Change the storage class depending on your environment
               storageClassName: managed # managed-premium # gp2  # TODO: need to make this a variable
               volumeMode: Block
