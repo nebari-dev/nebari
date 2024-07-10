@@ -544,13 +544,19 @@ def render_profiles(spawner):
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
+    managed_roles = yield spawner.authenticator.load_managed_roles()
+    spawner.log.info(f"managed_roles: {managed_roles}")
+
+    client_roles = spawner.authenticator.client_roles
+    spawner.log.info(f"client_roles: {client_roles}")
 
     username = auth_state["oauth_user"]["preferred_username"]
     # only return the lowest level group name
     # e.g. /projects/myproj -> myproj
     # and /developers -> developers
     groups = [Path(group).name for group in auth_state["oauth_user"]["groups"]]
-    spawner.log.info(f"user info: {username} {groups}")
+    roles = auth_state["oauth_user"].get("roles", [])
+    spawner.log.info(f"user info: {username} {groups} {roles}")
 
     keycloak_profilenames = auth_state["oauth_user"].get("jupyterlab_profiles", [])
 

@@ -274,11 +274,20 @@ module "jupyterhub-openid-client" {
   realm_id     = var.realm_id
   client_id    = "jupyterhub"
   external-url = var.external-url
+
   role_mapping = {
     "admin"     = ["jupyterhub_admin", "dask_gateway_admin", "create-shared-directory-role"]
     "developer" = ["jupyterhub_developer", "dask_gateway_developer", "create-shared-directory-role"]
     "analyst"   = ["jupyterhub_developer", "create-shared-directory-role"]
   }
+
+  role_attributes = {
+    "create-shared-directory-role" = {
+      "resource" = "shared-directory"
+      "scopes"   = "write:shared"
+    }
+  }
+
   callback-url-paths = [
     "https://${var.external-url}/hub/oauth_callback",
     var.jupyterhub-logout-redirect-url

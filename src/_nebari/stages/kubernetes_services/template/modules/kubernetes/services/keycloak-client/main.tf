@@ -97,7 +97,7 @@ resource "keycloak_role" "main" {
   client_id   = keycloak_openid_client.main.id
   name        = each.key
   description = each.key
-  attributes  = each.value != null ? each.value : {}
+  attributes  = lookup(var.role_attributes, each.key, null) != null ? var.role_attributes[each.key] : {}
 }
 
 

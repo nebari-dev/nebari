@@ -35,6 +35,11 @@ variable "role_mapping" {
   default     = {}
 }
 
+variable "role_attributes" {
+  description = "Attribute to use for role mapping"
+  type        = map(map(string))
+  default     = {}
+}
 
 variable "callback-url-paths" {
   description = "URLs to use for openid callback"
