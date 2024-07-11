@@ -47,6 +47,7 @@ def test_default_user_role_scopes():
 @pytest.mark.filterwarnings(
     "ignore:.*auto_refresh_token is deprecated:DeprecationWarning"
 )
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 def test_check_default_roles_added_in_keycloak():
     client_roles = get_keycloak_client_roles(client_name="jupyterhub")
     role_names = [role["name"] for role in client_roles]
