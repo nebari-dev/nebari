@@ -7,7 +7,7 @@ from functools import reduce
 from jupyterhub import scopes
 from jupyterhub.traitlets import Callable
 from oauthenticator.generic import GenericOAuthenticator
-from traitlets import Bool, Unicode, Union, List
+from traitlets import Bool, List, Unicode, Union
 
 
 class KeyCloakOAuthenticator(GenericOAuthenticator):
@@ -159,7 +159,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         # we could use either `name` (e.g. "developer") or `path` ("/developer");
         # since the default claim key returns `path`, it seems preferable.
 
-        self.log.info(f"Mapping roles with groups and users..")
+        self.log.info("Mapping roles with groups and users..")
 
         for role in roles:
             role_name = role["name"]
