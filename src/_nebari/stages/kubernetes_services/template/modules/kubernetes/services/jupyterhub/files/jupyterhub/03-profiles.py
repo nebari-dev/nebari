@@ -76,7 +76,7 @@ def base_profile_home_mounts(username):
     }
 
 
-def base_profile_shared_mounts(groups, client_roles):
+def base_profile_shared_mounts(groups, group_role_mapping):
     """Configure the group directory mounts for user.
 
     Ensure that {shared}/{group} directory exists based on the scope availability
@@ -84,16 +84,6 @@ def base_profile_shared_mounts(groups, client_roles):
     same pvc to be a volume thus we must check that the home and share
     pvc are not the same for some operation.
     """
-
-    def get_permission_level(scopes):
-        # Determine permission based on the scope
-        if "write:shared" in scopes:
-            return 777
-        elif "read:shared" in scopes:
-            return 444
-        elif "execute:shared" in scopes:
-            return 555
-        return 0
 
     home_pvc_name = z2jh.get_config("custom.home-pvc")
     shared_pvc_name = z2jh.get_config("custom.shared-pvc")
@@ -107,16 +97,13 @@ def base_profile_shared_mounts(groups, client_roles):
             {"name": "shared", "persistentVolumeClaim": {"claimName": shared_pvc_name}}
         )
 
-    role_permissions = {}
-    for role in client_roles:
-        if "shared-directory" in role.get("attributes", {}).get("resource", []):
-            for group in role.get("groups", []):
-                scope = role.get("attributes", {}).get("scopes", [])
-                permission_level = get_permission_level(scope)
-                if group not in role_permissions:
-                    role_permissions[group] = permission_level
-
-    relevant_groups = [group for group in groups if group in role_permissions]
+    relevant_groups = []
+    for group in groups:
+        for roles in group_role_mapping.get(group, []):
+            # Check if the group has a role that has a shared-directory scope
+            if "shared-directory" in roles.get("attributes", {}).get("resource", []):
+                relevant_groups.append(group)
+                break
 
     extra_container_config = {
         "volumeMounts": [
@@ -129,12 +116,11 @@ def base_profile_shared_mounts(groups, client_roles):
         ]
     }
 
-    MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod {perm} /mnt/{path}"
+    MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod 777 /mnt/{path}"
     command = " && ".join(
         [
             MKDIR_OWN_DIRECTORY.format(
                 path=pvc_shared_mount_path.format(group=group),
-                perm=role_permissions[group],
             )
             for group in relevant_groups
         ]
@@ -494,7 +480,9 @@ def profile_conda_store_viewer_token():
     }
 
 
-def render_profile(profile, username, groups, keycloak_profilenames, user_roles):
+def render_profile(
+    profile, username, groups, keycloak_profilenames, group_role_mapping
+):
     """Render each profile for user.
 
     If profile is not available for given username, groups returns
@@ -532,7 +520,7 @@ def render_profile(profile, username, groups, keycloak_profilenames, user_roles)
         deep_merge,
         [
             base_profile_home_mounts(username),
-            base_profile_shared_mounts(groups, user_roles),
+            base_profile_shared_mounts(groups, group_role_mapping),
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
             configure_user(username, groups),
@@ -562,21 +550,24 @@ def render_profile(profile, username, groups, keycloak_profilenames, user_roles)
     return profile
 
 
-def render_user_roles(client_roles, groups):
-    user_groups = set(groups)
-    user_roles = []
+def parse_roles(data):
+    parsed_roles = {}
 
-    for role in client_roles:
-        role_info = {
-            k: v for k, v in role.items() if k in ["name", "groups", "attributes"]
-        }
-        if "groups" in role_info:
-            role_info["groups"] = [Path(group).name for group in role_info["groups"]]
+    for role in data:
+        for group in role["groups"]:
+            group = str(group).replace("/", "")
+            if group not in parsed_roles:
+                parsed_roles[group] = []
 
-        if user_groups & set(role_info.get("groups", [])):
-            user_roles.append(role_info)
+            role_info = {
+                "description": role["description"],
+                "name": role["name"],
+                "attributes": role["attributes"],
+            }
 
-    return user_roles
+            parsed_roles[group].append(role_info)
+
+    return parsed_roles
 
 
 @gen.coroutine
@@ -587,8 +578,9 @@ def render_profiles(spawner):
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
     group_role_mapping = spawner.authenticator.user_group_role_mapping
+    group_role_mapping = parse_roles(group_role_mapping)
 
-    spawner.log.info(f"group_role_mapping: {group_role_mapping}")
+    spawner.log.info(f"role_mapping: {group_role_mapping}")
 
     username = auth_state["oauth_user"]["preferred_username"]
     # only return the lowest level group name
@@ -598,15 +590,15 @@ def render_profiles(spawner):
 
     keycloak_profilenames = auth_state["oauth_user"].get("jupyterlab_profiles", [])
 
-    user_roles = render_user_roles(group_role_mapping, groups)
-
     # fetch available profiles and render additional attributes
     profile_list = z2jh.get_config("custom.profiles")
     return list(
         filter(
             None,
             [
-                render_profile(p, username, groups, keycloak_profilenames, user_roles)
+                render_profile(
+                    p, username, groups, keycloak_profilenames, group_role_mapping
+                )
                 for p in profile_list
             ],
         )
