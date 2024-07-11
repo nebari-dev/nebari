@@ -30,6 +30,9 @@ def test_jupyterhub_loads_roles_from_keycloak():
         "grafana_developer",
         "manage-account-links",
         "view-profile",
+        # default roles
+        "allow-app-sharing-role",
+        "allow-read-access-to-services-role",
     }
 
 
