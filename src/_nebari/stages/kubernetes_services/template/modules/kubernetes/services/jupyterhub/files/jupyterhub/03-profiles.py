@@ -76,15 +76,25 @@ def base_profile_home_mounts(username):
     }
 
 
-def base_profile_shared_mounts(groups):
+def base_profile_shared_mounts(groups, client_roles):
     """Configure the group directory mounts for user.
 
-    Ensure that {shared}/{group} directory exists and user has
-    permissions to read/write/execute. Kubernetes does not allow the
+    Ensure that {shared}/{group} directory exists based on the scope availability
+    and if user has permissions to read/write/execute. Kubernetes does not allow the
     same pvc to be a volume thus we must check that the home and share
     pvc are not the same for some operation.
-
     """
+
+    def get_permission_level(scopes):
+        # Determine permission based on the scope
+        if "write:shared" in scopes:
+            return 777
+        elif "read:shared" in scopes:
+            return 444
+        elif "execute:shared" in scopes:
+            return 555
+        return 0
+
     home_pvc_name = z2jh.get_config("custom.home-pvc")
     shared_pvc_name = z2jh.get_config("custom.shared-pvc")
 
@@ -97,6 +107,17 @@ def base_profile_shared_mounts(groups):
             {"name": "shared", "persistentVolumeClaim": {"claimName": shared_pvc_name}}
         )
 
+    role_permissions = {}
+    for role in client_roles:
+        if "shared-directory" in role.get("attributes", {}).get("resource", []):
+            for group in role.get("groups", []):
+                scope = role.get("attributes", {}).get("scopes", [])
+                permission_level = get_permission_level(scope)
+                if group not in role_permissions:
+                    role_permissions[group] = permission_level
+
+    relevant_groups = [group for group in groups if group in role_permissions]
+
     extra_container_config = {
         "volumeMounts": [
             {
@@ -104,15 +125,18 @@ def base_profile_shared_mounts(groups):
                 "name": "shared" if home_pvc_name != shared_pvc_name else "home",
                 "subPath": pvc_shared_mount_path.format(group=group),
             }
-            for group in groups
+            for group in relevant_groups
         ]
     }
 
-    MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod 777 /mnt/{path}"
+    MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod {perm} /mnt/{path}"
     command = " && ".join(
         [
-            MKDIR_OWN_DIRECTORY.format(path=pvc_shared_mount_path.format(group=group))
-            for group in groups
+            MKDIR_OWN_DIRECTORY.format(
+                path=pvc_shared_mount_path.format(group=group),
+                perm=role_permissions[group],
+            )
+            for group in relevant_groups
         ]
     )
     init_containers = [
@@ -127,10 +151,11 @@ def base_profile_shared_mounts(groups):
                     "name": "shared" if home_pvc_name != shared_pvc_name else "home",
                     "subPath": pvc_shared_mount_path.format(group=group),
                 }
-                for group in groups
+                for group in relevant_groups
             ],
         }
     ]
+
     return {
         "extra_pod_config": extra_pod_config,
         "extra_container_config": extra_container_config,
@@ -469,7 +494,7 @@ def profile_conda_store_viewer_token():
     }
 
 
-def render_profile(profile, username, groups, keycloak_profilenames):
+def render_profile(profile, username, groups, keycloak_profilenames, user_roles):
     """Render each profile for user.
 
     If profile is not available for given username, groups returns
@@ -507,7 +532,7 @@ def render_profile(profile, username, groups, keycloak_profilenames):
         deep_merge,
         [
             base_profile_home_mounts(username),
-            base_profile_shared_mounts(groups),
+            base_profile_shared_mounts(groups, user_roles),
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
             configure_user(username, groups),
@@ -537,6 +562,23 @@ def render_profile(profile, username, groups, keycloak_profilenames):
     return profile
 
 
+def render_user_roles(client_roles, groups):
+    user_groups = set(groups)
+    user_roles = []
+
+    for role in client_roles:
+        role_info = {
+            k: v for k, v in role.items() if k in ["name", "groups", "attributes"]
+        }
+        if "groups" in role_info:
+            role_info["groups"] = [Path(group).name for group in role_info["groups"]]
+
+        if user_groups & set(role_info.get("groups", [])):
+            user_roles.append(role_info)
+
+    return user_roles
+
+
 @gen.coroutine
 def render_profiles(spawner):
     # jupyterhub does not yet manage groups but it will soon
@@ -544,21 +586,19 @@ def render_profiles(spawner):
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
-    managed_roles = yield spawner.authenticator.load_managed_roles()
-    spawner.log.info(f"managed_roles: {managed_roles}")
+    group_role_mapping = spawner.authenticator.user_group_role_mapping
 
-    client_roles = spawner.authenticator.client_roles
-    spawner.log.info(f"client_roles: {client_roles}")
+    spawner.log.info(f"group_role_mapping: {group_role_mapping}")
 
     username = auth_state["oauth_user"]["preferred_username"]
     # only return the lowest level group name
     # e.g. /projects/myproj -> myproj
     # and /developers -> developers
     groups = [Path(group).name for group in auth_state["oauth_user"]["groups"]]
-    roles = auth_state["oauth_user"].get("roles", [])
-    spawner.log.info(f"user info: {username} {groups} {roles}")
 
     keycloak_profilenames = auth_state["oauth_user"].get("jupyterlab_profiles", [])
+
+    user_roles = render_user_roles(group_role_mapping, groups)
 
     # fetch available profiles and render additional attributes
     profile_list = z2jh.get_config("custom.profiles")
@@ -566,7 +606,7 @@ def render_profiles(spawner):
         filter(
             None,
             [
-                render_profile(p, username, groups, keycloak_profilenames)
+                render_profile(p, username, groups, keycloak_profilenames, user_roles)
                 for p in profile_list
             ],
         )

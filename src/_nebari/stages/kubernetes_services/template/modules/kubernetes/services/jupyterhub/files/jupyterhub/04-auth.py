@@ -7,7 +7,7 @@ from functools import reduce
 from jupyterhub import scopes
 from jupyterhub.traitlets import Callable
 from oauthenticator.generic import GenericOAuthenticator
-from traitlets import Bool, Unicode, Union
+from traitlets import Bool, Unicode, Union, List
 
 
 class KeyCloakOAuthenticator(GenericOAuthenticator):
@@ -27,9 +27,10 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         config=True, help="""The keycloak REST API URL for the realm."""
     )
 
-    realm_roles = Unicode(config=False, help="""The keycloak realm roles.""")
-
-    client_roles = Unicode(config=False, help="""The keycloak client roles.""")
+    user_group_role_mapping = List(
+        config=False,
+        help="""A mapping of roles to groups based on the user's assigned roles.""",
+    )
 
     reset_managed_roles_on_startup = Bool(True)
 
@@ -58,6 +59,11 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         )
         user_roles_rich = await self._get_roles_with_attributes(
             roles=user_roles, client_id=jupyterhub_client_id, token=token
+        )
+        self.user_group_role_mapping = await self._fetch_and_map_roles(
+            roles=user_roles_rich,
+            token=token,
+            url=f"clients/{jupyterhub_client_id}/roles/{{role_name}}",
         )
         keycloak_api_call_time_taken = time.time() - keycloak_api_call_start
         user_roles_rich_names = {role["name"] for role in user_roles_rich}
@@ -97,8 +103,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         client_roles_rich = await self._get_roles_with_attributes(
             client_roles, client_id=jupyterhub_client_id, token=token
         )
-        self.log.info(f"Loaded {len(client_roles_rich)} client roles from keycloak..\n")
-        self.log.info(f"Client roles loaded: {client_roles_rich} \n")
         return client_roles_rich
 
     async def _get_jupyterhub_client_id(self, token):
@@ -123,26 +127,21 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         client_roles_rich = await self._get_jupyterhub_client_roles(
             jupyterhub_client_id=jupyterhub_client_id, token=token
         )
-        # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
-        realm_roles = await self._fetch_api(endpoint="roles", token=token)
-
-        self.log.info(f"Realm roles: {realm_roles}")
-
-        realm_roles = await self._fetch_and_map_roles(
-            roles=realm_roles,
-            token=token,
-            url="roles/{role_name}",
-        )
-        self.realm_roles = realm_roles
-
-        self.log.info(f"Client roles: {client_roles_rich}")
 
         client_roles_rich = await self._fetch_and_map_roles(
             roles=client_roles_rich,
             token=token,
             url=f"clients/{jupyterhub_client_id}/roles/{{role_name}}",
         )
-        self.client_roles = client_roles_rich
+
+        # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
+        realm_roles = await self._fetch_api(endpoint="roles", token=token)
+
+        realm_roles = await self._fetch_and_map_roles(
+            roles=realm_roles,
+            token=token,
+            url="roles/{role_name}",
+        )
 
         roles = {
             role["name"]: {
@@ -153,7 +152,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             for role in [*realm_roles, *client_roles_rich]
         }
         self.log.info(f"Loaded {len(roles)} roles from keycloak..\n")
-        self.log.info(f"Roles loaded: {roles} \n")
 
         return list(roles.values())
 
@@ -161,18 +159,15 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         # we could use either `name` (e.g. "developer") or `path` ("/developer");
         # since the default claim key returns `path`, it seems preferable.
 
-        self.log.info(f"Fetching roles with attributes from keycloak")
-        self.log.info(f"Roles: {roles}")
+        self.log.info(f"Mapping roles with groups and users..")
 
         for role in roles:
             role_name = role["name"]
             # fetch role assignments to groups
             base_url = url.format(role_name=role_name)
             groups = await self._fetch_api(f"{base_url}/groups", token=token)
-            self.log.info(f"Groups for role {role_name}: {groups}")
             role["groups"] = [group[group_name_key] for group in groups]
             users = await self._fetch_api(f"{base_url}/users", token=token)
-            self.log.info(f"Users for role {role_name}: {users}")
             role["users"] = [user["username"] for user in users]
 
         return roles
