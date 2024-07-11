@@ -174,7 +174,7 @@ def _calculate_node_groups(config: schema.Main):
             for group in ["general", "user", "worker"]
         }
     elif config.provider == schema.ProviderEnum.existing:
-        return config.existing.node_selectors
+        return config.existing.dict()["node_selectors"]
     else:
         return config.local.model_dump()["node_selectors"]
 
