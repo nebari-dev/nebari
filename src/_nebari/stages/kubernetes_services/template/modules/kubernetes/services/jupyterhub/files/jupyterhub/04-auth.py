@@ -70,7 +70,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         auth_model = await super().update_auth_model(auth_model)
         user_id = auth_model["auth_state"]["oauth_user"]["sub"]
         token = await self._get_token()
-
         jupyterhub_client_id = await self._get_jupyterhub_client_id(token=token)
         user_info = auth_model["auth_state"][self.user_auth_state_key]
         user_roles_from_claims = self._get_user_roles(user_info=user_info)
