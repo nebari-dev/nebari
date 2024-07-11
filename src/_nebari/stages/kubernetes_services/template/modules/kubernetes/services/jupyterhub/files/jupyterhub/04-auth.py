@@ -228,7 +228,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         token: str,
     ):
         """Create default roles for jupyterhub keycloak client"""
-        self.log.info("Creating default roles, which does not exits already")
+        self.log.info("Creating default roles, which does not exists already")
         self.log.info(
             f"Roles to create: {roles}, existing roles: {existing_roles}, client_id: {client_id}"
         )
@@ -239,56 +239,60 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             if role["name"] in existing_role_name_mapping:
                 self.log.info(f"role: {role} exists skipping")
                 continue
-
-            self.log.info(f"Creating keycloak client role: {role}")
-            body = json.dumps(
-                {
-                    "name": role.get("name"),
-                    "description": role.get("description"),
-                    "attributes": {
-                        "scopes": role.get("scopes"),
-                        "component": ["jupyterhub"],
-                    },
-                }
-            )
-            response = await self._fetch_api(
-                endpoint=f"clients/{client_id}/roles",
-                token=token,
-                method="POST",
-                body=body,
-                extra_headers={"Content-Type": "application/json"},
-            )
-            self.log.info(f"Keycloak client role creation response: {response}")
+            await self._create_keycloak_client_role(role, client_id, token)
 
         role_name_mapping = await self._get_keycloak_roles(
             token=token, client_id=client_id
         )
         groups = await self._get_keycloak_groups(token)
         for role in roles:
-            keycloak_role = role_name_mapping[role["name"]]
-            if len(keycloak_role) != 1:
+            keycloak_roles = role_name_mapping[role["name"]]
+            if len(keycloak_roles) != 1:
                 self.log.error(
-                    f"Multiple roles with same name: {keycloak_role}, skipping"
+                    f"Multiple roles with same name: {keycloak_roles}, skipping"
                 )
                 continue
             if not role.get("groups"):
                 self.log.info(
-                    f"No groups assigned for the role {keycloak_role}, not attaching to any group"
+                    f"No groups defined for the role {keycloak_roles}, not attaching to any group"
                 )
                 continue
             for group_path in role.get("groups"):
                 keycloak_group = groups[group_path][0]
                 keycloak_group_id = keycloak_group["id"]
                 self.log.info(
-                    f"Assigning role: {keycloak_role[0]['name']} to group: {keycloak_group['name']}, client: {client_id}"
+                    f"Assigning role: {keycloak_roles[0]['name']} "
+                    f"to group: {keycloak_group['name']},"
+                    f"client: {client_id}"
                 )
                 response_content = await self._assign_keycloak_client_role(
                     client_id=client_id,
                     group_id=keycloak_group_id,
                     token=token,
-                    role=keycloak_role[0],
+                    role=keycloak_roles[0],
                 )
                 self.log.info(f"Role assignment response_content: {response_content}")
+
+    async def _create_keycloak_client_role(self, role, client_id, token):
+        self.log.info(f"Creating keycloak client role: {role}")
+        body = json.dumps(
+            {
+                "name": role.get("name"),
+                "description": role.get("description"),
+                "attributes": {
+                    "scopes": role.get("scopes"),
+                    "component": ["jupyterhub"],
+                },
+            }
+        )
+        response = await self._fetch_api(
+            endpoint=f"clients/{client_id}/roles",
+            token=token,
+            method="POST",
+            body=body,
+            extra_headers={"Content-Type": "application/json"},
+        )
+        self.log.info(f"Keycloak client role creation response: {response}")
 
     async def _get_keycloak_groups(self, token: str) -> typing.DefaultDict[str, list]:
         self.log.info("Getting keycloak groups")

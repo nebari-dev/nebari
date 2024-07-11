@@ -286,6 +286,8 @@ module "jupyterhub-openid-client" {
   jupyterlab_profiles_mapper = true
   service-accounts-enabled   = true
   service-account-roles = [
+    # "manage-clients" is required for creating roles for the client
+    # "manage-users" is required for attaching roles to groups
     "view-realm", "view-users", "view-clients", "manage-clients", "manage-users"
   ]
 }
