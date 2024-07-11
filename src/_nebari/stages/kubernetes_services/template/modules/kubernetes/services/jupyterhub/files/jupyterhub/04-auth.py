@@ -21,6 +21,9 @@ DEFAULT_ROLES = [
         # grants permissions to read other groups' names
         # The later two are required for sharing with a group or user
         "scopes": ["shares,read:users:name,read:groups:name"],
+        # not attaching this to any group by default as that might not be desirable for all
+        # deployments and this gives the user (admin) a choice to attach or not attach this to any
+        # user or group based on the permission structure of the team / organization.
     },
     {
         "name": "allow-read-access-to-services-role",
@@ -141,6 +144,8 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             jupyterhub_client_id=jupyterhub_client_id, token=token
         )
         try:
+            # Creating the default roles in keycloak instead of jupyterhub directly
+            # to keep keycloak as single source of truth.
             await self._create_default_keycloak_client_roles(
                 DEFAULT_ROLES, client_roles_rich, jupyterhub_client_id, token
             )
@@ -296,10 +301,10 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
     async def _get_keycloak_groups(self, token: str) -> typing.DefaultDict[str, list]:
         self.log.info("Getting keycloak groups")
-        rjson = await self._fetch_api(endpoint="groups", token=token)
-        self.log.info(f"Keycloak groups: {rjson}")
+        response_json = await self._fetch_api(endpoint="groups", token=token)
+        self.log.info(f"Keycloak groups: {response_json}")
         group_name_mapping = defaultdict(list)
-        for group in rjson:
+        for group in response_json:
             group_name_mapping[group["path"]].append(group)
         self.log.info(f"Keycloak groups name mapping: {group_name_mapping}")
         return group_name_mapping
@@ -307,12 +312,13 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
     async def _get_keycloak_roles(
         self, token: str, client_id: str
     ) -> typing.DefaultDict[str, list]:
+        """Get keycloak roles for a client"""
         self.log.info(f"getting keycloak roles for client: {client_id}")
-        rjson = await self._fetch_api(
+        response_json = await self._fetch_api(
             endpoint=f"clients/{client_id}/roles", token=token
         )
         role_name_mapping = defaultdict(list)
-        for role in rjson:
+        for role in response_json:
             role_name_mapping[role["name"]].append(role)
         self.log.info(f"keycloak roles name mapping: {role_name_mapping}")
         return role_name_mapping
@@ -320,6 +326,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
     async def _assign_keycloak_client_role(
         self, client_id: str, group_id: str, token: str, role: dict
     ):
+        """Given a group id and a role, assign role to the group"""
         response_content = await self._fetch_api(
             endpoint=f"groups/{group_id}/role-mappings/clients/{client_id}",
             token=token,
@@ -357,9 +364,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 "client_secret": self.client_secret,
                 "grant_type": "client_credentials",
             }
-        )
-        self.log.info(
-            f"getting token client_id: {self.client_id}, client_secret: {self.client_secret} token: {self.token_url}"
         )
         response = await http.fetch(
             self.token_url,
