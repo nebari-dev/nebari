@@ -245,7 +245,10 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 {
                     "name": role.get("name"),
                     "description": role.get("description"),
-                    "attributes": {"scopes": role.get("scopes")},
+                    "attributes": {
+                        "scopes": role.get("scopes"),
+                        "component": ["jupyterhub"]
+                    },
                 }
             )
             response = await self._fetch_api(

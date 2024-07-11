@@ -36,6 +36,14 @@ def test_jupyterhub_loads_roles_from_keycloak():
     }
 
 
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_default_user_role_scopes():
+    # check token scopes before role creation and assignment
+    token_response = create_jupyterhub_token(note="get-default-scopes")
+    token_scopes = set(token_response.json()["scopes"])
+    assert "read:services" in token_scopes
+
+
 @pytest.mark.parametrize(
     "component,scopes,expected_scopes_difference",
     (
