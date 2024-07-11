@@ -247,7 +247,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                     "description": role.get("description"),
                     "attributes": {
                         "scopes": role.get("scopes"),
-                        "component": ["jupyterhub"]
+                        "component": ["jupyterhub"],
                     },
                 }
             )
