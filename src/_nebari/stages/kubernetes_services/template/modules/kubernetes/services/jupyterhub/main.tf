@@ -283,7 +283,7 @@ module "jupyterhub-openid-client" {
     {
       "name" : "allow-app-sharing-role",
       "description" : "Allow app sharing for apps created via JupyterHub App Launcher (jhub-apps)",
-      groups : [],
+      "groups" : [],
       "attributes" : {
         # grants permissions to share server
         # grants permissions to read other user's names
