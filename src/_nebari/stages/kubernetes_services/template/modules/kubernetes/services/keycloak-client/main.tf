@@ -99,6 +99,24 @@ resource "keycloak_role" "main" {
   description = each.key
 }
 
+data "keycloak_group" "main" {
+  for_each = var.role_mapping
+
+  realm_id = var.realm_id
+  name     = each.key
+}
+
+
+resource "keycloak_group_roles" "group_roles" {
+  for_each = var.role_mapping
+
+  realm_id = var.realm_id
+  group_id = data.keycloak_group.main[each.key].id
+  role_ids = [for role in each.value : keycloak_role.main[role].id]
+
+  exhaustive = false
+}
+
 resource "keycloak_role" "default_client_roles" {
   for_each    = { for role in var.client_roles : role.name => role }
   realm_id    = var.realm_id
@@ -118,38 +136,21 @@ locals {
     ]
   ])
 
-  groups = toset([
+  client_roles_groups = toset([
     for index, value in local.group_role_mapping : value.group
   ])
 }
 
 data "keycloak_group" "client_role_groups" {
-  for_each = local.groups
+  for_each = local.client_roles_groups
   realm_id = var.realm_id
   name     = each.value
 }
 
 resource "keycloak_group_roles" "assign_roles" {
-  for_each = { for idx, value in local.group_role_mapping : idx => value }
-  realm_id = var.realm_id
-  group_id = data.keycloak_group.client_role_groups[each.value.group].id
-  role_ids = [keycloak_role.default_client_roles[each.value.role_name].id]
-}
-
-data "keycloak_group" "main" {
-  for_each = var.role_mapping
-
-  realm_id = var.realm_id
-  name     = each.key
-}
-
-
-resource "keycloak_group_roles" "group_roles" {
-  for_each = var.role_mapping
-
-  realm_id = var.realm_id
-  group_id = data.keycloak_group.main[each.key].id
-  role_ids = [for role in each.value : keycloak_role.main[role].id]
-
+  for_each   = { for idx, value in local.group_role_mapping : idx => value }
+  realm_id   = var.realm_id
+  group_id   = data.keycloak_group.client_role_groups[each.value.group].id
+  role_ids   = [keycloak_role.default_client_roles[each.value.role_name].id]
   exhaustive = false
 }
