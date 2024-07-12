@@ -105,6 +105,10 @@ module "jupyterhub-nfs-mount" {
   depends_on = [
     module.kubernetes-nfs-server
   ]
+  timeouts = {
+    # 5 minute timeout is too low on creation when using rook-ceph
+    create = "10m"
+  }
 }
 
 
