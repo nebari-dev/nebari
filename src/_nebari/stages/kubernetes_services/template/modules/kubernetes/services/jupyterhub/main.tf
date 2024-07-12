@@ -279,6 +279,32 @@ module "jupyterhub-openid-client" {
     "developer" = ["jupyterhub_developer", "dask_gateway_developer"]
     "analyst"   = ["jupyterhub_developer"]
   }
+  client_roles = [
+    {
+      "name" : "allow-app-sharing-role",
+      "description" : "Allow app sharing for apps created via JupyterHub App Launcher (jhub-apps)",
+      groups : [],
+      "attributes" : {
+        # grants permissions to share server
+        # grants permissions to read other user's names
+        # grants permissions to read other groups' names
+        # The later two are required for sharing with a group or user
+        "scopes" : "shares,read:users:name,read:groups:name"
+        "component" : "jupyterhub"
+      }
+    },
+    {
+      "name" : "allow-read-access-to-services-role",
+      "description" : "Allow read access to services, such that they are visible on the home page e.g. conda-store",
+      # Adding it to analyst group such that it's applied to every user.
+      "groups" : ["analyst"],
+      "attributes" : {
+        # grants permissions to read services
+        "scopes" : "read:services",
+        "component" : "jupyterhub"
+      }
+    },
+  ]
   callback-url-paths = [
     "https://${var.external-url}/hub/oauth_callback",
     var.jupyterhub-logout-redirect-url
@@ -286,9 +312,7 @@ module "jupyterhub-openid-client" {
   jupyterlab_profiles_mapper = true
   service-accounts-enabled   = true
   service-account-roles = [
-    # "manage-clients" is required for creating roles for the client
-    # "manage-users" is required for attaching roles to groups
-    "view-realm", "view-users", "view-clients", "manage-clients", "manage-users"
+    "view-realm", "view-users", "view-clients"
   ]
 }
 

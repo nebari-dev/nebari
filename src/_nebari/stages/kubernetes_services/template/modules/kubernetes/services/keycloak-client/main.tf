@@ -99,6 +99,42 @@ resource "keycloak_role" "main" {
   description = each.key
 }
 
+resource "keycloak_role" "default_client_roles" {
+  for_each    = { for role in var.client_roles : role.name => role }
+  realm_id    = var.realm_id
+  client_id   = keycloak_openid_client.main.id
+  name        = each.value.name
+  description = each.value.description
+  attributes  = each.value.attributes
+}
+
+locals {
+  group_role_mapping = flatten([
+    for role_object in var.client_roles : [
+      for group_name in role_object.groups : {
+        group : group_name
+        role_name : role_object.name
+      }
+    ]
+  ])
+
+  groups = toset([
+    for index, value in local.group_role_mapping : value.group
+  ])
+}
+
+data "keycloak_group" "client_role_groups" {
+  for_each = local.groups
+  realm_id = var.realm_id
+  name     = each.value
+}
+
+resource "keycloak_group_roles" "assign_roles" {
+  for_each = { for idx, value in local.group_role_mapping : idx => value }
+  realm_id = var.realm_id
+  group_id = data.keycloak_group.client_role_groups[each.value.group].id
+  role_ids = [keycloak_role.default_client_roles[each.value.role_name].id]
+}
 
 data "keycloak_group" "main" {
   for_each = var.role_mapping
