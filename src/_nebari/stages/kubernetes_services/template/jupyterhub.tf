@@ -83,7 +83,7 @@ variable "idle-culler-settings" {
 }
 
 module "kubernetes-nfs-server" {
-  count = var.jupyterhub-shared-endpoint == null ? 1 : 0
+  count = (var.jupyterhub-shared-endpoint == null && local.fs == "nfs") ? 1 : 0 # TODO: Make sure this is what we want on AWS
 
   source = "./modules/kubernetes/nfs-server"
 
@@ -93,8 +93,8 @@ module "kubernetes-nfs-server" {
   node-group   = var.node_groups.general
 }
 
-
 module "jupyterhub-nfs-mount" {
+  count  = local.fs == "nfs" ? 1 : 0
   source = "./modules/kubernetes/nfs-mount"
 
   name         = "jupyterhub"
@@ -103,13 +103,39 @@ module "jupyterhub-nfs-mount" {
   nfs_endpoint = var.jupyterhub-shared-endpoint == null ? module.kubernetes-nfs-server.0.endpoint_ip : var.jupyterhub-shared-endpoint
 
   depends_on = [
-    module.kubernetes-nfs-server
+    module.kubernetes-nfs-server,
+    module.rook-ceph # This should be dependent on whether or not rook-ceph is enabled or maybe it's a no-op if it's not enabled so it's fine
   ]
-  timeouts = {
-    # 5 minute timeout is too low on creation when using rook-ceph
-    create = "10m"
-  }
 }
+
+# variable "fs" {
+#   type        = string
+#   description = "Use NFS or Ceph"
+
+#   validation {
+#     condition = contains(["ceph", "nfs"], var.fs)
+#     error_message = "Allowed values for input_parameter are \"ceph\", or \"nfs\"."
+#   }
+# }
+
+locals {
+  fs = "ceph" # TODO: Use the fs variable above instead
+}
+
+module "cephfs-mount" {
+  count  = local.fs == "ceph" ? 1 : 0
+  source = "./modules/kubernetes/cephfs-mount"
+
+  name         = "jupyterhub"
+  namespace    = var.environment
+  nfs_capacity = var.jupyterhub-shared-storage # TODO: rename these variables
+
+  depends_on = [
+    module.kubernetes-nfs-server,
+    module.rook-ceph # This should be dependent on whether or not rook-ceph is enabled or maybe it's a no-op if it's not enabled so it's fine
+  ]
+}
+
 
 
 module "jupyterhub" {
@@ -125,9 +151,9 @@ module "jupyterhub" {
 
   overrides = var.jupyterhub-overrides
 
-  home-pvc = module.jupyterhub-nfs-mount.persistent_volume_claim.name
+  home-pvc = local.fs == "ceph" ? module.cephfs-mount[0].persistent_volume_claim.name : module.jupyterhub-nfs-mount[0].persistent_volume_claim.name
 
-  shared-pvc = module.jupyterhub-nfs-mount.persistent_volume_claim.name
+  shared-pvc = local.fs == "ceph" ? module.cephfs-mount[0].persistent_volume_claim.name : module.jupyterhub-nfs-mount[0].persistent_volume_claim.name
 
   conda-store-pvc                                    = module.conda-store-nfs-mount.persistent_volume_claim.name
   conda-store-mount                                  = "/home/conda"
