@@ -83,13 +83,4 @@ resource "azurerm_kubernetes_cluster_node_pool" "node_group" {
   orchestrator_version = var.kubernetes_version
   tags                 = var.tags
   vnet_subnet_id       = var.vnet_subnet_id
-
-  # TODO: Get node taints working
-  # node_taints = [
-  #   "dedicated=${each.value.name}:NoSchedule"
-  # ]
-  # node_taints = [
-  #   for taint in each.value.taints :
-  #     "${taint.key}=${taint.value}:${taint.effect}"
-  # ]
 }
