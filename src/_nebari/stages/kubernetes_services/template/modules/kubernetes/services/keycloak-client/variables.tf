@@ -46,3 +46,14 @@ variable "jupyterlab_profiles_mapper" {
   type        = bool
   default     = false
 }
+
+variable "client_roles" {
+  description = "Create roles for the client and assign it to groups"
+  default     = []
+  type = list(object({
+    name        = string
+    description = string
+    groups      = optional(list(string))
+    attributes  = map(any)
+  }))
+}
