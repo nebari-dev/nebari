@@ -5,6 +5,7 @@ from tests.tests_deployment import constants
 from tests.tests_deployment.keycloak_utils import (
     assign_keycloak_client_role_to_user,
     create_keycloak_role,
+    get_keycloak_client_roles,
 )
 from tests.tests_deployment.utils import create_jupyterhub_token, get_jupyterhub_session
 
@@ -36,7 +37,27 @@ def test_jupyterhub_loads_roles_from_keycloak():
         "grafana_developer",
         "manage-account-links",
         "view-profile",
+        # default roles
+        "allow-read-access-to-services-role",
     }
+
+
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_default_user_role_scopes():
+    token_response = create_jupyterhub_token(note="get-default-scopes")
+    token_scopes = set(token_response.json()["scopes"])
+    assert "read:services" in token_scopes
+
+
+@pytest.mark.filterwarnings(
+    "ignore:.*auto_refresh_token is deprecated:DeprecationWarning"
+)
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_check_default_roles_added_in_keycloak():
+    client_roles = get_keycloak_client_roles(client_name="jupyterhub")
+    role_names = [role["name"] for role in client_roles]
+    assert "allow-app-sharing-role" in role_names
+    assert "allow-read-access-to-services-role" in role_names
 
 
 @pytest.mark.parametrize(
