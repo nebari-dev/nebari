@@ -17,10 +17,10 @@ cephClusterSpec:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
             - matchExpressions:
-                - key: azure-node-pool  # TODO: update this label for all cloud providers, use a taint/toleration instead
+                - key: ${node_group.key}
                   operator: In
                   values:
-                    - general  # TODO: don't hard code general but get it from a variable
+                    - ${node_group.value}
   # values from https://raw.githubusercontent.com/rook/rook/release-1.14/deploy/examples/cluster-on-pvc.yaml
   dataDirHostPath: /var/lib/rook
   mon:
@@ -36,7 +36,7 @@ cephClusterSpec:
     # size appropriate for monitor data will be used.
     volumeClaimTemplate:
       spec:
-        storageClassName: ${storageClassName} # managed-premium # TODO: need to make this a variable
+        storageClassName: ${storageClassName}
         resources:
           requests:
             storage: 10Gi
