@@ -65,7 +65,6 @@ resource "azurerm_kubernetes_cluster" "main" {
 }
 
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
-# https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster_node_pool
 resource "azurerm_kubernetes_cluster_node_pool" "node_group" {
   for_each = { for i, group in var.node_groups : i => group if i != 0 }
 

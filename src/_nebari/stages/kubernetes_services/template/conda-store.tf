@@ -38,16 +38,6 @@ variable "conda-store-service-token-scopes" {
   type        = map(any)
 }
 
-# variable "fs" {
-#   type        = string
-#   description = "Use NFS or Ceph"
-
-#   validation {
-#     condition = contains(["ceph", "nfs"], var.fs)
-#     error_message = "Allowed values for input_parameter are \"ceph\", or \"nfs\"."
-#   }
-# }
-
 # ====================== RESOURCES =======================
 module "kubernetes-conda-store-server" {
   source = "./modules/kubernetes/services/conda-store"
