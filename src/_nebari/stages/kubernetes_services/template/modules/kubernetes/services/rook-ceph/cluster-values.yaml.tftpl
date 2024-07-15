@@ -20,7 +20,7 @@ cephClusterSpec:
                 - key: azure-node-pool  # TODO: update this label for all cloud providers, use a taint/toleration instead
                   operator: In
                   values:
-                    - general
+                    - general  # TODO: don't hard code general but get it from a variable
   # values from https://raw.githubusercontent.com/rook/rook/release-1.14/deploy/examples/cluster-on-pvc.yaml
   dataDirHostPath: /var/lib/rook
   mon:
@@ -36,7 +36,7 @@ cephClusterSpec:
     # size appropriate for monitor data will be used.
     volumeClaimTemplate:
       spec:
-        storageClassName: managed # managed-premium # TODO: need to make this a variable
+        storageClassName: ${storageClassName} # managed-premium # TODO: need to make this a variable
         resources:
           requests:
             storage: 10Gi
@@ -79,10 +79,10 @@ cephClusterSpec:
             requiredDuringSchedulingIgnoredDuringExecution:
               nodeSelectorTerms:
                 - matchExpressions:
-                    - key: azure-node-pool  # TODO: update this label for all cloud providers, use a taint/toleration instead
+                    - key: ${node_group.key}
                       operator: In
                       values:
-                        - general
+                        - ${node_group.value}
         resources:
         # These are the OSD daemon limits. For OSD prepare limits, see the separate section below for "prepareosd" resources
         #   limits:

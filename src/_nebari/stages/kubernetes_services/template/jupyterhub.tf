@@ -122,7 +122,7 @@ locals {
   fs = "ceph" # TODO: Use the fs variable above instead
 }
 
-module "cephfs-mount" {
+module "jupyterhub-cephfs-mount" {
   count  = local.fs == "ceph" ? 1 : 0
   source = "./modules/kubernetes/cephfs-mount"
 
@@ -151,11 +151,11 @@ module "jupyterhub" {
 
   overrides = var.jupyterhub-overrides
 
-  home-pvc = local.fs == "ceph" ? module.cephfs-mount[0].persistent_volume_claim.name : module.jupyterhub-nfs-mount[0].persistent_volume_claim.name
+  home-pvc = local.fs == "ceph" ? module.jupyterhub-cephfs-mount[0].persistent_volume_claim.name : module.jupyterhub-nfs-mount[0].persistent_volume_claim.name
 
-  shared-pvc = local.fs == "ceph" ? module.cephfs-mount[0].persistent_volume_claim.name : module.jupyterhub-nfs-mount[0].persistent_volume_claim.name
+  shared-pvc = local.fs == "ceph" ? module.jupyterhub-cephfs-mount[0].persistent_volume_claim.name : module.jupyterhub-nfs-mount[0].persistent_volume_claim.name
 
-  conda-store-pvc                                    = module.conda-store-nfs-mount.persistent_volume_claim.name
+  conda-store-pvc                                    = local.fs == "ceph" ? module.conda-store-cephfs-mount[0].persistent_volume_claim.name : module.conda-store-nfs-mount[0].persistent_volume_claim.name
   conda-store-mount                                  = "/home/conda"
   conda-store-environments                           = var.conda-store-environments
   default-conda-store-namespace                      = var.conda-store-default-namespace

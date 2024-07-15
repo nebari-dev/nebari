@@ -9,6 +9,19 @@ variable "overrides" {
   default     = []
 }
 
+variable "storage_class_name" {
+  description = "Name of the storage class to create"
+  type        = string
+}
+
+variable "node_group" {
+  description = "Node key value pair for bound resources"
+  type = object({
+    key   = string
+    value = string
+  })
+}
+
 # variable "argo-workflows-namespace" {
 #   description = "deploy argo workflows on this namespace"
 #   type        = string

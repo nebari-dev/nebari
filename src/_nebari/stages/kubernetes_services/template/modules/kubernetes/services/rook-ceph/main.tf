@@ -22,7 +22,6 @@ resource "helm_release" "rook-ceph" {
 
   values = concat([
     file("${path.module}/operator-values.yaml"),
-
     jsonencode({
       # singleNamespace = true # Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
 
@@ -37,40 +36,6 @@ resource "helm_release" "rook-ceph" {
       #     "${var.node-group.key}" = var.node-group.value
       #   }
       # }
-
-      # server = {
-      #   # `sso` for OIDC/OAuth
-      #   extraArgs = ["--auth-mode=sso", "--auth-mode=client", "--insecure-skip-verify"]
-      #   # to enable TLS, `secure = true`
-      #   secure   = false
-      #   baseHref = "/${local.argo-workflows-prefix}/"
-
-      #   sso = {
-      #     insecureSkipVerify = true
-      #     issuer             = "https://${var.external-url}/auth/realms/${var.realm_id}"
-      #     clientId = {
-      #       name = "argo-server-sso"
-      #       key  = "argo-oidc-client-id"
-      #     }
-      #     clientSecret = {
-      #       name = "argo-server-sso"
-      #       key  = "argo-oidc-client-secret"
-      #     }
-      #     # The OIDC redirect URL. Should be in the form <argo-root-url>/oauth2/callback.
-      #     redirectUrl = "https://${var.external-url}/${local.argo-workflows-prefix}/oauth2/callback"
-      #     rbac = {
-      #       # https://argoproj.github.io/argo-workflows/argo-server-sso/#sso-rbac
-      #       enabled         = true
-      #       secretWhitelist = []
-      #     }
-      #     customGroupClaimName = "roles"
-      #     scopes               = ["roles"]
-      #   }
-      #   nodeSelector = {
-      #     "${var.node-group.key}" = var.node-group.value
-      #   }
-      # }
-
     })
   ], var.overrides)
 
@@ -85,8 +50,8 @@ resource "helm_release" "rook-ceph-cluster" {
   version    = "v1.14.7"
 
   values = concat([
-    file("${path.module}/cluster-values.yaml"),
-
+    templatefile("${path.module}/cluster-values.yaml.tftpl",
+    { "storageClassName" = "managed", "node_group" = var.node_group }),
     jsonencode({
       operatorNamespace = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
     })

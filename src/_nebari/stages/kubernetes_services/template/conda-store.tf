@@ -38,6 +38,16 @@ variable "conda-store-service-token-scopes" {
   type        = map(any)
 }
 
+# variable "fs" {
+#   type        = string
+#   description = "Use NFS or Ceph"
+
+#   validation {
+#     condition = contains(["ceph", "nfs"], var.fs)
+#     error_message = "Allowed values for input_parameter are \"ceph\", or \"nfs\"."
+#   }
+# }
+
 # ====================== RESOURCES =======================
 module "kubernetes-conda-store-server" {
   source = "./modules/kubernetes/services/conda-store"
@@ -64,6 +74,7 @@ module "kubernetes-conda-store-server" {
 }
 
 module "conda-store-nfs-mount" {
+  count  = local.fs == "nfs" ? 1 : 0
   source = "./modules/kubernetes/nfs-mount"
 
   name         = "conda-store"
@@ -73,5 +84,20 @@ module "conda-store-nfs-mount" {
 
   depends_on = [
     module.kubernetes-conda-store-server
+  ]
+}
+
+
+module "conda-store-cephfs-mount" {
+  count  = local.fs == "ceph" ? 1 : 0
+  source = "./modules/kubernetes/cephfs-mount"
+
+  name         = "conda-store"
+  namespace    = var.environment
+  nfs_capacity = var.conda-store-filesystem-storage
+
+  depends_on = [
+    module.kubernetes-conda-store-server,
+    module.rook-ceph # This should be dependent on whether or not rook-ceph is enabled or maybe it's a no-op if it's not enabled so it's fine
   ]
 }

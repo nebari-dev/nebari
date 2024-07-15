@@ -361,6 +361,10 @@ class ImageNameTag(schema.Base):
     tag: str
 
 
+class RookCephInputVars(schema.Base):
+    rook_ceph_storage_class_name: str
+
+
 class CondaStoreInputVars(schema.Base):
     conda_store_environments: Dict[str, CondaEnvironment] = Field(
         alias="conda-store-environments"
@@ -519,6 +523,17 @@ class KubernetesServicesStage(NebariTerraformStage):
             ),
         )
 
+        rook_ceph_vars = RookCephInputVars(
+            rook_ceph_storage_class_name={
+                # "local":
+                # "existing":
+                # "do":
+                # "aws":
+                "gcp": "standard-rwo",  # premiuim-rwo
+                "azure": "managed",  # managed-premium
+            }[self.config.provider.value]
+        )
+
         conda_store_vars = CondaStoreInputVars(
             conda_store_environments={
                 k: v.model_dump() for k, v in self.config.environments.items()
@@ -593,6 +608,7 @@ class KubernetesServicesStage(NebariTerraformStage):
 
         return {
             **kubernetes_services_vars.model_dump(by_alias=True),
+            **rook_ceph_vars.model_dump(by_alias=True),
             **conda_store_vars.model_dump(by_alias=True),
             **jupyterhub_vars.model_dump(by_alias=True),
             **dask_gateway_vars.model_dump(by_alias=True),

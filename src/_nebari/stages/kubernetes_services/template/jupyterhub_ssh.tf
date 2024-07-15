@@ -5,5 +5,5 @@ module "kubernetes-jupyterhub-ssh" {
   jupyterhub_api_url = module.jupyterhub.internal_jupyterhub_url
 
   node-group              = var.node_groups.general
-  persistent_volume_claim = local.fs == "ceph" ? module.cephfs-mount[0].persistent_volume_claim.name : module.jupyterhub-nfs-mount[0].persistent_volume_claim.name
+  persistent_volume_claim = local.fs == "ceph" ? module.jupyterhub-cephfs-mount[0].persistent_volume_claim.name : module.jupyterhub-nfs-mount[0].persistent_volume_claim.name
 }

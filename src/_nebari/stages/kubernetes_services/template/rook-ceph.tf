@@ -20,6 +20,11 @@
 #   type        = string
 # }
 
+variable "rook_ceph_storage_class_name" {
+  description = "Name of the storage class to create"
+  type        = string
+}
+
 
 # ====================== RESOURCES =======================
 module "rook-ceph" {
@@ -27,10 +32,13 @@ module "rook-ceph" {
 
   source    = "./modules/kubernetes/services/rook-ceph"
   namespace = var.environment
+
+  storage_class_name = var.rook_ceph_storage_class_name
+  node_group         = var.node_groups.general
   # external-url = var.endpoint
   # realm_id     = var.realm_id
 
-  # node-group                          = var.node_groups.general
+
   # overrides = var.rook-ceph-overrides
   # keycloak-read-only-user-credentials = var.keycloak-read-only-user-credentials
   # workflow-controller-image-tag       = var.workflow-controller-image-tag
