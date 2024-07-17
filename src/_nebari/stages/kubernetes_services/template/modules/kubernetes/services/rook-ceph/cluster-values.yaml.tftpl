@@ -36,7 +36,7 @@ cephClusterSpec:
     # size appropriate for monitor data will be used.
     volumeClaimTemplate:
       spec:
-        storageClassName: ${storageClassName}
+        %{ if storageClassName != null }storageClassName: ${storageClassName}%{ endif }
         resources:
           requests:
             storage: 10Gi
@@ -101,7 +101,7 @@ cephClusterSpec:
                 requests:
                   storage: 400Gi  # TODO: need to make this a variable  # TODO: Look into auto resizing these as needed
               # IMPORTANT: Change the storage class depending on your environment
-              storageClassName: managed # managed-premium # gp2  # TODO: need to make this a variable
+              %{ if storageClassName != null }storageClassName: ${storageClassName}%{ endif }
               volumeMode: Block
               accessModes:
                 - ReadWriteOnce

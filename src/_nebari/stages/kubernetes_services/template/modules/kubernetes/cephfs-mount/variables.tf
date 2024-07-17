@@ -8,7 +8,7 @@ variable "namespace" {
   type        = string
 }
 
-variable "nfs_capacity" {
+variable "fs_capacity" {
   description = "Capacity of NFS server mount"
   type        = string
   default     = "10Gi"

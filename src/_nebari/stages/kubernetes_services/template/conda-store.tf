@@ -63,8 +63,12 @@ module "kubernetes-conda-store-server" {
   extra-config   = var.conda-store-extra-config
 }
 
+locals {
+  conda-store-fs = var.shared_fs_type
+}
+
 module "conda-store-nfs-mount" {
-  count  = local.fs == "nfs" ? 1 : 0
+  count  = local.conda-store-fs == "nfs" ? 1 : 0
   source = "./modules/kubernetes/nfs-mount"
 
   name         = "conda-store"
@@ -79,12 +83,12 @@ module "conda-store-nfs-mount" {
 
 
 module "conda-store-cephfs-mount" {
-  count  = local.fs == "ceph" ? 1 : 0
+  count  = local.conda-store-fs == "cephfs" ? 1 : 0
   source = "./modules/kubernetes/cephfs-mount"
 
-  name         = "conda-store"
-  namespace    = var.environment
-  nfs_capacity = var.conda-store-filesystem-storage
+  name        = "conda-store"
+  namespace   = var.environment
+  fs_capacity = var.conda-store-filesystem-storage
 
   depends_on = [
     module.kubernetes-conda-store-server,

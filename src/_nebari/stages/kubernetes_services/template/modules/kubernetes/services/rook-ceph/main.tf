@@ -23,19 +23,15 @@ resource "helm_release" "rook-ceph" {
   values = concat([
     file("${path.module}/operator-values.yaml"),
     jsonencode({
-      # singleNamespace = true # Restrict Argo to operate only in a single namespace (the namespace of the Helm release)
-
-      # controller = {
-      #   metricsConfig = {
-      #     enabled = true # enable prometheus
-      #   }
-      #   workflowNamespaces = [
-      #     "${var.namespace}"
-      #   ]
-      #   nodeSelector = {
-      #     "${var.node-group.key}" = var.node-group.value
-      #   }
-      # }
+      nodeSelector = {
+        "${var.node_group.key}" = var.node_group.value
+      },
+      monitoring = {
+        enabled = false # TODO: Enable monitoring when nebari-config.yaml has it enabled
+      },
+      csi = {
+        enableRbdDriver = false # necessary to provision block storage, but saves some cpu and memory if not needed
+      }
     })
   ], var.overrides)
 
@@ -51,7 +47,7 @@ resource "helm_release" "rook-ceph-cluster" {
 
   values = concat([
     templatefile("${path.module}/cluster-values.yaml.tftpl",
-    { "storageClassName" = "managed", "node_group" = var.node_group }),
+    { "storageClassName" = var.storage_class_name, "node_group" = var.node_group }),
     jsonencode({
       operatorNamespace = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
     })

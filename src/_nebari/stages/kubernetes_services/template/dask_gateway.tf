@@ -30,7 +30,7 @@ module "dask-gateway" {
   dask-etc-configmap-name = "dask-etc"
 
   # environments
-  conda-store-pvc               = local.fs == "ceph" ? module.conda-store-cephfs-mount[0].persistent_volume_claim.name : module.conda-store-nfs-mount[0].persistent_volume_claim.name
+  conda-store-pvc               = local.conda-store-pvc-name
   conda-store-mount             = "/home/conda"
   default-conda-store-namespace = var.conda-store-default-namespace
   conda-store-api-token         = module.kubernetes-conda-store-server.service-tokens.dask-gateway

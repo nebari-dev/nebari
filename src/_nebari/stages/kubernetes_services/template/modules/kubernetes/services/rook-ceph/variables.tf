@@ -12,6 +12,7 @@ variable "overrides" {
 variable "storage_class_name" {
   description = "Name of the storage class to create"
   type        = string
+  default     = null
 }
 
 variable "node_group" {

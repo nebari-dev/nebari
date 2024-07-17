@@ -38,6 +38,16 @@ class AccessEnum(str, enum.Enum):
         return representer.represent_str(node.value)
 
 
+@schema.yaml_object(schema.yaml)
+class SharedFsEnum(str, enum.Enum):
+    nfs = "nfs"
+    cephfs = "cephfs"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
 class DefaultImages(schema.Base):
     jupyterhub: str = f"quay.io/nebari/nebari-jupyterhub:{set_docker_image_tag()}"
     jupyterlab: str = f"quay.io/nebari/nebari-jupyterlab:{set_docker_image_tag()}"
@@ -362,7 +372,7 @@ class ImageNameTag(schema.Base):
 
 
 class RookCephInputVars(schema.Base):
-    rook_ceph_storage_class_name: str
+    rook_ceph_storage_class_name: None | str = None
 
 
 class CondaStoreInputVars(schema.Base):
@@ -406,6 +416,7 @@ class JupyterhubInputVars(schema.Base):
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
     cloud_provider: str = Field(alias="cloud-provider")
     jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
+    shared_fs_type: SharedFsEnum
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -529,16 +540,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             ),
         )
 
-        rook_ceph_vars = RookCephInputVars(
-            rook_ceph_storage_class_name={
-                # "local":
-                # "existing":
-                # "do":
-                # "aws":
-                "gcp": "standard-rwo",  # premiuim-rwo
-                "azure": "managed",  # managed-premium
-            }[self.config.provider.value]
-        )
+        rook_ceph_vars = RookCephInputVars()
 
         conda_store_vars = CondaStoreInputVars(
             conda_store_environments={
@@ -577,6 +579,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterlab_default_settings=self.config.jupyterlab.default_settings,
             jupyterlab_gallery_settings=self.config.jupyterlab.gallery_settings,
             jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
+            shared_fs_type=SharedFsEnum.cephfs,  # TODO: nfs should be the default
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
