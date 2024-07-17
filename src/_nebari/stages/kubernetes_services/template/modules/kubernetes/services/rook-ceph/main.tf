@@ -47,7 +47,11 @@ resource "helm_release" "rook-ceph-cluster" {
 
   values = concat([
     templatefile("${path.module}/cluster-values.yaml.tftpl",
-    { "storageClassName" = var.storage_class_name, "node_group" = var.node_group }),
+      {
+        "storageClassName"    = var.storage_class_name,
+        "node_group"          = var.node_group,
+        "storage_capacity_Gi" = var.ceph_storage_capacity,
+    }),
     jsonencode({
       operatorNamespace = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
     })

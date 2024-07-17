@@ -22,3 +22,8 @@ variable "node_group" {
     value = string
   })
 }
+
+variable "ceph_storage_capacity" {
+  description = "Ceph storage capacity in Gi"
+  type        = number
+}

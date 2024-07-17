@@ -2,7 +2,7 @@ import enum
 import json
 import sys
 import time
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Self, Type, Union
 from urllib.parse import urlencode
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
@@ -55,6 +55,7 @@ class DefaultImages(schema.Base):
 
 
 class Storage(schema.Base):
+    type: SharedFsEnum = SharedFsEnum.cephfs
     conda_store: str = "200Gi"
     shared_filesystem: str = "200Gi"
 
@@ -269,6 +270,11 @@ class JupyterLab(schema.Base):
     preferred_dir: Optional[str] = None
 
 
+class RookCeph(schema.Base):
+    storage_class_name: None | str = None
+
+
+# InputSchema is what shows up in the Nebari Config
 class InputSchema(schema.Base):
     default_images: DefaultImages = DefaultImages()
     storage: Storage = Storage()
@@ -343,6 +349,18 @@ class InputSchema(schema.Base):
     jupyterhub: JupyterHub = JupyterHub()
     jupyterlab: JupyterLab = JupyterLab()
     jhub_apps: JHubApps = JHubApps()
+    ceph: RookCeph = RookCeph()
+
+    @model_validator(mode="after")
+    def validate_shared_fs_type(self) -> Self:
+        if (
+            self.storage.type == SharedFsEnum.cephfs
+            and self.provider == schema.ProviderEnum.local
+        ):
+            raise ValueError(
+                f'storage.type: "{SharedFsEnum.cephfs.value}" is not supported for provider: "{self.provider.value}"'
+            )
+        return self
 
 
 class OutputSchema(schema.Base):
@@ -404,7 +422,7 @@ class JupyterhubInputVars(schema.Base):
     )
     initial_repositories: str = Field(alias="initial-repositories")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
-    jupyterhub_stared_storage: str = Field(alias="jupyterhub-shared-storage")
+    jupyterhub_shared_storage: str = Field(alias="jupyterhub-shared-storage")
     jupyterhub_shared_endpoint: Optional[str] = Field(
         alias="jupyterhub-shared-endpoint", default=None
     )
@@ -417,6 +435,16 @@ class JupyterhubInputVars(schema.Base):
     cloud_provider: str = Field(alias="cloud-provider")
     jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
     shared_fs_type: SharedFsEnum
+
+    # # make a field_validator to remove any units on shared storage
+    # @field_validator("jupyterhub_shared_storage", "client_secret", mode="before")
+    # @classmethod
+    # def handle_units(cls, value: Optional[str]) -> str:
+
+    #     try:
+    #         return float(value)
+    #     except ValueError:
+    #         return value.split("Gi")[0]
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -561,7 +589,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterlab_image=_split_docker_image_name(
                 self.config.default_images.jupyterlab
             ),
-            jupyterhub_stared_storage=self.config.storage.shared_filesystem,
+            jupyterhub_shared_storage=self.config.storage.shared_filesystem,
             jupyterhub_shared_endpoint=jupyterhub_shared_endpoint,
             cloud_provider=cloud_provider,
             jupyterhub_profiles=self.config.profiles.model_dump()["jupyterlab"],
@@ -579,7 +607,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterlab_default_settings=self.config.jupyterlab.default_settings,
             jupyterlab_gallery_settings=self.config.jupyterlab.gallery_settings,
             jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
-            shared_fs_type=SharedFsEnum.cephfs,  # TODO: nfs should be the default
+            shared_fs_type=self.config.storage.type,
         )
 
         dask_gateway_vars = DaskGatewayInputVars(

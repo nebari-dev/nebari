@@ -99,7 +99,7 @@ cephClusterSpec:
             spec:
               resources:
                 requests:
-                  storage: 400Gi  # TODO: need to make this a variable  # TODO: Look into auto resizing these as needed
+                  storage: ${storage_capacity_Gi}Gi  # TODO: need to make this a variable  # TODO: Look into auto resizing these as needed
               # IMPORTANT: Change the storage class depending on your environment
               %{ if storageClassName != null }storageClassName: ${storageClassName}%{ endif }
               volumeMode: Block
