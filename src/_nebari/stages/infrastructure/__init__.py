@@ -340,10 +340,10 @@ class GoogleCloudPlatformProvider(schema.Base):
     @classmethod
     def _check_input(cls, data: Any) -> Any:
         google_cloud.check_credentials()
-        avaliable_regions = google_cloud.regions()
-        if data["region"] not in avaliable_regions:
+        available_regions = google_cloud.regions()
+        if data["region"] not in available_regions:
             raise ValueError(
-                f"Google Cloud region={data['region']} is not one of {avaliable_regions}"
+                f"Google Cloud region={data['region']} is not one of {available_regions}"
             )
 
         available_kubernetes_versions = google_cloud.kubernetes_versions(data["region"])
@@ -584,16 +584,16 @@ class InputSchema(schema.Base):
                     f"'{provider}' is not a valid enumeration member; permitted: local, existing, do, aws, gcp, azure"
                 )
         else:
-            setted_providers = [
+            set_providers = [
                 provider
                 for provider in provider_name_abbreviation_map.keys()
                 if provider in data
             ]
-            num_providers = len(setted_providers)
+            num_providers = len(set_providers)
             if num_providers > 1:
-                raise ValueError(f"Multiple providers set: {setted_providers}")
+                raise ValueError(f"Multiple providers set: {set_providers}")
             elif num_providers == 1:
-                data["provider"] = provider_name_abbreviation_map[setted_providers[0]]
+                data["provider"] = provider_name_abbreviation_map[set_providers[0]]
             elif num_providers == 0:
                 data["provider"] = schema.ProviderEnum.local.value
         return data
@@ -606,7 +606,7 @@ class NodeSelectorKeyValue(schema.Base):
 
 class KubernetesCredentials(schema.Base):
     host: str
-    cluster_ca_certifiate: str
+    cluster_ca_certificate: str
     token: Optional[str] = None
     username: Optional[str] = None
     password: Optional[str] = None
