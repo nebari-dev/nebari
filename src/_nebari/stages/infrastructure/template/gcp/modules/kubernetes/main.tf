@@ -87,6 +87,7 @@ resource "google_container_node_pool" "main" {
   node_config {
     preemptible  = local.merged_node_groups[count.index].preemptible
     machine_type = local.merged_node_groups[count.index].instance_type
+    image_type   = "UBUNTU_CONTAINERD" # Necessary for Ceph
 
     service_account = google_service_account.main.email
 

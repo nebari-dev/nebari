@@ -30,8 +30,8 @@ resource "helm_release" "rook-ceph" {
         enabled = false # TODO: Enable monitoring when nebari-config.yaml has it enabled
       },
       csi = {
-        enableRbdDriver = false # necessary to provision block storage, but saves some cpu and memory if not needed
-      }
+        enableRbdDriver = false, # necessary to provision block storage, but saves some cpu and memory if not needed
+      },
     })
   ], var.overrides)
 
@@ -83,4 +83,49 @@ resource "kubernetes_storage_class" "ceph-retain-sc" {
   parameters             = local.storage-class.parameters
 
   depends_on = [data.kubernetes_storage_class.rook-ceph-fs-delete-sc]
+}
+
+# add this resource but in terraform
+# apiVersion: v1
+# kind: ResourceQuota
+# metadata:
+#   # annotations:
+#   labels:
+#     addonmanager.kubernetes.io/mode: Reconcile
+#   name: rook-critical-pods
+#   namespace: rook-ceph
+# spec:
+#   hard:
+#     pods: 1G
+#   scopeSelector:
+#     matchExpressions:
+#     - operator: In
+#       scopeName: PriorityClass
+#       values:
+#       - system-node-critical
+#       - system-cluster-critical
+
+# This is necessary on GKE to completely create a ceph cluster
+resource "kubernetes_resource_quota" "rook_critical_pods" {
+  metadata {
+    name      = "rook-critical-pods"
+    namespace = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
+    labels = {
+      "addonmanager.kubernetes.io/mode" = "Reconcile"
+    }
+  }
+
+  spec {
+    hard = {
+      "pods" = "1G"
+    }
+
+    scope_selector {
+      match_expression {
+        operator   = "In"
+        scope_name = "PriorityClass"
+        values     = ["system-node-critical", "system-cluster-critical"]
+      }
+    }
+  }
 }

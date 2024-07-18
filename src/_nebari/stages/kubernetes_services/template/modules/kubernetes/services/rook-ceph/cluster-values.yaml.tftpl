@@ -1,6 +1,8 @@
 # https://github.com/rook/rook/blob/v1.14.7/deploy/charts/rook-ceph-cluster/values.yaml
 monitoring:
   enabled: false  # TODO: Enable monitoring when nebari-config.yaml has it enabled
+toolbox:
+  enabled: true # for debugging purposes
 cephBlockPools: []
 cephObjectStores: []
 cephClusterSpec:

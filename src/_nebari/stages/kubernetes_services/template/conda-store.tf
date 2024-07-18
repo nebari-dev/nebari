@@ -64,7 +64,8 @@ module "kubernetes-conda-store-server" {
 }
 
 locals {
-  conda-store-fs = var.shared_fs_type
+  conda-store-fs       = var.shared_fs_type
+  conda-store-pvc-name = local.conda-store-fs == "cephfs" ? module.conda-store-cephfs-mount[0].persistent_volume_claim.name : module.conda-store-nfs-mount[0].persistent_volume_claim.name
 }
 
 module "conda-store-nfs-mount" {

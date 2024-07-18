@@ -119,10 +119,9 @@ variable "shared_fs_type" {
 }
 
 locals {
-  jupyterhub-fs        = var.shared_fs_type
-  jupyterhub-pvc-name  = local.jupyterhub-fs == "cephfs" ? module.jupyterhub-cephfs-mount[0].persistent_volume_claim.name : module.jupyterhub-nfs-mount[0].persistent_volume_claim.name
-  conda-store-pvc-name = local.jupyterhub-pvc-name
-  enable-nfs-server    = var.jupyterhub-shared-endpoint == null && (local.jupyterhub-fs == "nfs" || local.conda-store-fs == "nfs")
+  jupyterhub-fs       = var.shared_fs_type
+  jupyterhub-pvc-name = local.jupyterhub-fs == "cephfs" ? module.jupyterhub-cephfs-mount[0].persistent_volume_claim.name : module.jupyterhub-nfs-mount[0].persistent_volume_claim.name
+  enable-nfs-server   = var.jupyterhub-shared-endpoint == null && (local.jupyterhub-fs == "nfs" || local.conda-store-fs == "nfs")
 }
 
 module "jupyterhub-cephfs-mount" {

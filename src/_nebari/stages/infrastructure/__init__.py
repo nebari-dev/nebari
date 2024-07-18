@@ -315,7 +315,7 @@ class GCPNodeGroup(schema.Base):
 
 
 DEFAULT_GCP_NODE_GROUPS = {
-    "general": GCPNodeGroup(instance="e2-highmem-4", min_nodes=1, max_nodes=1),
+    "general": GCPNodeGroup(instance="e2-standard-8", min_nodes=1, max_nodes=1),
     "user": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
     "worker": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
 }
