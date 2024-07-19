@@ -52,7 +52,7 @@ jobs:
           else
             echo "::set-output name=provider_credentials_aws::1"
           fi
-          
+
   test-aws-integration:
     runs-on: ubuntu-latest
     needs: check-for-credentials_aws
