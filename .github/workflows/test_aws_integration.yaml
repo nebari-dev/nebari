@@ -34,7 +34,6 @@ env:
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
   NO_PROVIDER_CREDENTIALS_aws: false
-  
 
 jobs:
   check-for-credentials_aws:
@@ -42,12 +41,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
     outputs:
       provider_credentials_aws: ${{ steps.flag-check.outputs.provider_credentials_aws }}
-    
     steps:
-
       - name: Check if user wants to run AWS integration based on credentials
         id: flag-check
         run: |
@@ -55,8 +51,8 @@ jobs:
             echo "::set-output name=provider_credentials_aws::0"
           else
             echo "::set-output name=provider_credentials_aws::1"
-          fi        
-    
+          fi
+          
   test-aws-integration:
     runs-on: ubuntu-latest
     needs: check-for-credentials_aws
