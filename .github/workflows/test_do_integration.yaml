@@ -35,18 +35,14 @@ env:
 
 
 jobs:
-
   check-for-credentials:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-
     outputs:
       provider_credentials_do: ${{ steps.flag-check.outputs.provider_credentials_do }}
-    
     steps:
-
       - name: Check if user wants to run Digital Ocean integration based on credentials
         id: flag-check
         run: |
@@ -54,7 +50,7 @@ jobs:
             echo "::set-output name=provider_credentials_do::0"
           else
             echo "::set-output name=provider_credentials_do::1"
-          fi      
+          fi
 
           
   test-do-integration:
