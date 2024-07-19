@@ -76,3 +76,19 @@ variable "services" {
   description = "Map of services tokens and scopes for conda-store"
   type        = map(any)
 }
+
+variable "create-pvc" {
+  description = "Create PVC for conda-store"
+  type        = bool
+}
+
+variable "pvc-name" {
+  description = "Existing or new conda store PVC name"
+  type        = string
+}
+
+
+variable "enable-nfs-server-worker" {
+  description = "Enable NFS server container in the conda store worker pod"
+  type        = bool
+}

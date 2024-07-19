@@ -28,7 +28,7 @@ resource "kubernetes_persistent_volume" "main" {
 
 resource "kubernetes_persistent_volume_claim" "main" {
   metadata {
-    name      = "${var.name}-${var.namespace}-share"
+    name      = var.nfs-pvc-name
     namespace = var.namespace
   }
 

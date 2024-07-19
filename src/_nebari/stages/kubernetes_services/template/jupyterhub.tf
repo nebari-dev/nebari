@@ -101,6 +101,7 @@ module "jupyterhub-nfs-mount" {
   namespace    = var.environment
   nfs_capacity = var.jupyterhub-shared-storage
   nfs_endpoint = var.jupyterhub-shared-endpoint == null ? module.kubernetes-nfs-server.0.endpoint_ip : var.jupyterhub-shared-endpoint
+  nfs-pvc-name = local.jupyterhub-pvc-name
 
   depends_on = [
     module.kubernetes-nfs-server,
@@ -120,7 +121,7 @@ variable "shared_fs_type" {
 
 locals {
   jupyterhub-fs       = var.shared_fs_type
-  jupyterhub-pvc-name = local.jupyterhub-fs == "cephfs" ? module.jupyterhub-cephfs-mount[0].persistent_volume_claim.name : module.jupyterhub-nfs-mount[0].persistent_volume_claim.name
+  jupyterhub-pvc-name = "jupyterhub-${var.environment}-share"
   enable-nfs-server   = var.jupyterhub-shared-endpoint == null && (local.jupyterhub-fs == "nfs" || local.conda-store-fs == "nfs")
 }
 
@@ -128,13 +129,14 @@ module "jupyterhub-cephfs-mount" {
   count  = local.jupyterhub-fs == "cephfs" ? 1 : 0
   source = "./modules/kubernetes/cephfs-mount"
 
-  name        = "jupyterhub"
-  namespace   = var.environment
-  fs_capacity = var.jupyterhub-shared-storage
+  name          = "jupyterhub"
+  namespace     = var.environment
+  fs_capacity   = var.jupyterhub-shared-storage
+  ceph-pvc-name = local.jupyterhub-pvc-name
 
   depends_on = [
     module.kubernetes-nfs-server,
-    module.rook-ceph # This should be a no-op if it's not enabled
+    module.rook-ceph
   ]
 }
 

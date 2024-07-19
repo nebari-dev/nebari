@@ -7,10 +7,11 @@ variable "rook_ceph_storage_class_name" {
 locals {
   jhub_storage_length  = length(var.jupyterhub-shared-storage)
   conda_storage_length = length(var.conda-store-filesystem-storage)
+  enable-ceph          = local.jupyterhub-fs == "cephfs" || local.conda-store-fs == "cephfs"
 }
 # ====================== RESOURCES =======================
 module "rook-ceph" {
-  # count = var.argo-workflows-enabled ? 1 : 0
+  count = local.enable-ceph ? 1 : 0
 
   source    = "./modules/kubernetes/services/rook-ceph"
   namespace = var.environment

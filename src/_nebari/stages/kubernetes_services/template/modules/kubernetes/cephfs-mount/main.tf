@@ -1,6 +1,6 @@
 resource "kubernetes_persistent_volume_claim" "main" {
   metadata {
-    name      = "${var.name}-${var.namespace}-share"
+    name      = var.ceph-pvc-name
     namespace = var.namespace
   }
 

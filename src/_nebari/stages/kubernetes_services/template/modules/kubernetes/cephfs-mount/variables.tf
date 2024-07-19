@@ -13,3 +13,8 @@ variable "fs_capacity" {
   type        = string
   default     = "10Gi"
 }
+
+variable "ceph-pvc-name" {
+  description = "Name of the persistent volume claim"
+  type        = string
+}

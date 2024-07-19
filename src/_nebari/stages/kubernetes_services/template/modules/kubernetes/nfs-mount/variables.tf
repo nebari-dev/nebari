@@ -18,3 +18,8 @@ variable "nfs_endpoint" {
   description = "Endpoint of nfs server"
   type        = string
 }
+
+variable "nfs-pvc-name" {
+  description = "Name of the persistent volume claim"
+  type        = string
+}
