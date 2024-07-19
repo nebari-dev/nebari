@@ -33,19 +33,15 @@ env:
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
   NO_PROVIDER_CREDENTIALS_gcp: false
 
-
 jobs:
   check-for-credentials:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-
     outputs:
       provider_credentials_gcp: ${{ steps.flag-check.outputs.provider_credentials_gcp }}
-    
     steps:
-
       - name: Check if user wants to run GCP integration based on credentials
         id: flag-check
         run: |
@@ -53,9 +49,8 @@ jobs:
             echo "::set-output name=provider_credentials_gcp::0"
           else
             echo "::set-output name=provider_credentials_gcp::1"
-          fi        
-
-          
+          fi
+  
   test-gcp-integration:
     runs-on: ubuntu-latest
     needs: check-for-credentials
