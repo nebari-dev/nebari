@@ -101,7 +101,7 @@ def base_profile_shared_mounts(groups, group_role_mapping):
     for group in groups:
         for roles in group_role_mapping.get(group, []):
             # Check if the group has a role that has a shared-directory scope
-            if "shared-directory" in roles.get("attributes", {}).get("resource", []):
+            if "shared-directory" in roles.get("attributes", {}).get("component", []):
                 relevant_groups.append(group)
                 break
 
@@ -555,9 +555,10 @@ def parse_roles(data):
 
     for role in data:
         for group in role["groups"]:
-            group = str(group).replace("/", "")
-            if group not in parsed_roles:
-                parsed_roles[group] = []
+            # group = str(group).replace("/", "")
+            group_name = Path(group).name
+            if group_name not in parsed_roles:
+                parsed_roles[group_name] = []
 
             role_info = {
                 "description": role["description"],
@@ -565,7 +566,7 @@ def parse_roles(data):
                 "attributes": role["attributes"],
             }
 
-            parsed_roles[group].append(role_info)
+            parsed_roles[group_name].append(role_info)
 
     return parsed_roles
 
@@ -577,10 +578,9 @@ def render_profiles(spawner):
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
-    group_role_mapping = spawner.authenticator.user_group_role_mapping
-    group_role_mapping = parse_roles(group_role_mapping)
+    user_group_role_mapping = parse_roles(spawner.authenticator.user_group_role_mapping)
 
-    spawner.log.info(f"role_mapping: {group_role_mapping}")
+    spawner.log.info(f"role_mapping: {user_group_role_mapping}")
 
     username = auth_state["oauth_user"]["preferred_username"]
     # only return the lowest level group name
@@ -597,7 +597,7 @@ def render_profiles(spawner):
             None,
             [
                 render_profile(
-                    p, username, groups, keycloak_profilenames, group_role_mapping
+                    p, username, groups, keycloak_profilenames, user_group_role_mapping
                 )
                 for p in profile_list
             ],
