@@ -2,10 +2,11 @@ import enum
 import json
 import sys
 import time
-from typing import Any, Dict, List, Optional, Self, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 from urllib.parse import urlencode
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Self
 
 from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
@@ -55,7 +56,7 @@ class DefaultImages(schema.Base):
 
 
 class Storage(schema.Base):
-    type: SharedFsEnum = SharedFsEnum.cephfs
+    type: SharedFsEnum = SharedFsEnum.nfs
     conda_store: str = "200Gi"
     shared_filesystem: str = "200Gi"
 
