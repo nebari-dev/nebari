@@ -197,11 +197,11 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         return []
 
     async def _get_roles_with_attributes(self, roles: dict, client_id: str, token: str):
-        """This fetches all roles by id to fetch there attributes."""
+        """This fetches all roles by id to fetch their attributes."""
         roles_rich = []
         for role in roles:
             # If this takes too much time, which isn't the case right now, we can
-            # also do multi-threaded requests
+            # also do multithreaded requests
             role_rich = await self._fetch_api(
                 endpoint=f"roles-by-id/{role['id']}?client={client_id}", token=token
             )
