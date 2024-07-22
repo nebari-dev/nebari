@@ -6,4 +6,9 @@ module "kubernetes-jupyterhub-ssh" {
 
   node-group              = var.node_groups.general
   persistent_volume_claim = local.jupyterhub-pvc-name
+
+  depends_on = [
+    module.kubernetes-nfs-server,
+    module.rook-ceph
+  ]
 }

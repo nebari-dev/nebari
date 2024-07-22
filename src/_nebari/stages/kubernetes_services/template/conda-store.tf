@@ -65,6 +65,11 @@ module "kubernetes-conda-store-server" {
   create-pvc               = local.conda-store-fs == "nfs"
   pvc-name                 = local.conda-store-fs == "nfs" ? local.new-pvc-name : local.conda-store-pvc-name
   enable-nfs-server-worker = local.conda-store-fs == "nfs"
+
+  depends_on = [
+    module.conda-store-nfs-mount,
+    module.conda-store-cephfs-mount
+  ]
 }
 
 locals {
@@ -84,7 +89,7 @@ module "conda-store-nfs-mount" {
   nfs-pvc-name = local.conda-store-pvc-name
 
   depends_on = [
-    module.kubernetes-conda-store-server
+    module.kubernetes-nfs-server,
   ]
 }
 
@@ -99,7 +104,6 @@ module "conda-store-cephfs-mount" {
   ceph-pvc-name = local.conda-store-pvc-name
 
   depends_on = [
-    # module.kubernetes-conda-store-server,
-    module.rook-ceph # This should be dependent on whether or not rook-ceph is enabled or maybe it's a no-op if it's not enabled so it's fine
+    module.rook-ceph,
   ]
 }

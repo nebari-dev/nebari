@@ -42,4 +42,9 @@ module "dask-gateway" {
   cloud-provider = var.cloud-provider
 
   forwardauth_middleware_name = var.forwardauth_middleware_name
+
+  depends_on = [
+    module.kubernetes-nfs-server,
+    module.rook-ceph
+  ]
 }

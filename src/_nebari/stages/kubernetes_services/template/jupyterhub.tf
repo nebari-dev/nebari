@@ -206,4 +206,9 @@ module "jupyterhub" {
   jupyterlab-pioneer-log-format = var.jupyterlab-pioneer-log-format
 
   jupyterlab-preferred-dir = var.jupyterlab-preferred-dir
+
+  depends_on = [
+    module.kubernetes-nfs-server,
+    module.rook-ceph
+  ]
 }

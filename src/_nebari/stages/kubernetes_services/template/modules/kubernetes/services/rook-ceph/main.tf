@@ -44,6 +44,7 @@ resource "helm_release" "rook-ceph-cluster" {
   repository = "https://charts.rook.io/release"
   chart      = "rook-ceph-cluster"
   version    = "v1.14.7"
+  wait       = true
 
   values = concat([
     templatefile("${path.module}/cluster-values.yaml.tftpl",
@@ -57,7 +58,7 @@ resource "helm_release" "rook-ceph-cluster" {
     })
   ], var.overrides)
 
-  depends_on = [helm_release.rook-ceph]
+  depends_on = [helm_release.rook-ceph, kubernetes_resource_quota.rook_critical_pods]
 }
 
 locals {
@@ -128,4 +129,5 @@ resource "kubernetes_resource_quota" "rook_critical_pods" {
       }
     }
   }
+  depends_on = [helm_release.rook-ceph]
 }
