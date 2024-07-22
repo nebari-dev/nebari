@@ -67,7 +67,6 @@ module "kubernetes-conda-store-server" {
   enable-nfs-server-worker = local.conda-store-fs == "nfs"
 
   depends_on = [
-    module.conda-store-nfs-mount,
     module.conda-store-cephfs-mount
   ]
 }
@@ -90,6 +89,7 @@ module "conda-store-nfs-mount" {
 
   depends_on = [
     module.kubernetes-nfs-server,
+    module.kubernetes-conda-store-server
   ]
 }
 
