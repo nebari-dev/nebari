@@ -306,12 +306,12 @@ module "jupyterhub-openid-client" {
       }
     },
     {
-      "name": "create-shared-directory-role",
-      "description": "Grants a group the ability to manage the creation of its corresponding mounted directory.",
-      "groups": ["admin", "developer", "analyst"],
-      "attributes": {
-      "scopes": "write:shared",
-      "component": "shared-directory"
+      "name" : "create-shared-directory-role",
+      "description" : "Grants a group the ability to manage the creation of its corresponding mounted directory.",
+      "groups" : ["admin", "developer", "analyst"],
+      "attributes" : {
+        "scopes" : "write:shared",
+        "component" : "shared-directory"
       }
     },
   ]
