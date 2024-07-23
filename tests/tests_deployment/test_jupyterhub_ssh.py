@@ -125,6 +125,7 @@ def test_contains_jupyterhub_ssh(paramiko_object):
         ("cat ~/.bashrc", "Managed by Nebari"),
         ("cat ~/.profile", "Managed by Nebari"),
         ("cat ~/.bash_logout", "Managed by Nebari"),
+        # ensure we don't copy over extra files from /etc/skel init container
         ("ls -la ~/..202*", "No such file or directory"),
         ("ls -la ~/..data", "No such file or directory"),
     ]
