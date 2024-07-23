@@ -1,5 +1,6 @@
 from tests.common.playwright_fixtures import navigator_parameterized
 from tests.common.run_notebook import Notebook
+from tests.common.run_services import Services
 
 
 @navigator_parameterized(instance_name="small-instance")
@@ -16,3 +17,8 @@ def test_notebook(navigator, test_data_root):
         conda_env="default *",
         timeout=500,
     )
+
+
+def test_services_access(navigator):
+    services = Services(navigator=navigator)
+    services.run(timeout=500)
