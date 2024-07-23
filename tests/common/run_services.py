@@ -22,7 +22,7 @@ class Services:
             Time in seconds to wait for the expected output text to appear.
             Default: 1000
         """
-        logger.debug(f">>> Running access services test")
+        logger.debug(">>> Running access services test")
 
         try:
             # Visit Conda-Store
