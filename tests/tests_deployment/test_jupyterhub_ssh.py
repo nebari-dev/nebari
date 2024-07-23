@@ -125,8 +125,8 @@ def test_contains_jupyterhub_ssh(paramiko_object):
         ("cat ~/.bashrc", "Managed by Nebari"),
         ("cat ~/.profile", "Managed by Nebari"),
         ("cat ~/.bash_logout", "Managed by Nebari"),
-        ("ls -la ..202*", "No such file or directory"),
-        ("ls -la ..data", "No such file or directory"),
+        ("ls -la ~/..202*", "No such file or directory"),
+        ("ls -la ~/..data", "No such file or directory"),
     ]
 
     for command, output in commands_contain:
