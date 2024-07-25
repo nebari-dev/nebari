@@ -48,5 +48,8 @@ variable "jupyterhub-sftp-image" {
 
 variable "persistent_volume_claim" {
   description = "name of persistent volume claim to mount"
-  type        = string
+  type = object({
+    name = string
+    id   = string
+  })
 }

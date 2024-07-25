@@ -48,12 +48,18 @@ variable "user-node-group" {
 
 variable "home-pvc" {
   description = "Name for persistent volume claim to use for home directory uses /home/{username}"
-  type        = string
+  type = object({
+    name = string
+    id   = string
+  })
 }
 
 variable "shared-pvc" {
   description = "Name for persistent volume claim to use for shared directory uses /share/{group}"
-  type        = string
+  type = object({
+    name = string
+    id   = string
+  })
 }
 
 variable "conda-store-pvc" {

@@ -11,7 +11,7 @@ locals {
 }
 # ====================== RESOURCES =======================
 module "rook-ceph" {
-  count = local.enable-ceph ? 1 : 0
+  # count = local.enable-ceph ? 1 : 0  # It's pretty light weight so I think we just keep it all the time
 
   source    = "./modules/kubernetes/services/rook-ceph"
   namespace = var.environment
@@ -20,6 +20,4 @@ module "rook-ceph" {
   node_group            = var.node_groups.general
   ceph_storage_capacity = tonumber(substr(var.jupyterhub-shared-storage, 0, local.jhub_storage_length - 2)) + tonumber(substr(var.conda-store-filesystem-storage, 0, local.conda_storage_length - 2))
 
-  # external-url = var.endpoint
-  # overrides = var.rook-ceph-overrides
 }

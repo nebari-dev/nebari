@@ -82,6 +82,25 @@ variable "idle-culler-settings" {
   type        = any
 }
 
+variable "shared_fs_type" {
+  type        = string
+  description = "Use NFS or Ceph"
+
+  validation {
+    condition     = contains(["cephfs", "nfs"], var.shared_fs_type) # TODO: Allow EFS as well
+    error_message = "Allowed values for input_parameter are \"cephfs\", or \"nfs\"."
+  }
+}
+
+locals {
+  jupyterhub-fs       = var.shared_fs_type
+  jupyterhub-pvc-name = "jupyterhub-${var.environment}-share"
+  jupyterhub-pvc      = local.jupyterhub-fs == "nfs" ? module.jupyterhub-nfs-mount[0].persistent_volume_claim.pvc : module.jupyterhub-cephfs-mount[0].persistent_volume_claim.pvc
+  enable-nfs-server   = var.jupyterhub-shared-endpoint == null && (local.jupyterhub-fs == "nfs" || local.conda-store-fs == "nfs")
+}
+
+
+
 module "kubernetes-nfs-server" {
   count = local.enable-nfs-server ? 1 : 0
 
@@ -107,22 +126,6 @@ module "jupyterhub-nfs-mount" {
     module.kubernetes-nfs-server,
     module.rook-ceph # This should be dependent on whether or not rook-ceph is enabled or maybe it's a no-op if it's not enabled so it's fine
   ]
-}
-
-variable "shared_fs_type" {
-  type        = string
-  description = "Use NFS or Ceph"
-
-  validation {
-    condition     = contains(["cephfs", "nfs"], var.shared_fs_type) # TODO: Allow EFS as well
-    error_message = "Allowed values for input_parameter are \"cephfs\", or \"nfs\"."
-  }
-}
-
-locals {
-  jupyterhub-fs       = var.shared_fs_type
-  jupyterhub-pvc-name = "jupyterhub-${var.environment}-share"
-  enable-nfs-server   = var.jupyterhub-shared-endpoint == null && (local.jupyterhub-fs == "nfs" || local.conda-store-fs == "nfs")
 }
 
 module "jupyterhub-cephfs-mount" {
@@ -155,9 +158,9 @@ module "jupyterhub" {
 
   overrides = var.jupyterhub-overrides
 
-  home-pvc = local.jupyterhub-pvc-name
+  home-pvc = local.jupyterhub-pvc
 
-  shared-pvc = local.jupyterhub-pvc-name
+  shared-pvc = local.jupyterhub-pvc
 
   conda-store-pvc                                    = local.conda-store-pvc-name
   conda-store-mount                                  = "/home/conda"
@@ -209,6 +212,6 @@ module "jupyterhub" {
 
   depends_on = [
     module.kubernetes-nfs-server,
-    module.rook-ceph
+    module.rook-ceph,
   ]
 }

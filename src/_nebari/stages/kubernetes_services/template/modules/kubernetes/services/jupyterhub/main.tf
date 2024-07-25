@@ -69,8 +69,8 @@ resource "helm_release" "jupyterhub" {
         theme                         = var.theme
         profiles                      = var.profiles
         argo-workflows-enabled        = var.argo-workflows-enabled
-        home-pvc                      = var.home-pvc
-        shared-pvc                    = var.shared-pvc
+        home-pvc                      = var.home-pvc.name
+        shared-pvc                    = var.shared-pvc.name
         conda-store-pvc               = var.conda-store-pvc
         conda-store-mount             = var.conda-store-mount
         default-conda-store-namespace = var.default-conda-store-namespace
@@ -216,8 +216,32 @@ resource "helm_release" "jupyterhub" {
     name  = "proxy.secretToken"
     value = random_password.proxy_secret_token.result
   }
+
+  depends_on = [
+    var.home-pvc,
+    var.shared-pvc,
+  ]
+
+  lifecycle {
+    replace_triggered_by = [
+      null_resource.home-pvc,
+      # null_resource.shared-pvc,
+    ]
+  }
+
 }
 
+resource "null_resource" "home-pvc" {
+  triggers = {
+    home-pvc = var.home-pvc.id
+  }
+}
+
+# resource "null_resource" "shared-pvc" {
+#   triggers = {
+#     home-pvc = var.shared-pvc
+#   }
+# }
 
 resource "kubernetes_manifest" "jupyterhub" {
   manifest = {
