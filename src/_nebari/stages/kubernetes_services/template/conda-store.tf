@@ -61,49 +61,17 @@ module "kubernetes-conda-store-server" {
   services       = var.conda-store-service-token-scopes
   extra-settings = var.conda-store-extra-settings
   extra-config   = var.conda-store-extra-config
+  conda-store-fs = var.shared_fs_type
 
-  create-pvc               = local.conda-store-fs == "nfs"
-  pvc-name                 = local.conda-store-fs == "nfs" ? local.new-pvc-name : local.conda-store-pvc-name
-  enable-nfs-server-worker = local.conda-store-fs == "nfs"
+  # create-pvc               = local.conda-store-fs == "nfs"
+  # pvc-name                 = local.conda-store-fs == "nfs" ? local.new-pvc-name : local.conda-store-pvc-name
+  # enable-nfs-server-worker = local.conda-store-fs == "nfs"
 
   depends_on = [
-    module.conda-store-cephfs-mount
+    module.rook-ceph
   ]
 }
 
 locals {
-  conda-store-fs       = var.shared_fs_type
-  conda-store-pvc-name = "conda-store-${var.environment}-share"
-  new-pvc-name         = "nebari-conda-store-storage"
-}
-
-module "conda-store-nfs-mount" {
-  count  = local.conda-store-fs == "nfs" ? 1 : 0
-  source = "./modules/kubernetes/nfs-mount"
-
-  name         = "conda-store"
-  namespace    = var.environment
-  nfs_capacity = var.conda-store-filesystem-storage
-  nfs_endpoint = module.kubernetes-conda-store-server.endpoint_ip
-  nfs-pvc-name = local.conda-store-pvc-name
-
-  depends_on = [
-    module.kubernetes-nfs-server,
-    module.kubernetes-conda-store-server
-  ]
-}
-
-
-module "conda-store-cephfs-mount" {
-  count  = local.conda-store-fs == "cephfs" ? 1 : 0
-  source = "./modules/kubernetes/cephfs-mount"
-
-  name          = "conda-store"
-  namespace     = var.environment
-  fs_capacity   = var.conda-store-filesystem-storage
-  ceph-pvc-name = local.conda-store-pvc-name
-
-  depends_on = [
-    module.rook-ceph,
-  ]
+  conda-store-fs = var.shared_fs_type
 }

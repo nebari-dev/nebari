@@ -162,7 +162,7 @@ module "jupyterhub" {
 
   shared-pvc = local.jupyterhub-pvc
 
-  conda-store-pvc                                    = local.conda-store-pvc-name
+  conda-store-pvc                                    = module.kubernetes-conda-store-server.pvc.name
   conda-store-mount                                  = "/home/conda"
   conda-store-environments                           = var.conda-store-environments
   default-conda-store-namespace                      = var.conda-store-default-namespace

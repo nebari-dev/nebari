@@ -28,7 +28,7 @@ resource "kubernetes_service" "nfs" {
 
 
 resource "kubernetes_persistent_volume_claim" "main" {
-  count = var.create-pvc ? 1 : 0
+  count = local.create-pvc ? 1 : 0
 
   metadata {
     name      = "${var.name}-conda-store-storage"
@@ -137,7 +137,7 @@ resource "kubernetes_deployment" "worker" {
         }
 
         dynamic "container" {
-          for_each = var.enable-nfs-server-worker ? [1] : []
+          for_each = local.enable-nfs-server-worker ? [1] : []
           content {
             name  = "nfs-server"
             image = "gcr.io/google_containers/volume-nfs:0.8"
@@ -196,7 +196,7 @@ resource "kubernetes_deployment" "worker" {
             # directly reference the pvc may no longer be issue in
             # future
             # claim_name = kubernetes_persistent_volume_claim.main.metadata.0.name
-            claim_name = var.pvc-name
+            claim_name = local.pvc-name
           }
         }
         security_context {
@@ -205,5 +205,24 @@ resource "kubernetes_deployment" "worker" {
         }
       }
     }
+  }
+  depends_on = [
+    module.conda-store-cephfs-mount
+  ]
+
+  lifecycle {
+    replace_triggered_by = [
+      null_resource.pvc
+      # module.conda-store-nfs-mount[0].pvc.id,
+      # module.conda-store-cephfs-mount[0].pvc.id
+    ]
+  }
+}
+
+resource "null_resource" "pvc" {
+  triggers = {
+    # pvc = local.shared-pvc.id
+    pvc = var.conda-store-fs
+    # pvc = var.conda-store-fs == "nfs" ? module.conda-store-nfs-mount[0].pvc.id : module.conda-store-cephfs-mount[0].pvc.id
   }
 }

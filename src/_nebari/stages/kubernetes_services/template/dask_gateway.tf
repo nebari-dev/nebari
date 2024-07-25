@@ -30,7 +30,7 @@ module "dask-gateway" {
   dask-etc-configmap-name = "dask-etc"
 
   # environments
-  conda-store-pvc               = local.conda-store-pvc-name
+  conda-store-pvc               = module.kubernetes-conda-store-server.pvc
   conda-store-mount             = "/home/conda"
   default-conda-store-namespace = var.conda-store-default-namespace
   conda-store-api-token         = module.kubernetes-conda-store-server.service-tokens.dask-gateway

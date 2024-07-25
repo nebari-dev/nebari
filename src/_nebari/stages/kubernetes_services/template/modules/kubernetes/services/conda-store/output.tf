@@ -17,3 +17,9 @@ output "service-tokens" {
   description = "Service tokens for conda-store"
   value       = { for k, _ in var.services : k => base64encode(random_password.conda_store_service_token[k].result) }
 }
+
+output "pvc" {
+  description = "Shared PVC name for conda-store"
+  value       = local.shared-pvc
+  # value       = var.conda-store-fs == "nfs" ? module.conda-store-nfs-mount[0].persistent_volume_claim : module.conda-store-cephfs-mount[0].persistent_volume_claim
+}
