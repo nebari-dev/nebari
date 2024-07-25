@@ -67,7 +67,7 @@ class HelmChartIndexer:
             var_name = self._clean_var_name(argument, "var")
             for var in parent_contents.get("variable", {}):
                 if var_name in var:
-                    return var[var_name]
+                    return var[var_name]["default"]
             else:
                 raise ValueError(f"Could not find variable {var_name}")
 
@@ -214,8 +214,8 @@ def add_workflow_job_summary(chart_index: dict):
 
 if __name__ == "__main__":
     # charts = generate_index_of_helm_charts()
-    STAGES_DIR = "nebari/template/stages"
-    SKIP_CHARTS = ["prefect", "clearml", "helm-extensions"]
+    STAGES_DIR = "src/_nebari/stages"
+    SKIP_CHARTS = ["helm-extensions"]
 
     charts = HelmChartIndexer(
         stages_dir=STAGES_DIR, skip_charts=SKIP_CHARTS

@@ -212,7 +212,7 @@ class Notebook:
 
     def _restart_run_all(self):
         # restart run all cells
-        self.nav.page.get_by_text("Kernel", exact=True).click()
+        self.nav.page.get_by_role("menuitem", name="Kernel", exact=True).click()
         self.nav.page.get_by_role(
             "menuitem", name="Restart Kernel and Run All Cells…"
         ).get_by_text("Restart Kernel and Run All Cells…").click()
@@ -220,7 +220,7 @@ class Notebook:
         # Restart dialog appears most, but not all of the time (e.g. set
         # No Kernel, then Restart Run All)
         restart_dialog_button = self.nav.page.get_by_role(
-            "button", name="Restart", exact=True
+            "button", name="Confirm Kernel Restart"
         )
         if restart_dialog_button.is_visible():
             restart_dialog_button.click()

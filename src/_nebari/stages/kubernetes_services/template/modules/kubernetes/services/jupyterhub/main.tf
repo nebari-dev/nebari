@@ -10,6 +10,46 @@ resource "random_password" "proxy_secret_token" {
   special = false
 }
 
+resource "random_password" "jhub_apps_jwt_secret" {
+  length  = 32
+  special = false
+}
+
+locals {
+  jhub_apps_secrets_name           = "jhub-apps-secrets"
+  jhub_apps_env_var_name           = "JHUB_APP_JWT_SECRET_KEY"
+  singleuser_nodeselector_key      = var.cloud-provider == "aws" ? "dedicated" : var.user-node-group.key
+  userscheduler_nodeselector_key   = var.cloud-provider == "aws" ? "dedicated" : var.general-node-group.key
+  userscheduler_nodeselector_value = var.general-node-group.value
+}
+
+resource "kubernetes_secret" "jhub_apps_secrets" {
+  metadata {
+    name      = local.jhub_apps_secrets_name
+    namespace = var.namespace
+  }
+
+  data = {
+    jwt_secret_key = random_password.jhub_apps_jwt_secret.result
+  }
+
+  type = "Opaque"
+}
+
+locals {
+  jupyterhub_env_vars = [
+    {
+      name = local.jhub_apps_env_var_name,
+      valueFrom : {
+        secretKeyRef : {
+          name : local.jhub_apps_secrets_name
+          key : "jwt_secret_key"
+        }
+      }
+    }
+  ]
+}
+
 
 resource "helm_release" "jupyterhub" {
   name      = "jupyterhub-${var.namespace}"
@@ -17,7 +57,7 @@ resource "helm_release" "jupyterhub" {
 
   repository = "https://jupyterhub.github.io/helm-chart/"
   chart      = "jupyterhub"
-  version    = "2.0.0"
+  version    = "4.0.0-0.dev.git.6619.hd126b1bd"
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -35,6 +75,9 @@ resource "helm_release" "jupyterhub" {
         conda-store-mount             = var.conda-store-mount
         default-conda-store-namespace = var.default-conda-store-namespace
         conda-store-service-name      = var.conda-store-service-name
+        conda-store-jhub-apps-token   = var.conda-store-jhub-apps-token
+        jhub-apps-enabled             = var.jhub-apps-enabled
+        initial-repositories          = var.initial-repositories
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace
@@ -87,6 +130,7 @@ resource "helm_release" "jupyterhub" {
           "01-theme.py"    = file("${path.module}/files/jupyterhub/01-theme.py")
           "02-spawner.py"  = file("${path.module}/files/jupyterhub/02-spawner.py")
           "03-profiles.py" = file("${path.module}/files/jupyterhub/03-profiles.py")
+          "04-auth.py"     = file("${path.module}/files/jupyterhub/04-auth.py")
         }
 
         services = {
@@ -100,25 +144,32 @@ resource "helm_release" "jupyterhub" {
         # for simple key value configuration with jupyterhub traitlets
         # this hub.config property should be used
         config = {
-          JupyterHub = {
-            authenticator_class = "generic-oauth"
-          }
           Authenticator = {
             enable_auth_state = true
           }
-          GenericOAuthenticator = {
-            client_id          = module.jupyterhub-openid-client.config.client_id
-            client_secret      = module.jupyterhub-openid-client.config.client_secret
-            oauth_callback_url = "https://${var.external-url}/hub/oauth_callback"
-            authorize_url      = module.jupyterhub-openid-client.config.authentication_url
-            token_url          = module.jupyterhub-openid-client.config.token_url
-            userdata_url       = module.jupyterhub-openid-client.config.userinfo_url
-            login_service      = "Keycloak"
-            username_key       = "preferred_username"
-            claim_groups_key   = "roles"
-            allowed_groups     = ["jupyterhub_admin", "jupyterhub_developer"]
-            admin_groups       = ["jupyterhub_admin"]
-            tls_verify         = false
+          KeyCloakOAuthenticator = {
+            client_id            = module.jupyterhub-openid-client.config.client_id
+            client_secret        = module.jupyterhub-openid-client.config.client_secret
+            oauth_callback_url   = "https://${var.external-url}/hub/oauth_callback"
+            authorize_url        = module.jupyterhub-openid-client.config.authentication_url
+            token_url            = module.jupyterhub-openid-client.config.token_url
+            userdata_url         = module.jupyterhub-openid-client.config.userinfo_url
+            realm_api_url        = module.jupyterhub-openid-client.config.realm_api_url
+            login_service        = "Keycloak"
+            username_claim       = "preferred_username"
+            claim_groups_key     = "groups"
+            claim_roles_key      = "roles"
+            allowed_groups       = ["/analyst", "/developer", "/admin", "jupyterhub_admin", "jupyterhub_developer"]
+            admin_groups         = ["/admin", "jupyterhub_admin"]
+            manage_groups        = true
+            manage_roles         = true
+            refresh_pre_spawn    = true
+            validate_server_cert = false
+
+            # deprecated, to be removed (replaced by validate_server_cert)
+            tls_verify = false
+            # deprecated, to be removed (replaced by username_claim)
+            username_key = "preferred_username"
           }
         }
       }
@@ -134,14 +185,14 @@ resource "helm_release" "jupyterhub" {
       singleuser = {
         image = var.jupyterlab-image
         nodeSelector = {
-          "${var.user-node-group.key}" = var.user-node-group.value
+          "${local.singleuser_nodeselector_key}" = var.user-node-group.value
         }
       }
 
       scheduling = {
         userScheduler = {
           nodeSelector = {
-            "${var.user-node-group.key}" = var.user-node-group.value
+            "${local.userscheduler_nodeselector_key}" = local.userscheduler_nodeselector_value
           }
         }
       }
@@ -153,8 +204,10 @@ resource "helm_release" "jupyterhub" {
           {
             name  = "OAUTH_LOGOUT_REDIRECT_URL",
             value = format("%s?redirect_uri=%s", "https://${var.external-url}/auth/realms/${var.realm_id}/protocol/openid-connect/logout", urlencode(var.jupyterhub-logout-redirect-url))
-          }],
-        jsondecode(var.jupyterhub-hub-extraEnv))
+          },
+          ],
+          concat(local.jupyterhub_env_vars, jsondecode(var.jupyterhub-hub-extraEnv))
+        )
       }
     })]
   )
@@ -186,6 +239,28 @@ resource "kubernetes_manifest" "jupyterhub" {
               port = 80
             }
           ]
+          middlewares = [
+            {
+              name      = kubernetes_manifest.jupyterhub-proxy-add-slash.manifest.metadata.name
+              namespace = var.namespace
+            }
+          ]
+        },
+        {
+          kind  = "Rule"
+          match = "Host(`${var.external-url}`) && (PathPrefix(`/home`) || PathPrefix(`/token`) || PathPrefix(`/admin`))"
+          middlewares = [
+            {
+              name      = kubernetes_manifest.jupyterhub-middleware-addprefix.manifest.metadata.name
+              namespace = var.namespace
+            }
+          ]
+          services = [
+            {
+              name = "proxy-public"
+              port = 80
+            }
+          ]
         }
       ]
     }
@@ -204,11 +279,41 @@ module "jupyterhub-openid-client" {
     "developer" = ["jupyterhub_developer", "dask_gateway_developer"]
     "analyst"   = ["jupyterhub_developer"]
   }
+  client_roles = [
+    {
+      "name" : "allow-app-sharing-role",
+      "description" : "Allow app sharing for apps created via JupyterHub App Launcher (jhub-apps)",
+      "groups" : [],
+      "attributes" : {
+        # grants permissions to share server
+        # grants permissions to read other user's names
+        # grants permissions to read other groups' names
+        # The later two are required for sharing with a group or user
+        "scopes" : "shares,read:users:name,read:groups:name"
+        "component" : "jupyterhub"
+      }
+    },
+    {
+      "name" : "allow-read-access-to-services-role",
+      "description" : "Allow read access to services, such that they are visible on the home page e.g. conda-store",
+      # Adding it to analyst group such that it's applied to every user.
+      "groups" : ["analyst"],
+      "attributes" : {
+        # grants permissions to read services
+        "scopes" : "read:services",
+        "component" : "jupyterhub"
+      }
+    },
+  ]
   callback-url-paths = [
     "https://${var.external-url}/hub/oauth_callback",
     var.jupyterhub-logout-redirect-url
   ]
   jupyterlab_profiles_mapper = true
+  service-accounts-enabled   = true
+  service-account-roles = [
+    "view-realm", "view-users", "view-clients"
+  ]
 }
 
 
@@ -219,8 +324,9 @@ resource "kubernetes_secret" "argo-workflows-conda-store-token" {
   }
 
   data = {
-    "conda-store-api-token"    = var.conda-store-argo-workflows-jupyter-scheduler-token
-    "conda-store-service-name" = var.conda-store-service-name
+    "conda-store-api-token"         = var.conda-store-argo-workflows-jupyter-scheduler-token
+    "conda-store-service-name"      = var.conda-store-service-name
+    "conda-store-service-namespace" = var.namespace
   }
 
   type = "Opaque"

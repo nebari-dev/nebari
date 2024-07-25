@@ -1,8 +1,8 @@
 terraform {
   required_providers {
     kind = {
-      source  = "kyma-incubator/kind"
-      version = "0.0.11"
+      source  = "tehcyx/kind"
+      version = "0.4.0"
     }
     docker = {
       source  = "kreuzwerker/docker"
@@ -48,7 +48,7 @@ resource "kind_cluster" "default" {
 
     node {
       role  = "general"
-      image = "kindest/node:v1.21.10"
+      image = "kindest/node:v1.29.2"
     }
   }
 }

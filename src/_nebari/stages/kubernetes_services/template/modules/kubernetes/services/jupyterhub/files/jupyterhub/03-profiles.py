@@ -1,3 +1,4 @@
+import ast
 import copy
 import functools
 import json
@@ -47,10 +48,16 @@ def base_profile_home_mounts(username):
     }
 
     MKDIR_OWN_DIRECTORY = (
-        "mkdir -p /mnt/{path} && chmod 777 /mnt/{path} && cp -r /etc/skel/. /mnt/{path}"
+        "mkdir -p /mnt/{path} && chmod 777 /mnt/{path} && "
+        # Copy skel files/folders not starting with '..' to user home directory.
+        # Filtering out ..* removes some unneeded folders (k8s configmap mount implementation details).
+        "find /etc/skel/. -maxdepth 1 -not -name '.' -not -name '..*' -exec "
+        "cp -rL {escaped_brackets} /mnt/{path} \;"
     )
     command = MKDIR_OWN_DIRECTORY.format(
-        path=pvc_home_mount_path.format(username=username)
+        # have to escape the brackets since this string will be formatted later by KubeSpawner
+        escaped_brackets="{{}}",
+        path=pvc_home_mount_path.format(username=username),
     )
     init_containers = [
         {
@@ -207,12 +214,14 @@ def base_profile_extra_mounts():
 
     extra_pod_config = {
         "volumes": [
-            {
-                "name": volume["name"],
-                "persistentVolumeClaim": {"claimName": volume["name"]},
-            }
-            if volume["kind"] == "persistentvolumeclaim"
-            else {"name": volume["name"], "configMap": {"name": volume["name"]}}
+            (
+                {
+                    "name": volume["name"],
+                    "persistentVolumeClaim": {"claimName": volume["name"]},
+                }
+                if volume["kind"] == "persistentvolumeclaim"
+                else {"name": volume["name"], "configMap": {"name": volume["name"]}}
+            )
             for mount_path, volume in extra_mounts.items()
         ]
     }
@@ -232,6 +241,85 @@ def base_profile_extra_mounts():
     }
 
 
+def configure_user_provisioned_repositories(username):
+    # Define paths and configurations
+    pvc_home_mount_path = f"home/{username}"
+
+    git_repos_provision_pvc = z2jh.get_config("custom.initial-repositories")
+    git_clone_update_config = {
+        "name": "git-clone-update",
+        "configMap": {"name": "git-clone-update", "defaultMode": 511},
+    }
+
+    # Convert the string configuration to a list of dictionaries
+    def string_to_objects(input_string):
+        try:
+            result = ast.literal_eval(input_string)
+            if isinstance(result, list) and all(
+                isinstance(item, dict) for item in result
+            ):
+                return result
+            else:
+                raise ValueError(
+                    "Input string does not contain a list of dictionaries."
+                )
+        except (ValueError, SyntaxError):
+            # Return an error message if the input string is not a list of dictionaries
+            raise ValueError(f"Invalid input string format: {input_string}")
+
+    git_repos_provision_pvc = string_to_objects(git_repos_provision_pvc)
+
+    if not git_repos_provision_pvc:
+        return {}
+
+    # Define the extra pod configuration for the volumes
+    extra_pod_config = {
+        "volumes": [{"name": "git-clone-update", **git_clone_update_config}]
+    }
+
+    extras_git_clone_cp_path = f"/mnt/{pvc_home_mount_path}/.git-clone-update.sh"
+
+    BASH_EXECUTION = "./.git-clone-update.sh"
+
+    for local_repo_pair in git_repos_provision_pvc:
+        for path, remote_url in local_repo_pair.items():
+            BASH_EXECUTION += f" '{path} {remote_url}'"
+
+    EXEC_OWNERSHIP_CHANGE = " && ".join(
+        [
+            f"cp /mnt/extras/git-clone-update.sh {extras_git_clone_cp_path}",
+            f"chmod 777 {extras_git_clone_cp_path}",
+            f"chown -R 1000:100 {extras_git_clone_cp_path}",
+            f"cd /mnt/{pvc_home_mount_path}",
+            BASH_EXECUTION,
+            f"rm -f {extras_git_clone_cp_path}",
+        ]
+    )
+
+    # Define init containers configuration
+    init_containers = [
+        {
+            "name": "pre-populate-git-repos",
+            "image": "bitnami/git",
+            "command": ["sh", "-c", EXEC_OWNERSHIP_CHANGE],
+            "securityContext": {"runAsUser": 0},
+            "volumeMounts": [
+                {
+                    "mountPath": f"/mnt/{pvc_home_mount_path}",
+                    "name": "home",
+                    "subPath": pvc_home_mount_path,
+                },
+                {"mountPath": "/mnt/extras", "name": "git-clone-update"},
+            ],
+        }
+    ]
+
+    return {
+        "extra_pod_config": extra_pod_config,
+        "init_containers": init_containers,
+    }
+
+
 def configure_user(username, groups, uid=1000, gid=100):
     environment = {
         # nss_wrapper
@@ -245,6 +333,8 @@ def configure_user(username, groups, uid=1000, gid=100):
         "SHELL": "/bin/bash",
         # set home directory to username
         "HOME": f"/home/{username}",
+        # Disable global usage of pip
+        "PIP_REQUIRE_VIRTUALENV": "true",
     }
 
     etc_passwd, etc_group = generate_nss_files(
@@ -285,9 +375,11 @@ def configure_user(username, groups, uid=1000, gid=100):
             # mount the shared directories for user only if there are
             # shared folders (groups) that the user is a member of
             # else ensure that the `shared` folder symlink does not exist
-            f"ln -sfn /shared /home/{username}/shared"
-            if groups
-            else f"rm -f /home/{username}/shared",
+            (
+                f"ln -sfn /shared /home/{username}/shared"
+                if groups
+                else f"rm -f /home/{username}/shared"
+            ),
             # conda-store environment configuration
             f"printf '{condarc}' > /home/{username}/.condarc",
             # jupyter configuration
@@ -340,7 +432,10 @@ def profile_argo_token(groups):
         "ARGO_BASE_HREF": "/argo",
         "ARGO_SERVER": f"{domain}:443",
         "ARGO_NAMESPACE": namespace,
-        "ARGO_TOKEN": {
+        "ARGO_TOKEN": "Bearer $(HERA_TOKEN)",
+        "ARGO_HTTP1": "true",  # Maybe due to traefik config, but `argo list` returns 404 without this set.  Try removing after upgrading argo past v3.4.4.
+        # Hera token is needed for versions of hera released before https://github.com/argoproj-labs/hera/pull/1053 is merged
+        "HERA_TOKEN": {
             "valueFrom": {
                 "secretKeyRef": {
                     "name": f"{argo_sa}.service-account-token",
@@ -366,6 +461,14 @@ def profile_conda_store_viewer_token():
                 "secretKeyRef": {
                     "name": "argo-workflows-conda-store-token",
                     "key": "conda-store-service-name",
+                }
+            }
+        },
+        "CONDA_STORE_SERVICE_NAMESPACE": {
+            "valueFrom": {
+                "secretKeyRef": {
+                    "name": "argo-workflows-conda-store-token",
+                    "key": "conda-store-service-namespace",
                 }
             }
         },
@@ -414,6 +517,7 @@ def render_profile(profile, username, groups, keycloak_profilenames):
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
             configure_user(username, groups),
+            configure_user_provisioned_repositories(username),
             profile_kubespawner_override,
         ],
         {},
@@ -446,14 +550,13 @@ def render_profiles(spawner):
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
-    spawner.log.error(str(auth_state))
 
     username = auth_state["oauth_user"]["preferred_username"]
     # only return the lowest level group name
     # e.g. /projects/myproj -> myproj
     # and /developers -> developers
     groups = [Path(group).name for group in auth_state["oauth_user"]["groups"]]
-    spawner.log.error(f"user info: {username} {groups}")
+    spawner.log.info(f"user info: {username} {groups}")
 
     keycloak_profilenames = auth_state["oauth_user"].get("jupyterlab_profiles", [])
 

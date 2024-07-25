@@ -1,6 +1,7 @@
 import functools
-import os
-from typing import Dict, List
+import json
+import subprocess
+from typing import Dict, List, Set
 
 from google.cloud import (
     compute_v1,
@@ -10,18 +11,15 @@ from google.cloud import (
     storage,
 )
 
-from _nebari import constants
+from _nebari.constants import GCP_ENV_DOCS
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari.utils import check_environment_variables
 from nebari import schema
 
 
-def check_credentials():
-    for variable in {"GOOGLE_CREDENTIALS", "PROJECT_ID"}:
-        if variable not in os.environ:
-            raise ValueError(
-                f"""Missing the following required environment variable: {variable}\n
-                Please see the documentation for more information: {constants.GCP_ENV_DOCS}"""
-            )
+def check_credentials() -> None:
+    required_variables = {"GOOGLE_CREDENTIALS", "PROJECT_ID"}
+    check_environment_variables(required_variables, GCP_ENV_DOCS)
 
 
 @functools.lru_cache()
@@ -89,6 +87,22 @@ def instances(project: str, zone: str) -> Dict[str, str]:
     instances = client.list(request=request)
     instance_dict = {instances.description: instances.name for instance in instances}
     return instance_dict
+
+
+def activated_services() -> Set[str]:
+    """Return a list of activated services."""
+    check_credentials()
+    output = subprocess.check_output(
+        [
+            "gcloud",
+            "services",
+            "list",
+            "--enabled",
+            "--format=json(config.title)",
+        ]
+    )
+    data = json.loads(output)
+    return {service["config"]["title"] for service in data}
 
 
 def cluster_exists(cluster_name: str, project_id: str, zone: str) -> bool:
@@ -190,6 +204,26 @@ def gcp_cleanup(config: schema.Main):
     delete_service_account(service_account_name, project_id)
 
 
+def check_missing_service() -> None:
+    """Check if all required services are activated."""
+    required = {
+        "Compute Engine API",
+        "Kubernetes Engine API",
+        "Cloud Monitoring API",
+        "Cloud Autoscaling API",
+        "Identity and Access Management (IAM) API",
+        "Cloud Resource Manager API",
+    }
+    activated = activated_services()
+    common = required.intersection(activated)
+    missing = required.difference(common)
+    if missing:
+        raise ValueError(
+            f"""Missing required services: {missing}\n
+            Please see the documentation for more information: {GCP_ENV_DOCS}"""
+        )
+
+
 # Getting pricing data could come from here
 # https://cloudpricingcalculator.appspot.com/static/data/pricelist.json
 
@@ -197,9 +231,9 @@ def gcp_cleanup(config: schema.Main):
 ### PYDANTIC VALIDATORS ###
 
 
-def validate_region(project_id: str, region: str) -> str:
+def validate_region(region: str) -> str:
     """Validate the GCP region is valid."""
-    available_regions = regions(project_id)
+    available_regions = regions()
     if region not in available_regions:
         raise ValueError(
             f"Region {region} is not one of available regions {available_regions}"

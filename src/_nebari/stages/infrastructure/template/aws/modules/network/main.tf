@@ -3,7 +3,6 @@ resource "aws_vpc" "main" {
 
   enable_dns_support   = true
   enable_dns_hostnames = true
-  enable_classiclink   = false
 
   tags = merge({ Name = var.name }, var.tags, var.vpc_tags)
 }

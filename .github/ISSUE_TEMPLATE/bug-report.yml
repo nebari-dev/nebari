@@ -104,7 +104,6 @@ body:
       description: Is this issue related to any of the Nebari integrations?
       multiple: true
       options:
-        - "Prefect"
         - "Keycloak"
         - "conda-store"
         - "Dask"

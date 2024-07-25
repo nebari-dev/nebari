@@ -1,0 +1,202 @@
+name: "Local Integration Tests"
+
+env:
+  TEST_USERNAME: "test-user"
+  TEST_PASSWORD: "P@sswo3d"
+  NEBARI_IMAGE_TAG: "main"
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/test_local_integration.yaml"
+      - "tests/**"
+      - "scripts/**"
+      - "src/**"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - ".cirun.yml"
+  push:
+    branches:
+      - main
+      - develop
+      - release/\d{4}.\d{1,2}.\d{1,2}
+    paths:
+      - ".github/workflows/test_local_integration.yaml"
+      - "tests/**"
+      - "scripts/**"
+      - "src/**"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - ".cirun.yml"
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
+  workflow_dispatch:
+
+# When the cancel-in-progress: true option is specified, any concurrent jobs or workflows using the same
+# concurrency group will cancel both the pending and currently running jobs or workflows. This allows only
+# one job or workflow in the concurrency group to be in progress at a time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  test-local-integration:
+    runs-on: "cirun-runner--${{ github.run_id }}"
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: 'Checkout Infrastructure'
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+
+      - name: Checkout the branch from the PR that triggered the job
+        if: ${{ github.event_name == 'issue_comment' }}
+        run: |
+          hub version
+          hub pr checkout ${{ inputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: conda-incubator/setup-miniconda@v3
+        env:
+          CONDA: /home/runnerx/miniconda3
+        with:
+          auto-update-conda: true
+          python-version: "3.11"
+          miniconda-version: "latest"
+
+      - name: Install Nebari and playwright
+        run: |
+          pip install .[dev]
+          playwright install
+
+      - uses: azure/setup-kubectl@v4.0.0
+        with:
+          version: v1.19.16
+
+      - name: Enable docker permissions for user
+        run: |
+          sudo docker ps
+          sudo usermod -aG docker $USER && newgrp docker
+
+          docker info
+          docker ps
+
+      - name: Get routing table for docker pods
+        run: |
+          ip route
+
+      - name: Initialize Nebari Cloud
+        run: |
+          mkdir -p local-deployment
+          cd local-deployment
+          nebari init local --project=thisisatest --domain github-actions.nebari.dev --auth-provider=password
+
+          # Need smaller profiles on Local Kind
+          sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
+          sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
+
+          # Change default JupyterLab theme
+          cat >> nebari-config.yaml <<- EOM
+          jupyterlab:
+            default_settings:
+              "@jupyterlab/apputils-extension:themes":
+                theme: JupyterLab Dark
+          EOM
+
+          # Change default value for minio persistence size
+          cat >> nebari-config.yaml <<- EOM
+          monitoring:
+            enabled: true
+            overrides:
+              minio:
+                persistence:
+                  size: 1Gi
+          EOM
+
+          cat nebari-config.yaml
+
+      - name: Deploy Nebari
+        working-directory: local-deployment
+        run: |
+          nebari deploy --config nebari-config.yaml --disable-prompt
+
+      - name: Basic kubectl checks after deployment
+        if: always()
+        run: |
+          kubectl get all,cm,secret,pv,pvc,ing -A
+
+      - name: Check github-actions.nebari.dev resolves
+        run: |
+          nslookup github-actions.nebari.dev
+
+      - name: Curl jupyterhub login page
+        run: |
+          curl -k https://github-actions.nebari.dev/hub/home -i
+
+      - name: Create example-user
+        working-directory: local-deployment
+        run: |
+          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
+          nebari keycloak listusers --config nebari-config.yaml
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Get nebari-config.yaml full path
+        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        env:
+          CYPRESS_EXAMPLE_USER_NAME: ${{ env.TEST_USERNAME }}
+          CYPRESS_EXAMPLE_USER_PASSWORD: ${{ env.TEST_PASSWORD }}
+          CYPRESS_BASE_URL: https://github-actions.nebari.dev/
+        with:
+          working-directory: tests/tests_e2e
+
+      - name: Playwright Tests
+        env:
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+          NEBARI_FULL_URL: https://github-actions.nebari.dev/
+        working-directory: tests/tests_e2e/playwright
+        run: |
+          # create environment file
+          envsubst < .env.tpl > .env
+          # run playwright pytest tests in headed mode with the chromium browser
+          xvfb-run pytest --browser chromium
+
+      - name: Save Cypress screenshots and videos
+        if: always()
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: e2e-cypress
+          path: |
+            ./tests/tests_e2e/cypress/screenshots/
+            ./tests/tests_e2e/cypress/videos/
+            ./tests/tests_e2e/playwright/videos/
+
+      - name: Deployment Pytests
+        env:
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+        run: |
+          pytest tests/tests_deployment/ -v -s
+
+      ### CLEANUP AFTER TESTS
+      - name: Cleanup nebari deployment
+        # Since this is not critical for most pull requests and takes more than half of the time
+        # in the CI, it makes sense to only run on merge to main or workflow_dispatch to speed
+        # up feedback cycle
+        if: github.ref_name == 'develop' || github.event_name == 'workflow_dispatch'
+        working-directory: local-deployment
+        run: |
+          nebari destroy --config nebari-config.yaml --disable-prompt

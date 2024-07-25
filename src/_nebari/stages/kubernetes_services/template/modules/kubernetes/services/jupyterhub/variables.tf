@@ -102,12 +102,21 @@ variable "conda-store-service-name" {
   type        = string
 }
 
+variable "conda-store-jhub-apps-token" {
+  description = "Token for conda-store to be used by jhub apps for fetching conda environments dynamically."
+  type        = string
+}
+
 variable "conda-store-environments" {
   description = "conda environments from conda-store in filesystem namespace"
   type        = any
   default     = {}
 }
 
+variable "jhub-apps-enabled" {
+  description = "Enable/Disable JupyterHub Apps extension to spin up apps, dashboards, etc"
+  type        = bool
+}
 
 variable "conda-store-argo-workflows-jupyter-scheduler-token" {
   description = "Token for argo-workflows-jupyter-schedule to use conda-store"
@@ -147,4 +156,55 @@ variable "idle-culler-settings" {
 variable "argo-workflows-enabled" {
   description = "Enable Argo Workflows"
   type        = bool
+}
+
+variable "jupyterlab-default-settings" {
+  description = "Default settings for JupyterLab to be placed in overrides.json"
+  type        = map(any)
+}
+
+variable "jupyterlab-gallery-settings" {
+  description = "Server-side settings for jupyterlab-gallery extension"
+  type = object({
+    title                         = optional(string)
+    destination                   = optional(string)
+    hide_gallery_without_exhibits = optional(bool)
+    exhibits = list(object({
+      git         = string
+      title       = string
+      homepage    = optional(string)
+      description = optional(string)
+      icon        = optional(string)
+      account     = optional(string)
+      token       = optional(string)
+      branch      = optional(string)
+      depth       = optional(number)
+    }))
+  })
+}
+
+variable "jupyterlab-pioneer-enabled" {
+  description = "Enable JupyterLab Pioneer for telemetry"
+  type        = bool
+}
+
+variable "jupyterlab-pioneer-log-format" {
+  description = "Logging format for JupyterLab Pioneer"
+  type        = string
+}
+
+variable "jupyterlab-preferred-dir" {
+  description = "Directory in which the JupyterLab should open the file browser"
+  type        = string
+}
+
+variable "cloud-provider" {
+  description = "Name of cloud provider."
+  type        = string
+}
+
+variable "initial-repositories" {
+  description = "Map of folder location and git repo url to clone"
+  type        = string
+  default     = "[]"
 }

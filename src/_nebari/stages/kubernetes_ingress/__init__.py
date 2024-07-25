@@ -3,8 +3,7 @@ import logging
 import socket
 import sys
 import time
-import typing
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Optional, Type
 
 from _nebari import constants
 from _nebari.provider.dns.cloudflare import update_record
@@ -22,17 +21,6 @@ logger = logging.getLogger(__name__)
 # check and retry settings
 NUM_ATTEMPTS = 10
 TIMEOUT = 10  # seconds
-
-
-def add_clearml_dns(zone_name, record_name, record_type, ip_or_hostname):
-    dns_records = [
-        f"app.clearml.{record_name}",
-        f"api.clearml.{record_name}",
-        f"files.clearml.{record_name}",
-    ]
-
-    for dns_record in dns_records:
-        update_record(zone_name, dns_record, record_type, ip_or_hostname)
 
 
 def provision_ingress_dns(
@@ -60,13 +48,9 @@ def provision_ingress_dns(
             schema.ProviderEnum.azure,
         }:
             update_record(zone_name, record_name, "A", ip_or_hostname)
-            if config.clearml.enabled:
-                add_clearml_dns(zone_name, record_name, "A", ip_or_hostname)
 
         elif config.provider == schema.ProviderEnum.aws:
             update_record(zone_name, record_name, "CNAME", ip_or_hostname)
-            if config.clearml.enabled:
-                add_clearml_dns(zone_name, record_name, "CNAME", ip_or_hostname)
         else:
             logger.info(
                 f"Couldn't update the DNS record for cloud provider: {config.provider}"
@@ -90,15 +74,15 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
     ):
         for i in range(num_attempts):
             try:
-                resolved_ip = socket.gethostbyname(domain_name)
-                if resolved_ip == ip:
+                _, _, resolved_ips = socket.gethostbyname_ex(domain_name)
+                if ip in resolved_ips:
                     print(
-                        f"DNS configured domain={domain_name} matches ingress ip={ip}"
+                        f"DNS configured domain={domain_name} matches ingress ips={ip}"
                     )
                     return True
                 else:
                     print(
-                        f"Attempt {i+1} polling DNS domain={domain_name} does not match ip={ip} instead got {resolved_ip}"
+                        f"Attempt {i+1} polling DNS domain={domain_name} does not match ip={ip} instead got {resolved_ips}"
                     )
             except socket.gaierror:
                 print(
@@ -109,17 +93,18 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
 
     attempt = 0
     while not _attempt_dns_lookup(domain_name, ip):
-        sleeptime = 60 * (2**attempt)
-        if not disable_prompt:
+        if disable_prompt:
+            sleeptime = 60 * (2**attempt)
+            print(f"Will attempt to poll DNS again in {sleeptime} seconds...")
+            time.sleep(sleeptime)
+        else:
             input(
                 f"After attempting to poll the DNS, the record for domain={domain_name} appears not to exist, "
                 f"has recently been updated, or has yet to fully propagate. This non-deterministic behavior is likely due to "
-                f"DNS caching and will likely resolve itself in a few minutes.\n\n\tTo poll the DNS again in {sleeptime} seconds "
-                f"[Press Enter].\n\n...otherwise kill the process and run the deployment again later..."
+                f"DNS caching and will likely resolve itself in a few minutes.\n\n\tTo poll the DNS again [Press Enter].\n\n"
+                f"...otherwise kill the process and run the deployment again later..."
             )
 
-        print(f"Will attempt to poll DNS again in {sleeptime} seconds...")
-        time.sleep(sleeptime)
         attempt += 1
         if attempt == 5:
             print(
@@ -143,23 +128,23 @@ class CertificateEnum(str, enum.Enum):
 class Certificate(schema.Base):
     type: CertificateEnum = CertificateEnum.selfsigned
     # existing
-    secret_name: typing.Optional[str]
+    secret_name: Optional[str] = None
     # lets-encrypt
-    acme_email: typing.Optional[str]
+    acme_email: Optional[str] = None
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
 
 
 class DnsProvider(schema.Base):
-    provider: typing.Optional[str]
-    auto_provision: typing.Optional[bool] = False
+    provider: Optional[str] = None
+    auto_provision: Optional[bool] = False
 
 
 class Ingress(schema.Base):
-    terraform_overrides: typing.Dict = {}
+    terraform_overrides: Dict = {}
 
 
 class InputSchema(schema.Base):
-    domain: typing.Optional[str]
+    domain: Optional[str] = None
     certificate: Certificate = Certificate()
     ingress: Ingress = Ingress()
     dns: DnsProvider = DnsProvider()
@@ -171,7 +156,7 @@ class IngressEndpoint(schema.Base):
 
 
 class OutputSchema(schema.Base):
-    load_balancer_address: typing.List[IngressEndpoint]
+    load_balancer_address: List[IngressEndpoint]
     domain: str
 
 
@@ -196,9 +181,9 @@ class KubernetesIngressStage(NebariTerraformStage):
             cert_details["acme-email"] = self.config.certificate.acme_email
             cert_details["acme-server"] = self.config.certificate.acme_server
         elif cert_type == "existing":
-            cert_details[
-                "certificate-secret-name"
-            ] = self.config.certificate.secret_name
+            cert_details["certificate-secret-name"] = (
+                self.config.certificate.secret_name
+            )
 
         return {
             **{

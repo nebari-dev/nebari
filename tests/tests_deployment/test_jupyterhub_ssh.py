@@ -14,10 +14,14 @@ monkeypatch_ssl_context()
 TIMEOUT_SECS = 300
 
 
+@pytest.fixture(scope="session")
+def api_token():
+    return get_jupyterhub_token("jupyterhub-ssh")
+
+
 @pytest.fixture(scope="function")
-def paramiko_object():
+def paramiko_object(api_token):
     """Connects to JupyterHub ssh cluster from outside the cluster."""
-    api_token = get_jupyterhub_token("jupyterhub-ssh")
 
     try:
         client = paramiko.SSHClient()
@@ -121,6 +125,9 @@ def test_contains_jupyterhub_ssh(paramiko_object):
         ("cat ~/.bashrc", "Managed by Nebari"),
         ("cat ~/.profile", "Managed by Nebari"),
         ("cat ~/.bash_logout", "Managed by Nebari"),
+        # ensure we don't copy over extra files from /etc/skel in init container
+        ("ls -la ~/..202*", "No such file or directory"),
+        ("ls -la ~/..data", "No such file or directory"),
     ]
 
     for command, output in commands_contain:

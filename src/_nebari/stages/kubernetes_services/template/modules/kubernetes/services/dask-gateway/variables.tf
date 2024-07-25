@@ -199,3 +199,12 @@ variable "conda-store-service-name" {
   description = "internal service-name:port where conda-store can be reached"
   type        = string
 }
+
+variable "cloud-provider" {
+  description = "Name of the cloud provider to deploy to."
+  type        = string
+}
+
+variable "forwardauth_middleware_name" {
+  type = string
+}
