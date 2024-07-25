@@ -132,11 +132,9 @@ resource "kubernetes_deployment" "jupyterhub-sftp" {
     }
   }
   lifecycle {
-    lifecycle {
-      replace_triggered_by = [
-        null_resource.pvc,
-      ]
-    }
+    replace_triggered_by = [
+      null_resource.pvc,
+    ]
   }
 }
 
