@@ -243,12 +243,15 @@ class JupyterLabGalleryExhibit(schema.Base):
     icon: Optional[str] = None
     account: Optional[str] = None
     token: Optional[str] = None
+    branch: Optional[str] = None
+    depth: Optional[int] = None
 
 
 class JupyterLabGallerySettings(schema.Base):
     title: str = "Examples"
     destination: str = "examples"
     exhibits: List[JupyterLabGalleryExhibit] = []
+    hide_gallery_without_exhibits: bool = True
 
 
 class JupyterLab(schema.Base):
