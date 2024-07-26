@@ -21,48 +21,6 @@ resource "aws_eks_cluster" "main" {
   tags = merge({ Name = var.name }, var.tags)
 }
 
-resource "aws_launch_template" "main" {
-  # Invoke launch_template only if var.extra_ssl_certificates is not null
-  count = var.extra_ssl_certificates == null ? 0 : length(var.node_groups)
-
-  key_name  = var.ec2_keypair_name == null ? null : var.ec2_keypair_name
-  name      = var.node_groups[count.index].name
-
-  vpc_security_group_ids = var.cluster_security_groups
-
-  block_device_mappings {
-    device_name = "/dev/xvda"
-
-    ebs {
-      volume_size = 50
-      volume_type = "gp2"
-    }
-  }
-  ## https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-basics ##
-  ## https://stackoverflow.com/questions/68894525/how-to-pass-kubelet-extra-args-to-aws-eks-node-group-created-by-terraform-aws ##
-  user_data                     = base64encode(<<-EOF
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="//"
-
---//
-Content-Type: text/x-shellscript; charset="us-ascii"
-#!/bin/bash
-cat <<-EOT >> /etc/pki/ca-trust/source/anchors/client.pem
-${var.extra_ssl_certificates}
-EOT
-sudo update-ca-trust extract
-## If using a Custom AMI, then the following bootstrap cmds and args must be included/modified,
-## otherwise, on AWS EKS Node AMI, the /etc/eks/bootstrap.sh cmd is appended automatically
-#set -ex
-#B64_CLUSTER_CA=${aws_eks_cluster.main.certificate_authority[0].data}
-#API_SERVER_URL=${aws_eks_cluster.main.endpoint}
-#K8S_CLUSTER_DNS_IP=172.20.0.10
-#/etc/eks/bootstrap.sh ${aws_eks_cluster.main.name} --kubelet-extra-args '--node-labels=eks.amazonaws.com/nodegroup-image=ami-0c7e1dd70292cb6c6,dedicated=${var.node_groups[count.index].name},eks.amazonaws.com/capacityType=ON_DEMAND,eks.amazonaws.com/nodegroup=${var.node_groups[count.index].name} --max-pods=58' --b64-cluster-ca $B64_CLUSTER_CA --apiserver-endpoint $API_SERVER_URL --dns-cluster-ip $K8S_CLUSTER_DNS_IP --use-max-pods false
-
---//--\
-  EOF
-  )
-}
 
 resource "aws_eks_node_group" "main" {
   count = length(var.node_groups)
@@ -72,17 +30,9 @@ resource "aws_eks_node_group" "main" {
   node_role_arn   = aws_iam_role.node-group.arn
   subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, 0)] : var.cluster_subnets
 
-  dynamic remote_access {
-    for_each = var.ec2_keypair_name != null && var.extra_ssl_certificates == null ? [1] : []
-    content {
-      ec2_ssh_key = var.ec2_keypair_name
-      source_security_group_ids = var.cluster_security_groups
-    }
-  }
-
   instance_types = [var.node_groups[count.index].instance_type]
   ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" : "AL2_x86_64"
-  disk_size      = var.extra_ssl_certificates == null ? 50 : null
+  disk_size      = 50
 
   scaling_config {
     min_size     = var.node_groups[count.index].min_size
@@ -98,15 +48,6 @@ resource "aws_eks_node_group" "main" {
     ignore_changes = [
       scaling_config[0].desired_size,
     ]
-  }
-  # Invoke launch_template only if var.extra_ssl_certificates is not null
-  dynamic "launch_template" {
-    for_each = var.extra_ssl_certificates == null ? [] : [1]
-    content {
-      id = aws_launch_template.main[count.index].id
-      #version = aws_launch_template.main[count.index].default_version
-      version = aws_launch_template.main[count.index].latest_version
-    }
   }
 
   # Ensure that IAM Role permissions are created before and deleted
