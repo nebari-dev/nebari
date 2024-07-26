@@ -82,11 +82,11 @@ def base_profile_home_mounts(username):
     }
 
 
-def base_profile_shared_mounts(groups):
+def base_profile_shared_mounts(groups, group_roles):
     """Configure the group directory mounts for user.
 
-    Ensure that {shared}/{group} directory exists and user has
-    permissions to read/write/execute. Kubernetes does not allow the
+    Ensure that {shared}/{group} directory exists based on the scope availability
+    and if user has permissions to read/write/execute. Kubernetes does not allow the
     same pvc to be a volume thus we must check that the home and share
     pvc are not the same for some operation.
 
@@ -103,6 +103,14 @@ def base_profile_shared_mounts(groups):
             {"name": "shared", "persistentVolumeClaim": {"claimName": shared_pvc_name}}
         )
 
+    relevant_groups = []
+    for group in groups:
+        for roles in group_roles.get(group, []):
+            # Check if the group has a role that has a shared-directory scope
+            if "shared-directory" in roles.get("attributes", {}).get("component", []):
+                relevant_groups.append(group)
+                break
+
     extra_container_config = {
         "volumeMounts": [
             {
@@ -110,7 +118,7 @@ def base_profile_shared_mounts(groups):
                 "name": "shared" if home_pvc_name != shared_pvc_name else "home",
                 "subPath": pvc_shared_mount_path.format(group=group),
             }
-            for group in groups
+            for group in relevant_groups
         ]
     }
 
@@ -118,7 +126,7 @@ def base_profile_shared_mounts(groups):
     command = " && ".join(
         [
             MKDIR_OWN_DIRECTORY.format(path=pvc_shared_mount_path.format(group=group))
-            for group in groups
+            for group in relevant_groups
         ]
     )
     init_containers = [
@@ -133,7 +141,7 @@ def base_profile_shared_mounts(groups):
                     "name": "shared" if home_pvc_name != shared_pvc_name else "home",
                     "subPath": pvc_shared_mount_path.format(group=group),
                 }
-                for group in groups
+                for group in relevant_groups
             ],
         }
     ]
@@ -475,7 +483,7 @@ def profile_conda_store_viewer_token():
     }
 
 
-def render_profile(profile, username, groups, keycloak_profilenames):
+def render_profile(profile, username, groups, keycloak_profilenames, group_roles):
     """Render each profile for user.
 
     If profile is not available for given username, groups returns
@@ -513,7 +521,7 @@ def render_profile(profile, username, groups, keycloak_profilenames):
         deep_merge,
         [
             base_profile_home_mounts(username),
-            base_profile_shared_mounts(groups),
+            base_profile_shared_mounts(groups, group_roles),
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
             configure_user(username, groups),
@@ -543,6 +551,27 @@ def render_profile(profile, username, groups, keycloak_profilenames):
     return profile
 
 
+def parse_roles(data):
+    parsed_roles = {}
+
+    for role in data:
+        for group in role["groups"]:
+            # group = str(group).replace("/", "")
+            group_name = Path(group).name
+            if group_name not in parsed_roles:
+                parsed_roles[group_name] = []
+
+            role_info = {
+                "description": role["description"],
+                "name": role["name"],
+                "attributes": role["attributes"],
+            }
+
+            parsed_roles[group_name].append(role_info)
+
+    return parsed_roles
+
+
 @gen.coroutine
 def render_profiles(spawner):
     # jupyterhub does not yet manage groups but it will soon
@@ -550,6 +579,7 @@ def render_profiles(spawner):
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
+    group_roles = parse_roles(spawner.authenticator.group_roles_map)
 
     username = auth_state["oauth_user"]["preferred_username"]
     # only return the lowest level group name
@@ -566,7 +596,7 @@ def render_profiles(spawner):
         filter(
             None,
             [
-                render_profile(p, username, groups, keycloak_profilenames)
+                render_profile(p, username, groups, keycloak_profilenames, group_roles)
                 for p in profile_list
             ],
         )

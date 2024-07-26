@@ -7,7 +7,7 @@ from functools import reduce
 from jupyterhub import scopes
 from jupyterhub.traitlets import Callable
 from oauthenticator.generic import GenericOAuthenticator
-from traitlets import Bool, Unicode, Union
+from traitlets import Bool, Unicode, Union, List
 
 
 class KeyCloakOAuthenticator(GenericOAuthenticator):
@@ -25,6 +25,11 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
     realm_api_url = Unicode(
         config=True, help="""The keycloak REST API URL for the realm."""
+    )
+
+    group_roles_map = List(
+        config=False,
+        help="""A mapping of roles to groups based on the user's assigned roles.""",
     )
 
     reset_managed_roles_on_startup = Bool(True)
@@ -54,6 +59,11 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         )
         user_roles_rich = await self._get_roles_with_attributes(
             roles=user_roles, client_id=jupyterhub_client_id, token=token
+        )
+        self.group_roles_map = await self._fetch_and_map_roles(
+            roles=user_roles_rich,
+            token=token,
+            url=f"clients/{jupyterhub_client_id}/roles/{{role_name}}",
         )
         keycloak_api_call_time_taken = time.time() - keycloak_api_call_start
         user_roles_rich_names = {role["name"] for role in user_roles_rich}
@@ -154,16 +164,35 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
         return list(roles.values())
 
-    def _get_scope_from_role(self, role):
+    def _get_scope_from_role(self, role, component_filter=["jupyterhub"]):
         """Return scopes from role if the component is jupyterhub"""
         role_scopes = role.get("attributes", {}).get("scopes", [])
         component = role.get("attributes", {}).get("component")
         # Attributes are returned as a single-element array, unless `##` delimiter is used in Keycloak
         # See this: https://stackoverflow.com/questions/68954733/keycloak-client-role-attribute-array
-        if component == ["jupyterhub"] and role_scopes:
+        if component == component_filter and role_scopes:
             return self.validate_scopes(role_scopes[0].split(","))
+        elif component_filter is None:
+            return self.validate_scopes(role_scopes)
         else:
             return []
+
+    async def _fetch_and_map_roles(self, roles, token, url, group_name_key="path"):
+        # we could use either `name` (e.g. "developer") or `path` ("/developer");
+        # since the default claim key returns `path`, it seems preferable.
+
+        self.log.info("Mapping roles with groups and users..")
+
+        for role in roles:
+            role_name = role["name"]
+            # fetch role assignments to groups
+            base_url = url.format(role_name=role_name)
+            groups = await self._fetch_api(f"{base_url}/groups", token=token)
+            role["groups"] = [group[group_name_key] for group in groups]
+            users = await self._fetch_api(f"{base_url}/users", token=token)
+            role["users"] = [user["username"] for user in users]
+
+        return roles
 
     def validate_scopes(self, role_scopes):
         """Validate role scopes to sanity check user provided scopes from keycloak"""
