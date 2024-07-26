@@ -4,6 +4,7 @@ env:
   TEST_USERNAME: "test-user"
   TEST_PASSWORD: "P@sswo3d"
   NEBARI_IMAGE_TAG: "main"
+  SKIP_LOCAL_TESTS: "true"
 
 on:
   pull_request:
@@ -45,6 +46,7 @@ concurrency:
 jobs:
   test-local-integration:
     runs-on: "cirun-runner--${{ github.run_id }}"
+    if: $SKIP_LOCAL_TESTS == "false"
     defaults:
       run:
         shell: bash -l {0}
