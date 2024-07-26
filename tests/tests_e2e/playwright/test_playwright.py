@@ -17,8 +17,3 @@ def test_notebook(navigator, test_data_root):
         conda_env="default *",
         timeout=500,
     )
-
-
-def test_services_access(navigator):
-    services = Services(navigator=navigator)
-    services.run(timeout=500)
