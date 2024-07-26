@@ -46,7 +46,7 @@ concurrency:
 jobs:
   test-local-integration:
     runs-on: "cirun-runner--${{ github.run_id }}"
-    if: $SKIP_LOCAL_TESTS == "false"
+    if: ${{ env.SKIP_LOCAL_TESTS == "false" }}
     defaults:
       run:
         shell: bash -l {0}
