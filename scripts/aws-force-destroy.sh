@@ -235,7 +235,8 @@ aws dynamodb delete-table --table-name "$PROJECT_NAME-$NAMESPACE-terraform-state
 echo "Deleting Resource Group"
 aws resource-groups delete-group --group "$PROJECT_NAME"
 
-volume_names=($(aws ec2 describe-volumes --filters "Name=tag:kubernetes.io/cluster/${PROJECT_NAME}-${NAMESPACE},Values=owned" --query 'Volumes[?Tags[?Key==`Name`]].VolumeId'  --output text))
+# shellcheck disable=SC2016
+mapfile -t volume_names < <(aws ec2 describe-volumes --filters "Name=tag:kubernetes.io/cluster/${PROJECT_NAME}-${NAMESPACE},Values=owned" --query 'Volumes[?Tags[?Key==`Name`]].VolumeId'  --output text)
 
 # delete EC2 volumes
 for id in "${volume_names[@]}"; do
