@@ -31,13 +31,12 @@ resource "azurerm_kubernetes_cluster" "main" {
   default_node_pool {
     vnet_subnet_id      = var.vnet_subnet_id
     name                = var.node_groups[0].name
-    node_count          = 1
     vm_size             = var.node_groups[0].instance_type
     enable_auto_scaling = "true"
-    min_count           = 1
-    max_count           = 1
+    min_count           = var.node_groups[0].min_size
+    max_count           = var.node_groups[0].max_size
     max_pods            = var.max_pods
-    # node_labels          = var.node_labels
+
     orchestrator_version = var.kubernetes_version
     node_labels = {
       "azure-node-pool" = var.node_groups[0].name

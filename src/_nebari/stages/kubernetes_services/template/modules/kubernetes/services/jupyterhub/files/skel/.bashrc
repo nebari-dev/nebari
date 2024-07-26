@@ -4,6 +4,10 @@
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
+#
+# Regular Nebari users do not have write permissions to modify the ~/.bashrc file.
+# Users can add their own customizations to the ~/.bash_profile file.
+# More details can be found in the docs https://www.nebari.dev/docs/faq#can-i-modify-the-bashrc-file-on-nebari.
 
 # If not running interactively, don't do anything
 case $- in

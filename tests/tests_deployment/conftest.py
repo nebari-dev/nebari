@@ -9,3 +9,4 @@ def cleanup_keycloak_roles():
     yield
     # teardown
     delete_client_keycloak_test_roles(client_name="jupyterhub")
+    delete_client_keycloak_test_roles(client_name="conda_store")

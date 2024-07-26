@@ -128,7 +128,7 @@ class NebariPluginManager:
         classes = [schema.Main] + [
             _.input_schema for _ in self.ordered_stages if _.input_schema is not None
         ]
-        return type("ConfigSchema", tuple(classes), {})
+        return type("ConfigSchema", tuple(classes[::-1]), {})
 
 
 nebari_plugin_manager = NebariPluginManager()

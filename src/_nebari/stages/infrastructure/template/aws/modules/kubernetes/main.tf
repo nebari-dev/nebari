@@ -90,8 +90,11 @@ resource "aws_eks_addon" "aws-ebs-csi-driver" {
 }
 
 resource "aws_eks_addon" "coredns" {
-  addon_name   = "coredns"
-  cluster_name = aws_eks_cluster.main.name
+  addon_name                  = "coredns"
+  cluster_name                = aws_eks_cluster.main.name
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
 
   configuration_values = jsonencode({
     nodeSelector = {
