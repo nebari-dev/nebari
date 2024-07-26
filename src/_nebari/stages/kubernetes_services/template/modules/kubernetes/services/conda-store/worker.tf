@@ -222,7 +222,9 @@ resource "kubernetes_deployment" "worker" {
 resource "null_resource" "pvc" {
   triggers = {
     # pvc = local.shared-pvc.id
-    pvc = var.conda-store-fs
+    # I need to trigger based on the incoming pvc id
+    pvc = local.create-pvc ? kubernetes_persistent_volume_claim.main[0].metadata.0.uid : module.conda-store-cephfs-mount[0].persistent_volume_claim.pvc.id
+    # pvc = var.conda-store-fs
     # pvc = var.conda-store-fs == "nfs" ? module.conda-store-nfs-mount[0].pvc.id : module.conda-store-cephfs-mount[0].pvc.id
   }
 }
