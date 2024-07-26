@@ -1,6 +1,5 @@
 from tests.common.playwright_fixtures import navigator_parameterized
 from tests.common.run_notebook import Notebook
-from tests.common.run_services import Services
 
 
 @navigator_parameterized(instance_name="small-instance")
