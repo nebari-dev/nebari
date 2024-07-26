@@ -403,7 +403,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "Comitted",
+          "legendFormat": "Committed",
           "refId": "C"
         },
         {
