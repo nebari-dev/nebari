@@ -16,6 +16,7 @@
 # Define colors for messages and command output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
+# shellcheck disable=SC2034
 YELLOW='\033[0;33m'
 NC='\033[0m'
 
@@ -37,6 +38,7 @@ fix_parent_dir_permissions() {
   local folder_path="$1"
 
   # Retrieve the very first parent directory
+  # shellcheck disable=SC2155
   local parent_dir=$(echo "$folder_path" | cut -d '/' -f1)
 
   # Check if the parent directory has the correct permissions
