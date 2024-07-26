@@ -662,6 +662,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 "\n\t❗️ [purple]local[/purple] requires Docker and Kubernetes running on your local machine. "
                 "[italic]Currently only available on Linux OS.[/italic]"
                 "\n\t❗️ [purple]existing[/purple] refers to an existing Kubernetes cluster that Nebari can be deployed on.\n"
+                "\n\t❗️ [red]Digital Ocean[/red] is currently being deprecated and support will be removed in the future.\n"
             )
         )
         # try:
