@@ -595,6 +595,13 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.cloud_provider = check_cloud_provider_creds(
             cloud_provider, disable_prompt
         )
+
+        # Digital Ocean deprecation warning -- Nebari 2024.7.1
+        if inputs.cloud_provider == ProviderEnum.do.value.lower():
+            rich.print(
+                ":warning: Digital Ocean support is being deprecated and support will be removed in the future. :warning:\n"
+            )
+
         inputs.region = check_cloud_provider_region(region, inputs.cloud_provider)
         inputs.kubernetes_version = check_cloud_provider_kubernetes_version(
             kubernetes_version, inputs.cloud_provider, inputs.region
