@@ -43,6 +43,7 @@ class AccessEnum(str, enum.Enum):
 class SharedFsEnum(str, enum.Enum):
     nfs = "nfs"
     cephfs = "cephfs"
+    efs = "efs"
 
     @classmethod
     def to_yaml(cls, representer, node):
@@ -359,7 +360,15 @@ class InputSchema(schema.Base):
             and self.provider == schema.ProviderEnum.local
         ):
             raise ValueError(
-                f'storage.type: "{SharedFsEnum.cephfs.value}" is not supported for provider: "{self.provider.value}"'
+                f'storage.type: "{self.storage.type.value}" is not supported for provider: "{self.provider.value}"'
+            )
+
+        if (
+            self.storage.type == SharedFsEnum.efs
+            and self.provider != schema.ProviderEnum.aws
+        ):
+            raise ValueError(
+                f'storage.type: "{self.storage.type.value}" is only supported for provider: "{schema.ProviderEnum.aws.value}"'
             )
         return self
 

@@ -18,6 +18,7 @@ from _nebari.provider.cloud import (
     google_cloud,
 )
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.kubernetes_services import SharedFsEnum
 from _nebari.stages.tf_objects import NebariTerraformState
 from _nebari.utils import (
     AZURE_NODE_RESOURCE_GROUP_SUFFIX,
@@ -139,6 +140,7 @@ class AWSInputVars(schema.Base):
     permissions_boundary: Optional[str] = None
     kubeconfig_filename: str = get_kubeconfig_filename()
     tags: Dict[str, str] = {}
+    efs_enabled: bool = None
 
 
 def _calculate_asg_node_group_map(config: schema.Main):
@@ -810,6 +812,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 vpc_cidr_block=self.config.amazon_web_services.vpc_cidr_block,
                 permissions_boundary=self.config.amazon_web_services.permissions_boundary,
                 tags=self.config.amazon_web_services.tags,
+                efs_enabled=self.config.storage.type == SharedFsEnum.efs,
             ).model_dump()
         else:
             raise ValueError(f"Unknown provider: {self.config.provider}")
