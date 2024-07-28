@@ -8,3 +8,4 @@ jupyterlab:
         git: https://github.com/nebari-dev/nebari.git
         homepage: https://github.com/nebari-dev/nebari
         description: 🪴 Nebari - your open source data science platform
+    run_in_separate_container: true

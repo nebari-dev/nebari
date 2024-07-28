@@ -78,6 +78,8 @@ resource "helm_release" "jupyterhub" {
         conda-store-jhub-apps-token   = var.conda-store-jhub-apps-token
         jhub-apps-enabled             = var.jhub-apps-enabled
         initial-repositories          = var.initial-repositories
+        gallery-sidecar-enabled       = var.jupyterlab-gallery-sidecar-enabled
+        gallery-sidecar-port          = var.jupyterlab-gallery-sidecar-port
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
           namespace = kubernetes_config_map.etc-skel.metadata.0.namespace
@@ -186,6 +188,13 @@ resource "helm_release" "jupyterhub" {
         image = var.jupyterlab-image
         nodeSelector = {
           "${local.singleuser_nodeselector_key}" = var.user-node-group.value
+        },
+        extraFiles = {
+          for filename, content in kubernetes_config_map.etc-jupyter-secret.data :
+          filename => {
+            mountPath  = "/etc/jupyter/${filename}",
+            stringData = content
+          }
         }
       }
 
@@ -242,6 +251,10 @@ resource "kubernetes_manifest" "jupyterhub" {
           middlewares = [
             {
               name      = kubernetes_manifest.jupyterhub-proxy-add-slash.manifest.metadata.name
+              namespace = var.namespace
+            },
+            {
+              name      = kubernetes_manifest.jupyterhub-proxy-jupyter-gallery.manifest.metadata.name
               namespace = var.namespace
             }
           ]

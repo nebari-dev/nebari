@@ -31,3 +31,20 @@ resource "kubernetes_manifest" "jupyterhub-proxy-add-slash" {
     }
   }
 }
+
+resource "kubernetes_manifest" "jupyterhub-proxy-jupyter-gallery" {
+  manifest = {
+    apiVersion = "traefik.containo.us/v1alpha1"
+    kind       = "Middleware"
+    metadata = {
+      name      = "nebari-jupyterhub-proxy-jupyter-gallery"
+      namespace = var.namespace
+    }
+    spec = {
+      replacePathRegex = {
+        regex       = "^/user/([^/]+)/jupyterlab-gallery(/?[^/]+)$"
+        replacement = "/user/$${1}/proxy/${var.jupyterlab-gallery-sidecar-port}/jupyterlab-gallery$${2}"
+      }
+    }
+  }
+}

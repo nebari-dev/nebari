@@ -71,6 +71,8 @@ variable "jupyterlab-gallery-settings" {
       branch      = optional(string)
       depth       = optional(number)
     }))
+
+    run_in_separate_container = optional(bool)
   })
 }
 
@@ -169,7 +171,9 @@ module "jupyterhub" {
 
   jupyterlab-default-settings = var.jupyterlab-default-settings
 
-  jupyterlab-gallery-settings = var.jupyterlab-gallery-settings
+  jupyterlab-gallery-settings        = { for k, v in var.jupyterlab-gallery-settings : k => v if k != "run_in_separate_container" }
+  jupyterlab-gallery-sidecar-enabled = var.jupyterlab-gallery-settings.run_in_separate_container
+  jupyterlab-gallery-sidecar-port    = 9989
 
   jupyterlab-pioneer-enabled    = var.jupyterlab-pioneer-enabled
   jupyterlab-pioneer-log-format = var.jupyterlab-pioneer-log-format

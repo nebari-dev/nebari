@@ -183,6 +183,16 @@ variable "jupyterlab-gallery-settings" {
   })
 }
 
+variable "jupyterlab-gallery-sidecar-enabled" {
+  description = "Whether to run jupyterlab-gallery in a sidecar container"
+  type        = bool
+}
+
+variable "jupyterlab-gallery-sidecar-port" {
+  description = "Port for jupyterlab-gallery sidecar container"
+  type        = number
+}
+
 variable "jupyterlab-pioneer-enabled" {
   description = "Enable JupyterLab Pioneer for telemetry"
   type        = bool

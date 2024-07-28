@@ -77,14 +77,18 @@ resource "kubernetes_config_map" "etc-ipython" {
 locals {
   etc-jupyter-config-data = merge(
     {
-      "jupyter_server_config.py"    = local_file.jupyter_server_config_py.content,
-      "jupyter_gallery_config.json" = local_sensitive_file.jupyter_gallery_config_json.content,
+      "jupyter_server_config.py" = local_file.jupyter_server_config_py.content,
     },
     var.jupyterlab-pioneer-enabled ? {
       # quotes are must here, as terraform would otherwise think py is a property of
       # a defined resource jupyter_jupyterlab_pioneer_config
       "jupyter_jupyterlab_pioneer_config.py" = local_file.jupyter_jupyterlab_pioneer_config_py.content
     } : {}
+  )
+  etc-jupyter-secret-config-data = merge(
+    {
+      "jupyter_gallery_config.json" = local_sensitive_file.jupyter_gallery_config_json.content,
+    }
   )
 }
 
@@ -97,8 +101,7 @@ locals {
 resource "kubernetes_config_map" "etc-jupyter" {
   depends_on = [
     local_file.jupyter_server_config_py,
-    local_file.jupyter_jupyterlab_pioneer_config_py,
-    local_sensitive_file.jupyter_gallery_config_json
+    local_file.jupyter_jupyterlab_pioneer_config_py
   ]
 
   metadata {
@@ -107,6 +110,22 @@ resource "kubernetes_config_map" "etc-jupyter" {
   }
 
   data = local.etc-jupyter-config-data
+}
+
+
+resource "kubernetes_config_map" "etc-jupyter-secret" {
+  depends_on = [
+    # jupyter_server_config_py is here so that sidecar shares the same main config, to be confirmed if we want/need this
+    local_file.jupyter_server_config_py,
+    local_sensitive_file.jupyter_gallery_config_json
+  ]
+
+  metadata {
+    name      = "etc-jupyter-secret"
+    namespace = var.namespace
+  }
+
+  data = local.etc-jupyter-secret-config-data
 }
 
 
