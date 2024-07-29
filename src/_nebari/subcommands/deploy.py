@@ -86,7 +86,7 @@ def nebari_subcommand(cli: typer.Typer):
 
         # Digital Ocean support deprecation warning -- Nebari 2024.7.1
         if config.provider == "do" and not disable_prompt:
-            msg = "Digital Ocean support is currently being deprecated and will be removed in a future release. Would you like to continue? [y/N]"
+            msg = "Digital Ocean support is currently being deprecated and will be removed in a future release. Would you like to continue?"
             typer.confirm(msg)
 
         deploy_configuration(
