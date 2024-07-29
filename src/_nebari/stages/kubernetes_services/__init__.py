@@ -356,15 +356,16 @@ class InputSchema(schema.Base):
     jhub_apps: JHubApps = JHubApps()
     ceph: RookCeph = RookCeph()
 
-    @model_validator(mode="after")
-    def model_validate(self) -> Self:
-
-        # Sets default to be efs on aws and nfs on all other providers
+    def _set_storage_type_default_value(self):
         if self.storage.type is None:
             if self.provider == schema.ProviderEnum.aws:
                 self.storage.type = SharedFsEnum.efs
             else:
                 self.storage.type = SharedFsEnum.nfs
+
+    @model_validator(mode="after")
+    def custom_validation(self) -> Self:
+        self._set_storage_type_default_value()
 
         if (
             self.storage.type == SharedFsEnum.cephfs
