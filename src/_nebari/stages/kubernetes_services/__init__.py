@@ -264,6 +264,7 @@ class JupyterLabGallerySettings(schema.Base):
     title: str = "Examples"
     destination: str = "examples"
     exhibits: List[JupyterLabGalleryExhibit] = []
+    hide_gallery_without_exhibits: bool = True
 
 
 class JupyterLab(schema.Base):
