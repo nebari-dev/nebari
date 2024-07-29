@@ -1181,6 +1181,26 @@ class Upgrade_2024_6_1(UpgradeStep):
                 Prompt.ask(text)
         return config
 
+class Upgrade_2024_7_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.7.1
+
+    Note:
+        - Digital Ocean deprecation warning.
+    """
+
+    version = "2024.7.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        if (provider := config.get("provider", "")) == ProviderEnum.gcp.value:
+            rich.print(
+                    f"Digital Ocean support is currently being deprecated and will be removed in a future release.",
+            )
+            rich.print("Ready to upgrade to Nebari version [green]2024.7.1[/green].")
+        return config
 
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
