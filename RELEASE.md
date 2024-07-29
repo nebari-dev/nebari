@@ -27,6 +27,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2551
 * #2566 Upgrade Jupyterhub ssh image by @arjxn-py in https://github.com/nebari-dev/nebari/pull/2576
 * stop copying unnecessary files into user home directory by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2578
+* Include deprecation notes for init/deploy subcommands by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2582
 
 
 **Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.6.1...2024.7.1
