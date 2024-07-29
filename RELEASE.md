@@ -9,6 +9,29 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+### Release 2024.7.1 - July 29, 2024
+
+> NOTE: Support for Digital Ocean deployments using CLI commands and related Terraform modules is being deprecated. Although Digital Ocean will no longer be directly supported in future releases, you can still deploy to Digital Ocean infrastructure using the current `existing` deployment option.
+
+## What's Changed
+* Enable authentication by default in jupyter-server by @krassowski in https://github.com/nebari-dev/nebari/pull/2288
+* remove dns sleep by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2550
+* Conda-store permissions v2 + load roles from keycloak by @aktech in https://github.com/nebari-dev/nebari/pull/2531
+* restrict public access and add bucket encryption using cmk by @dcmcand in https://github.com/nebari-dev/nebari/pull/2525
+* add overwrite to AWS coredns addon by @dcmcand in https://github.com/nebari-dev/nebari/pull/2538
+* Add a default roles at initialisation by @aktech in https://github.com/nebari-dev/nebari/pull/2546
+* Hide gallery section if no exhibits are configured by @krassowski in https://github.com/nebari-dev/nebari/pull/2549
+* add note about ~/.bash_profile by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2575
+* Upgrade conda store to latest version by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2574
+* Expose jupyterlab-gallery branch and depth options by @krassowski in https://github.com/nebari-dev/nebari/pull/2556
+* [pre-commit.ci] pre-commit autoupdate by @pre-commit-ci in https://github.com/nebari-dev/nebari/pull/2551
+* #2566 Upgrade Jupyterhub ssh image by @arjxn-py in https://github.com/nebari-dev/nebari/pull/2576
+* stop copying unneccesary files into user home directory by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2578
+
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.6.1...2024.7.1
+
+
 ### Release 2024.6.1 - June 26, 2024
 
 > NOTE: This release includes an upgrade to the `kube-prometheus-stack` Helm chart, resulting in a newer version of Grafana. When upgrading your Nebari cluster, you will be prompted to have Nebari update some CRDs and delete a DaemonSet on your behalf. If you prefer, you can also run the commands yourself, which will be shown to you. If you have any custom dashboards, you'll also need to back them up by [exporting them as JSON](https://grafana.com/docs/grafana/latest/dashboards/share-dashboards-panels/#export-a-dashboard-as-json), so you can [import them](https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/#import-a-dashboard) after upgrading.
