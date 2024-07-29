@@ -1,7 +1,5 @@
 module "conda-store-nfs-mount" {
-  count = var.conda-store-fs == "nfs" ? 1 : 0
-  # count = var.conda-store-fs == "cephfs" ? 0 : 1
-  # count = 1
+  count  = var.conda-store-fs == "nfs" ? 1 : 0
   source = "../../../../modules/kubernetes/nfs-mount"
 
   name         = "conda-store"

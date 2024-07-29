@@ -89,9 +89,10 @@ variable "shared_fs_type" {
   description = "Use NFS or Ceph"
 
   validation {
-    condition     = contains(["cephfs", "nfs"], var.shared_fs_type) # TODO: Allow EFS as well
-    error_message = "Allowed values for input_parameter are \"cephfs\", or \"nfs\"."
+    condition     = contains(["cephfs", "nfs"], var.shared_fs_type)
+    error_message = "Allowed values for input_parameter are \"cephfs\" or \"nfs\"."
   }
+
 }
 
 locals {
@@ -126,7 +127,7 @@ module "jupyterhub-nfs-mount" {
 
   depends_on = [
     module.kubernetes-nfs-server,
-    module.rook-ceph # This should be dependent on whether or not rook-ceph is enabled or maybe it's a no-op if it's not enabled so it's fine
+    module.rook-ceph
   ]
 }
 

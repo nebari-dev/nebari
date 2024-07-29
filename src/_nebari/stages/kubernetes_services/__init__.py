@@ -629,7 +629,12 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterlab_default_settings=self.config.jupyterlab.default_settings,
             jupyterlab_gallery_settings=self.config.jupyterlab.gallery_settings,
             jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
-            shared_fs_type=self.config.storage.type,
+            shared_fs_type=(
+                # efs is equivalent to nfs in these modules
+                SharedFsEnum.nfs
+                if self.config.storage.type == SharedFsEnum.efs
+                else self.config.storage.type
+            ),
         )
 
         dask_gateway_vars = DaskGatewayInputVars(
