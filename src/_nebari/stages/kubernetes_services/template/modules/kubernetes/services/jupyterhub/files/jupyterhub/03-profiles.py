@@ -48,7 +48,8 @@ def base_profile_home_mounts(username):
     }
 
     MKDIR_OWN_DIRECTORY = (
-        "mkdir -p /mnt/{path} && chmod 777 /mnt/{path} && "  # Copy skel files/folders not starting with '..' to user home directory.
+        "mkdir -p /mnt/{path} && chmod 777 /mnt/{path} && "
+        # Copy skel files/folders not starting with '..' to user home directory.
         # Filtering out ..* removes some unneeded folders (k8s configmap mount implementation details).
         "find /etc/skel/. -maxdepth 1 -not -name '.' -not -name '..*' -exec "
         "cp -rL {escaped_brackets} /mnt/{path} \;"

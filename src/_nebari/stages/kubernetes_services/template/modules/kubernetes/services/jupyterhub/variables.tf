@@ -172,8 +172,9 @@ variable "jupyterlab-default-settings" {
 variable "jupyterlab-gallery-settings" {
   description = "Server-side settings for jupyterlab-gallery extension"
   type = object({
-    title       = optional(string)
-    destination = optional(string)
+    title                         = optional(string)
+    destination                   = optional(string)
+    hide_gallery_without_exhibits = optional(bool)
     exhibits = list(object({
       git         = string
       title       = string
@@ -182,6 +183,8 @@ variable "jupyterlab-gallery-settings" {
       icon        = optional(string)
       account     = optional(string)
       token       = optional(string)
+      branch      = optional(string)
+      depth       = optional(number)
     }))
   })
 }

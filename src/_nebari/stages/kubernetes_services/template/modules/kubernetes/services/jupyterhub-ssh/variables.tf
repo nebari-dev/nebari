@@ -30,7 +30,7 @@ variable "jupyterhub-ssh-image" {
   })
   default = {
     name = "quay.io/jupyterhub-ssh/ssh"
-    tag  = "0.0.1-0.dev.git.136.ha610981"
+    tag  = "0.0.1-0.dev.git.149.he5107a4"
   }
 }
 

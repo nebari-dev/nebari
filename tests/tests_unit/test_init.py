@@ -15,7 +15,7 @@ from nebari.schema import ProviderEnum
     ],
 )
 def test_render_config(mock_all_cloud_methods, k8s_version, cloud_provider, expected):
-    if type(expected) == type and issubclass(expected, Exception):
+    if type(expected) is type and issubclass(expected, Exception):
         with pytest.raises(expected):
             config = render_config(
                 project_name="test",
