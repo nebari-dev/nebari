@@ -140,7 +140,7 @@ class AWSInputVars(schema.Base):
     permissions_boundary: Optional[str] = None
     kubeconfig_filename: str = get_kubeconfig_filename()
     tags: Dict[str, str] = {}
-    efs_enabled: bool = None
+    efs_enabled: bool
 
 
 def _calculate_asg_node_group_map(config: schema.Main):

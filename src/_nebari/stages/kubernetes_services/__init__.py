@@ -57,7 +57,7 @@ class DefaultImages(schema.Base):
 
 
 class Storage(schema.Base):
-    type: SharedFsEnum = SharedFsEnum.nfs
+    type: SharedFsEnum = None  # SharedFsEnum.nfs
     conda_store: str = "200Gi"
     shared_filesystem: str = "200Gi"
 
@@ -353,8 +353,20 @@ class InputSchema(schema.Base):
     jhub_apps: JHubApps = JHubApps()
     ceph: RookCeph = RookCeph()
 
+    def _set_default_storage_type(self):
+        # Sets default to be efs on aws and nfs on all other providers
+        if self.storage.type is None:
+            if self.provider == schema.ProviderEnum.aws:
+                self.storage.type = SharedFsEnum.efs
+            else:
+                self.storage.type = SharedFsEnum.nfs
+        return
+
     @model_validator(mode="after")
-    def validate_shared_fs_type(self) -> Self:
+    def model_validate(self) -> Self:
+
+        self._set_default_storage_type()
+
         if (
             self.storage.type == SharedFsEnum.cephfs
             and self.provider == schema.ProviderEnum.local
