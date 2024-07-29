@@ -1197,10 +1197,11 @@ class Upgrade_2024_7_1(UpgradeStep):
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         if config.get("provider", "") == ProviderEnum.gcp.value:
+            rich.print("\n ⚠️  Deprecation Warning ⚠️")
             rich.print(
-                "Digital Ocean support is currently being deprecated and will be removed in a future release.",
+                "-> Digital Ocean support is currently being deprecated and will be removed in a future release.",
             )
-            rich.print("Ready to upgrade to Nebari version [green]2024.7.1[/green].")
+            rich.print("")
         return config
 
 
