@@ -166,9 +166,8 @@ variable "jupyterlab-default-settings" {
 variable "jupyterlab-gallery-settings" {
   description = "Server-side settings for jupyterlab-gallery extension"
   type = object({
-    title                         = optional(string)
-    destination                   = optional(string)
-    hide_gallery_without_exhibits = optional(bool)
+    title       = optional(string)
+    destination = optional(string)
     exhibits = list(object({
       git         = string
       title       = string
