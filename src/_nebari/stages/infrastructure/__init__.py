@@ -606,7 +606,7 @@ class NodeSelectorKeyValue(schema.Base):
 
 class KubernetesCredentials(schema.Base):
     host: str
-    cluster_ca_certificate: str
+    cluster_ca_certifiate: str  # ignored for now.  More info in https://github.com/nebari-dev/nebari/issues/2597. # typos: ignore
     token: Optional[str] = None
     username: Optional[str] = None
     password: Optional[str] = None
