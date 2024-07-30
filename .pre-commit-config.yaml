@@ -62,7 +62,7 @@ repos:
         args: ["--line-length=88", "--exclude=/src/_nebari/template/"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.7
+    rev: v0.5.0
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -78,7 +78,7 @@ repos:
 
   # terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.90.0
+    rev: v1.92.0
     hooks:
       - id: terraform_fmt
         args:
