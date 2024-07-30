@@ -34,7 +34,7 @@ env:
   NO_PROVIDER_CREDENTIALS_gcp: false
 
 jobs:
-  # Used to skip cloud provider checks due to "jobs" not supporting {{ env }} variables contexts 
+  # Used to skip cloud provider checks due to "jobs" not supporting {{ env }} variables contexts
   check-for-credentials:
     runs-on: ubuntu-latest
     permissions:
