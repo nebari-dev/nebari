@@ -36,9 +36,7 @@ env:
   NO_PROVIDER_CREDENTIALS_aws: false
 
 jobs:
-  # In if statements at the top level of a job, you cannot use env variable as it is not loaded in.
-  # To skip a job based on a env variable, we use another job. This job's purpose is to make a job output.
-  # The job output can be read in at the top level if statement in the env variable's stead.
+  # Used to skip cloud provider checks due to "jobs" not supporting {{ env }} variables contexts.
   check-for-credentials_aws:
     runs-on: ubuntu-latest
     permissions:
