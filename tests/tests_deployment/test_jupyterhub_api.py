@@ -69,8 +69,8 @@ def test_check_default_groups_receive_directory_creation_scope(component, scopes
     client_role = get_keycloak_client_role(
         client_name="jupyterhub", role_name="allow-group-directory-creation-role"
     )
-    assert client_role["attributes"]["component"] == component
-    assert client_role["attributes"]["scopes"] == scopes
+    assert client_role["attributes"]["resource"][0] == component
+    assert client_role["attributes"]["scopes"][0] == scopes
 
 
 @pytest.mark.parametrize(
