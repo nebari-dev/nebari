@@ -59,7 +59,7 @@ def test_check_default_roles_added_in_keycloak():
 
 @pytest.mark.parametrize(
     "component,scopes",
-    (["shared-directory", "create:shared"],),
+    (["shared-directory", "write:shared-mount"],),
 )
 @pytest.mark.filterwarnings(
     "ignore:.*auto_refresh_token is deprecated:DeprecationWarning"
@@ -69,7 +69,7 @@ def test_check_default_groups_receive_directory_creation_scope(component, scopes
     client_role = get_keycloak_client_role(
         client_name="jupyterhub", role_name="allow-group-directory-creation-role"
     )
-    assert client_role["attributes"]["resource"][0] == component
+    assert client_role["attributes"]["component"][0] == component
     assert client_role["attributes"]["scopes"][0] == scopes
 
 
