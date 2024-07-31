@@ -103,48 +103,50 @@ def base_profile_shared_mounts(groups, group_roles):
             {"name": "shared", "persistentVolumeClaim": {"claimName": shared_pvc_name}}
         )
 
-    relevant_groups = []
+    groups_to_volume_mount = []
     for group in groups:
         for roles in group_roles.get(group, []):
             # Check if the group has a role that has a shared-directory scope
             if "shared-directory" in roles.get("attributes", {}).get("component", []):
-                relevant_groups.append(group)
+                groups_to_volume_mount.append(group)
                 break
 
-    extra_container_config = {
-        "volumeMounts": [
-            {
-                "mountPath": pod_shared_mount_path.format(group=group),
-                "name": "shared" if home_pvc_name != shared_pvc_name else "home",
-                "subPath": pvc_shared_mount_path.format(group=group),
-            }
-            for group in relevant_groups
-        ]
-    }
+    extra_container_config = {"volumeMounts": []}
 
     MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod 777 /mnt/{path}"
     command = " && ".join(
         [
             MKDIR_OWN_DIRECTORY.format(path=pvc_shared_mount_path.format(group=group))
-            for group in relevant_groups
+            for group in groups_to_volume_mount
         ]
     )
+
     init_containers = [
         {
             "name": "initialize-shared-mounts",
             "image": "busybox:1.31",
             "command": ["sh", "-c", command],
             "securityContext": {"runAsUser": 0},
-            "volumeMounts": [
-                {
-                    "mountPath": f"/mnt/{pvc_shared_mount_path.format(group=group)}",
-                    "name": "shared" if home_pvc_name != shared_pvc_name else "home",
-                    "subPath": pvc_shared_mount_path.format(group=group),
-                }
-                for group in relevant_groups
-            ],
+            "volumeMounts": [],
         }
     ]
+
+    for groups in groups_to_volume_mount:
+        extra_container_config["volumeMounts"].append(
+            {
+                "mountPath": pod_shared_mount_path.format(group=groups),
+                "name": "shared" if home_pvc_name != shared_pvc_name else "home",
+                "subPath": pvc_shared_mount_path.format(group=groups),
+            }
+        )
+        init_containers[0]["volumeMounts"].append(
+            {
+                "mountPath": f"/mnt/{pvc_shared_mount_path.format(group=groups)}",
+                "name": "shared" if home_pvc_name != shared_pvc_name else "home",
+                "subPath": pvc_shared_mount_path.format(group=groups),
+            }
+        )
+
     return {
         "extra_pod_config": extra_pod_config,
         "extra_container_config": extra_container_config,
