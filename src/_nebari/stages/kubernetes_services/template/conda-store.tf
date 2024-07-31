@@ -63,10 +63,6 @@ module "kubernetes-conda-store-server" {
   extra-config   = var.conda-store-extra-config
   conda-store-fs = var.shared_fs_type
 
-  # create-pvc               = local.conda-store-fs == "nfs"
-  # pvc-name                 = local.conda-store-fs == "nfs" ? local.new-pvc-name : local.conda-store-pvc-name
-  # enable-nfs-server-worker = local.conda-store-fs == "nfs"
-
   depends_on = [
     module.rook-ceph
   ]

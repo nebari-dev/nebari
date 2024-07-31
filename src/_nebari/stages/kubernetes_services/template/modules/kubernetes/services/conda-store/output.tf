@@ -21,5 +21,4 @@ output "service-tokens" {
 output "pvc" {
   description = "Shared PVC name for conda-store"
   value       = local.shared-pvc
-  # value       = var.conda-store-fs == "nfs" ? module.conda-store-nfs-mount[0].persistent_volume_claim : module.conda-store-cephfs-mount[0].persistent_volume_claim
 }
