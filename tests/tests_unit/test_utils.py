@@ -3,7 +3,6 @@ import pytest
 from _nebari.utils import byte_unit_conversion
 
 
-# add a bunch of parameterized test cases (using B, KB, MB, GB, TB and KiB, MiB, GiB, TiB)
 @pytest.mark.parametrize(
     "value, from_unit, to_unit, expected",
     [

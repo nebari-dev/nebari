@@ -1,6 +1,6 @@
 resource "helm_release" "rook-ceph-cluster" {
   name       = "rook-ceph-cluster"
-  namespace  = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
+  namespace  = var.namespace
   repository = "https://charts.rook.io/release"
   chart      = "rook-ceph-cluster"
   version    = "v1.14.7"
@@ -14,7 +14,7 @@ resource "helm_release" "rook-ceph-cluster" {
         "storage_capacity_Gi" = var.ceph_storage_capacity,
     }),
     jsonencode({
-      operatorNamespace = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
+      operatorNamespace = var.operator_namespace,
     })
   ], var.overrides)
 }
@@ -48,7 +48,7 @@ resource "kubernetes_storage_class" "ceph-retain-sc" {
 resource "kubernetes_resource_quota" "rook_critical_pods" {
   metadata {
     name      = "rook-critical-pods"
-    namespace = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
+    namespace = var.namespace
     labels = {
       "addonmanager.kubernetes.io/mode" = "Reconcile"
     }

@@ -9,9 +9,10 @@ locals {
 }
 # ====================== RESOURCES =======================
 module "rook-ceph" {
-  count     = local.enable-ceph-cluster ? 1 : 0
-  source    = "./modules/kubernetes/services/rook-ceph"
-  namespace = var.environment
+  count              = local.enable-ceph-cluster ? 1 : 0
+  source             = "./modules/kubernetes/services/rook-ceph"
+  namespace          = var.environment
+  operator_namespace = var.environment
 
   storage_class_name    = var.rook_ceph_storage_class_name
   node_group            = var.node_groups.general
@@ -20,15 +21,15 @@ module "rook-ceph" {
   depends_on = [helm_release.rook-ceph]
 }
 
-resource "kubernetes_namespace" "rook-ceph" {
-  metadata {
-    name = "rook-ceph" # TODO: Make this a variable
-  }
-}
+# data "kubernetes_namespace" "existing" {
+#   metadata {
+#     name = var.environment
+#   }
+# }
 
 resource "helm_release" "rook-ceph" {
   name       = "rook-ceph"
-  namespace  = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
+  namespace  = var.environment
   repository = "https://charts.rook.io/release"
   chart      = "rook-ceph"
   version    = "v1.14.7"
@@ -50,5 +51,5 @@ resource "helm_release" "rook-ceph" {
     # var.overrides
   )
 
-  depends_on = [kubernetes_namespace.rook-ceph]
+  # depends_on = [kubernetes_namespace.rook-ceph]
 }

@@ -3,6 +3,12 @@ variable "namespace" {
   type        = string
 }
 
+variable "operator_namespace" {
+  description = "namespace where the rook-ceph operator is deployed"
+  type        = string
+}
+
+
 variable "overrides" {
   description = "Rook Ceph helm chart overrides"
   type        = list(string)

@@ -1,4 +1,5 @@
 import contextlib
+import enum
 import inspect
 import os
 import pathlib
@@ -74,9 +75,14 @@ class GCPPrivateClusterConfig(schema.Base):
     master_ipv4_cidr_block: str
 
 
-class GCPNodeGroupImageTypeEnum(schema.Enum):
+@schema.yaml_object(schema.yaml)
+class GCPNodeGroupImageTypeEnum(str, enum.Enum):
     UBUNTU_CONTAINERD = "UBUNTU_CONTAINERD"
     COS_CONTAINERD = "COS_CONTAINERD"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
 
 
 class GCPInputVars(schema.Base):
