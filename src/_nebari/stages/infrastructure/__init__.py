@@ -74,6 +74,11 @@ class GCPPrivateClusterConfig(schema.Base):
     master_ipv4_cidr_block: str
 
 
+class GCPNodeGroupImageTypeEnum(schema.Enum):
+    UBUNTU_CONTAINERD = "UBUNTU_CONTAINERD"
+    COS_CONTAINERD = "COS_CONTAINERD"
+
+
 class GCPInputVars(schema.Base):
     name: str
     environment: str
@@ -91,6 +96,7 @@ class GCPInputVars(schema.Base):
     ip_allocation_policy: Optional[Dict[str, str]] = None
     master_authorized_networks_config: Optional[Dict[str, str]] = None
     private_cluster_config: Optional[GCPPrivateClusterConfig] = None
+    node_group_image_type: GCPNodeGroupImageTypeEnum = None
 
 
 class AzureNodeGroupInputVars(schema.Base):
@@ -754,6 +760,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 ip_allocation_policy=self.config.google_cloud_platform.ip_allocation_policy,
                 master_authorized_networks_config=self.config.google_cloud_platform.master_authorized_networks_config,
                 private_cluster_config=self.config.google_cloud_platform.private_cluster_config,
+                node_group_image_type=(
+                    GCPNodeGroupImageTypeEnum.UBUNTU_CONTAINERD
+                    if self.config.storage.type == SharedFsEnum.cephfs
+                    else GCPNodeGroupImageTypeEnum.COS_CONTAINERD
+                ),
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.azure:
             return AzureInputVars(
