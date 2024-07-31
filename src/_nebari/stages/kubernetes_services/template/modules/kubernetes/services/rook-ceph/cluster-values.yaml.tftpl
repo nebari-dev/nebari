@@ -45,8 +45,6 @@ cephClusterSpec:
   cephVersion:
     image: quay.io/ceph/ceph:v18.2.2
     allowUnsupported: false
-  # skipUpgradeChecks: false
-  # continueUpgradeAfterChecksEvenIfNotHealthy: false
   mgr:
     count: 1
     allowMultiplePerNode: true
@@ -86,12 +84,6 @@ cephClusterSpec:
                       values:
                         - ${node_group.value}
         resources:
-        # These are the OSD daemon limits. For OSD prepare limits, see the separate section below for "prepareosd" resources
-        #   limits:
-        #     memory: "4Gi"
-        #   requests:
-        #     cpu: "500m"
-        #     memory: "4Gi"
         volumeClaimTemplates:
           - metadata:
               name: data
@@ -107,41 +99,9 @@ cephClusterSpec:
               volumeMode: Block
               accessModes:
                 - ReadWriteOnce
-        # dedicated block device to store bluestore database (block.db)
-        # - metadata:
-        #     name: metadata
-        #   spec:
-        #     resources:
-        #       requests:
-        #         # Find the right size https://docs.ceph.com/docs/master/rados/configuration/bluestore-config-ref/#sizing
-        #         storage: 5Gi
-        #     # IMPORTANT: Change the storage class depending on your environment
-        #     storageClassName: io1
-        #     volumeMode: Block
-        #     accessModes:
-        #       - ReadWriteOnce
-        # dedicated block device to store bluestore wal (block.wal)
-        # - metadata:
-        #     name: wal
-        #   spec:
-        #     resources:
-        #       requests:
-        #         # Find the right size https://docs.ceph.com/docs/master/rados/configuration/bluestore-config-ref/#sizing
-        #         storage: 5Gi
-        #     # IMPORTANT: Change the storage class depending on your environment
-        #     storageClassName: io1
-        #     volumeMode: Block
-        #     accessModes:
-        #       - ReadWriteOnce
-        # Scheduler name for OSD pod placement
-        # schedulerName: osd-scheduler
     # when onlyApplyOSDPlacement is false, will merge both placement.All() and storageClassDeviceSets.Placement.
     onlyApplyOSDPlacement: false
   resources:
-  #  prepareosd:
-  #    requests:
-  #      cpu: "200m"
-  #      memory: "200Mi"
   priorityClassNames:
     # If there are multiple nodes available in a failure domain (e.g. zones), the
     # mons and osds can be portable and set the system-cluster-critical priority class.
@@ -152,31 +112,6 @@ cephClusterSpec:
     managePodBudgets: true
     osdMaintenanceTimeout: 30
     pgHealthCheckTimeout: 0
-  # security oriented settings
-  # security:
-  # Settings to enable key rotation for KEK(Key Encryption Key).
-  # Currently, this is supported only for the default encryption type,
-  # using kubernetes secrets.
-  #   keyRotation:
-  #     enabled: true
-  #     # The schedule, written in [cron format](https://en.wikipedia.org/wiki/Cron),
-  #     # with which key rotation [CronJob](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/)
-  #     # is created. The default value is `"@weekly"`.
-  #     schedule: "@monthly"
-  # To enable the KMS configuration properly don't forget to uncomment the Secret at the end of the file
-  #   kms:
-  #     # name of the config map containing all the kms connection details
-  #     connectionDetails:
-  #        KMS_PROVIDER: "vault"
-  #        VAULT_ADDR: VAULT_ADDR_CHANGE_ME # e,g: https://vault.my-domain.com:8200
-  #        VAULT_BACKEND_PATH: "rook"
-  #        VAULT_SECRET_ENGINE: "kv"
-  #     # name of the secret containing the kms authentication token
-  #     tokenSecretName: rook-vault-token
-# UNCOMMENT THIS TO ENABLE A KMS CONNECTION
-# Also, do not forget to replace both:
-#   * ROOK_TOKEN_CHANGE_ME: with a base64 encoded value of the token to use
-#   * VAULT_ADDR_CHANGE_ME: with the Vault address
 
 cephFileSystems:
   - name: ceph-filesystem
