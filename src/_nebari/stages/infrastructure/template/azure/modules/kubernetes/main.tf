@@ -45,7 +45,6 @@ resource "azurerm_kubernetes_cluster" "main" {
 
     # temparory_name_for_rotation must be <= 12 characters
     temporary_name_for_rotation = "${substr(var.node_groups[0].name, 0, 9)}tmp"
-
   }
 
   sku_tier = "Free" # "Free" [Default] or "Paid"

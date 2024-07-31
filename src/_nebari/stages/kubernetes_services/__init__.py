@@ -57,7 +57,7 @@ class DefaultImages(schema.Base):
 
 
 class Storage(schema.Base):
-    type: SharedFsEnum = None  # SharedFsEnum.nfs
+    type: SharedFsEnum = None
     conda_store: str = "200Gi"
     shared_filesystem: str = "200Gi"
 
@@ -279,7 +279,6 @@ class RookCeph(schema.Base):
     storage_class_name: None | str = None
 
 
-# InputSchema is what shows up in the Nebari Config
 class InputSchema(schema.Base):
     default_images: DefaultImages = DefaultImages()
     storage: Storage = Storage()
