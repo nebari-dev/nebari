@@ -5,9 +5,7 @@ variable "rook_ceph_storage_class_name" {
 }
 
 locals {
-  jhub_storage_length  = length(var.jupyterhub-shared-storage)
-  conda_storage_length = length(var.conda-store-filesystem-storage)
-  enable-ceph-cluster  = local.jupyterhub-fs == "cephfs" || local.conda-store-fs == "cephfs"
+  enable-ceph-cluster = local.jupyterhub-fs == "cephfs" || local.conda-store-fs == "cephfs"
 }
 # ====================== RESOURCES =======================
 module "rook-ceph" {
@@ -17,7 +15,7 @@ module "rook-ceph" {
 
   storage_class_name    = var.rook_ceph_storage_class_name
   node_group            = var.node_groups.general
-  ceph_storage_capacity = tonumber(substr(var.jupyterhub-shared-storage, 0, local.jhub_storage_length - 2)) + tonumber(substr(var.conda-store-filesystem-storage, 0, local.conda_storage_length - 2))
+  ceph_storage_capacity = var.jupyterhub-shared-storage + var.conda-store-filesystem-storage
 
   depends_on = [helm_release.rook-ceph]
 }

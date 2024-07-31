@@ -19,7 +19,7 @@ variable "jupyterhub-overrides" {
 
 variable "jupyterhub-shared-storage" {
   description = "JupyterHub shared storage size [GB]"
-  type        = string
+  type        = number
 }
 
 variable "jupyterhub-shared-endpoint" {

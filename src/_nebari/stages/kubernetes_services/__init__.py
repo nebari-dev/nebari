@@ -15,7 +15,11 @@ from _nebari.stages.tf_objects import (
     NebariKubernetesProvider,
     NebariTerraformState,
 )
-from _nebari.utils import set_docker_image_tag, set_nebari_dask_version
+from _nebari.utils import (
+    byte_unit_conversion,
+    set_docker_image_tag,
+    set_nebari_dask_version,
+)
 from _nebari.version import __version__
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -419,7 +423,9 @@ class CondaStoreInputVars(schema.Base):
         alias="conda-store-environments"
     )
     conda_store_default_namespace: str = Field(alias="conda-store-default-namespace")
-    conda_store_filesystem_storage: str = Field(alias="conda-store-filesystem-storage")
+    conda_store_filesystem_storage: float = Field(
+        alias="conda-store-filesystem-storage"
+    )
     conda_store_object_storage: str = Field(alias="conda-store-object-storage")
     conda_store_extra_settings: Dict[str, Any] = Field(
         alias="conda-store-extra-settings"
@@ -430,6 +436,11 @@ class CondaStoreInputVars(schema.Base):
     conda_store_service_token_scopes: Dict[str, Dict[str, Any]] = Field(
         alias="conda-store-service-token-scopes"
     )
+
+    @field_validator("conda_store_filesystem_storage", mode="before")
+    @classmethod
+    def handle_units(cls, value: Optional[str]) -> float:
+        return byte_unit_conversion(value, "GiB")
 
 
 class JupyterhubInputVars(schema.Base):
@@ -443,7 +454,7 @@ class JupyterhubInputVars(schema.Base):
     )
     initial_repositories: str = Field(alias="initial-repositories")
     jupyterhub_overrides: List[str] = Field(alias="jupyterhub-overrides")
-    jupyterhub_shared_storage: str = Field(alias="jupyterhub-shared-storage")
+    jupyterhub_shared_storage: float = Field(alias="jupyterhub-shared-storage")
     jupyterhub_shared_endpoint: Optional[str] = Field(
         alias="jupyterhub-shared-endpoint", default=None
     )
@@ -457,15 +468,10 @@ class JupyterhubInputVars(schema.Base):
     jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
     shared_fs_type: SharedFsEnum
 
-    # # make a field_validator to remove any units on shared storage
-    # @field_validator("jupyterhub_shared_storage", "client_secret", mode="before")
-    # @classmethod
-    # def handle_units(cls, value: Optional[str]) -> str:
-
-    #     try:
-    #         return float(value)
-    #     except ValueError:
-    #         return value.split("Gi")[0]
+    @field_validator("jupyterhub_shared_storage", mode="before")
+    @classmethod
+    def handle_units(cls, value: Optional[str]) -> float:
+        return byte_unit_conversion(value, "GiB")
 
 
 class DaskGatewayInputVars(schema.Base):
