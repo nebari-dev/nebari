@@ -5,6 +5,7 @@ from tests.tests_deployment.keycloak_utils import (
     assign_keycloak_client_role_to_user,
     create_keycloak_role,
     get_keycloak_client_roles,
+    get_keycloak_client_role,
 )
 from tests.tests_deployment.utils import create_jupyterhub_token, get_jupyterhub_session
 
@@ -33,6 +34,7 @@ def test_jupyterhub_loads_roles_from_keycloak():
         "view-profile",
         # default roles
         "allow-read-access-to-services-role",
+        "allow-group-directory-creation-role",
     }
 
 
@@ -52,6 +54,23 @@ def test_check_default_roles_added_in_keycloak():
     role_names = [role["name"] for role in client_roles]
     assert "allow-app-sharing-role" in role_names
     assert "allow-read-access-to-services-role" in role_names
+    assert "allow-group-directory-creation-role" in role_names
+
+
+@pytest.mark.parametrize(
+    "component,scopes",
+    (["shared-directory", "create:shared"],),
+)
+@pytest.mark.filterwarnings(
+    "ignore:.*auto_refresh_token is deprecated:DeprecationWarning"
+)
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_check_default_groups_receive_directory_creation_scope(component, scopes):
+    client_role = get_keycloak_client_role(
+        client_name="jupyterhub", role_name="allow-group-directory-creation-role"
+    )
+    assert client_role["attributes"]["component"] == component
+    assert client_role["attributes"]["scopes"] == scopes
 
 
 @pytest.mark.parametrize(
