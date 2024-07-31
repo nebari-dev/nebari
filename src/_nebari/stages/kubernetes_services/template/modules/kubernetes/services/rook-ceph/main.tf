@@ -1,13 +1,3 @@
-locals {
-  # name                  = "rook-ceph"
-  # argo-workflows-prefix = "argo"
-  # # roles
-  # admin     = "argo-admin"
-  # developer = "argo-developer"
-  # viewer    = "argo-viewer"
-}
-
-
 resource "helm_release" "rook-ceph-cluster" {
   name       = "rook-ceph-cluster"
   namespace  = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
@@ -27,8 +17,6 @@ resource "helm_release" "rook-ceph-cluster" {
       operatorNamespace = "rook-ceph" # var.namespace  # TODO: Consider putting this in deployment namespace
     })
   ], var.overrides)
-
-  # depends_on = [helm_release.rook-ceph, kubernetes_resource_quota.rook_critical_pods]
 }
 
 locals {

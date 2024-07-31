@@ -9,16 +9,10 @@ module "conda-store-nfs-mount" {
   nfs-pvc-name = local.conda-store-pvc-name
 
   depends_on = [
-    # module.kubernetes-nfs-server,  I don't think this is needed
-    # module.kubernetes-conda-store-server
     kubernetes_deployment.worker,
   ]
 }
 
-# resource "local_file" "hi" {
-#   content  = try(module.conda-store-nfs-mount.0.persistent_volume_claim.pvc, "nope")
-#   filename = "/home/balast/CodingProjects/nebari/blah.txt"
-# }
 
 locals {
   conda-store-pvc-name     = "conda-store-${var.namespace}-share"

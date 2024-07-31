@@ -77,28 +77,12 @@ variable "services" {
   type        = map(any)
 }
 
-# variable "create-pvc" {
-#   description = "Create PVC for conda-store"
-#   type        = bool
-# }
-
-# variable "pvc-name" {
-#   description = "Existing or new conda store PVC name"
-#   type        = string
-# }
-
-
-# variable "enable-nfs-server-worker" {
-#   description = "Enable NFS server container in the conda store worker pod"
-#   type        = bool
-# }
-
 variable "conda-store-fs" {
   type        = string
   description = "Use NFS or Ceph"
 
   validation {
-    condition     = contains(["cephfs", "nfs"], var.conda-store-fs) # TODO: Allow EFS as well
+    condition     = contains(["cephfs", "nfs"], var.conda-store-fs)
     error_message = "Allowed values for input_parameter are \"cephfs\", or \"nfs\"."
   }
 }

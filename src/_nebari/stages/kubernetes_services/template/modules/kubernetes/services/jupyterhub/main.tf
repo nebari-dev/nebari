@@ -225,7 +225,6 @@ resource "helm_release" "jupyterhub" {
   lifecycle {
     replace_triggered_by = [
       null_resource.home-pvc,
-      # null_resource.shared-pvc,
     ]
   }
 
@@ -236,12 +235,6 @@ resource "null_resource" "home-pvc" {
     home-pvc = var.home-pvc.id
   }
 }
-
-# resource "null_resource" "shared-pvc" {
-#   triggers = {
-#     home-pvc = var.shared-pvc
-#   }
-# }
 
 resource "kubernetes_manifest" "jupyterhub" {
   manifest = {
