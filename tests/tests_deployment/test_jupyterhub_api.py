@@ -4,8 +4,8 @@ from tests.tests_deployment import constants
 from tests.tests_deployment.keycloak_utils import (
     assign_keycloak_client_role_to_user,
     create_keycloak_role,
-    get_keycloak_client_roles,
     get_keycloak_client_role,
+    get_keycloak_client_roles,
 )
 from tests.tests_deployment.utils import create_jupyterhub_token, get_jupyterhub_session
 
