@@ -165,6 +165,14 @@ jobs:
           # run playwright pytest tests in headed mode with the chromium browser
           xvfb-run pytest --browser chromium
 
+      - name: Save Playwright recording artifacts
+        if: always()
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: e2e-playwright
+          path: |
+            ./tests/tests_e2e/playwright/videos/
+
       - name: Deployment Pytests
         env:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
