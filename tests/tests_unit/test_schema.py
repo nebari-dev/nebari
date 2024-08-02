@@ -139,7 +139,7 @@ def test_multiple_providers(config_schema):
         config_schema(**config_dict)
 
 
-def test_aws_premissions_boundary(config_schema):
+def test_aws_permissions_boundary(config_schema):
     permissions_boundary = "arn:aws:iam::123456789012:policy/MyBoundaryPolicy"
     config_dict = {
         "project_name": "test",
@@ -156,7 +156,7 @@ def test_aws_premissions_boundary(config_schema):
 
 
 @pytest.mark.parametrize("provider", ["local", "existing"])
-def test_setted_provider(config_schema, provider):
+def test_set_provider(config_schema, provider):
     config_dict = {
         "project_name": "test",
         "provider": provider,

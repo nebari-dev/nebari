@@ -129,7 +129,7 @@ def base_node_group(options):
         default_node_group if worker_node_group is None else worker_node_group
     )
 
-    # check `schduler_extra_pod_config` first
+    # check `scheduler_extra_pod_config` first
     scheduler_node_group = (
         config["profiles"][options.profile]
         .get("scheduler_extra_pod_config", {})
