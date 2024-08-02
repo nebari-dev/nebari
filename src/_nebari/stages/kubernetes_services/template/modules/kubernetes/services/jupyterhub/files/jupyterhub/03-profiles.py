@@ -581,7 +581,9 @@ def render_profiles(spawner):
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
-    group_roles = parse_roles(spawner.authenticator.group_roles_map)
+    groups_with_permission_to_mount = auth_state.get(
+        "groups_with_permission_to_mount", []
+    )
 
     username = auth_state["oauth_user"]["preferred_username"]
     # only return the lowest level group name
@@ -598,7 +600,13 @@ def render_profiles(spawner):
         filter(
             None,
             [
-                render_profile(p, username, groups, keycloak_profilenames, group_roles)
+                render_profile(
+                    p,
+                    username,
+                    groups,
+                    keycloak_profilenames,
+                    groups_with_permission_to_mount,
+                )
                 for p in profile_list
             ],
         )
