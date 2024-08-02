@@ -177,3 +177,9 @@ exclude_also = [
     "@(abc\\.)?abstractmethod",
     ]
 ignore_errors = false
+
+[tool.typos]
+files.extend-exclude = ["_build", "*/build/*", "*/node_modules/*", "nebari.egg-info", "*.git", "*.js", "*.json", "*.yaml", "*.yml", "pre-commit-config.yaml"]
+default.extend-ignore-re = ["(?Rm)^.*(#|//)\\s*typos: ignore$"]
+default.extend-ignore-words-re = ["aks", "AKS"]
+default.check-filename = false  # Turn off initially, enable once https://github.com/nebari-dev/nebari/issues/2598 is addressed

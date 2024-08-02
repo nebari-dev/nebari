@@ -1,4 +1,4 @@
-name: Azure Delpoyment
+name: Azure Deployment
 
 on:
   schedule:
