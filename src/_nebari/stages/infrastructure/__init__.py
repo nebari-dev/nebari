@@ -339,8 +339,8 @@ class GoogleCloudPlatformProvider(schema.Base):
     @model_validator(mode="before")
     @classmethod
     def _check_input(cls, data: Any) -> Any:
-        avaliable_regions = google_cloud.regions(data["project"])
-        if data["region"] not in avaliable_regions:
+        available_regions = google_cloud.regions(data["project"])
+        if data["region"] not in available_regions:
             raise ValueError(
                 f"Google Cloud region={data['region']} is not one of {available_regions}"
             )
