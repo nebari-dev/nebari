@@ -406,7 +406,7 @@ def check_cloud_provider_kubernetes_version(
                 f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the Azure docs for a list of valid versions: {versions}"
             )
     elif cloud_provider == ProviderEnum.gcp.value.lower():
-        versions = google_cloud.kubernetes_versions(region)
+        versions = google_cloud.kubernetes_versions(os.getenv("PROJECT_ID"), region)
 
         if not kubernetes_version or kubernetes_version == LATEST:
             kubernetes_version = get_latest_kubernetes_version(versions)
@@ -458,7 +458,7 @@ def check_cloud_provider_region(region: str, cloud_provider: str) -> str:
         if not region:
             region = GCP_DEFAULT_REGION
             rich.print(DEFAULT_REGION_MSG.format(region=region))
-        if region not in google_cloud.regions():
+        if region not in google_cloud.regions(os.getenv("PROJECT_ID")):
             raise ValueError(
                 f"Invalid region `{region}`. Please refer to the GCP docs for a list of valid regions: {GCP_REGIONS}"
             )

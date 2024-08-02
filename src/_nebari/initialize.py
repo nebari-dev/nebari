@@ -133,9 +133,10 @@ def render_config(
         ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
 
     elif cloud_provider == ProviderEnum.gcp:
+        gcp_project = os.environ.get("PROJECT_ID")
         gcp_region = region or constants.GCP_DEFAULT_REGION
         gcp_kubernetes_version = kubernetes_version or get_latest_kubernetes_version(
-            google_cloud.kubernetes_versions(gcp_region)
+            google_cloud.kubernetes_versions(gcp_project, gcp_region)
         )
         config["google_cloud_platform"] = {
             "kubernetes_version": gcp_kubernetes_version,

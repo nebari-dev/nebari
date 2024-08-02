@@ -1,15 +1,7 @@
 import functools
-import json
-import subprocess
-from typing import Dict, List, Set
+from typing import List, Set
 
-from google.cloud import (
-    compute_v1,
-    container_v1,
-    iam_credentials_v1,
-    resourcemanager,
-    storage,
-)
+from google.cloud import compute_v1, container_v1, iam_credentials_v1, storage
 
 from _nebari.constants import GCP_ENV_DOCS
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
@@ -23,86 +15,24 @@ def check_credentials() -> None:
 
 
 @functools.lru_cache()
-def projects() -> Dict[str, str]:
-    """Return a dict of available projects."""
-    check_credentials()
-    client = resourcemanager.Client()
-    projects = client.list_projects()
-    project_dict = {project.name: project.project_id for project in projects}
-
-    return project_dict
-
-
-@functools.lru_cache()
-def regions(project: str) -> Dict[str, str]:
+def regions(project: str) -> Set[str]:
     """Return a dict of available regions."""
-    client = compute_v1.RegionClient()
-    request = compute_v1.ListRegionsRequest(
-        project="project_value",
-    )
-    regions = client.list(request=request)
-    region_dict = {region.description: region.name for region in regions}
-
-    return region_dict
-
-
-@functools.lru_cache()
-def zones(project: str, region: str) -> Dict[str, str]:
-    """Return a dict of available zones."""
     check_credentials()
-    client = compute_v1.ZonesClient()
-    request = compute_v1.ListZonesRequest(
-        project="project_value",
-    )
-    zones = client.list(request=request)
-    zone_dict = {
-        zone.description: zone.name for zone in zones if zone.name.startswith(region)
-    }
-    return zone_dict
+    client = compute_v1.RegionsClient()
+    response = client.list(project=project)
+
+    return {region.name for region in response}
 
 
 @functools.lru_cache()
-def kubernetes_versions(region: str) -> List[str]:
+def kubernetes_versions(project: str, region: str) -> List[str]:
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
     check_credentials()
     client = container_v1.ClusterManagerClient()
-    request = container_v1.GetServerConfigRequest()
-    response = client.get_server_config(request=request)
-    supported_kubernetes_versions = sorted(response.valid_master_versions)
-    filtered_versions = filter_by_highest_supported_k8s_version(
-        supported_kubernetes_versions
-    )
-    return filtered_versions
+    response = client.get_server_config(name=f"projects/{project}/locations/{region}")
+    supported_kubernetes_versions = response.valid_master_versions
 
-
-@functools.lru_cache()
-def instances(project: str, zone: str) -> Dict[str, str]:
-    """Return a dict of available instances of a particular zone."""
-    check_credentials()
-    client = compute_v1.InstancesClient()
-    request = compute_v1.ListInstancesRequest(
-        project="project",
-        zone="zone",
-    )
-    instances = client.list(request=request)
-    instance_dict = {instances.description: instances.name for instance in instances}
-    return instance_dict
-
-
-def activated_services() -> Set[str]:
-    """Return a list of activated services."""
-    check_credentials()
-    output = subprocess.check_output(
-        [
-            "gcloud",
-            "services",
-            "list",
-            "--enabled",
-            "--format=json(config.title)",
-        ]
-    )
-    data = json.loads(output)
-    return {service["config"]["title"] for service in data}
+    return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
 
 
 def cluster_exists(cluster_name: str, project_id: str, zone: str) -> bool:
@@ -202,40 +132,3 @@ def gcp_cleanup(config: schema.Main):
     delete_cluster(cluster_name, project_id, region)
     delete_storage_bucket(bucket_name, project_id)
     delete_service_account(service_account_name, project_id)
-
-
-def check_missing_service() -> None:
-    """Check if all required services are activated."""
-    required = {
-        "Compute Engine API",
-        "Kubernetes Engine API",
-        "Cloud Monitoring API",
-        "Cloud Autoscaling API",
-        "Identity and Access Management (IAM) API",
-        "Cloud Resource Manager API",
-    }
-    activated = activated_services()
-    common = required.intersection(activated)
-    missing = required.difference(common)
-    if missing:
-        raise ValueError(
-            f"""Missing required services: {missing}\n
-            Please see the documentation for more information: {GCP_ENV_DOCS}"""
-        )
-
-
-# Getting pricing data could come from here
-# https://cloudpricingcalculator.appspot.com/static/data/pricelist.json
-
-
-### PYDANTIC VALIDATORS ###
-
-
-def validate_region(region: str) -> str:
-    """Validate the GCP region is valid."""
-    available_regions = regions()
-    if region not in available_regions:
-        raise ValueError(
-            f"Region {region} is not one of available regions {available_regions}"
-        )
-    return region
