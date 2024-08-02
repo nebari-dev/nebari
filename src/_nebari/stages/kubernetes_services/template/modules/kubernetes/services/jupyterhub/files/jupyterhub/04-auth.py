@@ -62,6 +62,21 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             roles=user_roles, client_id=jupyterhub_client_id, token=token
         )
 
+        # Include which groups have permission to mount shared directories (user by
+        # profiles.py)
+        self.log.info(f"User roles: {user_roles_rich}")
+        self.log.info(
+            f"User groups: {auth_model['auth_state']['oauth_user']['groups']}"
+        )
+        auth_model["auth_state"]["groups_with_permission_to_mount"] = (
+            await self.get_client_groups_with_mount_permissions(
+                user_groups=auth_model["auth_state"]["oauth_user"]["groups"],
+                user_roles=user_roles_rich,
+                client_id=jupyterhub_client_id,
+                token=token,
+            )
+        )
+
         keycloak_api_call_time_taken = time.time() - keycloak_api_call_start
         user_roles_rich_names = {role["name"] for role in user_roles_rich}
 
@@ -79,15 +94,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             }
             for role in [*user_roles_rich, *user_roles_non_jhub_client]
         ]
-
-        # Include which groups have permission to mount shared directories (user by profiles.py)
-        auth_model["auth_state"]["groups_with_permission_to_mount"] = (
-            await self.get_client_groups_with_mount_permissions(
-                user_groups=auth_model["auth_state"]["oauth_user"]["groups"],
-                user_roles=user_roles_rich,
-                token=token,
-            )
-        )
 
         # note: because the roles check is comprehensive, we need to re-add the admin and user roles
         if auth_model["admin"]:
@@ -183,41 +189,64 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
                 await self._map_users_and_groups_to_role(
                     role_name,
                     token=token,
+                    client_id=jupyterhub_client_id,
                 )
             )
 
         return list(roles.values())
 
     async def get_client_groups_with_mount_permissions(
-        self, user_groups, user_roles, token
+        self, user_groups, user_roles, client_id, token
     ):
         """
         Asynchronously retrieves the list of client groups with mount permissions
         that the user belongs to.
         """
+
+        roles_with_permission = []
         groups_with_permission_to_mount = set()
 
-        # filter user roles by scope=shared-directory
+        # Filter roles with the shared-directory component and scope
+        # This should only happen in case there are user defined/custom ones
         for role in user_roles:
-            role_component = role["attributes"].get("component", [None])[0]
-            role_scopes = role["attributes"].get("scopes", [None])[0]
-            if (role_component == "shared-directory") and (
-                role_scopes == "write:shared-mount"
-            ):
-                role_groups = await self._fetch_api(
-                    endpoint=f"roles/{role['name']}/groups",
-                    token=token,
-                )
-                # using name here, as the auth_state groups also does not have the path prefix
-                groups_with_permission_to_mount |= set(
-                    [group["name"] for group in role_groups]
-                )
+            attributes = role.get("attributes", {})
 
-        groups_with_permission_to_mount &= set(user_groups)
-        return list(groups_with_permission_to_mount)
+            role_component = attributes.get("component", [None])[0]
+            role_scopes = attributes.get("scopes", [None])[0]
+
+            if (
+                role_component == "shared-directory"
+                and role_scopes == "write:shared-mount"
+            ):
+                role_name = role.get("name")
+                roles_with_permission.append(role_name)
+        self.log.info(f"Roles with permission to mount: {roles_with_permission}")
+
+        # Fetch groups for all relevant roles concurrently
+        group_fetch_tasks = [
+            self._fetch_api(
+                endpoint=f"clients/{client_id}/roles/{role_name}/groups",
+                token=token,
+            )
+            for role_name in roles_with_permission
+        ]
+        all_role_groups = await asyncio.gather(*group_fetch_tasks)
+        self.log.info(f"Groups with permission to mount: {all_role_groups}")
+
+        # Collect group names with permissions
+        for role_groups in all_role_groups:
+            groups_with_permission_to_mount |= set(
+                [group["path"] for group in role_groups]
+            )
+        self.log.info(
+            f"Groups with permission to mount: {groups_with_permission_to_mount}"
+        )
+        self.log.info(f"User groups: {user_groups}")
+
+        return list(groups_with_permission_to_mount & set(user_groups))
 
     async def _map_users_and_groups_to_role(
-        self, role_name, token, group_name_key="path"
+        self, role_name, token, client_id=None, group_name_key="path"
     ):
         """
         Asynchronously fetches and maps groups and users to a specified role.
@@ -233,10 +262,16 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         group_endpoint = f"roles/{role_name}/groups"
         user_endpoint = f"roles/{role_name}/users"
 
+        if client_id:
+            group_endpoint = f"clients/{client_id}/roles/{role_name}/groups"
+            user_endpoint = f"clients/{client_id}/roles/{role_name}/users"
+
         # fetch role assignments to groups (Fetch data concurrently)
         groups, users = await asyncio.gather(
-            self._fetch_api(endpoint=group_endpoint, token=token),
-            self._fetch_api(endpoint=user_endpoint, token=token),
+            *[
+                self._fetch_api(endpoint=group_endpoint, token=token),
+                self._fetch_api(endpoint=user_endpoint, token=token),
+            ]
         )
 
         # Process results

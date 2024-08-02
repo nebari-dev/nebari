@@ -82,7 +82,7 @@ def base_profile_home_mounts(username):
     }
 
 
-def base_profile_shared_mounts(groups, group_roles):
+def base_profile_shared_mounts(groups, groups_to_volume_mount):
     """Configure the group directory mounts for user.
 
     Ensure that {shared}/{group} directory exists based on the scope availability
@@ -102,14 +102,6 @@ def base_profile_shared_mounts(groups, group_roles):
         extra_pod_config["volumes"].append(
             {"name": "shared", "persistentVolumeClaim": {"claimName": shared_pvc_name}}
         )
-
-    groups_to_volume_mount = []
-    for group in groups:
-        for roles in group_roles.get(group, []):
-            # Check if the group has a role that has a shared-directory scope
-            if "shared-directory" in roles.get("attributes", {}).get("component", []):
-                groups_to_volume_mount.append(group)
-                break
 
     extra_container_config = {"volumeMounts": []}
 
@@ -485,7 +477,9 @@ def profile_conda_store_viewer_token():
     }
 
 
-def render_profile(profile, username, groups, keycloak_profilenames, group_roles):
+def render_profile(
+    profile, username, groups, keycloak_profilenames, groups_to_volume_mount
+):
     """Render each profile for user.
 
     If profile is not available for given username, groups returns
@@ -523,7 +517,7 @@ def render_profile(profile, username, groups, keycloak_profilenames, group_roles
         deep_merge,
         [
             base_profile_home_mounts(username),
-            base_profile_shared_mounts(groups, group_roles),
+            base_profile_shared_mounts(groups, groups_to_volume_mount),
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
             configure_user(username, groups),
@@ -553,25 +547,25 @@ def render_profile(profile, username, groups, keycloak_profilenames, group_roles
     return profile
 
 
-def parse_roles(data):
-    parsed_roles = {}
+# def parse_roles(data):
+#     parsed_roles = {}
 
-    for role in data:
-        for group in role["groups"]:
-            # group = str(group).replace("/", "")
-            group_name = Path(group).name
-            if group_name not in parsed_roles:
-                parsed_roles[group_name] = []
+#     for role in data:
+#         for group in role["groups"]:
+#             # group = str(group).replace("/", "")
+#             group_name = Path(group).name
+#             if group_name not in parsed_roles:
+#                 parsed_roles[group_name] = []
 
-            role_info = {
-                "description": role["description"],
-                "name": role["name"],
-                "attributes": role["attributes"],
-            }
+#             role_info = {
+#                 "description": role["description"],
+#                 "name": role["name"],
+#                 "attributes": role["attributes"],
+#             }
 
-            parsed_roles[group_name].append(role_info)
+#             parsed_roles[group_name].append(role_info)
 
-    return parsed_roles
+#     return parsed_roles
 
 
 @gen.coroutine
@@ -585,7 +579,12 @@ def render_profiles(spawner):
         "groups_with_permission_to_mount", []
     )
 
+    spawner.log.info(
+        f"groups_with_permission_to_mount: {groups_with_permission_to_mount}"
+    )
+
     username = auth_state["oauth_user"]["preferred_username"]
+    spawner.log.info(f"username: {username}")
     # only return the lowest level group name
     # e.g. /projects/myproj -> myproj
     # and /developers -> developers
