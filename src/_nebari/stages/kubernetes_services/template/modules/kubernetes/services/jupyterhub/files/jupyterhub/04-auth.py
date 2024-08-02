@@ -8,7 +8,7 @@ from functools import reduce
 from jupyterhub import scopes
 from jupyterhub.traitlets import Callable
 from oauthenticator.generic import GenericOAuthenticator
-from traitlets import Bool, List, Unicode, Union
+from traitlets import Bool, Unicode, Union
 
 
 class KeyCloakOAuthenticator(GenericOAuthenticator):
