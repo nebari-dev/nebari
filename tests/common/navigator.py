@@ -178,7 +178,13 @@ class Navigator:
         self.page.get_by_role("button", name="Sign In").click()
 
         # let the page load
-        self.page.wait_for_load_state("networkidle")
+        self.page.wait_for_load_state()
+
+        # got to hub control panel
+        self.page.goto(urllib.parse.urljoin(self.nebari_url, "hub/home"))
+
+        # Check if user is logged in by looking for the logout button
+        expect(self.page.get_by_role("button", name="Logout")).to_be_visible()
 
     def start_server(self) -> None:
         """Start a nebari server. There are several different web interfaces
@@ -208,13 +214,13 @@ class Navigator:
             self.page.locator(f"#profile-item-{self.instance_name}").click()
             self.page.get_by_role("button", name="Start").click()
 
-        # wait for server spinup
+        # Confirm redirection to user's /lab page
         self.page.wait_for_url(
-            urllib.parse.urljoin(self.nebari_url, f"user/{self.username}/*"),
-            wait_until="networkidle",
+            re.compile(
+                f".*user/{self.username}/.*",
+            ),
             timeout=180000,
         )
-
         # the jupyter page loads independent of network activity so here
         # we wait for the File menu to be available on the page, a proxy for
         # the jupyterlab page being loaded.
@@ -233,7 +239,7 @@ class Navigator:
         -------
         True if the kernel popup is open.
         """
-        self.page.wait_for_load_state("networkidle")
+        self.page.wait_for_load_state()
         time.sleep(3)
         visible = self.page.get_by_text("Select Kernel", exact=True).is_visible()
         return visible
@@ -256,10 +262,14 @@ class Navigator:
             self._set_environment_via_popup(kernel=None)
 
         # go to Kernel menu
-        kernel_menuitem = self.page.get_by_role("menuitem", name="Kernel", exact=True)
+        kernel_menuitem = self.page.get_by_label("main menu").get_by_text(
+            "Kernel", exact=True
+        )
         kernel_menuitem.click()
+
         # shut down multiple running kernels
         with contextlib.suppress(Exception):
+            print("Shutting down all kernels")
             shut_down_all = self.page.get_by_text(
                 "Shut Down All Kernels...", exact=True
             )
@@ -280,6 +290,7 @@ class Navigator:
 
         # go to File menu
         self.page.get_by_text("File", exact=True).click()
+
         # close all tabs
         self.page.get_by_role("menuitem", name="Close All Tabs", exact=True).click()
 
@@ -287,10 +298,14 @@ class Navigator:
         if self.page.get_by_text("Save your work", exact=True).is_visible():
             self.page.get_by_role("button", name="Discard", exact=True).click()
 
-        # wait to ensure that the Launcher is showing
-        self.page.get_by_text("VS Code [↗]", exact=True).wait_for(
-            timeout=3000, state="attached"
-        )
+        self.page.get_by_title("VS Code [↗]").wait_for(state="visible")
+
+        # Asset that the theme is set to JupyterLab Dark
+        expect(
+            self.page.get_by_text(
+                "Set Preferred Dark Theme: JupyterLab Dark", exact=True
+            )
+        ).to_be_hidden()
 
     def _set_environment_via_popup(self, kernel=None):
         """Set the environment kernel on a jupyter notebook via the popup
@@ -320,23 +335,14 @@ class Navigator:
             # failure here indicates that the environment doesn't exist either
             # because of incorrect naming syntax or because the env is still
             # being built
-
-            new_launcher_popup = self.page.locator(
-                ".jp-KernelSelector-Dialog .jp-NewLauncher-table table"
-            ).nth(0)
-            if new_launcher_popup.is_visible():
-                # for when the jupyterlab-new-launcher extension is installed
-                new_launcher_popup.locator("td").nth(0).click()
-            else:
-                # for when only the native launcher is available
-                self.page.get_by_role("combobox").nth(1).select_option(kernel)
-                # click Select to close popup (deal with the two formats of this dialog)
-                try:
-                    self.page.get_by_role("button", name="Select Kernel").click()
-                except Exception:
-                    self.page.locator("div").filter(
-                        has_text="No KernelSelect"
-                    ).get_by_role("button", name="Select Kernel").click()
+            self.page.get_by_role("combobox").nth(1).select_option(kernel)
+            # click Select to close popup (deal with the two formats of this dialog)
+            try:
+                self.page.get_by_role("button", name="Select Kernel").click()
+            except Exception:
+                self.page.locator("div").filter(has_text="No KernelSelect").get_by_role(
+                    "button", name="Select Kernel"
+                ).click()
 
     def set_environment(self, kernel):
         """Set environment of a jupyter notebook.
@@ -359,7 +365,7 @@ class Navigator:
         popup = self._check_for_kernel_popup()
         # if there is not a kernel popup, make it appear
         if not popup:
-            self.page.get_by_role("menuitem", name="Kernel", exact=True).click()
+            self.page.get_by_text("Kernel", exact=True).click()
             self.page.get_by_role("menuitem", name="Change Kernel…").get_by_text(
                 "Change Kernel…"
             ).click()
