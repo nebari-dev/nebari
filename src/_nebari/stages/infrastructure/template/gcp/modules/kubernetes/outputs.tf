@@ -1,5 +1,5 @@
 output "credentials" {
-  description = "Credentials required for connecting to kubernets cluster"
+  description = "Credentials required for connecting to kubernetes cluster"
   sensitive   = true
   value = {
     endpoint = "https://${google_container_cluster.main.endpoint}"

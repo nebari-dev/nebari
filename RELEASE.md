@@ -285,7 +285,7 @@ command and follow the instructions
 * paginator for boto3 ec2 instance types by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1923
 * Update README.md -- fix typo. by @teoliphant in https://github.com/nebari-dev/nebari/pull/1925
 * Add more unit tests, add cleanup step for Digital Ocean integration test by @iameskild in https://github.com/nebari-dev/nebari/pull/1910
-* Add cleanup step for AWS integration test, ensure diable_prompt is passed through by @iameskild in https://github.com/nebari-dev/nebari/pull/1921
+* Add cleanup step for AWS integration test, ensure disable_prompt is passed through by @iameskild in https://github.com/nebari-dev/nebari/pull/1921
 * K8s 1.25 + More Improvements by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1856
 * adding lifecycle ignore to eks node group by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1905
 * nebari init unit tests by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1931

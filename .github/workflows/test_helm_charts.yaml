@@ -1,5 +1,5 @@
 # Right now the trigger is set to run on every Monday at 13:00 UTC,
-# or when the workflow file is modified. An aditional manual trigger
+# or when the workflow file is modified. An additional manual trigger
 # is also available.
 name: "Validate Helm Charts downloads"
 

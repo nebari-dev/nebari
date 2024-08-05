@@ -31,11 +31,31 @@ env:
   NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'develop' }}
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
-
+  NO_PROVIDER_CREDENTIALS_gcp: false
 
 jobs:
+  # Used to skip cloud provider checks due to "jobs" not supporting {{ env }} variables contexts
+  check-for-credentials:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      provider_credentials_gcp: ${{ steps.flag-check.outputs.provider_credentials_gcp }}
+    steps:
+      - name: Check if user wants to run GCP integration based on credentials
+        id: flag-check
+        run: |
+          if [ "${{ env.NO_PROVIDER_CREDENTIALS_gcp }}" == "true" ]; then
+            echo "::set-output name=provider_credentials_gcp::0"
+          else
+            echo "::set-output name=provider_credentials_gcp::1"
+          fi
+
   test-gcp-integration:
     runs-on: ubuntu-latest
+    needs: check-for-credentials
+    if: ${{ needs.check-for-credentials.outputs.provider_credentials_gcp == '1' }}
     permissions:
       id-token: write
       contents: read
