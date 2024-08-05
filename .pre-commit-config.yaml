@@ -37,7 +37,7 @@ repos:
         exclude: "^src/_nebari/template/"
 
   - repo: https://github.com/crate-ci/typos
-    rev: v1.23.2
+    rev: v1.23.6
     hooks:
       - id: typos
 
@@ -56,13 +56,13 @@ repos:
 
   # python
   - repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 24.8.0
     hooks:
       - id: black
         args: ["--line-length=88", "--exclude=/src/_nebari/template/"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.0
+    rev: v0.5.6
     hooks:
       - id: ruff
         args: ["--fix"]
@@ -78,7 +78,7 @@ repos:
 
   # terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.92.0
+    rev: v1.92.1
     hooks:
       - id: terraform_fmt
         args:
