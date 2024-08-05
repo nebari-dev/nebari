@@ -2,10 +2,12 @@ import pytest
 
 from tests.tests_deployment import constants
 from tests.tests_deployment.keycloak_utils import (
+    get_keycloak_client_details_by_name,
     assign_keycloak_client_role_to_user,
     create_keycloak_role,
     get_keycloak_client_role,
     get_keycloak_client_roles,
+    get_keycloak_role_groups,
 )
 from tests.tests_deployment.utils import create_jupyterhub_token, get_jupyterhub_session
 
@@ -65,12 +67,33 @@ def test_check_default_roles_added_in_keycloak():
     "ignore:.*auto_refresh_token is deprecated:DeprecationWarning"
 )
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
-def test_check_default_groups_receive_directory_creation_scope(component, scopes):
+def test_check_directory_creation_scope_attributes(component, scopes):
     client_role = get_keycloak_client_role(
         client_name="jupyterhub", role_name="allow-group-directory-creation-role"
     )
     assert client_role["attributes"]["component"][0] == component
     assert client_role["attributes"]["scopes"][0] == scopes
+
+
+@pytest.mark.parametrize(
+    "groups_to_volume_mount",
+    (["/developer", "/admin", "/analyst"],),
+)
+@pytest.mark.filterwarnings(
+    "ignore:.*auto_refresh_token is deprecated:DeprecationWarning"
+)
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_groups_with_mount_permissions(
+    groups_to_volume_mount, groups_to_not_volume_mount
+):
+    client_role = get_keycloak_client_role(
+        client_name="jupyterhub", role_name="allow-group-directory-creation-role"
+    )
+    client_details = get_keycloak_client_details_by_name(client_name="jupyterhub")
+    role_groups = get_keycloak_role_groups(
+        client_id=client_details["id"], role_name=client_role["name"]
+    )
+    assert list([group["path"] for group in role_groups]) == groups_to_volume_mount
 
 
 @pytest.mark.parametrize(

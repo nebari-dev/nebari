@@ -144,6 +144,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         client_roles_rich = await self._get_jupyterhub_client_roles(
             jupyterhub_client_id=jupyterhub_client_id, token=token
         )
+
         # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
         realm_roles = await self._fetch_api(endpoint="roles", token=token)
         roles = {
@@ -154,17 +155,13 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             }
             for role in [*realm_roles, *client_roles_rich]
         }
+
         # we could use either `name` (e.g. "developer") or `path` ("/developer");
         # since the default claim key returns `path`, it seems preferable.
         for realm_role in realm_roles:
             role_name = realm_role["name"]
             role = roles[role_name]
-            # # fetch role assignments to groups
-            # groups = await self._fetch_api(f"roles/{role_name}/groups", token=token)
-            # role["groups"] = [group[group_name_key] for group in groups]
-            # # fetch role assignments to users
-            # users = await self._fetch_api(f"roles/{role_name}/users", token=token)
-            # role["users"] = [user["username"] for user in users]
+            # fetch role assignments to groups
             role.update(
                 await self._map_users_and_groups_to_role(
                     role_name,
@@ -176,15 +173,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             role_name = client_role["name"]
             role = roles[role_name]
             # fetch role assignments to groups
-            # groups = await self._fetch_api(
-            #     f"clients/{jupyterhub_client_id}/roles/{role_name}/groups", token=token
-            # )
-            # role["groups"] = [group[group_name_key] for group in groups]
-            # # fetch role assignments to users
-            # users = await self._fetch_api(
-            #     f"clients/{jupyterhub_client_id}/roles/{role_name}/users", token=token
-            # )
-            # role["users"] = [user["username"] for user in users]
             role.update(
                 await self._map_users_and_groups_to_role(
                     role_name,
@@ -207,7 +195,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         groups_with_permission_to_mount = set()
 
         # Filter roles with the shared-directory component and scope
-        # This should only happen in case there are user defined/custom ones
         for role in user_roles:
             attributes = role.get("attributes", {})
 
@@ -220,7 +207,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             ):
                 role_name = role.get("name")
                 roles_with_permission.append(role_name)
-        self.log.info(f"Roles with permission to mount: {roles_with_permission}")
 
         # Fetch groups for all relevant roles concurrently
         group_fetch_tasks = [
@@ -230,18 +216,14 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             )
             for role_name in roles_with_permission
         ]
+
         all_role_groups = await asyncio.gather(*group_fetch_tasks)
-        self.log.info(f"Groups with permission to mount: {all_role_groups}")
 
         # Collect group names with permissions
         for role_groups in all_role_groups:
             groups_with_permission_to_mount |= set(
                 [group["path"] for group in role_groups]
             )
-        self.log.info(
-            f"Groups with permission to mount: {groups_with_permission_to_mount}"
-        )
-        self.log.info(f"User groups: {user_groups}")
 
         return list(groups_with_permission_to_mount & set(user_groups))
 

@@ -547,27 +547,6 @@ def render_profile(
     return profile
 
 
-# def parse_roles(data):
-#     parsed_roles = {}
-
-#     for role in data:
-#         for group in role["groups"]:
-#             # group = str(group).replace("/", "")
-#             group_name = Path(group).name
-#             if group_name not in parsed_roles:
-#                 parsed_roles[group_name] = []
-
-#             role_info = {
-#                 "description": role["description"],
-#                 "name": role["name"],
-#                 "attributes": role["attributes"],
-#             }
-
-#             parsed_roles[group_name].append(role_info)
-
-#     return parsed_roles
-
-
 @gen.coroutine
 def render_profiles(spawner):
     # jupyterhub does not yet manage groups but it will soon
@@ -575,23 +554,19 @@ def render_profiles(spawner):
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
-    groups_with_permission_to_mount = auth_state.get(
-        "groups_with_permission_to_mount", []
-    )
-
-    spawner.log.info(
-        f"groups_with_permission_to_mount: {groups_with_permission_to_mount}"
-    )
 
     username = auth_state["oauth_user"]["preferred_username"]
-    spawner.log.info(f"username: {username}")
+
     # only return the lowest level group name
     # e.g. /projects/myproj -> myproj
     # and /developers -> developers
     groups = [Path(group).name for group in auth_state["oauth_user"]["groups"]]
-    spawner.log.info(f"user info: {username} {groups}")
 
     keycloak_profilenames = auth_state["oauth_user"].get("jupyterlab_profiles", [])
+
+    groups_with_permission_to_mount = auth_state.get(
+        "groups_with_permission_to_mount", []
+    )
 
     # fetch available profiles and render additional attributes
     profile_list = z2jh.get_config("custom.profiles")
