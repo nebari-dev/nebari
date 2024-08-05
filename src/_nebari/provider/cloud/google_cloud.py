@@ -1,6 +1,8 @@
 import functools
+import os
 from typing import List, Set
 
+from google.auth import load_credentials_from_file
 from google.cloud import compute_v1, container_v1, iam_credentials_v1, storage
 
 from _nebari.constants import GCP_ENV_DOCS
@@ -15,20 +17,31 @@ def check_credentials() -> None:
 
 
 @functools.lru_cache()
-def regions(project: str) -> Set[str]:
-    """Return a dict of available regions."""
+def load_credentials():
     check_credentials()
-    client = compute_v1.RegionsClient()
+    credentials_file_path = os.environ["GOOGLE_CREDENTIALS"]
+    credentials = load_credentials_from_file(credentials_file_path)
+
+    return credentials
+
+
+@functools.lru_cache()
+def regions() -> Set[str]:
+    """Return a dict of available regions."""
+    credentials = load_credentials()
+    project = os.environ["PROJECT_ID"]
+    client = compute_v1.RegionsClient(credentials=credentials)
     response = client.list(project=project)
 
     return {region.name for region in response}
 
 
 @functools.lru_cache()
-def kubernetes_versions(project: str, region: str) -> List[str]:
+def kubernetes_versions(region: str) -> List[str]:
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
-    check_credentials()
-    client = container_v1.ClusterManagerClient()
+    credentials = load_credentials()
+    project = os.environ["PROJECT_ID"]
+    client = container_v1.ClusterManagerClient(credentials=credentials)
     response = client.get_server_config(name=f"projects/{project}/locations/{region}")
     supported_kubernetes_versions = response.valid_master_versions
 
@@ -37,8 +50,9 @@ def kubernetes_versions(project: str, region: str) -> List[str]:
 
 def cluster_exists(cluster_name: str, project_id: str, zone: str) -> bool:
     """Check if a GKE cluster exists."""
-    client = container_v1.ClusterManagerClient()
-    request = container_v1.GetClusterRequest()
+    credentials = load_credentials()
+    client = container_v1.ClusterManagerClient(credentials=credentials)
+    request = container_v1.GetClusterRequest(credentials=credentials)
     response = client.get_cluster(request=request, project_id=project_id, zone=zone)
 
     return response is not None

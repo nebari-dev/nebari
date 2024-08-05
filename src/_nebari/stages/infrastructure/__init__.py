@@ -339,15 +339,13 @@ class GoogleCloudPlatformProvider(schema.Base):
     @model_validator(mode="before")
     @classmethod
     def _check_input(cls, data: Any) -> Any:
-        available_regions = google_cloud.regions(data["project"])
+        available_regions = google_cloud.regions()
         if data["region"] not in available_regions:
             raise ValueError(
                 f"Google Cloud region={data['region']} is not one of {available_regions}"
             )
 
-        available_kubernetes_versions = google_cloud.kubernetes_versions(
-            data["project"], data["region"]
-        )
+        available_kubernetes_versions = google_cloud.kubernetes_versions(data["region"])
         print(available_kubernetes_versions)
         if data["kubernetes_version"] not in available_kubernetes_versions:
             raise ValueError(
