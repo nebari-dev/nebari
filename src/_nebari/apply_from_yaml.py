@@ -63,13 +63,13 @@ def create_from_directory(
 
     if not yaml_dir:
         raise ValueError("`yaml_dir` argument must be provided")
-    elif not os.path.isdir(yaml_dir):
+    elif not os.path.isdir(yaml_dir):  # noqa
         raise ValueError("`yaml_dir` argument must be a path to directory")
 
     files = [
-        os.path.join(yaml_dir, i)
+        os.path.join(yaml_dir, i)  # noqa
         for i in os.listdir(yaml_dir)
-        if os.path.isfile(os.path.join(yaml_dir, i))
+        if os.path.isfile(os.path.join(yaml_dir, i))  # noqa
     ]
     if not files:
         raise ValueError("`yaml_dir` contains no files")
@@ -170,7 +170,7 @@ def create_from_yaml(
         yml_document_all = yaml_objects
         return create_with(yml_document_all)
     elif yaml_file:
-        with open(os.path.abspath(yaml_file)) as f:
+        with open(os.path.abspath(yaml_file)) as f:  # noqa
             yml_document_all = yaml.load_all(f, Loader=Loader)
             return create_with(yml_document_all, apply)
     else:
@@ -250,6 +250,18 @@ def create_from_dict(
 def create_from_yaml_single_item(
     k8s_client, yml_object, verbose=False, apply=False, **kwargs
 ):
+    kind = yml_object["kind"]
+    if apply:
+        print(f"\n{yml_object}\n")
+        for arg in kwargs:
+            print(f"{arg}: {kwargs[arg]}")
+        apply_client = DynamicClient(k8s_client).resources.get(
+            api_version=yml_object["apiVersion"], kind=kind
+        )
+        resp = apply_client.server_side_apply(
+            body=yml_object, field_manager="python-client", **kwargs
+        )
+        return resp
     group, _, version = yml_object["apiVersion"].partition("/")
     if version == "":
         version = group
@@ -263,37 +275,26 @@ def create_from_yaml_single_item(
     fcn_to_call = "{0}{1}Api".format(group, version.capitalize())
     k8s_api = getattr(client, fcn_to_call)(k8s_client)
     # Replace CamelCased action_type into snake_case
-    kind = yml_object["kind"]
-    if apply:
-        apply_client = DynamicClient(k8s_client).resources.get(
-            api_version=yml_object["apiVersion"], kind=kind
-        )
-        resp = apply_client.server_side_apply(
-            body=yml_object, field_manager="python-client", **kwargs
-        )
-    else:
-        kind = UPPER_FOLLOWED_BY_LOWER_RE.sub(r"\1_\2", kind)
-        kind = LOWER_OR_NUM_FOLLOWED_BY_UPPER_RE.sub(r"\1_\2", kind).lower()
-        # Expect the user to create namespaced objects more often
-        if hasattr(k8s_api, "create_namespaced_{0}".format(kind)):
-            # Decide which namespace we are going to put the object in,
-            # if any
-            if "namespace" in yml_object["metadata"]:
-                namespace = yml_object["metadata"]["namespace"]
-                kwargs["namespace"] = namespace
-                resp = getattr(k8s_api, "create_namespaced_{0}".format(kind))(
-                    body=yml_object, **kwargs
-                )
-        else:
-            kwargs.pop("namespace", None)
-            resp = getattr(k8s_api, "create_{0}".format(kind))(
+    kind = UPPER_FOLLOWED_BY_LOWER_RE.sub(r"\1_\2", kind)
+    kind = LOWER_OR_NUM_FOLLOWED_BY_UPPER_RE.sub(r"\1_\2", kind).lower()
+    # Expect the user to create namespaced objects more often
+    if hasattr(k8s_api, "create_namespaced_{0}".format(kind)):
+        # Decide which namespace we are going to put the object in,
+        # if any
+        if "namespace" in yml_object["metadata"]:
+            namespace = yml_object["metadata"]["namespace"]
+            kwargs["namespace"] = namespace
+            resp = getattr(k8s_api, "create_namespaced_{0}".format(kind))(
                 body=yml_object, **kwargs
             )
-        if verbose:
-            msg = "{0} created.".format(kind)
-            if hasattr(resp, "status"):
-                msg += " status='{0}'".format(str(resp.status))
-            print(msg)
+    else:
+        kwargs.pop("namespace", None)
+        resp = getattr(k8s_api, "create_{0}".format(kind))(body=yml_object, **kwargs)
+    if verbose:
+        msg = "{0} created.".format(kind)
+        if hasattr(resp, "status"):
+            msg += " status='{0}'".format(str(resp.status))
+        print(msg)
     return resp
 
 
