@@ -51,10 +51,5 @@ resource "helm_release" "rook-ceph" {
     # var.overrides
   )
 
-  # Hack to wait for the operator to destroy existing resources before proceeding
-  # If kubectl were available, we could wait for the problematic resources specifically
-  provisioner "local-exec" {
-    command = "sleep 120"
-    when    = destroy
-  }
+  # depends_on = [kubernetes_namespace.rook-ceph]
 }
