@@ -59,10 +59,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
         # Include which groups have permission to mount shared directories (user by
         # profiles.py)
-        self.log.info(f"User roles: {user_roles_rich}")
-        self.log.info(
-            f"User groups: {auth_model['auth_state']['oauth_user']['groups']}"
-        )
         auth_model["auth_state"]["groups_with_permission_to_mount"] = (
             await self.get_client_groups_with_mount_permissions(
                 user_groups=auth_model["auth_state"]["oauth_user"]["groups"],
