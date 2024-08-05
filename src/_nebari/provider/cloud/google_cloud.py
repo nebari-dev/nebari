@@ -1,8 +1,10 @@
 import functools
+import json
 import os
+from pathlib import Path
 from typing import List, Set
 
-from google.auth import load_credentials_from_file
+from google.auth import load_credentials_from_dict, load_credentials_from_file
 from google.cloud import compute_v1, container_v1, iam_credentials_v1, storage
 
 from _nebari.constants import GCP_ENV_DOCS
@@ -19,19 +21,22 @@ def check_credentials() -> None:
 @functools.lru_cache()
 def load_credentials():
     check_credentials()
-    credentials_file_path = os.environ["GOOGLE_CREDENTIALS"]
-    credentials = load_credentials_from_file(credentials_file_path)
-
-    return credentials
+    credentials = os.environ["GOOGLE_CREDENTIALS"]
+    # Google credentials are stored as strings in GHA secrets so we need
+    # to determine if the credentials are stored as a file or not before
+    # reading them
+    if Path(credentials).is_file():
+        return load_credentials_from_file(credentials)
+    else:
+        return load_credentials_from_dict(json.loads(credentials))
 
 
 @functools.lru_cache()
 def regions() -> Set[str]:
     """Return a dict of available regions."""
-    credentials = load_credentials()
-    project = os.environ["PROJECT_ID"]
+    credentials, project_id = load_credentials()
     client = compute_v1.RegionsClient(credentials=credentials)
-    response = client.list(project=project)
+    response = client.list(project=project_id)
 
     return {region.name for region in response}
 
@@ -39,18 +44,19 @@ def regions() -> Set[str]:
 @functools.lru_cache()
 def kubernetes_versions(region: str) -> List[str]:
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
-    credentials = load_credentials()
-    project = os.environ["PROJECT_ID"]
+    credentials, project_id = load_credentials()
     client = container_v1.ClusterManagerClient(credentials=credentials)
-    response = client.get_server_config(name=f"projects/{project}/locations/{region}")
+    response = client.get_server_config(
+        name=f"projects/{project_id}/locations/{region}"
+    )
     supported_kubernetes_versions = response.valid_master_versions
 
     return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
 
 
-def cluster_exists(cluster_name: str, project_id: str, zone: str) -> bool:
+def cluster_exists(cluster_name: str, zone: str) -> bool:
     """Check if a GKE cluster exists."""
-    credentials = load_credentials()
+    credentials, project_id = load_credentials()
     client = container_v1.ClusterManagerClient(credentials=credentials)
     request = container_v1.GetClusterRequest(credentials=credentials)
     response = client.get_cluster(request=request, project_id=project_id, zone=zone)
