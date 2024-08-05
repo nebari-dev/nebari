@@ -28,11 +28,6 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         config=True, help="""The keycloak REST API URL for the realm."""
     )
 
-    # group_roles_map = List(
-    #     config=False,
-    #     help="""A mapping of roles to groups based on the user's assigned roles.""",
-    # )
-
     reset_managed_roles_on_startup = Bool(True)
 
     async def update_auth_model(self, auth_model):
