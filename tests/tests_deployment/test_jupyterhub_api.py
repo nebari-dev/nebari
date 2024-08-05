@@ -2,9 +2,9 @@ import pytest
 
 from tests.tests_deployment import constants
 from tests.tests_deployment.keycloak_utils import (
-    get_keycloak_client_details_by_name,
     assign_keycloak_client_role_to_user,
     create_keycloak_role,
+    get_keycloak_client_details_by_name,
     get_keycloak_client_role,
     get_keycloak_client_roles,
     get_keycloak_role_groups,
