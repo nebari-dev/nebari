@@ -20,7 +20,7 @@ class Notebook:
         expected_outputs: List[str],
         conda_env: str,
         timeout: float = 1000,
-        complition_wait_time: float = 2,
+        completion_wait_time: float = 2,
         retry: int = 2,
         retry_wait_time: float = 5,
         exact_match: bool = True,
@@ -47,7 +47,7 @@ class Notebook:
         timeout: float
             Time in seconds to wait for the expected output text to appear.
             default: 1000
-        complition_wait_time: float
+        completion_wait_time: float
             Time in seconds to wait between checking for expected output text.
             default: 2
         retry: int
@@ -77,7 +77,7 @@ class Notebook:
             self._restart_run_all()
             # Wait for a couple of seconds to make sure it's re-started
             time.sleep(retry_wait_time)
-            self._wait_for_commands_completion(timeout, complition_wait_time)
+            self._wait_for_commands_completion(timeout, completion_wait_time)
             all_outputs = self._get_outputs()
             assert_match_all_outputs(expected_outputs, all_outputs, exact_match)
 
@@ -126,7 +126,7 @@ class Notebook:
         code: str,
         expected_output: str,
         timeout: float = 1000,
-        complition_wait_time: float = 2,
+        completion_wait_time: float = 2,
         exact_match: bool = True,
     ):
         """
@@ -143,11 +143,11 @@ class Notebook:
         timeout: float
             Time in seconds to wait for the expected output text to appear.
             default: 1000
-        complition_wait_time: float
+        completion_wait_time: float
             Time in seconds to wait between checking for expected output text.
         """
         self.run_in_last_cell(code)
-        self._wait_for_commands_completion(timeout, complition_wait_time)
+        self._wait_for_commands_completion(timeout, completion_wait_time)
         outputs = self._get_outputs()
         actual_output = outputs[-1] if outputs else ""
         assert_match_output(expected_output, actual_output, exact_match)
@@ -177,7 +177,7 @@ class Notebook:
         raise ValueError("Unable to get last cell")
 
     def _wait_for_commands_completion(
-        self, timeout: float, complition_wait_time: float
+        self, timeout: float, completion_wait_time: float
     ):
         """
         Wait for commands to finish running
@@ -186,7 +186,7 @@ class Notebook:
         ----------
         timeout: float
             Time in seconds to wait for the expected output text to appear.
-        complition_wait_time: float
+        completion_wait_time: float
         Time in seconds to wait between checking for expected output text.
         """
         elapsed_time = 0.0
@@ -198,7 +198,7 @@ class Notebook:
             if not still_visible:
                 break
             elapsed_time = time.time() - start_time
-            time.sleep(complition_wait_time)
+            time.sleep(completion_wait_time)
         if still_visible:
             raise ValueError(
                 f"Timeout Waited for commands to finish, "
