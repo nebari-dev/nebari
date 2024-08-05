@@ -49,7 +49,9 @@ def deploy_configuration(
         stage_outputs = {}
         with contextlib.ExitStack() as stack:
             for stage in stages:
-                s = stage(output_directory=pathlib.Path.cwd(), config=config)
+                s: hookspecs.NebariStage = stage(
+                    output_directory=pathlib.Path.cwd(), config=config
+                )
                 stack.enter_context(s.deploy(stage_outputs, disable_prompt))
 
                 if not disable_checks:

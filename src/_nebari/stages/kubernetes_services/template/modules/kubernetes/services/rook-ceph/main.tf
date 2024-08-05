@@ -1,10 +1,11 @@
 resource "helm_release" "rook-ceph-cluster" {
-  name       = "rook-ceph-cluster"
-  namespace  = var.namespace
-  repository = "https://charts.rook.io/release"
-  chart      = "rook-ceph-cluster"
-  version    = "v1.14.7"
-  wait       = true
+  name          = "rook-ceph-cluster"
+  namespace     = var.namespace
+  repository    = "https://charts.rook.io/release"
+  chart         = "rook-ceph-cluster"
+  version       = "v1.14.7"
+  wait          = true
+  wait_for_jobs = true
 
   values = concat([
     templatefile("${path.module}/cluster-values.yaml.tftpl",

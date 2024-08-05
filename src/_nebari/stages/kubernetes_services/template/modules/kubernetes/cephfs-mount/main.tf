@@ -13,4 +13,9 @@ resource "kubernetes_persistent_volume_claim" "main" {
       }
     }
   }
+
+  # Hack to avoid timeout while CephCluster is being created
+  timeouts {
+    create = "10m"
+  }
 }
