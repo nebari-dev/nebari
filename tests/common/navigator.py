@@ -1,125 +1,52 @@
-import contextlib
-import datetime as dt
 import logging
 import re
-import time
 import urllib
+from abc import abstractmethod
 
 from playwright.sync_api import expect, sync_playwright
 
 logger = logging.getLogger()
 
 
-class Navigator:
-    """Base class for Nebari Playwright testing. This provides setup and
-    teardown methods that all tests will need and some other generally useful
-    methods such as clearing the workspace. Specific tests such has "Run a
-    notebook" are included in separate classes which use an instance of
-    this class.
-
-    The Navigator class and the associated test classes are design to be able
-    to run either standalone, or inside of pytest. This makes it easy to
-    develop new tests, but also have them fully prepared to be
-    included as part of the test suite.
+class BaseNavigator:
+    """
+    Base class for Playwright setup and teardown. This provides the necessary
+    setup for browser and page context that can be used in subclasses for
+    specific testing or navigation functionalities.
 
     Parameters
     ----------
-    nebari_url: str
-        Nebari URL to access for testing, e.g. "https://{nebari_url}
-    username: str
-        Login username for Nebari. For Google login, this will be email address.
-    password: str
-        Login password for Nebari. For Google login, this will be the Google
-        password.
-    auth: str
-        Authentication type of this Nebari instance. Options are "google" and
-        "password".
     headless: bool
-        (Optional) Run the tests in headless mode (without visuals). Defaults
-        to False.
+        (Optional) Run the tests in headless mode (without visuals). Defaults to False.
     slow_mo: int
-        (Optional) Additional milliseconds to add to each Playwright command,
-        creating the effect of running the tests in slow motion so they are
-        easier for humans to follow. Defaults to 0.
+        (Optional) Additional milliseconds to add to each Playwright command, creating the effect of running the tests in slow motion. Defaults to 0.
     browser: str
-        (Optional) Browser on which to run tests. Options are "chromium",
-        "webkit", and "firefox". Defaults to "chromium".
-    instance_name: str
-        (Optional) Server instance type on which to run tests. Options are
-        based on the configuration of the Nebari instance. Defaults to
-        "small-instance". Note that special characters (such as parenthesis)
-        will need to be converted to dashes. Check the HTML element to get the
-        exact structure.
+        (Optional) Browser on which to run tests. Options are "chromium", "webkit", and "firefox". Defaults to "chromium".
     video_dir: None or str
-        (Optional) Directory in which to save videos. If None, no video will
-        be saved. Defaults to None.
+        (Optional) Directory in which to save videos. If None, no video will be saved. Defaults to None.
     """
 
-    def __init__(
-        self,
-        nebari_url,
-        username,
-        password,
-        auth,
-        headless=False,
-        slow_mo=0,
-        browser="chromium",
-        instance_name="small-instance",
-        video_dir=None,
-    ):
-        self.nebari_url = nebari_url
-        self.username = username
-        self.password = password
-        self.auth = auth
-        self.initialized = False
+    def __init__(self, headless=False, slow_mo=0, browser="chromium", video_dir=None):
         self.headless = headless
         self.slow_mo = slow_mo
-        self.browser = browser
-        self.instance_name = instance_name
+        self.browser_name = browser
         self.video_dir = video_dir
+        self.initialized = False
+        self.setup()
 
-        self.setup(
-            browser=self.browser,
-            headless=self.headless,
-            slow_mo=self.slow_mo,
-        )
-        self.wait_for_server_spinup = 300_000  # 5 * 60 * 1_000  # 5 minutes in ms
-
-    @property
-    def initialize(self):
-        """Ensure that the Navigator is setup and ready for testing."""
-        if not self.initialized:
-            self.setup(
-                browser=self.browser,
-                headless=self.headless,
-                slow_mo=self.slow_mo,
-            )
-
-    def setup(self, browser, headless, slow_mo):
-        """Initial setup for running playwright. Starts playwright, creates
-        the browser object, a new browser context, and a new page object.
-
-        Parameters
-        ----------
-        browser: str
-            Browser on which to run tests. Options are "chromium",
-            "webkit", and "firefox".
-        headless: bool
-            Run the tests in headless mode (without visuals) if True
-        slow_mo: int
-            Additional milliseconds to add to each Playwright command,
-            creating the effect of running the tests in slow motion so they are
-            easier for humans to follow.
-        """
+    def setup(self):
+        """Initial setup for running Playwright. Starts Playwright, creates
+        the browser object, a new browser context, and a new page object."""
         logger.debug(">>> Setting up browser for Playwright")
-
         self.playwright = sync_playwright().start()
         try:
-            self.browser = getattr(self.playwright, browser).launch(
-                headless=headless, slow_mo=slow_mo
+            self.browser = getattr(self.playwright, self.browser_name).launch(
+                headless=self.headless, slow_mo=self.slow_mo
             )
         except AttributeError:
-            raise RuntimeError(f"{browser} browser is not recognized.") from None
+            raise RuntimeError(
+                f"{self.browser_name} browser is not recognized."
+            ) from None
         self.context = self.browser.new_context(
             ignore_https_errors=True,
             record_video_dir=self.video_dir,
@@ -128,12 +55,46 @@ class Navigator:
         self.initialized = True
 
     def teardown(self) -> None:
-        """Shut down and close playwright. This is important to ensure that
+        """Shut down and close Playwright. This is important to ensure that
         no leftover processes are left running in the background."""
         self.context.close()
         self.browser.close()  # Make sure to close, so that videos are saved.
         self.playwright.stop()
         logger.debug(">>> Teardown complete.")
+
+
+class LoginManager:
+    """
+    Context manager for handling Nebari login operations. Manages authentication
+    processes and ensures proper login/logout sequences.
+
+    Parameters
+    ----------
+    base_navigator: BaseNavigator
+        An instance of BaseNavigator for browser interaction.
+    nebari_url: str
+        Nebari URL to access for testing, e.g. "https://{nebari_url}"
+    username: str
+        Login username for Nebari. For Google login, this will be an email address.
+    password: str
+        Login password for Nebari. For Google login, this will be the Google password.
+    auth: str
+        Authentication type of this Nebari instance. Options are "google" and "password".
+    """
+
+    def __init__(self, base_navigator, nebari_url, username, password, auth):
+        self.base_navigator = base_navigator
+        self.nebari_url = nebari_url
+        self.username = username
+        self.password = password
+        self.auth = auth
+
+    def __enter__(self):
+        self.login()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return self
 
     def login(self) -> None:
         """Login to nebari deployment using the auth method on the class."""
@@ -148,43 +109,101 @@ class Navigator:
     def login_google(self) -> None:
         """Go to a nebari deployment, login via Google"""
         logger.debug(">>> Sign in via Google and start the server")
-        self.page.goto(self.nebari_url)
-        expect(self.page).to_have_url(re.compile(f"{self.nebari_url}*"))
+        self.base_navigator.page.goto(self.nebari_url)
+        expect(self.base_navigator.page).to_have_url(re.compile(f"{self.nebari_url}*"))
 
-        self.page.get_by_role("button", name="Sign in with Keycloak").click()
-        self.page.get_by_role("link", name="Google").click()
-        self.page.get_by_role("textbox", name="Email or phone").fill(self.username)
-        self.page.get_by_role("button", name="Next").click()
-        self.page.get_by_role("textbox", name="Enter your password").fill(self.password)
+        self.base_navigator.page.get_by_role(
+            "button", name="Sign in with Keycloak"
+        ).click()
+        self.base_navigator.page.get_by_role("link", name="Google").click()
+        self.base_navigator.page.get_by_role("textbox", name="Email or phone").fill(
+            self.username
+        )
+        self.base_navigator.page.get_by_role("button", name="Next").click()
+        self.base_navigator.page.get_by_role(
+            "textbox", name="Enter your password"
+        ).fill(self.password)
 
-        self.page.wait_for_load_state("networkidle")
-        self.page.get_by_role("button", name="Next").click()
+        self.base_navigator.page.wait_for_load_state("networkidle")
+        self.base_navigator.page.get_by_role("button", name="Next").click()
 
         # let the page load
-        self.page.wait_for_load_state("networkidle")
+        self.base_navigator.page.wait_for_load_state("networkidle")
 
     def login_password(self) -> None:
-        """Go to a nebari deployment, login via Username/Password, and start
-        a new server.
-        """
+        """Go to a nebari deployment, login via Username/Password."""
         logger.debug(">>> Sign in via Username/Password")
-        self.page.goto(self.nebari_url)
-        expect(self.page).to_have_url(re.compile(f"{self.nebari_url}*"))
+        self.base_navigator.page.goto(self.nebari_url)
+        expect(self.base_navigator.page).to_have_url(re.compile(f"{self.nebari_url}*"))
 
-        self.page.get_by_role("button", name="Sign in with Keycloak").click()
-        self.page.get_by_label("Username").fill(self.username)
-        self.page.get_by_label("Password").click()
-        self.page.get_by_label("Password").fill(self.password)
-        self.page.get_by_role("button", name="Sign In").click()
+        self.base_navigator.page.get_by_role(
+            "button", name="Sign in with Keycloak"
+        ).click()
+        self.base_navigator.page.get_by_label("Username").fill(self.username)
+        self.base_navigator.page.get_by_label("Password").click()
+        self.base_navigator.page.get_by_label("Password").fill(self.password)
+        self.base_navigator.page.get_by_role("button", name="Sign In").click()
 
         # let the page load
-        self.page.wait_for_load_state()
+        self.base_navigator.page.wait_for_load_state()
 
-        # got to hub control panel
-        self.page.goto(urllib.parse.urljoin(self.nebari_url, "hub/home"))
+        # go to hub control panel
+        self.base_navigator.page.goto(urllib.parse.urljoin(self.nebari_url, "hub/home"))
 
         # Check if user is logged in by looking for the logout button
-        expect(self.page.get_by_role("button", name="Logout")).to_be_visible()
+        expect(
+            self.base_navigator.page.get_by_role("button", name="Logout")
+        ).to_be_visible()
+
+
+class ServerManager(BaseNavigator):
+    """
+    Server manager for Nebari Playwright testing. Handles all server management
+    functionalities such as starting, stopping, and configuring servers.
+
+    Parameters
+    ----------
+    nebari_url: str
+        Nebari URL to access for server management.
+    username: str
+        Username to verify user-specific URLs and pages.
+    instance_name: str
+        (Optional) Server instance type on which to run tests. Defaults to "small-instance".
+    """
+
+    def __init__(
+        self,
+        nebari_url,
+        username,
+        password,
+        auth="password",
+        instance_name="small-instance",
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.nebari_url = nebari_url
+        self.username = username
+        self.password = password
+        self.instance_name = instance_name
+        self.auth = auth
+        self.wait_for_server_spinup = 300_000  # 5 * 60 * 1_000  # 5 minutes in ms
+
+    def run(self):
+        """Wrapper to use LoginManager and run server-related tasks."""
+        with LoginManager(
+            base_navigator=self,
+            nebari_url=self.nebari_url,
+            username=self.username,
+            password=self.password,
+            auth=self.auth,
+        ):
+            # Run server-related methods after login
+            return self.start()
+
+    @abstractmethod
+    def start(self):
+        # Do wherever you want here
+        return self.start_server()
 
     def start_server(self) -> None:
         """Start a nebari server. There are several different web interfaces
@@ -230,198 +249,7 @@ class Navigator:
             state="attached",
         )
 
-        logger.debug(">>> Sign in complete.")
-
-    def _check_for_kernel_popup(self):
-        """Is the kernel popup currently open?
-
-        Returns
-        -------
-        True if the kernel popup is open.
-        """
-        self.page.wait_for_load_state()
-        time.sleep(3)
-        visible = self.page.get_by_text("Select Kernel", exact=True).is_visible()
-        return visible
-
-    def reset_workspace(self):
-        """Reset the Jupyterlab workspace.
-
-        * Closes all Tabs & handle possible popups for saving changes,
-        * make sure any kernel popups are dealt with
-        * reset file browser is reset to root
-        * Finally, ensure that the Launcher screen is showing
-        """
-        logger.info(">>> Reset JupyterLab workspace")
-
-        # server is already running and there is no popup
-        popup = self._check_for_kernel_popup()
-
-        # server is on running and there is a popup
-        if popup:
-            self._set_environment_via_popup(kernel=None)
-
-        # go to Kernel menu
-        kernel_menuitem = self.page.get_by_label("main menu").get_by_text(
-            "Kernel", exact=True
-        )
-        kernel_menuitem.click()
-
-        # shut down multiple running kernels
-        with contextlib.suppress(Exception):
-            print("Shutting down all kernels")
-            shut_down_all = self.page.get_by_text(
-                "Shut Down All Kernels...", exact=True
-            )
-            shut_down_all.wait_for(timeout=300, state="attached")
-            shut_down_all.click()
-
-        # shut down kernel if only one notebook is running
-        kernel_menuitem.click()
-        with contextlib.suppress(Exception):
-            shut_down_current = self.page.get_by_text("Shut Down Kernel", exact=True)
-            shut_down_current.wait_for(timeout=300, state="attached")
-            shut_down_current.click()
-
-        # go back to root folder
-        self.page.get_by_title(f"/home/{self.username}", exact=True).locator(
-            "path"
-        ).click()
-
-        # go to File menu
-        self.page.get_by_text("File", exact=True).click()
-
-        # close all tabs
-        self.page.get_by_role("menuitem", name="Close All Tabs", exact=True).click()
-
-        # there may be a popup to save your work, don't save
-        if self.page.get_by_text("Save your work", exact=True).is_visible():
-            self.page.get_by_role("button", name="Discard", exact=True).click()
-
-        self.page.get_by_title("VS Code [↗]").wait_for(state="visible")
-
-        # Asset that the theme is set to JupyterLab Dark
-        expect(
-            self.page.get_by_text(
-                "Set Preferred Dark Theme: JupyterLab Dark", exact=True
-            )
-        ).to_be_hidden()
-
-    def _set_environment_via_popup(self, kernel=None):
-        """Set the environment kernel on a jupyter notebook via the popup
-        dialog box. If kernel is `None`, `No Kernel` is selected and the
-        popup is dismissed.
-
-        Attributes
-        ----------
-        kernel: str or None
-            (Optional) name of conda environment to set. Defaults to None.
-
-        """
-        if kernel is None:
-            # close dialog (deal with the two formats of this dialog)
-            try:
-                cancel_button = self.page.get_by_text("Cancel", exact=True)
-                if cancel_button.is_visible():
-                    cancel_button.click()
-                else:
-                    self.page.mouse.click(0, 0)
-            except Exception:
-                self.page.locator("div").filter(has_text="No KernelSelect").get_by_role(
-                    "button", name="No Kernel"
-                ).wait_for(timeout=300, state="attached")
-        else:
-            # set the environment
-            # failure here indicates that the environment doesn't exist either
-            # because of incorrect naming syntax or because the env is still
-            # being built
-            self.page.get_by_role("combobox").nth(1).select_option(kernel)
-            # click Select to close popup (deal with the two formats of this dialog)
-            try:
-                self.page.get_by_role("button", name="Select Kernel").click()
-            except Exception:
-                self.page.locator("div").filter(has_text="No KernelSelect").get_by_role(
-                    "button", name="Select Kernel"
-                ).click()
-
-    def set_environment(self, kernel):
-        """Set environment of a jupyter notebook.
-
-        IMPORTANT: The focus MUST be on the notebook on which you want to set
-        the environment.
-
-        Conda environments may still be being built shortly after deployment.
-
-        Parameters
-        ----------
-        kernel: str
-            Name of kernel to set.
-
-        Returns
-        -------
-        None
-        """
-
-        popup = self._check_for_kernel_popup()
-        # if there is not a kernel popup, make it appear
-        if not popup:
-            self.page.get_by_text("Kernel", exact=True).click()
-            self.page.get_by_role("menuitem", name="Change Kernel…").get_by_text(
-                "Change Kernel…"
-            ).click()
-
-        self._set_environment_via_popup(kernel)
-
-        # wait for the jupyter UI to catch up before moving forward
-        # see if the jupyter notebook label for the conda env is visible
-        kernel_label_loc = self.page.get_by_role("button", name=kernel)
-        if not kernel_label_loc.is_visible():
-            kernel_label_loc.wait_for(state="attached")
-
-    def open_terminal(self):
-        """Open Terminal in the Nebari Jupyter Lab"""
-        self.page.get_by_text("File", exact=True).click()
-        self.page.get_by_text("New", exact=True).click()
-        self.page.get_by_role("menuitem", name="Terminal").get_by_text(
-            "Terminal"
-        ).click()
-
-    def run_terminal_command(self, command):
-        """Run a command on the terminal in the Nebari Jupyter Lab
-
-        Parameters
-        ----------
-        command: str
-            command to run in the terminal
-        """
-        self.page.get_by_role("textbox", name="Terminal input").fill(command)
-        self.page.get_by_role("textbox", name="Terminal input").press("Enter")
-
-    def write_file(self, filepath, content):
-        """Write a file to Nebari instance filesystem
-
-        The terminal is a blackbox for the browser. We can't access any of the
-        displayed text, therefore we have no way of knowing if the commands
-        are done executing. For this reason, there is an unavoidable sleep
-        here that prevents playwright from moving on to ensure that the focus
-        remains on the Terminal until we are done issuing our commands.
-
-        Parameters
-        ----------
-        filepath: str
-            path to write the file on the nebari file system
-        content: str
-            text to write to that file.
-        """
-        start = dt.datetime.now()
-        logger.debug(f"Writing notebook to {filepath}")
-        self.open_terminal()
-        self.run_terminal_command(f"cat <<EOF >{filepath}")
-        self.run_terminal_command(content)
-        self.run_terminal_command("EOF")
-        self.run_terminal_command(f"ls {filepath}")
-        logger.debug(f"time to complete {dt.datetime.now() - start}")
-        time.sleep(2)
+        logger.debug(">>> Profile Spawn complete.")
 
     def stop_server(self) -> None:
         """Stops the JupyterHub server by navigating to the Hub Control Panel."""
