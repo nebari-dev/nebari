@@ -36,6 +36,11 @@ repos:
       - id: check-executables-have-shebangs
         exclude: "^src/_nebari/template/"
 
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.23.2
+    hooks:
+      - id: typos
+
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
