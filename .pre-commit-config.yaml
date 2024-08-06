@@ -53,6 +53,8 @@ repos:
             "--write",
           ]
         language: python
+        additional_dependencies:
+        - tomli
 
   # python
   - repo: https://github.com/psf/black
