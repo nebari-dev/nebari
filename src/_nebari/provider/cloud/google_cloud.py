@@ -1,7 +1,6 @@
 import functools
 import json
 import os
-from pathlib import Path
 from typing import List, Set
 
 from google.auth import load_credentials_from_dict, load_credentials_from_file
@@ -25,7 +24,7 @@ def load_credentials():
     # Google credentials are stored as strings in GHA secrets so we need
     # to determine if the credentials are stored as a file or not before
     # reading them
-    if Path(credentials).is_file():
+    if credentials.endswith(".json"):
         return load_credentials_from_file(credentials)
     else:
         return load_credentials_from_dict(json.loads(credentials))
