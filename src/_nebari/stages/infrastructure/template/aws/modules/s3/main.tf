@@ -35,6 +35,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
     }
   }
   // AWS may return HTTP 409 if PutBucketEncryption is called immediately after S3
-  // bucket creation. Adding dependency avoids concurent requests.
+  // bucket creation. Adding dependency avoids concurrent requests.
   depends_on = [aws_s3_bucket_public_access_block.main]
 }
