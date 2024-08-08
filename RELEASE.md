@@ -17,16 +17,26 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Enable authentication by default in jupyter-server by @krassowski in https://github.com/nebari-dev/nebari/pull/2288
 * remove dns sleep by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2550
 * Conda-store permissions v2 + load roles from keycloak by @aktech in https://github.com/nebari-dev/nebari/pull/2531
-* restrict public access and add bucket encryption using cmk by @dcmcand in https://github.com/nebari-dev/nebari/pull/2525
-* add overwrite to AWS coredns addon by @dcmcand in https://github.com/nebari-dev/nebari/pull/2538
+* Restrict public access and add bucket encryption using cmk by @dcmcand in https://github.com/nebari-dev/nebari/pull/2525
+* Add overwrite to AWS coredns addon by @dcmcand in https://github.com/nebari-dev/nebari/pull/2538
 * Add a default roles at initialisation by @aktech in https://github.com/nebari-dev/nebari/pull/2546
 * Hide gallery section if no exhibits are configured by @krassowski in https://github.com/nebari-dev/nebari/pull/2549
-* add note about ~/.bash_profile by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2575
-* Upgrade conda store to latest version by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2574
+* Add note about ~/.bash_profile by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2575
 * Expose jupyterlab-gallery branch and depth options by @krassowski in https://github.com/nebari-dev/nebari/pull/2556
 * #2566 Upgrade Jupyterhub ssh image by @arjxn-py in https://github.com/nebari-dev/nebari/pull/2576
-* stop copying unnecessary files into user home directory by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2578
+* Stop copying unneccesary files into user home directory by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2578
 * Include deprecation notes for init/deploy subcommands by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2582
+* Only download jar if file doesn't exist by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2588
+* Remove unnecessary experimental flag by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2606
+* Add typos spell checker to pre-commit by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2568
+* Enh 2451 skip conditionals by @BrianCashProf in https://github.com/nebari-dev/nebari/pull/2569
+* Improve codespell support: adjust and concentrate config to pyproject.toml and fix more typos by @yarikoptic in https://github.com/nebari-dev/nebari/pull/2583
+* Move codespell config to pyproject.toml only by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2611
+* Add `depends_on` for bucket encryption by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2615
+
+## New Contributors
+* @BrianCashProf made their first contribution in https://github.com/nebari-dev/nebari/pull/2569
+* @yarikoptic made their first contribution in https://github.com/nebari-dev/nebari/pull/2583
 
 
 **Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.6.1...2024.7.1
