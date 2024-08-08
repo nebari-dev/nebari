@@ -32,12 +32,32 @@ env:
   AWS_DEFAULT_REGION: "us-west-2"
   NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'develop' }}
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
-  TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
-
+  TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}∏
+  NO_PROVIDER_CREDENTIALS_aws: false
 
 jobs:
+  # Used to skip cloud provider checks due to "jobs" not supporting {{ env }} variables contexts.
+  check-for-credentials_aws:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      provider_credentials_aws: ${{ steps.flag-check.outputs.provider_credentials_aws }}
+    steps:
+      - name: Check if user wants to run AWS integration based on credentials
+        id: flag-check
+        run: |
+          if [ "${{ env.NO_PROVIDER_CREDENTIALS_aws }}" == "true" ]; then
+            echo "::set-output name=provider_credentials_aws::0"
+          else
+            echo "::set-output name=provider_credentials_aws::1"
+          fi
+
   test-aws-integration:
     runs-on: ubuntu-latest
+    needs: check-for-credentials_aws
+    if: ${{ needs.check-for-credentials.outputs.provider_credentials_aws == '1' }}
     permissions:
       id-token: write
       contents: read

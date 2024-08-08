@@ -84,6 +84,11 @@ def nebari_subcommand(cli: typer.Typer):
                     stages.remove(stage)
             rich.print("Skipping remote state provision")
 
+        # Digital Ocean support deprecation warning -- Nebari 2024.7.1
+        if config.provider == "do" and not disable_prompt:
+            msg = "Digital Ocean support is currently being deprecated and will be removed in a future release. Would you like to continue?"
+            typer.confirm(msg)
+
         deploy_configuration(
             config,
             stages,
