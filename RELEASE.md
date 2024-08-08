@@ -9,7 +9,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-### Release 2024.7.1 - July 29, 2024
+### Release 2024.7.1 - August 8, 2024
 
 > NOTE: Support for Digital Ocean deployments using CLI commands and related Terraform modules is being deprecated. Although Digital Ocean will no longer be directly supported in future releases, you can still deploy to Digital Ocean infrastructure using the current `existing` deployment option.
 
