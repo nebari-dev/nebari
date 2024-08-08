@@ -24,7 +24,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Add note about ~/.bash_profile by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2575
 * Expose jupyterlab-gallery branch and depth options by @krassowski in https://github.com/nebari-dev/nebari/pull/2556
 * #2566 Upgrade Jupyterhub ssh image by @arjxn-py in https://github.com/nebari-dev/nebari/pull/2576
-* Stop copying unneccesary files into user home directory by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2578
+* Stop copying unnecessary files into user home directory by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2578
 * Include deprecation notes for init/deploy subcommands by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2582
 * Only download jar if file doesn't exist by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2588
 * Remove unnecessary experimental flag by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2606
