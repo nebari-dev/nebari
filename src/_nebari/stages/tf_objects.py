@@ -17,7 +17,6 @@ def NebariKubernetesProvider(nebari_config: schema.Main):
             Provider("aws", region=nebari_config.amazon_web_services.region),
             Provider(
                 "kubernetes",
-                experiments={"manifest_resource": True},
                 host="${data.aws_eks_cluster.default.endpoint}",
                 cluster_ca_certificate="${base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)}",
                 token="${data.aws_eks_cluster_auth.default.token}",
@@ -25,7 +24,6 @@ def NebariKubernetesProvider(nebari_config: schema.Main):
         )
     return Provider(
         "kubernetes",
-        experiments={"manifest_resource": True},
     )
 
 
