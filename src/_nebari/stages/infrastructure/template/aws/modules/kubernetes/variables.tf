@@ -60,6 +60,11 @@ variable "node_group_instance_type" {
   default     = "m5.large"
 }
 
+variable "endpoint_public_access" {
+  type    = bool
+  default = true
+}
+
 variable "endpoint_private_access" {
   type    = bool
   default = false
