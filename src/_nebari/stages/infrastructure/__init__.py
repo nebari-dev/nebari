@@ -511,12 +511,15 @@ class AmazonWebServicesProvider(schema.Base):
 
         # check if eks cluster endpoint access config is valid
         available_endpoint_options = ['private', 'public', 'public_and_private']
-        if data["eks_endpoint_access"] is None:
+        if "eks_endpoint_access" not in data:
             data["eks_endpoint_access"] = 'public'
-        elif data["eks_endpoint_access"] not in available_endpoint_options:
-            raise ValueError(
-                f"\nInvalid `eks-endpoint-access` provided: {data['eks_endpoint_access']}.\nPlease select from one of the following supported EKS cluster endpoint access options: {available_endpoint_options}"
-            )
+        else:
+            if data["eks_endpoint_access"] is None:
+                data["eks_endpoint_access"] = 'public'
+            elif data["eks_endpoint_access"] not in available_endpoint_options:
+                raise ValueError(
+                    f"\nInvalid `eks-endpoint-access` provided: {data['eks_endpoint_access']}.\nPlease select from one of the following supported EKS cluster endpoint access options: {available_endpoint_options}"
+                )
         return data
 
 
