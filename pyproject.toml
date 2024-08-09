@@ -183,3 +183,10 @@ files.extend-exclude = ["_build", "*/build/*", "*/node_modules/*", "nebari.egg-i
 default.extend-ignore-re = ["(?Rm)^.*(#|//)\\s*typos: ignore$"]
 default.extend-ignore-words-re = ["aks", "AKS"]
 default.check-filename = false  # Turn off initially, enable once https://github.com/nebari-dev/nebari/issues/2598 is addressed
+
+[tool.codespell]
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
+skip = '_build,*/build/*,*/node_modules/*,nebari.egg-info,*.git,package-lock.json,*.lock'
+check-hidden = true
+ignore-regex = '^\s*"image/\S+": ".*'
+ignore-words-list = 'aks'
