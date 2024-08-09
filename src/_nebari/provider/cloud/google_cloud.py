@@ -22,13 +22,23 @@ def check_credentials() -> None:
 def load_credentials():
     check_credentials()
     credentials = os.environ["GOOGLE_CREDENTIALS"]
+    project_id = os.environ["PROJECT_ID"]
+
+    # Scopes need to be explicitly defined when using workload identity
+    # federation.
+    scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+
     # Google credentials are stored as strings in GHA secrets so we need
     # to determine if the credentials are stored as a file or not before
     # reading them
     if credentials.endswith(".json"):
-        return load_credentials_from_file(credentials)
+        loaded_credentials, _ = load_credentials_from_file(credentials, scopes=scopes)
     else:
-        return load_credentials_from_dict(json.loads(credentials))
+        loaded_credentials, _ = load_credentials_from_dict(
+            json.loads(credentials), scopes=scopes
+        )
+
+    return loaded_credentials, project_id
 
 
 @functools.lru_cache()
