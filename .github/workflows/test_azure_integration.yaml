@@ -1,4 +1,4 @@
-name: Azure Delpoyment
+name: Azure Deployment
 
 on:
   schedule:
@@ -31,10 +31,34 @@ env:
   NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'develop' }}
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
+  NO_PROVIDER_CREDENTIALS_azure: false
 
 jobs:
+  # Used to skip cloud provider checks due to "jobs" not supporting {{ env }} variables contexts
+  check-for-credentials:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    outputs:
+      provider_credentials_azure: ${{ steps.flag-check.outputs.provider_credentials_azure }}
+
+    steps:
+
+      - name: Check if user wants to run Azure integration based on credentials
+        id: flag-check
+        run: |
+          if [ "${{ env.NO_PROVIDER_CREDENTIALS_azure }}" == "true" ]; then
+            echo "::set-output name=provider_credentials_azure::0"
+          else
+            echo "::set-output name=provider_credentials_azure::1"
+          fi
+
   test-azure-integration:
     runs-on: ubuntu-latest
+    needs: check-for-credentials
+    if: ${{ needs.check-for-credentials.outputs.provider_credentials_azure == '1' }}
     permissions:
       id-token: write
       contents: read

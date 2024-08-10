@@ -31,11 +31,33 @@ env:
   NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'develop' }}
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
+  NO_PROVIDER_CREDENTIALS_do: false
 
 
 jobs:
+  # Used to skip cloud provider checks due to "jobs" not supporting {{ env }} variables contexts
+  check-for-credentials:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      provider_credentials_do: ${{ steps.flag-check.outputs.provider_credentials_do }}
+    steps:
+      - name: Check if user wants to run Digital Ocean integration based on credentials
+        id: flag-check
+        run: |
+          if [ "${{ env.NO_PROVIDER_CREDENTIALS_do }}" == "true" ]; then
+            echo "::set-output name=provider_credentials_do::0"
+          else
+            echo "::set-output name=provider_credentials_do::1"
+          fi
+
+
   test-do-integration:
     runs-on: ubuntu-latest
+    needs: check-for-credentials
+    if: ${{ needs.check-for-credentials.outputs.provider_credentials_do == '1' }}
     permissions:
       id-token: write
       contents: read

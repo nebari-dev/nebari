@@ -93,17 +93,18 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
 
     attempt = 0
     while not _attempt_dns_lookup(domain_name, ip):
-        sleeptime = 60 * (2**attempt)
-        if not disable_prompt:
+        if disable_prompt:
+            sleeptime = 60 * (2**attempt)
+            print(f"Will attempt to poll DNS again in {sleeptime} seconds...")
+            time.sleep(sleeptime)
+        else:
             input(
                 f"After attempting to poll the DNS, the record for domain={domain_name} appears not to exist, "
                 f"has recently been updated, or has yet to fully propagate. This non-deterministic behavior is likely due to "
-                f"DNS caching and will likely resolve itself in a few minutes.\n\n\tTo poll the DNS again in {sleeptime} seconds "
-                f"[Press Enter].\n\n...otherwise kill the process and run the deployment again later..."
+                f"DNS caching and will likely resolve itself in a few minutes.\n\n\tTo poll the DNS again [Press Enter].\n\n"
+                f"...otherwise kill the process and run the deployment again later..."
             )
 
-        print(f"Will attempt to poll DNS again in {sleeptime} seconds...")
-        time.sleep(sleeptime)
         attempt += 1
         if attempt == 5:
             print(
