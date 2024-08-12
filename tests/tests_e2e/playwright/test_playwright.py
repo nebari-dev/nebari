@@ -1,8 +1,8 @@
 import time
 
-from tests.common.playwright_fixtures import server_parameterized
+from tests.common.playwright_fixtures import server_parameterized, login_parameterized
 
-# from tests.common.run_notebook import Notebook
+from tests.common.run_notebook import Notebook
 
 
 # @navigator_parameterized(instance_name="small-instance")
@@ -21,8 +21,12 @@ from tests.common.playwright_fixtures import server_parameterized
 #     )
 
 
+@login_parameterized()
+def test_main_hub(navigator):
+    navigator.page.goto(navigator.nebari_url)
+    # expect(navigator.page.locator("Nebari")).to_be_visible(
+
+
 @server_parameterized(instance_name="small-instance")
-def test_instance_start(navigator):
+def test_notebook(navigator, test_data_root):
     time.sleep(15)
-    # navigator.start_server()
-    # navigator.stop_server()

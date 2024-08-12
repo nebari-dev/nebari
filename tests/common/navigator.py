@@ -1,29 +1,16 @@
 import logging
 import re
 import urllib
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 from playwright.sync_api import expect, sync_playwright
 
 logger = logging.getLogger()
 
 
-class BaseNavigator:
+class NavigatorMixin(ABC):
     """
-    Base class for Playwright setup and teardown. This provides the necessary
-    setup for browser and page context that can be used in subclasses for
-    specific testing or navigation functionalities.
-
-    Parameters
-    ----------
-    headless: bool
-        (Optional) Run the tests in headless mode (without visuals). Defaults to False.
-    slow_mo: int
-        (Optional) Additional milliseconds to add to each Playwright command, creating the effect of running the tests in slow motion. Defaults to 0.
-    browser: str
-        (Optional) Browser on which to run tests. Options are "chromium", "webkit", and "firefox". Defaults to "chromium".
-    video_dir: None or str
-        (Optional) Directory in which to save videos. If None, no video will be saved. Defaults to None.
+    A mixin class providing common setup and teardown functionalities for Playwright navigators.
     """
 
     def __init__(self, headless=False, slow_mo=0, browser="chromium", video_dir=None):
@@ -35,8 +22,7 @@ class BaseNavigator:
         self.setup()
 
     def setup(self):
-        """Initial setup for running Playwright. Starts Playwright, creates
-        the browser object, a new browser context, and a new page object."""
+        """Setup Playwright browser and context."""
         logger.debug(">>> Setting up browser for Playwright")
         self.playwright = sync_playwright().start()
         try:
@@ -55,213 +41,121 @@ class BaseNavigator:
         self.initialized = True
 
     def teardown(self) -> None:
-        """Shut down and close Playwright. This is important to ensure that
-        no leftover processes are left running in the background."""
+        """Teardown Playwright browser and context."""
         self.context.close()
-        self.browser.close()  # Make sure to close, so that videos are saved.
+        self.browser.close()
         self.playwright.stop()
         logger.debug(">>> Teardown complete.")
 
 
-class LoginManager:
+class LoginNavigator(NavigatorMixin):
     """
-    Context manager for handling Nebari login operations. Manages authentication
-    processes and ensures proper login/logout sequences.
-
-    Parameters
-    ----------
-    base_navigator: BaseNavigator
-        An instance of BaseNavigator for browser interaction.
-    nebari_url: str
-        Nebari URL to access for testing, e.g. "https://{nebari_url}"
-    username: str
-        Login username for Nebari. For Google login, this will be an email address.
-    password: str
-        Login password for Nebari. For Google login, this will be the Google password.
-    auth: str
-        Authentication type of this Nebari instance. Options are "google" and "password".
+    A navigator class to handle login operations for Nebari.
     """
 
-    def __init__(self, base_navigator, nebari_url, username, password, auth):
-        self.base_navigator = base_navigator
-        self.nebari_url = nebari_url
-        self.username = username
-        self.password = password
-        self.auth = auth
-
-    def __enter__(self):
-        self.login()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        return self
-
-    def login(self) -> None:
-        """Login to nebari deployment using the auth method on the class."""
-        try:
-            return {
-                "google": self.login_google,
-                "password": self.login_password,
-            }[self.auth]()
-        except KeyError:
-            raise ValueError(f"Auth type of {self.auth} is invalid.") from None
-
-    def login_google(self) -> None:
-        """Go to a nebari deployment, login via Google"""
-        logger.debug(">>> Sign in via Google and start the server")
-        self.base_navigator.page.goto(self.nebari_url)
-        expect(self.base_navigator.page).to_have_url(re.compile(f"{self.nebari_url}*"))
-
-        self.base_navigator.page.get_by_role(
-            "button", name="Sign in with Keycloak"
-        ).click()
-        self.base_navigator.page.get_by_role("link", name="Google").click()
-        self.base_navigator.page.get_by_role("textbox", name="Email or phone").fill(
-            self.username
-        )
-        self.base_navigator.page.get_by_role("button", name="Next").click()
-        self.base_navigator.page.get_by_role(
-            "textbox", name="Enter your password"
-        ).fill(self.password)
-
-        self.base_navigator.page.wait_for_load_state("networkidle")
-        self.base_navigator.page.get_by_role("button", name="Next").click()
-
-        # let the page load
-        self.base_navigator.page.wait_for_load_state("networkidle")
-
-    def login_password(self) -> None:
-        """Go to a nebari deployment, login via Username/Password."""
-        logger.debug(">>> Sign in via Username/Password")
-        self.base_navigator.page.goto(self.nebari_url)
-        expect(self.base_navigator.page).to_have_url(re.compile(f"{self.nebari_url}*"))
-
-        self.base_navigator.page.get_by_role(
-            "button", name="Sign in with Keycloak"
-        ).click()
-        self.base_navigator.page.get_by_label("Username").fill(self.username)
-        self.base_navigator.page.get_by_label("Password").click()
-        self.base_navigator.page.get_by_label("Password").fill(self.password)
-        self.base_navigator.page.get_by_role("button", name="Sign In").click()
-
-        # let the page load
-        self.base_navigator.page.wait_for_load_state()
-
-        # go to hub control panel
-        self.base_navigator.page.goto(urllib.parse.urljoin(self.nebari_url, "hub/home"))
-
-        # Check if user is logged in by looking for the logout button
-        expect(
-            self.base_navigator.page.get_by_role("button", name="Logout")
-        ).to_be_visible()
-
-
-class ServerManager(BaseNavigator):
-    """
-    Server manager for Nebari Playwright testing. Handles all server management
-    functionalities such as starting, stopping, and configuring servers.
-
-    Parameters
-    ----------
-    nebari_url: str
-        Nebari URL to access for server management.
-    username: str
-        Username to verify user-specific URLs and pages.
-    instance_name: str
-        (Optional) Server instance type on which to run tests. Defaults to "small-instance".
-    """
-
-    def __init__(
-        self,
-        nebari_url,
-        username,
-        password,
-        auth="password",
-        instance_name="small-instance",
-        **kwargs,
-    ):
+    def __init__(self, nebari_url, username, password, auth="password", **kwargs):
         super().__init__(**kwargs)
         self.nebari_url = nebari_url
         self.username = username
         self.password = password
-        self.instance_name = instance_name
         self.auth = auth
-        self.wait_for_server_spinup = 300_000  # 5 * 60 * 1_000  # 5 minutes in ms
 
-    def run(self):
-        """Wrapper to use LoginManager and run server-related tasks."""
-        with LoginManager(
-            base_navigator=self,
-            nebari_url=self.nebari_url,
-            username=self.username,
-            password=self.password,
-            auth=self.auth,
-        ):
-            # Run server-related methods after login
-            return self.start()
+    def login(self):
+        """Login to Nebari deployment using the provided authentication method."""
+        login_methods = {
+            "google": self._login_google,
+            "password": self._login_password,
+        }
+        try:
+            login_methods[self.auth]()
+        except KeyError:
+            raise ValueError(f"Auth type {self.auth} is invalid.")
 
-    @abstractmethod
-    def start(self):
-        # Do wherever you want here
-        return self.start_server()
+    def _login_google(self):
+        logger.debug(">>> Sign in via Google and start the server")
+        self.page.goto(self.nebari_url)
+        expect(self.page).to_have_url(re.compile(f"{self.nebari_url}*"))
 
-    def start_server(self) -> None:
-        """Start a nebari server. There are several different web interfaces
-        possible in this process depending on if you already have a server
-        running or not. In order for this to work, wait for the page to load,
-        we look for html elements that exist when no server is running, if
-        they aren't visible, we check for an existing server start option.
-        """
-        # wait for the page to load
+        self.page.get_by_role("button", name="Sign in with Keycloak").click()
+        self.page.get_by_role("link", name="Google").click()
+        self.page.get_by_role("textbox", name="Email or phone").fill(self.username)
+        self.page.get_by_role("button", name="Next").click()
+        self.page.get_by_role("textbox", name="Enter your password").fill(self.password)
+        self.page.get_by_role("button", name="Next").click()
+        self.page.wait_for_load_state("networkidle")
+
+    def _login_password(self):
+        logger.debug(">>> Sign in via Username/Password")
+        self.page.goto(self.nebari_url)
+        expect(self.page).to_have_url(re.compile(f"{self.nebari_url}*"))
+
+        self.page.get_by_role("button", name="Sign in with Keycloak").click()
+        self.page.get_by_label("Username").fill(self.username)
+        self.page.get_by_label("Password").fill(self.password)
+        self.page.get_by_role("button", name="Sign In").click()
+        self.page.wait_for_load_state()
+
+        # Redirect to hub control panel
+        self.page.goto(urllib.parse.urljoin(self.nebari_url, "hub/home"))
+        expect(self.page.get_by_role("button", name="Logout")).to_be_visible()
+
+
+class ServerManager(LoginNavigator):
+    """
+    Manages server operations such as starting and stopping a Nebari server.
+    """
+
+    def __init__(
+        self, instance_name="small-instance", wait_for_server_spinup=300_000, **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.instance_name = instance_name
+        self.wait_for_server_spinup = wait_for_server_spinup
+
+    def start_server(self):
+        """Start a Nebari server, handling different UI states."""
+        self.login()
+
         logout_button = self.page.get_by_text("Logout", exact=True)
         logout_button.wait_for(state="attached", timeout=90000)
 
-        # if the server is already running
         start_locator = self.page.get_by_role("button", name="My Server", exact=True)
         if start_locator.is_visible():
             start_locator.click()
-
-        # if server is not yet running
-        start_locator = self.page.get_by_role("button", name="Start My Server")
-        if start_locator.is_visible():
-            start_locator.click()
+        else:
+            start_locator = self.page.get_by_role("button", name="Start My Server")
+            if start_locator.is_visible():
+                start_locator.click()
 
         server_options = self.page.get_by_role("heading", name="Server Options")
         if server_options.is_visible():
-            # select instance type (this will fail if this instance type is not
-            # available)
             self.page.locator(f"#profile-item-{self.instance_name}").click()
             self.page.get_by_role("button", name="Start").click()
 
-        # Confirm redirection to user's /lab page
-        self.page.wait_for_url(
-            re.compile(
-                f".*user/{self.username}/.*",
-            ),
-            timeout=180000,
-        )
-        # the jupyter page loads independent of network activity so here
-        # we wait for the File menu to be available on the page, a proxy for
-        # the jupyterlab page being loaded.
+        self.page.wait_for_url(re.compile(f".*user/{self.username}/.*"), timeout=180000)
         file_locator = self.page.get_by_text("File", exact=True)
-        file_locator.wait_for(
-            timeout=self.wait_for_server_spinup,
-            state="attached",
-        )
+        file_locator.wait_for(state="attached", timeout=self.wait_for_server_spinup)
 
         logger.debug(">>> Profile Spawn complete.")
 
-    def stop_server(self) -> None:
-        """Stops the JupyterHub server by navigating to the Hub Control Panel."""
+    def stop_server(self):
+        """Stops the Nebari server via the Hub Control Panel."""
         self.page.get_by_text("File", exact=True).click()
-
         with self.context.expect_page() as page_info:
             self.page.get_by_role("menuitem", name="Home", exact=True).click()
 
         home_page = page_info.value
         home_page.wait_for_load_state()
         stop_button = home_page.get_by_role("button", name="Stop My Server")
-        if not stop_button.is_visible():
-            stop_button.wait_for(state="visible")
+        stop_button.wait_for(state="visible")
         stop_button.click()
         stop_button.wait_for(state="hidden")
+
+
+# Factory method for creating different navigators if needed
+def navigator_factory(navigator_type, **kwargs):
+    navigators = {
+        "login": LoginNavigator,
+        "server": ServerManager,
+    }
+    return navigators[navigator_type](**kwargs)
