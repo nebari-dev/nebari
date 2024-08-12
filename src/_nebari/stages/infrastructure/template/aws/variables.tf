@@ -56,6 +56,12 @@ variable "kubeconfig_filename" {
   type        = string
 }
 
+variable "node_prebootstrap_command" {
+  description = "Custom pre-bootstrap and /etc/eks/bootstrap.sh commands run on EKS nodes"
+  type        = string
+  default     = null
+}
+
 variable "eks_endpoint_private_access" {
   type    = bool
   default = false

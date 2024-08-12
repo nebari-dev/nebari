@@ -133,6 +133,7 @@ class AWSInputVars(schema.Base):
     existing_subnet_ids: Optional[List[str]] = None
     region: str
     kubernetes_version: str
+    node_prebootstrap_command: Optional[str] = None
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -451,6 +452,7 @@ class AmazonWebServicesProvider(schema.Base):
     kubernetes_version: str
     availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
+    node_prebootstrap_command: Optional[str] = None
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -789,6 +791,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             return AWSInputVars(
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
+                node_prebootstrap_command=self.config.amazon_web_services.node_prebootstrap_command,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
                 region=self.config.amazon_web_services.region,
