@@ -1,11 +1,8 @@
 import contextlib
-import datetime as dt
 import logging
 import time
 
 from playwright.sync_api import expect
-
-from tests.common.navigator import ServerManager
 
 logger = logging.getLogger()
 

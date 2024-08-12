@@ -1,9 +1,6 @@
 import time
 
-from tests.common.playwright_fixtures import server_parameterized, login_parameterized
-
-from tests.common.run_notebook import Notebook
-
+from tests.common.playwright_fixtures import login_parameterized, server_parameterized
 
 # @navigator_parameterized(instance_name="small-instance")
 # def test_notebook(navigator, test_data_root):

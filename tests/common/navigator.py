@@ -1,7 +1,7 @@
 import logging
 import re
 import urllib
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from playwright.sync_api import expect, sync_playwright
 
