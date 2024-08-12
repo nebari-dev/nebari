@@ -46,6 +46,7 @@ variable "node_groups" {
   type = list(object({
     name          = string
     instance_type = string
+    custom_ami    = string
     gpu           = bool
     min_size      = number
     desired_size  = number
@@ -61,7 +62,7 @@ variable "node_group_instance_type" {
 }
 
 variable "node_prebootstrap_command" {
-  description = "Custom pre-bootstrap and /etc/eks/bootstrap.sh commands run on EKS nodes"
+  description = "Custom pre-bootstrap commands run on EKS nodes"
   type        = string
   default     = null
 }
