@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+import shutil
 
 import dotenv
 import pytest
@@ -14,9 +15,9 @@ def load_env_vars():
     """Load environment variables using dotenv and return necessary parameters."""
     dotenv.load_dotenv()
     return {
-        "nebari_url": os.getenv("NEBARI_FULL_URL"),
-        "username": os.getenv("KEYCLOAK_USERNAME"),
-        "password": os.getenv("KEYCLOAK_PASSWORD"),
+        "nebari_url": os.getenv("NEBARI_FULL_URL", "https://thisisatest.nebari.dev/"),
+        "username": os.getenv("KEYCLOAK_USERNAME", "example-user"),
+        "password": os.getenv("KEYCLOAK_PASSWORD", "exampleuser"),
     }
 
 
@@ -28,7 +29,8 @@ def build_params(request, pytestconfig, extra_params=None):
         "username": request.param.get("keycloak_username") or env_vars["username"],
         "password": request.param.get("keycloak_password") or env_vars["password"],
         "auth": "password",
-        "headless": pytestconfig.getoption("--headless"),
+        "video_dir": "videos/",
+        "headless": pytestconfig.getoption("--headed"),
         "slow_mo": pytestconfig.getoption("--slowmo"),
     }
     if extra_params:
@@ -41,34 +43,41 @@ def create_navigator(navigator_type, params):
     return navigator_factory(navigator_type, **params)
 
 
-@pytest.fixture(scope="session")
+def pytest_sessionstart(session):
+    """Called before the start of the session. Clean up the videos directory."""
+    if os.path.exists("./videos"):
+        for filename in os.listdir("./videos"):
+            filepath = os.path.join("./videos", filename)
+            try:
+                shutil.rmtree(filepath)
+            except OSError as e:
+                os.remove(filepath)
+
+
+# scope="function" will make sure that the fixture is created and destroyed for each test function.
+@pytest.fixture(scope="function")
 def navigator_session(request, pytestconfig):
     session_type = request.param.get("session_type")
     extra_params = request.param.get("extra_params", {})
 
+    # Get the test function name for video naming
+    test_name = request.node.originalname
+    video_name_prefix = f"video_{test_name}"
+    extra_params["video_name_prefix"] = video_name_prefix
+
     params = build_params(request, pytestconfig, extra_params)
 
-    nav = create_navigator(session_type, params)
-
-    # Setup and teardown the navigator instance (could be improved)
-    try:
-        if session_type == "login":
-            nav.login()
-        elif session_type == "server":
-            nav.start_server()
-        yield nav
-    except Exception as e:
-        logger.debug(e)
-        raise
-    finally:
+    with create_navigator(session_type, params) as nav:
+        # Setup the navigator instance (e.g., login or start server)
         try:
             if session_type == "login":
-                nav.logout()
+                nav.login()
             elif session_type == "server":
-                nav.stop_server()
+                nav.start_server()
+            yield nav
         except Exception as e:
             logger.debug(e)
-        nav.teardown()
+            raise
 
 
 def parameterized_fixture(session_type, **extra_params):

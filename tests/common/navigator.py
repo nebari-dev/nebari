@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 import urllib
 from abc import ABC
@@ -13,11 +14,19 @@ class NavigatorMixin(ABC):
     A mixin class providing common setup and teardown functionalities for Playwright navigators.
     """
 
-    def __init__(self, headless=False, slow_mo=0, browser="chromium", video_dir=None):
+    def __init__(
+        self,
+        headless=False,
+        slow_mo=0,
+        browser="chromium",
+        video_dir=None,
+        video_name_prefix=None,
+    ):
         self.headless = headless
         self.slow_mo = slow_mo
         self.browser_name = browser
         self.video_dir = video_dir
+        self.video_name_prefix = video_name_prefix
         self.initialized = False
         self.setup()
 
@@ -33,6 +42,7 @@ class NavigatorMixin(ABC):
             raise RuntimeError(
                 f"{self.browser_name} browser is not recognized."
             ) from None
+
         self.context = self.browser.new_context(
             ignore_https_errors=True,
             record_video_dir=self.video_dir,
@@ -40,12 +50,34 @@ class NavigatorMixin(ABC):
         self.page = self.context.new_page()
         self.initialized = True
 
+    def _rename_test_video_path(self, video_path):
+        """Rename the test video file to the test unique identifier."""
+        video_file_name = (
+            f"{self.video_name_prefix}.mp4" if self.video_name_prefix else None
+        )
+        if video_file_name and video_path:
+            os.rename(video_path, os.path.join(self.video_dir, video_file_name))
+
     def teardown(self) -> None:
         """Teardown Playwright browser and context."""
-        self.context.close()
-        self.browser.close()
-        self.playwright.stop()
-        logger.debug(">>> Teardown complete.")
+        if self.initialized:
+            # Rename the video file to the test unique identifier
+            current_video_path = self.page.video.path()
+            self._rename_test_video_path(current_video_path)
+
+            self.context.close()
+            self.browser.close()
+            self.playwright.stop()
+            logger.debug(">>> Teardown complete.")
+            self.initialized = False
+
+    def __enter__(self):
+        """Enter the runtime context related to this object."""
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Exit the runtime context related to this object."""
+        self.teardown()
 
 
 class LoginNavigator(NavigatorMixin):

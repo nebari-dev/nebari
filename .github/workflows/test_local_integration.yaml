@@ -163,7 +163,7 @@ jobs:
           # create environment file
           envsubst < .env.tpl > .env
           # run playwright pytest tests in headed mode with the chromium browser
-          xvfb-run pytest --browser chromium
+          xvfb-run pytest --browser chromium --slowmo 300
 
       - name: Save Playwright recording artifacts
         if: always()

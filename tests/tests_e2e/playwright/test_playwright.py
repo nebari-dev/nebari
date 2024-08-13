@@ -30,6 +30,8 @@ def test_login_logout(navigator):
 )
 @login_parameterized()
 def test_navbar_services(navigator, services):
+    navigator.page.goto(navigator.nebari_url + "hub/home")
+    navigator.page.wait_for_load_state("networkidle")
     navbar_items = navigator.page.locator("#thenavbar").get_by_role("link")
     navbar_items_names = [item.text_content() for item in navbar_items.all()]
     assert len(navbar_items_names) == len(services)
@@ -62,6 +64,9 @@ def test_notebook(navigator, test_data_root, expected_outputs):
 
     assert outputs == expected_outputs
 
+    # Clean up
+    notebook_manager.reset_workspace()
+
 
 @pytest.mark.parametrize(
     "namespaces",
@@ -80,3 +85,6 @@ def test_conda_store_ui(navigator, namespaces):
     shown_namespaces = conda_store._get_shown_namespaces()
 
     assert shown_namespaces == namespaces
+
+    # Clean up
+    conda_store.reset_workspace()
