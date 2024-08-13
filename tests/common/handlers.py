@@ -294,6 +294,7 @@ class CondaStore(JupyterLab):
         self.page.get_by_text("Services", exact=True).click()
         self.page.get_by_text("Environment Management").click()
         expect(self.page.get_by_role("tab", name="conda-store")).to_be_visible()
+        time.sleep(2)
 
     def _open_new_environment_tab(self):
         self.page.get_by_label("Create a new environment in").click()
@@ -320,6 +321,7 @@ class CondaStore(JupyterLab):
             login_button.click()
             # wait for page to reload
             self.page.wait_for_load_state()
+            time.sleep(2)
             # A reload is required as conda-store "created" a new page once logged in
             self.page.reload()
             self.page.wait_for_load_state()
