@@ -71,6 +71,11 @@ class LoginNavigator(NavigatorMixin):
         except KeyError:
             raise ValueError(f"Auth type {self.auth} is invalid.")
 
+    def logout(self):
+        """Logout from Nebari deployment."""
+        self.page.get_by_role("button", name="Logout").click()
+        self.page.wait_for_load_state
+
     def _login_google(self):
         logger.debug(">>> Sign in via Google and start the server")
         self.page.goto(self.nebari_url)
