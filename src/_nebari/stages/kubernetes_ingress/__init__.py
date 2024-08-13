@@ -3,8 +3,7 @@ import logging
 import socket
 import sys
 import time
-import typing
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Optional, Type
 
 from _nebari import constants
 from _nebari.provider.dns.cloudflare import update_record
@@ -94,17 +93,18 @@ def check_ingress_dns(stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: 
 
     attempt = 0
     while not _attempt_dns_lookup(domain_name, ip):
-        sleeptime = 60 * (2**attempt)
-        if not disable_prompt:
+        if disable_prompt:
+            sleeptime = 60 * (2**attempt)
+            print(f"Will attempt to poll DNS again in {sleeptime} seconds...")
+            time.sleep(sleeptime)
+        else:
             input(
                 f"After attempting to poll the DNS, the record for domain={domain_name} appears not to exist, "
                 f"has recently been updated, or has yet to fully propagate. This non-deterministic behavior is likely due to "
-                f"DNS caching and will likely resolve itself in a few minutes.\n\n\tTo poll the DNS again in {sleeptime} seconds "
-                f"[Press Enter].\n\n...otherwise kill the process and run the deployment again later..."
+                f"DNS caching and will likely resolve itself in a few minutes.\n\n\tTo poll the DNS again [Press Enter].\n\n"
+                f"...otherwise kill the process and run the deployment again later..."
             )
 
-        print(f"Will attempt to poll DNS again in {sleeptime} seconds...")
-        time.sleep(sleeptime)
         attempt += 1
         if attempt == 5:
             print(
@@ -128,23 +128,23 @@ class CertificateEnum(str, enum.Enum):
 class Certificate(schema.Base):
     type: CertificateEnum = CertificateEnum.selfsigned
     # existing
-    secret_name: typing.Optional[str]
+    secret_name: Optional[str] = None
     # lets-encrypt
-    acme_email: typing.Optional[str]
+    acme_email: Optional[str] = None
     acme_server: str = "https://acme-v02.api.letsencrypt.org/directory"
 
 
 class DnsProvider(schema.Base):
-    provider: typing.Optional[str]
-    auto_provision: typing.Optional[bool] = False
+    provider: Optional[str] = None
+    auto_provision: Optional[bool] = False
 
 
 class Ingress(schema.Base):
-    terraform_overrides: typing.Dict = {}
+    terraform_overrides: Dict = {}
 
 
 class InputSchema(schema.Base):
-    domain: typing.Optional[str]
+    domain: Optional[str] = None
     certificate: Certificate = Certificate()
     ingress: Ingress = Ingress()
     dns: DnsProvider = DnsProvider()
@@ -156,7 +156,7 @@ class IngressEndpoint(schema.Base):
 
 
 class OutputSchema(schema.Base):
-    load_balancer_address: typing.List[IngressEndpoint]
+    load_balancer_address: List[IngressEndpoint]
     domain: str
 
 

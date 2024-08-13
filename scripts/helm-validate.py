@@ -67,7 +67,7 @@ class HelmChartIndexer:
             var_name = self._clean_var_name(argument, "var")
             for var in parent_contents.get("variable", {}):
                 if var_name in var:
-                    return var[var_name]
+                    return var[var_name]["default"]
             else:
                 raise ValueError(f"Could not find variable {var_name}")
 

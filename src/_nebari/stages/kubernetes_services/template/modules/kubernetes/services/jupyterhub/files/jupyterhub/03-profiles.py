@@ -48,10 +48,16 @@ def base_profile_home_mounts(username):
     }
 
     MKDIR_OWN_DIRECTORY = (
-        "mkdir -p /mnt/{path} && chmod 777 /mnt/{path} && cp -r /etc/skel/. /mnt/{path}"
+        "mkdir -p /mnt/{path} && chmod 777 /mnt/{path} && "
+        # Copy skel files/folders not starting with '..' to user home directory.
+        # Filtering out ..* removes some unneeded folders (k8s configmap mount implementation details).
+        "find /etc/skel/. -maxdepth 1 -not -name '.' -not -name '..*' -exec "
+        "cp -rL {escaped_brackets} /mnt/{path} \;"
     )
     command = MKDIR_OWN_DIRECTORY.format(
-        path=pvc_home_mount_path.format(username=username)
+        # have to escape the brackets since this string will be formatted later by KubeSpawner
+        escaped_brackets="{{}}",
+        path=pvc_home_mount_path.format(username=username),
     )
     init_containers = [
         {
@@ -426,7 +432,10 @@ def profile_argo_token(groups):
         "ARGO_BASE_HREF": "/argo",
         "ARGO_SERVER": f"{domain}:443",
         "ARGO_NAMESPACE": namespace,
-        "ARGO_TOKEN": {
+        "ARGO_TOKEN": "Bearer $(HERA_TOKEN)",
+        "ARGO_HTTP1": "true",  # Maybe due to traefik config, but `argo list` returns 404 without this set.  Try removing after upgrading argo past v3.4.4.
+        # Hera token is needed for versions of hera released before https://github.com/argoproj-labs/hera/pull/1053 is merged
+        "HERA_TOKEN": {
             "valueFrom": {
                 "secretKeyRef": {
                     "name": f"{argo_sa}.service-account-token",
@@ -452,6 +461,14 @@ def profile_conda_store_viewer_token():
                 "secretKeyRef": {
                     "name": "argo-workflows-conda-store-token",
                     "key": "conda-store-service-name",
+                }
+            }
+        },
+        "CONDA_STORE_SERVICE_NAMESPACE": {
+            "valueFrom": {
+                "secretKeyRef": {
+                    "name": "argo-workflows-conda-store-token",
+                    "key": "conda-store-service-namespace",
                 }
             }
         },
@@ -533,14 +550,13 @@ def render_profiles(spawner):
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
-    spawner.log.error(str(auth_state))
 
     username = auth_state["oauth_user"]["preferred_username"]
     # only return the lowest level group name
     # e.g. /projects/myproj -> myproj
     # and /developers -> developers
     groups = [Path(group).name for group in auth_state["oauth_user"]["groups"]]
-    spawner.log.error(f"user info: {username} {groups}")
+    spawner.log.info(f"user info: {username} {groups}")
 
     keycloak_profilenames = auth_state["oauth_user"].get("jupyterlab_profiles", [])
 

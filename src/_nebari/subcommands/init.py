@@ -75,6 +75,15 @@ DEFAULT_KUBERNETES_VERSION_MSG = (
 
 LATEST = "latest"
 
+CLOUD_PROVIDER_FULL_NAME = {
+    "Local": ProviderEnum.local.name,
+    "Existing": ProviderEnum.existing.name,
+    "Digital Ocean": ProviderEnum.do.name,
+    "Amazon Web Services": ProviderEnum.aws.name,
+    "Google Cloud Platform": ProviderEnum.gcp.name,
+    "Microsoft Azure": ProviderEnum.azure.name,
+}
+
 
 class GitRepoEnum(str, enum.Enum):
     github = "github.com"
@@ -97,6 +106,7 @@ class InitInputs(schema.Base):
     ssl_cert_email: Optional[schema.email_pydantic] = None
     disable_prompt: bool = False
     output: pathlib.Path = pathlib.Path("nebari-config.yaml")
+    explicit: int = 0
 
 
 def enum_to_list(enum_cls):
@@ -143,7 +153,7 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
     try:
         write_configuration(
             inputs.output,
-            config,
+            config if not inputs.explicit else config_schema(**config),
             mode="x",
         )
     except FileExistsError:
@@ -410,7 +420,7 @@ def check_cloud_provider_kubernetes_version(
                 f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the GCP docs for a list of valid versions: {versions}"
             )
     elif cloud_provider == ProviderEnum.do.value.lower():
-        versions = digital_ocean.kubernetes_versions(region)
+        versions = digital_ocean.kubernetes_versions()
 
         if not kubernetes_version or kubernetes_version == LATEST:
             kubernetes_version = get_latest_kubernetes_version(versions)
@@ -556,6 +566,13 @@ def nebari_subcommand(cli: typer.Typer):
             "-o",
             help="Output file path for the rendered config file.",
         ),
+        explicit: int = typer.Option(
+            0,
+            "--explicit",
+            "-e",
+            count=True,
+            help="Write explicit nebari config file (advanced users only).",
+        ),
     ):
         """
         Create and initialize your [purple]nebari-config.yaml[/purple] file.
@@ -578,6 +595,13 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.cloud_provider = check_cloud_provider_creds(
             cloud_provider, disable_prompt
         )
+
+        # Digital Ocean deprecation warning -- Nebari 2024.7.1
+        if inputs.cloud_provider == ProviderEnum.do.value.lower():
+            rich.print(
+                ":warning: Digital Ocean support is being deprecated and support will be removed in the future. :warning:\n"
+            )
+
         inputs.region = check_cloud_provider_region(region, inputs.cloud_provider)
         inputs.kubernetes_version = check_cloud_provider_kubernetes_version(
             kubernetes_version, inputs.cloud_provider, inputs.region
@@ -595,6 +619,7 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.ssl_cert_email = ssl_cert_email
         inputs.disable_prompt = disable_prompt
         inputs.output = output
+        inputs.explicit = explicit
 
         from nebari.plugins import nebari_plugin_manager
 
@@ -644,14 +669,17 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 "\n\t❗️ [purple]local[/purple] requires Docker and Kubernetes running on your local machine. "
                 "[italic]Currently only available on Linux OS.[/italic]"
                 "\n\t❗️ [purple]existing[/purple] refers to an existing Kubernetes cluster that Nebari can be deployed on.\n"
+                "\n\t❗️ [red]Digital Ocean[/red] is currently being deprecated and support will be removed in the future.\n"
             )
         )
         # try:
-        inputs.cloud_provider = questionary.select(
+        cloud_provider: str = questionary.select(
             "Where would you like to deploy your Nebari cluster?",
-            choices=enum_to_list(ProviderEnum),
+            choices=CLOUD_PROVIDER_FULL_NAME.keys(),
             qmark=qmark,
         ).unsafe_ask()
+
+        inputs.cloud_provider = CLOUD_PROVIDER_FULL_NAME.get(cloud_provider)
 
         if not disable_checks:
             check_cloud_provider_creds(
@@ -883,6 +911,14 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 )
             inputs.kubernetes_version = kubernetes_version
 
+            # EXPLICIT CONFIG
+            inputs.explicit = questionary.confirm(
+                "Would you like the nebari config to show all available options? (recommended for advanced users only)",
+                default=False,
+                qmark=qmark,
+                auto_enter=False,
+            ).unsafe_ask()
+
         from nebari.plugins import nebari_plugin_manager
 
         config_schema = nebari_plugin_manager.config_schema
@@ -910,7 +946,11 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                     return b.format(key=key, value=value).replace("_", "-")
 
         cmds = " ".join(
-            [_ for _ in [if_used(_) for _ in inputs.dict().keys()] if _ is not None]
+            [
+                _
+                for _ in [if_used(_) for _ in inputs.model_dump().keys()]
+                if _ is not None
+            ]
         )
 
         rich.print(
