@@ -1,7 +1,7 @@
 import logging
 import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 import dotenv
 import pytest
@@ -50,7 +50,7 @@ def pytest_sessionstart(session):
             filepath = os.path.join("./videos", filename)
             try:
                 shutil.rmtree(filepath)
-            except OSError as e:
+            except OSError:
                 os.remove(filepath)
 
 
