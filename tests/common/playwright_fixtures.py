@@ -36,79 +36,63 @@ def build_params(request, pytestconfig, extra_params=None):
     return params
 
 
-def create_navigator(navigator_type, request, pytestconfig, extra_params=None):
+def create_navigator(navigator_type, params):
     """Create and return a navigator instance."""
-    params = build_params(request, pytestconfig, extra_params)
     return navigator_factory(navigator_type, **params)
 
 
 @pytest.fixture(scope="session")
-def _login_session(request, pytestconfig):
-    nav = create_navigator("login", request, pytestconfig)
+def navigator_session(request, pytestconfig):
+    session_type = request.param.get("session_type")
+    extra_params = request.param.get("extra_params", {})
+
+    params = build_params(request, pytestconfig, extra_params)
+
+    nav = create_navigator(session_type, params)
+
+    # Setup and teardown the navigator instance (could be improved)
     try:
-        nav.login()
+        if session_type == "login":
+            nav.login()
+        elif session_type == "server":
+            nav.start_server()
         yield nav
     except Exception as e:
         logger.debug(e)
         raise
     finally:
         try:
-            nav.logout()
+            if session_type == "login":
+                nav.logout()
+            elif session_type == "server":
+                nav.stop_server()
         except Exception as e:
             logger.debug(e)
         nav.teardown()
 
 
-@pytest.fixture(scope="session")
-def _server_session(request, pytestconfig):
-    extra_params = {"instance_name": request.param.get("instance_name")}
-    nav = create_navigator("server", request, pytestconfig, extra_params)
-    try:
-        nav.start_server()
-        yield nav
-    except Exception as e:
-        logger.debug(e)
-        raise
-    finally:
-        try:
-            nav.stop_server()
-        except Exception as e:
-            logger.debug(e)
-        nav.teardown()
+def parameterized_fixture(session_type, **extra_params):
+    """Utility function to create parameterized pytest fixtures."""
+    return pytest.mark.parametrize(
+        "navigator_session",
+        [{"session_type": session_type, "extra_params": extra_params}],
+        indirect=True,
+    )
+
+
+def server_parameterized(instance_name=None, **kwargs):
+    return parameterized_fixture("server", instance_name=instance_name, **kwargs)
+
+
+def login_parameterized(**kwargs):
+    return parameterized_fixture("login", **kwargs)
 
 
 @pytest.fixture(scope="function")
-def navigator(_server_session):
-    """High-level navigator instance with a reset workspace."""
-    yield _server_session
-
-
-def parameterized_fixture(fixture_name, **params):
-    """Utility function to create parameterized pytest fixtures."""
-    return pytest.mark.parametrize(fixture_name, [params], indirect=True)
-
-
-def server_parameterized(
-    nebari_url=None, keycloak_username=None, keycloak_password=None, instance_name=None
-):
-    return parameterized_fixture(
-        "_server_session",
-        nebari_url=nebari_url,
-        keycloak_username=keycloak_username,
-        keycloak_password=keycloak_password,
-        instance_name=instance_name,
-    )
-
-
-def login_parameterized(
-    nebari_url=None, keycloak_username=None, keycloak_password=None
-):
-    return parameterized_fixture(
-        "_login_session",
-        nebari_url=nebari_url,
-        keycloak_username=keycloak_username,
-        keycloak_password=keycloak_password,
-    )
+def navigator(navigator_session):
+    """High-level navigator instance. Can be overridden based on the available
+    parameterized decorator."""
+    yield navigator_session
 
 
 @pytest.fixture(scope="session")
