@@ -15,9 +15,9 @@ def load_env_vars():
     """Load environment variables using dotenv and return necessary parameters."""
     dotenv.load_dotenv()
     return {
-        "nebari_url": os.getenv("NEBARI_FULL_URL", "https://thisisatest.nebari.dev/"),
-        "username": os.getenv("KEYCLOAK_USERNAME", "example-user"),
-        "password": os.getenv("KEYCLOAK_PASSWORD", "exampleuser"),
+        "nebari_url": os.getenv("NEBARI_FULL_URL"),
+        "username": os.getenv("KEYCLOAK_USERNAME"),
+        "password": os.getenv("KEYCLOAK_PASSWORD"),
     }
 
 
