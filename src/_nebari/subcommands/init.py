@@ -97,7 +97,7 @@ class InitInputs(schema.Base):
     namespace: Optional[schema.namespace_pydantic] = "dev"
     auth_provider: AuthenticationEnum = AuthenticationEnum.password
     auth_auto_provision: bool = False
-    repository: Optional[schema.git_url_pydantic] = None
+    repository: Optional[schema.github_url_pydantic] = None
     repository_auto_provision: bool = False
     ci_provider: CiEnum = CiEnum.none
     terraform_state: TerraformStateEnum = TerraformStateEnum.remote
@@ -529,7 +529,7 @@ def nebari_subcommand(cli: typer.Typer):
             None,
             help="Github repository URL to be initialized with --repository-auto-provision",
             callback=typer_validate_regex(
-                schema.git_url_regex,
+                schema.github_url_regex,
                 "Must be a fully qualified GitHub repository URL.",
             ),
         ),
@@ -812,21 +812,9 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 qmark=qmark,
             ).unsafe_ask()
 
-            org_name = questionary.text(
-                f"Which user or organization will this repository live under? ({repo_url.format(git_provider=git_provider, org_name='<org-name>', repo_name='')})",
-                qmark=qmark,
-            ).unsafe_ask()
-
-            repo_name = questionary.text(
-                f"And what will the name of this repository be? ({repo_url.format(git_provider=git_provider, org_name=org_name, repo_name='<repo-name>')})",
-                qmark=qmark,
-            ).unsafe_ask()
-
-            inputs.repository = repo_url.format(
-                git_provider=git_provider, org_name=org_name, repo_name=repo_name
-            )
-
             if git_provider == GitRepoEnum.github.value.lower():
+                inputs.ci_provider = CiEnum.github_actions.value.lower()
+
                 inputs.repository_auto_provision = questionary.confirm(
                     f"Would you like nebari to create a remote repository on {git_provider}?",
                     default=False,
@@ -834,11 +822,26 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                     auto_enter=False,
                 ).unsafe_ask()
 
-            if not disable_checks and inputs.repository_auto_provision:
-                check_repository_creds(ctx, git_provider)
+                if inputs.repository_auto_provision:
+                    org_name = questionary.text(
+                        f"Which user or organization will this repository live under? ({repo_url.format(git_provider=git_provider, org_name='<org-name>', repo_name='')})",
+                        qmark=qmark,
+                    ).unsafe_ask()
 
-            if git_provider == GitRepoEnum.github.value.lower():
-                inputs.ci_provider = CiEnum.github_actions.value.lower()
+                    repo_name = questionary.text(
+                        f"And what will the name of this repository be? ({repo_url.format(git_provider=git_provider, org_name=org_name, repo_name='<repo-name>')})",
+                        qmark=qmark,
+                    ).unsafe_ask()
+
+                    inputs.repository = repo_url.format(
+                        git_provider=git_provider,
+                        org_name=org_name,
+                        repo_name=repo_name,
+                    )
+
+                    if not disable_checks:
+                        check_repository_creds(ctx, git_provider)
+
             elif git_provider == GitRepoEnum.gitlab.value.lower():
                 inputs.ci_provider = CiEnum.gitlab_ci.value.lower()
 
