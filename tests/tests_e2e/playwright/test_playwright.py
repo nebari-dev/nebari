@@ -71,7 +71,7 @@ def test_notebook(navigator, test_data_root, expected_outputs):
 @pytest.mark.parametrize(
     "namespaces",
     [
-        (["example-user", "analyst", "developer", "global", "nebari-git", "users"]),
+        (["analyst", "developer", "global", "nebari-git", "users"]),
     ],
 )
 @server_parameterized(instance_name="small-instance")
@@ -84,7 +84,7 @@ def test_conda_store_ui(navigator, namespaces):
 
     shown_namespaces = conda_store._get_shown_namespaces()
 
-    assert shown_namespaces == namespaces
+    assert shown_namespaces == namespaces + [navigator.username]
 
     # Clean up
     conda_store.reset_workspace()
