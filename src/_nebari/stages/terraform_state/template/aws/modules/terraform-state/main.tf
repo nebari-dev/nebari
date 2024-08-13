@@ -20,6 +20,14 @@ resource "aws_s3_bucket" "terraform-state" {
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "terraform-state" {
+  bucket                  = aws_s3_bucket.terraform-state.id
+  ignore_public_acls      = true
+  block_public_acls       = true
+  block_public_policy     = true
+  restrict_public_buckets = true
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "terraform-state" {
   bucket = aws_s3_bucket.terraform-state.id
 
@@ -29,14 +37,9 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "terraform-state" 
       sse_algorithm     = "aws:kms"
     }
   }
-}
-
-resource "aws_s3_bucket_public_access_block" "terraform-state" {
-  bucket                  = aws_s3_bucket.terraform-state.id
-  ignore_public_acls      = true
-  block_public_acls       = true
-  block_public_policy     = true
-  restrict_public_buckets = true
+  # // AWS may return HTTP 409 if PutBucketEncryption is called immediately after S3
+  # bucket creation. Adding dependency avoids concurrent requests.
+  depends_on = [aws_s3_bucket_public_access_block.terraform-state]
 }
 
 resource "aws_dynamodb_table" "terraform-state-lock" {
