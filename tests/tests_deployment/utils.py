@@ -8,42 +8,76 @@ from tests.tests_deployment import constants
 
 def get_jupyterhub_session():
     session = requests.Session()
-    r = session.get(
-        f"https://{constants.NEBARI_HOSTNAME}/hub/oauth_login", verify=False
-    )
-    auth_url = re.search('action="([^"]+)"', r.content.decode("utf8")).group(1)
+    session.cookies.clear()
 
-    r = session.post(
-        auth_url.replace("&amp;", "&"),
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-        data={
-            "username": constants.KEYCLOAK_USERNAME,
-            "password": constants.KEYCLOAK_PASSWORD,
-            "credentialId": "",
-        },
-        verify=False,
-    )
+    try:
+        r = session.get(
+            f"https://{constants.NEBARI_HOSTNAME}/hub/oauth_login", verify=False
+        )
+        r.raise_for_status()  # Ensure the request was successful
+
+        auth_url_match = re.search('action="([^"]+)"', r.content.decode("utf8"))
+        if not auth_url_match:
+            raise ValueError("Authentication URL not found in response.")
+
+        auth_url = auth_url_match.group(1).replace("&amp;", "&")
+
+        r = session.post(
+            auth_url,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data={
+                "username": constants.KEYCLOAK_USERNAME,
+                "password": constants.KEYCLOAK_PASSWORD,
+                "credentialId": "",
+            },
+            verify=False,
+        )
+        r.raise_for_status()  # Ensure the request was successful
+
+    except requests.exceptions.RequestException as e:
+        raise ValueError(f"An error occurred while authenticating: {e}")
+
     return session
 
 
 def create_jupyterhub_token(note):
     session = get_jupyterhub_session()
+
     xsrf_token = session.cookies.get("_xsrf")
-    headers = {"Referer": f"https://{constants.NEBARI_HOSTNAME}/hub/token"}
-    if xsrf_token:
-        headers["X-XSRFToken"] = xsrf_token
+    if not xsrf_token:
+        raise ValueError("XSRF token not found in session cookies.")
+
+    headers = {
+        "Referer": f"https://{constants.NEBARI_HOSTNAME}/hub/token",
+        "X-XSRFToken": xsrf_token,
+    }
+
     data = {"note": note, "expires_in": None}
-    return session.post(
-        f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
-        headers=headers,
-        json=data,
-        verify=False,
-    )
+
+    try:
+        response = session.post(
+            f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
+            headers=headers,
+            json=data,
+            verify=False,
+        )
+        response.raise_for_status()  # Ensure the request was successful
+
+    except requests.exceptions.RequestException as e:
+        raise ValueError(f"An error occurred while creating the token: {e}")
+
+    return response
 
 
 def get_jupyterhub_token(note="jupyterhub-tests-deployment"):
     response = create_jupyterhub_token(note=note)
-    return response.json()["token"]
+    try:
+        token = response.json()["token"]
+    except (KeyError, ValueError) as e:
+        print(f"An error occurred while retrieving the token: {e}")
+        raise
+
+    return token
 
 
 def monkeypatch_ssl_context():
