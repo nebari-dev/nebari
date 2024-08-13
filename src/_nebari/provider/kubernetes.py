@@ -14,11 +14,13 @@
 
 
 import os
+import pathlib
 import re
 
 import yaml
 from kubernetes import client
 from kubernetes.dynamic.client import DynamicClient
+from kubernetes.dynamic.resource import Resource
 
 UPPER_FOLLOWED_BY_LOWER_RE = re.compile("(.)([A-Z][a-z]+)")
 LOWER_OR_NUM_FOLLOWED_BY_UPPER_RE = re.compile("([a-z0-9])([A-Z])")
@@ -88,10 +90,10 @@ def create_from_directory(
                 **kwargs,
             )
             k8s_objects_all.append(k8s_objects)
-        except FailToCreateError as failure:
+        except OperationFailureError as failure:
             failures.extend(failure.api_exceptions)
     if failures:
-        raise FailToCreateError(failures)
+        raise OperationFailureError(failures)
     return k8s_objects_all
 
 
@@ -155,10 +157,10 @@ def create_from_yaml(
                     **kwargs,
                 )
                 k8s_objects.append(created)
-            except FailToCreateError as failure:
+            except OperationFailureError as failure:
                 failures.extend(failure.api_exceptions)
         if failures:
-            raise FailToCreateError(failures)
+            raise OperationFailureError(failures)
         return k8s_objects
 
     class Loader(yaml.loader.SafeLoader):
@@ -242,7 +244,7 @@ def create_from_dict(
 
     # In case we have exceptions waiting for us, raise them
     if api_exceptions:
-        raise FailToCreateError(api_exceptions)
+        raise OperationFailureError(api_exceptions)
 
     return k8s_objects
 
@@ -252,9 +254,6 @@ def create_from_yaml_single_item(
 ):
     kind = yml_object["kind"]
     if apply:
-        print(f"\n{yml_object}\n")
-        for arg in kwargs:
-            print(f"{arg}: {kwargs[arg]}")
         apply_client = DynamicClient(k8s_client).resources.get(
             api_version=yml_object["apiVersion"], kind=kind
         )
@@ -298,7 +297,88 @@ def create_from_yaml_single_item(
     return resp
 
 
-class FailToCreateError(Exception):
+def delete_from_yaml(
+    k8s_client: client.ApiClient, yaml_file: pathlib.Path = None, verbose: bool = False
+) -> None:
+    """
+    Delete all objects in a yaml file. Pass True for verbose to
+    print confirmation information.
+    Input:
+    yaml_file: string. Contains the path to yaml file.
+    k8s_client: an ApiClient object, initialized with the client args.
+
+    Returns:
+        None
+
+    Raises:
+        OperationFailureError which holds list of `client.rest.ApiException`
+        instances for each object that failed to delete.
+    """
+    dynamic_client = DynamicClient(k8s_client)
+    k8s_objects = parse_yaml_file(yaml_file)
+    exceptions = []
+    for object in k8s_objects:
+        try:
+            if verbose:
+                print(f"Deleting {object.kind} {object.name}")
+            if object.namespaced:
+                dynamic_client.resources.get(
+                    api_version=object.api_version, kind=object.kind
+                ).delete(
+                    name=object.name,
+                    namespace=object.extra_args.get("namespace", "default"),
+                )
+            else:
+                dynamic_client.resources.get(
+                    api_version=object.api_version, kind=object.kind
+                ).delete(name=object.name)
+        except client.rest.ApiException as api_exception:
+            if api_exception.reason == "Not Found":
+                continue
+            if verbose:
+                print(f"Failed to delete {object.kind} {object.name}")
+            exceptions.append(api_exception)
+        except Exception as e:
+            print(f"Warning, failed to delete {object.kind} {object.name}: {e}")
+    if exceptions:
+        raise OperationFailureError(exceptions)
+
+
+def parse_yaml_file(yaml_file: pathlib.Path) -> list:
+    """
+    Parse a yaml file and return a list of dictionaries.
+    Input:
+    yaml_file: pathlib.Path. Contains the path to yaml file.
+
+    Returns:
+        A list of kubernetes objects in the yaml file.
+    """
+
+    class Loader(yaml.loader.SafeLoader):
+        yaml_implicit_resolvers = yaml.loader.SafeLoader.yaml_implicit_resolvers.copy()
+        if "=" in yaml_implicit_resolvers:
+            yaml_implicit_resolvers.pop("=")
+
+    with open(yaml_file.absolute()) as f:  # noqa
+        yml_document_all = yaml.load_all(f, Loader=Loader)
+
+        objects = []
+        for doc in yml_document_all:
+            object = Resource(
+                api_version=doc["apiVersion"],
+                prefix=doc["apiVersion"].split("/")[0],
+                kind=doc["kind"],
+                namespaced=True if "namespace" in doc["metadata"] else False,
+                name=doc["metadata"]["name"],
+                body=doc,
+                namespace=doc["metadata"].get("namespace", None),
+                annotations=doc["metadata"].get("annotations", None),
+            )
+            objects.append(object)
+        return objects
+
+
+class OperationFailureError(Exception):
     """
     An exception class for handling error if an error occurred when
     handling a yaml file.

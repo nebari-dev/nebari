@@ -1,0 +1,11 @@
+# kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+- name: kuberhealthy
+  repo: https://kuberhealthy.github.io/kuberhealthy/helm-repos
+  releaseName: kuberhealthy
+  namespace: dev
+  version: v2
+  valuesFile: values.yaml

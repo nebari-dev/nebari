@@ -5,6 +5,8 @@ CURRENT_RELEASE = "2024.7.1"
 # https://www.hashicorp.com/license-faq
 TERRAFORM_VERSION = "1.5.7"
 
+KUSTOMIZE_VERSION = "5.4.3"
+
 # 04-kubernetes-ingress
 DEFAULT_TRAEFIK_IMAGE_TAG = "2.9.1"
 
