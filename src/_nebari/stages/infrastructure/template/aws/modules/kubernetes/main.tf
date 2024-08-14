@@ -40,24 +40,18 @@ resource "aws_launch_template" "main" {
     }
   }
   # https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-basics
-  user_data                     = base64encode(<<-EOF
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
-
---==MYBOUNDARY==
-Content-Type: text/x-shellscript; charset="us-ascii"
-%{ if var.node_prebootstrap_command != null }${var.node_prebootstrap_command}%{ endif }
-
-%{ if var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami != null }--==MYBOUNDARY==%{ endif }
-%{ if var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami != null }Content-Type: text/x-shellscript; charset="us-ascii"%{ endif }
-%{ if var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami == null }%{ else }#!/bin/bash%{ endif }
-%{ if var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami == null }%{ else }set -ex%{ endif }
-%{ if var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami == null }%{ else }B64_CLUSTER_CA=${aws_eks_cluster.main.certificate_authority[0].data}%{ endif }
-%{ if var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami == null }%{ else }API_SERVER_URL=${aws_eks_cluster.main.endpoint}%{ endif }
-%{ if var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami == null }%{ else }/etc/eks/bootstrap.sh ${aws_eks_cluster.main.name} --b64-cluster-ca $B64_CLUSTER_CA --apiserver-endpoint $API_SERVER_URL%{ endif }
-
---==MYBOUNDARY==--
-  EOF
+  user_data = base64encode(
+    templatefile(
+      "${path.module}/files/user_data.tftpl",
+      {
+        node_prebootstrap_command = var.node_prebootstrap_command
+        split_user_data           = var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami != null ? true : false
+        include_bootstrap_cmd     = var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami == null ? false : true
+        cluster_name              = aws_eks_cluster.main.name
+        cluster_cert_authority    = aws_eks_cluster.main.certificate_authority[0].data
+        cluster_endpoint          = aws_eks_cluster.main.endpoint
+      }
+    )
   )
 }
 
