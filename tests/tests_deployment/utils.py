@@ -71,6 +71,29 @@ def create_jupyterhub_token(note):
     return response
 
 
+def get_refresh_jupyterhub_token(old_token, note):
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {old_token}",
+    }
+
+    data = {"note": note, "expires_in": None}
+
+    try:
+        response = requests.post(
+            f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
+            headers=headers,
+            json=data,
+            verify=False,
+        )
+        response.raise_for_status()  # Ensure the request was successful
+
+    except requests.exceptions.RequestException as e:
+        raise ValueError(f"An error occurred while creating the token: {e}")
+
+    return response
+
+
 def get_jupyterhub_token(note="jupyterhub-tests-deployment"):
     response = create_jupyterhub_token(note=note)
     try:
