@@ -34,10 +34,10 @@ env:
 
 
 jobs:
-  # Must have action variable NO_PROVIDER_CREDENTIALS_DO set up in the repo as a boolean.
+  # Must have action variable NO_PROVIDER_CREDENTIALS_DO set up in the repo as a binary boolean.
   test-do-integration:
     runs-on: ubuntu-latest
-    if: ${{ vars.NO_PROVIDER_CREDENTIALS_DO == false }}
+    if: ${{ vars.NO_PROVIDER_CREDENTIALS_DO == 0 }}
     permissions:
       id-token: write
       contents: read
