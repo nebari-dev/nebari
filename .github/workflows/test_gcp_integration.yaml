@@ -33,10 +33,10 @@ env:
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
 jobs:
-  # Must have action variable NO_PROVIDER_CREDENTIALS_GCP set up in the repo as a boolean.
+  # Must have action variable NO_PROVIDER_CREDENTIALS_GCP set up in the repo as a binary boolean.
   test-gcp-integration:
     runs-on: ubuntu-latest
-    if: ${{ vars.NO_PROVIDER_CREDENTIALS_GCP == false }}
+    if: ${{ vars.NO_PROVIDER_CREDENTIALS_GCP == 0 }}
     permissions:
       id-token: write
       contents: read
