@@ -57,7 +57,7 @@ jobs:
   test-aws-integration:
     runs-on: ubuntu-latest
     needs: check-for-credentials_aws
-    if: ${{ needs.check-for-credentials.outputs.provider_credentials_aws == '1' }}
+    if: {{ var.NO_PROVIDER_CREDENTIALS == 0 }}
     permissions:
       id-token: write
       contents: read
