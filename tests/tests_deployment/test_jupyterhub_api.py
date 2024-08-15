@@ -8,11 +8,7 @@ from tests.tests_deployment.keycloak_utils import (
     create_keycloak_role,
     get_keycloak_client_roles,
 )
-
-from tests.tests_deployment.utils import (
-    get_jupyterhub_session,
-    get_refresh_jupyterhub_token,
-)
+from tests.tests_deployment.utils import get_refresh_jupyterhub_token
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
