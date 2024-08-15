@@ -57,7 +57,7 @@ jobs:
   test-aws-integration:
     runs-on: ubuntu-latest
     needs: check-for-credentials_aws
-    if: ${{ var.NO_PROVIDER_CREDENTIALS_AWS == false }}
+    if: ${{ vars.NO_PROVIDER_CREDENTIALS_AWS == false }}
     permissions:
       id-token: write
       contents: read
