@@ -33,7 +33,7 @@ env:
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
 jobs:
-  # Must have action variable NO_PROVIDER_CREDENTIALS_AZURE set up in the repo as a boolean.
+  # Must have action variable NO_PROVIDER_CREDENTIALS_AZURE set up in the repo as a binary boolean.
   test-azure-integration:
     runs-on: ubuntu-latest
     if: ${{ vars.NO_PROVIDER_CREDENTIALS_AZURE == 0 }}
