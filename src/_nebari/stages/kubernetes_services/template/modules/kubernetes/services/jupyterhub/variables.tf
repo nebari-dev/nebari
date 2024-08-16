@@ -163,6 +163,26 @@ variable "jupyterlab-default-settings" {
   type        = map(any)
 }
 
+variable "jupyterlab-gallery-settings" {
+  description = "Server-side settings for jupyterlab-gallery extension"
+  type = object({
+    title                         = optional(string)
+    destination                   = optional(string)
+    hide_gallery_without_exhibits = optional(bool)
+    exhibits = list(object({
+      git         = string
+      title       = string
+      homepage    = optional(string)
+      description = optional(string)
+      icon        = optional(string)
+      account     = optional(string)
+      token       = optional(string)
+      branch      = optional(string)
+      depth       = optional(number)
+    }))
+  })
+}
+
 variable "jupyterlab-pioneer-enabled" {
   description = "Enable JupyterLab Pioneer for telemetry"
   type        = bool

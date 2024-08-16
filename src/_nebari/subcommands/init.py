@@ -106,6 +106,7 @@ class InitInputs(schema.Base):
     ssl_cert_email: Optional[schema.email_pydantic] = None
     disable_prompt: bool = False
     output: pathlib.Path = pathlib.Path("nebari-config.yaml")
+    explicit: int = 0
 
 
 def enum_to_list(enum_cls):
@@ -152,7 +153,7 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
     try:
         write_configuration(
             inputs.output,
-            config,
+            config if not inputs.explicit else config_schema(**config),
             mode="x",
         )
     except FileExistsError:
@@ -565,6 +566,13 @@ def nebari_subcommand(cli: typer.Typer):
             "-o",
             help="Output file path for the rendered config file.",
         ),
+        explicit: int = typer.Option(
+            0,
+            "--explicit",
+            "-e",
+            count=True,
+            help="Write explicit nebari config file (advanced users only).",
+        ),
     ):
         """
         Create and initialize your [purple]nebari-config.yaml[/purple] file.
@@ -587,6 +595,13 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.cloud_provider = check_cloud_provider_creds(
             cloud_provider, disable_prompt
         )
+
+        # Digital Ocean deprecation warning -- Nebari 2024.7.1
+        if inputs.cloud_provider == ProviderEnum.do.value.lower():
+            rich.print(
+                ":warning: Digital Ocean support is being deprecated and support will be removed in the future. :warning:\n"
+            )
+
         inputs.region = check_cloud_provider_region(region, inputs.cloud_provider)
         inputs.kubernetes_version = check_cloud_provider_kubernetes_version(
             kubernetes_version, inputs.cloud_provider, inputs.region
@@ -604,6 +619,7 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.ssl_cert_email = ssl_cert_email
         inputs.disable_prompt = disable_prompt
         inputs.output = output
+        inputs.explicit = explicit
 
         from nebari.plugins import nebari_plugin_manager
 
@@ -653,6 +669,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 "\n\t❗️ [purple]local[/purple] requires Docker and Kubernetes running on your local machine. "
                 "[italic]Currently only available on Linux OS.[/italic]"
                 "\n\t❗️ [purple]existing[/purple] refers to an existing Kubernetes cluster that Nebari can be deployed on.\n"
+                "\n\t❗️ [red]Digital Ocean[/red] is currently being deprecated and support will be removed in the future.\n"
             )
         )
         # try:
@@ -893,6 +910,14 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                     region=inputs.region,
                 )
             inputs.kubernetes_version = kubernetes_version
+
+            # EXPLICIT CONFIG
+            inputs.explicit = questionary.confirm(
+                "Would you like the nebari config to show all available options? (recommended for advanced users only)",
+                default=False,
+                qmark=qmark,
+                auto_enter=False,
+            ).unsafe_ask()
 
         from nebari.plugins import nebari_plugin_manager
 
