@@ -45,13 +45,11 @@ def create_navigator(navigator_type, params):
 
 def pytest_sessionstart(session):
     """Called before the start of the session. Clean up the videos directory."""
-    if Path.exists("./videos"):
+    _videos_path = Path("./videos")
+    if _videos_path.exists():
         for filename in os.listdir("./videos"):
-            filepath = Path("./videos") / filename
-            try:
-                shutil.rmtree(filepath)
-            except OSError:
-                Path.unlink(filepath)
+            filepath = _videos_path / filename
+            filepath.unlink()
 
 
 # scope="function" will make sure that the fixture is created and destroyed for each test function.
