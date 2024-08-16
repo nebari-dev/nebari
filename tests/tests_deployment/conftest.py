@@ -16,13 +16,14 @@ def cleanup_keycloak_roles():
     delete_client_keycloak_test_roles(client_name="conda_store")
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def jupyterhub_access_token():
-    return get_jupyterhub_token()
+    return get_jupyterhub_token(note="base-jupyterhub-token")
 
 
 @pytest.fixture(scope="function")
-def refresh_token_response(note, jupyterhub_access_token):
+def refresh_token_response(request, jupyterhub_access_token):
+    note = request.param  # Get the parameter passed to the fixture
     yield get_refresh_jupyterhub_token(jupyterhub_access_token, note)
 
 
@@ -30,7 +31,7 @@ def parameterized_fixture(new_note):
     """Utility function to create parameterized pytest fixtures."""
     return pytest.mark.parametrize(
         "refresh_token_response",
-        [{"note": new_note}],
+        [new_note],
         indirect=True,
     )
 

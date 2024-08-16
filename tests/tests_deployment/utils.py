@@ -42,24 +42,22 @@ def get_jupyterhub_session():
 
 def create_jupyterhub_token(note):
     session = get_jupyterhub_session()
-    xsrf_token = session.cookies.get_dict(
-        domain=f"{constants.NEBARI_HOSTNAME}",
-    ).get("_xsrf")
+    # Get the XSRF token from the session cookies (path is required due to duplicates
+    # appearing in some cases)
+    xsrf_token = session.cookies.get("_xsrf", path="/hub/")
 
     if not xsrf_token:
         raise ValueError("XSRF token not found in session cookies.")
-
-    headers = {
-        "Referer": f"https://{constants.NEBARI_HOSTNAME}/hub/token",
-        "X-XSRFToken": xsrf_token,
-    }
 
     data = {"note": note, "expires_in": None}
 
     try:
         response = session.post(
             f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens",
-            headers=headers,
+            headers={
+                "Referer": f"https://{constants.NEBARI_HOSTNAME}/hub/token",
+                "X-XSRFToken": xsrf_token,
+            },
             json=data,
             verify=False,
         )
