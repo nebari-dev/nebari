@@ -1,8 +1,8 @@
 import logging
-import os
 import re
 import urllib
 from abc import ABC
+from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -56,7 +56,7 @@ class NavigatorMixin(ABC):
             f"{self.video_name_prefix}.mp4" if self.video_name_prefix else None
         )
         if video_file_name and video_path:
-            os.rename(video_path, os.path.join(self.video_dir, video_file_name))
+            Path.rename(video_path, Path(self.video_dir) / video_file_name)
 
     def teardown(self) -> None:
         """Teardown Playwright browser and context."""
