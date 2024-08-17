@@ -153,10 +153,6 @@ jobs:
       - name: Get nebari-config.yaml full path
         run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
 
-      - name: tmate session
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 5
-
       - name: Playwright Tests
         env:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
@@ -176,6 +172,9 @@ jobs:
           name: e2e-playwright
           path: |
             ./tests/tests_e2e/playwright/videos/
+
+      - name: tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: Deployment Pytests
         env:
