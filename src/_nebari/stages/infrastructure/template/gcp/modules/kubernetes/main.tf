@@ -95,19 +95,11 @@ resource "google_container_node_pool" "main" {
     dynamic "taint" {
       for_each = local.merged_node_groups[count.index].node_taints
       content {
-        key    = each.value["key"]
-        value  = each.value["value"]
-        effect = each.value["effect"]
+        key    = taint.value.key
+        value  = taint.value.value
+        effect = taint.value.effect
       }
     }
-    # taint = [
-    #   # Do this for every taint in taints
-    #   {
-    #     "key": local.merged_node_groups[count.index].taints[0]['key'],
-    #     "value": local.merged_node_groups[count.index].taints[0]['value'],
-    #     "effect": local.merged_node_groups[count.index].taints[0]['effect']}
-    #   },
-    # ]
 
     metadata = {
       disable-legacy-endpoints = "true"

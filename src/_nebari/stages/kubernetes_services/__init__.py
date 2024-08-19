@@ -382,6 +382,19 @@ class CondaStoreInputVars(schema.Base):
     )
 
 
+class TolerationOperatorEnum(str, enum.Enum):
+    Equal = "Equal"
+    Exists = "Exists"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
+class Toleration(schema.Taint):
+    operator: TolerationOperatorEnum = TolerationOperatorEnum.Equal
+
+
 class JupyterhubInputVars(schema.Base):
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
@@ -405,6 +418,9 @@ class JupyterhubInputVars(schema.Base):
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
     cloud_provider: str = Field(alias="cloud-provider")
     jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
+    node_taint_tolerations: Optional[List[Toleration]] = Field(
+        alias="node-taint-tolerations"
+    )
 
 
 class DaskGatewayInputVars(schema.Base):
@@ -565,6 +581,12 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterlab_default_settings=self.config.jupyterlab.default_settings,
             jupyterlab_gallery_settings=self.config.jupyterlab.gallery_settings,
             jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
+            node_taint_tolerations=[
+                Toleration(**taint.model_dump())
+                for taint in self.config.google_cloud_platform.node_groups[
+                    "user"
+                ].taints
+            ],  # TODO: support other cloud providers
         )
 
         dask_gateway_vars = DaskGatewayInputVars(

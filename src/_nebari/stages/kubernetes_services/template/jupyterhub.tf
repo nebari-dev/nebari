@@ -85,6 +85,16 @@ variable "idle-culler-settings" {
   type        = any
 }
 
+variable "node-taint-tolerations" {
+  description = "Node taint toleration"
+  type = list(object({
+    key      = string
+    operator = string
+    value    = string
+    effect   = string
+  }))
+}
+
 module "kubernetes-nfs-server" {
   count = var.jupyterhub-shared-endpoint == null ? 1 : 0
 
@@ -137,6 +147,7 @@ module "jupyterhub" {
   conda-store-service-name                           = module.kubernetes-conda-store-server.service_name
   conda-store-jhub-apps-token                        = module.kubernetes-conda-store-server.service-tokens.jhub-apps
   jhub-apps-enabled                                  = var.jhub-apps-enabled
+  node-taint-tolerations                             = var.node-taint-tolerations
 
   extra-mounts = {
     "/etc/dask" = {

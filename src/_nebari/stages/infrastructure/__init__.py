@@ -1,5 +1,4 @@
 import contextlib
-import enum
 import inspect
 import os
 import pathlib
@@ -42,43 +41,30 @@ class ExistingInputVars(schema.Base):
     kube_context: str
 
 
-# TODO: Make sure the taint is actually applied to the nodes for each provider
-class taintEffectEnum(str, enum.Enum):
-    NoSchedule: str = "NoSchedule"
-    PreferNoSchedule: str = "PreferNoSchedule"
-    NoExecute: str = "NoExecute"
-
-
-class Taint(schema.Base):
-    key: str
-    value: str
-    effect: taintEffectEnum
-
-
 class NodeGroup(schema.Base):
     instance: str
     min_nodes: Annotated[int, Field(ge=0)] = 0
     max_nodes: Annotated[int, Field(ge=1)] = 1
-    taints: Optional[List[Taint]] = []
+    taints: Optional[List[schema.Taint]] = []
 
     @field_validator("taints", mode="before")
-    def validate_taint_strings(cls, value: List[str | Taint]):
+    def validate_taint_strings(cls, value: List[str | schema.Taint]):
         TAINT_STR_REGEX = re.compile(r"(\w+)=(\w+):(\w+)")
         parsed_taints = []
         for taint in value:
-            if not isinstance(taint, (str, Taint)):
+            if not isinstance(taint, (str, schema.Taint)):
                 raise ValueError(
                     f"Unable to parse type: {type(taint)} as taint.  Must be a string or Taint object."
                 )
 
-            if isinstance(taint, Taint):
+            if isinstance(taint, schema.Taint):
                 parsed_taint = taint
             elif isinstance(taint, str):
                 match = TAINT_STR_REGEX.match(taint)
                 if not match:
                     raise ValueError(f"Invalid taint string: {taint}")
                 key, value, effect = match.groups()
-                parsed_taint = Taint(key=key, value=value, effect=effect)
+                parsed_taint = schema.Taint(key=key, value=value, effect=effect)
             parsed_taints.append(parsed_taint)
 
         return parsed_taints
@@ -99,10 +85,25 @@ class GCPNodeGroupInputVars(schema.Base):
     instance_type: str
     min_size: int
     max_size: int
-    node_taints: None | List[Taint]
+    node_taints: List[dict]
     labels: Dict[str, str]
     preemptible: bool
     guest_accelerators: List["GCPGuestAccelerator"]
+
+    @field_validator("node_taints", mode="before")
+    def convert_taints(cls, value: Optional[List[schema.Taint]]):
+        return [
+            dict(
+                key=taint.key,
+                value=taint.value,
+                effect={
+                    schema.TaintEffectEnum.NoSchedule: "NO_SCHEDULE",
+                    schema.TaintEffectEnum.PreferNoSchedule: "PREFER_NO_SCHEDULE",
+                    schema.TaintEffectEnum.NoExecute: "NO_EXECUTE",
+                }[taint.effect],
+            )
+            for taint in value
+        ]
 
 
 class GCPPrivateClusterConfig(schema.Base):
@@ -353,13 +354,13 @@ DEFAULT_GCP_NODE_GROUPS = {
         instance="e2-standard-4",
         min_nodes=0,
         max_nodes=5,
-        taints=[Taint(key="dedicated", value="user", effect="NoSchedule")],
+        taints=[schema.Taint(key="dedicated", value="user", effect="NoSchedule")],
     ),
     "worker": GCPNodeGroup(
         instance="e2-standard-4",
         min_nodes=0,
         max_nodes=5,
-        taints=[Taint(key="dedicated", value="worker", effect="NoSchedule")],
+        taints=[schema.Taint(key="dedicated", value="worker", effect="NoSchedule")],
     ),
 }
 

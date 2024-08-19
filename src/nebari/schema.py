@@ -91,3 +91,16 @@ def is_version_accepted(v):
     for deployment with the current Nebari package.
     """
     return Main.is_version_accepted(v)
+
+
+# TODO: Make sure the taint is actually applied to the nodes for each provider
+class TaintEffectEnum(str, enum.Enum):
+    NoSchedule: str = "NoSchedule"
+    PreferNoSchedule: str = "PreferNoSchedule"
+    NoExecute: str = "NoExecute"
+
+
+class Taint(Base):
+    key: str
+    value: str
+    effect: TaintEffectEnum
