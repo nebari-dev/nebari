@@ -93,11 +93,11 @@ resource "google_container_node_pool" "main" {
     oauth_scopes = local.node_group_oauth_scopes
 
     dynamic "taint" {
-      for_each = local.merged_node_groups[count.index].taints
+      for_each = local.merged_node_groups[count.index].node_taints
       content {
-        key    = taint.value["key"]
-        value  = taint.value["value"]
-        effect = taint.value["effect"]
+        key    = each.value["key"]
+        value  = each.value["value"]
+        effect = each.value["effect"]
       }
     }
     # taint = [
