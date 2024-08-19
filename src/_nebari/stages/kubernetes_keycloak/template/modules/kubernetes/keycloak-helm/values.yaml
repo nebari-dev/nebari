@@ -27,14 +27,18 @@ extraInitContainers: |
     - sh
     - -c
     - |
-      wget https://github.com/aerogear/keycloak-metrics-spi/releases/download/2.5.3/keycloak-metrics-spi-2.5.3.jar -P /data/ &&
-      export SHA256SUM=9b3f52f842a66dadf5ff3cc3a729b8e49042d32f84510a5d73d41a2e39f29a96 &&
-      if ! (echo "$SHA256SUM  /data/keycloak-metrics-spi-2.5.3.jar" | sha256sum -c)
-        then
-          echo "Error: Checksum not verified" && exit 1
-        else
-          chown 1000:1000 /data/keycloak-metrics-spi-2.5.3.jar &&
-          chmod 777 /data/keycloak-metrics-spi-2.5.3.jar
+      if [ ! -f /data/keycloak-metrics-spi-2.5.3.jar ]; then
+        wget https://github.com/aerogear/keycloak-metrics-spi/releases/download/2.5.3/keycloak-metrics-spi-2.5.3.jar -P /data/ &&
+        export SHA256SUM=9b3f52f842a66dadf5ff3cc3a729b8e49042d32f84510a5d73d41a2e39f29a96 &&
+        if ! (echo "$SHA256SUM  /data/keycloak-metrics-spi-2.5.3.jar" | sha256sum -c)
+          then
+            echo "Error: Checksum not verified" && exit 1
+          else
+            chown 1000:1000 /data/keycloak-metrics-spi-2.5.3.jar &&
+            chmod 777 /data/keycloak-metrics-spi-2.5.3.jar
+        fi
+      else
+        echo "File /data/keycloak-metrics-spi-2.5.3.jar already exists. Skipping download."
       fi
     image: busybox:1.36
     name: initialize-spi-metrics-jar
