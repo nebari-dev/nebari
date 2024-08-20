@@ -1,3 +1,5 @@
+import inspect
+
 import kubernetes.client.models
 from tornado import gen
 
@@ -84,4 +86,10 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
     )
 
     c.JupyterHub.template_paths = theme_template_paths
-    c = install_jhub_apps(c, spawner_to_subclass=KubeSpawner)
+
+    kwargs = {}
+    jhub_apps_signature = inspect.signature(install_jhub_apps)
+    if "oauth_no_confirm" in jhub_apps_signature.parameters:
+        kwargs["oauth_no_confirm"] = True
+
+    c = install_jhub_apps(c, spawner_to_subclass=KubeSpawner, **kwargs)
