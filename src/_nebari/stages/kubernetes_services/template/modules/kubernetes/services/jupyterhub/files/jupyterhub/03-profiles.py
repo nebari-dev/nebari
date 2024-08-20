@@ -82,7 +82,7 @@ def base_profile_home_mounts(username):
     }
 
 
-def base_profile_shared_mounts(groups, groups_to_volume_mount):
+def base_profile_shared_mounts(groups_to_volume_mount):
     """Configure the group directory mounts for user.
 
     Ensure that {shared}/{group} directory exists based on the scope availability
@@ -123,19 +123,19 @@ def base_profile_shared_mounts(groups, groups_to_volume_mount):
         }
     ]
 
-    for groups in groups_to_volume_mount:
+    for group in groups_to_volume_mount:
         extra_container_config["volumeMounts"].append(
             {
-                "mountPath": pod_shared_mount_path.format(group=groups),
+                "mountPath": pod_shared_mount_path.format(group=group),
                 "name": "shared" if home_pvc_name != shared_pvc_name else "home",
-                "subPath": pvc_shared_mount_path.format(group=groups),
+                "subPath": pvc_shared_mount_path.format(group=group),
             }
         )
         init_containers[0]["volumeMounts"].append(
             {
-                "mountPath": f"/mnt/{pvc_shared_mount_path.format(group=groups)}",
+                "mountPath": f"/mnt/{pvc_shared_mount_path.format(group=group)}",
                 "name": "shared" if home_pvc_name != shared_pvc_name else "home",
-                "subPath": pvc_shared_mount_path.format(group=groups),
+                "subPath": pvc_shared_mount_path.format(group=group),
             }
         )
 
@@ -517,7 +517,7 @@ def render_profile(
         deep_merge,
         [
             base_profile_home_mounts(username),
-            base_profile_shared_mounts(groups, groups_to_volume_mount),
+            base_profile_shared_mounts(groups_to_volume_mount),
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
             configure_user(username, groups),

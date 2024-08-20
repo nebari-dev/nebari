@@ -154,7 +154,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             role = roles[role_name]
             # fetch role assignments to groups
             role.update(
-                await self._map_users_and_groups_to_role(
+                await self._get_users_and_groups_for_role(
                     role_name,
                     token=token,
                 )
@@ -165,7 +165,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             role = roles[role_name]
             # fetch role assignments to groups
             role.update(
-                await self._map_users_and_groups_to_role(
+                await self._get_users_and_groups_for_role(
                     role_name,
                     token=token,
                     client_id=jupyterhub_client_id,
@@ -218,7 +218,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
         return list(groups_with_permission_to_mount & set(user_groups))
 
-    async def _map_users_and_groups_to_role(
+    async def _get_users_and_groups_for_role(
         self, role_name, token, client_id=None, group_name_key="path"
     ):
         """
@@ -253,16 +253,14 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             "users": [user["username"] for user in users],
         }
 
-    def _get_scope_from_role(self, role, component_filter=["jupyterhub"]):
+    def _get_scope_from_role(self, role):
         """Return scopes from role if the component is jupyterhub"""
         role_scopes = role.get("attributes", {}).get("scopes", [])
         component = role.get("attributes", {}).get("component")
         # Attributes are returned as a single-element array, unless `##` delimiter is used in Keycloak
         # See this: https://stackoverflow.com/questions/68954733/keycloak-client-role-attribute-array
-        if component == component_filter and role_scopes:
+        if component == "jupyterhub" and role_scopes:
             return self.validate_scopes(role_scopes[0].split(","))
-        elif component_filter is None:
-            return self.validate_scopes(role_scopes)
         else:
             return []
 
