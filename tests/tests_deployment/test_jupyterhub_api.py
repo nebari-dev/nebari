@@ -83,11 +83,13 @@ def test_groups_with_mount_permissions():
     role_groups = get_keycloak_role_groups(
         client_id=client_details["id"], role_name=client_role["name"]
     )
-    assert set([group["path"] for group in role_groups]) == set([
-        "/developer",
-        "/admin",
-        "/analyst",
-    ])
+    assert set([group["path"] for group in role_groups]) == set(
+        [
+            "/developer",
+            "/admin",
+            "/analyst",
+        ]
+    )
 
 
 @pytest.mark.parametrize(
