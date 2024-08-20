@@ -307,10 +307,9 @@ module "jupyterhub-openid-client" {
     {
       "name" : "allow-group-directory-creation-role",
       "description" : "Grants a group the ability to manage the creation of its corresponding mounted directory.",
-      # Adding it to analyst group such that it's applied to every user.
       "groups" : ["admin", "analyst", "developer"],
       "attributes" : {
-        # grants permissions to read services
+        # grants permissions to mount group folder to shared dir
         "scopes" : "write:shared-mount",
         "component" : "shared-directory"
       }
