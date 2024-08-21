@@ -479,9 +479,15 @@ class JupyterhubInputVars(schema.Base):
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
     cloud_provider: str = Field(alias="cloud-provider")
     jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
+    shared_fs_type: SharedFsEnum
     node_taint_tolerations: Optional[List[Toleration]] = Field(
         alias="node-taint-tolerations"
     )
+
+    @field_validator("jupyterhub_shared_storage", mode="before")
+    @classmethod
+    def handle_units(cls, value: Optional[str]) -> float:
+        return byte_unit_conversion(value, "GiB")
 
 
 class DaskGatewayInputVars(schema.Base):

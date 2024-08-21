@@ -45,6 +45,13 @@ resource "helm_release" "rook-ceph" {
       },
       csi = {
         enableRbdDriver = false, # necessary to provision block storage, but saves some cpu and memory if not needed
+        provisionerReplicas : 1, # default is 2 on different nodes
+        pluginTolerations = [
+          {
+            operator = "Exists"
+            effect   = "NoSchedule"
+          }
+        ],
       },
     })
     ],
