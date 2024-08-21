@@ -43,6 +43,19 @@ module "dask-gateway" {
 
   forwardauth_middleware_name = var.forwardauth_middleware_name
 
+  cluster = {
+    scheduler_extra_pod_config = {
+      tolerations = [
+        {
+          key      = "dedicated"
+          operator = "Equal"
+          value    = "adamworker"
+          effect   = "NoSchedule"
+        }
+      ]
+    }
+  }
+
   depends_on = [
     module.kubernetes-nfs-server,
     module.rook-ceph
