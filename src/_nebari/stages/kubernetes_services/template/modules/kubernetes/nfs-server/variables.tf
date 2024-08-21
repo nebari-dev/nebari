@@ -9,9 +9,9 @@ variable "namespace" {
 }
 
 variable "nfs_capacity" {
-  description = "Capacity of NFS server deployment"
-  type        = string
-  default     = "10Gi"
+  description = "Capacity of NFS server deployment in Gi"
+  type        = number
+  default     = 10
 }
 
 variable "node-group" {

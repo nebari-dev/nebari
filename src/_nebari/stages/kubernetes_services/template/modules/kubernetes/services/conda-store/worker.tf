@@ -28,6 +28,8 @@ resource "kubernetes_service" "nfs" {
 
 
 resource "kubernetes_persistent_volume_claim" "main" {
+  count = local.create-pvc ? 1 : 0
+
   metadata {
     name      = "${var.name}-conda-store-storage"
     namespace = var.namespace
@@ -37,7 +39,7 @@ resource "kubernetes_persistent_volume_claim" "main" {
     access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
-        storage = var.nfs_capacity
+        storage = "${var.nfs_capacity}Gi"
       }
     }
   }
@@ -134,32 +136,35 @@ resource "kubernetes_deployment" "worker" {
           }
         }
 
-        container {
-          name  = "nfs-server"
-          image = "gcr.io/google_containers/volume-nfs:0.8"
+        dynamic "container" {
+          for_each = local.enable-nfs-server-worker ? [1] : []
+          content {
+            name  = "nfs-server"
+            image = "gcr.io/google_containers/volume-nfs:0.8"
 
-          port {
-            name           = "nfs"
-            container_port = 2049
-          }
+            port {
+              name           = "nfs"
+              container_port = 2049
+            }
 
-          port {
-            name           = "mountd"
-            container_port = 20048
-          }
+            port {
+              name           = "mountd"
+              container_port = 20048
+            }
 
-          port {
-            name           = "rpcbind"
-            container_port = 111
-          }
+            port {
+              name           = "rpcbind"
+              container_port = 111
+            }
 
-          security_context {
-            privileged = true
-          }
+            security_context {
+              privileged = true
+            }
 
-          volume_mount {
-            mount_path = "/exports"
-            name       = "storage"
+            volume_mount {
+              mount_path = "/exports"
+              name       = "storage"
+            }
           }
         }
 
@@ -191,7 +196,7 @@ resource "kubernetes_deployment" "worker" {
             # directly reference the pvc may no longer be issue in
             # future
             # claim_name = kubernetes_persistent_volume_claim.main.metadata.0.name
-            claim_name = "${var.name}-conda-store-storage"
+            claim_name = local.pvc-name
           }
         }
         security_context {
@@ -200,5 +205,20 @@ resource "kubernetes_deployment" "worker" {
         }
       }
     }
+  }
+  depends_on = [
+    module.conda-store-cephfs-mount
+  ]
+
+  lifecycle {
+    replace_triggered_by = [
+      null_resource.pvc
+    ]
+  }
+}
+
+resource "null_resource" "pvc" {
+  triggers = {
+    pvc = var.conda-store-fs
   }
 }
