@@ -2,6 +2,7 @@ import re
 import ssl
 
 import requests
+from requests.cookies import CookieConflictError
 
 from tests.tests_deployment import constants
 
@@ -48,9 +49,10 @@ def create_jupyterhub_token(note):
     session = get_jupyterhub_session()
 
     # Attempt to retrieve the XSRF token from session cookies
-    xsrf_token = session.cookies.get("_xsrf") or session.cookies.get(
-        "_xsrf", path="/hub/"
-    )
+    try:
+        xsrf_token = session.cookies.get("_xsrf")
+    except CookieConflictError:
+        xsrf_token = session.cookies.get("_xsrf", path="/hub/")
 
     if not xsrf_token:
         raise ValueError("XSRF token not found in session cookies.")
