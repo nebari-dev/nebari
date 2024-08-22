@@ -34,6 +34,10 @@ def get_jupyterhub_session():
         )
         r.raise_for_status()  # Ensure the request was successful
 
+        # Refresh the page to get the XSRF token
+        r = session.get(f"https://{constants.NEBARI_HOSTNAME}/hub/", verify=False)
+        r.raise_for_status()  # Ensure the request was successful
+
     except requests.exceptions.RequestException as e:
         raise ValueError(f"An error occurred while authenticating: {e}")
 
