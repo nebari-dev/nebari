@@ -173,8 +173,8 @@ jobs:
           path: |
             ./tests/tests_e2e/playwright/videos/
 
-      - name: tmate session
-        uses: mxschmitt/action-tmate@v3
+      # - name: tmate session
+      #   uses: mxschmitt/action-tmate@v3
 
       - name: Deployment Pytests
         env:
