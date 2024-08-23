@@ -38,7 +38,7 @@ jobs:
 # Must have action variable NO_PROVIDER_CREDENTIALS_AWS set up in the repo as a binary boolean.
   test-aws-integration:
     runs-on: ubuntu-latest
-    if: ${{ vars.NO_PROVIDER_CREDENTIALS_AWS == 0 }}
+    if: ${{ vars.NO_PROVIDER_CREDENTIALS_AWS == false }}
     permissions:
       id-token: write
       contents: read
