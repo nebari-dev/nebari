@@ -12,7 +12,7 @@ resource "kubernetes_persistent_volume" "main" {
   }
   spec {
     capacity = {
-      storage = var.nfs_capacity
+      storage = "${var.nfs_capacity}Gi"
     }
     storage_class_name = kubernetes_storage_class.main.metadata.0.name
     access_modes       = ["ReadWriteMany"]
@@ -28,7 +28,7 @@ resource "kubernetes_persistent_volume" "main" {
 
 resource "kubernetes_persistent_volume_claim" "main" {
   metadata {
-    name      = "${var.name}-${var.namespace}-share"
+    name      = var.nfs-pvc-name
     namespace = var.namespace
   }
 
@@ -37,7 +37,7 @@ resource "kubernetes_persistent_volume_claim" "main" {
     storage_class_name = kubernetes_storage_class.main.metadata.0.name
     resources {
       requests = {
-        storage = var.nfs_capacity
+        storage = "${var.nfs_capacity}Gi"
       }
     }
   }
