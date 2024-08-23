@@ -83,3 +83,8 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "efs_enabled" {
+  description = "Enable EFS"
+  type        = bool
+}

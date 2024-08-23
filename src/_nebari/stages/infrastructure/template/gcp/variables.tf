@@ -99,3 +99,16 @@ variable "private_cluster_config" {
     master_ipv4_cidr_block  = string
   }))
 }
+
+variable "node_group_image_type" {
+  description = "The image type to use for the node groups"
+  type        = string
+  default     = null
+
+  validation {
+    # Only 2 values are valid according to docs
+    # https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/container_cluster#image_type
+    condition     = var.node_group_image_type == null || contains(["COS_CONTAINERD", "UBUNTU_CONTAINERD"], var.node_group_image_type)
+    error_message = "Allowed values for input_parameter are \"COS_CONTAINERD\" or \"UBUNTU_CONTAINERD\"."
+  }
+}

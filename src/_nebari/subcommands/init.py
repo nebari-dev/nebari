@@ -743,7 +743,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # DOMAIN NAME
         rich.print(
             (
-                "\n\n 🪴  Great! Now you can provide a valid domain name (i.e. the URL) to access your Nebri instance. "
+                "\n\n 🪴  Great! Now you can provide a valid domain name (i.e. the URL) to access your Nebari instance. "
                 "This should be a domain that you own. Default if unspecified is the IP of the load balancer.\n\n"
             )
         )
