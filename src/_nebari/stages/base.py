@@ -2,7 +2,9 @@ import contextlib
 import inspect
 import os
 import pathlib
+import subprocess
 import sys
+import tempfile
 from typing import Any, Dict, List, Tuple
 
 from kubernetes import client, config
@@ -68,18 +70,36 @@ class NebariKustomizeStage(NebariStage):
     def render(self) -> Dict[pathlib.Path, str]:
 
         contents = {}
-        for root, _, filenames in os.walk(self.template_directory):
-            for filename in filenames:
-                root_filename = pathlib.Path(root) / filename
-                with root_filename.open("rb") as f:
-                    contents[
-                        pathlib.Path(
-                            self.stage_prefix,
-                            pathlib.Path.relative_to(
-                                pathlib.Path(root_filename), self.template_directory
-                            ),
-                        )
-                    ] = f.read()
+        if not (self.template_directory / "kustomization.yaml").exists():
+            raise FileNotFoundError(
+                f"ERROR: After stage={self.name} "
+                "kustomization.yaml file not found in template directory"
+            )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            subprocess.run(
+                [
+                    "kustomize",
+                    "build",
+                    "-o",
+                    f"{temp_dir}",
+                    "--enable-helm",
+                    f"{self.template_directory}",
+                ],
+                check=True,
+            )
+
+            for root, _, filenames in os.walk(temp_dir):
+                for filename in filenames:
+                    root_filename = pathlib.Path(root) / filename
+                    with root_filename.open("rb") as f:
+                        contents[
+                            pathlib.Path(
+                                self.stage_prefix,
+                                pathlib.Path.relative_to(
+                                    pathlib.Path(root_filename), temp_dir
+                                ),
+                            )
+                        ] = f.read()
 
             return contents
 
