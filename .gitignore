@@ -57,3 +57,6 @@ nebari-config.yaml
 
 # Integration tests deployments
 _test_deploy
+
+# ignore downloaded helm charts
+**/template/charts
