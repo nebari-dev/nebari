@@ -3,3 +3,4 @@ prometheus:
 
   serviceMonitor:
     enabled: true
+    namespace: dev

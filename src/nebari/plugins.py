@@ -37,6 +37,7 @@ DEFAULT_STAGES_PLUGINS = [
     "_nebari.stages.kubernetes_services",
     "_nebari.stages.nebari_tf_extensions",
     "_nebari.stages.kubernetes_kuberhealthy",
+    "_nebari.stages.kubernetes_kuberhealthy_healthchecks",
 ]
 
 

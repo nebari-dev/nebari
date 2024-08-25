@@ -2,7 +2,6 @@ import contextlib
 import inspect
 import os
 import pathlib
-import subprocess
 import sys
 import tempfile
 from typing import Any, Dict, List, Tuple
@@ -10,7 +9,7 @@ from typing import Any, Dict, List, Tuple
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
-from _nebari.provider import kubernetes, terraform
+from _nebari.provider import kubernetes, kustomize, terraform
 from _nebari.stages.tf_objects import NebariTerraformState
 from nebari.hookspecs import NebariStage
 
@@ -76,17 +75,27 @@ class NebariKustomizeStage(NebariStage):
                 "kustomization.yaml file not found in template directory"
             )
         with tempfile.TemporaryDirectory() as temp_dir:
-            subprocess.run(
+            kustomize.run_kustomize_subprocess(
                 [
-                    "kustomize",
                     "build",
                     "-o",
                     f"{temp_dir}",
                     "--enable-helm",
                     f"{self.template_directory}",
-                ],
-                check=True,
+                ]
             )
+
+            # copy crds from the template directory to the temp directory
+            crds = self.template_directory.glob("charts/*/*/crds/*.yaml")
+            for crd in crds:
+                with crd.open("rb") as f:
+                    contents[
+                        pathlib.Path(
+                            self.stage_prefix,
+                            "crds",
+                            crd.name,
+                        )
+                    ] = f.read()
 
             for root, _, filenames in os.walk(temp_dir):
                 for filename in filenames:
@@ -95,6 +104,7 @@ class NebariKustomizeStage(NebariStage):
                         contents[
                             pathlib.Path(
                                 self.stage_prefix,
+                                "manifests",
                                 pathlib.Path.relative_to(
                                     pathlib.Path(root_filename), temp_dir
                                 ),
@@ -118,15 +128,31 @@ class NebariKustomizeStage(NebariStage):
         # get the path to the manifests folder
         directory = pathlib.Path(self.output_directory, self.stage_prefix)
 
+        # get the list of all the files in the crds folder
+        crds = directory.glob("crds/*.yaml")
+
         # get the list of all the files in the manifests folder
-        manifests = directory.glob("*.yaml")
+        manifests = directory.glob("manifests/*.yaml")
+
+        # apply each crd to the kubernetes cluster in alphabetical order
+        for crd in sorted(crds):
+            print(f"CRD: {crd}")
+            try:
+                kubernetes.create_from_yaml(kubernetes_client, crd, apply=True)
+            except ApiException as e:
+                self.failed_to_create = True
+                self.error_message = str(e)
+            print(f"Applied CRD: {crd}")
 
         # apply each manifest to the kubernetes cluster in alphabetical order
         for manifest in sorted(manifests):
             print(f"manifest: {manifest}")
             try:
                 kubernetes.create_from_yaml(
-                    kubernetes_client, manifest, namespace="kuberhealthy", apply=True
+                    kubernetes_client,
+                    manifest,
+                    namespace=self.config.namespace,
+                    apply=True,
                 )
             except ApiException as e:
                 self.failed_to_create = True
@@ -153,7 +179,7 @@ class NebariKustomizeStage(NebariStage):
         # get the list of all the files in the manifests folder
         manifests = directory.glob("*.yaml")
 
-        # destroy each manifest in the reverse orde02-kuberhealthyr
+        # destroy each manifest in the reverse order
 
         for manifest in sorted(manifests, reverse=True):
 
