@@ -71,7 +71,7 @@ resource "helm_release" "prometheus-grafana" {
               static_configs = [
                 {
                   targets = [
-                    "kuberhealthy.kuberhealthy.svc.cluster.local:8080"
+                    "kuberhealthy.${var.namespace}.svc.cluster.local"
                   ]
                 }
               ]
