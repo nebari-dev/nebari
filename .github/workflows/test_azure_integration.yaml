@@ -36,7 +36,7 @@ jobs:
   # Must have action variable NO_PROVIDER_CREDENTIALS_AZURE set up in the repo as a binary boolean.
   test-azure-integration:
     runs-on: ubuntu-latest
-    if: ${{ vars.NO_PROVIDER_CREDENTIALS_AZURE == 0 }}
+    if: ${{ vars.SKIP_AZURE_INTEGRATION_TEST == 0 }}
     permissions:
       id-token: write
       contents: read
