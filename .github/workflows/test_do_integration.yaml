@@ -37,7 +37,7 @@ jobs:
   # Must have action variable NO_PROVIDER_CREDENTIALS_DO set up in the repo as a binary boolean.
   test-do-integration:
     runs-on: ubuntu-latest
-    if: ${{ vars.NO_PROVIDER_CREDENTIALS_DO == 0 }}
+    if: ${{ vars.SKIP_DO_INTEGRATION_TEST != 'true' }}
     permissions:
       id-token: write
       contents: read
