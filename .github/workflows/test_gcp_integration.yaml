@@ -36,7 +36,7 @@ jobs:
   # Must have action variable NO_PROVIDER_CREDENTIALS_GCP set up in the repo as a binary boolean.
   test-gcp-integration:
     runs-on: ubuntu-latest
-    if: ${{ vars.NO_PROVIDER_CREDENTIALS_GCP == 0 }}
+    if: ${{ vars.SKIP_GCP_INTEGRATION_TEST != 'true' }}
     permissions:
       id-token: write
       contents: read
