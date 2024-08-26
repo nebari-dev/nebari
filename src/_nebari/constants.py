@@ -1,11 +1,11 @@
 CURRENT_RELEASE = "2024.7.1"
 
+HELM_VERSION = "v3.15.3"
+KUSTOMIZE_VERSION = "5.4.3"
 # NOTE: Terraform cannot be upgraded further due to Hashicorp licensing changes
 # implemented in August 2023.
 # https://www.hashicorp.com/license-faq
 TERRAFORM_VERSION = "1.5.7"
-
-KUSTOMIZE_VERSION = "5.4.3"
 
 # 04-kubernetes-ingress
 DEFAULT_TRAEFIK_IMAGE_TAG = "2.9.1"

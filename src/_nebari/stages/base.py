@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Tuple
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
-from _nebari.provider import kubernetes, kustomize, terraform
+from _nebari.provider import helm, kubernetes, kustomize, terraform
 from _nebari.stages.tf_objects import NebariTerraformState
 from nebari.hookspecs import NebariStage
 
@@ -81,6 +81,8 @@ class NebariKustomizeStage(NebariStage):
                     "-o",
                     f"{temp_dir}",
                     "--enable-helm",
+                    "--helm-command",
+                    f"{helm.download_helm_binary()}",
                     f"{self.template_directory}",
                 ]
             )

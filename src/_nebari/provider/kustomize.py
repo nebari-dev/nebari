@@ -47,7 +47,6 @@ def download_kustomize_binary(version=constants.KUSTOMIZE_VERSION) -> Path:
 
 def run_kustomize_subprocess(processargs, **kwargs) -> None:
     kustomize_path = download_kustomize_binary()
-    logger.info("kustomize at %s", kustomize_path)
     if run_subprocess_cmd([kustomize_path] + processargs, **kwargs):
         raise KustomizeException("Kustomize returned an error")
 
