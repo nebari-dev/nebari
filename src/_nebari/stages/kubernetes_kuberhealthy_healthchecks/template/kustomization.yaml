@@ -5,6 +5,8 @@ kind: Kustomization
 
 resources:
 - ./base/conda-store-healthcheck.yaml
+- ./base/jupyterhub-healthcheck.yaml
+- ./base/keycloak-healthcheck.yaml
 
 patches:
   - target:
