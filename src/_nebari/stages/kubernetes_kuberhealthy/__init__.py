@@ -7,7 +7,7 @@ from nebari.hookspecs import NebariStage, hookimpl
 
 
 class KuberhealthyInputSchema(schema.Base):
-    enabled: bool = True
+    enabled: bool = False
 
 
 class InputSchema(schema.Base):
