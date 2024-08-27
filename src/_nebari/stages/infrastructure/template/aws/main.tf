@@ -64,6 +64,7 @@ module "registry-jupyterlab" {
 
 # ====================== EFS =========================
 module "efs" {
+  count  = var.efs_enabled ? 1 : 0
   source = "./modules/efs"
 
   name = "${local.cluster_name}-jupyterhub-shared"

@@ -76,3 +76,13 @@ variable "services" {
   description = "Map of services tokens and scopes for conda-store"
   type        = map(any)
 }
+
+variable "conda-store-fs" {
+  type        = string
+  description = "Use NFS or Ceph"
+
+  validation {
+    condition     = contains(["cephfs", "nfs"], var.conda-store-fs)
+    error_message = "Allowed values for input_parameter are \"cephfs\", or \"nfs\"."
+  }
+}

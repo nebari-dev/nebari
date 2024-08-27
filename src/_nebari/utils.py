@@ -353,3 +353,56 @@ def check_environment_variables(variables: Set[str], reference: str) -> None:
             f"""Missing the following required environment variables: {required_variables}\n
             Please see the documentation for more information: {reference}"""
         )
+
+
+def byte_unit_conversion(byte_size_str: str, output_unit: str = "B") -> float:
+    """Converts string representation of byte size to another unit and returns float output
+
+    e.g. byte_unit_conversion("1 KB", "B") -> 1000.0
+    e.g. byte_unit_conversion("1 KiB", "B") -> 1024.0
+    """
+    byte_size_str = byte_size_str.lower()
+    output_unit = output_unit.lower()
+
+    units_multiplier = {
+        "b": 1,
+        "k": 1000,
+        "m": 1000**2,
+        "g": 1000**3,
+        "t": 1000**4,
+        "kb": 1000,
+        "mb": 1000**2,
+        "gb": 1000**3,
+        "tb": 1000**4,
+        "ki": 1024,
+        "mi": 1024**2,
+        "gi": 1024**3,
+        "ti": 1024**4,
+        "kib": 1024,
+        "mib": 1024**2,
+        "gib": 1024**3,
+        "tib": 1024**4,
+    }
+
+    if output_unit not in units_multiplier:
+        raise ValueError(
+            f'Invalid input unit "{output_unit}".  Valid units are {units_multiplier.keys()}'
+        )
+
+    str_pattern = r"\s*^(\d+(?:\.\d*){0,1})\s*([a-zA-Z]*)\s*$"
+    pattern = re.compile(str_pattern, re.IGNORECASE)
+    match = pattern.search(byte_size_str)
+
+    if not match:
+        raise ValueError("Invalid byte size string")
+    value = float(match.group(1))
+    input_unit = match.group(2)
+    if not input_unit:
+        input_unit = "b"
+
+    if input_unit not in units_multiplier:
+        raise ValueError(
+            f'Invalid input unit "{input_unit}".  Valid units are {list(units_multiplier.keys())}'
+        )
+
+    return value * units_multiplier[input_unit] / units_multiplier[output_unit]
