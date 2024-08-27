@@ -52,7 +52,8 @@ def _navigator_session(request, browser_name, pytestconfig):
             nav.stop_server()
         except Exception as e:
             logger.debug(e)
-        nav.teardown()
+        finally:
+            nav.teardown()
 
 
 @pytest.fixture(scope="function")

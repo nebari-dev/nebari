@@ -187,9 +187,11 @@ class Navigator:
         we look for html elements that exist when no server is running, if
         they aren't visible, we check for an existing server start option.
         """
-        # wait for the page to load
-        logout_button = self.page.get_by_text("Logout", exact=True)
-        logout_button.wait_for(state="attached", timeout=90000)
+        self.page.get_by_text("Logout", exact=True)
+        file_menu = self.page.get_by_text("File", exact=True)
+        if file_menu.is_visible():
+            logger.debug("Server is already up!")
+            return
 
         # if the server is already running
         start_locator = self.page.get_by_role("button", name="My Server", exact=True)
@@ -255,7 +257,9 @@ class Navigator:
         if popup:
             self._set_environment_via_popup(kernel=None)
 
-        # go to Kernel menu
+        dialog = self.page.get_by_role("dialog")
+        if dialog.is_visible():
+            dialog.get_by_role("button", name="No Kernel").click()
         kernel_menuitem = self.page.get_by_role("menuitem", name="Kernel", exact=True)
         kernel_menuitem.click()
         # shut down multiple running kernels
@@ -284,8 +288,11 @@ class Navigator:
         self.page.get_by_role("menuitem", name="Close All Tabs", exact=True).click()
 
         # there may be a popup to save your work, don't save
+        time.sleep(2)
         if self.page.get_by_text("Save your work", exact=True).is_visible():
-            self.page.get_by_role("button", name="Discard", exact=True).click()
+            self.page.get_by_role(
+                "button", name="Discard changes to file", exact=True
+            ).click()
 
         # wait to ensure that the Launcher is showing
         self.page.get_by_text("VS Code [↗]", exact=True).wait_for(
