@@ -1,11 +1,8 @@
 apiVersion: comcast.github.io/v1
 kind: KuberhealthyCheck
-labels:
-  serviceChecked: conda-store
-  checkType: http
 metadata:
   name: conda-store-http-check
-  namespace: kuberhealthy
+  namespace: dev
 spec:
   runInterval: 5m
   timeout: 10m
