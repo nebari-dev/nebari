@@ -100,7 +100,7 @@ def get_keycloak_admin_from_config(config: schema.Main):
             password=keycloak_password,
             realm_name=os.environ.get("KEYCLOAK_REALM", "nebari"),
             user_realm_name="master",
-            auto_refresh_token=("get", "put", "post", "delete"),
+            # auto_refresh_token=("get", "put", "post", "delete"),
             verify=should_verify_tls,
         )
     except (

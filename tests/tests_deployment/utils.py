@@ -2,7 +2,7 @@ import re
 import ssl
 
 import requests
-from requests.cookies import CookieConflictError
+import requests.cookies
 
 from tests.tests_deployment import constants
 
@@ -12,35 +12,42 @@ def get_jupyterhub_session():
     session.cookies.clear()
 
     try:
-        r = session.get(
+        # Initial request to get the authentication URL
+        response = session.get(
             f"https://{constants.NEBARI_HOSTNAME}/hub/oauth_login", verify=False
         )
-        r.raise_for_status()  # Ensure the request was successful
+        response.raise_for_status()
 
-        auth_url_match = re.search('action="([^"]+)"', r.content.decode("utf8"))
+        # Extract the authentication URL from the response
+        auth_url_match = re.search('action="([^"]+)"', response.content.decode("utf8"))
+
         if not auth_url_match:
             raise ValueError("Authentication URL not found in response.")
 
         auth_url = auth_url_match.group(1).replace("&amp;", "&")
 
-        r = session.post(
+        # Authenticate using the credentials
+        auth_data = {
+            "username": constants.KEYCLOAK_USERNAME,
+            "password": constants.KEYCLOAK_PASSWORD,
+            "credentialId": "",
+        }
+        response = session.post(
             auth_url,
             headers={"Content-Type": "application/x-www-form-urlencoded"},
-            data={
-                "username": constants.KEYCLOAK_USERNAME,
-                "password": constants.KEYCLOAK_PASSWORD,
-                "credentialId": "",
-            },
+            data=auth_data,
             verify=False,
         )
-        r.raise_for_status()  # Ensure the request was successful
+        response.raise_for_status()
 
-        # Refresh the page to get the XSRF token
-        r = session.get(f"https://{constants.NEBARI_HOSTNAME}/hub/", verify=False)
-        r.raise_for_status()  # Ensure the request was successful
+        # Refresh the session to get the XSRF token
+        response = session.get(
+            f"https://{constants.NEBARI_HOSTNAME}/hub/", verify=False
+        )
+        response.raise_for_status()
 
-    except requests.exceptions.RequestException as e:
-        raise ValueError(f"An error occurred while authenticating: {e}")
+    except requests.RequestException as e:
+        raise ValueError(f"An error occurred during authentication: {e}")
 
     return session
 
@@ -48,10 +55,10 @@ def get_jupyterhub_session():
 def create_jupyterhub_token(note):
     session = get_jupyterhub_session()
 
-    # Attempt to retrieve the XSRF token from session cookies
     try:
+        # Retrieve the XSRF token from session cookies
         xsrf_token = session.cookies.get("_xsrf")
-    except CookieConflictError:
+    except requests.cookies.CookieConflictError:
         xsrf_token = session.cookies.get("_xsrf", path="/hub/")
 
     if not xsrf_token:
@@ -62,22 +69,14 @@ def create_jupyterhub_token(note):
         "X-XSRFToken": xsrf_token,
     }
 
-    data = {"note": note, "expires_in": None}
-
     url = f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens"
 
     try:
-        response = session.post(url, headers=headers, json=data, verify=False)
-        response.raise_for_status()  # Ensure the request was successful
-
-        # Handle 403 Forbidden response by updating the XSRF token
-        if response.status_code == 403:
-            xsrf_token = response.cookies.get("_xsrf")
-            if xsrf_token:
-                headers["X-XSRFToken"] = xsrf_token
-                response = session.post(url, headers=headers, json=data, verify=False)
-
-    except requests.exceptions.RequestException as e:
+        response = session.post(
+            url, headers=headers, json={"note": note, "expires_in": None}, verify=False
+        )
+        response.raise_for_status()
+    except requests.RequestException as e:
         raise ValueError(f"An error occurred while creating the token: {e}")
 
     return response
