@@ -58,12 +58,11 @@ def create_jupyterhub_token(note):
     try:
         # Retrieve the XSRF token from session cookies
         xsrf_token = session.cookies.get("_xsrf")
-        if not xsrf_token:
-            xsrf_token = session.cookies.get("_xsrf", path="/hub/")
-        if not xsrf_token:
-            raise ValueError("XSRF token not found in session cookies.")
-    except requests.cookies.CookieConflictError as e:
-        raise ValueError(f"Cookie conflict error encountered: {e}")
+    except requests.cookies.CookieConflictError:
+        xsrf_token = session.cookies.get("_xsrf", path="/hub/")
+
+    if not xsrf_token:
+        raise ValueError("XSRF token not found in session cookies.")
 
     headers = {
         "Referer": f"https://{constants.NEBARI_HOSTNAME}/hub/token",
