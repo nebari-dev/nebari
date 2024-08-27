@@ -17,3 +17,8 @@ output "service-tokens" {
   description = "Service tokens for conda-store"
   value       = { for k, _ in var.services : k => base64encode(random_password.conda_store_service_token[k].result) }
 }
+
+output "pvc" {
+  description = "Shared PVC name for conda-store"
+  value       = local.shared-pvc
+}

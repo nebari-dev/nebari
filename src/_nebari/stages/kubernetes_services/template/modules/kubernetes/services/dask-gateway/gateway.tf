@@ -18,7 +18,7 @@ resource "kubernetes_secret" "gateway" {
       cluster-image                        = var.cluster-image
       profiles                             = var.profiles
       default-conda-store-namespace        = var.default-conda-store-namespace
-      conda-store-pvc                      = var.conda-store-pvc
+      conda-store-pvc                      = var.conda-store-pvc.name
       conda-store-mount                    = var.conda-store-mount
       worker-node-group                    = var.worker-node-group
       conda-store-api-token                = var.conda-store-api-token
@@ -170,7 +170,7 @@ resource "kubernetes_deployment" "gateway" {
         volume {
           name = "conda-store"
           persistent_volume_claim {
-            claim_name = var.conda-store-pvc
+            claim_name = var.conda-store-pvc.name
           }
         }
 
@@ -244,5 +244,15 @@ resource "kubernetes_deployment" "gateway" {
         }
       }
     }
+  }
+
+  lifecycle {
+    replace_triggered_by = [null_resource.conda-store-pvc]
+  }
+}
+
+resource "null_resource" "conda-store-pvc" {
+  triggers = {
+    pvc = var.conda-store-pvc.id
   }
 }
