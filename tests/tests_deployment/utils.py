@@ -58,11 +58,12 @@ def create_jupyterhub_token(note):
     try:
         # Retrieve the XSRF token from session cookies
         xsrf_token = session.cookies.get("_xsrf")
-    except requests.cookies.CookieConflictError:
-        xsrf_token = session.cookies.get("_xsrf", path="/hub/")
-
-    if not xsrf_token:
-        raise ValueError("XSRF token not found in session cookies.")
+        if not xsrf_token:
+            xsrf_token = session.cookies.get("_xsrf", path="/hub/")
+        if not xsrf_token:
+            raise ValueError("XSRF token not found in session cookies.")
+    except requests.cookies.CookieConflictError as e:
+        raise ValueError(f"Cookie conflict error encountered: {e}")
 
     headers = {
         "Referer": f"https://{constants.NEBARI_HOSTNAME}/hub/token",
@@ -70,14 +71,18 @@ def create_jupyterhub_token(note):
     }
 
     url = f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}/tokens"
+    payload = {"note": note, "expires_in": None}
 
     try:
-        response = session.post(
-            url, headers=headers, json={"note": note, "expires_in": None}, verify=False
-        )
+        response = session.post(url, headers=headers, json=payload, verify=False)
+        if response.status_code == 403:
+            # Retry with refreshed XSRF token if initial attempt is forbidden
+            xsrf_token = response.cookies.get("_xsrf")
+            headers["X-XSRFToken"] = xsrf_token
+            response = session.post(url, headers=headers, json=payload, verify=False)
         response.raise_for_status()
     except requests.RequestException as e:
-        raise ValueError(f"An error occurred while creating the token: {e}")
+        raise ValueError(f"Failed to create JupyterHub token: {e}")
 
     return response
 
