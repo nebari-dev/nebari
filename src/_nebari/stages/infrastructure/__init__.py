@@ -6,7 +6,7 @@ import pathlib
 import re
 import sys
 import tempfile
-from typing import Annotated, Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
 from pydantic import Field, field_validator, model_validator
 
@@ -134,6 +134,7 @@ class AWSNodeLaunchTemplate(schema.Base):
     ebs_device_name: Optional[str] = None
     ebs_volume_size: Optional[int] = None
     ebs_volume_type: Optional[str] = None
+    ami_id: Optional[str] = None
     vars: Optional[Dict[str, str]] = None
 
 
@@ -146,6 +147,7 @@ class AWSNodeGroupInputVars(schema.Base):
     max_size: int
     single_subnet: bool
     permissions_boundary: Optional[str] = None
+    ami_type: Optional[Literal["AL2_x86_64", "AL2_x86_64_GPU", "CUSTOM"]] = "AL2_x86_64"
     node_launch_template: Optional[AWSNodeLaunchTemplate] = None
 
 
@@ -836,6 +838,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         single_subnet=node_group.single_subnet,
                         permissions_boundary=node_group.permissions_boundary,
                         node_launch_template=node_group.node_launch_template,
+                        ami_type=(
+                            node_group.ami_type
+                            if not node_group.gpu
+                            else "AL2_x86_64_GPU"
+                        ),
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()
                 ],

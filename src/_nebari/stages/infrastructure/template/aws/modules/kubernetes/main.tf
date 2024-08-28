@@ -28,11 +28,19 @@ resource "aws_launch_template" "main" {
   # count    = var.node_prebootstrap_command != null ? length(var.node_groups) : length(local.cust_ami_node_index)
   # name     = var.node_prebootstrap_command != null ? var.node_groups[count.index].name : var.node_groups[local.cust_ami_node_index[count.index]].name
   # image_id = var.node_prebootstrap_command != null ? var.node_groups[count.index].custom_ami : var.node_groups[local.cust_ami_node_index[count.index]].custom_ami
-  count = var.node_launch_template != null ? length(var.node_groups) : 0
-  name  = var.node_launch_template != null ? var.node_groups[count.index].name : null
+  # count = var.node_launch_template != null ? length(var.node_groups) : 0
+  # name  = var.node_launch_template != null ? var.node_groups[count.index].name : null
+  for_each = {
+    for node_group in var.node_groups :
+    node_group.name => node_group
+    if node_group.launch_template != null
+  }
 
+  name     = each.value.name
+  image_id = each.value.launch_template.ami_id
 
   vpc_security_group_ids = var.cluster_security_groups
+
 
   metadata_options {
     http_tokens            = "required"
@@ -73,8 +81,10 @@ resource "aws_eks_node_group" "main" {
   subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, 0)] : var.cluster_subnets
 
   instance_types = [var.node_groups[count.index].instance_type]
-  ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" : "AL2_x86_64"
-  disk_size      = 50
+  # ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" :
+  # "AL2_x86_64"
+  ami_type  = var.node_groups[count.index].ami_type
+  disk_size = 50
 
   scaling_config {
     min_size     = var.node_groups[count.index].min_size
