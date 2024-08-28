@@ -116,6 +116,11 @@ module "kubernetes-nfs-server" {
   node-group   = var.node_groups.general
 }
 
+moved {
+  from = module.jupyterhub-nfs-mount
+  to   = module.jupyterhub-nfs-mount[0]
+}
+
 module "jupyterhub-nfs-mount" {
   count  = local.jupyterhub-fs == "nfs" ? 1 : 0
   source = "./modules/kubernetes/nfs-mount"
