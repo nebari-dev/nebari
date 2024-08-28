@@ -11,6 +11,7 @@ from pydantic import field_validator
 from _nebari.provider import terraform
 from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.tf_objects import NebariConfig
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
@@ -170,8 +171,9 @@ class TerraformStateStage(NebariTerraformStage):
             return []
 
     def tf_objects(self) -> List[Dict]:
+        resources = [NebariConfig(self.config)]
         if self.config.provider == schema.ProviderEnum.gcp:
-            return [
+            return resources + [
                 terraform.Provider(
                     "google",
                     project=self.config.google_cloud_platform.project,
@@ -179,13 +181,13 @@ class TerraformStateStage(NebariTerraformStage):
                 ),
             ]
         elif self.config.provider == schema.ProviderEnum.aws:
-            return [
+            return resources + [
                 terraform.Provider(
                     "aws", region=self.config.amazon_web_services.region
                 ),
             ]
         else:
-            return []
+            return resources
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         if self.config.provider == schema.ProviderEnum.do:
@@ -231,6 +233,21 @@ class TerraformStateStage(NebariTerraformStage):
     def deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
+        directory = str(self.output_directory / self.stage_prefix)
+        state = terraform.show(directory)
+        nebari_config_state = None
+        for resource in state["values"]["root_module"]["resources"]:
+            if resource["address"] == "terraform_data.nebari_config":
+                from nebari.plugins import nebari_plugin_manager
+
+                nebari_config_state = nebari_plugin_manager.config_schema(
+                    **resource["values"]["input"]
+                )
+                break
+
+        # calculate any differences between the current and remote state
+        print(nebari_config_state)
+        print(self.config)
         with super().deploy(stage_outputs, disable_prompt):
             env_mapping = {}
             # DigitalOcean terraform remote state using Spaces Bucket

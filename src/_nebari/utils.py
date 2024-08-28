@@ -44,7 +44,7 @@ def change_directory(directory):
     os.chdir(current_directory)
 
 
-def run_subprocess_cmd(processargs, **kwargs):
+def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
     """Runs subprocess command with realtime stdout logging with optional line prefix."""
     if "prefix" in kwargs:
         line_prefix = f"[{kwargs['prefix']}]: ".encode("utf-8")
@@ -78,6 +78,7 @@ def run_subprocess_cmd(processargs, **kwargs):
         timeout_timer = threading.Timer(timeout, kill_process)
         timeout_timer.start()
 
+    output = []
     for line in iter(lambda: process.stdout.readline(), b""):
         full_line = line_prefix + line
         if strip_errors:
@@ -87,16 +88,24 @@ def run_subprocess_cmd(processargs, **kwargs):
             )  # Remove red ANSI escape code
             full_line = full_line.encode("utf-8")
 
-        sys.stdout.buffer.write(full_line)
-        sys.stdout.flush()
+        if capture_output:
+            output.append(full_line)
+        else:
+            sys.stdout.buffer.write(full_line)
+            sys.stdout.flush()
 
     if timeout_timer is not None:
         timeout_timer.cancel()
 
     process.stdout.close()
-    return process.wait(
+    exit_code = process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout
+
+    if capture_output:
+        return exit_code, b"".join(output)
+    else:
+        return exit_code, None
 
 
 def load_yaml(config_filename: Path):
