@@ -146,6 +146,9 @@ jobs:
           nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
           nebari keycloak listusers --config nebari-config.yaml
 
+      - name: Get nebari-config.yaml full path
+        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
+
       ### DEPLOYMENT TESTS
       - name: Deployment Pytests
         env:
@@ -158,9 +161,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Get nebari-config.yaml full path
-        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
 
       - name: Cypress run
         uses: cypress-io/github-action@v6
