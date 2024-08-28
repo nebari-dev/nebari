@@ -1,4 +1,5 @@
 import contextlib
+import enum
 import inspect
 import os
 import pathlib
@@ -18,6 +19,7 @@ from _nebari.provider.cloud import (
     google_cloud,
 )
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.kubernetes_services import SharedFsEnum
 from _nebari.stages.tf_objects import NebariTerraformState
 from _nebari.utils import (
     AZURE_NODE_RESOURCE_GROUP_SUFFIX,
@@ -73,6 +75,16 @@ class GCPPrivateClusterConfig(schema.Base):
     master_ipv4_cidr_block: str
 
 
+@schema.yaml_object(schema.yaml)
+class GCPNodeGroupImageTypeEnum(str, enum.Enum):
+    UBUNTU_CONTAINERD = "UBUNTU_CONTAINERD"
+    COS_CONTAINERD = "COS_CONTAINERD"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
 class GCPInputVars(schema.Base):
     name: str
     environment: str
@@ -90,6 +102,7 @@ class GCPInputVars(schema.Base):
     ip_allocation_policy: Optional[Dict[str, str]] = None
     master_authorized_networks_config: Optional[Dict[str, str]] = None
     private_cluster_config: Optional[GCPPrivateClusterConfig] = None
+    node_group_image_type: GCPNodeGroupImageTypeEnum = None
 
 
 class AzureNodeGroupInputVars(schema.Base):
@@ -139,6 +152,7 @@ class AWSInputVars(schema.Base):
     permissions_boundary: Optional[str] = None
     kubeconfig_filename: str = get_kubeconfig_filename()
     tags: Dict[str, str] = {}
+    efs_enabled: bool
 
 
 def _calculate_asg_node_group_map(config: schema.Main):
@@ -315,7 +329,7 @@ class GCPNodeGroup(schema.Base):
 
 
 DEFAULT_GCP_NODE_GROUPS = {
-    "general": GCPNodeGroup(instance="e2-highmem-4", min_nodes=1, max_nodes=1),
+    "general": GCPNodeGroup(instance="e2-standard-8", min_nodes=1, max_nodes=1),
     "user": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
     "worker": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
 }
@@ -752,6 +766,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 ip_allocation_policy=self.config.google_cloud_platform.ip_allocation_policy,
                 master_authorized_networks_config=self.config.google_cloud_platform.master_authorized_networks_config,
                 private_cluster_config=self.config.google_cloud_platform.private_cluster_config,
+                node_group_image_type=(
+                    GCPNodeGroupImageTypeEnum.UBUNTU_CONTAINERD
+                    if self.config.storage.type == SharedFsEnum.cephfs
+                    else GCPNodeGroupImageTypeEnum.COS_CONTAINERD
+                ),
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.azure:
             return AzureInputVars(
@@ -810,6 +829,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 vpc_cidr_block=self.config.amazon_web_services.vpc_cidr_block,
                 permissions_boundary=self.config.amazon_web_services.permissions_boundary,
                 tags=self.config.amazon_web_services.tags,
+                efs_enabled=self.config.storage.type == SharedFsEnum.efs,
             ).model_dump()
         else:
             raise ValueError(f"Unknown provider: {self.config.provider}")

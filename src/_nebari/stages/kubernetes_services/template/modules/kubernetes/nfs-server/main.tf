@@ -8,7 +8,7 @@ resource "kubernetes_persistent_volume_claim" "main" {
     access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
-        storage = var.nfs_capacity
+        storage = "${var.nfs_capacity}Gi"
       }
     }
   }

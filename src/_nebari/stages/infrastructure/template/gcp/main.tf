@@ -36,4 +36,5 @@ module "kubernetes" {
   release_channel                   = var.release_channel
   tags                              = var.tags
   labels                            = var.labels
+  node_group_image_type             = var.node_group_image_type
 }
