@@ -49,10 +49,10 @@ resource "aws_launch_template" "main" {
   }
 
   block_device_mappings {
-    device_name = "/dev/xvda"
+    device_name = each.value.launch_template.ebs_device_name
     ebs {
-      volume_size = 50
-      volume_type = "gp2"
+      volume_size = each.value.launch_template.ebs_volume_size
+      volume_type = each.value.launch_template.ebs_volume_type
     }
   }
 
@@ -61,12 +61,12 @@ resource "aws_launch_template" "main" {
     templatefile(
       "${path.module}/files/user_data.tftpl",
       {
-        # node_prebootstrap_command = var.node_prebootstrap_command
-        # split_user_data           = var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami != null ? true : false
-        # include_bootstrap_cmd     = var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami == null ? false : true
-        cluster_name           = aws_eks_cluster.main.name
-        cluster_cert_authority = aws_eks_cluster.main.certificate_authority[0].data
-        cluster_endpoint       = aws_eks_cluster.main.endpoint
+        node_prebootstrap_command = each.value.launch_template.pre_bootstrap_command
+        user_data                 = each.value.launch_template.user_data
+        split_user_data           = each.value.launch_template.user_data != null ? true : false
+        cluster_name              = aws_eks_cluster.main.name
+        cluster_cert_authority    = aws_eks_cluster.main.certificate_authority[0].data
+        cluster_endpoint          = aws_eks_cluster.main.endpoint
       }
     )
   )
@@ -84,12 +84,21 @@ resource "aws_eks_node_group" "main" {
   # ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" :
   # "AL2_x86_64"
   ami_type  = var.node_groups[count.index].ami_type
-  disk_size = 50
+  disk_size = var.node_groups[count.index].launch_template == null ? 50 : null
 
   scaling_config {
     min_size     = var.node_groups[count.index].min_size
     desired_size = var.node_groups[count.index].desired_size
     max_size     = var.node_groups[count.index].max_size
+  }
+
+  # Only set launch_template if its node_group counterpart parameter is not null
+  dynamic "launch_template" {
+    for_each = var.node_groups[count.index].launch_template != null ? [var.node_groups[count.index].launch_template] : []
+    content {
+      id      = aws_launch_template.main[each.key].id
+      version = aws_launch_template.main[each.key].latest_version
+    }
   }
 
   labels = {

@@ -31,14 +31,21 @@ variable "kubernetes_version" {
 variable "node_groups" {
   description = "AWS node groups"
   type = list(object({
-    name          = string
-    instance_type = string
-    gpu           = bool
-    min_size      = number
-    desired_size  = number
-    max_size      = number
-    single_subnet = bool
+    name            = string
+    instance_type   = string
+    gpu             = bool
+    min_size        = number
+    desired_size    = number
+    max_size        = number
+    single_subnet   = bool
+    launch_template = string
+    ami_type        = string
   }))
+}
+
+variable "node_launch_template" {
+  description = "Custom launch template for EKS nodes (placeholder)"
+  type        = string
 }
 
 variable "availability_zones" {

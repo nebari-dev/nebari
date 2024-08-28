@@ -131,9 +131,9 @@ class AzureInputVars(schema.Base):
 class AWSNodeLaunchTemplate(schema.Base):
     user_data: Optional[str] = None
     pre_bootstrap_command: Optional[str] = None
-    ebs_device_name: Optional[str] = None
-    ebs_volume_size: Optional[int] = None
-    ebs_volume_type: Optional[str] = None
+    ebs_device_name: Optional[str] = "/dev/xvda"
+    ebs_volume_size: Optional[int] = 50
+    ebs_volume_type: Optional[str] = "gp2"
     ami_id: Optional[str] = None
     vars: Optional[Dict[str, str]] = None
 
@@ -148,7 +148,7 @@ class AWSNodeGroupInputVars(schema.Base):
     single_subnet: bool
     permissions_boundary: Optional[str] = None
     ami_type: Optional[Literal["AL2_x86_64", "AL2_x86_64_GPU", "CUSTOM"]] = "AL2_x86_64"
-    node_launch_template: Optional[AWSNodeLaunchTemplate] = None
+    launch_template: Optional[AWSNodeLaunchTemplate] = None
 
 
 class AWSInputVars(schema.Base):
@@ -822,7 +822,6 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             return AWSInputVars(
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
-                node_launch_template=self.config.amazon_web_services.node_launch_template,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
                 region=self.config.amazon_web_services.region,
@@ -837,7 +836,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         max_size=node_group.max_nodes,
                         single_subnet=node_group.single_subnet,
                         permissions_boundary=node_group.permissions_boundary,
-                        node_launch_template=node_group.node_launch_template,
+                        launch_template=(
+                            self.config.amazon_web_services.node_launch_template
+                            if not node_group.node_launch_template
+                            else node_group.node_launch_template
+                        ),
                         ami_type=(
                             node_group.ami_type
                             if not node_group.gpu
