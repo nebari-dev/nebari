@@ -128,6 +128,15 @@ class AzureInputVars(schema.Base):
     workload_identity_enabled: bool = False
 
 
+class AWSNodeLaunchTemplate(schema.Base):
+    user_data: Optional[str] = None
+    pre_bootstrap_command: Optional[str] = None
+    ebs_device_name: Optional[str] = None
+    ebs_volume_size: Optional[int] = None
+    ebs_volume_type: Optional[str] = None
+    vars: Optional[Dict[str, str]] = None
+
+
 class AWSNodeGroupInputVars(schema.Base):
     name: str
     instance_type: str
@@ -137,6 +146,7 @@ class AWSNodeGroupInputVars(schema.Base):
     max_size: int
     single_subnet: bool
     permissions_boundary: Optional[str] = None
+    node_launch_template: Optional[AWSNodeLaunchTemplate] = None
 
 
 class AWSInputVars(schema.Base):
@@ -146,6 +156,7 @@ class AWSInputVars(schema.Base):
     existing_subnet_ids: Optional[List[str]] = None
     region: str
     kubernetes_version: str
+    node_launch_template: Optional[AWSNodeLaunchTemplate] = None
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -465,6 +476,7 @@ class AmazonWebServicesProvider(schema.Base):
     kubernetes_version: str
     availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
+    node_launch_template: Optional[AWSNodeLaunchTemplate] = None
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -808,6 +820,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             return AWSInputVars(
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
+                node_launch_template=self.config.amazon_web_services.node_launch_template,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
                 region=self.config.amazon_web_services.region,
@@ -822,6 +835,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         max_size=node_group.max_nodes,
                         single_subnet=node_group.single_subnet,
                         permissions_boundary=node_group.permissions_boundary,
+                        node_launch_template=node_group.node_launch_template,
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()
                 ],

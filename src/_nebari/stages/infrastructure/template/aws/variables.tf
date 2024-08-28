@@ -56,6 +56,12 @@ variable "kubeconfig_filename" {
   type        = string
 }
 
+variable "node_launch_template" {
+  description = "Custom launch template for EKS nodes"
+  type        = string
+  default     = null
+}
+
 variable "eks_endpoint_private_access" {
   type    = bool
   default = false

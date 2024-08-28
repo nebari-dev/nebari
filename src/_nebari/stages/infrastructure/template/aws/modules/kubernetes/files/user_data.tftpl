@@ -1,0 +1,22 @@
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
+
+--==MYBOUNDARY==
+Content-Type: text/x-shellscript; charset="us-ascii"
+
+%{ if node_prebootstrap_command != null }${node_prebootstrap_command}%{ endif }
+
+%{ if split_user_data == true }
+--==MYBOUNDARY==
+Content-Type: text/x-shellscript; charset="us-ascii"
+#!/bin/bash
+
+export CLUSTER_NAME="{{ cluster_name }}"
+export CLUSTER_CERT_AUTHORITY="{{ cluster_cert_authority }}"
+export CLUSTER_ENDPOINT="{{ cluster_endpoint }}"
+
+{{ user_data }}
+
+%{ endif }
+
+--==MYBOUNDARY==--

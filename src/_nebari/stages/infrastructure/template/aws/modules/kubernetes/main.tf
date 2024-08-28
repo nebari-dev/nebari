@@ -20,6 +20,49 @@ resource "aws_eks_cluster" "main" {
   tags = merge({ Name = var.name }, var.tags)
 }
 
+## aws_launch_template user_data invocation
+## If using a Custom AMI, then the /etc/eks/bootstrap cmds and args must be included/modified,
+## otherwise, on default AWS EKS Node AMI, the bootstrap cmd is appended automatically
+resource "aws_launch_template" "main" {
+  # Invoke launch_template only if var.node_prebootstrap_command is not null or custom_ami is not null
+  # count    = var.node_prebootstrap_command != null ? length(var.node_groups) : length(local.cust_ami_node_index)
+  # name     = var.node_prebootstrap_command != null ? var.node_groups[count.index].name : var.node_groups[local.cust_ami_node_index[count.index]].name
+  # image_id = var.node_prebootstrap_command != null ? var.node_groups[count.index].custom_ami : var.node_groups[local.cust_ami_node_index[count.index]].custom_ami
+  count = var.node_launch_template != null ? length(var.node_groups) : 0
+  name  = var.node_launch_template != null ? var.node_groups[count.index].name : null
+
+
+  vpc_security_group_ids = var.cluster_security_groups
+
+  metadata_options {
+    http_tokens            = "required"
+    http_endpoint          = "enabled"
+    instance_metadata_tags = "enabled"
+  }
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size = 50
+      volume_type = "gp2"
+    }
+  }
+
+  # https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-basics
+  user_data = base64encode(
+    templatefile(
+      "${path.module}/files/user_data.tftpl",
+      {
+        # node_prebootstrap_command = var.node_prebootstrap_command
+        # split_user_data           = var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami != null ? true : false
+        # include_bootstrap_cmd     = var.node_prebootstrap_command != null && var.node_groups[count.index].custom_ami == null ? false : true
+        cluster_name           = aws_eks_cluster.main.name
+        cluster_cert_authority = aws_eks_cluster.main.certificate_authority[0].data
+        cluster_endpoint       = aws_eks_cluster.main.endpoint
+      }
+    )
+  )
+}
 
 resource "aws_eks_node_group" "main" {
   count = length(var.node_groups)
