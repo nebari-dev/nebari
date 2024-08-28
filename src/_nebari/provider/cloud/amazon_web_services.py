@@ -7,25 +7,18 @@ from typing import Dict, List, Optional
 import boto3
 from botocore.exceptions import ClientError, EndpointConnectionError
 
-from _nebari import constants
+from _nebari.constants import AWS_ENV_DOCS
 from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari.utils import check_environment_variables
 from nebari import schema
 
 MAX_RETRIES = 5
 DELAY = 5
 
 
-def check_credentials():
-    """Check for AWS credentials are set in the environment."""
-    for variable in {
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-    }:
-        if variable not in os.environ:
-            raise ValueError(
-                f"""Missing the following required environment variable: {variable}\n
-                Please see the documentation for more information: {constants.AWS_ENV_DOCS}"""
-            )
+def check_credentials() -> None:
+    required_variables = {"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"}
+    check_environment_variables(required_variables, AWS_ENV_DOCS)
 
 
 @functools.lru_cache()
@@ -141,6 +134,46 @@ def aws_get_vpc_id(name: str, namespace: str, region: str) -> Optional[str]:
             if tag["Key"] == "Name" and tag["Value"] == cluster_name:
                 return vpc["VpcId"]
     return None
+
+
+def set_asg_tags(asg_node_group_map: Dict[str, str], region: str) -> None:
+    """Set tags for AWS node scaling from zero to work."""
+    session = aws_session(region=region)
+    autoscaling_client = session.client("autoscaling")
+    tags = []
+    for asg_name, node_group in asg_node_group_map.items():
+        tags.append(
+            {
+                "Key": "k8s.io/cluster-autoscaler/node-template/label/dedicated",
+                "Value": node_group,
+                "ResourceId": asg_name,
+                "ResourceType": "auto-scaling-group",
+                "PropagateAtLaunch": True,
+            }
+        )
+    autoscaling_client.create_or_update_tags(Tags=tags)
+
+
+def aws_get_asg_node_group_mapping(
+    name: str, namespace: str, region: str
+) -> Dict[str, str]:
+    """Return a dictionary of autoscaling groups and their associated node groups."""
+    asg_node_group_mapping = {}
+    session = aws_session(region=region)
+    eks = session.client("eks")
+    node_groups_response = eks.list_nodegroups(
+        clusterName=f"{name}-{namespace}",
+    )
+    node_groups = node_groups_response.get("nodegroups", [])
+    for nodegroup in node_groups:
+        response = eks.describe_nodegroup(
+            clusterName=f"{name}-{namespace}", nodegroupName=nodegroup
+        )
+        node_group_name = response["nodegroup"]["nodegroupName"]
+        auto_scaling_groups = response["nodegroup"]["resources"]["autoScalingGroups"]
+        for auto_scaling_group in auto_scaling_groups:
+            asg_node_group_mapping[auto_scaling_group["name"]] = node_group_name
+    return asg_node_group_mapping
 
 
 def aws_get_subnet_ids(name: str, namespace: str, region: str) -> List[str]:

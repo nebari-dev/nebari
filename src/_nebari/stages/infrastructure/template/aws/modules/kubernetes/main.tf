@@ -39,6 +39,10 @@ resource "aws_eks_node_group" "main" {
     max_size     = var.node_groups[count.index].max_size
   }
 
+  labels = {
+    "dedicated" = var.node_groups[count.index].name
+  }
+
   lifecycle {
     ignore_changes = [
       scaling_config[0].desired_size,
@@ -53,7 +57,8 @@ resource "aws_eks_node_group" "main" {
   ]
 
   tags = merge({
-    "kubernetes.io/cluster/${var.name}" = "shared"
+    "k8s.io/cluster-autoscaler/node-template/label/dedicated" = var.node_groups[count.index].name
+    propagate_at_launch                                       = true
   }, var.tags)
 }
 
@@ -63,9 +68,39 @@ data "aws_eks_cluster_auth" "main" {
 
 resource "aws_eks_addon" "aws-ebs-csi-driver" {
   # required for Kubernetes v1.23+ on AWS
-  addon_name        = "aws-ebs-csi-driver"
-  cluster_name      = aws_eks_cluster.main.name
-  resolve_conflicts = "OVERWRITE"
+  addon_name                  = "aws-ebs-csi-driver"
+  cluster_name                = aws_eks_cluster.main.name
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  configuration_values = jsonencode({
+    controller = {
+      nodeSelector = {
+        "eks.amazonaws.com/nodegroup" = "general"
+      }
+    }
+  })
+
+  # Ensure cluster and node groups are created
+  depends_on = [
+    aws_eks_cluster.main,
+    aws_eks_node_group.main,
+  ]
+}
+
+resource "aws_eks_addon" "coredns" {
+  addon_name                  = "coredns"
+  cluster_name                = aws_eks_cluster.main.name
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+
+  configuration_values = jsonencode({
+    nodeSelector = {
+      "eks.amazonaws.com/nodegroup" = "general"
+    }
+  })
+
   # Ensure cluster and node groups are created
   depends_on = [
     aws_eks_cluster.main,

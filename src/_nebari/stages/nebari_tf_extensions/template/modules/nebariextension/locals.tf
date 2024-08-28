@@ -1,6 +1,6 @@
 locals {
   middlewares = (var.private) ? ([{
-    name      = "traefik-forward-auth"
+    name      = var.forwardauth_middleware_name
     namespace = var.namespace
   }]) : ([])
 

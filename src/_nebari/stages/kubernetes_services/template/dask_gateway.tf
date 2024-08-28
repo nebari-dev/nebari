@@ -11,7 +11,6 @@ variable "dask-gateway-profiles" {
   description = "Dask Gateway profiles to expose to user"
 }
 
-
 # =================== RESOURCES =====================
 module "dask-gateway" {
   source = "./modules/kubernetes/services/dask-gateway"
@@ -31,7 +30,7 @@ module "dask-gateway" {
   dask-etc-configmap-name = "dask-etc"
 
   # environments
-  conda-store-pvc               = module.conda-store-nfs-mount.persistent_volume_claim.name
+  conda-store-pvc               = module.kubernetes-conda-store-server.pvc
   conda-store-mount             = "/home/conda"
   default-conda-store-namespace = var.conda-store-default-namespace
   conda-store-api-token         = module.kubernetes-conda-store-server.service-tokens.dask-gateway
@@ -39,4 +38,13 @@ module "dask-gateway" {
 
   # profiles
   profiles = var.dask-gateway-profiles
+
+  cloud-provider = var.cloud-provider
+
+  forwardauth_middleware_name = var.forwardauth_middleware_name
+
+  depends_on = [
+    module.kubernetes-nfs-server,
+    module.rook-ceph
+  ]
 }

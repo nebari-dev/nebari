@@ -177,7 +177,10 @@ variable "profiles" {
 
 variable "conda-store-pvc" {
   description = "Name for persistent volume claim to use for conda-store directory"
-  type        = string
+  type = object({
+    name = string
+    id   = string
+  })
 }
 
 variable "conda-store-mount" {
@@ -198,4 +201,13 @@ variable "conda-store-api-token" {
 variable "conda-store-service-name" {
   description = "internal service-name:port where conda-store can be reached"
   type        = string
+}
+
+variable "cloud-provider" {
+  description = "Name of the cloud provider to deploy to."
+  type        = string
+}
+
+variable "forwardauth_middleware_name" {
+  type = string
 }

@@ -33,6 +33,14 @@ on:
       pr_number:
         required: true
         type: string
+  workflow_dispatch:
+
+# When the cancel-in-progress: true option is specified, any concurrent jobs or workflows using the same
+# concurrency group will cancel both the pending and currently running jobs or workflows. This allows only
+# one job or workflow in the concurrency group to be in progress at a time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 jobs:
   test-local-integration:
@@ -40,8 +48,6 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
     steps:
       - name: 'Checkout Infrastructure'
         uses: actions/checkout@main
@@ -57,12 +63,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         env:
           CONDA: /home/runnerx/miniconda3
         with:
           auto-update-conda: true
-          python-version: 3.8
+          python-version: "3.11"
           miniconda-version: "latest"
 
       - name: Install Nebari and playwright
@@ -70,7 +76,7 @@ jobs:
           pip install .[dev]
           playwright install
 
-      - uses: azure/setup-kubectl@v3
+      - uses: azure/setup-kubectl@v4.0.0
         with:
           version: v1.19.16
 
@@ -96,6 +102,24 @@ jobs:
           sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
           sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
 
+          # Change default JupyterLab theme
+          cat >> nebari-config.yaml <<- EOM
+          jupyterlab:
+            default_settings:
+              "@jupyterlab/apputils-extension:themes":
+                theme: JupyterLab Dark
+          EOM
+
+          # Change default value for minio persistence size
+          cat >> nebari-config.yaml <<- EOM
+          monitoring:
+            enabled: true
+            overrides:
+              minio:
+                persistence:
+                  size: 1Gi
+          EOM
+
           cat nebari-config.yaml
 
       - name: Deploy Nebari
@@ -106,7 +130,7 @@ jobs:
       - name: Basic kubectl checks after deployment
         if: always()
         run: |
-          kubectl get all,cm,secret,ing -A
+          kubectl get all,cm,secret,pv,pvc,ing -A
 
       - name: Check github-actions.nebari.dev resolves
         run: |
@@ -122,9 +146,9 @@ jobs:
           nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
           nebari keycloak listusers --config nebari-config.yaml
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
 
       - name: Get nebari-config.yaml full path
         run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
@@ -152,7 +176,7 @@ jobs:
 
       - name: Save Cypress screenshots and videos
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.3.1
         with:
           name: e2e-cypress
           path: |
@@ -167,25 +191,12 @@ jobs:
         run: |
           pytest tests/tests_deployment/ -v -s
 
-      - name: JupyterHub Notebook Tests
-        timeout-minutes: 2
-        # run jhub-client after pytest since jhubctl can cleanup
-        # the running server
-        env:
-          JUPYTERHUB_USERNAME: ${{ env.TEST_USERNAME }}
-          JUPYTERHUB_PASSWORD: ${{ env.TEST_PASSWORD }}
-        run: |
-          sleep 60
-          jhubctl --verbose run --hub=https://github-actions.nebari.dev\
-                                --auth-type=keycloak \
-                                --validate --no-verify-ssl \
-                                --kernel python3 \
-                                --stop-server \
-                                --notebook tests/tests_deployment/assets/notebook/simple.ipynb \
-
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
-        if: always()
+        # Since this is not critical for most pull requests and takes more than half of the time
+        # in the CI, it makes sense to only run on merge to main or workflow_dispatch to speed
+        # up feedback cycle
+        if: github.ref_name == 'develop' || github.event_name == 'workflow_dispatch'
         working-directory: local-deployment
         run: |
           nebari destroy --config nebari-config.yaml --disable-prompt

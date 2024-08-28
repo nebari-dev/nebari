@@ -52,14 +52,17 @@ describe('First Test', () => {
         cy.get('h1')
         .should('contain', 'Server Options');
 
-      cy.get('input.btn.btn-jupyter')
-        .should('have.attr', 'value', 'Start').click();
+      cy.get('button.btn.btn-jupyter')
+        .should('contain', 'Start').click();
 
       // Minimal check that JupyterLab has opened
       cy.get('div#jp-MainLogo', { timeout: 60000 }).should('exist').wait(4000);
 
       // Click VS Code Launcher exists
       cy.get('div.jp-LauncherCard[title="VS Code [↗]"]').should('exist');
+
+      // Should reflect theme set by default_settings
+      cy.get('body[data-jp-theme-name="JupyterLab Dark"]').should('exist');
 
       // Stop my Jupyter server - must do this so PVC can be destroyed on Minikube
       cy.visit('/hub/home');
@@ -84,7 +87,7 @@ describe('First Test', () => {
 
       cy.visit('/monitoring/dashboards');
 
-      cy.get('div.page-header h1', { timeout: 20000 }).should('contain', 'Dashboards');
+      cy.get('div#pageContent h1', { timeout: 20000 }).should('contain', 'Dashboards');
 
       // Visit Keycloak User Profile
 

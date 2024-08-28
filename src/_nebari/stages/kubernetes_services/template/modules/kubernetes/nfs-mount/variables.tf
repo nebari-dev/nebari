@@ -9,12 +9,17 @@ variable "namespace" {
 }
 
 variable "nfs_capacity" {
-  description = "Capacity of NFS server mount"
-  type        = string
-  default     = "10Gi"
+  description = "Capacity of NFS server mount in Gi"
+  type        = number
+  default     = 10
 }
 
 variable "nfs_endpoint" {
   description = "Endpoint of nfs server"
+  type        = string
+}
+
+variable "nfs-pvc-name" {
+  description = "Name of the persistent volume claim"
   type        = string
 }

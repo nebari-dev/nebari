@@ -1,4 +1,4 @@
-name: test-gcp-integration
+name: GCP Deployment
 
 on:
   schedule:
@@ -32,23 +32,23 @@ env:
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
-
 jobs:
   test-gcp-integration:
     runs-on: ubuntu-latest
+    if: ${{ vars.SKIP_GCP_INTEGRATION_TEST != 'true' }}
     permissions:
       id-token: write
       contents: read
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.NEBARI_GH_BRANCH }}
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
 
@@ -58,7 +58,7 @@ jobs:
           playwright install
 
       - name: Retrieve secret from Vault
-        uses: hashicorp/vault-action@v2.5.0
+        uses: hashicorp/vault-action@v3.0.0
         with:
           method: jwt
           url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"

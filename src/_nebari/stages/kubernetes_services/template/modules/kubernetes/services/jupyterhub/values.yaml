@@ -5,8 +5,21 @@ hub:
     pvc:
       storage: 1Gi
   baseUrl: "/"
+
   networkPolicy:
-    enabled: false
+    ingress:
+      - ports:
+          - port: 10202
+        from:
+          - podSelector:
+              matchLabels:
+                hub.jupyter.org/network-access-hub: "true"
+
+  service:
+    extraPorts:
+      - port: 10202
+        targetPort: 10202
+        name: jhub-apps
 
 proxy:
   secretToken: "<placeholder>"
@@ -25,6 +38,8 @@ proxy:
           - port: 53
             protocol: UDP
           - port: 53
+            protocol: TCP
+          - port: 10202
             protocol: TCP
         - to:
           - ipBlock:

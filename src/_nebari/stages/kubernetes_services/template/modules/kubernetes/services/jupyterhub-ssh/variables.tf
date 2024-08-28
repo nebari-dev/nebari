@@ -30,7 +30,7 @@ variable "jupyterhub-ssh-image" {
   })
   default = {
     name = "quay.io/jupyterhub-ssh/ssh"
-    tag  = "0.0.1-0.dev.git.136.ha610981"
+    tag  = "0.0.1-0.dev.git.149.he5107a4"
   }
 }
 
@@ -48,5 +48,8 @@ variable "jupyterhub-sftp-image" {
 
 variable "persistent_volume_claim" {
   description = "name of persistent volume claim to mount"
-  type        = string
+  type = object({
+    name = string
+    id   = string
+  })
 }

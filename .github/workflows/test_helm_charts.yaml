@@ -1,5 +1,5 @@
 # Right now the trigger is set to run on every Monday at 13:00 UTC,
-# or when the workflow file is modified. An aditional manual trigger
+# or when the workflow file is modified. An additional manual trigger
 # is also available.
 name: "Validate Helm Charts downloads"
 
@@ -23,13 +23,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Infrastructure"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.8"
+          python-version: "3.11"
       - name: Install additional Python dependencies
         run: |
           pip install python-hcl2
