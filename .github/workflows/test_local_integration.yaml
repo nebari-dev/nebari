@@ -49,7 +49,7 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: 'Checkout Infrastructure'
+      - name: "Checkout Infrastructure"
         uses: actions/checkout@main
         with:
           fetch-depth: 0
@@ -146,6 +146,15 @@ jobs:
           nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
           nebari keycloak listusers --config nebari-config.yaml
 
+      ### DEPLOYMENT TESTS
+      - name: Deployment Pytests
+        env:
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+        run: |
+          pytest tests/tests_deployment/ -v -s
+
+      ### USER-JOURNEY TESTS
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -183,13 +192,6 @@ jobs:
             ./tests/tests_e2e/cypress/screenshots/
             ./tests/tests_e2e/cypress/videos/
             ./tests/tests_e2e/playwright/videos/
-
-      - name: Deployment Pytests
-        env:
-          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
-          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-        run: |
-          pytest tests/tests_deployment/ -v -s
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
