@@ -45,6 +45,12 @@ class ProviderEnum(str, enum.Enum):
         return representer.represent_str(node.value)
 
 
+class ExtraFieldSchema(Base):
+    immutable: bool = (
+        False  # Whether value supports being changed after initial deployment
+    )
+
+
 class Main(Base):
     project_name: project_name_pydantic
     namespace: namespace_pydantic = "dev"
