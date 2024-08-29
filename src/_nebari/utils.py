@@ -1,5 +1,7 @@
 import contextlib
+import enum
 import functools
+import json
 import os
 import re
 import secrets
@@ -11,7 +13,7 @@ import threading
 import time
 import warnings
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 
 from ruamel.yaml import YAML
 
@@ -415,3 +417,71 @@ def byte_unit_conversion(byte_size_str: str, output_unit: str = "B") -> float:
         )
 
     return value * units_multiplier[input_unit] / units_multiplier[output_unit]
+
+
+class JsonDiffEnum(str, enum.Enum):
+    ADDED = "+"
+    REMOVED = "-"
+    CHANGED = "!"
+
+
+def json_diff(obj1: Dict[str, Any], obj2: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculates the diff between two json-like objects
+
+    # Example usage
+    obj1 = {"a": 1, "b": {"c": 2, "d": 3}}
+    obj2 = {"a": 1, "b": {"c": 2, "e": 4}, "f": 5}
+
+    result = json_diff(obj1, obj2)
+    """
+    diff = {}
+    for key in set(obj1.keys()) | set(obj2.keys()):
+        if key not in obj1:
+            diff[key] = {JsonDiffEnum.ADDED: obj2[key]}
+        elif key not in obj2:
+            diff[key] = {JsonDiffEnum.REMOVED: obj1[key]}
+        elif obj1[key] != obj2[key]:
+            if isinstance(obj1[key], dict) and isinstance(obj2[key], dict):
+                nested_diff = json_diff(obj1[key], obj2[key])
+                if nested_diff:
+                    diff[key] = nested_diff
+            else:
+                diff[key] = {JsonDiffEnum.CHANGED: (obj1[key], obj2[key])}
+    return diff
+
+
+class JsonDiff:
+    def __init__(self, obj1: Dict[str, Any], obj2: Dict[str, Any]):
+        self.diff = json_diff(obj1, obj2)
+
+    @staticmethod
+    def walk_dict(d, path, sentinel):
+        for key, value in d.items():
+            # print(d)
+            if key is not sentinel:
+                if not isinstance(value, dict):
+                    continue
+                yield from JsonDiff.walk_dict(value, path + [key], sentinel)
+            else:
+                yield path, value
+
+    def changed(self):
+        """Generator that yields the path, old value, and new value of changed items"""
+        for path, (old, new) in self.walk_dict(self.diff, [], JsonDiffEnum.CHANGED):
+            yield path, old, new
+
+    def __repr__(self):
+        return json.dumps(self.diff, indent=2)
+
+    # # make it a context manager
+    # def __enter__(self):
+
+
+if __name__ == "__main__":
+    obj1 = {"a": 1, "b": {"c": 2, "d": 3}}
+    obj2 = {"a": 1, "b": {"c": 3, "e": 4}, "f": 5}
+
+    json_diff = JsonDiff(obj1, obj2)
+    print(json_diff)
+    for keys, old, new in json_diff.changed():
+        print(keys, old, new)

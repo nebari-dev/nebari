@@ -46,6 +46,11 @@ class ProviderEnum(str, enum.Enum):
 
 
 class ExtraFieldSchema(Base):
+    model_config = ConfigDict(
+        extra="allow",
+        validate_assignment=True,
+        populate_by_name=True,
+    )
     immutable: bool = (
         False  # Whether value supports being changed after initial deployment
     )

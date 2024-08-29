@@ -1,5 +1,6 @@
 import contextlib
 import enum
+import functools
 import inspect
 import os
 import pathlib
@@ -8,6 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 
 from pydantic import field_validator
 
+from _nebari import utils
 from _nebari.provider import terraform
 from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
@@ -233,23 +235,7 @@ class TerraformStateStage(NebariTerraformStage):
     def deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
-        directory = str(self.output_directory / self.stage_prefix)
-        state = terraform.show(directory)
-        nebari_config_state = None
-        for resource in state["values"]["root_module"]["resources"]:
-            if resource["address"] == "terraform_data.nebari_config":
-                from nebari.plugins import nebari_plugin_manager
-
-                nebari_config_state = nebari_plugin_manager.config_schema(
-                    **resource["values"]["input"]
-                )
-                break
-
-        # calculate any differences between the current and remote state
-        print(nebari_config_state)
-        print(self.config)
-
-        # For each stage with a change, call the check_disallowed method
+        self.check_immutable_fields()
 
         with super().deploy(stage_outputs, disable_prompt):
             env_mapping = {}
@@ -265,6 +251,46 @@ class TerraformStateStage(NebariTerraformStage):
 
             with modified_environ(**env_mapping):
                 yield
+
+    def check_immutable_fields(self):
+        directory = str(self.output_directory / self.stage_prefix)
+        tf_state = terraform.show(directory)
+        nebari_config_state = None
+
+        # get nebari config from state
+        for resource in (
+            tf_state.get("values", {}).get("root_module", {}).get("resources", [])
+        ):
+            if resource["address"] == "terraform_data.nebari_config":
+                from nebari.plugins import nebari_plugin_manager
+
+                nebari_config_state = nebari_plugin_manager.config_schema(
+                    **resource["values"]["input"]
+                )
+                break
+        if nebari_config_state is None:
+            return
+
+        # get diff of remote/prior and current nebari config
+        new_nebari_config = self.config.model_dump()
+        nebari_config_diff = utils.JsonDiff(
+            nebari_config_state.model_dump(), new_nebari_config
+        )
+
+        # check if any changed fields are immutable
+        for keys, _, _ in nebari_config_diff.changed():
+            bottom_level_schema = self.config
+            if len(keys) > 1:
+                bottom_level_schema = functools.reduce(
+                    lambda m, k: getattr(m, k), keys[:-1], self.config
+                )
+            extra_field_schema = schema.ExtraFieldSchema(
+                **bottom_level_schema.model_fields[keys[-1]].json_schema_extra
+            )
+            if extra_field_schema.immutable:
+                raise ValueError(
+                    f"Nebari config field \"{'.'.join(keys)}\" is immutable and cannot be changed after initial deployment."
+                )
 
     @contextlib.contextmanager
     def destroy(
