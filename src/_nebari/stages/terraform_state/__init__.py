@@ -248,6 +248,9 @@ class TerraformStateStage(NebariTerraformStage):
         # calculate any differences between the current and remote state
         print(nebari_config_state)
         print(self.config)
+
+        # For each stage with a change, call the check_disallowed method
+
         with super().deploy(stage_outputs, disable_prompt):
             env_mapping = {}
             # DigitalOcean terraform remote state using Spaces Bucket
