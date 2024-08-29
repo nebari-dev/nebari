@@ -263,7 +263,7 @@ class TerraformStateStage(NebariTerraformStage):
         )
 
         # check if any changed fields are immutable
-        for keys, old, new in nebari_config_diff.changed():
+        for keys, old, new in nebari_config_diff.modified():
             bottom_level_schema = self.config
             if len(keys) > 1:
                 bottom_level_schema = functools.reduce(

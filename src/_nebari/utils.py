@@ -422,12 +422,12 @@ def byte_unit_conversion(byte_size_str: str, output_unit: str = "B") -> float:
 class JsonDiffEnum(str, enum.Enum):
     ADDED = "+"
     REMOVED = "-"
-    CHANGED = "!"
+    MODIFIED = "!"
 
 
 class JsonDiff:
     def __init__(self, obj1: Dict[str, Any], obj2: Dict[str, Any]):
-        self.diff = json_diff(obj1, obj2)
+        self.diff = self.json_diff(obj1, obj2)
 
     @staticmethod
     def json_diff(obj1: Dict[str, Any], obj2: Dict[str, Any]) -> Dict[str, Any]:
@@ -447,11 +447,11 @@ class JsonDiff:
                 diff[key] = {JsonDiffEnum.REMOVED: obj1[key]}
             elif obj1[key] != obj2[key]:
                 if isinstance(obj1[key], dict) and isinstance(obj2[key], dict):
-                    nested_diff = json_diff(obj1[key], obj2[key])
+                    nested_diff = JsonDiff.json_diff(obj1[key], obj2[key])
                     if nested_diff:
                         diff[key] = nested_diff
                 else:
-                    diff[key] = {JsonDiffEnum.CHANGED: (obj1[key], obj2[key])}
+                    diff[key] = {JsonDiffEnum.MODIFIED: (obj1[key], obj2[key])}
         return diff
 
     @staticmethod
@@ -464,10 +464,10 @@ class JsonDiff:
             else:
                 yield path, value
 
-    def changed(self):
+    def modified(self):
         """Generator that yields the path, old value, and new value of changed items"""
-        for path, (old, new) in self.walk_dict(self.diff, [], JsonDiffEnum.CHANGED):
+        for path, (old, new) in self.walk_dict(self.diff, [], JsonDiffEnum.MODIFIED):
             yield path, old, new
 
     def __repr__(self):
-        return json.dumps(self.diff, indent=2)
+        return f"{self.__class__.__name__}(diff={json.dumps(self.diff)})"
