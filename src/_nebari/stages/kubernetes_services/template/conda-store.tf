@@ -68,6 +68,12 @@ module "kubernetes-conda-store-server" {
   ]
 }
 
+moved {
+  from = module.conda-store-nfs-mount
+  to   = module.kubernetes-conda-store-server.module.conda-store-nfs-mount[0]
+}
+
+
 locals {
   conda-store-fs = var.shared_fs_type
 }
