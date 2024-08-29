@@ -48,12 +48,18 @@ variable "user-node-group" {
 
 variable "home-pvc" {
   description = "Name for persistent volume claim to use for home directory uses /home/{username}"
-  type        = string
+  type = object({
+    name = string
+    id   = string
+  })
 }
 
 variable "shared-pvc" {
   description = "Name for persistent volume claim to use for shared directory uses /share/{group}"
-  type        = string
+  type = object({
+    name = string
+    id   = string
+  })
 }
 
 variable "conda-store-pvc" {
@@ -161,6 +167,26 @@ variable "argo-workflows-enabled" {
 variable "jupyterlab-default-settings" {
   description = "Default settings for JupyterLab to be placed in overrides.json"
   type        = map(any)
+}
+
+variable "jupyterlab-gallery-settings" {
+  description = "Server-side settings for jupyterlab-gallery extension"
+  type = object({
+    title                         = optional(string)
+    destination                   = optional(string)
+    hide_gallery_without_exhibits = optional(bool)
+    exhibits = list(object({
+      git         = string
+      title       = string
+      homepage    = optional(string)
+      description = optional(string)
+      icon        = optional(string)
+      account     = optional(string)
+      token       = optional(string)
+      branch      = optional(string)
+      depth       = optional(number)
+    }))
+  })
 }
 
 variable "jupyterlab-pioneer-enabled" {

@@ -1,4 +1,4 @@
-name: test-gcp-integration
+name: GCP Deployment
 
 on:
   schedule:
@@ -32,10 +32,10 @@ env:
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
-
 jobs:
   test-gcp-integration:
     runs-on: ubuntu-latest
+    if: ${{ vars.SKIP_GCP_INTEGRATION_TEST != 'true' }}
     permissions:
       id-token: write
       contents: read
@@ -58,7 +58,7 @@ jobs:
           playwright install
 
       - name: Retrieve secret from Vault
-        uses: hashicorp/vault-action@v2.5.0
+        uses: hashicorp/vault-action@v3.0.0
         with:
           method: jwt
           url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"

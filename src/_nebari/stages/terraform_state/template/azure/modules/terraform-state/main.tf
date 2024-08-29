@@ -12,6 +12,7 @@ resource "azurerm_storage_account" "terraform-state-storage-account" {
   account_tier             = "Standard"
   account_replication_type = "GRS"
   tags                     = var.tags
+  min_tls_version          = "TLS1_2"
 
   identity {
     type = "SystemAssigned"

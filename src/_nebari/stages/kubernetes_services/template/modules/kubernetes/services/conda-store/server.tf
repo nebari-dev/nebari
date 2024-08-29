@@ -13,21 +13,27 @@ resource "kubernetes_secret" "conda-store-secret" {
 
   data = {
     "config.json" = jsonencode({
-      external-url      = var.external-url
-      minio-username    = module.minio.root_username
-      minio-password    = module.minio.root_password
-      minio-service     = module.minio.service
-      redis-password    = module.redis.root_password
-      redis-service     = module.redis.service
-      postgres-username = module.postgresql.root_username
-      postgres-password = module.postgresql.root_password
-      postgres-service  = module.postgresql.service
-      openid-config     = module.conda-store-openid-client.config
-      extra-settings    = var.extra-settings
-      extra-config      = var.extra-config
-      default-namespace = var.default-namespace-name
+      external-url           = var.external-url
+      minio-username         = module.minio.root_username
+      minio-password         = module.minio.root_password
+      minio-service          = module.minio.service
+      redis-password         = module.redis.root_password
+      redis-service          = module.redis.service
+      postgres-username      = module.postgresql.root_username
+      postgres-password      = module.postgresql.root_password
+      postgres-service       = module.postgresql.service
+      openid-config          = module.conda-store-openid-client.config
+      extra-settings         = var.extra-settings
+      extra-config           = var.extra-config
+      default-namespace      = var.default-namespace-name
+      token_url_internal     = "http://keycloak-http.${var.namespace}.svc/auth/realms/${var.realm_id}/protocol/openid-connect/token"
+      realm_api_url_internal = "http://keycloak-http.${var.namespace}.svc/auth/admin/realms/${var.realm_id}"
       service-tokens = {
         for service, value in var.services : base64encode(random_password.conda_store_service_token[service].result) => value
+      }
+      # So that the mapping can be used in conda-store config itself
+      service-tokens-mapping = {
+        for service, _ in var.services : service => base64encode(random_password.conda_store_service_token[service].result)
       }
       extra-settings = var.extra-settings
       extra-config   = var.extra-config
@@ -62,6 +68,10 @@ module "conda-store-openid-client" {
   }
   callback-url-paths = [
     "https://${var.external-url}/conda-store/oauth_callback"
+  ]
+  service-accounts-enabled = true
+  service-account-roles = [
+    "view-realm", "view-users", "view-clients"
   ]
 }
 

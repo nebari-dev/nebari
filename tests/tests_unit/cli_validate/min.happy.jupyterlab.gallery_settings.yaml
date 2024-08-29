@@ -1,0 +1,10 @@
+project_name: test
+jupyterlab:
+  gallery_settings:
+    title: Example repositories
+    destination: examples
+    exhibits:
+      - title: Nebari
+        git: https://github.com/nebari-dev/nebari.git
+        homepage: https://github.com/nebari-dev/nebari
+        description: 🪴 Nebari - your open source data science platform

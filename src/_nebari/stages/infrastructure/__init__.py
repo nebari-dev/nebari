@@ -1,4 +1,5 @@
 import contextlib
+import enum
 import inspect
 import os
 import pathlib
@@ -18,6 +19,7 @@ from _nebari.provider.cloud import (
     google_cloud,
 )
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.kubernetes_services import SharedFsEnum
 from _nebari.stages.tf_objects import NebariTerraformState
 from _nebari.utils import (
     AZURE_NODE_RESOURCE_GROUP_SUFFIX,
@@ -73,6 +75,16 @@ class GCPPrivateClusterConfig(schema.Base):
     master_ipv4_cidr_block: str
 
 
+@schema.yaml_object(schema.yaml)
+class GCPNodeGroupImageTypeEnum(str, enum.Enum):
+    UBUNTU_CONTAINERD = "UBUNTU_CONTAINERD"
+    COS_CONTAINERD = "COS_CONTAINERD"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
 class GCPInputVars(schema.Base):
     name: str
     environment: str
@@ -90,6 +102,7 @@ class GCPInputVars(schema.Base):
     ip_allocation_policy: Optional[Dict[str, str]] = None
     master_authorized_networks_config: Optional[Dict[str, str]] = None
     private_cluster_config: Optional[GCPPrivateClusterConfig] = None
+    node_group_image_type: GCPNodeGroupImageTypeEnum = None
 
 
 class AzureNodeGroupInputVars(schema.Base):
@@ -112,6 +125,7 @@ class AzureInputVars(schema.Base):
     tags: Dict[str, str] = {}
     max_pods: Optional[int] = None
     network_profile: Optional[Dict[str, str]] = None
+    workload_identity_enabled: bool = False
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -138,6 +152,7 @@ class AWSInputVars(schema.Base):
     permissions_boundary: Optional[str] = None
     kubeconfig_filename: str = get_kubeconfig_filename()
     tags: Dict[str, str] = {}
+    efs_enabled: bool
 
 
 def _calculate_asg_node_group_map(config: schema.Main):
@@ -173,7 +188,7 @@ def _calculate_node_groups(config: schema.Main):
             for group in ["general", "user", "worker"]
         }
     elif config.provider == schema.ProviderEnum.existing:
-        return config.existing.node_selectors
+        return config.existing.model_dump()["node_selectors"]
     else:
         return config.local.model_dump()["node_selectors"]
 
@@ -314,9 +329,9 @@ class GCPNodeGroup(schema.Base):
 
 
 DEFAULT_GCP_NODE_GROUPS = {
-    "general": GCPNodeGroup(instance="n1-standard-8", min_nodes=1, max_nodes=1),
-    "user": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
-    "worker": GCPNodeGroup(instance="n1-standard-4", min_nodes=0, max_nodes=5),
+    "general": GCPNodeGroup(instance="e2-standard-8", min_nodes=1, max_nodes=1),
+    "user": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
+    "worker": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
 }
 
 
@@ -339,10 +354,10 @@ class GoogleCloudPlatformProvider(schema.Base):
     @classmethod
     def _check_input(cls, data: Any) -> Any:
         google_cloud.check_credentials()
-        avaliable_regions = google_cloud.regions()
-        if data["region"] not in avaliable_regions:
+        available_regions = google_cloud.regions()
+        if data["region"] not in available_regions:
             raise ValueError(
-                f"Google Cloud region={data['region']} is not one of {avaliable_regions}"
+                f"Google Cloud region={data['region']} is not one of {available_regions}"
             )
 
         available_kubernetes_versions = google_cloud.kubernetes_versions(data["region"])
@@ -380,6 +395,7 @@ class AzureProvider(schema.Base):
     tags: Optional[Dict[str, str]] = {}
     network_profile: Optional[Dict[str, str]] = None
     max_pods: Optional[int] = None
+    workload_identity_enabled: bool = False
 
     @model_validator(mode="before")
     @classmethod
@@ -582,16 +598,16 @@ class InputSchema(schema.Base):
                     f"'{provider}' is not a valid enumeration member; permitted: local, existing, do, aws, gcp, azure"
                 )
         else:
-            setted_providers = [
+            set_providers = [
                 provider
                 for provider in provider_name_abbreviation_map.keys()
                 if provider in data
             ]
-            num_providers = len(setted_providers)
+            num_providers = len(set_providers)
             if num_providers > 1:
-                raise ValueError(f"Multiple providers set: {setted_providers}")
+                raise ValueError(f"Multiple providers set: {set_providers}")
             elif num_providers == 1:
-                data["provider"] = provider_name_abbreviation_map[setted_providers[0]]
+                data["provider"] = provider_name_abbreviation_map[set_providers[0]]
             elif num_providers == 0:
                 data["provider"] = schema.ProviderEnum.local.value
         return data
@@ -604,7 +620,7 @@ class NodeSelectorKeyValue(schema.Base):
 
 class KubernetesCredentials(schema.Base):
     host: str
-    cluster_ca_certifiate: str
+    cluster_ca_certifiate: str  # ignored for now.  More info in https://github.com/nebari-dev/nebari/issues/2597. # typos: ignore
     token: Optional[str] = None
     username: Optional[str] = None
     password: Optional[str] = None
@@ -750,6 +766,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 ip_allocation_policy=self.config.google_cloud_platform.ip_allocation_policy,
                 master_authorized_networks_config=self.config.google_cloud_platform.master_authorized_networks_config,
                 private_cluster_config=self.config.google_cloud_platform.private_cluster_config,
+                node_group_image_type=(
+                    GCPNodeGroupImageTypeEnum.UBUNTU_CONTAINERD
+                    if self.config.storage.type == SharedFsEnum.cephfs
+                    else GCPNodeGroupImageTypeEnum.COS_CONTAINERD
+                ),
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.azure:
             return AzureInputVars(
@@ -781,6 +802,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 tags=self.config.azure.tags,
                 network_profile=self.config.azure.network_profile,
                 max_pods=self.config.azure.max_pods,
+                workload_identity_enabled=self.config.azure.workload_identity_enabled,
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
@@ -807,6 +829,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 vpc_cidr_block=self.config.amazon_web_services.vpc_cidr_block,
                 permissions_boundary=self.config.amazon_web_services.permissions_boundary,
                 tags=self.config.amazon_web_services.tags,
+                efs_enabled=self.config.storage.type == SharedFsEnum.efs,
             ).model_dump()
         else:
             raise ValueError(f"Unknown provider: {self.config.provider}")

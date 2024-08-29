@@ -47,7 +47,7 @@ variable "availability_zones" {
 }
 
 variable "vpc_cidr_block" {
-  description = "VPC cidr block for infastructure"
+  description = "VPC cidr block for infrastructure"
   type        = string
 }
 
@@ -76,4 +76,9 @@ variable "tags" {
   description = "Additional tags to add to resources"
   type        = map(string)
   default     = {}
+}
+
+variable "efs_enabled" {
+  description = "Enable EFS"
+  type        = bool
 }
