@@ -471,13 +471,3 @@ class JsonDiff:
 
     def __repr__(self):
         return json.dumps(self.diff, indent=2)
-
-
-if __name__ == "__main__":
-    obj1 = {"a": 1, "b": {"c": 2, "d": 3}}
-    obj2 = {"a": 1, "b": {"c": 3, "e": 4}, "f": 5}
-
-    json_diff = JsonDiff(obj1, obj2)
-    print(json_diff)
-    for keys, old, new in json_diff.changed():
-        print(keys, old, new)
