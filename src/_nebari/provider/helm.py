@@ -1,4 +1,5 @@
 import logging
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -26,6 +27,8 @@ def download_helm_binary(version=constants.HELM_VERSION) -> Path:
             constants.HELM_VERSION,
             filename_path,
         )
+        old_path = os.environ.get("PATH")
+        new_path = f"{filename_directory}:{old_path}"
         install_script = subprocess.run(
             [
                 "curl",
@@ -46,7 +49,7 @@ def download_helm_binary(version=constants.HELM_VERSION) -> Path:
             ],
             input=install_script.stdout,
             check=True,
-            env={"HELM_INSTALL_DIR": str(filename_directory)},
+            env={"HELM_INSTALL_DIR": str(filename_directory), "PATH": new_path},
         )
 
     filename_path.chmod(0o555)
