@@ -63,7 +63,7 @@ class DefaultImages(schema.Base):
 class Storage(schema.Base):
     type: SharedFsEnum = Field(
         default=None,
-        json_schema_extra=schema.ExtraFieldSchema(immutable=True).model_dump(),
+        json_schema_extra={"immutable": True},
     )
     conda_store: str = "200Gi"
     shared_filesystem: str = "200Gi"
