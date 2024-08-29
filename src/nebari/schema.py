@@ -57,9 +57,14 @@ class ExtraFieldSchema(Base):
 
 
 class Main(Base):
-    project_name: project_name_pydantic
+    project_name: project_name_pydantic = Field(
+        json_schema_extra=ExtraFieldSchema(immutable=True).model_dump()
+    )
     namespace: namespace_pydantic = "dev"
-    provider: ProviderEnum = ProviderEnum.local
+    provider: ProviderEnum = Field(
+        default=ProviderEnum.local,
+        json_schema_extra=ExtraFieldSchema(immutable=True).model_dump(),
+    )
     # In nebari_version only use major.minor.patch version - drop any pre/post/dev suffixes
     nebari_version: Annotated[str, Field(validate_default=True)] = __version__
 

@@ -253,6 +253,32 @@ class TerraformStateStage(NebariTerraformStage):
                 yield
 
     def check_immutable_fields(self):
+        nebari_config_state = self.get_nebari_config_state()
+        if not nebari_config_state:
+            return
+
+        # compute diff of remote/prior and current nebari config
+        nebari_config_diff = utils.JsonDiff(
+            nebari_config_state.model_dump(), self.config.model_dump()
+        )
+
+        # check if any changed fields are immutable
+        for keys, old, new in nebari_config_diff.changed():
+            bottom_level_schema = self.config
+            if len(keys) > 1:
+                bottom_level_schema = functools.reduce(
+                    lambda m, k: getattr(m, k), keys[:-1], self.config
+                )
+            extra_field_schema = schema.ExtraFieldSchema(
+                **bottom_level_schema.model_fields[keys[-1]].json_schema_extra or {}
+            )
+            if extra_field_schema.immutable:
+                key_path = ".".join(keys)
+                raise ValueError(
+                    f'Attempting to change immutable field "{key_path}" ("{old}"->"{new}") in Nebari config file.  Immutable fields cannot be changed after initial deployment.'
+                )
+
+    def get_nebari_config_state(self):
         directory = str(self.output_directory / self.stage_prefix)
         tf_state = terraform.show(directory)
         nebari_config_state = None
@@ -268,29 +294,7 @@ class TerraformStateStage(NebariTerraformStage):
                     **resource["values"]["input"]
                 )
                 break
-        if nebari_config_state is None:
-            return
-
-        # get diff of remote/prior and current nebari config
-        new_nebari_config = self.config.model_dump()
-        nebari_config_diff = utils.JsonDiff(
-            nebari_config_state.model_dump(), new_nebari_config
-        )
-
-        # check if any changed fields are immutable
-        for keys, _, _ in nebari_config_diff.changed():
-            bottom_level_schema = self.config
-            if len(keys) > 1:
-                bottom_level_schema = functools.reduce(
-                    lambda m, k: getattr(m, k), keys[:-1], self.config
-                )
-            extra_field_schema = schema.ExtraFieldSchema(
-                **bottom_level_schema.model_fields[keys[-1]].json_schema_extra
-            )
-            if extra_field_schema.immutable:
-                raise ValueError(
-                    f"Nebari config field \"{'.'.join(keys)}\" is immutable and cannot be changed after initial deployment."
-                )
+        return nebari_config_state
 
     @contextlib.contextmanager
     def destroy(

@@ -457,7 +457,6 @@ class JsonDiff:
     @staticmethod
     def walk_dict(d, path, sentinel):
         for key, value in d.items():
-            # print(d)
             if key is not sentinel:
                 if not isinstance(value, dict):
                     continue
@@ -472,9 +471,6 @@ class JsonDiff:
 
     def __repr__(self):
         return json.dumps(self.diff, indent=2)
-
-    # # make it a context manager
-    # def __enter__(self):
 
 
 if __name__ == "__main__":
