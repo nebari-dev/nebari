@@ -425,34 +425,34 @@ class JsonDiffEnum(str, enum.Enum):
     CHANGED = "!"
 
 
-def json_diff(obj1: Dict[str, Any], obj2: Dict[str, Any]) -> Dict[str, Any]:
-    """Calculates the diff between two json-like objects
-
-    # Example usage
-    obj1 = {"a": 1, "b": {"c": 2, "d": 3}}
-    obj2 = {"a": 1, "b": {"c": 2, "e": 4}, "f": 5}
-
-    result = json_diff(obj1, obj2)
-    """
-    diff = {}
-    for key in set(obj1.keys()) | set(obj2.keys()):
-        if key not in obj1:
-            diff[key] = {JsonDiffEnum.ADDED: obj2[key]}
-        elif key not in obj2:
-            diff[key] = {JsonDiffEnum.REMOVED: obj1[key]}
-        elif obj1[key] != obj2[key]:
-            if isinstance(obj1[key], dict) and isinstance(obj2[key], dict):
-                nested_diff = json_diff(obj1[key], obj2[key])
-                if nested_diff:
-                    diff[key] = nested_diff
-            else:
-                diff[key] = {JsonDiffEnum.CHANGED: (obj1[key], obj2[key])}
-    return diff
-
-
 class JsonDiff:
     def __init__(self, obj1: Dict[str, Any], obj2: Dict[str, Any]):
         self.diff = json_diff(obj1, obj2)
+
+    @staticmethod
+    def json_diff(obj1: Dict[str, Any], obj2: Dict[str, Any]) -> Dict[str, Any]:
+        """Calculates the diff between two json-like objects
+
+        # Example usage
+        obj1 = {"a": 1, "b": {"c": 2, "d": 3}}
+        obj2 = {"a": 1, "b": {"c": 2, "e": 4}, "f": 5}
+
+        result = json_diff(obj1, obj2)
+        """
+        diff = {}
+        for key in set(obj1.keys()) | set(obj2.keys()):
+            if key not in obj1:
+                diff[key] = {JsonDiffEnum.ADDED: obj2[key]}
+            elif key not in obj2:
+                diff[key] = {JsonDiffEnum.REMOVED: obj1[key]}
+            elif obj1[key] != obj2[key]:
+                if isinstance(obj1[key], dict) and isinstance(obj2[key], dict):
+                    nested_diff = json_diff(obj1[key], obj2[key])
+                    if nested_diff:
+                        diff[key] = nested_diff
+                else:
+                    diff[key] = {JsonDiffEnum.CHANGED: (obj1[key], obj2[key])}
+        return diff
 
     @staticmethod
     def walk_dict(d, path, sentinel):
