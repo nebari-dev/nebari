@@ -1,5 +1,7 @@
 import contextlib
+import enum
 import functools
+import json
 import os
 import re
 import secrets
@@ -11,7 +13,7 @@ import threading
 import time
 import warnings
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 
 from ruamel.yaml import YAML
 
@@ -44,7 +46,7 @@ def change_directory(directory):
     os.chdir(current_directory)
 
 
-def run_subprocess_cmd(processargs, **kwargs):
+def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
     """Runs subprocess command with realtime stdout logging with optional line prefix."""
     if "prefix" in kwargs:
         line_prefix = f"[{kwargs['prefix']}]: ".encode("utf-8")
@@ -78,6 +80,7 @@ def run_subprocess_cmd(processargs, **kwargs):
         timeout_timer = threading.Timer(timeout, kill_process)
         timeout_timer.start()
 
+    output = []
     for line in iter(lambda: process.stdout.readline(), b""):
         full_line = line_prefix + line
         if strip_errors:
@@ -87,16 +90,24 @@ def run_subprocess_cmd(processargs, **kwargs):
             )  # Remove red ANSI escape code
             full_line = full_line.encode("utf-8")
 
-        sys.stdout.buffer.write(full_line)
-        sys.stdout.flush()
+        if capture_output:
+            output.append(full_line)
+        else:
+            sys.stdout.buffer.write(full_line)
+            sys.stdout.flush()
 
     if timeout_timer is not None:
         timeout_timer.cancel()
 
     process.stdout.close()
-    return process.wait(
+    exit_code = process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout
+
+    if capture_output:
+        return exit_code, b"".join(output)
+    else:
+        return exit_code, None
 
 
 def load_yaml(config_filename: Path):
@@ -406,3 +417,57 @@ def byte_unit_conversion(byte_size_str: str, output_unit: str = "B") -> float:
         )
 
     return value * units_multiplier[input_unit] / units_multiplier[output_unit]
+
+
+class JsonDiffEnum(str, enum.Enum):
+    ADDED = "+"
+    REMOVED = "-"
+    MODIFIED = "!"
+
+
+class JsonDiff:
+    def __init__(self, obj1: Dict[str, Any], obj2: Dict[str, Any]):
+        self.diff = self.json_diff(obj1, obj2)
+
+    @staticmethod
+    def json_diff(obj1: Dict[str, Any], obj2: Dict[str, Any]) -> Dict[str, Any]:
+        """Calculates the diff between two json-like objects
+
+        # Example usage
+        obj1 = {"a": 1, "b": {"c": 2, "d": 3}}
+        obj2 = {"a": 1, "b": {"c": 2, "e": 4}, "f": 5}
+
+        result = json_diff(obj1, obj2)
+        """
+        diff = {}
+        for key in set(obj1.keys()) | set(obj2.keys()):
+            if key not in obj1:
+                diff[key] = {JsonDiffEnum.ADDED: obj2[key]}
+            elif key not in obj2:
+                diff[key] = {JsonDiffEnum.REMOVED: obj1[key]}
+            elif obj1[key] != obj2[key]:
+                if isinstance(obj1[key], dict) and isinstance(obj2[key], dict):
+                    nested_diff = JsonDiff.json_diff(obj1[key], obj2[key])
+                    if nested_diff:
+                        diff[key] = nested_diff
+                else:
+                    diff[key] = {JsonDiffEnum.MODIFIED: (obj1[key], obj2[key])}
+        return diff
+
+    @staticmethod
+    def walk_dict(d, path, sentinel):
+        for key, value in d.items():
+            if key is not sentinel:
+                if not isinstance(value, dict):
+                    continue
+                yield from JsonDiff.walk_dict(value, path + [key], sentinel)
+            else:
+                yield path, value
+
+    def modified(self):
+        """Generator that yields the path, old value, and new value of changed items"""
+        for path, (old, new) in self.walk_dict(self.diff, [], JsonDiffEnum.MODIFIED):
+            yield path, old, new
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(diff={json.dumps(self.diff)})"
