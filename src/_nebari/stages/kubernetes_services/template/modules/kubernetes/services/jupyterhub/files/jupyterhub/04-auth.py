@@ -256,10 +256,10 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
     def _get_scope_from_role(self, role):
         """Return scopes from role if the component is jupyterhub"""
         role_scopes = role.get("attributes", {}).get("scopes", [])
-        component = role.get("attributes", {}).get("component")
+        component = role.get("attributes", {}).get("component", [])
         # Attributes are returned as a single-element array, unless `##` delimiter is used in Keycloak
         # See this: https://stackoverflow.com/questions/68954733/keycloak-client-role-attribute-array
-        if component == "jupyterhub" and role_scopes:
+        if component == ["jupyterhub"] and role_scopes:
             return self.validate_scopes(role_scopes[0].split(","))
         else:
             return []
