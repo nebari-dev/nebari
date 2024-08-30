@@ -57,7 +57,7 @@ resource "helm_release" "jupyterhub" {
 
   repository = "https://jupyterhub.github.io/helm-chart/"
   chart      = "jupyterhub"
-  version    = "4.0.0-0.dev.git.6619.hd126b1bd"
+  version    = "4.0.0-0.dev.git.6707.h109668fd"
 
   values = concat([
     file("${path.module}/values.yaml"),

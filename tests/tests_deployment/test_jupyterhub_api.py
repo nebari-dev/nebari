@@ -1,6 +1,8 @@
 import pytest
+import requests
 
 from tests.tests_deployment import constants
+from tests.tests_deployment.conftest import token_parameterized
 from tests.tests_deployment.keycloak_utils import (
     assign_keycloak_client_role_to_user,
     create_keycloak_role,
@@ -9,16 +11,14 @@ from tests.tests_deployment.keycloak_utils import (
     get_keycloak_client_roles,
     get_keycloak_role_groups,
 )
-from tests.tests_deployment.utils import create_jupyterhub_token, get_jupyterhub_session
+from tests.tests_deployment.utils import get_refresh_jupyterhub_token
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
-def test_jupyterhub_loads_roles_from_keycloak():
-    session = get_jupyterhub_session()
-    xsrf_token = session.cookies.get("_xsrf")
-    response = session.get(
-        f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}",
-        headers={"X-XSRFToken": xsrf_token},
+def test_jupyterhub_loads_roles_from_keycloak(jupyterhub_access_token):
+    response = requests.get(
+        url=f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}",
+        headers={"Authorization": f"Bearer {jupyterhub_access_token}"},
         verify=False,
     )
     user = response.json()
@@ -40,10 +40,10 @@ def test_jupyterhub_loads_roles_from_keycloak():
     }
 
 
+@token_parameterized(note="get-default-scopes")
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
-def test_default_user_role_scopes():
-    token_response = create_jupyterhub_token(note="get-default-scopes")
-    token_scopes = set(token_response.json()["scopes"])
+def test_default_user_role_scopes(access_token_response):
+    token_scopes = set(access_token_response.json()["scopes"])
     assert "read:services" in token_scopes
 
 
@@ -92,6 +92,7 @@ def test_groups_with_mount_permissions():
     )
 
 
+@token_parameterized(note="before-role-creation-and-assignment")
 @pytest.mark.parametrize(
     "component,scopes,expected_scopes_difference",
     (
@@ -109,13 +110,14 @@ def test_groups_with_mount_permissions():
     "ignore:.*auto_refresh_token is deprecated:DeprecationWarning"
 )
 def test_keycloak_roles_attributes_parsed_as_jhub_scopes(
-    component, scopes, expected_scopes_difference, cleanup_keycloak_roles
+    component,
+    scopes,
+    expected_scopes_difference,
+    cleanup_keycloak_roles,
+    access_token_response,
 ):
     # check token scopes before role creation and assignment
-    token_response_before = create_jupyterhub_token(
-        note="before-role-creation-and-assignment"
-    )
-    token_scopes_before = set(token_response_before.json()["scopes"])
+    token_scopes_before = set(access_token_response.json()["scopes"])
     # create keycloak role with jupyterhub scopes in attributes
     role = create_keycloak_role(
         client_name="jupyterhub",
@@ -130,8 +132,9 @@ def test_keycloak_roles_attributes_parsed_as_jhub_scopes(
     assign_keycloak_client_role_to_user(
         constants.KEYCLOAK_USERNAME, client_name="jupyterhub", role=role
     )
-    token_response_after = create_jupyterhub_token(
-        note="after-role-creation-and-assignment"
+    token_response_after = get_refresh_jupyterhub_token(
+        old_token=access_token_response.json()["token"],
+        note="after-role-creation-and-assignment",
     )
     token_scopes_after = set(token_response_after.json()["scopes"])
     # verify new scopes added/removed
@@ -141,12 +144,10 @@ def test_keycloak_roles_attributes_parsed_as_jhub_scopes(
 
 
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
-def test_jupyterhub_loads_groups_from_keycloak():
-    session = get_jupyterhub_session()
-    xsrf_token = session.cookies.get("_xsrf")
-    response = session.get(
+def test_jupyterhub_loads_groups_from_keycloak(jupyterhub_access_token):
+    response = requests.get(
         f"https://{constants.NEBARI_HOSTNAME}/hub/api/users/{constants.KEYCLOAK_USERNAME}",
-        headers={"X-XSRFToken": xsrf_token},
+        headers={"Authorization": f"Bearer {jupyterhub_access_token}"},
         verify=False,
     )
     user = response.json()

@@ -1,4 +1,4 @@
-from _nebari.provider.terraform import Data, Provider, TerraformBackend
+from _nebari.provider.terraform import Data, Provider, Resource, TerraformBackend
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
@@ -115,3 +115,7 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
         )
     else:
         raise NotImplementedError("state not implemented")
+
+
+def NebariConfig(nebari_config: schema.Main):
+    return Resource("terraform_data", "nebari_config", input=nebari_config.model_dump())
