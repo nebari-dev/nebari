@@ -2,6 +2,7 @@ import contextlib
 import inspect
 import os
 import pathlib
+import shutil
 import sys
 import tempfile
 from typing import Any, Dict, List, Tuple
@@ -112,6 +113,11 @@ class NebariKustomizeStage(NebariStage):
                                 ),
                             )
                         ] = f.read()
+
+            # clean up downloaded helm charts
+            charts_dir = pathlib.Path(self.template_directory, "charts")
+            if charts_dir.exists():
+                shutil.rmtree(charts_dir)
 
             return contents
 
