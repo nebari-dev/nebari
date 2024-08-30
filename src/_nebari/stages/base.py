@@ -178,8 +178,11 @@ class NebariKustomizeStage(NebariStage):
         # get the path to the manifests folder
         directory = pathlib.Path(self.output_directory, self.stage_prefix)
 
+        # get the list of all the files in the crds folder
+        crds = directory.glob("crds/*.yaml")
+
         # get the list of all the files in the manifests folder
-        manifests = directory.glob("*.yaml")
+        manifests = directory.glob("manifests/*.yaml")
 
         # destroy each manifest in the reverse order
 
@@ -190,6 +193,20 @@ class NebariKustomizeStage(NebariStage):
                 kubernetes.delete_from_yaml(kubernetes_client, manifest)
             except ApiException as e:
                 self.error_message = str(e)
+                if not ignore_errors:
+                    raise e
+
+        # destroy each crd in the reverse order
+
+        for crd in sorted(crds, reverse=True):
+
+            print(f"Destroyed CRD: {crd}")
+            try:
+                kubernetes.delete_from_yaml(kubernetes_client, crd)
+            except ApiException as e:
+                self.error_message = str(e)
+                if not ignore_errors:
+                    raise e
         yield
 
 

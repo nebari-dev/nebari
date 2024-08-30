@@ -223,10 +223,15 @@ class MonitoringOverrides(schema.Base):
     minio: Dict = {}
 
 
+class Healthchecks(schema.Base):
+    enabled: bool = False
+
+
 class Monitoring(schema.Base):
     enabled: bool = True
     overrides: MonitoringOverrides = MonitoringOverrides()
     minio_enabled: bool = True
+    healthchecks: Healthchecks = Healthchecks()
 
 
 class JupyterLabPioneer(schema.Base):

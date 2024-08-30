@@ -25,7 +25,7 @@ class KuberHealthyStage(NebariKustomizeStage):
     def deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
-        if self.config.kuberhealthy.enabled:
+        if self.config.monitoring.healthchecks.enabled:
             with super().deploy(stage_outputs, disable_prompt):
                 yield
         else:
