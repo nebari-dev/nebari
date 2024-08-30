@@ -64,6 +64,19 @@ resource "helm_release" "prometheus-grafana" {
           }
           additionalScrapeConfigs = [
             {
+              job_name        = "kuberhealthy"
+              scrape_interval = "1m"
+              honor_labels    = true
+              metrics_path    = "/metrics"
+              static_configs = [
+                {
+                  targets = [
+                    "kuberhealthy.${var.namespace}.svc.cluster.local"
+                  ]
+                }
+              ]
+            },
+            {
               job_name     = "Keycloak Target"
               metrics_path = "/auth/realms/master/metrics"
               static_configs = [

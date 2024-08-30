@@ -1,0 +1,6 @@
+prometheus:
+  enabled: true
+
+  serviceMonitor:
+    enabled: true
+    namespace: dev
