@@ -934,16 +934,19 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             )
         )
 
-        base_cmd = f"nebari init {inputs.cloud_provider}"
+        base_cmd = f"nebari init {inputs.cloud_provider.value}"
 
         def if_used(key, model=inputs, ignore_list=["cloud_provider"]):
             if key not in ignore_list:
-                b = "--{key} {value}"
                 value = getattr(model, key)
-                if isinstance(value, str) and (value != "" or value is not None):
-                    return b.format(key=key, value=value).replace("_", "-")
-                if isinstance(value, bool) and value:
-                    return b.format(key=key, value=value).replace("_", "-")
+                if isinstance(value, enum.Enum):
+                    return f"--{key} {value.value}".replace("_", "-")
+                elif isinstance(value, bool):
+                    if value:
+                        return f"--{key}".replace("_", "-")
+                elif isinstance(value, (int, str)):
+                    if value:
+                        return f"--{key} {value}".replace("_", "-")
 
         cmds = " ".join(
             [
