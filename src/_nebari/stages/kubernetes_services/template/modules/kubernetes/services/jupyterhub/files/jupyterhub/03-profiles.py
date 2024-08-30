@@ -241,6 +241,149 @@ def base_profile_extra_mounts():
     }
 
 
+NSS_WRAPPER_ENV = {
+    # nss_wrapper
+    # https://cwrap.org/nss_wrapper.html
+    "LD_PRELOAD": "libnss_wrapper.so",
+    "NSS_WRAPPER_PASSWD": "/tmp/passwd",
+    "NSS_WRAPPER_GROUP": "/tmp/group",
+}
+
+
+jupyterhub_gallery_patched = """\
+sh -c 'cd ~ && $(cat > .jupyterhub_gallery_patched.py <<- END
+from jupyterhub.singleuser.mixins import SingleUserNotebookAppMixin
+from jupyterhub.singleuser._disable_user_config import _disable_user_config
+import os
+import sys
+
+def initialize(self, argv=None, **kwargs):
+    if self.disable_user_config:
+        _disable_user_config(self)
+    self.config.FileContentsManager.delete_to_trash = False
+    default_url = os.environ.get("JUPYTERHUB_DEFAULT_URL")
+    if default_url:
+        self.config[self.__class__.__name__].default_url = default_url
+    self._log_app_versions()
+    self.init_ioloop()
+    super(SingleUserNotebookAppMixin, self).initialize(argv, **kwargs)
+    self.patch_templates()
+
+SingleUserNotebookAppMixin.initialize = initialize
+
+from jupyterlab_gallery.hub import HubGalleryApp
+sys.exit(HubGalleryApp.launch_instance())
+END
+) && /opt/conda/envs/default/bin/python .jupyterhub_gallery_patched.py --port={port} --ServerApp.disable_check_xsrf=True --debug'
+"""
+
+
+def preserve_extra_files(spawner, uid, gid, home_mounts, username):
+    """Copy over configuration for `singleuser.extraFiles`
+    from `KubeSpawner.volumes` and `KubeSpawner.volume_mounts`
+    as these would be overshadowed by the values we set in
+    `kubespawner_override` otherwise.
+    Also, because of a long-standing bug in k8s, setting
+    the mode to 0400 does not actually work so we need to use
+    a workaround as described in
+    https://github.com/kubernetes/kubernetes/issues/57923#issuecomment-713572886
+    """
+    sidecar_port = z2jh.get_config("custom.gallery-sidecar-port")
+    sidecar_enabled = z2jh.get_config("custom.gallery-sidecar-enabled")
+
+    if not sidecar_enabled:
+        return {
+            # TODO: put extra volume mounts for the gallery here
+        }
+
+    from kubernetes_asyncio.client.models import V1EnvVar
+
+    secret_volumes = [
+        mount for mount in c.KubeSpawner.volumes if mount["name"] == "files"
+    ]
+
+    empty_dir_name = "empty-dir"
+
+    extra_pod_config = {"volumes": [{"name": empty_dir_name}, *secret_volumes]}
+
+    volume_mounts = [
+        {
+            **mount,
+            "mountPath": "/tmp/"
+            + mount["mountPath"].replace("/etc/jupyter", "").lstrip("/"),
+        }
+        for mount in c.KubeSpawner.volume_mounts
+        if mount["name"] == "files"
+    ]
+
+    command = " && ".join(
+        [
+            f"cp /tmp/{path} /well/known/dir/{path} && chmod 0777 /well/known/dir/{path}"
+            for mount in c.KubeSpawner.volume_mounts
+            if mount["name"] == "files"
+            for path in [mount["mountPath"].replace("/etc/jupyter", "").lstrip("/")]
+        ]
+    )
+
+    api_token = spawner.user.new_api_token(
+        note="jupyterlab-gallery sidecar", scopes=["users:activity!user"]
+    )
+
+    jupyterhub_env = spawner.get_env()
+    env = {
+        **jupyterhub_env,
+        **NSS_WRAPPER_ENV,
+        # set home directory to username
+        "HOME": f"/home/{username}",
+        "JUPYTERHUB_API_TOKEN": api_token,
+        # ensure that user cannot peek into the config by placing a python config file in user directory
+        "JUPYTERHUB_DISABLE_USER_CONFIG": "1",
+    }
+    sidecar_env = [V1EnvVar(name=key, value=value) for key, value in env.items()]
+
+    # all containers in a pod share the same network, so we need to start the sidecar on a different port
+    # we also then need to filter what it is allowed to expose.
+    init_secret_volumes = {
+        "name": "init-secret-volumes",
+        "image": "busybox:1.31",
+        "command": ["sh", "-c", command],
+        "volumeMounts": [
+            {"name": empty_dir_name, "mountPath": "/well/known/dir"},
+            *volume_mounts,
+        ],
+    }
+
+    from shlex import split
+
+    args = split(jupyterhub_gallery_patched.format(port=sidecar_port))
+    # args = ["jupyterhub-gallery", f"--port={sidecar_port}"]
+
+    sidecar_with_secret_mounts_jhub = {
+        "name": "gallery-sidecar",
+        "image": spawner.image,
+        "args": args,
+        "ports": [{"name": "notebook-port", "containerPort": sidecar_port}],
+        "security_context": {
+            "runAsUser": uid,
+            "runAsGroup": gid,
+            "allowPrivilegeEscalation": False,
+        },
+        "env": sidecar_env,
+        "workingDir": spawner.working_dir,
+        # "restartPolicy": "Always",  # restartPolicy changes the init container into a sidecar container
+        "volumeMounts": [
+            *home_mounts,
+            {"name": empty_dir_name, "mountPath": "/etc/jupyter"},
+        ],
+    }
+
+    return {
+        "extra_pod_config": extra_pod_config,
+        "init_containers": [init_secret_volumes],
+        "extra_containers": [sidecar_with_secret_mounts_jhub],
+    }
+
+
 def configure_user_provisioned_repositories(username):
     # Define paths and configurations
     pvc_home_mount_path = f"home/{username}"
@@ -320,13 +463,9 @@ def configure_user_provisioned_repositories(username):
     }
 
 
-def configure_user(username, groups, uid=1000, gid=100):
+def configure_user(username, groups, uid, gid):
     environment = {
-        # nss_wrapper
-        # https://cwrap.org/nss_wrapper.html
-        "LD_PRELOAD": "libnss_wrapper.so",
-        "NSS_WRAPPER_PASSWD": "/tmp/passwd",
-        "NSS_WRAPPER_GROUP": "/tmp/group",
+        **NSS_WRAPPER_ENV,
         # default files created will have 775 permissions
         "NB_UMASK": "0002",
         # set default shell to bash
@@ -370,8 +509,8 @@ def configure_user(username, groups, uid=1000, gid=100):
         [
             # nss_wrapper
             # https://cwrap.org/nss_wrapper.html
-            f"echo '{etc_passwd}' > /tmp/passwd",
-            f"echo '{etc_group}' > /tmp/group",
+            f"echo '{etc_passwd}' > {NSS_WRAPPER_ENV['NSS_WRAPPER_PASSWD']}",
+            f"echo '{etc_group}' > {NSS_WRAPPER_ENV['NSS_WRAPPER_GROUP']}",
             # mount the shared directories for user only if there are
             # shared folders (groups) that the user is a member of
             # else ensure that the `shared` folder symlink does not exist
@@ -475,7 +614,7 @@ def profile_conda_store_viewer_token():
     }
 
 
-def render_profile(profile, username, groups, keycloak_profilenames):
+def render_profile(profile, username, groups, keycloak_profilenames, spawner):
     """Render each profile for user.
 
     If profile is not available for given username, groups returns
@@ -507,16 +646,28 @@ def render_profile(profile, username, groups, keycloak_profilenames):
         if profile.get("display_name", None) not in keycloak_profilenames:
             return None
 
+    uid = 1000
+    gid = 100
+
+    home_mounts = base_profile_home_mounts(username)
+
     profile = copy.copy(profile)
     profile_kubespawner_override = profile.get("kubespawner_override")
     profile["kubespawner_override"] = functools.reduce(
         deep_merge,
         [
-            base_profile_home_mounts(username),
+            home_mounts,
             base_profile_shared_mounts(groups),
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
-            configure_user(username, groups),
+            preserve_extra_files(
+                spawner,
+                uid=uid,
+                gid=gid,
+                home_mounts=home_mounts["extra_container_config"]["volumeMounts"],
+                username=username,
+            ),
+            configure_user(username, groups, uid=uid, gid=gid),
             configure_user_provisioned_repositories(username),
             profile_kubespawner_override,
         ],
@@ -566,7 +717,7 @@ def render_profiles(spawner):
         filter(
             None,
             [
-                render_profile(p, username, groups, keycloak_profilenames)
+                render_profile(p, username, groups, keycloak_profilenames, spawner)
                 for p in profile_list
             ],
         )
