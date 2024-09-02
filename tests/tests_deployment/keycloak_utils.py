@@ -81,12 +81,29 @@ def create_keycloak_role(client_name: str, role_name: str, scopes: str, componen
     )
 
 
+def get_keycloak_client_role(client_name, role_name):
+    keycloak_admin = get_keycloak_admin()
+    client_details = get_keycloak_client_details_by_name(
+        client_name=client_name, keycloak_admin=keycloak_admin
+    )
+    return keycloak_admin.get_client_role(
+        client_id=client_details["id"], role_name=role_name
+    )
+
+
 def get_keycloak_client_roles(client_name):
     keycloak_admin = get_keycloak_admin()
     client_details = get_keycloak_client_details_by_name(
         client_name=client_name, keycloak_admin=keycloak_admin
     )
     return keycloak_admin.get_client_roles(client_id=client_details["id"])
+
+
+def get_keycloak_role_groups(client_id, role_name):
+    keycloak_admin = get_keycloak_admin()
+    return keycloak_admin.get_client_role_groups(
+        client_id=client_id, role_name=role_name
+    )
 
 
 def delete_client_keycloak_test_roles(client_name):

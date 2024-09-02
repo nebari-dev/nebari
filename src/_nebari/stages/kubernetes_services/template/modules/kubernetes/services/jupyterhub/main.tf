@@ -321,6 +321,16 @@ module "jupyterhub-openid-client" {
         "component" : "jupyterhub"
       }
     },
+    {
+      "name" : "allow-group-directory-creation-role",
+      "description" : "Grants a group the ability to manage the creation of its corresponding mounted directory.",
+      "groups" : ["admin", "analyst", "developer"],
+      "attributes" : {
+        # grants permissions to mount group folder to shared dir
+        "scopes" : "write:shared-mount",
+        "component" : "shared-directory"
+      }
+    },
   ]
   callback-url-paths = [
     "https://${var.external-url}/hub/oauth_callback",
