@@ -74,6 +74,10 @@ module "efs" {
   efs_security_groups = [local.security_group_id]
 }
 
+moved {
+  from = module.efs
+  to   = module.efs[0]
+}
 
 # ==================== KUBERNETES =====================
 module "kubernetes" {

@@ -6,7 +6,10 @@ from tests.tests_deployment.conftest import token_parameterized
 from tests.tests_deployment.keycloak_utils import (
     assign_keycloak_client_role_to_user,
     create_keycloak_role,
+    get_keycloak_client_details_by_name,
+    get_keycloak_client_role,
     get_keycloak_client_roles,
+    get_keycloak_role_groups,
 )
 from tests.tests_deployment.utils import get_refresh_jupyterhub_token
 
@@ -33,6 +36,7 @@ def test_jupyterhub_loads_roles_from_keycloak(jupyterhub_access_token):
         "view-profile",
         # default roles
         "allow-read-access-to-services-role",
+        "allow-group-directory-creation-role",
     }
 
 
@@ -52,6 +56,40 @@ def test_check_default_roles_added_in_keycloak():
     role_names = [role["name"] for role in client_roles]
     assert "allow-app-sharing-role" in role_names
     assert "allow-read-access-to-services-role" in role_names
+    assert "allow-group-directory-creation-role" in role_names
+
+
+@pytest.mark.filterwarnings(
+    "ignore:.*auto_refresh_token is deprecated:DeprecationWarning"
+)
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_check_directory_creation_scope_attributes():
+    client_role = get_keycloak_client_role(
+        client_name="jupyterhub", role_name="allow-group-directory-creation-role"
+    )
+    assert client_role["attributes"]["component"][0] == "shared-directory"
+    assert client_role["attributes"]["scopes"][0] == "write:shared-mount"
+
+
+@pytest.mark.filterwarnings(
+    "ignore:.*auto_refresh_token is deprecated:DeprecationWarning"
+)
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+def test_groups_with_mount_permissions():
+    client_role = get_keycloak_client_role(
+        client_name="jupyterhub", role_name="allow-group-directory-creation-role"
+    )
+    client_details = get_keycloak_client_details_by_name(client_name="jupyterhub")
+    role_groups = get_keycloak_role_groups(
+        client_id=client_details["id"], role_name=client_role["name"]
+    )
+    assert set([group["path"] for group in role_groups]) == set(
+        [
+            "/developer",
+            "/admin",
+            "/analyst",
+        ]
+    )
 
 
 @token_parameterized(note="before-role-creation-and-assignment")
