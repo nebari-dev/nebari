@@ -46,13 +46,17 @@ def change_directory(directory):
     os.chdir(current_directory)
 
 
-def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
+def run_subprocess_cmd(processargs, prefix=b"", capture_output=False, **kwargs):
     """Runs subprocess command with realtime stdout logging with optional line prefix."""
-    if "prefix" in kwargs:
-        line_prefix = f"[{kwargs['prefix']}]: ".encode("utf-8")
-        kwargs.pop("prefix")
+    if prefix:
+        line_prefix = f"[{prefix}]: ".encode("utf-8")
     else:
         line_prefix = b""
+
+    if capture_output:
+        stderr_stream = subprocess.PIPE
+    else:
+        stderr_stream = subprocess.STDOUT
 
     timeout = 0
     if "timeout" in kwargs:
@@ -64,7 +68,7 @@ def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
         processargs,
         **kwargs,
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        stderr=stderr_stream,
         preexec_fn=os.setsid,
     )
     # Set timeout thread
@@ -80,8 +84,8 @@ def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
         timeout_timer = threading.Timer(timeout, kill_process)
         timeout_timer.start()
 
-    output = []
-    for line in iter(lambda: process.stdout.readline(), b""):
+    print_stream = process.stderr if capture_output else process.stdout
+    for line in iter(lambda: print_stream.readline(), b""):
         full_line = line_prefix + line
         if strip_errors:
             full_line = full_line.decode("utf-8")
@@ -90,16 +94,19 @@ def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
             )  # Remove red ANSI escape code
             full_line = full_line.encode("utf-8")
 
-        if capture_output:
-            output.append(full_line)
-        else:
-            sys.stdout.buffer.write(full_line)
-            sys.stdout.flush()
+        sys.stdout.buffer.write(full_line)
+        sys.stdout.flush()
+    print_stream.close()
+
+    output = []
+    if capture_output:
+        for line in iter(lambda: process.stdout.readline(), b""):
+            output.append(line)
+        process.stdout.close()
 
     if timeout_timer is not None:
         timeout_timer.cancel()
 
-    process.stdout.close()
     exit_code = process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout
