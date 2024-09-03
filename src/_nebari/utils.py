@@ -64,7 +64,7 @@ def run_subprocess_cmd(processargs, capture_output=False, **kwargs):
         processargs,
         **kwargs,
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        # stderr=subprocess.STDOUT,
         preexec_fn=os.setsid,
     )
     # Set timeout thread
