@@ -451,6 +451,19 @@ class CondaStoreInputVars(schema.Base):
         return byte_unit_conversion(value, "GiB")
 
 
+class TolerationOperatorEnum(str, enum.Enum):
+    Equal = "Equal"
+    Exists = "Exists"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
+
+
+class Toleration(schema.Taint):
+    operator: TolerationOperatorEnum = TolerationOperatorEnum.Equal
+
+
 class JupyterhubInputVars(schema.Base):
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
     jupyterlab_image: ImageNameTag = Field(alias="jupyterlab-image")
@@ -475,6 +488,9 @@ class JupyterhubInputVars(schema.Base):
     cloud_provider: str = Field(alias="cloud-provider")
     jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
     shared_fs_type: SharedFsEnum
+    node_taint_tolerations: Optional[List[Toleration]] = Field(
+        alias="node-taint-tolerations"
+    )
 
     @field_validator("jupyterhub_shared_storage", mode="before")
     @classmethod
@@ -642,6 +658,12 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterlab_default_settings=self.config.jupyterlab.default_settings,
             jupyterlab_gallery_settings=self.config.jupyterlab.gallery_settings,
             jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
+            node_taint_tolerations=[
+                Toleration(**taint.model_dump())
+                for taint in self.config.google_cloud_platform.node_groups[
+                    "user"
+                ].taints
+            ],  # TODO: support other cloud providers
             shared_fs_type=(
                 # efs is equivalent to nfs in these modules
                 SharedFsEnum.nfs
