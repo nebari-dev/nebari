@@ -195,6 +195,7 @@ def show(directory=None) -> dict:
                     command,
                     cwd=directory,
                     prefix="terraform",
+                    strip_errors=True,
                     capture_output=True,
                 )
             )
