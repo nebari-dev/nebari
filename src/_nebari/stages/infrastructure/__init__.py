@@ -146,7 +146,9 @@ class AWSInputVars(schema.Base):
     existing_subnet_ids: Optional[List[str]] = None
     region: str
     kubernetes_version: str
-    eks_endpoint_access: Optional[Literal["private", "public", "public_and_private"]] = "public"
+    eks_endpoint_access: Optional[
+        Literal["private", "public", "public_and_private"]
+    ] = "public"
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -466,7 +468,9 @@ class AmazonWebServicesProvider(schema.Base):
     kubernetes_version: str
     availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
-    eks_endpoint_access: Optional[Literal["private", "public", "public_and_private"]] = "public"
+    eks_endpoint_access: Optional[
+        Literal["private", "public", "public_and_private"]
+    ] = "public"
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
