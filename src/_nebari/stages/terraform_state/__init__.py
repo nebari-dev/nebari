@@ -1,5 +1,6 @@
 import contextlib
 import enum
+import functools
 import inspect
 import os
 import pathlib
@@ -8,9 +9,11 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 
 from pydantic import field_validator
 
+from _nebari import utils
 from _nebari.provider import terraform
 from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
+from _nebari.stages.tf_objects import NebariConfig
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
@@ -170,8 +173,9 @@ class TerraformStateStage(NebariTerraformStage):
             return []
 
     def tf_objects(self) -> List[Dict]:
+        resources = [NebariConfig(self.config)]
         if self.config.provider == schema.ProviderEnum.gcp:
-            return [
+            return resources + [
                 terraform.Provider(
                     "google",
                     project=self.config.google_cloud_platform.project,
@@ -179,13 +183,13 @@ class TerraformStateStage(NebariTerraformStage):
                 ),
             ]
         elif self.config.provider == schema.ProviderEnum.aws:
-            return [
+            return resources + [
                 terraform.Provider(
                     "aws", region=self.config.amazon_web_services.region
                 ),
             ]
         else:
-            return []
+            return resources
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
         if self.config.provider == schema.ProviderEnum.do:
@@ -231,6 +235,8 @@ class TerraformStateStage(NebariTerraformStage):
     def deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
+        self.check_immutable_fields()
+
         with super().deploy(stage_outputs, disable_prompt):
             env_mapping = {}
             # DigitalOcean terraform remote state using Spaces Bucket
@@ -245,6 +251,50 @@ class TerraformStateStage(NebariTerraformStage):
 
             with modified_environ(**env_mapping):
                 yield
+
+    def check_immutable_fields(self):
+        nebari_config_state = self.get_nebari_config_state()
+        if not nebari_config_state:
+            return
+
+        # compute diff of remote/prior and current nebari config
+        nebari_config_diff = utils.JsonDiff(
+            nebari_config_state.model_dump(), self.config.model_dump()
+        )
+
+        # check if any changed fields are immutable
+        for keys, old, new in nebari_config_diff.modified():
+            bottom_level_schema = self.config
+            if len(keys) > 1:
+                bottom_level_schema = functools.reduce(
+                    lambda m, k: getattr(m, k), keys[:-1], self.config
+                )
+            extra_field_schema = schema.ExtraFieldSchema(
+                **bottom_level_schema.model_fields[keys[-1]].json_schema_extra or {}
+            )
+            if extra_field_schema.immutable:
+                key_path = ".".join(keys)
+                raise ValueError(
+                    f'Attempting to change immutable field "{key_path}" ("{old}"->"{new}") in Nebari config file.  Immutable fields cannot be changed after initial deployment.'
+                )
+
+    def get_nebari_config_state(self):
+        directory = str(self.output_directory / self.stage_prefix)
+        tf_state = terraform.show(directory)
+        nebari_config_state = None
+
+        # get nebari config from state
+        for resource in (
+            tf_state.get("values", {}).get("root_module", {}).get("resources", [])
+        ):
+            if resource["address"] == "terraform_data.nebari_config":
+                from nebari.plugins import nebari_plugin_manager
+
+                nebari_config_state = nebari_plugin_manager.config_schema(
+                    **resource["values"]["input"]
+                )
+                break
+        return nebari_config_state
 
     @contextlib.contextmanager
     def destroy(

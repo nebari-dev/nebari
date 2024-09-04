@@ -1,5 +1,7 @@
-CURRENT_RELEASE = "2024.6.1"
+CURRENT_RELEASE = "2024.7.1"
 
+HELM_VERSION = "v3.15.3"
+KUSTOMIZE_VERSION = "5.4.3"
 # NOTE: Terraform cannot be upgraded further due to Hashicorp licensing changes
 # implemented in August 2023.
 # https://www.hashicorp.com/license-faq
