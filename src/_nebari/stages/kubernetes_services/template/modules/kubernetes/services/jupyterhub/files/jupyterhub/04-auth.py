@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import time
@@ -55,13 +56,27 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         user_roles_rich = await self._get_roles_with_attributes(
             roles=user_roles, client_id=jupyterhub_client_id, token=token
         )
+
+        # Include which groups have permission to mount shared directories (user by
+        # profiles.py)
+        auth_model["auth_state"]["groups_with_permission_to_mount"] = (
+            await self.get_client_groups_with_mount_permissions(
+                user_groups=auth_model["auth_state"]["oauth_user"]["groups"],
+                user_roles=user_roles_rich,
+                client_id=jupyterhub_client_id,
+                token=token,
+            )
+        )
+
         keycloak_api_call_time_taken = time.time() - keycloak_api_call_start
         user_roles_rich_names = {role["name"] for role in user_roles_rich}
+
         user_roles_non_jhub_client = [
             {"name": role}
             for role in user_roles_from_claims
             if role in (user_roles_from_claims - user_roles_rich_names)
         ]
+
         auth_model["roles"] = [
             {
                 "name": role["name"],
@@ -70,12 +85,16 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             }
             for role in [*user_roles_rich, *user_roles_non_jhub_client]
         ]
+
         # note: because the roles check is comprehensive, we need to re-add the admin and user roles
         if auth_model["admin"]:
             auth_model["roles"].append({"name": "admin"})
+
         if await self.check_allowed(auth_model["name"], auth_model):
             auth_model["roles"].append({"name": "user"})
+
         execution_time = time.time() - start
+
         self.log.info(
             f"Auth model update complete, time taken: {execution_time}s "
             f"time taken for keycloak api call: {keycloak_api_call_time_taken}s "
@@ -116,6 +135,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
         client_roles_rich = await self._get_jupyterhub_client_roles(
             jupyterhub_client_id=jupyterhub_client_id, token=token
         )
+
         # Includes roles like "default-roles-nebari", "offline_access", "uma_authorization"
         realm_roles = await self._fetch_api(endpoint="roles", token=token)
         roles = {
@@ -126,38 +146,117 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             }
             for role in [*realm_roles, *client_roles_rich]
         }
+
         # we could use either `name` (e.g. "developer") or `path` ("/developer");
         # since the default claim key returns `path`, it seems preferable.
-        group_name_key = "path"
         for realm_role in realm_roles:
             role_name = realm_role["name"]
             role = roles[role_name]
             # fetch role assignments to groups
-            groups = await self._fetch_api(f"roles/{role_name}/groups", token=token)
-            role["groups"] = [group[group_name_key] for group in groups]
-            # fetch role assignments to users
-            users = await self._fetch_api(f"roles/{role_name}/users", token=token)
-            role["users"] = [user["username"] for user in users]
+            role.update(
+                await self._get_users_and_groups_for_role(
+                    role_name,
+                    token=token,
+                )
+            )
+
         for client_role in client_roles_rich:
             role_name = client_role["name"]
             role = roles[role_name]
             # fetch role assignments to groups
-            groups = await self._fetch_api(
-                f"clients/{jupyterhub_client_id}/roles/{role_name}/groups", token=token
+            role.update(
+                await self._get_users_and_groups_for_role(
+                    role_name,
+                    token=token,
+                    client_id=jupyterhub_client_id,
+                )
             )
-            role["groups"] = [group[group_name_key] for group in groups]
-            # fetch role assignments to users
-            users = await self._fetch_api(
-                f"clients/{jupyterhub_client_id}/roles/{role_name}/users", token=token
-            )
-            role["users"] = [user["username"] for user in users]
 
         return list(roles.values())
+
+    async def get_client_groups_with_mount_permissions(
+        self, user_groups, user_roles, client_id, token
+    ):
+        """
+        Asynchronously retrieves the list of client groups with mount permissions
+        that the user belongs to.
+        """
+
+        roles_with_permission = []
+        groups_with_permission_to_mount = set()
+
+        # Filter roles with the shared-directory component and scope
+        for role in user_roles:
+            attributes = role.get("attributes", {})
+
+            role_component = attributes.get("component", [None])[0]
+            role_scopes = attributes.get("scopes", [None])[0]
+
+            if (
+                role_component == "shared-directory"
+                and role_scopes == "write:shared-mount"
+            ):
+                role_name = role.get("name")
+                roles_with_permission.append(role_name)
+
+        # Fetch groups for all relevant roles concurrently
+        group_fetch_tasks = [
+            self._fetch_api(
+                endpoint=f"clients/{client_id}/roles/{role_name}/groups",
+                token=token,
+            )
+            for role_name in roles_with_permission
+        ]
+
+        all_role_groups = await asyncio.gather(*group_fetch_tasks)
+
+        # Collect group names with permissions
+        for role_groups in all_role_groups:
+            groups_with_permission_to_mount |= set(
+                [group["path"] for group in role_groups]
+            )
+
+        return list(groups_with_permission_to_mount & set(user_groups))
+
+    async def _get_users_and_groups_for_role(
+        self, role_name, token, client_id=None, group_name_key="path"
+    ):
+        """
+        Asynchronously fetches and maps groups and users to a specified role.
+
+        Returns:
+            dict: A dictionary with groups (path or name) and users mapped to the role.
+        {
+            "groups": ["/group1", "/group2"],
+            "users": ["user1", "user2"],
+        },
+        """
+        # Prepare endpoints
+        group_endpoint = f"roles/{role_name}/groups"
+        user_endpoint = f"roles/{role_name}/users"
+
+        if client_id:
+            group_endpoint = f"clients/{client_id}/roles/{role_name}/groups"
+            user_endpoint = f"clients/{client_id}/roles/{role_name}/users"
+
+        # fetch role assignments to groups (Fetch data concurrently)
+        groups, users = await asyncio.gather(
+            *[
+                self._fetch_api(endpoint=group_endpoint, token=token),
+                self._fetch_api(endpoint=user_endpoint, token=token),
+            ]
+        )
+
+        # Process results
+        return {
+            "groups": [group[group_name_key] for group in groups],
+            "users": [user["username"] for user in users],
+        }
 
     def _get_scope_from_role(self, role):
         """Return scopes from role if the component is jupyterhub"""
         role_scopes = role.get("attributes", {}).get("scopes", [])
-        component = role.get("attributes", {}).get("component")
+        component = role.get("attributes", {}).get("component", [])
         # Attributes are returned as a single-element array, unless `##` delimiter is used in Keycloak
         # See this: https://stackoverflow.com/questions/68954733/keycloak-client-role-attribute-array
         if component == ["jupyterhub"] and role_scopes:

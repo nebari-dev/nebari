@@ -57,7 +57,7 @@ resource "helm_release" "jupyterhub" {
 
   repository = "https://jupyterhub.github.io/helm-chart/"
   chart      = "jupyterhub"
-  version    = "4.0.0-0.dev.git.6619.hd126b1bd"
+  version    = "4.0.0-0.dev.git.6707.h109668fd"
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -319,6 +319,16 @@ module "jupyterhub-openid-client" {
         # grants permissions to read services
         "scopes" : "read:services",
         "component" : "jupyterhub"
+      }
+    },
+    {
+      "name" : "allow-group-directory-creation-role",
+      "description" : "Grants a group the ability to manage the creation of its corresponding mounted directory.",
+      "groups" : ["admin", "analyst", "developer"],
+      "attributes" : {
+        # grants permissions to mount group folder to shared dir
+        "scopes" : "write:shared-mount",
+        "component" : "shared-directory"
       }
     },
   ]

@@ -45,10 +45,24 @@ class ProviderEnum(str, enum.Enum):
         return representer.represent_str(node.value)
 
 
+class ExtraFieldSchema(Base):
+    model_config = ConfigDict(
+        extra="allow",
+        validate_assignment=True,
+        populate_by_name=True,
+    )
+    immutable: bool = (
+        False  # Whether field supports being changed after initial deployment
+    )
+
+
 class Main(Base):
-    project_name: project_name_pydantic
+    project_name: project_name_pydantic = Field(json_schema_extra={"immutable": True})
     namespace: namespace_pydantic = "dev"
-    provider: ProviderEnum = ProviderEnum.local
+    provider: ProviderEnum = Field(
+        default=ProviderEnum.local,
+        json_schema_extra={"immutable": True},
+    )
     # In nebari_version only use major.minor.patch version - drop any pre/post/dev suffixes
     nebari_version: Annotated[str, Field(validate_default=True)] = __version__
 

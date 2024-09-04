@@ -61,7 +61,10 @@ class DefaultImages(schema.Base):
 
 
 class Storage(schema.Base):
-    type: SharedFsEnum = None
+    type: SharedFsEnum = Field(
+        default=None,
+        json_schema_extra={"immutable": True},
+    )
     conda_store: str = "200Gi"
     shared_filesystem: str = "200Gi"
 
@@ -223,10 +226,15 @@ class MonitoringOverrides(schema.Base):
     minio: Dict = {}
 
 
+class Healthchecks(schema.Base):
+    enabled: bool = False
+
+
 class Monitoring(schema.Base):
     enabled: bool = True
     overrides: MonitoringOverrides = MonitoringOverrides()
     minio_enabled: bool = True
+    healthchecks: Healthchecks = Healthchecks()
 
 
 class JupyterLabPioneer(schema.Base):
