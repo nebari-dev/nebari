@@ -6,7 +6,7 @@ import pathlib
 import re
 import sys
 import tempfile
-from typing import Annotated, Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
 from pydantic import Field, field_validator, model_validator
 
@@ -146,7 +146,7 @@ class AWSInputVars(schema.Base):
     existing_subnet_ids: Optional[List[str]] = None
     region: str
     kubernetes_version: str
-    eks_endpoint_access: str = "public"
+    eks_endpoint_access: Optional[Literal["private", "public", "public_and_private"]] = "public"
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -466,7 +466,7 @@ class AmazonWebServicesProvider(schema.Base):
     kubernetes_version: str
     availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
-    eks_endpoint_access: str = "public"
+    eks_endpoint_access: Optional[Literal["private", "public", "public_and_private"]] = "public"
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -522,18 +522,6 @@ class AmazonWebServicesProvider(schema.Base):
                     raise ValueError(
                         f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
                     )
-
-        # check if eks cluster endpoint access config is valid
-        available_endpoint_options = ["private", "public", "public_and_private"]
-        if "eks_endpoint_access" not in data:
-            data["eks_endpoint_access"] = "public"
-        else:
-            if data["eks_endpoint_access"] is None:
-                data["eks_endpoint_access"] = "public"
-            elif data["eks_endpoint_access"] not in available_endpoint_options:
-                raise ValueError(
-                    f"\nInvalid `eks-endpoint-access` provided: {data['eks_endpoint_access']}.\nPlease select from one of the following supported EKS cluster endpoint access options: {available_endpoint_options}"
-                )
         return data
 
 
