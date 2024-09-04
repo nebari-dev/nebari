@@ -87,3 +87,6 @@ jobs:
           NEBARI_SECRET__default_images__dask_worker: "quay.io/nebari/nebari-dask-worker:${{ env.NEBARI_IMAGE_TAG }}"
           ARM_CLIENT_ID: ${{ env.ARM_CLIENT_ID }}
           ARM_TENANT_ID: ${{ env.ARM_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ env.ARM_SUBSCRIPTION_ID }}
+          ARM_USE_OIDC: "true"
+          CLOUDFLARE_TOKEN: ${{ env.CLOUDFLARE_TOKEN }}
