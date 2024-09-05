@@ -82,11 +82,11 @@ def base_profile_home_mounts(username):
     }
 
 
-def base_profile_shared_mounts(groups):
+def base_profile_shared_mounts(groups_to_volume_mount):
     """Configure the group directory mounts for user.
 
-    Ensure that {shared}/{group} directory exists and user has
-    permissions to read/write/execute. Kubernetes does not allow the
+    Ensure that {shared}/{group} directory exists based on the scope availability
+    and if user has permissions to read/write/execute. Kubernetes does not allow the
     same pvc to be a volume thus we must check that the home and share
     pvc are not the same for some operation.
 
@@ -103,40 +103,42 @@ def base_profile_shared_mounts(groups):
             {"name": "shared", "persistentVolumeClaim": {"claimName": shared_pvc_name}}
         )
 
-    extra_container_config = {
-        "volumeMounts": [
-            {
-                "mountPath": pod_shared_mount_path.format(group=group),
-                "name": "shared" if home_pvc_name != shared_pvc_name else "home",
-                "subPath": pvc_shared_mount_path.format(group=group),
-            }
-            for group in groups
-        ]
-    }
+    extra_container_config = {"volumeMounts": []}
 
     MKDIR_OWN_DIRECTORY = "mkdir -p /mnt/{path} && chmod 777 /mnt/{path}"
     command = " && ".join(
         [
             MKDIR_OWN_DIRECTORY.format(path=pvc_shared_mount_path.format(group=group))
-            for group in groups
+            for group in groups_to_volume_mount
         ]
     )
+
     init_containers = [
         {
             "name": "initialize-shared-mounts",
             "image": "busybox:1.31",
             "command": ["sh", "-c", command],
             "securityContext": {"runAsUser": 0},
-            "volumeMounts": [
-                {
-                    "mountPath": f"/mnt/{pvc_shared_mount_path.format(group=group)}",
-                    "name": "shared" if home_pvc_name != shared_pvc_name else "home",
-                    "subPath": pvc_shared_mount_path.format(group=group),
-                }
-                for group in groups
-            ],
+            "volumeMounts": [],
         }
     ]
+
+    for group in groups_to_volume_mount:
+        extra_container_config["volumeMounts"].append(
+            {
+                "mountPath": pod_shared_mount_path.format(group=group),
+                "name": "shared" if home_pvc_name != shared_pvc_name else "home",
+                "subPath": pvc_shared_mount_path.format(group=group),
+            }
+        )
+        init_containers[0]["volumeMounts"].append(
+            {
+                "mountPath": f"/mnt/{pvc_shared_mount_path.format(group=group)}",
+                "name": "shared" if home_pvc_name != shared_pvc_name else "home",
+                "subPath": pvc_shared_mount_path.format(group=group),
+            }
+        )
+
     return {
         "extra_pod_config": extra_pod_config,
         "extra_container_config": extra_container_config,
@@ -475,7 +477,9 @@ def profile_conda_store_viewer_token():
     }
 
 
-def render_profile(profile, username, groups, keycloak_profilenames):
+def render_profile(
+    profile, username, groups, keycloak_profilenames, groups_to_volume_mount
+):
     """Render each profile for user.
 
     If profile is not available for given username, groups returns
@@ -513,7 +517,7 @@ def render_profile(profile, username, groups, keycloak_profilenames):
         deep_merge,
         [
             base_profile_home_mounts(username),
-            base_profile_shared_mounts(groups),
+            base_profile_shared_mounts(groups_to_volume_mount),
             profile_conda_store_mounts(username, groups),
             base_profile_extra_mounts(),
             configure_user(username, groups),
@@ -552,13 +556,17 @@ def render_profiles(spawner):
     auth_state = yield spawner.user.get_auth_state()
 
     username = auth_state["oauth_user"]["preferred_username"]
+
     # only return the lowest level group name
     # e.g. /projects/myproj -> myproj
     # and /developers -> developers
     groups = [Path(group).name for group in auth_state["oauth_user"]["groups"]]
-    spawner.log.info(f"user info: {username} {groups}")
 
     keycloak_profilenames = auth_state["oauth_user"].get("jupyterlab_profiles", [])
+
+    groups_with_permission_to_mount = auth_state.get(
+        "groups_with_permission_to_mount", []
+    )
 
     # fetch available profiles and render additional attributes
     profile_list = z2jh.get_config("custom.profiles")
@@ -566,7 +574,13 @@ def render_profiles(spawner):
         filter(
             None,
             [
-                render_profile(p, username, groups, keycloak_profilenames)
+                render_profile(
+                    p,
+                    username,
+                    groups,
+                    keycloak_profilenames,
+                    groups_with_permission_to_mount,
+                )
                 for p in profile_list
             ],
         )

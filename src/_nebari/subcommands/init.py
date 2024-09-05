@@ -743,7 +743,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # DOMAIN NAME
         rich.print(
             (
-                "\n\n 🪴  Great! Now you can provide a valid domain name (i.e. the URL) to access your Nebri instance. "
+                "\n\n 🪴  Great! Now you can provide a valid domain name (i.e. the URL) to access your Nebari instance. "
                 "This should be a domain that you own. Default if unspecified is the IP of the load balancer.\n\n"
             )
         )
@@ -812,21 +812,9 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 qmark=qmark,
             ).unsafe_ask()
 
-            org_name = questionary.text(
-                f"Which user or organization will this repository live under? ({repo_url.format(git_provider=git_provider, org_name='<org-name>', repo_name='')})",
-                qmark=qmark,
-            ).unsafe_ask()
-
-            repo_name = questionary.text(
-                f"And what will the name of this repository be? ({repo_url.format(git_provider=git_provider, org_name=org_name, repo_name='<repo-name>')})",
-                qmark=qmark,
-            ).unsafe_ask()
-
-            inputs.repository = repo_url.format(
-                git_provider=git_provider, org_name=org_name, repo_name=repo_name
-            )
-
             if git_provider == GitRepoEnum.github.value.lower():
+                inputs.ci_provider = CiEnum.github_actions.value.lower()
+
                 inputs.repository_auto_provision = questionary.confirm(
                     f"Would you like nebari to create a remote repository on {git_provider}?",
                     default=False,
@@ -834,11 +822,26 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                     auto_enter=False,
                 ).unsafe_ask()
 
-            if not disable_checks and inputs.repository_auto_provision:
-                check_repository_creds(ctx, git_provider)
+                if inputs.repository_auto_provision:
+                    org_name = questionary.text(
+                        f"Which user or organization will this repository live under? ({repo_url.format(git_provider=git_provider, org_name='<org-name>', repo_name='')})",
+                        qmark=qmark,
+                    ).unsafe_ask()
 
-            if git_provider == GitRepoEnum.github.value.lower():
-                inputs.ci_provider = CiEnum.github_actions.value.lower()
+                    repo_name = questionary.text(
+                        f"And what will the name of this repository be? ({repo_url.format(git_provider=git_provider, org_name=org_name, repo_name='<repo-name>')})",
+                        qmark=qmark,
+                    ).unsafe_ask()
+
+                    inputs.repository = repo_url.format(
+                        git_provider=git_provider,
+                        org_name=org_name,
+                        repo_name=repo_name,
+                    )
+
+                    if not disable_checks:
+                        check_repository_creds(ctx, git_provider)
+
             elif git_provider == GitRepoEnum.gitlab.value.lower():
                 inputs.ci_provider = CiEnum.gitlab_ci.value.lower()
 
@@ -934,16 +937,19 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             )
         )
 
-        base_cmd = f"nebari init {inputs.cloud_provider}"
+        base_cmd = f"nebari init {inputs.cloud_provider.value}"
 
         def if_used(key, model=inputs, ignore_list=["cloud_provider"]):
             if key not in ignore_list:
-                b = "--{key} {value}"
                 value = getattr(model, key)
-                if isinstance(value, str) and (value != "" or value is not None):
-                    return b.format(key=key, value=value).replace("_", "-")
-                if isinstance(value, bool) and value:
-                    return b.format(key=key, value=value).replace("_", "-")
+                if isinstance(value, enum.Enum):
+                    return f"--{key} {value.value}".replace("_", "-")
+                elif isinstance(value, bool):
+                    if value:
+                        return f"--{key}".replace("_", "-")
+                elif isinstance(value, (int, str)):
+                    if value:
+                        return f"--{key} {value}".replace("_", "-")
 
         cmds = " ".join(
             [

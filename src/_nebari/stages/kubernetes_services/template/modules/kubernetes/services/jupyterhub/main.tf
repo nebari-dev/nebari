@@ -57,7 +57,7 @@ resource "helm_release" "jupyterhub" {
 
   repository = "https://jupyterhub.github.io/helm-chart/"
   chart      = "jupyterhub"
-  version    = "4.0.0-0.dev.git.6619.hd126b1bd"
+  version    = "4.0.0-0.dev.git.6707.h109668fd"
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -69,8 +69,8 @@ resource "helm_release" "jupyterhub" {
         theme                         = var.theme
         profiles                      = var.profiles
         argo-workflows-enabled        = var.argo-workflows-enabled
-        home-pvc                      = var.home-pvc
-        shared-pvc                    = var.shared-pvc
+        home-pvc                      = var.home-pvc.name
+        shared-pvc                    = var.shared-pvc.name
         conda-store-pvc               = var.conda-store-pvc
         conda-store-mount             = var.conda-store-mount
         default-conda-store-namespace = var.default-conda-store-namespace
@@ -216,8 +216,25 @@ resource "helm_release" "jupyterhub" {
     name  = "proxy.secretToken"
     value = random_password.proxy_secret_token.result
   }
+
+  depends_on = [
+    var.home-pvc,
+    var.shared-pvc,
+  ]
+
+  lifecycle {
+    replace_triggered_by = [
+      null_resource.home-pvc,
+    ]
+  }
+
 }
 
+resource "null_resource" "home-pvc" {
+  triggers = {
+    home-pvc = var.home-pvc.id
+  }
+}
 
 resource "kubernetes_manifest" "jupyterhub" {
   manifest = {
@@ -302,6 +319,16 @@ module "jupyterhub-openid-client" {
         # grants permissions to read services
         "scopes" : "read:services",
         "component" : "jupyterhub"
+      }
+    },
+    {
+      "name" : "allow-group-directory-creation-role",
+      "description" : "Grants a group the ability to manage the creation of its corresponding mounted directory.",
+      "groups" : ["admin", "analyst", "developer"],
+      "attributes" : {
+        # grants permissions to mount group folder to shared dir
+        "scopes" : "write:shared-mount",
+        "component" : "shared-directory"
       }
     },
   ]
