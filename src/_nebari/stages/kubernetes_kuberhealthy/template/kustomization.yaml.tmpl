@@ -7,7 +7,7 @@ helmCharts:
   repo: https://kuberhealthy.github.io/kuberhealthy/helm-repos
   releaseName: kuberhealthy
   namespace: {{ namespace }}
-  version: "{{ kuberhealthy_version }}" # v.2.7.1
+  version: "{{ kuberhealthy_helm_version }}"
   valuesFile: values.yaml
   valuesInline:
     prometheus:

@@ -15,6 +15,8 @@ from _nebari.provider import helm, kubernetes, kustomize, terraform
 from _nebari.stages.tf_objects import NebariTerraformState
 from nebari.hookspecs import NebariStage
 
+KUSTOMIZATION_TEMPLATE = "kustomization.yaml.tmpl"
+
 
 class NebariKustomizeStage(NebariStage):
     @property
@@ -76,12 +78,12 @@ class NebariKustomizeStage(NebariStage):
         env = Environment(loader=FileSystemLoader(self.template_directory))
 
         contents = {}
-        if not (self.template_directory / "kustomization.yaml.tmpl").exists():
+        if not (self.template_directory / KUSTOMIZATION_TEMPLATE).exists():
             raise FileNotFoundError(
                 f"ERROR: After stage={self.name} "
-                "kustomization.yaml.tmpl template file not found in template directory"
+                f"{KUSTOMIZATION_TEMPLATE} template file not found in template directory"
             )
-        kustomize_template = env.get_template("kustomization.yaml.tmpl")
+        kustomize_template = env.get_template(KUSTOMIZATION_TEMPLATE)
         rendered_kustomization = kustomize_template.render(**self.kustomize_vars)
         with open(self.template_directory / "kustomization.yaml", "w") as f:
             f.write(rendered_kustomization)
