@@ -21,6 +21,13 @@ class KuberHealthyStage(NebariKustomizeStage):
     input_schema = InputSchema
     output_schema = OutputSchema
 
+    @property
+    def kustomize_vars(self):
+        return {
+            "namespace": self.config.namespace,
+            "kuberhealthy_helm_version": self.config.monitoring.healthchecks.kuberhealthy_helm_version,
+        }
+
     @contextlib.contextmanager
     def deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
