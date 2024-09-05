@@ -228,6 +228,7 @@ class MonitoringOverrides(schema.Base):
 
 class Healthchecks(schema.Base):
     enabled: bool = False
+    kuberhealthy_helm_version: str = constants.KUBERHEALTHY_HELM_VERSION
 
 
 class Monitoring(schema.Base):
