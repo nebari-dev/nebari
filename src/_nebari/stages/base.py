@@ -7,12 +7,15 @@ import sys
 import tempfile
 from typing import Any, Dict, List, Tuple
 
+from jinja2 import Environment, FileSystemLoader
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
 from _nebari.provider import helm, kubernetes, kustomize, terraform
 from _nebari.stages.tf_objects import NebariTerraformState
 from nebari.hookspecs import NebariStage
+
+KUSTOMIZATION_TEMPLATE = "kustomization.yaml.tmpl"
 
 
 class NebariKustomizeStage(NebariStage):
@@ -23,6 +26,10 @@ class NebariKustomizeStage(NebariStage):
     @property
     def stage_prefix(self):
         return pathlib.Path("stages") / self.name
+
+    @property
+    def kustomize_vars(self):
+        return {}
 
     failed_to_create = False
     error_message = ""
@@ -68,13 +75,19 @@ class NebariKustomizeStage(NebariStage):
             sys.exit(1)
 
     def render(self) -> Dict[pathlib.Path, str]:
+        env = Environment(loader=FileSystemLoader(self.template_directory))
 
         contents = {}
-        if not (self.template_directory / "kustomization.yaml").exists():
+        if not (self.template_directory / KUSTOMIZATION_TEMPLATE).exists():
             raise FileNotFoundError(
                 f"ERROR: After stage={self.name} "
-                "kustomization.yaml file not found in template directory"
+                f"{KUSTOMIZATION_TEMPLATE} template file not found in template directory"
             )
+        kustomize_template = env.get_template(KUSTOMIZATION_TEMPLATE)
+        rendered_kustomization = kustomize_template.render(**self.kustomize_vars)
+        with open(self.template_directory / "kustomization.yaml", "w") as f:
+            f.write(rendered_kustomization)
+
         with tempfile.TemporaryDirectory() as temp_dir:
             kustomize.run_kustomize_subprocess(
                 [
@@ -113,6 +126,8 @@ class NebariKustomizeStage(NebariStage):
                                 ),
                             )
                         ] = f.read()
+            # cleanup generated kustomization.yaml
+            pathlib.Path(self.template_directory, "kustomization.yaml").unlink()
 
             # clean up downloaded helm charts
             charts_dir = pathlib.Path(self.template_directory, "charts")
