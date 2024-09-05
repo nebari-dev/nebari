@@ -174,21 +174,19 @@ def test_cli_init_error_repository_missing_env(monkeypatch: pytest.MonkeyPatch):
         assert tmp_file.exists() is False
 
 
-def test_cli_init_error_invalid_repo(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setenv("GITHUB_USERNAME", TEST_GITHUB_USERNAME)
-    monkeypatch.setenv("GITHUB_TOKEN", TEST_GITHUB_TOKEN)
-
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://github.com",
+        "http://github.com/user/repo",
+        "https://github.com/user/" "github.com/user/repo",
+        "https://notgithub.com/user/repository",
+    ],
+)
+def test_cli_init_error_invalid_repo(url):
     app = create_cli()
 
-    args = [
-        "init",
-        "local",
-        "--project-name",
-        "test",
-        "--repository-auto-provision",
-        "--repository",
-        "https://notgithub.com",
-    ]
+    args = ["init", "local", "--project-name", "test", "--repository", url]
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"

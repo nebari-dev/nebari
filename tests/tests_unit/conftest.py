@@ -125,7 +125,7 @@ def mock_all_cloud_methods(monkeypatch):
             "gcp.nebari.dev",
             schema.ProviderEnum.gcp,
             GCP_DEFAULT_REGION,
-            CiEnum.github_actions,
+            CiEnum.gitlab_ci,
             AuthenticationEnum.password,
         ),
         (
@@ -154,6 +154,11 @@ def nebari_config_options(request) -> schema.Main:
         auth_provider,
     ) = request.param
 
+    if ci_provider == CiEnum.github_actions:
+        repo = DEFAULT_GH_REPO
+    else:
+        repo = None
+
     return dict(
         project_name=project,
         namespace=namespace,
@@ -162,7 +167,7 @@ def nebari_config_options(request) -> schema.Main:
         region=region,
         ci_provider=ci_provider,
         auth_provider=auth_provider,
-        repository=DEFAULT_GH_REPO,
+        repository=repo,
         repository_auto_provision=False,
         auth_auto_provision=False,
         terraform_state=DEFAULT_TERRAFORM_STATE,
