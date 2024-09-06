@@ -24,12 +24,6 @@ resource "aws_eks_cluster" "main" {
 ## If using a Custom AMI, then the /etc/eks/bootstrap cmds and args must be included/modified,
 ## otherwise, on default AWS EKS Node AMI, the bootstrap cmd is appended automatically
 resource "aws_launch_template" "main" {
-  # Invoke launch_template only if var.node_prebootstrap_command is not null or custom_ami is not null
-  # count    = var.node_prebootstrap_command != null ? length(var.node_groups) : length(local.cust_ami_node_index)
-  # name     = var.node_prebootstrap_command != null ? var.node_groups[count.index].name : var.node_groups[local.cust_ami_node_index[count.index]].name
-  # image_id = var.node_prebootstrap_command != null ? var.node_groups[count.index].custom_ami : var.node_groups[local.cust_ami_node_index[count.index]].custom_ami
-  # count = var.node_launch_template != null ? length(var.node_groups) : 0
-  # name  = var.node_launch_template != null ? var.node_groups[count.index].name : null
   for_each = {
     for node_group in var.node_groups :
     node_group.name => node_group
@@ -49,10 +43,10 @@ resource "aws_launch_template" "main" {
   }
 
   block_device_mappings {
-    device_name = each.value.launch_template.ebs_device_name
+    device_name = "/dev/xvda"
     ebs {
-      volume_size = each.value.launch_template.ebs_volume_size
-      volume_type = each.value.launch_template.ebs_volume_type
+      volume_size = 50
+      volume_type = "gp2"
     }
   }
 
@@ -62,8 +56,7 @@ resource "aws_launch_template" "main" {
       "${path.module}/files/user_data.tftpl",
       {
         node_prebootstrap_command = each.value.launch_template.pre_bootstrap_command
-        user_data                 = each.value.launch_template.user_data
-        split_user_data           = each.value.launch_template.user_data != null ? true : false
+        include_bootstrap_cmd     = each.value._ami_type == "CUSTOM" ? true : false
         cluster_name              = aws_eks_cluster.main.name
         cluster_cert_authority    = aws_eks_cluster.main.certificate_authority[0].data
         cluster_endpoint          = aws_eks_cluster.main.endpoint
@@ -83,7 +76,7 @@ resource "aws_eks_node_group" "main" {
   instance_types = [var.node_groups[count.index].instance_type]
   # ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" :
   # "AL2_x86_64"
-  ami_type  = var.node_groups[count.index].ami_type
+  ami_type  = var.node_groups[count.index]._ami_type
   disk_size = var.node_groups[count.index].launch_template == null ? 50 : null
 
   scaling_config {

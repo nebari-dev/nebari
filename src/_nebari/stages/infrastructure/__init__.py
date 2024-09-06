@@ -129,13 +129,15 @@ class AzureInputVars(schema.Base):
 
 
 class AWSNodeLaunchTemplate(schema.Base):
-    user_data: Optional[str] = None
     pre_bootstrap_command: Optional[str] = None
-    ebs_device_name: Optional[str] = "/dev/xvda"
-    ebs_volume_size: Optional[int] = 50
-    ebs_volume_type: Optional[str] = "gp2"
     ami_id: Optional[str] = None
-    vars: Optional[Dict[str, str]] = None
+
+    @field_validator("ami_id")
+    @classmethod
+    def _validate_ami_id(cls, value: Optional[str]) -> str:
+        if value is None:
+            raise ValueError("ami_id is required if pre_bootstrap_command is passed")
+        return value
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -147,8 +149,10 @@ class AWSNodeGroupInputVars(schema.Base):
     max_size: int
     single_subnet: bool
     permissions_boundary: Optional[str] = None
-    ami_type: Optional[Literal["AL2_x86_64", "AL2_x86_64_GPU", "CUSTOM"]] = "AL2_x86_64"
     launch_template: Optional[AWSNodeLaunchTemplate] = None
+    _ami_type: Optional[Literal["AL2_x86_64", "AL2_x86_64_GPU", "CUSTOM"]] = (
+        "AL2_x86_64"
+    )
 
 
 class AWSInputVars(schema.Base):
@@ -841,7 +845,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                             if not node_group.node_launch_template
                             else node_group.node_launch_template
                         ),
-                        ami_type=(
+                        _ami_type=(
                             node_group.ami_type
                             if not node_group.gpu
                             else "AL2_x86_64_GPU"

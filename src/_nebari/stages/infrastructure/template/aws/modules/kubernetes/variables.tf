@@ -51,8 +51,8 @@ variable "node_groups" {
     desired_size    = number
     max_size        = number
     single_subnet   = bool
-    launch_template = string
-    ami_type        = string
+    launch_template = map(any)
+    _ami_type       = string
   }))
 }
 
@@ -64,7 +64,7 @@ variable "node_group_instance_type" {
 
 variable "node_launch_template" {
   description = "Custom launch template for EKS nodes"
-  type        = string
+  type        = map(any)
   default     = null
 }
 
