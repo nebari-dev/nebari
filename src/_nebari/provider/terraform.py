@@ -194,6 +194,8 @@ def show(directory=None) -> dict:
                 run_terraform_subprocess(
                     command,
                     cwd=directory,
+                    prefix="terraform",
+                    strip_errors=True,
                     capture_output=True,
                 )
             )
