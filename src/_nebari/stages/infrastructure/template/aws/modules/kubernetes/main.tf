@@ -56,7 +56,7 @@ resource "aws_launch_template" "main" {
       "${path.module}/files/user_data.tftpl",
       {
         node_prebootstrap_command = each.value.launch_template.pre_bootstrap_command
-        include_bootstrap_cmd     = each.value._ami_type == "CUSTOM" ? true : false
+        include_bootstrap_cmd     = each.value.ami_type == "CUSTOM" ? true : false
         cluster_name              = aws_eks_cluster.main.name
         cluster_cert_authority    = aws_eks_cluster.main.certificate_authority[0].data
         cluster_endpoint          = aws_eks_cluster.main.endpoint
@@ -76,7 +76,7 @@ resource "aws_eks_node_group" "main" {
   instance_types = [var.node_groups[count.index].instance_type]
   # ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" :
   # "AL2_x86_64"
-  ami_type  = var.node_groups[count.index]._ami_type
+  ami_type  = var.node_groups[count.index].ami_type
   disk_size = var.node_groups[count.index].launch_template == null ? 50 : null
 
   scaling_config {

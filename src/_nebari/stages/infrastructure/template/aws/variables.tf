@@ -39,7 +39,7 @@ variable "node_groups" {
     max_size        = number
     single_subnet   = bool
     launch_template = map(any)
-    _ami_type       = string
+    ami_type        = string
   }))
 }
 

@@ -150,8 +150,8 @@ class AWSNodeGroupInputVars(schema.Base):
     single_subnet: bool
     permissions_boundary: Optional[str] = None
     launch_template: Optional[AWSNodeLaunchTemplate] = None
-    _ami_type: Optional[Literal["AL2_x86_64", "AL2_x86_64_GPU", "CUSTOM"]] = (
-        "AL2_x86_64"
+    ami_type: Optional[Literal["AL2_x86_64", "AL2_x86_64_GPU", "CUSTOM"]] = Field(
+        "AL2_x86_64", exclude=True
     )
 
 
@@ -845,7 +845,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                             if not node_group.node_launch_template
                             else node_group.node_launch_template
                         ),
-                        _ami_type=(
+                        ami_type=(
                             node_group.ami_type
                             if not node_group.gpu
                             else "AL2_x86_64_GPU"
