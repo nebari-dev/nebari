@@ -43,11 +43,6 @@ variable "node_groups" {
   }))
 }
 
-variable "node_launch_template" {
-  description = "Custom launch template for EKS nodes (placeholder)"
-  type        = map(any)
-}
-
 variable "availability_zones" {
   description = "AWS availability zones within AWS region"
   type        = list(string)
@@ -61,12 +56,6 @@ variable "vpc_cidr_block" {
 variable "kubeconfig_filename" {
   description = "Kubernetes kubeconfig written to filesystem"
   type        = string
-}
-
-variable "node_launch_template" {
-  description = "Custom launch template for EKS nodes"
-  type        = string
-  default     = null
 }
 
 variable "eks_endpoint_access" {

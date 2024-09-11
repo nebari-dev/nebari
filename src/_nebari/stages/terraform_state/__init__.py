@@ -2,6 +2,7 @@ import contextlib
 import enum
 import functools
 import inspect
+import json
 import os
 import pathlib
 import re
@@ -261,11 +262,16 @@ class TerraformStateStage(NebariTerraformStage):
         nebari_config_diff = utils.JsonDiff(
             nebari_config_state.model_dump(), self.config.model_dump()
         )
-
+        # save both for testing:
+        with open("nebari_config_state.json", "w") as f:
+            f.write(json.dumps(nebari_config_state.model_dump(), indent=4))
+        with open("nebari_config.json", "w") as f:
+            f.write(json.dumps(self.config.model_dump(), indent=4))
         # check if any changed fields are immutable
         for keys, old, new in nebari_config_diff.modified():
             bottom_level_schema = self.config
             if len(keys) > 1:
+                print(keys)
                 bottom_level_schema = functools.reduce(
                     lambda m, k: getattr(m, k), keys[:-1], self.config
                 )

@@ -132,13 +132,6 @@ class AWSNodeLaunchTemplate(schema.Base):
     pre_bootstrap_command: Optional[str] = None
     ami_id: Optional[str] = None
 
-    @field_validator("ami_id")
-    @classmethod
-    def _validate_ami_id(cls, value: Optional[str]) -> str:
-        if value is None:
-            raise ValueError("ami_id is required if pre_bootstrap_command is passed")
-        return value
-
 
 class AWSNodeGroupInputVars(schema.Base):
     name: str
@@ -150,9 +143,28 @@ class AWSNodeGroupInputVars(schema.Base):
     single_subnet: bool
     permissions_boundary: Optional[str] = None
     launch_template: Optional[AWSNodeLaunchTemplate] = None
-    ami_type: Optional[Literal["AL2_x86_64", "AL2_x86_64_GPU", "CUSTOM"]] = Field(
-        "AL2_x86_64", exclude=True
-    )
+    ami_type: Optional[str] = None
+
+    @field_validator("ami_type", mode="before")
+    @classmethod
+    def _infer_and_validate_ami_type(cls, value, values) -> str:
+        gpu_enabled = values.get("gpu", False)
+
+        # Auto-set ami_type if not provided
+        if not value:
+            if values.get("launch_template") and values["launch_template"].ami_id:
+                return "CUSTOM"
+            if gpu_enabled:
+                return "AL2_x86_64_GPU"
+            return "AL2_x86_64"
+
+        # Explicit validation
+        if value == "AL2_x86_64" and gpu_enabled:
+            raise ValueError(
+                "ami_type 'AL2_x86_64' cannot be used with GPU enabled (gpu=True)."
+            )
+
+        return value
 
 
 class AWSInputVars(schema.Base):
@@ -162,7 +174,6 @@ class AWSInputVars(schema.Base):
     existing_subnet_ids: Optional[List[str]] = None
     region: str
     kubernetes_version: str
-    node_launch_template: Optional[AWSNodeLaunchTemplate] = None
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
     ] = "public"
@@ -467,6 +478,7 @@ class AWSNodeGroup(schema.Base):
     gpu: bool = False
     single_subnet: bool = False
     permissions_boundary: Optional[str] = None
+    launch_template: Optional[AWSNodeLaunchTemplate] = None
 
 
 DEFAULT_AWS_NODE_GROUPS = {
@@ -849,13 +861,8 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         permissions_boundary=node_group.permissions_boundary,
                         launch_template=(
                             self.config.amazon_web_services.node_launch_template
-                            if not node_group.node_launch_template
-                            else node_group.node_launch_template
-                        ),
-                        ami_type=(
-                            node_group.ami_type
-                            if not node_group.gpu
-                            else "AL2_x86_64_GPU"
+                            if not node_group.launch_template
+                            else node_group.launch_template
                         ),
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()

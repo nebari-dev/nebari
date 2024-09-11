@@ -62,12 +62,6 @@ variable "node_group_instance_type" {
   default     = "m5.large"
 }
 
-variable "node_launch_template" {
-  description = "Custom launch template for EKS nodes"
-  type        = map(any)
-  default     = null
-}
-
 variable "endpoint_public_access" {
   type    = bool
   default = true

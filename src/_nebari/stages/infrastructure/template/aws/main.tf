@@ -97,7 +97,6 @@ module "kubernetes" {
 
   node_groups = var.node_groups
 
-  node_launch_template    = var.node_launch_template
   endpoint_public_access  = var.eks_endpoint_access == "private" ? false : true
   endpoint_private_access = var.eks_endpoint_access == "public" ? false : true
   public_access_cidrs     = var.eks_public_access_cidrs
