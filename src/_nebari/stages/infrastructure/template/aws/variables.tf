@@ -56,6 +56,12 @@ variable "kubeconfig_filename" {
   type        = string
 }
 
+variable "eks_endpoint_access" {
+  description = "EKS cluster api server endpoint access setting"
+  type        = string
+  default     = "public"
+}
+
 variable "eks_endpoint_private_access" {
   type    = bool
   default = false

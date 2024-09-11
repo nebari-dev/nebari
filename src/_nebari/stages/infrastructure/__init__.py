@@ -6,7 +6,7 @@ import pathlib
 import re
 import sys
 import tempfile
-from typing import Annotated, Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
 from pydantic import Field, field_validator, model_validator
 
@@ -146,6 +146,9 @@ class AWSInputVars(schema.Base):
     existing_subnet_ids: Optional[List[str]] = None
     region: str
     kubernetes_version: str
+    eks_endpoint_access: Optional[
+        Literal["private", "public", "public_and_private"]
+    ] = "public"
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -464,6 +467,9 @@ class AmazonWebServicesProvider(schema.Base):
     kubernetes_version: str
     availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
+    eks_endpoint_access: Optional[
+        Literal["private", "public", "public_and_private"]
+    ] = "public"
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -807,6 +813,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             return AWSInputVars(
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
+                eks_endpoint_access=self.config.amazon_web_services.eks_endpoint_access,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
                 region=self.config.amazon_web_services.region,
