@@ -163,6 +163,9 @@ class AWSInputVars(schema.Base):
     region: str
     kubernetes_version: str
     node_launch_template: Optional[AWSNodeLaunchTemplate] = None
+    eks_endpoint_access: Optional[
+        Literal["private", "public", "public_and_private"]
+    ] = "public"
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -483,6 +486,9 @@ class AmazonWebServicesProvider(schema.Base):
     availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
     node_launch_template: Optional[AWSNodeLaunchTemplate] = None
+    eks_endpoint_access: Optional[
+        Literal["private", "public", "public_and_private"]
+    ] = "public"
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -826,6 +832,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             return AWSInputVars(
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
+                eks_endpoint_access=self.config.amazon_web_services.eks_endpoint_access,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
                 region=self.config.amazon_web_services.region,
