@@ -128,6 +128,12 @@ class AzureInputVars(schema.Base):
     workload_identity_enabled: bool = False
 
 
+class AWSAmiTypes(enum.Enum):
+    AL2_x86_64 = "AL2_x86_64"
+    AL2_x86_64_GPU = "AL2_x86_64_GPU"
+    CUSTOM = "CUSTOM"
+
+
 class AWSNodeLaunchTemplate(schema.Base):
     pre_bootstrap_command: Optional[str] = None
     ami_id: Optional[str] = None
@@ -142,8 +148,8 @@ class AWSNodeGroupInputVars(schema.Base):
     max_size: int
     single_subnet: bool
     permissions_boundary: Optional[str] = None
+    ami_type: Optional[AWSAmiTypes] = None
     launch_template: Optional[AWSNodeLaunchTemplate] = None
-    ami_type: Optional[str] = None
 
     @field_validator("ami_type", mode="before")
     @classmethod
@@ -497,7 +503,6 @@ class AmazonWebServicesProvider(schema.Base):
     kubernetes_version: str
     availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
-    node_launch_template: Optional[AWSNodeLaunchTemplate] = None
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
     ] = "public"
@@ -546,6 +551,8 @@ class AmazonWebServicesProvider(schema.Base):
         # check if instances are valid
         available_instances = amazon_web_services.instances(data["region"])
         if "node_groups" in data:
+            # Cache for available AMIs per ami_type
+            available_amis_cache = {}
             for _, node_group in data["node_groups"].items():
                 instance = (
                     node_group["instance"]
@@ -556,6 +563,38 @@ class AmazonWebServicesProvider(schema.Base):
                     raise ValueError(
                         f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
                     )
+
+                # Check if launch_template and ami_id are provided
+                print(available_amis_cache)
+                launch_template = getattr(node_group, "launch_template", None)
+                if (
+                    launch_template
+                    and getattr(node_group, "ami_type", None) != "CUSTOM"
+                ):
+                    if getattr(launch_template, "ami_id", None):
+                        ami_id = launch_template.ami_id
+                        ami_type = getattr(node_group, "ami_type", None)
+
+                        # Retrieve available AMIs from cache or API
+                        if ami_type not in available_amis_cache:
+                            available_amis_cache[ami_type] = amazon_web_services.amis(
+                                region=data["region"],
+                                k8s_version=data["kubernetes_version"],
+                                ami_type=ami_type,
+                            )
+
+                        available_amis = available_amis_cache[ami_type]
+
+                        # Validate AMI ID
+                        if ami_id not in available_amis:
+                            raise ValueError(
+                                f"Amazon Web Services AMI '{ami_id}' is not among the available AMIs: {available_amis} for AMI type '{ami_type}'"
+                            )
+                    else:
+                        raise ValueError(
+                            "Launch template provided without AMI ID. Please provide an AMI ID."
+                        )
+
         return data
 
 
@@ -859,11 +898,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         max_size=node_group.max_nodes,
                         single_subnet=node_group.single_subnet,
                         permissions_boundary=node_group.permissions_boundary,
-                        launch_template=(
-                            self.config.amazon_web_services.node_launch_template
-                            if not node_group.launch_template
-                            else node_group.launch_template
-                        ),
+                        launch_template=node_group.launch_template,
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()
                 ],

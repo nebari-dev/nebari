@@ -1,4 +1,5 @@
 import functools
+import json
 import os
 import re
 import time
@@ -8,7 +9,10 @@ import boto3
 from botocore.exceptions import ClientError, EndpointConnectionError
 
 from _nebari.constants import AWS_ENV_DOCS
-from _nebari.provider.cloud.commons import filter_by_highest_supported_k8s_version
+from _nebari.provider.cloud.commons import (
+    filter_amis_by_latest_version,
+    filter_by_highest_supported_k8s_version,
+)
 from _nebari.utils import check_environment_variables
 from nebari import schema
 
@@ -107,6 +111,37 @@ def kubernetes_versions(region: str) -> List[str]:
 
     supported_kubernetes_versions = sorted(list(set(supported_kubernetes_versions)))
     return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
+
+
+@functools.lru_cache()
+def amis(region: str, k8s_version: str, ami_type: str) -> Dict[str, str]:
+    # do an ssm get-parameters-by-path to get the latest AMI for the k8s version
+    session = aws_session(region=region)
+    ami_ssm_format = {
+        "AL2_x86_64": "/aws/service/eks/optimized-ami/{}/amazon-linux-2",
+        "AL2_x86_64_GPU": "/aws/service/eks/optimized-ami/{}/amazon-linux-2-gpu",
+    }
+    ami_specifier = ami_ssm_format.get(ami_type).format(k8s_version)
+    if ami_specifier is None:
+        raise ValueError(f"Unsupported ami_type: {ami_type}")
+
+    ssm_client = session.client("ssm")
+    paginator = ssm_client.get_paginator("get_parameters_by_path")
+    page_iterator = paginator.paginate(
+        Path=ami_specifier,
+    )
+    ssm_param_name_list = []
+    for page in page_iterator:
+        for parameter in page["Parameters"]:
+            values = json.loads(parameter["Value"])
+            ssm_param_name_list.append(
+                {
+                    "Name": values["image_name"],
+                    "Value": values["image_id"],
+                    "LastModifiedDate": parameter["LastModifiedDate"],
+                }
+            )
+    return filter_amis_by_latest_version(ssm_param_name_list)
 
 
 @functools.lru_cache()
