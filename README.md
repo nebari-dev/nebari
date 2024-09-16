@@ -181,5 +181,5 @@ If you're using Nebari and would like professional support, please get in touch 
 [nebari-issues]: https://github.com/nebari-dev/nebari/issues
 [nebari-faqs]: https://www.nebari.dev/docs/faq
 [gh-discussions]: https://github.com/nebari-dev/nebari/discussions
-[docs-get-started]: https://www.nebari.dev/docs/category/get-started
+[docs-get-started]: https://www.nebari.dev/docs/get-started
 [docs-deploy]: https://www.nebari.dev/docs/get-started/deploy
