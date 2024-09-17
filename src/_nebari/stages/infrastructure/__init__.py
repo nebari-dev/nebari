@@ -547,53 +547,26 @@ class AmazonWebServicesProvider(schema.Base):
                     raise ValueError(
                         f"Amazon Web Services availability zone={zone} is not one of {available_zones}"
                     )
-
-        # check if instances are valid
-        available_instances = amazon_web_services.instances(data["region"])
+        # check if instances and/or ami_ids are valid
         if "node_groups" in data:
-            # Cache for available AMIs per ami_type
-            available_amis_cache = {}
+            available_instances = set(amazon_web_services.instances(data["region"]))
+            # available_amis = set(
+            #     amazon_web_services.amis(data["region"], data["kubernetes_version"])
+            # )
+
             for _, node_group in data["node_groups"].items():
-                instance = (
-                    node_group["instance"]
-                    if hasattr(node_group, "__getitem__")
-                    else node_group.instance
-                )
-                if instance not in available_instances:
+                instance = node_group.get("instance")
+                if instance and instance not in available_instances:
                     raise ValueError(
-                        f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
+                        f"Amazon Web Services instance '{instance}' is not among the available instance types for your region or account."
                     )
-
-                # Check if launch_template and ami_id are provided
-                print(available_amis_cache)
-                launch_template = getattr(node_group, "launch_template", None)
-                if (
-                    launch_template
-                    and getattr(node_group, "ami_type", None) != "CUSTOM"
-                ):
-                    if getattr(launch_template, "ami_id", None):
-                        ami_id = launch_template.ami_id
-                        ami_type = getattr(node_group, "ami_type", None)
-
-                        # Retrieve available AMIs from cache or API
-                        if ami_type not in available_amis_cache:
-                            available_amis_cache[ami_type] = amazon_web_services.amis(
-                                region=data["region"],
-                                k8s_version=data["kubernetes_version"],
-                                ami_type=ami_type,
-                            )
-
-                        available_amis = available_amis_cache[ami_type]
-
-                        # Validate AMI ID
-                        if ami_id not in available_amis:
-                            raise ValueError(
-                                f"Amazon Web Services AMI '{ami_id}' is not among the available AMIs: {available_amis} for AMI type '{ami_type}'"
-                            )
-                    else:
-                        raise ValueError(
-                            "Launch template provided without AMI ID. Please provide an AMI ID."
-                        )
+                # launch_template = node_group.get("launch_template")
+                # if launch_template:
+                #     ami_id = launch_template.get("ami_id")
+                #     if ami_id and ami_id not in available_amis:
+                #         raise ValueError(
+                #             f"Invalid AMI ID '{ami_id}' specified in launch_template."
+                #         )
 
         return data
 

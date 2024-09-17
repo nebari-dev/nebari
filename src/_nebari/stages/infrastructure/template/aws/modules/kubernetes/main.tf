@@ -31,8 +31,9 @@ resource "aws_launch_template" "main" {
     if node_group.launch_template != null
   }
 
-  name     = each.value.name
-  image_id = each.value.launch_template.ami_id
+  name          = each.value.name
+  image_id      = each.value.launch_template.ami_id
+  instance_type = each.value.instance_type
 
   vpc_security_group_ids = var.cluster_security_groups
 
@@ -66,6 +67,7 @@ resource "aws_launch_template" "main" {
   )
 }
 
+
 resource "aws_eks_node_group" "main" {
   count = length(var.node_groups)
 
@@ -74,12 +76,9 @@ resource "aws_eks_node_group" "main" {
   node_role_arn   = aws_iam_role.node-group.arn
   subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, 0)] : var.cluster_subnets
 
-  instance_types = [var.node_groups[count.index].instance_type]
-  # ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" :
-  # "AL2_x86_64"
-  ami_type = var.node_groups[count.index].ami_type
-  # disk_size = var.node_groups[count.index].launch_template == null ? 50 : null
-  disk_size = 50
+  instance_types = var.node_groups[count.index].launch_template == null ? [var.node_groups[count.index].instance_type] : null
+  ami_type       = var.node_groups[count.index].ami_type
+  disk_size      = var.node_groups[count.index].launch_template == null ? 50 : null
 
   scaling_config {
     min_size     = var.node_groups[count.index].min_size
@@ -88,22 +87,13 @@ resource "aws_eks_node_group" "main" {
   }
 
   # Only set launch_template if its node_group counterpart parameter is not null
-  # dynamic "launch_template" {
-  #   for_each = var.node_groups[count.index].launch_template != null ? [var.node_groups[count.index].launch_template] : []
-  #   content {
-  #     id      = aws_launch_template.main[each.key].id
-  #     version = aws_launch_template.main[each.key].latest_version
-  #   }
-  # }
-  # The "each" object can be used only in "module" or "resource" blocks, and only when
-  # the "for_each" argument is set.
-  # dynamic "launch_template" {
-  #   for_each = var.node_groups[count.index].launch_template != null ? [var.node_groups[count.index].launch_template] : []
-  #   content {
-  #     id      = aws_launch_template.main
-  #     version = launch_template.latest_version
-  #   }
-  # }
+  dynamic "launch_template" {
+    for_each = var.node_groups[count.index].launch_template != null ? [var.node_groups[count.index].launch_template] : []
+    content {
+      id      = aws_launch_template.main[var.node_groups[count.index].name].id
+      version = aws_launch_template.main[var.node_groups[count.index].name].latest_version
+    }
+  }
 
   labels = {
     "dedicated" = var.node_groups[count.index].name
