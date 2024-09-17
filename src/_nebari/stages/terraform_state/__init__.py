@@ -271,10 +271,8 @@ class TerraformStateStage(NebariTerraformStage):
                         if isinstance(bottom_level_schema, dict):
                             # handle case where value is a dict
                             bottom_level_schema = bottom_level_schema[key]
-                            print(bottom_level_schema)
                         else:
                             raise e
-
             extra_field_schema = schema.ExtraFieldSchema(
                 **bottom_level_schema.model_fields[keys[-1]].json_schema_extra or {}
             )
