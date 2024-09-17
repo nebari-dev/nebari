@@ -201,16 +201,6 @@ def setup_python_step():
     )
 
 
-def setup_gcloud():
-    return GHA_job_step(
-        name="Setup gcloud",
-        uses="google-github-actions/auth@v1",
-        with_={
-            "credentials_json": "${{ secrets.GOOGLE_CREDENTIALS }}",
-        },
-    )
-
-
 def install_nebari_step(nebari_version):
     return GHA_job_step(name="Install Nebari", run=pip_install_nebari(nebari_version))
 
@@ -225,9 +215,6 @@ def gen_nebari_ops(config):
     step2 = setup_python_step()
     step3 = install_nebari_step(config.nebari_version)
     gha_steps = [step1, step2, step3]
-
-    if config.provider == schema.ProviderEnum.gcp:
-        gha_steps.append(setup_gcloud())
 
     for step in config.ci_cd.before_script:
         gha_steps.append(GHA_job_step(**step))
