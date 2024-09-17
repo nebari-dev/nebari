@@ -356,7 +356,6 @@ class GoogleCloudPlatformProvider(schema.Base):
     @model_validator(mode="before")
     @classmethod
     def _check_input(cls, data: Any) -> Any:
-        google_cloud.check_credentials()
         available_regions = google_cloud.regions()
         if data["region"] not in available_regions:
             raise ValueError(
