@@ -49,14 +49,14 @@ resource "aws_iam_policy" "cluster_encryption" {
   count       = var.eks_kms_arn != null ? 1 : 0
   name        = "${var.name}-eks-encryption-policy"
   description = "IAM policy for EKS cluster encryption"
-  policy      = data.aws_iam_policy_document.cluster_encryption.json
+  policy      = data.aws_iam_policy_document.cluster_encryption[count.index].json
 }
 
 # Grant the EKS Cluster role KMS permissions if a key-arn is specified
 resource "aws_iam_role_policy_attachment" "cluster_encryption" {
   count = var.eks_kms_arn != null ? 1 : 0
 
-  policy_arn = aws_iam_policy.cluster_encryption.arn
+  policy_arn = aws_iam_policy.cluster_encryption[count.index].arn
   role       = aws_iam_role.cluster.name
 }
 
