@@ -72,8 +72,8 @@ variable "endpoint_private_access" {
 
 variable "eks_kms_arn" {
   description = "kms key arn for EKS cluster encryption_config"
-  type    = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "public_access_cidrs" {
