@@ -41,7 +41,7 @@ Release captain responsible - <@gh_username>
 - [ ] Prepare for the release.
   - [ ] Update the [`nebari upgrade`](https://github.com/nebari-dev/nebari/blob/develop/src/_nebari/upgrade.py) for this release
     - [ ] Add upgrade messaging including deprecation warnings, version specific warnings and so on.
-  - [ ] Announce build freeze.
+  - [ ] Optionally, announce a merge freeze.
   - [ ] Release Candidate (RC) cycle.
     - Is this a hotfix?
       - [ ] Create a new branch off of the last version tag.
