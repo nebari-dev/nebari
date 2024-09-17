@@ -8,4 +8,4 @@ You should feel comfortable upgrading if you're using our documented public APIs
 
 ## Reporting a Vulnerability
 
-If you think you found a vulnerability, please report it at [nebari/security](https://github.com/nebari-dev/nebari/security/new). Please do not report security vulnerabilities on our public issue tracker. Exposing vulnerabilities publicly without giving maintainers a chance to release a fix puts users at risk.
+If you think you found a vulnerability, please report it at [nebari/security](https://github.com/nebari-dev/nebari/security/advisories/new). Please do not report security vulnerabilities on our public issue tracker. Exposing vulnerabilities publicly without giving maintainers a chance to release a fix puts users at risk.
