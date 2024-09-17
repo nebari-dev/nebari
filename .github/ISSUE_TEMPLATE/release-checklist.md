@@ -47,9 +47,9 @@ Release captain responsible - <@gh_username>
       - [ ] Create a new branch off of the last version tag.
         - Use this branch to cut the pre-release and the "official" release.
       - [ ] `git cherry-pick` the commits that should be included.
+    - [ ] [Cut RC via GHA release workflow (w/ "This is a pre-release" checked).](https://github.com/nebari-dev/nebari/releases/new)
     - [ ] Perform end-to-end testing. [Use the Testing Checklist template.](https://github.com/nebari-dev/nebari/issues/new?assignees=&labels=type%3A+release+%F0%9F%8F%B7&template=testing-checklist.md&title=Testing+checklist+for+<version>)
       - For minor releases, relying on the end-to-end integration tests might suffice.
-    - [ ] [Cut RC via GHA release workflow (w/ "This is a pre-release" checked).](https://github.com/nebari-dev/nebari/releases/new)
     - [ ] End-user validation.
       - If possible, pull in volunteers to help test.
       - (Repeat steps if necessary)
