@@ -1,6 +1,5 @@
 import contextlib
 import enum
-import functools
 import inspect
 import os
 import pathlib
@@ -266,9 +265,15 @@ class TerraformStateStage(NebariTerraformStage):
         for keys, old, new in nebari_config_diff.modified():
             bottom_level_schema = self.config
             if len(keys) > 1:
-                bottom_level_schema = functools.reduce(
-                    lambda m, k: getattr(m, k), keys[:-1], self.config
-                )
+                for key in keys[:-1]:
+                    try:
+                        bottom_level_schema = getattr(bottom_level_schema, key)
+                    except AttributeError as e:
+                        if isinstance(bottom_level_schema, dict):
+                            # handle case where value is a dict
+                            bottom_level_schema = bottom_level_schema[key]
+                        else:
+                            raise e
             extra_field_schema = schema.ExtraFieldSchema(
                 **bottom_level_schema.model_fields[keys[-1]].json_schema_extra or {}
             )
