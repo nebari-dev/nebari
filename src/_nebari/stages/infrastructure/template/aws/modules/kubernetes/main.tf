@@ -31,9 +31,8 @@ resource "aws_launch_template" "main" {
     if node_group.launch_template != null
   }
 
-  name          = each.value.name
-  image_id      = each.value.launch_template.ami_id
-  instance_type = each.value.instance_type
+  name_prefix = "eks-${var.name}-${each.value.name}-"
+  image_id    = each.value.launch_template.ami_id
 
   vpc_security_group_ids = var.cluster_security_groups
 
@@ -57,11 +56,12 @@ resource "aws_launch_template" "main" {
     templatefile(
       "${path.module}/files/user_data.tftpl",
       {
-        node_prebootstrap_command = each.value.launch_template.pre_bootstrap_command
-        include_bootstrap_cmd     = each.value.ami_type == "CUSTOM" ? true : false
-        cluster_name              = aws_eks_cluster.main.name
-        cluster_cert_authority    = aws_eks_cluster.main.certificate_authority[0].data
-        cluster_endpoint          = aws_eks_cluster.main.endpoint
+        node_pre_bootstrap_command = each.value.launch_template.pre_bootstrap_command
+        # This will ensure the boostrap user data is used to join the node
+        include_bootstrap_cmd  = each.value.launch_template.ami_id != null ? true : false
+        cluster_name           = aws_eks_cluster.main.name
+        cluster_cert_authority = aws_eks_cluster.main.certificate_authority[0].data
+        cluster_endpoint       = aws_eks_cluster.main.endpoint
       }
     )
   )
@@ -76,7 +76,7 @@ resource "aws_eks_node_group" "main" {
   node_role_arn   = aws_iam_role.node-group.arn
   subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, 0)] : var.cluster_subnets
 
-  instance_types = var.node_groups[count.index].launch_template == null ? [var.node_groups[count.index].instance_type] : null
+  instance_types = [var.node_groups[count.index].instance_type]
   ami_type       = var.node_groups[count.index].ami_type
   disk_size      = var.node_groups[count.index].launch_template == null ? 50 : null
 
@@ -88,7 +88,7 @@ resource "aws_eks_node_group" "main" {
 
   # Only set launch_template if its node_group counterpart parameter is not null
   dynamic "launch_template" {
-    for_each = var.node_groups[count.index].launch_template != null ? [var.node_groups[count.index].launch_template] : []
+    for_each = var.node_groups[count.index].launch_template != null ? [0] : []
     content {
       id      = aws_launch_template.main[var.node_groups[count.index].name].id
       version = aws_launch_template.main[var.node_groups[count.index].name].latest_version

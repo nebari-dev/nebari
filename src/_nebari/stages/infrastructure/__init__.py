@@ -169,7 +169,6 @@ class AWSNodeGroupInputVars(schema.Base):
             raise ValueError(
                 "ami_type 'AL2_x86_64' cannot be used with GPU enabled (gpu=True)."
             )
-
         return value
 
 
