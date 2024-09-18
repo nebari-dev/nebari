@@ -57,7 +57,7 @@ resource "aws_launch_template" "main" {
       "${path.module}/files/user_data.tftpl",
       {
         node_pre_bootstrap_command = each.value.launch_template.pre_bootstrap_command
-        # This will ensure the boostrap user data is used to join the node
+        # This will ensure the bootstrap user data is used to join the node
         include_bootstrap_cmd  = each.value.launch_template.ami_id != null ? true : false
         cluster_name           = aws_eks_cluster.main.name
         cluster_cert_authority = aws_eks_cluster.main.certificate_authority[0].data
