@@ -39,7 +39,7 @@ def test_check_immutable_fields_no_changes(mock_get_state, terraform_state_stage
 def test_check_immutable_fields_mutable_change(
     mock_get_state, terraform_state_stage, mock_config
 ):
-    old_config = mock_config.model_copy()
+    old_config = mock_config.model_copy(deep=True)
     old_config.namespace = "old-namespace"
     mock_get_state.return_value = old_config
 
@@ -52,7 +52,7 @@ def test_check_immutable_fields_mutable_change(
 def test_check_immutable_fields_immutable_change(
     mock_model_fields, mock_get_state, terraform_state_stage, mock_config
 ):
-    old_config = mock_config.model_copy()
+    old_config = mock_config.model_copy(deep=True)
     old_config.provider = schema.ProviderEnum.gcp
     mock_get_state.return_value = old_config
 
@@ -70,4 +70,24 @@ def test_check_immutable_fields_no_prior_state(mock_get_state, terraform_state_s
     mock_get_state.return_value = None
 
     # This should not raise an exception
+    terraform_state_stage.check_immutable_fields()
+
+
+@patch.object(TerraformStateStage, "get_nebari_config_state")
+def test_check_dict_value_change(mock_get_state, terraform_state_stage, mock_config):
+    old_config = mock_config.model_copy(deep=True)
+    terraform_state_stage.config.local.node_selectors["worker"].value += "new_value"
+    mock_get_state.return_value = old_config
+
+    # should not throw an exception
+    terraform_state_stage.check_immutable_fields()
+
+
+@patch.object(TerraformStateStage, "get_nebari_config_state")
+def test_check_list_change(mock_get_state, terraform_state_stage, mock_config):
+    old_config = mock_config.model_copy(deep=True)
+    old_config.environments["environment-dask.yaml"].channels.append("defaults")
+    mock_get_state.return_value = old_config
+
+    # should not throw an exception
     terraform_state_stage.check_immutable_fields()

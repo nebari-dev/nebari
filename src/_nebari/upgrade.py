@@ -1205,6 +1205,39 @@ class Upgrade_2024_7_1(UpgradeStep):
         return config
 
 
+class Upgrade_2024_9_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.9.1
+
+    """
+
+    version = "2024.9.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        if config.get("provider", "") == ProviderEnum.azure.value:
+            rich.print("\n ⚠️ Upgrade Warning ⚠️")
+            rich.print(
+                textwrap.dedent(
+                    """
+                -> Please ensure no users are currently logged in prior to deploying this update.  The node groups will be destroyed and recreated during the deployment process causing a downtime of approximately 15 minutes.
+
+                Due to an upstream issue, Azure Nebari deployments may raise an error when deploying for the first time after this upgrade. Waiting for a few minutes and then re-running `nebari deploy` should resolve the issue.  More info can be found at [green][link=https://github.com/nebari-dev/nebari/issues/2640]issue #2640[/link][/green]."""
+                ),
+            )
+            rich.print("")
+        elif config.get("provider", "") == ProviderEnum.do.value:
+            rich.print("\n ⚠️  Deprecation Warning ⚠️")
+            rich.print(
+                "-> Digital Ocean support is currently being deprecated and will be removed in a future release.",
+            )
+            rich.print("")
+
+        return config
+
+
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
 # Manually-added upgrade steps must go above this line
