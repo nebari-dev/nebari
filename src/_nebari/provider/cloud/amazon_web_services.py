@@ -1,5 +1,4 @@
 import functools
-import json
 import os
 import re
 import time
@@ -108,35 +107,6 @@ def kubernetes_versions(region: str) -> List[str]:
 
     supported_kubernetes_versions = sorted(list(set(supported_kubernetes_versions)))
     return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
-
-
-@functools.lru_cache()
-def amis(region: str, k8s_version: str, ami_type: str = None) -> Dict[str, str]:
-    # do an ssm get-parameters-by-path to get the latest AMI for the k8s version
-    session = aws_session(region=region)
-    ssm_client = session.client("ssm")
-    ami_ssm_format = {
-        "AL2_x86_64": "/aws/service/eks/optimized-ami/{}/amazon-linux-2",
-        "AL2_x86_64_GPU": "/aws/service/eks/optimized-ami/{}/amazon-linux-2-gpu",
-    }
-    amis = {}
-
-    if ami_type and ami_type not in ami_ssm_format:
-        raise ValueError(f"Unsupported ami_type: {ami_type}")
-
-    for type, ssm_path_specifier in ami_ssm_format.items():
-        if ami_type and ami_type != type:
-            continue
-        ami_specifier = ssm_path_specifier.format(k8s_version)
-        paginator = ssm_client.get_paginator("get_parameters_by_path")
-        page_iterator = paginator.paginate(
-            Path=ami_specifier,
-        )
-        for page in page_iterator:
-            for parameter in page["Parameters"]:
-                values = json.loads(parameter["Value"])
-                amis[values["image_id"]] = values["image_name"]
-    return amis
 
 
 @functools.lru_cache()

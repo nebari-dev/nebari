@@ -545,26 +545,20 @@ class AmazonWebServicesProvider(schema.Base):
                     raise ValueError(
                         f"Amazon Web Services availability zone={zone} is not one of {available_zones}"
                     )
-        # check if instances and/or ami_ids are valid
-        if "node_groups" in data:
-            available_instances = set(amazon_web_services.instances(data["region"]))
-            # available_amis = set(
-            #     amazon_web_services.amis(data["region"], data["kubernetes_version"])
-            # )
 
+        # check if instances are valid
+        available_instances = amazon_web_services.instances(data["region"])
+        if "node_groups" in data:
             for _, node_group in data["node_groups"].items():
-                instance = node_group.get("instance")
-                if instance and instance not in available_instances:
+                instance = (
+                    node_group["instance"]
+                    if hasattr(node_group, "__getitem__")
+                    else node_group.instance
+                )
+                if instance not in available_instances:
                     raise ValueError(
-                        f"Amazon Web Services instance '{instance}' is not among the available instance types for your region or account."
+                        f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
                     )
-                # launch_template = node_group.get("launch_template")
-                # if launch_template:
-                #     ami_id = launch_template.get("ami_id")
-                #     if ami_id and ami_id not in available_amis:
-                #         raise ValueError(
-                #             f"Invalid AMI ID '{ami_id}' specified in launch_template."
-                #         )
 
         return data
 
