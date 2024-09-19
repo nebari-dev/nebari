@@ -413,7 +413,7 @@ class GoogleCloudPlatformProvider(schema.Base):
                 )
                 if instance not in available_instances:
                     raise ValueError(
-                        f"Google Cloud Platform instance {node_group.instance} not one of available instance types={available_instances}"
+                        f"Google Cloud Platform instance {instance} not one of available instance types={available_instances}"
                     )
 
         return data
