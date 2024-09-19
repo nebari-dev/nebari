@@ -260,7 +260,6 @@ class TerraformStateStage(NebariTerraformStage):
         nebari_config_diff = utils.JsonDiff(
             nebari_config_state.model_dump(), self.config.model_dump()
         )
-
         # check if any changed fields are immutable
         for keys, old, new in nebari_config_diff.modified():
             bottom_level_schema = self.config

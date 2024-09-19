@@ -31,13 +31,15 @@ variable "kubernetes_version" {
 variable "node_groups" {
   description = "AWS node groups"
   type = list(object({
-    name          = string
-    instance_type = string
-    gpu           = bool
-    min_size      = number
-    desired_size  = number
-    max_size      = number
-    single_subnet = bool
+    name            = string
+    instance_type   = string
+    gpu             = bool
+    min_size        = number
+    desired_size    = number
+    max_size        = number
+    single_subnet   = bool
+    launch_template = map(any)
+    ami_type        = string
   }))
 }
 
