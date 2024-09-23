@@ -185,7 +185,11 @@ def tfimport(addr, id, directory=None, var_files=None, exist_ok=False):
                 raise e
 
 
-def show(directory=None) -> dict:
+def show(directory=None, terraform_init: bool = True) -> dict:
+
+    if terraform_init:
+        init(directory)
+
     logger.info(f"terraform show directory={directory}")
     command = ["show", "-json"]
     with timer(logger, "terraform show"):
