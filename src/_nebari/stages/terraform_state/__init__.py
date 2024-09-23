@@ -236,7 +236,9 @@ class TerraformStateStage(NebariTerraformStage):
     ):
         self.check_immutable_fields()
 
-        with super().deploy(stage_outputs, disable_prompt):
+        # No need to run terraform init here as it's being called when running the
+        # terraform show command, inside check_immutable_fields
+        with super().deploy(stage_outputs, disable_prompt, terraform_init=False):
             env_mapping = {}
             # DigitalOcean terraform remote state using Spaces Bucket
             # assumes aws credentials thus we set them to match spaces credentials
