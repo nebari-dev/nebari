@@ -24,7 +24,7 @@ from rich.prompt import Prompt
 from typing_extensions import override
 
 from _nebari.config import backup_configuration
-from _nebari.keycloak import get_keycloak_admin_from_config
+from _nebari.keycloak import get_keycloak_admin
 from _nebari.stages.infrastructure import (
     provider_enum_default_node_groups_map,
     provider_enum_name_map,
@@ -1256,21 +1256,33 @@ class Upgrade_2024_9_1(UpgradeStep):
         rich.print(text)
 
         confirm = Prompt.ask(
-            "[bold]Would you like Nebari to update your group permissions now?[/bold] (y/n)",
+            "[bold]Would you like Nebari to update your group permissions now?[/bold]",
             choices=["y", "N"],
             default="N",
         )
-
         if confirm.lower() == "y":
             # Proceed with updating group permissions
-            keycloak_admin = get_keycloak_admin_from_config(config)
+            keycloak_admin = get_keycloak_admin(
+                server_url=f"https://{config['domain']}/auth/",
+                username="root",
+                password=config["security"]["keycloak"]["initial_root_password"],
+            )
+            client_id = keycloak_admin.get_client_id("jupyterhub")
+            _role_representation = keycloak_admin.get_role_by_id(
+                role_id=keycloak_admin.get_client_role_id(
+                    client_id=client_id, role_name="allow-group-directory-creation-role"
+                )
+            )
             groups = keycloak_admin.get_groups()
+            groups_with_roles = keycloak_admin.get_client_role_groups(
+                client_id=client_id, role_name="allow-group-directory-creation-role"
+            )
             groups_without_role = [
                 group
                 for group in groups
-                if "allow-group-directory-creation-role"
-                not in group.get("attributes", {})
+                if group["id"] not in [group["id"] for group in groups_with_roles]
             ]
+
             if groups_without_role:
                 group_names = ", ".join(
                     [group["name"] for group in groups_without_role]
@@ -1282,8 +1294,8 @@ class Upgrade_2024_9_1(UpgradeStep):
                     _group_id = group["id"]
                     keycloak_admin.assign_group_client_roles(
                         group_id=_group_id,
-                        client_id="jupyterhub",
-                        roles=["allow-group-directory-creation-role"],
+                        client_id=client_id,
+                        roles=[_role_representation],
                     )
                 rich.print(
                     "[green]Group permissions have been updated successfully.[/green]"
