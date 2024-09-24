@@ -9,11 +9,55 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-### Release 2024.7.1 - August 8, 2024
+## Release 2024.9.1 - September 24, 2024
+
+### What's Changed
+* Fix: KeyValueDict error when deploying to existing infrastructure by @oftheaxe in https://github.com/nebari-dev/nebari/pull/2560
+* Remove unused AWS terraform modules by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2623
+* Upgrade Hashicorp Vault action by @aktech in https://github.com/nebari-dev/nebari/pull/2616
+* Pass `oauth_no_confirm=True` to jhub-apps by @krassowski in https://github.com/nebari-dev/nebari/pull/2631
+* Use Rook Ceph for Jupyterhub and Conda Store drives by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2541
+* Fix typo in guided init by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2635
+* Action var tests off by @BrianCashProf in https://github.com/nebari-dev/nebari/pull/2632
+* add a "moved" block to account for refactored terraform code without deleting/recreating NFS disks by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2639
+* Use Helm Chart for JupyterHub 5.1.0 by @krassowski in https://github.com/nebari-dev/nebari/pull/2661
+* Add a how to test section to PR template by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2659
+* Support disallowed nebari config changes by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2660
+* Fix converted init command in guided init by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2666
+* Add initial uptime metrics by @dcmcand in https://github.com/nebari-dev/nebari/pull/2609
+* Refactor and extend Playwright tests by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2644
+* Remove Cypress remaining tests/files by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2672
+* refactor jupyterhub user token retrieval within pytest by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2645
+* add moved block to account for terraform changes on AWS only by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2673
+* Refactor shared group mounting using RBAC by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2593
+* Dashboard fix usage report by @kenafoster in https://github.com/nebari-dev/nebari/pull/2671
+* only capture stdout not stdout+stderr when capture_output=True by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2704
+* revert breaking change to azure deployment test by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2706
+* Refactor GitOps approach prompt flow in guided init by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2269
+* template the kustomization.yaml file  by @dcmcand in https://github.com/nebari-dev/nebari/pull/2667
+* Fix auto-provisioned GitHub repo description after guided init by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2708
+* Add amazon_web_services configuration option to specify EKS cluster api server endpoint access setting by @joneszc in https://github.com/nebari-dev/nebari/pull/2618
+* Use Google Auth and Cloud Python APIs instead of `gcloud` CLI by @swastik959 in https://github.com/nebari-dev/nebari/pull/2083
+* fix broken links in README.md, SECURITY.md, and CONTRIBUTING.md by @blakerosenthal in https://github.com/nebari-dev/nebari/pull/2720
+* add test for changing dicts and lists by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2724
+* 2024.9.1 upgrade notes by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2726
+* Add Support for AWS Launch Template Configuration by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2668
+* Run terraform init before running terraform show by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2734
+
+### New Contributors
+* @oftheaxe made their first contribution in https://github.com/nebari-dev/nebari/pull/2560
+* @joneszc made their first contribution in https://github.com/nebari-dev/nebari/pull/2618
+* @swastik959 made their first contribution in https://github.com/nebari-dev/nebari/pull/2083
+* @blakerosenthal made their first contribution in https://github.com/nebari-dev/nebari/pull/2720
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.7.1...2024.9.1
+
+
+## Release 2024.7.1 - August 8, 2024
 
 > NOTE: Support for Digital Ocean deployments using CLI commands and related Terraform modules is being deprecated. Although Digital Ocean will no longer be directly supported in future releases, you can still deploy to Digital Ocean infrastructure using the current `existing` deployment option.
 
-## What's Changed
+### What's Changed
 * Enable authentication by default in jupyter-server by @krassowski in https://github.com/nebari-dev/nebari/pull/2288
 * remove dns sleep by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2550
 * Conda-store permissions v2 + load roles from keycloak by @aktech in https://github.com/nebari-dev/nebari/pull/2531
@@ -34,7 +78,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * Move codespell config to pyproject.toml only by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2611
 * Add `depends_on` for bucket encryption by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2615
 
-## New Contributors
+### New Contributors
 * @BrianCashProf made their first contribution in https://github.com/nebari-dev/nebari/pull/2569
 * @yarikoptic made their first contribution in https://github.com/nebari-dev/nebari/pull/2583
 
@@ -42,7 +86,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 **Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.6.1...2024.7.1
 
 
-### Release 2024.6.1 - June 26, 2024
+## Release 2024.6.1 - June 26, 2024
 
 > NOTE: This release includes an upgrade to the `kube-prometheus-stack` Helm chart, resulting in a newer version of Grafana. When upgrading your Nebari cluster, you will be prompted to have Nebari update some CRDs and delete a DaemonSet on your behalf. If you prefer, you can also run the commands yourself, which will be shown to you. If you have any custom dashboards, you'll also need to back them up by [exporting them as JSON](https://grafana.com/docs/grafana/latest/dashboards/share-dashboards-panels/#export-a-dashboard-as-json), so you can [import them](https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/#import-a-dashboard) after upgrading.
 
@@ -81,9 +125,9 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 **Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.5.1...2024.6.1
 
-### Release 2024.5.1 - May 13, 2024
+## Release 2024.5.1 - May 13, 2024
 
-## What's Changed
+### What's Changed
 
 * make userscheduler run on general node group by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2415>
 * Upgrade to Pydantic V2 by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2348>
@@ -137,6 +181,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * @tylergraff made their first contribution in https://github.com/nebari-dev/nebari/pull/2314
 
 **Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.3.2...2024.3.3
+
 
 ## Release 2024.3.2 - March 14, 2024
 
