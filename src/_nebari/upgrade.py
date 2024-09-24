@@ -1236,22 +1236,29 @@ class Upgrade_2024_9_1(UpgradeStep):
             )
             rich.print("")
 
-        rich.print("\n ⚠️  Warning ⚠️")
-        rich.print(
-            f"Nebari version [green]{self.version}[/green] introduces changes to how group directories are mounted in JupyterLab pods.\n\n"
-            "[bold]What does this mean?[/bold]\n"
-            "- Only groups with specific permissions will have their directories mounted.\n"
-            "- You need to confirm how Nebari should handle your groups.\n\n"
-            "[bold yellow]No data will be lost during this operation.[/bold yellow]\n"
-            "You can reverse this at any time by adding or removing the `allow-group-directory-creation-role` from your groups in the Keycloak UI.\n\n"
-            "For more information, please see the [green][link=https://www.nebari.dev/docs/how-tos/group-directory-creation]documentation[/link][/green].\n"
-        )
+        rich.print("\n ⚠️ Upgrade Warning ⚠️")
 
-        # Prompt the user for action
+        text = textwrap.dedent(
+            """
+            Nebari version [green]2024.9.1[/green] introduces changes to how group
+            directories are mounted in JupyterLab pods, now only groups with specific
+            permissions will have their directories mounted.
+
+            You will be asked to confirm how Nebari should handle your groups.
+            No data will be lost during this operation. You can reverse this at any time
+            by adding or removing the `allow-group-directory-creation-role` from your
+            groups in the Keycloak UI.
+
+
+            For more information, please see the [green][link=https://www.nebari.dev/docs/how-tos/group-directory-creation]documentation[/link][/green].
+            """
+        )
+        rich.print(text)
+
         confirm = Prompt.ask(
             "[bold]Would you like Nebari to update your group permissions now?[/bold] (y/n)",
-            choices=["y", "n"],
-            default="y",
+            choices=["y", "N"],
+            default="N",
         )
 
         if confirm.lower() == "y":
