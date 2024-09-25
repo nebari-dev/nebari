@@ -28,7 +28,7 @@ module "rook-ceph" {
 # }
 
 resource "helm_release" "rook-ceph" {
-  count              = local.enable-ceph-cluster ? 1 : 0
+  count = local.enable-ceph-cluster ? 1 : 0
 
   name       = "rook-ceph"
   namespace  = var.environment
