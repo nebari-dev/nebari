@@ -1240,77 +1240,92 @@ class Upgrade_2024_9_1(UpgradeStep):
 
         text = textwrap.dedent(
             """
-            Nebari version [green]2024.9.1[/green] introduces changes to how group
-            directories are mounted in JupyterLab pods, now only groups with specific
-            permissions will have their directories mounted.
+            Nebari [green]2024.9.1[/green] introduces changes to how group
+            directories are mounted in JupyterLab pods.
 
-            You will be asked to confirm how Nebari should handle your groups.
-            No data will be lost during this operation. You can reverse this at any time
-            by adding or removing the `allow-group-directory-creation-role` from your
-            groups in the Keycloak UI.
+            Previously, every Keycloak group in the Nebari realm automatically created a
+            shared directory at ~/shared/<group-name>, accessible to all group members
+            in their JupyterLab pods.
 
+            Starting with Nebari [green]2024.9.1[/green], only groups assigned the
+            JupyterHub client role [magenta]allow-group-directory-creation[/magenta] will have their
+            directories mounted.
 
-            For more information, please see the [green][link=https://www.nebari.dev/docs/how-tos/group-directory-creation]documentation[/link][/green].
+            By default, the admin, analyst, and developer groups will have this
+            role assigned during the upgrade. For other groups, you'll now need to
+            assign this role manually in the Keycloak UI to have their directories
+            mounted.
+
+            After the upgrade, users with active sessions may experience issues with
+            their shared folders due to cached user data. To resolve this, all users
+            will need to log out and log back in to update their session data.
+
+            For more details check our [green][link=https://www.nebari.dev/docs/references/release/]release notes[/link][/green].
             """
         )
         rich.print(text)
+        keycloak_admin = None
 
-        confirm = Prompt.ask(
-            "[bold]Would you like Nebari to update your group permissions now?[/bold]",
-            choices=["y", "N"],
-            default="N",
+        # Prompt the user for role assignment (if yes, transforms the response into bool)
+        assign_roles = (
+            Prompt.ask(
+                "[bold]Would you like Nebari to assign the corresponding role to all of your current groups automatically?[/bold]",
+                choices=["y", "N"],
+                default="N",
+            ).lower()
+            == "y"
         )
-        if confirm.lower() == "y":
-            # Proceed with updating group permissions
+
+        if assign_roles:
+            # In case this is done with a local deployment
+            import urllib3
+
+            urllib3.disable_warnings()
+
             keycloak_admin = get_keycloak_admin(
                 server_url=f"https://{config['domain']}/auth/",
                 username="root",
                 password=config["security"]["keycloak"]["initial_root_password"],
             )
+
+            # Proceed with updating group permissions
             client_id = keycloak_admin.get_client_id("jupyterhub")
-            _role_representation = keycloak_admin.get_role_by_id(
-                role_id=keycloak_admin.get_client_role_id(
-                    client_id=client_id, role_name="allow-group-directory-creation-role"
-                )
+            role_name = "allow-group-directory-creation-role"
+            role_id = keycloak_admin.get_client_role_id(
+                client_id=client_id, role_name=role_name
             )
-            groups = keycloak_admin.get_groups()
-            groups_with_roles = keycloak_admin.get_client_role_groups(
-                client_id=client_id, role_name="allow-group-directory-creation-role"
+            role_representation = keycloak_admin.get_role_by_id(role_id=role_id)
+
+            # Fetch all groups and groups with the role
+            all_groups = keycloak_admin.get_groups()
+            groups_with_role = keycloak_admin.get_client_role_groups(
+                client_id=client_id, role_name=role_name
             )
+            groups_with_role_ids = {group["id"] for group in groups_with_role}
+
+            # Identify groups without the role
             groups_without_role = [
-                group
-                for group in groups
-                if group["id"] not in [group["id"] for group in groups_with_roles]
+                group for group in all_groups if group["id"] not in groups_with_role_ids
             ]
 
             if groups_without_role:
-                group_names = ", ".join(
-                    [group["name"] for group in groups_without_role]
-                )
+                group_names = ", ".join(group["name"] for group in groups_without_role)
                 rich.print(
                     f"\n[bold]Updating the following groups with the required permissions:[/bold] {group_names}\n"
                 )
                 for group in groups_without_role:
-                    _group_id = group["id"]
                     keycloak_admin.assign_group_client_roles(
-                        group_id=_group_id,
+                        group_id=group["id"],
                         client_id=client_id,
-                        roles=[_role_representation],
+                        roles=[role_representation],
                     )
                 rich.print(
-                    "[green]Group permissions have been updated successfully.[/green]"
+                    "\n[green]Group permissions have been updated successfully.[/green]"
                 )
             else:
                 rich.print(
-                    "\n[green]All groups already have the required permissions.[/green]\n"
+                    "\n[green]All groups already have the required permissions.[/green]"
                 )
-        else:
-            rich.print(
-                "\n[bold yellow]You have chosen not to update group permissions at this time.[/bold yellow]"
-            )
-            rich.print(
-                "You can update them later by visiting the Keycloak UI and adding or removing the `allow-group-directory-creation-role` from your groups.\n"
-            )
         return config
 
 
