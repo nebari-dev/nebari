@@ -6,8 +6,6 @@ import pytest
 from tests.tests_deployment import constants
 from tests.tests_deployment.utils import get_jupyterhub_token
 
-# monkeypatch_ssl_context()
-
 
 @pytest.fixture
 def dask_gateway_object():
