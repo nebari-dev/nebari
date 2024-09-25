@@ -26,7 +26,7 @@ def dask_gateway_object():
     return DaskGateway(
         address=f"https://{constants.NEBARI_HOSTNAME}/{constants.GATEWAY_ENDPOINT}",
         auth="jupyterhub",
-        proxy_address=f"https://{constants.NEBARI_HOSTNAME}:8786",
+        proxy_address=f"tcp://{constants.NEBARI_HOSTNAME}:8786",
     )
 
 
