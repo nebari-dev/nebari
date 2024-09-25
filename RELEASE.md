@@ -11,6 +11,8 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ## Release 2024.9.1 - September 24, 2024
 
+> WARNING: This release changes how group directories are mounted in JupyterLab pods: only groups with specific permissions will have their directories mounted. If you rely on custom group mounts, we strongly recommend running `nebari upgrade` before updating. This will prompt you to confirm how Nebari should handle your groups—either keep them mounted or allow unmounting. **No data will be lost**, and you can reverse this anytime.
+
 ### What's Changed
 * Fix: KeyValueDict error when deploying to existing infrastructure by @oftheaxe in https://github.com/nebari-dev/nebari/pull/2560
 * Remove unused AWS terraform modules by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2623
