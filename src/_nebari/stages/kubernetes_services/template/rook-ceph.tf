@@ -21,12 +21,6 @@ module "rook-ceph" {
   depends_on = [helm_release.rook-ceph]
 }
 
-# data "kubernetes_namespace" "existing" {
-#   metadata {
-#     name = var.environment
-#   }
-# }
-
 resource "helm_release" "rook-ceph" {
   name       = "rook-ceph"
   namespace  = var.environment
@@ -48,8 +42,6 @@ resource "helm_release" "rook-ceph" {
       },
     })
     ],
-    # var.overrides
+    # var.overrides  # TODO: Add overrides for Rook-Ceph Operator
   )
-
-  # depends_on = [kubernetes_namespace.rook-ceph]
 }
