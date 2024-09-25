@@ -69,7 +69,7 @@ def test_upgrade_4_0(
             return "y"
         elif (
             prompt
-            == "[bold]Would you like Nebari to update your group permissions now?[/bold]"
+            == "[bold]Would you like Nebari to assign the corresponding role to all of your current groups automatically?[/bold]"
         ):
             return "N"
         # All other prompts will be answered with "y"
