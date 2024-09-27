@@ -9,7 +9,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-## Release 2024.9.1 - September 24, 2024
+## Release 2024.9.1 - September 27, 2024
 
 > WARNING: This release changes how group directories are mounted in JupyterLab pods: only groups with specific permissions will have their directories mounted. If you rely on custom group mounts, we strongly recommend running `nebari upgrade` before updating. This will prompt you to confirm how Nebari should handle your groups—either keep them mounted or allow unmounting. **No data will be lost**, and you can reverse this anytime.
 
@@ -45,6 +45,12 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * 2024.9.1 upgrade notes by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2726
 * Add Support for AWS Launch Template Configuration by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2668
 * Run terraform init before running terraform show by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2734
+* Release Process Checklist Updates by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2727
+* Test implicit aiohttp's TCP to HTTP connector change by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2741
+* remove comments by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2743
+* Deploy Rook Ceph Helm only when Ceph FS Needed by @kenafoster in https://github.com/nebari-dev/nebari/pull/2742
+* fix group mounting paths by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2738
+* Add compatibility prompt and notes for shared group mounting by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2739
 
 ### New Contributors
 * @oftheaxe made their first contribution in https://github.com/nebari-dev/nebari/pull/2560
