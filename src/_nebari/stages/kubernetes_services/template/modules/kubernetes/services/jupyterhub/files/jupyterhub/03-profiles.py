@@ -561,12 +561,12 @@ def render_profiles(spawner):
     # e.g. /projects/myproj -> myproj
     # and /developers -> developers
     groups = [Path(group).name for group in auth_state["oauth_user"]["groups"]]
+    groups_with_permission_to_mount = [
+        Path(group).name
+        for group in auth_state.get("groups_with_permission_to_mount", [])
+    ]
 
     keycloak_profilenames = auth_state["oauth_user"].get("jupyterlab_profiles", [])
-
-    groups_with_permission_to_mount = auth_state.get(
-        "groups_with_permission_to_mount", []
-    )
 
     # fetch available profiles and render additional attributes
     profile_list = z2jh.get_config("custom.profiles")
