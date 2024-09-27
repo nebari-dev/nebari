@@ -1240,6 +1240,9 @@ class Upgrade_2024_9_1(UpgradeStep):
 
         text = textwrap.dedent(
             """
+            Please ensure no users are currently logged in prior to deploying this
+            update.
+
             Nebari [green]2024.9.1[/green] introduces changes to how group
             directories are mounted in JupyterLab pods.
 
@@ -1255,10 +1258,6 @@ class Upgrade_2024_9_1(UpgradeStep):
             role assigned during the upgrade. For other groups, you'll now need to
             assign this role manually in the Keycloak UI to have their directories
             mounted.
-
-            After the upgrade, users with active sessions may experience issues with
-            their shared folders due to cached user data. To resolve this, all users
-            will need to log out and log back in to update their session data.
 
             For more details check our [green][link=https://www.nebari.dev/docs/references/release/]release notes[/link][/green].
             """
