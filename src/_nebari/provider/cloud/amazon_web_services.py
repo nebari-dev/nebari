@@ -121,6 +121,30 @@ def instances(region: str) -> Dict[str, str]:
     return {t: t for t in instance_types}
 
 
+@functools.lru_cache()
+def kms_key_arns(region: str) -> Dict[str, dict]:
+    """Return dict of available/enabled KMS key IDs and associated KeyMetadata for the AWS region."""
+    session = aws_session(region=region)
+    client = session.client("kms")
+    paginator = client.get_paginator("list_keys")
+    schema = [
+        "Arn",
+        "KeyUsage",
+        "KeyState",
+        "Origin",
+        "KeyManager",
+        "KeySpec",
+        "EncryptionAlgorithms",
+        "MultiRegion",
+    ]
+    kms_keys = [
+        client.describe_key(KeyId=j["KeyId"]).get("KeyMetadata")
+        for i in paginator.paginate()
+        for j in i["Keys"]
+    ]
+    return {i["KeyId"]: {k: i[k] for k in schema} for i in kms_keys if i["Enabled"]}
+
+
 def aws_get_vpc_id(name: str, namespace: str, region: str) -> Optional[str]:
     """Return VPC ID for the EKS cluster namedd `{name}-{namespace}`."""
     cluster_name = f"{name}-{namespace}"

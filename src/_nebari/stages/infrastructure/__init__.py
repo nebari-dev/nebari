@@ -562,6 +562,25 @@ class AmazonWebServicesProvider(schema.Base):
                         f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
                     )
 
+        # check if kms key is valid
+        available_kms_keys = amazon_web_services.kms_key_arns(data["region"])
+        if "eks_kms_arn" in data:
+            key_id = [id for id in available_kms_keys.keys() if id in data["eks_kms_arn"]]
+            if len(key_id) == 1 and available_kms_keys[key_id[0]]["Arn"] == data["eks_kms_arn"]:
+                key_id = key_id[0]
+                if available_kms_keys[key_id]["KeyUsage"] != "ENCRYPT_DECRYPT":
+                    raise ValueError(
+                        f"Amazon Web Services KMS Key with ID {key_id} does not have KeyUsage configured to encrypt and decrypt data"
+                    )
+                if available_kms_keys[key_id]["KeySpec"] != "SYMMETRIC_DEFAULT":
+                    raise ValueError(
+                        f"Amazon Web Services KMS Key with ID {key_id} is not a Symmetric key"
+                    )
+            else:
+                raise ValueError(
+                    f"Amazon Web Services KMS Key with ARN {data['eks_kms_arn']} not one of available/enabled keys={[v['Arn'] for v in available_kms_keys.values()]}"
+                )
+
         return data
 
 
