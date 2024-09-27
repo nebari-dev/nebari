@@ -67,6 +67,11 @@ def test_upgrade_4_0(
             == "Have you backed up your custom dashboards (if necessary), deleted the prometheus-node-exporter daemonset and updated the kube-prometheus-stack CRDs?"
         ):
             return "y"
+        elif (
+            prompt
+            == "[bold]Would you like Nebari to assign the corresponding role to all of your current groups automatically?[/bold]"
+        ):
+            return "N"
         # All other prompts will be answered with "y"
         else:
             return "y"
