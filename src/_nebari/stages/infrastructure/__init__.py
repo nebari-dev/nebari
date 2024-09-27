@@ -565,8 +565,13 @@ class AmazonWebServicesProvider(schema.Base):
         # check if kms key is valid
         available_kms_keys = amazon_web_services.kms_key_arns(data["region"])
         if "eks_kms_arn" in data:
-            key_id = [id for id in available_kms_keys.keys() if id in data["eks_kms_arn"]]
-            if len(key_id) == 1 and available_kms_keys[key_id[0]]["Arn"] == data["eks_kms_arn"]:
+            key_id = [
+                id for id in available_kms_keys.keys() if id in data["eks_kms_arn"]
+            ]
+            if (
+                len(key_id) == 1
+                and available_kms_keys[key_id[0]]["Arn"] == data["eks_kms_arn"]
+            ):
                 key_id = key_id[0]
                 if available_kms_keys[key_id]["KeyUsage"] != "ENCRYPT_DECRYPT":
                     raise ValueError(
