@@ -187,7 +187,7 @@ jobs:
         # Since this is not critical for most pull requests and takes more than half of the time
         # in the CI, it makes sense to only run on merge to main or workflow_dispatch to speed
         # up feedback cycle
-        if: github.ref_name == 'develop' || github.event_name == 'workflow_dispatch'
+        if: github.ref_name == 'main' || github.event_name == 'workflow_dispatch'
         working-directory: local-deployment
         run: |
           nebari destroy --config nebari-config.yaml --disable-prompt
