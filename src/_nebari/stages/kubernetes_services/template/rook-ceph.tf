@@ -21,13 +21,9 @@ module "rook-ceph" {
   depends_on = [helm_release.rook-ceph]
 }
 
-# data "kubernetes_namespace" "existing" {
-#   metadata {
-#     name = var.environment
-#   }
-# }
-
 resource "helm_release" "rook-ceph" {
+  count = local.enable-ceph-cluster ? 1 : 0
+
   name       = "rook-ceph"
   namespace  = var.environment
   repository = "https://charts.rook.io/release"
@@ -48,8 +44,6 @@ resource "helm_release" "rook-ceph" {
       },
     })
     ],
-    # var.overrides
+    # var.overrides  # TODO: Add overrides for Rook-Ceph Operator
   )
-
-  # depends_on = [kubernetes_namespace.rook-ceph]
 }
