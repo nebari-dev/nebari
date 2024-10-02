@@ -131,11 +131,11 @@ def kms_key_arns(region: str) -> Dict[str, dict]:
         "Arn",
         "KeyUsage",
         "KeySpec",
-        #"KeyState",
-        #"Origin",
-        #"KeyManager",
-        #"EncryptionAlgorithms",
-        #"MultiRegion",
+        # "KeyState",
+        # "Origin",
+        # "KeyManager",
+        # "EncryptionAlgorithms",
+        # "MultiRegion",
     ]
     kms_keys = [
         client.describe_key(KeyId=j["KeyId"]).get("KeyMetadata")

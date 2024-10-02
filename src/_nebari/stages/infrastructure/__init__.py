@@ -575,12 +575,14 @@ class AmazonWebServicesProvider(schema.Base):
                 key_id = key_id[0]
                 # Symmetric KMS keys with Encrypt and decrypt key-usage have the SYMMETRIC_DEFAULT key-spec
                 # EKS cluster encryption requires a Symmetric key that is set to encrypt and decrypt data
-                if available_kms_keys[key_id]["KeySpec"] is not "SYMMETRIC_DEFAULT":
-                    if available_kms_keys[key_id]["KeyUsage"] is "GENERATE_VERIFY_MAC":
+                if available_kms_keys[key_id]["KeySpec"] != "SYMMETRIC_DEFAULT":
+                    if available_kms_keys[key_id]["KeyUsage"] == "GENERATE_VERIFY_MAC":
                         raise ValueError(
                             f"Amazon Web Services KMS Key with ID {key_id} does not have KeyUsage set to 'Encrypt and decrypt' data"
                         )
-                    elif available_kms_keys[key_id]["KeyUsage"] is not "ENCRYPT_DECRYPT":
+                    elif (
+                        available_kms_keys[key_id]["KeyUsage"] != "ENCRYPT_DECRYPT"
+                    ):
                         raise ValueError(
                             f"Amazon Web Services KMS Key with ID {key_id} is not of type Symmetric, and KeyUsage not set to 'Encrypt and decrypt' data"
                         )
