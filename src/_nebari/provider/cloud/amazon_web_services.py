@@ -127,22 +127,22 @@ def kms_key_arns(region: str) -> Dict[str, dict]:
     session = aws_session(region=region)
     client = session.client("kms")
     paginator = client.get_paginator("list_keys")
-    schema = [
+    fields = [
         "Arn",
         "KeyUsage",
-        "KeyState",
-        "Origin",
-        "KeyManager",
         "KeySpec",
-        "EncryptionAlgorithms",
-        "MultiRegion",
+        #"KeyState",
+        #"Origin",
+        #"KeyManager",
+        #"EncryptionAlgorithms",
+        #"MultiRegion",
     ]
     kms_keys = [
         client.describe_key(KeyId=j["KeyId"]).get("KeyMetadata")
         for i in paginator.paginate()
         for j in i["Keys"]
     ]
-    return {i["KeyId"]: {k: i[k] for k in schema} for i in kms_keys if i["Enabled"]}
+    return {i["KeyId"]: {k: i[k] for k in fields} for i in kms_keys if i["Enabled"]}
 
 
 def aws_get_vpc_id(name: str, namespace: str, region: str) -> Optional[str]:
