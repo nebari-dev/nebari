@@ -580,9 +580,7 @@ class AmazonWebServicesProvider(schema.Base):
                         raise ValueError(
                             f"Amazon Web Services KMS Key with ID {key_id} does not have KeyUsage set to 'Encrypt and decrypt' data"
                         )
-                    elif (
-                        available_kms_keys[key_id]["KeyUsage"] != "ENCRYPT_DECRYPT"
-                    ):
+                    elif available_kms_keys[key_id]["KeyUsage"] != "ENCRYPT_DECRYPT":
                         raise ValueError(
                             f"Amazon Web Services KMS Key with ID {key_id} is not of type Symmetric, and KeyUsage not set to 'Encrypt and decrypt' data"
                         )
