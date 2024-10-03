@@ -81,6 +81,26 @@ def list_users(keycloak_admin: keycloak.KeycloakAdmin):
         )
 
 
+def get_keycloak_admin(server_url, username, password, verify=False):
+    try:
+        keycloak_admin = keycloak.KeycloakAdmin(
+            server_url=server_url,
+            username=username,
+            password=password,
+            realm_name=os.environ.get("KEYCLOAK_REALM", "nebari"),
+            user_realm_name="master",
+            auto_refresh_token=("get", "put", "post", "delete"),
+            verify=verify,
+        )
+    except (
+        keycloak.exceptions.KeycloakConnectionError,
+        keycloak.exceptions.KeycloakAuthenticationError,
+    ) as e:
+        raise ValueError(f"Failed to connect to Keycloak server: {e}")
+
+    return keycloak_admin
+
+
 def get_keycloak_admin_from_config(config: schema.Main):
     keycloak_server_url = os.environ.get(
         "KEYCLOAK_SERVER_URL", f"https://{config.domain}/auth/"
@@ -93,23 +113,12 @@ def get_keycloak_admin_from_config(config: schema.Main):
 
     should_verify_tls = config.certificate.type != CertificateEnum.selfsigned
 
-    try:
-        keycloak_admin = keycloak.KeycloakAdmin(
-            server_url=keycloak_server_url,
-            username=keycloak_username,
-            password=keycloak_password,
-            realm_name=os.environ.get("KEYCLOAK_REALM", "nebari"),
-            user_realm_name="master",
-            auto_refresh_token=("get", "put", "post", "delete"),
-            verify=should_verify_tls,
-        )
-    except (
-        keycloak.exceptions.KeycloakConnectionError,
-        keycloak.exceptions.KeycloakAuthenticationError,
-    ) as e:
-        raise ValueError(f"Failed to connect to Keycloak server: {e}")
-
-    return keycloak_admin
+    return get_keycloak_admin(
+        server_url=keycloak_server_url,
+        username=keycloak_username,
+        password=keycloak_password,
+        verify=should_verify_tls,
+    )
 
 
 def keycloak_rest_api_call(config: schema.Main = None, request: str = None):
