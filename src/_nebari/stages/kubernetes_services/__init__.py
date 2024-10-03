@@ -190,6 +190,14 @@ class Profiles(schema.Base):
         return value
 
 
+class BackupRestoreStorage(schema.Base):
+    type: str
+
+
+class BackupRestore(schema.Base):
+    storage: BackupRestoreStorage = BackupRestoreStorage(type="s3")
+
+
 class CondaEnvironment(schema.Base):
     name: str
     channels: Optional[List[str]] = None

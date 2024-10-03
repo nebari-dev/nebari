@@ -923,9 +923,12 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
     @contextlib.contextmanager
     def deploy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        disable_prompt: bool = False,
+        force_unlock: bool = False,
     ):
-        with super().deploy(stage_outputs, disable_prompt):
+        with super().deploy(stage_outputs, disable_prompt, force_unlock=force_unlock):
             with kubernetes_provider_context(
                 stage_outputs["stages/" + self.name]["kubernetes_credentials"]["value"]
             ):

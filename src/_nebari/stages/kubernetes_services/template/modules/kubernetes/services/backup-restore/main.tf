@@ -1,8 +1,27 @@
+locals {
+  clients = {
+    for client in var.clients : client => client
+  }
+}
+
 resource "random_password" "backup_restore_service_token" {
-  for_each = var.clients
+  for_each = local.clients
   length   = 32
   special  = false
 }
+
+resource "kubernetes_secret" "backup_restore_service_token" {
+  for_each = local.clients
+  metadata {
+    name      = "backup-restore-${each.key}"
+    namespace = var.namespace
+  }
+
+  data = {
+    token = random_password.backup_restore_service_token[each.key].result
+  }
+}
+
 
 resource "kubernetes_service" "backup_restore" {
   metadata {
@@ -19,6 +38,18 @@ resource "kubernetes_service" "backup_restore" {
       port     = 8000
       protocol = "TCP"
     }
+  }
+}
+
+resource "kubernetes_config_map" "backup-restore-etc" {
+  metadata {
+    name      = "backup-restore-etc"
+    namespace = var.namespace
+  }
+
+  data = {
+    "keycloak.json" = jsonencode({})
+    "storage.json"  = jsonencode({})
   }
 }
 
@@ -53,7 +84,7 @@ resource "kubernetes_manifest" "backup_restore" {
 
           services = [
             {
-              name = kubernetes_service.gateway.metadata.0.name
+              name = kubernetes_service.backup_restore.metadata.0.name
               port = 8000
             }
           ]
@@ -63,16 +94,18 @@ resource "kubernetes_manifest" "backup_restore" {
   }
 }
 
-resource "kubernetes_secret" "backup_restore_service_token" {
-  for_each = var.clients
-  metadata {
-    name      = "backup-restore-${each.key}"
-    namespace = var.namespace
-  }
 
-  data = {
-    token = random_password.backup_restore_service_token[each.key].result
-  }
+module "jupyterhub-openid-client" {
+  source = "../keycloak-client"
+
+  realm_id                 = var.realm_id
+  client_id                = "nebari-cli"
+  external-url             = var.external-url
+  role_mapping             = {}
+  client_roles             = []
+  callback-url-paths       = []
+  service-accounts-enabled = true
+  service-account-roles    = ["realm-admin"]
 }
 
 resource "kubernetes_deployment" "backup_restore" {
@@ -101,31 +134,33 @@ resource "kubernetes_deployment" "backup_restore" {
         service_account_name = kubernetes_service_account.backup_restore.metadata.0.name
 
         container {
-          name  = "backup-restore"
-          image = "nebari/backup-restore:latest"
+          name              = "backup-restore"
+          image             = "${var.backup-restore-image}:${var.backup-restore-image-tag}"
+          image_pull_policy = "Always"
 
           env {
-            name  = "BACKUP_RESTORE_TOKEN"
-            value = kubernetes_secret.backup_restore_service_token[each.key].data["token"]
+            name  = "CONFIG_DIR"
+            value = "/etc/backup-restore/config"
           }
 
-          env {
-            name  = "BACKUP_RESTORE_NAMESPACE"
-            value = var.namespace
-          }
+          command = ["backup-restore", "--standalone"]
 
-          env {
-            name  = "BACKUP_RESTORE_EXTERNAL_URL"
-            value = var.external-url
-          }
-
-          env {
-            name  = "BACKUP_RESTORE_CLIENT"
-            value = each.key
+          volume_mount {
+            name       = "config"
+            mount_path = "/etc/backup-restore/config"
+            read_only  = true
           }
 
           port {
             container_port = 8000
+          }
+        }
+
+        volume {
+          name = "config"
+
+          config_map {
+            name = kubernetes_config_map.backup-restore-etc.metadata.0.name
           }
         }
       }

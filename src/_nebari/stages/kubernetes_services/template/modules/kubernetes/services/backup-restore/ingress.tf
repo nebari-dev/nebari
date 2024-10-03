@@ -14,7 +14,7 @@ resource "kubernetes_manifest" "backup-restore-api" {
           match = "Host(`${var.external-url}`)"
           services = [
             {
-              name      = helm_release.backup_restore.name
+              name      = kubernetes_deployment.backup_restore.metadata.0.name
               port      = 9000
               namespace = var.namespace
             }

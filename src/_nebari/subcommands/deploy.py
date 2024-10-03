@@ -59,6 +59,11 @@ def nebari_subcommand(cli: typer.Typer):
             "--skip-remote-state-provision",
             help="Skip terraform state deployment which is often required in CI once the terraform remote state bootstrapping phase is complete",
         ),
+        stage_force_unlock: str = typer.Option(
+            None,
+            "--stage-force-unlock",
+            help="Force unlock the terraform state file for a given stage. This should be only used if you know what you are doing",
+        ),
     ):
         """
         Deploy the Nebari cluster from your [purple]nebari-config.yaml[/purple] file.
@@ -94,4 +99,5 @@ def nebari_subcommand(cli: typer.Typer):
             stages,
             disable_prompt=disable_prompt,
             disable_checks=disable_checks,
+            stage_force_unlock=stage_force_unlock,
         )

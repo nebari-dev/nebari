@@ -18,3 +18,18 @@ variable "clients" {
   description = "List of clients that can access the backup-restore server by API"
   type        = list(string)
 }
+
+variable "realm_id" {
+  description = "Realm ID to use for authentication"
+  type        = string
+}
+
+variable "backup-restore-image" {
+  description = "Backup-restore image"
+  type        = string
+}
+
+variable "backup-restore-image-tag" {
+  description = "Version of backup-restore to use"
+  type        = string
+}

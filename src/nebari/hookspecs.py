@@ -28,7 +28,10 @@ class NebariStage:
 
     @contextlib.contextmanager
     def deploy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        disable_prompt: bool = False,
+        force_unlock: str = None,
     ):
         yield
 

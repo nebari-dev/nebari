@@ -28,6 +28,7 @@ def deploy(
     terraform_import: bool = False,
     terraform_apply: bool = True,
     terraform_destroy: bool = False,
+    terraform_lock_id: str = None,
     input_vars: Dict[str, Any] = {},
     state_imports: List[Any] = [],
 ):
@@ -46,6 +47,10 @@ def deploy(
       terraform_destroy: whether to run `terraform destroy` default
         False
 
+      terraform_lock_id: Used to toggle the force-unlock feature of a given stage based
+      on the provided lock_id.
+        None
+
       input_vars: supply values for "variable" resources within
         terraform module
 
@@ -60,6 +65,9 @@ def deploy(
 
         if terraform_init:
             init(directory)
+
+        if terraform_lock_id:
+            force_unlock(directory, terraform_lock_id)
 
         if terraform_import:
             for addr, id in state_imports:
@@ -137,6 +145,14 @@ def init(directory=None, upgrade=True):
         if upgrade:
             command.append("-upgrade")
         run_terraform_subprocess(command, cwd=directory, prefix="terraform")
+
+
+def force_unlock(directory=None, lock_id=None):
+    logger.info(f"terraform unlock directory={directory}")
+    with timer(logger, "terraform unlock"):
+        run_terraform_subprocess(
+            ["force-unlock", "-force", lock_id], cwd=directory, prefix="terraform"
+        )
 
 
 def apply(directory=None, targets=None, var_files=None):

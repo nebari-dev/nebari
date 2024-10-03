@@ -15,6 +15,7 @@ def deploy_configuration(
     stages: List[hookspecs.NebariStage],
     disable_prompt: bool = False,
     disable_checks: bool = False,
+    stage_force_unlock: str = None,
 ) -> Dict[str, Any]:
     if config.prevent_deploy:
         raise ValueError(
@@ -47,12 +48,26 @@ def deploy_configuration(
 
     with timer(logger, "deploying Nebari"):
         stage_outputs = {}
+        force_unlock = False
         with contextlib.ExitStack() as stack:
             for stage in stages:
                 s: hookspecs.NebariStage = stage(
                     output_directory=pathlib.Path.cwd(), config=config
                 )
-                stack.enter_context(s.deploy(stage_outputs, disable_prompt))
+                print(f"Deploying stage {s.name}")
+                print("stage_force_unlock", stage_force_unlock)
+                if stage_force_unlock:
+                    _unlock_stage_name, _unlock_state_id = stage_force_unlock.split(":")
+                    if _unlock_stage_name == s.name:
+                        force_unlock = _unlock_state_id
+                    print(f"Force unlocking stage {s.name} :: {force_unlock}")
+                stack.enter_context(
+                    s.deploy(
+                        stage_outputs=stage_outputs,
+                        disable_prompt=disable_prompt,
+                        force_unlock=force_unlock,
+                    )
+                )
 
                 if not disable_checks:
                     s.check(stage_outputs, disable_prompt)
