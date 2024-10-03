@@ -69,6 +69,12 @@ variable "eks_endpoint_private_access" {
   default = false
 }
 
+variable "eks_kms_arn" {
+  description = "kms key arn for EKS cluster encryption_config"
+  type        = string
+  default     = null
+}
+
 variable "eks_public_access_cidrs" {
   type    = list(string)
   default = ["0.0.0.0/0"]
