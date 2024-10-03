@@ -182,6 +182,7 @@ class AWSInputVars(schema.Base):
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
     ] = "public"
+    eks_kms_arn: Optional[str] = None
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -504,6 +505,7 @@ class AmazonWebServicesProvider(schema.Base):
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
     ] = "public"
+    eks_kms_arn: Optional[str] = None
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -849,6 +851,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 eks_endpoint_access=self.config.amazon_web_services.eks_endpoint_access,
+                eks_kms_arn=self.config.amazon_web_services.eks_kms_arn,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
                 region=self.config.amazon_web_services.region,
