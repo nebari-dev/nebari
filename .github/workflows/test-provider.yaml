@@ -74,54 +74,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Retrieve secret from Vault
-        uses: hashicorp/vault-action@v3.0.0
+      - name: Authenticate to Cloud Provider
+        uses: ./.github/actions/authenticate-provider
         with:
-          method: jwt
-          url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"
-          namespace: "admin/quansight"
-          role: "repository-nebari-dev-nebari-role"
-          secrets: |
-            kv/data/repository/nebari-dev/nebari/amazon_web_services/nebari-dev-ci role_name | AWS_ROLE_ARN;
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci project_id | PROJECT_ID;
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci workload_identity_provider | GCP_WORKFLOW_PROVIDER;
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci service_account_name | GCP_SERVICE_ACCOUNT;
-            kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci client_id | ARM_CLIENT_ID;
-            kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci tenant_id | ARM_TENANT_ID;
-            kv/data/repository/nebari-dev/nebari/azure/nebari-dev-ci/github-nebari-dev-repo-ci subscription_id | ARM_SUBSCRIPTION_ID;
-            kv/data/repository/nebari-dev/nebari/shared_secrets DIGITALOCEAN_TOKEN | DIGITALOCEAN_TOKEN;
-            kv/data/repository/nebari-dev/nebari/shared_secrets SPACES_ACCESS_KEY_ID | SPACES_ACCESS_KEY_ID;
-            kv/data/repository/nebari-dev/nebari/shared_secrets SPACES_SECRET_ACCESS_KEY | SPACES_SECRET_ACCESS_KEY;
-
-      - name: 'Authenticate to GCP'
-        if: ${{ matrix.provider == 'gcp' }}
-        uses: 'google-github-actions/auth@v1'
-        with:
-          token_format: access_token
-          create_credentials_file: 'true'
-          workload_identity_provider: ${{ env.GCP_WORKFLOW_PROVIDER }}
-          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
-
-      - name: Set required environment variables
-        if: ${{ matrix.provider == 'gcp' }}
-        run: |
-          echo "GOOGLE_CREDENTIALS=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}" >> $GITHUB_ENV
-
-      - name: 'Authenticate to AWS'
-        if: ${{ matrix.provider == 'aws' }}
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ env.AWS_ROLE_ARN }}
-          role-session-name: github-action
-          aws-region: us-east-1
-
-      - name: 'Azure login'
-        if: ${{ matrix.provider == 'azure' }}
-        uses: azure/login@v1
-        with:
-          client-id: ${{ env.ARM_CLIENT_ID }}
-          tenant-id: ${{ env.ARM_TENANT_ID }}
-          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+          provider: ${{ matrix.provider }}
 
       - name: Install Nebari
         run: |
