@@ -6,26 +6,26 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Nebari branch to deploy, test, destroy'
+        description: "Nebari branch to deploy, test, destroy"
         required: true
         default: develop
         type: string
       image-tag:
-        description: 'Nebari image tag created by the nebari-docker-images repo'
+        description: "Nebari image tag created by the nebari-docker-images repo"
         required: true
         default: main
         type: string
       tf-log-level:
-        description: 'Change Terraform log levels'
+        description: "Change Terraform log levels"
         required: false
         default: info
         type: choice
         options:
-        - info
-        - warn
-        - debug
-        - trace
-        - error
+          - info
+          - warn
+          - debug
+          - trace
+          - error
 
 env:
   NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'main' }}
@@ -57,28 +57,11 @@ jobs:
           pip install .[dev]
           playwright install
 
-      - name: Retrieve secret from Vault
-        uses: hashicorp/vault-action@v3.0.0
+      - name: Authenticate to GCP
+        uses: ./.github/actions/authenticate-provider
         with:
-          method: jwt
-          url: "https://quansight-vault-public-vault-b2379fa7.d415e30e.z1.hashicorp.cloud:8200"
-          namespace: "admin/quansight"
-          role: "repository-nebari-dev-nebari-role"
-          secrets: |
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci project_id | PROJECT_ID;
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci workload_identity_provider | GCP_WORKFLOW_PROVIDER;
-            kv/data/repository/nebari-dev/nebari/google_cloud_platform/nebari-dev-ci/github-nebari-dev-repo-ci service_account_name | GCP_SERVICE_ACCOUNT;
-            kv/data/repository/nebari-dev/nebari/cloudflare/internal-devops@quansight.com/nebari-dev-ci token | CLOUDFLARE_TOKEN;
-
-      - name: 'Authenticate to GCP'
-        uses: 'google-github-actions/auth@v1'
-        with:
-            workload_identity_provider: ${{ env.GCP_WORKFLOW_PROVIDER }}
-            service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
-
-      - name: Set required environment variables
-        run: |
-          echo "GOOGLE_CREDENTIALS=${{ env.GOOGLE_APPLICATION_CREDENTIALS }}" >> $GITHUB_ENV
+          provider: gcp
+          cloudflare_token: true
 
       - name: Integration Tests
         run: |
