@@ -360,8 +360,9 @@ def get_provider_config_block_name(provider):
 
 def check_environment_variables(variables: Set[str], reference: str) -> None:
     """Check that environment variables are set."""
+    __env__ = copy(os.environ)
     required_variables = {
-        variable: os.environ.get(variable, None) for variable in variables
+        variable: __get__.get(variable, None) for variable in variables
     }
     missing_variables = {
         variable for variable, value in required_variables.items() if value is None
