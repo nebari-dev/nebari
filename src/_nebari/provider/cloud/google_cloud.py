@@ -50,6 +50,7 @@ def regions() -> Set[str]:
 
     return {region.name for region in response}
 
+
 @functools.lru_cache()
 def instances(region: str) -> Set[str]:
     """Return a set of available compute instances in a region."""
@@ -64,6 +65,7 @@ def instances(region: str) -> Set[str]:
         for zone in zones_client.list(project=project_id, region=region)
         for instance in instances_client.list(project=project_id, zone=zone.name)
     }
+
 
 @functools.lru_cache()
 def kubernetes_versions(region: str) -> List[str]:
