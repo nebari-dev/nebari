@@ -284,6 +284,7 @@ class NebariTerraformStage(NebariStage):
         stage_outputs: Dict[str, Dict[str, Any]],
         disable_prompt: bool = False,
         terraform_init: bool = True,
+        force_unlock: bool = False,
     ):
         deploy_config = dict(
             directory=str(self.output_directory / self.stage_prefix),
@@ -291,6 +292,11 @@ class NebariTerraformStage(NebariStage):
             terraform_init=terraform_init,
         )
         state_imports = self.state_imports()
+        print("Deploying terraform resources for", self.name)
+        print("Force unlock:", force_unlock)
+        if force_unlock:
+            deploy_config["terraform_lock_id"] = force_unlock
+
         if state_imports:
             deploy_config["terraform_import"] = True
             deploy_config["state_imports"] = state_imports
