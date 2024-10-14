@@ -338,7 +338,7 @@ class NebariTerraformStage(NebariStage):
                 terraform_destroy=True,
             )
             status["stages/" + self.name] = True
-        except terraform.TerraformException as e:
+        except terraform.OpenTofuException as e:
             if not ignore_errors:
                 raise e
             status["stages/" + self.name] = False
