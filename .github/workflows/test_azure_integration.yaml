@@ -8,7 +8,7 @@ on:
       branch:
         description: 'Nebari branch to deploy, test, destroy'
         required: true
-        default: develop
+        default: main
         type: string
       image-tag:
         description: 'Nebari image tag created by the nebari-docker-images repo'
