@@ -196,7 +196,7 @@ def checkout_image_step():
 def setup_python_step():
     return GHA_job_step(
         name="Set up Python",
-        uses="actions/setup-python@v4",
+        uses="actions/setup-python@v5",
         with_={"python-version": GHA_job_steps_extras(LATEST_SUPPORTED_PYTHON_VERSION)},
     )
 
