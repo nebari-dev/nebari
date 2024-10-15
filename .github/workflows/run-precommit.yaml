@@ -19,6 +19,11 @@ jobs:
       - name: Checkout repository 🔔
         uses: actions/checkout@v4.1.1
 
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
       - name: Run terraform pre-commit ⚡️
         uses: pre-commit/action@v3.0.1
         with:
