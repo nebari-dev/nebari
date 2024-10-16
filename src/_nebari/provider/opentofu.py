@@ -24,33 +24,33 @@ class OpenTofuException(Exception):
 
 def deploy(
     directory,
-    terraform_init: bool = True,
-    terraform_import: bool = False,
-    terraform_apply: bool = True,
-    terraform_destroy: bool = False,
+    tofu_init: bool = True,
+    tofu_import: bool = False,
+    tofu_apply: bool = True,
+    tofu_destroy: bool = False,
     input_vars: Dict[str, Any] = {},
     state_imports: List[Any] = [],
 ):
-    """Execute a given terraform directory.
+    """Execute a given directory with OpenTofu infrastructure configuration.
 
     Parameters:
-      directory: directory in which to run terraform operations on
+      directory: directory in which to run tofu operations on
 
-      terraform_init: whether to run `terraform init` default True
+      tofu_init: whether to run `tofu init` default True
 
-      terraform_import: whether to run `terraform import` default
+      tofu_import: whether to run `tofu import` default
         False for each `state_imports` supplied to function
 
-      terraform_apply: whether to run `terraform apply` default True
+      tofu_apply: whether to run `tofu apply` default True
 
-      terraform_destroy: whether to run `terraform destroy` default
+      tofu_destroy: whether to run `tofu destroy` default
         False
 
       input_vars: supply values for "variable" resources within
         terraform module
 
       state_imports: (addr, id) pairs for iterate through and attempt
-        to terraform import
+        to tofu import
     """
     with tempfile.NamedTemporaryFile(
         mode="w", encoding="utf-8", suffix=".tfvars.json"
@@ -58,19 +58,19 @@ def deploy(
         json.dump(input_vars, f.file)
         f.file.flush()
 
-        if terraform_init:
+        if tofu_init:
             init(directory)
 
-        if terraform_import:
+        if tofu_import:
             for addr, id in state_imports:
                 tfimport(
                     addr, id, directory=directory, var_files=[f.name], exist_ok=True
                 )
 
-        if terraform_apply:
+        if tofu_apply:
             apply(directory, var_files=[f.name])
 
-        if terraform_destroy:
+        if tofu_destroy:
             destroy(directory, var_files=[f.name])
 
         return output(directory)
@@ -184,9 +184,9 @@ def tfimport(addr, id, directory=None, var_files=None, exist_ok=False):
                 raise e
 
 
-def show(directory=None, terraform_init: bool = True) -> dict:
+def show(directory=None, tofu_init: bool = True) -> dict:
 
-    if terraform_init:
+    if tofu_init:
         init(directory)
 
     logger.info(f"tofu show directory={directory}")

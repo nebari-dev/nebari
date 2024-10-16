@@ -11,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
-from _nebari.provider import helm, kubernetes, kustomize, terraform
+from _nebari.provider import helm, kubernetes, kustomize, opentofu
 from _nebari.stages.tf_objects import NebariTerraformState
 from nebari.hookspecs import NebariStage
 
@@ -248,7 +248,7 @@ class NebariTerraformStage(NebariStage):
 
     def render(self) -> Dict[pathlib.Path, str]:
         contents = {
-            (self.stage_prefix / "_nebari.tf.json"): terraform.tf_render_objects(
+            (self.stage_prefix / "_nebari.tf.json"): opentofu.tf_render_objects(
                 self.tf_objects()
             )
         }
@@ -283,19 +283,19 @@ class NebariTerraformStage(NebariStage):
         self,
         stage_outputs: Dict[str, Dict[str, Any]],
         disable_prompt: bool = False,
-        terraform_init: bool = True,
+        tofu_init: bool = True,
     ):
         deploy_config = dict(
             directory=str(self.output_directory / self.stage_prefix),
             input_vars=self.input_vars(stage_outputs),
-            terraform_init=terraform_init,
+            tofu_init=tofu_init,
         )
         state_imports = self.state_imports()
         if state_imports:
             deploy_config["terraform_import"] = True
             deploy_config["state_imports"] = state_imports
 
-        self.set_outputs(stage_outputs, terraform.deploy(**deploy_config))
+        self.set_outputs(stage_outputs, opentofu.deploy(**deploy_config))
         self.post_deploy(stage_outputs, disable_prompt)
         yield
 
@@ -318,27 +318,27 @@ class NebariTerraformStage(NebariStage):
     ):
         self.set_outputs(
             stage_outputs,
-            terraform.deploy(
+            opentofu.deploy(
                 directory=str(self.output_directory / self.stage_prefix),
                 input_vars=self.input_vars(stage_outputs),
-                terraform_init=True,
-                terraform_import=True,
-                terraform_apply=False,
-                terraform_destroy=False,
+                tofu_init=True,
+                tofu_import=True,
+                tofu_apply=False,
+                tofu_destroy=False,
             ),
         )
         yield
         try:
-            terraform.deploy(
+            opentofu.deploy(
                 directory=str(self.output_directory / self.stage_prefix),
                 input_vars=self.input_vars(stage_outputs),
-                terraform_init=True,
-                terraform_import=True,
-                terraform_apply=False,
-                terraform_destroy=True,
+                tofu_init=True,
+                tofu_import=True,
+                tofu_apply=False,
+                tofu_destroy=True,
             )
             status["stages/" + self.name] = True
-        except terraform.OpenTofuException as e:
+        except opentofu.OpenTofuException as e:
             if not ignore_errors:
                 raise e
             status["stages/" + self.name] = False
