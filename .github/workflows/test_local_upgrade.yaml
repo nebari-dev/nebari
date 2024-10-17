@@ -6,17 +6,16 @@ env:
   NEBARI_IMAGE_TAG: "main"
 
 on:
-  release:
-    types:
-      - prereleased
-  workflow_dispatch:
+  pull_request:
+#  release:
+#    types:
+#      - prereleased
+#  workflow_dispatch:
 
-## When the cancel-in-progress: true option is specified, any concurrent jobs or workflows using the same
-## concurrency group will cancel both the pending and currently running jobs or workflows. This allows only
-## one job or workflow in the concurrency group to be in progress at a time.
-#concurrency:
-#  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-#  cancel-in-progress: true
+
+concurrency:
+  group: "upgrade"
+  cancel-in-progress: true
 
 jobs:
   test-local-upgrade:
