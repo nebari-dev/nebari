@@ -15,3 +15,31 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: "{{ namespace }}"
+  - target:
+      kind: KuberhealthyCheck
+      name: conda-store-http-check
+    patch: |-
+      - op: add
+        path: /spec/podSpec/containers/0/env/-
+        value:
+          name: CHECK_URL
+          value: "http://nebari-conda-store-server.{{ namespace }}:5000"
+  - target:
+      kind: KuberhealthyCheck
+      name: jupyterhub-http-check
+    patch: |-
+      - op: add
+        path: /spec/podSpec/containers/0/env/-
+        value:
+          name: CHECK_URL
+          value: "http://
+          hub.{{ namespace }}:8081"
+  - target:
+      kind: KuberhealthyCheck
+      name: keycloak-http-check
+    patch: |-
+      - op: add
+        path: /spec/podSpec/containers/0/env/-
+        value:
+          name: CHECK_URL
+          value: "http://keycloak-http.{{ namespace }}"
