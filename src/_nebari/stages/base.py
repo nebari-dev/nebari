@@ -292,7 +292,7 @@ class NebariTerraformStage(NebariStage):
         )
         state_imports = self.state_imports()
         if state_imports:
-            deploy_config["terraform_import"] = True
+            deploy_config["tofu_import"] = True
             deploy_config["state_imports"] = state_imports
 
         self.set_outputs(stage_outputs, opentofu.deploy(**deploy_config))
