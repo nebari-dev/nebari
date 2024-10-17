@@ -160,12 +160,12 @@ def construct_aws_ami_type(
         return ami_type
 
     if launch_template and launch_template.get("ami_id"):
-        return AWSAmiTypes.CUSTOM.value
+        return "CUSTOM"
 
     if gpu_enabled:
-        return AWSAmiTypes.AL2_x86_64_GPU.value
+        return "AL2_x86_64_GPU"
 
-    return AWSAmiTypes.AL2_x86_64.value
+    return "AL2_x86_64"
 
 
 class AWSInputVars(schema.Base):
