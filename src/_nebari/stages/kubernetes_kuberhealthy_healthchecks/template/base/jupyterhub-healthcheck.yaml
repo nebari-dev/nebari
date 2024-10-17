@@ -12,8 +12,6 @@ spec:
         image: kuberhealthy/http-check:v1.5.0
         imagePullPolicy: IfNotPresent
         env:
-          - name: CHECK_URL
-            value: "http://hub.dev:8081"
           - name: COUNT #### default: "0"
             value: "5"
           - name: SECONDS #### default: "0"
