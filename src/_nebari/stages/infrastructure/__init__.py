@@ -128,11 +128,10 @@ class AzureInputVars(schema.Base):
     workload_identity_enabled: bool = False
 
 
-class AWSAmiTypes(enum.Enum):
+class AWSAmiTypes(str, enum.Enum):
     AL2_x86_64 = "AL2_x86_64"
     AL2_x86_64_GPU = "AL2_x86_64_GPU"
     CUSTOM = "CUSTOM"
-
 
 class AWSNodeLaunchTemplate(schema.Base):
     pre_bootstrap_command: Optional[str] = None
