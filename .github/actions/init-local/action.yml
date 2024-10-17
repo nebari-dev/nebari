@@ -38,7 +38,7 @@ runs:
       run: |
         mkdir -p local-deployment
         cd local-deployment
-        nebari init local --project=thisisatest --domain github-actions.nebari.dev --auth-provider=password
+        nebari init local --project=${{ inputs.project }} --domain=${{ inputs.domain }} --auth-provider=password
 
         # Need smaller profiles on Local Kind
         sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"

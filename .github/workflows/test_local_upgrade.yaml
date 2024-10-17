@@ -44,6 +44,9 @@ jobs:
 
       - name: Initialize local deployment
         uses: ./.github/actions/init-local
+        with:
+          project: upgradetest
+          domain: upgradetest.nebari.dev
 
       - name: Deploy Nebari
         working-directory: local-deployment
