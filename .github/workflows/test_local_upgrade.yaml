@@ -1,0 +1,73 @@
+name: "Local Upgrade Tests"
+
+env:
+  TEST_USERNAME: "test-user"
+  TEST_PASSWORD: "P@sswo3d"
+  NEBARI_IMAGE_TAG: "main"
+
+on:
+  release:
+    types:
+      - prereleased
+  workflow_dispatch:
+
+## When the cancel-in-progress: true option is specified, any concurrent jobs or workflows using the same
+## concurrency group will cancel both the pending and currently running jobs or workflows. This allows only
+## one job or workflow in the concurrency group to be in progress at a time.
+#concurrency:
+#  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+#  cancel-in-progress: true
+
+jobs:
+  test-local-upgrade:
+    runs-on: "cirun-runner--${{ github.run_id }}"
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: "Checkout Infrastructure"
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: conda-incubator/setup-miniconda@v3
+        env:
+          CONDA: /home/runnerx/miniconda3
+        with:
+          auto-update-conda: true
+          python-version: "3.11"
+          miniconda-version: "latest"
+
+      - name: Install Nebari
+        run: pip install .
+
+      - name: Initialize local deployment
+        uses: ./.github/actions/init-local
+
+      - name: Deploy Nebari
+        working-directory: local-deployment
+        run: |
+          nebari deploy --config nebari-config.yaml --disable-prompt
+
+      - name: Basic kubectl checks after deployment
+        if: always()
+        run: |
+          kubectl get all,cm,secret,pv,pvc,ing -A
+
+      - name: Check github-actions.nebari.dev resolves
+        run: |
+          nslookup github-actions.nebari.dev
+
+      - name: Curl jupyterhub login page
+        run: |
+          curl -k https://github-actions.nebari.dev/hub/home -i
+
+      - name: Create example-user
+        working-directory: local-deployment
+        run: |
+          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
+          nebari keycloak listusers --config nebari-config.yaml
+
+      - name: Get nebari-config.yaml full path
+        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
