@@ -14,8 +14,20 @@ resource "aws_eks_cluster" "main" {
     public_access_cidrs     = var.public_access_cidrs
   }
 
+  # Only set encryption_config if eks_kms_arn is not null
+  dynamic "encryption_config" {
+    for_each = var.eks_kms_arn != null ? [1] : []
+    content {
+      provider {
+        key_arn = var.eks_kms_arn
+      }
+      resources = ["secrets"]
+    }
+  }
+
   depends_on = [
     aws_iam_role_policy_attachment.cluster-policy,
+    aws_iam_role_policy_attachment.cluster_encryption,
   ]
 
   tags = merge({ Name = var.name }, var.tags)
