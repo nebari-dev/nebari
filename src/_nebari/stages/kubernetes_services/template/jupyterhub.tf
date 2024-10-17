@@ -180,6 +180,7 @@ module "jupyterhub" {
   conda-store-service-name                           = module.kubernetes-conda-store-server.service_name
   conda-store-jhub-apps-token                        = module.kubernetes-conda-store-server.service-tokens.jhub-apps
   jhub-apps-enabled                                  = var.jhub-apps-enabled
+  jhub-apps-overrides                                = var.jhub-apps-overrides
 
   extra-mounts = {
     "/etc/dask" = {
