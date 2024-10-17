@@ -1,0 +1,65 @@
+name: init-local
+description: "Publish information from a template"
+
+inputs:
+  project:
+    description: TBD
+    required: false
+    default: thisisatest
+  domain:
+    description: TBD
+    required: false
+    default: github-actions.nebari.dev
+
+runs:
+  using: composite
+
+  steps:
+    - uses: azure/setup-kubectl@v4.0.0
+      with:
+        version: v1.19.16
+
+    - name: Enable docker permissions for user
+      shell: bash
+      run: |
+        sudo docker ps
+        sudo usermod -aG docker $USER && newgrp docker
+
+        docker info
+        docker ps
+
+    - name: Get routing table for docker pods
+      shell: bash
+      run: |
+        ip route
+
+    - name: Initialize Nebari Cloud
+      shell: bash -l {0}
+      run: |
+        mkdir -p local-deployment
+        cd local-deployment
+        nebari init local --project=${{ inputs.project }} --domain=${{ inputs.domain }} --auth-provider=password
+
+        # Need smaller profiles on Local Kind
+        sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
+        sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
+
+        # Change default JupyterLab theme
+        cat >> nebari-config.yaml <<- EOM
+        jupyterlab:
+          default_settings:
+            "@jupyterlab/apputils-extension:themes":
+              theme: JupyterLab Dark
+        EOM
+
+        # Change default value for minio persistence size
+        cat >> nebari-config.yaml <<- EOM
+        monitoring:
+          enabled: true
+          overrides:
+            minio:
+              persistence:
+                size: 1Gi
+        EOM
+
+        cat nebari-config.yaml
