@@ -60,7 +60,14 @@ jobs:
         run: pip install --upgrade .
 
       - name: Upgrade Nebari config
-        run: nebari upgrade --config ${{ steps.init.outputs.config }} --attempt-fixes
+        run: |
+          git add --force ${{ steps.init.outputs.config }}
+          nebari upgrade --config ${{ steps.init.outputs.config }} --attempt-fixes
+          git diff
+
+      - name: Redeploy Nebari
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
 
       - name: Health check after upgrade
         id: health-check-after
