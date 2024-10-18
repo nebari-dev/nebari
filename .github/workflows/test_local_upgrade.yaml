@@ -63,6 +63,7 @@ jobs:
         run: |
           git add --force ${{ steps.init.outputs.config }}
           nebari upgrade --config ${{ steps.init.outputs.config }} --attempt-fixes
+          nebari validate --config ${{ steps.init.outputs.config }}
           git diff
 
       - name: Redeploy Nebari
