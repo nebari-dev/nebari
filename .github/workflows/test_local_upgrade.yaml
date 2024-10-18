@@ -2,10 +2,13 @@ name: "Local Upgrade Tests"
 
 on:
   pull_request:
-#  release:
-#    types:
-#      - prereleased
-#  workflow_dispatch:
+    paths:
+      - ".github/actions/**"
+      - ".github/workflows/test_local_upgrade.yaml"
+  release:
+    types:
+      - prereleased
+  workflow_dispatch:
 
 
 concurrency:
