@@ -1,0 +1,23 @@
+name: health-check
+description: "Check health of Nebari deployment"
+
+inputs:
+  domain:
+    description: Domain name
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Basic kubectl checks after deployment
+      shell: bash
+      run: kubectl get all,cm,secret,pv,pvc,ing -A
+
+    - name: Check if domain resolves
+      shell: bash
+      run: nslookup ${{ inputs.domain }}
+
+    - name: Curl jupyterhub login page
+      shell: bash
+      run: curl --insecure --show-headers 'https://${{ inputs.domain }}/hub/home'

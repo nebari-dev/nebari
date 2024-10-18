@@ -1,10 +1,5 @@
 name: "Local Upgrade Tests"
 
-env:
-  TEST_USERNAME: "test-user"
-  TEST_PASSWORD: "P@sswo3d"
-  NEBARI_IMAGE_TAG: "main"
-
 on:
   pull_request:
 #  release:
@@ -17,6 +12,9 @@ concurrency:
   group: "upgrade"
   cancel-in-progress: true
 
+env:
+  NEBARI_IMAGE_TAG: "main"
+
 jobs:
   test-local-upgrade:
     runs-on: "cirun-runner--${{ github.run_id }}"
@@ -24,12 +22,15 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: "Checkout Infrastructure"
-        uses: actions/checkout@main
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Python
+      - name: Setup runner for local deployment
+        uses: ./.github/actions/setup-local
+
+      - name: Setup Python
         uses: conda-incubator/setup-miniconda@v3
         env:
           CONDA: /home/runnerx/miniconda3
@@ -38,35 +39,31 @@ jobs:
           python-version: "3.11"
           miniconda-version: "latest"
 
-      - name: Install Nebari
-        run: pip install .
+      - name: Install latest stable Nebari release
+        run: pip install nebari
 
-      - name: Initialize local deployment
+      - name: Initialize Nebari config for local deployment
+        id: local
         uses: ./.github/actions/init-local
 
       - name: Deploy Nebari
-        working-directory: local-deployment
-        run: |
-          nebari deploy --config nebari-config.yaml --disable-prompt
+        working-directory: ${{ steps.local.outputs.directory }}
+        run: nebari deploy --config ${{ steps.nebari.outputs.config }} --disable-prompt
 
-      - name: Basic kubectl checks after deployment
-        if: always()
-        run: |
-          kubectl get all,cm,secret,pv,pvc,ing -A
+      - name: Health check before upgrade
+        id: health-check-before
+        uses: ./.github/actions/health-check
+        with:
+          domain: ${{ steps.nebari.outputs.domain }}
 
-      - name: Check github-actions.nebari.dev resolves
-        run: |
-          nslookup github-actions.nebari.dev
+      - name: Install current Nebari
+        run: pip install --upgrade .
 
-      - name: Curl jupyterhub login page
-        run: |
-          curl -k https://github-actions.nebari.dev/hub/home -i
+      - name: Upgrade Nebari config
+        run: nebari upgrade --config ${{ steps.local.outputs.config }} --attempt-fixes
 
-      - name: Create example-user
-        working-directory: local-deployment
-        run: |
-          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
-          nebari keycloak listusers --config nebari-config.yaml
-
-      - name: Get nebari-config.yaml full path
-        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
+      - name: Health check after upgrade
+        id: health-check-after
+        uses: ./.github/actions/health-check
+        with:
+          domain: ${{ steps.nebari.outputs.domain }}
