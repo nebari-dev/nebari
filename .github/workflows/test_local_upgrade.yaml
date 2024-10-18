@@ -46,6 +46,11 @@ jobs:
         id: init
         uses: ./.github/actions/init-local
 
+      - name: Extract old Nebari version
+        run: |
+          OLD_NEBARI_VERSION=$(grep 'nebari_version: ' ${{ steps.init.outputs.config }} | sed 's/nebari_version: //')
+          echo "OLD_NEBARI_VERSION=${OLD_NEBARI_VERSION}" | tee --append "${GITHUB_ENV}"
+
       - name: Deploy Nebari
         working-directory: ${{ steps.init.outputs.directory }}
         run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
@@ -63,8 +68,16 @@ jobs:
         run: |
           git add --force ${{ steps.init.outputs.config }}
           nebari upgrade --config ${{ steps.init.outputs.config }} --attempt-fixes
-          nebari validate --config ${{ steps.init.outputs.config }}
           git diff
+          nebari validate --config ${{ steps.init.outputs.config }}
+
+      - name: Upgrade TF state
+        run: |
+          NEW_NEBARI_VERSION=$(grep 'nebari_version: ' ${{ steps.init.outputs.config }} | sed 's/nebari_version: //')
+
+          sed \
+            "s/\"nebari_version\": \"${OLD_NEBARI_VERSION}\"/\"nebari_version\": \"${NEW_NEBARI_VERSION}\"/" \
+            -i ${{ steps.init.outputs.directory }}/stages/01-terraform-state/local/terraform.tfstate
 
       - name: Redeploy Nebari
         working-directory: ${{ steps.init.outputs.directory }}
