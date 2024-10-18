@@ -39,8 +39,8 @@ runs:
         PROJECT='github-actions'
         echo "project=${PROJECT}" | tee --append "${GITHUB_OUTPUT}"
 
-        # This domain has a DNS entry that points back to a local IP, i.e. 172.X.X.X.
         DOMAIN='github-actions.nebari.dev'
+        nslookup "${DOMAIN}"
         echo "domain=${DOMAIN}" | tee --append "${GITHUB_OUTPUT}"
 
     - shell: bash -l {0}

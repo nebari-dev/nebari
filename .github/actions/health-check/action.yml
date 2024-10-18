@@ -10,14 +10,10 @@ runs:
   using: composite
 
   steps:
-    - name: Basic kubectl checks after deployment
+    - name: List kubernetes components
       shell: bash
-      run: kubectl get all,cm,secret,pv,pvc,ing -A
+      run: kubectl get --all-namespaces all,cm,secret,pv,pvc,ing
 
-    - name: Check if domain resolves
-      shell: bash
-      run: nslookup ${{ inputs.domain }}
-
-    - name: Curl jupyterhub login page
+    - name: Check if JupyterHub login page is accessible
       shell: bash
       run: curl --insecure --include 'https://${{ inputs.domain }}/hub/home'
