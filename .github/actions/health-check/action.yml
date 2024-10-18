@@ -20,4 +20,4 @@ runs:
 
     - name: Curl jupyterhub login page
       shell: bash
-      run: curl --insecure --show-headers 'https://${{ inputs.domain }}/hub/home'
+      run: curl --insecure --include 'https://${{ inputs.domain }}/hub/home'
