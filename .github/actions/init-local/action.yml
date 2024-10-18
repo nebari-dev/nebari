@@ -16,10 +16,10 @@ outputs:
     value: ${{ steps.metadata.outputs.config }}
   project:
     description: "Project name"
-    value: ${{ inputs.domain }}
+    value: ${{ steps.metadata.outputs.project }}
   domain:
     description: "Domain name"
-    value: ${{ inputs.domain }}
+    value: ${{ steps.metadata.outputs.domain }}
 
 runs:
   using: composite
