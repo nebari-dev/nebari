@@ -79,28 +79,28 @@ jobs:
           playwright install
 
       - name: Initialize Nebari config for local deployment
-        id: local
+        id: init
         uses: ./.github/actions/init-local
 
       - name: Deploy Nebari
-        working-directory: ${{ steps.local.outputs.directory }}
-        run: nebari deploy --config ${{ steps.nebari.outputs.config }} --disable-prompt
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
 
       - name: Health check
         uses: ./.github/actions/health-check
         with:
-          domain: ${{ steps.nebari.outputs.domain }}
+          domain: ${{ steps.init.outputs.domain }}
 
       - name: Create example-user
-        working-directory: ${{ steps.local.outputs.directory }}
+        working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config ${{ steps.nebari.outputs.config }}
-          nebari keycloak listusers --config ${{ steps.nebari.outputs.config }}
+          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
+          nebari keycloak listusers --config ${{ steps.init.outputs.config }}
 
       ### DEPLOYMENT TESTS
       - name: Deployment Pytests
         env:
-          NEBARI_CONFIG_PATH: ${{ steps.local.outputs.config }}
+          NEBARI_CONFIG_PATH: ${{ steps.init.outputs.config }}
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
         run: |
@@ -115,7 +115,7 @@ jobs:
         env:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-          NEBARI_FULL_URL: "https://${{ steps.nebari.outputs.domain }}"
+          NEBARI_FULL_URL: "https://${{ steps.init.outputs.domain }}"
         working-directory: tests/tests_e2e/playwright
         run: |
           # create environment file
@@ -137,5 +137,5 @@ jobs:
         # in the CI, it makes sense to only run on merge to main or workflow_dispatch to speed
         # up feedback cycle
         if: github.ref_name == 'main' || github.event_name == 'workflow_dispatch'
-        working-directory: ${{ steps.local.outputs.directory }}
-        run: nebari destroy --config ${{ steps.local.outputs.config }} --disable-prompt
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari destroy --config ${{ steps.init.outputs.config }} --disable-prompt

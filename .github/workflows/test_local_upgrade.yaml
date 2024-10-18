@@ -43,27 +43,27 @@ jobs:
         run: pip install nebari
 
       - name: Initialize Nebari config for local deployment
-        id: local
+        id: init
         uses: ./.github/actions/init-local
 
       - name: Deploy Nebari
-        working-directory: ${{ steps.local.outputs.directory }}
-        run: nebari deploy --config ${{ steps.nebari.outputs.config }} --disable-prompt
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
 
       - name: Health check before upgrade
         id: health-check-before
         uses: ./.github/actions/health-check
         with:
-          domain: ${{ steps.nebari.outputs.domain }}
+          domain: ${{ steps.init.outputs.domain }}
 
       - name: Install current Nebari
         run: pip install --upgrade .
 
       - name: Upgrade Nebari config
-        run: nebari upgrade --config ${{ steps.local.outputs.config }} --attempt-fixes
+        run: nebari upgrade --config ${{ steps.init.outputs.config }} --attempt-fixes
 
       - name: Health check after upgrade
         id: health-check-after
         uses: ./.github/actions/health-check
         with:
-          domain: ${{ steps.nebari.outputs.domain }}
+          domain: ${{ steps.init.outputs.domain }}
