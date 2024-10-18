@@ -1,0 +1,35 @@
+name: Run pre-commit
+
+on:
+  push:
+    branches:
+      - main
+      - release/\d{4}.\d{1,2}.\d{1,2}
+  pull_request:
+
+jobs:
+  pre-commit:
+    if: github.event.pull_request.merged == false
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout repository 🔔
+        uses: actions/checkout@v4.1.1
+
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Setup terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.7"
+
+
+      - name: Run terraform pre-commit ⚡️
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files terraform_fmt

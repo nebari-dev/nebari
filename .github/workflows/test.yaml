@@ -1,0 +1,68 @@
+name: "Tests"
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/test.yaml"
+      - "tests/**"
+      - "scripts/**"
+      - "src/**"
+      - "pyproject.toml"
+      - "pytest.ini"
+  push:
+    branches:
+      - main
+      - develop
+      - release/\d{4}.\d{1,2}.\d{1,2}
+    paths:
+      - ".github/workflows/test.yaml"
+      - "tests/**"
+      - "scripts/**"
+      - "src/**"
+      - "pyproject.toml"
+      - "pytest.ini"
+
+jobs:
+  test-general:
+    name: "Pytest"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+    strategy:
+      matrix:
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+      fail-fast: false
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-${{ matrix.python-version }}
+      cancel-in-progress: true
+    steps:
+      - name: "Checkout Infrastructure"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          channels: conda-forge,defaults
+          activate-environment: nebari-dev
+
+      - name: Install Nebari
+        run: |
+          python --version
+          pip install -e .[dev]
+
+      - name: Test Nebari
+        run: |
+          pytest --version
+          pytest --cov=src --cov-report=xml --cov-config=pyproject.toml tests/tests_unit
+
+      - name: Report Coverage
+        run: |
+          coverage report -m

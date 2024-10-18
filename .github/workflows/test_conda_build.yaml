@@ -1,0 +1,58 @@
+name: "Test Conda Build"
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/test_conda_build.yaml"
+      - "pyproject.toml"
+  push:
+    branches:
+      - main
+      - release/\d{4}.\d{1,2}.\d{1,2}
+    paths:
+      - ".github/workflows/test_conda_build.yaml"
+      - "pyproject.toml"
+
+jobs:
+  test-conda-build:
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+          shell: bash -el {0}
+    concurrency:
+        group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+        cancel-in-progress: true
+    steps:
+      - name: "Checkout Infrastructure"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          python-version: "3.10"
+          channels: conda-forge
+          activate-environment: nebari-dev
+
+      - name: Install dependencies
+        run: |
+          conda install build grayskull conda-build conda-verify
+
+      - name: Generate sdist
+        run: |
+          python -m build --sdist
+
+      - name: Generate meta.yaml
+        run: |
+          python -m grayskull pypi dist/*.tar.gz
+
+      - name: Build conda package
+        run: |
+          conda build nebari
+
+      - name: Test conda package
+        run: |
+          conda install --use-local nebari
+          nebari --version

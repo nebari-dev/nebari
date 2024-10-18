@@ -1,0 +1,21 @@
+name: Sync release notes with nebari.dev/docs
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@master
+      - name: Run Release File Sync ♻️
+        uses: BetaHuhn/repo-file-sync-action@v1
+        with:
+          GH_PAT: ${{ secrets.NEBARI_SENSEI_API_DOCS_PR_OPENER }}
+          CONFIG_PATH: .github/release-notes-sync-config.yaml
+          COMMIT_BODY: "MAINT - Sync release notes :robot:"
+          PR_LABELS: |
+            type: file sync ♻️

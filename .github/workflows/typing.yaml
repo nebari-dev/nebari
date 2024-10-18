@@ -1,0 +1,45 @@
+name: "Typing Check"
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/typing.yaml"
+      - "src/**"
+      - "pyproject.toml"
+  push:
+    branches:
+      - main
+      - release/\d{4}.\d{1,2}.\d{1,2}
+    paths:
+      - ".github/workflows/typing.yaml"
+      - "src/**"
+      - "pyproject.toml"
+
+jobs:
+  typing-check:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+      cancel-in-progress: true
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Nebari and type stubs
+        run: |
+          python --version
+          pip install -e .[dev]
+          pip install types-Pygments types-requests types-six
+
+      - name: Run MyPy
+        continue-on-error: true
+        run: |
+          mypy
