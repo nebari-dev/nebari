@@ -115,7 +115,6 @@ class AzureInputVars(schema.Base):
     name: str
     environment: str
     region: str
-    authorized_ip_ranges: List[str] = ["0.0.0.0/0"]
     kubeconfig_filename: str = get_kubeconfig_filename()
     kubernetes_version: str
     node_groups: Dict[str, AzureNodeGroupInputVars]
@@ -416,7 +415,6 @@ class AzureProvider(schema.Base):
     region: str
     kubernetes_version: Optional[str] = None
     storage_account_postfix: str
-    authorized_ip_ranges: Optional[List[str]] = ["0.0.0.0/0"]
     resource_group_name: Optional[str] = None
     node_groups: Dict[str, AzureNodeGroup] = DEFAULT_AZURE_NODE_GROUPS
     storage_account_postfix: str
