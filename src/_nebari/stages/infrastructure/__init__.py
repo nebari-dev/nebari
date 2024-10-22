@@ -133,6 +133,7 @@ class AWSAmiTypes(str, enum.Enum):
     AL2_x86_64_GPU = "AL2_x86_64_GPU"
     CUSTOM = "CUSTOM"
 
+
 class AWSNodeLaunchTemplate(schema.Base):
     pre_bootstrap_command: Optional[str] = None
     ami_id: Optional[str] = None
