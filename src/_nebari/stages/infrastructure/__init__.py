@@ -43,10 +43,33 @@ class ExistingInputVars(schema.Base):
     kube_context: str
 
 
-class DigitalOceanNodeGroup(schema.Base):
+class NodeGroup(schema.Base):
     instance: str
-    min_nodes: int
-    max_nodes: int
+    min_nodes: Annotated[int, Field(ge=0)] = 0
+    max_nodes: Annotated[int, Field(ge=1)] = 1
+    taints: Optional[List[schema.Taint]] = []
+
+    @field_validator("taints", mode="before")
+    def validate_taint_strings(cls, value: List[str | schema.Taint]):
+        TAINT_STR_REGEX = re.compile(r"(\w+)=(\w+):(\w+)")
+        parsed_taints = []
+        for taint in value:
+            if not isinstance(taint, (str, schema.Taint)):
+                raise ValueError(
+                    f"Unable to parse type: {type(taint)} as taint.  Must be a string or Taint object."
+                )
+
+            if isinstance(taint, schema.Taint):
+                parsed_taint = taint
+            elif isinstance(taint, str):
+                match = TAINT_STR_REGEX.match(taint)
+                if not match:
+                    raise ValueError(f"Invalid taint string: {taint}")
+                key, value, effect = match.groups()
+                parsed_taint = schema.Taint(key=key, value=value, effect=effect)
+            parsed_taints.append(parsed_taint)
+
+        return parsed_taints
 
 
 class DigitalOceanInputVars(schema.Base):
@@ -55,7 +78,7 @@ class DigitalOceanInputVars(schema.Base):
     region: str
     tags: List[str]
     kubernetes_version: str
-    node_groups: Dict[str, DigitalOceanNodeGroup]
+    node_groups: Dict[str, "DigitalOceanNodeGroup"]
     kubeconfig_filename: str = get_kubeconfig_filename()
 
 
@@ -64,9 +87,25 @@ class GCPNodeGroupInputVars(schema.Base):
     instance_type: str
     min_size: int
     max_size: int
+    node_taints: List[dict]
     labels: Dict[str, str]
     preemptible: bool
     guest_accelerators: List["GCPGuestAccelerator"]
+
+    @field_validator("node_taints", mode="before")
+    def convert_taints(cls, value: Optional[List[schema.Taint]]):
+        return [
+            dict(
+                key=taint.key,
+                value=taint.value,
+                effect={
+                    schema.TaintEffectEnum.NoSchedule: "NO_SCHEDULE",
+                    schema.TaintEffectEnum.PreferNoSchedule: "PREFER_NO_SCHEDULE",
+                    schema.TaintEffectEnum.NoExecute: "NO_EXECUTE",
+                }[taint.effect],
+            )
+            for taint in value
+        ]
 
 
 class GCPPrivateClusterConfig(schema.Base):
@@ -261,16 +300,14 @@ class KeyValueDict(schema.Base):
     value: str
 
 
-class DigitalOceanNodeGroup(schema.Base):
+class DigitalOceanNodeGroup(NodeGroup):
     """Representation of a node group with Digital Ocean
 
     - Kubernetes limits: https://docs.digitalocean.com/products/kubernetes/details/limits/
     - Available instance types: https://slugs.do-api.dev/
     """
 
-    instance: str
     min_nodes: Annotated[int, Field(ge=1)] = 1
-    max_nodes: Annotated[int, Field(ge=1)] = 1
 
 
 DEFAULT_DO_NODE_GROUPS = {
@@ -349,10 +386,7 @@ class GCPGuestAccelerator(schema.Base):
     count: Annotated[int, Field(ge=1)] = 1
 
 
-class GCPNodeGroup(schema.Base):
-    instance: str
-    min_nodes: Annotated[int, Field(ge=0)] = 0
-    max_nodes: Annotated[int, Field(ge=1)] = 1
+class GCPNodeGroup(NodeGroup):
     preemptible: bool = False
     labels: Dict[str, str] = {}
     guest_accelerators: List[GCPGuestAccelerator] = []
@@ -360,8 +394,18 @@ class GCPNodeGroup(schema.Base):
 
 DEFAULT_GCP_NODE_GROUPS = {
     "general": GCPNodeGroup(instance="e2-standard-8", min_nodes=1, max_nodes=1),
-    "user": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
-    "worker": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
+    "user": GCPNodeGroup(
+        instance="e2-standard-4",
+        min_nodes=0,
+        max_nodes=5,
+        taints=[schema.Taint(key="dedicated", value="user", effect="NoSchedule")],
+    ),
+    "worker": GCPNodeGroup(
+        instance="e2-standard-4",
+        min_nodes=0,
+        max_nodes=5,
+        taints=[schema.Taint(key="dedicated", value="worker", effect="NoSchedule")],
+    ),
 }
 
 
@@ -398,10 +442,8 @@ class GoogleCloudPlatformProvider(schema.Base):
         return data
 
 
-class AzureNodeGroup(schema.Base):
-    instance: str
-    min_nodes: int
-    max_nodes: int
+class AzureNodeGroup(NodeGroup):
+    pass
 
 
 DEFAULT_AZURE_NODE_GROUPS = {
@@ -469,10 +511,7 @@ class AzureProvider(schema.Base):
         return value if value is None else azure_cloud.validate_tags(value)
 
 
-class AWSNodeGroup(schema.Base):
-    instance: str
-    min_nodes: int = 0
-    max_nodes: int
+class AWSNodeGroup(NodeGroup):
     gpu: bool = False
     single_subnet: bool = False
     permissions_boundary: Optional[str] = None
@@ -786,6 +825,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         instance_type=node_group.instance,
                         min_size=node_group.min_nodes,
                         max_size=node_group.max_nodes,
+                        node_taints=node_group.taints,
                         preemptible=node_group.preemptible,
                         guest_accelerators=node_group.guest_accelerators,
                     )
