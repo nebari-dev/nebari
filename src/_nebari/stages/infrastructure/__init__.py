@@ -339,12 +339,6 @@ class GCPMasterAuthorizedNetworksConfig(schema.Base):
     cidr_blocks: List[GCPCIDRBlock]
 
 
-class GCPPrivateClusterConfig(schema.Base):
-    enable_private_endpoint: bool
-    enable_private_nodes: bool
-    master_ipv4_cidr_block: str
-
-
 class GCPGuestAccelerator(schema.Base):
     """
     See general information regarding GPU support at:
