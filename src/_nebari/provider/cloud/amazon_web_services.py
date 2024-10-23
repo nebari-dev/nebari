@@ -23,6 +23,7 @@ def check_credentials() -> None:
 
 @functools.lru_cache()
 
+
 def aws_session(
     region: Optional[str] = None, digitalocean_region: Optional[str] = None
 ) -> boto3.Session:
