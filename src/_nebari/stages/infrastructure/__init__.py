@@ -173,6 +173,7 @@ class AWSNodeGroupInputVars(schema.Base):
 
 
 class AWSInputVars(schema.Base):
+
     name: str
     environment: str
     existing_security_group_id: Optional[str] = None
