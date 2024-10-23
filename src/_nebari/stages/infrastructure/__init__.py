@@ -115,6 +115,7 @@ class AzureInputVars(schema.Base):
     name: str
     environment: str
     region: str
+    authorized_ip_ranges: List[str] = ["0.0.0.0/0"]
     kubeconfig_filename: str = get_kubeconfig_filename()
     kubernetes_version: str
     node_groups: Dict[str, AzureNodeGroupInputVars]
@@ -338,12 +339,6 @@ class GCPMasterAuthorizedNetworksConfig(schema.Base):
     cidr_blocks: List[GCPCIDRBlock]
 
 
-class GCPPrivateClusterConfig(schema.Base):
-    enable_private_endpoint: bool
-    enable_private_nodes: bool
-    master_ipv4_cidr_block: str
-
-
 class GCPGuestAccelerator(schema.Base):
     """
     See general information regarding GPU support at:
@@ -421,6 +416,7 @@ class AzureProvider(schema.Base):
     region: str
     kubernetes_version: Optional[str] = None
     storage_account_postfix: str
+    authorized_ip_ranges: Optional[List[str]] = ["0.0.0.0/0"]
     resource_group_name: Optional[str] = None
     node_groups: Dict[str, AzureNodeGroup] = DEFAULT_AZURE_NODE_GROUPS
     storage_account_postfix: str
@@ -818,6 +814,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 environment=self.config.namespace,
                 region=self.config.azure.region,
                 kubernetes_version=self.config.azure.kubernetes_version,
+                authorized_ip_ranges=self.config.azure.authorized_ip_ranges,
                 node_groups={
                     name: AzureNodeGroupInputVars(
                         instance=node_group.instance,
