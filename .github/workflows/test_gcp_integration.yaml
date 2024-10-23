@@ -8,7 +8,7 @@ on:
       branch:
         description: 'Nebari branch to deploy, test, destroy'
         required: true
-        default: develop
+        default: main
         type: string
       image-tag:
         description: 'Nebari image tag created by the nebari-docker-images repo'
@@ -28,7 +28,7 @@ on:
         - error
 
 env:
-  NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'develop' }}
+  NEBARI_GH_BRANCH: ${{ github.event.inputs.branch || 'main' }}
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
@@ -73,7 +73,6 @@ jobs:
       - name: 'Authenticate to GCP'
         uses: 'google-github-actions/auth@v1'
         with:
-            token_format: access_token
             workload_identity_provider: ${{ env.GCP_WORKFLOW_PROVIDER }}
             service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
 

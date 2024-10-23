@@ -114,20 +114,26 @@ amazon_web_services:
             ["validate", "--config", tmp_file.resolve()],
             env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.20"},
         )
-
-        assert 0 == valid_result.exit_code
-        assert not valid_result.exception
-        assert "Successfully validated configuration" in valid_result.stdout
+        try:
+            assert 0 == valid_result.exit_code
+            assert not valid_result.exception
+            assert "Successfully validated configuration" in valid_result.stdout
+        except AssertionError:
+            print(valid_result.stdout)
+            raise
 
         invalid_result = runner.invoke(
             app,
             ["validate", "--config", tmp_file.resolve()],
             env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.0"},
         )
-
-        assert 1 == invalid_result.exit_code
-        assert invalid_result.exception
-        assert "Invalid `kubernetes-version`" in invalid_result.stdout
+        try:
+            assert 1 == invalid_result.exit_code
+            assert invalid_result.exception
+            assert "Invalid `kubernetes-version`" in invalid_result.stdout
+        except AssertionError:
+            print(invalid_result.stdout)
+            raise
 
 
 @pytest.mark.parametrize(

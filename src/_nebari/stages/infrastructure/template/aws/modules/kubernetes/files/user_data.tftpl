@@ -1,0 +1,20 @@
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="//"
+
+%{ if node_pre_bootstrap_command != null }
+--//
+Content-Type: text/x-shellscript; charset="us-ascii"
+
+${node_pre_bootstrap_command}
+%{ endif }
+
+%{ if include_bootstrap_cmd }
+--//
+Content-Type: text/x-shellscript; charset="us-ascii"
+#!/bin/bash
+set -ex
+
+/etc/eks/bootstrap.sh ${cluster_name} --b64-cluster-ca ${cluster_cert_authority} --apiserver-endpoint ${cluster_endpoint}
+%{ endif }
+
+ --//

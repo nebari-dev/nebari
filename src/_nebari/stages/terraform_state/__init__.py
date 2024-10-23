@@ -1,6 +1,5 @@
 import contextlib
 import enum
-import functools
 import inspect
 import os
 import pathlib
@@ -237,7 +236,9 @@ class TerraformStateStage(NebariTerraformStage):
     ):
         self.check_immutable_fields()
 
-        with super().deploy(stage_outputs, disable_prompt):
+        # No need to run terraform init here as it's being called when running the
+        # terraform show command, inside check_immutable_fields
+        with super().deploy(stage_outputs, disable_prompt, terraform_init=False):
             env_mapping = {}
             # DigitalOcean terraform remote state using Spaces Bucket
             # assumes aws credentials thus we set them to match spaces credentials
@@ -261,14 +262,19 @@ class TerraformStateStage(NebariTerraformStage):
         nebari_config_diff = utils.JsonDiff(
             nebari_config_state.model_dump(), self.config.model_dump()
         )
-
         # check if any changed fields are immutable
         for keys, old, new in nebari_config_diff.modified():
             bottom_level_schema = self.config
             if len(keys) > 1:
-                bottom_level_schema = functools.reduce(
-                    lambda m, k: getattr(m, k), keys[:-1], self.config
-                )
+                for key in keys[:-1]:
+                    try:
+                        bottom_level_schema = getattr(bottom_level_schema, key)
+                    except AttributeError as e:
+                        if isinstance(bottom_level_schema, dict):
+                            # handle case where value is a dict
+                            bottom_level_schema = bottom_level_schema[key]
+                        else:
+                            raise e
             extra_field_schema = schema.ExtraFieldSchema(
                 **bottom_level_schema.model_fields[keys[-1]].json_schema_extra or {}
             )
