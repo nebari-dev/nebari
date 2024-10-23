@@ -22,8 +22,6 @@ def check_credentials() -> None:
 
 
 @functools.lru_cache()
-
-
 def aws_session(
     region: Optional[str] = None, digitalocean_region: Optional[str] = None
 ) -> boto3.Session:
@@ -38,7 +36,6 @@ def aws_session(
         aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
         aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
         aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
-
         if not region:
             raise ValueError(
                 "Please specify `region` in the nebari-config.yaml or if initializing the nebari-config, set the region via the "
