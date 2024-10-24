@@ -1286,13 +1286,29 @@ class Upgrade_2024_9_1(UpgradeStep):
                 username="root",
                 password=config["security"]["keycloak"]["initial_root_password"],
             )
-
-            # Proceed with updating group permissions
+            # Get client ID as role is bound to the JupyterHub client
             client_id = keycloak_admin.get_client_id("jupyterhub")
-            role_name = "allow-group-directory-creation-role"
+            role_name = "legacy-group-directory-creation-role"
+
+            # Create the role if it doesn't exist
+            # If the role does not exist, create it
+            keycloak_admin.create_client_role(
+                client_id=client_id,
+                skip_exists=True,
+                payload={
+                    "name": role_name,
+                    "attributes": {
+                        "scopes": "write:shared-mount",
+                        "component": "shared-directory" "scopes",
+                    },
+                    "description": "Role to allow group directory creation, created as part of the Nebari 2024.9.1 upgrade workflow.",
+                },
+            )
+
             role_id = keycloak_admin.get_client_role_id(
                 client_id=client_id, role_name=role_name
             )
+
             role_representation = keycloak_admin.get_role_by_id(role_id=role_id)
 
             # Fetch all groups and groups with the role
@@ -1325,6 +1341,23 @@ class Upgrade_2024_9_1(UpgradeStep):
                 rich.print(
                     "\n[green]All groups already have the required permissions.[/green]"
                 )
+        return config
+
+
+class Upgrade_2024_9_2(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.9.2
+
+    """
+
+    version = "2024.9.2"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("Ready to upgrade to Nebari version [green]2024.9.2[/green].")
+
         return config
 
 
