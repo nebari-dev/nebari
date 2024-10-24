@@ -77,7 +77,7 @@ jobs:
       - name: Upgrade TF state
         run: |
           NEW_NEBARI_VERSION=$(grep 'nebari_version: ' ${{ steps.init.outputs.config }} | sed 's/nebari_version: //')
-
+          # This is a workaround due to  https://github.com/nebari-dev/nebari/issues/2781
           sed \
             "s/\"nebari_version\": \"${OLD_NEBARI_VERSION}\"/\"nebari_version\": \"${NEW_NEBARI_VERSION}\"/" \
             -i ${{ steps.init.outputs.directory }}/stages/01-terraform-state/local/terraform.tfstate
