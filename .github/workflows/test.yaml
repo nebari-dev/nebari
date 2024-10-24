@@ -58,6 +58,9 @@ jobs:
           pip install -e .[dev]
 
       - name: Test Nebari
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           pytest --version
           pytest --cov=src --cov-report=xml --cov-config=pyproject.toml tests/tests_unit
