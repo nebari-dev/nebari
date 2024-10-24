@@ -2,10 +2,7 @@ CURRENT_RELEASE = "2024.9.1"
 
 HELM_VERSION = "v3.15.3"
 KUSTOMIZE_VERSION = "5.4.3"
-# NOTE: Terraform cannot be upgraded further due to Hashicorp licensing changes
-# implemented in August 2023.
-# https://www.hashicorp.com/license-faq
-TERRAFORM_VERSION = "1.5.7"
+OPENTOFU_VERSION = "1.8.3"
 
 KUBERHEALTHY_HELM_VERSION = "100"
 
