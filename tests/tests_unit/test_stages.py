@@ -91,3 +91,15 @@ def test_check_list_change(mock_get_state, terraform_state_stage, mock_config):
 
     # should not throw an exception
     terraform_state_stage.check_immutable_fields()
+
+
+@patch.object(TerraformStateStage, "get_nebari_config_state")
+def test_check_immutable_fields_old_nebari_version(
+    mock_get_state, terraform_state_stage, mock_config
+):
+    old_config = mock_config.model_copy(deep=True).model_dump()
+    old_config["nebari_version"] = "2024.7.1"  # Simulate an old version
+    mock_get_state.return_value = old_config
+
+    # This should not raise an exception
+    terraform_state_stage.check_immutable_fields()
