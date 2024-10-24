@@ -126,16 +126,13 @@ def kms_key_arns(region: str) -> Dict[str, dict]:
     """Return dict of available/enabled KMS key IDs and associated KeyMetadata for the AWS region."""
     session = aws_session(region=region)
     client = session.client("kms")
+    # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kms/client/list_keys.html
     paginator = client.get_paginator("list_keys")
     fields = [
         "Arn",
         "KeyUsage",
         "KeySpec",
-        # "KeyState",
-        # "Origin",
-        # "KeyManager",
-        # "EncryptionAlgorithms",
-        # "MultiRegion",
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kms/client/describe_key.html#:~:text=Response%20Structure
     ]
     kms_keys = [
         client.describe_key(KeyId=j["KeyId"]).get("KeyMetadata")
