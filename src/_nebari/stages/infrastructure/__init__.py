@@ -182,6 +182,7 @@ class AWSInputVars(schema.Base):
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
     ] = "public"
+    eks_kms_arn: Optional[str] = None
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -498,6 +499,7 @@ class AmazonWebServicesProvider(schema.Base):
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
     ] = "public"
+    eks_kms_arn: Optional[str] = None
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -553,6 +555,37 @@ class AmazonWebServicesProvider(schema.Base):
                     raise ValueError(
                         f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
                     )
+
+        # check if kms key is valid
+        available_kms_keys = amazon_web_services.kms_key_arns(data["region"])
+        if "eks_kms_arn" in data and data["eks_kms_arn"] is not None:
+            key_id = [
+                id for id in available_kms_keys.keys() if id in data["eks_kms_arn"]
+            ]
+            if (
+                len(key_id) == 1
+                and available_kms_keys[key_id[0]]["Arn"] == data["eks_kms_arn"]
+            ):
+                key_id = key_id[0]
+                # Symmetric KMS keys with Encrypt and decrypt key-usage have the SYMMETRIC_DEFAULT key-spec
+                # EKS cluster encryption requires a Symmetric key that is set to encrypt and decrypt data
+                if available_kms_keys[key_id]["KeySpec"] != "SYMMETRIC_DEFAULT":
+                    if available_kms_keys[key_id]["KeyUsage"] == "GENERATE_VERIFY_MAC":
+                        raise ValueError(
+                            f"Amazon Web Services KMS Key with ID {key_id} does not have KeyUsage set to 'Encrypt and decrypt' data"
+                        )
+                    elif available_kms_keys[key_id]["KeyUsage"] != "ENCRYPT_DECRYPT":
+                        raise ValueError(
+                            f"Amazon Web Services KMS Key with ID {key_id} is not of type Symmetric, and KeyUsage not set to 'Encrypt and decrypt' data"
+                        )
+                    else:
+                        raise ValueError(
+                            f"Amazon Web Services KMS Key with ID {key_id} is not of type Symmetric"
+                        )
+            else:
+                raise ValueError(
+                    f"Amazon Web Services KMS Key with ARN {data['eks_kms_arn']} not one of available/enabled keys={[v['Arn'] for v in available_kms_keys.values()]}"
+                )
 
         return data
 
@@ -843,6 +876,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 eks_endpoint_access=self.config.amazon_web_services.eks_endpoint_access,
+                eks_kms_arn=self.config.amazon_web_services.eks_kms_arn,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
                 region=self.config.amazon_web_services.region,
