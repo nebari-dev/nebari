@@ -1,0 +1,81 @@
+name: init-local
+description: "Initialize Nebari config for local deployment"
+
+inputs:
+  directory:
+    description: "Path to directory to initialize in"
+    required: false
+    default: './local-deployment'
+
+outputs:
+  directory:
+    description: "Path to config directory"
+    value: ${{ steps.metadata.outputs.directory }}
+  config:
+    description: "Path to Nebari config"
+    value: ${{ steps.metadata.outputs.config }}
+  project:
+    description: "Project name"
+    value: ${{ steps.metadata.outputs.project }}
+  domain:
+    description: "Domain name"
+    value: ${{ steps.metadata.outputs.domain }}
+
+runs:
+  using: composite
+
+  steps:
+    - shell: bash
+      id: metadata
+      run: |
+        # Setup metadata
+        DIRECTORY=$(realpath '${{ inputs.directory }}')
+        mkdir --parents "${DIRECTORY}"
+        echo "directory=${DIRECTORY}" | tee --append "${GITHUB_OUTPUT}"
+
+        CONFIG="${DIRECTORY}/nebari-config.yaml"
+        echo "config=${CONFIG}" | tee --append "${GITHUB_OUTPUT}"
+
+        PROJECT='github-actions'
+        echo "project=${PROJECT}" | tee --append "${GITHUB_OUTPUT}"
+
+        DOMAIN='github-actions.nebari.dev'
+        nslookup "${DOMAIN}"
+        echo "domain=${DOMAIN}" | tee --append "${GITHUB_OUTPUT}"
+
+    - shell: bash -l {0}
+      id: init
+      working-directory: ${{ steps.metadata.outputs.directory }}
+      run: |
+        nebari init local \
+          --project-name '${{ steps.metadata.outputs.project }}' \
+          --domain-name '${{ steps.metadata.outputs.domain }}' \
+          --auth-provider password \
+          --output '${{ steps.metadata.outputs.config }}'
+
+    - shell: bash
+      run: |
+        # Update nebari config for CI
+
+        # Change default JupyterLab theme
+        cat >> '${{ steps.metadata.outputs.config }}' <<- EOM
+        jupyterlab:
+          default_settings:
+            "@jupyterlab/apputils-extension:themes":
+              theme: JupyterLab Dark
+        EOM
+
+        # Change default value for minio persistence size
+        cat >> '${{ steps.metadata.outputs.config }}' <<- EOM
+        monitoring:
+          enabled: true
+          overrides:
+            minio:
+              persistence:
+                size: 1Gi
+        EOM
+
+    - shell: bash
+      run: |
+        # Display Nebari config
+        cat '${{ steps.metadata.outputs.config }}'

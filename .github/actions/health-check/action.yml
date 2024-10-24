@@ -1,0 +1,19 @@
+name: health-check
+description: "Check health of Nebari deployment"
+
+inputs:
+  domain:
+    description: Domain name
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: List kubernetes components
+      shell: bash
+      run: kubectl get --all-namespaces all,cm,secret,pv,pvc,ing
+
+    - name: Check if JupyterHub login page is accessible
+      shell: bash
+      run: curl --insecure --include 'https://${{ inputs.domain }}/hub/home'
