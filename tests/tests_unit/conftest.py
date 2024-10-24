@@ -56,6 +56,12 @@ def mock_all_cloud_methods(monkeypatch):
             "m5.xlarge": "m5.xlarge",
             "m5.2xlarge": "m5.2xlarge",
         },
+        "_nebari.provider.cloud.amazon_web_services.kms_key_arns": {
+            "kms_key_1": {
+                "KeySpec": "SYMMETRIC_DEFAULT",
+                "KeyUsage": "ENCRYPT_DECRYPT",
+            },
+        },
         # Azure
         "_nebari.provider.cloud.azure_cloud.kubernetes_versions": [
             "1.18",
@@ -143,7 +149,6 @@ def nebari_config_options(request) -> schema.Main:
     """This fixtures creates a set of nebari configurations for tests"""
     DEFAULT_GH_REPO = "github.com/test/test"
     DEFAULT_TERRAFORM_STATE = TerraformStateEnum.remote
-
     (
         project,
         namespace,
