@@ -22,7 +22,9 @@ def destroy_configuration(config: schema.Main, stages: List[hookspecs.NebariStag
         with contextlib.ExitStack() as stack:
             for stage in stages:
                 try:
-                    s = stage(output_directory=pathlib.Path.cwd(), config=config)
+                    s: hookspecs.NebariStage = stage(
+                        output_directory=pathlib.Path.cwd(), config=config
+                    )
                     stack.enter_context(s.destroy(stage_outputs, status))
                 except Exception as e:
                     status[s.name] = False

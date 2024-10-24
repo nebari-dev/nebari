@@ -57,7 +57,7 @@ resource "helm_release" "jupyterhub" {
 
   repository = "https://jupyterhub.github.io/helm-chart/"
   chart      = "jupyterhub"
-  version    = "4.0.0-0.dev.git.6607.hd1a1130e"
+  version    = "4.0.0-0.dev.git.6707.h109668fd"
 
   values = concat([
     file("${path.module}/values.yaml"),
@@ -69,14 +69,15 @@ resource "helm_release" "jupyterhub" {
         theme                         = var.theme
         profiles                      = var.profiles
         argo-workflows-enabled        = var.argo-workflows-enabled
-        home-pvc                      = var.home-pvc
-        shared-pvc                    = var.shared-pvc
+        home-pvc                      = var.home-pvc.name
+        shared-pvc                    = var.shared-pvc.name
         conda-store-pvc               = var.conda-store-pvc
         conda-store-mount             = var.conda-store-mount
         default-conda-store-namespace = var.default-conda-store-namespace
         conda-store-service-name      = var.conda-store-service-name
         conda-store-jhub-apps-token   = var.conda-store-jhub-apps-token
         jhub-apps-enabled             = var.jhub-apps-enabled
+        jhub-apps-overrides           = var.jhub-apps-overrides
         initial-repositories          = var.initial-repositories
         skel-mount = {
           name      = kubernetes_config_map.etc-skel.metadata.0.name
@@ -216,8 +217,25 @@ resource "helm_release" "jupyterhub" {
     name  = "proxy.secretToken"
     value = random_password.proxy_secret_token.result
   }
+
+  depends_on = [
+    var.home-pvc,
+    var.shared-pvc,
+  ]
+
+  lifecycle {
+    replace_triggered_by = [
+      null_resource.home-pvc,
+    ]
+  }
+
 }
 
+resource "null_resource" "home-pvc" {
+  triggers = {
+    home-pvc = var.home-pvc.id
+  }
+}
 
 resource "kubernetes_manifest" "jupyterhub" {
   manifest = {
@@ -279,6 +297,42 @@ module "jupyterhub-openid-client" {
     "developer" = ["jupyterhub_developer", "dask_gateway_developer"]
     "analyst"   = ["jupyterhub_developer"]
   }
+  client_roles = [
+    {
+      "name" : "allow-app-sharing-role",
+      "description" : "Allow app sharing for apps created via JupyterHub App Launcher (jhub-apps)",
+      "groups" : [],
+      "attributes" : {
+        # grants permissions to share server
+        # grants permissions to read other user's names
+        # grants permissions to read other groups' names
+        # The later two are required for sharing with a group or user
+        "scopes" : "shares,read:users:name,read:groups:name"
+        "component" : "jupyterhub"
+      }
+    },
+    {
+      "name" : "allow-read-access-to-services-role",
+      "description" : "Allow read access to services, such that they are visible on the home page e.g. conda-store",
+      # Adding it to analyst group such that it's applied to every user.
+      "groups" : ["analyst"],
+      "attributes" : {
+        # grants permissions to read services
+        "scopes" : "read:services",
+        "component" : "jupyterhub"
+      }
+    },
+    {
+      "name" : "allow-group-directory-creation-role",
+      "description" : "Grants a group the ability to manage the creation of its corresponding mounted directory.",
+      "groups" : ["admin", "analyst", "developer"],
+      "attributes" : {
+        # grants permissions to mount group folder to shared dir
+        "scopes" : "write:shared-mount",
+        "component" : "shared-directory"
+      }
+    },
+  ]
   callback-url-paths = [
     "https://${var.external-url}/hub/oauth_callback",
     var.jupyterhub-logout-redirect-url

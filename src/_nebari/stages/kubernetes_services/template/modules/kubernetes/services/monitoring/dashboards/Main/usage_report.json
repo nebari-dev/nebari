@@ -238,14 +238,14 @@
         "datasource": {
           "uid": "$PROMETHEUS_DS"
         },
-        "definition": "",
+        "definition": "label_values({service=\"hub\"},namespace)",
         "hide": 0,
-        "includeAll": true,
+        "includeAll": false,
         "multi": false,
         "name": "hub",
         "options": [],
         "query": {
-          "query": "label_values(kube_service_labels{service=\"hub\"}, namespace)",
+          "query": "label_values({service=\"hub\"},namespace)",
           "refId": "Prometheus-hub-Variable-Query"
         },
         "refresh": 1,

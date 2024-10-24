@@ -61,17 +61,19 @@ module "kubernetes-conda-store-server" {
   services       = var.conda-store-service-token-scopes
   extra-settings = var.conda-store-extra-settings
   extra-config   = var.conda-store-extra-config
-}
-
-module "conda-store-nfs-mount" {
-  source = "./modules/kubernetes/nfs-mount"
-
-  name         = "conda-store"
-  namespace    = var.environment
-  nfs_capacity = var.conda-store-filesystem-storage
-  nfs_endpoint = module.kubernetes-conda-store-server.endpoint_ip
+  conda-store-fs = var.shared_fs_type
 
   depends_on = [
-    module.kubernetes-conda-store-server
+    module.rook-ceph
   ]
+}
+
+moved {
+  from = module.conda-store-nfs-mount
+  to   = module.kubernetes-conda-store-server.module.conda-store-nfs-mount[0]
+}
+
+
+locals {
+  conda-store-fs = var.shared_fs_type
 }

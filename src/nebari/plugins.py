@@ -36,6 +36,8 @@ DEFAULT_STAGES_PLUGINS = [
     "_nebari.stages.kubernetes_keycloak_configuration",
     "_nebari.stages.kubernetes_services",
     "_nebari.stages.nebari_tf_extensions",
+    "_nebari.stages.kubernetes_kuberhealthy",
+    "_nebari.stages.kubernetes_kuberhealthy_healthchecks",
 ]
 
 
@@ -128,7 +130,7 @@ class NebariPluginManager:
         classes = [schema.Main] + [
             _.input_schema for _ in self.ordered_stages if _.input_schema is not None
         ]
-        return type("ConfigSchema", tuple(classes), {})
+        return type("ConfigSchema", tuple(classes[::-1]), {})
 
 
 nebari_plugin_manager = NebariPluginManager()

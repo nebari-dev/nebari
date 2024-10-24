@@ -30,6 +30,14 @@ _Put a `x` in the boxes that apply_
 - [ ] Did you test the pull request locally?
 - [ ] Did you add new tests?
 
+## How to test this PR?
+
+<!--
+If relevant, please outline the steps required to test your contribution
+and the expected outcomes from the proposed changes. Providing clear
+testing instructions will help reviewers evaluate your contribution.
+-->
+
 ## Any other comments?
 
 <!--

@@ -1,5 +1,7 @@
 import contextlib
+import enum
 import functools
+import json
 import os
 import re
 import secrets
@@ -11,7 +13,7 @@ import threading
 import time
 import warnings
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 
 from ruamel.yaml import YAML
 
@@ -44,13 +46,17 @@ def change_directory(directory):
     os.chdir(current_directory)
 
 
-def run_subprocess_cmd(processargs, **kwargs):
+def run_subprocess_cmd(processargs, prefix=b"", capture_output=False, **kwargs):
     """Runs subprocess command with realtime stdout logging with optional line prefix."""
-    if "prefix" in kwargs:
-        line_prefix = f"[{kwargs['prefix']}]: ".encode("utf-8")
-        kwargs.pop("prefix")
+    if prefix:
+        line_prefix = f"[{prefix}]: ".encode("utf-8")
     else:
         line_prefix = b""
+
+    if capture_output:
+        stderr_stream = subprocess.PIPE
+    else:
+        stderr_stream = subprocess.STDOUT
 
     timeout = 0
     if "timeout" in kwargs:
@@ -62,7 +68,7 @@ def run_subprocess_cmd(processargs, **kwargs):
         processargs,
         **kwargs,
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
+        stderr=stderr_stream,
         preexec_fn=os.setsid,
     )
     # Set timeout thread
@@ -78,7 +84,8 @@ def run_subprocess_cmd(processargs, **kwargs):
         timeout_timer = threading.Timer(timeout, kill_process)
         timeout_timer.start()
 
-    for line in iter(lambda: process.stdout.readline(), b""):
+    print_stream = process.stderr if capture_output else process.stdout
+    for line in iter(lambda: print_stream.readline(), b""):
         full_line = line_prefix + line
         if strip_errors:
             full_line = full_line.decode("utf-8")
@@ -89,14 +96,25 @@ def run_subprocess_cmd(processargs, **kwargs):
 
         sys.stdout.buffer.write(full_line)
         sys.stdout.flush()
+    print_stream.close()
+
+    output = []
+    if capture_output:
+        for line in iter(lambda: process.stdout.readline(), b""):
+            output.append(line)
+        process.stdout.close()
 
     if timeout_timer is not None:
         timeout_timer.cancel()
 
-    process.stdout.close()
-    return process.wait(
+    exit_code = process.wait(
         timeout=10
     )  # Should already have finished because we have drained stdout
+
+    if capture_output:
+        return exit_code, b"".join(output)
+    else:
+        return exit_code, None
 
 
 def load_yaml(config_filename: Path):
@@ -353,3 +371,110 @@ def check_environment_variables(variables: Set[str], reference: str) -> None:
             f"""Missing the following required environment variables: {required_variables}\n
             Please see the documentation for more information: {reference}"""
         )
+
+
+def byte_unit_conversion(byte_size_str: str, output_unit: str = "B") -> float:
+    """Converts string representation of byte size to another unit and returns float output
+
+    e.g. byte_unit_conversion("1 KB", "B") -> 1000.0
+    e.g. byte_unit_conversion("1 KiB", "B") -> 1024.0
+    """
+    byte_size_str = byte_size_str.lower()
+    output_unit = output_unit.lower()
+
+    units_multiplier = {
+        "b": 1,
+        "k": 1000,
+        "m": 1000**2,
+        "g": 1000**3,
+        "t": 1000**4,
+        "kb": 1000,
+        "mb": 1000**2,
+        "gb": 1000**3,
+        "tb": 1000**4,
+        "ki": 1024,
+        "mi": 1024**2,
+        "gi": 1024**3,
+        "ti": 1024**4,
+        "kib": 1024,
+        "mib": 1024**2,
+        "gib": 1024**3,
+        "tib": 1024**4,
+    }
+
+    if output_unit not in units_multiplier:
+        raise ValueError(
+            f'Invalid input unit "{output_unit}".  Valid units are {units_multiplier.keys()}'
+        )
+
+    str_pattern = r"\s*^(\d+(?:\.\d*){0,1})\s*([a-zA-Z]*)\s*$"
+    pattern = re.compile(str_pattern, re.IGNORECASE)
+    match = pattern.search(byte_size_str)
+
+    if not match:
+        raise ValueError("Invalid byte size string")
+    value = float(match.group(1))
+    input_unit = match.group(2)
+    if not input_unit:
+        input_unit = "b"
+
+    if input_unit not in units_multiplier:
+        raise ValueError(
+            f'Invalid input unit "{input_unit}".  Valid units are {list(units_multiplier.keys())}'
+        )
+
+    return value * units_multiplier[input_unit] / units_multiplier[output_unit]
+
+
+class JsonDiffEnum(str, enum.Enum):
+    ADDED = "+"
+    REMOVED = "-"
+    MODIFIED = "!"
+
+
+class JsonDiff:
+    def __init__(self, obj1: Dict[str, Any], obj2: Dict[str, Any]):
+        self.diff = self.json_diff(obj1, obj2)
+
+    @staticmethod
+    def json_diff(obj1: Dict[str, Any], obj2: Dict[str, Any]) -> Dict[str, Any]:
+        """Calculates the diff between two json-like objects
+
+        # Example usage
+        obj1 = {"a": 1, "b": {"c": 2, "d": 3}}
+        obj2 = {"a": 1, "b": {"c": 2, "e": 4}, "f": 5}
+
+        result = json_diff(obj1, obj2)
+        """
+        diff = {}
+        for key in set(obj1.keys()) | set(obj2.keys()):
+            if key not in obj1:
+                diff[key] = {JsonDiffEnum.ADDED: obj2[key]}
+            elif key not in obj2:
+                diff[key] = {JsonDiffEnum.REMOVED: obj1[key]}
+            elif obj1[key] != obj2[key]:
+                if isinstance(obj1[key], dict) and isinstance(obj2[key], dict):
+                    nested_diff = JsonDiff.json_diff(obj1[key], obj2[key])
+                    if nested_diff:
+                        diff[key] = nested_diff
+                else:
+                    diff[key] = {JsonDiffEnum.MODIFIED: (obj1[key], obj2[key])}
+        return diff
+
+    @staticmethod
+    def walk_dict(d, path, sentinel):
+        for key, value in d.items():
+            if key is not sentinel:
+                if not isinstance(value, dict):
+                    continue
+                yield from JsonDiff.walk_dict(value, path + [key], sentinel)
+            else:
+                yield path, value
+
+    def modified(self):
+        """Generator that yields the path, old value, and new value of changed items"""
+        for path, (old, new) in self.walk_dict(self.diff, [], JsonDiffEnum.MODIFIED):
+            yield path, old, new
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(diff={json.dumps(self.diff)})"

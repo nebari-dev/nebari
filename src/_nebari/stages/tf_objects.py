@@ -1,4 +1,4 @@
-from _nebari.provider.terraform import Data, Provider, TerraformBackend
+from _nebari.provider.terraform import Data, Provider, Resource, TerraformBackend
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
@@ -17,7 +17,6 @@ def NebariKubernetesProvider(nebari_config: schema.Main):
             Provider("aws", region=nebari_config.amazon_web_services.region),
             Provider(
                 "kubernetes",
-                experiments={"manifest_resource": True},
                 host="${data.aws_eks_cluster.default.endpoint}",
                 cluster_ca_certificate="${base64decode(data.aws_eks_cluster.default.certificate_authority[0].data)}",
                 token="${data.aws_eks_cluster_auth.default.token}",
@@ -25,7 +24,6 @@ def NebariKubernetesProvider(nebari_config: schema.Main):
         )
     return Provider(
         "kubernetes",
-        experiments={"manifest_resource": True},
     )
 
 
@@ -117,3 +115,7 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
         )
     else:
         raise NotImplementedError("state not implemented")
+
+
+def NebariConfig(nebari_config: schema.Main):
+    return Resource("terraform_data", "nebari_config", input=nebari_config.model_dump())

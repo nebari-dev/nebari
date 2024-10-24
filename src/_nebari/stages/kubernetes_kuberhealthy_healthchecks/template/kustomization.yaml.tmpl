@@ -1,0 +1,45 @@
+# kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+
+resources:
+- ./base/conda-store-healthcheck.yaml
+- ./base/jupyterhub-healthcheck.yaml
+- ./base/keycloak-healthcheck.yaml
+
+patches:
+  - target:
+      kind: KuberhealthyCheck
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: "{{ namespace }}"
+  - target:
+      kind: KuberhealthyCheck
+      name: conda-store-http-check
+    patch: |-
+      - op: add
+        path: /spec/podSpec/containers/0/env/-
+        value:
+          name: CHECK_URL
+          value: "http://nebari-conda-store-server.{{ namespace }}:5000"
+  - target:
+      kind: KuberhealthyCheck
+      name: jupyterhub-http-check
+    patch: |-
+      - op: add
+        path: /spec/podSpec/containers/0/env/-
+        value:
+          name: CHECK_URL
+          value: "http://
+          hub.{{ namespace }}:8081"
+  - target:
+      kind: KuberhealthyCheck
+      name: keycloak-http-check
+    patch: |-
+      - op: add
+        path: /spec/podSpec/containers/0/env/-
+        value:
+          name: CHECK_URL
+          value: "http://keycloak-http.{{ namespace }}"

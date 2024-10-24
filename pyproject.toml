@@ -60,6 +60,13 @@ dependencies = [
     "bcrypt==4.0.1",
     "boto3==1.34.63",
     "cloudflare==2.11.7",
+    "google-auth==2.31.0",
+    "google-cloud-compute==1.19.1",
+    "google-cloud-container==2.49.0",
+    "google-cloud-iam==2.15.1",
+    "google-cloud-storage==2.18.0",
+    "grpc-google-iam-v1==0.13.1",
+    "jinja2",
     "kubernetes==27.2.0",
     "pluggy==1.3.0",
     "prompt-toolkit==3.0.36",
@@ -72,6 +79,7 @@ dependencies = [
     "ruamel.yaml==0.18.6",
     "typer==0.9.0",
     "packaging==23.2",
+    "typing-extensions==4.11.0",
 ]
 
 [project.optional-dependencies]
@@ -82,7 +90,6 @@ dev = [
     "diagrams",
     "escapism",
     "importlib-metadata<5.0",
-    "jinja2",
     "mypy==1.6.1",
     "paramiko",
     "pre-commit",
@@ -176,3 +183,16 @@ exclude_also = [
     "@(abc\\.)?abstractmethod",
     ]
 ignore_errors = false
+
+[tool.typos]
+files.extend-exclude = ["_build", "*/build/*", "*/node_modules/*", "nebari.egg-info", "*.git", "*.js", "*.json", "*.yaml", "*.yml", "pre-commit-config.yaml"]
+default.extend-ignore-re = ["(?Rm)^.*(#|//)\\s*typos: ignore$"]
+default.extend-ignore-words-re = ["aks", "AKS"]
+default.check-filename = true
+
+[tool.codespell]
+# Ref: https://github.com/codespell-project/codespell#using-a-config-file
+skip = '_build,*/build/*,*/node_modules/*,nebari.egg-info,*.git,package-lock.json,*.lock'
+check-hidden = true
+ignore-regex = '^\s*"image/\S+": ".*'
+ignore-words-list = 'aks'

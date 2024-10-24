@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - name: "Nebari Development Team"
+type: software
+title: "Nebari"
+version: 2024.4.1
+date-released: 2024-04-20
+url: "https://www.nebari.dev"
+repository-code: "https://github.com/nebari-dev/nebari"

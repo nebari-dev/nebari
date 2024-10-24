@@ -1,3 +1,9 @@
+"""
+This file contains the upgrade logic for Nebari.
+Each release of Nebari requires an upgrade step class (which is a child class of UpgradeStep) to be created.
+When a user runs `nebari upgrade  -c nebari-config.yaml`, then the do_upgrade function will then run through all required upgrade steps to bring the config file up to date with the current version of Nebari.
+"""
+
 import json
 import logging
 import re
@@ -8,12 +14,17 @@ from abc import ABC
 from pathlib import Path
 from typing import Any, ClassVar, Dict
 
+import kubernetes.client
+import kubernetes.config
+import requests
 import rich
 from packaging.version import Version
 from pydantic import ValidationError
 from rich.prompt import Prompt
+from typing_extensions import override
 
 from _nebari.config import backup_configuration
+from _nebari.keycloak import get_keycloak_admin
 from _nebari.stages.infrastructure import (
     provider_enum_default_node_groups_map,
     provider_enum_name_map,
@@ -39,6 +50,20 @@ DESTRUCTIVE_UPGRADE_WARNING = "-> This version upgrade will result in your clust
 
 
 def do_upgrade(config_filename, attempt_fixes=False):
+    """
+    Perform an upgrade of the Nebari configuration file.
+
+    This function loads the YAML configuration file, checks for deprecated keys,
+    validates the current version, and if necessary, upgrades the configuration
+    to the latest version of Nebari.
+
+    Args:
+    config_filename (str): The path to the configuration file.
+    attempt_fixes (bool): Whether to attempt automatic fixes for validation errors.
+
+    Returns:
+    None
+    """
     config = load_yaml(config_filename)
     if config.get("qhub_version"):
         rich.print(
@@ -87,10 +112,24 @@ def do_upgrade(config_filename, attempt_fixes=False):
 
 
 class UpgradeStep(ABC):
+    """
+    Abstract base class representing an upgrade step.
+
+    Attributes:
+        _steps (ClassVar[Dict[str, Any]]): Class variable holding registered upgrade steps.
+        version (ClassVar[str]): The version of the upgrade step.
+    """
+
     _steps: ClassVar[Dict[str, Any]] = {}
     version: ClassVar[str] = ""
 
     def __init_subclass__(cls):
+        """
+        Initializes a subclass of UpgradeStep.
+
+        This method validates the version string and registers the subclass
+        in the _steps dictionary.
+        """
         try:
             parsed_version = Version(cls.version)
         except ValueError as exc:
@@ -112,6 +151,15 @@ class UpgradeStep(ABC):
 
     @classmethod
     def has_step(cls, version):
+        """
+        Checks if there is an upgrade step for a given version.
+
+        Args:
+            version (str): The version to check.
+
+        Returns:
+            bool: True if the step exists, False otherwise.
+        """
         return version in cls._steps
 
     @classmethod
@@ -121,6 +169,16 @@ class UpgradeStep(ABC):
         """
         Runs through all required upgrade steps (i.e. relevant subclasses of UpgradeStep).
         Calls UpgradeStep.upgrade_step for each.
+
+        Args:
+            config (dict): The current configuration dictionary.
+            start_version (str): The starting version of the configuration.
+            finish_version (str): The target version for the configuration.
+            config_filename (str): The path to the configuration file.
+            attempt_fixes (bool): Whether to attempt automatic fixes for validation errors.
+
+        Returns:
+            dict: The updated configuration dictionary.
         """
         starting_ver = rounded_ver_parse(start_version or "0.0.0")
         finish_ver = rounded_ver_parse(finish_version)
@@ -156,9 +214,19 @@ class UpgradeStep(ABC):
         return config
 
     def get_version(self):
+        """
+        Returns:
+            str: The version of the upgrade step.
+        """
         return self.version
 
     def requires_nebari_version_field(self):
+        """
+        Checks if the nebari_version field is required for this upgrade step.
+
+        Returns:
+            bool: True if the nebari_version field is required, False otherwise.
+        """
         return rounded_ver_parse(self.version) > rounded_ver_parse("0.3.13")
 
     def upgrade_step(self, config, start_version, config_filename, *args, **kwargs):
@@ -174,6 +242,14 @@ class UpgradeStep(ABC):
 
         It should normally be left as-is for all upgrades. Use _version_specific_upgrade below
         for any actions that are only required for the particular upgrade you are creating.
+
+        Args:
+            config (dict): The current configuration dictionary.
+            start_version (str): The starting version of the configuration.
+            config_filename (str): The path to the configuration file.
+
+        Returns:
+            dict: The updated configuration dictionary.
         """
         finish_version = self.get_version()
         __rounded_finish_version__ = str(rounded_ver_parse(finish_version))
@@ -191,11 +267,32 @@ class UpgradeStep(ABC):
             config["nebari_version"] = self.version
 
         def contains_image_and_tag(s: str) -> bool:
-            # match on `quay.io/nebari/nebari-<...>:YYYY.MM.XX``
+            """
+            Check if the string matches the Nebari image pattern.
+
+            Args:
+                s (str): The string to check.
+
+            Returns:
+                bool: True if the string matches the pattern, False otherwise.
+            """
             pattern = r"^quay\.io\/nebari\/nebari-(jupyterhub|jupyterlab|dask-worker)(-gpu)?:\d{4}\.\d+\.\d+$"
             return bool(re.match(pattern, s))
 
-        def replace_image_tag_legacy(image, start_version, new_version):
+        def replace_image_tag_legacy(
+            image: str, start_version: str, new_version: str
+        ) -> str:
+            """
+            Replace legacy image tags with the new version.
+
+            Args:
+                image (str): The current image string.
+                start_version (str): The starting version of the image.
+                new_version (str): The new version to replace with.
+
+            Returns:
+                str: The updated image string with the new version, or None if no match.
+            """
             start_version_regex = start_version.replace(".", "\\.")
             if not start_version:
                 start_version_regex = "0\\.[0-3]\\.[0-9]{1,2}"
@@ -210,6 +307,17 @@ class UpgradeStep(ABC):
             return None
 
         def replace_image_tag(s: str, new_version: str, config_path: str) -> str:
+            """
+            Replace the image tag with the new version.
+
+            Args:
+                s (str): The current image string.
+                new_version (str): The new version to replace with.
+                config_path (str): The path to the configuration file.
+
+            Returns:
+                str: The updated image string with the new version, or the original string if no changes.
+            """
             legacy_replacement = replace_image_tag_legacy(s, start_version, new_version)
             if legacy_replacement:
                 return legacy_replacement
@@ -230,6 +338,17 @@ class UpgradeStep(ABC):
                 return s
 
         def set_nested_item(config: dict, config_path: list, value: str):
+            """
+            Set a nested item in the configuration dictionary.
+
+            Args:
+                config (dict): The configuration dictionary.
+                config_path (list): The path to the item to set.
+                value (str): The value to set.
+
+            Returns:
+                None
+            """
             config_path = config_path.split(".")
             for k in config_path[:-1]:
                 try:
@@ -243,7 +362,21 @@ class UpgradeStep(ABC):
                 pass
             config[config_path[-1]] = value
 
-        def update_image_tag(config, config_path, current_image, new_version):
+        def update_image_tag(
+            config: dict, config_path: str, current_image: str, new_version: str
+        ) -> dict:
+            """
+            Update the image tag in the configuration.
+
+            Args:
+                config (dict): The configuration dictionary.
+                config_path (str): The path to the item to update.
+                current_image (str): The current image string.
+                new_version (str): The new version to replace with.
+
+            Returns:
+                dict: The updated configuration dictionary.
+            """
             new_image = replace_image_tag(current_image, new_version, config_path)
             if new_image != current_image:
                 set_nested_item(config, config_path, new_image)
@@ -288,7 +421,17 @@ class UpgradeStep(ABC):
         self, config, start_version, config_filename, *args, **kwargs
     ):
         """
+        Perform version-specific upgrade tasks.
+
         Override this method in subclasses if you need to do anything specific to your version.
+
+        Args:
+            config (dict): The current configuration dictionary.
+            start_version (str): The starting version of the configuration.
+            config_filename (str): The path to the configuration file.
+
+        Returns:
+            dict: The updated configuration dictionary.
         """
         return config
 
@@ -296,6 +439,7 @@ class UpgradeStep(ABC):
 class Upgrade_0_3_12(UpgradeStep):
     version = "0.3.12"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename, *args, **kwargs
     ):
@@ -316,11 +460,13 @@ class Upgrade_0_3_12(UpgradeStep):
 class Upgrade_0_4_0(UpgradeStep):
     version = "0.4.0"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         """
-        Upgrade to Keycloak.
+        This version of Nebari introduces Keycloak for authentication, removes deprecated fields,
+        and generates a default password for the Keycloak root user.
         """
         security = config.get("security", {})
         users = security.get("users", {})
@@ -448,6 +594,7 @@ class Upgrade_0_4_0(UpgradeStep):
 class Upgrade_0_4_1(UpgradeStep):
     version = "0.4.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -474,6 +621,7 @@ class Upgrade_0_4_1(UpgradeStep):
 class Upgrade_2023_4_2(UpgradeStep):
     version = "2023.4.2"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -508,6 +656,7 @@ class Upgrade_2023_4_2(UpgradeStep):
 class Upgrade_2023_7_1(UpgradeStep):
     version = "2023.7.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -526,6 +675,7 @@ class Upgrade_2023_7_1(UpgradeStep):
 class Upgrade_2023_7_2(UpgradeStep):
     version = "2023.7.2"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -547,11 +697,22 @@ class Upgrade_2023_7_2(UpgradeStep):
 
 
 class Upgrade_2023_10_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.10.1
+
+    Note:
+        Upgrading to 2023.10.1 is considered high-risk because it includes a major refactor
+        to introduce the extension mechanism system. This version introduces significant
+        changes, including the support for third-party plugins, upgrades JupyterHub to version 3.1,
+        and deprecates certain components such as CDS Dashboards, ClearML, Prefect, and kbatch.
+    """
+
     version = "2023.10.1"
     # JupyterHub Helm chart 2.0.0 (app version 3.0.0) requires K8S Version >=1.23. (reference: https://z2jh.jupyter.org/en/stable/)
     # This released has been tested against 1.26
     min_k8s_version = 1.26
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -654,8 +815,16 @@ class Upgrade_2023_10_1(UpgradeStep):
 
 
 class Upgrade_2023_11_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.11.1
+
+    Note:
+        - ClearML, Prefect, and kbatch are no longer supported in this version.
+    """
+
     version = "2023.11.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -672,8 +841,16 @@ class Upgrade_2023_11_1(UpgradeStep):
 
 
 class Upgrade_2023_12_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2023.12.1
+
+    Note:
+        - This is the last version that supports the jupyterlab-videochat extension.
+    """
+
     version = "2023.12.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -691,8 +868,16 @@ class Upgrade_2023_12_1(UpgradeStep):
 
 
 class Upgrade_2024_1_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.1.1
+
+    Note:
+        - jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store, and jupyter-nvdashboard are no longer supported.
+    """
+
     version = "2024.1.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -713,6 +898,7 @@ class Upgrade_2024_1_1(UpgradeStep):
 class Upgrade_2024_3_1(UpgradeStep):
     version = "2024.3.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -724,6 +910,7 @@ class Upgrade_2024_3_1(UpgradeStep):
 class Upgrade_2024_3_2(UpgradeStep):
     version = "2024.3.2"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -735,6 +922,7 @@ class Upgrade_2024_3_2(UpgradeStep):
 class Upgrade_2024_3_3(UpgradeStep):
     version = "2024.3.3"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -744,8 +932,16 @@ class Upgrade_2024_3_3(UpgradeStep):
 
 
 class Upgrade_2024_4_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.4.1
+
+    Note:
+        - Adds default configuration for node groups if not already defined.
+    """
+
     version = "2024.4.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -777,6 +973,7 @@ class Upgrade_2024_4_1(UpgradeStep):
 class Upgrade_2024_5_1(UpgradeStep):
     version = "2024.5.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
@@ -786,11 +983,137 @@ class Upgrade_2024_5_1(UpgradeStep):
 
 
 class Upgrade_2024_6_1(UpgradeStep):
+    """
+    Upgrade step for version 2024.6.1
+
+    This upgrade includes:
+    - Manual updates for kube-prometheus-stack CRDs if monitoring is enabled.
+    - Prompts to upgrade GCP node groups to more cost-efficient instances.
+    """
+
     version = "2024.6.1"
 
+    @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
+        # Prompt users to manually update kube-prometheus-stack CRDs if monitoring is enabled
+        if config.get("monitoring", {}).get("enabled", True):
+
+            crd_urls = [
+                "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml",
+                "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml",
+                "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml",
+                "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml",
+                "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml",
+                "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml",
+                "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml",
+                "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml",
+                "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml",
+                "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml",
+            ]
+            daemonset_name = "prometheus-node-exporter"
+            namespace = config.get("namespace", "default")
+
+            # We're upgrading from version 30.1.0 to 58.4.0. This is a major upgrade and requires manual intervention.
+            # See https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/README.md#upgrading-chart
+            # for more information on why the following commands are necessary.
+            commands = "[cyan bold]"
+            for url in crd_urls:
+                commands += f"kubectl apply --server-side --force-conflicts -f {url}\n"
+            commands += f"kubectl delete daemonset -l app={daemonset_name} --namespace {namespace}\n"
+            commands += "[/cyan bold]"
+
+            rich.print(
+                "\n ⚠️  Warning ⚠️"
+                "\n-> [red bold]Nebari version 2024.6.1 comes with a new version of Grafana. Any custom dashboards that you created will be deleted after upgrading Nebari. Make sure to [link=https://grafana.com/docs/grafana/latest/dashboards/share-dashboards-panels/#export-a-dashboard-as-json]export them as JSON[/link] so you can [link=https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/#import-a-dashboard]import them[/link] again afterwards.[/red bold]"
+                f"\n-> [red bold]Before upgrading, kube-prometheus-stack CRDs need to be updated and the {daemonset_name} daemonset needs to be deleted.[/red bold]"
+            )
+            run_commands = Prompt.ask(
+                "\nDo you want Nebari to update the kube-prometheus-stack CRDs and delete the prometheus-node-exporter for you? If not, you'll have to do it manually.",
+                choices=["y", "N"],
+                default="N",
+            )
+
+            # By default, rich wraps lines by splitting them into multiple lines. This is
+            # far from ideal, as users copy-pasting the commands will get errors when running them.
+            # To avoid this, we use a rich console with a larger width to print the entire commands
+            # and let the terminal wrap them if needed.
+            console = rich.console.Console(width=220)
+            if run_commands == "y":
+                try:
+                    kubernetes.config.load_kube_config()
+                except kubernetes.config.config_exception.ConfigException:
+                    rich.print(
+                        "[red bold]No default kube configuration file was found. Make sure to [link=https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig]have one pointing to your Nebari cluster[/link] before upgrading.[/red bold]"
+                    )
+                    exit()
+                current_kube_context = kubernetes.config.list_kube_config_contexts()[1]
+                cluster_name = current_kube_context["context"]["cluster"]
+                rich.print(
+                    f"The following commands will be run for the [cyan bold]{cluster_name}[/cyan bold] cluster"
+                )
+                Prompt.ask("Hit enter to show the commands")
+                console.print(commands)
+
+                Prompt.ask("Hit enter to continue")
+                # We need to add a special constructor to the yaml loader to handle a specific
+                # tag as otherwise the kubernetes API will fail when updating the CRD.
+                yaml.constructor.add_constructor(
+                    "tag:yaml.org,2002:value", lambda loader, node: node.value
+                )
+                for url in crd_urls:
+                    response = requests.get(url)
+                    response.raise_for_status()
+                    crd = yaml.load(response.text)
+                    crd_name = crd["metadata"]["name"]
+                    api_instance = kubernetes.client.ApiextensionsV1Api()
+                    try:
+                        api_response = api_instance.read_custom_resource_definition(
+                            name=crd_name
+                        )
+                    except kubernetes.client.exceptions.ApiException:
+                        api_response = api_instance.create_custom_resource_definition(
+                            body=crd
+                        )
+                    else:
+                        api_response = api_instance.patch_custom_resource_definition(
+                            name=crd["metadata"]["name"], body=crd
+                        )
+
+                api_instance = kubernetes.client.AppsV1Api()
+                api_response = api_instance.list_namespaced_daemon_set(
+                    namespace=namespace, label_selector=f"app={daemonset_name}"
+                )
+                if api_response.items:
+                    api_instance.delete_namespaced_daemon_set(
+                        name=api_response.items[0].metadata.name,
+                        namespace=namespace,
+                    )
+
+                rich.print(
+                    f"The kube-prometheus-stack CRDs have been updated and the {daemonset_name} daemonset has been deleted."
+                )
+            else:
+                rich.print(
+                    "[red bold]Before upgrading, you need to manually delete the prometheus-node-exporter daemonset and update the kube-prometheus-stack CRDs. To do that, please run the following commands.[/red bold]"
+                )
+                Prompt.ask("Hit enter to show the commands")
+                console.print(commands)
+
+                Prompt.ask("Hit enter to continue")
+                continue_ = Prompt.ask(
+                    f"Have you backed up your custom dashboards (if necessary), deleted the {daemonset_name} daemonset and updated the kube-prometheus-stack CRDs?",
+                    choices=["y", "N"],
+                    default="N",
+                )
+                if not continue_ == "y":
+                    rich.print(
+                        f"[red bold]You must back up your custom dashboards (if necessary), delete the {daemonset_name} daemonset and update the kube-prometheus-stack CRDs before upgrading to [green]{self.version}[/green] (or later).[/bold red]"
+                    )
+                    exit()
+
+        # Prompt users to upgrade to the new default node groups for GCP
         if (provider := config.get("provider", "")) == ProviderEnum.gcp.value:
             provider_full_name = provider_enum_name_map[provider]
             if not config.get(provider_full_name, {}).get("node_groups", {}):
@@ -799,6 +1122,9 @@ class Upgrade_2024_6_1(UpgradeStep):
                         f"""
                         The default node groups for GCP have been changed to cost efficient e2 family nodes reducing the running cost of Nebari on GCP by ~50%.
                         This change will affect your current deployment, and will result in ~15 minutes of downtime during the upgrade step as the node groups are switched out, but shouldn't result in data loss.
+
+                        [red bold]Note: If upgrading to the new node types, the upgrade process will take longer than usual. For this upgrade only, you'll likely see a timeout \
+                        error and need to restart the deployment process afterwards in order to upgrade successfully.[/red bold]
 
                         As always, make sure to backup data before upgrading.  See https://www.nebari.dev/docs/how-tos/manual-backup for more information.
 
@@ -857,6 +1183,151 @@ class Upgrade_2024_6_1(UpgradeStep):
         return config
 
 
+class Upgrade_2024_7_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.7.1
+
+    Note:
+        - Digital Ocean deprecation warning.
+    """
+
+    version = "2024.7.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        if config.get("provider", "") == ProviderEnum.do.value:
+            rich.print("\n ⚠️  Deprecation Warning ⚠️")
+            rich.print(
+                "-> Digital Ocean support is currently being deprecated and will be removed in a future release.",
+            )
+            rich.print("")
+        return config
+
+
+class Upgrade_2024_9_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.9.1
+
+    """
+
+    version = "2024.9.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        if config.get("provider", "") == ProviderEnum.azure.value:
+            rich.print("\n ⚠️ Upgrade Warning ⚠️")
+            rich.print(
+                textwrap.dedent(
+                    """
+                -> Please ensure no users are currently logged in prior to deploying this update.  The node groups will be destroyed and recreated during the deployment process causing a downtime of approximately 15 minutes.
+
+                Due to an upstream issue, Azure Nebari deployments may raise an error when deploying for the first time after this upgrade. Waiting for a few minutes and then re-running `nebari deploy` should resolve the issue.  More info can be found at [green][link=https://github.com/nebari-dev/nebari/issues/2640]issue #2640[/link][/green]."""
+                ),
+            )
+            rich.print("")
+        elif config.get("provider", "") == ProviderEnum.do.value:
+            rich.print("\n ⚠️  Deprecation Warning ⚠️")
+            rich.print(
+                "-> Digital Ocean support is currently being deprecated and will be removed in a future release.",
+            )
+            rich.print("")
+
+        rich.print("\n ⚠️ Upgrade Warning ⚠️")
+
+        text = textwrap.dedent(
+            """
+            Please ensure no users are currently logged in prior to deploying this
+            update.
+
+            Nebari [green]2024.9.1[/green] introduces changes to how group
+            directories are mounted in JupyterLab pods.
+
+            Previously, every Keycloak group in the Nebari realm automatically created a
+            shared directory at ~/shared/<group-name>, accessible to all group members
+            in their JupyterLab pods.
+
+            Starting with Nebari [green]2024.9.1[/green], only groups assigned the
+            JupyterHub client role [magenta]allow-group-directory-creation[/magenta] will have their
+            directories mounted.
+
+            By default, the admin, analyst, and developer groups will have this
+            role assigned during the upgrade. For other groups, you'll now need to
+            assign this role manually in the Keycloak UI to have their directories
+            mounted.
+
+            For more details check our [green][link=https://www.nebari.dev/docs/references/release/]release notes[/link][/green].
+            """
+        )
+        rich.print(text)
+        keycloak_admin = None
+
+        # Prompt the user for role assignment (if yes, transforms the response into bool)
+        assign_roles = (
+            Prompt.ask(
+                "[bold]Would you like Nebari to assign the corresponding role to all of your current groups automatically?[/bold]",
+                choices=["y", "N"],
+                default="N",
+            ).lower()
+            == "y"
+        )
+
+        if assign_roles:
+            # In case this is done with a local deployment
+            import urllib3
+
+            urllib3.disable_warnings()
+
+            keycloak_admin = get_keycloak_admin(
+                server_url=f"https://{config['domain']}/auth/",
+                username="root",
+                password=config["security"]["keycloak"]["initial_root_password"],
+            )
+
+            # Proceed with updating group permissions
+            client_id = keycloak_admin.get_client_id("jupyterhub")
+            role_name = "allow-group-directory-creation-role"
+            role_id = keycloak_admin.get_client_role_id(
+                client_id=client_id, role_name=role_name
+            )
+            role_representation = keycloak_admin.get_role_by_id(role_id=role_id)
+
+            # Fetch all groups and groups with the role
+            all_groups = keycloak_admin.get_groups()
+            groups_with_role = keycloak_admin.get_client_role_groups(
+                client_id=client_id, role_name=role_name
+            )
+            groups_with_role_ids = {group["id"] for group in groups_with_role}
+
+            # Identify groups without the role
+            groups_without_role = [
+                group for group in all_groups if group["id"] not in groups_with_role_ids
+            ]
+
+            if groups_without_role:
+                group_names = ", ".join(group["name"] for group in groups_without_role)
+                rich.print(
+                    f"\n[bold]Updating the following groups with the required permissions:[/bold] {group_names}\n"
+                )
+                for group in groups_without_role:
+                    keycloak_admin.assign_group_client_roles(
+                        group_id=group["id"],
+                        client_id=client_id,
+                        roles=[role_representation],
+                    )
+                rich.print(
+                    "\n[green]Group permissions have been updated successfully.[/green]"
+                )
+            else:
+                rich.print(
+                    "\n[green]All groups already have the required permissions.[/green]"
+                )
+        return config
+
+
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
 # Manually-added upgrade steps must go above this line
@@ -864,4 +1335,11 @@ if not UpgradeStep.has_step(__rounded_version__):
     # Always have a way to upgrade to the latest full version number, even if no customizations
     # Don't let dev/prerelease versions cloud things
     class UpgradeLatest(UpgradeStep):
+        """
+        Upgrade step for the latest available version.
+
+        This class ensures there is always an upgrade path to the latest version,
+        even if no specific upgrade steps are defined for the current version.
+        """
+
         version = __rounded_version__

@@ -31,7 +31,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -108,7 +108,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "count(kube_pod_status_ready{namespace=\"$namespace\",condition=\"true\",pod=~\"nebari-traefik-ingress-.*\", job=\"kube-state-metrics\"})",
@@ -211,7 +211,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -506,7 +506,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -806,7 +806,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -917,7 +917,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -1168,7 +1168,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
         "definition": "label_values(kube_pod_container_info{pod=~\".*traefik.*\"}, namespace)",
         "hide": 0,

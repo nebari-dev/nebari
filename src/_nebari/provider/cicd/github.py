@@ -196,18 +196,8 @@ def checkout_image_step():
 def setup_python_step():
     return GHA_job_step(
         name="Set up Python",
-        uses="actions/setup-python@v4",
+        uses="actions/setup-python@v5",
         with_={"python-version": GHA_job_steps_extras(LATEST_SUPPORTED_PYTHON_VERSION)},
-    )
-
-
-def setup_gcloud():
-    return GHA_job_step(
-        name="Setup gcloud",
-        uses="google-github-actions/auth@v1",
-        with_={
-            "credentials_json": "${{ secrets.GOOGLE_CREDENTIALS }}",
-        },
     )
 
 
@@ -225,9 +215,6 @@ def gen_nebari_ops(config):
     step2 = setup_python_step()
     step3 = install_nebari_step(config.nebari_version)
     gha_steps = [step1, step2, step3]
-
-    if config.provider == schema.ProviderEnum.gcp:
-        gha_steps.append(setup_gcloud())
 
     for step in config.ci_cd.before_script:
         gha_steps.append(GHA_job_step(**step))

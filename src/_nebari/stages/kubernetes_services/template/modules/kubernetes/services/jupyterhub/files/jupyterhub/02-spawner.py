@@ -1,3 +1,6 @@
+import inspect
+import json
+
 import kubernetes.client.models
 from tornado import gen
 
@@ -63,6 +66,10 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
     c.JAppsConfig.hub_host = "hub"
     c.JAppsConfig.service_workers = 4
 
+    jhub_apps_overrides = json.loads(z2jh.get_config("custom.jhub-apps-overrides"))
+    for config_key, config_value in jhub_apps_overrides.items():
+        setattr(c.JAppsConfig, config_key, config_value)
+
     def service_for_jhub_apps(name, url):
         return {
             "name": name,
@@ -80,9 +87,14 @@ if z2jh.get_config("custom.jhub-apps-enabled"):
             service_for_jhub_apps(name="Users", url="/auth/admin/nebari/console/"),
             service_for_jhub_apps(name="Environments", url="/conda-store"),
             service_for_jhub_apps(name="Monitoring", url="/monitoring"),
-            service_for_jhub_apps(name="VSCode", url="/user/[USER]/vscode"),
         ]
     )
 
     c.JupyterHub.template_paths = theme_template_paths
-    c = install_jhub_apps(c, spawner_to_subclass=KubeSpawner)
+
+    kwargs = {}
+    jhub_apps_signature = inspect.signature(install_jhub_apps)
+    if "oauth_no_confirm" in jhub_apps_signature.parameters:
+        kwargs["oauth_no_confirm"] = True
+
+    c = install_jhub_apps(c, spawner_to_subclass=KubeSpawner, **kwargs)

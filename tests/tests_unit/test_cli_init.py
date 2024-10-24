@@ -51,6 +51,8 @@ MOCK_CLOUD_REGIONS = {
         (["--ssl-cert-email"], 2, ["requires an argument"]),
         (["--output"], 2, ["requires an argument"]),
         (["-o"], 2, ["requires an argument"]),
+        (["--explicit"], 2, ["Missing option"]),
+        (["-e"], 2, ["Missing option"]),
     ],
 )
 def test_cli_init_stdout(args: List[str], exit_code: int, content: List[str]):
@@ -90,20 +92,22 @@ def generate_test_data_test_cli_init_happy_path():
                                         ) in get_kubernetes_versions(provider) + [
                                             "latest"
                                         ]:
-                                            test_data.append(
-                                                (
-                                                    provider,
-                                                    region,
-                                                    project_name,
-                                                    domain_name,
-                                                    namespace,
-                                                    auth_provider,
-                                                    ci_provider,
-                                                    terraform_state,
-                                                    email,
-                                                    kubernetes_version,
+                                            for explicit in [True, False]:
+                                                test_data.append(
+                                                    (
+                                                        provider,
+                                                        region,
+                                                        project_name,
+                                                        domain_name,
+                                                        namespace,
+                                                        auth_provider,
+                                                        ci_provider,
+                                                        terraform_state,
+                                                        email,
+                                                        kubernetes_version,
+                                                        explicit,
+                                                    )
                                                 )
-                                            )
 
     keys = [
         "provider",
@@ -116,6 +120,7 @@ def generate_test_data_test_cli_init_happy_path():
         "terraform_state",
         "email",
         "kubernetes_version",
+        "explicit",
     ]
     return {"keys": keys, "test_data": test_data}
 
@@ -131,6 +136,7 @@ def test_cli_init_happy_path(
     terraform_state: str,
     email: str,
     kubernetes_version: str,
+    explicit: bool,
 ):
     app = create_cli()
     args = [
@@ -159,6 +165,8 @@ def test_cli_init_happy_path(
         "--region",
         region,
     ]
+    if explicit:
+        args += ["--explicit"]
 
     expected_yaml = f"""
     provider: {provider}

@@ -3,16 +3,28 @@ resource "random_password" "grafana_admin_password" {
   special = false
 }
 
+resource "kubernetes_secret" "grafana_oauth_secret" {
+  metadata {
+    name      = "grafana-oauth-secret"
+    namespace = var.namespace
+  }
+
+  data = {
+    "grafana-oauth-client-id"     = module.grafana-client-id.config.client_id
+    "grafana-oauth-client-secret" = module.grafana-client-id.config.client_secret
+  }
+}
+
 resource "helm_release" "prometheus-grafana" {
   name       = "nebari"
   namespace  = var.namespace
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
-  version    = "30.1.0"
+  version    = "58.4.0"
 
   values = concat([
     file("${path.module}/values.yaml"),
-    # https://github.com/prometheus-community/helm-charts/blob/kube-prometheus-stack-30.1.0/charts/kube-prometheus-stack/values.yaml
+    # https://github.com/prometheus-community/helm-charts/blob/kube-prometheus-stack-58.4.0/charts/kube-prometheus-stack/values.yaml
     jsonencode({
       alertmanager = {
         alertmanagerSpec = {
@@ -51,6 +63,19 @@ resource "helm_release" "prometheus-grafana" {
             "${var.node-group.key}" = var.node-group.value
           }
           additionalScrapeConfigs = [
+            {
+              job_name        = "kuberhealthy"
+              scrape_interval = "1m"
+              honor_labels    = true
+              metrics_path    = "/metrics"
+              static_configs = [
+                {
+                  targets = [
+                    "kuberhealthy.${var.namespace}.svc.cluster.local"
+                  ]
+                }
+              ]
+            },
             {
               job_name     = "Keycloak Target"
               metrics_path = "/auth/realms/master/metrics"
@@ -206,6 +231,8 @@ resource "helm_release" "prometheus-grafana" {
           }
         }
 
+        envFromSecret = kubernetes_secret.grafana_oauth_secret.metadata[0].name
+
         "grafana.ini" : {
           server = {
             protocol            = "http"
@@ -222,8 +249,8 @@ resource "helm_release" "prometheus-grafana" {
             enabled                  = "true"
             name                     = "Login Keycloak"
             allow_sign_up            = "true"
-            client_id                = module.grafana-client-id.config.client_id
-            client_secret            = module.grafana-client-id.config.client_secret
+            client_id                = "$__env{grafana-oauth-client-id}"
+            client_secret            = "$__env{grafana-oauth-client-secret}"
             scopes                   = "profile"
             auth_url                 = module.grafana-client-id.config.authentication_url
             token_url                = module.grafana-client-id.config.token_url

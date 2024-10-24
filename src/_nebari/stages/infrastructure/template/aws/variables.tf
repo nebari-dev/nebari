@@ -31,13 +31,15 @@ variable "kubernetes_version" {
 variable "node_groups" {
   description = "AWS node groups"
   type = list(object({
-    name          = string
-    instance_type = string
-    gpu           = bool
-    min_size      = number
-    desired_size  = number
-    max_size      = number
-    single_subnet = bool
+    name            = string
+    instance_type   = string
+    gpu             = bool
+    min_size        = number
+    desired_size    = number
+    max_size        = number
+    single_subnet   = bool
+    launch_template = map(any)
+    ami_type        = string
   }))
 }
 
@@ -47,13 +49,19 @@ variable "availability_zones" {
 }
 
 variable "vpc_cidr_block" {
-  description = "VPC cidr block for infastructure"
+  description = "VPC cidr block for infrastructure"
   type        = string
 }
 
 variable "kubeconfig_filename" {
   description = "Kubernetes kubeconfig written to filesystem"
   type        = string
+}
+
+variable "eks_endpoint_access" {
+  description = "EKS cluster api server endpoint access setting"
+  type        = string
+  default     = "public"
 }
 
 variable "eks_endpoint_private_access" {
@@ -76,4 +84,9 @@ variable "tags" {
   description = "Additional tags to add to resources"
   type        = map(string)
   default     = {}
+}
+
+variable "efs_enabled" {
+  description = "Enable EFS"
+  type        = bool
 }

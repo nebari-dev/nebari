@@ -44,13 +44,15 @@ variable "node_group_additional_policies" {
 variable "node_groups" {
   description = "Node groups to add to EKS Cluster"
   type = list(object({
-    name          = string
-    instance_type = string
-    gpu           = bool
-    min_size      = number
-    desired_size  = number
-    max_size      = number
-    single_subnet = bool
+    name            = string
+    instance_type   = string
+    gpu             = bool
+    min_size        = number
+    desired_size    = number
+    max_size        = number
+    single_subnet   = bool
+    launch_template = map(any)
+    ami_type        = string
   }))
 }
 
@@ -58,6 +60,11 @@ variable "node_group_instance_type" {
   description = "AWS instance types to use for kubernetes nodes"
   type        = string
   default     = "m5.large"
+}
+
+variable "endpoint_public_access" {
+  type    = bool
+  default = true
 }
 
 variable "endpoint_private_access" {

@@ -7,36 +7,33 @@ import pytest
 
 from _nebari.utils import escape_string
 from tests.tests_deployment import constants
-from tests.tests_deployment.utils import get_jupyterhub_token, monkeypatch_ssl_context
+from tests.tests_deployment.utils import monkeypatch_ssl_context
 
 monkeypatch_ssl_context()
 
 TIMEOUT_SECS = 300
 
 
-@pytest.fixture(scope="session")
-def api_token():
-    return get_jupyterhub_token("jupyterhub-ssh")
-
-
 @pytest.fixture(scope="function")
-def paramiko_object(api_token):
+def paramiko_object(jupyterhub_access_token):
     """Connects to JupyterHub ssh cluster from outside the cluster."""
+    params = {
+        "hostname": constants.NEBARI_HOSTNAME,
+        "port": 8022,
+        "username": constants.KEYCLOAK_USERNAME,
+        "password": jupyterhub_access_token,
+        "allow_agent": constants.PARAMIKO_SSH_ALLOW_AGENT,
+        "look_for_keys": constants.PARAMIKO_SSH_LOOK_FOR_KEYS,
+        "auth_timeout": 5 * 60,
+    }
 
+    ssh_client = paramiko.SSHClient()
+    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
-        client.connect(
-            hostname=constants.NEBARI_HOSTNAME,
-            port=8022,
-            username=constants.KEYCLOAK_USERNAME,
-            password=api_token,
-            # wait 5 minutes for jupyterlab server/terminal to spin up
-            auth_timeout=5 * 60,
-        )
-        yield client
+        ssh_client.connect(**params)
+        yield ssh_client
     finally:
-        client.close()
+        ssh_client.close()
 
 
 def run_command(command, stdin, stdout, stderr):
@@ -125,6 +122,9 @@ def test_contains_jupyterhub_ssh(paramiko_object):
         ("cat ~/.bashrc", "Managed by Nebari"),
         ("cat ~/.profile", "Managed by Nebari"),
         ("cat ~/.bash_logout", "Managed by Nebari"),
+        # ensure we don't copy over extra files from /etc/skel in init container
+        ("ls -la ~/..202*", "No such file or directory"),
+        ("ls -la ~/..data", "No such file or directory"),
     ]
 
     for command, output in commands_contain:

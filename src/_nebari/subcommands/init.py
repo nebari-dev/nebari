@@ -106,6 +106,7 @@ class InitInputs(schema.Base):
     ssl_cert_email: Optional[schema.email_pydantic] = None
     disable_prompt: bool = False
     output: pathlib.Path = pathlib.Path("nebari-config.yaml")
+    explicit: int = 0
 
 
 def enum_to_list(enum_cls):
@@ -152,7 +153,7 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
     try:
         write_configuration(
             inputs.output,
-            config,
+            config if not inputs.explicit else config_schema(**config),
             mode="x",
         )
     except FileExistsError:
@@ -565,6 +566,13 @@ def nebari_subcommand(cli: typer.Typer):
             "-o",
             help="Output file path for the rendered config file.",
         ),
+        explicit: int = typer.Option(
+            0,
+            "--explicit",
+            "-e",
+            count=True,
+            help="Write explicit nebari config file (advanced users only).",
+        ),
     ):
         """
         Create and initialize your [purple]nebari-config.yaml[/purple] file.
@@ -587,6 +595,13 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.cloud_provider = check_cloud_provider_creds(
             cloud_provider, disable_prompt
         )
+
+        # Digital Ocean deprecation warning -- Nebari 2024.7.1
+        if inputs.cloud_provider == ProviderEnum.do.value.lower():
+            rich.print(
+                ":warning: Digital Ocean support is being deprecated and support will be removed in the future. :warning:\n"
+            )
+
         inputs.region = check_cloud_provider_region(region, inputs.cloud_provider)
         inputs.kubernetes_version = check_cloud_provider_kubernetes_version(
             kubernetes_version, inputs.cloud_provider, inputs.region
@@ -604,6 +619,7 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.ssl_cert_email = ssl_cert_email
         inputs.disable_prompt = disable_prompt
         inputs.output = output
+        inputs.explicit = explicit
 
         from nebari.plugins import nebari_plugin_manager
 
@@ -653,6 +669,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 "\n\t❗️ [purple]local[/purple] requires Docker and Kubernetes running on your local machine. "
                 "[italic]Currently only available on Linux OS.[/italic]"
                 "\n\t❗️ [purple]existing[/purple] refers to an existing Kubernetes cluster that Nebari can be deployed on.\n"
+                "\n\t❗️ [red]Digital Ocean[/red] is currently being deprecated and support will be removed in the future.\n"
             )
         )
         # try:
@@ -726,7 +743,7 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
         # DOMAIN NAME
         rich.print(
             (
-                "\n\n 🪴  Great! Now you can provide a valid domain name (i.e. the URL) to access your Nebri instance. "
+                "\n\n 🪴  Great! Now you can provide a valid domain name (i.e. the URL) to access your Nebari instance. "
                 "This should be a domain that you own. Default if unspecified is the IP of the load balancer.\n\n"
             )
         )
@@ -795,21 +812,9 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 qmark=qmark,
             ).unsafe_ask()
 
-            org_name = questionary.text(
-                f"Which user or organization will this repository live under? ({repo_url.format(git_provider=git_provider, org_name='<org-name>', repo_name='')})",
-                qmark=qmark,
-            ).unsafe_ask()
-
-            repo_name = questionary.text(
-                f"And what will the name of this repository be? ({repo_url.format(git_provider=git_provider, org_name=org_name, repo_name='<repo-name>')})",
-                qmark=qmark,
-            ).unsafe_ask()
-
-            inputs.repository = repo_url.format(
-                git_provider=git_provider, org_name=org_name, repo_name=repo_name
-            )
-
             if git_provider == GitRepoEnum.github.value.lower():
+                inputs.ci_provider = CiEnum.github_actions.value.lower()
+
                 inputs.repository_auto_provision = questionary.confirm(
                     f"Would you like nebari to create a remote repository on {git_provider}?",
                     default=False,
@@ -817,11 +822,26 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                     auto_enter=False,
                 ).unsafe_ask()
 
-            if not disable_checks and inputs.repository_auto_provision:
-                check_repository_creds(ctx, git_provider)
+                if inputs.repository_auto_provision:
+                    org_name = questionary.text(
+                        f"Which user or organization will this repository live under? ({repo_url.format(git_provider=git_provider, org_name='<org-name>', repo_name='')})",
+                        qmark=qmark,
+                    ).unsafe_ask()
 
-            if git_provider == GitRepoEnum.github.value.lower():
-                inputs.ci_provider = CiEnum.github_actions.value.lower()
+                    repo_name = questionary.text(
+                        f"And what will the name of this repository be? ({repo_url.format(git_provider=git_provider, org_name=org_name, repo_name='<repo-name>')})",
+                        qmark=qmark,
+                    ).unsafe_ask()
+
+                    inputs.repository = repo_url.format(
+                        git_provider=git_provider,
+                        org_name=org_name,
+                        repo_name=repo_name,
+                    )
+
+                    if not disable_checks:
+                        check_repository_creds(ctx, git_provider)
+
             elif git_provider == GitRepoEnum.gitlab.value.lower():
                 inputs.ci_provider = CiEnum.gitlab_ci.value.lower()
 
@@ -894,6 +914,14 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
                 )
             inputs.kubernetes_version = kubernetes_version
 
+            # EXPLICIT CONFIG
+            inputs.explicit = questionary.confirm(
+                "Would you like the nebari config to show all available options? (recommended for advanced users only)",
+                default=False,
+                qmark=qmark,
+                auto_enter=False,
+            ).unsafe_ask()
+
         from nebari.plugins import nebari_plugin_manager
 
         config_schema = nebari_plugin_manager.config_schema
@@ -909,16 +937,19 @@ def guided_init_wizard(ctx: typer.Context, guided_init: str):
             )
         )
 
-        base_cmd = f"nebari init {inputs.cloud_provider}"
+        base_cmd = f"nebari init {inputs.cloud_provider.value}"
 
         def if_used(key, model=inputs, ignore_list=["cloud_provider"]):
             if key not in ignore_list:
-                b = "--{key} {value}"
                 value = getattr(model, key)
-                if isinstance(value, str) and (value != "" or value is not None):
-                    return b.format(key=key, value=value).replace("_", "-")
-                if isinstance(value, bool) and value:
-                    return b.format(key=key, value=value).replace("_", "-")
+                if isinstance(value, enum.Enum):
+                    return f"--{key} {value.value}".replace("_", "-")
+                elif isinstance(value, bool):
+                    if value:
+                        return f"--{key}".replace("_", "-")
+                elif isinstance(value, (int, str)):
+                    if value:
+                        return f"--{key} {value}".replace("_", "-")
 
         cmds = " ".join(
             [

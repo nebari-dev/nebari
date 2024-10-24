@@ -4,9 +4,7 @@ import dask_gateway
 import pytest
 
 from tests.tests_deployment import constants
-from tests.tests_deployment.utils import get_jupyterhub_token, monkeypatch_ssl_context
-
-monkeypatch_ssl_context()
+from tests.tests_deployment.utils import get_jupyterhub_token
 
 
 @pytest.fixture
@@ -15,7 +13,17 @@ def dask_gateway_object():
     os.environ["JUPYTERHUB_API_TOKEN"] = get_jupyterhub_token(
         "dask-gateway-pytest-token"
     )
-    return dask_gateway.Gateway(
+
+    # Create custom class from Gateway that disables the tls/ssl verification
+    # to do that we will override the self._request_kwargs dictionary within the
+    # __init__, targeting aiohttp.ClientSession.request method
+
+    class DaskGateway(dask_gateway.Gateway):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self._request_kwargs.update({"ssl": False})
+
+    return DaskGateway(
         address=f"https://{constants.NEBARI_HOSTNAME}/{constants.GATEWAY_ENDPOINT}",
         auth="jupyterhub",
         proxy_address=f"tcp://{constants.NEBARI_HOSTNAME}:8786",

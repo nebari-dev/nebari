@@ -8,7 +8,8 @@ resource "aws_eks_cluster" "main" {
   vpc_config {
     security_group_ids = var.cluster_security_groups
     subnet_ids         = var.cluster_subnets
-
+    #trivy:ignore:AVD-AWS-0040
+    endpoint_public_access  = var.endpoint_public_access
     endpoint_private_access = var.endpoint_private_access
     public_access_cidrs     = var.public_access_cidrs
   }
@@ -18,6 +19,52 @@ resource "aws_eks_cluster" "main" {
   ]
 
   tags = merge({ Name = var.name }, var.tags)
+}
+
+## aws_launch_template user_data invocation
+## If using a Custom AMI, then the /etc/eks/bootstrap cmds and args must be included/modified,
+## otherwise, on default AWS EKS Node AMI, the bootstrap cmd is appended automatically
+resource "aws_launch_template" "main" {
+  for_each = {
+    for node_group in var.node_groups :
+    node_group.name => node_group
+    if node_group.launch_template != null
+  }
+
+  name_prefix = "eks-${var.name}-${each.value.name}-"
+  image_id    = each.value.launch_template.ami_id
+
+  vpc_security_group_ids = var.cluster_security_groups
+
+
+  metadata_options {
+    http_tokens            = "required"
+    http_endpoint          = "enabled"
+    instance_metadata_tags = "enabled"
+  }
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size = 50
+      volume_type = "gp2"
+    }
+  }
+
+  # https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-basics
+  user_data = base64encode(
+    templatefile(
+      "${path.module}/files/user_data.tftpl",
+      {
+        node_pre_bootstrap_command = each.value.launch_template.pre_bootstrap_command
+        # This will ensure the bootstrap user data is used to join the node
+        include_bootstrap_cmd  = each.value.launch_template.ami_id != null ? true : false
+        cluster_name           = aws_eks_cluster.main.name
+        cluster_cert_authority = aws_eks_cluster.main.certificate_authority[0].data
+        cluster_endpoint       = aws_eks_cluster.main.endpoint
+      }
+    )
+  )
 }
 
 
@@ -30,13 +77,22 @@ resource "aws_eks_node_group" "main" {
   subnet_ids      = var.node_groups[count.index].single_subnet ? [element(var.cluster_subnets, 0)] : var.cluster_subnets
 
   instance_types = [var.node_groups[count.index].instance_type]
-  ami_type       = var.node_groups[count.index].gpu == true ? "AL2_x86_64_GPU" : "AL2_x86_64"
-  disk_size      = 50
+  ami_type       = var.node_groups[count.index].ami_type
+  disk_size      = var.node_groups[count.index].launch_template == null ? 50 : null
 
   scaling_config {
     min_size     = var.node_groups[count.index].min_size
     desired_size = var.node_groups[count.index].desired_size
     max_size     = var.node_groups[count.index].max_size
+  }
+
+  # Only set launch_template if its node_group counterpart parameter is not null
+  dynamic "launch_template" {
+    for_each = var.node_groups[count.index].launch_template != null ? [0] : []
+    content {
+      id      = aws_launch_template.main[var.node_groups[count.index].name].id
+      version = aws_launch_template.main[var.node_groups[count.index].name].latest_version
+    }
   }
 
   labels = {
@@ -89,8 +145,11 @@ resource "aws_eks_addon" "aws-ebs-csi-driver" {
 }
 
 resource "aws_eks_addon" "coredns" {
-  addon_name   = "coredns"
-  cluster_name = aws_eks_cluster.main.name
+  addon_name                  = "coredns"
+  cluster_name                = aws_eks_cluster.main.name
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
 
   configuration_values = jsonencode({
     nodeSelector = {

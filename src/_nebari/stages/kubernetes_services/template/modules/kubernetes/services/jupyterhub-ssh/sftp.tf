@@ -76,7 +76,7 @@ resource "kubernetes_deployment" "jupyterhub-sftp" {
         volume {
           name = "home"
           persistent_volume_claim {
-            claim_name = var.persistent_volume_claim
+            claim_name = var.persistent_volume_claim.name
           }
         }
 
@@ -130,5 +130,17 @@ resource "kubernetes_deployment" "jupyterhub-sftp" {
         }
       }
     }
+  }
+  lifecycle {
+    replace_triggered_by = [
+      null_resource.pvc,
+    ]
+  }
+}
+
+# hack to force the deployment to update when the pvc changes
+resource "null_resource" "pvc" {
+  triggers = {
+    pvc = var.persistent_volume_claim.id
   }
 }

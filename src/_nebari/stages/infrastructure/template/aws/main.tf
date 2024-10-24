@@ -64,6 +64,7 @@ module "registry-jupyterlab" {
 
 # ====================== EFS =========================
 module "efs" {
+  count  = var.efs_enabled ? 1 : 0
   source = "./modules/efs"
 
   name = "${local.cluster_name}-jupyterhub-shared"
@@ -73,6 +74,10 @@ module "efs" {
   efs_security_groups = [local.security_group_id]
 }
 
+moved {
+  from = module.efs
+  to   = module.efs[0]
+}
 
 # ==================== KUBERNETES =====================
 module "kubernetes" {
@@ -92,7 +97,8 @@ module "kubernetes" {
 
   node_groups = var.node_groups
 
-  endpoint_private_access = var.eks_endpoint_private_access
+  endpoint_public_access  = var.eks_endpoint_access == "private" ? false : true
+  endpoint_private_access = var.eks_endpoint_access == "public" ? false : true
   public_access_cidrs     = var.eks_public_access_cidrs
   permissions_boundary    = var.permissions_boundary
 }

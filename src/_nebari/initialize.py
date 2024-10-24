@@ -233,7 +233,7 @@ def github_auto_provision(config: pydantic.BaseModel, owner: str, repo: str):
             github.create_repository(
                 owner,
                 repo,
-                description=f"Nebari {config.project_name}-{config.provider}",
+                description=f"Nebari {config.project_name}-{config.provider.value}",
                 homepage=f"https://{config.domain}",
             )
         except requests.exceptions.HTTPError as he:

@@ -9,9 +9,133 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-### Release 2024.5.1 - May 13, 2024
+## Release 2024.9.1 - September 27, 2024
 
-## What's Changed
+> WARNING: This release changes how group directories are mounted in JupyterLab pods: only groups with specific permissions will have their directories mounted. If you rely on custom group mounts, we strongly recommend running `nebari upgrade` before updating. This will prompt you to confirm how Nebari should handle your groups—either keep them mounted or allow unmounting. **No data will be lost**, and you can reverse this anytime.
+
+### What's Changed
+* Fix: KeyValueDict error when deploying to existing infrastructure by @oftheaxe in https://github.com/nebari-dev/nebari/pull/2560
+* Remove unused AWS terraform modules by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2623
+* Upgrade Hashicorp Vault action by @aktech in https://github.com/nebari-dev/nebari/pull/2616
+* Pass `oauth_no_confirm=True` to jhub-apps by @krassowski in https://github.com/nebari-dev/nebari/pull/2631
+* Use Rook Ceph for Jupyterhub and Conda Store drives by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2541
+* Fix typo in guided init by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2635
+* Action var tests off by @BrianCashProf in https://github.com/nebari-dev/nebari/pull/2632
+* add a "moved" block to account for refactored terraform code without deleting/recreating NFS disks by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2639
+* Use Helm Chart for JupyterHub 5.1.0 by @krassowski in https://github.com/nebari-dev/nebari/pull/2661
+* Add a how to test section to PR template by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2659
+* Support disallowed nebari config changes by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2660
+* Fix converted init command in guided init by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2666
+* Add initial uptime metrics by @dcmcand in https://github.com/nebari-dev/nebari/pull/2609
+* Refactor and extend Playwright tests by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2644
+* Remove Cypress remaining tests/files by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2672
+* refactor jupyterhub user token retrieval within pytest by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2645
+* add moved block to account for terraform changes on AWS only by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2673
+* Refactor shared group mounting using RBAC by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2593
+* Dashboard fix usage report by @kenafoster in https://github.com/nebari-dev/nebari/pull/2671
+* only capture stdout not stdout+stderr when capture_output=True by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2704
+* revert breaking change to azure deployment test by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2706
+* Refactor GitOps approach prompt flow in guided init by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2269
+* template the kustomization.yaml file  by @dcmcand in https://github.com/nebari-dev/nebari/pull/2667
+* Fix auto-provisioned GitHub repo description after guided init by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2708
+* Add amazon_web_services configuration option to specify EKS cluster api server endpoint access setting by @joneszc in https://github.com/nebari-dev/nebari/pull/2618
+* Use Google Auth and Cloud Python APIs instead of `gcloud` CLI by @swastik959 in https://github.com/nebari-dev/nebari/pull/2083
+* fix broken links in README.md, SECURITY.md, and CONTRIBUTING.md by @blakerosenthal in https://github.com/nebari-dev/nebari/pull/2720
+* add test for changing dicts and lists by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2724
+* 2024.9.1 upgrade notes by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2726
+* Add Support for AWS Launch Template Configuration by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2668
+* Run terraform init before running terraform show by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2734
+* Release Process Checklist Updates by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2727
+* Test implicit aiohttp's TCP to HTTP connector change by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2741
+* remove comments by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2743
+* Deploy Rook Ceph Helm only when Ceph FS Needed by @kenafoster in https://github.com/nebari-dev/nebari/pull/2742
+* fix group mounting paths by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2738
+* Add compatibility prompt and notes for shared group mounting by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2739
+
+### New Contributors
+* @oftheaxe made their first contribution in https://github.com/nebari-dev/nebari/pull/2560
+* @joneszc made their first contribution in https://github.com/nebari-dev/nebari/pull/2618
+* @swastik959 made their first contribution in https://github.com/nebari-dev/nebari/pull/2083
+* @blakerosenthal made their first contribution in https://github.com/nebari-dev/nebari/pull/2720
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.7.1...2024.9.1
+
+
+## Release 2024.7.1 - August 8, 2024
+
+> NOTE: Support for Digital Ocean deployments using CLI commands and related Terraform modules is being deprecated. Although Digital Ocean will no longer be directly supported in future releases, you can still deploy to Digital Ocean infrastructure using the current `existing` deployment option.
+
+### What's Changed
+* Enable authentication by default in jupyter-server by @krassowski in https://github.com/nebari-dev/nebari/pull/2288
+* remove dns sleep by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2550
+* Conda-store permissions v2 + load roles from keycloak by @aktech in https://github.com/nebari-dev/nebari/pull/2531
+* Restrict public access and add bucket encryption using cmk by @dcmcand in https://github.com/nebari-dev/nebari/pull/2525
+* Add overwrite to AWS coredns addon by @dcmcand in https://github.com/nebari-dev/nebari/pull/2538
+* Add a default roles at initialisation by @aktech in https://github.com/nebari-dev/nebari/pull/2546
+* Hide gallery section if no exhibits are configured by @krassowski in https://github.com/nebari-dev/nebari/pull/2549
+* Add note about ~/.bash_profile by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2575
+* Expose jupyterlab-gallery branch and depth options by @krassowski in https://github.com/nebari-dev/nebari/pull/2556
+* #2566 Upgrade Jupyterhub ssh image by @arjxn-py in https://github.com/nebari-dev/nebari/pull/2576
+* Stop copying unnecessary files into user home directory by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2578
+* Include deprecation notes for init/deploy subcommands by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2582
+* Only download jar if file doesn't exist by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2588
+* Remove unnecessary experimental flag by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2606
+* Add typos spell checker to pre-commit by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2568
+* Enh 2451 skip conditionals by @BrianCashProf in https://github.com/nebari-dev/nebari/pull/2569
+* Improve codespell support: adjust and concentrate config to pyproject.toml and fix more typos by @yarikoptic in https://github.com/nebari-dev/nebari/pull/2583
+* Move codespell config to pyproject.toml only by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2611
+* Add `depends_on` for bucket encryption by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2615
+
+### New Contributors
+* @BrianCashProf made their first contribution in https://github.com/nebari-dev/nebari/pull/2569
+* @yarikoptic made their first contribution in https://github.com/nebari-dev/nebari/pull/2583
+
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.6.1...2024.7.1
+
+
+## Release 2024.6.1 - June 26, 2024
+
+> NOTE: This release includes an upgrade to the `kube-prometheus-stack` Helm chart, resulting in a newer version of Grafana. When upgrading your Nebari cluster, you will be prompted to have Nebari update some CRDs and delete a DaemonSet on your behalf. If you prefer, you can also run the commands yourself, which will be shown to you. If you have any custom dashboards, you'll also need to back them up by [exporting them as JSON](https://grafana.com/docs/grafana/latest/dashboards/share-dashboards-panels/#export-a-dashboard-as-json), so you can [import them](https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/#import-a-dashboard) after upgrading.
+
+### What's Changed
+* Fetch JupyterHub roles from Keycloak by @krassowski in https://github.com/nebari-dev/nebari/pull/2447
+* Update selector for Start server button to use button tag by @krassowski in https://github.com/nebari-dev/nebari/pull/2464
+* Reduce GCP Fixed Costs by 50% by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2453
+* Restore JupyterHub updates from PR-2427 by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2465
+* Workload identity by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2460
+* Fix test using a non-specific selector by @krassowski in https://github.com/nebari-dev/nebari/pull/2475
+* add verify=false since we use self signed cert in tests by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2481
+* fix forward auth when using custom cert by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2479
+* Upgrade to JupyterHub 5.0.0b2 by @krassowski in https://github.com/nebari-dev/nebari/pull/2468
+* upgrade instructions for PR 2453 by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2466
+* Use Helm Chart for JupyterHub 5.0.0 final by @krassowski in https://github.com/nebari-dev/nebari/pull/2484
+* Parse and insert keycloak roles scopes into JupyterHub by @aktech in https://github.com/nebari-dev/nebari/pull/2471
+* Add CITATION file by @pavithraes in https://github.com/nebari-dev/nebari/pull/2455
+* CI: add azure integration by @fangchenli in https://github.com/nebari-dev/nebari/pull/2061
+* Create trivy.yml by @dcmcand in https://github.com/nebari-dev/nebari/pull/2458
+* don't run azure deployment on PRs, only on schedule and manual trigger by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2498
+* add cloud provider deployment status badges to README.md by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2407
+* Upgrade kube-prometheus-stack helm chart by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2472
+* upgrade note by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2502
+* Remove VSCode from jhub_apps default services by @jbouder in https://github.com/nebari-dev/nebari/pull/2503
+* Explicit config by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2294
+* fix general node scaling bug for azure by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2517
+* Skip running cleanup on pull requests by @aktech in https://github.com/nebari-dev/nebari/pull/2488
+* 1792 Add docstrings to `upgrade.py` by @arjxn-py in https://github.com/nebari-dev/nebari/pull/2512
+* set's min TLS version for azure storage account to TLS 1.2 by @dcmcand in https://github.com/nebari-dev/nebari/pull/2522
+* Fix conda-store and Traefik Grafana Dashboards by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2540
+* Implement support for jupyterlab-gallery config by @krassowski in https://github.com/nebari-dev/nebari/pull/2501
+* Add option to run CRDs updates and DaemonSet deletion on user's behalf. by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2544
+
+### New Contributors
+* @arjxn-py made their first contribution in https://github.com/nebari-dev/nebari/pull/2512
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.5.1...2024.6.1
+
+## Release 2024.5.1 - May 13, 2024
+
+### What's Changed
 
 * make userscheduler run on general node group by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2415>
 * Upgrade to Pydantic V2 by @Adam-D-Lewis in <https://github.com/nebari-dev/nebari/pull/2348>
@@ -65,6 +189,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 * @tylergraff made their first contribution in https://github.com/nebari-dev/nebari/pull/2314
 
 **Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.3.2...2024.3.3
+
 
 ## Release 2024.3.2 - March 14, 2024
 
@@ -246,7 +371,7 @@ command and follow the instructions
 * paginator for boto3 ec2 instance types by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1923
 * Update README.md -- fix typo. by @teoliphant in https://github.com/nebari-dev/nebari/pull/1925
 * Add more unit tests, add cleanup step for Digital Ocean integration test by @iameskild in https://github.com/nebari-dev/nebari/pull/1910
-* Add cleanup step for AWS integration test, ensure diable_prompt is passed through by @iameskild in https://github.com/nebari-dev/nebari/pull/1921
+* Add cleanup step for AWS integration test, ensure disable_prompt is passed through by @iameskild in https://github.com/nebari-dev/nebari/pull/1921
 * K8s 1.25 + More Improvements by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/1856
 * adding lifecycle ignore to eks node group by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1905
 * nebari init unit tests by @sblair-metrostar in https://github.com/nebari-dev/nebari/pull/1931
