@@ -59,6 +59,12 @@ variable "jhub-apps-enabled" {
   type        = bool
 }
 
+variable "jhub-apps-overrides" {
+  description = "jhub-apps configuration overrides"
+  type        = string
+  default     = "{}"
+}
+
 variable "cloud-provider" {
   description = "Name of cloud provider."
   type        = string
