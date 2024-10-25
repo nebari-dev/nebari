@@ -114,8 +114,10 @@ def download_terraform_binary(version=constants.TERRAFORM_VERSION):
 def run_terraform_subprocess(processargs, **kwargs):
     terraform_path = download_terraform_binary()
     logger.info(f" terraform at {terraform_path}")
-    if run_subprocess_cmd([terraform_path] + processargs, **kwargs):
+    exit_code, output = run_subprocess_cmd([terraform_path] + processargs, **kwargs)
+    if exit_code != 0:
         raise TerraformException("Terraform returned an error")
+    return output
 
 
 def version():
@@ -181,6 +183,29 @@ def tfimport(addr, id, directory=None, var_files=None, exist_ok=False):
         except TerraformException as e:
             if not exist_ok:
                 raise e
+
+
+def show(directory=None, terraform_init: bool = True) -> dict:
+
+    if terraform_init:
+        init(directory)
+
+    logger.info(f"terraform show directory={directory}")
+    command = ["show", "-json"]
+    with timer(logger, "terraform show"):
+        try:
+            output = json.loads(
+                run_terraform_subprocess(
+                    command,
+                    cwd=directory,
+                    prefix="terraform",
+                    strip_errors=True,
+                    capture_output=True,
+                )
+            )
+            return output
+        except TerraformException as e:
+            raise e
 
 
 def refresh(directory=None, var_files=None):

@@ -61,7 +61,10 @@ class DefaultImages(schema.Base):
 
 
 class Storage(schema.Base):
-    type: SharedFsEnum = None
+    type: SharedFsEnum = Field(
+        default=None,
+        json_schema_extra={"immutable": True},
+    )
     conda_store: str = "200Gi"
     shared_filesystem: str = "200Gi"
 
@@ -215,6 +218,7 @@ class ArgoWorkflows(schema.Base):
 
 class JHubApps(schema.Base):
     enabled: bool = False
+    overrides: Dict = {}
 
 
 class MonitoringOverrides(schema.Base):
@@ -223,10 +227,16 @@ class MonitoringOverrides(schema.Base):
     minio: Dict = {}
 
 
+class Healthchecks(schema.Base):
+    enabled: bool = False
+    kuberhealthy_helm_version: str = constants.KUBERHEALTHY_HELM_VERSION
+
+
 class Monitoring(schema.Base):
     enabled: bool = True
     overrides: MonitoringOverrides = MonitoringOverrides()
     minio_enabled: bool = True
+    healthchecks: Healthchecks = Healthchecks()
 
 
 class JupyterLabPioneer(schema.Base):
@@ -477,6 +487,7 @@ class JupyterhubInputVars(schema.Base):
     idle_culler_settings: Dict[str, Any] = Field(alias="idle-culler-settings")
     argo_workflows_enabled: bool = Field(alias="argo-workflows-enabled")
     jhub_apps_enabled: bool = Field(alias="jhub-apps-enabled")
+    jhub_apps_overrides: str = Field(alias="jhub-apps-overrides")
     cloud_provider: str = Field(alias="cloud-provider")
     jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
     shared_fs_type: SharedFsEnum
@@ -646,6 +657,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             idle_culler_settings=self.config.jupyterlab.idle_culler.model_dump(),
             argo_workflows_enabled=self.config.argo_workflows.enabled,
             jhub_apps_enabled=self.config.jhub_apps.enabled,
+            jhub_apps_overrides=json.dumps(self.config.jhub_apps.overrides),
             initial_repositories=str(self.config.jupyterlab.initial_repositories),
             jupyterlab_default_settings=self.config.jupyterlab.default_settings,
             jupyterlab_gallery_settings=self.config.jupyterlab.gallery_settings,

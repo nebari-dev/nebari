@@ -1,6 +1,6 @@
 import pytest
 
-from _nebari.utils import byte_unit_conversion
+from _nebari.utils import JsonDiff, JsonDiffEnum, byte_unit_conversion
 
 
 @pytest.mark.parametrize(
@@ -42,3 +42,25 @@ from _nebari.utils import byte_unit_conversion
 )
 def test_byte_unit_conversion(value, from_unit, to_unit, expected):
     assert byte_unit_conversion(f"{value} {from_unit}", to_unit) == expected
+
+
+def test_JsonDiff_diff():
+    obj1 = {"a": 1, "b": {"c": 2, "d": 3}}
+    obj2 = {"a": 1, "b": {"c": 3, "e": 4}, "f": 5}
+    diff = JsonDiff(obj1, obj2)
+    assert diff.diff == {
+        "b": {
+            "e": {JsonDiffEnum.ADDED: 4},
+            "c": {JsonDiffEnum.MODIFIED: (2, 3)},
+            "d": {JsonDiffEnum.REMOVED: 3},
+        },
+        "f": {JsonDiffEnum.ADDED: 5},
+    }
+
+
+def test_JsonDiff_modified():
+    obj1 = {"a": 1, "b": {"!": 2, "-": 3}, "+": 4}
+    obj2 = {"a": 1, "b": {"!": 3, "+": 4}, "+": 5}
+    diff = JsonDiff(obj1, obj2)
+    modifieds = diff.modified()
+    assert sorted(modifieds) == sorted([(["b", "!"], 2, 3), (["+"], 4, 5)])

@@ -126,6 +126,11 @@ module "kubernetes-nfs-server" {
   node-group   = var.node_groups.general
 }
 
+moved {
+  from = module.jupyterhub-nfs-mount
+  to   = module.jupyterhub-nfs-mount[0]
+}
+
 module "jupyterhub-nfs-mount" {
   count  = local.jupyterhub-fs == "nfs" ? 1 : 0
   source = "./modules/kubernetes/nfs-mount"
@@ -186,6 +191,7 @@ module "jupyterhub" {
   conda-store-jhub-apps-token                        = module.kubernetes-conda-store-server.service-tokens.jhub-apps
   jhub-apps-enabled                                  = var.jhub-apps-enabled
   node-taint-tolerations                             = var.node-taint-tolerations
+  jhub-apps-overrides                                = var.jhub-apps-overrides
 
   extra-mounts = {
     "/etc/dask" = {

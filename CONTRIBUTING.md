@@ -30,4 +30,4 @@ This [blog post by Matthew Rocklin](https://matthewrocklin.com/blog/work/2018/02
 
 [nebari-docs-issues]: https://github.com/nebari-dev/nebari-docs/issues
 [nebari-issues]: https://github.com/nebari-dev/nebari/issues
-[nebari-community]: https://nebari.dev/docs/community
+[nebari-community]: https://www.nebari.dev/community/introduction
