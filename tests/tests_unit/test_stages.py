@@ -104,14 +104,17 @@ def test_check_immutable_fields_old_nebari_version(
     # This should not raise an exception
     terraform_state_stage.check_immutable_fields()
 
+
 @patch.object(TerraformStateStage, "get_nebari_config_state")
 def test_check_immutable_fields_change_dict_any(
     mock_get_state, terraform_state_stage, mock_config
 ):
     old_config = mock_config.model_copy(deep=True).model_dump()
     # Change the value of a config deep in 'overrides' block
-    old_config["jupyterhub"]["overrides"]["singleuser"]["extraEnv"]["TEST_ENV"] = "new_value"
+    old_config["jupyterhub"]["overrides"]["singleuser"]["extraEnv"][
+        "TEST_ENV"
+    ] = "new_value"
     mock_get_state.return_value = old_config
-    
+
     # This should not raise an exception
     terraform_state_stage.check_immutable_fields()
