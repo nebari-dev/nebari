@@ -334,12 +334,6 @@ class GCPMasterAuthorizedNetworksConfig(schema.Base):
     cidr_blocks: List[GCPCIDRBlock]
 
 
-class GCPPrivateClusterConfig(schema.Base):
-    enable_private_endpoint: bool
-    enable_private_nodes: bool
-    master_ipv4_cidr_block: str
-
-
 class GCPGuestAccelerator(schema.Base):
     """
     See general information regarding GPU support at:
@@ -656,7 +650,7 @@ class NodeSelectorKeyValue(schema.Base):
 
 class KubernetesCredentials(schema.Base):
     host: str
-    cluster_ca_certifiate: str  # ignored for now.  More info in https://github.com/nebari-dev/nebari/issues/2597. # typos: ignore
+    cluster_ca_certificate: str
     token: Optional[str] = None
     username: Optional[str] = None
     password: Optional[str] = None
