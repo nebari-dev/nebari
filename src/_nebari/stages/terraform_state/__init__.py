@@ -260,7 +260,7 @@ class TerraformStateStage(NebariTerraformStage):
 
         # compute diff of remote/prior and current nebari config
         nebari_config_diff = utils.JsonDiff(
-            nebari_config_state.model_dump(), self.config.model_dump()
+            nebari_config_state, self.config.model_dump()
         )
         # check if any changed fields are immutable
         for keys, old, new in nebari_config_diff.modified():
@@ -284,7 +284,7 @@ class TerraformStateStage(NebariTerraformStage):
                     f'Attempting to change immutable field "{key_path}" ("{old}"->"{new}") in Nebari config file.  Immutable fields cannot be changed after initial deployment.'
                 )
 
-    def get_nebari_config_state(self):
+    def get_nebari_config_state(self) -> dict:
         directory = str(self.output_directory / self.stage_prefix)
         tf_state = terraform.show(directory)
         nebari_config_state = None
@@ -294,11 +294,7 @@ class TerraformStateStage(NebariTerraformStage):
             tf_state.get("values", {}).get("root_module", {}).get("resources", [])
         ):
             if resource["address"] == "terraform_data.nebari_config":
-                from nebari.plugins import nebari_plugin_manager
-
-                nebari_config_state = nebari_plugin_manager.config_schema(
-                    **resource["values"]["input"]
-                )
+                nebari_config_state = resource["values"]["input"]
                 break
         return nebari_config_state
 
