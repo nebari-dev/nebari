@@ -126,20 +126,20 @@ def kms_key_arns(region: str) -> Dict[str, dict]:
     """Return dict of available/enabled KMS key IDs and associated KeyMetadata for the AWS region."""
     session = aws_session(region=region)
     client = session.client("kms")
+    kms_keys = {}
     # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kms/client/list_keys.html
-    paginator = client.get_paginator("list_keys")
-    fields = [
-        "Arn",
-        "KeyUsage",
-        "KeySpec",
+    for key in client.list_keys().get("Keys"):
+        key_id = key["KeyId"]
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kms/client/describe_key.html#:~:text=Response%20Structure
-    ]
-    kms_keys = [
-        client.describe_key(KeyId=j["KeyId"]).get("KeyMetadata")
-        for i in paginator.paginate()
-        for j in i["Keys"]
-    ]
-    return {i["KeyId"]: {k: i[k] for k in fields} for i in kms_keys if i["Enabled"]}
+        key_data = client.describe_key(KeyId=key_id).get("KeyMetadata")
+        if key_data.get("Enabled"):
+            kms_keys[key_id] = {
+                "Arn": key_data.get("Arn"),
+                "KeyUsage": key_data.get("KeyUsage"),
+                "KeySpec": key_data.get("KeySpec"),
+                "KeyManager": key_data.get("KeyManager"),
+            }
+    return kms_keys
 
 
 def aws_get_vpc_id(name: str, namespace: str, region: str) -> Optional[str]:
