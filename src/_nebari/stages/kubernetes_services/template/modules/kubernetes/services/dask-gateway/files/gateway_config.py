@@ -15,7 +15,6 @@ def dask_gateway_config(path="/var/lib/dask-gateway/config.json"):
 
 config = dask_gateway_config()
 
-
 c.DaskGateway.log_level = config["gateway"]["loglevel"]
 
 # Configure addresses
@@ -227,18 +226,19 @@ def base_username_mount(username, uid=1000, gid=100):
     }
 
 
-def worker_profile(options, user):
+def options_handler(options, user):
     namespace, name = options.conda_environment.split("/")
     return functools.reduce(
         deep_merge,
         [
+            {},
             base_node_group(options),
             base_conda_store_mounts(namespace, name),
             base_username_mount(user.name),
             config["profiles"][options.profile],
             {"environment": {**options.environment_vars}},
+            config["cluster"],
         ],
-        {},
     )
 
 
@@ -279,7 +279,7 @@ def user_options(user):
 
     return Options(
         *args,
-        handler=worker_profile,
+        handler=options_handler,
     )
 
 
@@ -288,7 +288,7 @@ c.Backend.cluster_options = user_options
 
 # ============== utils ============
 def deep_merge(d1, d2):
-    """Deep merge two dictionaries.
+    """Deep merge two dictionaries.  Left argument takes precedence.
     >>> value_1 = {
     'a': [1, 2],
     'b': {'c': 1, 'z': [5, 6]},
