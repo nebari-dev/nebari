@@ -231,13 +231,16 @@ def options_handler(options, user):
     return functools.reduce(
         deep_merge,
         [
+            # ordering is higher to lower precedence
             {},
             base_node_group(options),
             base_conda_store_mounts(namespace, name),
             base_username_mount(user.name),
             config["profiles"][options.profile],
             {"environment": {**options.environment_vars}},
-            config["cluster"],
+            config[
+                "cluster"
+            ],  # TODO: potentially too broad, maybe just add scheduler/worker pod overrides
         ],
     )
 
