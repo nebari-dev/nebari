@@ -153,11 +153,9 @@ class AWSNodeGroupInputVars(schema.Base):
 
 
 def construct_aws_ami_type(
-    gpu_enabled: bool, launch_template: AWSNodeLaunchTemplate, ami_type: str = None
+    gpu_enabled: bool, launch_template: AWSNodeLaunchTemplate
 ):
     """Construct the AWS AMI type based on the provided parameters."""
-    if ami_type:
-        return ami_type
 
     if launch_template and launch_template.ami_id:
         return "CUSTOM"
