@@ -1251,7 +1251,8 @@ class Upgrade_2024_9_1(UpgradeStep):
             in their JupyterLab pods.
 
             Starting with Nebari [green]2024.9.1[/green], only groups assigned the
-            JupyterHub client role [magenta]allow-group-directory-creation[/magenta] will have their
+            JupyterHub client role [magenta]allow-group-directory-creation[/magenta] or
+            its affiliated scope [magenta]write:shared-mount[/magenta] will have their
             directories mounted.
 
             By default, the admin, analyst, and developer groups will have this
@@ -1268,7 +1269,7 @@ class Upgrade_2024_9_1(UpgradeStep):
         # Prompt the user for role assignment (if yes, transforms the response into bool)
         assign_roles = (
             Prompt.ask(
-                "[bold]Would you like Nebari to assign the corresponding role to all of your current groups automatically?[/bold]",
+                "[bold]Would you like Nebari to assign the corresponding role/scopes to all of your current groups automatically?[/bold]",
                 choices=["y", "N"],
                 default="N",
             ).lower()
@@ -1293,15 +1294,18 @@ class Upgrade_2024_9_1(UpgradeStep):
             # Create the role if it doesn't exist
             # If the role does not exist, create it
             keycloak_admin.create_client_role(
-                client_id=client_id,
+                client_role_id=client_id,
                 skip_exists=True,
                 payload={
                     "name": role_name,
                     "attributes": {
-                        "scopes": "write:shared-mount",
-                        "component": "shared-directory" "scopes",
+                        "scopes": ["write:shared-mount"],
+                        "component": ["shared-directory"],
                     },
-                    "description": "Role to allow group directory creation, created as part of the Nebari 2024.9.1 upgrade workflow.",
+                    "description": (
+                        "Role to allow group directory creation, created as part of the "
+                        "Nebari 2024.9.1 upgrade workflow."
+                    ),
                 },
             )
 
