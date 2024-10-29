@@ -280,11 +280,15 @@ class NebariTerraformStage(NebariStage):
 
     @contextlib.contextmanager
     def deploy(
-        self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
+        self,
+        stage_outputs: Dict[str, Dict[str, Any]],
+        disable_prompt: bool = False,
+        terraform_init: bool = True,
     ):
         deploy_config = dict(
             directory=str(self.output_directory / self.stage_prefix),
             input_vars=self.input_vars(stage_outputs),
+            terraform_init=terraform_init,
         )
         state_imports = self.state_imports()
         if state_imports:

@@ -6,7 +6,7 @@ import pathlib
 import re
 import sys
 import tempfile
-from typing import Annotated, Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
 from pydantic import Field, field_validator, model_validator
 
@@ -128,6 +128,17 @@ class AzureInputVars(schema.Base):
     workload_identity_enabled: bool = False
 
 
+class AWSAmiTypes(enum.Enum):
+    AL2_x86_64 = "AL2_x86_64"
+    AL2_x86_64_GPU = "AL2_x86_64_GPU"
+    CUSTOM = "CUSTOM"
+
+
+class AWSNodeLaunchTemplate(schema.Base):
+    pre_bootstrap_command: Optional[str] = None
+    ami_id: Optional[str] = None
+
+
 class AWSNodeGroupInputVars(schema.Base):
     name: str
     instance_type: str
@@ -137,6 +148,28 @@ class AWSNodeGroupInputVars(schema.Base):
     max_size: int
     single_subnet: bool
     permissions_boundary: Optional[str] = None
+    ami_type: Optional[AWSAmiTypes] = None
+    launch_template: Optional[AWSNodeLaunchTemplate] = None
+
+    @field_validator("ami_type", mode="before")
+    @classmethod
+    def _infer_and_validate_ami_type(cls, value, values) -> str:
+        gpu_enabled = values.get("gpu", False)
+
+        # Auto-set ami_type if not provided
+        if not value:
+            if values.get("launch_template") and values["launch_template"].ami_id:
+                return "CUSTOM"
+            if gpu_enabled:
+                return "AL2_x86_64_GPU"
+            return "AL2_x86_64"
+
+        # Explicit validation
+        if value == "AL2_x86_64" and gpu_enabled:
+            raise ValueError(
+                "ami_type 'AL2_x86_64' cannot be used with GPU enabled (gpu=True)."
+            )
+        return value
 
 
 class AWSInputVars(schema.Base):
@@ -146,6 +179,9 @@ class AWSInputVars(schema.Base):
     existing_subnet_ids: Optional[List[str]] = None
     region: str
     kubernetes_version: str
+    eks_endpoint_access: Optional[
+        Literal["private", "public", "public_and_private"]
+    ] = "public"
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -302,12 +338,6 @@ class GCPMasterAuthorizedNetworksConfig(schema.Base):
     cidr_blocks: List[GCPCIDRBlock]
 
 
-class GCPPrivateClusterConfig(schema.Base):
-    enable_private_endpoint: bool
-    enable_private_nodes: bool
-    master_ipv4_cidr_block: str
-
-
 class GCPGuestAccelerator(schema.Base):
     """
     See general information regarding GPU support at:
@@ -353,7 +383,6 @@ class GoogleCloudPlatformProvider(schema.Base):
     @model_validator(mode="before")
     @classmethod
     def _check_input(cls, data: Any) -> Any:
-        google_cloud.check_credentials()
         available_regions = google_cloud.regions()
         if data["region"] not in available_regions:
             raise ValueError(
@@ -447,6 +476,7 @@ class AWSNodeGroup(schema.Base):
     gpu: bool = False
     single_subnet: bool = False
     permissions_boundary: Optional[str] = None
+    launch_template: Optional[AWSNodeLaunchTemplate] = None
 
 
 DEFAULT_AWS_NODE_GROUPS = {
@@ -465,6 +495,9 @@ class AmazonWebServicesProvider(schema.Base):
     kubernetes_version: str
     availability_zones: Optional[List[str]]
     node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
+    eks_endpoint_access: Optional[
+        Literal["private", "public", "public_and_private"]
+    ] = "public"
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -520,6 +553,7 @@ class AmazonWebServicesProvider(schema.Base):
                     raise ValueError(
                         f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
                     )
+
         return data
 
 
@@ -620,7 +654,7 @@ class NodeSelectorKeyValue(schema.Base):
 
 class KubernetesCredentials(schema.Base):
     host: str
-    cluster_ca_certifiate: str  # ignored for now.  More info in https://github.com/nebari-dev/nebari/issues/2597. # typos: ignore
+    cluster_ca_certificate: str
     token: Optional[str] = None
     username: Optional[str] = None
     password: Optional[str] = None
@@ -808,6 +842,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             return AWSInputVars(
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
+                eks_endpoint_access=self.config.amazon_web_services.eks_endpoint_access,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
                 region=self.config.amazon_web_services.region,
@@ -822,6 +857,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         max_size=node_group.max_nodes,
                         single_subnet=node_group.single_subnet,
                         permissions_boundary=node_group.permissions_boundary,
+                        launch_template=node_group.launch_template,
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()
                 ],

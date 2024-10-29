@@ -24,6 +24,7 @@ from rich.prompt import Prompt
 from typing_extensions import override
 
 from _nebari.config import backup_configuration
+from _nebari.keycloak import get_keycloak_admin
 from _nebari.stages.infrastructure import (
     provider_enum_default_node_groups_map,
     provider_enum_name_map,
@@ -1202,6 +1203,128 @@ class Upgrade_2024_7_1(UpgradeStep):
                 "-> Digital Ocean support is currently being deprecated and will be removed in a future release.",
             )
             rich.print("")
+        return config
+
+
+class Upgrade_2024_9_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.9.1
+
+    """
+
+    version = "2024.9.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        if config.get("provider", "") == ProviderEnum.azure.value:
+            rich.print("\n ⚠️ Upgrade Warning ⚠️")
+            rich.print(
+                textwrap.dedent(
+                    """
+                -> Please ensure no users are currently logged in prior to deploying this update.  The node groups will be destroyed and recreated during the deployment process causing a downtime of approximately 15 minutes.
+
+                Due to an upstream issue, Azure Nebari deployments may raise an error when deploying for the first time after this upgrade. Waiting for a few minutes and then re-running `nebari deploy` should resolve the issue.  More info can be found at [green][link=https://github.com/nebari-dev/nebari/issues/2640]issue #2640[/link][/green]."""
+                ),
+            )
+            rich.print("")
+        elif config.get("provider", "") == ProviderEnum.do.value:
+            rich.print("\n ⚠️  Deprecation Warning ⚠️")
+            rich.print(
+                "-> Digital Ocean support is currently being deprecated and will be removed in a future release.",
+            )
+            rich.print("")
+
+        rich.print("\n ⚠️ Upgrade Warning ⚠️")
+
+        text = textwrap.dedent(
+            """
+            Please ensure no users are currently logged in prior to deploying this
+            update.
+
+            Nebari [green]2024.9.1[/green] introduces changes to how group
+            directories are mounted in JupyterLab pods.
+
+            Previously, every Keycloak group in the Nebari realm automatically created a
+            shared directory at ~/shared/<group-name>, accessible to all group members
+            in their JupyterLab pods.
+
+            Starting with Nebari [green]2024.9.1[/green], only groups assigned the
+            JupyterHub client role [magenta]allow-group-directory-creation[/magenta] will have their
+            directories mounted.
+
+            By default, the admin, analyst, and developer groups will have this
+            role assigned during the upgrade. For other groups, you'll now need to
+            assign this role manually in the Keycloak UI to have their directories
+            mounted.
+
+            For more details check our [green][link=https://www.nebari.dev/docs/references/release/]release notes[/link][/green].
+            """
+        )
+        rich.print(text)
+        keycloak_admin = None
+
+        # Prompt the user for role assignment (if yes, transforms the response into bool)
+        assign_roles = (
+            Prompt.ask(
+                "[bold]Would you like Nebari to assign the corresponding role to all of your current groups automatically?[/bold]",
+                choices=["y", "N"],
+                default="N",
+            ).lower()
+            == "y"
+        )
+
+        if assign_roles:
+            # In case this is done with a local deployment
+            import urllib3
+
+            urllib3.disable_warnings()
+
+            keycloak_admin = get_keycloak_admin(
+                server_url=f"https://{config['domain']}/auth/",
+                username="root",
+                password=config["security"]["keycloak"]["initial_root_password"],
+            )
+
+            # Proceed with updating group permissions
+            client_id = keycloak_admin.get_client_id("jupyterhub")
+            role_name = "allow-group-directory-creation-role"
+            role_id = keycloak_admin.get_client_role_id(
+                client_id=client_id, role_name=role_name
+            )
+            role_representation = keycloak_admin.get_role_by_id(role_id=role_id)
+
+            # Fetch all groups and groups with the role
+            all_groups = keycloak_admin.get_groups()
+            groups_with_role = keycloak_admin.get_client_role_groups(
+                client_id=client_id, role_name=role_name
+            )
+            groups_with_role_ids = {group["id"] for group in groups_with_role}
+
+            # Identify groups without the role
+            groups_without_role = [
+                group for group in all_groups if group["id"] not in groups_with_role_ids
+            ]
+
+            if groups_without_role:
+                group_names = ", ".join(group["name"] for group in groups_without_role)
+                rich.print(
+                    f"\n[bold]Updating the following groups with the required permissions:[/bold] {group_names}\n"
+                )
+                for group in groups_without_role:
+                    keycloak_admin.assign_group_client_roles(
+                        group_id=group["id"],
+                        client_id=client_id,
+                        roles=[role_representation],
+                    )
+                rich.print(
+                    "\n[green]Group permissions have been updated successfully.[/green]"
+                )
+            else:
+                rich.print(
+                    "\n[green]All groups already have the required permissions.[/green]"
+                )
         return config
 
 
