@@ -104,6 +104,11 @@ resource "helm_release" "jupyterhub" {
               kind      = "configmap"
             }
 
+            "/opt/conda/envs/default/etc/jupyter/labconfig/page_config.json" = {
+              name      = kubernetes_config_map.jupyterlab-page-config.metadata.0.name
+              namespace = kubernetes_config_map.jupyterlab-page-config.metadata.0.namespace
+              kind      = "configmap"
+            }
           }
         )
         environments = var.conda-store-environments
