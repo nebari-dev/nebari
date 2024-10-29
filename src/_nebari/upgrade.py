@@ -1223,12 +1223,12 @@ class Upgrade_2024_9_1(UpgradeStep):
         return config
 
 
-class Upgrade_2024_10_1(UpgradeStep):
+class Upgrade_2024_11_1(UpgradeStep):
     """
-    Upgrade step for Nebari version 2024.10.1
+    Upgrade step for Nebari version 2024.11.1
     """
 
-    version = "2024.10.1"
+    version = "2024.11.1"
 
     @override
     def _version_specific_upgrade(
@@ -1319,7 +1319,7 @@ class Upgrade_2024_10_1(UpgradeStep):
                     },
                     "description": (
                         "Role to allow group directory creation, created as part of the "
-                        "Nebari 2024.10.1 upgrade workflow."
+                        "Nebari 2024.11.1 upgrade workflow."
                     ),
                 },
             )
