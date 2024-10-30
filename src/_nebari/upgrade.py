@@ -1306,8 +1306,7 @@ class Upgrade_2024_11_1(UpgradeStep):
             client_id = keycloak_admin.get_client_id("jupyterhub")
             role_name = "legacy-group-directory-creation-role"
 
-            # Create the role if it doesn't exist
-            # If the role does not exist, create it
+            # Create role with shared scopes
             keycloak_admin.create_client_role(
                 client_role_id=client_id,
                 skip_exists=True,
