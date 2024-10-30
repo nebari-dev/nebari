@@ -9,7 +9,9 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-## Release 2024.9.1 - September 27, 2024
+## Release 2024.9.1 - September 27, 2024 (Broken Release)
+
+> WARNING: This release was later found to have unresolved issues described further in [issue 2798](https://github.com/nebari-dev/nebari/issues/2798). We have marked this release as broken on conda-forge and yanked it on PyPI. One of the bugs prevents any upgrade from 2024.9.1 to 2024.11.1. Users should skip this release entirely and upgrade directly from 2024.7.1 to 2024.11.1.
 
 > WARNING: This release changes how group directories are mounted in JupyterLab pods: only groups with specific permissions will have their directories mounted. If you rely on custom group mounts, we strongly recommend running `nebari upgrade` before updating. This will prompt you to confirm how Nebari should handle your groups—either keep them mounted or allow unmounting. **No data will be lost**, and you can reverse this anytime.
 
