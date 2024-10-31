@@ -63,7 +63,7 @@ resource "local_file" "overrides_json" {
 resource "local_file" "page_config_json" {
   content = jsonencode({
     "disabledExtensions" : {
-      "jupyterlab-jhub-apps:" : !var.jhub-apps-enabled
+      "jupyterlab-jhub-apps" : !var.jhub-apps-enabled
     },
     # `lockedExtensions` is an empty dict to signify that `jupyterlab-jhub-apps` is not being disabled and locked (but only disabled)
     # which means users are still allowed to disable the jupyterlab-jhub-apps extension (if they have write access to page_config).
