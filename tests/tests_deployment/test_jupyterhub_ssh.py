@@ -14,9 +14,18 @@ monkeypatch_ssl_context()
 TIMEOUT_SECS = 300
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def paramiko_object(jupyterhub_access_token):
-    """Connects to JupyterHub ssh cluster from outside the cluster."""
+    """
+    Connects to JupyterHub SSH cluster from outside the cluster with retry on
+    authentication errors.
+    """
+
+    # Define the sequence of auth_timeouts in seconds
+    retry_timeouts = [2 * 60, 3 * 60, 5 * 60]  # 2min, 3min, 5min
+
+    ssh_client = paramiko.SSHClient()
+    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     params = {
         "hostname": constants.NEBARI_HOSTNAME,
         "port": 8022,
@@ -24,13 +33,33 @@ def paramiko_object(jupyterhub_access_token):
         "password": jupyterhub_access_token,
         "allow_agent": constants.PARAMIKO_SSH_ALLOW_AGENT,
         "look_for_keys": constants.PARAMIKO_SSH_LOOK_FOR_KEYS,
-        "auth_timeout": 5 * 60,
     }
 
-    ssh_client = paramiko.SSHClient()
-    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    for timeout in retry_timeouts:
+        params["auth_timeout"] = timeout
+        try:
+            ssh_client.connect(**params)
+            break
+        except paramiko.AuthenticationException as auth_err:
+            if "failed to start server on time!" in str(auth_err):
+                if timeout == retry_timeouts[-1]:
+                    ssh_client.close()
+                    raise
+            else:
+                ssh_client.close()
+                raise
+        except paramiko.SSHException:
+            ssh_client.close()
+            raise
+        except Exception:
+            ssh_client.close()
+            raise
+    else:
+        ssh_client.close()
+        raise paramiko.AuthenticationException(
+            "Failed to authenticate after multiple attempts."
+        )
     try:
-        ssh_client.connect(**params)
         yield ssh_client
     finally:
         ssh_client.close()
