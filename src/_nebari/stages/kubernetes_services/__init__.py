@@ -506,6 +506,9 @@ class DaskGatewayInputVars(schema.Base):
     dask_gateway_profiles: Dict[str, Any] = Field(alias="dask-gateway-profiles")
     cloud_provider: str = Field(alias="cloud-provider")
     forwardauth_middleware_name: str = _forwardauth_middleware_name
+    worker_taint_tolerations: Optional[list[Toleration]] = Field(
+        alias="worker-taint-tolerations"
+    )
 
 
 class MonitoringInputVars(schema.Base):
@@ -664,10 +667,12 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
             node_taint_tolerations=[
                 Toleration(**taint.model_dump())
-                for taint in self.config.google_cloud_platform.node_groups[
-                    "user"
-                ].taints
-            ],  # TODO: support other cloud providers
+                for taint in getattr(
+                    self.config, schema.provider_enum_name_map[self.config.provider]
+                )
+                .node_groups["user"]
+                .taints
+            ],
             shared_fs_type=(
                 # efs is equivalent to nfs in these modules
                 SharedFsEnum.nfs
@@ -682,6 +687,14 @@ class KubernetesServicesStage(NebariTerraformStage):
             ),
             dask_gateway_profiles=self.config.profiles.model_dump()["dask_worker"],
             cloud_provider=cloud_provider,
+            worker_taint_tolerations=[
+                Toleration(**taint.model_dump())
+                for taint in getattr(
+                    self.config, schema.provider_enum_name_map[self.config.provider]
+                )
+                .node_groups["worker"]
+                .taints
+            ],
         )
 
         monitoring_vars = MonitoringInputVars(

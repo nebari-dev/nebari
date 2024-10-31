@@ -25,10 +25,6 @@ from typing_extensions import override
 
 from _nebari.config import backup_configuration
 from _nebari.keycloak import get_keycloak_admin
-from _nebari.stages.infrastructure import (
-    provider_enum_default_node_groups_map,
-    provider_enum_name_map,
-)
 from _nebari.utils import (
     get_k8s_version_prefix,
     get_provider_config_block_name,
@@ -36,7 +32,7 @@ from _nebari.utils import (
     yaml,
 )
 from _nebari.version import __version__, rounded_ver_parse
-from nebari.schema import ProviderEnum, is_version_accepted
+from nebari.schema import ProviderEnum, is_version_accepted, provider_enum_name_map
 
 logger = logging.getLogger(__name__)
 
@@ -954,7 +950,7 @@ class Upgrade_2024_4_1(UpgradeStep):
                 provider_full_name, {}
             ):
                 try:
-                    default_node_groups = provider_enum_default_node_groups_map[
+                    default_node_groups = schema.provider_enum_default_node_groups_map[
                         provider
                     ]
                     continue_ = Prompt.ask(

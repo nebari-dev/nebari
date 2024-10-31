@@ -1,10 +1,17 @@
 import enum
-from typing import Annotated
+from typing import Annotated, Any, Dict
 
 import pydantic
 from pydantic import ConfigDict, Field, StringConstraints, field_validator
 from ruamel.yaml import yaml_object
 
+from _nebari.stages.infrastructure import (
+    DEFAULT_AWS_NODE_GROUPS,
+    DEFAULT_AZURE_NODE_GROUPS,
+    DEFAULT_DO_NODE_GROUPS,
+    DEFAULT_GCP_NODE_GROUPS,
+    node_groups_to_dict,
+)
 from _nebari.utils import escape_string, yaml
 from _nebari.version import __version__, rounded_ver_parse
 
@@ -118,3 +125,20 @@ class Taint(Base):
     key: str
     value: str
     effect: TaintEffectEnum
+
+
+provider_enum_name_map: dict[ProviderEnum, str] = {
+    ProviderEnum.local: "local",
+    ProviderEnum.existing: "existing",
+    ProviderEnum.gcp: "google_cloud_platform",
+    ProviderEnum.aws: "amazon_web_services",
+    ProviderEnum.azure: "azure",
+    ProviderEnum.do: "digital_ocean",
+}
+
+provider_enum_default_node_groups_map: Dict[ProviderEnum, Any] = {
+    ProviderEnum.gcp: node_groups_to_dict(DEFAULT_GCP_NODE_GROUPS),
+    ProviderEnum.aws: node_groups_to_dict(DEFAULT_AWS_NODE_GROUPS),
+    ProviderEnum.azure: node_groups_to_dict(DEFAULT_AZURE_NODE_GROUPS),
+    ProviderEnum.do: node_groups_to_dict(DEFAULT_DO_NODE_GROUPS),
+}

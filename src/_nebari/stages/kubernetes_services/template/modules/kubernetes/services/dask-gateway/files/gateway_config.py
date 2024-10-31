@@ -25,6 +25,8 @@ c.DaskGateway.backend_class = "dask_gateway_server.backends.kubernetes.KubeBacke
 c.KubeBackend.gateway_instance = config["gateway_service_name"]
 
 # ========= Dask Cluster Default Configuration =========
+# These settings are overridden by c.Backend.cluster_option if key e.g. image, scheduler_extra_pod_config, etc. is present
+
 c.KubeClusterConfig.image = (
     f"{config['cluster-image']['name']}:{config['cluster-image']['tag']}"
 )
@@ -40,7 +42,6 @@ c.KubeClusterConfig.scheduler_extra_container_config = config["cluster"][
     "scheduler_extra_container_config"
 ]
 
-# clobbered by c.Backend.cluster_options['scheduler_extra_pod_config'] if present
 c.KubeClusterConfig.scheduler_extra_pod_config = config["cluster"][
     "scheduler_extra_pod_config"
 ]
@@ -240,9 +241,10 @@ def options_handler(options, user):
             base_username_mount(user.name),
             config["profiles"][options.profile],
             {"environment": {**options.environment_vars}},
-            config[
-                "cluster",
-            ],  # TODO: potentially too broad, maybe just add scheduler/worker pod overrides
+            {
+                k: config["cluster"][k]
+                for k in ("worker_extra_pod_config", "scheduler_extra_pod_config")
+            },
         ],
     )
 

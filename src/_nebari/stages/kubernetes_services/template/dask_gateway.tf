@@ -11,6 +11,16 @@ variable "dask-gateway-profiles" {
   description = "Dask Gateway profiles to expose to user"
 }
 
+variable "worker-taint-tolerations" {
+  description = "Tolerations for the worker node taints needed by Dask Scheduler/Worker pods"
+  type = list(object({
+    key      = string
+    operator = string
+    value    = string
+    effect   = string
+  }))
+}
+
 # =================== RESOURCES =====================
 module "dask-gateway" {
   source = "./modules/kubernetes/services/dask-gateway"
@@ -45,14 +55,10 @@ module "dask-gateway" {
 
   cluster = {
     scheduler_extra_pod_config = {
-      tolerations = [
-        {
-          key      = "dedicated"
-          operator = "Equal"
-          value    = "adamworker"
-          effect   = "NoSchedule"
-        }
-      ]
+      tolerations = var.worker-taint-tolerations
+    }
+    worker_extra_pod_config = {
+      tolerations = var.worker-taint-tolerations
     }
   }
 
