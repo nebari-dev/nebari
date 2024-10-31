@@ -227,19 +227,19 @@ def base_username_mount(username, uid=1000, gid=100):
 
 
 def options_handler(options, user):
-    namespace, name = options.conda_environment.split("/")
+    namespace, environment_name = options.conda_environment.split("/")
     return functools.reduce(
         deep_merge,
         [
             # ordering is higher to lower precedence
             {},
             base_node_group(options),
-            base_conda_store_mounts(namespace, name),
+            base_conda_store_mounts(namespace, environment_name),
             base_username_mount(user.name),
             config["profiles"][options.profile],
             {"environment": {**options.environment_vars}},
             config[
-                "cluster"
+                "cluster",
             ],  # TODO: potentially too broad, maybe just add scheduler/worker pod overrides
         ],
     )
