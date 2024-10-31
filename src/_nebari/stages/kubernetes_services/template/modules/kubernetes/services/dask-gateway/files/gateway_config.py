@@ -39,6 +39,8 @@ c.KubeClusterConfig.scheduler_memory_limit = config["cluster"]["scheduler_memory
 c.KubeClusterConfig.scheduler_extra_container_config = config["cluster"][
     "scheduler_extra_container_config"
 ]
+
+# clobbered by c.Backend.cluster_options['scheduler_extra_pod_config'] if present
 c.KubeClusterConfig.scheduler_extra_pod_config = config["cluster"][
     "scheduler_extra_pod_config"
 ]
