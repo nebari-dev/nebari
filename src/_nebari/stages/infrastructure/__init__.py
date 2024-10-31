@@ -624,15 +624,15 @@ provider_enum_model_map = {
     schema.ProviderEnum.do: DigitalOceanProvider,
 }
 
+provider_name_abbreviation_map: Dict[str, str] = {
+    value: key.value for key, value in schema.provider_enum_name_map.items()
+}
+
 provider_enum_default_node_groups_map: Dict[ProviderEnum, Any] = {
     ProviderEnum.gcp: node_groups_to_dict(DEFAULT_GCP_NODE_GROUPS),
     ProviderEnum.aws: node_groups_to_dict(DEFAULT_AWS_NODE_GROUPS),
     ProviderEnum.azure: node_groups_to_dict(DEFAULT_AZURE_NODE_GROUPS),
     ProviderEnum.do: node_groups_to_dict(DEFAULT_DO_NODE_GROUPS),
-}
-
-provider_name_abbreviation_map: Dict[str, str] = {
-    value: key.value for key, value in schema.provider_enum_name_map.items()
 }
 
 
