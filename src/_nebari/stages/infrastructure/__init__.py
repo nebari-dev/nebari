@@ -28,6 +28,7 @@ from _nebari.utils import (
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
+from nebari.schema import ProviderEnum
 
 
 def get_kubeconfig_filename():
@@ -963,3 +964,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 @hookimpl
 def nebari_stage() -> List[Type[NebariStage]]:
     return [KubernetesInfrastructureStage]
+
+
+provider_enum_default_node_groups_map: Dict[ProviderEnum, Any] = {
+    ProviderEnum.gcp: node_groups_to_dict(DEFAULT_GCP_NODE_GROUPS),
+    ProviderEnum.aws: node_groups_to_dict(DEFAULT_AWS_NODE_GROUPS),
+    ProviderEnum.azure: node_groups_to_dict(DEFAULT_AZURE_NODE_GROUPS),
+    ProviderEnum.do: node_groups_to_dict(DEFAULT_DO_NODE_GROUPS),
+}
