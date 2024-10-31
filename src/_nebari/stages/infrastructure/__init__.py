@@ -560,7 +560,7 @@ class AmazonWebServicesProvider(schema.Base):
                 or available_kms_keys[key_id[0]].Arn != data["eks_kms_arn"]
             ):
                 raise ValueError(
-                    f"Amazon Web Services KMS Key with ARN {data['eks_kms_arn']} not one of available/enabled keys={[v.Arn for v in available_kms_keys.values() if v.KeyManager=='CUSTOMER']}"
+                    f"Amazon Web Services KMS Key with ARN {data['eks_kms_arn']} not one of available/enabled keys={[v.Arn for v in available_kms_keys.values() if v.KeyManager=='CUSTOMER' and v.KeySpec=='SYMMETRIC_DEFAULT']}"
                 )
             key_id = key_id[0]
             # Raise error if key is not a customer managed key
