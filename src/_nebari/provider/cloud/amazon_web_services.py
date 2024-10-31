@@ -2,8 +2,8 @@ import functools
 import os
 import re
 import time
-from typing import Dict, List, Optional
 from dataclasses import dataclass
+from typing import Dict, List, Optional
 
 import boto3
 from botocore.exceptions import ClientError, EndpointConnectionError
@@ -128,6 +128,7 @@ class Kms_Key_Info:
     KeyUsage: str
     KeySpec: str
     KeyManager: str
+
 
 @functools.lru_cache()
 def kms_key_arns(region: str) -> Dict[str, Kms_Key_Info]:
