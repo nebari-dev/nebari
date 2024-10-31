@@ -63,22 +63,6 @@ def mock_all_cloud_methods(monkeypatch):
             "1.20",
         ],
         "_nebari.provider.cloud.azure_cloud.check_credentials": None,
-        # Digital Ocean
-        "_nebari.provider.cloud.digital_ocean.kubernetes_versions": [
-            "1.19.2-do.3",
-            "1.20.2-do.0",
-            "1.21.5-do.0",
-        ],
-        "_nebari.provider.cloud.digital_ocean.check_credentials": None,
-        "_nebari.provider.cloud.digital_ocean.regions": [
-            {"name": "New York 3", "slug": "nyc3"},
-        ],
-        "_nebari.provider.cloud.digital_ocean.instances": [
-            {"name": "s-2vcpu-4gb", "slug": "s-2vcpu-4gb"},
-            {"name": "g-2vcpu-8gb", "slug": "g-2vcpu-8gb"},
-            {"name": "g-8vcpu-32gb", "slug": "g-8vcpu-32gb"},
-            {"name": "g-4vcpu-16gb", "slug": "g-4vcpu-16gb"},
-        ],
         # Google Cloud
         "_nebari.provider.cloud.google_cloud.kubernetes_versions": [
             "1.18",

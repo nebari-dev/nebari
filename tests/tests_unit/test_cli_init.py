@@ -265,8 +265,6 @@ def get_provider_section_header(provider: str):
         return "google_cloud_platform"
     if provider == "azure":
         return "azure"
-    if provider == "do":
-        return "digital_ocean"
 
     return ""
 
