@@ -3,6 +3,7 @@ import os
 import re
 import time
 from typing import Dict, List, Optional
+from dataclasses import dataclass
 
 import boto3
 from botocore.exceptions import ClientError, EndpointConnectionError
@@ -121,8 +122,15 @@ def instances(region: str) -> Dict[str, str]:
     return {t: t for t in instance_types}
 
 
+@dataclass
+class Kms_Key_Info:
+    Arn: str
+    KeyUsage: str
+    KeySpec: str
+    KeyManager: str
+
 @functools.lru_cache()
-def kms_key_arns(region: str) -> Dict[str, dict]:
+def kms_key_arns(region: str) -> Dict[str, Kms_Key_Info]:
     """Return dict of available/enabled KMS key IDs and associated KeyMetadata for the AWS region."""
     session = aws_session(region=region)
     client = session.client("kms")
@@ -133,12 +141,12 @@ def kms_key_arns(region: str) -> Dict[str, dict]:
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kms/client/describe_key.html#:~:text=Response%20Structure
         key_data = client.describe_key(KeyId=key_id).get("KeyMetadata")
         if key_data.get("Enabled"):
-            kms_keys[key_id] = {
-                "Arn": key_data.get("Arn"),
-                "KeyUsage": key_data.get("KeyUsage"),
-                "KeySpec": key_data.get("KeySpec"),
-                "KeyManager": key_data.get("KeyManager"),
-            }
+            kms_keys[key_id] = Kms_Key_Info(
+                Arn=key_data.get("Arn"),
+                KeyUsage=key_data.get("KeyUsage"),
+                KeySpec=key_data.get("KeySpec"),
+                KeyManager=key_data.get("KeyManager"),
+            )
     return kms_keys
 
 
