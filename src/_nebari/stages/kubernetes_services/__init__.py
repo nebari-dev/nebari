@@ -465,6 +465,15 @@ class TolerationOperatorEnum(str, enum.Enum):
 class Toleration(schema.Taint):
     operator: TolerationOperatorEnum = TolerationOperatorEnum.Equal
 
+    @classmethod
+    def from_taint(
+        cls, taint: schema.Taint, operator: None | TolerationOperatorEnum = None
+    ):
+        kwargs = {}
+        if operator:
+            kwargs["operator"] = operator
+        cls(**taint.model_dump(), **kwargs)
+
 
 class JupyterhubInputVars(schema.Base):
     jupyterhub_theme: Dict[str, Any] = Field(alias="jupyterhub-theme")
@@ -491,7 +500,7 @@ class JupyterhubInputVars(schema.Base):
     cloud_provider: str = Field(alias="cloud-provider")
     jupyterlab_preferred_dir: Optional[str] = Field(alias="jupyterlab-preferred-dir")
     shared_fs_type: SharedFsEnum
-    node_taint_tolerations: Optional[List[Toleration]] = Field(
+    user_taint_tolerations: Optional[List[Toleration]] = Field(
         alias="node-taint-tolerations"
     )
 
@@ -611,6 +620,27 @@ class KubernetesServicesStage(NebariTerraformStage):
         ):
             jupyterhub_theme.update({"version": f"v{self.config.nebari_version}"})
 
+        def _node_taint_tolerations(node_group_name: str) -> List[Toleration]:
+            tolerations = []
+            provider = getattr(
+                self.config, schema.provider_enum_name_map[self.config.provider]
+            )
+            if not (
+                hasattr(provider, "node_groups")
+                and provider.node_groups.get(node_group_name, {})
+                and hasattr(provider.node_groups[node_group_name], "taints")
+            ):
+                return tolerations
+            tolerations = [
+                Toleration.from_taint(taint)
+                for taint in getattr(
+                    self.config, schema.provider_enum_name_map[self.config.provider]
+                )
+                .node_groups[node_group_name]
+                .taints
+            ]
+            return tolerations
+
         kubernetes_services_vars = KubernetesServicesInputVars(
             name=self.config.project_name,
             environment=self.config.namespace,
@@ -665,14 +695,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             jupyterlab_default_settings=self.config.jupyterlab.default_settings,
             jupyterlab_gallery_settings=self.config.jupyterlab.gallery_settings,
             jupyterlab_preferred_dir=self.config.jupyterlab.preferred_dir,
-            node_taint_tolerations=[
-                Toleration(**taint.model_dump())
-                for taint in getattr(
-                    self.config, schema.provider_enum_name_map[self.config.provider]
-                )
-                .node_groups["user"]
-                .taints
-            ],
+            user_taint_tolerations=_node_taint_tolerations(node_group_name="user"),
             shared_fs_type=(
                 # efs is equivalent to nfs in these modules
                 SharedFsEnum.nfs
@@ -687,14 +710,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             ),
             dask_gateway_profiles=self.config.profiles.model_dump()["dask_worker"],
             cloud_provider=cloud_provider,
-            worker_taint_tolerations=[
-                Toleration(**taint.model_dump())
-                for taint in getattr(
-                    self.config, schema.provider_enum_name_map[self.config.provider]
-                )
-                .node_groups["worker"]
-                .taints
-            ],
+            worker_taint_tolerations=_node_taint_tolerations(node_group_name="worker"),
         )
 
         monitoring_vars = MonitoringInputVars(
