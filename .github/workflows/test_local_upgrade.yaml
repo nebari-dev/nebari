@@ -74,14 +74,6 @@ jobs:
           git diff
           nebari validate --config ${{ steps.init.outputs.config }}
 
-      - name: Upgrade TF state
-        run: |
-          NEW_NEBARI_VERSION=$(grep 'nebari_version: ' ${{ steps.init.outputs.config }} | sed 's/nebari_version: //')
-
-          sed \
-            "s/\"nebari_version\": \"${OLD_NEBARI_VERSION}\"/\"nebari_version\": \"${NEW_NEBARI_VERSION}\"/" \
-            -i ${{ steps.init.outputs.directory }}/stages/01-terraform-state/local/terraform.tfstate
-
       - name: Redeploy Nebari
         working-directory: ${{ steps.init.outputs.directory }}
         run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
