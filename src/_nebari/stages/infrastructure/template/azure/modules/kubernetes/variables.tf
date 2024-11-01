@@ -30,9 +30,21 @@ variable "environment" {
 }
 
 
+# variable "node_groups" {
+#   description = "Node pools to add to Azure Kubernetes Cluster"
+#   type        = list(map(any))
+# }
+
 variable "node_groups" {
   description = "Node pools to add to Azure Kubernetes Cluster"
-  type        = list(map(any))
+  type = list(object({
+    name          = string
+    auto_scale    = bool
+    instance_type = string
+    min_size      = number
+    max_size      = number
+    node_taints   = list(string)
+  }))
 }
 
 variable "vnet_subnet_id" {

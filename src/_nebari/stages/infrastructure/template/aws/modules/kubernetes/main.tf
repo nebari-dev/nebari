@@ -88,14 +88,14 @@ resource "aws_eks_node_group" "main" {
 
   # TODO: add node_taints (var.node_groups.node_taints) to the node group, check the node taints below are working
   # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group#node_taints
-  # dynamic "taint" {
-  #   for_each = var.node_groups[count.index].node_taints
-  #   content {
-  #     key    = taint.value.key
-  #     value  = taint.value.value
-  #     effect = taint.value.effect
-  #   }
-  # }
+  dynamic "taint" {
+    for_each = var.node_groups[count.index].node_taints
+    content {
+      key    = taint.value.key
+      value  = taint.value.value
+      effect = taint.value.effect
+    }
+  }
 
   # Only set launch_template if its node_group counterpart parameter is not null
   dynamic "launch_template" {

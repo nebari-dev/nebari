@@ -32,7 +32,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     vnet_subnet_id      = var.vnet_subnet_id
     name                = var.node_groups[0].name
     vm_size             = var.node_groups[0].instance_type
-    enable_auto_scaling = "true"
+    enable_auto_scaling = "true" # TODO: Check if this is still supported in the provider version we are using
     min_count           = var.node_groups[0].min_size
     max_count           = var.node_groups[0].max_size
     max_pods            = var.max_pods
@@ -72,7 +72,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "node_group" {
   name                  = each.value.name
   kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
   vm_size               = each.value.instance_type
-  enable_auto_scaling   = "true"
+  enable_auto_scaling   = "true" # TODO: Check if this is still supported in the provider version we are using
   mode                  = "User" # "System" or "User", only "User" nodes can scale down to 0
   min_count             = each.value.min_size
   max_count             = each.value.max_size

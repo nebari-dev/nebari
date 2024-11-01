@@ -472,7 +472,7 @@ class Toleration(schema.Taint):
         kwargs = {}
         if operator:
             kwargs["operator"] = operator
-        cls(**taint.model_dump(), **kwargs)
+        return cls(**taint.model_dump(), **kwargs)
 
 
 class JupyterhubInputVars(schema.Base):

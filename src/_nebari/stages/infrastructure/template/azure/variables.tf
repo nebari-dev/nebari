@@ -24,7 +24,7 @@ variable "node_groups" {
     instance    = string
     min_nodes   = number
     max_nodes   = number
-    node_taints = list(any)
+    node_taints = list(string)
   }))
 }
 

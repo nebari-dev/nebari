@@ -148,6 +148,11 @@ class AzureNodeGroupInputVars(schema.Base):
     instance: str
     min_nodes: int
     max_nodes: int
+    node_taints: list[str]
+
+    @field_validator("node_taints", mode="before")
+    def convert_taints(cls, value: Optional[List[schema.Taint]]):
+        return [f"{taint.key}={taint.value}:{taint.effect.value}" for taint in value]
 
 
 class AzureInputVars(schema.Base):
@@ -189,6 +194,7 @@ class AWSNodeGroupInputVars(schema.Base):
     permissions_boundary: Optional[str] = None
     ami_type: Optional[AWSAmiTypes] = None
     launch_template: Optional[AWSNodeLaunchTemplate] = None
+    node_taints: list[dict]
 
     @field_validator("ami_type", mode="before")
     @classmethod
@@ -209,6 +215,21 @@ class AWSNodeGroupInputVars(schema.Base):
                 "ami_type 'AL2_x86_64' cannot be used with GPU enabled (gpu=True)."
             )
         return value
+
+    @field_validator("node_taints", mode="before")
+    def convert_taints(cls, value: Optional[List[schema.Taint]]):
+        return [
+            dict(
+                key=taint.key,
+                value=taint.value,
+                effect={
+                    schema.TaintEffectEnum.NoSchedule: "NO_SCHEDULE",
+                    schema.TaintEffectEnum.PreferNoSchedule: "PREFER_NO_SCHEDULE",
+                    schema.TaintEffectEnum.NoExecute: "NO_EXECUTE",
+                }[taint.effect],
+            )
+            for taint in value
+        ]
 
 
 class AWSInputVars(schema.Base):
@@ -848,6 +869,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         instance=node_group.instance,
                         min_nodes=node_group.min_nodes,
                         max_nodes=node_group.max_nodes,
+                        node_taints=node_group.taints,
                     )
                     for name, node_group in self.config.azure.node_groups.items()
                 },
@@ -889,6 +911,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         single_subnet=node_group.single_subnet,
                         permissions_boundary=node_group.permissions_boundary,
                         launch_template=node_group.launch_template,
+                        node_taints=node_group.taints,
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()
                 ],
