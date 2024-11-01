@@ -1210,6 +1210,22 @@ class Upgrade_2024_9_1(UpgradeStep):
 
     version = "2024.9.1"
 
+    # Nebari version 2024.9.1 has been marked as broken, and will be skipped:
+    # https://github.com/nebari-dev/nebari/issues/2798
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        return config
+
+
+class Upgrade_2024_11_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.11.1
+    """
+
+    version = "2024.11.1"
+
     @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
@@ -1239,16 +1255,16 @@ class Upgrade_2024_9_1(UpgradeStep):
             Please ensure no users are currently logged in prior to deploying this
             update.
 
-            Nebari [green]2024.9.1[/green] introduces changes to how group
-            directories are mounted in JupyterLab pods.
+            This release introduces changes to how group directories are mounted in
+            JupyterLab pods.
 
             Previously, every Keycloak group in the Nebari realm automatically created a
             shared directory at ~/shared/<group-name>, accessible to all group members
             in their JupyterLab pods.
 
-            Starting with Nebari [green]2024.9.1[/green], only groups assigned the
-            JupyterHub client role [magenta]allow-group-directory-creation[/magenta] will have their
-            directories mounted.
+            Moving forward, only groups assigned the JupyterHub client role
+            [magenta]allow-group-directory-creation[/magenta] or its affiliated scope
+            [magenta]write:shared-mount[/magenta] will have their directories mounted.
 
             By default, the admin, analyst, and developer groups will have this
             role assigned during the upgrade. For other groups, you'll now need to
@@ -1264,7 +1280,7 @@ class Upgrade_2024_9_1(UpgradeStep):
         # Prompt the user for role assignment (if yes, transforms the response into bool)
         assign_roles = (
             Prompt.ask(
-                "[bold]Would you like Nebari to assign the corresponding role to all of your current groups automatically?[/bold]",
+                "[bold]Would you like Nebari to assign the corresponding role/scopes to all of your current groups automatically?[/bold]",
                 choices=["y", "N"],
                 default="N",
             ).lower()
@@ -1282,13 +1298,31 @@ class Upgrade_2024_9_1(UpgradeStep):
                 username="root",
                 password=config["security"]["keycloak"]["initial_root_password"],
             )
-
-            # Proceed with updating group permissions
+            # Get client ID as role is bound to the JupyterHub client
             client_id = keycloak_admin.get_client_id("jupyterhub")
-            role_name = "allow-group-directory-creation-role"
+            role_name = "legacy-group-directory-creation-role"
+
+            # Create role with shared scopes
+            keycloak_admin.create_client_role(
+                client_role_id=client_id,
+                skip_exists=True,
+                payload={
+                    "name": role_name,
+                    "attributes": {
+                        "scopes": ["write:shared-mount"],
+                        "component": ["shared-directory"],
+                    },
+                    "description": (
+                        "Role to allow group directory creation, created as part of the "
+                        "Nebari 2024.11.1 upgrade workflow."
+                    ),
+                },
+            )
+
             role_id = keycloak_admin.get_client_role_id(
                 client_id=client_id, role_name=role_name
             )
+
             role_representation = keycloak_admin.get_role_by_id(role_id=role_id)
 
             # Fetch all groups and groups with the role
