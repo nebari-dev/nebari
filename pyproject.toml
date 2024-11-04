@@ -89,7 +89,6 @@ dev = [
     "black==22.3.0",
     "coverage[toml]",
     "dask-gateway",
-    "diagrams",
     "escapism",
     "importlib-metadata<5.0",
     "mypy==1.6.1",
