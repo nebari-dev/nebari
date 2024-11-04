@@ -50,26 +50,21 @@ class NodeGroup(schema.Base):
     taints: Optional[List[schema.Taint]] = []
 
     @field_validator("taints", mode="before")
-    def validate_taint_strings(cls, value: List[str | schema.Taint]):
+    def validate_taint_strings(cls, value: list[Any]):
         TAINT_STR_REGEX = re.compile(r"(\w+)=(\w+):(\w+)")
-        parsed_taints = []
+        return_value = []
         for taint in value:
-            if not isinstance(taint, (str, schema.Taint)):
-                raise ValueError(
-                    f"Unable to parse type: {type(taint)} as taint.  Must be a string or Taint object."
-                )
-
-            if isinstance(taint, schema.Taint):
-                parsed_taint = taint
-            elif isinstance(taint, str):
+            if not isinstance(taint, str):
+                return_value.append(taint)
+            else:
                 match = TAINT_STR_REGEX.match(taint)
                 if not match:
                     raise ValueError(f"Invalid taint string: {taint}")
                 key, value, effect = match.groups()
                 parsed_taint = schema.Taint(key=key, value=value, effect=effect)
-            parsed_taints.append(parsed_taint)
+                return_value.append(parsed_taint)
 
-        return parsed_taints
+        return return_value
 
 
 DEFAULT_GENERAL_TAINTS = []
