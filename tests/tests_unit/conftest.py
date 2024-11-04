@@ -7,7 +7,6 @@ from _nebari.config import write_configuration
 from _nebari.constants import (
     AWS_DEFAULT_REGION,
     AZURE_DEFAULT_REGION,
-    DO_DEFAULT_REGION,
     GCP_DEFAULT_REGION,
 )
 from _nebari.initialize import render_config
@@ -85,15 +84,6 @@ def mock_all_cloud_methods(monkeypatch):
 @pytest.fixture(
     params=[
         # project, namespace, domain, cloud_provider, region, ci_provider, auth_provider
-        (
-            "pytestdo",
-            "dev",
-            "do.nebari.dev",
-            schema.ProviderEnum.do,
-            DO_DEFAULT_REGION,
-            CiEnum.github_actions,
-            AuthenticationEnum.password,
-        ),
         (
             "pytestaws",
             "dev",
