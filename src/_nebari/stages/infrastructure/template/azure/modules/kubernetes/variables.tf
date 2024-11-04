@@ -29,12 +29,6 @@ variable "environment" {
   type        = string
 }
 
-
-# variable "node_groups" {
-#   description = "Node pools to add to Azure Kubernetes Cluster"
-#   type        = list(map(any))
-# }
-
 variable "node_groups" {
   description = "Node pools to add to Azure Kubernetes Cluster"
   type = list(object({

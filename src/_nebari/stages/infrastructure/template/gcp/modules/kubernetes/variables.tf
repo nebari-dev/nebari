@@ -58,7 +58,7 @@ variable "node_groups" {
       min_size      = 0
       max_size      = 2
       labels        = {}
-      node_taints   = [] # TODO: Do this for other cloud providers
+      node_taints   = []
     },
     {
       name          = "worker"
