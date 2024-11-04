@@ -86,8 +86,6 @@ resource "aws_eks_node_group" "main" {
     max_size     = var.node_groups[count.index].max_size
   }
 
-  # TODO: add node_taints (var.node_groups.node_taints) to the node group, check the node taints below are working
-  # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group#node_taints
   dynamic "taint" {
     for_each = var.node_groups[count.index].node_taints
     content {

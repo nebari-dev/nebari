@@ -241,6 +241,7 @@ def options_handler(options, user):
             base_username_mount(user.name),
             config["profiles"][options.profile],
             {"environment": {**options.environment_vars}},
+            # merge with default values
             {
                 k: config["cluster"][k]
                 for k in ("worker_extra_pod_config", "scheduler_extra_pod_config")
