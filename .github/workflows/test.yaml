@@ -12,6 +12,7 @@ on:
   push:
     branches:
       - main
+      - develop
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test.yaml"
@@ -31,7 +32,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
