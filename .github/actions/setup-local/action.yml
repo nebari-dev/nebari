@@ -1,0 +1,30 @@
+name: setup-local
+description: "Setup runner for local deployment"
+
+inputs:
+  kubectl-version:
+    description: "Version of kubectl to install"
+    required: false
+    default: "1.19.16"
+
+runs:
+  using: composite
+
+  steps:
+    - uses: azure/setup-kubectl@v4
+      with:
+        version: v${{ inputs.kubectl-version }}
+
+    - shell: bash
+      run: |
+        # Enable docker permissions for user
+        sudo docker ps
+        sudo usermod -aG docker $USER && newgrp docker
+
+        docker info
+        docker ps
+
+    - shell: bash
+      run: |
+        # Get routing table for docker pods
+        ip route
