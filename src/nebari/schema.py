@@ -107,10 +107,15 @@ def is_version_accepted(v):
     return Main.is_version_accepted(v)
 
 
+@yaml_object(yaml)
 class TaintEffectEnum(str, enum.Enum):
     NoSchedule: str = "NoSchedule"
     PreferNoSchedule: str = "PreferNoSchedule"
     NoExecute: str = "NoExecute"
+
+    @classmethod
+    def to_yaml(cls, representer, node):
+        return representer.represent_str(node.value)
 
 
 class Taint(Base):
