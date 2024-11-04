@@ -72,6 +72,13 @@ class NodeGroup(schema.Base):
         return parsed_taints
 
 
+DEFAULT_GENERAL_TAINTS = []
+DEFAULT_USER_TAINTS = [schema.Taint(key="dedicated", value="user", effect="NoSchedule")]
+DEFAULT_WORKER_TAINTS = [
+    schema.Taint(key="dedicated", value="worker", effect="NoSchedule")
+]
+
+
 class DigitalOceanInputVars(schema.Base):
     name: str
     environment: str
@@ -421,18 +428,23 @@ class GCPNodeGroup(NodeGroup):
 
 
 DEFAULT_GCP_NODE_GROUPS = {
-    "general": GCPNodeGroup(instance="e2-standard-8", min_nodes=1, max_nodes=1),
+    "general": GCPNodeGroup(
+        instance="e2-standard-8",
+        min_nodes=1,
+        max_nodes=1,
+        taints=DEFAULT_GENERAL_TAINTS,
+    ),
     "user": GCPNodeGroup(
         instance="e2-standard-4",
         min_nodes=0,
         max_nodes=5,
-        taints=[schema.Taint(key="dedicated", value="user", effect="NoSchedule")],
+        taints=DEFAULT_USER_TAINTS,
     ),
     "worker": GCPNodeGroup(
         instance="e2-standard-4",
         min_nodes=0,
         max_nodes=5,
-        taints=[schema.Taint(key="dedicated", value="worker", effect="NoSchedule")],
+        taints=DEFAULT_WORKER_TAINTS,
     ),
 }
 
@@ -475,9 +487,21 @@ class AzureNodeGroup(NodeGroup):
 
 
 DEFAULT_AZURE_NODE_GROUPS = {
-    "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
-    "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
-    "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
+    "general": AzureNodeGroup(
+        instance="Standard_D8_v3",
+        min_nodes=1,
+        max_nodes=1,
+        taints=DEFAULT_GENERAL_TAINTS,
+    ),
+    "user": AzureNodeGroup(
+        instance="Standard_D4_v3", min_nodes=0, max_nodes=5, taints=DEFAULT_USER_TAINTS
+    ),
+    "worker": AzureNodeGroup(
+        instance="Standard_D4_v3",
+        min_nodes=0,
+        max_nodes=5,
+        taints=DEFAULT_WORKER_TAINTS,
+    ),
 }
 
 
@@ -547,12 +571,22 @@ class AWSNodeGroup(NodeGroup):
 
 
 DEFAULT_AWS_NODE_GROUPS = {
-    "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
+    "general": AWSNodeGroup(
+        instance="m5.2xlarge", min_nodes=1, max_nodes=1, taints=DEFAULT_GENERAL_TAINTS
+    ),
     "user": AWSNodeGroup(
-        instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
+        instance="m5.xlarge",
+        min_nodes=0,
+        max_nodes=5,
+        single_subnet=False,
+        taints=DEFAULT_USER_TAINTS,
     ),
     "worker": AWSNodeGroup(
-        instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
+        instance="m5.xlarge",
+        min_nodes=0,
+        max_nodes=5,
+        single_subnet=False,
+        taints=DEFAULT_WORKER_TAINTS,
     ),
 }
 
