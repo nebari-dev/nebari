@@ -6,7 +6,7 @@ import pathlib
 import re
 from typing import Any, Dict, List, Optional, Tuple, Type
 
-from pydantic import field_validator
+from pydantic import BaseModel, field_validator
 
 from _nebari import utils
 from _nebari.provider import terraform
@@ -268,7 +268,7 @@ class TerraformStateStage(NebariTerraformStage):
 
         # compute diff of remote/prior and current nebari config
         nebari_config_diff = utils.JsonDiff(
-            nebari_config_state.model_dump(), self.config.model_dump()
+            nebari_config_state, self.config.model_dump()
         )
         # check if any changed fields are immutable
         for keys, old, new in nebari_config_diff.modified():
@@ -283,16 +283,22 @@ class TerraformStateStage(NebariTerraformStage):
                             bottom_level_schema = bottom_level_schema[key]
                         else:
                             raise e
-            extra_field_schema = schema.ExtraFieldSchema(
-                **bottom_level_schema.model_fields[keys[-1]].json_schema_extra or {}
-            )
+
+            # Return a default (mutable) extra field schema if bottom level is not a Pydantic model (such as a free-form 'overrides' block)
+            if isinstance(bottom_level_schema, BaseModel):
+                extra_field_schema = schema.ExtraFieldSchema(
+                    **bottom_level_schema.model_fields[keys[-1]].json_schema_extra or {}
+                )
+            else:
+                extra_field_schema = schema.ExtraFieldSchema()
+
             if extra_field_schema.immutable:
                 key_path = ".".join(keys)
                 raise ValueError(
                     f'Attempting to change immutable field "{key_path}" ("{old}"->"{new}") in Nebari config file.  Immutable fields cannot be changed after initial deployment.'
                 )
 
-    def get_nebari_config_state(self):
+    def get_nebari_config_state(self) -> dict:
         directory = str(self.output_directory / self.stage_prefix)
         tf_state = terraform.show(directory)
         nebari_config_state = None
@@ -302,11 +308,7 @@ class TerraformStateStage(NebariTerraformStage):
             tf_state.get("values", {}).get("root_module", {}).get("resources", [])
         ):
             if resource["address"] == "terraform_data.nebari_config":
-                from nebari.plugins import nebari_plugin_manager
-
-                nebari_config_state = nebari_plugin_manager.config_schema(
-                    **resource["values"]["input"]
-                )
+                nebari_config_state = resource["values"]["input"]
                 break
         return nebari_config_state
 
