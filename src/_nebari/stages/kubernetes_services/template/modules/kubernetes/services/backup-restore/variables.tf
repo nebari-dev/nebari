@@ -24,12 +24,20 @@ variable "realm_id" {
   type        = string
 }
 
-variable "backup-restore-image" {
-  description = "Backup-restore image"
+variable "storage" {
+  description = "Storage configuration for backup-restore server"
+  type = object({
+    type   = string
+    config = map(string)
+  })
+}
+
+variable "image" {
+  description = "The image to use for the backup-restore service"
   type        = string
 }
 
-variable "backup-restore-image-tag" {
-  description = "Version of backup-restore to use"
+variable "image_tag" {
+  description = "The tag of the image to use for the backup-restore service"
   type        = string
 }

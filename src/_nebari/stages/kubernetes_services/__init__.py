@@ -192,10 +192,14 @@ class Profiles(schema.Base):
 
 class BackupRestoreStorage(schema.Base):
     type: str
+    config: Dict[str, Any] = {}
 
 
 class BackupRestore(schema.Base):
+    enabled: bool = False
     storage: BackupRestoreStorage = BackupRestoreStorage(type="s3")
+    image: str = "nebari/nebari-backup-restore"
+    image_tag: str = "main"
 
 
 class CondaEnvironment(schema.Base):
@@ -375,6 +379,7 @@ class InputSchema(schema.Base):
     jupyterlab: JupyterLab = JupyterLab()
     jhub_apps: JHubApps = JHubApps()
     ceph: RookCeph = RookCeph()
+    backup_restore: BackupRestore = BackupRestore()
 
     def _set_storage_type_default_value(self):
         if self.storage.type is None:
@@ -523,6 +528,13 @@ class ArgoWorkflowsInputVars(schema.Base):
     keycloak_read_only_user_credentials: Dict[str, Any] = Field(
         alias="keycloak-read-only-user-credentials"
     )
+
+
+class BackupRestoreInputVars(schema.Base):
+    backup_restore_enabled: bool = Field(alias="backup-restore-enabled")
+    backup_restore_storage: BackupRestoreStorage = Field(alias="backup-restore-storage")
+    backup_restore_image: str = Field(alias="backup-restore-image")
+    backup_restore_image_tag: str = Field(alias="backup-restore-image-tag")
 
 
 class KubernetesServicesStage(NebariTerraformStage):
@@ -692,6 +704,14 @@ class KubernetesServicesStage(NebariTerraformStage):
             keycloak_read_only_user_credentials=keycloak_read_only_user_credentials,
         )
 
+        backup_restore_vars = BackupRestoreInputVars(
+            backup_restore_enabled=self.config.backup_restore.enabled,
+            backup_restore_storage=self.config.backup_restore.storage,
+            backup_restore_services=self.config.backup_restore.services,
+            backup_restore_image=self.config.backup_restore.image,
+            backup_restore_image_tag=self.config.backup_restore.image_tag,
+        )
+
         return {
             **kubernetes_services_vars.model_dump(by_alias=True),
             **rook_ceph_vars.model_dump(by_alias=True),
@@ -701,6 +721,7 @@ class KubernetesServicesStage(NebariTerraformStage):
             **monitoring_vars.model_dump(by_alias=True),
             **argo_workflows_vars.model_dump(by_alias=True),
             **telemetry_vars.model_dump(by_alias=True),
+            **backup_restore_vars.model_dump(by_alias=True),
         }
 
     def check(

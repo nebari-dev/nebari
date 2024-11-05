@@ -1,6 +1,30 @@
+module "jupyterhub-openid-client" {
+  source = "../keycloak-client"
+
+  realm_id                 = var.realm_id
+  client_id                = "nebari-cli"
+  external-url             = var.external-url
+  role_mapping             = {}
+  client_roles             = []
+  callback-url-paths       = []
+  service-accounts-enabled = true
+  service-account-roles    = ["realm-admin"]
+}
+
 locals {
   clients = {
     for client in var.clients : client => client
+  }
+  services = {
+    "keycloak.json" = jsonencode({
+      "auth" : {
+        "auth_url" : "https://${var.external-url}/auth",
+        "realm" : var.realm_id,
+        "client_id" : "nebari-cli",
+        "client_secret" : module.jupyterhub-openid-client.client_secret,
+        "verify_ssl" : false
+      }
+    })
   }
 }
 
@@ -22,6 +46,17 @@ resource "kubernetes_secret" "backup_restore_service_token" {
   }
 }
 
+resource "kubernetes_config_map" "backup-restore-etc" {
+  metadata {
+    name      = "backup-restore-etc"
+    namespace = var.namespace
+  }
+
+  # Merge local.services with the storage.json entry
+  data = merge(local.services, {
+    "storage.json" = jsonencode(var.storage)
+  })
+}
 
 resource "kubernetes_service" "backup_restore" {
   metadata {
@@ -41,71 +76,11 @@ resource "kubernetes_service" "backup_restore" {
   }
 }
 
-resource "kubernetes_config_map" "backup-restore-etc" {
-  metadata {
-    name      = "backup-restore-etc"
-    namespace = var.namespace
-  }
-
-  data = {
-    "keycloak.json" = jsonencode({})
-    "storage.json"  = jsonencode({})
-  }
-}
-
 resource "kubernetes_service_account" "backup_restore" {
   metadata {
     name      = "backup-restore"
     namespace = var.namespace
   }
-}
-
-resource "kubernetes_manifest" "backup_restore" {
-  manifest = {
-    apiVersion = "traefik.containo.us/v1alpha1"
-    kind       = "IngressRoute"
-    metadata = {
-      name      = "backup-restore"
-      namespace = var.namespace
-    }
-    spec = {
-      entryPoints = ["websecure"]
-      routes = [
-        {
-          kind  = "Rule"
-          match = "Host(`${var.external-url}`) && PathPrefix(`/backup-restore/`)"
-
-          middlewares = [
-            {
-              name      = "nebari-backup-restore-api"
-              namespace = var.namespace
-            }
-          ]
-
-          services = [
-            {
-              name = kubernetes_service.backup_restore.metadata.0.name
-              port = 8000
-            }
-          ]
-        }
-      ]
-    }
-  }
-}
-
-
-module "jupyterhub-openid-client" {
-  source = "../keycloak-client"
-
-  realm_id                 = var.realm_id
-  client_id                = "nebari-cli"
-  external-url             = var.external-url
-  role_mapping             = {}
-  client_roles             = []
-  callback-url-paths       = []
-  service-accounts-enabled = true
-  service-account-roles    = ["realm-admin"]
 }
 
 resource "kubernetes_deployment" "backup_restore" {
@@ -135,7 +110,7 @@ resource "kubernetes_deployment" "backup_restore" {
 
         container {
           name              = "backup-restore"
-          image             = "${var.backup-restore-image}:${var.backup-restore-image-tag}"
+          image             = "${var.image}:${var.image_tag}"
           image_pull_policy = "Always"
 
           env {
