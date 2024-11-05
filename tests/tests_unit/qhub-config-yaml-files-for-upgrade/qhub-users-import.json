@@ -1,0 +1,15 @@
+{
+  "id": "nebari",
+  "realm": "nebari",
+  "users": [
+    {
+      "username": "example-user",
+      "enabled": true,
+      "groups": [
+        "admin",
+        "users"
+      ]
+    }
+  ],
+  "groups": []
+}

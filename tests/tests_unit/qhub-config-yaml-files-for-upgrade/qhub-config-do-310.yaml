@@ -1,0 +1,128 @@
+project_name: do-pytest
+provider: do
+domain: do.nebari.dev
+certificate:
+  type: self-signed
+security:
+  authentication:
+    type: password
+  users:
+    example-user:
+      uid: 1000
+      primary_group: admin
+      secondary_groups:
+      - users
+      password: $2b$12$YrEkTAEFfo4fKO7lYPpReegKagd1irrW5YmRugJcaPCjkVaPzrVLq
+  groups:
+    users:
+      gid: 100
+    admin:
+      gid: 101
+default_images:
+  jupyterhub: quansight/nebari-jupyterhub:v0.3.10
+  jupyterlab: quansight/nebari-jupyterlab:v0.3.10
+  dask_worker: quansight/nebari-dask-worker:v0.3.10
+  dask_gateway: quansight/nebari-dask-gateway:v0.3.10
+storage:
+  conda_store: 60Gi
+  shared_filesystem: 100Gi
+theme:
+  jupyterhub:
+    hub_title: Nebari - do-pytest
+    hub_subtitle: Autoscaling Compute Environment on Digital Ocean
+    welcome: Welcome to do.nebari.dev. It is maintained by <a href="http://quansight.com">Quansight
+      staff</a>. The hub's configuration is stored in a github repository based on
+      <a href="https://github.com/Quansight/nebari/">https://github.com/Quansight/nebari/</a>.
+      To provide feedback and report any technical problems, please use the <a href="https://github.com/Quansight/nebari/issues">github
+      issue tracker</a>.
+    logo: /hub/custom/images/jupyter_nebari_logo.svg
+    primary_color: '#4f4173'
+    secondary_color: '#957da6'
+    accent_color: '#32C574'
+    text_color: '#111111'
+    h1_color: '#652e8e'
+    h2_color: '#652e8e'
+terraform_state:
+  type: remote
+namespace: dev
+digital_ocean:
+  region: nyc3
+  kubernetes_version: 1.21.5-do.0
+  node_groups:
+    general:
+      instance: s-2vcpu-4gb
+      min_nodes: 1
+      max_nodes: 1
+    user:
+      instance: g-2vcpu-8gb
+      min_nodes: 1
+      max_nodes: 5
+    worker:
+      instance: g-2vcpu-8gb
+      min_nodes: 1
+      max_nodes: 5
+profiles:
+  jupyterlab:
+  - display_name: Small Instance
+    description: Stable environment with 1 cpu / 4 GB ram
+    default: true
+    kubespawner_override:
+      cpu_limit: 1
+      cpu_guarantee: 0.75
+      mem_limit: 4G
+      mem_guarantee: 2.5G
+      image: quansight/nebari-jupyterlab:v0.3.10
+  - display_name: Medium Instance
+    description: Stable environment with 2 cpu / 8 GB ram
+    kubespawner_override:
+      cpu_limit: 2
+      cpu_guarantee: 1.5
+      mem_limit: 8G
+      mem_guarantee: 5G
+      image: quansight/nebari-jupyterlab:v0.3.10
+  dask_worker:
+    Small Worker:
+      worker_cores_limit: 1
+      worker_cores: 0.75
+      worker_memory_limit: 4G
+      worker_memory: 2.5G
+      worker_threads: 1
+      image: quansight/nebari-dask-worker:v0.3.10
+    Medium Worker:
+      worker_cores_limit: 2
+      worker_cores: 1.5
+      worker_memory_limit: 8G
+      worker_memory: 5G
+      worker_threads: 2
+      image: quansight/nebari-dask-worker:v0.3.10
+environments:
+  environment-dask.yaml:
+    name: dask
+    channels:
+    - conda-forge
+    dependencies:
+    - python
+    - ipykernel
+    - ipywidgets
+    - python-graphviz
+    - dask ==2.30.0
+    - distributed ==2.30.1
+    - dask-gateway ==0.9.0
+    - numpy
+    - numba
+    - pandas
+  environment-dashboard.yaml:
+    name: dashboard
+    channels:
+    - conda-forge
+    dependencies:
+    - python
+    - ipykernel
+    - ipywidgets >=7.6
+    - param
+    - python-graphviz
+    - matplotlib >=3.3.4
+    - panel >=0.10.3
+    - voila >=0.2.7
+    - streamlit >=0.76
+    - dash >=1.19
