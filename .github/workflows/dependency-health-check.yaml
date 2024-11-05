@@ -1,0 +1,23 @@
+name: Annotate Python Packages
+
+on: [pull_request]
+
+jobs:
+  annotate-requirements:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run the Annotate Requirements Action for pip
+        uses: openteamsinc/score@v1
+        with:
+          package-ecosystem: 'pip'
+          requirements-path: 'requirements.txt'
+          annotate-modified-only: true
+
+      - name: Run the Annotate Requirements Action for conda
+        uses: openteamsinc/score@v1
+        with:
+          package-ecosystem: 'conda'
+          requirements-path: 'environment.yml'
+          annotate-modified-only: false
