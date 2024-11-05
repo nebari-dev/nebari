@@ -56,6 +56,18 @@ def mock_all_cloud_methods(monkeypatch):
             "m5.xlarge": "m5.xlarge",
             "m5.2xlarge": "m5.2xlarge",
         },
+        "_nebari.provider.cloud.amazon_web_services.kms_key_arns": {
+            "xxxxxxxx-east-zzzz": {
+                "Arn": "arn:aws:kms:us-east-1:100000:key/xxxxxxxx-east-zzzz",
+                "KeyUsage": "ENCRYPT_DECRYPT",
+                "KeySpec": "SYMMETRIC_DEFAULT",
+            },
+            "xxxxxxxx-west-zzzz": {
+                "Arn": "arn:aws:kms:us-west-2:100000:key/xxxxxxxx-west-zzzz",
+                "KeyUsage": "ENCRYPT_DECRYPT",
+                "KeySpec": "SYMMETRIC_DEFAULT",
+            },
+        },
         # Azure
         "_nebari.provider.cloud.azure_cloud.kubernetes_versions": [
             "1.18",
