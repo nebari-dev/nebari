@@ -221,7 +221,6 @@ project_name: test
                 }
             },
         ),
-        ("do", {"digital_ocean": {"kubernetes_version": "1.20", "region": "nyc3"}}),
         pytest.param(
             "local",
             {"security": {"authentication": {"type": "Auth0"}}},
@@ -248,7 +247,6 @@ def test_cli_validate_error_missing_cloud_env(
         "ARM_TENANT_ID",
         "ARM_CLIENT_ID",
         "ARM_CLIENT_SECRET",
-        "DIGITALOCEAN_TOKEN",
         "SPACES_ACCESS_KEY_ID",
         "SPACES_SECRET_ACCESS_KEY",
         "AUTH0_CLIENT_ID",

@@ -1,14 +1,11 @@
-project_name: do-pytest
-provider: do
-domain: do.nebari.dev
+project_name: aws-pytest
+provider: aws
+domain: aws.nebari.dev
 certificate:
   type: self-signed
 security:
   authentication:
-    type: custom
-    authentication_class: 'firstuseauthenticator.FirstUseAuthenticator'
-    config:
-       min_password_length: 5
+    type: password
   users:
     example-user:
       uid: 1000
@@ -48,22 +45,31 @@ theme:
 terraform_state:
   type: remote
 namespace: dev
-digital_ocean:
-  region: nyc3
-  kubernetes_version: 1.21.5-do.0
+amazon_web_services:
+  kubernetes_version: '1.20'
+  region: us-east-1
   node_groups:
     general:
-      instance: s-2vcpu-4gb
+      instance: m5.2xlarge
       min_nodes: 1
       max_nodes: 1
+      gpu: false
+      single_subnet: false
+      permissions_boundary:
     user:
-      instance: g-2vcpu-8gb
-      min_nodes: 1
+      instance: m5.xlarge
+      min_nodes: 0
       max_nodes: 5
+      gpu: false
+      single_subnet: false
+      permissions_boundary:
     worker:
-      instance: g-2vcpu-8gb
-      min_nodes: 1
+      instance: m5.xlarge
+      min_nodes: 0
       max_nodes: 5
+      gpu: false
+      single_subnet: false
+      permissions_boundary:
 profiles:
   jupyterlab:
   - display_name: Small Instance
