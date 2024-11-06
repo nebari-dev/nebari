@@ -6,7 +6,7 @@ import pathlib
 import re
 from typing import Any, Dict, List, Optional, Tuple, Type
 
-from pydantic import field_validator
+from pydantic import BaseModel, field_validator
 
 from _nebari import utils
 from _nebari.provider import opentofu
@@ -273,9 +273,15 @@ class TerraformStateStage(NebariTerraformStage):
                             bottom_level_schema = bottom_level_schema[key]
                         else:
                             raise e
-            extra_field_schema = schema.ExtraFieldSchema(
-                **bottom_level_schema.model_fields[keys[-1]].json_schema_extra or {}
-            )
+
+            # Return a default (mutable) extra field schema if bottom level is not a Pydantic model (such as a free-form 'overrides' block)
+            if isinstance(bottom_level_schema, BaseModel):
+                extra_field_schema = schema.ExtraFieldSchema(
+                    **bottom_level_schema.model_fields[keys[-1]].json_schema_extra or {}
+                )
+            else:
+                extra_field_schema = schema.ExtraFieldSchema()
+
             if extra_field_schema.immutable:
                 key_path = ".".join(keys)
                 raise ValueError(

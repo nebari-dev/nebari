@@ -99,6 +99,7 @@ module "kubernetes" {
 
   endpoint_public_access  = var.eks_endpoint_access == "private" ? false : true
   endpoint_private_access = var.eks_endpoint_access == "public" ? false : true
+  eks_kms_arn             = var.eks_kms_arn
   public_access_cidrs     = var.eks_public_access_cidrs
   permissions_boundary    = var.permissions_boundary
 }

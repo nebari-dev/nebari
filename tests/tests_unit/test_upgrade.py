@@ -25,17 +25,17 @@ def qhub_users_import_json():
     "old_qhub_config_path_str,attempt_fixes,expect_upgrade_error",
     [
         (
-            "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310.yaml",
+            "./qhub-config-yaml-files-for-upgrade/qhub-config-aws-310.yaml",
             False,
             False,
         ),
         (
-            "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310-customauth.yaml",
+            "./qhub-config-yaml-files-for-upgrade/qhub-config-aws-310-customauth.yaml",
             False,
             True,
         ),
         (
-            "./qhub-config-yaml-files-for-upgrade/qhub-config-do-310-customauth.yaml",
+            "./qhub-config-yaml-files-for-upgrade/qhub-config-aws-310-customauth.yaml",
             True,
             False,
         ),
