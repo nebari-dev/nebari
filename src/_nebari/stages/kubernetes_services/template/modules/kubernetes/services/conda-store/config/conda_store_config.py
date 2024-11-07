@@ -10,7 +10,8 @@ import urllib.request
 from pathlib import Path
 
 import requests
-from conda_store_server import api, orm, schema
+from conda_store_server import api
+from conda_store_server._internal import orm, schema
 from conda_store_server.server.auth import GenericOAuthAuthentication
 from conda_store_server.server.dependencies import get_conda_store
 from conda_store_server.storage import S3Storage
