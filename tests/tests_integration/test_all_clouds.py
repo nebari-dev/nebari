@@ -2,7 +2,6 @@ import requests
 
 
 def test_service_status(deploy):
-    """Tests if deployment on DigitalOcean succeeds"""
     service_urls = deploy["stages/07-kubernetes-services"]["service_urls"]["value"]
     assert (
         requests.get(service_urls["jupyterhub"]["health_url"], verify=False).status_code
