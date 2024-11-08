@@ -57,7 +57,7 @@ def kubernetes_versions(region: str) -> List[str]:
     credentials, project_id = load_credentials()
     client = container_v1.ClusterManagerClient(credentials=credentials)
     response = client.get_server_config(
-        name=f"projects/{project_id}/locations/{region}"
+        name=f"projects/{project_id}/locations/{region}", timeout=300
     )
     supported_kubernetes_versions = response.valid_master_versions
 
