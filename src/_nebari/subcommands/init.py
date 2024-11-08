@@ -13,16 +13,10 @@ from _nebari.config import write_configuration
 from _nebari.constants import (
     AWS_DEFAULT_REGION,
     AZURE_DEFAULT_REGION,
-    DO_DEFAULT_REGION,
     GCP_DEFAULT_REGION,
 )
 from _nebari.initialize import render_config
-from _nebari.provider.cloud import (
-    amazon_web_services,
-    azure_cloud,
-    digital_ocean,
-    google_cloud,
-)
+from _nebari.provider.cloud import amazon_web_services, azure_cloud, google_cloud
 from _nebari.stages.bootstrap import CiEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
@@ -44,18 +38,13 @@ CREATE_AWS_CREDS = (
 CREATE_GCP_CREDS = (
     "https://cloud.google.com/iam/docs/creating-managing-service-accounts"
 )
-CREATE_DO_CREDS = (
-    "https://docs.digitalocean.com/reference/api/create-personal-access-token"
-)
 CREATE_AZURE_CREDS = "https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/guides/service_principal_client_secret#creating-a-service-principal-in-the-azure-portal"
 CREATE_AUTH0_CREDS = "https://auth0.com/docs/get-started/auth0-overview/create-applications/machine-to-machine-apps"
 CREATE_GITHUB_OAUTH_CREDS = "https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app"
 AWS_REGIONS = "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-regions"
 GCP_REGIONS = "https://cloud.google.com/compute/docs/regions-zones"
 AZURE_REGIONS = "https://azure.microsoft.com/en-us/explore/global-infrastructure/geographies/#overview"
-DO_REGIONS = (
-    "https://docs.digitalocean.com/products/platform/availability-matrix/#regions"
-)
+
 
 # links to Nebari docs
 DOCS_HOME = "https://nebari.dev/docs/"
@@ -78,7 +67,6 @@ LATEST = "latest"
 CLOUD_PROVIDER_FULL_NAME = {
     "Local": ProviderEnum.local.name,
     "Existing": ProviderEnum.existing.name,
-    "Digital Ocean": ProviderEnum.do.name,
     "Amazon Web Services": ProviderEnum.aws.name,
     "Google Cloud Platform": ProviderEnum.gcp.name,
     "Microsoft Azure": ProviderEnum.azure.name,
@@ -120,8 +108,6 @@ def get_region_docs(cloud_provider: str):
         return GCP_REGIONS
     elif cloud_provider == ProviderEnum.azure.value.lower():
         return AZURE_REGIONS
-    elif cloud_provider == ProviderEnum.do.value.lower():
-        return DO_REGIONS
 
 
 def handle_init(inputs: InitInputs, config_schema: BaseModel):
@@ -312,36 +298,6 @@ def check_cloud_provider_creds(cloud_provider: ProviderEnum, disable_prompt: boo
             hide_input=True,
         )
 
-    # DO
-    elif cloud_provider == ProviderEnum.do.value.lower() and (
-        not os.environ.get("DIGITALOCEAN_TOKEN")
-        or not os.environ.get("SPACES_ACCESS_KEY_ID")
-        or not os.environ.get("SPACES_SECRET_ACCESS_KEY")
-    ):
-        rich.print(
-            MISSING_CREDS_TEMPLATE.format(
-                provider="Digital Ocean", link_to_docs=CREATE_DO_CREDS
-            )
-        )
-
-        os.environ["DIGITALOCEAN_TOKEN"] = typer.prompt(
-            "Paste your DIGITALOCEAN_TOKEN",
-            hide_input=True,
-        )
-        os.environ["SPACES_ACCESS_KEY_ID"] = typer.prompt(
-            "Paste your SPACES_ACCESS_KEY_ID",
-            hide_input=True,
-        )
-        os.environ["SPACES_SECRET_ACCESS_KEY"] = typer.prompt(
-            "Paste your SPACES_SECRET_ACCESS_KEY",
-            hide_input=True,
-        )
-        # Set spaces credentials. Spaces are API compatible with s3
-        # Setting spaces credentials to AWS credentials allows us to
-        # reuse s3 code
-        os.environ["AWS_ACCESS_KEY_ID"] = os.getenv("SPACES_ACCESS_KEY_ID")
-        os.environ["AWS_SECRET_ACCESS_KEY"] = os.getenv("SPACES_SECRET_ACCESS_KEY")
-
     # AZURE
     elif cloud_provider == ProviderEnum.azure.value.lower() and (
         not os.environ.get("ARM_CLIENT_ID")
@@ -419,20 +375,6 @@ def check_cloud_provider_kubernetes_version(
             raise ValueError(
                 f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the GCP docs for a list of valid versions: {versions}"
             )
-    elif cloud_provider == ProviderEnum.do.value.lower():
-        versions = digital_ocean.kubernetes_versions()
-
-        if not kubernetes_version or kubernetes_version == LATEST:
-            kubernetes_version = get_latest_kubernetes_version(versions)
-            rich.print(
-                DEFAULT_KUBERNETES_VERSION_MSG.format(
-                    kubernetes_version=kubernetes_version
-                )
-            )
-        if kubernetes_version not in versions:
-            raise ValueError(
-                f"Invalid Kubernetes version `{kubernetes_version}`. Please refer to the DO docs for a list of valid versions: {versions}"
-            )
 
     return kubernetes_version
 
@@ -462,15 +404,7 @@ def check_cloud_provider_region(region: str, cloud_provider: str) -> str:
             raise ValueError(
                 f"Invalid region `{region}`. Please refer to the GCP docs for a list of valid regions: {GCP_REGIONS}"
             )
-    elif cloud_provider == ProviderEnum.do.value.lower():
-        if not region:
-            region = DO_DEFAULT_REGION
-            rich.print(DEFAULT_REGION_MSG.format(region=region))
 
-        if region not in set(_["slug"] for _ in digital_ocean.regions()):
-            raise ValueError(
-                f"Invalid region `{region}`. Please refer to the DO docs for a list of valid regions: {DO_REGIONS}"
-            )
     return region
 
 
@@ -597,7 +531,7 @@ def nebari_subcommand(cli: typer.Typer):
         )
 
         # Digital Ocean deprecation warning -- Nebari 2024.7.1
-        if inputs.cloud_provider == ProviderEnum.do.value.lower():
+        if inputs.cloud_provider == "do":
             rich.print(
                 ":warning: Digital Ocean support is being deprecated and support will be removed in the future. :warning:\n"
             )
