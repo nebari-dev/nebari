@@ -1052,7 +1052,13 @@ class Upgrade_2024_6_1(UpgradeStep):
 
     @override
     def _version_specific_upgrade(
-        self, config, start_version, config_filename: Path, *args, **kwargs
+        self,
+        config,
+        start_version,
+        config_filename: Path,
+        *args,
+        attempt_fixes=False,
+        **kwargs,
     ):
         # Prompt users to manually update kube-prometheus-stack CRDs if monitoring is enabled
         if config.get("monitoring", {}).get("enabled", True):
@@ -1085,10 +1091,9 @@ class Upgrade_2024_6_1(UpgradeStep):
                 "\n-> [red bold]Nebari version 2024.6.1 comes with a new version of Grafana. Any custom dashboards that you created will be deleted after upgrading Nebari. Make sure to [link=https://grafana.com/docs/grafana/latest/dashboards/share-dashboards-panels/#export-a-dashboard-as-json]export them as JSON[/link] so you can [link=https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/#import-a-dashboard]import them[/link] again afterwards.[/red bold]"
                 f"\n-> [red bold]Before upgrading, kube-prometheus-stack CRDs need to be updated and the {daemonset_name} daemonset needs to be deleted.[/red bold]"
             )
-            run_commands = Prompt.ask(
+            run_commands = attempt_fixes or Confirm.ask(
                 "\nDo you want Nebari to update the kube-prometheus-stack CRDs and delete the prometheus-node-exporter for you? If not, you'll have to do it manually.",
-                choices=["y", "N"],
-                default="N",
+                default=False,
             )
 
             # By default, rich wraps lines by splitting them into multiple lines. This is
@@ -1096,7 +1101,7 @@ class Upgrade_2024_6_1(UpgradeStep):
             # To avoid this, we use a rich console with a larger width to print the entire commands
             # and let the terminal wrap them if needed.
             console = rich.console.Console(width=220)
-            if run_commands == "y":
+            if run_commands:
                 try:
                     kubernetes.config.load_kube_config()
                 except kubernetes.config.config_exception.ConfigException:
@@ -1109,10 +1114,10 @@ class Upgrade_2024_6_1(UpgradeStep):
                 rich.print(
                     f"The following commands will be run for the [cyan bold]{cluster_name}[/cyan bold] cluster"
                 )
-                Prompt.ask("Hit enter to show the commands")
+                _ = attempt_fixes or Prompt.ask("Hit enter to show the commands")
                 console.print(commands)
 
-                Prompt.ask("Hit enter to continue")
+                _ = attempt_fixes or Prompt.ask("Hit enter to continue")
                 # We need to add a special constructor to the yaml loader to handle a specific
                 # tag as otherwise the kubernetes API will fail when updating the CRD.
                 yaml.constructor.add_constructor(
@@ -1154,16 +1159,15 @@ class Upgrade_2024_6_1(UpgradeStep):
                 rich.print(
                     "[red bold]Before upgrading, you need to manually delete the prometheus-node-exporter daemonset and update the kube-prometheus-stack CRDs. To do that, please run the following commands.[/red bold]"
                 )
-                Prompt.ask("Hit enter to show the commands")
+                _ = attempt_fixes or Prompt.ask("Hit enter to show the commands")
                 console.print(commands)
 
-                Prompt.ask("Hit enter to continue")
-                continue_ = Prompt.ask(
+                _ = attempt_fixes or Prompt.ask("Hit enter to continue")
+                continue_ = attempt_fixes or Confirm.ask(
                     f"Have you backed up your custom dashboards (if necessary), deleted the {daemonset_name} daemonset and updated the kube-prometheus-stack CRDs?",
-                    choices=["y", "N"],
-                    default="N",
+                    default=False,
                 )
-                if not continue_ == "y":
+                if not continue_:
                     rich.print(
                         f"[red bold]You must back up your custom dashboards (if necessary), delete the {daemonset_name} daemonset and update the kube-prometheus-stack CRDs before upgrading to [green]{self.version}[/green] (or later).[/bold red]"
                     )
@@ -1188,12 +1192,11 @@ class Upgrade_2024_6_1(UpgradeStep):
                         If not, select "N" and the old default node groups will be added to the nebari config file.
                     """
                     )
-                    continue_ = Prompt.ask(
+                    continue_ = attempt_fixes or Confirm.ask(
                         text,
-                        choices=["y", "N"],
-                        default="y",
+                        default=True,
                     )
-                    if continue_ == "N":
+                    if not continue_:
                         config[provider_full_name]["node_groups"] = {
                             "general": {
                                 "instance": "n1-standard-8",
@@ -1234,8 +1237,9 @@ class Upgrade_2024_6_1(UpgradeStep):
                     },
                     indent=4,
                 )
-                text += "\n\nHit enter to continue"
-                Prompt.ask(text)
+                rich.print(text)
+                if not attempt_fixes:
+                    _ = Prompt.ask("\n\nHit enter to continue")
         return config
 
 
