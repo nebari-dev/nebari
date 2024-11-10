@@ -723,15 +723,21 @@ class Upgrade_2023_7_2(UpgradeStep):
 
     @override
     def _version_specific_upgrade(
-        self, config, start_version, config_filename: Path, *args, **kwargs
+        self,
+        config,
+        start_version,
+        config_filename: Path,
+        *args,
+        attempt_fixes=False,
+        **kwargs,
     ):
         argo = config.get("argo_workflows", {})
         if argo.get("enabled"):
-            response = Prompt.ask(
-                f"\nDo you want to enable the [green][link={NEBARI_WORKFLOW_CONTROLLER_DOCS}]Nebari Workflow Controller[/link][/green], required for [green][link={ARGO_JUPYTER_SCHEDULER_REPO}]Argo-Jupyter-Scheduler[/link][green]? [Y/n] ",
-                default="Y",
+            response = attempt_fixes or Confirm.ask(
+                f"\nDo you want to enable the [green][link={NEBARI_WORKFLOW_CONTROLLER_DOCS}]Nebari Workflow Controller[/link][/green], required for [green][link={ARGO_JUPYTER_SCHEDULER_REPO}]Argo-Jupyter-Scheduler[/link][green]?",
+                default=True,
             )
-            if response.lower() in ["y", "yes", ""]:
+            if response:
                 argo["nebari_workflow_controller"] = {"enabled": True}
 
         rich.print("\n ⚠️ Deprecation Warnings ⚠️")
