@@ -1292,7 +1292,13 @@ class Upgrade_2024_11_1(UpgradeStep):
 
     @override
     def _version_specific_upgrade(
-        self, config, start_version, config_filename: Path, *args, **kwargs
+        self,
+        config,
+        start_version,
+        config_filename: Path,
+        *args,
+        attempt_fixes=False,
+        **kwargs,
     ):
         if config.get("provider", "") == ProviderEnum.azure.value:
             rich.print("\n ⚠️ Upgrade Warning ⚠️")
@@ -1342,13 +1348,9 @@ class Upgrade_2024_11_1(UpgradeStep):
         keycloak_admin = None
 
         # Prompt the user for role assignment (if yes, transforms the response into bool)
-        assign_roles = (
-            Prompt.ask(
-                "[bold]Would you like Nebari to assign the corresponding role/scopes to all of your current groups automatically?[/bold]",
-                choices=["y", "N"],
-                default="N",
-            ).lower()
-            == "y"
+        assign_roles = attempt_fixes or Confirm.ask(
+            "[bold]Would you like Nebari to assign the corresponding role/scopes to all of your current groups automatically?[/bold]",
+            default=False,
         )
 
         if assign_roles:
