@@ -230,7 +230,15 @@ class UpgradeStep(ABC):
         """
         return rounded_ver_parse(self.version) > rounded_ver_parse("0.3.13")
 
-    def upgrade_step(self, config, start_version, config_filename, *args, **kwargs):
+    def upgrade_step(
+        self,
+        config,
+        start_version,
+        config_filename,
+        *args,
+        attempt_fixes=False,
+        **kwargs,
+    ):
         """
         Perform the upgrade from start_version to self.version.
 
@@ -415,11 +423,22 @@ class UpgradeStep(ABC):
 
         # Run any version-specific tasks
         return self._version_specific_upgrade(
-            config, start_version, config_filename, *args, **kwargs
+            config,
+            start_version,
+            config_filename,
+            *args,
+            attempt_fixes=attempt_fixes,
+            **kwargs,
         )
 
     def _version_specific_upgrade(
-        self, config, start_version, config_filename, *args, **kwargs
+        self,
+        config,
+        start_version,
+        config_filename,
+        *args,
+        attempt_fixes=False,
+        **kwargs,
     ):
         """
         Perform version-specific upgrade tasks.
