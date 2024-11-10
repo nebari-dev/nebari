@@ -995,7 +995,13 @@ class Upgrade_2024_4_1(UpgradeStep):
 
     @override
     def _version_specific_upgrade(
-        self, config, start_version, config_filename: Path, *args, **kwargs
+        self,
+        config,
+        start_version,
+        config_filename: Path,
+        *args,
+        attempt_fixes=False,
+        **kwargs,
     ):
         # Default configuration for the node groups was added in this version. Therefore,
         # users upgrading who don't have any specific node groups defined on their config
@@ -1009,12 +1015,11 @@ class Upgrade_2024_4_1(UpgradeStep):
                     default_node_groups = provider_enum_default_node_groups_map[
                         provider
                     ]
-                    continue_ = Prompt.ask(
+                    continue_ = attempt_fixes or Confirm.ask(
                         f"Would you like to include the default configuration for the node groups in [purple]{config_filename}[/purple]?",
-                        choices=["y", "N"],
-                        default="N",
+                        default=False,
                     )
-                    if continue_ == "y":
+                    if continue_:
                         config[provider_full_name]["node_groups"] = default_node_groups
                 except KeyError:
                     pass
