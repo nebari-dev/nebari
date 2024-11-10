@@ -1000,7 +1000,6 @@ class Upgrade_2024_6_1(UpgradeStep):
     ):
         # Prompt users to manually update kube-prometheus-stack CRDs if monitoring is enabled
         if config.get("monitoring", {}).get("enabled", True):
-
             crd_urls = [
                 "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml",
                 "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml",
