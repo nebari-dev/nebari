@@ -663,7 +663,13 @@ class Upgrade_2023_4_2(UpgradeStep):
 
     @override
     def _version_specific_upgrade(
-        self, config, start_version, config_filename: Path, *args, **kwargs
+        self,
+        config,
+        start_version,
+        config_filename: Path,
+        *args,
+        attempt_fixes=False,
+        **kwargs,
     ):
         """
         Prompt users to delete Argo CRDs
@@ -680,11 +686,11 @@ class Upgrade_2023_4_2(UpgradeStep):
             ""
         )
 
-        continue_ = Prompt.ask(
+        continue_ = attempt_fixes or Confirm.ask(
             "Have you deleted the Argo Workflows CRDs and service accounts? [y/N] ",
-            default="N",
+            default=False,
         )
-        if not continue_ == "y":
+        if not continue_:
             rich.print(
                 f"You must delete the Argo Workflows CRDs and service accounts before upgrading to [green]{self.version}[/green] (or later)."
             )
