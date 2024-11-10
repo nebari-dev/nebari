@@ -21,7 +21,7 @@ import requests
 import rich
 from packaging.version import Version
 from pydantic import ValidationError
-from rich.prompt import Prompt
+from rich.prompt import Confirm, Prompt
 from typing_extensions import override
 
 from _nebari.config import backup_configuration
@@ -315,7 +315,12 @@ class UpgradeStep(ABC):
                 return ":".join([m.groups()[0], f"v{new_version}"])
             return None
 
-        def replace_image_tag(s: str, new_version: str, config_path: str) -> str:
+        def replace_image_tag(
+            s: str,
+            new_version: str,
+            config_path: str,
+            attempt_fixes: bool = attempt_fixes,
+        ) -> str:
             """
             Replace the image tag with the new version.
 
@@ -337,11 +342,11 @@ class UpgradeStep(ABC):
             if current_tag == new_version:
                 return s
             loc = f"{config_path}: {image_name}"
-            response = Prompt.ask(
-                f"\nDo you want to replace current tag [green]{current_tag}[/green] with [green]{new_version}[/green] for:\n[purple]{loc}[/purple]? [Y/n] ",
-                default="Y",
+            response = attempt_fixes or Confirm.ask(
+                f"\nDo you want to replace current tag [green]{current_tag}[/green] with [green]{new_version}[/green] for:\n[purple]{loc}[/purple]?",
+                default=True,
             )
-            if response.lower() in ["y", "yes", ""]:
+            if response:
                 return s.replace(current_tag, new_version)
             else:
                 return s
@@ -372,7 +377,11 @@ class UpgradeStep(ABC):
             config[config_path[-1]] = value
 
         def update_image_tag(
-            config: dict, config_path: str, current_image: str, new_version: str
+            config: dict,
+            config_path: str,
+            current_image: str,
+            new_version: str,
+            attempt_fixes: bool = attempt_fixes,
         ) -> dict:
             """
             Update the image tag in the configuration.
@@ -386,7 +395,12 @@ class UpgradeStep(ABC):
             Returns:
                 dict: The updated configuration dictionary.
             """
-            new_image = replace_image_tag(current_image, new_version, config_path)
+            new_image = replace_image_tag(
+                current_image,
+                new_version,
+                config_path,
+                attempt_fixes,
+            )
             if new_image != current_image:
                 set_nested_item(config, config_path, new_image)
 
@@ -396,7 +410,11 @@ class UpgradeStep(ABC):
         for k, v in config.get("default_images", {}).items():
             config_path = f"default_images.{k}"
             config = update_image_tag(
-                config, config_path, v, __rounded_finish_version__
+                config,
+                config_path,
+                v,
+                __rounded_finish_version__,
+                attempt_fixes,
             )
 
         # update profiles.jupyterlab images
@@ -408,6 +426,7 @@ class UpgradeStep(ABC):
                     f"profiles.jupyterlab.{i}.kubespawner_override.image",
                     current_image,
                     __rounded_finish_version__,
+                    attempt_fixes,
                 )
 
         # update profiles.dask_worker images
@@ -419,6 +438,7 @@ class UpgradeStep(ABC):
                     f"profiles.dask_worker.{k}.image",
                     current_image,
                     __rounded_finish_version__,
+                    attempt_fixes,
                 )
 
         # Run any version-specific tasks
