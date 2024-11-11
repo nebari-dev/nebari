@@ -135,8 +135,11 @@ class AWSAmiTypes(str, enum.Enum):
 
 
 class AWSNodeLaunchTemplate(schema.Base):
+    class Config:
+        underscore_attrs_are_private = True
+
     pre_bootstrap_command: Optional[str] = None
-    ami_id: Optional[str] = None
+    _ami_id: Optional[str] = None
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -155,7 +158,7 @@ class AWSNodeGroupInputVars(schema.Base):
 def construct_aws_ami_type(gpu_enabled: bool, launch_template: AWSNodeLaunchTemplate):
     """Construct the AWS AMI type based on the provided parameters."""
 
-    if launch_template and launch_template.ami_id:
+    if launch_template and launch_template._ami_id:
         return "CUSTOM"
 
     if gpu_enabled:
