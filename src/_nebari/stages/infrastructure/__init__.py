@@ -359,6 +359,8 @@ DEFAULT_GCP_NODE_GROUPS = {
 
 
 class GoogleCloudPlatformProvider(schema.Base):
+    # If you pass a major and minor version without a patch version
+    # yaml will pass it as a float, so we need to coerce it to a string
     model_config = ConfigDict(coerce_numbers_to_str=True)
     region: str
     project: str
