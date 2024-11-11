@@ -6,6 +6,7 @@ When a user runs `nebari upgrade  -c nebari-config.yaml`, then the do_upgrade fu
 
 import json
 import logging
+import os
 import re
 import secrets
 import string
@@ -1297,10 +1298,16 @@ class Upgrade_2024_11_1(UpgradeStep):
 
             urllib3.disable_warnings()
 
+            keycloak_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
+            keycloak_password = os.environ.get(
+                "KEYCLOAK_ADMIN_PASSWORD",
+                config["security"]["keycloak"]["initial_root_password"],
+            )
+
             keycloak_admin = get_keycloak_admin(
                 server_url=f"https://{config['domain']}/auth/",
-                username="root",
-                password=config["security"]["keycloak"]["initial_root_password"],
+                username=keycloak_username,
+                password=keycloak_password,
             )
             # Get client ID as role is bound to the JupyterHub client
             client_id = keycloak_admin.get_client_id("jupyterhub")
