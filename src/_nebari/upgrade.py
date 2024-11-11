@@ -1309,6 +1309,23 @@ class Upgrade_2024_11_1(UpgradeStep):
                 username=keycloak_username,
                 password=keycloak_password,
             )
+
+            try:
+                # Quick test to connect to Keycloak
+                keycloak_admin.get_server_info()
+            except ValueError as e:
+                if "invalid_grant" in str(e):
+                    print(
+                        "[red bold]Failed to connect to the Keycloak server.[/red bold]\n"
+                        "[yellow]This may occur if the default admin credentials have been changed for security reasons.[/yellow]\n"
+                        "Please update the [bold]KEYCLOAK_ADMIN_USERNAME[/bold] and [bold]KEYCLOAK_ADMIN_PASSWORD[/bold] environment variables with the new credentials and try again."
+                    )
+                    exit()
+                else:
+                    # Handle other exceptions
+                    print(f"[red bold]An unexpected error occurred: {e}[/red bold]")
+                    exit()
+
             # Get client ID as role is bound to the JupyterHub client
             client_id = keycloak_admin.get_client_id("jupyterhub")
             role_name = "legacy-group-directory-creation-role"
