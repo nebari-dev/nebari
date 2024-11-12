@@ -37,6 +37,7 @@ def paramiko_object(jupyterhub_access_token):
 
     for timeout in retry_timeouts:
         params["auth_timeout"] = timeout
+        params["banner_timeout"] = timeout
         try:
             ssh_client.connect(**params)
             break
