@@ -14,7 +14,7 @@ monkeypatch_ssl_context()
 TIMEOUT_SECS = 300
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def paramiko_object(jupyterhub_access_token):
     """
     Connects to JupyterHub SSH cluster from outside the cluster with retry on
