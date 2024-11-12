@@ -52,3 +52,8 @@ def nebari_stage() -> List[NebariStage]:
 @hookspec
 def nebari_subcommand(cli: typer.Typer):
     """Register Typer subcommand in nebari"""
+
+
+@hookspec
+def nebari_init_options() -> Dict[str, Any]:
+    """Register options for nebari init command"""

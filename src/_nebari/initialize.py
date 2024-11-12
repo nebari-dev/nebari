@@ -1,3 +1,4 @@
+import functools
 import logging
 import os
 import re
@@ -29,7 +30,11 @@ from _nebari.stages.infrastructure import (
 from _nebari.stages.kubernetes_ingress import CertificateEnum
 from _nebari.stages.kubernetes_keycloak import AuthenticationEnum
 from _nebari.stages.terraform_state import TerraformStateEnum
-from _nebari.utils import get_latest_kubernetes_version, random_secure_string
+from _nebari.utils import (
+    deep_merge,
+    get_latest_kubernetes_version,
+    random_secure_string,
+)
 from _nebari.version import __version__
 from nebari.schema import ProviderEnum, github_url_regex
 
@@ -53,6 +58,7 @@ def render_config(
     region: str = None,
     disable_prompt: bool = False,
     ssl_cert_email: str = None,
+    overrides: list[dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     config = {
         "provider": cloud_provider,
@@ -196,6 +202,10 @@ def render_config(
     if ssl_cert_email:
         config["certificate"] = {"type": CertificateEnum.letsencrypt.value}
         config["certificate"]["acme_email"] = ssl_cert_email
+
+    # apply overrides
+    if overrides:
+        config = functools.reduce(deep_merge(overrides, config))
 
     # validate configuration and convert to model
     from nebari.plugins import nebari_plugin_manager

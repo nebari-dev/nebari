@@ -107,6 +107,7 @@ class InitInputs(schema.Base):
     disable_prompt: bool = False
     output: pathlib.Path = pathlib.Path("nebari-config.yaml")
     explicit: int = 0
+    overrides: dict = None
 
 
 def enum_to_list(enum_cls):
@@ -148,6 +149,7 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
         terraform_state=inputs.terraform_state,
         ssl_cert_email=inputs.ssl_cert_email,
         disable_prompt=inputs.disable_prompt,
+        overrides=inputs.overrides,
     )
 
     try:
@@ -478,8 +480,16 @@ def check_cloud_provider_region(region: str, cloud_provider: str) -> str:
 
 @hookimpl
 def nebari_subcommand(cli: typer.Typer):
+    from nebari.plugins import nebari_plugin_manager
+
     @cli.command()
     def init(
+        distro: str = typer.Option(
+            None,
+            "--distro",
+            callback=distribution_callback,
+            is_eager=True,
+        ),
         cloud_provider: ProviderEnum = typer.Argument(
             ProviderEnum.local,
             help=f"options: {enum_to_list(ProviderEnum)}",
@@ -623,11 +633,27 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.output = output
         inputs.explicit = explicit
 
-        from nebari.plugins import nebari_plugin_manager
-
         handle_init(inputs, config_schema=nebari_plugin_manager.config_schema)
 
         nebari_plugin_manager.read_config(output)
+
+
+def distribution_callback(ctx: typer.Context, distro: str):
+    """
+    Callback to handle the distro option for the `nebari init` command.
+    """
+    from nebari.plugins import nebari_plugin_manager
+
+    inputs = InitInputs()
+    distro_inputs = nebari_plugin_manager.plugin_manager.hook.distro(inputs=inputs)
+
+    # TODO: How to handle distro conflicts?
+    # TODO: Merge the distro inputs.
+    if distro_inputs:
+        for key, value in distro_inputs.items():
+            setattr(inputs, key)
+
+    return distro
 
 
 def guided_init_wizard(ctx: typer.Context, guided_init: str):
