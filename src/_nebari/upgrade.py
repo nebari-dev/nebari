@@ -1317,13 +1317,12 @@ class Upgrade_2024_11_1(UpgradeStep):
                 if "invalid_grant" in str(e):
                     print(
                         "[red bold]Failed to connect to the Keycloak server.[/red bold]\n"
-                        "[yellow]This may occur if the default admin credentials have been changed for security reasons.[/yellow]\n"
-                        "Please update the [bold]KEYCLOAK_ADMIN_USERNAME[/bold] and [bold]KEYCLOAK_ADMIN_PASSWORD[/bold] environment variables with the new credentials and try again."
+                        "Please set the [bold]KEYCLOAK_ADMIN_USERNAME[/bold] and [bold]KEYCLOAK_ADMIN_PASSWORD[/bold] environment variables with the Keycloak root credentials and try again."
                     )
                     exit()
                 else:
                     # Handle other exceptions
-                    print(f"[red bold]An unexpected error occurred: {e}[/red bold]")
+                    print(f"[red bold]An unexpected error occurred: {repr(e)}[/red bold]")
                     exit()
 
             # Get client ID as role is bound to the JupyterHub client
