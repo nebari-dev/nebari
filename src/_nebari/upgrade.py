@@ -1304,25 +1304,28 @@ class Upgrade_2024_11_1(UpgradeStep):
                 config["security"]["keycloak"]["initial_root_password"],
             )
 
-            keycloak_admin = get_keycloak_admin(
-                server_url=f"https://{config['domain']}/auth/",
-                username=keycloak_username,
-                password=keycloak_password,
-            )
-
             try:
                 # Quick test to connect to Keycloak
-                keycloak_admin.get_server_info()
+                keycloak_admin = get_keycloak_admin(
+                    server_url=f"https://{config['domain']}/auth/",
+                    username=keycloak_username,
+                    password=keycloak_password,
+                )
             except ValueError as e:
                 if "invalid_grant" in str(e):
-                    print(
-                        "[red bold]Failed to connect to the Keycloak server.[/red bold]\n"
-                        "Please set the [bold]KEYCLOAK_ADMIN_USERNAME[/bold] and [bold]KEYCLOAK_ADMIN_PASSWORD[/bold] environment variables with the Keycloak root credentials and try again."
+                    rich.print(
+                        textwrap.dedent(
+                            """
+                            [red bold]Failed to connect to the Keycloak server.[/red bold]\n
+                            [yellow]Please set the [bold]KEYCLOAK_ADMIN_USERNAME[/bold] and [bold]KEYCLOAK_ADMIN_PASSWORD[/bold]
+                            environment variables with the Keycloak root credentials and try again.[/yellow]
+                            """
+                        )
                     )
                     exit()
                 else:
                     # Handle other exceptions
-                    print(
+                    rich.print(
                         f"[red bold]An unexpected error occurred: {repr(e)}[/red bold]"
                     )
                     exit()
