@@ -55,6 +55,7 @@ resource "aws_security_group" "main" {
   vpc_id = aws_vpc.main.id
 
   ingress {
+    description = "Allow all ports and protocols to enter the security group"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -62,6 +63,7 @@ resource "aws_security_group" "main" {
   }
 
   egress {
+    description = "Allow all ports and protocols to exit the security group"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
