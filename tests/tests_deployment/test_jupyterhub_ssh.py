@@ -1,6 +1,7 @@
 import re
 import string
 import uuid
+import time
 
 import paramiko
 import pytest
@@ -14,18 +15,14 @@ monkeypatch_ssl_context()
 TIMEOUT_SECS = 300
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def paramiko_object(jupyterhub_access_token):
-    """
-    Connects to JupyterHub SSH cluster from outside the cluster with retry on
-    authentication errors.
-    """
+    """Connects to JupyterHub SSH cluster from outside the cluster.
 
-    # Define the sequence of auth_timeouts in seconds
-    retry_timeouts = [2 * 60, 3 * 60, 5 * 60]  # 2min, 3min, 5min
-
-    ssh_client = paramiko.SSHClient()
-    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    Ensures the JupyterLab pod is ready before attempting reauthentication
+    by setting both `auth_timeout` and `banner_timeout` appropriately,
+    and by retrying the connection until the pod is ready or a timeout occurs.
+    """
     params = {
         "hostname": constants.NEBARI_HOSTNAME,
         "port": 8022,
@@ -33,75 +30,76 @@ def paramiko_object(jupyterhub_access_token):
         "password": jupyterhub_access_token,
         "allow_agent": constants.PARAMIKO_SSH_ALLOW_AGENT,
         "look_for_keys": constants.PARAMIKO_SSH_LOOK_FOR_KEYS,
+        "auth_timeout": TIMEOUT_SECS,
+        "banner_timeout": TIMEOUT_SECS,
     }
 
-    for timeout in retry_timeouts:
-        params["auth_timeout"] = timeout
-        params["banner_timeout"] = timeout
+    ssh_client = paramiko.SSHClient()
+    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    max_attempts = int(TIMEOUT_SECS / 10)
+    delay = 10  # seconds
+
+    for attempt in range(max_attempts):
         try:
             ssh_client.connect(**params)
             break
-        except paramiko.AuthenticationException as auth_err:
-            if "failed to start server on time!" in str(auth_err):
-                if timeout == retry_timeouts[-1]:
-                    ssh_client.close()
-                    raise
-            else:
-                ssh_client.close()
-                raise
-        except paramiko.SSHException:
-            ssh_client.close()
-            raise
-        except Exception:
-            ssh_client.close()
-            raise
+        except (
+            paramiko.ssh_exception.NoValidConnectionsError,
+            paramiko.ssh_exception.SSHException,
+        ) as e:
+            print(
+                f"SSH connection failed on attempt {attempt + 1}/{max_attempts}, "
+                f"retrying in {delay} seconds..."
+            )
+            time.sleep(delay)
     else:
-        ssh_client.close()
-        raise paramiko.AuthenticationException(
-            "Failed to authenticate after multiple attempts."
-        )
+        pytest.fail("Could not establish SSH connection after multiple attempts.")
+
     try:
         yield ssh_client
     finally:
         ssh_client.close()
 
 
-def run_command(command, stdin, stdout, stderr):
+def run_command(command, channel):
     delimiter = uuid.uuid4().hex
-    stdin.write(f"echo {delimiter}start; {command}; echo {delimiter}end\n")
+    channel.send(f"echo {delimiter}start; {command}; echo {delimiter}end\n")
 
-    output = []
+    output = ""
 
-    line = stdout.readline()
-    while not re.match(f"^{delimiter}start$", line.strip()):
-        line = stdout.readline()
+    while True:
+        if channel.recv_ready():
+            recv = channel.recv(1024).decode("utf-8")
+            output += recv
+            if f"{delimiter}end" in recv:
+                break
+        else:
+            time.sleep(0.1)  # Slight delay to prevent busy-waiting
 
-    line = stdout.readline()
-    if delimiter not in line:
-        output.append(line)
-
-    while not re.match(f"^{delimiter}end$", line.strip()):
-        line = stdout.readline()
-        if delimiter not in line:
-            output.append(line)
-
-    return "".join(output).strip()
+    # Extract the command output between the start and end delimiters
+    match = re.search(f"{delimiter}start(.*){delimiter}end", output, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    else:
+        return output.strip()
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_simple_jupyterhub_ssh(paramiko_object):
-    stdin, stdout, stderr = paramiko_object.exec_command("")
+    channel = paramiko_object.invoke_shell()
+    channel.close()
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_print_jupyterhub_ssh(paramiko_object):
-    stdin, stdout, stderr = paramiko_object.exec_command("")
+    channel = paramiko_object.invoke_shell()
 
-    # commands to run and just print the output
+    # Commands to run and just print the output
     commands_print = [
         "id",
         "env",
@@ -113,16 +111,18 @@ def test_print_jupyterhub_ssh(paramiko_object):
 
     for command in commands_print:
         print(f'COMMAND: "{command}"')
-        print(run_command(command, stdin, stdout, stderr))
+        print(run_command(command, channel))
+
+    channel.close()
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_exact_jupyterhub_ssh(paramiko_object):
-    stdin, stdout, stderr = paramiko_object.exec_command("")
+    channel = paramiko_object.invoke_shell()
 
-    # commands to run and exactly match output
+    # Commands to run and exactly match output
     commands_exact = [
         ("id -u", "1000"),
         ("id -g", "100"),
@@ -136,26 +136,36 @@ def test_exact_jupyterhub_ssh(paramiko_object):
         ),
     ]
 
-    for command, output in commands_exact:
-        assert output == run_command(command, stdin, stdout, stderr)
+    for command, expected_output in commands_exact:
+        output = run_command(command, channel)
+        assert (
+            output == expected_output
+        ), f"Command '{command}' output '{output}' does not match expected '{expected_output}'"
+
+    channel.close()
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_contains_jupyterhub_ssh(paramiko_object):
-    stdin, stdout, stderr = paramiko_object.exec_command("")
+    channel = paramiko_object.invoke_shell()
 
-    # commands to run and string need to be contained in output
+    # Commands to run and check if the output contains specific strings
     commands_contain = [
         ("ls -la", ".bashrc"),
         ("cat ~/.bashrc", "Managed by Nebari"),
         ("cat ~/.profile", "Managed by Nebari"),
         ("cat ~/.bash_logout", "Managed by Nebari"),
-        # ensure we don't copy over extra files from /etc/skel in init container
+        # Ensure we don't copy over extra files from /etc/skel in init container
         ("ls -la ~/..202*", "No such file or directory"),
         ("ls -la ~/..data", "No such file or directory"),
     ]
 
-    for command, output in commands_contain:
-        assert output in run_command(command, stdin, stdout, stderr)
+    for command, expected_substring in commands_contain:
+        output = run_command(command, channel)
+        assert (
+            expected_substring in output
+        ), f"Command '{command}' output does not contain expected substring '{expected_substring}'"
+
+    channel.close()
