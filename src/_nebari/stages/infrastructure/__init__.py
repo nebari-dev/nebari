@@ -8,7 +8,7 @@ import sys
 import tempfile
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, PrivateAttr, field_validator, model_validator
 
 from _nebari import constants
 from _nebari.provider import terraform
@@ -135,11 +135,8 @@ class AWSAmiTypes(str, enum.Enum):
 
 
 class AWSNodeLaunchTemplate(schema.Base):
-    class Config:
-        underscore_attrs_are_private = True
-
     pre_bootstrap_command: Optional[str] = None
-    _ami_id: Optional[str] = None
+    _ami_id: Optional[str] = PrivateAttr(default=None)
 
 
 class AWSNodeGroupInputVars(schema.Base):
