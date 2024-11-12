@@ -1322,7 +1322,9 @@ class Upgrade_2024_11_1(UpgradeStep):
                     exit()
                 else:
                     # Handle other exceptions
-                    print(f"[red bold]An unexpected error occurred: {repr(e)}[/red bold]")
+                    print(
+                        f"[red bold]An unexpected error occurred: {repr(e)}[/red bold]"
+                    )
                     exit()
 
             # Get client ID as role is bound to the JupyterHub client
