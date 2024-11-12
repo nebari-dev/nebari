@@ -1,7 +1,7 @@
 import re
 import string
-import uuid
 import time
+import uuid
 
 import paramiko
 import pytest
@@ -47,7 +47,7 @@ def paramiko_object(jupyterhub_access_token):
         except (
             paramiko.ssh_exception.NoValidConnectionsError,
             paramiko.ssh_exception.SSHException,
-        ) as e:
+        ):
             print(
                 f"SSH connection failed on attempt {attempt + 1}/{max_attempts}, "
                 f"retrying in {delay} seconds..."
