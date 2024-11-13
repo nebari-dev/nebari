@@ -62,7 +62,7 @@ def paramiko_object(jupyterhub_access_token):
 def run_command(command, channel):
     _in, _out, _err = channel.exec_command(command)
 
-    return _out.decode("utf-8")
+    return _out.read().decode("utf-8").strip()
     # delimiter = uuid.uuid4().hex
     # channel.send(f"echo {delimiter}start; {command}; echo {delimiter}end\n")
 
