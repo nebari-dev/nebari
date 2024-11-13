@@ -56,20 +56,17 @@ def paramiko_object(jupyterhub_access_token):
     else:
         pytest.fail("Could not establish SSH connection after multiple attempts.")
 
-    try:
-        yield ssh_client
-    finally:
-        ssh_client.close()
+    channel = ssh_client.invoke_shell()
+
+    yield channel
+
+    channel.close()
+    ssh_client.close()
 
 
 def run_command(command, channel):
     delimiter = uuid.uuid4().hex
-    try:
-        channel.send(f"echo {delimiter}start; {command}; echo {delimiter}end\n")
-    except paramiko.ssh_exception.SSHException:
-        # If the channel is closed, we need to re-open it
-        channel = paramiko_object.invoke_shell()
-        channel.send(f"echo {delimiter}start; {command}; echo {delimiter}end\n")
+    channel.send(f"echo {delimiter}start; {command}; echo {delimiter}end\n")
 
     output = ""
 
@@ -93,16 +90,7 @@ def run_command(command, channel):
 @pytest.mark.timeout(TIMEOUT_SECS)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::ResourceWarning")
-def test_simple_jupyterhub_ssh(paramiko_object):
-    channel = paramiko_object.invoke_shell()
-    channel.close()
-
-
-@pytest.mark.timeout(TIMEOUT_SECS)
-@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
-@pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_print_jupyterhub_ssh(paramiko_object):
-    channel = paramiko_object.invoke_shell()
 
     # Commands to run and just print the output
     commands_print = [
@@ -116,17 +104,14 @@ def test_print_jupyterhub_ssh(paramiko_object):
 
     for command in commands_print:
         print(f'COMMAND: "{command}"')
-        print(run_command(command, channel))
-
-    channel.close()
+        print(run_command(command, paramiko_object))
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_exact_jupyterhub_ssh(paramiko_object):
-    channel = paramiko_object.invoke_shell()
-
+    channel = paramiko_object
     # Commands to run and exactly match output
     commands_exact = [
         ("id -u", "1000"),
@@ -154,7 +139,7 @@ def test_exact_jupyterhub_ssh(paramiko_object):
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_contains_jupyterhub_ssh(paramiko_object):
-    channel = paramiko_object.invoke_shell()
+    channel = paramiko_object
 
     # Commands to run and check if the output contains specific strings
     commands_contain = [
