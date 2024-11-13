@@ -54,9 +54,7 @@ def paramiko_object(jupyterhub_access_token):
     else:
         pytest.fail("Could not establish SSH connection after multiple attempts.")
 
-    channel = ssh_client.invoke_shell()
-    yield channel
-    channel.close()
+    yield ssh_client
 
     ssh_client.close()
 
