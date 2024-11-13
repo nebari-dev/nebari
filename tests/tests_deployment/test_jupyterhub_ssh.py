@@ -1,4 +1,3 @@
-import re
 import string
 import time
 import uuid
@@ -79,12 +78,13 @@ def run_command(command, channel):
         else:
             time.sleep(0.1)  # Slight delay to prevent busy-waiting
 
-    # Extract the command output between the start and end delimiters
-    match = re.search(f"{delimiter}start(.*){delimiter}end", output, re.DOTALL)
-    if match:
-        return match.group(1).strip()
-    else:
-        return output.strip()
+    # # Extract the command output between the start and end delimiters
+    # match = re.search(f"{delimiter}start(.*){delimiter}end", output, re.DOTALL)
+    # if match:
+    #     return match.group(1).strip()
+    # else:
+    #     return output.strip()
+    return output.strip()
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)

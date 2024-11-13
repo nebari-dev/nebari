@@ -110,12 +110,6 @@ jobs:
           timeout: 60
           max-restarts: 0
 
-      - name: Emit namespace report
-        uses: jupyterhub/action-k8s-namespace-report@v1
-        if: always()
-        with:
-          namespace: "dev"
-
       ### DEPLOYMENT TESTS
       - name: Deployment Pytests
         env:
