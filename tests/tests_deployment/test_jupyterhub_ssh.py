@@ -64,7 +64,12 @@ def paramiko_object(jupyterhub_access_token):
 
 def run_command(command, channel):
     delimiter = uuid.uuid4().hex
-    channel.send(f"echo {delimiter}start; {command}; echo {delimiter}end\n")
+    try:
+        channel.send(f"echo {delimiter}start; {command}; echo {delimiter}end\n")
+    except paramiko.ssh_exception.SSHException:
+        # If the channel is closed, we need to re-open it
+        channel = paramiko_object.invoke_shell()
+        channel.send(f"echo {delimiter}start; {command}; echo {delimiter}end\n")
 
     output = ""
 
