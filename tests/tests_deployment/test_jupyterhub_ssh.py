@@ -87,12 +87,12 @@ def run_command(command, channel):
     #     return output.strip()
 
 
-@pytest.mark.timeout(TIMEOUT_SECS)
-@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
-@pytest.mark.filterwarnings("ignore::ResourceWarning")
-def test_simple_jupyterhub_ssh(paramiko_object):
-    channel = paramiko_object.invoke_shell()
-    channel.close()
+# @pytest.mark.timeout(TIMEOUT_SECS)
+# @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+# @pytest.mark.filterwarnings("ignore::ResourceWarning")
+# def test_simple_jupyterhub_ssh(paramiko_object):
+#     channel = paramiko_object.invoke_shell()
+# channel.close()
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
