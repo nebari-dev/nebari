@@ -87,7 +87,16 @@ def run_command(command, channel):
 @pytest.mark.timeout(TIMEOUT_SECS)
 @pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
 @pytest.mark.filterwarnings("ignore::ResourceWarning")
+def test_simple_jupyterhub_ssh(paramiko_object):
+    channel = paramiko_object.invoke_shell()
+    channel.close()
+
+
+@pytest.mark.timeout(TIMEOUT_SECS)
+@pytest.mark.filterwarnings("ignore::urllib3.exceptions.InsecureRequestWarning")
+@pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_print_jupyterhub_ssh(paramiko_object):
+    channel = paramiko_object.invoke_shell()
 
     # Commands to run and just print the output
     commands_print = [
@@ -101,7 +110,9 @@ def test_print_jupyterhub_ssh(paramiko_object):
 
     for command in commands_print:
         print(f'COMMAND: "{command}"')
-        print(run_command(command, paramiko_object))
+        print(run_command(command, channel))
+
+    channel.close()
 
 
 @pytest.mark.timeout(TIMEOUT_SECS)
@@ -109,6 +120,7 @@ def test_print_jupyterhub_ssh(paramiko_object):
 @pytest.mark.filterwarnings("ignore::ResourceWarning")
 def test_exact_jupyterhub_ssh(paramiko_object):
     channel = paramiko_object.invoke_shell()
+
     # Commands to run and exactly match output
     commands_exact = [
         ("id -u", "1000"),
