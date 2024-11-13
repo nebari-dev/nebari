@@ -11,7 +11,7 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, U
 from pydantic import ConfigDict, Field, PrivateAttr, field_validator, model_validator
 
 from _nebari import constants
-from _nebari.provider import terraform
+from _nebari.provider import opentofu
 from _nebari.provider.cloud import (
     amazon_web_services,
     azure_cloud,
@@ -770,7 +770,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
     def tf_objects(self) -> List[Dict]:
         if self.config.provider == schema.ProviderEnum.gcp:
             return [
-                terraform.Provider(
+                opentofu.Provider(
                     "google",
                     project=self.config.google_cloud_platform.project,
                     region=self.config.google_cloud_platform.region,
@@ -787,9 +787,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ]
         elif self.config.provider == schema.ProviderEnum.aws:
             return [
-                terraform.Provider(
-                    "aws", region=self.config.amazon_web_services.region
-                ),
+                opentofu.Provider("aws", region=self.config.amazon_web_services.region),
                 NebariTerraformState(self.name, self.config),
             ]
         else:
