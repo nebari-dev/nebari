@@ -1,0 +1,85 @@
+name: "Local Upgrade Tests"
+
+on:
+  pull_request:
+    paths:
+      - ".github/actions/**"
+      - ".github/workflows/test_local_upgrade.yaml"
+  release:
+    types:
+      - prereleased
+  workflow_dispatch:
+
+
+concurrency:
+  group: ${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  NEBARI_IMAGE_TAG: "main"
+
+jobs:
+  test-local-upgrade:
+    runs-on: "cirun-runner--${{ github.run_id }}"
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup runner for local deployment
+        uses: ./.github/actions/setup-local
+
+      - name: Setup Python
+        uses: conda-incubator/setup-miniconda@v3
+        env:
+          CONDA: /home/runnerx/miniconda3
+        with:
+          auto-update-conda: true
+          python-version: "3.11"
+          miniconda-version: "latest"
+
+      - name: Install latest stable Nebari release
+        run: pip install nebari
+
+      - name: Initialize Nebari config for local deployment
+        id: init
+        uses: ./.github/actions/init-local
+
+      - name: Extract old Nebari version
+        run: |
+          OLD_NEBARI_VERSION=$(grep 'nebari_version: ' ${{ steps.init.outputs.config }} | sed 's/nebari_version: //')
+          echo "OLD_NEBARI_VERSION=${OLD_NEBARI_VERSION}" | tee --append "${GITHUB_ENV}"
+
+      - name: Deploy Nebari
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
+
+      - name: Health check before upgrade
+        id: health-check-before
+        uses: ./.github/actions/health-check
+        with:
+          domain: ${{ steps.init.outputs.domain }}
+
+      - name: Install current Nebari
+        run: pip install --upgrade .
+
+      - name: Upgrade Nebari config
+        run: |
+          git add --force ${{ steps.init.outputs.config }}
+          nebari upgrade --config ${{ steps.init.outputs.config }} --attempt-fixes
+          git diff
+          nebari validate --config ${{ steps.init.outputs.config }}
+
+      - name: Redeploy Nebari
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
+
+      - name: Health check after upgrade
+        id: health-check-after
+        uses: ./.github/actions/health-check
+        with:
+          domain: ${{ steps.init.outputs.domain }}
