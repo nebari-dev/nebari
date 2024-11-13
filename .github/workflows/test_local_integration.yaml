@@ -76,7 +76,7 @@ jobs:
       - name: Install JQ
         run: |
           sudo apt-get update
-          sudo apt-get install jq
+          sudo apt-get install jq -y
 
       - name: Install Nebari and playwright
         run: |
