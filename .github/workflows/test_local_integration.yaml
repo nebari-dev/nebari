@@ -97,6 +97,18 @@ jobs:
           nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
           nebari keycloak listusers --config ${{ steps.init.outputs.config }}
 
+      - name: Await Workloads
+        uses: jupyterhub/action-k8s-await-workloads@v3
+        with:
+          workloads: "" # all
+          namespace: "dev"
+          timeout: 60
+          max-restarts: 0
+
+      - name: Emit namespace report
+        uses: jupyterhub/action-k8s-namespace-report@v1
+        if: always()
+
       ### DEPLOYMENT TESTS
       - name: Deployment Pytests
         env:
