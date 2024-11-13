@@ -1,15 +1,15 @@
 terraform {
   required_providers {
     kind = {
-      source  = "tehcyx/kind"
+      source  = "registry.terraform.io/tehcyx/kind"
       version = "0.4.0"
     }
     docker = {
-      source  = "kreuzwerker/docker"
+      source  = "registry.terraform.io/kreuzwerker/docker"
       version = "2.16.0"
     }
     kubectl = {
-      source  = "gavinbunney/kubectl"
+      source  = "registry.terraform.io/gavinbunney/kubectl"
       version = ">= 1.7.0"
     }
   }
