@@ -147,6 +147,6 @@ def test_contains_jupyterhub_ssh(paramiko_object):
     for command, expected_output in commands_contain.items():
         assert (
             expected_output in outputs[command]
-        ), f"Command '{command}' output does not contain expected substring '{commands_contain[output]}'. Instead got '{outputs[command]}'"
+        ), f"Command '{command}' output does not contain expected substring '{expected_output}'. Instead got '{outputs[command]}'"
 
     channel.close()
