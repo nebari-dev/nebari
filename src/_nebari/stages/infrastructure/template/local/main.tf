@@ -5,11 +5,11 @@ terraform {
       version = "0.4.0"
     }
     docker = {
-      source  = "registry.terraform.io/kreuzwerker/docker"
+      source  = "kreuzwerker/docker"
       version = "2.16.0"
     }
     kubectl = {
-      source  = "registry.terraform.io/gavinbunney/kubectl"
+      source  = "gavinbunney/kubectl"
       version = ">= 1.7.0"
     }
   }
