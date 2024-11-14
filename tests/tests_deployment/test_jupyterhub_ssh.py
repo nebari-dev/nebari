@@ -57,7 +57,9 @@ def extract_output(delimiter: str, output: str) -> str:
         return output.strip()
 
 
-def run_command_list(commands: list[str], channel: paramiko.Channel) -> dict[str, str]:
+def run_command_list(
+    commands: list[str], channel: paramiko.Channel, wait_time: int = 0
+) -> dict[str, str]:
     command_delimiters = {}
     for command in commands:
         delimiter = uuid.uuid4().hex
@@ -65,6 +67,8 @@ def run_command_list(commands: list[str], channel: paramiko.Channel) -> dict[str
         b = channel.send(f"echo {delimiter}start; {command}; echo {delimiter}end\n")
         if b == 0:
             print(f"Command '{command}' failed to send")
+    # Wait for the output to be ready before reading
+    time.sleep(wait_time)
     while not channel.recv_ready():
         time.sleep(1)
         print("Waiting for output")
@@ -143,7 +147,7 @@ def test_contains_jupyterhub_ssh(paramiko_object):
         "ls -la ~/..data": "No such file or directory",
     }
 
-    outputs = run_command_list(commands_contain.keys(), channel)
+    outputs = run_command_list(commands_contain.keys(), channel, 30)
     for command, expected_output in commands_contain.items():
         assert (
             expected_output in outputs[command]
