@@ -6,6 +6,7 @@ When a user runs `nebari upgrade  -c nebari-config.yaml`, then the do_upgrade fu
 
 import json
 import logging
+import os
 import re
 import secrets
 import string
@@ -1293,11 +1294,38 @@ class Upgrade_2024_11_1(UpgradeStep):
 
             urllib3.disable_warnings()
 
-            keycloak_admin = get_keycloak_admin(
-                server_url=f"https://{config['domain']}/auth/",
-                username="root",
-                password=config["security"]["keycloak"]["initial_root_password"],
+            keycloak_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
+            keycloak_password = os.environ.get(
+                "KEYCLOAK_ADMIN_PASSWORD",
+                config["security"]["keycloak"]["initial_root_password"],
             )
+
+            try:
+                # Quick test to connect to Keycloak
+                keycloak_admin = get_keycloak_admin(
+                    server_url=f"https://{config['domain']}/auth/",
+                    username=keycloak_username,
+                    password=keycloak_password,
+                )
+            except ValueError as e:
+                if "invalid_grant" in str(e):
+                    rich.print(
+                        textwrap.dedent(
+                            """
+                            [red bold]Failed to connect to the Keycloak server.[/red bold]\n
+                            [yellow]Please set the [bold]KEYCLOAK_ADMIN_USERNAME[/bold] and [bold]KEYCLOAK_ADMIN_PASSWORD[/bold]
+                            environment variables with the Keycloak root credentials and try again.[/yellow]
+                            """
+                        )
+                    )
+                    exit()
+                else:
+                    # Handle other exceptions
+                    rich.print(
+                        f"[red bold]An unexpected error occurred: {repr(e)}[/red bold]"
+                    )
+                    exit()
+
             # Get client ID as role is bound to the JupyterHub client
             client_id = keycloak_admin.get_client_id("jupyterhub")
             role_name = "legacy-group-directory-creation-role"

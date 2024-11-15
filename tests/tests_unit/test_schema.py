@@ -103,11 +103,6 @@ def test_provider_validation(config_schema, provider, exception):
             },
         ),
         (
-            "do",
-            "digital_ocean",
-            {"region": "nyc3", "kubernetes_version": "1.19.2-do.3"},
-        ),
-        (
             "azure",
             "azure",
             {

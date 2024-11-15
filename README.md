@@ -70,7 +70,7 @@ Hence, it is not necessary to know any of the technologies mentioned above to ha
 
 ### Cloud Providers ☁️
 
-Nebari offers out-of-the-box support for the major public cloud providers: [Digital Ocean](https://www.digitalocean.com/),
+Nebari offers out-of-the-box support for the major public cloud providers:
 Amazon [AWS](https://aws.amazon.com/), [GCP](https://cloud.google.com/ "Google Cloud Provider"), and Microsoft [Azure](https://azure.microsoft.com/en-us/).
 ![High-level illustration of Nebari architecture](https://raw.githubusercontent.com/nebari-dev/nebari-docs/main/docs/static/img/welcome/nebari_overview_sequence.png)
 

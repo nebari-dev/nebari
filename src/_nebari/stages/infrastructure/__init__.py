@@ -8,7 +8,7 @@ import sys
 import tempfile
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, PrivateAttr, field_validator, model_validator
 
 from _nebari import constants
 from _nebari.provider import terraform
@@ -182,7 +182,7 @@ class AWSAmiTypes(str, enum.Enum):
 
 class AWSNodeLaunchTemplate(schema.Base):
     pre_bootstrap_command: Optional[str] = None
-    ami_id: Optional[str] = None
+    _ami_id: Optional[str] = PrivateAttr(default=None)
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -217,7 +217,7 @@ class AWSNodeGroupInputVars(schema.Base):
 def construct_aws_ami_type(gpu_enabled: bool, launch_template: AWSNodeLaunchTemplate):
     """Construct the AWS AMI type based on the provided parameters."""
 
-    if launch_template and launch_template.ami_id:
+    if launch_template and launch_template._ami_id:
         return "CUSTOM"
 
     if gpu_enabled:
@@ -251,6 +251,7 @@ class AWSInputVars(schema.Base):
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
     ] = "public"
+    eks_kms_arn: Optional[str] = None
     node_groups: List[AWSNodeGroupInputVars]
     availability_zones: List[str]
     vpc_cidr_block: str
@@ -445,6 +446,9 @@ DEFAULT_GCP_NODE_GROUPS = {
 
 
 class GoogleCloudPlatformProvider(schema.Base):
+    # If you pass a major and minor version without a patch version
+    # yaml will pass it as a float, so we need to coerce it to a string
+    model_config = ConfigDict(coerce_numbers_to_str=True)
     region: str
     project: str
     kubernetes_version: str
@@ -459,6 +463,12 @@ class GoogleCloudPlatformProvider(schema.Base):
     master_authorized_networks_config: Optional[Union[GCPCIDRBlock, None]] = None
     private_cluster_config: Optional[Union[GCPPrivateClusterConfig, None]] = None
 
+    @field_validator("kubernetes_version", mode="before")
+    @classmethod
+    def transform_version_to_str(cls, value) -> str:
+        """Transforms the version to a string if it is not already."""
+        return str(value)
+
     @model_validator(mode="before")
     @classmethod
     def _check_input(cls, data: Any) -> Any:
@@ -469,8 +479,10 @@ class GoogleCloudPlatformProvider(schema.Base):
             )
 
         available_kubernetes_versions = google_cloud.kubernetes_versions(data["region"])
-        print(available_kubernetes_versions)
-        if data["kubernetes_version"] not in available_kubernetes_versions:
+        if not any(
+            v.startswith(str(data["kubernetes_version"]))
+            for v in available_kubernetes_versions
+        ):
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
@@ -594,6 +606,7 @@ class AmazonWebServicesProvider(schema.Base):
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
     ] = "public"
+    eks_kms_arn: Optional[str] = None
     existing_subnet_ids: Optional[List[str]] = None
     existing_security_group_id: Optional[str] = None
     vpc_cidr_block: str = "10.10.0.0/16"
@@ -648,6 +661,42 @@ class AmazonWebServicesProvider(schema.Base):
                 if instance not in available_instances:
                     raise ValueError(
                         f"Amazon Web Services instance {node_group.instance} not one of available instance types={available_instances}"
+                    )
+
+        # check if kms key is valid
+        available_kms_keys = amazon_web_services.kms_key_arns(data["region"])
+        if "eks_kms_arn" in data and data["eks_kms_arn"] is not None:
+            key_id = [
+                id for id in available_kms_keys.keys() if id in data["eks_kms_arn"]
+            ]
+            # Raise error if key_id is not found in available_kms_keys
+            if (
+                len(key_id) != 1
+                or available_kms_keys[key_id[0]].Arn != data["eks_kms_arn"]
+            ):
+                raise ValueError(
+                    f"Amazon Web Services KMS Key with ARN {data['eks_kms_arn']} not one of available/enabled keys={[v.Arn for v in available_kms_keys.values() if v.KeyManager=='CUSTOMER' and v.KeySpec=='SYMMETRIC_DEFAULT']}"
+                )
+            key_id = key_id[0]
+            # Raise error if key is not a customer managed key
+            if available_kms_keys[key_id].KeyManager != "CUSTOMER":
+                raise ValueError(
+                    f"Amazon Web Services KMS Key with ID {key_id} is not a customer managed key"
+                )
+            # Symmetric KMS keys with Encrypt and decrypt key-usage have the SYMMETRIC_DEFAULT key-spec
+            # EKS cluster encryption requires a Symmetric key that is set to encrypt and decrypt data
+            if available_kms_keys[key_id].KeySpec != "SYMMETRIC_DEFAULT":
+                if available_kms_keys[key_id].KeyUsage == "GENERATE_VERIFY_MAC":
+                    raise ValueError(
+                        f"Amazon Web Services KMS Key with ID {key_id} does not have KeyUsage set to 'Encrypt and decrypt' data"
+                    )
+                elif available_kms_keys[key_id].KeyUsage != "ENCRYPT_DECRYPT":
+                    raise ValueError(
+                        f"Amazon Web Services KMS Key with ID {key_id} is not of type Symmetric, and KeyUsage not set to 'Encrypt and decrypt' data"
+                    )
+                else:
+                    raise ValueError(
+                        f"Amazon Web Services KMS Key with ID {key_id} is not of type Symmetric"
                     )
 
         return data
@@ -932,6 +981,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 eks_endpoint_access=self.config.amazon_web_services.eks_endpoint_access,
+                eks_kms_arn=self.config.amazon_web_services.eks_kms_arn,
                 existing_subnet_ids=self.config.amazon_web_services.existing_subnet_ids,
                 existing_security_group_id=self.config.amazon_web_services.existing_security_group_id,
                 region=self.config.amazon_web_services.region,
