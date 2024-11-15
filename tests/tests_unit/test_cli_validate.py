@@ -114,26 +114,20 @@ amazon_web_services:
             ["validate", "--config", tmp_file.resolve()],
             env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.20"},
         )
-        try:
-            assert 0 == valid_result.exit_code
-            assert not valid_result.exception
-            assert "Successfully validated configuration" in valid_result.stdout
-        except AssertionError:
-            print(valid_result.stdout)
-            raise
+
+        assert 0 == valid_result.exit_code
+        assert not valid_result.exception
+        assert "Successfully validated configuration" in valid_result.stdout
 
         invalid_result = runner.invoke(
             app,
             ["validate", "--config", tmp_file.resolve()],
             env={"NEBARI_SECRET__amazon_web_services__kubernetes_version": "1.0"},
         )
-        try:
-            assert 1 == invalid_result.exit_code
-            assert invalid_result.exception
-            assert "Invalid `kubernetes-version`" in invalid_result.stdout
-        except AssertionError:
-            print(invalid_result.stdout)
-            raise
+
+        assert 1 == invalid_result.exit_code
+        assert invalid_result.exception
+        assert "Invalid `kubernetes-version`" in invalid_result.stdout
 
 
 @pytest.mark.parametrize(
@@ -227,7 +221,6 @@ project_name: test
                 }
             },
         ),
-        ("do", {"digital_ocean": {"kubernetes_version": "1.20", "region": "nyc3"}}),
         pytest.param(
             "local",
             {"security": {"authentication": {"type": "Auth0"}}},
@@ -254,7 +247,6 @@ def test_cli_validate_error_missing_cloud_env(
         "ARM_TENANT_ID",
         "ARM_CLIENT_ID",
         "ARM_CLIENT_SECRET",
-        "DIGITALOCEAN_TOKEN",
         "SPACES_ACCESS_KEY_ID",
         "SPACES_SECRET_ACCESS_KEY",
         "AUTH0_CLIENT_ID",

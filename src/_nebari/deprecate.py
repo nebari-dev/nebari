@@ -7,4 +7,6 @@ DEPRECATED_FILE_PATHS = [
     ".github/workflows/image.yaml",
     ".github/workflows/jupyterhub-pr.yaml",
     ".github/workflows/jupyterhub.yaml",
+    # v2024.7.3 renamed misspelled file path
+    "stages/07-kubernetes-services/modules/kubernetes/services/dask-gateway/controler.tf",  # codespell:ignore
 ]

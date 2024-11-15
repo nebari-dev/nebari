@@ -18,7 +18,6 @@ on:
   push:
     branches:
       - main
-      - develop
       - release/\d{4}.\d{1,2}.\d{1,2}
     paths:
       - ".github/workflows/test_local_integration.yaml"
@@ -54,6 +53,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup runner for local deployment
+        uses: ./.github/actions/setup-local
+
       - name: Checkout the branch from the PR that triggered the job
         if: ${{ github.event_name == 'issue_comment' }}
         run: |
@@ -71,87 +73,47 @@ jobs:
           python-version: "3.11"
           miniconda-version: "latest"
 
+      - name: Install JQ
+        run: |
+          sudo apt-get update
+          sudo apt-get install jq -y
+
       - name: Install Nebari and playwright
         run: |
           pip install .[dev]
           playwright install
 
-      - uses: azure/setup-kubectl@v4.0.0
-        with:
-          version: v1.19.16
-
-      - name: Enable docker permissions for user
-        run: |
-          sudo docker ps
-          sudo usermod -aG docker $USER && newgrp docker
-
-          docker info
-          docker ps
-
-      - name: Get routing table for docker pods
-        run: |
-          ip route
-
-      - name: Initialize Nebari Cloud
-        run: |
-          mkdir -p local-deployment
-          cd local-deployment
-          nebari init local --project=thisisatest --domain github-actions.nebari.dev --auth-provider=password
-
-          # Need smaller profiles on Local Kind
-          sed -i -E 's/(cpu_guarantee):\s+[0-9\.]+/\1: 0.25/g' "nebari-config.yaml"
-          sed -i -E 's/(mem_guarantee):\s+[A-Za-z0-9\.]+/\1: 0.25G/g' "nebari-config.yaml"
-
-          # Change default JupyterLab theme
-          cat >> nebari-config.yaml <<- EOM
-          jupyterlab:
-            default_settings:
-              "@jupyterlab/apputils-extension:themes":
-                theme: JupyterLab Dark
-          EOM
-
-          # Change default value for minio persistence size
-          cat >> nebari-config.yaml <<- EOM
-          monitoring:
-            enabled: true
-            overrides:
-              minio:
-                persistence:
-                  size: 1Gi
-          EOM
-
-          cat nebari-config.yaml
+      - name: Initialize Nebari config for local deployment
+        id: init
+        uses: ./.github/actions/init-local
 
       - name: Deploy Nebari
-        working-directory: local-deployment
-        run: |
-          nebari deploy --config nebari-config.yaml --disable-prompt
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
 
-      - name: Basic kubectl checks after deployment
-        if: always()
-        run: |
-          kubectl get all,cm,secret,pv,pvc,ing -A
-
-      - name: Check github-actions.nebari.dev resolves
-        run: |
-          nslookup github-actions.nebari.dev
-
-      - name: Curl jupyterhub login page
-        run: |
-          curl -k https://github-actions.nebari.dev/hub/home -i
+      - name: Health check
+        uses: ./.github/actions/health-check
+        with:
+          domain: ${{ steps.init.outputs.domain }}
 
       - name: Create example-user
-        working-directory: local-deployment
+        working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config nebari-config.yaml
-          nebari keycloak listusers --config nebari-config.yaml
+          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
+          nebari keycloak listusers --config ${{ steps.init.outputs.config }}
 
-      - name: Get nebari-config.yaml full path
-        run: echo "NEBARI_CONFIG_PATH=`realpath ./local-deployment/nebari-config.yaml`" >> "$GITHUB_ENV"
+      - name: Await Workloads
+        uses: jupyterhub/action-k8s-await-workloads@v3
+        with:
+          workloads: "" # all
+          namespace: "dev"
+          timeout: 60
+          max-restarts: 0
 
       ### DEPLOYMENT TESTS
       - name: Deployment Pytests
         env:
+          NEBARI_CONFIG_PATH: ${{ steps.init.outputs.config }}
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
         run: |
@@ -166,7 +128,7 @@ jobs:
         env:
           KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
           KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-          NEBARI_FULL_URL: https://github-actions.nebari.dev/
+          NEBARI_FULL_URL: "https://${{ steps.init.outputs.domain }}/"
         working-directory: tests/tests_e2e/playwright
         run: |
           # create environment file
@@ -187,7 +149,6 @@ jobs:
         # Since this is not critical for most pull requests and takes more than half of the time
         # in the CI, it makes sense to only run on merge to main or workflow_dispatch to speed
         # up feedback cycle
-        if: github.ref_name == 'develop' || github.event_name == 'workflow_dispatch'
-        working-directory: local-deployment
-        run: |
-          nebari destroy --config nebari-config.yaml --disable-prompt
+        if: github.ref_name == 'main' || github.event_name == 'workflow_dispatch'
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari destroy --config ${{ steps.init.outputs.config }} --disable-prompt

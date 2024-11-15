@@ -6,6 +6,7 @@ When a user runs `nebari upgrade  -c nebari-config.yaml`, then the do_upgrade fu
 
 import json
 import logging
+import os
 import re
 import secrets
 import string
@@ -24,6 +25,7 @@ from rich.prompt import Prompt
 from typing_extensions import override
 
 from _nebari.config import backup_configuration
+from _nebari.keycloak import get_keycloak_admin
 from _nebari.stages.infrastructure import (
     provider_enum_default_node_groups_map,
     provider_enum_name_map,
@@ -1213,6 +1215,22 @@ class Upgrade_2024_9_1(UpgradeStep):
 
     version = "2024.9.1"
 
+    # Nebari version 2024.9.1 has been marked as broken, and will be skipped:
+    # https://github.com/nebari-dev/nebari/issues/2798
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        return config
+
+
+class Upgrade_2024_11_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.11.1
+    """
+
+    version = "2024.11.1"
+
     @override
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
@@ -1235,6 +1253,140 @@ class Upgrade_2024_9_1(UpgradeStep):
             )
             rich.print("")
 
+        rich.print("\n ⚠️ Upgrade Warning ⚠️")
+
+        text = textwrap.dedent(
+            """
+            Please ensure no users are currently logged in prior to deploying this
+            update.
+
+            This release introduces changes to how group directories are mounted in
+            JupyterLab pods.
+
+            Previously, every Keycloak group in the Nebari realm automatically created a
+            shared directory at ~/shared/<group-name>, accessible to all group members
+            in their JupyterLab pods.
+
+            Moving forward, only groups assigned the JupyterHub client role
+            [magenta]allow-group-directory-creation[/magenta] or its affiliated scope
+            [magenta]write:shared-mount[/magenta] will have their directories mounted.
+
+            By default, the admin, analyst, and developer groups will have this
+            role assigned during the upgrade. For other groups, you'll now need to
+            assign this role manually in the Keycloak UI to have their directories
+            mounted.
+
+            For more details check our [green][link=https://www.nebari.dev/docs/references/release/]release notes[/link][/green].
+            """
+        )
+        rich.print(text)
+        keycloak_admin = None
+
+        # Prompt the user for role assignment (if yes, transforms the response into bool)
+        assign_roles = (
+            Prompt.ask(
+                "[bold]Would you like Nebari to assign the corresponding role/scopes to all of your current groups automatically?[/bold]",
+                choices=["y", "N"],
+                default="N",
+            ).lower()
+            == "y"
+        )
+
+        if assign_roles:
+            # In case this is done with a local deployment
+            import urllib3
+
+            urllib3.disable_warnings()
+
+            keycloak_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
+            keycloak_password = os.environ.get(
+                "KEYCLOAK_ADMIN_PASSWORD",
+                config["security"]["keycloak"]["initial_root_password"],
+            )
+
+            try:
+                # Quick test to connect to Keycloak
+                keycloak_admin = get_keycloak_admin(
+                    server_url=f"https://{config['domain']}/auth/",
+                    username=keycloak_username,
+                    password=keycloak_password,
+                )
+            except ValueError as e:
+                if "invalid_grant" in str(e):
+                    rich.print(
+                        textwrap.dedent(
+                            """
+                            [red bold]Failed to connect to the Keycloak server.[/red bold]\n
+                            [yellow]Please set the [bold]KEYCLOAK_ADMIN_USERNAME[/bold] and [bold]KEYCLOAK_ADMIN_PASSWORD[/bold]
+                            environment variables with the Keycloak root credentials and try again.[/yellow]
+                            """
+                        )
+                    )
+                    exit()
+                else:
+                    # Handle other exceptions
+                    rich.print(
+                        f"[red bold]An unexpected error occurred: {repr(e)}[/red bold]"
+                    )
+                    exit()
+
+            # Get client ID as role is bound to the JupyterHub client
+            client_id = keycloak_admin.get_client_id("jupyterhub")
+            role_name = "legacy-group-directory-creation-role"
+
+            # Create role with shared scopes
+            keycloak_admin.create_client_role(
+                client_role_id=client_id,
+                skip_exists=True,
+                payload={
+                    "name": role_name,
+                    "attributes": {
+                        "scopes": ["write:shared-mount"],
+                        "component": ["shared-directory"],
+                    },
+                    "description": (
+                        "Role to allow group directory creation, created as part of the "
+                        "Nebari 2024.11.1 upgrade workflow."
+                    ),
+                },
+            )
+
+            role_id = keycloak_admin.get_client_role_id(
+                client_id=client_id, role_name=role_name
+            )
+
+            role_representation = keycloak_admin.get_role_by_id(role_id=role_id)
+
+            # Fetch all groups and groups with the role
+            all_groups = keycloak_admin.get_groups()
+            groups_with_role = keycloak_admin.get_client_role_groups(
+                client_id=client_id, role_name=role_name
+            )
+            groups_with_role_ids = {group["id"] for group in groups_with_role}
+
+            # Identify groups without the role
+            groups_without_role = [
+                group for group in all_groups if group["id"] not in groups_with_role_ids
+            ]
+
+            if groups_without_role:
+                group_names = ", ".join(group["name"] for group in groups_without_role)
+                rich.print(
+                    f"\n[bold]Updating the following groups with the required permissions:[/bold] {group_names}\n"
+                )
+                for group in groups_without_role:
+                    keycloak_admin.assign_group_client_roles(
+                        group_id=group["id"],
+                        client_id=client_id,
+                        roles=[role_representation],
+                    )
+                rich.print(
+                    "\n[green]Group permissions have been updated successfully.[/green]"
+                )
+            else:
+                rich.print(
+                    "\n[green]All groups already have the required permissions.[/green]"
+                )
         return config
 
 

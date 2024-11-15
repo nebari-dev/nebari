@@ -73,11 +73,21 @@ def kubernetes_versions(region: str) -> List[str]:
     credentials, project_id = load_credentials()
     client = container_v1.ClusterManagerClient(credentials=credentials)
     response = client.get_server_config(
-        name=f"projects/{project_id}/locations/{region}"
+        name=f"projects/{project_id}/locations/{region}", timeout=300
     )
     supported_kubernetes_versions = response.valid_master_versions
 
     return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
+
+
+def get_patch_version(full_version: str) -> str:
+    return full_version.split("-")[0]
+
+
+def get_minor_version(full_version: str) -> str:
+    patch_version = get_patch_version(full_version)
+    parts = patch_version.split(".")
+    return f"{parts[0]}.{parts[1]}"
 
 
 def cluster_exists(cluster_name: str, region: str) -> bool:

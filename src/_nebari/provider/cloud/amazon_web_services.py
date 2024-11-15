@@ -2,6 +2,7 @@ import functools
 import os
 import re
 import time
+from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 import boto3
@@ -119,6 +120,35 @@ def instances(region: str) -> Dict[str, str]:
         [j["InstanceType"] for i in paginator.paginate() for j in i["InstanceTypes"]]
     )
     return {t: t for t in instance_types}
+
+
+@dataclass
+class Kms_Key_Info:
+    Arn: str
+    KeyUsage: str
+    KeySpec: str
+    KeyManager: str
+
+
+@functools.lru_cache()
+def kms_key_arns(region: str) -> Dict[str, Kms_Key_Info]:
+    """Return dict of available/enabled KMS key IDs and associated KeyMetadata for the AWS region."""
+    session = aws_session(region=region)
+    client = session.client("kms")
+    kms_keys = {}
+    # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kms/client/list_keys.html
+    for key in client.list_keys().get("Keys"):
+        key_id = key["KeyId"]
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/kms/client/describe_key.html#:~:text=Response%20Structure
+        key_data = client.describe_key(KeyId=key_id).get("KeyMetadata")
+        if key_data.get("Enabled"):
+            kms_keys[key_id] = Kms_Key_Info(
+                Arn=key_data.get("Arn"),
+                KeyUsage=key_data.get("KeyUsage"),
+                KeySpec=key_data.get("KeySpec"),
+                KeyManager=key_data.get("KeyManager"),
+            )
+    return kms_keys
 
 
 def aws_get_vpc_id(name: str, namespace: str, region: str) -> Optional[str]:
