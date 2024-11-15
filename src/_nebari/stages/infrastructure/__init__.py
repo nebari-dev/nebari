@@ -496,6 +496,14 @@ class AWSNodeGroup(schema.Base):
     # Disabled as part of 2024.11.1 until #2832 is resolved
     # launch_template: Optional[AWSNodeLaunchTemplate] = None
 
+    @model_validator(mode="before")
+    def check_launch_template(cls, values):
+        if "launch_template" in values:
+            raise ValueError(
+                "The 'launch_template' field is currently unavailable and has been removed from the configuration schema.\nPlease omit this field until it is reintroduced in a future update.",
+            )
+        return values
+
 
 DEFAULT_AWS_NODE_GROUPS = {
     "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
