@@ -8,21 +8,16 @@ from typing import Any, Dict
 import pydantic
 import requests
 
-from _nebari import constants
+from _nebari import constants, utils
+from _nebari.config_set import read_config_set
 from _nebari.provider import git
 from _nebari.provider.cicd import github
-from _nebari.provider.cloud import (
-    amazon_web_services,
-    azure_cloud,
-    digital_ocean,
-    google_cloud,
-)
+from _nebari.provider.cloud import amazon_web_services, azure_cloud, google_cloud
 from _nebari.provider.oauth.auth0 import create_client
 from _nebari.stages.bootstrap import CiEnum
 from _nebari.stages.infrastructure import (
     DEFAULT_AWS_NODE_GROUPS,
     DEFAULT_AZURE_NODE_GROUPS,
-    DEFAULT_DO_NODE_GROUPS,
     DEFAULT_GCP_NODE_GROUPS,
     node_groups_to_dict,
 )
@@ -53,6 +48,7 @@ def render_config(
     region: str = None,
     disable_prompt: bool = False,
     ssl_cert_email: str = None,
+    config_set: str = None,
 ) -> Dict[str, Any]:
     config = {
         "provider": cloud_provider,
@@ -117,22 +113,7 @@ def render_config(
                 ),
             }
 
-    if cloud_provider == ProviderEnum.do:
-        do_region = region or constants.DO_DEFAULT_REGION
-        do_kubernetes_versions = kubernetes_version or get_latest_kubernetes_version(
-            digital_ocean.kubernetes_versions()
-        )
-        config["digital_ocean"] = {
-            "kubernetes_version": do_kubernetes_versions,
-            "region": do_region,
-            "node_groups": node_groups_to_dict(DEFAULT_DO_NODE_GROUPS),
-        }
-
-        config["theme"]["jupyterhub"][
-            "hub_subtitle"
-        ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
-
-    elif cloud_provider == ProviderEnum.gcp:
+    if cloud_provider == ProviderEnum.gcp:
         gcp_region = region or constants.GCP_DEFAULT_REGION
         gcp_kubernetes_version = kubernetes_version or get_latest_kubernetes_version(
             google_cloud.kubernetes_versions(gcp_region)
@@ -197,13 +178,17 @@ def render_config(
         config["certificate"] = {"type": CertificateEnum.letsencrypt.value}
         config["certificate"]["acme_email"] = ssl_cert_email
 
+    if config_set:
+        config_set = read_config_set(config_set)
+        config = utils.deep_merge(config, config_set.config)
+
     # validate configuration and convert to model
     from nebari.plugins import nebari_plugin_manager
 
     try:
         config_model = nebari_plugin_manager.config_schema.model_validate(config)
     except pydantic.ValidationError as e:
-        print(str(e))
+        raise e
 
     if repository_auto_provision:
         match = re.search(github_url_regex, repository)
@@ -245,16 +230,7 @@ def github_auto_provision(config: pydantic.BaseModel, owner: str, repo: str):
 
     try:
         # Secrets
-        if config.provider == ProviderEnum.do:
-            for name in {
-                "AWS_ACCESS_KEY_ID",
-                "AWS_SECRET_ACCESS_KEY",
-                "SPACES_ACCESS_KEY_ID",
-                "SPACES_SECRET_ACCESS_KEY",
-                "DIGITALOCEAN_TOKEN",
-            }:
-                github.update_secret(owner, repo, name, os.environ[name])
-        elif config.provider == ProviderEnum.aws:
+        if config.provider == ProviderEnum.aws:
             for name in {
                 "AWS_ACCESS_KEY_ID",
                 "AWS_SECRET_ACCESS_KEY",

@@ -6,6 +6,7 @@ When a user runs `nebari upgrade  -c nebari-config.yaml`, then the do_upgrade fu
 
 import json
 import logging
+import os
 import re
 import secrets
 import string
@@ -20,7 +21,7 @@ import requests
 import rich
 from packaging.version import Version
 from pydantic import ValidationError
-from rich.prompt import Prompt
+from rich.prompt import Confirm, Prompt
 from typing_extensions import override
 
 from _nebari.config import backup_configuration
@@ -47,6 +48,20 @@ ARGO_JUPYTER_SCHEDULER_REPO = "https://github.com/nebari-dev/argo-jupyter-schedu
 
 UPGRADE_KUBERNETES_MESSAGE = "Please see the [green][link=https://www.nebari.dev/docs/how-tos/kubernetes-version-upgrade]Kubernetes upgrade docs[/link][/green] for more information."
 DESTRUCTIVE_UPGRADE_WARNING = "-> This version upgrade will result in your cluster being completely torn down and redeployed.  Please ensure you have backed up any data you wish to keep before proceeding!!!"
+TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION = (
+    "Nebari needs to generate an updated set of Terraform scripts for your deployment and delete the old scripts.\n"
+    "Do you want Nebari to remove your [green]stages[/green] directory automatically for you? It will be recreated the next time Nebari is run.\n"
+    "[red]Warning:[/red] This will remove everything in the [green]stages[/green] directory.\n"
+    "If you do not have Nebari do it automatically here, you will need to remove the [green]stages[/green] manually with a command"
+    "like [green]rm -rf stages[/green]."
+)
+DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE = (
+    "⚠️ CAUTION ⚠️\n"
+    "Nebari would like to remove your old Terraform/Opentofu [green]stages[/green] files. Your [blue]terraform_state[/blue] configuration is not set to [blue]remote[/blue], so destroying your [green]stages[/green] files could potentially be very detructive.\n"
+    "If you don't have active Terraform/Opentofu deployment state files contained within your [green]stages[/green] directory, you may proceed by entering [red]y[/red] at the prompt."
+    "If you have an active Terraform/Opentofu deployment with active state files in your [green]stages[/green] folder, you will need to either bring Nebari down temporarily to redeploy or pursue some other means to upgrade. Enter [red]n[/red] at the prompt.\n\n"
+    "Do you want to proceed by deleting your [green]stages[/green] directory and everything in it? ([red]POTENTIALLY VERY DESTRUCTIVE[/red])"
+)
 
 
 def do_upgrade(config_filename, attempt_fixes=False):
@@ -213,6 +228,54 @@ class UpgradeStep(ABC):
 
         return config
 
+    @classmethod
+    def _rm_rf_stages(cls, config_filename, dry_run: bool = False, verbose=False):
+        """
+        Remove stage files during and upgrade step
+
+        Usually used when you need files in your `stages` directory to be
+        removed in order to avoid resource conflicts
+
+        Args:
+            config_filename (str): The path to the configuration file.
+        Returns:
+            None
+        """
+        config_dir = Path(config_filename).resolve().parent
+
+        if Path.is_dir(config_dir):
+            stage_dir = config_dir / "stages"
+
+            stage_filenames = [d for d in stage_dir.rglob("*") if d.is_file()]
+
+            for stage_filename in stage_filenames:
+                if dry_run and verbose:
+                    rich.print(f"Dry run: Would remove {stage_filename}")
+                else:
+                    stage_filename.unlink(missing_ok=True)
+                    if verbose:
+                        rich.print(f"Removed {stage_filename}")
+
+            stage_filedirs = sorted(
+                (d for d in stage_dir.rglob("*") if d.is_dir()),
+                reverse=True,
+            )
+
+            for stage_filedir in stage_filedirs:
+                if dry_run and verbose:
+                    rich.print(f"Dry run: Would remove {stage_filedir}")
+                else:
+                    stage_filedir.rmdir()
+                    if verbose:
+                        rich.print(f"Removed {stage_filedir}")
+
+            if dry_run and verbose:
+                rich.print(f"Dry run: Would remove {stage_dir}")
+            elif stage_dir.is_dir():
+                stage_dir.rmdir()
+                if verbose:
+                    rich.print(f"Removed {stage_dir}")
+
     def get_version(self):
         """
         Returns:
@@ -306,7 +369,9 @@ class UpgradeStep(ABC):
                 return ":".join([m.groups()[0], f"v{new_version}"])
             return None
 
-        def replace_image_tag(s: str, new_version: str, config_path: str) -> str:
+        def replace_image_tag(
+            s: str, new_version: str, config_path: str, attempt_fixes: bool
+        ) -> str:
             """
             Replace the image tag with the new version.
 
@@ -328,11 +393,11 @@ class UpgradeStep(ABC):
             if current_tag == new_version:
                 return s
             loc = f"{config_path}: {image_name}"
-            response = Prompt.ask(
-                f"\nDo you want to replace current tag [green]{current_tag}[/green] with [green]{new_version}[/green] for:\n[purple]{loc}[/purple]? [Y/n] ",
-                default="Y",
+            response = attempt_fixes or Confirm.ask(
+                f"\nDo you want to replace current tag [green]{current_tag}[/green] with [green]{new_version}[/green] for:\n[purple]{loc}[/purple]?",
+                default=True,
             )
-            if response.lower() in ["y", "yes", ""]:
+            if response:
                 return s.replace(current_tag, new_version)
             else:
                 return s
@@ -363,7 +428,11 @@ class UpgradeStep(ABC):
             config[config_path[-1]] = value
 
         def update_image_tag(
-            config: dict, config_path: str, current_image: str, new_version: str
+            config: dict,
+            config_path: str,
+            current_image: str,
+            new_version: str,
+            attempt_fixes: bool,
         ) -> dict:
             """
             Update the image tag in the configuration.
@@ -377,7 +446,12 @@ class UpgradeStep(ABC):
             Returns:
                 dict: The updated configuration dictionary.
             """
-            new_image = replace_image_tag(current_image, new_version, config_path)
+            new_image = replace_image_tag(
+                current_image,
+                new_version,
+                config_path,
+                attempt_fixes,
+            )
             if new_image != current_image:
                 set_nested_item(config, config_path, new_image)
 
@@ -387,7 +461,11 @@ class UpgradeStep(ABC):
         for k, v in config.get("default_images", {}).items():
             config_path = f"default_images.{k}"
             config = update_image_tag(
-                config, config_path, v, __rounded_finish_version__
+                config,
+                config_path,
+                v,
+                __rounded_finish_version__,
+                kwargs.get("attempt_fixes", False),
             )
 
         # update profiles.jupyterlab images
@@ -399,6 +477,7 @@ class UpgradeStep(ABC):
                     f"profiles.jupyterlab.{i}.kubespawner_override.image",
                     current_image,
                     __rounded_finish_version__,
+                    kwargs.get("attempt_fixes", False),
                 )
 
         # update profiles.dask_worker images
@@ -410,11 +489,16 @@ class UpgradeStep(ABC):
                     f"profiles.dask_worker.{k}.image",
                     current_image,
                     __rounded_finish_version__,
+                    kwargs.get("attempt_fixes", False),
                 )
 
         # Run any version-specific tasks
         return self._version_specific_upgrade(
-            config, start_version, config_filename, *args, **kwargs
+            config,
+            start_version,
+            config_filename,
+            *args,
+            **kwargs,
         )
 
     def _version_specific_upgrade(
@@ -628,27 +712,93 @@ class Upgrade_2023_4_2(UpgradeStep):
         """
         Prompt users to delete Argo CRDs
         """
+        argo_crds = [
+            "clusterworkflowtemplates.argoproj.io",
+            "cronworkflows.argoproj.io",
+            "workfloweventbindings.argoproj.io",
+            "workflows.argoproj.io",
+            "workflowtasksets.argoproj.io",
+            "workflowtemplates.argoproj.io",
+        ]
 
-        kubectl_delete_argo_crds_cmd = "kubectl delete crds clusterworkflowtemplates.argoproj.io cronworkflows.argoproj.io workfloweventbindings.argoproj.io workflows.argoproj.io workflowtasksets.argoproj.io workflowtemplates.argoproj.io"
+        argo_sa = ["argo-admin", "argo-dev", "argo-view"]
 
-        kubectl_delete_argo_sa_cmd = (
-            f"kubectl delete sa -n {config['namespace']} argo-admin argo-dev argo-view"
-        )
+        namespace = config.get("namespace", "default")
 
-        rich.print(
-            f"\n\n[bold cyan]Note:[/] Upgrading requires a one-time manual deletion of the Argo Workflows Custom Resource Definitions (CRDs) and service accounts. \n\n[red bold]Warning:  [link=https://{config['domain']}/argo/workflows]Workflows[/link] and [link=https://{config['domain']}/argo/workflows]CronWorkflows[/link] created before deleting the CRDs will be erased when the CRDs are deleted and will not be restored.[/red bold] \n\nThe updated CRDs will be installed during the next [cyan bold]nebari deploy[/cyan bold] step. Argo Workflows will not function after deleting the CRDs until the updated CRDs and service accounts are installed in the next nebari deploy. You must delete the Argo Workflows CRDs and service accounts before upgrading to {self.version} (or later) or the deploy step will fail.  Please delete them before proceeding by generating a kubeconfig (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari/#generating-the-kubeconfig]docs[/link]), installing kubectl (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari#installing-kubectl]docs[/link]), and running the following two commands:\n\n\t[cyan bold]{kubectl_delete_argo_crds_cmd} [/cyan bold]\n\n\t[cyan bold]{kubectl_delete_argo_sa_cmd} [/cyan bold]"
-            ""
-        )
+        if kwargs.get("attempt_fixes", False):
+            try:
+                kubernetes.config.load_kube_config()
+            except kubernetes.config.config_exception.ConfigException:
+                rich.print(
+                    "[red bold]No default kube configuration file was found. Make sure to [link=https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig]have one pointing to your Nebari cluster[/link] before upgrading.[/red bold]"
+                )
+                exit()
 
-        continue_ = Prompt.ask(
-            "Have you deleted the Argo Workflows CRDs and service accounts? [y/N] ",
-            default="N",
-        )
-        if not continue_ == "y":
-            rich.print(
-                f"You must delete the Argo Workflows CRDs and service accounts before upgrading to [green]{self.version}[/green] (or later)."
+            for crd in argo_crds:
+                api_instance = kubernetes.client.ApiextensionsV1Api()
+                try:
+                    api_instance.delete_custom_resource_definition(
+                        name=crd,
+                    )
+                except kubernetes.client.exceptions.ApiException as e:
+                    if e.status == 404:
+                        rich.print(f"CRD [yellow]{crd}[/yellow] not found. Ignoring.")
+                    else:
+                        raise e
+                else:
+                    rich.print(f"Successfully removed CRD [green]{crd}[/green]")
+
+            for sa in argo_sa:
+                api_instance = kubernetes.client.CoreV1Api()
+                try:
+                    api_instance.delete_namespaced_service_account(
+                        sa,
+                        namespace,
+                    )
+                except kubernetes.client.exceptions.ApiException as e:
+                    if e.status == 404:
+                        rich.print(
+                            f"Service account [yellow]{sa}[/yellow] not found. Ignoring."
+                        )
+                    else:
+                        raise e
+                else:
+                    rich.print(
+                        f"Successfully removed service account [green]{sa}[/green]"
+                    )
+        else:
+            kubectl_delete_argo_crds_cmd = " ".join(
+                (
+                    *("kubectl delete crds",),
+                    *argo_crds,
+                ),
             )
-            exit()
+            kubectl_delete_argo_sa_cmd = " ".join(
+                (
+                    *(
+                        "kubectl delete sa",
+                        f"-n {namespace}",
+                    ),
+                    *argo_sa,
+                ),
+            )
+            rich.print(
+                f"\n\n[bold cyan]Note:[/] Upgrading requires a one-time manual deletion of the Argo Workflows Custom Resource Definitions (CRDs) and service accounts. \n\n[red bold]"
+                f"Warning:  [link=https://{config['domain']}/argo/workflows]Workflows[/link] and [link=https://{config['domain']}/argo/workflows]CronWorkflows[/link] created before deleting the CRDs will be erased when the CRDs are deleted and will not be restored.[/red bold] \n\n"
+                f"The updated CRDs will be installed during the next [cyan bold]nebari deploy[/cyan bold] step. Argo Workflows will not function after deleting the CRDs until the updated CRDs and service accounts are installed in the next nebari deploy. "
+                f"You must delete the Argo Workflows CRDs and service accounts before upgrading to {self.version} (or later) or the deploy step will fail.  "
+                f"Please delete them before proceeding by generating a kubeconfig (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari/#generating-the-kubeconfig]docs[/link]), installing kubectl (see [link=https://www.nebari.dev/docs/how-tos/debug-nebari#installing-kubectl]docs[/link]), and running the following two commands:\n\n\t[cyan bold]{kubectl_delete_argo_crds_cmd} [/cyan bold]\n\n\t[cyan bold]{kubectl_delete_argo_sa_cmd} [/cyan bold]"
+            )
+
+            continue_ = Confirm.ask(
+                "Have you deleted the Argo Workflows CRDs and service accounts?",
+                default=False,
+            )
+            if not continue_:
+                rich.print(
+                    f"You must delete the Argo Workflows CRDs and service accounts before upgrading to [green]{self.version}[/green] (or later)."
+                )
+                exit()
 
         return config
 
@@ -681,11 +831,11 @@ class Upgrade_2023_7_2(UpgradeStep):
     ):
         argo = config.get("argo_workflows", {})
         if argo.get("enabled"):
-            response = Prompt.ask(
-                f"\nDo you want to enable the [green][link={NEBARI_WORKFLOW_CONTROLLER_DOCS}]Nebari Workflow Controller[/link][/green], required for [green][link={ARGO_JUPYTER_SCHEDULER_REPO}]Argo-Jupyter-Scheduler[/link][green]? [Y/n] ",
-                default="Y",
+            response = kwargs.get("attempt_fixes", False) or Confirm.ask(
+                f"\nDo you want to enable the [green][link={NEBARI_WORKFLOW_CONTROLLER_DOCS}]Nebari Workflow Controller[/link][/green], required for [green][link={ARGO_JUPYTER_SCHEDULER_REPO}]Argo-Jupyter-Scheduler[/link][green]?",
+                default=True,
             )
-            if response.lower() in ["y", "yes", ""]:
+            if response:
                 argo["nebari_workflow_controller"] = {"enabled": True}
 
         rich.print("\n ⚠️ Deprecation Warnings ⚠️")
@@ -724,9 +874,6 @@ class Upgrade_2023_10_1(UpgradeStep):
         )
         rich.print(
             "-> Data should be backed up before performing this upgrade ([green][link=https://www.nebari.dev/docs/how-tos/manual-backup]see docs[/link][/green])  The 'prevent_deploy' flag has been set in your config file and must be manually removed to deploy."
-        )
-        rich.print(
-            "-> Please also run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
         )
 
         # Setting the following flag will prevent deployment and display guidance to the user
@@ -811,6 +958,26 @@ class Upgrade_2023_10_1(UpgradeStep):
             rich.print("\n ⚠️  DANGER ⚠️")
             rich.print(DESTRUCTIVE_UPGRADE_WARNING)
 
+        if kwargs.get("attempt_fixes", False) or Confirm.ask(
+            TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION,
+            default=False,
+        ):
+            if (
+                (_terraform_state_config := config.get("terraform_state"))
+                and (_terraform_state_config.get("type") != "remote")
+                and not Confirm.ask(
+                    DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
+                    default=False,
+                )
+            ):
+                exit()
+
+            self._rm_rf_stages(
+                config_filename,
+                dry_run=kwargs.get("dry_run", False),
+                verbose=True,
+            )
+
         return config
 
 
@@ -828,14 +995,30 @@ class Upgrade_2023_11_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        rich.print("\n ⚠️  Warning ⚠️")
-        rich.print(
-            "-> Please run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
-        )
         rich.print("\n ⚠️  Deprecation Warning ⚠️")
         rich.print(
             f"-> ClearML, Prefect and kbatch are no longer supported in Nebari version [green]{self.version}[/green] and will be uninstalled."
         )
+
+        if kwargs.get("attempt_fixes", False) or Confirm.ask(
+            TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION,
+            default=False,
+        ):
+            if (
+                (_terraform_state_config := config.get("terraform_state"))
+                and (_terraform_state_config.get("type") != "remote")
+                and not Confirm.ask(
+                    DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
+                    default=False,
+                )
+            ):
+                exit()
+
+            self._rm_rf_stages(
+                config_filename,
+                dry_run=kwargs.get("dry_run", False),
+                verbose=True,
+            )
 
         return config
 
@@ -854,15 +1037,31 @@ class Upgrade_2023_12_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        rich.print("\n ⚠️  Warning ⚠️")
-        rich.print(
-            "-> Please run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
-        )
         rich.print("\n ⚠️  Deprecation Warning ⚠️")
         rich.print(
             f"-> [green]{self.version}[/green] is the last Nebari version that supports the jupyterlab-videochat extension."
         )
         rich.print()
+
+        if kwargs.get("attempt_fixes", False) or Confirm.ask(
+            TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION,
+            default=False,
+        ):
+            if (
+                (_terraform_state_config := config.get("terraform_state"))
+                and (_terraform_state_config.get("type") != "remote")
+                and not Confirm.ask(
+                    DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
+                    default=False,
+                )
+            ):
+                exit()
+
+            self._rm_rf_stages(
+                config_filename,
+                dry_run=kwargs.get("dry_run", False),
+                verbose=True,
+            )
 
         return config
 
@@ -881,16 +1080,32 @@ class Upgrade_2024_1_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        rich.print("\n ⚠️  Warning ⚠️")
-        rich.print(
-            "-> Please run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
-        )
         rich.print("\n ⚠️  Deprecation Warning ⚠️")
         rich.print(
             "-> jupyterlab-videochat, retrolab, jupyter-tensorboard, jupyterlab-conda-store and jupyter-nvdashboard",
             f"are no longer supported in Nebari version [green]{self.version}[/green] and will be uninstalled.",
         )
         rich.print()
+
+        if kwargs.get("attempt_fixes", False) or Confirm.ask(
+            TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION,
+            default=False,
+        ):
+            if (
+                (_terraform_state_config := config.get("terraform_state"))
+                and (_terraform_state_config.get("type") != "remote")
+                and not Confirm.ask(
+                    DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
+                    default=False,
+                )
+            ):
+                exit()
+
+            self._rm_rf_stages(
+                config_filename,
+                dry_run=kwargs.get("dry_run", False),
+                verbose=True,
+            )
 
         return config
 
@@ -957,12 +1172,11 @@ class Upgrade_2024_4_1(UpgradeStep):
                     default_node_groups = provider_enum_default_node_groups_map[
                         provider
                     ]
-                    continue_ = Prompt.ask(
+                    continue_ = kwargs.get("attempt_fixes", False) or Confirm.ask(
                         f"Would you like to include the default configuration for the node groups in [purple]{config_filename}[/purple]?",
-                        choices=["y", "N"],
-                        default="N",
+                        default=False,
                     )
-                    if continue_ == "y":
+                    if continue_:
                         config[provider_full_name]["node_groups"] = default_node_groups
                 except KeyError:
                     pass
@@ -999,7 +1213,6 @@ class Upgrade_2024_6_1(UpgradeStep):
     ):
         # Prompt users to manually update kube-prometheus-stack CRDs if monitoring is enabled
         if config.get("monitoring", {}).get("enabled", True):
-
             crd_urls = [
                 "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml",
                 "https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml",
@@ -1029,10 +1242,9 @@ class Upgrade_2024_6_1(UpgradeStep):
                 "\n-> [red bold]Nebari version 2024.6.1 comes with a new version of Grafana. Any custom dashboards that you created will be deleted after upgrading Nebari. Make sure to [link=https://grafana.com/docs/grafana/latest/dashboards/share-dashboards-panels/#export-a-dashboard-as-json]export them as JSON[/link] so you can [link=https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/#import-a-dashboard]import them[/link] again afterwards.[/red bold]"
                 f"\n-> [red bold]Before upgrading, kube-prometheus-stack CRDs need to be updated and the {daemonset_name} daemonset needs to be deleted.[/red bold]"
             )
-            run_commands = Prompt.ask(
+            run_commands = kwargs.get("attempt_fixes", False) or Confirm.ask(
                 "\nDo you want Nebari to update the kube-prometheus-stack CRDs and delete the prometheus-node-exporter for you? If not, you'll have to do it manually.",
-                choices=["y", "N"],
-                default="N",
+                default=False,
             )
 
             # By default, rich wraps lines by splitting them into multiple lines. This is
@@ -1040,7 +1252,7 @@ class Upgrade_2024_6_1(UpgradeStep):
             # To avoid this, we use a rich console with a larger width to print the entire commands
             # and let the terminal wrap them if needed.
             console = rich.console.Console(width=220)
-            if run_commands == "y":
+            if run_commands:
                 try:
                     kubernetes.config.load_kube_config()
                 except kubernetes.config.config_exception.ConfigException:
@@ -1053,10 +1265,14 @@ class Upgrade_2024_6_1(UpgradeStep):
                 rich.print(
                     f"The following commands will be run for the [cyan bold]{cluster_name}[/cyan bold] cluster"
                 )
-                Prompt.ask("Hit enter to show the commands")
+                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
+                    "Hit enter to show the commands"
+                )
                 console.print(commands)
 
-                Prompt.ask("Hit enter to continue")
+                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
+                    "Hit enter to continue"
+                )
                 # We need to add a special constructor to the yaml loader to handle a specific
                 # tag as otherwise the kubernetes API will fail when updating the CRD.
                 yaml.constructor.add_constructor(
@@ -1098,16 +1314,15 @@ class Upgrade_2024_6_1(UpgradeStep):
                 rich.print(
                     "[red bold]Before upgrading, you need to manually delete the prometheus-node-exporter daemonset and update the kube-prometheus-stack CRDs. To do that, please run the following commands.[/red bold]"
                 )
-                Prompt.ask("Hit enter to show the commands")
+                _ = Prompt.ask("Hit enter to show the commands")
                 console.print(commands)
 
-                Prompt.ask("Hit enter to continue")
-                continue_ = Prompt.ask(
+                _ = Prompt.ask("Hit enter to continue")
+                continue_ = Confirm.ask(
                     f"Have you backed up your custom dashboards (if necessary), deleted the {daemonset_name} daemonset and updated the kube-prometheus-stack CRDs?",
-                    choices=["y", "N"],
-                    default="N",
+                    default=False,
                 )
-                if not continue_ == "y":
+                if not continue_:
                     rich.print(
                         f"[red bold]You must back up your custom dashboards (if necessary), delete the {daemonset_name} daemonset and update the kube-prometheus-stack CRDs before upgrading to [green]{self.version}[/green] (or later).[/bold red]"
                     )
@@ -1132,12 +1347,11 @@ class Upgrade_2024_6_1(UpgradeStep):
                         If not, select "N" and the old default node groups will be added to the nebari config file.
                     """
                     )
-                    continue_ = Prompt.ask(
+                    continue_ = kwargs.get("attempt_fixes", False) or Confirm.ask(
                         text,
-                        choices=["y", "N"],
-                        default="y",
+                        default=True,
                     )
-                    if continue_ == "N":
+                    if not continue_:
                         config[provider_full_name]["node_groups"] = {
                             "general": {
                                 "instance": "n1-standard-8",
@@ -1178,8 +1392,9 @@ class Upgrade_2024_6_1(UpgradeStep):
                     },
                     indent=4,
                 )
-                text += "\n\nHit enter to continue"
-                Prompt.ask(text)
+                rich.print(text)
+                if not kwargs.get("attempt_fixes", False):
+                    _ = Prompt.ask("\n\nHit enter to continue")
         return config
 
 
@@ -1197,7 +1412,7 @@ class Upgrade_2024_7_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        if config.get("provider", "") == ProviderEnum.do.value:
+        if config.get("provider", "") == "do":
             rich.print("\n ⚠️  Deprecation Warning ⚠️")
             rich.print(
                 "-> Digital Ocean support is currently being deprecated and will be removed in a future release.",
@@ -1245,7 +1460,7 @@ class Upgrade_2024_11_1(UpgradeStep):
                 ),
             )
             rich.print("")
-        elif config.get("provider", "") == ProviderEnum.do.value:
+        elif config.get("provider", "") == "do":
             rich.print("\n ⚠️  Deprecation Warning ⚠️")
             rich.print(
                 "-> Digital Ocean support is currently being deprecated and will be removed in a future release.",
@@ -1282,13 +1497,10 @@ class Upgrade_2024_11_1(UpgradeStep):
         keycloak_admin = None
 
         # Prompt the user for role assignment (if yes, transforms the response into bool)
-        assign_roles = (
-            Prompt.ask(
-                "[bold]Would you like Nebari to assign the corresponding role/scopes to all of your current groups automatically?[/bold]",
-                choices=["y", "N"],
-                default="N",
-            ).lower()
-            == "y"
+        # This needs to be monkeypatched and will be addressed in a future PR. Until then, this causes test failures.
+        assign_roles = kwargs.get("attempt_fixes", False) or Confirm.ask(
+            "[bold]Would you like Nebari to assign the corresponding role/scopes to all of your current groups automatically?[/bold]",
+            default=False,
         )
 
         if assign_roles:
@@ -1297,11 +1509,38 @@ class Upgrade_2024_11_1(UpgradeStep):
 
             urllib3.disable_warnings()
 
-            keycloak_admin = get_keycloak_admin(
-                server_url=f"https://{config['domain']}/auth/",
-                username="root",
-                password=config["security"]["keycloak"]["initial_root_password"],
+            keycloak_username = os.environ.get("KEYCLOAK_ADMIN_USERNAME", "root")
+            keycloak_password = os.environ.get(
+                "KEYCLOAK_ADMIN_PASSWORD",
+                config["security"]["keycloak"]["initial_root_password"],
             )
+
+            try:
+                # Quick test to connect to Keycloak
+                keycloak_admin = get_keycloak_admin(
+                    server_url=f"https://{config['domain']}/auth/",
+                    username=keycloak_username,
+                    password=keycloak_password,
+                )
+            except ValueError as e:
+                if "invalid_grant" in str(e):
+                    rich.print(
+                        textwrap.dedent(
+                            """
+                            [red bold]Failed to connect to the Keycloak server.[/red bold]\n
+                            [yellow]Please set the [bold]KEYCLOAK_ADMIN_USERNAME[/bold] and [bold]KEYCLOAK_ADMIN_PASSWORD[/bold]
+                            environment variables with the Keycloak root credentials and try again.[/yellow]
+                            """
+                        )
+                    )
+                    exit()
+                else:
+                    # Handle other exceptions
+                    rich.print(
+                        f"[red bold]An unexpected error occurred: {repr(e)}[/red bold]"
+                    )
+                    exit()
+
             # Get client ID as role is bound to the JupyterHub client
             client_id = keycloak_admin.get_client_id("jupyterhub")
             role_name = "legacy-group-directory-creation-role"
@@ -1359,6 +1598,61 @@ class Upgrade_2024_11_1(UpgradeStep):
                 rich.print(
                     "\n[green]All groups already have the required permissions.[/green]"
                 )
+        return config
+
+
+class Upgrade_2024_12_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.12.1
+    """
+
+    version = "2024.12.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        if config.get("provider", "") == "do":
+            rich.print(
+                "\n[red bold]Error: DigitalOcean is no longer supported as a provider[/red bold].",
+            )
+            rich.print(
+                "You can still deploy Nebari to a Kubernetes cluster on DigitalOcean by using 'existing' as the provider in the config file."
+            )
+            exit()
+
+        rich.print("Ready to upgrade to Nebari version [green]2024.12.1[/green].")
+
+        return config
+
+
+class Upgrade_2025_1_1(UpgradeStep):
+    version = "2025.1.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("\n ⚠️ Upgrade Warning ⚠️")
+
+        text = textwrap.dedent(
+            """
+            In this release, we have updated our maximum supported Kubernetes version from 1.29 to 1.31.
+            Please note that Nebari will NOT automatically upgrade your running Kubernetes version as part of
+            the redeployment process.
+
+            After completing this upgrade step, we strongly recommend updating the Kubernetes version
+            specified in your nebari-config YAML file and redeploying to apply the changes. Remember that
+            Kubernetes minor versions must be upgraded incrementally (1.29 → 1.30 → 1.31).
+
+            For more information on upgrading Kubernetes for your specific cloud provider, please visit:
+            https://www.nebari.dev/docs/how-tos/kubernetes-version-upgrade
+            """
+        )
+
+        rich.print(text)
+        rich.print("Ready to upgrade to Nebari version [green]2025.1.1[/green].")
+
         return config
 
 

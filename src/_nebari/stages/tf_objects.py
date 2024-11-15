@@ -1,4 +1,4 @@
-from _nebari.provider.terraform import Data, Provider, Resource, TerraformBackend
+from _nebari.provider.opentofu import Data, Provider, Resource, TerraformBackend
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
@@ -68,16 +68,6 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
             "gcs",
             bucket=f"{nebari_config.escaped_project_name}-{nebari_config.namespace}-terraform-state",
             prefix=f"terraform/{nebari_config.escaped_project_name}/{directory}",
-        )
-    elif nebari_config.provider == "do":
-        return TerraformBackend(
-            "s3",
-            endpoint=f"{nebari_config.digital_ocean.region}.digitaloceanspaces.com",
-            region="us-west-1",  # fake aws region required by terraform
-            bucket=f"{nebari_config.escaped_project_name}-{nebari_config.namespace}-terraform-state",
-            key=f"terraform/{nebari_config.escaped_project_name}-{nebari_config.namespace}/{directory}.tfstate",
-            skip_credentials_validation=True,
-            skip_metadata_api_check=True,
         )
     elif nebari_config.provider == "azure":
         return TerraformBackend(

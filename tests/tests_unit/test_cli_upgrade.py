@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 
 import pytest
 import yaml
+from rich.prompt import Confirm, Prompt
 from typer.testing import CliRunner
 
 import _nebari.upgrade
@@ -18,13 +19,11 @@ MOCK_KUBERNETES_VERSIONS = {
     "aws": ["1.20"],
     "azure": ["1.20"],
     "gcp": ["1.20"],
-    "do": ["1.21.5-do.0"],
 }
 MOCK_CLOUD_REGIONS = {
     "aws": ["us-east-1"],
     "azure": [AZURE_DEFAULT_REGION],
     "gcp": ["us-central1"],
-    "do": ["nyc3"],
 }
 
 
@@ -106,7 +105,7 @@ def test_cli_upgrade_2023_4_1_to_2023_5_1(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.mark.parametrize(
     "provider",
-    ["aws", "azure", "do", "gcp"],
+    ["aws", "azure", "gcp"],
 )
 def test_cli_upgrade_2023_5_1_to_2023_7_1(
     monkeypatch: pytest.MonkeyPatch, provider: str
@@ -434,9 +433,6 @@ cdsdashboards:
         ("azure", "compatible"),
         ("azure", "incompatible"),
         ("azure", "invalid"),
-        ("do", "compatible"),
-        ("do", "incompatible"),
-        ("do", "invalid"),
         ("gcp", "compatible"),
         ("gcp", "incompatible"),
         ("gcp", "invalid"),
@@ -452,13 +448,26 @@ def test_cli_upgrade_to_2023_10_1_kubernetes_validations(
     kubernetes_configs = {
         "aws": {"incompatible": "1.19", "compatible": "1.26", "invalid": "badname"},
         "azure": {"incompatible": "1.23", "compatible": "1.26", "invalid": "badname"},
-        "do": {
-            "incompatible": "1.19.2-do.3",
-            "compatible": "1.26.0-do.custom",
-            "invalid": "badname",
-        },
         "gcp": {"incompatible": "1.23", "compatible": "1.26", "invalid": "badname"},
     }
+
+    def mock_input_ask(prompt, *args, **kwargs):
+        from _nebari.upgrade import TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION
+
+        # For more about structural pattern matching, see:
+        # https://peps.python.org/pep-0636/
+        match prompt:
+            case str(s) if s == TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION:
+                return kwargs.get("attempt_fixes", False)
+            case _:
+                return kwargs.get("default", False)
+
+    monkeypatch.setattr(Confirm, "ask", mock_input_ask)
+    monkeypatch.setattr(
+        Prompt,
+        "ask",
+        lambda x, *args, **kwargs: "",
+    )
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"

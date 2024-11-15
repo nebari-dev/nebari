@@ -160,7 +160,7 @@ def modified_environ(*remove: List[str], **update: Dict[str, str]):
 
 
 def deep_merge(*args):
-    """Deep merge multiple dictionaries.
+    """Deep merge multiple dictionaries.  Preserves order in dicts and lists.
 
     >>> value_1 = {
     'a': [1, 2],
@@ -190,7 +190,7 @@ def deep_merge(*args):
 
     if isinstance(d1, dict) and isinstance(d2, dict):
         d3 = {}
-        for key in d1.keys() | d2.keys():
+        for key in tuple(d1.keys()) + tuple(d2.keys()):
             if key in d1 and key in d2:
                 d3[key] = deep_merge(d1[key], d2[key])
             elif key in d1:
@@ -286,11 +286,6 @@ def random_secure_string(
     return "".join(secrets.choice(chars) for i in range(length))
 
 
-def set_do_environment():
-    os.environ["AWS_ACCESS_KEY_ID"] = os.environ["SPACES_ACCESS_KEY_ID"]
-    os.environ["AWS_SECRET_ACCESS_KEY"] = os.environ["SPACES_SECRET_ACCESS_KEY"]
-
-
 def set_docker_image_tag() -> str:
     """Set docker image tag for `jupyterlab`, `jupyterhub`, and `dask-worker`."""
     return os.environ.get("NEBARI_IMAGE_TAG", constants.DEFAULT_NEBARI_IMAGE_TAG)
@@ -348,7 +343,6 @@ def get_provider_config_block_name(provider):
     PROVIDER_CONFIG_NAMES = {
         "aws": "amazon_web_services",
         "azure": "azure",
-        "do": "digital_ocean",
         "gcp": "google_cloud_platform",
     }
 
