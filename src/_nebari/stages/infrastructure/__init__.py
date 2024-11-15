@@ -8,7 +8,7 @@ import sys
 import tempfile
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from pydantic import Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, PrivateAttr, field_validator, model_validator
 
 from _nebari import constants
 from _nebari.provider import terraform
@@ -115,7 +115,7 @@ class AWSAmiTypes(str, enum.Enum):
 
 class AWSNodeLaunchTemplate(schema.Base):
     pre_bootstrap_command: Optional[str] = None
-    ami_id: Optional[str] = None
+    _ami_id: Optional[str] = PrivateAttr(default=None)
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -134,7 +134,7 @@ class AWSNodeGroupInputVars(schema.Base):
 def construct_aws_ami_type(gpu_enabled: bool, launch_template: AWSNodeLaunchTemplate):
     """Construct the AWS AMI type based on the provided parameters."""
 
-    if launch_template and launch_template.ami_id:
+    if launch_template and launch_template._ami_id:
         return "CUSTOM"
 
     if gpu_enabled:
@@ -272,6 +272,9 @@ DEFAULT_GCP_NODE_GROUPS = {
 
 
 class GoogleCloudPlatformProvider(schema.Base):
+    # If you pass a major and minor version without a patch version
+    # yaml will pass it as a float, so we need to coerce it to a string
+    model_config = ConfigDict(coerce_numbers_to_str=True)
     region: str
     project: str
     kubernetes_version: str
@@ -286,6 +289,12 @@ class GoogleCloudPlatformProvider(schema.Base):
     master_authorized_networks_config: Optional[Union[GCPCIDRBlock, None]] = None
     private_cluster_config: Optional[Union[GCPPrivateClusterConfig, None]] = None
 
+    @field_validator("kubernetes_version", mode="before")
+    @classmethod
+    def transform_version_to_str(cls, value) -> str:
+        """Transforms the version to a string if it is not already."""
+        return str(value)
+
     @model_validator(mode="before")
     @classmethod
     def _check_input(cls, data: Any) -> Any:
@@ -296,8 +305,10 @@ class GoogleCloudPlatformProvider(schema.Base):
             )
 
         available_kubernetes_versions = google_cloud.kubernetes_versions(data["region"])
-        print(available_kubernetes_versions)
-        if data["kubernetes_version"] not in available_kubernetes_versions:
+        if not any(
+            v.startswith(str(data["kubernetes_version"]))
+            for v in available_kubernetes_versions
+        ):
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
