@@ -43,10 +43,35 @@ class ExistingInputVars(schema.Base):
     kube_context: str
 
 
-class DigitalOceanNodeGroup(schema.Base):
+class NodeGroup(schema.Base):
     instance: str
-    min_nodes: int
-    max_nodes: int
+    min_nodes: Annotated[int, Field(ge=0)] = 0
+    max_nodes: Annotated[int, Field(ge=1)] = 1
+    taints: Optional[List[schema.Taint]] = []
+
+    @field_validator("taints", mode="before")
+    def validate_taint_strings(cls, value: list[Any]):
+        TAINT_STR_REGEX = re.compile(r"(\w+)=(\w+):(\w+)")
+        return_value = []
+        for taint in value:
+            if not isinstance(taint, str):
+                return_value.append(taint)
+            else:
+                match = TAINT_STR_REGEX.match(taint)
+                if not match:
+                    raise ValueError(f"Invalid taint string: {taint}")
+                key, value, effect = match.groups()
+                parsed_taint = schema.Taint(key=key, value=value, effect=effect)
+                return_value.append(parsed_taint)
+
+        return return_value
+
+
+DEFAULT_GENERAL_TAINTS = []
+DEFAULT_USER_TAINTS = [schema.Taint(key="dedicated", value="user", effect="NoSchedule")]
+DEFAULT_WORKER_TAINTS = [
+    schema.Taint(key="dedicated", value="worker", effect="NoSchedule")
+]
 
 
 class DigitalOceanInputVars(schema.Base):
@@ -55,7 +80,7 @@ class DigitalOceanInputVars(schema.Base):
     region: str
     tags: List[str]
     kubernetes_version: str
-    node_groups: Dict[str, DigitalOceanNodeGroup]
+    node_groups: Dict[str, "DigitalOceanNodeGroup"]
     kubeconfig_filename: str = get_kubeconfig_filename()
 
 
@@ -64,9 +89,25 @@ class GCPNodeGroupInputVars(schema.Base):
     instance_type: str
     min_size: int
     max_size: int
+    node_taints: List[dict]
     labels: Dict[str, str]
     preemptible: bool
     guest_accelerators: List["GCPGuestAccelerator"]
+
+    @field_validator("node_taints", mode="before")
+    def convert_taints(cls, value: Optional[List[schema.Taint]]):
+        return [
+            dict(
+                key=taint.key,
+                value=taint.value,
+                effect={
+                    schema.TaintEffectEnum.NoSchedule: "NO_SCHEDULE",
+                    schema.TaintEffectEnum.PreferNoSchedule: "PREFER_NO_SCHEDULE",
+                    schema.TaintEffectEnum.NoExecute: "NO_EXECUTE",
+                }[taint.effect],
+            )
+            for taint in value
+        ]
 
 
 class GCPPrivateClusterConfig(schema.Base):
@@ -109,6 +150,11 @@ class AzureNodeGroupInputVars(schema.Base):
     instance: str
     min_nodes: int
     max_nodes: int
+    node_taints: list[str]
+
+    @field_validator("node_taints", mode="before")
+    def convert_taints(cls, value: Optional[List[schema.Taint]]):
+        return [f"{taint.key}={taint.value}:{taint.effect.value}" for taint in value]
 
 
 class AzureInputVars(schema.Base):
@@ -150,6 +196,22 @@ class AWSNodeGroupInputVars(schema.Base):
     permissions_boundary: Optional[str] = None
     ami_type: Optional[AWSAmiTypes] = None
     launch_template: Optional[AWSNodeLaunchTemplate] = None
+    node_taints: list[dict]
+
+    @field_validator("node_taints", mode="before")
+    def convert_taints(cls, value: Optional[List[schema.Taint]]):
+        return [
+            dict(
+                key=taint.key,
+                value=taint.value,
+                effect={
+                    schema.TaintEffectEnum.NoSchedule: "NO_SCHEDULE",
+                    schema.TaintEffectEnum.PreferNoSchedule: "PREFER_NO_SCHEDULE",
+                    schema.TaintEffectEnum.NoExecute: "NO_EXECUTE",
+                }[taint.effect],
+            )
+            for taint in value
+        ]
 
 
 def construct_aws_ami_type(gpu_enabled: bool, launch_template: AWSNodeLaunchTemplate):
@@ -162,6 +224,21 @@ def construct_aws_ami_type(gpu_enabled: bool, launch_template: AWSNodeLaunchTemp
         return "AL2_x86_64_GPU"
 
     return "AL2_x86_64"
+
+    @field_validator("node_taints", mode="before")
+    def convert_taints(cls, value: Optional[List[schema.Taint]]):
+        return [
+            dict(
+                key=taint.key,
+                value=taint.value,
+                effect={
+                    schema.TaintEffectEnum.NoSchedule: "NO_SCHEDULE",
+                    schema.TaintEffectEnum.PreferNoSchedule: "PREFER_NO_SCHEDULE",
+                    schema.TaintEffectEnum.NoExecute: "NO_EXECUTE",
+                }[taint.effect],
+            )
+            for taint in value
+        ]
 
 
 class AWSInputVars(schema.Base):
@@ -254,16 +331,14 @@ class KeyValueDict(schema.Base):
     value: str
 
 
-class DigitalOceanNodeGroup(schema.Base):
+class DigitalOceanNodeGroup(NodeGroup):
     """Representation of a node group with Digital Ocean
 
     - Kubernetes limits: https://docs.digitalocean.com/products/kubernetes/details/limits/
     - Available instance types: https://slugs.do-api.dev/
     """
 
-    instance: str
     min_nodes: Annotated[int, Field(ge=1)] = 1
-    max_nodes: Annotated[int, Field(ge=1)] = 1
 
 
 DEFAULT_DO_NODE_GROUPS = {
@@ -342,19 +417,31 @@ class GCPGuestAccelerator(schema.Base):
     count: Annotated[int, Field(ge=1)] = 1
 
 
-class GCPNodeGroup(schema.Base):
-    instance: str
-    min_nodes: Annotated[int, Field(ge=0)] = 0
-    max_nodes: Annotated[int, Field(ge=1)] = 1
+class GCPNodeGroup(NodeGroup):
     preemptible: bool = False
     labels: Dict[str, str] = {}
     guest_accelerators: List[GCPGuestAccelerator] = []
 
 
 DEFAULT_GCP_NODE_GROUPS = {
-    "general": GCPNodeGroup(instance="e2-standard-8", min_nodes=1, max_nodes=1),
-    "user": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
-    "worker": GCPNodeGroup(instance="e2-standard-4", min_nodes=0, max_nodes=5),
+    "general": GCPNodeGroup(
+        instance="e2-standard-8",
+        min_nodes=1,
+        max_nodes=1,
+        taints=DEFAULT_GENERAL_TAINTS,
+    ),
+    "user": GCPNodeGroup(
+        instance="e2-standard-4",
+        min_nodes=0,
+        max_nodes=5,
+        taints=DEFAULT_USER_TAINTS,
+    ),
+    "worker": GCPNodeGroup(
+        instance="e2-standard-4",
+        min_nodes=0,
+        max_nodes=5,
+        taints=DEFAULT_WORKER_TAINTS,
+    ),
 }
 
 
@@ -402,16 +489,26 @@ class GoogleCloudPlatformProvider(schema.Base):
         return data
 
 
-class AzureNodeGroup(schema.Base):
-    instance: str
-    min_nodes: int
-    max_nodes: int
+class AzureNodeGroup(NodeGroup):
+    pass
 
 
 DEFAULT_AZURE_NODE_GROUPS = {
-    "general": AzureNodeGroup(instance="Standard_D8_v3", min_nodes=1, max_nodes=1),
-    "user": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
-    "worker": AzureNodeGroup(instance="Standard_D4_v3", min_nodes=0, max_nodes=5),
+    "general": AzureNodeGroup(
+        instance="Standard_D8_v3",
+        min_nodes=1,
+        max_nodes=1,
+        taints=DEFAULT_GENERAL_TAINTS,
+    ),
+    "user": AzureNodeGroup(
+        instance="Standard_D4_v3", min_nodes=0, max_nodes=5, taints=DEFAULT_USER_TAINTS
+    ),
+    "worker": AzureNodeGroup(
+        instance="Standard_D4_v3",
+        min_nodes=0,
+        max_nodes=5,
+        taints=DEFAULT_WORKER_TAINTS,
+    ),
 }
 
 
@@ -473,10 +570,7 @@ class AzureProvider(schema.Base):
         return value if value is None else azure_cloud.validate_tags(value)
 
 
-class AWSNodeGroup(schema.Base):
-    instance: str
-    min_nodes: int = 0
-    max_nodes: int
+class AWSNodeGroup(NodeGroup):
     gpu: bool = False
     single_subnet: bool = False
     permissions_boundary: Optional[str] = None
@@ -484,12 +578,22 @@ class AWSNodeGroup(schema.Base):
 
 
 DEFAULT_AWS_NODE_GROUPS = {
-    "general": AWSNodeGroup(instance="m5.2xlarge", min_nodes=1, max_nodes=1),
+    "general": AWSNodeGroup(
+        instance="m5.2xlarge", min_nodes=1, max_nodes=1, taints=DEFAULT_GENERAL_TAINTS
+    ),
     "user": AWSNodeGroup(
-        instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
+        instance="m5.xlarge",
+        min_nodes=0,
+        max_nodes=5,
+        single_subnet=False,
+        taints=DEFAULT_USER_TAINTS,
     ),
     "worker": AWSNodeGroup(
-        instance="m5.xlarge", min_nodes=0, max_nodes=5, single_subnet=False
+        instance="m5.xlarge",
+        min_nodes=0,
+        max_nodes=5,
+        single_subnet=False,
+        taints=DEFAULT_WORKER_TAINTS,
     ),
 }
 
@@ -625,17 +729,8 @@ provider_enum_model_map = {
     schema.ProviderEnum.do: DigitalOceanProvider,
 }
 
-provider_enum_name_map: Dict[schema.ProviderEnum, str] = {
-    schema.ProviderEnum.local: "local",
-    schema.ProviderEnum.existing: "existing",
-    schema.ProviderEnum.gcp: "google_cloud_platform",
-    schema.ProviderEnum.aws: "amazon_web_services",
-    schema.ProviderEnum.azure: "azure",
-    schema.ProviderEnum.do: "digital_ocean",
-}
-
 provider_name_abbreviation_map: Dict[str, str] = {
-    value: key.value for key, value in provider_enum_name_map.items()
+    value: key.value for key, value in schema.provider_enum_name_map.items()
 }
 
 provider_enum_default_node_groups_map: Dict[schema.ProviderEnum, Any] = {
@@ -827,6 +922,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         instance_type=node_group.instance,
                         min_size=node_group.min_nodes,
                         max_size=node_group.max_nodes,
+                        node_taints=node_group.taints,
                         preemptible=node_group.preemptible,
                         guest_accelerators=node_group.guest_accelerators,
                     )
@@ -858,6 +954,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         instance=node_group.instance,
                         min_nodes=node_group.min_nodes,
                         max_nodes=node_group.max_nodes,
+                        node_taints=node_group.taints,
                     )
                     for name, node_group in self.config.azure.node_groups.items()
                 },
@@ -900,6 +997,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         single_subnet=node_group.single_subnet,
                         permissions_boundary=node_group.permissions_boundary,
                         launch_template=node_group.launch_template,
+                        node_taints=node_group.taints,
                         ami_type=construct_aws_ami_type(
                             gpu_enabled=node_group.gpu,
                             launch_template=node_group.launch_template,
