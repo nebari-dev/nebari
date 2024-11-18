@@ -8,7 +8,7 @@ import sys
 import tempfile
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from pydantic import Field, PrivateAttr, field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from _nebari import constants
 from _nebari.provider import terraform
@@ -136,7 +136,7 @@ class AWSAmiTypes(str, enum.Enum):
 
 class AWSNodeLaunchTemplate(schema.Base):
     pre_bootstrap_command: Optional[str] = None
-    _ami_id: Optional[str] = PrivateAttr(default=None)
+    ami_id: Optional[str] = None
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -152,10 +152,23 @@ class AWSNodeGroupInputVars(schema.Base):
     launch_template: Optional[AWSNodeLaunchTemplate] = None
 
 
-def construct_aws_ami_type(gpu_enabled: bool, launch_template: AWSNodeLaunchTemplate):
-    """Construct the AWS AMI type based on the provided parameters."""
+def construct_aws_ami_type(
+    gpu_enabled: bool, launch_template: AWSNodeLaunchTemplate
+) -> str:
+    """
+    This function selects the Amazon Machine Image (AMI) type for AWS nodes by evaluating
+    the provided parameters. The selection logic prioritizes the launch template over the
+    GPU flag.
 
-    if launch_template and launch_template._ami_id:
+    Returns the AMI type (str) determined by the following rules:
+        - Returns "CUSTOM" if a `launch_template` is provided and it includes a valid `ami_id`.
+        - Returns "AL2_x86_64_GPU" if `gpu_enabled` is True and no valid
+          `launch_template` is provided (None).
+        - Returns "AL2_x86_64" as the default AMI type if `gpu_enabled` is False and no
+          valid `launch_template` is provided (None).
+    """
+
+    if launch_template and getattr(launch_template, "ami_id", None):
         return "CUSTOM"
 
     if gpu_enabled:
@@ -474,7 +487,16 @@ class AWSNodeGroup(schema.Base):
     gpu: bool = False
     single_subnet: bool = False
     permissions_boundary: Optional[str] = None
-    launch_template: Optional[AWSNodeLaunchTemplate] = None
+    # Disabled as part of 2024.11.1 until #2832 is resolved
+    # launch_template: Optional[AWSNodeLaunchTemplate] = None
+
+    @model_validator(mode="before")
+    def check_launch_template(cls, values):
+        if "launch_template" in values:
+            raise ValueError(
+                "The 'launch_template' field is currently unavailable and has been removed from the configuration schema.\nPlease omit this field until it is reintroduced in a future update.",
+            )
+        return values
 
 
 DEFAULT_AWS_NODE_GROUPS = {
@@ -855,10 +877,10 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         max_size=node_group.max_nodes,
                         single_subnet=node_group.single_subnet,
                         permissions_boundary=node_group.permissions_boundary,
-                        launch_template=node_group.launch_template,
+                        launch_template=None,
                         ami_type=construct_aws_ami_type(
                             gpu_enabled=node_group.gpu,
-                            launch_template=node_group.launch_template,
+                            launch_template=None,
                         ),
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()
