@@ -530,10 +530,10 @@ def nebari_subcommand(cli: typer.Typer):
             cloud_provider, disable_prompt
         )
 
-        # Digital Ocean deprecation warning -- Nebari 2024.7.1
+        # DigitalOcean is no longer supported
         if inputs.cloud_provider == "do":
             rich.print(
-                ":warning: Digital Ocean support is being deprecated and support will be removed in the future. :warning:\n"
+                ":warning: DigitalOcean is no longer supported. You'll need to deploy on an existing k8s cluster if you plan to use Nebari on DigitalOcean :warning:\n"
             )
 
         inputs.region = check_cloud_provider_region(region, inputs.cloud_provider)
