@@ -230,15 +230,7 @@ class UpgradeStep(ABC):
         """
         return rounded_ver_parse(self.version) > rounded_ver_parse("0.3.13")
 
-    def upgrade_step(
-        self,
-        config,
-        start_version,
-        config_filename,
-        *args,
-        attempt_fixes=False,
-        **kwargs,
-    ):
+    def upgrade_step(self, config, start_version, config_filename, *args, **kwargs):
         """
         Perform the upgrade from start_version to self.version.
 
@@ -452,13 +444,7 @@ class UpgradeStep(ABC):
         )
 
     def _version_specific_upgrade(
-        self,
-        config,
-        start_version,
-        config_filename,
-        *args,
-        attempt_fixes=False,
-        **kwargs,
+        self, config, start_version, config_filename, *args, **kwargs
     ):
         """
         Perform version-specific upgrade tasks.
@@ -663,13 +649,7 @@ class Upgrade_2023_4_2(UpgradeStep):
 
     @override
     def _version_specific_upgrade(
-        self,
-        config,
-        start_version,
-        config_filename: Path,
-        *args,
-        attempt_fixes=False,
-        **kwargs,
+        self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         """
         Prompt users to delete Argo CRDs
@@ -723,13 +703,7 @@ class Upgrade_2023_7_2(UpgradeStep):
 
     @override
     def _version_specific_upgrade(
-        self,
-        config,
-        start_version,
-        config_filename: Path,
-        *args,
-        attempt_fixes=False,
-        **kwargs,
+        self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         argo = config.get("argo_workflows", {})
         if argo.get("enabled"):
@@ -995,13 +969,7 @@ class Upgrade_2024_4_1(UpgradeStep):
 
     @override
     def _version_specific_upgrade(
-        self,
-        config,
-        start_version,
-        config_filename: Path,
-        *args,
-        attempt_fixes=False,
-        **kwargs,
+        self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         # Default configuration for the node groups was added in this version. Therefore,
         # users upgrading who don't have any specific node groups defined on their config
@@ -1052,13 +1020,7 @@ class Upgrade_2024_6_1(UpgradeStep):
 
     @override
     def _version_specific_upgrade(
-        self,
-        config,
-        start_version,
-        config_filename: Path,
-        *args,
-        attempt_fixes=False,
-        **kwargs,
+        self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         # Prompt users to manually update kube-prometheus-stack CRDs if monitoring is enabled
         if config.get("monitoring", {}).get("enabled", True):
@@ -1292,13 +1254,7 @@ class Upgrade_2024_11_1(UpgradeStep):
 
     @override
     def _version_specific_upgrade(
-        self,
-        config,
-        start_version,
-        config_filename: Path,
-        *args,
-        attempt_fixes=False,
-        **kwargs,
+        self, config, start_version, config_filename: Path, *args, **kwargs
     ):
         if config.get("provider", "") == ProviderEnum.azure.value:
             rich.print("\n ⚠️ Upgrade Warning ⚠️")
