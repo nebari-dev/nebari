@@ -667,7 +667,7 @@ class Upgrade_2023_4_2(UpgradeStep):
         )
 
         continue_ = attempt_fixes or Confirm.ask(
-            "Have you deleted the Argo Workflows CRDs and service accounts? [y/N] ",
+            "Have you deleted the Argo Workflows CRDs and service accounts?",
             default=False,
         )
         if not continue_:
