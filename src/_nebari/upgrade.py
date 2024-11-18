@@ -311,7 +311,7 @@ class UpgradeStep(ABC):
             s: str,
             new_version: str,
             config_path: str,
-            attempt_fixes: bool = attempt_fixes,
+            attempt_fixes: bool = kwargs.get("attempt_fixes", False),
         ) -> str:
             """
             Replace the image tag with the new version.
@@ -373,7 +373,7 @@ class UpgradeStep(ABC):
             config_path: str,
             current_image: str,
             new_version: str,
-            attempt_fixes: bool = attempt_fixes,
+            attempt_fixes: bool = kwargs.get("attempt_fixes", False),
         ) -> dict:
             """
             Update the image tag in the configuration.
@@ -406,7 +406,7 @@ class UpgradeStep(ABC):
                 config_path,
                 v,
                 __rounded_finish_version__,
-                attempt_fixes,
+                kwargs.get("attempt_fixes", False),
             )
 
         # update profiles.jupyterlab images
@@ -418,7 +418,7 @@ class UpgradeStep(ABC):
                     f"profiles.jupyterlab.{i}.kubespawner_override.image",
                     current_image,
                     __rounded_finish_version__,
-                    attempt_fixes,
+                    kwargs.get("attempt_fixes", False),
                 )
 
         # update profiles.dask_worker images
@@ -430,7 +430,7 @@ class UpgradeStep(ABC):
                     f"profiles.dask_worker.{k}.image",
                     current_image,
                     __rounded_finish_version__,
-                    attempt_fixes,
+                    kwargs.get("attempt_fixes", False),
                 )
 
         # Run any version-specific tasks
@@ -439,7 +439,6 @@ class UpgradeStep(ABC):
             start_version,
             config_filename,
             *args,
-            attempt_fixes=attempt_fixes,
             **kwargs,
         )
 
@@ -666,7 +665,7 @@ class Upgrade_2023_4_2(UpgradeStep):
             ""
         )
 
-        continue_ = attempt_fixes or Confirm.ask(
+        continue_ = kwargs.get("attempt_fixes", False) or Confirm.ask(
             "Have you deleted the Argo Workflows CRDs and service accounts?",
             default=False,
         )
@@ -707,7 +706,7 @@ class Upgrade_2023_7_2(UpgradeStep):
     ):
         argo = config.get("argo_workflows", {})
         if argo.get("enabled"):
-            response = attempt_fixes or Confirm.ask(
+            response = kwargs.get("attempt_fixes", False) or Confirm.ask(
                 f"\nDo you want to enable the [green][link={NEBARI_WORKFLOW_CONTROLLER_DOCS}]Nebari Workflow Controller[/link][/green], required for [green][link={ARGO_JUPYTER_SCHEDULER_REPO}]Argo-Jupyter-Scheduler[/link][green]?",
                 default=True,
             )
@@ -983,7 +982,7 @@ class Upgrade_2024_4_1(UpgradeStep):
                     default_node_groups = provider_enum_default_node_groups_map[
                         provider
                     ]
-                    continue_ = attempt_fixes or Confirm.ask(
+                    continue_ = kwargs.get("attempt_fixes", False) or Confirm.ask(
                         f"Would you like to include the default configuration for the node groups in [purple]{config_filename}[/purple]?",
                         default=False,
                     )
@@ -1053,7 +1052,7 @@ class Upgrade_2024_6_1(UpgradeStep):
                 "\n-> [red bold]Nebari version 2024.6.1 comes with a new version of Grafana. Any custom dashboards that you created will be deleted after upgrading Nebari. Make sure to [link=https://grafana.com/docs/grafana/latest/dashboards/share-dashboards-panels/#export-a-dashboard-as-json]export them as JSON[/link] so you can [link=https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/#import-a-dashboard]import them[/link] again afterwards.[/red bold]"
                 f"\n-> [red bold]Before upgrading, kube-prometheus-stack CRDs need to be updated and the {daemonset_name} daemonset needs to be deleted.[/red bold]"
             )
-            run_commands = attempt_fixes or Confirm.ask(
+            run_commands = kwargs.get("attempt_fixes", False) or Confirm.ask(
                 "\nDo you want Nebari to update the kube-prometheus-stack CRDs and delete the prometheus-node-exporter for you? If not, you'll have to do it manually.",
                 default=False,
             )
@@ -1076,10 +1075,14 @@ class Upgrade_2024_6_1(UpgradeStep):
                 rich.print(
                     f"The following commands will be run for the [cyan bold]{cluster_name}[/cyan bold] cluster"
                 )
-                _ = attempt_fixes or Prompt.ask("Hit enter to show the commands")
+                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
+                    "Hit enter to show the commands"
+                )
                 console.print(commands)
 
-                _ = attempt_fixes or Prompt.ask("Hit enter to continue")
+                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
+                    "Hit enter to continue"
+                )
                 # We need to add a special constructor to the yaml loader to handle a specific
                 # tag as otherwise the kubernetes API will fail when updating the CRD.
                 yaml.constructor.add_constructor(
@@ -1121,11 +1124,15 @@ class Upgrade_2024_6_1(UpgradeStep):
                 rich.print(
                     "[red bold]Before upgrading, you need to manually delete the prometheus-node-exporter daemonset and update the kube-prometheus-stack CRDs. To do that, please run the following commands.[/red bold]"
                 )
-                _ = attempt_fixes or Prompt.ask("Hit enter to show the commands")
+                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
+                    "Hit enter to show the commands"
+                )
                 console.print(commands)
 
-                _ = attempt_fixes or Prompt.ask("Hit enter to continue")
-                continue_ = attempt_fixes or Confirm.ask(
+                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
+                    "Hit enter to continue"
+                )
+                continue_ = kwargs.get("attempt_fixes", False) or Confirm.ask(
                     f"Have you backed up your custom dashboards (if necessary), deleted the {daemonset_name} daemonset and updated the kube-prometheus-stack CRDs?",
                     default=False,
                 )
@@ -1154,7 +1161,7 @@ class Upgrade_2024_6_1(UpgradeStep):
                         If not, select "N" and the old default node groups will be added to the nebari config file.
                     """
                     )
-                    continue_ = attempt_fixes or Confirm.ask(
+                    continue_ = kwargs.get("attempt_fixes", False) or Confirm.ask(
                         text,
                         default=True,
                     )
@@ -1200,7 +1207,7 @@ class Upgrade_2024_6_1(UpgradeStep):
                     indent=4,
                 )
                 rich.print(text)
-                if not attempt_fixes:
+                if not kwargs.get("attempt_fixes", False):
                     _ = Prompt.ask("\n\nHit enter to continue")
         return config
 
@@ -1304,7 +1311,7 @@ class Upgrade_2024_11_1(UpgradeStep):
         keycloak_admin = None
 
         # Prompt the user for role assignment (if yes, transforms the response into bool)
-        assign_roles = attempt_fixes or Confirm.ask(
+        assign_roles = kwargs.get("attempt_fixes", False) or Confirm.ask(
             "[bold]Would you like Nebari to assign the corresponding role/scopes to all of your current groups automatically?[/bold]",
             default=False,
         )
