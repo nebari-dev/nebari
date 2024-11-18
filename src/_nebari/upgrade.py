@@ -308,10 +308,7 @@ class UpgradeStep(ABC):
             return None
 
         def replace_image_tag(
-            s: str,
-            new_version: str,
-            config_path: str,
-            attempt_fixes: bool = kwargs.get("attempt_fixes", False),
+            s: str, new_version: str, config_path: str, attempt_fixes: bool
         ) -> str:
             """
             Replace the image tag with the new version.
@@ -373,7 +370,7 @@ class UpgradeStep(ABC):
             config_path: str,
             current_image: str,
             new_version: str,
-            attempt_fixes: bool = kwargs.get("attempt_fixes", False),
+            attempt_fixes: bool,
         ) -> dict:
             """
             Update the image tag in the configuration.
