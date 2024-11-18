@@ -535,7 +535,7 @@ def nebari_subcommand(cli: typer.Typer):
         # DigitalOcean is no longer supported
         if inputs.cloud_provider == "do":
             rich.print(
-                ":warning: DigitalOcean is no longer supported. You'll need to deploy on an existing k8s cluster if you plan to use Nebari on DigitalOcean :warning:\n"
+                ":warning: DigitalOcean is no longer supported. You'll need to deploy to an existing k8s cluster if you plan to use Nebari on DigitalOcean :warning:\n"
             )
 
         inputs.region = check_cloud_provider_region(region, inputs.cloud_provider)
