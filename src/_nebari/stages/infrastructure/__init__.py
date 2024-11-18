@@ -8,7 +8,7 @@ import sys
 import tempfile
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from pydantic import ConfigDict, Field, PrivateAttr, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from _nebari import constants
 from _nebari.provider import terraform
@@ -135,8 +135,10 @@ class AWSAmiTypes(str, enum.Enum):
 
 
 class AWSNodeLaunchTemplate(schema.Base):
-    pre_bootstrap_command: Optional[str] = None
-    _ami_id: Optional[str] = PrivateAttr(default=None)
+    pre_bootstrap_script: Optional[str] = None
+    bootstrap_env_vars: Optional[Dict[str, str]] = None
+    kubelet_extra_args: Optional[Dict[str, str]] = None
+    ami_id: Optional[str] = None
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -155,7 +157,7 @@ class AWSNodeGroupInputVars(schema.Base):
 def construct_aws_ami_type(gpu_enabled: bool, launch_template: AWSNodeLaunchTemplate):
     """Construct the AWS AMI type based on the provided parameters."""
 
-    if launch_template and launch_template._ami_id:
+    if launch_template and launch_template.ami_id:
         return "CUSTOM"
 
     if gpu_enabled:

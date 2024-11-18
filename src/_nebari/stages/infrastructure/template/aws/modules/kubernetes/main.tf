@@ -33,53 +33,6 @@ resource "aws_eks_cluster" "main" {
   tags = merge({ Name = var.name }, var.tags)
 }
 
-## aws_launch_template user_data invocation
-## If using a Custom AMI, then the /etc/eks/bootstrap cmds and args must be included/modified,
-## otherwise, on default AWS EKS Node AMI, the bootstrap cmd is appended automatically
-resource "aws_launch_template" "main" {
-  for_each = {
-    for node_group in var.node_groups :
-    node_group.name => node_group
-    if node_group.launch_template != null
-  }
-
-  name_prefix = "eks-${var.name}-${each.value.name}-"
-  image_id    = each.value.launch_template.ami_id
-
-  vpc_security_group_ids = var.cluster_security_groups
-
-
-  metadata_options {
-    http_tokens            = "required"
-    http_endpoint          = "enabled"
-    instance_metadata_tags = "enabled"
-  }
-
-  block_device_mappings {
-    device_name = "/dev/xvda"
-    ebs {
-      volume_size = 50
-      volume_type = "gp2"
-    }
-  }
-
-  # https://docs.aws.amazon.com/eks/latest/userguide/launch-templates.html#launch-template-basics
-  user_data = base64encode(
-    templatefile(
-      "${path.module}/files/user_data.tftpl",
-      {
-        node_pre_bootstrap_command = each.value.launch_template.pre_bootstrap_command
-        # This will ensure the bootstrap user data is used to join the node
-        include_bootstrap_cmd  = each.value.launch_template.ami_id != null ? true : false
-        cluster_name           = aws_eks_cluster.main.name
-        cluster_cert_authority = aws_eks_cluster.main.certificate_authority[0].data
-        cluster_endpoint       = aws_eks_cluster.main.endpoint
-      }
-    )
-  )
-}
-
-
 resource "aws_eks_node_group" "main" {
   count = length(var.node_groups)
 
