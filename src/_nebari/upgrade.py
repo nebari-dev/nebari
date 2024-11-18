@@ -1121,15 +1121,11 @@ class Upgrade_2024_6_1(UpgradeStep):
                 rich.print(
                     "[red bold]Before upgrading, you need to manually delete the prometheus-node-exporter daemonset and update the kube-prometheus-stack CRDs. To do that, please run the following commands.[/red bold]"
                 )
-                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
-                    "Hit enter to show the commands"
-                )
+                _ = Prompt.ask("Hit enter to show the commands")
                 console.print(commands)
 
-                _ = kwargs.get("attempt_fixes", False) or Prompt.ask(
-                    "Hit enter to continue"
-                )
-                continue_ = kwargs.get("attempt_fixes", False) or Confirm.ask(
+                _ = Prompt.ask("Hit enter to continue")
+                continue_ = Confirm.ask(
                     f"Have you backed up your custom dashboards (if necessary), deleted the {daemonset_name} daemonset and updated the kube-prometheus-stack CRDs?",
                     default=False,
                 )
