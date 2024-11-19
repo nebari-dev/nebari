@@ -62,12 +62,11 @@ def test_render_schema(nebari_config):
             "fake",
             pytest.raises(
                 ValueError,
-                match="'fake' is not a valid enumeration member; permitted: local, existing, do, aws, gcp, azure",
+                match="'fake' is not a valid enumeration member; permitted: local, existing, aws, gcp, azure",
             ),
         ),
         ("aws", nullcontext()),
         ("gcp", nullcontext()),
-        ("do", nullcontext()),
         ("azure", nullcontext()),
         ("existing", nullcontext()),
         ("local", nullcontext()),
