@@ -22,12 +22,6 @@ from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
 
-class DigitalOceanInputVars(schema.Base):
-    name: str
-    namespace: str
-    region: str
-
-
 class GCPInputVars(schema.Base):
     name: str
     namespace: str
@@ -117,14 +111,7 @@ class TerraformStateStage(NebariTerraformStage):
         return pathlib.Path("stages") / self.name / self.config.provider.value
 
     def state_imports(self) -> List[Tuple[str, str]]:
-        if self.config.provider == schema.ProviderEnum.do:
-            return [
-                (
-                    "module.terraform-state.module.spaces.digitalocean_spaces_bucket.main",
-                    f"{self.config.digital_ocean.region},{self.config.project_name}-{self.config.namespace}-terraform-state",
-                )
-            ]
-        elif self.config.provider == schema.ProviderEnum.gcp:
+        if self.config.provider == schema.ProviderEnum.gcp:
             return [
                 (
                     "module.terraform-state.module.gcs.google_storage_bucket.static-site",
@@ -189,13 +176,7 @@ class TerraformStateStage(NebariTerraformStage):
             return resources
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        if self.config.provider == schema.ProviderEnum.do:
-            return DigitalOceanInputVars(
-                name=self.config.project_name,
-                namespace=self.config.namespace,
-                region=self.config.digital_ocean.region,
-            ).model_dump()
-        elif self.config.provider == schema.ProviderEnum.gcp:
+        if self.config.provider == schema.ProviderEnum.gcp:
             return GCPInputVars(
                 name=self.config.project_name,
                 namespace=self.config.namespace,
@@ -238,15 +219,6 @@ class TerraformStateStage(NebariTerraformStage):
         # terraform show command, inside check_immutable_fields
         with super().deploy(stage_outputs, disable_prompt, tofu_init=False):
             env_mapping = {}
-            # DigitalOcean terraform remote state using Spaces Bucket
-            # assumes aws credentials thus we set them to match spaces credentials
-            if self.config.provider == schema.ProviderEnum.do:
-                env_mapping.update(
-                    {
-                        "AWS_ACCESS_KEY_ID": os.environ["SPACES_ACCESS_KEY_ID"],
-                        "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
-                    }
-                )
 
             with modified_environ(**env_mapping):
                 yield
@@ -308,15 +280,6 @@ class TerraformStateStage(NebariTerraformStage):
     ):
         with super().destroy(stage_outputs, status):
             env_mapping = {}
-            # DigitalOcean terraform remote state using Spaces Bucket
-            # assumes aws credentials thus we set them to match spaces credentials
-            if self.config.provider == schema.ProviderEnum.do:
-                env_mapping.update(
-                    {
-                        "AWS_ACCESS_KEY_ID": os.environ["SPACES_ACCESS_KEY_ID"],
-                        "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
-                    }
-                )
 
             with modified_environ(**env_mapping):
                 yield

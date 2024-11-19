@@ -15,7 +15,6 @@ render_config_partial = partial(
 )
 INIT_INPUTS = [
     # project, namespace, domain, cloud_provider, ci_provider, auth_provider
-    ("pytestdo", "dev", "do.nebari.dev", "do", "github-actions", "github"),
     ("pytestaws", "dev", "aws.nebari.dev", "aws", "github-actions", "github"),
     ("pytestgcp", "dev", "gcp.nebari.dev", "gcp", "github-actions", "github"),
     ("pytestazure", "dev", "azure.nebari.dev", "azure", "github-actions", "github"),

@@ -22,7 +22,6 @@ LATEST_SUPPORTED_PYTHON_VERSION = "3.10"
 
 
 # DOCS
-DO_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-do"
 AZURE_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-azure"
 AWS_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-aws"
 GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
@@ -31,4 +30,3 @@ GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
 AWS_DEFAULT_REGION = "us-east-1"
 AZURE_DEFAULT_REGION = "Central US"
 GCP_DEFAULT_REGION = "us-central1"
-DO_DEFAULT_REGION = "nyc3"
