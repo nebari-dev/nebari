@@ -663,7 +663,7 @@ class Upgrade_2023_4_2(UpgradeStep):
         argo_sa = ["argo-admin", "argo-dev", "argo-view"]
 
         if kwargs.get("attempt_fixes", False):
-            ...
+            pass
         else:
             kubectl_delete_argo_crds_cmd = " ".join(
                 (
@@ -675,7 +675,7 @@ class Upgrade_2023_4_2(UpgradeStep):
                 (
                     *(
                         "kubectl delete sa",
-                        f"-n {config.get("namespace", "default")}",
+                        f"-n {config.get('namespace', 'default')}",
                     ),
                     *argo_sa,
                 ),
