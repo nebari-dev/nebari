@@ -661,6 +661,8 @@ class Upgrade_2023_4_2(UpgradeStep):
 
         argo_sa = ["argo-admin", "argo-dev", "argo-view"]
 
+        namespace = config.get("namespace", "default")
+
         if kwargs.get("attempt_fixes", False):
             try:
                 kubernetes.config.load_kube_config()
@@ -682,7 +684,6 @@ class Upgrade_2023_4_2(UpgradeStep):
                     else:
                         raise e
 
-            namespace = config.get("namespace", "default")
             for sa in argo_sa:
                 api_instance = kubernetes.client.CoreV1Api()
                 try:
@@ -708,7 +709,7 @@ class Upgrade_2023_4_2(UpgradeStep):
                 (
                     *(
                         "kubectl delete sa",
-                        f"-n {config.get('namespace', 'default')}",
+                        f"-n {namespace}",
                     ),
                     *argo_sa,
                 ),
