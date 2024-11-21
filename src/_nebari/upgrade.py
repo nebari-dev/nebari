@@ -683,6 +683,8 @@ class Upgrade_2023_4_2(UpgradeStep):
                         rich.print(f"CRD [yellow]{crd}[/yellow] not found. Ignoring.")
                     else:
                         raise e
+                else:
+                    rich.print(f"Successfully removed CRD [green]{crd}[/green]")
 
             for sa in argo_sa:
                 api_instance = kubernetes.client.CoreV1Api()
@@ -698,6 +700,10 @@ class Upgrade_2023_4_2(UpgradeStep):
                         )
                     else:
                         raise e
+                else:
+                    rich.print(
+                        f"Successfully removed service account [green]{sa}[/green]"
+                    )
         else:
             kubectl_delete_argo_crds_cmd = " ".join(
                 (
