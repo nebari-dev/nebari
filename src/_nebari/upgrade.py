@@ -650,7 +650,6 @@ class Upgrade_2023_4_2(UpgradeStep):
         """
         Prompt users to delete Argo CRDs
         """
-
         argo_crds = [
             "clusterworkflowtemplates.argoproj.io",
             "cronworkflows.argoproj.io",
@@ -663,7 +662,35 @@ class Upgrade_2023_4_2(UpgradeStep):
         argo_sa = ["argo-admin", "argo-dev", "argo-view"]
 
         if kwargs.get("attempt_fixes", False):
-            pass
+            try:
+                kubernetes.config.load_kube_config()
+            except kubernetes.config.config_exception.ConfigException:
+                rich.print(
+                    "[red bold]No default kube configuration file was found. Make sure to [link=https://www.nebari.dev/docs/how-tos/debug-nebari#generating-the-kubeconfig]have one pointing to your Nebari cluster[/link] before upgrading.[/red bold]"
+                )
+                exit()
+
+            for crd in argo_crds:
+                api_instance = kubernetes.client.ApiextensionsV1Api()
+                try:
+                    api_instance.delete_custom_resource_definition(
+                        name=crd,
+                    )
+                except kubernetes.client.exceptions.ApiException as e:
+                    if e.status != 404:
+                        raise e
+
+            namespace = config.get("namespace", "default")
+            for sa in argo_sa:
+                api_instance = kubernetes.client.CoreV1Api()
+                try:
+                    api_instance.delete_namespaced_service_account(
+                        sa,
+                        namespace,
+                    )
+                except kubernetes.client.exceptions.ApiException as e:
+                    if e.status != 404:
+                        raise e
         else:
             kubectl_delete_argo_crds_cmd = " ".join(
                 (
