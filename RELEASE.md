@@ -9,6 +9,23 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+## Release 2024.11.1 - November 21, 2024 (Hotfix Release)
+
+> NOTE: This hotfix addresses several major bugs identified in the 2024.9.1 release. For a detailed overview, please refer to the related discussion at #2798. Users should upgrade directly from 2024.7.1 to 2024.11.1.
+
+## What's Changed
+
+- fix `CHECK_URL` in kuberhealthy checks to respect namespaces by @dcmcand in https://github.com/nebari-dev/nebari/pull/2779
+- fix bug where `check_immutable_fields` throws error with old version of Nebari by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2796
+- Fix immutable field validation error when a sub-schema is not Pydantic by @kenafoster in https://github.com/nebari-dev/nebari/pull/2797
+- Address issue with AWS instance type schema by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2787
+- Add broken note by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2802
+- Refactor role creation for upgrade command path by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2795
+- Allow overriding of keycloak root credentials for 2024.11.1 upgrade path #2843
+- Disable AWS `launch_template` from nebari-config schema #2856
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.9.1...2024.11.1
+
 ## Release 2024.9.1 - September 27, 2024 (Broken Release)
 
 > WARNING: This release was later found to have unresolved issues described further in [issue 2798](https://github.com/nebari-dev/nebari/issues/2798). We have marked this release as broken on conda-forge and yanked it on PyPI. One of the bugs prevents any upgrade from 2024.9.1 to 2024.11.1. Users should skip this release entirely and upgrade directly from 2024.7.1 to 2024.11.1.
