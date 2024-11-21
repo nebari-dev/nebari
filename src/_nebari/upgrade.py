@@ -677,7 +677,9 @@ class Upgrade_2023_4_2(UpgradeStep):
                         name=crd,
                     )
                 except kubernetes.client.exceptions.ApiException as e:
-                    if e.status != 404:
+                    if e.status == 404:
+                        rich.print(f"CRD [yellow]{crd}[/yellow] not found. Ignoring.")
+                    else:
                         raise e
 
             namespace = config.get("namespace", "default")
@@ -689,7 +691,11 @@ class Upgrade_2023_4_2(UpgradeStep):
                         namespace,
                     )
                 except kubernetes.client.exceptions.ApiException as e:
-                    if e.status != 404:
+                    if e.status == 404:
+                        rich.print(
+                            f"Service account [yellow]{sa}[/yellow] not found. Ignoring."
+                        )
+                    else:
                         raise e
         else:
             kubectl_delete_argo_crds_cmd = " ".join(
