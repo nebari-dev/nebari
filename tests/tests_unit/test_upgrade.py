@@ -2,7 +2,7 @@ from contextlib import nullcontext
 from pathlib import Path
 
 import pytest
-from rich.prompt import Prompt
+from rich.prompt import Confirm, Prompt
 
 from _nebari.upgrade import do_upgrade
 from _nebari.version import __version__, rounded_ver_parse
@@ -49,34 +49,31 @@ def test_upgrade_4_0(
     qhub_users_import_json,
     monkeypatch,
 ):
-
     def mock_input(prompt, **kwargs):
         # Mock different upgrade steps prompt answers
-        if (
-            prompt
-            == "Have you deleted the Argo Workflows CRDs and service accounts? [y/N] "
-        ):
-            return "y"
+        if prompt == "Have you deleted the Argo Workflows CRDs and service accounts?":
+            return True
         elif (
             prompt
             == "\nDo you want Nebari to update the kube-prometheus-stack CRDs and delete the prometheus-node-exporter for you? If not, you'll have to do it manually."
         ):
-            return "N"
+            return False
         elif (
             prompt
             == "Have you backed up your custom dashboards (if necessary), deleted the prometheus-node-exporter daemonset and updated the kube-prometheus-stack CRDs?"
         ):
-            return "y"
+            return True
         elif (
             prompt
             == "[bold]Would you like Nebari to assign the corresponding role to all of your current groups automatically?[/bold]"
         ):
-            return "N"
+            return False
         # All other prompts will be answered with "y"
         else:
-            return "y"
+            return True
 
-    monkeypatch.setattr(Prompt, "ask", mock_input)
+    monkeypatch.setattr(Confirm, "ask", mock_input)
+    monkeypatch.setattr(Prompt, "ask", lambda x: "")
 
     old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
 
