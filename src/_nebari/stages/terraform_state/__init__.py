@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 
 from pydantic import BaseModel, field_validator
 
-from _nebari import utils
+from _nebari import constants, utils
 from _nebari.provider import opentofu
 from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
@@ -159,9 +159,14 @@ class TerraformStateStage(NebariTerraformStage):
             return []
 
     def tf_objects(self) -> List[Dict]:
-        resources = [NebariConfig(self.config)]
+        resources = [
+            NebariConfig(self.config),
+            opentofu.Terraform(required_version=constants.OPENTOFU_VERSION),
+        ]
         if self.config.provider == schema.ProviderEnum.gcp:
-            return resources + [
+            return [
+                *resources,
+                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["google"]),
                 opentofu.Provider(
                     "google",
                     project=self.config.google_cloud_platform.project,
@@ -169,8 +174,15 @@ class TerraformStateStage(NebariTerraformStage):
                 ),
             ]
         elif self.config.provider == schema.ProviderEnum.aws:
-            return resources + [
+            return [
+                *resources,
+                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["aws"]),
                 opentofu.Provider("aws", region=self.config.amazon_web_services.region),
+            ]
+        elif self.config.provider == schema.ProviderEnum.azure:
+            return [
+                *resources,
+                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["azurerem"]),
             ]
         else:
             return resources

@@ -30,3 +30,22 @@ GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
 AWS_DEFAULT_REGION = "us-east-1"
 AZURE_DEFAULT_REGION = "Central US"
 GCP_DEFAULT_REGION = "us-central1"
+
+# TERRAFORM REQUIRED PROVIDERS
+REQUIRED_PROVIDERS = {
+    "aws": {
+        "_name": "aws",
+        "source": "hashicorp/aws",
+        "version": "5.12.0",
+    },
+    "azurerm": {
+        "_name": "azurerm",
+        "source": "hashicorp/azurerm",
+        "version": "=3.97.1",
+    },
+    "google": {
+        "_name": "google",
+        "source": "hashicorp/google",
+        "version": "4.83.0",
+    },
+}
