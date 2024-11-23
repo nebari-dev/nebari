@@ -48,4 +48,19 @@ REQUIRED_PROVIDERS = {
         "source": "hashicorp/google",
         "version": "4.83.0",
     },
+    "kind": {
+        "_name": "kind",
+        "source": "registry.terraform.io/tehcyx/kind",
+        "version": "0.4.0",
+    },
+    "docker": {
+        "_name": "docker",
+        "source": "kreuzwerker/docker",
+        "version": "2.16.0",
+    },
+    "kubectl": {
+        "_name": "kubectl",
+        "source": "gavinbunney/kubectl",
+        "version": ">= 1.7.0",
+    },
 }

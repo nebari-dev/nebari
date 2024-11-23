@@ -11,6 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
+from _nebari import constants
 from _nebari.provider import helm, kubernetes, kustomize, opentofu
 from _nebari.stages.tf_objects import NebariTerraformState
 from nebari.hookspecs import NebariStage
@@ -65,7 +66,6 @@ class NebariKustomizeStage(NebariStage):
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
-
         if self.failed_to_create:
             print(
                 f"ERROR: After stage={self.name} "
@@ -143,7 +143,6 @@ class NebariKustomizeStage(NebariStage):
     def deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
-
         print(f"Deploying kubernetes resources for {self.name}")
         # get the kubernetes client
         kubernetes_client = self._get_k8s_client(stage_outputs)
@@ -208,7 +207,6 @@ class NebariKustomizeStage(NebariStage):
         # destroy each manifest in the reverse order
 
         for manifest in sorted(manifests, reverse=True):
-
             print(f"Destroyed manifest: {manifest}")
             try:
                 kubernetes.delete_from_yaml(kubernetes_client, manifest)
@@ -220,7 +218,6 @@ class NebariKustomizeStage(NebariStage):
         # destroy each crd in the reverse order
 
         for crd in sorted(crds, reverse=True):
-
             print(f"Destroyed CRD: {crd}")
             try:
                 kubernetes.delete_from_yaml(kubernetes_client, crd)
@@ -244,7 +241,10 @@ class NebariTerraformStage(NebariStage):
         return []
 
     def tf_objects(self) -> List[Dict]:
-        return [NebariTerraformState(self.name, self.config)]
+        return [
+            NebariTerraformState(self.name, self.config),
+            opentofu.Terraform(required_version=constants.OPENTOFU_VERSION),
+        ]
 
     def render(self) -> Dict[pathlib.Path, str]:
         contents = {
