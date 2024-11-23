@@ -1,4 +1,11 @@
-from _nebari.provider.opentofu import Data, Provider, Resource, TerraformBackend
+from _nebari import constants
+from _nebari.provider.opentofu import (
+    Data,
+    Provider,
+    Resource,
+    Terraform,
+    TerraformBackend,
+)
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
@@ -105,6 +112,14 @@ def NebariTerraformState(directory: str, nebari_config: schema.Main):
         )
     else:
         raise NotImplementedError("state not implemented")
+
+
+def NebariOpentofuRequiredProvider(name: str, nebari_config: schema.Main):
+    return RequiredProvider(**constants.REQUIRED_PROVIDERS[name])
+
+
+def NebariOpentofuRequiredVersion(nebari_config: schema.Main):
+    return Terraform(required_version=constants.OPENTOFU_VERSION)
 
 
 def NebariConfig(nebari_config: schema.Main):

@@ -13,7 +13,10 @@ from kubernetes.client.rest import ApiException
 
 from _nebari import constants
 from _nebari.provider import helm, kubernetes, kustomize, opentofu
-from _nebari.stages.tf_objects import NebariTerraformState
+from _nebari.stages.tf_objects import (
+    NebariOpentofuRequiredVersion,
+    NebariTerraformState,
+)
 from nebari.hookspecs import NebariStage
 
 KUSTOMIZATION_TEMPLATE = "kustomization.yaml.tmpl"
@@ -243,7 +246,7 @@ class NebariTerraformStage(NebariStage):
     def tf_objects(self) -> List[Dict]:
         return [
             NebariTerraformState(self.name, self.config),
-            opentofu.Terraform(required_version=constants.OPENTOFU_VERSION),
+            NebariOpentofuRequiredVersion(self.config),
         ]
 
     def render(self) -> Dict[pathlib.Path, str]:
