@@ -12,7 +12,7 @@ from _nebari import constants, utils
 from _nebari.provider import opentofu
 from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import NebariConfig
+from _nebari.stages.tf_objects import NebariConfig, NebariOpentofuRequiredVersion
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
@@ -161,7 +161,7 @@ class TerraformStateStage(NebariTerraformStage):
     def tf_objects(self) -> List[Dict]:
         resources = [
             NebariConfig(self.config),
-            opentofu.Terraform(required_version=constants.OPENTOFU_VERSION),
+            NebariOpentofuRequiredVersion(self.config),
         ]
         if self.config.provider == schema.ProviderEnum.gcp:
             return [
