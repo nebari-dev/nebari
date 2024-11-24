@@ -15,6 +15,7 @@ from _nebari.provider import opentofu
 from _nebari.provider.cloud import amazon_web_services, azure_cloud, google_cloud
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.kubernetes_services import SharedFsEnum
+from _nebari.stages.tf_objects import NebariOpentofuRequiredProvider
 from _nebari.utils import (
     AZURE_NODE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
@@ -702,7 +703,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         if self.config.provider == schema.ProviderEnum.gcp:
             return [
                 *resources,
-                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["google"]),
+                NebariOpentofuRequiredProvider("google", self.config),
                 opentofu.Provider(
                     "google",
                     project=self.config.google_cloud_platform.project,
@@ -712,20 +713,20 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         elif self.config.provider == schema.ProviderEnum.azure:
             return [
                 *resources,
-                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["azure"]),
+                NebariOpentofuRequiredProvider("azurerm", self.config),
             ]
         elif self.config.provider == schema.ProviderEnum.aws:
             return [
                 *resources,
-                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["aws"]),
+                NebariOpentofuRequiredProvider("aws", self.config),
                 opentofu.Provider("aws", region=self.config.amazon_web_services.region),
             ]
         elif self.config.provider == schema.ProviderEnum.local:
             return [
-                *resources,
-                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["kind"]),
-                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["docker"]),
-                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["kubectl"]),
+                *resource,
+                NebariOpentofuRequiredProvider("kind", self.config),
+                NebariOpentofuRequiredProvider("docker", self.config),
+                NebariOpentofuRequiredProvider("kubectl", self.config),
             ]
         else:
             return resources

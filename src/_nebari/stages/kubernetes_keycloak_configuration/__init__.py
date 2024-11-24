@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Type
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.kubernetes_keycloak import Authentication
+from _nebari.stages.tf_objects import NebariOpentofuRequiredProvider
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 

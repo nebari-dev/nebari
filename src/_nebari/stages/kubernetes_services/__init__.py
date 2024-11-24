@@ -10,7 +10,11 @@ from typing_extensions import Self
 
 from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import NebariHelmProvider, NebariKubernetesProvider
+from _nebari.stages.tf_objects import (
+    NebariHelmProvider,
+    NebariKubernetesProvider,
+    NebariOpentofuRequiredProvider,
+)
 from _nebari.utils import (
     byte_unit_conversion,
     set_docker_image_tag,

@@ -2,6 +2,7 @@ from _nebari import constants
 from _nebari.provider.opentofu import (
     Data,
     Provider,
+    RequiredProvider,
     Resource,
     Terraform,
     TerraformBackend,

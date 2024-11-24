@@ -8,11 +8,15 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 
 from pydantic import BaseModel, field_validator
 
-from _nebari import constants, utils
+from _nebari import utils
 from _nebari.provider import opentofu
 from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import NebariConfig, NebariOpentofuRequiredVersion
+from _nebari.stages.tf_objects import (
+    NebariConfig,
+    NebariOpentofuRequiredProvider,
+    NebariOpentofuRequiredVersion,
+)
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
@@ -166,7 +170,7 @@ class TerraformStateStage(NebariTerraformStage):
         if self.config.provider == schema.ProviderEnum.gcp:
             return [
                 *resources,
-                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["google"]),
+                NebariOpentofuRequiredProvider("google", self.config),
                 opentofu.Provider(
                     "google",
                     project=self.config.google_cloud_platform.project,
@@ -176,13 +180,13 @@ class TerraformStateStage(NebariTerraformStage):
         elif self.config.provider == schema.ProviderEnum.aws:
             return [
                 *resources,
-                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["aws"]),
+                NebariOpentofuRequiredProvider("aws", self.config),
                 opentofu.Provider("aws", region=self.config.amazon_web_services.region),
             ]
         elif self.config.provider == schema.ProviderEnum.azure:
             return [
                 *resources,
-                opentofu.RequiredProvider(**constants.REQUIRED_PROVIDERS["azurerem"]),
+                NebariOpentofuRequiredProvider("azurerm", self.config),
             ]
         else:
             return resources
