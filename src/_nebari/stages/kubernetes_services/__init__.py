@@ -10,11 +10,7 @@ from typing_extensions import Self
 
 from _nebari import constants
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import (
-    NebariHelmProvider,
-    NebariKubernetesProvider,
-    NebariTerraformState,
-)
+from _nebari.stages.tf_objects import NebariHelmProvider, NebariKubernetesProvider
 from _nebari.utils import (
     byte_unit_conversion,
     set_docker_image_tag,
@@ -528,8 +524,11 @@ class KubernetesServicesStage(NebariTerraformStage):
 
     def tf_objects(self) -> List[Dict]:
         return [
-            NebariTerraformState(self.name, self.config),
+            *super().tf_objects(),
+            NebariOpentofuRequiredProvider("keycloak", self.config),
+            NebariOpentofuRequiredProvider("kubernetes", self.config),
             NebariKubernetesProvider(self.config),
+            NebariOpentofuRequiredProvider("helm", self.config),
             NebariHelmProvider(self.config),
         ]
 
