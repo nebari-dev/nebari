@@ -8,11 +8,7 @@ from typing import Any, Dict, List, Optional, Type
 from _nebari import constants
 from _nebari.provider.dns.cloudflare import update_record
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import (
-    NebariHelmProvider,
-    NebariKubernetesProvider,
-    NebariTerraformState,
-)
+from _nebari.stages.tf_objects import NebariHelmProvider, NebariKubernetesProvider
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -168,8 +164,10 @@ class KubernetesIngressStage(NebariTerraformStage):
 
     def tf_objects(self) -> List[Dict]:
         return [
-            NebariTerraformState(self.name, self.config),
+            *super().tf_objects(),
+            NebariOpentofuRequiredProvider("kubernetes", self.config),
             NebariKubernetesProvider(self.config),
+            NebariOpentofuRequiredProvider("helm", self.config),
             NebariHelmProvider(self.config),
         ]
 
