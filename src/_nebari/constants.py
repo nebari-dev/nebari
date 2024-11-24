@@ -58,6 +58,11 @@ REQUIRED_PROVIDERS = {
         "source": "hashicorp/kubernetes",
         "version": "2.1.2",
     },
+    "keycloak": {
+        "_name": "keycloak",
+        "source": "mrparkers/keycloak",
+        "version": "3.7.0",
+    },
     "kind": {
         "_name": "kind",
         "source": "registry.terraform.io/tehcyx/kind",
