@@ -723,7 +723,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ]
         elif self.config.provider == schema.ProviderEnum.local:
             return [
-                *resource,
+                *resources,
                 NebariOpentofuRequiredProvider("kind", self.config),
                 NebariOpentofuRequiredProvider("docker", self.config),
                 NebariOpentofuRequiredProvider("kubectl", self.config),
