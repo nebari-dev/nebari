@@ -11,11 +11,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 from pydantic import Field, ValidationInfo, field_validator
 
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import (
-    NebariHelmProvider,
-    NebariKubernetesProvider,
-    NebariTerraformState,
-)
+from _nebari.stages.tf_objects import NebariHelmProvider, NebariKubernetesProvider
 from _nebari.utils import modified_environ
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -218,8 +214,10 @@ class KubernetesKeycloakStage(NebariTerraformStage):
 
     def tf_objects(self) -> List[Dict]:
         return [
-            NebariTerraformState(self.name, self.config),
+            *super().tf_objects(),
+            NebariOpentofuRequiredProvider("kubernetes", self.config),
             NebariKubernetesProvider(self.config),
+            NebariOpentofuRequiredProvider("helm", self.config),
             NebariHelmProvider(self.config),
         ]
 
