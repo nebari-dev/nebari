@@ -55,7 +55,7 @@ REQUIRED_PROVIDERS = {
     },
     "helm": {
         "_name": "helm",
-        "source": "hashicorp/kubernetes",
+        "source": "hashicorp/helm",
         "version": "2.1.2",
     },
     "keycloak": {
