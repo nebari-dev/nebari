@@ -727,6 +727,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 NebariOpentofuRequiredProvider("kind", self.config),
                 NebariOpentofuRequiredProvider("docker", self.config),
                 NebariOpentofuRequiredProvider("kubectl", self.config),
+                NebariOpentofuRequiredProvider("kubernetes", self.config),
             ]
         else:
             return resources
