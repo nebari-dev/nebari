@@ -15,6 +15,7 @@ from _nebari.stages.tf_objects import (
     NebariHelmProvider,
     NebariKubernetesProvider,
     NebariOpentofuRequiredProvider,
+    NebariTerraformState,
 )
 from _nebari.utils import modified_environ
 from nebari import schema
@@ -223,6 +224,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             NebariKubernetesProvider(self.config),
             NebariOpentofuRequiredProvider("helm", self.config),
             NebariHelmProvider(self.config),
+            NebariTerraformState(self.name, self.config),
         ]
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
