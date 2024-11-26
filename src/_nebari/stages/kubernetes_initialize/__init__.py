@@ -8,6 +8,7 @@ from _nebari.stages.tf_objects import (
     NebariHelmProvider,
     NebariKubernetesProvider,
     NebariOpentofuRequiredProvider,
+    NebariTerraformState,
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
@@ -70,6 +71,7 @@ class KubernetesInitializeStage(NebariTerraformStage):
             NebariKubernetesProvider(self.config),
             NebariOpentofuRequiredProvider("helm", self.config),
             NebariHelmProvider(self.config),
+            NebariTerraformState(self.name, self.config),
         ]
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
