@@ -60,7 +60,7 @@ REQUIRED_PROVIDERS = {
     },
     "keycloak": {
         "_name": "keycloak",
-        "source": "mrparkers/keycloak",
+        "source": "registry.terraform.io/mrparkers/keycloak",
         "version": "3.7.0",
     },
     "kind": {
