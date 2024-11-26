@@ -15,7 +15,10 @@ from _nebari.provider import opentofu
 from _nebari.provider.cloud import amazon_web_services, azure_cloud, google_cloud
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.kubernetes_services import SharedFsEnum
-from _nebari.stages.tf_objects import NebariOpentofuRequiredProvider
+from _nebari.stages.tf_objects import (
+    NebariOpentofuRequiredProvider,
+    NebariTerraformState,
+)
 from _nebari.utils import (
     AZURE_NODE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
@@ -700,6 +703,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
 
     def tf_objects(self) -> List[Dict]:
         resources = super().tf_objects()
+
         if self.config.provider == schema.ProviderEnum.gcp:
             return [
                 *resources,
@@ -709,17 +713,20 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                     project=self.config.google_cloud_platform.project,
                     region=self.config.google_cloud_platform.region,
                 ),
+                NebariTerraformState(self.name, self.config),
             ]
         elif self.config.provider == schema.ProviderEnum.azure:
             return [
                 *resources,
                 NebariOpentofuRequiredProvider("azurerm", self.config),
+                NebariTerraformState(self.name, self.config),
             ]
         elif self.config.provider == schema.ProviderEnum.aws:
             return [
                 *resources,
                 NebariOpentofuRequiredProvider("aws", self.config),
                 opentofu.Provider("aws", region=self.config.amazon_web_services.region),
+                NebariTerraformState(self.name, self.config),
             ]
         elif self.config.provider == schema.ProviderEnum.local:
             return [
