@@ -8,6 +8,7 @@ module "forwardauth" {
   node-group                  = var.node_groups.general
   forwardauth_middleware_name = var.forwardauth_middleware_name
   cert_secret_name            = var.cert_secret_name
+
 }
 
 variable "forwardauth_middleware_name" {
