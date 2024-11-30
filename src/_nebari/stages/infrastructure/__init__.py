@@ -325,6 +325,21 @@ class GoogleCloudPlatformProvider(schema.Base):
             raise ValueError(
                 f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
             )
+
+        # check if instances are valid
+        available_instances = google_cloud.instances(data["region"])
+        if "node_groups" in data:
+            for _, node_group in data["node_groups"].items():
+                instance = (
+                    node_group["instance"]
+                    if hasattr(node_group, "__getitem__")
+                    else node_group.instance
+                )
+                if instance not in available_instances:
+                    raise ValueError(
+                        f"Google Cloud Platform instance {instance} not one of available instance types={available_instances}"
+                    )
+
         return data
 
 
