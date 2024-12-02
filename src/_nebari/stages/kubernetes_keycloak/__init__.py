@@ -224,6 +224,7 @@ class KubernetesKeycloakStage(NebariTerraformStage):
             NebariKubernetesProvider(self.config),
             NebariOpentofuRequiredProvider("helm", self.config),
             NebariHelmProvider(self.config),
+            NebariOpentofuRequiredProvider("keycloak", self.config),
             NebariTerraformState(self.name, self.config),
         ]
 

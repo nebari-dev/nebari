@@ -14,6 +14,7 @@ from _nebari.stages.tf_objects import (
     NebariHelmProvider,
     NebariKubernetesProvider,
     NebariOpentofuRequiredProvider,
+    NebariTerraformState,
 )
 from _nebari.utils import (
     byte_unit_conversion,
@@ -529,6 +530,7 @@ class KubernetesServicesStage(NebariTerraformStage):
     def tf_objects(self) -> List[Dict]:
         return [
             *super().tf_objects(),
+            NebariTerraformState(self.name, self.config),
             NebariOpentofuRequiredProvider("keycloak", self.config),
             NebariOpentofuRequiredProvider("kubernetes", self.config),
             NebariKubernetesProvider(self.config),
