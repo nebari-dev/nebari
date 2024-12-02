@@ -7,7 +7,6 @@ from _nebari.config import write_configuration
 from _nebari.constants import (
     AWS_DEFAULT_REGION,
     AZURE_DEFAULT_REGION,
-    DO_DEFAULT_REGION,
     GCP_DEFAULT_REGION,
 )
 from _nebari.initialize import render_config
@@ -56,6 +55,18 @@ def mock_all_cloud_methods(monkeypatch):
             "m5.xlarge": "m5.xlarge",
             "m5.2xlarge": "m5.2xlarge",
         },
+        "_nebari.provider.cloud.amazon_web_services.kms_key_arns": {
+            "xxxxxxxx-east-zzzz": {
+                "Arn": "arn:aws:kms:us-east-1:100000:key/xxxxxxxx-east-zzzz",
+                "KeyUsage": "ENCRYPT_DECRYPT",
+                "KeySpec": "SYMMETRIC_DEFAULT",
+            },
+            "xxxxxxxx-west-zzzz": {
+                "Arn": "arn:aws:kms:us-west-2:100000:key/xxxxxxxx-west-zzzz",
+                "KeyUsage": "ENCRYPT_DECRYPT",
+                "KeySpec": "SYMMETRIC_DEFAULT",
+            },
+        },
         # Azure
         "_nebari.provider.cloud.azure_cloud.kubernetes_versions": [
             "1.18",
@@ -63,22 +74,6 @@ def mock_all_cloud_methods(monkeypatch):
             "1.20",
         ],
         "_nebari.provider.cloud.azure_cloud.check_credentials": None,
-        # Digital Ocean
-        "_nebari.provider.cloud.digital_ocean.kubernetes_versions": [
-            "1.19.2-do.3",
-            "1.20.2-do.0",
-            "1.21.5-do.0",
-        ],
-        "_nebari.provider.cloud.digital_ocean.check_credentials": None,
-        "_nebari.provider.cloud.digital_ocean.regions": [
-            {"name": "New York 3", "slug": "nyc3"},
-        ],
-        "_nebari.provider.cloud.digital_ocean.instances": [
-            {"name": "s-2vcpu-4gb", "slug": "s-2vcpu-4gb"},
-            {"name": "g-2vcpu-8gb", "slug": "g-2vcpu-8gb"},
-            {"name": "g-8vcpu-32gb", "slug": "g-8vcpu-32gb"},
-            {"name": "g-4vcpu-16gb", "slug": "g-4vcpu-16gb"},
-        ],
         # Google Cloud
         "_nebari.provider.cloud.google_cloud.kubernetes_versions": [
             "1.18",
@@ -101,15 +96,6 @@ def mock_all_cloud_methods(monkeypatch):
 @pytest.fixture(
     params=[
         # project, namespace, domain, cloud_provider, region, ci_provider, auth_provider
-        (
-            "pytestdo",
-            "dev",
-            "do.nebari.dev",
-            schema.ProviderEnum.do,
-            DO_DEFAULT_REGION,
-            CiEnum.github_actions,
-            AuthenticationEnum.password,
-        ),
         (
             "pytestaws",
             "dev",
