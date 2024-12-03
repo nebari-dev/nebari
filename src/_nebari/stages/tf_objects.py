@@ -1,4 +1,4 @@
-from _nebari.provider.terraform import Data, Provider, Resource, TerraformBackend
+from _nebari.provider.opentofu import Data, Provider, Resource, TerraformBackend
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,

@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 from pydantic import BaseModel, field_validator
 
 from _nebari import utils
-from _nebari.provider import terraform
+from _nebari.provider import opentofu
 from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariConfig
@@ -162,7 +162,7 @@ class TerraformStateStage(NebariTerraformStage):
         resources = [NebariConfig(self.config)]
         if self.config.provider == schema.ProviderEnum.gcp:
             return resources + [
-                terraform.Provider(
+                opentofu.Provider(
                     "google",
                     project=self.config.google_cloud_platform.project,
                     region=self.config.google_cloud_platform.region,
@@ -170,9 +170,7 @@ class TerraformStateStage(NebariTerraformStage):
             ]
         elif self.config.provider == schema.ProviderEnum.aws:
             return resources + [
-                terraform.Provider(
-                    "aws", region=self.config.amazon_web_services.region
-                ),
+                opentofu.Provider("aws", region=self.config.amazon_web_services.region),
             ]
         else:
             return resources
@@ -217,9 +215,9 @@ class TerraformStateStage(NebariTerraformStage):
     ):
         self.check_immutable_fields()
 
-        # No need to run terraform init here as it's being called when running the
+        # No need to run tofu init here as it's being called when running the
         # terraform show command, inside check_immutable_fields
-        with super().deploy(stage_outputs, disable_prompt, terraform_init=False):
+        with super().deploy(stage_outputs, disable_prompt, tofu_init=False):
             env_mapping = {}
 
             with modified_environ(**env_mapping):
@@ -264,7 +262,7 @@ class TerraformStateStage(NebariTerraformStage):
 
     def get_nebari_config_state(self) -> dict:
         directory = str(self.output_directory / self.stage_prefix)
-        tf_state = terraform.show(directory)
+        tf_state = opentofu.show(directory)
         nebari_config_state = None
 
         # get nebari config from state
