@@ -65,7 +65,7 @@ REQUIRED_PROVIDERS = {
     },
     "kind": {
         "_name": "kind",
-        "source": "registry.terraform.io/tehcyx/kind",
+        "source": "tehcyx/kind",
         "version": "0.4.0",
     },
     "kubectl": {
