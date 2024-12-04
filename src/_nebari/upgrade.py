@@ -237,6 +237,17 @@ class UpgradeStep(ABC):
                 else:
                     stage_filename.unlink(missing_ok=True)
 
+            stage_filedirs = sorted(
+                (d for d in stages_dir.rglob("*") if d.is_dir()),
+                reverse=True,
+            )
+
+            for stage_filedir in stage_filedirs:
+                if dry_run:
+                    rich.print(f"Dry run: Would remove {stage_filedir}")
+                else:
+                    stage_filedir.rmdir()
+
     def get_version(self):
         """
         Returns:
