@@ -252,6 +252,13 @@ class UpgradeStep(ABC):
                     if verbose:
                         rich.print(f"Removed {stage_filedir}")
 
+            if dry_run and verbose:
+                rich.print(f"Dry run: Would remove {stage_dir}")
+            else:
+                stage_dir.rmdir()
+                if verbose:
+                    rich.print(f"Removed {stage_dir}")
+
     def get_version(self):
         """
         Returns:
