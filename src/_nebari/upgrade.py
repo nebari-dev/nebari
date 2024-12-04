@@ -1007,15 +1007,21 @@ class Upgrade_2023_12_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        rich.print("\n ⚠️  Warning ⚠️")
-        rich.print(
-            "-> Please run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
-        )
         rich.print("\n ⚠️  Deprecation Warning ⚠️")
         rich.print(
             f"-> [green]{self.version}[/green] is the last Nebari version that supports the jupyterlab-videochat extension."
         )
         rich.print()
+
+        if kwargs.get("attempt_fixes", False) or Confirm.ask(
+            TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION,
+            default=False,
+        ):
+            self._rm_rf_stages(
+                config_filename,
+                dry_run=kwargs.get("dry_run", False),
+                verbose=True,
+            )
 
         return config
 
