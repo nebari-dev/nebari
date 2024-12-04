@@ -48,6 +48,13 @@ ARGO_JUPYTER_SCHEDULER_REPO = "https://github.com/nebari-dev/argo-jupyter-schedu
 
 UPGRADE_KUBERNETES_MESSAGE = "Please see the [green][link=https://www.nebari.dev/docs/how-tos/kubernetes-version-upgrade]Kubernetes upgrade docs[/link][/green] for more information."
 DESTRUCTIVE_UPGRADE_WARNING = "-> This version upgrade will result in your cluster being completely torn down and redeployed.  Please ensure you have backed up any data you wish to keep before proceeding!!!"
+TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION = (
+    "Nebari needs to generate an updated set of Terraform scripts for your deployment and delete the old scripts.\n"
+    "Do you want Nebari to remove your [green]stages[/green] directory automatically for you? It will be recreated the next time Nebari is run.\n"
+    "[red]Warning:[/red] This will remove everything in the [green]stages[/green] directory.\n"
+    "If you do not have Nebari do it automatically here, you will need to remove the [green]stages[/green] manually with a command"
+    "like [green]rm -rf stages[/green]."
+)
 
 
 def do_upgrade(config_filename, attempt_fixes=False):
@@ -942,13 +949,7 @@ class Upgrade_2023_10_1(UpgradeStep):
             rich.print(DESTRUCTIVE_UPGRADE_WARNING)
 
         if kwargs.get("attempt_fixes", False) or Confirm.ask(
-            (
-                "Nebari needs to generate an updated set of Terraform scripts for your deployment and delete the old scripts.\n"
-                "Do you want Nebari to remove your [green]stages[/green] directory automatically for you? It will be recreated the next time Nebari is run.\n"
-                "[red]Warning:[/red] This will remove everything in the [green]stages[/green] directory.\n"
-                "If you do not have Nebari do it automatically here, you will need to remove the [green]stages[/green] manually with a command"
-                "like [green]rm -rf stages[/green]."
-            ),
+            TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION,
             default=False,
         ):
             self._rm_rf_stages(
