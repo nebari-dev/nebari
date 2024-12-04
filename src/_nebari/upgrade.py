@@ -215,7 +215,7 @@ class UpgradeStep(ABC):
         return config
 
     @classmethod
-    def _rm_rf_stages(cls, config_filename, dry_run: bool = False):
+    def _rm_rf_stages(cls, config_filename, dry_run: bool = False, verbose=False):
         """
         Remove stage files during and upgrade step
 
@@ -227,26 +227,30 @@ class UpgradeStep(ABC):
         config_dir = Path(config_filename).resolve().parent
 
         if Path.is_dir(config_dir):
-            stages_dir = config_dir / "stages"
+            stage_dir = config_dir / "stages"
 
-            stage_filenames = [d for d in stages_dir.rglob("*") if d.is_file()]
+            stage_filenames = [d for d in stage_dir.rglob("*") if d.is_file()]
 
             for stage_filename in stage_filenames:
-                if dry_run:
+                if dry_run and verbose:
                     rich.print(f"Dry run: Would remove {stage_filename}")
                 else:
                     stage_filename.unlink(missing_ok=True)
+                    if verbose:
+                        rich.print(f"Removed {stage_filename}")
 
             stage_filedirs = sorted(
-                (d for d in stages_dir.rglob("*") if d.is_dir()),
+                (d for d in stage_dir.rglob("*") if d.is_dir()),
                 reverse=True,
             )
 
             for stage_filedir in stage_filedirs:
-                if dry_run:
+                if dry_run and verbose:
                     rich.print(f"Dry run: Would remove {stage_filedir}")
                 else:
                     stage_filedir.rmdir()
+                    if verbose:
+                        rich.print(f"Removed {stage_filedir}")
 
     def get_version(self):
         """
