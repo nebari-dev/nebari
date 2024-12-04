@@ -858,9 +858,6 @@ class Upgrade_2023_10_1(UpgradeStep):
         rich.print(
             "-> Data should be backed up before performing this upgrade ([green][link=https://www.nebari.dev/docs/how-tos/manual-backup]see docs[/link][/green])  The 'prevent_deploy' flag has been set in your config file and must be manually removed to deploy."
         )
-        rich.print(
-            "-> Please also run the [green]rm -rf stages[/green] so that we can regenerate an updated set of Terraform scripts for your deployment."
-        )
 
         # Setting the following flag will prevent deployment and display guidance to the user
         # which they can override if they are happy they understand the situation.
@@ -943,6 +940,22 @@ class Upgrade_2023_10_1(UpgradeStep):
         if provider == "aws":
             rich.print("\n ⚠️  DANGER ⚠️")
             rich.print(DESTRUCTIVE_UPGRADE_WARNING)
+
+        if kwargs.get("attempt_fixes", False) or Confirm.ask(
+            (
+                "Nebari needs to generate an updated set of Terraform scripts for your deployment and delete the old scripts.\n"
+                "Do you want Nebari to remove your [green]stages[/green] directory automatically for you? It will be recreated the next time Nebari is run.\n"
+                "[red]Warning:[/red] This will remove everything in the [green]stages[/green] directory.\n"
+                "If you do not have Nebari do it automatically here, you will need to remove the [green]stages[/green] manually with a command"
+                "like [green]rm -rf stages[/green]."
+            ),
+            default=False,
+        ):
+            self._rm_rf_stages(
+                config_filename,
+                dry_run=kwargs.get("dry_run", False),
+                verbose=True,
+            )
 
         return config
 
