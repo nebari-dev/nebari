@@ -261,7 +261,7 @@ class UpgradeStep(ABC):
 
             if dry_run and verbose:
                 rich.print(f"Dry run: Would remove {stage_dir}")
-            else:
+            elif stage_dir.is_dir():
                 stage_dir.rmdir()
                 if verbose:
                     rich.print(f"Removed {stage_dir}")
