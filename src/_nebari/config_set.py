@@ -2,12 +2,11 @@ import pathlib
 
 import yaml
 from pydantic import BaseModel, ConfigDict
-from pytest import Config
 
 
 class ConfigSetMetadata(BaseModel):
     model_config: ConfigDict = ConfigDict(
-        extra=Config.extra.allow,
+        extra="allow",
     )
     name: str = None  # for use with guided init
     description: str = None
