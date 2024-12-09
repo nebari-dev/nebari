@@ -85,6 +85,10 @@ def mock_all_cloud_methods(monkeypatch):
             "us-central1",
             "us-east1",
         ],
+        "_nebari.provider.cloud.google_cloud.instances": [
+            "e2-standard-4",
+            "e2-highmem-4",
+        ],
     }
 
     for attribute_path, return_value in MOCK_VALUES.items():
