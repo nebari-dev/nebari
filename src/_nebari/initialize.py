@@ -179,7 +179,6 @@ def render_config(
         config["certificate"]["acme_email"] = ssl_cert_email
 
     if config_set:
-        # read the config set, validate, merge/clobber with existing config
         config_set = read_config_set(config_set)
         config = utils.deep_merge(config_set.config, config)
 

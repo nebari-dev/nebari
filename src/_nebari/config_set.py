@@ -9,7 +9,7 @@ class ConfigSetMetadata(BaseModel):
     model_config: ConfigDict = ConfigDict(
         extra=Config.extra.allow,
     )
-    name: str = None
+    name: str = None  # for use with guided init
     description: str = None
     nebari_version: str = None
 
@@ -25,8 +25,9 @@ def read_config_set(config_set_filepath: str):
     filename = pathlib.Path(config_set_filepath)
 
     with filename.open() as f:
-        config_set = yaml.load(f)
+        config_set_yaml = yaml.load(f)
 
     # TODO: Validation e.g. Check Nebari version
+    config_set = ConfigSet(**config_set_yaml)
 
     return config_set
