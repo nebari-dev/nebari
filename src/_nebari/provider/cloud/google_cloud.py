@@ -52,19 +52,21 @@ def regions() -> Set[str]:
 
 
 @functools.lru_cache()
-def instances(region: str) -> Set[str]:
+def instances(region: str) -> set[str]:
     """Return a set of available compute instances in a region."""
     credentials, project_id = load_credentials()
     zones_client = compute_v1.services.region_zones.RegionZonesClient(
         credentials=credentials
     )
-    instances_client = compute_v1.InstancesClient(credentials=credentials)
-
-    return {
-        instance.machine_type.split("/")[-1]
-        for zone in zones_client.list(project=project_id, region=region)
-        for instance in instances_client.list(project=project_id, zone=zone.name)
-    }
+    instances_client = compute_v1.MachineTypesClient(credentials=credentials)
+    zone_list = zones_client.list(project=project_id, region=region)
+    zones = [zone for zone in zone_list]
+    instance_set: set[str] = set()
+    for zone in zones:
+        instance_list = instances_client.list(project=project_id, zone=zone.name)
+        for instance in instance_list:
+            instance_set.add(instance.name)
+    return instance_set
 
 
 @functools.lru_cache()
