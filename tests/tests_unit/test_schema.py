@@ -130,7 +130,7 @@ def test_no_provider(config_schema, provider, full_name, default_fields):
             "existing": {},
         },
         {
-            "local": {},
+            "provider": "local",
             "google_cloud_platform": {},
         },
     ],
