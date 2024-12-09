@@ -122,13 +122,25 @@ def test_no_provider(config_schema, provider, full_name, default_fields):
     assert full_name in config.model_dump()
 
 
-def test_multiple_providers(config_schema):
+@pytest.mark.parametrize(
+    "providers",
+    [
+        {
+            "local": {},
+            "existing": {},
+        },
+        {
+            "local": {},
+            "google_cloud_platform": {},
+        },
+    ],
+)
+def test_multiple_providers(config_schema, providers):
     config_dict = {
         "project_name": "test",
-        "local": {},
-        "existing": {},
+        **providers,
     }
-    msg = r"Multiple providers set: \['local', 'existing'\]"
+    msg = r"Only a single provider may be set.  Multiple providers are set: "
     with pytest.raises(ValidationError, match=msg):
         config_schema(**config_dict)
 
