@@ -1,7 +1,8 @@
 import pathlib
 
-import yaml
 from pydantic import BaseModel, ConfigDict
+
+from _nebari.utils import yaml
 
 
 class ConfigSetMetadata(BaseModel):
