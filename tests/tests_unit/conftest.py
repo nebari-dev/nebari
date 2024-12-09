@@ -87,6 +87,7 @@ def mock_all_cloud_methods(monkeypatch):
         ],
         "_nebari.provider.cloud.google_cloud.instances": [
             "e2-standard-4",
+            "e2-standard-8",
             "e2-highmem-4",
         ],
     }
