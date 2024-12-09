@@ -8,7 +8,7 @@ from typing import Any, Dict
 import pydantic
 import requests
 
-from _nebari import constants
+from _nebari import constants, utils
 from _nebari.config_set import read_config_set
 from _nebari.provider import git
 from _nebari.provider.cicd import github
@@ -180,8 +180,8 @@ def render_config(
 
     if config_set:
         # read the config set, validate, merge/clobber with existing config
-        config_set_config = read_config_set(config_set)
-        config.update(config_set_config)
+        config_set = read_config_set(config_set)
+        config = utils.deep_merge(config_set.config, config)
 
     # validate configuration and convert to model
     from nebari.plugins import nebari_plugin_manager
