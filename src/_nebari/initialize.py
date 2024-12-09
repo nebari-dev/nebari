@@ -180,7 +180,7 @@ def render_config(
 
     if config_set:
         config_set = read_config_set(config_set)
-        config = utils.deep_merge(config_set.config, config)
+        config = utils.deep_merge(config, config_set.config)
 
     # validate configuration and convert to model
     from nebari.plugins import nebari_plugin_manager
@@ -188,7 +188,7 @@ def render_config(
     try:
         config_model = nebari_plugin_manager.config_schema.model_validate(config)
     except pydantic.ValidationError as e:
-        print(str(e))
+        raise e
 
     if repository_auto_provision:
         match = re.search(github_url_regex, repository)
