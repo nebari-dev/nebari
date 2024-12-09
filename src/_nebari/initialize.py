@@ -9,6 +9,7 @@ import pydantic
 import requests
 
 from _nebari import constants
+from _nebari.config_set import read_config_set
 from _nebari.provider import git
 from _nebari.provider.cicd import github
 from _nebari.provider.cloud import amazon_web_services, azure_cloud, google_cloud
@@ -47,6 +48,7 @@ def render_config(
     region: str = None,
     disable_prompt: bool = False,
     ssl_cert_email: str = None,
+    config_set: str = None,
 ) -> Dict[str, Any]:
     config = {
         "provider": cloud_provider,
@@ -175,6 +177,11 @@ def render_config(
     if ssl_cert_email:
         config["certificate"] = {"type": CertificateEnum.letsencrypt.value}
         config["certificate"]["acme_email"] = ssl_cert_email
+
+    if config_set:
+        # read the config set, validate, merge/clobber with existing config
+        config_set_config = read_config_set(config_set)
+        config.update(config_set_config)
 
     # validate configuration and convert to model
     from nebari.plugins import nebari_plugin_manager
