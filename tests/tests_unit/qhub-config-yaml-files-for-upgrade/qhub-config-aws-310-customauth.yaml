@@ -32,7 +32,7 @@ storage:
 theme:
   jupyterhub:
     hub_title: Nebari - do-pytest
-    hub_subtitle: Autoscaling Compute Environment on Digital Ocean
+    hub_subtitle: Autoscaling Compute Environment on AWS
     welcome: Welcome to do.nebari.dev. It is maintained by <a href="http://quansight.com">Quansight
       staff</a>. The hub's configuration is stored in a github repository based on
       <a href="https://github.com/Quansight/nebari/">https://github.com/Quansight/nebari/</a>.

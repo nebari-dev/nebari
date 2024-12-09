@@ -24,25 +24,19 @@ def check_credentials() -> None:
 
 @functools.lru_cache()
 def aws_session(
-    region: Optional[str] = None, digitalocean_region: Optional[str] = None
+    region: Optional[str] = None,
 ) -> boto3.Session:
     """Create a boto3 session."""
-    if digitalocean_region:
-        aws_access_key_id = os.environ["SPACES_ACCESS_KEY_ID"]
-        aws_secret_access_key = os.environ["SPACES_SECRET_ACCESS_KEY"]
-        region = digitalocean_region
-        aws_session_token = None
-    else:
-        check_credentials()
-        aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
-        aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
-        aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
+    check_credentials()
+    aws_access_key_id = os.environ["AWS_ACCESS_KEY_ID"]
+    aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"]
+    aws_session_token = os.environ.get("AWS_SESSION_TOKEN")
 
-        if not region:
-            raise ValueError(
-                "Please specify `region` in the nebari-config.yaml or if initializing the nebari-config, set the region via the "
-                "`--region` flag or via the AWS_DEFAULT_REGION environment variable.\n"
-            )
+    if not region:
+        raise ValueError(
+            "Please specify `region` in the nebari-config.yaml or if initializing the nebari-config, set the region via the "
+            "`--region` flag or via the AWS_DEFAULT_REGION environment variable.\n"
+        )
 
     return boto3.Session(
         region_name=region,
@@ -712,21 +706,17 @@ def aws_delete_s3_objects(
     bucket_name: str,
     endpoint: Optional[str] = None,
     region: Optional[str] = None,
-    digitalocean_region: Optional[str] = None,
 ):
     """
     Delete all objects in the S3 bucket.
 
-    NOTE: This method is shared with Digital Ocean as their "Spaces" is S3 compatible and uses the same API.
-
     Parameters:
         bucket_name (str): S3 bucket name
-        endpoint (str): S3 endpoint URL (required for Digital Ocean spaces)
+        endpoint (str): S3 endpoint URL
         region (str): AWS region
-        digitalocean_region (str): Digital Ocean region
 
     """
-    session = aws_session(region=region, digitalocean_region=digitalocean_region)
+    session = aws_session(region=region)
     s3 = session.client("s3", endpoint_url=endpoint)
 
     try:
@@ -779,22 +769,18 @@ def aws_delete_s3_bucket(
     bucket_name: str,
     endpoint: Optional[str] = None,
     region: Optional[str] = None,
-    digitalocean_region: Optional[str] = None,
 ):
     """
     Delete S3 bucket.
 
-    NOTE: This method is shared with Digital Ocean as their "Spaces" is S3 compatible and uses the same API.
-
     Parameters:
         bucket_name (str): S3 bucket name
-        endpoint (str): S3 endpoint URL (required for Digital Ocean spaces)
+        endpoint (str): S3 endpoint URL
         region (str): AWS region
-        digitalocean_region (str): Digital Ocean region
     """
-    aws_delete_s3_objects(bucket_name, endpoint, region, digitalocean_region)
+    aws_delete_s3_objects(bucket_name, endpoint, region)
 
-    session = aws_session(region=region, digitalocean_region=digitalocean_region)
+    session = aws_session(region=region)
     s3 = session.client("s3", endpoint_url=endpoint)
 
     try:

@@ -7,5 +7,5 @@ pytest_plugins = [
 # argparse under-the-hood
 def pytest_addoption(parser):
     parser.addoption(
-        "--cloud", action="store", help="Cloud to deploy on: aws/do/gcp/azure"
+        "--cloud", action="store", help="Cloud to deploy on: aws/gcp/azure"
     )

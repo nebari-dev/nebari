@@ -8,16 +8,11 @@ import sys
 import tempfile
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from pydantic import ConfigDict, Field, PrivateAttr, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from _nebari import constants
-from _nebari.provider import terraform
-from _nebari.provider.cloud import (
-    amazon_web_services,
-    azure_cloud,
-    digital_ocean,
-    google_cloud,
-)
+from _nebari.provider import opentofu
+from _nebari.provider.cloud import amazon_web_services, azure_cloud, google_cloud
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.kubernetes_services import SharedFsEnum
 from _nebari.stages.tf_objects import NebariTerraformState
@@ -41,22 +36,6 @@ class LocalInputVars(schema.Base):
 
 class ExistingInputVars(schema.Base):
     kube_context: str
-
-
-class DigitalOceanNodeGroup(schema.Base):
-    instance: str
-    min_nodes: int
-    max_nodes: int
-
-
-class DigitalOceanInputVars(schema.Base):
-    name: str
-    environment: str
-    region: str
-    tags: List[str]
-    kubernetes_version: str
-    node_groups: Dict[str, DigitalOceanNodeGroup]
-    kubeconfig_filename: str = get_kubeconfig_filename()
 
 
 class GCPNodeGroupInputVars(schema.Base):
@@ -136,7 +115,7 @@ class AWSAmiTypes(str, enum.Enum):
 
 class AWSNodeLaunchTemplate(schema.Base):
     pre_bootstrap_command: Optional[str] = None
-    _ami_id: Optional[str] = PrivateAttr(default=None)
+    ami_id: Optional[str] = None
 
 
 class AWSNodeGroupInputVars(schema.Base):
@@ -152,10 +131,23 @@ class AWSNodeGroupInputVars(schema.Base):
     launch_template: Optional[AWSNodeLaunchTemplate] = None
 
 
-def construct_aws_ami_type(gpu_enabled: bool, launch_template: AWSNodeLaunchTemplate):
-    """Construct the AWS AMI type based on the provided parameters."""
+def construct_aws_ami_type(
+    gpu_enabled: bool, launch_template: AWSNodeLaunchTemplate
+) -> str:
+    """
+    This function selects the Amazon Machine Image (AMI) type for AWS nodes by evaluating
+    the provided parameters. The selection logic prioritizes the launch template over the
+    GPU flag.
 
-    if launch_template and launch_template._ami_id:
+    Returns the AMI type (str) determined by the following rules:
+        - Returns "CUSTOM" if a `launch_template` is provided and it includes a valid `ami_id`.
+        - Returns "AL2_x86_64_GPU" if `gpu_enabled` is True and no valid
+          `launch_template` is provided (None).
+        - Returns "AL2_x86_64" as the default AMI type if `gpu_enabled` is False and no
+          valid `launch_template` is provided (None).
+    """
+
+    if launch_template and getattr(launch_template, "ami_id", None):
         return "CUSTOM"
 
     if gpu_enabled:
@@ -211,11 +203,6 @@ def _calculate_node_groups(config: schema.Main):
             group: {"key": "azure-node-pool", "value": group}
             for group in ["general", "user", "worker"]
         }
-    elif config.provider == schema.ProviderEnum.do:
-        return {
-            group: {"key": "doks.digitalocean.com/node-pool", "value": group}
-            for group in ["general", "user", "worker"]
-        }
     elif config.provider == schema.ProviderEnum.existing:
         return config.existing.model_dump()["node_selectors"]
     else:
@@ -252,67 +239,6 @@ def kubernetes_provider_context(kubernetes_credentials: Dict[str, str]):
 class KeyValueDict(schema.Base):
     key: str
     value: str
-
-
-class DigitalOceanNodeGroup(schema.Base):
-    """Representation of a node group with Digital Ocean
-
-    - Kubernetes limits: https://docs.digitalocean.com/products/kubernetes/details/limits/
-    - Available instance types: https://slugs.do-api.dev/
-    """
-
-    instance: str
-    min_nodes: Annotated[int, Field(ge=1)] = 1
-    max_nodes: Annotated[int, Field(ge=1)] = 1
-
-
-DEFAULT_DO_NODE_GROUPS = {
-    "general": DigitalOceanNodeGroup(instance="g-8vcpu-32gb", min_nodes=1, max_nodes=1),
-    "user": DigitalOceanNodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
-    "worker": DigitalOceanNodeGroup(instance="g-4vcpu-16gb", min_nodes=1, max_nodes=5),
-}
-
-
-class DigitalOceanProvider(schema.Base):
-    region: str
-    kubernetes_version: Optional[str] = None
-    # Digital Ocean image slugs are listed here https://slugs.do-api.dev/
-    node_groups: Dict[str, DigitalOceanNodeGroup] = DEFAULT_DO_NODE_GROUPS
-    tags: Optional[List[str]] = []
-
-    @model_validator(mode="before")
-    @classmethod
-    def _check_input(cls, data: Any) -> Any:
-        digital_ocean.check_credentials()
-
-        # check if region is valid
-        available_regions = set(_["slug"] for _ in digital_ocean.regions())
-        if data["region"] not in available_regions:
-            raise ValueError(
-                f"Digital Ocean region={data['region']} is not one of {available_regions}"
-            )
-
-        # check if kubernetes version is valid
-        available_kubernetes_versions = digital_ocean.kubernetes_versions()
-        if len(available_kubernetes_versions) == 0:
-            raise ValueError(
-                "Request to Digital Ocean for available Kubernetes versions failed."
-            )
-        if data["kubernetes_version"] is None:
-            data["kubernetes_version"] = available_kubernetes_versions[-1]
-        elif data["kubernetes_version"] not in available_kubernetes_versions:
-            raise ValueError(
-                f"\nInvalid `kubernetes-version` provided: {data['kubernetes_version']}.\nPlease select from one of the following supported Kubernetes versions: {available_kubernetes_versions} or omit flag to use latest Kubernetes version available."
-            )
-
-        available_instances = {_["slug"] for _ in digital_ocean.instances()}
-        if "node_groups" in data:
-            for _, node_group in data["node_groups"].items():
-                if node_group["instance"] not in available_instances:
-                    raise ValueError(
-                        f"Digital Ocean instance {node_group.instance} not one of available instance types={available_instances}"
-                    )
-        return data
 
 
 class GCPIPAllocationPolicy(schema.Base):
@@ -495,7 +421,16 @@ class AWSNodeGroup(schema.Base):
     gpu: bool = False
     single_subnet: bool = False
     permissions_boundary: Optional[str] = None
-    launch_template: Optional[AWSNodeLaunchTemplate] = None
+    # Disabled as part of 2024.11.1 until #2832 is resolved
+    # launch_template: Optional[AWSNodeLaunchTemplate] = None
+
+    @model_validator(mode="before")
+    def check_launch_template(cls, values):
+        if "launch_template" in values:
+            raise ValueError(
+                "The 'launch_template' field is currently unavailable and has been removed from the configuration schema.\nPlease omit this field until it is reintroduced in a future update.",
+            )
+        return values
 
 
 DEFAULT_AWS_NODE_GROUPS = {
@@ -637,7 +572,6 @@ provider_enum_model_map = {
     schema.ProviderEnum.gcp: GoogleCloudPlatformProvider,
     schema.ProviderEnum.aws: AmazonWebServicesProvider,
     schema.ProviderEnum.azure: AzureProvider,
-    schema.ProviderEnum.do: DigitalOceanProvider,
 }
 
 provider_enum_name_map: Dict[schema.ProviderEnum, str] = {
@@ -646,7 +580,6 @@ provider_enum_name_map: Dict[schema.ProviderEnum, str] = {
     schema.ProviderEnum.gcp: "google_cloud_platform",
     schema.ProviderEnum.aws: "amazon_web_services",
     schema.ProviderEnum.azure: "azure",
-    schema.ProviderEnum.do: "digital_ocean",
 }
 
 provider_name_abbreviation_map: Dict[str, str] = {
@@ -657,7 +590,6 @@ provider_enum_default_node_groups_map: Dict[schema.ProviderEnum, Any] = {
     schema.ProviderEnum.gcp: node_groups_to_dict(DEFAULT_GCP_NODE_GROUPS),
     schema.ProviderEnum.aws: node_groups_to_dict(DEFAULT_AWS_NODE_GROUPS),
     schema.ProviderEnum.azure: node_groups_to_dict(DEFAULT_AZURE_NODE_GROUPS),
-    schema.ProviderEnum.do: node_groups_to_dict(DEFAULT_DO_NODE_GROUPS),
 }
 
 
@@ -667,7 +599,6 @@ class InputSchema(schema.Base):
     google_cloud_platform: Optional[GoogleCloudPlatformProvider] = None
     amazon_web_services: Optional[AmazonWebServicesProvider] = None
     azure: Optional[AzureProvider] = None
-    digital_ocean: Optional[DigitalOceanProvider] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -685,7 +616,7 @@ class InputSchema(schema.Base):
                 # so we need to check for it explicitly here, and set the `pre` to True
                 # TODO: this is a workaround, check if there is a better way to do this in Pydantic v2
                 raise ValueError(
-                    f"'{provider}' is not a valid enumeration member; permitted: local, existing, do, aws, gcp, azure"
+                    f"'{provider}' is not a valid enumeration member; permitted: local, existing, aws, gcp, azure"
                 )
         else:
             set_providers = [
@@ -785,15 +716,11 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
     def tf_objects(self) -> List[Dict]:
         if self.config.provider == schema.ProviderEnum.gcp:
             return [
-                terraform.Provider(
+                opentofu.Provider(
                     "google",
                     project=self.config.google_cloud_platform.project,
                     region=self.config.google_cloud_platform.region,
                 ),
-                NebariTerraformState(self.name, self.config),
-            ]
-        elif self.config.provider == schema.ProviderEnum.do:
-            return [
                 NebariTerraformState(self.name, self.config),
             ]
         elif self.config.provider == schema.ProviderEnum.azure:
@@ -802,9 +729,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
             ]
         elif self.config.provider == schema.ProviderEnum.aws:
             return [
-                terraform.Provider(
-                    "aws", region=self.config.amazon_web_services.region
-                ),
+                opentofu.Provider("aws", region=self.config.amazon_web_services.region),
                 NebariTerraformState(self.name, self.config),
             ]
         else:
@@ -818,15 +743,6 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
         elif self.config.provider == schema.ProviderEnum.existing:
             return ExistingInputVars(
                 kube_context=self.config.existing.kube_context
-            ).model_dump()
-        elif self.config.provider == schema.ProviderEnum.do:
-            return DigitalOceanInputVars(
-                name=self.config.escaped_project_name,
-                environment=self.config.namespace,
-                region=self.config.digital_ocean.region,
-                tags=self.config.digital_ocean.tags,
-                kubernetes_version=self.config.digital_ocean.kubernetes_version,
-                node_groups=self.config.digital_ocean.node_groups,
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.gcp:
             return GCPInputVars(
@@ -914,10 +830,10 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                         max_size=node_group.max_nodes,
                         single_subnet=node_group.single_subnet,
                         permissions_boundary=node_group.permissions_boundary,
-                        launch_template=node_group.launch_template,
+                        launch_template=None,
                         ami_type=construct_aws_ami_type(
                             gpu_enabled=node_group.gpu,
-                            launch_template=node_group.launch_template,
+                            launch_template=None,
                         ),
                     )
                     for name, node_group in self.config.amazon_web_services.node_groups.items()

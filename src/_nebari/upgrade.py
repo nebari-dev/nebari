@@ -1198,7 +1198,7 @@ class Upgrade_2024_7_1(UpgradeStep):
     def _version_specific_upgrade(
         self, config, start_version, config_filename: Path, *args, **kwargs
     ):
-        if config.get("provider", "") == ProviderEnum.do.value:
+        if config.get("provider", "") == "do":
             rich.print("\n ⚠️  Deprecation Warning ⚠️")
             rich.print(
                 "-> Digital Ocean support is currently being deprecated and will be removed in a future release.",
@@ -1246,7 +1246,7 @@ class Upgrade_2024_11_1(UpgradeStep):
                 ),
             )
             rich.print("")
-        elif config.get("provider", "") == ProviderEnum.do.value:
+        elif config.get("provider", "") == "do":
             rich.print("\n ⚠️  Deprecation Warning ⚠️")
             rich.print(
                 "-> Digital Ocean support is currently being deprecated and will be removed in a future release.",
