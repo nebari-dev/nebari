@@ -16,6 +16,14 @@ resource "azurerm_kubernetes_cluster" "main" {
   node_resource_group     = var.node_resource_group_name
   private_cluster_enabled = var.private_cluster_enabled
 
+  dynamic "api_server_access_profile" {
+    for_each = var.authorized_ip_ranges != null ? [1] : []
+    content {
+      authorized_ip_ranges = var.authorized_ip_ranges
+    }
+
+  }
+
   dynamic "network_profile" {
     for_each = var.network_profile != null ? [var.network_profile] : []
     content {

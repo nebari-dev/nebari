@@ -76,3 +76,9 @@ variable "workload_identity_enabled" {
   type        = bool
   default     = false
 }
+
+variable "authorized_ip_ranges" {
+  description = "Authorized IP Ranges"
+  type        = list(string)
+  default     = null
+}

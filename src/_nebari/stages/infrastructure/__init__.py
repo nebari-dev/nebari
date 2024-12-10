@@ -365,6 +365,7 @@ class AzureProvider(schema.Base):
     storage_account_postfix: str
     vnet_subnet_id: Optional[str] = None
     private_cluster_enabled: bool = False
+    authorized_ip_ranges: Optional[List[str]] = None
     resource_group_name: Optional[str] = None
     tags: Optional[Dict[str, str]] = {}
     network_profile: Optional[Dict[str, str]] = None
