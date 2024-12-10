@@ -618,19 +618,22 @@ class InputSchema(schema.Base):
                 raise ValueError(
                     f"'{provider}' is not a valid enumeration member; permitted: local, existing, aws, gcp, azure"
                 )
-        else:
-            set_providers = [
-                provider
-                for provider in provider_name_abbreviation_map.keys()
-                if provider in data
-            ]
-            num_providers = len(set_providers)
-            if num_providers > 1:
-                raise ValueError(f"Multiple providers set: {set_providers}")
-            elif num_providers == 1:
-                data["provider"] = provider_name_abbreviation_map[set_providers[0]]
-            elif num_providers == 0:
-                data["provider"] = schema.ProviderEnum.local.value
+
+        set_providers = [
+            provider
+            for provider in provider_name_abbreviation_map.keys()
+            if provider in data
+        ]
+        num_providers = len(set_providers)
+        if num_providers > 1:
+            raise ValueError(
+                f"Only a single provider may be set.  Multiple providers are set: {set_providers}"
+            )
+        elif num_providers == 1:
+            data["provider"] = provider_name_abbreviation_map[set_providers[0]]
+        elif num_providers == 0:
+            data["provider"] = schema.ProviderEnum.local.value
+
         return data
 
 
