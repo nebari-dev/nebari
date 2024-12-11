@@ -101,6 +101,7 @@ class AzureInputVars(schema.Base):
     node_resource_group_name: str
     vnet_subnet_id: Optional[str] = None
     private_cluster_enabled: bool
+    authorized_ip_ranges: Optional[List[str]] = None
     tags: Dict[str, str] = {}
     max_pods: Optional[int] = None
     network_profile: Optional[Dict[str, str]] = None
@@ -784,6 +785,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 name=self.config.escaped_project_name,
                 environment=self.config.namespace,
                 region=self.config.azure.region,
+                authorized_ip_ranges=self.config.azure.authorized_ip_ranges,
                 kubernetes_version=self.config.azure.kubernetes_version,
                 node_groups={
                     name: AzureNodeGroupInputVars(
