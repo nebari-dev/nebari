@@ -52,16 +52,44 @@ def regions() -> Set[str]:
 
 
 @functools.lru_cache()
+def instances(region: str) -> set[str]:
+    """Return a set of available compute instances in a region."""
+    credentials, project_id = load_credentials()
+    zones_client = compute_v1.services.region_zones.RegionZonesClient(
+        credentials=credentials
+    )
+    instances_client = compute_v1.MachineTypesClient(credentials=credentials)
+    zone_list = zones_client.list(project=project_id, region=region)
+    zones = [zone for zone in zone_list]
+    instance_set: set[str] = set()
+    for zone in zones:
+        instance_list = instances_client.list(project=project_id, zone=zone.name)
+        for instance in instance_list:
+            instance_set.add(instance.name)
+    return instance_set
+
+
+@functools.lru_cache()
 def kubernetes_versions(region: str) -> List[str]:
     """Return list of available kubernetes supported by cloud provider. Sorted from oldest to latest."""
     credentials, project_id = load_credentials()
     client = container_v1.ClusterManagerClient(credentials=credentials)
     response = client.get_server_config(
-        name=f"projects/{project_id}/locations/{region}"
+        name=f"projects/{project_id}/locations/{region}", timeout=300
     )
     supported_kubernetes_versions = response.valid_master_versions
 
     return filter_by_highest_supported_k8s_version(supported_kubernetes_versions)
+
+
+def get_patch_version(full_version: str) -> str:
+    return full_version.split("-")[0]
+
+
+def get_minor_version(full_version: str) -> str:
+    patch_version = get_patch_version(full_version)
+    parts = patch_version.split(".")
+    return f"{parts[0]}.{parts[1]}"
 
 
 def cluster_exists(cluster_name: str, region: str) -> bool:

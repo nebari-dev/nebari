@@ -1,6 +1,6 @@
-project_name: do-pytest
-provider: do
-domain: do.nebari.dev
+project_name: aws-pytest
+provider: aws
+domain: aws.nebari.dev
 certificate:
   type: self-signed
 security:
@@ -29,7 +29,7 @@ storage:
 theme:
   jupyterhub:
     hub_title: Nebari - do-pytest
-    hub_subtitle: Autoscaling Compute Environment on Digital Ocean
+    hub_subtitle: Autoscaling Compute Environment on AWS
     welcome: Welcome to do.nebari.dev. It is maintained by <a href="http://quansight.com">Quansight
       staff</a>. The hub's configuration is stored in a github repository based on
       <a href="https://github.com/Quansight/nebari/">https://github.com/Quansight/nebari/</a>.
@@ -45,22 +45,31 @@ theme:
 terraform_state:
   type: remote
 namespace: dev
-digital_ocean:
-  region: nyc3
-  kubernetes_version: 1.21.5-do.0
+amazon_web_services:
+  kubernetes_version: '1.20'
+  region: us-east-1
   node_groups:
     general:
-      instance: s-2vcpu-4gb
+      instance: m5.2xlarge
       min_nodes: 1
       max_nodes: 1
+      gpu: false
+      single_subnet: false
+      permissions_boundary:
     user:
-      instance: g-2vcpu-8gb
-      min_nodes: 1
+      instance: m5.xlarge
+      min_nodes: 0
       max_nodes: 5
+      gpu: false
+      single_subnet: false
+      permissions_boundary:
     worker:
-      instance: g-2vcpu-8gb
-      min_nodes: 1
+      instance: m5.xlarge
+      min_nodes: 0
       max_nodes: 5
+      gpu: false
+      single_subnet: false
+      permissions_boundary:
 profiles:
   jupyterlab:
   - display_name: Small Instance

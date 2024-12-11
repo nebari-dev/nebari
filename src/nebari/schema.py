@@ -35,7 +35,6 @@ class Base(pydantic.BaseModel):
 class ProviderEnum(str, enum.Enum):
     local = "local"
     existing = "existing"
-    do = "do"
     aws = "aws"
     gcp = "gcp"
     azure = "azure"

@@ -23,3 +23,8 @@ theme:
 certificate:
   type: lets-encrypt
   acme_email: test@example.com
+jupyterhub:
+  overrides:
+    singleuser:
+      extraEnv:
+        TEST_ENV: "my_env"
