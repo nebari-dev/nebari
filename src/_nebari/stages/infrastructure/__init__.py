@@ -622,7 +622,7 @@ class InputSchema(schema.Base):
         set_providers = [
             provider
             for provider in provider_name_abbreviation_map.keys()
-            if provider in data
+            if provider in data and data[provider]
         ]
         num_providers = len(set_providers)
         if num_providers > 1:
