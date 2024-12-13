@@ -9,7 +9,7 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
-## Release 2024.12.1 - December 12, 2024
+## Release 2024.12.1 - December 13, 2024
 
 > NOTE: Support for DigitalOcean has been removed in this release. If you plan to deploy Nebari on DigitalOcean, you first need to independently create a Kubernetes cluster and then use the `existing` deployment option.
 
