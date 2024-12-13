@@ -13,6 +13,7 @@ from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import (
     NebariHelmProvider,
     NebariKubernetesProvider,
+    NebariOpentofuRequiredProvider,
     NebariTerraformState,
 )
 from _nebari.utils import (
@@ -528,8 +529,12 @@ class KubernetesServicesStage(NebariTerraformStage):
 
     def tf_objects(self) -> List[Dict]:
         return [
+            *super().tf_objects(),
             NebariTerraformState(self.name, self.config),
+            NebariOpentofuRequiredProvider("keycloak", self.config),
+            NebariOpentofuRequiredProvider("kubernetes", self.config),
             NebariKubernetesProvider(self.config),
+            NebariOpentofuRequiredProvider("helm", self.config),
             NebariHelmProvider(self.config),
         ]
 

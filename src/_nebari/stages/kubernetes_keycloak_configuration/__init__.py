@@ -4,7 +4,10 @@ from typing import Any, Dict, List, Type
 
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.kubernetes_keycloak import Authentication
-from _nebari.stages.tf_objects import NebariTerraformState
+from _nebari.stages.tf_objects import (
+    NebariOpentofuRequiredProvider,
+    NebariTerraformState,
+)
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
 
@@ -26,7 +29,11 @@ class KubernetesKeycloakConfigurationStage(NebariTerraformStage):
 
     def tf_objects(self) -> List[Dict]:
         return [
+            *super().tf_objects(),
             NebariTerraformState(self.name, self.config),
+            NebariOpentofuRequiredProvider("helm", self.config),
+            NebariOpentofuRequiredProvider("kubernetes", self.config),
+            NebariOpentofuRequiredProvider("keycloak", self.config),
         ]
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
