@@ -6,6 +6,7 @@ import pathlib
 import re
 import sys
 import tempfile
+import warnings
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
@@ -613,11 +614,23 @@ class InputSchema(schema.Base):
                     data[provider] = provider_enum_model_map[provider]()
             else:
                 # if the provider field is invalid, it won't be set when this validator is called
-                # so we need to check for it explicitly here, and set the `pre` to True
+                # so we need to check for it explicitly here, and set mode to "before"
                 # TODO: this is a workaround, check if there is a better way to do this in Pydantic v2
                 raise ValueError(
                     f"'{provider}' is not a valid enumeration member; permitted: local, existing, aws, gcp, azure"
                 )
+            set_providers = {
+                provider
+                for provider in provider_name_abbreviation_map.keys()
+                if provider in data and data[provider]
+            }
+            expected_provider_config = provider_enum_name_map[provider]
+            extra_provider_config = set_providers - {expected_provider_config}
+            if extra_provider_config:
+                warnings.warn(
+                    f"Provider is set to {getattr(provider, 'value', provider)},  but configuration defined for other providers: {extra_provider_config}"
+                )
+
         else:
             set_providers = [
                 provider
