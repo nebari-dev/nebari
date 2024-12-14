@@ -50,6 +50,8 @@ def test_upgrade_4_0(
     monkeypatch,
 ):
     def mock_input(prompt, **kwargs):
+        from _nebari.upgrade import TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION
+
         # Mock different upgrade steps prompt answers
         if prompt == "Have you deleted the Argo Workflows CRDs and service accounts?":
             return True
@@ -68,6 +70,8 @@ def test_upgrade_4_0(
             == "[bold]Would you like Nebari to assign the corresponding role to all of your current groups automatically?[/bold]"
         ):
             return False
+        elif prompt == TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION:
+            return attempt_fixes
         # All other prompts will be answered with "y"
         else:
             return True
