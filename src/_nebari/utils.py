@@ -160,7 +160,7 @@ def modified_environ(*remove: List[str], **update: Dict[str, str]):
 
 
 def deep_merge(*args):
-    """Deep merge multiple dictionaries.
+    """Deep merge multiple dictionaries.  Preserves order in dicts and lists.
 
     >>> value_1 = {
     'a': [1, 2],
@@ -190,7 +190,7 @@ def deep_merge(*args):
 
     if isinstance(d1, dict) and isinstance(d2, dict):
         d3 = {}
-        for key in d1.keys() | d2.keys():
+        for key in tuple(d1.keys()) + tuple(d2.keys()):
             if key in d1 and key in d2:
                 d3[key] = deep_merge(d1[key], d2[key])
             elif key in d1:
