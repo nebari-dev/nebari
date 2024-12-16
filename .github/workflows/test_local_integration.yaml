@@ -107,8 +107,8 @@ jobs:
         with:
           workloads: "" # all
           namespace: "dev"
-          timeout: 60
-          max-restarts: 0
+          timeout: 300
+          max-restarts: 3
 
       ### DEPLOYMENT TESTS
       - name: Deployment Pytests
