@@ -43,4 +43,5 @@ module "kubernetes" {
   vnet_subnet_id            = var.vnet_subnet_id
   private_cluster_enabled   = var.private_cluster_enabled
   workload_identity_enabled = var.workload_identity_enabled
+  azure_rbac                = var.azure_rbac
 }

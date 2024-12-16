@@ -82,3 +82,17 @@ variable "workload_identity_enabled" {
   type        = bool
   default     = false
 }
+
+variable "azure_rbac" {
+  description = "Azure Active Directory Role-Based Access Control (RBAC) integration in a Kubernetes cluster"
+  type = object({
+    enabled : bool
+    managed : bool
+    admin_group_object_ids : list(string)
+  })
+  default = {
+    enabled : false
+    managed : false
+    admin_group_object_ids : []
+  }
+}
