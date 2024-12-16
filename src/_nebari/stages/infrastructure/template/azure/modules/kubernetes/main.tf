@@ -4,6 +4,9 @@ resource "azurerm_kubernetes_cluster" "main" {
   location            = var.location
   resource_group_name = var.resource_group_name
   tags                = var.tags
+  api_server_access_profile {
+    authorized_ip_ranges = var.authorized_ip_ranges
+  }
 
   # To enable Azure AD Workload Identity oidc_issuer_enabled must be set to true.
   oidc_issuer_enabled       = var.workload_identity_enabled
