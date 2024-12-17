@@ -1,4 +1,4 @@
-data "azure_client_config" "current" {
+data "azurerm_client_config" "current" {
   count = var.azure_rbac.enabled ? 1 : 0
 }
 
@@ -68,10 +68,10 @@ resource "azurerm_kubernetes_cluster" "main" {
   dynamic "azure_active_directory_role_based_access_control" {
     for_each = var.azure_rbac.enabled ? [var.azure_rbac] : []
     content {
-      azure_rbac_enabled     = var.azure_rbac.azure_rbac_enabled
+      azure_rbac_enabled     = var.azure_rbac.enabled
       admin_group_object_ids = var.azure_rbac.admin_group_object_ids
-      tenant_id              = data.azure_client_config.current[0].tenant_id
-      managed                = var.azure_rbac.managed
+      tenant_id              = data.azurerm_client_config.current[0].tenant_id
+      managed                = var.azure_rbac.managed_identity
     }
   }
 }

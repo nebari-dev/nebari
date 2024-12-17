@@ -81,12 +81,12 @@ variable "azure_rbac" {
   description = "Azure Active Directory Role-Based Access Control (RBAC) integration in a Kubernetes cluster"
   type = object({
     enabled : bool
-    managed : bool
+    managed_identity : bool
     admin_group_object_ids : list(string)
   })
   default = {
     enabled : false
-    managed : false
+    managed_identity : false
     admin_group_object_ids : []
   }
 }

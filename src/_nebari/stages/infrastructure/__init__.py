@@ -107,7 +107,7 @@ class AzureRBAC(schema.Base):
     """
 
     enabled: bool
-    managed: bool
+    managed_identity: bool
     admin_group_object_ids: List[str]
 
 
