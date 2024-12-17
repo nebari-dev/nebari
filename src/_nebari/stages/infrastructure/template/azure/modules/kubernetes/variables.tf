@@ -89,4 +89,5 @@ variable "azure_rbac" {
     managed_identity : false
     admin_group_object_ids : []
   }
+  nullable = false
 }
