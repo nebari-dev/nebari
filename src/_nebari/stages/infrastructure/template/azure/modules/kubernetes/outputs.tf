@@ -1,21 +1,20 @@
+module "k8s_credentials" {
+  source             = "../credentials"
+  azure_rbac_enabled = var.azure_rbac.enabled
+  kube_admin_config  = azurerm_kubernetes_cluster.main.kube_admin_config[0]
+  kube_config        = azurerm_kubernetes_cluster.main.kube_config[0]
+}
+
 output "credentials" {
-  description = "Credentials required for connecting to kubernetes cluster"
+  description = "Credentials required for connecting to Kubernetes cluster"
   sensitive   = true
-  value = {
-    # see bottom of https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster
-    endpoint               = azurerm_kubernetes_cluster.main.kube_config.0.host
-    username               = azurerm_kubernetes_cluster.main.kube_config.0.username
-    password               = azurerm_kubernetes_cluster.main.kube_config.0.password
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.main.kube_config.0.client_certificate)
-    client_key             = base64decode(azurerm_kubernetes_cluster.main.kube_config.0.client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.main.kube_config.0.cluster_ca_certificate)
-  }
+  value       = module.k8s_credentials.credentials
 }
 
 output "kubeconfig" {
   description = "Kubernetes connection kubeconfig"
   sensitive   = true
-  value       = azurerm_kubernetes_cluster.main.kube_config_raw
+  value       = var.azure_rbac.enabled ? azurerm_kubernetes_cluster.main.kube_admin_config_raw : azurerm_kubernetes_cluster.main.kube_config_raw
 }
 
 output "cluster_oidc_issuer_url" {
