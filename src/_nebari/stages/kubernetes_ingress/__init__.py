@@ -43,7 +43,6 @@ def provision_ingress_dns(
         record_name = ".".join(record_name)
         zone_name = ".".join(zone_name)
         if config.provider in {
-            schema.ProviderEnum.do,
             schema.ProviderEnum.gcp,
             schema.ProviderEnum.azure,
         }:
