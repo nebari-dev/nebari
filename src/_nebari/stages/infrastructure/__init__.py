@@ -104,6 +104,7 @@ class AzureInputVars(schema.Base):
     tags: Dict[str, str] = {}
     max_pods: Optional[int] = None
     network_profile: Optional[Dict[str, str]] = None
+    azure_policy_enabled: bool = None
     workload_identity_enabled: bool = False
 
 
@@ -809,6 +810,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 network_profile=self.config.azure.network_profile,
                 max_pods=self.config.azure.max_pods,
                 workload_identity_enabled=self.config.azure.workload_identity_enabled,
+                azure_policy_enabled=self.config.azure.azure_policy_enabled,
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.aws:
             return AWSInputVars(
