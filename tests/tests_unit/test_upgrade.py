@@ -80,6 +80,7 @@ def test_upgrade_4_0(
     monkeypatch.setattr(Prompt, "ask", lambda x: "")
 
     from kubernetes.client import ApiextensionsV1Api as _ApiextensionsV1Api
+    from kubernetes.client import AppsV1Api as _AppsV1Api
     from kubernetes.client import CoreV1Api as _CoreV1Api
     from kubernetes.client import V1Status as _V1Status
 
@@ -88,6 +89,12 @@ def test_upgrade_4_0(
 
     def monkey_patch_delete_namespaced_sa(*args, **kwargs):
         return _V1Status(code=200)
+
+    def monkey_patch_list_namespaced_daemon_set(*args, **kwargs):
+        class MonkeypatchApiResponse:
+            items = False
+
+        return MonkeypatchApiResponse
 
     monkeypatch.setattr(
         _ApiextensionsV1Api,
@@ -98,6 +105,21 @@ def test_upgrade_4_0(
         _CoreV1Api,
         "delete_namespaced_service_account",
         monkey_patch_delete_namespaced_sa,
+    )
+    monkeypatch.setattr(
+        _ApiextensionsV1Api,
+        "read_custom_resource_definition",
+        lambda x, *args, **kwargs: True,
+    )
+    monkeypatch.setattr(
+        _ApiextensionsV1Api,
+        "patch_custom_resource_definition",
+        lambda x, *args, **kwargs: True,
+    )
+    monkeypatch.setattr(
+        _AppsV1Api,
+        "list_namespaced_daemon_set",
+        monkey_patch_list_namespaced_daemon_set,
     )
 
     old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
