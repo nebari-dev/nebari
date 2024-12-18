@@ -1447,6 +1447,7 @@ class Upgrade_2024_11_1(UpgradeStep):
         keycloak_admin = None
 
         # Prompt the user for role assignment (if yes, transforms the response into bool)
+        # This needs to be monkeypatched and will be addressed in a future PR. Until then, this causes test failures.
         assign_roles = kwargs.get("attempt_fixes", False) or Confirm.ask(
             "[bold]Would you like Nebari to assign the corresponding role/scopes to all of your current groups automatically?[/bold]",
             default=False,
