@@ -109,12 +109,12 @@ def test_upgrade_4_0(
     monkeypatch.setattr(
         _ApiextensionsV1Api,
         "read_custom_resource_definition",
-        lambda x, *args, **kwargs: True,
+        lambda *args, **kwargs: True,
     )
     monkeypatch.setattr(
         _ApiextensionsV1Api,
         "patch_custom_resource_definition",
-        lambda x, *args, **kwargs: True,
+        lambda *args, **kwargs: True,
     )
     monkeypatch.setattr(
         _AppsV1Api,
