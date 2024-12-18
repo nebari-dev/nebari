@@ -79,6 +79,27 @@ def test_upgrade_4_0(
     monkeypatch.setattr(Confirm, "ask", mock_input)
     monkeypatch.setattr(Prompt, "ask", lambda x: "")
 
+    from kubernetes.client import ApiextensionsV1Api as _ApiextensionsV1Api
+    from kubernetes.client import CoreV1Api as _CoreV1Api
+    from kubernetes.client import V1Status as _V1Status
+
+    def monkey_patch_delete_crd(*args, **kwargs):
+        return _V1Status(code=200)
+
+    def monkey_patch_delete_namespaced_sa(*args, **kwargs):
+        return _V1Status(code=200)
+
+    monkeypatch.setattr(
+        _ApiextensionsV1Api,
+        "delete_custom_resource_definition",
+        monkey_patch_delete_crd,
+    )
+    monkeypatch.setattr(
+        _CoreV1Api,
+        "delete_namespaced_service_account",
+        monkey_patch_delete_namespaced_sa,
+    )
+
     old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
 
     tmp_qhub_config = Path(tmp_path, old_qhub_config_path.name)
