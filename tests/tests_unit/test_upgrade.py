@@ -67,7 +67,7 @@ def test_upgrade_4_0(
             return True
         elif (
             prompt
-            == "[bold]Would you like Nebari to assign the corresponding role to all of your current groups automatically?[/bold]"
+            == "[bold]Would you like Nebari to assign the corresponding role/scopes to all of your current groups automatically?[/bold]"
         ):
             return False
         elif prompt == TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION:
