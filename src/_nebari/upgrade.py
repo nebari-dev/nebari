@@ -226,6 +226,10 @@ class UpgradeStep(ABC):
         """
         Remove stage files during and upgrade step
 
+
+        Usually used when you need files in your `stages` directory to be
+        removed in order to avoid resource conflicts
+
         Args:
             config_filename (str): The path to the configuration file.
         Returns:
