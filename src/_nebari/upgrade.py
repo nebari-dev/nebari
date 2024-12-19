@@ -56,6 +56,7 @@ TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION = (
     "like [green]rm -rf stages[/green]."
 )
 DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE = (
+    "⚠️ CAUTION ⚠️\n"
     "Nebari would like to remove your old Terraform/Opentofu [green]stages[/green] files. Your [blue]terraform_state[/blue] configuration is not set to [blue]remote[/blue], so destroying your [green]stages[/green] files could potentially be very detructive.\n"
     "If you don't have active Terraform/Opentofu deployment state files contained within your [green]stages[/green] directory, you may proceed by entering [red]y[/red] at the prompt."
     "If you have an active Terraform/Opentofu deployment with active state files in your [green]stages[/green] folder, you will need to either bring Nebari down temporarily to redeploy or pursue some other means to upgrade. Enter [red]n[/red] at the prompt.\n\n"
