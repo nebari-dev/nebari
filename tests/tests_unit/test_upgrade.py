@@ -2,7 +2,7 @@ from contextlib import nullcontext
 from pathlib import Path
 
 import pytest
-from rich.prompt import Prompt
+from rich.prompt import Confirm, Prompt
 
 from _nebari.upgrade import do_upgrade
 from _nebari.version import __version__, rounded_ver_parse
@@ -34,10 +34,12 @@ def qhub_users_import_json():
             False,
             True,
         ),
-        (
+        pytest.param(
+            # We add an xfail mark until a monkey patch for the keycloak calls are implemented in upgrade steps
             "./qhub-config-yaml-files-for-upgrade/qhub-config-aws-310-customauth.yaml",
             True,
             False,
+            marks=pytest.mark.xfail,
         ),
     ],
 )
@@ -49,34 +51,78 @@ def test_upgrade_4_0(
     qhub_users_import_json,
     monkeypatch,
 ):
-
     def mock_input(prompt, **kwargs):
+        from _nebari.upgrade import TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION
+
         # Mock different upgrade steps prompt answers
-        if (
-            prompt
-            == "Have you deleted the Argo Workflows CRDs and service accounts? [y/N] "
-        ):
-            return "y"
+        if prompt == "Have you deleted the Argo Workflows CRDs and service accounts?":
+            return True
         elif (
             prompt
             == "\nDo you want Nebari to update the kube-prometheus-stack CRDs and delete the prometheus-node-exporter for you? If not, you'll have to do it manually."
         ):
-            return "N"
+            return False
         elif (
             prompt
             == "Have you backed up your custom dashboards (if necessary), deleted the prometheus-node-exporter daemonset and updated the kube-prometheus-stack CRDs?"
         ):
-            return "y"
+            return True
         elif (
             prompt
             == "[bold]Would you like Nebari to assign the corresponding role/scopes to all of your current groups automatically?[/bold]"
         ):
-            return "N"
+            return False
+        elif prompt == TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION:
+            return attempt_fixes
         # All other prompts will be answered with "y"
         else:
-            return "y"
+            return True
 
-    monkeypatch.setattr(Prompt, "ask", mock_input)
+    monkeypatch.setattr(Confirm, "ask", mock_input)
+    monkeypatch.setattr(Prompt, "ask", lambda x: "")
+
+    from kubernetes.client import ApiextensionsV1Api as _ApiextensionsV1Api
+    from kubernetes.client import AppsV1Api as _AppsV1Api
+    from kubernetes.client import CoreV1Api as _CoreV1Api
+    from kubernetes.client import V1Status as _V1Status
+
+    def monkey_patch_delete_crd(*args, **kwargs):
+        return _V1Status(code=200)
+
+    def monkey_patch_delete_namespaced_sa(*args, **kwargs):
+        return _V1Status(code=200)
+
+    def monkey_patch_list_namespaced_daemon_set(*args, **kwargs):
+        class MonkeypatchApiResponse:
+            items = False
+
+        return MonkeypatchApiResponse
+
+    monkeypatch.setattr(
+        _ApiextensionsV1Api,
+        "delete_custom_resource_definition",
+        monkey_patch_delete_crd,
+    )
+    monkeypatch.setattr(
+        _CoreV1Api,
+        "delete_namespaced_service_account",
+        monkey_patch_delete_namespaced_sa,
+    )
+    monkeypatch.setattr(
+        _ApiextensionsV1Api,
+        "read_custom_resource_definition",
+        lambda *args, **kwargs: True,
+    )
+    monkeypatch.setattr(
+        _ApiextensionsV1Api,
+        "patch_custom_resource_definition",
+        lambda *args, **kwargs: True,
+    )
+    monkeypatch.setattr(
+        _AppsV1Api,
+        "list_namespaced_daemon_set",
+        monkey_patch_list_namespaced_daemon_set,
+    )
 
     old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
 
