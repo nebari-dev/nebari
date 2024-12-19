@@ -34,10 +34,12 @@ def qhub_users_import_json():
             False,
             True,
         ),
-        (
+        pytest.param(
+            # We add an xfail mark until a monkey patch for the keycloak calls are implemented in upgrade steps
             "./qhub-config-yaml-files-for-upgrade/qhub-config-aws-310-customauth.yaml",
             True,
             False,
+            marks=pytest.mark.xfail,
         ),
     ],
 )
