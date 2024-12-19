@@ -55,6 +55,12 @@ TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION = (
     "If you do not have Nebari do it automatically here, you will need to remove the [green]stages[/green] manually with a command"
     "like [green]rm -rf stages[/green]."
 )
+DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE = (
+    "Nebari would like to remove your old Terraform/Opentofu [green]stages[/green] files. Your [blue]terraform_state[/blue] configuration is not set to [blue]remote[/blue], so destroying your [green]stages[/green] files could potentially be very detructive.\n"
+    "If you don't have active Terraform/Opentofu deployment state files contained within your [green]stages[/green] directory, you may proceed by entering [red]y[/red] at the prompt."
+    "If you have an active Terraform/Opentofu deployment with active state files in your [green]stages[/green] folder, you will need to either bring Nebari down temporarily to redeploy or pursue some other means to upgrade. Enter [red]n[/red] at the prompt.\n\n"
+    "Do you want to proceed by deleting your [green]stages[/green] directory and everything in it? ([red]POTENTIALLY VERY DESTRUCTIVE[/red])"
+)
 
 
 def do_upgrade(config_filename, attempt_fixes=False):
@@ -225,7 +231,6 @@ class UpgradeStep(ABC):
     def _rm_rf_stages(cls, config_filename, dry_run: bool = False, verbose=False):
         """
         Remove stage files during and upgrade step
-
 
         Usually used when you need files in your `stages` directory to be
         removed in order to avoid resource conflicts
@@ -956,6 +961,16 @@ class Upgrade_2023_10_1(UpgradeStep):
             TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION,
             default=False,
         ):
+            if (
+                _terraform_state_config := config.get("terraform_state")
+                and (_terraform_state_config.get("type") != "remote")
+                and not Confirm.ask(
+                    DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
+                    default=False,
+                )
+            ):
+                exit()
+
             self._rm_rf_stages(
                 config_filename,
                 dry_run=kwargs.get("dry_run", False),
@@ -988,6 +1003,16 @@ class Upgrade_2023_11_1(UpgradeStep):
             TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION,
             default=False,
         ):
+            if (
+                _terraform_state_config := config.get("terraform_state")
+                and (_terraform_state_config.get("type") != "remote")
+                and not Confirm.ask(
+                    DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
+                    default=False,
+                )
+            ):
+                exit()
+
             self._rm_rf_stages(
                 config_filename,
                 dry_run=kwargs.get("dry_run", False),
@@ -1021,6 +1046,16 @@ class Upgrade_2023_12_1(UpgradeStep):
             TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION,
             default=False,
         ):
+            if (
+                _terraform_state_config := config.get("terraform_state")
+                and (_terraform_state_config.get("type") != "remote")
+                and not Confirm.ask(
+                    DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
+                    default=False,
+                )
+            ):
+                exit()
+
             self._rm_rf_stages(
                 config_filename,
                 dry_run=kwargs.get("dry_run", False),
@@ -1055,6 +1090,16 @@ class Upgrade_2024_1_1(UpgradeStep):
             TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION,
             default=False,
         ):
+            if (
+                _terraform_state_config := config.get("terraform_state")
+                and (_terraform_state_config.get("type") != "remote")
+                and not Confirm.ask(
+                    DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
+                    default=False,
+                )
+            ):
+                exit()
+
             self._rm_rf_stages(
                 config_filename,
                 dry_run=kwargs.get("dry_run", False),
