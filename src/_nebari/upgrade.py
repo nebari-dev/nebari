@@ -962,7 +962,7 @@ class Upgrade_2023_10_1(UpgradeStep):
             default=False,
         ):
             if (
-                _terraform_state_config := config.get("terraform_state")
+                (_terraform_state_config := config.get("terraform_state"))
                 and (_terraform_state_config.get("type") != "remote")
                 and not Confirm.ask(
                     DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
@@ -1004,7 +1004,7 @@ class Upgrade_2023_11_1(UpgradeStep):
             default=False,
         ):
             if (
-                _terraform_state_config := config.get("terraform_state")
+                (_terraform_state_config := config.get("terraform_state"))
                 and (_terraform_state_config.get("type") != "remote")
                 and not Confirm.ask(
                     DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
@@ -1047,7 +1047,7 @@ class Upgrade_2023_12_1(UpgradeStep):
             default=False,
         ):
             if (
-                _terraform_state_config := config.get("terraform_state")
+                (_terraform_state_config := config.get("terraform_state"))
                 and (_terraform_state_config.get("type") != "remote")
                 and not Confirm.ask(
                     DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
@@ -1091,7 +1091,7 @@ class Upgrade_2024_1_1(UpgradeStep):
             default=False,
         ):
             if (
-                _terraform_state_config := config.get("terraform_state")
+                (_terraform_state_config := config.get("terraform_state"))
                 and (_terraform_state_config.get("type") != "remote")
                 and not Confirm.ask(
                     DESTROY_STAGE_FILES_WITH_TF_STATE_NOT_REMOTE,
