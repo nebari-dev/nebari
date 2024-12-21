@@ -251,8 +251,24 @@ class NebariTerraformStage(NebariStage):
             )
         }
         for root, dirs, filenames in os.walk(self.template_directory):
+            root_path = pathlib.Path(root)
+            if any(filename.endswith(".tf") for filename in filenames) and (
+                pathlib.PosixPath("modules")
+                in root_path.relative_to(self.template_directory).parents
+            ):
+                contents[
+                    pathlib.Path(
+                        self.stage_prefix,
+                        pathlib.Path.relative_to(
+                            root_path,
+                            self.template_directory,
+                        ),
+                    )
+                    / "_nebari.tf.json"
+                ] = opentofu.tf_render_objects([])
+
             for filename in filenames:
-                root_filename = pathlib.Path(root) / filename
+                root_filename = root_path / filename
                 with root_filename.open("rb") as f:
                     contents[
                         pathlib.Path(
