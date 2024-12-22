@@ -35,12 +35,12 @@ GCP_DEFAULT_REGION = "us-central1"
 REQUIRED_PROVIDERS = {
     "aws": {
         "_name": "aws",
-        "source": "opentofu/aws",
+        "source": "hashicorp/aws",
         "version": "5.12.0",
     },
     "azurerm": {
         "_name": "azurerm",
-        "source": "opentofu/azurerm",
+        "source": "hashicorp/azurerm",
         "version": "=3.97.1",
     },
     "docker": {
@@ -50,12 +50,12 @@ REQUIRED_PROVIDERS = {
     },
     "google": {
         "_name": "google",
-        "source": "opentofu/google",
+        "source": "hashicorp/google",
         "version": "4.83.0",
     },
     "helm": {
         "_name": "helm",
-        "source": "opentofu/helm",
+        "source": "hashicorp/helm",
         "version": "2.1.2",
     },
     "keycloak": {
@@ -75,7 +75,7 @@ REQUIRED_PROVIDERS = {
     },
     "kubernetes": {
         "_name": "kubernetes",
-        "source": "opentofu/kubernetes",
+        "source": "hashicorp/kubernetes",
         "version": ">= 2.20.0",
     },
 }
