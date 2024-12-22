@@ -9,6 +9,55 @@ This file is copied to nebari-dev/nebari-docs using a GitHub Action. -->
 
 ---
 
+## Release 2024.12.1 - December 13, 2024
+
+> NOTE: Support for DigitalOcean has been removed in this release. If you plan to deploy Nebari on DigitalOcean, you first need to independently create a Kubernetes cluster and then use the `existing` deployment option.
+
+### What's Changed
+- Precommit typos by @blakerosenthal in https://github.com/nebari-dev/nebari/pull/2731
+- fix typo in KubernetesCredentials by @blakerosenthal in https://github.com/nebari-dev/nebari/pull/2729
+- handle branch rename from develop to main in github actions by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2748
+- remove do integration test by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2765
+- Remove old develop branch references after default branch renaming by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2769
+- fix CICD issue with pre-commit action by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2775
+- fix CHECK_URL in kuberhealthy checks to respect namespaces by @dcmcand in https://github.com/nebari-dev/nebari/pull/2779
+- remove duplicate GCPPrivateClusterConfig class by @dcmcand in https://github.com/nebari-dev/nebari/pull/2786
+- Fix hub variable for jupyterhub_dashboard by @kenafoster in https://github.com/nebari-dev/nebari/pull/2721
+- Fix Pytest Tests failing on PRs updating src by @joneszc in https://github.com/nebari-dev/nebari/pull/2790
+- Add ability to add overrides to jhub-apps config by @aktech in https://github.com/nebari-dev/nebari/pull/2754
+- Remove leftover develop reference by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2792
+- fix bug where check_immutable_fields throws error with old version of Nebari by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2796
+- Fix immutable field validation error when a sub-schema is not Pydantic by @kenafoster in https://github.com/nebari-dev/nebari/pull/2797
+- Address issue with AWS instance type schema by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2787
+- add broken note by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2802
+- Fix release notes formatting to restore docs syncing functionality by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2809
+- Refactor role creation for upgrade command path by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2795
+- add test workflow for upgrade by @pmeier in https://github.com/nebari-dev/nebari/pull/2780
+- Add config option to enable the encryption of AWS EKS secrets by @joneszc in https://github.com/nebari-dev/nebari/pull/2788
+- remove digital ocean tests by @dcmcand in https://github.com/nebari-dev/nebari/pull/2813
+- Python3 13 upgrade dependencies by @dcmcand in https://github.com/nebari-dev/nebari/pull/2823
+- Test support for Python 3.13 in CI by @aktech in https://github.com/nebari-dev/nebari/pull/2774
+- remove unmaintained nix files by @Adam-D-Lewis in https://github.com/nebari-dev/nebari/pull/2831
+- allow passing X.XX or X.XX.XX as k8s versions by @dcmcand in https://github.com/nebari-dev/nebari/pull/2840
+- Remove explicit branch inputs from cloud integration test workflows in GHA by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2837
+- Allow overriding of keycloak root credentials for `2024.11.1` upgrade path by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2843
+- Added security group rule descriptions by @jcbolling in https://github.com/nebari-dev/nebari/pull/2850
+- Set `launch_template.ami_id` attrs to private by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2842
+- attempt to address paramiko connection errors by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2811
+- specify terraform registry for providers not in opentofu registry by @dcmcand in https://github.com/nebari-dev/nebari/pull/2852
+- Disable AWS `launch_template` from nebari-config schema by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2856
+- Remove Digital Ocean references by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2838
+- Use tofu binary instead of terraform one by @marcelovilla in https://github.com/nebari-dev/nebari/pull/2773
+- Add 2024.11.1 release notes and bump version by @viniciusdc in https://github.com/nebari-dev/nebari/pull/2859
+- Disable `jupyterlab-jhub-apps` extension when jhub-apps is disabled by @krassowski in https://github.com/nebari-dev/nebari/pull/2804
+- Validate instance types for GCP by @blakerosenthal in https://github.com/nebari-dev/nebari/pull/2730
+- update gcp instance validation by @dcmcand in https://github.com/nebari-dev/nebari/pull/2875
+
+### New Contributors
+- @jcbolling made their first contribution in https://github.com/nebari-dev/nebari/pull/2850
+
+**Full Changelog**: https://github.com/nebari-dev/nebari/compare/2024.11.1...2024.12.1
+
 ## Release 2024.11.1 - November 21, 2024 (Hotfix Release)
 
 > NOTE: This hotfix addresses several major bugs identified in the 2024.9.1 release. For a detailed overview, please refer to the related discussion at #2798. Users should upgrade directly from 2024.7.1 to 2024.11.1.
