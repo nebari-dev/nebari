@@ -12,7 +12,10 @@ from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
 from _nebari.provider import helm, kubernetes, kustomize, opentofu
-from _nebari.stages.tf_objects import NebariOpentofuRequiredVersion
+from _nebari.stages.tf_objects import (
+    NebariOpentofuRequiredProvider,
+    NebariOpentofuRequiredVersion,
+)
 from nebari.hookspecs import NebariStage
 
 KUSTOMIZATION_TEMPLATE = "kustomization.yaml.tmpl"
@@ -244,6 +247,17 @@ class NebariTerraformStage(NebariStage):
             NebariOpentofuRequiredVersion(self.config),
         ]
 
+    def _tf_objects_required_providers(self) -> List[Dict]:
+        contents = [NebariOpentofuRequiredVersion(self.config)]
+        for obj in self.tf_objects():
+            match obj:
+                case {"terraform": {"required_providers": dict(providers)}}:
+                    contents.extend(
+                        NebariOpentofuRequiredProvider(provider, self.config)
+                        for provider in providers.keys()
+                    )
+        return contents
+
     def render(self) -> Dict[pathlib.Path, str]:
         contents = {
             (self.stage_prefix / "_nebari.tf.json"): opentofu.tf_render_objects(
@@ -265,7 +279,7 @@ class NebariTerraformStage(NebariStage):
                         ),
                     )
                     / "_nebari.tf.json"
-                ] = opentofu.tf_render_objects([])
+                ] = opentofu.tf_render_objects(self._tf_objects_required_providers())
 
             for filename in filenames:
                 root_filename = root_path / filename
