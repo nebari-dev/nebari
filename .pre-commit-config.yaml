@@ -37,7 +37,7 @@ repos:
         exclude: "^src/_nebari/template/"
 
   - repo: https://github.com/crate-ci/typos
-    rev: v1.27.0
+    rev: typos-dict-v0.11.37
     hooks:
       - id: typos
 
@@ -61,7 +61,7 @@ repos:
         args: ["--line-length=88", "--exclude=/src/_nebari/template/"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.7.2
+    rev: v0.8.1
     hooks:
       - id: ruff
         args: ["--fix"]
