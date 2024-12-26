@@ -60,6 +60,17 @@ resource "local_file" "overrides_json" {
   filename = "${path.module}/files/jupyterlab/overrides.json"
 }
 
+resource "local_file" "page_config_json" {
+  content = jsonencode({
+    "disabledExtensions" : {
+      "jupyterlab-jhub-apps" : !var.jhub-apps-enabled
+    },
+    # `lockedExtensions` is an empty dict to signify that `jupyterlab-jhub-apps` is not being disabled and locked (but only disabled)
+    # which means users are still allowed to disable the jupyterlab-jhub-apps extension (if they have write access to page_config).
+    "lockedExtensions" : {}
+  })
+  filename = "${path.module}/files/jupyterlab/page_config.json"
+}
 
 resource "kubernetes_config_map" "etc-ipython" {
   metadata {
@@ -91,6 +102,9 @@ locals {
 locals {
   etc-jupyterlab-settings = {
     "overrides.json" = local_file.overrides_json.content
+  }
+  etc-jupyterlab-page-config = {
+    "page_config.json" = local_file.page_config_json.content
   }
 }
 
@@ -134,6 +148,20 @@ resource "kubernetes_config_map" "jupyterlab-settings" {
   }
 
   data = local.etc-jupyterlab-settings
+}
+
+
+resource "kubernetes_config_map" "jupyterlab-page-config" {
+  depends_on = [
+    local_file.page_config_json
+  ]
+
+  metadata {
+    name      = "jupyterlab-page-config"
+    namespace = var.namespace
+  }
+
+  data = local.etc-jupyterlab-page-config
 }
 
 resource "kubernetes_config_map" "git_clone_update" {
