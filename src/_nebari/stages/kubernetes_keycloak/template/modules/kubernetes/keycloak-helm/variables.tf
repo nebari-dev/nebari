@@ -31,3 +31,17 @@ variable "node_group" {
     value = string
   })
 }
+
+variable "themes" {
+  description = "Custom themes configuration for keycloak"
+  type = object({
+    enabled    = bool
+    repository = string
+    branch     = string
+  })
+  default = {
+    enabled    = false
+    repository = ""
+    branch     = ""
+  }
+}
