@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type
 from pydantic import BaseModel, field_validator
 
 from _nebari import utils
-from _nebari.provider import terraform
+from _nebari.provider import opentofu
 from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
 from _nebari.stages.tf_objects import NebariConfig
@@ -20,12 +20,6 @@ from _nebari.utils import (
 )
 from nebari import schema
 from nebari.hookspecs import NebariStage, hookimpl
-
-
-class DigitalOceanInputVars(schema.Base):
-    name: str
-    namespace: str
-    region: str
 
 
 class GCPInputVars(schema.Base):
@@ -117,14 +111,7 @@ class TerraformStateStage(NebariTerraformStage):
         return pathlib.Path("stages") / self.name / self.config.provider.value
 
     def state_imports(self) -> List[Tuple[str, str]]:
-        if self.config.provider == schema.ProviderEnum.do:
-            return [
-                (
-                    "module.terraform-state.module.spaces.digitalocean_spaces_bucket.main",
-                    f"{self.config.digital_ocean.region},{self.config.project_name}-{self.config.namespace}-terraform-state",
-                )
-            ]
-        elif self.config.provider == schema.ProviderEnum.gcp:
+        if self.config.provider == schema.ProviderEnum.gcp:
             return [
                 (
                     "module.terraform-state.module.gcs.google_storage_bucket.static-site",
@@ -175,7 +162,7 @@ class TerraformStateStage(NebariTerraformStage):
         resources = [NebariConfig(self.config)]
         if self.config.provider == schema.ProviderEnum.gcp:
             return resources + [
-                terraform.Provider(
+                opentofu.Provider(
                     "google",
                     project=self.config.google_cloud_platform.project,
                     region=self.config.google_cloud_platform.region,
@@ -183,21 +170,13 @@ class TerraformStateStage(NebariTerraformStage):
             ]
         elif self.config.provider == schema.ProviderEnum.aws:
             return resources + [
-                terraform.Provider(
-                    "aws", region=self.config.amazon_web_services.region
-                ),
+                opentofu.Provider("aws", region=self.config.amazon_web_services.region),
             ]
         else:
             return resources
 
     def input_vars(self, stage_outputs: Dict[str, Dict[str, Any]]):
-        if self.config.provider == schema.ProviderEnum.do:
-            return DigitalOceanInputVars(
-                name=self.config.project_name,
-                namespace=self.config.namespace,
-                region=self.config.digital_ocean.region,
-            ).model_dump()
-        elif self.config.provider == schema.ProviderEnum.gcp:
+        if self.config.provider == schema.ProviderEnum.gcp:
             return GCPInputVars(
                 name=self.config.project_name,
                 namespace=self.config.namespace,
@@ -236,19 +215,10 @@ class TerraformStateStage(NebariTerraformStage):
     ):
         self.check_immutable_fields()
 
-        # No need to run terraform init here as it's being called when running the
+        # No need to run tofu init here as it's being called when running the
         # terraform show command, inside check_immutable_fields
-        with super().deploy(stage_outputs, disable_prompt, terraform_init=False):
+        with super().deploy(stage_outputs, disable_prompt, tofu_init=False):
             env_mapping = {}
-            # DigitalOcean terraform remote state using Spaces Bucket
-            # assumes aws credentials thus we set them to match spaces credentials
-            if self.config.provider == schema.ProviderEnum.do:
-                env_mapping.update(
-                    {
-                        "AWS_ACCESS_KEY_ID": os.environ["SPACES_ACCESS_KEY_ID"],
-                        "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
-                    }
-                )
 
             with modified_environ(**env_mapping):
                 yield
@@ -292,7 +262,7 @@ class TerraformStateStage(NebariTerraformStage):
 
     def get_nebari_config_state(self) -> dict:
         directory = str(self.output_directory / self.stage_prefix)
-        tf_state = terraform.show(directory)
+        tf_state = opentofu.show(directory)
         nebari_config_state = None
 
         # get nebari config from state
@@ -310,15 +280,6 @@ class TerraformStateStage(NebariTerraformStage):
     ):
         with super().destroy(stage_outputs, status):
             env_mapping = {}
-            # DigitalOcean terraform remote state using Spaces Bucket
-            # assumes aws credentials thus we set them to match spaces credentials
-            if self.config.provider == schema.ProviderEnum.do:
-                env_mapping.update(
-                    {
-                        "AWS_ACCESS_KEY_ID": os.environ["SPACES_ACCESS_KEY_ID"],
-                        "AWS_SECRET_ACCESS_KEY": os.environ["SPACES_SECRET_ACCESS_KEY"],
-                    }
-                )
 
             with modified_environ(**env_mapping):
                 yield

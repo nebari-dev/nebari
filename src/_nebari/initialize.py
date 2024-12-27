@@ -11,18 +11,12 @@ import requests
 from _nebari import constants
 from _nebari.provider import git
 from _nebari.provider.cicd import github
-from _nebari.provider.cloud import (
-    amazon_web_services,
-    azure_cloud,
-    digital_ocean,
-    google_cloud,
-)
+from _nebari.provider.cloud import amazon_web_services, azure_cloud, google_cloud
 from _nebari.provider.oauth.auth0 import create_client
 from _nebari.stages.bootstrap import CiEnum
 from _nebari.stages.infrastructure import (
     DEFAULT_AWS_NODE_GROUPS,
     DEFAULT_AZURE_NODE_GROUPS,
-    DEFAULT_DO_NODE_GROUPS,
     DEFAULT_GCP_NODE_GROUPS,
     node_groups_to_dict,
 )
@@ -117,22 +111,7 @@ def render_config(
                 ),
             }
 
-    if cloud_provider == ProviderEnum.do:
-        do_region = region or constants.DO_DEFAULT_REGION
-        do_kubernetes_versions = kubernetes_version or get_latest_kubernetes_version(
-            digital_ocean.kubernetes_versions()
-        )
-        config["digital_ocean"] = {
-            "kubernetes_version": do_kubernetes_versions,
-            "region": do_region,
-            "node_groups": node_groups_to_dict(DEFAULT_DO_NODE_GROUPS),
-        }
-
-        config["theme"]["jupyterhub"][
-            "hub_subtitle"
-        ] = f"{WELCOME_HEADER_TEXT} on Digital Ocean"
-
-    elif cloud_provider == ProviderEnum.gcp:
+    if cloud_provider == ProviderEnum.gcp:
         gcp_region = region or constants.GCP_DEFAULT_REGION
         gcp_kubernetes_version = kubernetes_version or get_latest_kubernetes_version(
             google_cloud.kubernetes_versions(gcp_region)
@@ -245,16 +224,7 @@ def github_auto_provision(config: pydantic.BaseModel, owner: str, repo: str):
 
     try:
         # Secrets
-        if config.provider == ProviderEnum.do:
-            for name in {
-                "AWS_ACCESS_KEY_ID",
-                "AWS_SECRET_ACCESS_KEY",
-                "SPACES_ACCESS_KEY_ID",
-                "SPACES_SECRET_ACCESS_KEY",
-                "DIGITALOCEAN_TOKEN",
-            }:
-                github.update_secret(owner, repo, name, os.environ[name])
-        elif config.provider == ProviderEnum.aws:
+        if config.provider == ProviderEnum.aws:
             for name in {
                 "AWS_ACCESS_KEY_ID",
                 "AWS_SECRET_ACCESS_KEY",

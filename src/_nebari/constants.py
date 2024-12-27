@@ -1,11 +1,8 @@
-CURRENT_RELEASE = "2024.9.1"
+CURRENT_RELEASE = "2024.12.1"
 
 HELM_VERSION = "v3.15.3"
 KUSTOMIZE_VERSION = "5.4.3"
-# NOTE: Terraform cannot be upgraded further due to Hashicorp licensing changes
-# implemented in August 2023.
-# https://www.hashicorp.com/license-faq
-TERRAFORM_VERSION = "1.5.7"
+OPENTOFU_VERSION = "1.8.3"
 
 KUBERHEALTHY_HELM_VERSION = "100"
 
@@ -25,7 +22,6 @@ LATEST_SUPPORTED_PYTHON_VERSION = "3.10"
 
 
 # DOCS
-DO_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-do"
 AZURE_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-azure"
 AWS_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-aws"
 GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
@@ -34,4 +30,3 @@ GCP_ENV_DOCS = "https://www.nebari.dev/docs/how-tos/nebari-gcp"
 AWS_DEFAULT_REGION = "us-east-1"
 AZURE_DEFAULT_REGION = "Central US"
 GCP_DEFAULT_REGION = "us-central1"
-DO_DEFAULT_REGION = "nyc3"
