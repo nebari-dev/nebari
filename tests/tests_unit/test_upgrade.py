@@ -21,6 +21,12 @@ def qhub_users_import_json():
     )
 
 
+class MockKeycloakAdmin:
+    @staticmethod
+    def foo():
+        return ...
+
+
 @pytest.mark.parametrize(
     "old_qhub_config_path_str,attempt_fixes,expect_upgrade_error",
     [
@@ -122,6 +128,17 @@ def test_upgrade_4_0(
         _AppsV1Api,
         "list_namespaced_daemon_set",
         monkey_patch_list_namespaced_daemon_set,
+    )
+
+    from _nebari import keycloak as _keycloak
+
+    def monkey_patch_get_keycloak_admin(*args, **kwargs):
+        return MockKeycloakAdmin()
+
+    monkeypatch.setattr(
+        _keycloak.KeycloakAdmin,
+        "get_client_id",
+        monkey_patch_get_keycloak_admin,
     )
 
     old_qhub_config_path = Path(__file__).parent / old_qhub_config_path_str
