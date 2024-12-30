@@ -1,3 +1,4 @@
+import logging
 import pathlib
 from typing import Optional
 
@@ -6,6 +7,8 @@ from pydantic import BaseModel, ConfigDict, field_validator
 
 from _nebari._version import __version__
 from _nebari.utils import yaml
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigSetMetadata(BaseModel):
@@ -19,7 +22,10 @@ class ConfigSetMetadata(BaseModel):
     def validate_version_requirement(cls, version_req):
         if isinstance(version_req, str):
             version_req = SpecifierSet(version_req, prereleases=True)
-
+        if version_req.prereleases is not True:
+            logger.warning(
+                "ConfigSetMetadata created with nebari_version SpecifierSet not allowing pre-releases."
+            )
         return version_req
 
     def check_version(self, version):
