@@ -1,26 +1,31 @@
 from unittest.mock import patch
 
 import pytest
-from packaging.requirements import Requirement
+from packaging.requirements import SpecifierSet
 
 from _nebari.config_set import ConfigSetMetadata, read_config_set
 
 test_version = "2024.12.2"
 
 
-test_version = "2024.12.2"
-
-
 @pytest.mark.parametrize(
-    "version_input,should_pass",
+    "version_input,test_version,should_pass",
     [
-        (">=2024.12.0,<2025.0.0", True),
-        (Requirement("nebari>=2024.12.0,<2025.0.0"), True),
-        (">=2025.0.0", False),
-        (Requirement("nebari>=2025.0.0"), False),
+        # Standard version tests
+        (">=2024.12.0,<2025.0.0", "2024.12.2", True),
+        (SpecifierSet(">=2024.12.0,<2025.0.0", prereleases=True), "2024.12.2", True),
+        # Pre-release version requirement tests
+        (">=2024.12.0rc1,<2025.0.0", "2024.12.0rc1", True),
+        (SpecifierSet(">=2024.12.0rc1", prereleases=True), "2024.12.0rc2", True),
+        # Pre-release test version against standard requirement
+        (">=2024.12.0,<2025.0.0", "2024.12.1rc1", True),
+        (SpecifierSet(">=2024.12.0,<2025.0.0", prereleases=True), "2024.12.1rc1", True),
+        # Failing cases
+        (">=2025.0.0", "2024.12.2rc1", False),
+        (SpecifierSet(">=2025.0.0rc1", prereleases=True), "2024.12.2", False),
     ],
 )
-def test_version_requirement(version_input, should_pass):
+def test_version_requirement(version_input, test_version, should_pass):
     metadata = ConfigSetMetadata(name="test-config", nebari_version=version_input)
 
     if should_pass:
@@ -28,7 +33,7 @@ def test_version_requirement(version_input, should_pass):
     else:
         with pytest.raises(ValueError) as exc_info:
             metadata.check_version(test_version)
-        assert "Current Nebari version" in str(exc_info.value)
+        assert "Nebari version" in str(exc_info.value)
 
 
 def test_valid_version_requirement_with_requirement_object():
