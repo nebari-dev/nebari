@@ -22,14 +22,11 @@ class ConfigSetMetadata(BaseModel):
     def validate_version_requirement(cls, version_req):
         if isinstance(version_req, str):
             version_req = SpecifierSet(version_req, prereleases=True)
-        if version_req.prereleases is not True:
-            logger.warning(
-                "ConfigSetMetadata created with nebari_version SpecifierSet not allowing pre-releases."
-            )
+
         return version_req
 
     def check_version(self, version):
-        if version not in self.nebari_version:
+        if not self.nebari_version.contains(version, prereleases=True):
             raise ValueError(
                 f'Nebari version "{version}" is not compatible with '
                 f'version requirement {self.nebari_version} for "{self.name}" config set.'

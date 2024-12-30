@@ -13,16 +13,16 @@ test_version = "2024.12.2"
     [
         # Standard version tests
         (">=2024.12.0,<2025.0.0", "2024.12.2", True),
-        (SpecifierSet(">=2024.12.0,<2025.0.0", prereleases=True), "2024.12.2", True),
+        (SpecifierSet(">=2024.12.0,<2025.0.0"), "2024.12.2", True),
         # Pre-release version requirement tests
         (">=2024.12.0rc1,<2025.0.0", "2024.12.0rc1", True),
-        (SpecifierSet(">=2024.12.0rc1", prereleases=True), "2024.12.0rc2", True),
+        (SpecifierSet(">=2024.12.0rc1"), "2024.12.0rc2", True),
         # Pre-release test version against standard requirement
         (">=2024.12.0,<2025.0.0", "2024.12.1rc1", True),
-        (SpecifierSet(">=2024.12.0,<2025.0.0", prereleases=True), "2024.12.1rc1", True),
+        (SpecifierSet(">=2024.12.0,<2025.0.0"), "2024.12.1rc1", True),
         # Failing cases
         (">=2025.0.0", "2024.12.2rc1", False),
-        (SpecifierSet(">=2025.0.0rc1", prereleases=True), "2024.12.2", False),
+        (SpecifierSet(">=2025.0.0rc1"), "2024.12.2", False),
     ],
 )
 def test_version_requirement(version_input, test_version, should_pass):
