@@ -8,7 +8,7 @@ import sys
 import tempfile
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Type, Union
 
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import AfterValidator, ConfigDict, Field, field_validator, model_validator
 
 from _nebari import constants
 from _nebari.provider import opentofu
@@ -42,31 +42,54 @@ class NodeGroup(schema.Base):
     instance: str
     min_nodes: Annotated[int, Field(ge=0)] = 0
     max_nodes: Annotated[int, Field(ge=1)] = 1
-    taints: Optional[List[schema.Taint]] = []
+    taints: Optional[List[schema.Taint]] = None
 
     @field_validator("taints", mode="before")
-    def validate_taint_strings(cls, value: list[Any]):
+    def validate_taint_strings(cls, taints: list[Any]):
+        if taints is None:
+            return taints
+
         TAINT_STR_REGEX = re.compile(r"(\w+)=(\w+):(\w+)")
         return_value = []
-        for taint in value:
+        for taint in taints:
             if not isinstance(taint, str):
                 return_value.append(taint)
             else:
                 match = TAINT_STR_REGEX.match(taint)
                 if not match:
                     raise ValueError(f"Invalid taint string: {taint}")
-                key, value, effect = match.groups()
-                parsed_taint = schema.Taint(key=key, value=value, effect=effect)
+                key, taints, effect = match.groups()
+                parsed_taint = schema.Taint(key=key, value=taints, effect=effect)
                 return_value.append(parsed_taint)
 
         return return_value
 
 
-DEFAULT_GENERAL_TAINTS = []
-DEFAULT_USER_TAINTS = [schema.Taint(key="dedicated", value="user", effect="NoSchedule")]
-DEFAULT_WORKER_TAINTS = [
-    schema.Taint(key="dedicated", value="worker", effect="NoSchedule")
+DEFAULT_GENERAL_NODE_GROUP_TAINTS = []
+DEFAULT_NODE_GROUP_TAINTS = [
+    schema.Taint(key="dedicated", value="nebari", effect="NoSchedule")
 ]
+
+
+def set_missing_taints_to_default_taints(node_groups: NodeGroup) -> NodeGroup:
+
+    for node_group_name, node_group in node_groups.items():
+        if node_group.taints is None:
+            if node_group_name == "general":
+                node_group.taints = DEFAULT_GENERAL_NODE_GROUP_TAINTS
+            else:
+                node_group.taints = DEFAULT_NODE_GROUP_TAINTS
+    return node_groups
+
+
+class DigitalOceanInputVars(schema.Base):
+    name: str
+    environment: str
+    region: str
+    tags: List[str]
+    kubernetes_version: str
+    node_groups: Dict[str, "DigitalOceanNodeGroup"]
+    kubeconfig_filename: str = get_kubeconfig_filename()
 
 
 class GCPNodeGroupInputVars(schema.Base):
@@ -362,19 +385,16 @@ DEFAULT_GCP_NODE_GROUPS = {
         instance="e2-standard-8",
         min_nodes=1,
         max_nodes=1,
-        taints=DEFAULT_GENERAL_TAINTS,
     ),
     "user": GCPNodeGroup(
         instance="e2-standard-4",
         min_nodes=0,
         max_nodes=5,
-        taints=DEFAULT_USER_TAINTS,
     ),
     "worker": GCPNodeGroup(
         instance="e2-standard-4",
         min_nodes=0,
         max_nodes=5,
-        taints=DEFAULT_WORKER_TAINTS,
     ),
 }
 
@@ -388,7 +408,9 @@ class GoogleCloudPlatformProvider(schema.Base):
     kubernetes_version: str
     availability_zones: Optional[List[str]] = []
     release_channel: str = constants.DEFAULT_GKE_RELEASE_CHANNEL
-    node_groups: Dict[str, GCPNodeGroup] = DEFAULT_GCP_NODE_GROUPS
+    node_groups: Annotated[
+        Dict[str, GCPNodeGroup], AfterValidator(set_missing_taints_to_default_taints)
+    ] = Field(DEFAULT_GCP_NODE_GROUPS, validate_default=True)
     tags: Optional[List[str]] = []
     networking_mode: str = "ROUTE"
     network: str = "default"
@@ -447,16 +469,16 @@ DEFAULT_AZURE_NODE_GROUPS = {
         instance="Standard_D8_v3",
         min_nodes=1,
         max_nodes=1,
-        taints=DEFAULT_GENERAL_TAINTS,
     ),
     "user": AzureNodeGroup(
-        instance="Standard_D4_v3", min_nodes=0, max_nodes=5, taints=DEFAULT_USER_TAINTS
+        instance="Standard_D4_v3",
+        min_nodes=0,
+        max_nodes=5,
     ),
     "worker": AzureNodeGroup(
         instance="Standard_D4_v3",
         min_nodes=0,
         max_nodes=5,
-        taints=DEFAULT_WORKER_TAINTS,
     ),
 }
 
@@ -466,7 +488,9 @@ class AzureProvider(schema.Base):
     kubernetes_version: Optional[str] = None
     storage_account_postfix: str
     resource_group_name: Optional[str] = None
-    node_groups: Dict[str, AzureNodeGroup] = DEFAULT_AZURE_NODE_GROUPS
+    node_groups: Annotated[
+        Dict[str, AzureNodeGroup], AfterValidator(set_missing_taints_to_default_taints)
+    ] = Field(DEFAULT_AZURE_NODE_GROUPS, validate_default=True)
     storage_account_postfix: str
     vnet_subnet_id: Optional[str] = None
     private_cluster_enabled: bool = False
@@ -537,21 +561,21 @@ class AWSNodeGroup(NodeGroup):
 
 DEFAULT_AWS_NODE_GROUPS = {
     "general": AWSNodeGroup(
-        instance="m5.2xlarge", min_nodes=1, max_nodes=1, taints=DEFAULT_GENERAL_TAINTS
+        instance="m5.2xlarge",
+        min_nodes=1,
+        max_nodes=1,
     ),
     "user": AWSNodeGroup(
         instance="m5.xlarge",
         min_nodes=0,
         max_nodes=5,
         single_subnet=False,
-        taints=DEFAULT_USER_TAINTS,
     ),
     "worker": AWSNodeGroup(
         instance="m5.xlarge",
         min_nodes=0,
         max_nodes=5,
         single_subnet=False,
-        taints=DEFAULT_WORKER_TAINTS,
     ),
 }
 
@@ -560,7 +584,9 @@ class AmazonWebServicesProvider(schema.Base):
     region: str
     kubernetes_version: str
     availability_zones: Optional[List[str]]
-    node_groups: Dict[str, AWSNodeGroup] = DEFAULT_AWS_NODE_GROUPS
+    node_groups: Annotated[
+        Dict[str, AWSNodeGroup], AfterValidator(set_missing_taints_to_default_taints)
+    ] = Field(DEFAULT_AWS_NODE_GROUPS, validate_default=True)
     eks_endpoint_access: Optional[
         Literal["private", "public", "public_and_private"]
     ] = "public"

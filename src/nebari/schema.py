@@ -129,5 +129,4 @@ provider_enum_name_map: dict[ProviderEnum, str] = {
     ProviderEnum.gcp: "google_cloud_platform",
     ProviderEnum.aws: "amazon_web_services",
     ProviderEnum.azure: "azure",
-    ProviderEnum.do: "digital_ocean",
 }
