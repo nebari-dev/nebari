@@ -1386,6 +1386,31 @@ class Upgrade_2024_11_1(UpgradeStep):
         return config
 
 
+class Upgrade_2024_12_1(UpgradeStep):
+    """
+    Upgrade step for Nebari version 2024.12.1
+    """
+
+    version = "2024.12.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        if config.get("provider", "") == "do":
+            rich.print(
+                "\n[red bold]Error: DigitalOcean is no longer supported as a provider[/red bold].",
+            )
+            rich.print(
+                "You can still deploy Nebari to a Kubernetes cluster on DigitalOcean by using 'existing' as the provider in the config file."
+            )
+            exit()
+
+        rich.print("Ready to upgrade to Nebari version [green]2024.12.1[/green].")
+
+        return config
+
+
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
 # Manually-added upgrade steps must go above this line
