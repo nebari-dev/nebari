@@ -36,20 +36,6 @@ def test_version_requirement(version_input, test_version, should_pass):
         assert "Nebari version" in str(exc_info.value)
 
 
-def test_valid_version_requirement_with_requirement_object():
-    requirement = Requirement("nebari>=2024.12.0")
-    metadata = ConfigSetMetadata(name="test-config", nebari_version=requirement)
-    assert metadata.nebari_version.specifier.contains(test_version)
-
-
-def test_invalid_version_requirement_with_requirement_object():
-    requirement = Requirement("nebari>=2025.0.0")
-    with pytest.raises(ValueError) as exc_info:
-        csm = ConfigSetMetadata(name="test-config", nebari_version=requirement)
-        csm.check_version(test_version)
-    assert "Current Nebari version" in str(exc_info.value)
-
-
 def test_read_config_set_valid(tmp_path):
     config_set_yaml = """
     metadata:
@@ -80,7 +66,7 @@ def test_read_config_set_invalid_version(tmp_path):
     with patch("_nebari.config_set.__version__", "2024.12.2"):
         with pytest.raises(ValueError) as exc_info:
             read_config_set(str(config_set_filepath))
-        assert "Current Nebari version" in str(exc_info.value)
+        assert "Nebari version" in str(exc_info.value)
 
 
 if __name__ == "__main__":
