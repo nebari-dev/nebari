@@ -161,3 +161,13 @@ def test_set_provider(config_schema, provider):
     result_config_dict = config.model_dump()
     assert provider in result_config_dict
     assert result_config_dict[provider]["kube_context"] == "some_context"
+
+
+def test_provider_config_mismatch_warning(config_schema):
+    config_dict = {
+        "project_name": "test",
+        "provider": "local",
+        "existing": {"kube_context": "some_context"},  # <-- Doesn't match the provider
+    }
+    with pytest.warns(UserWarning, match="configuration defined for other providers"):
+        config_schema(**config_dict)
