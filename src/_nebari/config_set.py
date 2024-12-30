@@ -1,4 +1,5 @@
 import pathlib
+from typing import Optional
 
 from packaging.requirements import Requirement
 from pydantic import BaseModel, ConfigDict, field_validator
@@ -10,7 +11,7 @@ from _nebari.utils import yaml
 class ConfigSetMetadata(BaseModel):
     model_config: ConfigDict = ConfigDict(extra="allow", arbitrary_types_allowed=True)
     name: str  # for use with guided init
-    description: str = None
+    description: Optional[str] = None
     nebari_version: str | Requirement
 
     @field_validator("nebari_version")
