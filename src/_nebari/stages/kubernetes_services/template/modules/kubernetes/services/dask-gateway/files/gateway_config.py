@@ -15,7 +15,6 @@ def dask_gateway_config(path="/var/lib/dask-gateway/config.json"):
 
 config = dask_gateway_config()
 
-
 c.DaskGateway.log_level = config["gateway"]["loglevel"]
 
 # Configure addresses
@@ -26,6 +25,8 @@ c.DaskGateway.backend_class = "dask_gateway_server.backends.kubernetes.KubeBacke
 c.KubeBackend.gateway_instance = config["gateway_service_name"]
 
 # ========= Dask Cluster Default Configuration =========
+# These settings are overridden by c.Backend.cluster_option if key e.g. image, scheduler_extra_pod_config, etc. is present
+
 c.KubeClusterConfig.image = (
     f"{config['cluster-image']['name']}:{config['cluster-image']['tag']}"
 )
@@ -40,6 +41,7 @@ c.KubeClusterConfig.scheduler_memory_limit = config["cluster"]["scheduler_memory
 c.KubeClusterConfig.scheduler_extra_container_config = config["cluster"][
     "scheduler_extra_container_config"
 ]
+
 c.KubeClusterConfig.scheduler_extra_pod_config = config["cluster"][
     "scheduler_extra_pod_config"
 ]
@@ -227,18 +229,24 @@ def base_username_mount(username, uid=1000, gid=100):
     }
 
 
-def worker_profile(options, user):
-    namespace, name = options.conda_environment.split("/")
+def options_handler(options, user):
+    namespace, environment_name = options.conda_environment.split("/")
     return functools.reduce(
         deep_merge,
         [
+            # ordering is higher to lower precedence
+            {},
             base_node_group(options),
-            base_conda_store_mounts(namespace, name),
+            base_conda_store_mounts(namespace, environment_name),
             base_username_mount(user.name),
             config["profiles"][options.profile],
             {"environment": {**options.environment_vars}},
+            # merge with default values
+            {
+                k: config["cluster"][k]
+                for k in ("worker_extra_pod_config", "scheduler_extra_pod_config")
+            },
         ],
-        {},
     )
 
 
@@ -279,7 +287,7 @@ def user_options(user):
 
     return Options(
         *args,
-        handler=worker_profile,
+        handler=options_handler,
     )
 
 
@@ -288,7 +296,7 @@ c.Backend.cluster_options = user_options
 
 # ============== utils ============
 def deep_merge(d1, d2):
-    """Deep merge two dictionaries.
+    """Deep merge two dictionaries.  Left argument takes precedence.
     >>> value_1 = {
     'a': [1, 2],
     'b': {'c': 1, 'z': [5, 6]},
