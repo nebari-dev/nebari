@@ -23,8 +23,32 @@ def qhub_users_import_json():
 
 class MockKeycloakAdmin:
     @staticmethod
-    def foo():
-        return ...
+    def get_client_id(*args, **kwargs):
+        return "test-client"
+
+    @staticmethod
+    def create_client_role(*args, **kwargs):
+        return "test-client-role"
+
+    @staticmethod
+    def get_client_role_id(*args, **kwargs):
+        return "test-client-role-id"
+
+    @staticmethod
+    def get_role_by_id(*args, **kwargs):
+        return bytearray("test-role-id", "utf-8")
+
+    @staticmethod
+    def get_groups(*args, **kwargs):
+        return []
+
+    @staticmethod
+    def get_client_role_groups(*args, **kwargs):
+        return []
+
+    @staticmethod
+    def assign_group_client_roles(*args, **kwargs):
+        pass
 
 
 @pytest.mark.parametrize(
@@ -136,8 +160,8 @@ def test_upgrade_4_0(
         return MockKeycloakAdmin()
 
     monkeypatch.setattr(
-        _keycloak.KeycloakAdmin,
-        "get_client_id",
+        _keycloak,
+        "get_keycloak_admin",
         monkey_patch_get_keycloak_admin,
     )
 
