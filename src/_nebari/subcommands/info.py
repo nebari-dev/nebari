@@ -10,11 +10,15 @@ from nebari.hookspecs import hookimpl
 
 @hookimpl
 def nebari_subcommand(cli: typer.Typer):
+    EXTERNAL_PLUGIN_STYLE = "cyan"
+
     @cli.command()
     def info(ctx: typer.Context):
         from nebari.plugins import nebari_plugin_manager
 
         rich.print(f"Nebari version: {__version__}")
+
+        external_plugins = nebari_plugin_manager.get_external_plugins()
 
         hooks = collections.defaultdict(list)
         for plugin in nebari_plugin_manager.plugin_manager.get_plugins():
@@ -27,7 +31,8 @@ def nebari_subcommand(cli: typer.Typer):
 
         for hook_name, modules in hooks.items():
             for module in modules:
-                table.add_row(hook_name, module)
+                style = EXTERNAL_PLUGIN_STYLE if module in external_plugins else None
+                table.add_row(hook_name, module, style=style)
 
         rich.print(table)
 
@@ -36,8 +41,14 @@ def nebari_subcommand(cli: typer.Typer):
         table.add_column("priority")
         table.add_column("module")
         for stage in nebari_plugin_manager.ordered_stages:
+            style = (
+                EXTERNAL_PLUGIN_STYLE if stage.__module__ in external_plugins else None
+            )
             table.add_row(
-                stage.name, str(stage.priority), f"{stage.__module__}.{stage.__name__}"
+                stage.name,
+                str(stage.priority),
+                f"{stage.__module__}.{stage.__name__}",
+                style=style,
             )
 
         rich.print(table)
