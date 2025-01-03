@@ -154,13 +154,13 @@ def test_upgrade_4_0(
         monkey_patch_list_namespaced_daemon_set,
     )
 
-    from _nebari import keycloak as _keycloak
+    from _nebari import upgrade as _upgrade
 
     def monkey_patch_get_keycloak_admin(*args, **kwargs):
         return MockKeycloakAdmin()
 
     monkeypatch.setattr(
-        _keycloak,
+        _upgrade,
         "get_keycloak_admin",
         monkey_patch_get_keycloak_admin,
     )
