@@ -121,6 +121,14 @@ class NebariPluginManager:
 
         return read_configuration(config_path, self.config_schema, **kwargs)
 
+    def get_external_plugins(self):
+        external_plugins = []
+        all_plugins = DEFAULT_SUBCOMMAND_PLUGINS + DEFAULT_STAGES_PLUGINS
+        for plugin in self.plugin_manager.get_plugins():
+            if plugin.__name__ not in all_plugins:
+                external_plugins.append(plugin.__name__)
+        return external_plugins
+
     @property
     def ordered_stages(self):
         return self.get_available_stages()
