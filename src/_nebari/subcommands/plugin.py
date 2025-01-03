@@ -1,11 +1,11 @@
+from importlib.metadata import version
+
 import rich
 import typer
 from rich.table import Table
 
-from importlib.metadata import version
-
-from _nebari.version import __version__
 from nebari.hookspecs import hookimpl
+
 
 @hookimpl
 def nebari_subcommand(cli: typer.Typer):
@@ -20,7 +20,7 @@ def nebari_subcommand(cli: typer.Typer):
         plugin_cmd,
         name="plugin",
         help="Interact with nebari plugins",
-        rich_help_panel="Additional Commands"
+        rich_help_panel="Additional Commands",
     )
 
     @plugin_cmd.command()
@@ -31,12 +31,12 @@ def nebari_subcommand(cli: typer.Typer):
         from nebari.plugins import nebari_plugin_manager
 
         external_plugins = nebari_plugin_manager.get_external_plugins()
-        
+
         table = Table(title="Plugins")
         table.add_column("name", justify="left", no_wrap=True)
         table.add_column("version", justify="left", no_wrap=True)
 
         for plugin in external_plugins:
             table.add_row(plugin, version(plugin))
-        
+
         rich.print(table)

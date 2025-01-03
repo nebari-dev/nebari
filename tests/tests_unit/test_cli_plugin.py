@@ -1,11 +1,13 @@
-import pytest
 from typing import List
-from typer.testing import CliRunner
 from unittest.mock import Mock, patch
+
+import pytest
+from typer.testing import CliRunner
 
 from _nebari.cli import create_cli
 
 runner = CliRunner()
+
 
 @pytest.mark.parametrize(
     "args, exit_code, content",
@@ -46,21 +48,17 @@ def mock_version(pkg):
 
 
 @patch(
-    "nebari.plugins.NebariPluginManager.plugin_manager.get_plugins",
-    mock_get_plugins
+    "nebari.plugins.NebariPluginManager.plugin_manager.get_plugins", mock_get_plugins
 )
-@patch(
-    "_nebari.subcommands.plugin.version",
-    mock_version
-)
+@patch("_nebari.subcommands.plugin.version", mock_version)
 def test_cli_plugin_list_external_plugins():
     app = create_cli()
     result = runner.invoke(app, ["plugin", "list"])
     assert result.exit_code == 0
-    expected_ouput = [
+    expected_output = [
         "Plugins",
         "mytestexternalplugin │ 0.4.4",
-        "otherplugin          │ 1.1.1"
+        "otherplugin          │ 1.1.1",
     ]
-    for c in expected_ouput:
+    for c in expected_output:
         assert c in result.stdout
