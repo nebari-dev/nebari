@@ -19,6 +19,7 @@ DEFAULT_SUBCOMMAND_PLUGINS = [
     "_nebari.subcommands.deploy",
     "_nebari.subcommands.destroy",
     "_nebari.subcommands.keycloak",
+    "_nebari.subcommands.plugin",
     "_nebari.subcommands.render",
     "_nebari.subcommands.support",
     "_nebari.subcommands.upgrade",
