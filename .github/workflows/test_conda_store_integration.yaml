@@ -1,0 +1,143 @@
+name: "Conda Store Integration Tests"
+
+env:
+  TEST_USERNAME: "test-user"
+  TEST_PASSWORD: "P@sswo3d"
+  NEBARI_IMAGE_TAG: "main"
+  PYTHON_VERSION: "3.11"
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/test_conda_store_integration.yaml"
+      - "tests/**"
+      - "scripts/**"
+      - "src/**"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - ".cirun.yml"
+  push:
+    branches:
+      - main
+      - release/\d{4}.\d{1,2}.\d{1,2}
+    paths:
+      - ".github/workflows/test_conda_store_integration.yaml"
+      - "tests/**"
+      - "scripts/**"
+      - "src/**"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - ".cirun.yml"
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
+  workflow_dispatch:
+
+# When the cancel-in-progress: true option is specified, any concurrent jobs or workflows using the same
+# concurrency group will cancel both the pending and currently running jobs or workflows. This allows only
+# one job or workflow in the concurrency group to be in progress at a time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  test-conda-store-integration:
+    runs-on: "cirun-runner--${{ github.run_id }}"
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: "Checkout Infrastructure"
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+
+      - name: Setup runner for local deployment
+        uses: ./.github/actions/setup-local
+
+      - name: Checkout the branch from the PR that triggered the job
+        if: ${{ github.event_name == 'issue_comment' }}
+        run: |
+          hub version
+          hub pr checkout ${{ inputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install JQ
+        run: |
+          sudo apt-get update
+          sudo apt-get install jq -y
+
+      - name: "Checkout conda-store"
+        uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+          repository: conda-incubator/conda-store
+          path: conda-store
+
+      - name: "Set up conda env"
+        uses: conda-incubator/setup-miniconda@v3
+        env:
+          CONDA: /home/runnerx/miniconda3
+        with:
+            environment-file: conda-store/conda-store-server/environment-dev.yaml
+            miniforge-version: latest
+            auto-activate-base: false
+            activate-environment: conda-store-server-dev
+            python-version: ${{ env.PYTHON_VERSION }}
+            conda-remove-defaults: "true"
+
+      - name: Install Nebari
+        run: |
+          pip install .[dev]
+
+      - name: Initialize Nebari config for local deployment
+        id: init
+        uses: ./.github/actions/init-local
+
+      - name: Deploy Nebari
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari deploy --config ${{ steps.init.outputs.config }} --disable-prompt
+
+      - name: Health check
+        uses: ./.github/actions/health-check
+        with:
+          domain: ${{ steps.init.outputs.domain }}
+
+      - name: Create example-user
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: |
+          nebari keycloak adduser --user "${TEST_USERNAME}" "${TEST_PASSWORD}" --config ${{ steps.init.outputs.config }}
+          nebari keycloak listusers --config ${{ steps.init.outputs.config }}
+
+      - name: Await Workloads
+        uses: jupyterhub/action-k8s-await-workloads@v3
+        with:
+          workloads: "" # all
+          namespace: "dev"
+          timeout: 300
+          max-restarts: 3
+
+      - name: Install conda-store dependencies
+        run: |
+          which python
+          # install conda-store-server
+          python -m pip install conda-store/conda-store-server
+
+      - name: Run conda-store-server user_journey tests
+        env:
+          NEBARI_CONFIG_PATH: ${{ steps.init.outputs.config }}
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+          CONDA_STORE_BASE_URL: https://${{ steps.init.outputs.domain }}/conda-store
+        run: |
+          cd conda-store/conda-store-server
+          CONDA_STORE_TEST_VERIFY_SSL=0 python -m pytest -m "user_journey"
+
+      ### CLEANUP AFTER TESTS
+      - name: Cleanup nebari deployment
+        if: github.ref_name == 'main' || github.event_name == 'workflow_dispatch'
+        working-directory: ${{ steps.init.outputs.directory }}
+        run: nebari destroy --config ${{ steps.init.outputs.config }} --disable-prompt
