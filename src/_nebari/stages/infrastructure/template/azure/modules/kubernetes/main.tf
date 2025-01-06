@@ -1,5 +1,5 @@
 data "azurerm_client_config" "current" {
-  count = var.azure_rbac.enabled ? 1 : 0
+  count = var.azure_rbac.azure_rbac_enabled ? 1 : 0
 }
 
 # https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster
@@ -69,12 +69,12 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   dynamic "azure_active_directory_role_based_access_control" {
-    for_each = var.azure_rbac.enabled ? [var.azure_rbac] : []
+    for_each = var.azure_rbac.azure_rbac_enabled ? [var.aad_access_control] : []
     content {
-      azure_rbac_enabled     = var.azure_rbac.enabled
+      azure_rbac_enabled     = var.azure_rbac.azure_rbac_enabled
       admin_group_object_ids = var.azure_rbac.admin_group_object_ids
       tenant_id              = data.azurerm_client_config.current[0].tenant_id
-      managed                = var.azure_rbac.managed_identity
+      managed                = true
     }
   }
 }

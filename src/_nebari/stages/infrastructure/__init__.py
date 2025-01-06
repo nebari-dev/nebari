@@ -90,7 +90,7 @@ class AzureNodeGroupInputVars(schema.Base):
     max_nodes: int
 
 
-class AzureRBAC(schema.Base):
+class AADAccessControl(schema.Base):
     """
     Represents the configuration for Azure Active Directory Role-Based Access Control
     (RBAC) integration in a Kubernetes cluster.
@@ -98,16 +98,12 @@ class AzureRBAC(schema.Base):
     Attributes:
         enabled (bool): Indicates whether Azure AD-based Role-Based Access Control is
         enabled.
-        managed (bool): Specifies if the Azure AD integration is managed by Azure.
-            When set to True, Azure creates and manages the Service Principal used for
-            integration.
         admin_group_object_ids (List[str]): A list of Object IDs of Azure AD groups assigned
             administrative roles on the cluster. This property is only applicable when
             `managed` is set to True.
     """
 
-    enabled: bool
-    managed_identity: bool
+    azure_rbac_enabled: bool
     admin_group_object_ids: List[str]
 
 
@@ -127,7 +123,7 @@ class AzureInputVars(schema.Base):
     network_profile: Optional[Dict[str, str]] = None
     azure_policy_enabled: bool = None
     workload_identity_enabled: bool = False
-    azure_rbac: Optional[AzureRBAC] = None
+    aad_access_control: Optional[AADAccessControl] = None
 
 
 class AWSAmiTypes(str, enum.Enum):
