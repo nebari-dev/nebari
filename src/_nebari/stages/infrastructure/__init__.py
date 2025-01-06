@@ -388,7 +388,7 @@ class AzureProvider(schema.Base):
     network_profile: Optional[Dict[str, str]] = None
     max_pods: Optional[int] = None
     workload_identity_enabled: bool = False
-    azure_rbac: Optional[AzureRBAC] = None
+    aad_access_control: Optional[AADAccessControl] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -828,7 +828,7 @@ class KubernetesInfrastructureStage(NebariTerraformStage):
                 network_profile=self.config.azure.network_profile,
                 max_pods=self.config.azure.max_pods,
                 workload_identity_enabled=self.config.azure.workload_identity_enabled,
-                azure_rbac=self.config.azure.azure_rbac,
+                aad_access_control=self.config.azure.azure_rbac,
                 azure_policy_enabled=self.config.azure.azure_policy_enabled,
             ).model_dump()
         elif self.config.provider == schema.ProviderEnum.aws:
