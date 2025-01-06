@@ -81,12 +81,10 @@ variable "aad_access_control" {
   description = "Azure Active Directory Role-Based Access Control (RBAC) integration in a Kubernetes cluster"
   type = object({
     azure_rbac_enabled : bool
-    managed_identity : bool
     admin_group_object_ids : list(string)
   })
   default = {
     azure_rbac_enabled : false
-    managed_identity : false
     admin_group_object_ids : []
   }
   nullable = false
