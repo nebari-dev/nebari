@@ -82,7 +82,7 @@ variable "authorized_ip_ranges" {
   type        = list(string)
   default     = ["0.0.0.0/0"]
 }
-  
+
 variable "azure_policy_enabled" {
   description = "Enable Azure Policy"
   type        = bool
