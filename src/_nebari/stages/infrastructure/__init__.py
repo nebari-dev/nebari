@@ -98,9 +98,8 @@ class AADAccessControl(schema.Base):
     Attributes:
         enabled (bool): Indicates whether Azure AD-based Role-Based Access Control is
         enabled.
-        admin_group_object_ids (List[str]): A list of Object IDs of Azure AD groups assigned
-            administrative roles on the cluster. This property is only applicable when
-            `managed` is set to True.
+        admin_group_object_ids (List[str]): A list of Object IDs of Azure AD groups
+        assigned administrative roles on the cluster.
     """
 
     azure_rbac_enabled: bool
