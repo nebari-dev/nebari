@@ -53,6 +53,7 @@ def test_check_immutable_fields_immutable_change(
     mock_model_fields, mock_get_state, terraform_state_stage, mock_config
 ):
     old_config = mock_config.model_copy(deep=True)
+    old_config.local = None
     old_config.provider = schema.ProviderEnum.gcp
     mock_get_state.return_value = old_config.model_dump()
 
