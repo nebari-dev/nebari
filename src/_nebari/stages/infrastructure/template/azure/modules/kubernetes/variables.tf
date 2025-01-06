@@ -91,3 +91,9 @@ variable "azure_rbac" {
   }
   nullable = false
 }
+
+variable "azure_policy_enabled" {
+  description = "Enable Azure Policy"
+  type        = bool
+  default     = false
+}

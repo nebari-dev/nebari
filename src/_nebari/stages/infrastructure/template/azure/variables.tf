@@ -96,3 +96,8 @@ variable "azure_rbac" {
     admin_group_object_ids : []
   }
 }
+
+variable "azure_policy_enabled" {
+  description = "Enable Azure Policy"
+  type        = bool
+}
