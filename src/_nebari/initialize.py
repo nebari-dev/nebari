@@ -8,7 +8,8 @@ from typing import Any, Dict
 import pydantic
 import requests
 
-from _nebari import constants
+from _nebari import constants, utils
+from _nebari.config_set import read_config_set
 from _nebari.provider import git
 from _nebari.provider.cicd import github
 from _nebari.provider.cloud import amazon_web_services, azure_cloud, google_cloud
@@ -47,6 +48,7 @@ def render_config(
     region: str = None,
     disable_prompt: bool = False,
     ssl_cert_email: str = None,
+    config_set: str = None,
 ) -> Dict[str, Any]:
     config = {
         "provider": cloud_provider,
@@ -176,13 +178,17 @@ def render_config(
         config["certificate"] = {"type": CertificateEnum.letsencrypt.value}
         config["certificate"]["acme_email"] = ssl_cert_email
 
+    if config_set:
+        config_set = read_config_set(config_set)
+        config = utils.deep_merge(config, config_set.config)
+
     # validate configuration and convert to model
     from nebari.plugins import nebari_plugin_manager
 
     try:
         config_model = nebari_plugin_manager.config_schema.model_validate(config)
     except pydantic.ValidationError as e:
-        print(str(e))
+        raise e
 
     if repository_auto_provision:
         match = re.search(github_url_regex, repository)
