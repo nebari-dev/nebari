@@ -1,6 +1,6 @@
 import pytest
 
-from _nebari.utils import JsonDiff, JsonDiffEnum, byte_unit_conversion
+from _nebari.utils import JsonDiff, JsonDiffEnum, byte_unit_conversion, deep_merge
 
 
 @pytest.mark.parametrize(
@@ -64,3 +64,75 @@ def test_JsonDiff_modified():
     diff = JsonDiff(obj1, obj2)
     modifieds = diff.modified()
     assert sorted(modifieds) == sorted([(["b", "!"], 2, 3), (["+"], 4, 5)])
+
+
+def test_deep_merge_order_preservation_dict():
+    value_1 = {
+        "a": [1, 2],
+        "b": {"c": 1, "z": [5, 6]},
+        "e": {"f": {"g": {}}},
+        "m": 1,
+    }
+
+    value_2 = {
+        "a": [3, 4],
+        "b": {"d": 2, "z": [7]},
+        "e": {"f": {"h": 1}},
+        "m": [1],
+    }
+
+    expected_result = {
+        "a": [1, 2, 3, 4],
+        "b": {"c": 1, "z": [5, 6, 7], "d": 2},
+        "e": {"f": {"g": {}, "h": 1}},
+        "m": 1,
+    }
+
+    result = deep_merge(value_1, value_2)
+    assert result == expected_result
+    assert list(result.keys()) == list(expected_result.keys())
+    assert list(result["b"].keys()) == list(expected_result["b"].keys())
+    assert list(result["e"]["f"].keys()) == list(expected_result["e"]["f"].keys())
+
+
+def test_deep_merge_order_preservation_list():
+    value_1 = {
+        "a": [1, 2],
+        "b": {"c": 1, "z": [5, 6]},
+    }
+
+    value_2 = {
+        "a": [3, 4],
+        "b": {"d": 2, "z": [7]},
+    }
+
+    expected_result = {
+        "a": [1, 2, 3, 4],
+        "b": {"c": 1, "z": [5, 6, 7], "d": 2},
+    }
+
+    result = deep_merge(value_1, value_2)
+    assert result == expected_result
+    assert result["a"] == expected_result["a"]
+    assert result["b"]["z"] == expected_result["b"]["z"]
+
+
+def test_deep_merge_single_dict():
+    value_1 = {
+        "a": [1, 2],
+        "b": {"c": 1, "z": [5, 6]},
+    }
+
+    expected_result = value_1
+
+    result = deep_merge(value_1)
+    assert result == expected_result
+    assert list(result.keys()) == list(expected_result.keys())
+    assert list(result["b"].keys()) == list(expected_result["b"].keys())
+
+
+def test_deep_merge_empty():
+    expected_result = {}
+
+    result = deep_merge()
+    assert result == expected_result

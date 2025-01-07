@@ -76,3 +76,9 @@ variable "workload_identity_enabled" {
   type        = bool
   default     = false
 }
+
+variable "azure_policy_enabled" {
+  description = "Enable Azure Policy"
+  type        = bool
+  default     = false
+}
