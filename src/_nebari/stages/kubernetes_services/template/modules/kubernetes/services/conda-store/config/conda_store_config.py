@@ -423,8 +423,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             for namespace in namespaces:
                 _namespace = api.get_namespace(db, name=namespace)
                 if _namespace is None:
-                    api.create_namespace(db, name=namespace)
-                    db.commit()
+                    api.ensure_namespace(db, name=namespace)
 
         return schema.AuthenticationToken(
             primary_namespace=username,
