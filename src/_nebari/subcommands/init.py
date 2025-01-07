@@ -93,6 +93,7 @@ class InitInputs(schema.Base):
     region: Optional[str] = None
     ssl_cert_email: Optional[schema.email_pydantic] = None
     disable_prompt: bool = False
+    config_set: Optional[str] = None
     output: pathlib.Path = pathlib.Path("nebari-config.yaml")
     explicit: int = 0
 
@@ -134,6 +135,7 @@ def handle_init(inputs: InitInputs, config_schema: BaseModel):
         terraform_state=inputs.terraform_state,
         ssl_cert_email=inputs.ssl_cert_email,
         disable_prompt=inputs.disable_prompt,
+        config_set=inputs.config_set,
     )
 
     try:
@@ -496,6 +498,12 @@ def nebari_subcommand(cli: typer.Typer):
             False,
             is_eager=True,
         ),
+        config_set: str = typer.Option(
+            None,
+            "--config-set",
+            "-s",
+            help="Apply a pre-defined set of nebari configuration options.",
+        ),
         output: str = typer.Option(
             pathlib.Path("nebari-config.yaml"),
             "--output",
@@ -554,6 +562,7 @@ def nebari_subcommand(cli: typer.Typer):
         inputs.terraform_state = terraform_state
         inputs.ssl_cert_email = ssl_cert_email
         inputs.disable_prompt = disable_prompt
+        inputs.config_set = config_set
         inputs.output = output
         inputs.explicit = explicit
 
