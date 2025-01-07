@@ -29,6 +29,9 @@ on:
         required: true
         type: string
 
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
 jobs:
   test-render-providers:
     # Prevents the execution of this test under the following conditions:
