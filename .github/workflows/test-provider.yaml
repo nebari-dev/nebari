@@ -30,6 +30,9 @@ on:
         type: string
 
 env:
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
 
 jobs:
