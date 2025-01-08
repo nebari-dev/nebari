@@ -109,6 +109,7 @@ def test_upgrade_4_0(
     monkeypatch.setattr(Confirm, "ask", mock_input)
     monkeypatch.setattr(Prompt, "ask", lambda x: "")
 
+    from kubernetes import config as _kube_config
     from kubernetes.client import ApiextensionsV1Api as _ApiextensionsV1Api
     from kubernetes.client import AppsV1Api as _AppsV1Api
     from kubernetes.client import CoreV1Api as _CoreV1Api
@@ -126,6 +127,16 @@ def test_upgrade_4_0(
 
         return MonkeypatchApiResponse
 
+    monkeypatch.setattr(
+        _kube_config,
+        "load_kube_config",
+        lambda *args, **kwargs: None,
+    )
+    monkeypatch.setattr(
+        _kube_config,
+        "list_kube_config_contexts",
+        lambda *args, **kwargs: [None, {"context": {"cluster": "test"}}],
+    )
     monkeypatch.setattr(
         _ApiextensionsV1Api,
         "delete_custom_resource_definition",
