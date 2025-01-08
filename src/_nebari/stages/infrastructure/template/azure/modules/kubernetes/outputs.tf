@@ -1,6 +1,6 @@
 module "k8s_credentials" {
   source             = "../credentials"
-  azure_rbac_enabled = var.azure_rbac.azure_rbac_enabled
+  azure_rbac_enabled = var.aad_access_control.azure_rbac_enabled
   kube_admin_config  = azurerm_kubernetes_cluster.main.kube_admin_config[0]
   kube_config        = azurerm_kubernetes_cluster.main.kube_config[0]
 }
@@ -14,7 +14,7 @@ output "credentials" {
 output "kubeconfig" {
   description = "Kubernetes connection kubeconfig"
   sensitive   = true
-  value       = var.azure_rbac.azure_rbac_enabled ? azurerm_kubernetes_cluster.main.kube_admin_config_raw : azurerm_kubernetes_cluster.main.kube_config_raw
+  value       = var.aad_access_control.azure_rbac_enabled ? azurerm_kubernetes_cluster.main.kube_admin_config_raw : azurerm_kubernetes_cluster.main.kube_config_raw
 }
 
 output "cluster_oidc_issuer_url" {

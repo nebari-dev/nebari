@@ -98,4 +98,5 @@ variable "aad_access_control" {
 variable "azure_policy_enabled" {
   description = "Enable Azure Policy"
   type        = bool
+  default     = false
 }

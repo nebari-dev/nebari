@@ -22,6 +22,31 @@ def NebariKubernetesProvider(nebari_config: schema.Main):
                 token="${data.aws_eks_cluster_auth.default.token}",
             ),
         )
+
+    # if (
+    #     nebari_config.provider == "azure"
+    # ):  # we need to also check for disabled local account
+    #     return deep_merge(
+    #         Data("azurerm_kubernetes_cluster", "default", name=cluster_name),
+    #         Provider(
+    #             "kubernetes",
+    #             host="${data.azurerm_kubernetes_cluster.default.kube_config.0.host}",
+    #             cluster_ca_certificate="${base64decode(data.azurerm_kubernetes_cluster.default.kube_config.0.cluster_ca_certificate)}",
+    #             exec={
+    #                 "api_version": "client.authentication.k8s.io/v1beta1",
+    #                 "command": "az",
+    #                 "args": [
+    #                     "aks",
+    #                     "get-credentials",
+    #                     "--resource-group",
+    #                     nebari_config.azure.resource_group_name,
+    #                     "--name",
+    #                     nebari_config.azure.cluster_name,
+    #                     "--overwrite-existing",
+    #                 ],
+    #             },
+    #         ),
+    #     )
     return Provider(
         "kubernetes",
     )
