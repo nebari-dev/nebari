@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 
 import pytest
 import yaml
+from rich.prompt import Confirm, Prompt
 from typer.testing import CliRunner
 
 import _nebari.upgrade
@@ -449,6 +450,24 @@ def test_cli_upgrade_to_2023_10_1_kubernetes_validations(
         "azure": {"incompatible": "1.23", "compatible": "1.26", "invalid": "badname"},
         "gcp": {"incompatible": "1.23", "compatible": "1.26", "invalid": "badname"},
     }
+
+    def mock_input_ask(prompt, *args, **kwargs):
+        from _nebari.upgrade import TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION
+
+        # For more about structural pattern matching, see:
+        # https://peps.python.org/pep-0636/
+        match prompt:
+            case str(s) if s == TERRAFORM_REMOVE_TERRAFORM_STAGE_FILES_CONFIRMATION:
+                return kwargs.get("attempt_fixes", False)
+            case _:
+                return kwargs.get("default", False)
+
+    monkeypatch.setattr(Confirm, "ask", mock_input_ask)
+    monkeypatch.setattr(
+        Prompt,
+        "ask",
+        lambda x, *args, **kwargs: "",
+    )
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp).resolve() / "nebari-config.yaml"
