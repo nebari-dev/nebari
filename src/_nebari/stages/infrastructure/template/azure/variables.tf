@@ -92,4 +92,5 @@ variable "authorized_ip_ranges" {
 variable "azure_policy_enabled" {
   description = "Enable Azure Policy"
   type        = bool
+  default     = false
 }
