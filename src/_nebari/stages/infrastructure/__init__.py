@@ -106,7 +106,7 @@ class AzureInputVars(schema.Base):
     tags: Dict[str, str] = {}
     max_pods: Optional[int] = None
     network_profile: Optional[Dict[str, str]] = None
-    azure_policy_enabled: bool = None
+    azure_policy_enabled: Optional[bool] = None
     workload_identity_enabled: bool = False
 
 
@@ -374,6 +374,7 @@ class AzureProvider(schema.Base):
     network_profile: Optional[Dict[str, str]] = None
     max_pods: Optional[int] = None
     workload_identity_enabled: bool = False
+    azure_policy_enabled: Optional[bool] = None
 
     @model_validator(mode="before")
     @classmethod

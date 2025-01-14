@@ -10,9 +10,10 @@ import urllib.request
 from pathlib import Path
 
 import requests
-from conda_store_server import api, orm, schema
+from conda_store_server import api
+from conda_store_server._internal import schema
+from conda_store_server._internal.server.dependencies import get_conda_store
 from conda_store_server.server.auth import GenericOAuthAuthentication
-from conda_store_server.server.dependencies import get_conda_store
 from conda_store_server.storage import S3Storage
 
 
@@ -422,8 +423,7 @@ class KeyCloakAuthentication(GenericOAuthAuthentication):
             for namespace in namespaces:
                 _namespace = api.get_namespace(db, name=namespace)
                 if _namespace is None:
-                    db.add(orm.Namespace(name=namespace))
-                    db.commit()
+                    api.ensure_namespace(db, name=namespace)
 
         return schema.AuthenticationToken(
             primary_namespace=username,
