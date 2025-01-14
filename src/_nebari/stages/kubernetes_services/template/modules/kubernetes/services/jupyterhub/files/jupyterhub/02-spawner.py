@@ -11,6 +11,9 @@ kubernetes.client.models.V1EndpointPort = (
 from kubespawner import KubeSpawner  # noqa: E402
 
 
+# conda-store default page size
+PAGE_SIZE_LIMIT = 100
+
 @gen.coroutine
 def get_username_hook(spawner):
     auth_state = yield spawner.user.get_auth_state()
@@ -26,22 +29,38 @@ def get_username_hook(spawner):
 def get_conda_store_environments(user_info: dict):
     import urllib3
     import yarl
+    import math
 
     external_url = z2jh.get_config("custom.conda-store-service-name")
     token = z2jh.get_config("custom.conda-store-jhub-apps-token")
     endpoint = "conda-store/api/v1/environment"
 
-    url = yarl.URL(f"http://{external_url}/{endpoint}/")
-
+    url = yarl.URL(f"http://{external_url}/{endpoint}/?size={PAGE_SIZE_LIMIT}")
     http = urllib3.PoolManager()
     response = http.request(
         "GET", str(url), headers={"Authorization": f"Bearer {token}"}
     )
 
     # parse response
-    j = json.loads(response.data.decode("UTF-8"))
+    decoded_response = json.loads(response.data.decode("UTF-8"))
+    env_data = decoded_response.get("data", [])
+    total_records = decoded_response.get("count", 0)
+
+    # If there are more records than the specified size limit, then
+    # will need to page through to get all the available envs
+    if total_records > PAGE_SIZE_LIMIT:
+        # Already pulled the first page of results, start looping through
+        # the envs starting on the 2nd page
+        for page in range(2, math.ceil(total_records/PAGE_SIZE_LIMIT)+1):
+            url = yarl.URL(f"http://{external_url}/{endpoint}/?size={PAGE_SIZE_LIMIT}&page={page}")
+            response = http.request(
+                "GET", str(url), headers={"Authorization": f"Bearer {token}"}
+            )
+            decoded_response = json.loads(response.data.decode("UTF-8"))
+            env_data += decoded_response.get("data", [])
+
     # Filter and return conda environments for the user
-    return [f"{env['namespace']['name']}-{env['name']}" for env in j.get("data", [])]
+    return [f"{env['namespace']['name']}-{env['name']}" for env in env_data]
 
 
 c.Spawner.pre_spawn_hook = get_username_hook
