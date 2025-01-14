@@ -39,7 +39,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     min_count           = var.node_groups[0].min_size
     max_count           = var.node_groups[0].max_size
     max_pods            = var.max_pods
-    # TODO: It's not possible to add node_taints to the default node pool. See https://github.com/hashicorp/terraform-provider-azurerm/issues/9183 for more info
+    # It's not possible to add node_taints to the default node pool. See https://github.com/hashicorp/terraform-provider-azurerm/issues/9183 for more info
 
     orchestrator_version = var.kubernetes_version
     node_labels = {

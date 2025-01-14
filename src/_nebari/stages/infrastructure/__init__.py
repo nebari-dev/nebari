@@ -83,16 +83,6 @@ def set_missing_taints_to_default_taints(node_groups: NodeGroup) -> NodeGroup:
     return node_groups
 
 
-class DigitalOceanInputVars(schema.Base):
-    name: str
-    environment: str
-    region: str
-    tags: List[str]
-    kubernetes_version: str
-    node_groups: Dict[str, "DigitalOceanNodeGroup"]
-    kubeconfig_filename: str = get_kubeconfig_filename()
-
-
 class GCPNodeGroupInputVars(schema.Base):
     name: str
     instance_type: str
@@ -755,7 +745,7 @@ class InputSchema(schema.Base):
                 for provider in provider_name_abbreviation_map.keys()
                 if provider in data and data[provider]
             }
-            expected_provider_config = provider_enum_name_map[provider]
+            expected_provider_config = schema.provider_enum_name_map[provider]
             extra_provider_config = set_providers - {expected_provider_config}
             if extra_provider_config:
                 warnings.warn(
