@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    keycloak = {
-      source  = "mrparkers/keycloak"
-      version = "3.7.0"
-    }
-  }
-}
-
 resource "kubernetes_service" "nebari-extension-service" {
   metadata {
     name      = "${var.name}-service"

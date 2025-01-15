@@ -12,7 +12,10 @@ from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
 from _nebari.provider import helm, kubernetes, kustomize, opentofu
-from _nebari.stages.tf_objects import NebariTerraformState
+from _nebari.stages.tf_objects import (
+    NebariOpentofuRequiredProvider,
+    NebariOpentofuRequiredVersion,
+)
 from nebari.hookspecs import NebariStage
 
 KUSTOMIZATION_TEMPLATE = "kustomization.yaml.tmpl"
@@ -65,7 +68,6 @@ class NebariKustomizeStage(NebariStage):
     def check(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
-
         if self.failed_to_create:
             print(
                 f"ERROR: After stage={self.name} "
@@ -143,7 +145,6 @@ class NebariKustomizeStage(NebariStage):
     def deploy(
         self, stage_outputs: Dict[str, Dict[str, Any]], disable_prompt: bool = False
     ):
-
         print(f"Deploying kubernetes resources for {self.name}")
         # get the kubernetes client
         kubernetes_client = self._get_k8s_client(stage_outputs)
@@ -208,7 +209,6 @@ class NebariKustomizeStage(NebariStage):
         # destroy each manifest in the reverse order
 
         for manifest in sorted(manifests, reverse=True):
-
             print(f"Destroyed manifest: {manifest}")
             try:
                 kubernetes.delete_from_yaml(kubernetes_client, manifest)
@@ -220,7 +220,6 @@ class NebariKustomizeStage(NebariStage):
         # destroy each crd in the reverse order
 
         for crd in sorted(crds, reverse=True):
-
             print(f"Destroyed CRD: {crd}")
             try:
                 kubernetes.delete_from_yaml(kubernetes_client, crd)
@@ -244,7 +243,20 @@ class NebariTerraformStage(NebariStage):
         return []
 
     def tf_objects(self) -> List[Dict]:
-        return [NebariTerraformState(self.name, self.config)]
+        return [
+            NebariOpentofuRequiredVersion(self.config),
+        ]
+
+    def _tf_objects_required_providers(self) -> List[Dict]:
+        contents = [NebariOpentofuRequiredVersion(self.config)]
+        for obj in self.tf_objects():
+            match obj:
+                case {"terraform": {"required_providers": dict(providers)}}:
+                    contents.extend(
+                        NebariOpentofuRequiredProvider(provider, self.config)
+                        for provider in providers.keys()
+                    )
+        return contents
 
     def render(self) -> Dict[pathlib.Path, str]:
         contents = {
@@ -253,8 +265,24 @@ class NebariTerraformStage(NebariStage):
             )
         }
         for root, dirs, filenames in os.walk(self.template_directory):
+            root_path = pathlib.Path(root)
+            if any(filename.endswith(".tf") for filename in filenames) and (
+                pathlib.PosixPath("modules")
+                in root_path.relative_to(self.template_directory).parents
+            ):
+                contents[
+                    pathlib.Path(
+                        self.stage_prefix,
+                        pathlib.Path.relative_to(
+                            root_path,
+                            self.template_directory,
+                        ),
+                    )
+                    / "_nebari.tf.json"
+                ] = opentofu.tf_render_objects(self._tf_objects_required_providers())
+
             for filename in filenames:
-                root_filename = pathlib.Path(root) / filename
+                root_filename = root_path / filename
                 with root_filename.open("rb") as f:
                     contents[
                         pathlib.Path(

@@ -12,7 +12,11 @@ from _nebari import utils
 from _nebari.provider import opentofu
 from _nebari.provider.cloud import azure_cloud
 from _nebari.stages.base import NebariTerraformStage
-from _nebari.stages.tf_objects import NebariConfig
+from _nebari.stages.tf_objects import (
+    NebariConfig,
+    NebariOpentofuRequiredProvider,
+    NebariOpentofuRequiredVersion,
+)
 from _nebari.utils import (
     AZURE_TF_STATE_RESOURCE_GROUP_SUFFIX,
     construct_azure_resource_group_name,
@@ -159,9 +163,14 @@ class TerraformStateStage(NebariTerraformStage):
             return []
 
     def tf_objects(self) -> List[Dict]:
-        resources = [NebariConfig(self.config)]
+        resources = [
+            NebariConfig(self.config),
+            NebariOpentofuRequiredVersion(self.config),
+        ]
         if self.config.provider == schema.ProviderEnum.gcp:
-            return resources + [
+            return [
+                *resources,
+                NebariOpentofuRequiredProvider("google", self.config),
                 opentofu.Provider(
                     "google",
                     project=self.config.google_cloud_platform.project,
@@ -169,8 +178,15 @@ class TerraformStateStage(NebariTerraformStage):
                 ),
             ]
         elif self.config.provider == schema.ProviderEnum.aws:
-            return resources + [
+            return [
+                *resources,
+                NebariOpentofuRequiredProvider("aws", self.config),
                 opentofu.Provider("aws", region=self.config.amazon_web_services.region),
+            ]
+        elif self.config.provider == schema.ProviderEnum.azure:
+            return [
+                *resources,
+                NebariOpentofuRequiredProvider("azurerm", self.config),
             ]
         else:
             return resources
