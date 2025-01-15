@@ -298,7 +298,9 @@ class CondaStore(JupyterLab):
 
     def _open_new_environment_tab(self):
         self.page.get_by_label("Create a new environment in").click()
-        expect(self.page.get_by_text("Create Environment")).to_be_visible()
+        expect(
+            self.page.get_by_role("button", name="Create", exact=True)
+        ).to_be_visible()
 
     def _assert_user_namespace(self):
         expect(

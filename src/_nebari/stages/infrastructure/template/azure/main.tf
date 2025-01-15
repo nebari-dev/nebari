@@ -28,6 +28,7 @@ module "kubernetes" {
   kubernetes_version       = var.kubernetes_version
   tags                     = var.tags
   max_pods                 = var.max_pods
+  authorized_ip_ranges     = var.authorized_ip_ranges
 
   network_profile = var.network_profile
 
