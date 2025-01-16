@@ -26,6 +26,7 @@ env:
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
 
 jobs:
   test-gcp-integration:
