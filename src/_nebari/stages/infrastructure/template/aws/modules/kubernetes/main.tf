@@ -147,6 +147,9 @@ resource "aws_eks_addon" "aws-ebs-csi-driver" {
         "eks.amazonaws.com/nodegroup" = "general"
       }
     }
+    defaultStorageClass = {
+      enabled = true
+    }
   })
 
   # Ensure cluster and node groups are created
