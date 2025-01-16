@@ -26,7 +26,7 @@ on:
 env:
   AWS_DEFAULT_REGION: "us-west-2"
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
-  TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}∏
+  TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
 
 jobs:
   test-aws-integration:
