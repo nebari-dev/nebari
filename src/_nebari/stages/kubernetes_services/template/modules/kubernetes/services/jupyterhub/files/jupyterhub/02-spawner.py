@@ -10,8 +10,8 @@ kubernetes.client.models.V1EndpointPort = (
 
 from kubespawner import KubeSpawner  # noqa: E402
 
-
 PAGE_SIZE_LIMIT = 100
+
 
 @gen.coroutine
 def get_username_hook(spawner):
@@ -26,9 +26,10 @@ def get_username_hook(spawner):
 
 
 def get_conda_store_environments(user_info: dict):
+    import math
+
     import urllib3
     import yarl
-    import math
 
     external_url = z2jh.get_config("custom.conda-store-service-name")
     token = z2jh.get_config("custom.conda-store-jhub-apps-token")
@@ -50,8 +51,10 @@ def get_conda_store_environments(user_info: dict):
     if total_records > PAGE_SIZE_LIMIT:
         # Already pulled the first page of results, start looping through
         # the envs starting on the 2nd page
-        for page in range(2, math.ceil(total_records/PAGE_SIZE_LIMIT)+1):
-            url = yarl.URL(f"http://{external_url}/{endpoint}/?size={PAGE_SIZE_LIMIT}&page={page}")
+        for page in range(2, math.ceil(total_records / PAGE_SIZE_LIMIT) + 1):
+            url = yarl.URL(
+                f"http://{external_url}/{endpoint}/?size={PAGE_SIZE_LIMIT}&page={page}"
+            )
             response = http.request(
                 "GET", str(url), headers={"Authorization": f"Bearer {token}"}
             )
