@@ -25,8 +25,6 @@ on:
 env:
   NEBARI_IMAGE_TAG: ${{ github.event.inputs.image-tag || 'main' }}
   TF_LOG: ${{ github.event.inputs.tf-log-level || 'info' }}
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
 
 jobs:
   test-gcp-integration:
@@ -70,3 +68,5 @@ jobs:
           NEBARI_SECRET__default_images__jupyterhub: "quay.io/nebari/nebari-jupyterhub:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__jupyterlab: "quay.io/nebari/nebari-jupyterlab:${{ env.NEBARI_IMAGE_TAG }}"
           NEBARI_SECRET__default_images__dask_worker: "quay.io/nebari/nebari-dask-worker:${{ env.NEBARI_IMAGE_TAG }}"
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
