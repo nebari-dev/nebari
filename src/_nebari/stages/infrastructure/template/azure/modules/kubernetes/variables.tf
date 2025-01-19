@@ -77,6 +77,19 @@ variable "workload_identity_enabled" {
   default     = false
 }
 
+variable "aad_access_control" {
+  description = "Azure Active Directory Role-Based Access Control (RBAC) integration in a Kubernetes cluster"
+  type = object({
+    azure_rbac_enabled : bool
+    admin_group_object_ids : list(string)
+  })
+  default = {
+    azure_rbac_enabled : false
+    admin_group_object_ids : []
+  }
+  nullable = false
+}
+
 variable "authorized_ip_ranges" {
   description = "The ip range allowed to access the Kubernetes API server, defaults to 0.0.0.0/0"
   type        = list(string)
