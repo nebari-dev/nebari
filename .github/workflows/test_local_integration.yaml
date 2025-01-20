@@ -172,16 +172,12 @@ jobs:
           # install conda-store-server
           python -m pip install conda-store/conda-store-server
 
-      - name: Get conda store token
+      - name: Get conda store token from terraform state
         id: conda-store-token
-        env:
-            KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
-            KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-            CONDA_STORE_BASE_URL: https://${{ steps.init.outputs.domain }}
+        working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          curl --insecure -c /tmp/conda-store-cookie -L -X POST --data '{"username": "${{ env.KEYCLOAK_USERNAME }}", "password": "${{ env.TEST_PASSWORD }}"}' ${{ env.CONDA_STORE_BASE_URL }}/conda-store/login/
-          curl --insecure -L -X POST -b /tmp/conda-store-cookie ${{ env.CONDA_STORE_BASE_URL }}/conda-store/api/v1/token/ | jq .data.token
-          echo "CONDA_STORE_TOKEN=$(curl --insecure -L -X POST -b /tmp/conda-store-cookie ${{ env.CONDA_STORE_BASE_URL }}/conda-store/api/v1/token/ | jq .data.token)" >> "$GITHUB_OUTPUT"
+          cat stages/07-kubernetes-services/terraform.tfstate | jq | grep conda-store-service-account | sed -n '2 p' | tr -s ' ' | sed "s/\"config.json\": \"//" | sed -e 's/\\\"/\"/g' -e 's/^.//g' -e 's/.$//g'  | jq '."service-tokens-mapping"."conda-store-service-account"'
+          echo "CONDA_STORE_TOKEN=$(cat stages/07-kubernetes-services/terraform.tfstate | jq | grep conda-store-service-account | sed -n '2 p' | tr -s ' ' | sed "s/\"config.json\": \"//" | sed -e 's/\\\"/\"/g' -e 's/^.//g' -e 's/.$//g'  | jq '."service-tokens-mapping"."conda-store-service-account"')" >> "$GITHUB_OUTPUT"
 
       - name: Run conda-store-server user_journey tests
         env:
