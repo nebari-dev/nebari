@@ -1,6 +1,8 @@
 import typing
+
 import typer
 from typer.core import TyperGroup
+
 from _nebari.version import __version__
 from nebari.plugins import nebari_plugin_manager
 
