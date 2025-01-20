@@ -12,7 +12,7 @@ from kubespawner import KubeSpawner  # noqa: E402
 
 
 # conda-store default page size
-PAGE_SIZE_LIMIT = 100
+DEFAULT_PAGE_SIZE_LIMIT = 100
 
 @gen.coroutine
 def get_username_hook(spawner):
@@ -26,16 +26,24 @@ def get_username_hook(spawner):
     )
 
 
+# TODO: this should get unit tests. Currently, since this is not a python module,
+# adding tests in a traditional sense is not possible. See https://github.com/soapy1/nebari/tree/try-unit-test-spawner
+# for a demo on one approach to adding test.
 def get_conda_store_environments(user_info: dict):
     import urllib3
     import yarl
     import math
+    import os
+
+    # Check for the environment variable `CONDA_STORE_API_PAGE_SIZE_LIMIT`. Fall
+    # back to using the default page size limit if not set.
+    page_size = os.environ.get("CONDA_STORE_API_PAGE_SIZE_LIMIT", DEFAULT_PAGE_SIZE_LIMIT)
 
     external_url = z2jh.get_config("custom.conda-store-service-name")
     token = z2jh.get_config("custom.conda-store-jhub-apps-token")
     endpoint = "conda-store/api/v1/environment"
 
-    url = yarl.URL(f"http://{external_url}/{endpoint}/?size={PAGE_SIZE_LIMIT}")
+    url = yarl.URL(f"http://{external_url}/{endpoint}/?size={page_size}")
     http = urllib3.PoolManager()
     response = http.request(
         "GET", str(url), headers={"Authorization": f"Bearer {token}"}
@@ -48,11 +56,11 @@ def get_conda_store_environments(user_info: dict):
 
     # If there are more records than the specified size limit, then
     # will need to page through to get all the available envs
-    if total_records > PAGE_SIZE_LIMIT:
+    if total_records > page_size:
         # Already pulled the first page of results, start looping through
         # the envs starting on the 2nd page
-        for page in range(2, math.ceil(total_records/PAGE_SIZE_LIMIT)+1):
-            url = yarl.URL(f"http://{external_url}/{endpoint}/?size={PAGE_SIZE_LIMIT}&page={page}")
+        for page in range(2, math.ceil(total_records/page_size)+1):
+            url = yarl.URL(f"http://{external_url}/{endpoint}/?size={page_size}&page={page}")
             response = http.request(
                 "GET", str(url), headers={"Authorization": f"Bearer {token}"}
             )
