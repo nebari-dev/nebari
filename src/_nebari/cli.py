@@ -1,8 +1,6 @@
 import typing
-
 import typer
 from typer.core import TyperGroup
-
 from _nebari.version import __version__
 from nebari.plugins import nebari_plugin_manager
 
@@ -10,7 +8,7 @@ from nebari.plugins import nebari_plugin_manager
 class OrderCommands(TyperGroup):
     def list_commands(self, ctx: typer.Context):
         """Return list of commands in the order appear."""
-        return list(self.commands)
+        return list(self.commands)[::-1]
 
 
 def version_callback(value: bool):
