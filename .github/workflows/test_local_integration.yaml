@@ -150,8 +150,8 @@ jobs:
         uses: actions/checkout@main
         with:
           fetch-depth: 0
-          repository: soapy1/conda-store
-          ref: fix-ssl-verify-test-check
+          repository: conda-incubator/conda-store
+          ref: main
           path: conda-store
 
       - name: "Set up conda-store conda env"
@@ -172,12 +172,12 @@ jobs:
           # install conda-store-server
           python -m pip install conda-store/conda-store-server
 
-      - name: Get conda store token from terraform state
+      - name: Get conda-store token from terraform state
         id: conda-store-token
         working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          cat stages/07-kubernetes-services/terraform.tfstate | jq | grep conda-store-service-account | sed -n '2 p' | tr -s ' ' | sed "s/\"config.json\": \"//" | sed -e 's/\\\"/\"/g' -e 's/^.//g' -e 's/.$//g'  | jq '."service-tokens-mapping"."conda-store-service-account"'
-          echo "CONDA_STORE_TOKEN=$(cat stages/07-kubernetes-services/terraform.tfstate | jq | grep conda-store-service-account | sed -n '2 p' | tr -s ' ' | sed "s/\"config.json\": \"//" | sed -e 's/\\\"/\"/g' -e 's/^.//g' -e 's/.$//g'  | jq '."service-tokens-mapping"."conda-store-service-account"')" >> "$GITHUB_OUTPUT"
+          kubectl get secret -n default tfstate-default-${{ steps.init.outputs.project }}-dev-07-kubernetes-services --template={{.data}} | cut -d ":" -f2 | cut -d "]" -f1 | base64 --decode | gzip -d --to-stdout > terraform_state
+          echo "CONDA_STORE_TOKEN=$(cat terraform_state | jq | grep conda-store-service-account | sed -n '2 p' | tr -s ' ' | sed "s/\"config.json\": \"//" | sed -e 's/\\\"/\"/g' -e 's/^.//g' -e 's/.$//g'  | jq --raw-output '."service-tokens-mapping"."conda-store-service-account"')"  | tee --append "${GITHUB_OUTPUT}"
 
       - name: Run conda-store-server user_journey tests
         env:
@@ -188,8 +188,14 @@ jobs:
           CONDA_STORE_TEST_VERIFY_SSL: 0
           CONDA_STORE_TOKEN: ${{ steps.conda-store-token.outputs.CONDA_STORE_TOKEN }}
         run: |
+          curl --insecure --header "Authorization: Bearer ${CONDA_STORE_TOKEN}" ${CONDA_STORE_BASE_URL}/conda-store/api/v1/permission/ | jq
           cd conda-store/conda-store-server
           python -m pytest -m "user_journey"
+
+      - name: Get conda-store-server logs
+        if: ${{ failure() }}
+        run: |
+          kubectl logs -n dev deployment/nebari-conda-store-server
 
       ### CLEANUP AFTER TESTS
       - name: Cleanup nebari deployment
