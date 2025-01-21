@@ -40,7 +40,7 @@ resource "kubernetes_secret" "jhub_apps_secrets" {
 resource "keycloak_user" "jhub_apps_service_account" {
   count    = var.jhub-apps-enabled ? 1 : 0
   realm_id = var.realm_id
-  username = "service-account-jhub-apps"
+  username = "jhub-apps-sa"
   enabled  = true
 }
 
