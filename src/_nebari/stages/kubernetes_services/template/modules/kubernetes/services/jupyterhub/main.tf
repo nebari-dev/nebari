@@ -37,24 +37,22 @@ resource "kubernetes_secret" "jhub_apps_secrets" {
   type = "Opaque"
 }
 
+
 resource "keycloak_user" "jhub_apps_service_account" {
   realm_id = var.realm_id
   username = "jhub-apps-sa"
   # email    = "jhub-apps-sa@${var.external-url}"
-  enabled = true # not sure if they need to be enabled,  TODO: check
+  enabled = false # not sure if they need to be enabled,  TODO: check
 }
 
-data "keycloak_group" "admin_group" {
+
+resource "keycloak_user_roles" "allow_app_sharing_role" {
   realm_id = var.realm_id
-  name     = "admin"
-}
-
-
-resource "keycloak_user_groups" "jhub_apps_service_account_groups" {
-  realm_id   = var.realm_id
-  user_id    = keycloak_user.jhub_apps_service_account.id
-  group_ids  = [data.keycloak_group.admin_group.id]
-  exhaustive = true # remove all other groups
+  user_id  = keycloak_user.jhub_apps_service_account.id
+  role_ids = [
+    module.jupyterhub-openid-client.client_role_ids["allow-app-sharing-role"]
+  ]
+  exhaustive = true
 }
 
 locals {
