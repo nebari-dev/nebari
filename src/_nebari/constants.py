@@ -9,7 +9,7 @@ KUBERHEALTHY_HELM_VERSION = "100"
 # 04-kubernetes-ingress
 DEFAULT_TRAEFIK_IMAGE_TAG = "2.9.1"
 
-HIGHEST_SUPPORTED_K8S_VERSION = ("1", "29", "2")
+HIGHEST_SUPPORTED_K8S_VERSION = ("1", "31")  # specify Major and Minor version
 DEFAULT_GKE_RELEASE_CHANNEL = "UNSPECIFIED"
 
 DEFAULT_NEBARI_DASK_VERSION = CURRENT_RELEASE
@@ -76,6 +76,6 @@ REQUIRED_PROVIDERS = {
     "kubernetes": {
         "_name": "kubernetes",
         "source": "hashicorp/kubernetes",
-        "version": ">= 2.20.0",
+        "version": ">= 2.35.1",
     },
 }
