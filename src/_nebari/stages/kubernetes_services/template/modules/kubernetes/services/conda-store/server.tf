@@ -70,9 +70,9 @@ module "conda-store-openid-client" {
     "https://${var.external-url}/conda-store/oauth_callback"
   ]
   service-accounts-enabled = true
-  service-account-roles = [
-    "view-realm", "view-users", "view-clients"
-  ]
+  service-account-roles = {
+    "realm-management" : ["view-realm", "view-users", "view-clients"]
+  }
 }
 
 

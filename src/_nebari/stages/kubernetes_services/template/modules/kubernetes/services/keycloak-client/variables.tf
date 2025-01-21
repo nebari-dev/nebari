@@ -22,10 +22,22 @@ variable "service-accounts-enabled" {
   default     = false
 }
 
+# variable "service-account-roles" {
+#   description = "Realm roles to be granted to the service account. Requires setting service-accounts-enabled to true."
+#   type        = list(string)
+#   default     = []
+# }
+
 variable "service-account-roles" {
-  description = "Roles to be granted to the service account. Requires setting service-accounts-enabled to true."
-  type        = list(string)
-  default     = []
+  description = <<-EOT
+  List of client roles to be granted to the service account client. Requires setting service-accounts-enabled to true.
+
+  e.g. {
+    \"my-client\": [\"my-role\"],
+  }
+  EOT
+  type        = map(list(string))
+  default     = {}
 }
 
 
