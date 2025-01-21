@@ -37,23 +37,23 @@ resource "kubernetes_secret" "jhub_apps_secrets" {
 }
 
 
-# resource "keycloak_user" "jhub_apps_service_account" {
-#   count    = var.jhub-apps-enabled ? 1 : 0
-#   realm_id = var.realm_id
-#   username = "service-account-jhub-apps"
-#   enabled  = true
-# }
+resource "keycloak_user" "jhub_apps_service_account" {
+  count    = var.jhub-apps-enabled ? 1 : 0
+  realm_id = var.realm_id
+  username = "service-account-jhub-apps"
+  enabled  = true
+}
 
 
-# resource "keycloak_user_roles" "jhub_apps_sa_allow_app_sharing_role" {
-#   count    = var.jhub-apps-enabled ? 1 : 0
-#   realm_id = var.realm_id
-#   user_id  = keycloak_user.jhub_apps_service_account[0].id
-#   role_ids = [
-#     module.jupyterhub-openid-client.client_role_ids["allow-app-sharing-role"]
-#   ]
-#   exhaustive = true
-# }
+resource "keycloak_user_roles" "jhub_apps_sa_allow_app_sharing_role" {
+  count    = var.jhub-apps-enabled ? 1 : 0
+  realm_id = var.realm_id
+  user_id  = keycloak_user.jhub_apps_service_account[0].id
+  role_ids = [
+    module.jupyterhub-openid-client.client_role_ids["allow-app-sharing-role"]
+  ]
+  exhaustive = true
+}
 
 locals {
   jupyterhub_env_vars = [
@@ -365,7 +365,7 @@ module "jupyterhub-openid-client" {
   service-accounts-enabled   = true
   service-account-roles = {
     "realm-management" : ["view-realm", "view-users", "view-clients"],
-  "jupyterhub" = ["allow-app-sharing-role"] }
+  }
 }
 
 
