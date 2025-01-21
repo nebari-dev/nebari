@@ -65,6 +65,7 @@ def create_cli():
             [],
             "--import-plugin",
             help="Import nebari plugin",
+            callback=import_plugin,
         ),
         excluded_stages: typing.List[str] = typer.Option(
             [],
