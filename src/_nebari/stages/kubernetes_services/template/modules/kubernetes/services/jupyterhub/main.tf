@@ -23,7 +23,6 @@ locals {
   userscheduler_nodeselector_value = var.general-node-group.value
 }
 
-
 resource "kubernetes_secret" "jhub_apps_secrets" {
   metadata {
     name      = local.jhub_apps_secrets_name
@@ -39,14 +38,15 @@ resource "kubernetes_secret" "jhub_apps_secrets" {
 
 
 resource "keycloak_user" "jhub_apps_service_account" {
+  count    = var.jhub-apps-enabled ? 1 : 0
   realm_id = var.realm_id
-  username = "jhub-apps-sa"
-  # email    = "jhub-apps-sa@${var.external-url}"
-  enabled = false # not sure if they need to be enabled,  TODO: check
+  username = "service-account-jhub-apps"
+  enabled  = false
 }
 
 
-resource "keycloak_user_roles" "allow_app_sharing_role" {
+resource "keycloak_user_roles" "jhub_apps_sa_allow_app_sharing_role" {
+  count    = var.jhub-apps-enabled ? 1 : 0
   realm_id = var.realm_id
   user_id  = keycloak_user.jhub_apps_service_account.id
   role_ids = [
