@@ -10,9 +10,9 @@ kubernetes.client.models.V1EndpointPort = (
 
 from kubespawner import KubeSpawner  # noqa: E402
 
-
 # conda-store default page size
 DEFAULT_PAGE_SIZE_LIMIT = 100
+
 
 @gen.coroutine
 def get_username_hook(spawner):
@@ -28,21 +28,19 @@ def get_username_hook(spawner):
 
 def get_total_records(url: str, token: str) -> int:
     import urllib3
-    
+
     http = urllib3.PoolManager()
-    response = http.request(
-        "GET", url, headers={"Authorization": f"Bearer {token}"}
-    )
+    response = http.request("GET", url, headers={"Authorization": f"Bearer {token}"})
     decoded_response = json.loads(response.data.decode("UTF-8"))
     return decoded_response.get("count", 0)
 
 
 def generate_paged_urls(base_url: str, total_records: int, page_size: int) -> list[str]:
     import math
-    
+
     urls = []
     # pages starts at 1
-    for page in range(1, math.ceil(total_records/page_size)+1):
+    for page in range(1, math.ceil(total_records / page_size) + 1):
         urls.append(f"{base_url}?size={page_size}&page={page}")
 
     return urls
@@ -52,12 +50,15 @@ def generate_paged_urls(base_url: str, total_records: int, page_size: int) -> li
 # adding tests in a traditional sense is not possible. See https://github.com/soapy1/nebari/tree/try-unit-test-spawner
 # for a demo on one approach to adding test.
 def get_conda_store_environments(user_info: dict):
-    import urllib3
     import os
+
+    import urllib3
 
     # Check for the environment variable `CONDA_STORE_API_PAGE_SIZE_LIMIT`. Fall
     # back to using the default page size limit if not set.
-    page_size = os.environ.get("CONDA_STORE_API_PAGE_SIZE_LIMIT", DEFAULT_PAGE_SIZE_LIMIT)
+    page_size = os.environ.get(
+        "CONDA_STORE_API_PAGE_SIZE_LIMIT", DEFAULT_PAGE_SIZE_LIMIT
+    )
 
     external_url = z2jh.get_config("custom.conda-store-service-name")
     token = z2jh.get_config("custom.conda-store-jhub-apps-token")
