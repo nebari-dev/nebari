@@ -1626,6 +1626,36 @@ class Upgrade_2024_12_1(UpgradeStep):
         return config
 
 
+class Upgrade_2025_1_1(UpgradeStep):
+    version = "2025.1.1"
+
+    @override
+    def _version_specific_upgrade(
+        self, config, start_version, config_filename: Path, *args, **kwargs
+    ):
+        rich.print("\n ⚠️ Upgrade Warning ⚠️")
+
+        text = textwrap.dedent(
+            """
+            In this release, we have updated our maximum supported Kubernetes version from 1.29 to 1.31.
+            Please note that Nebari will NOT automatically upgrade your running Kubernetes version as part of
+            the redeployment process.
+
+            After completing this upgrade step, we strongly recommend updating the Kubernetes version
+            specified in your nebari-config YAML file and redeploying to apply the changes. Remember that
+            Kubernetes minor versions must be upgraded incrementally (1.29 → 1.30 → 1.31).
+
+            For more information on upgrading Kubernetes for your specific cloud provider, please visit:
+            https://www.nebari.dev/docs/how-tos/kubernetes-version-upgrade
+            """
+        )
+
+        rich.print(text)
+        rich.print("Ready to upgrade to Nebari version [green]2025.1.1[/green].")
+
+        return config
+
+
 __rounded_version__ = str(rounded_ver_parse(__version__))
 
 # Manually-added upgrade steps must go above this line
