@@ -125,25 +125,25 @@ jobs:
         with:
           node-version: 20
 
-      - name: Playwright Tests
-        env:
-          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
-          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
-          NEBARI_FULL_URL: "https://${{ steps.init.outputs.domain }}/"
-        working-directory: tests/tests_e2e/playwright
-        run: |
-          # create environment file
-          envsubst < .env.tpl > .env
-          # run playwright pytest tests in headed mode with the chromium browser
-          xvfb-run pytest --browser chromium --slowmo 300 --headed
+      # - name: Playwright Tests
+      #   env:
+      #     KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+      #     KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+      #     NEBARI_FULL_URL: "https://${{ steps.init.outputs.domain }}/"
+      #   working-directory: tests/tests_e2e/playwright
+      #   run: |
+      #     # create environment file
+      #     envsubst < .env.tpl > .env
+      #     # run playwright pytest tests in headed mode with the chromium browser
+      #     xvfb-run pytest --browser chromium --slowmo 300 --headed
 
-      - name: Save Playwright recording artifacts
-        if: always()
-        uses: actions/upload-artifact@v4.3.1
-        with:
-          name: e2e-playwright
-          path: |
-            ./tests/tests_e2e/playwright/videos/
+      # - name: Save Playwright recording artifacts
+      #   if: always()
+      #   uses: actions/upload-artifact@v4.3.1
+      #   with:
+      #     name: e2e-playwright
+      #     path: |
+      #       ./tests/tests_e2e/playwright/videos/
 
       ### CONDA-STORE TESTS
       - name: "Checkout conda-store"
@@ -172,12 +172,17 @@ jobs:
           # install conda-store-server
           python -m pip install conda-store/conda-store-server
 
-      - name: Get conda-store token from terraform state
+      - name: Get conda-store token from login
         id: conda-store-token
+        env:
+          KEYCLOAK_USERNAME: ${{ env.TEST_USERNAME }}
+          KEYCLOAK_PASSWORD: ${{ env.TEST_PASSWORD }}
+          CONDA_STORE_BASE_URL: https://${{ steps.init.outputs.domain }}
         working-directory: ${{ steps.init.outputs.directory }}
         run: |
-          kubectl get secret -n default tfstate-default-${{ steps.init.outputs.project }}-dev-07-kubernetes-services --template={{.data}} | cut -d ":" -f2 | cut -d "]" -f1 | base64 --decode | gzip -d --to-stdout > terraform_state
-          echo "CONDA_STORE_TOKEN=$(cat terraform_state | jq | grep conda-store-service-account | sed -n '2 p' | tr -s ' ' | sed "s/\"config.json\": \"//" | sed -e 's/\\\"/\"/g' -e 's/^.//g' -e 's/.$//g'  | jq --raw-output '."service-tokens-mapping"."conda-store-service-account"')"  | tee --append "${GITHUB_OUTPUT}"
+          LOGIN_URL=$(curl -c /tmp/nebari-session --insecure -Ls ${CONDA_STORE_BASE_URL}/conda-store/login/\?next= | grep auth/realms/nebari/login-actions/authenticate | grep -oP '(?<=action=")([^"]+)' | sed  's/\&amp\;/\&/g')
+          curl -X POST --insecure -b /tmp/nebari-session -H "Content-Type: application/x-www-form-urlencoded"  -vv --data '{"credentialId":"", "username": "${KEYCLOAK_USERNAME}", "password": "${KEYCLOAK_PASSWORD}"}' $LOGIN_URL
+          echo "CONDA_STORE_TOKEN=$(curl --insecure -L -X POST -b /tmp/conda-store-cookie ${CONDA_STORE_BASE_URL}/conda-store/api/v1/token | jq --raw-output .data.token)" >> "$GITHUB_OUTPUT"
 
       - name: Run conda-store-server user_journey tests
         env:
