@@ -1,5 +1,6 @@
 import inspect
 import json
+import logging
 
 import kubernetes.client.models
 from tornado import gen
@@ -14,6 +15,12 @@ from kubespawner import KubeSpawner  # noqa: E402
 @gen.coroutine
 def get_username_hook(spawner):
     auth_state = yield spawner.user.get_auth_state()
+    if auth_state is not None:
+        logging.warning(f"======auth_state: {auth_state}")
+    else:
+        logging.warning("======auth_state is None")
+        if spawner.user.name == "service-account-jupyterhub":
+            auth_state = yield spawner.authenticator.authenticate_service_account()
     username = auth_state["oauth_user"]["preferred_username"]
 
     spawner.environment.update(

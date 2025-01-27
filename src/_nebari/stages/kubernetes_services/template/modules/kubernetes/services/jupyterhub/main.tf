@@ -52,7 +52,8 @@ resource "keycloak_user_roles" "jhub_apps_sa_allow_app_sharing_role" {
   role_ids = [
     module.jupyterhub-openid-client.client_role_ids["allow-app-sharing-role"]
   ]
-  exhaustive = true
+  # include default roles as well
+  exhaustive = false
 }
 
 locals {

@@ -554,6 +554,9 @@ def render_profiles(spawner):
     # userinfo request to have the groups in the key
     # "auth_state.oauth_user.groups"
     auth_state = yield spawner.user.get_auth_state()
+    if not auth_state:
+        if spawner.user.name == "service-account-jupyterhub":
+            auth_state = yield spawner.authenticator.authenticate_service_account()
 
     username = auth_state["oauth_user"]["preferred_username"]
 

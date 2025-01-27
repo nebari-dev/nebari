@@ -30,6 +30,27 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
 
     reset_managed_roles_on_startup = Bool(True)
 
+    async def authenticate_service_account(self):
+        token_info = await self._get_token_info()
+
+        # Get user info using the access token
+        user_info = await self.token_to_user(token_info)
+
+        # Get/set username
+        username = self.user_info_to_username(user_info)
+        username = self.normalize_username(username)
+
+        # Build auth model similar to OAuth flow
+        auth_model = {
+            "name": username,
+            "admin": True if username in self.admin_users else None,
+            "auth_state": self.build_auth_state_dict(token_info, user_info),
+        }
+
+        auth_model = await self.update_auth_model(auth_model)
+
+        return auth_model["auth_state"]
+
     async def update_auth_model(self, auth_model):
         """Updates and returns the auth_model dict.
         This function is called every time a user authenticates with JupyterHub, as in
@@ -307,7 +328,7 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             )
             return set()
 
-    async def _get_token(self) -> str:
+    async def _get_token_info(self) -> str:
         http = self.http_client
 
         body = urllib.parse.urlencode(
@@ -322,8 +343,12 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
             method="POST",
             body=body,
         )
-        data = json.loads(response.body)
-        return data["access_token"]  # type: ignore[no-any-return]
+        token_info = json.loads(response.body)
+        return token_info
+
+    async def _get_token(self) -> str:
+        token_info = await self._get_token_info()
+        return token_info["access_token"]  # type: ignore[no-any-return]
 
     async def _fetch_api(self, endpoint: str, token: str):
         response = await self.http_client.fetch(
