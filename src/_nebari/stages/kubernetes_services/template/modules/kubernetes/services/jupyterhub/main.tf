@@ -366,6 +366,7 @@ module "jupyterhub-openid-client" {
   service-accounts-enabled   = true
   service-account-roles = {
     "realm-management" : ["view-realm", "view-users", "view-clients"],
+    "jupyterhub" : ["allow-app-sharing-role"]
   }
 }
 

@@ -22,11 +22,6 @@ variable "service-accounts-enabled" {
   default     = false
 }
 
-# variable "service-account-roles" {
-#   description = "Realm roles to be granted to the service account. Requires setting service-accounts-enabled to true."
-#   type        = list(string)
-#   default     = []
-# }
 
 variable "service-account-roles" {
   description = <<-EOT
