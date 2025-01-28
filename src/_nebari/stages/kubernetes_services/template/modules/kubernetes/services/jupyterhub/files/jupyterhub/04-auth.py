@@ -9,7 +9,7 @@ from functools import reduce
 from jupyterhub import scopes
 from jupyterhub.traitlets import Callable
 from oauthenticator.generic import GenericOAuthenticator
-from traitlets import Bool, Unicode, Union
+from traitlets import Bool, Unicode, Union, default
 
 
 class KeyCloakOAuthenticator(GenericOAuthenticator):
@@ -19,7 +19,11 @@ class KeyCloakOAuthenticator(GenericOAuthenticator):
     feature added in JupyterHub 5.0 (https://github.com/jupyterhub/jupyterhub/pull/4748).
     """
 
-    JHUB_SERVICE_ACCOUNT_NAME = "service-account-jupyterhub"
+    JHUB_SERVICE_ACCOUNT_NAME = Unicode()
+
+    @default("JHUB_SERVICE_ACCOUNT_NAME")
+    def _default_jhub_service_account_name(self):
+        return f"service-account-{self.client_id}"
 
     claim_roles_key = Union(
         [Unicode(os.environ.get("OAUTH2_ROLES_KEY", "groups")), Callable()],
